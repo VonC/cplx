@@ -1,0 +1,8 @@
+
+*.log
+logs/
+a
+aa
+*.zip
+*.rpm
+*.tar.gz
