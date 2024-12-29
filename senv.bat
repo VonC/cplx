@@ -15,8 +15,6 @@ doskey hsenv=%HOME%\bin\senv.bat $*
 doskey fsenv=%~dp0senv.bat force
 doskey usenv=%~dp0senv.bat unset
 doskey rsenv=%~dp0senv.bat restore
-doskey u=updateChangelog.bat $*
-doskey uf=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat $*"
 
 set "CHECK_QUIET_PRJ=echo %QUIET_PRJ% | findstr /C:true >nul ||"
 set "CHECK_DEBUG_PRJ=echo %DEBUG_PRJ% | findstr /C:true >nul &&"
@@ -76,6 +74,10 @@ if defined local_path (
   doskey gv=get-version
   doskey uv=update-version
   doskey uvr=update-version rel
+  doskey u=updateChangelog.bat $*
+  doskey uf=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat $*"
+  doskey ul=updateChangelog.bat latest $*
+  doskey ufl=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat latest $*"
 )
 
 ::  ===============================================
@@ -86,6 +88,10 @@ if not defined local_path (
   doskey gv=
   doskey uv=
   doskey uvr=
+  doskey u=
+  doskey uf=
+  doskey ul=
+  doskey ufl=
 )
 set "local_path="
 
