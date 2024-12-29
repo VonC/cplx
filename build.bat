@@ -10,6 +10,11 @@ call <NUL "%build_dir%\senv.bat"
 set "params=%*"
 %_info% "Params for build: '%params%'"
 
+if not defined called_from_update-version (
+  call "%build_dir%\tools\update-version.bat"
+)
+set "called_from_update-version="
+
 %_task% "Start build of '%project_dir_name%' with params '%params%'"
 set "cmd=echo%params% build"
 %_info% "%cmd%"
