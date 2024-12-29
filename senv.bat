@@ -4,9 +4,7 @@
 ::  DEFINE ALIASES (DOSKEY MACROS)
 ::##################################################
 doskey a=all.bat $*
-doskey ast=all.bat -DskipTests $*
 doskey b=build.bat $*
-doskey bst=build.bat -DskipTests $*
 doskey d=deploy.bat $*
 doskey r=run.bat $*
 doskey t=test.bat $
