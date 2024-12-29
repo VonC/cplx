@@ -18,6 +18,10 @@ doskey rsenv=%~dp0senv.bat restore
 doskey u=updateChangelog.bat $*
 doskey uf=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat $*"
 
+set "CHECK_QUIET_PRJ=echo %QUIET_PRJ% | findstr /C:true >nul ||"
+set "CHECK_DEBUG_PRJ=echo %DEBUG_PRJ% | findstr /C:true >nul &&"
+
+
 ::##################################################
 ::  SET PROJECT DIRECTORY
 ::##################################################
@@ -254,5 +258,7 @@ if "%~1"=="restore" (
 )
 set "project_path="
 set "project_dir="
+set "CHECK_DEBUG_PRJ="
+set "CHECK_QUIET_PRJ="
 
 goto:eof
