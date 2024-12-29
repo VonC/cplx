@@ -2,7 +2,7 @@
 setlocal enableextensions enabledelayedexpansion
 
 set "QUIET_PRJ=true"
-call <NUL "%~dp0senv.bat"
+call <NUL "%~dp0..\senv.bat"
 set "QUIET_PRJ="
 
 call "%project_dir%\tools\get-version.bat"
