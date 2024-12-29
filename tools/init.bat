@@ -25,7 +25,6 @@ if "%~1"=="unset" (
 
 cd "%project_dir%" || echo "unable to cd to '%project_dir%'"&& exit /b 1
 
-set "CHECK_DEBUG_CL=echo %DEBUG_CL% | findstr /C:true >nul &&"
 set "okInit="
 if not exist "%project_dir%\tools\batcolors\echos.bat" (
     echo "WARN: Missing submodules"
@@ -86,4 +85,3 @@ exit /b
 
 :unset_init
 set "okInit="
-set "CHECK_DEBUG_CL="
