@@ -88,7 +88,9 @@ set "local_path="
 call:call_init
 
 if not defined called_from_init (
-  %_ok% "project '%project_dir_name%' senv activated: project_dir='%project_dir%'"
+  %_info% "project PATH '%PATH%'"
+  if not "%PATH%"=="%project_path%" ( call:update_project_path_ini )
+  %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'"
 )
 set "called_from_init="
 goto:eof
@@ -117,14 +119,15 @@ if not exist "%project_dir%\tools\path.ini" (
   echo   ori=%PATH%>>"%project_dir%\tools\path.ini"
 )
 
+if defined force_project_path ( goto:skip_read_path_ini )
 call:read_path_ini project
 if defined project_path (
   set "PATH=%project_path%"
-  %_info% "project_path='%project_path%'"
-  set "project_path="
   goto:eof
 )
 
+:skip_read_path_ini
+set "force_project_path="
 ::  ===============================================
 ::  CHECK FOR GIT.EXE IN PATH
 ::  ===============================================
@@ -149,22 +152,38 @@ for /f "tokens=* delims=" %%a in ('where git.exe') do (
 )
 :git_path_found
 endlocal & set "git_home=%git_path:~0,-4%"
-echo === git_home='%git_home%'
+rem echo === git_home='%git_home%'
 
 ::  ===============================================
 ::  SET FINAL PROJECT PATH
 ::  ===============================================
 set "project_path=C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\"
-set "project_path=%git_home%\bin;%git_home%\cmd;%git_home%\mingw64\bin;%git_home%\mingw64\libexec\git-core;%project_path%"
+set "project_path=%git_home%\bin;%git_home%\cmd;%git_home%\usr\bin;%git_home%\mingw64\bin;%git_home%\mingw64\libexec\git-core;%project_path%"
 if exist "%HOME%\bin\senv.bat" ( set "project_path=%HOME%\bin;%project_path%" )
 set "project_path=%project_dir%;%project_path%"
-echo   project=%project_path%>>"%project_dir%\tools\path.ini"
+set "PATH=%project_path%"
+call:update_project_path_ini
 set "git_home="
 %_info% "project_path(ini)='%project_path%'"
-set "PATH=%project_path%"
 set "project_path="
 goto:eof
 
+::##################################################
+::  UPDATE PROJECT PATH IN PATH.INI
+::##################################################
+:update_project_path_ini
+findstr /R /C:"^  project=" "%project_dir%\tools\path.ini" >NUL 2>&1
+if errorlevel 1 (
+  echo record to ini
+  echo   project=%PATH%>>"%project_dir%\tools\path.ini"
+) else (
+  sed.exe -i "s,^  project=.*,  project=%PATH:\=\\\\%,g" "%project_dir%\tools\path.ini"
+  if errorlevel 1 (
+    %_fatal% "sed.exe failed to update path.ini with PATH '%PATH%" 231
+  )
+  echo sed ok
+)
+goto:eof
 
 ::##################################################
 ::  READ PROJECT or ORI PATH FROM PATH.INI
