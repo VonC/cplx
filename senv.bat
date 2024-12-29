@@ -196,7 +196,6 @@ if "%~1"=="restore" (
   call:read_path_ini ori
 )
 
-set "project_dir="
 set "project_dir_name="
 set "local_path="
 set "project_key="
@@ -229,7 +228,9 @@ if "%~1"=="restore" (
   if defined project_path (
     set "PATH=%project_path%"
   )
+  del /Q /F "%project_dir%\tools\path.ini"
 )
 set "project_path="
+set "project_dir="
 
 goto:eof
