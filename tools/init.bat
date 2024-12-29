@@ -55,7 +55,7 @@ if not defined okInit (
   call:iExitBatch 6
 )
 if defined okInit (
-  %_ok% "%okInit%"
+  %CHECK_QUIET_PRJ% %_ok% "%okInit%"
   set "okInit="
 )
 

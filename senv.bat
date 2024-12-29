@@ -92,9 +92,9 @@ set "local_path="
 call:call_init
 
 if not defined called_from_init (
-  %_info% "project PATH '%PATH%'"
+  %CHECK_QUIET_PRJ% %_info% "project PATH '%PATH%'"
   if not "%PATH%"=="%project_path%" ( call:update_project_path_ini )
-  %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'"
+  %CHECK_QUIET_PRJ% %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'"
 )
 set "called_from_init="
 goto:eof
