@@ -51,10 +51,15 @@ call:set_path
 ::  DETERMINE LOCAL PATH
 ::  ===============================================
 set "local_path="
+set "local_path_msg="
+set "force_project_path="
 if "%~1"=="local" ( set "local_path=1" )
 where get-version >NUL 2>&1
-if errorlevel 0 ( set "local_path=1" )
-if "%~1"=="force" ( set "local_path=" )
+if not errorlevel 1 ( set "local_path=1" && set "local_path_msg= preserved")
+if "%~1"=="force" ( set "local_path=" && set "local_path_msg=" && set "force_project_path=1" )
+if defined local_path (
+  set "local_path_msg=[local%local_path_msg%]"
+)
 
 ::  ===============================================
 ::  CONFIGURE LOCAL PATH
