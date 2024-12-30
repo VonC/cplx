@@ -17,9 +17,9 @@ setlocal enableextensions enabledelayedexpansion
 ::##################################################
 ::  INITIAL SETUP
 ::##################################################
-for %%i in ("%~dp0") do SET "updateChangelog_dir=%%~fi"
+for %%i in ("%~dp0") do SET "update-version_dir=%%~fi"
 set "QUIET_PRJ=true"
-call <NUL "%updateChangelog_dir%\..\senv.bat"
+call <NUL "%update-version_dir%\..\senv.bat"
 set "QUIET_PRJ="
 
 ::##################################################
@@ -27,7 +27,7 @@ set "QUIET_PRJ="
 ::##################################################
 %_task% "[%~nx0] Must get version from '%project_dir%\version.txt'"
 set "project_version="
-call "%updateChangelog_dir%\%get-version.bat"
+call "%update-version_dir%\%get-version.bat"
 if not defined project_version (
   %_fatal% "[%~nx0] Unable to find version from '%project_dir%\version.txt'" 11
 )
@@ -320,10 +320,22 @@ if errorlevel 1 (
 set "artifact=%project_dir_name%"
 %_task% "Must build release '%artifact%-%version_release%'"
 set "called_from_update-version=1"
+set "failed_build="
 call "%project_dir%\build.bat"
+if errorlevel 1 (
+  set failed_build=1
+)
+set "QUIET_PRJ=true"
+call <NUL "%update-version_dir%\..\senv.bat"
+set "QUIET_PRJ="
 set "called_from_update-version="
 set "has_been_called_from_update=1"
-if errorlevel 1 (
+if defined failed_build (
+  if defined called_from_build (
+    %_error% "Build called fro update-version failed, unable to make release"
+    endlocal & set "has_been_called_from_update=true"
+    exit /b 1
+  )
   %_fatal% "Unable to build '%artifact%-%version_release%'" 141
 )
 if not exist "%project_dir%\target\%artifact%-%version_release%" (
