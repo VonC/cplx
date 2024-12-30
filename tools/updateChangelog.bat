@@ -1,23 +1,36 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 
+::********************************************************************
+:: Script Name:  updateChangelog.bat
+:: Description:  Updates the CHANGELOG.md with a new release version.
+::
+:: Parameters:
+::    %1 - Release version ('vX.Y.Z[-rcR]' or 'latest')
+::         'latest' means the current project version from version.txt
+::    %2 - Release title (optional)
+::
+:: Usage:
+::    updateChangelog.bat v1.2.3 "Release Title"
+::
+::  Return Value: 0 - Success, 1 - Error
+::********************************************************************
+
 set "QUIET_PRJ=true"
 call <NUL "%~dp0..\senv.bat"
 set "QUIET_PRJ="
 
 call "%project_dir%\tools\get-version.bat"
 
-rem echo fatal is '%_fatal%', with batdir='%batdir%' and project_dir '%project_dir%'
+::##################################################
+::  CHECK VERSION PATTERN
+::##################################################
 
-: This makeRelease.bat Windows script complete the %project_dir%\CHANGELOG.md with a title and changes.
-: The title is X.Y.Z[-rcR] (with X, Y, Z and R digits, the -rcR is optional)
-
-::: First task: check that %1 respects the pattern vX.Y.Z[-rcR] (Linux command acceptable in this bat script), or use the one from version.txt
+:: First task: check that %1 respects the pattern vX.Y.Z[-rcR] (Linux command acceptable in this bat script), or use the one from version.txt
 set "relVersion=%~1"
 set "relTitleParam=%~2"
 
-: Check if argument matches the pattern vX.Y.Z[-rcR]
-: echo %~1| findstr /R "^^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*^$" >nul
+:: Check if argument matches the pattern vX.Y.Z[-rcR]
 echo %relVersion%| grep -Eq "^^v[0-9]+\.[0-9]+\.[0-9]+(-[rR][cC][0-9]+)?$"
 IF not ERRORLEVEL 1 (
     for %%i in ("a=A" "b=B" "c=C" "d=D" "e=E" "f=F" "g=G" "h=H" "i=I" "j=J" "k=K" "l=L" "m=M" "n=N" "o=O" "p=P" "q=Q" "r=R" "s=S" "t=T" "u=U" "v=v" "w=W" "x=X" "y=Y" "z=Z") do call set "relVersion=%%relVersion:%%~i%%"
@@ -38,6 +51,7 @@ IF not ERRORLEVEL 1 (
 )
 if "%relVersion%" == "latest" ( goto:relVersion_is_project_version )
 %_fatal% "[%~nx0] Version '%relVersion%' from first argument does not follow the pattern X.Y.Z[-rcR]" 279
+
 :relVersion_is_project_version
 set "relVersion=%project_version%"
 for %%i in ("a=A" "b=B" "c=C" "d=D" "e=E" "f=F" "g=G" "h=H" "i=I" "j=J" "k=K" "l=L" "m=M" "n=N" "o=O" "p=P" "q=Q" "r=R" "s=S" "t=T" "u=U" "v=v" "w=W" "x=X" "y=Y" "z=Z") do call set "relVersion=%%relVersion:%%~i%%"
@@ -51,9 +65,14 @@ set "relVersion=v%relVersion%"
 %_ok% "[%~nx0] Version '%relVersion%' from version.txt is valid."
 
 :CheckRelease
-::: Second task: extract the title of the release from %project_dir%\CHANGELOG.md
+
+::##################################################
+::  EXTRACT RELEASE TITLE
+::##################################################
+
+:: Second task: extract the title of the release from %project_dir%\CHANGELOG.md
 rem %_fatal% "Stop at :CheckRelease" 1
-: Unless forced, a '## vX.Y.Z[-rcC] - ...' means the release is already written: exit
+:: Unless forced, a '## vX.Y.Z[-rcC] - ...' means the release is already written: exit
 set "overwriteRel=false"
 grep -Eq "## %relVersion% - " "%project_dir%\CHANGELOG.md" >NUL 2>NUL
 if not errorlevel 1 (
@@ -72,7 +91,7 @@ if not errorlevel 1 (
 %_info% "[%~nx0] Release '%relVersion%' not already written in '%project_dir%\CHANGELOG.md'"
 
 :extractTitle
-: extract title written in advance in CHANGELOG.md
+:: Extract title written in advance in CHANGELOG.md
 for /f "tokens=*" %%i in ('grep -E "%relVersion%\b" "%project_dir%\CHANGELOG.md" 2^>NUL') do ( set "relTitle=%%i" )
 %_info% "[%~nx0] relTitle='%relTitle%'"
 if "%relTitle%" == "" ( goto:compareTitle )
@@ -92,10 +111,11 @@ if "%overwriteRel%" == "true" (
     for /f "tokens=*" %%i in ('type "%project_dir%\temp"') do ( set "relTitle=%%i" )
 )
 %_info% "[%~nx0] relTitle1='%relTitle%'"
+
 :compareTitle
-: compare extracted title from CHANGELOG.md with second parameter
+:: Compare extracted title from CHANGELOG.md with second parameter
 if "%relTitle%" == "" (
-    : There was not title from CHANGELOG, so the second parameter *must* be there:
+    :: There was no title from CHANGELOG, so the second parameter *must* be there:
     if "%relTitleParam%" == "" (
         %_fatal% "[%~nx0] No title found for '%relVersion%' in '%project_dir%\CHANGELOG.md', you need to provide one as second parameter of updateChangelog.bat" 282
     ) else (
@@ -103,7 +123,7 @@ if "%relTitle%" == "" (
         %_ok% "[%~nx0] Release title from second parameter: '!relTitle!'"
     )
 ) else (
-    : there was a title from CHANGELOG: it must be the same as the second parameter, if present
+    :: There was a title from CHANGELOG: it must be the same as the second parameter, if present
     if not "%relTitleParam%" == "" (
         if not "%relTitle%" == "%relTitleParam%" (
             if "%RELFORCE%" == "" (
@@ -115,11 +135,15 @@ if "%relTitle%" == "" (
             )
         )
     )
-    : (if not second parameter, then we simply keep the title extracted from CHANGELOG)
-    %_ok% "[%~nx0] Release title from1 CHANGELOG.md: '!relTitle!'"
+    :: (if not second parameter, then we simply keep the title extracted from CHANGELOG)
+    %_ok% "[%~nx0] Release title from CHANGELOG.md: '!relTitle!'"
 )
 
-::: Third task: Generate a temporary changelog for that new release version
+::##################################################
+::  GENERATE TEMPORARY CHANGELOG
+::##################################################
+
+:: Third task: Generate a temporary changelog for that new release version
 set "GIT_CLIFF_CONFIG=%project_dir%\tools\cliff.toml"
 set "gcliff=%PRGS%\git-cliffs\current\git-cliff.exe"
 rem echo gcliff='%gcliff%'
@@ -127,15 +151,19 @@ rem echo gcliff='%gcliff%'
 if errorlevel 1 (
     %_fatal% "[%~nx0] Error while generating temporary changelog for '%relVersion%'" 281
 )
-: source for conventional commit emojis
-: https://gist.github.com/parmentf/359667bf23e08a1bd8241fbf47ecdef0 (emojis)
-: https://gitmoji.dev/
-: Add missing emojis not supported by git-cliff (alias gcliff): https://github.com/orhun/git-cliff/blob/a5a85298f3fe280ad2de85bb19c338aeb24bfb33/cliff.toml#L79-L95
+:: Source for conventional commit emojis
+:: https://gist.github.com/parmentf/359667bf23e08a1bd8241fbf47ecdef0 (emojis)
+:: https://gitmoji.dev/
+:: Add missing emojis not supported by git-cliff (alias gcliff): https://github.com/orhun/git-cliff/blob/a5a85298f3fe280ad2de85bb19c338aeb24bfb33/cliff.toml#L79-L95
 sed -i "s/### Build/### 🔨 Build/g" "%project_dir%\CHANGELOG.tmp.md"
 sed -i "s/### Wip/### 🚧 Wip/g" "%project_dir%\CHANGELOG.tmp.md"
 
-::: Fourth task: check if "Features" are present. 
-:   That means new major version (for v1.x.y or more) or new minor version (for v0.y.z)
+::##################################################
+::  CHECK FOR FEATURES
+::##################################################
+
+:: Fourth task: check if "Features" are present.
+:: That means new major version (for v1.x.y or more) or new minor version (for v0.y.z)
 set "hasFeatures=false"
 grep -Eq "### .* Features" "%project_dir%\CHANGELOG.tmp.md"
 if not errorlevel 1 (
@@ -145,7 +173,7 @@ if not errorlevel 1 (
     %_info% "[%~nx0] No Feature detected for '%relVersion%'"
 )
 
-: Extract major, minor and fix number from relVersion, to check if they are coherent with the presence (or not) of features
+:: Extract major, minor and fix number from relVersion, to check if they are coherent with the presence (or not) of features
 
 FOR /F "tokens=1,2,3 delims=." %%i in ("%relVersion%") do (
     set maj=%%i
@@ -178,9 +206,14 @@ if "%hasFeatures%" == "true" (
 )
 
 :features_ok
-::: Fifth task: update and insert tmp changelog into the actual CHANGELOG.md
-: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-date?view=powershell-7.4&viewFallbackFrom=powershell-7.1
-: https://www.reddit.com/r/PowerShell/comments/ssc6eq/force_english_in_getdate/
+
+::##################################################
+::  UPDATE CHANGELOG
+::##################################################
+
+:: Fifth task: update and insert tmp changelog into the actual CHANGELOG.md
+:: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-date?view=powershell-7.4&viewFallbackFrom=powershell-7.1
+:: https://www.reddit.com/r/PowerShell/comments/ssc6eq/force_english_in_getdate/
 %CHECK_DEBUG_PRJ% echo 0------------
 %+@% for /f "tokens=*" %%a in ('C:\Windows\System32\WindowsPowershell\v1.0\powershell -ExecutionPolicy Bypass -File "%project_dir%\tools\get_day_index.ps1"') do set relDate=%%a
 
@@ -225,7 +258,7 @@ goto:done
 del /F /Q "%project_dir%\temp" 2>NUL
 del /F /Q "%project_dir%\found" 2>NUL
 del /F /Q "%project_dir%\added" 2>NUL
-REM From https://stackoverflow.com/questions/38723595/preserve-empty-lines-in-a-text-file-while-using-batch-for-f
+:: From https://stackoverflow.com/questions/38723595/preserve-empty-lines-in-a-text-file-while-using-batch-for-f
 >"%project_dir%\temp" (
   for /f "delims=" %%i in ('findstr /n "^" "%project_dir%\CHANGELOG.md"') do (
       set "line=%%i"

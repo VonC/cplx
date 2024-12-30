@@ -1,13 +1,30 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 
-for %%i in ("%~dp0") do SET "updateChangelog_dir=%%~fi"
+::********************************************************************
+:: Script Name:  update-version.bat
+:: Description:  Updates the project version and handles Git operations.
+::
+:: Parameters:
+::    None
+::
+:: Usage:
+::    update-version.bat
+::
+:: Return Value: 0 - Success, 1 - Error, or set the 'xxx' variable.
+::********************************************************************
 
+::##################################################
+::  INITIAL SETUP
+::##################################################
+for %%i in ("%~dp0") do SET "updateChangelog_dir=%%~fi"
 set "QUIET_PRJ=true"
 call <NUL "%updateChangelog_dir%\..\senv.bat"
 set "QUIET_PRJ="
 
-
+::##################################################
+::  GET PROJECT VERSION
+::##################################################
 %_task% "[%~nx0] Must get version from '%project_dir%\version.txt'"
 set "project_version="
 call "%updateChangelog_dir%\%get-version.bat"
@@ -27,8 +44,10 @@ if not "%version_release%"=="%version%" (
 )
 %_info% "[%~nx0] is_snapshot='%is_snapshot%', is_release='%is_release%', version_release='%version_release%'"
 
+::##################################################
+::  GIT DESCRIBE AND STATUS
+::##################################################
 for /f %%i in ('git -C "%project_dir%" describe --long --tags --dirty --always') do set git_describe=%%i
-rem set "first_letter=!git_describe:~0,1!"
 for /f %%i in ('git describe --tags^^^ --abbrev^=0 2^>NUL') do set "git_tag=%%i"
 set "is_dirty="
 if not "%git_describe:-dirty=%" == "%git_describe%" ( set "is_dirty=1" )
@@ -47,14 +66,10 @@ for /f "tokens=2" %%i in ('git status --porcelain') do (
             if not "%%i"=="CHANGELOG.md" (
                 set "is_dirty_files=true"
                 set "file=,%%i"
-                rem %_info% "is_dirty_files because of file  '!file:,=!'"
                 if not "!file:,src/=!"=="!file!" (
                   set "is_dirty_src=true"
                   set "file=!file:,=!"
-                  rem %_info% "src file  '!file!'"
-                  rem %_info% "src file full path '%project_path%/!file!'"
                   for /f %%i in ('bash -c "date +%%s -r "%project_path%/!file!""') do set "src_file_timestamp=%%i"
-                  rem %_info% "src_file_timestamp='!src_file_timestamp!' vs src_file_max_timestamp='!src_file_max_timestamp!'"
                   if !src_file_timestamp! gtr !src_file_max_timestamp! (
                     set "src_file_max_timestamp=!src_file_timestamp!"
                   )
@@ -68,8 +83,9 @@ for /f "tokens=2" %%i in ('git status --porcelain') do (
 %_info% "[%~nx0] is_dirty='%is_dirty%', is_dirty_files='%is_dirty_files%'"
 %_info% "[%~nx0] is_dirty_src='%is_dirty_src%', src_file_max_timestamp='%src_file_max_timestamp%'"
 
-rem goto:check_if_build_is_needed
-
+::##################################################
+::  CHECK IF BUILD IS NEEDED
+::##################################################
 if not defined git_tag (
   %_warning% "[%~nx0] No release tag ever set, so Git tag is 'v0.0.0', Git repo considered snapshot"
   set "git_tag=v0.0.0"
@@ -122,8 +138,9 @@ if "%~1"=="rel" (
 call:make_new_snapshot
 goto:eof
 
-
-
+::##################################################
+::  MAKE NEW SNAPSHOT
+::##################################################
 :make_new_snapshot
 %_info% "[%~nx0] [make_new_snapshot]: Check if new snapshot has to be made"
 
@@ -150,7 +167,6 @@ if defined is_release (
   )
 )
 
-rem %_info% "[%~nx0] [make_new_snapshot]: askForNewSnapshot='%askForNewSnapshot%'"
 %_warning% "New modifications detected since last release '%version%' (%askForNewSnapshot%)"
 git diff --cached --quiet
 if errorlevel 1 (
@@ -210,10 +226,12 @@ git commit -m "chore(release): prepare for new '!appver!' from previous release 
 if errorlevel 1 ( call:restore-version
     %_fatal% "ERROR unable to commit version.txt" 113 )
 
-
 %_fatal% "[%~nx0] [make_new_snapshot]: stop for now" 51
 goto:eof
 
+::##################################################
+::  RESTORE VERSION
+::##################################################
 :restore-version
 echo %version_release%> "%project_dir%\version.txt"
 if errorlevel 1 (
@@ -225,6 +243,9 @@ if errorlevel 1 (
 )
 goto:eof
 
+::##################################################
+::  MAKE NEW RELEASE
+::##################################################
 :make_new_release
 if defined UV_FORCE_REL (
   if defined is_dirty_files (
@@ -239,7 +260,6 @@ if defined is_dirty_files (
   %_warning% "[%~nx0] [make_new_release] Repository is not clean (and 'UV_FORCE_REL' is not set):"
   git status --porcelain | grep -v version.txt | grep -v CHANGELOG.md
   set /p "confirm=Do you want to make a release? (y/N): "
-  rem echo confirm='%confirm%'
 ) else (
   %_ok% "[%~nx0] [make_new_release] Repository is clean. Proceed with release."
 )
@@ -272,6 +292,9 @@ if defined is_snapshot (
 )
 call:update-changelog
 
+::##################################################
+::  CHECK IF BUILD IS NEEDED
+::##################################################
 :check_if_build_is_needed
 if defined called_from_build (
   %_info% "No need to check if build needed, since this is called from build"
@@ -320,8 +343,9 @@ git -C "%project_dir%" commit -m "chore(release): prepare for new 'v%version_rel
 if errorlevel 1 ( %_fatal% "[%~nx0] Unable commit version.txt/CHANGELOG.md to index of '%project_dir%'" 214 )
 %_ok% "[%~nx0] Git repository reset, version.txt and CHANGELOG.md added to index and committed"
 
-
-rem Check if git tag is needed, create it if it does not already exist. The git tag is in the %git_tag% variable
+::##################################################
+::  CREATE GIT TAG
+::##################################################
 %_task% "[%~nx0] Must check if git tag 'v%version_release%' is needed"
 set "existing_tag="
 for /f %%i in ('git tag -l "v%version_release%"') do set "existing_tag=%%i"
@@ -335,9 +359,11 @@ if errorlevel 1 (
 )
 %_ok% "[%~nx0] Git tag 'v%version_release%' created"
 
-rem %_fatal% "[%~nx0] [make_new_release] Stop for now" 422
 goto:eof
 
+::##################################################
+::  UPDATE CHANGELOG
+::##################################################
 :update-changelog
 for /f %%i in ('bash -c "cygpath '%project_dir%\CHANGELOG.md'"') do set "changelog_path=%%i"
 for /f %%i in ('bash -c "date +%%s -r "%changelog_path%""') do set "changelog_timestamp=%%i"
