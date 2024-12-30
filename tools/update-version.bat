@@ -349,7 +349,12 @@ goto:eof
 %_task% "[%~nx0] Must reset pre-release state (build failed): git reset --hard, git tag -d 'v%version_release%'"
 git -C "%project_dir%" reset --hard @~1
 if errorlevel 1 ( %_fatal% "[%~nx0] Unable to reset hard to previous commit of '%project_dir%'" 311 )
+%_ok% "[%~nx0] Git repository reset to previous commit"
+git -C "%project_dir%" tag -d "v%version_release%"
+if errorlevel 1 ( %_fatal% "[%~nx0] Unable to delete git tag 'v%version_release%' of '%project_dir%'" 312 )
+%_ok% "[%~nx0] Git tag 'v%version_release%' deleted"
 call:restore-version
+goto:eof
 
 ::##################################################
 ::  UPDATE CHANGELOG
