@@ -59,7 +59,7 @@ if defined failed_update-version (
 )
 
 %_info% "----------------------------------------"
-%_info% "Build the project '%project_dir_name%'"%build_msg%
+%_info% "Build the project '%project_dir_name%'%build_msg%"
 %_info% "----------------------------------------"
 set "build_msg="
 
@@ -81,4 +81,4 @@ set "params-uv="
 set "SKIP_LOCAL="
 call "%build_dir%\senv.bat" unset
 set "build_dir="
-rem goto:eof
+goto:eof
