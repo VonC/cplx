@@ -227,14 +227,10 @@ goto:eof
 ::  RESTORE VERSION
 ::##################################################
 :restore-version
-%_task% "[%~nx0] Must restore version.txt (to '%project_version%') and CHANGELOG.md"
+%_task% "[%~nx0] Must restore version.txt (to '%project_version%')"
 echo %project_version%> "%project_dir%\version.txt"
 if errorlevel 1 (
   %_fatal% "Unable to restore %project_version% in '%project_dir%\version.txt'" 256
-)
-git -C "%project_dir%" restore CHANGELOG.md
-if errorlevel 1 (
-  %_fatal% "Unable to restore CHANGELOG.md in '%project_dir%'" 257
 )
 goto:eof
 
