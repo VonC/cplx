@@ -238,6 +238,8 @@ set "called_from_init="
 set "called_from_env="
 set "ccd="
 set "err="
+set "local_path_msg="
+set "all_dir="
 
 if "%~1"=="restore" (
   doskey a=
