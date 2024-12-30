@@ -6,7 +6,7 @@ setlocal enableextensions enabledelayedexpansion
 :: Description:  Updates the project version and handles Git operations.
 ::
 :: Parameters:
-::    None
+::    rel - Force a release version
 ::
 :: Usage:
 ::    update-version.bat
@@ -58,8 +58,6 @@ for /f %%i in ('bash -c "cygpath '%project_dir%'"') do set "project_path=%%i"
 %_task% "[%~nx0] Must check if Git repository is dirty"
 set "is_dirty_files="
 set "is_dirty_src="
-set "src_file_timestamp="
-set "src_file_max_timestamp=0"
 for /f "tokens=2" %%i in ('git status --porcelain') do (
     if not "%%i"=="" (
         if not "%%i"=="version.txt" (
@@ -69,10 +67,6 @@ for /f "tokens=2" %%i in ('git status --porcelain') do (
                 if not "!file:,src/=!"=="!file!" (
                   set "is_dirty_src=true"
                   set "file=!file:,=!"
-                  for /f %%i in ('bash -c "date +%%s -r "%project_path%/!file!""') do set "src_file_timestamp=%%i"
-                  if !src_file_timestamp! gtr !src_file_max_timestamp! (
-                    set "src_file_max_timestamp=!src_file_timestamp!"
-                  )
                 )
             )
         )
@@ -84,7 +78,7 @@ for /f "tokens=2" %%i in ('git status --porcelain') do (
 %_info% "[%~nx0] is_dirty_src='%is_dirty_src%', src_file_max_timestamp='%src_file_max_timestamp%'"
 
 ::##################################################
-::  CHECK IF BUILD IS NEEDED
+::  CHECK IF RELEASE IS NEEDED
 ::##################################################
 if not defined git_tag (
   %_warning% "[%~nx0] No release tag ever set, so Git tag is 'v0.0.0', Git repo considered snapshot"
@@ -170,7 +164,7 @@ if defined is_release (
 %_warning% "New modifications detected since last release '%version%' (%askForNewSnapshot%)"
 git diff --cached --quiet
 if errorlevel 1 (
-    %_fatal% "Please commit or reset your indexed/staged changes first, to allow version.txt modification and individual commit" 111
+    %_fatal% "Please commit or stash or reset your indexed/staged changes first, to allow version.txt modification and individual commit" 111
 )
 %_task% "Specify the new SNAPSHOT version to do"
 FOR /F "tokens=1,2,3 delims=." %%i in ("%version%") do (
@@ -226,16 +220,17 @@ git commit -m "chore(release): prepare for new '!appver!' from previous release 
 if errorlevel 1 ( call:restore-version
     %_fatal% "ERROR unable to commit version.txt" 113 )
 
-%_fatal% "[%~nx0] [make_new_snapshot]: stop for now" 51
+%_ok% "[%~nx0] [make_new_snapshot]: all done, new snapshot version '%appver%' set"
 goto:eof
 
 ::##################################################
 ::  RESTORE VERSION
 ::##################################################
 :restore-version
-echo %version_release%> "%project_dir%\version.txt"
+%_task% "[%~nx0] Must restore version.txt (to '%project_version%') and CHANGELOG.md"
+echo %project_version%> "%project_dir%\version.txt"
 if errorlevel 1 (
-  %_fatal% "Unable to restore %version_release% in '%project_dir%\version.txt'" 256
+  %_fatal% "Unable to restore %project_version% in '%project_dir%\version.txt'" 256
 )
 git -C "%project_dir%" restore CHANGELOG.md
 if errorlevel 1 (
@@ -292,46 +287,6 @@ if defined is_snapshot (
 )
 call:update-changelog
 
-::##################################################
-::  CHECK IF BUILD IS NEEDED
-::##################################################
-:check_if_build_is_needed
-if defined called_from_build (
-  %_info% "No need to check if build needed, since this is called from build"
-  goto:build_not_needed
-)
-%_task% "Must check if a build is needed"
-if not exist "%project_dir%\target\%artifact%-%version_release%.jar" (
-  %_warning% "No release jar '%artifact%-%version_release%.jar' detected in '%project_dir%\target'"
-  goto:build_release
-)
-for /f %%i in ('bash -c "date +%%s -r "%project_path%/target/%artifact%-%version_release%.jar""') do set "jar_file_timestamp=%%i"
-%_ok% "Build release '%artifact%-%version_release%.jar' already done, timestamp '%jar_file_timestamp%'"
-if defined is_dirty_src (
-  if %src_file_max_timestamp% gtr %jar_file_timestamp% (
-    %_warning% "Source file(s) timestamp '%src_file_max_timestamp%' is greater than release jar '%artifact%-%version_release%.jar' timestamp '%jar_file_timestamp%'"
-    goto:build_release
-  ) else (
-    %_ok% "No source file(s) timestamp greater than release jar '%artifact%-%version_release%.jar' timestamp: no rebuild needed"
-  )
-) else (
-  %_ok% "Git status clean for src: no rebuild needed"
-)
-goto:build_not_needed
-:build_release
-%_task% "Must build release '%artifact%-%version_release%.jar'"
-set "called_from_update-version=1"
-call "%project_dir%\build.bat"
-set "called_from_update-version="
-if errorlevel 1 (
-  %_fatal% "Unable to build '%artifact%-%version_release%.jar'" 141
-)
-if not exist "%project_dir%\target\%artifact%-%version_release%.jar" (
-  %_fatal% "After build, No release jar '%artifact%-%version_release%.jar' detected in '%project_dir%\target'" 142
-)
-%_ok% "Build release '%artifact%-%version_release%.jar' built"
-:build_not_needed
-
 %_task% "[%~nx0] Must reset Git repository, add version.txt and CHANGELOG and commit"
 git -C "%project_dir%" reset
 if errorlevel 1 ( %_fatal% "[%~nx0] Unable to reset index of '%project_dir%'" 211 )
@@ -359,7 +314,34 @@ if errorlevel 1 (
 )
 %_ok% "[%~nx0] Git tag 'v%version_release%' created"
 
+::  ===============================================
+::  BUILD RELEASE WITH EVERYTHING COMMITTED
+::  ===============================================
+set "artifact=%project_dir_name%"
+%_task% "Must build release '%artifact%-%version_release%'"
+set "called_from_update-version=1"
+call "%project_dir%\build.bat"
+set "called_from_update-version="
+set "has_been_called_from_update=1"
+if errorlevel 1 (
+  %_fatal% "Unable to build '%artifact%-%version_release%'" 141
+)
+if not exist "%project_dir%\target\%artifact%-%version_release%" (
+  call:reset_pre_release
+  %_fatal% "After build, No release jar '%artifact%-%version_release%' detected in '%project_dir%\target'" 142
+)
+%_ok% "Build release '%artifact%-%version_release%' built"
+
 goto:eof
+
+::##################################################
+::  RESET PRE-RELEASE BECAUSE BUILD FAILED
+::##################################################
+:reset_pre_release
+%_task% "[%~nx0] Must reset pre-release state (build failed): git reset --hard, git tag -d 'v%version_release%'"
+git -C "%project_dir%" reset --hard @~1
+if errorlevel 1 ( %_fatal% "[%~nx0] Unable to reset hard to previous commit of '%project_dir%'" 311 )
+call:restore-version
 
 ::##################################################
 ::  UPDATE CHANGELOG
