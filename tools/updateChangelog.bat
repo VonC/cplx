@@ -10,6 +10,10 @@ setlocal enableextensions enabledelayedexpansion
 ::         'latest' means the current project version from version.txt
 ::    %2 - Release title (optional)
 ::
+:: Environment Variables:
+::    RELFORCE - Force the update of the release in CHANGELOG.md
+::    PRJ_REL_TITLE - Title for the release in CHANGELOG.md
+::
 :: Usage:
 ::    updateChangelog.bat v1.2.3 "Release Title"
 ::
@@ -29,6 +33,7 @@ call "%project_dir%\tools\get-version.bat"
 :: First task: check that %1 respects the pattern vX.Y.Z[-rcR] (Linux command acceptable in this bat script), or use the one from version.txt
 set "relVersion=%~1"
 set "relTitleParam=%~2"
+if not defined relTitleParam ( set "relTitleParam=%PRJ_REL_TITLE%" )
 
 :: Check if argument matches the pattern vX.Y.Z[-rcR]
 echo %relVersion%| grep -Eq "^^v[0-9]+\.[0-9]+\.[0-9]+(-[rR][cC][0-9]+)?$"
