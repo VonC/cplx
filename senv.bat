@@ -15,6 +15,7 @@ doskey hsenv=%HOME%\bin\senv.bat $*
 doskey fsenv=%~dp0senv.bat force
 doskey usenv=%~dp0senv.bat unset
 doskey rsenv=%~dp0senv.bat restore
+doskey crel=
 
 set "CHECK_QUIET_PRJ=echo %QUIET_PRJ% | findstr /C:true >nul ||"
 set "CHECK_DEBUG_PRJ=echo %DEBUG_PRJ% | findstr /C:true >nul &&"
@@ -78,6 +79,7 @@ if defined local_path (
   doskey uf=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat $*"
   doskey ul=updateChangelog.bat latest $*
   doskey ufl=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat latest $*"
+  doskey crel=bash -c "git tag --sort=-creatordate | head -n 1 | xargs -I {} sh -c 'git reset $(git rev-list -n 1 {}^); git tag -d {}'"
 )
 
 ::  ===============================================
@@ -92,6 +94,7 @@ if not defined local_path (
   doskey uf=
   doskey ul=
   doskey ufl=
+  doskey crel=
 )
 set "local_path="
 
