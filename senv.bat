@@ -268,5 +268,6 @@ set "project_path="
 set "project_dir="
 set "CHECK_DEBUG_PRJ="
 set "CHECK_QUIET_PRJ="
+set "PRJ_REL_TITLE="
 
 goto:eof

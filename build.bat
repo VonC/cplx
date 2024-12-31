@@ -31,6 +31,7 @@ set "params="
 set "params-uv="
 set "sp="
 set "sp-uv="
+set "PRJ_REL_TITLE="
 :loop
 if "%~1"=="" goto:end
 if "%~1"=="rel" (
@@ -124,4 +125,5 @@ set "params-uv="
 set "SKIP_LOCAL="
 call "%build_dir%\senv.bat" unset
 set "build_dir="
+set "PRJ_REL_TITLE="
 goto:eof
