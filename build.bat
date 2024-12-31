@@ -14,18 +14,28 @@ set "sp-uv="
 :loop
 if "%~1"=="" goto end
 if "%~1"=="rel" (
-    set "params-uv=!params-uv!!sp-uv!%1"
+    set "params-uv=!params-uv!!sp-uv!^"%~1^""
     set "sp-uv= "
 ) else (
-    set "params=!params!!sp!%1"
+    set "a_param=%~1"
+    if "!a_param:rel_title=!" neq "!a_param!" (
+      set "PRJ_REL_TITLE=!a_param:rel_title=!"
+      set "PRJ_REL_TITLE=!PRJ_REL_TITLE:~1!"
+      shift
+      goto:loop
+    )
+    set "params=!params!!sp!^"%~1^""
     set "sp= "
 )
 shift
 goto loop
 :end
-endlocal & set "params=%params%" & set "params-uv=%params-uv%"
-%_info% "Params for build: '%params%'"
-%_info% "Params for update-version (rel for 'make release'): '%params-uv%'"
+endlocal & set "params=%params%" & set "params-uv=%params-uv%" & set "PRJ_REL_TITLE=%PRJ_REL_TITLE%"
+%_info% "Params for build: '%params:"=＂%'"
+%_info% "Params for update-version (rel for 'make release'): '%params-uv:"=＂%'"
+if defined PRJ_REL_TITLE (
+  %_info% "Release title PRJ_REL_TITLE: '%PRJ_REL_TITLE%'"
+)
 
 set "build_msg="
 set "failed_update-version="
