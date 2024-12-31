@@ -25,38 +25,64 @@ if defined called_from_update-version ( set "QUIET_PRJ=true" )
 call <NUL "%build_dir%\senv.bat"
 set "QUIET_PRJ="
 
+set "build_msg="
+if defined called_from_update (
+  set "build_msg= (from update-version)"
+  goto:info_params
+)
+
 ::  ===============================================
 ::  PARSE PARAMETERS
 ::  ===============================================
 setlocal enabledelayedexpansion
-set "params="
-set "params-uv="
+set "build_params="
+set "build_params-uv="
 set "sp="
 set "sp-uv="
 set "PRJ_REL_TITLE="
+set "build_must_fail="
 :loop
 if "%~1"=="" goto:end
 if "%~1"=="rel" (
-    set "params-uv=!params-uv!!sp-uv!^"%~1^""
+    set "build_params-uv=!build_params-uv!!sp-uv!^"%~1^""
     set "sp-uv= "
 ) else (
     set "a_param=%~1"
     if "!a_param:rel_title=!" neq "!a_param!" (
       set "PRJ_REL_TITLE=!a_param:rel_title=!"
       set "PRJ_REL_TITLE=!PRJ_REL_TITLE:~1!"
-      shift
-      goto:loop
+      goto:continue
     )
-    set "params=!params!!sp!^"%~1^""
+    if "!a_param!"=="prj_error" (
+      set "build_must_fail=fail"
+      goto:continue
+    )
+    set "build_params=!build_params!!sp!^"%~1^""
     set "sp= "
 )
+:continue
 shift
 goto loop
 :end
-endlocal & set "params=%params%" & set "params-uv=%params-uv%" & set "PRJ_REL_TITLE=%PRJ_REL_TITLE%"
+endlocal & set "build_params=%build_params%" & set "build_params-uv=%build_params-uv%" & set "PRJ_REL_TITLE=%PRJ_REL_TITLE%"
 
-%_info% "Params for build: '%params:"=＂%'"
-%_info% "Params for update-version (rel for 'make release'): '%params-uv:"=＂%'"
+set "build_params_echos="
+if not defined build_params ( goto:build_params-uv_echos )
+setlocal enabledelayedexpansion
+  set "build_params_echos=%build_params:"=‟%"
+  echo build_params_echos='!build_params_echos!'
+endlocal & set "build_params_echos=%build_params_echos%"
+
+:build_params-uv_echos
+set "build_params-uv_echos="
+if not defined build_params-uv ( goto:info_params )
+  setlocal enabledelayedexpansion
+  set "build_params-uv_echos=%build_params-uv:"=‟%"
+endlocal & set "build_params-uv_echos=%build_params-uv_echos%"
+
+:info_params
+%_info% "build_params for build%build_msg%: '%build_params_echos%'"
+%_info% "build_params for update-version (rel for 'make release'): '%build_params-uv_echos%'"
 if defined PRJ_REL_TITLE (
   %_info% "Release title PRJ_REL_TITLE: '%PRJ_REL_TITLE%'"
 )
