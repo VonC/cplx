@@ -349,7 +349,7 @@ if defined failed_build (
 )
 if not exist "%project_dir%\target\%artifact%-%version_release%" (
   call:reset_pre_release
-  %_fatal% "After build, No release jar '%artifact%-%version_release%' detected in '%project_dir%\target'" 142
+  %_fatal% "After build, No release '%artifact%-%version_release%' detected in '%project_dir%\target'" 142
 )
 %_ok% "Build release '%artifact%-%version_release%' built"
 
