@@ -303,7 +303,7 @@ git -C "%project_dir%" add "version.txt"
 if errorlevel 1 ( %_fatal% "[%~nx0] Unable add version.txt to index of '%project_dir%'" 212 )
 git -C "%project_dir%" add "CHANGELOG.md"
 if errorlevel 1 ( %_fatal% "[%~nx0] Unable add CHANGELOG.md to index of '%project_dir%'" 213 )
-git -C "%project_dir%" commit -m "chore(release): prepare for new 'v%version_release%' from previous release '%git_tag%'"
+git -C "%project_dir%" commit -m "chore(release): set new 'v%version_release%' from previous release '%git_tag%'"
 if errorlevel 1 ( %_fatal% "[%~nx0] Unable commit version.txt/CHANGELOG.md to index of '%project_dir%'" 214 )
 %_ok% "[%~nx0] Git repository reset, version.txt and CHANGELOG.md added to index and committed"
 
@@ -323,50 +323,6 @@ if errorlevel 1 (
 )
 %_ok% "[%~nx0] Git tag 'v%version_release%' created"
 
-::  ===============================================
-::  BUILD RELEASE WITH EVERYTHING COMMITTED
-::  ===============================================
-set "artifact=%project_dir_name%"
-%_task% "Must build release '%artifact%-%version_release%'"
-set "called_from_update-version=1"
-set "failed_build="
-call "%project_dir%\build.bat"
-if errorlevel 1 (
-  set failed_build=1
-)
-set "QUIET_PRJ=true"
-call <NUL "%update-version_dir%\..\senv.bat"
-set "QUIET_PRJ="
-set "called_from_update-version="
-set "has_been_called_from_update=1"
-if defined failed_build (
-  if defined called_from_build (
-    %_error% "Build called fro update-version failed, unable to make release"
-    endlocal & set "has_been_called_from_update=true"
-    exit /b 1
-  )
-  %_fatal% "Unable to build '%artifact%-%version_release%'" 141
-)
-if not exist "%project_dir%\target\%artifact%-%version_release%" (
-  call:reset_pre_release
-  %_fatal% "After build, No release '%artifact%-%version_release%' detected in '%project_dir%\target'" 142
-)
-%_ok% "Build release '%artifact%-%version_release%' built"
-
-goto:eof
-
-::##################################################
-::  RESET PRE-RELEASE BECAUSE BUILD FAILED
-::##################################################
-:reset_pre_release
-%_task% "[%~nx0] Must reset pre-release state (build failed): git reset --hard, git tag -d 'v%version_release%'"
-git -C "%project_dir%" reset --hard @~1
-if errorlevel 1 ( %_fatal% "[%~nx0] Unable to reset hard to previous commit of '%project_dir%'" 311 )
-%_ok% "[%~nx0] Git repository reset to previous commit"
-git -C "%project_dir%" tag -d "v%version_release%"
-if errorlevel 1 ( %_fatal% "[%~nx0] Unable to delete git tag 'v%version_release%' of '%project_dir%'" 312 )
-%_ok% "[%~nx0] Git tag 'v%version_release%' deleted"
-call:restore-version
 goto:eof
 
 ::##################################################
