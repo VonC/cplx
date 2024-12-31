@@ -32,7 +32,7 @@ set "QUIET_PRJ="
 set "build_msg="
 if defined called_from_update (
   set "build_msg= (from update-version)"
-  goto:info_params
+  goto:set_param_echos
 )
 
 ::  ===============================================
@@ -70,6 +70,7 @@ goto loop
 :end
 endlocal & set "build_params=%build_params%" & set "build_params-uv=%build_params-uv%" & set "PRJ_REL_TITLE=%PRJ_REL_TITLE%"
 
+:set_param_echos
 set "build_params_echos="
 if not defined build_params ( goto:build_params-uv_echos )
 setlocal enabledelayedexpansion
