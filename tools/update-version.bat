@@ -8,6 +8,10 @@ setlocal enableextensions enabledelayedexpansion
 :: Parameters:
 ::    rel - Force a release version
 ::
+:: Environment Variables:
+::    UV_FORCE_REL - Force a release version
+::    PRJ_REL_TITLE - Title for the release in CHANGELOG.md
+::
 :: Usage:
 ::    update-version.bat
 ::
@@ -201,17 +205,26 @@ if errorlevel 1 ( call:restore-version
 
 set "relVersion=%appver:-SNAPSHOT=%"
 grep -Eq "## %relVersion% - " "%project_dir%\CHANGELOG.md" >NUL 2>NUL
-if errorlevel 1 (
-  %_task% "Must enter title for CHANGELOG.md next release '%relVersion%'"
-  set /p "title=Enter title for '%relVersion%': "
-  if "!title!"=="" ( %_fatal% "Empty title for '%relVersion%'" 311 )
-  echo.>> "%project_dir%\CHANGELOG.md"
-  echo ## %relVersion% - !title!>> "%project_dir%\CHANGELOG.md"
-  %_ok% "'%project_dir%\CHANGELOG.md' now has '%relVersion%' title '!title!'"
-) else (
+if not errorlevel 1 (
   %_ok% "'%project_dir%\CHANGELOG.md' now has '%relVersion%'"
+  goto:add_changelog_with_title
+)
+if defined PRJ_REL_TITLE (
+  set "title=%PRJ_REL_TITLE%"
+  %_ok% "Using PRJ_REL_TITLE='%title%' for '%relVersion%'"
+  goto:update_changelog_with_title
 )
 
+%_task% "Must enter title for CHANGELOG.md next release '%relVersion%' (PRJ_REL_TITLE not set)"
+set /p "title=Enter title for '%relVersion%': "
+if "!title!"=="" ( %_fatal% "Empty title for '%relVersion%'" 311 )
+
+:update_changelog_with_title
+echo.>> "%project_dir%\CHANGELOG.md"
+echo ## %relVersion% - !title!>> "%project_dir%\CHANGELOG.md"
+%_ok% "'%project_dir%\CHANGELOG.md' now has '%relVersion%' title '!title!'"
+
+:add_changelog_with_title
 git add -- "%project_dir%\CHANGELOG.md"
 if errorlevel 1 ( call:restore-version
     %_fatal% "ERROR unable to add CHANGELOG.md" 122 )
