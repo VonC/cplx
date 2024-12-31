@@ -11,3 +11,4 @@ path.ini
 *.ori.*
 tmp/
 old/
+target/
