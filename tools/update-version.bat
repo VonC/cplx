@@ -140,7 +140,7 @@ goto:eof
 
 if defined is_snapshot (
   %_ok% "No need for new snapshot: current version '%version%' is already a SNAPSHOT one"
-  call:update-changelog
+  call:check_update-changelog "snapshot version '%version%'"
   goto:eof
 )
 
@@ -281,7 +281,7 @@ if defined is_snapshot (
 ) else (
   %_ok% "[%~nx0] [make_new_release] version.txt already at release revision '%version%'"
 )
-call:update-changelog
+call:check_update-changelog "release version '%version_release%'"
 
 %_task% "[%~nx0] Must reset Git repository, add version.txt and CHANGELOG and commit"
 git -C "%project_dir%" reset
@@ -357,9 +357,14 @@ call:restore-version
 goto:eof
 
 ::##################################################
-::  UPDATE CHANGELOG
+::  CHECK IF CHANGELOG NEEDS TO BE UPDATED
 ::##################################################
-:update-changelog
+:check_update-changelog
+if not exist "%project_dir%\CHANGELOG.md" (
+  %_info% "[%~nx0] [update-changelog] No CHANGELOG.md found in '%project_dir%'"
+  call:generate-changelog %1
+  goto:eof
+)
 for /f %%i in ('bash -c "cygpath '%project_dir%\CHANGELOG.md'"') do set "changelog_path=%%i"
 for /f %%i in ('bash -c "date +%%s -r "%changelog_path%""') do set "changelog_timestamp=%%i"
 if not defined changelog_timestamp (
@@ -370,16 +375,25 @@ for /f %%i in ('bash -c "git -C "%project_path%" log -1 --format=%%ct"') do set 
 %_info% "[%~nx0] [update-changelog] git_last_commit_timestamp='%git_last_commit_timestamp%'"
 if %git_last_commit_timestamp% gtr %changelog_timestamp% (
   %_info% "[%~nx0] [update-changelog] Last commit timestamp '%git_last_commit_timestamp%' is greater than CHANGELOG.md timestamp '%changelog_timestamp%'"
-  %_task% "[%~nx0] [update-changelog] Must update/refresh CHANGELOG.md for version 'v%version_release%'"
-  set "RELFORCE=1"
-  call "%project_dir%\tools\updateChangelog.bat" latest
-  if errorlevel 1 (
-    set "RELFORCE="
-    %_fatal% "[%~nx0] Unable to update '%project_dir%\CHANGELOG.md'" 129
-  )
-  set "RELFORCE="
-  %_ok% "[%~nx0] '%project_dir%\CHANGELOG.md' updated/refreshed"
+  goto:generate-changelog %1
+  goto:eof
 ) else (
   %_info% "[%~nx0] [update-changelog] Last commit timestamp '%git_last_commit_timestamp%' is older than CHANGELOG.md timestamp '%changelog_timestamp%'"
   %_ok% "[%~nx0] [update-changelog] no need to update/refresh CHANGELOG.md"
 )
+goto:eof
+
+::##################################################
+::  (RE-)GENERATE CHANGELOG
+::##################################################
+:generate-changelog
+%_task% "[%~nx0] [update-changelog] Must update/refresh CHANGELOG.md for %~1"
+set "RELFORCE=1"
+call "%project_dir%\tools\updateChangelog.bat" latest
+if errorlevel 1 (
+  set "RELFORCE="
+  %_fatal% "[%~nx0] Unable to update '%project_dir%\CHANGELOG.md'" 129
+)
+set "RELFORCE="
+%_ok% "[%~nx0] '%project_dir%\CHANGELOG.md' updated/refreshed"
+goto:eof
