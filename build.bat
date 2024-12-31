@@ -1,18 +1,38 @@
 @echo off
 
+::********************************************************************
+:: Script Name:  build.bat
+:: Description:  Builds the project and handles version updates.
+::
+:: Parameters:
+::    %1 - Build parameters (e.g., rel, rel_title)
+::
+:: Usage:
+::    build.bat rel
+::    build.bat rel_title "Release Title"
+::
+:: Return Value: 0 - Success, 1 - Error
+::********************************************************************
+
+::  ===============================================
+::  INITIAL SETUP
+::  ===============================================
 for %%i in ("%~dp0") do SET "build_dir=%%~fi"
 
 if defined called_from_update-version ( set "QUIET_PRJ=true" )
 call <NUL "%build_dir%\senv.bat"
 set "QUIET_PRJ="
 
+::  ===============================================
+::  PARSE PARAMETERS
+::  ===============================================
 setlocal enabledelayedexpansion
 set "params="
 set "params-uv="
 set "sp="
 set "sp-uv="
 :loop
-if "%~1"=="" goto end
+if "%~1"=="" goto:end
 if "%~1"=="rel" (
     set "params-uv=!params-uv!!sp-uv!^"%~1^""
     set "sp-uv= "
@@ -31,12 +51,16 @@ shift
 goto loop
 :end
 endlocal & set "params=%params%" & set "params-uv=%params-uv%" & set "PRJ_REL_TITLE=%PRJ_REL_TITLE%"
+
 %_info% "Params for build: '%params:"=＂%'"
 %_info% "Params for update-version (rel for 'make release'): '%params-uv:"=＂%'"
 if defined PRJ_REL_TITLE (
   %_info% "Release title PRJ_REL_TITLE: '%PRJ_REL_TITLE%'"
 )
 
+::  ===============================================
+::  UPDATE VERSION
+::  ===============================================
 set "build_msg="
 set "failed_update-version="
 if not defined called_from_update-version (
@@ -68,6 +92,9 @@ if defined failed_update-version (
   goto:eof
 )
 
+::  ===============================================
+::  BUILD PROJECT
+::  ===============================================
 %_info% "----------------------------------------"
 %_info% "Build the project '%project_dir_name%'%build_msg%"
 %_info% "----------------------------------------"
@@ -79,10 +106,16 @@ set "cmd=echo%params% build"
 call <NUL %cmd%
 if not errorlevel 1 (
   %_ok% "project '%project_dir_name%' build successful"
+  call:build_unset
 ) else (
   call:build_unset
   call "%~dp0tools\batcolors\echos.bat" :fatal "project '%project_dir_name%' build FAILED, code '%ERRORLEVEL%'" 3
 )
+goto:eof
+
+::##################################################
+::  CLEANUP
+::##################################################
 
 :build_unset
 set "cmd="
