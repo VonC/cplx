@@ -10,6 +10,8 @@
 :: Usage:
 ::    build.bat rel
 ::    build.bat rel_title "Release Title"
+::    brel "rel_title=Initial project template"
+::    brel a "e f" "rel_title=Initial project template" "g t h"
 ::
 :: Return Value: 0 - Success, 1 - Error
 ::********************************************************************
