@@ -7,3 +7,7 @@ aa
 *.rpm
 *.tar.gz
 path.ini
+*.old.*
+*.ori.*
+tmp/
+old/
