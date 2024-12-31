@@ -10,6 +10,10 @@
 :: Usage:
 ::    build.bat rel
 ::    build.bat rel_title "Release Title"
+::    build.bat prj_error: fail the build (for testing)
+::
+::    With aliases b or brel:
+::    b rel
 ::    brel "rel_title=Initial project template"
 ::    brel a "e f" "rel_title=Initial project template" "g t h"
 ::
@@ -90,12 +94,11 @@ if defined PRJ_REL_TITLE (
 ::  ===============================================
 ::  UPDATE VERSION
 ::  ===============================================
-set "build_msg="
 set "failed_update-version="
 if not defined called_from_update-version (
   set "has_been_called_from_update-version="
   set "called_from_build=true"
-  call "%build_dir%\tools\update-version.bat" %params-uv%
+  call "%build_dir%\tools\update-version.bat" %build_params-uv%
   if errorlevel 1 (
     set "failed_update-version=true"
   )
@@ -124,15 +127,19 @@ if defined failed_update-version (
 ::  ===============================================
 ::  BUILD PROJECT
 ::  ===============================================
+call "%project_dir%\tools\get-version.bat"
 %_info% "----------------------------------------"
-%_info% "Build the project '%project_dir_name%'%build_msg%"
+%_info% "Build the project '%project_dir_name%'%build_msg%, version '%project_version%'"
 %_info% "----------------------------------------"
 set "build_msg="
 
-%_task% "Start build of '%project_dir_name%' with params '%params%'"
-set "cmd=echo%params% build"
-%_info% "%cmd%"
-call <NUL %cmd%
+mkdir "%project_dir%\target" 2>NUL
+del /F /Q "%project_dir%\target\*.*" 2>NUL
+
+%_task% "Start build of '%project_dir_name%' with build_params '%build_params_echos%'"
+set "cmd=%build_must_fail%echo %build_params% build"
+%_info% "%cmd:"=＂%"
+call <NUL %cmd%> "%project_dir%\target\%project_dir_name%-%project_version%"
 if not errorlevel 1 (
   %_ok% "project '%project_dir_name%' build successful"
   call:build_unset
@@ -148,10 +155,11 @@ goto:eof
 
 :build_unset
 set "cmd="
-set "params="
-set "params-uv="
+set "build_params="
+set "build_params-uv="
 set "SKIP_LOCAL="
 call "%build_dir%\senv.bat" unset
 set "build_dir="
 set "PRJ_REL_TITLE="
+set "build_must_fail="
 goto:eof
