@@ -151,7 +151,9 @@ if defined is_snapshot (
 set "askForNewSnapshot="
 if defined is_release ( 
   if defined commit_count (
-    set "askForNewSnapshot=%commit_count% new commits" 
+    if not "%commit_count%"=="0" (
+      set "askForNewSnapshot=%commit_count% new commits"
+    )
   )
 )
 
@@ -163,6 +165,11 @@ if defined is_release (
         set "askForNewSnapshot=%askForNewSnapshot%, dirty"
     )
   )
+)
+
+if not defined askForNewSnapshot (
+  %_ok% "No need for new snapshot: current version '%version%' is a RELEASE one without local modification or new commit"
+  goto:eof
 )
 
 %_warning% "New modifications detected since last release '%version%' (%askForNewSnapshot%)"
@@ -194,7 +201,7 @@ if "!c!" == "1" ( set "appver=!maj!.!min!.!nfix!-SNAPSHOT" )
 if "!c!" == "2" ( set "appver=!maj!.!nmin!.0-SNAPSHOT" )
 if "!c!" == "3" ( set "appver=!nmaj!.0.0-SNAPSHOT" )
 
-echo %appver%>"%project_dir%\version.txt"
+echo %appver%> "%project_dir%\version.txt"
 if errorlevel 1 (
   %_fatal% "Unable to set %appver% in '%project_dir%\version.txt'" 256
 )
