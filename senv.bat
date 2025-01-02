@@ -61,7 +61,7 @@ where get-version >NUL 2>&1
 if not errorlevel 1 ( set "local_path=1" && set "local_path_msg= preserved")
 if "%~1"=="force" ( set "local_path=" && set "local_path_msg=" && set "force_project_path=1" )
 if defined local_path (
-  set "local_path_msg=[local%local_path_msg%]"
+  set "local_path_msg= [local%local_path_msg%]"
 )
 
 ::  ===============================================
