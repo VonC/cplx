@@ -175,4 +175,5 @@ set "called_from_build="
 set "build_params_echos="
 set "build_params-uv_echos="
 set "params-uv="
+set "a_release_has_just_been_made="
 goto:eof
