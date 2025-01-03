@@ -88,20 +88,20 @@ if defined PRJ_REL_TITLE (
 ::  ===============================================
 ::  UPDATE VERSION
 ::  ===============================================
-call "%build_dir%\tools\update-version.bat" %build_params-uv%
+%_stack_call% "%build_dir%\tools\update-version.bat" %build_params-uv%
 if errorlevel 1 (
   call:build_unset
   call "%~dp0tools\batcolors\echos.bat" :fatal "update-version FAILED, code '%ERRORLEVEL%'" 3
   goto:eof
 )
 set "QUIET_PRJ=true"
-call <NUL "%build_dir%\senv.bat"
+%_stack_call% <NUL "%build_dir%\senv.bat"
 set "QUIET_PRJ="
 
 ::  ===============================================
 ::  BUILD PROJECT
 ::  ===============================================
-call "%project_dir%\tools\get-version.bat"
+%_stack_call% "%project_dir%\tools\get-version.bat"
 %_info% "----------------------------------------"
 %_info% "Build the project '%project_dir_name%', version '%project_version%'"
 %_info% "----------------------------------------"
