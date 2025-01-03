@@ -201,6 +201,7 @@ if "!c!" == "1" ( set "appver=!maj!.!min!.!nfix!-SNAPSHOT" )
 if "!c!" == "2" ( set "appver=!maj!.!nmin!.0-SNAPSHOT" )
 if "!c!" == "3" ( set "appver=!nmaj!.0.0-SNAPSHOT" )
 
+verify >nul
 echo %appver%> "%project_dir%\version.txt"
 if errorlevel 1 (
   %_fatal% "Unable to set %appver% in '%project_dir%\version.txt'" 256
