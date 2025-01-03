@@ -26,6 +26,7 @@
 ::  INITIAL SETUP
 ::  ===============================================
 for %%i in ("%~dp0") do SET "build_dir=%%~fi"
+set "build_dir=%build_dir:~0,-1%"
 
 call <NUL "%build_dir%\senv.bat"
 
