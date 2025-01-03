@@ -121,7 +121,7 @@ goto:eof
 :call_init
 if not defined called_from_init (
   set "called_from_env=1"
-  call "%project_dir%\tools\init.bat" %~1
+  %_stack% senv.bat & call "%project_dir%\tools\init.bat" %~1
   set "called_from_init="
 )
 goto:eof
