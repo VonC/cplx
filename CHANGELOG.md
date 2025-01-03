@@ -53,3 +53,30 @@
 - *(git)* Ignore old and ori extensions, old/ and tmp/ folders
 - *(bat)* Build.bat add usage example using aliases
 - *(git)* Ignore target/ folder
+
+## v0.2.0 - Use stack and unstack of batcolors
+
+### 🚀 Features
+
+- *(tools)* Use batcolors with stacks
+- *(bat)* Senv.bat stack before calling init.bat
+- *(bat)* Senv.bat stack declares :call_echos_stack needed by batcolors stack
+- *(tools)* Init.bat declares :call_echos_stack needed by batcolors stack
+- *(tools)* Update-version.bat declares :call_echos_stack needed by batcolors stack
+- *(bat)* Build.bat declares :call_echos_stack needed by batcolors stack
+- *(bat)* Build.bat stack before calling senv, update-version or get-version
+
+### 🐛 Bug Fixes
+
+- *(bat)* Build.bat additional cleanup
+- *(bat)* Senv.bat extra space on local message
+- *(tools)* Update-version.bat does not create snap on clean rel with 0 additional commit
+- *(bat)* Senv.bat empty stack if not done already
+- *(bat)* Senv.bat stack makes sure batcolors is unset last
+- *(bat)* Build.bat trim build_dir trailing /
+
+### ⚙️ Miscellaneous Tasks
+
+- *(git)* Ignore temp/tmp files
+
+## 0.2.0 - Use stack and unstack of batcolors
