@@ -229,9 +229,6 @@ goto:eof
 ::  UNSET PROJECT VARIABLES IF REQUESTED
 ::##################################################
 :unset_senv
-if exist "%project_dir%\tools\batcolors\echos_macros.bat" (
-  call "%project_dir%\tools\batcolors\echos_macros.bat" unset
-)
 call:call_init unset
 
 if "%~1"=="restore" (
@@ -279,6 +276,13 @@ set "project_dir="
 set "CHECK_DEBUG_PRJ="
 set "CHECK_QUIET_PRJ="
 set "PRJ_REL_TITLE="
+set "ECHOS_STACK="
+set "echos_stack_emptied="
+if exist "%project_dir%\tools\batcolors\echos_macros.bat" (
+  call "%project_dir%\tools\batcolors\echos_macros.bat" unset
+)
+
+goto:eof
 
 :call_echos_stack
 call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
