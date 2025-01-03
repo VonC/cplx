@@ -12,3 +12,6 @@ path.ini
 tmp/
 old/
 target/
+temp.*
+*.tmp*
+*.temp*
