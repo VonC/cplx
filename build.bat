@@ -178,3 +178,7 @@ set "build_params-uv_echos="
 set "params-uv="
 set "a_release_has_just_been_made="
 goto:eof
+
+:call_echos_stack
+call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
+goto:eof
