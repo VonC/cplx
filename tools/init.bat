@@ -85,3 +85,8 @@ exit /b
 
 :unset_init
 set "okInit="
+goto:eof
+
+:call_echos_stack
+call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
+goto:eof
