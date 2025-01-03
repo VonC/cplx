@@ -373,3 +373,7 @@ if errorlevel 1 (
 set "RELFORCE="
 %_ok% "[%~nx0] '%project_dir%\CHANGELOG.md' updated/refreshed"
 goto:eof
+
+:call_echos_stack
+call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
+goto:eof
