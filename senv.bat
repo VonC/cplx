@@ -280,4 +280,6 @@ set "CHECK_DEBUG_PRJ="
 set "CHECK_QUIET_PRJ="
 set "PRJ_REL_TITLE="
 
+:call_echos_stack
+call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
 goto:eof
