@@ -45,6 +45,13 @@ if exist "%project_dir%\tools\batcolors\echos_macros.bat" (
     call "%project_dir%\tools\batcolors\echos_macros.bat" export
 )
 
+set "ECHOS_STACK=1"
+if not defined echos_stack_emptied (
+  call "%project_dir%\tools\batcolors\echos.bat" :empty_stack
+  set "echos_stack_emptied=1"
+)
+
+
 ::##################################################
 ::  SET PATH
 ::##################################################
