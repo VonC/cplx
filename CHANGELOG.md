@@ -74,6 +74,7 @@
 - *(bat)* Senv.bat empty stack if not done already
 - *(bat)* Senv.bat stack makes sure batcolors is unset last
 - *(bat)* Build.bat trim build_dir trailing /
+- *(tools)* Update-version.bat makes sure errorlevel is 0 before updating version.txt
 
 ### ⚙️ Miscellaneous Tasks
 
