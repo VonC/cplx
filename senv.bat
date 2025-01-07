@@ -105,26 +105,14 @@ if not defined local_path (
 )
 set "local_path="
 
-call:call_init
+%_stack_call% "%project_dir%\tools\init.bat" %~1
 
-if not defined called_from_init (
-  if not defined QUIET_PRJ (  %_info% "project PATH '%PATH%'" )
-  if not "%PATH%"=="%project_path%" ( call:update_project_path_ini )
-  rem %CHECK_QUIET_PRJ% %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'"
-  if not defined QUIET_PRJ ( %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'" )
+if not defined QUIET_PRJ (  %_info% "project PATH '%PATH%'" )
+if not "%PATH%"=="%project_path%" ( call:update_project_path_ini )
+rem %CHECK_QUIET_PRJ% %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'"
+if not defined QUIET_PRJ ( %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'" )
 )
 set "called_from_init="
-goto:eof
-
-::##################################################
-::  CALL INIT SCRIPT IF NOT CALLED FROM INIT
-::##################################################
-:call_init
-if not defined called_from_init (
-  set "called_from_env=1"
-  %_stack_call% "%project_dir%\tools\init.bat" %~1
-  set "called_from_init="
-)
 goto:eof
 
 ::##################################################
