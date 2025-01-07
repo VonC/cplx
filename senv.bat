@@ -168,6 +168,7 @@ rem echo === git_home='%git_home%'
 ::  ===============================================
 set "project_path=C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\"
 set "project_path=%git_home%\bin;%git_home%\cmd;%git_home%\usr\bin;%git_home%\mingw64\bin;%git_home%\mingw64\libexec\git-core;%project_path%"
+if exist "%USERPROFILE%\go\bin" ( set "project_path=%USERPROFILE%\go\bin;%project_path%" )
 if exist "%HOME%\bin\senv.bat" ( set "project_path=%HOME%\bin;%project_path%" )
 set "project_path=%project_dir%;%project_path%"
 set "PATH=%project_path%"
