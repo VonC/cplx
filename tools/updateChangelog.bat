@@ -40,22 +40,22 @@ echo %relVersion%| grep -Eq "^^v[0-9]+\.[0-9]+\.[0-9]+(-[rR][cC][0-9]+)?$"
 IF not ERRORLEVEL 1 (
     for %%i in ("a=A" "b=B" "c=C" "d=D" "e=E" "f=F" "g=G" "h=H" "i=I" "j=J" "k=K" "l=L" "m=M" "n=N" "o=O" "p=P" "q=Q" "r=R" "s=S" "t=T" "u=U" "v=v" "w=W" "x=X" "y=Y" "z=Z") do call set "relVersion=%%relVersion:%%~i%%"
     set "relVersion=!relVersion:v=!"
-    %_ok% "[%~nx0] Version 'v!relVersion!' from first argument is valid."
+    %_ok% "Version 'v!relVersion!' from first argument is valid."
     set "relVersionFile=%project_version%"
     for %%i in ("a=A" "b=B" "c=C" "d=D" "e=E" "f=F" "g=G" "h=H" "i=I" "j=J" "k=K" "l=L" "m=M" "n=N" "o=O" "p=P" "q=Q" "r=R" "s=S" "t=T" "u=U" "v=v" "w=W" "x=X" "y=Y" "z=Z") do call set "relVersionFile=%%relVersionFile:%%~i%%"
     set "relVersionFile=!relVersionFile:v=!"
     set "relVersionFile=!relVersionFile:-SNAPSHOT=!"
     if not "!relVersion!" == "!relVersionFile!" (
-        %_warning% "[%~nx0] Version 'v!relVersion!' from first argument is different from the one in version.txt: 'v!relVersionFile!'"
-        %_task% "[%~nx0] Must update version.txt with that new version 'v!relVersion!'"
+        %_warning% "Version 'v!relVersion!' from first argument is different from the one in version.txt: 'v!relVersionFile!'"
+        %_task% "Must update version.txt with that new version 'v!relVersion!'"
         rem echo !relVersion!-SNAPSHOT > "%project_dir%\version.txt"
-        %_ok% "[%~nx0] Version 'v!relVersion!' updated in version.txt"
+        %_ok% "Version 'v!relVersion!' updated in version.txt"
     )
     set "relVersion=v!relVersion!"
     goto:CheckRelease
 )
 if "%relVersion%" == "latest" ( goto:relVersion_is_project_version )
-%_fatal% "[%~nx0] Version '%relVersion%' from first argument does not follow the pattern X.Y.Z[-rcR]" 279
+%_fatal% "Version '%relVersion%' from first argument does not follow the pattern X.Y.Z[-rcR]" 279
 
 :relVersion_is_project_version
 set "relVersion=%project_version%"
@@ -64,10 +64,10 @@ set "relVersion=%relVersion:-SNAPSHOT=%"
 set "relVersion=%relVersion:v=%"
 echo %relVersion%| grep -Eq "^^[0-9]+\.[0-9]+\.[0-9]+(-[rR][cC][0-9]+)?$"
 IF ERRORLEVEL 1 (
-    %_fatal% "[%~nx0] Version '!relVersion!' from version.txt does not follow the pattern X.Y.Z[-rcR]" 280
+    %_fatal% "Version '!relVersion!' from version.txt does not follow the pattern X.Y.Z[-rcR]" 280
 )
 set "relVersion=v%relVersion%"
-%_ok% "[%~nx0] Version '%relVersion%' from version.txt is valid."
+%_ok% "Version '%relVersion%' from version.txt is valid."
 
 :CheckRelease
 
@@ -81,24 +81,24 @@ rem %_fatal% "Stop at :CheckRelease" 1
 set "overwriteRel=false"
 grep -Eq "## %relVersion% - " "%project_dir%\CHANGELOG.md" >NUL 2>NUL
 if not errorlevel 1 (
-    %_ok% "[%~nx0] Release '%relVersion%' already written in '%project_dir%\CHANGELOG.md'."
+    %_ok% "Release '%relVersion%' already written in '%project_dir%\CHANGELOG.md'."
     if not "%RELFORCE%" == "" (
-        %_task% "[%~nx0] Must rewrite release '%relVersion%' in '%project_dir%\CHANGELOG.md'"
+        %_task% "Must rewrite release '%relVersion%' in '%project_dir%\CHANGELOG.md'"
         set "overwriteRel=true"
         goto:extractTitle
     )
-    %_info% "[%~nx0] To overwrite the release, set RELFORCE=1"
+    %_info% "To overwrite the release, set RELFORCE=1"
     grep -E "## %relVersion% - " "%project_dir%\CHANGELOG.md"
     del /F /Q "%project_dir%\CHANGELOG.tmp.md" 2>NUL
     goto:eof
 )
 
-%_info% "[%~nx0] Release '%relVersion%' not already written in '%project_dir%\CHANGELOG.md'"
+%_info% "Release '%relVersion%' not already written in '%project_dir%\CHANGELOG.md'"
 
 :extractTitle
 :: Extract title written in advance in CHANGELOG.md
 for /f "tokens=*" %%i in ('grep -E "%relVersion%\b" "%project_dir%\CHANGELOG.md" 2^>NUL') do ( set "relTitle=%%i" )
-%_info% "[%~nx0] relTitle='%relTitle%'"
+%_info% "relTitle='%relTitle%'"
 if "%relTitle%" == "" ( goto:compareTitle )
 del /F /Q "%project_dir%\temp" 2>NUL
 echo %relTitle%| sed "s/.*%relVersion%[ \t:,_-]\+//g">"%project_dir%\temp"
@@ -115,33 +115,33 @@ if "%overwriteRel%" == "true" (
     echo %relTitle%| sed "s/.*\?:[ \t:,_-]\+//g">"%project_dir%\temp"
     for /f "tokens=*" %%i in ('type "%project_dir%\temp"') do ( set "relTitle=%%i" )
 )
-%_info% "[%~nx0] relTitle1='%relTitle%'"
+%_info% "relTitle1='%relTitle%'"
 
 :compareTitle
 :: Compare extracted title from CHANGELOG.md with second parameter
 if "%relTitle%" == "" (
     :: There was no title from CHANGELOG, so the second parameter *must* be there:
     if "%relTitleParam%" == "" (
-        %_fatal% "[%~nx0] No title found for '%relVersion%' in '%project_dir%\CHANGELOG.md', you need to provide one as second parameter of updateChangelog.bat" 282
+        %_fatal% "No title found for '%relVersion%' in '%project_dir%\CHANGELOG.md', you need to provide one as second parameter of updateChangelog.bat" 282
     ) else (
         set "relTitle=%relTitleParam%"
-        %_ok% "[%~nx0] Release title from second parameter: '!relTitle!'"
+        %_ok% "Release title from second parameter: '!relTitle!'"
     )
 ) else (
     :: There was a title from CHANGELOG: it must be the same as the second parameter, if present
     if not "%relTitleParam%" == "" (
         if not "%relTitle%" == "%relTitleParam%" (
             if "%RELFORCE%" == "" (
-                %_error% "[%~nx0] Title '%relTitleParam%' provided for '%relVersion%' in '%project_dir%\CHANGELOG.md' is different from the one extracted '%relTitle%'"
-                %_fatal% "[%~nx0] Edit changelog or do not pass a title as second parameter of updateChangelog.bat" 283
+                %_error% "Title '%relTitleParam%' provided for '%relVersion%' in '%project_dir%\CHANGELOG.md' is different from the one extracted '%relTitle%'"
+                %_fatal% "Edit changelog or do not pass a title as second parameter of updateChangelog.bat" 283
             ) else (
-                %_info% "[%~nx0] Update title from '%relTitle%' to '%relTitleParam%' for '%relVersion%'"
+                %_info% "Update title from '%relTitle%' to '%relTitleParam%' for '%relVersion%'"
                 set "relTitle=%relTitleParam%"
             )
         )
     )
     :: (if not second parameter, then we simply keep the title extracted from CHANGELOG)
-    %_ok% "[%~nx0] Release title from CHANGELOG.md: '!relTitle!'"
+    %_ok% "Release title from CHANGELOG.md: '!relTitle!'"
 )
 
 ::##################################################
@@ -154,7 +154,7 @@ set "gcliff=%PRGS%\git-cliffs\current\git-cliff.exe"
 rem echo gcliff='%gcliff%'
 %gcliff% -u -s all > "%project_dir%\CHANGELOG.tmp.md"
 if errorlevel 1 (
-    %_fatal% "[%~nx0] Error while generating temporary changelog for '%relVersion%'" 281
+    %_fatal% "Error while generating temporary changelog for '%relVersion%'" 281
 )
 :: Source for conventional commit emojis
 :: https://gist.github.com/parmentf/359667bf23e08a1bd8241fbf47ecdef0 (emojis)
@@ -173,9 +173,9 @@ set "hasFeatures=false"
 grep -Eq "### .* Features" "%project_dir%\CHANGELOG.tmp.md"
 if not errorlevel 1 (
     set "hasFeatures=true"
-    %_info% "[%~nx0] Feature(s) detected for '%relVersion%'"
+    %_info% "Feature(s) detected for '%relVersion%'"
 ) else (
-    %_info% "[%~nx0] No Feature detected for '%relVersion%'"
+    %_info% "No Feature detected for '%relVersion%'"
 )
 
 :: Extract major, minor and fix number from relVersion, to check if they are coherent with the presence (or not) of features
@@ -191,21 +191,21 @@ set /a "minPlusOne=%min% + 1"
 set /a "majPlusOne=%maj% + 1"
 
 if not "%hasFeatures%" == "true" (
-    %_info% "[%~nx0] No new features present in this release: '%relVersion%' is valid"
+    %_info% "No new features present in this release: '%relVersion%' is valid"
     goto:features_ok
 )
 if "%hasFeatures%" == "true" (
     if "%maj%" == "0" (
         if "%fix%" == "0" (
-            %_info% "[%~nx0] New features: '%relVersion%' is compatible for a v0"
+            %_info% "New features: '%relVersion%' is compatible for a v0"
         ) else (
-            %_fatal% "[%~nx0] New features means v0.%minPlusOne%.0: update version.txt, or pass a compatible version, not '%relVersion%'" 284
+            %_fatal% "New features means v0.%minPlusOne%.0: update version.txt, or pass a compatible version, not '%relVersion%'" 284
         )
     ) else (
         if "%fix%" == "0" (
-            %_info% "[%~nx0] New features: '%relVersion%' is compatible for a v1+"
+            %_info% "New features: '%relVersion%' is compatible for a v1+"
         ) else (
-            %_fatal% "[%~nx0] New features means v%majPlusOne%.0.0: update version.txt, or pass a compatible version, not '%relVersion%'" 284
+            %_fatal% "New features means v%majPlusOne%.0.0: update version.txt, or pass a compatible version, not '%relVersion%'" 284
         )
     )
 )
@@ -256,7 +256,7 @@ for /f "tokens=*" %%i in ('where bash.exe^|grep gits^|grep -v usr') do ( set "ba
 echo bashExe='%bashExe%'
 "%bashExe%" "%project_dir%\tools\updateChangelog.sh" "%relVersion%" "%relTitle%"
 if errorlevel 1 (
-    %_fatal% "[%~nx0] Error while updating temporary changelog for '%relVersion%'" 285
+    %_fatal% "Error while updating temporary changelog for '%relVersion%'" 285
 )
 %CHECK_DEBUG_PRJ% echo 2b------------
 goto:done
@@ -306,7 +306,7 @@ move /y temp "%project_dir%\CHANGELOG.md" 2> NUL 1>NUL
 sed -i 's/\r$//' "%project_dir%\CHANGELOG.md"
 sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "%project_dir%\CHANGELOG.md" > "%project_dir%\temp.md" && move /y "%project_dir%\temp.md" "%project_dir%\CHANGELOG.md"
 :done
-%_ok% "[%~nx0] CHANGELOG.md updated with '%relVersion%'"
+%_ok% "CHANGELOG.md updated with '%relVersion%'"
 del /F /Q "%project_dir%\CHANGELOG.tmp.md" 2>NUL
 git diff -- CHANGELOG.md
 goto:eof
