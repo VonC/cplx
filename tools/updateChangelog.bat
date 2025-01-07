@@ -310,3 +310,7 @@ sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "%project_dir%\CHANGELOG.md" > "%project_d
 del /F /Q "%project_dir%\CHANGELOG.tmp.md" 2>NUL
 git diff -- CHANGELOG.md
 goto:eof
+
+:call_echos_stack
+call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
+goto:eof
