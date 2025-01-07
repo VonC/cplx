@@ -1,5 +1,8 @@
 @echo off
 
+for %%i in ("%~dp0") do SET "init_dir=%%~fi"
+set "init_dir=%init_dir:~0,-1%"
+
 REM https://stackoverflow.com/questions/57131654/using-utf-8-encoding-chcp-65001-in-command-prompt-windows-powershell-window
 REM But should still work in Windows terminal (https://www.microsoft.com/p/windows-terminal/9n0dx20hk701, https://github.com/microsoft/terminal)
 REM https://github.com/microsoft/terminal/blob/4a243f044572146e18e0051badb1b5b3f3c28ac8/src/tools/ansi-color/README.md?plain=1#L20-L22
@@ -9,24 +12,13 @@ chcp 65001 >nul
 
 if "%~1"=="unset" (
   call:unset_init
-)
-if not defined called_from_env (
-  set "called_from_init=1"
-  call "%~dp0..\senv.bat" %~1
-  set "called_from_env="
-) else (
-  set "called_from_env="
-)
-set "called_from_init="
-if "%~1"=="unset" (
   goto:eof
 )
 
-
-cd "%project_dir%" || echo "unable to cd to '%project_dir%'"&& exit /b 1
+cd "%init_dir%" || echo "unable to cd to '%init_dir%'"&& exit /b 1
 
 set "okInit="
-if not exist "%project_dir%\tools\batcolors\echos.bat" (
+if not exist "%init_dir%\batcolors\echos.bat" (
     echo "WARN: Missing submodules"
     if not exist "%project_dir%\.gitmodules" (
       echo INFO: Executing  in %CD%' 'git submodule add -b legacy -- https://github.com/VonC/batcolors tools/batcolors'
@@ -44,10 +36,10 @@ if not exist "%project_dir%\tools\batcolors\echos.bat" (
           call:iExitBatch 6
       )
     )
-    call  "%project_dir%\tools\batcolors\echos_macros.bat" export
+    call  "%init_dir%\batcolors\echos_macros.bat" export
     set "okInit=OK: Submodules initialized"
 ) else (
-  call  "%project_dir%\tools\batcolors\echos_macros.bat" export
+  call  "%init_dir%\batcolors\echos_macros.bat" export
   set "okInit=Submodule already initialized"
 )
 if not defined okInit (
@@ -85,8 +77,9 @@ exit /b
 
 :unset_init
 set "okInit="
+set "init_dir="
 goto:eof
 
 :call_echos_stack
-call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
+call "%init_dir%\batcolors\echos.bat" :stack %~nx0
 goto:eof
