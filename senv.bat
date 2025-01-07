@@ -106,6 +106,7 @@ if not defined local_path (
 set "local_path="
 
 %_stack_call% "%project_dir%\tools\init.bat" %~1
+%_unstack% senv.bat
 
 if not defined QUIET_PRJ (  %_info% "project PATH '%PATH%'" )
 if not "%PATH%"=="%project_path%" ( call:update_project_path_ini )
