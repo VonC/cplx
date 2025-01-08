@@ -133,6 +133,10 @@ if defined force_project_path ( goto:skip_read_path_ini )
 call:read_path_ini project
 if defined project_path (
   set "PATH=%project_path%"
+  if exist "%project_dir%\senv.local.bat" (
+    %_stack_call% "%project_dir%\senv.local.bat" %~1
+    %_unstack% senv.bat
+  )
   goto:eof
 )
 
@@ -173,6 +177,10 @@ if exist "%USERPROFILE%\go\bin" ( set "project_path=%USERPROFILE%\go\bin;%projec
 if exist "%HOME%\bin\senv.bat" ( set "project_path=%HOME%\bin;%project_path%" )
 set "project_path=%project_dir%;%project_path%"
 set "PATH=%project_path%"
+if exist "%project_dir%\senv.local.bat" (
+  %_stack_call% "%project_dir%\senv.local.bat" %~1
+  %_unstack% senv.bat
+)
 call:update_project_path_ini
 set "git_home="
 %_info% "project_path(ini)='%project_path%'"
@@ -221,6 +229,10 @@ goto:eof
 ::##################################################
 :unset_senv
 call "%project_dir%\tools\init.bat" unset
+if exist "%project_dir%\senv.local.bat" (
+  %_stack_call% "%project_dir%\senv.local.bat" %~1
+  %_unstack% senv.bat
+)
 
 if "%~1"=="restore" (
   call:read_path_ini ori
