@@ -46,6 +46,7 @@ del /F /Q "%project_dir%\target\*.*" 2>NUL
 set "cmd=%build_must_fail%echo %build_params% build"
 %_info% "%cmd:"=＂%"
 call <NUL %cmd%> "%project_dir%\target\%project_dir_name%-%project_version%"
+set "QUIET_PRJ=true"
 call "%build_dir%\tools\t_build.bat" :post-processing %ERRORLEVEL%
 call:build_unset
 goto:eof
