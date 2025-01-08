@@ -220,7 +220,7 @@ goto:eof
 ::  UNSET PROJECT VARIABLES IF REQUESTED
 ::##################################################
 :unset_senv
-call:call_init unset
+call "%project_dir%\tools\init.bat" unset
 
 if "%~1"=="restore" (
   call:read_path_ini ori
@@ -263,7 +263,6 @@ if "%~1"=="restore" (
   del /Q /F "%project_dir%\tools\path.ini"
 )
 set "project_path="
-set "project_dir="
 set "CHECK_DEBUG_PRJ="
 set "CHECK_QUIET_PRJ="
 set "PRJ_REL_TITLE="
@@ -272,6 +271,7 @@ set "echos_stack_emptied="
 if exist "%project_dir%\tools\batcolors\echos_macros.bat" (
   call "%project_dir%\tools\batcolors\echos_macros.bat" unset
 )
+set "project_dir="
 
 goto:eof
 
