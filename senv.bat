@@ -45,7 +45,7 @@ if exist "%project_dir%\tools\batcolors\echos_macros.bat" (
     call "%project_dir%\tools\batcolors\echos_macros.bat" export
 )
 
-rem set "ECHOS_STACK=1"
+set "ECHOS_STACK="
 if not defined echos_stack_emptied (
   call "%project_dir%\tools\batcolors\echos.bat" :empty_stack
   set "echos_stack_emptied=1"
@@ -276,5 +276,5 @@ if exist "%project_dir%\tools\batcolors\echos_macros.bat" (
 goto:eof
 
 :call_echos_stack
-call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0
+if not defined ECHOS_STACK ( set "CURRENT_SCRIPT=%~nx0" & goto:eof ) else ( call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0 )
 goto:eof

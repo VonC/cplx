@@ -81,5 +81,5 @@ set "init_dir="
 goto:eof
 
 :call_echos_stack
-call "%init_dir%\batcolors\echos.bat" :stack %~nx0
+if not defined ECHOS_STACK ( set "CURRENT_SCRIPT=%~nx0" & goto:eof ) else ( call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0 )
 goto:eof
