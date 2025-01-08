@@ -152,7 +152,7 @@ if "%relTitle%" == "" (
 set "GIT_CLIFF_CONFIG=%project_dir%\tools\cliff.toml"
 set "gcliff=%PRGS%\git-cliffs\current\git-cliff.exe"
 rem echo gcliff='%gcliff%'
-%gcliff% -u -s all > "%project_dir%\CHANGELOG.tmp.md"
+%gcliff% -w "%project_dir%" -u -s all > "%project_dir%\CHANGELOG.tmp.md"
 if errorlevel 1 (
     %_fatal% "Error while generating temporary changelog for '%relVersion%'" 281
 )
