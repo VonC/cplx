@@ -343,7 +343,8 @@ if not exist "%project_dir%\CHANGELOG.md" (
   goto:eof
 )
 if defined is_snapshot (
-  %_info% "(update-changelog) No CHANGELOG.md made while in SNAPSHOT. Type uv to update it on demand"
+  %_post% "                   Type uv to update it on demand"
+  %_info% "(update-changelog) No CHANGELOG.md made while in SNAPSHOT"
   goto:eof
 )
 for /f %%i in ('bash -c "cygpath '%project_dir%\CHANGELOG.md'"') do set "changelog_path=%%i"
