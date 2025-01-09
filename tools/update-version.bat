@@ -342,6 +342,10 @@ if not exist "%project_dir%\CHANGELOG.md" (
   call:generate-changelog %1
   goto:eof
 )
+if defined is_snapshot (
+  %_info% "(update-changelog) No CHANGELOG.md made while in SNAPSHOT. Type uv to update it on demand"
+  goto:eof
+)
 for /f %%i in ('bash -c "cygpath '%project_dir%\CHANGELOG.md'"') do set "changelog_path=%%i"
 for /f %%i in ('bash -c "date +%%s -r "%changelog_path%""') do set "changelog_timestamp=%%i"
 if not defined changelog_timestamp (
