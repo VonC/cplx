@@ -284,6 +284,19 @@ if exist "%project_dir%\tools\batcolors\echos_macros.bat" (
   call "%project_dir%\tools\batcolors\echos_macros.bat" unset
 )
 set "project_dir="
+set "version="
+set "version_release="
+set "update-version_dir="
+set "project_version="
+set "is_dirty="
+set "is_dirty_files="
+set "is_snapshot="
+set "git_describe="
+set "git_is_snapshot="
+set "git_is_release="
+set "git_tag="
+set "commit_count="
+
 
 goto:eof
 
