@@ -7,7 +7,7 @@ if "%~1"=="unset" (
 )
 
 rem set "ECHOS_STACK=true"
-...
+rem ...
 goto:eof
 
 
