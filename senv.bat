@@ -82,6 +82,7 @@ if defined local_path (
   doskey gv=get-version
   doskey uv=update-version
   doskey uvr=update-version rel
+  doskey uvf=cmd /V /C "set "FORCE_UC=1" && update-version.bat $*"
   doskey u=updateChangelog.bat $*
   doskey uf=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat $*"
   doskey ul=updateChangelog.bat latest $*
@@ -97,6 +98,7 @@ if not defined local_path (
   doskey gv=
   doskey uv=
   doskey uvr=
+  doskey uvf=
   doskey u=
   doskey uf=
   doskey ul=
@@ -266,6 +268,8 @@ if "%~1"=="restore" (
   doskey fsenv=
   doskey usenv=
   doskey rsenv=
+  doskey uv=
+  doskey uvf=
   doskey u=
   doskey uf=
   if exist "%HOME%\bin\senv.bat" ( call "%HOME%\bin\senv.bat" )
@@ -296,6 +300,8 @@ set "git_is_snapshot="
 set "git_is_release="
 set "git_tag="
 set "commit_count="
+set "FORCE_UC="
+set "REL_FORCE="
 
 goto:eof
 
