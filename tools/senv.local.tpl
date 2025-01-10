@@ -8,6 +8,11 @@ if "%~1"=="unset" (
 
 rem set "ECHOS_STACK=true"
 rem ...
+::##################################################
+::  SET PROJECT VARIABLES
+::##################################################
+set SSH_CONFIG_ENTRY=centos8
+
 goto:eof
 
 
