@@ -12,6 +12,8 @@ if errorlevel 1 (
     call:unset_all
     exit /b 1
 )
+
+for %%i in ("%~dp0") do SET "all_dir=%%~fi"
 call "%all_dir%\senv.bat"
 %_task% "Start project '%project_dir_name%' run"
 call <NUL "%all_dir%\run.bat" %*
@@ -23,6 +25,7 @@ call:unset_all
 goto:eof
 
 :unset_all
+for %%i in ("%~dp0") do SET "all_dir=%%~fi"
 call "%all_dir%\senv.bat" unset
 set "all_dir="
 set "barg="
