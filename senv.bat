@@ -5,6 +5,8 @@
 ::##################################################
 doskey a=all.bat $*
 doskey b=build.bat $*
+doskey brel=build.bat rel $*
+doskey br=build.bat rel $*
 doskey d=deploy.bat $*
 doskey r=run.bat $*
 doskey t=test.bat $
@@ -257,6 +259,8 @@ if "%~1"=="restore" (
   doskey a=
   doskey ast=
   doskey b=
+  doskey br=
+  doskey brel=
   doskey bst=
   doskey d=
   doskey r=
