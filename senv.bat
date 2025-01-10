@@ -228,12 +228,12 @@ goto:eof
 ::  UNSET PROJECT VARIABLES IF REQUESTED
 ::##################################################
 :unset_senv
-call "%project_dir%\tools\init.bat" unset
 if exist "%project_dir%\senv.local.bat" (
-  %_stack_call% "%project_dir%\senv.local.bat" %~1
-  %_unstack% senv.bat
+  call:call_echos_stack & call "%project_dir%\senv.local.bat" %~1
+  call "%project_dir%\tools\batcolors\echos.bat" :unstack senv.bat
 )
 
+call "%project_dir%\tools\init.bat" unset
 if "%~1"=="restore" (
   call:read_path_ini ori
 )
@@ -296,7 +296,6 @@ set "git_is_snapshot="
 set "git_is_release="
 set "git_tag="
 set "commit_count="
-
 
 goto:eof
 
