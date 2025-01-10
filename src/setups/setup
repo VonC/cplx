@@ -1,0 +1,16 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+echo "DIR='${DIR}'"
+# shellcheck source=/dev/null
+source "${DIR}/../echos/echos"
+info "$DIR"
+
+main() {
+    info "SSH_CONFIG_ENTRY='${SSH_CONFIG_ENTRY}'"
+    if [[ -z "${SSH_CONFIG_ENTRY}" ]]; then
+        fatal "SSH_CONFIG_ENTRY is not defined (must be an SSH alias to remote Linux server where a program is compiled)" 1
+    fi
+}
+
+main "$@"
