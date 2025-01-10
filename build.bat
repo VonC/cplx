@@ -43,11 +43,13 @@ mkdir "%project_dir%\target" 2>NUL
 del /F /Q "%project_dir%\target\*.*" 2>NUL
 
 %_task% "Start build of '%project_dir_name%' with build_params '%build_params_echos%'"
-set "cmd=%build_must_fail%echo %build_params% build"
+set "cmd=%build_dir%\src\setups\setup.bat"
 %_info% "%cmd:"=＂%"
-call <NUL %cmd%> "%project_dir%\target\%project_dir_name%-%project_version%"
 set "QUIET_PRJ=true"
-call "%build_dir%\tools\t_build.bat" :post-processing %ERRORLEVEL%
+call <NUL %cmd% %build_params%
+set "build_status=%ERRORLEVEL%"
+set "QUIET_PRJ=true"
+call "%build_dir%\tools\t_build.bat" :post-processing %build_status%
 call:build_unset
 goto:eof
 
