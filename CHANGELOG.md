@@ -114,3 +114,5 @@
 - *(git)* Update batcolors
 
 ## 0.3.0 - Setup initialization
+
+## 0.3.1 - Minimal environment scp to remote host
