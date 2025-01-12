@@ -17,3 +17,4 @@ temp.*
 *.temp*
 temp
 senv.local.bat
+*.bak
