@@ -10,6 +10,7 @@ doskey br=build.bat rel $*
 doskey d=deploy.bat $*
 doskey r=run.bat $*
 doskey t=test.bat $
+doskey s=setup.bat $
 doskey lsenv=%~dp0senv.bat local
 doskey senv=%~dp0senv.bat $*
 doskey psenv=%~dp0senv.bat $*
@@ -265,6 +266,7 @@ if "%~1"=="restore" (
   doskey d=
   doskey r=
   doskey t=
+  doskey s=
   doskey lsenv=
   doskey senv=
   doskey psenv=
