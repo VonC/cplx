@@ -32,6 +32,8 @@ set "project_dir=%project_dir:~0,-1%"
 cd "%project_dir%" || echo "unable to cd to '%project_dir%'"&& exit /b 1
 for /f "tokens=* delims=\" %%i in ("%project_dir%") do SET "project_dir_name=%%~ni"
 
+doskey cdc=cd %project_dir%
+
 if "%~1"=="unset" (
   call:unset_senv
   goto:eof
@@ -252,6 +254,7 @@ set "batdir="
 set "called_from_init="
 set "called_from_env="
 set "ccd="
+set "cdc="
 set "err="
 set "local_path_msg="
 set "all_dir="
