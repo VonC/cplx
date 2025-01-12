@@ -302,7 +302,9 @@ if defined is_snapshot (
 ) else (
   %_ok% "(make_new_release) version.txt already at release revision '%version%'"
 )
+set "make_new_release=1"
 call:check_update-changelog "release version '%version_release%'"
+set "make_new_release="
 
 %_task% "Must reset Git repository, add version.txt and CHANGELOG and commit"
 git -C "%project_dir%" reset
@@ -342,6 +344,11 @@ if not exist "%project_dir%\CHANGELOG.md" (
   call:generate-changelog %1
   goto:eof
 )
+if defined make_new_release (
+  %_info% "(update-changelog) Force CHANGELOG.md check while making new release"
+  set "FORCE_UC=1"
+  goto:do_update-changelog
+)
 if defined is_snapshot (
   if not defined FORCE_UC (
     %_post% "                   Type uvf to update it on demand"
@@ -350,6 +357,7 @@ if defined is_snapshot (
   )
   %_info% "(update-changelog) Force CHANGELOG.md check while in SNAPSHOT (FORCE_UC set)"
 )
+:do_update-changelog
 for /f %%i in ('bash -c "cygpath '%project_dir%\CHANGELOG.md'"') do set "changelog_path=%%i"
 for /f %%i in ('bash -c "date +%%s -r "%changelog_path%""') do set "changelog_timestamp=%%i"
 if not defined changelog_timestamp (
