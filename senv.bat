@@ -88,6 +88,7 @@ if defined local_path (
   doskey uv=update-version
   doskey uvr=update-version rel
   doskey uvf=cmd /V /C "set "FORCE_UC=1" && update-version.bat $*"
+  doskey uc=update-changelog.bat $*
   doskey u=updateChangelog.bat $*
   doskey uf=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat $*"
   doskey ul=updateChangelog.bat latest $*
@@ -104,6 +105,7 @@ if not defined local_path (
   doskey uv=
   doskey uvr=
   doskey uvf=
+  doskey uc=
   doskey u=
   doskey uf=
   doskey ul=
