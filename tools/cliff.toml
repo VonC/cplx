@@ -8,16 +8,17 @@
 [changelog]
 # changelog header
 header = """
-# Changelog\n
-All notable changes to this project will be documented in this file.\n
+# Changelog cplx\n
+`cplx` aims to recompile Linux tools self-contained build or a static build environment, using `LD_LIBRARY_PATH`, and ignoring `/usr/lib` and `/usr/local/lib`\n
+By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.\n
 """
 # template for the changelog body
 # https://keats.github.io/tera/docs/#introduction
 body = """
 {% if version %}\
-    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+    ## [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }} - {{ message }}
 {% else %}\
-    ## [unreleased]
+    ## [unreleased] - 
 {% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | striptags | trim | upper_first }}
