@@ -49,6 +49,9 @@ main() {
     (cat "${PROJECT_DIR}/CHANGELOG.tmp.md"; echo ""; cat "${PROJECT_DIR}/CHANGELOG.md") > "${PROJECT_DIR}/CHANGELOG.new.md"
     mv "${PROJECT_DIR}/CHANGELOG.new.md" "${PROJECT_DIR}/CHANGELOG.md"
   fi
+
+  rm -f "${PROJECT_DIR}/CHANGELOG.tmp.md"
+  rm -f "${PROJECT_DIR}/version.tmp.txt"
 }
 
 main "$@"
