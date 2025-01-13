@@ -1,5 +1,107 @@
+# Changelog cplx
 
-## v0.1.0 - Initial project template
+`cplx` aims to recompile Linux tools self-contained build or a static build environment, using `LD_LIBRARY_PATH`, and ignoring `/usr/lib` and `/usr/local/lib`
+
+By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
+
+## [v0.4.0 unreleased] First step check SSH connexion - 30decb7982af8b2906d154a9784728019f6c7dfc
+
+This first steps also uses the next properties and step features: the goal is to describe/document the steps in `src/setups/steps.md`, and to avoid making that step if the properties are already set (and memorize in `src/setups/setup.properties`)
+
+This release also refactor the `CHANGELOG.md` generation, using `version.txt` both for the version and the release title/documentation.
+
+### 🚀 Features
+
+- *(bat)* Senv.bat add s alias for setup.bat
+- *(bat)* Senv.bat add cdc to go back to project root folder
+- *(echos)* Echoslog display exit status on fatal message
+- *(echos)* Display script name as prefix on echos messages
+- *(utils)* Steps and properties file management
+- *(setup)* First step check SSH connexion
+
+### 🐛 Bug Fixes
+
+- *(tools)* Update-version.bat make sure to update changelog when doing a release
+
+### ⚙️ Miscellaneous Tasks
+
+- *(shell)* Add .shellcheckrc for external file directive
+- *(git)* Ignore bak files
+
+## [v0.3.0] - 2025-01-10 - v0.3.0 - Setup initialization
+
+### 🚀 Features
+
+- *(bat)* Build.bat calls src\setups\setup.bat, fix exit status
+- *(tools)* Senv.local.tpl declare SSH_CONFIG_ENTRY
+- *(src)* Add Linux echos
+- *(setups)* Add bat and sh scripts for setup
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* Set new 'v0.3.0' from previous release 'v0.2.0'
+
+## [v0.2.0] - 2025-01-10 - v0.2.0 - Refactor, use improved batcolors, with prefix, stack and multi-lines
+
+### 🚀 Features
+
+- *(tools)* Use batcolors with stacks
+- *(bat)* Senv.bat stack before calling init.bat
+- *(bat)* Senv.bat stack declares :call_echos_stack needed by batcolors stack
+- *(tools)* Init.bat declares :call_echos_stack needed by batcolors stack
+- *(tools)* Update-version.bat declares :call_echos_stack needed by batcolors stack
+- *(bat)* Build.bat declares :call_echos_stack needed by batcolors stack
+- *(bat)* Build.bat stack before calling senv, update-version or get-version
+- *(tools)* Update-version.bat removes all [%~nx0] from _xx echos macros calls
+- *(tools)* Init.bat no longer calls/depends on senv.bat
+- *(bat)* Senv.bat is no longer called from init.bat, but calls it
+- *(bat)* Senv.bat adds ^%USERPROFILE^%\go\bin to PATH if found
+- *(bat)* Set CURRENT_SCRIPT when ECHOS_STACK not set in call_echos_stack
+- *(bat)* Externalize release version management and changelog to tools/t_build.bat
+- *(bat)* Senv.bat calls a senv.local.bat if exists
+- *(bat)* Senv.local.tpl template for senv.local.bat (which remains private)
+- *(tools)* No more CHANGELOG update while in SNAPSHOT build
+- *(tools)* Reference new batcolors with prefix, callstack and pre/post macros
+- *(bat)* Senv.bat adds uvf for forcing changelog check in update-version: FORCE_UC
+- *(tools)* Update-version.bat does not stop if SNAPSHOT and FORCE_UC set
+- *(bat)* Senv.bat add brel/br aliases for making release
+
+### 🐛 Bug Fixes
+
+- *(bat)* Build.bat additional cleanup
+- *(bat)* Senv.bat extra space on local message
+- *(tools)* Update-version.bat does not create snap on clean rel with 0 additional commit
+- *(bat)* Senv.bat empty stack if not done already
+- *(bat)* Senv.bat stack makes sure batcolors is unset last
+- *(bat)* Build.bat trim build_dir trailing /
+- *(tools)* Update-version.bat makes sure errorlevel is 0 before updating version.txt
+- *(bat)* Senv.bat, init.bat cannot use CHECK_QUIET_PRJ macro with _xx echos macros
+- *(bat)* Senv.bat unstack senv.bat after call to init.bat
+- *(bat)* Senv.bat does not activate (ECHOS_STACK) stack by default
+- *(tools)* UpdateChangelog.bat removes any nx0
+- *(tools)* UpdateChangelog.bat add call_echos_stack
+- *(bat)* Senv.bat fix unset, calls init.bat unset
+- *(tools)* UpdateChangelog.bat specified working directory for git-cliff
+- *(bat)* Build.bat silent mode for senv after a build (before post-processing)
+- *(tools)* T_build.bat reset QUIET_PRJ on unset
+- *(bat)* Add rem for other commands to add
+- *(tools)* Migrate senv.local.tpl to tools
+- *(tools)* Update-version.bat uses _post batcolors echos macro
+- *(bat)* Senv.bat reset more variables in unset
+- *(bat)* All.bat restore all_dir variable unset by build or run
+- *(bat)* Senv.bat unset do not rely on possibly unset vars
+- *(bat)* All.bat add missing eof after :unset function
+
+### ⚙️ Miscellaneous Tasks
+
+- *(git)* Ignore temp/tmp files
+- *(git)* Update batcolors submodule SHA1 reference
+- *(git)* CHANGELOG.md update
+- *(git)* Ignore temp file, generated by updateChangelog.bat
+- *(git)* Update batcolors
+- *(release)* Set new 'v0.2.0' from previous release 'v0.1.0'
+
+## [v0.1.0] - 2024-12-31 - v0.1.0 - Initial project template
 
 ### 🚀 Features
 
@@ -53,66 +155,4 @@
 - *(git)* Ignore old and ori extensions, old/ and tmp/ folders
 - *(bat)* Build.bat add usage example using aliases
 - *(git)* Ignore target/ folder
-
-## v0.2.0 - Refactor, use improved batcolors, with prefix, stack and multi-lines
-## [unreleased]
-
-### 🚀 Features
-
-- *(tools)* Use batcolors with stacks
-- *(bat)* Senv.bat stack before calling init.bat
-- *(bat)* Senv.bat stack declares :call_echos_stack needed by batcolors stack
-- *(tools)* Init.bat declares :call_echos_stack needed by batcolors stack
-- *(tools)* Update-version.bat declares :call_echos_stack needed by batcolors stack
-- *(bat)* Build.bat declares :call_echos_stack needed by batcolors stack
-- *(bat)* Build.bat stack before calling senv, update-version or get-version
-- *(tools)* Update-version.bat removes all [%~nx0] from _xx echos macros calls
-- *(tools)* Init.bat no longer calls/depends on senv.bat
-- *(bat)* Senv.bat is no longer called from init.bat, but calls it
-- *(bat)* Senv.bat adds ^%USERPROFILE^%\go\bin to PATH if found
-- *(bat)* Set CURRENT_SCRIPT when ECHOS_STACK not set in call_echos_stack
-- *(bat)* Externalize release version management and changelog to tools/t_build.bat
-- *(bat)* Senv.bat calls a senv.local.bat if exists
-- *(bat)* Senv.local.tpl template for senv.local.bat (which remains private)
-- *(tools)* No more CHANGELOG update while in SNAPSHOT build
-- *(tools)* Reference new batcolors with prefix, callstack and pre/post macros
-- *(bat)* Senv.bat adds uvf for forcing changelog check in update-version: FORCE_UC
-- *(tools)* Update-version.bat does not stop if SNAPSHOT and FORCE_UC set
-
-### 🐛 Bug Fixes
-
-- *(bat)* Build.bat additional cleanup
-- *(bat)* Senv.bat extra space on local message
-- *(tools)* Update-version.bat does not create snap on clean rel with 0 additional commit
-- *(bat)* Senv.bat empty stack if not done already
-- *(bat)* Senv.bat stack makes sure batcolors is unset last
-- *(bat)* Build.bat trim build_dir trailing /
-- *(tools)* Update-version.bat makes sure errorlevel is 0 before updating version.txt
-- *(bat)* Senv.bat, init.bat cannot use CHECK_QUIET_PRJ macro with _xx echos macros
-- *(bat)* Senv.bat unstack senv.bat after call to init.bat
-- *(bat)* Senv.bat does not activate (ECHOS_STACK) stack by default
-- *(tools)* UpdateChangelog.bat removes any nx0
-- *(tools)* UpdateChangelog.bat add call_echos_stack
-- *(bat)* Senv.bat fix unset, calls init.bat unset
-- *(tools)* UpdateChangelog.bat specified working directory for git-cliff
-- *(bat)* Build.bat silent mode for senv after a build (before post-processing)
-- *(tools)* T_build.bat reset QUIET_PRJ on unset
-- *(bat)* Add rem for other commands to add
-- *(tools)* Migrate senv.local.tpl to tools
-- *(tools)* Update-version.bat uses _post batcolors echos macro
-- *(bat)* Senv.bat reset more variables in unset
-- *(bat)* All.bat restore all_dir variable unset by build or run
-- *(bat)* Senv.bat unset do not rely on possibly unset vars
-- *(bat)* All.bat add missing eof after :unset function
-
-### ⚙️ Miscellaneous Tasks
-
-- *(git)* Ignore temp/tmp files
-- *(git)* Update batcolors submodule SHA1 reference
-- *(git)* CHANGELOG.md update
-- *(git)* Ignore temp file, generated by updateChangelog.bat
-- *(git)* Update batcolors
-
-## 0.3.0 - Setup initialization
-
-## 0.3.1 - Minimal environment scp to remote host
+- *(release)* Set new 'v0.1.0' from previous release 'v0.0.0'
