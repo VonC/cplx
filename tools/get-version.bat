@@ -34,6 +34,13 @@ if not exist "%project_dir%\version.txt" (
 ::  ===============================================
 ::  READ VERSION FROM FILE
 ::  ===============================================
-for /f "usebackq tokens=* delims=" %%i in ("%project_dir%\version.txt") do SET "project_version=%%i"
-endlocal & set "project_version=%project_version%"
+for /f "tokens=* delims= -" %%i in ('head -1 "%project_dir%\version.txt"') do ( 
+  SET "project_version=%%i"
+  SET "project_title=%%j"
+)
+set "project_release_notes="
+for /f "delims=" %%a in ('tail -n +3 "%project_dir%\version.txt"') do (
+      set "project_release_notes=!project_release_notes!%%a\n"
+)
+endlocal & set "project_version=%project_version%" & set "project_title=%project_title%" & set "project_release_notes=%project_release_notes%"
 goto:eof
