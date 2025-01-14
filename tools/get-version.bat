@@ -32,9 +32,9 @@ if not exist "%project_dir%\version.txt" (
 )
 
 ::  ===============================================
-::  READ VERSION FROM FILE
+::  READ VERSION/TITLE/RELEASE NOTE FROM FILE
 ::  ===============================================
-for /f "tokens=* delims= -" %%i in ('head -1 "%project_dir%\version.txt"') do ( 
+for /f "tokens=1* delims=- " %%i in ('head -1 "%project_dir%\version.txt"') do (
   SET "project_version=%%i"
   SET "project_title=%%j"
 )
