@@ -313,6 +313,11 @@ set "git_tag="
 set "commit_count="
 set "FORCE_UC="
 set "REL_FORCE="
+set "project_version="
+set "project_title="
+set "project_release_notes="
+
+
 
 goto:eof
 
