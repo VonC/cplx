@@ -249,7 +249,7 @@ goto:eof
 ::##################################################
 :restore-version
 %_task% "Must restore version.txt (to '%project_version%')"
-echo %project_version%> "%project_dir%\version.txt"
+echo %project_version% -- %project_title%> "%project_dir%\version.txt"
 if errorlevel 1 (
   %_fatal% "Unable to restore %project_version% in '%project_dir%\version.txt'" 256
 )
@@ -294,7 +294,7 @@ if defined is_snapshot (
     %_fatal% "(make_new_release) version.txt next release version '%version_release%' cannot be the same as the last Git tag '%git_tag%'" 31
   )
   %_task% "Must update version.txt from '%version%' to '%version_release%'"
-  echo %version_release%> "%project_dir%\version.txt"
+  sed -i "1s/^.*--/%version_release% --/" "%project_dir%\version.txt"
   if errorlevel 1 (
     %_fatal% "(make_new_release) Unable to update version.txt from '%version%' to '%version_release%'" 32
   )
