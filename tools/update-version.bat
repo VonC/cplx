@@ -201,42 +201,45 @@ if "!c!" == "1" ( set "appver=!maj!.!min!.!nfix!-SNAPSHOT" )
 if "!c!" == "2" ( set "appver=!maj!.!nmin!.0-SNAPSHOT" )
 if "!c!" == "3" ( set "appver=!nmaj!.0.0-SNAPSHOT" )
 
-verify >nul
-echo %appver%> "%project_dir%\version.txt"
-if errorlevel 1 (
-  %_fatal% "Unable to set %appver% in '%project_dir%\version.txt'" 256
-)
-
-git add -- "%project_dir%\version.txt"
-if errorlevel 1 ( call:restore-version
-    %_fatal% "ERROR unable to add version.txt" 112 )
-
 set "relVersion=%appver:-SNAPSHOT=%"
-grep -Eq "## %relVersion% - " "%project_dir%\CHANGELOG.md" >NUL 2>NUL
-if not errorlevel 1 (
-  %_ok% "'%project_dir%\CHANGELOG.md' now has '%relVersion%'"
-  goto:add_changelog_with_title
-)
+
 if defined PRJ_REL_TITLE (
   set "title=%PRJ_REL_TITLE%"
   %_ok% "Using PRJ_REL_TITLE='%title%' for '%relVersion%'"
   goto:update_changelog_with_title
 )
-
 %_task% "Must enter title for CHANGELOG.md next release '%relVersion%' (PRJ_REL_TITLE not set)"
 set /p "title=Enter title for '%relVersion%': "
 if "!title!"=="" ( %_fatal% "Empty title for '%relVersion%'" 311 )
 
-:update_changelog_with_title
-echo.>> "%project_dir%\CHANGELOG.md"
-echo ## %relVersion% - !title!>> "%project_dir%\CHANGELOG.md"
-%_ok% "'%project_dir%\CHANGELOG.md' now has '%relVersion%' title '!title!'"
+verify >nul
+echo %appver% -- !title!> "%project_dir%\version.txt"
+if errorlevel 1 (
+  %_fatal% "Unable to set %appver% in '%project_dir%\version.txt'" 256
+)
 
-:add_changelog_with_title
-git add -- "%project_dir%\CHANGELOG.md"
+%_task% "Must enter multi-line description for CHANGELOG.md next release '%relVersion%' (PRJ_REL_DESCRIPTION not set)"
+%_info% "You will be able to edit that description at any time in the version.txt file"
+set "description="
+%_info% "Enter description for '%relVersion%'. Type 'END' on a new line to finish:"
+:readInput
+set /p "line=> "
+if /i "%line%"=="END" goto endInput
+set "description=%description%%line%\n"
+goto readInput
+:endInput
+if "!description!"=="" ( %_fatal% "Empty description for '%relVersion%'" 312 )
+
+echo.>> "%project_dir%\version.txt"
+verify >nul
+echo !description!>> "%project_dir%\version.txt"
+if errorlevel 1 (
+  %_fatal% "Unable to add description in '%project_dir%\version.txt'" 257
+)
+
+git add -- "%project_dir%\version.txt"
 if errorlevel 1 ( call:restore-version
-    %_fatal% "ERROR unable to add CHANGELOG.md" 122 )
-
+    %_fatal% "ERROR unable to add version.txt" 112 )
 git commit -m "chore(release): prepare for new '!appver!' from previous release '%VERSION%'"
 if errorlevel 1 ( call:restore-version
     %_fatal% "ERROR unable to commit version.txt" 113 )
@@ -382,7 +385,7 @@ goto:eof
 :generate-changelog
 %_task% "(update-changelog) Must update/refresh CHANGELOG.md for %~1"
 set "RELFORCE=1"
-call "%project_dir%\tools\updateChangelog.bat" latest
+call "%project_dir%\tools\update-changelog.bat" latest
 if errorlevel 1 (
   set "RELFORCE="
   %_fatal% "Unable to update '%project_dir%\CHANGELOG.md'" 129
