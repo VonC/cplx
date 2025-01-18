@@ -12,7 +12,7 @@ main() {
   "${gcliff[@]}" -V
 
   if [[ ! -e "${PROJECT_DIR}/CHANGELOG.md" ]]; then
-    range=""
+    range=()
     "${gcliff[@]}" --
  else
     range=(-u -- "$(git -C "${PROJECT_DIR}" describe --abbrev=0 --tags)..HEAD")
@@ -41,7 +41,7 @@ main() {
     sed -i "s/## \[unreleased\] -/## [v${version} unreleased] ${version_title} - ${commit_hash}/" "${PROJECT_DIR}/CHANGELOG.tmp.md"    
   fi
 
-  if [[ -z "${range}" ]]; then
+  if [[ ${#range[@]} -eq 0 ]];then
     mv "${PROJECT_DIR}/CHANGELOG.tmp.md" "${PROJECT_DIR}/CHANGELOG.md"
   else
     # Replace lines in CHANGELOG.md until the first occurrence of ## [vx.y.z] with the content of CHANGELOG.tmp.md
