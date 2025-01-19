@@ -220,15 +220,18 @@ if errorlevel 1 (
 
 %_task% "Must enter multi-line description for CHANGELOG.md next release '%relVersion%' (PRJ_REL_DESCRIPTION not set)"
 %_info% "You will be able to edit that description at any time in the version.txt file"
-set "description="
+echo.>> "%project_dir%\version.txt"
+set "at_least_one_line="
 %_info% "Enter description for '%relVersion%'. Type 'END' on a new line to finish:"
 :readInput
 set /p "line=> "
 if /i "%line%"=="END" goto endInput
-set "description=%description%%line%\n"
+if "%line: =%"=="" goto readInput
+echo %line%>> "%project_dir%\version.txt"
+set at_least_one_line=1
 goto readInput
 :endInput
-if "!description!"=="" ( %_fatal% "Empty description for '%relVersion%'" 312 )
+if not defined at_least_one_line ( %_fatal% "Empty description for '%relVersion%'" 312 )
 
 echo.>> "%project_dir%\version.txt"
 verify >nul
