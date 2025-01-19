@@ -4,7 +4,7 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.4.0 unreleased] First step check SSH connexion - 205456df4199c0735736ff05093d822550062ec7
+## [v0.4.0 unreleased] First step check SSH connexion - c89cfa6be3078a9c932847e8548536a96decdcc9
 
 This first steps also uses the next properties and step features: the goal is to describe/document the steps in `src/setups/steps.md`, and to avoid making that step if the properties are already set (and memorize in `src/setups/setup.properties`)
 
@@ -20,12 +20,18 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 - *(setup)* First step check SSH connexion
 - *(tools)* Update-changelog(.bat/.sh) generate CHANGELOG.md
 - *(alias)* Add uc local alias for update-changelog.bat
+- *(tools)* Get-version.bat should also set project title and release notes
+- *(tools)* Update-version.bat set or restore version and title in version.txt
+- *(tools)* Update-version.bat use new version-title format with version.txt on SNAPSHOT
 
 ### 🐛 Bug Fixes
 
 - *(tools)* Update-version.bat make sure to update changelog when doing a release
 - *(tools)* Cliff.toml also skip chore commit for setting new release tag
 - *(tools)* Update-changelog.sh clean up tmp files
+- *(tools)* Get-version.bat now works
+- *(bat)* Senv.bat unset project_version/title/release_notes
+- *(tools)* Update-changelog.sh test range array size
 
 ### 📚 Documentation
 
@@ -33,6 +39,7 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 - *(tools)* Cliff.toml add header for cplx project, with commit message on tags
 - *(md)* CHANGELOG.md regenerated with more doc
 - *(version)* Typo in release description
+- *(md)* CHANGELOG.md updated
 
 ### ⚙️ Miscellaneous Tasks
 
