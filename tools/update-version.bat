@@ -36,7 +36,7 @@ if not defined project_version (
   %_fatal% "Unable to find version from '%project_dir%\version.txt'" 11
 )
 set "version=%project_version%"
-%_ok% "version '%version%' found in '%project_dir%\version.txt'"
+%_ok% "version '%version%' found in '%project_dir%\version.txt', release title '%project_title%'"
 set "version_release=%version:-SNAPSHOT=%"
 
 if not "%version_release%"=="%version%" (

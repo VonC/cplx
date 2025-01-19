@@ -38,6 +38,10 @@ for /f "tokens=1* delims=- " %%i in ('head -1 "%project_dir%\version.txt"') do (
   SET "project_version=%%i"
   SET "project_title=%%j"
 )
+if not "%project_title:SNAPSHOT -- =%"=="%project_title%" (
+  SET "project_version=%project_version%-SNAPSHOT"
+  SET "project_title=%project_title:SNAPSHOT -- =%"
+)
 set "project_release_notes="
 for /f "delims=" %%a in ('tail -n +3 "%project_dir%\version.txt"') do (
       set "project_release_notes=!project_release_notes!%%a\n"
