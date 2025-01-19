@@ -1,5 +1,3 @@
-0.4.0 -- First step check SSH connexion
+0.5.0-SNAPSHOT -- SCP environment
 
-This first steps also uses the next properties and step features: the goal is to describe/document the steps in `src/setups/steps.md`, and to avoid making that step if the properties are already set (and memorize in `src/setups/setup.properties`)
-
-This release also refactors the `CHANGELOG.md` generation, using `version.txt` both for the version and the release title/documentation.
+copies the local "environment" folder (`src/setup/env`) to the remote host\n
