@@ -96,7 +96,7 @@ if defined PRJ_REL_TITLE (
 %_stack_call% "%t_build_dir%\update-version.bat" %build_params-uv%
 if errorlevel 1 (
   call:build_unset
-  call "%~dp0tools\batcolors\echos.bat" :fatal "update-version FAILED, code '%ERRORLEVEL%'" 3
+  call "%~dp0batcolors\echos.bat" :fatal "update-version FAILED, code '%ERRORLEVEL%'" 3
   goto:eof
 )
 set "QUIET_PRJ=true"
@@ -119,7 +119,7 @@ if "%~1"=="0" (
     call:reset_pre_release
   )
   call:build_unset
-  call "%~dp0tools\batcolors\echos.bat" :fatal "project '%project_dir_name%' build FAILED, code '%ERRORLEVEL%'" 3
+  call "%~dp0batcolors\echos.bat" :fatal "project '%project_dir_name%' build FAILED, code '%ERRORLEVEL%'" 3
 )
 goto:eof
 
