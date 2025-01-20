@@ -4,7 +4,7 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.5.0-SNAPSHOT unreleased] SCP environment, CHANGELOG and tag updates - 1f8ac52c5255325de5c4507686211e3c90b932e2
+## [v0.5.0-SNAPSHOT unreleased] SCP environment, CHANGELOG and tag updates - b4180658450ccaef83fd83375e17ec6c2bd4e797
 
 Copies the local "environment" folder (`src/setup/env`) to the remote host
 
@@ -13,15 +13,26 @@ A `git tag -n v.0.4.0` will show all those informations.
 Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
 Update the CHANGELOG.md accordingly
 
+### 🚀 Features
+
+- *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
+- *(tools)* Update-tag-message updated tag annotation message
+
 ### 🐛 Bug Fixes
 
 - *(tools)* Update-version.bat fix multi-line release description
 - *(bat)* T_build.bat echo fatal call path was incorrect
 - *(tools)* Get-version.bat detects SNAPSHOT
 
+### 📚 Documentation
+
+- *(setup)* Describe SCP step
+
 ### ⚙️ Miscellaneous Tasks
 
 - *(tools)* Remote old updateChangelog.sh
+- *(git)* Update CHANGELOG.md
+- *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
 
 ## [v0.4.0] - 2025-01-19 - First step check SSH connexion, `update-changelog.sh` refactor
 
