@@ -11,6 +11,7 @@ main() {
     steps_file="${SETUP_DIR}/steps.md"
     properties_file="${SETUP_DIR}/setup.properties"
     validate-the-ssh-connection "$@"
+    scp-env "$@"
 }
 
 validate-the-ssh-connection() {
