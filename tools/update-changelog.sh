@@ -11,18 +11,35 @@ main() {
   info "gcliff='${gcliff[*]}'"
   "${gcliff[@]}" -V
 
+  previous_tag=""
   if [[ ! -e "${PROJECT_DIR}/CHANGELOG.md" ]]; then
     range=()
     "${gcliff[@]}" --
- else
-    range=(-u -- "$(git -C "${PROJECT_DIR}" describe --abbrev=0 --tags)..HEAD")
+  elif [[ -z "${1}" ]]; then
+    range=(-- "$(git -C "${PROJECT_DIR}" describe --abbrev=0 --tags)..HEAD")
     "${gcliff[@]}" "${range[@]}"
+  elif git show-ref --tags --quiet --verify "refs/tags/$1" && [ "$(git cat-file -t "$1")" = "tag" ]; then
+    previous_tag=$(git tag --sort=-version:refname | awk "/^${1}\$/ {getline; print; exit}")
+    info "Previous tag of '${1}' is '${previous_tag}'"
+    if [[ -z "${previous_tag}" ]]; then
+      fatal "Failed to retrieve previous tag of '${1}'" 1
+    elif [[ "${previous_tag}" == "${1}" ]]; then
+      # no previous tag: get the first commit of the current branch
+      range=()
+      "${gcliff[@]}" --
+    else
+      range=(-- "${previous_tag}..HEAD")
+      "${gcliff[@]}" "${range[@]}"
+    fi
+  else
+    fatal "Tag '${1}' not found" 1
   fi
 
   sed -i "s/### Build/### 🔨 Build/g" "${PROJECT_DIR}/CHANGELOG.tmp.md"
   sed -i "s/### Wip/### 🚧 Wip/g" "${PROJECT_DIR}/CHANGELOG.tmp.md"
   sed -i -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "${PROJECT_DIR}/CHANGELOG.tmp.md"
   sed -i 's/\r$//' "${PROJECT_DIR}/CHANGELOG.tmp.md"
+  sed -i 's/ - v[0-9]\+.*\? - / - /g' "${PROJECT_DIR}/CHANGELOG.tmp.md"
 
   # check if the current commit is tagged
   if ! git describe --exact-match --tags HEAD >/dev/null 2>&1; then
@@ -44,8 +61,26 @@ main() {
   if [[ ${#range[@]} -eq 0 ]];then
     mv "${PROJECT_DIR}/CHANGELOG.tmp.md" "${PROJECT_DIR}/CHANGELOG.md"
   else
-    # Replace lines in CHANGELOG.md until the first occurrence of ## [vx.y.z] with the content of CHANGELOG.tmp.md
-    sed -i '/^## \[v[0-9]\+\.[0-9]\+\.[0-9]\+\]/,$!d' "${PROJECT_DIR}/CHANGELOG.md"
+    if [[ -z "${previous_tag}" ]]; then
+      # Replace lines in CHANGELOG.md until the first occurrence of ## [vx.y.z] with the content of CHANGELOG.tmp.md
+      sed -i '/^## \[v[0-9]\+\.[0-9]\+\.[0-9]\+\]/,$!d' "${PROJECT_DIR}/CHANGELOG.md"
+    else
+      # Replace lines in CHANGELOG.md between the last instance of '## [${previous_tag}]'' with the content of CHANGELOG.tmp.md
+
+      # Find the line number of the last occurrence of the pattern
+      last_line=$(grep -n -E "## \[${previous_tag}\] " "${PROJECT_DIR}/CHANGELOG.md" | tail -n 1 | cut -d: -f1)
+      if [[ -z "${last_line}" ]]; then
+        fatal "Failed to find the last line of '${previous_tag}' in CHANGELOG.md" 1
+      fi
+      last_line=$((last_line - 1))
+      # Ensure that new_last_line is a positive integer
+      if [[ "${last_line}" -ge 1 ]]; then
+        # Delete all lines from the start of the file up to new_last_line
+        sed -i "1,${last_line}d" "${PROJECT_DIR}/CHANGELOG.md"
+      else
+        info "No lines to delete before line ${last_line}."
+      fi
+    fi
     (cat "${PROJECT_DIR}/CHANGELOG.tmp.md"; echo ""; cat "${PROJECT_DIR}/CHANGELOG.md") > "${PROJECT_DIR}/CHANGELOG.new.md"
     mv "${PROJECT_DIR}/CHANGELOG.new.md" "${PROJECT_DIR}/CHANGELOG.md"
   fi
