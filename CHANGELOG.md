@@ -4,9 +4,28 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.4.0 unreleased] First step check SSH connexion - c89cfa6be3078a9c932847e8548536a96decdcc9
+## [v0.5.0-SNAPSHOT unreleased] SCP environment, CHANGELOG and tag updates - 1f8ac52c5255325de5c4507686211e3c90b932e2
 
-This first steps also uses the next properties and step features: the goal is to describe/document the steps in `src/setups/steps.md`, and to avoid making that step if the properties are already set (and memorize in `src/setups/setup.properties`)
+Copies the local "environment" folder (`src/setup/env`) to the remote host
+
+Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
+A `git tag -n v.0.4.0` will show all those informations.  
+Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
+Update the CHANGELOG.md accordingly
+
+### 🐛 Bug Fixes
+
+- *(tools)* Update-version.bat fix multi-line release description
+- *(bat)* T_build.bat echo fatal call path was incorrect
+- *(tools)* Get-version.bat detects SNAPSHOT
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tools)* Remote old updateChangelog.sh
+
+## [v0.4.0] - 2025-01-19 - First step check SSH connexion, `update-changelog.sh` refactor
+
+This first steps also uses the next properties and step features: the goal is to describe/document the steps in `src/setups/steps.md`, and to avoid making that step if the properties are already set (and memorize in `src/setups/setup.properties`).
 
 This release also refactors the `CHANGELOG.md` generation, using `version.txt` both for the version and the release title/documentation.
 
@@ -45,8 +64,12 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 
 - *(shell)* Add .shellcheckrc for external file directive
 - *(git)* Ignore bak files
+- *(release)* Set new 'v0.4.0' from previous release 'v0.3.0'
 
-## [v0.3.0] - 2025-01-10 - v0.3.0 - Setup initialization
+## [v0.3.0] - 2025-01-10 - Setup initialization
+
+Put in place the skeleton of a setup script (valled by `build.bat`), which will executed multiple steps.
+Since those are bash scripts, add an `echos` for colored log headers in bash.
 
 ### 🚀 Features
 
@@ -59,7 +82,11 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 
 - *(release)* Set new 'v0.3.0' from previous release 'v0.2.0'
 
-## [v0.2.0] - 2025-01-10 - v0.2.0 - Refactor, use improved batcolors, with prefix, stack and multi-lines
+## [v0.2.0] - 2025-01-10 - Refactor, use improved batcolors, with prefix, stack and multi-lines
+
+A `call_echos_stack` in a script enable batcolors to print the script name.
+Init.bat no longer calls/depends on senv.bat.
+No more CHANGELOG update while in SNAPSHOT build.
 
 ### 🚀 Features
 
@@ -119,7 +146,10 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 - *(git)* Update batcolors
 - *(release)* Set new 'v0.2.0' from previous release 'v0.1.0'
 
-## [v0.1.0] - 2024-12-31 - v0.1.0 - Initial project template
+## [v0.1.0] - 2024-12-31 - Initial project template
+
+Initial `senv.bat` with its aliases.
+Focus on build.bat, which calls update-version.bat.
 
 ### 🚀 Features
 
