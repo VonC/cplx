@@ -52,7 +52,7 @@ if not "%version_release%"=="%version%" (
 ::  GIT DESCRIBE AND STATUS
 ::##################################################
 for /f %%i in ('git -C "%project_dir%" describe --long --tags --dirty --always') do set git_describe=%%i
-for /f %%i in ('git describe --tags^^^ --abbrev^=0 2^>NUL') do set "git_tag=%%i"
+for /f %%i in ('git -C "%project_dir%" describe --tags^^^ --abbrev^=0 2^>NUL') do set "git_tag=%%i"
 set "is_dirty="
 if not "%git_describe:-dirty=%" == "%git_describe%" ( set "is_dirty=1" )
 
@@ -62,7 +62,7 @@ for /f %%i in ('bash -c "cygpath '%project_dir%'"') do set "project_path=%%i"
 %_task% "Must check if Git repository is dirty"
 set "is_dirty_files="
 set "is_dirty_src="
-for /f "tokens=2" %%i in ('git status --porcelain') do (
+for /f "tokens=2" %%i in ('git -C "%project_dir%" status --porcelain') do (
     if not "%%i"=="" (
         if not "%%i"=="version.txt" (
             if not "%%i"=="CHANGELOG.md" (
@@ -173,7 +173,7 @@ if not defined askForNewSnapshot (
 )
 
 %_warning% "New modifications detected since last release '%version%' (%askForNewSnapshot%)"
-git diff --cached --quiet
+git -C "%project_dir%" diff --cached --quiet
 if errorlevel 1 (
     %_fatal% "Please commit or stash or reset your indexed/staged changes first, to allow version.txt modification and individual commit" 111
 )
@@ -240,10 +240,10 @@ if errorlevel 1 (
   %_fatal% "Unable to add description in '%project_dir%\version.txt'" 257
 )
 
-git add -- "%project_dir%\version.txt"
+git -C "%project_dir%" add -- "version.txt"
 if errorlevel 1 ( call:restore-version
     %_fatal% "ERROR unable to add version.txt" 112 )
-git commit -m "chore(release): prepare for new '!appver!' from previous release '%VERSION%'"
+git -C "%project_dir%" commit -m "chore(release): prepare for new '!appver!' from previous release '%VERSION%'"
 if errorlevel 1 ( call:restore-version
     %_fatal% "ERROR unable to commit version.txt" 113 )
 
@@ -268,7 +268,7 @@ goto:eof
 if defined UV_FORCE_REL (
   if defined is_dirty_files (
     %_warning% "(make_new_release) Repository is not clean, but 'UV_FORCE_REL' is set"
-    git status --porcelain | grep -v version.txt | grep -v CHANGELOG.md
+    git -C "%project_dir%" status --porcelain | grep -v version.txt | grep -v CHANGELOG.md
     goto:make_new_release_check
   )
 )
@@ -276,7 +276,7 @@ set "confirm=y"
 if defined is_dirty_files (
   set "confirm=N"
   %_warning% "(make_new_release) Repository is not clean (and 'UV_FORCE_REL' is not set):"
-  git status --porcelain | grep -v version.txt | grep -v CHANGELOG.md
+  git -C "%project_dir%" status --porcelain | grep -v version.txt | grep -v CHANGELOG.md
   set /p "confirm=Do you want to make a release? (y/N): "
 ) else (
   %_ok% "(make_new_release) Repository is clean. Proceed with release."
@@ -328,12 +328,12 @@ if errorlevel 1 ( %_fatal% "Unable commit version.txt/CHANGELOG.md to index of '
 ::##################################################
 %_task% "Must check if git tag 'v%version_release%' is needed"
 set "existing_tag="
-for /f %%i in ('git tag -l "v%version_release%"') do set "existing_tag=%%i"
+for /f %%i in ('git -C "%project_dir%" tag -l "v%version_release%"') do set "existing_tag=%%i"
 if defined existing_tag (
   %_fatal% "Git tag 'v%version_release%' already exists" 344
 )
 %_task% "Creating git tag 'v%version_release%'"
-git tag -m "v%version_release%" "v%version_release%"
+git -C "%project_dir%" tag -m "v%version_release%" "v%version_release%"
 if errorlevel 1 (
   %_fatal% "Unable to create git tag 'v%version_release%'" 343
 )
