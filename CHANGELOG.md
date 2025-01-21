@@ -4,6 +4,19 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.6.0-SNAPSHOT unreleased] SCP to remote host - 8822d9d02abfcc755fe6c9d43cfdba19292d72cc
+
+scp all files needed for an sshe session
+Include all rc files like a .env and .vimrc
+
+### 🚀 Features
+
+- *(tools)* Cliff.toml skip CHANGELOG updates entries
+
+### 🐛 Bug Fixes
+
+- *(tools)* Avoid adding description
+
 ## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
 
 Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
@@ -287,7 +300,7 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 
 ## [v0.3.0] - 2025-01-10 - Setup initialization
 
-Put in place the skeleton of a setup script (valled by `build.bat`), which will executed multiple steps.
+Put in place the skeleton of a setup script (called by `build.bat`), which will executed multiple steps.
 Since those are bash scripts, add an `echos` for colored log headers in bash.
 
 ### 🚀 Features
