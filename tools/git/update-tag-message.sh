@@ -20,13 +20,14 @@ main() {
   fi
   info "Tag '${v_tag_name}' message before: '${tag_before}'"
 
+  c_date_time=$(git show -s --format=%ci "${v_tag_name}"^{})
+  c_date=$(printf "%s" "${c_date_time}" | cut -f1 -d' ' )
+  GIT_COMMITTER_DATE="${c_date_time}"
+  GIT_AUTHOR_DATE="${c_date_time}"
   if [[ -z "${file}" ]]; then
     warning "Tag file is missing"
-    c_date=$(git show -s --format=%ci "${v_tag_name}"^{})
-    task "Must only update the creation date of the tag to '${c_date}'"
-    GIT_COMMITTER_DATE="${c_date}"
-    GIT_AUTHOR_DATE="${c_date}"
-    tag_msg=$(git show -s --format=%N "${v_tag_name}" | tail -n +4)
+    task "Must only update the creation date of the tag to '${c_date_time}', c_date='${c_date}'"
+    tag_msg=$(git show -s --format=%N "${v_tag_name}" | tail -n +4 | sed "1s/^.*\? --\? /${c_date} -- /")
     info "Tag message: '${tag_msg}'"
     if ! printf "%s" "${tag_msg}" | git tag -f -a -F - -- "${v_tag_name}" "$(git rev-parse "${v_tag_name}"^{})" ; then
       fatal "Failed to update tag date for '${v_tag_name}' with date '${GIT_AUTHOR_DATE}' / '${GIT_COMMITTER_DATE}" $?
@@ -43,7 +44,7 @@ main() {
   # This removes the first 'v' only if it exists at the start
   tag_pattern="${v_tag_name#v}"
 
-  tag_after=v$(awk -v pattern="${tag_pattern}" -f release_reader.awk "${file}")
+  tag_after=$(awk -v pattern="${tag_pattern}" -f release_reader.awk "${file}" | sed "1s/^.*\? --\? /${c_date} -- /")
   awk_exit_status=$?  # Capture the exit status immediately
   # Check if AWK executed successfully
   if [ "${awk_exit_status}" -ne 0 ]; then
@@ -57,7 +58,6 @@ main() {
   fi
 
   task "Must update tag message from '${v_tag_name}'"
-  GIT_COMMITTER_DATE="${c_date}"
   if ! printf "%s" "${tag_after}" | git tag -f -a -F - -- "${v_tag_name}" "$(git rev-parse "${v_tag_name}"^{})" ; then
     fatal "Failed to update tag message for '${v_tag_name}' with date '${GIT_COMMITTER_DATE}'" $?
   fi
