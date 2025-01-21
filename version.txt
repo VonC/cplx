@@ -1,6 +1,4 @@
-0.5.0-SNAPSHOT -- SCP environment, CHANGELOG and tag updates
-
-Copies the local "environment" folder (`src/setup/env`) to the remote host
+0.5.0-SNAPSHOT -- CHANGELOG and tag updates with new version.txt format
 
 Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
 A `git tag -n v.0.4.0` will show all those informations.  
