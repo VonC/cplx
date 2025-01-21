@@ -227,18 +227,11 @@ set "at_least_one_line="
 set /p "line=> "
 if /i "%line%"=="END" goto endInput
 if "%line: =%"=="" goto readInput
-echo %line%>> "%project_dir%\version.txt"
+echo.%line%>> "%project_dir%\version.txt"
 set at_least_one_line=1
 goto readInput
 :endInput
 if not defined at_least_one_line ( %_fatal% "Empty description for '%relVersion%'" 312 )
-
-echo.>> "%project_dir%\version.txt"
-verify >nul
-echo !description!>> "%project_dir%\version.txt"
-if errorlevel 1 (
-  %_fatal% "Unable to add description in '%project_dir%\version.txt'" 257
-)
 
 git -C "%project_dir%" add -- "version.txt"
 if errorlevel 1 ( call:restore-version

@@ -2,5 +2,3 @@
 
 scp all files needed for an sshe session
 Include all rc files like a .env and .vimrc
-
-ECHO is off.
