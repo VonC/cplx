@@ -55,7 +55,7 @@ main() {
     sed -i "/## \[unreleased\] -/r ${PROJECT_DIR}/version.tmp.txt" "${PROJECT_DIR}/CHANGELOG.tmp.md"
 
     # Extract the version and title from the first line of version.txt
-    read -r version version_title < <(head -n 1 "${PROJECT_DIR}/version.txt" | awk -F ' -- ' '{print ${v_tag_name}, $2}')
+    read -r version version_title < <(head -n 1 "${PROJECT_DIR}/version.txt" | awk -F ' -- ' '{print $1, $2}')
 
     # Modify the ## [unreleased] - line with the version, title, and commit hash
     sed -i "s/## \[unreleased\] -/## [v${version} unreleased] ${version_title} - ${commit_hash}/" "${PROJECT_DIR}/CHANGELOG.tmp.md"    
