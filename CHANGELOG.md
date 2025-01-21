@@ -12,6 +12,8 @@ Include all rc files like a .env and .vimrc
 ### 🚀 Features
 
 - *(tools)* Cliff.toml skip CHANGELOG updates entries
+- *(setup)* Initial files for env to scp
+- *(bat)* Senv.bat add CHANGELOG.md content filter driver
 
 ### 🐛 Bug Fixes
 
