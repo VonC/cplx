@@ -333,7 +333,7 @@ if defined existing_tag (
   %_fatal% "Git tag 'v%version_release%' already exists" 344
 )
 %_task% "Creating git tag 'v%version_release%'"
-git -C "%project_dir%" tag -m "v%version_release%" "v%version_release%"
+type "%project_dir%\version.txt" | sed "1s/^/v/" | git tag -a -F - -- "v${version_release}" HEAD
 if errorlevel 1 (
   %_fatal% "Unable to create git tag 'v%version_release%'" 343
 )
