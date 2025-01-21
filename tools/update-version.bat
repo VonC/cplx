@@ -300,7 +300,7 @@ if defined is_snapshot (
     %_fatal% "(make_new_release) version.txt next release version '%version_release%' cannot be the same as the last Git tag '%git_tag%'" 31
   )
   %_task% "Must update version.txt from '%version%' to '%version_release%'"
-  sed -i "1s/^.*--/%version_release% --/" "%project_dir%\version.txt"
+  sed -i "1s/^.*\?--/%version_release% --/" "%project_dir%\version.txt"
   if errorlevel 1 (
     %_fatal% "(make_new_release) Unable to update version.txt from '%version%' to '%version_release%'" 32
   )
