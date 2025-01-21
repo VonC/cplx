@@ -4,9 +4,7 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.5.0-SNAPSHOT unreleased] SCP environment, CHANGELOG and tag updates - b4180658450ccaef83fd83375e17ec6c2bd4e797
-
-Copies the local "environment" folder (`src/setup/env`) to the remote host
+## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
 
 Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
 A `git tag -n v.0.4.0` will show all those informations.  
@@ -17,12 +15,23 @@ Update the CHANGELOG.md accordingly
 
 - *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
 - *(tools)* Update-tag-message updated tag annotation message
+- *(tools)* Update-changelog.sh make_new_release means release header
+- *(tools)* Update-version.bat release tag with date
+- *(tools/git)* Update-tag-message.sh use date
 
 ### 🐛 Bug Fixes
 
 - *(tools)* Update-version.bat fix multi-line release description
 - *(bat)* T_build.bat echo fatal call path was incorrect
 - *(tools)* Get-version.bat detects SNAPSHOT
+- *(tools)* Update-version.bat git cmd must use -C
+- *(tools)* Update-version.bat update version pattern
+- *(tools)* Update-version.bat tag with version.txt
+- *(tools)* Update-version.bat restore version
+- *(tools)* Update-changelog.sh managed 'latest'
+- *(tools)* Update-changelog.sh restore $1 in awk
+- *(tools)* No need for double-quotes with date
+- *(tools)* Update-version.bat avoid creating tag twice
 
 ### 📚 Documentation
 
@@ -33,6 +42,205 @@ Update the CHANGELOG.md accordingly
 - *(tools)* Remote old updateChangelog.sh
 - *(git)* Update CHANGELOG.md
 - *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
+- *(git)* Update CHANGELOG.md
+- *(git)* Version.txt update release goal
+
+## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
+
+Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
+A `git tag -n v.0.4.0` will show all those informations.  
+Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
+Update the CHANGELOG.md accordingly
+
+### 🚀 Features
+
+- *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
+- *(tools)* Update-tag-message updated tag annotation message
+- *(tools)* Update-changelog.sh make_new_release means release header
+- *(tools)* Update-version.bat release tag with date
+
+### 🐛 Bug Fixes
+
+- *(tools)* Update-version.bat fix multi-line release description
+- *(bat)* T_build.bat echo fatal call path was incorrect
+- *(tools)* Get-version.bat detects SNAPSHOT
+- *(tools)* Update-version.bat git cmd must use -C
+- *(tools)* Update-version.bat update version pattern
+- *(tools)* Update-version.bat tag with version.txt
+- *(tools)* Update-version.bat restore version
+- *(tools)* Update-changelog.sh managed 'latest'
+- *(tools)* Update-changelog.sh restore $1 in awk
+- *(tools)* No need for double-quotes with date
+- *(tools)* Update-version.bat avoid creating tag twice
+
+### 📚 Documentation
+
+- *(setup)* Describe SCP step
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tools)* Remote old updateChangelog.sh
+- *(git)* Update CHANGELOG.md
+- *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
+- *(git)* Update CHANGELOG.md
+- *(git)* Version.txt update release goal
+
+## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
+
+Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
+A `git tag -n v.0.4.0` will show all those informations.  
+Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
+Update the CHANGELOG.md accordingly
+
+### 🚀 Features
+
+- *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
+- *(tools)* Update-tag-message updated tag annotation message
+- *(tools)* Update-changelog.sh make_new_release means release header
+- *(tools)* Update-version.bat release tag with date
+
+### 🐛 Bug Fixes
+
+- *(tools)* Update-version.bat fix multi-line release description
+- *(bat)* T_build.bat echo fatal call path was incorrect
+- *(tools)* Get-version.bat detects SNAPSHOT
+- *(tools)* Update-version.bat git cmd must use -C
+- *(tools)* Update-version.bat update version pattern
+- *(tools)* Update-version.bat tag with version.txt
+- *(tools)* Update-version.bat restore version
+- *(tools)* Update-changelog.sh managed 'latest'
+- *(tools)* Update-changelog.sh restore $1 in awk
+- *(tools)* No need for double-quotes with date
+- *(tools)* Update-version.bat avoid creating tag twice
+
+### 📚 Documentation
+
+- *(setup)* Describe SCP step
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tools)* Remote old updateChangelog.sh
+- *(git)* Update CHANGELOG.md
+- *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
+- *(git)* Update CHANGELOG.md
+- *(git)* Version.txt update release goal
+
+## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
+
+Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
+A `git tag -n v.0.4.0` will show all those informations.  
+Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
+Update the CHANGELOG.md accordingly
+
+### 🚀 Features
+
+- *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
+- *(tools)* Update-tag-message updated tag annotation message
+- *(tools)* Update-changelog.sh make_new_release means release header
+- *(tools)* Update-version.bat release tag with date
+
+### 🐛 Bug Fixes
+
+- *(tools)* Update-version.bat fix multi-line release description
+- *(bat)* T_build.bat echo fatal call path was incorrect
+- *(tools)* Get-version.bat detects SNAPSHOT
+- *(tools)* Update-version.bat git cmd must use -C
+- *(tools)* Update-version.bat update version pattern
+- *(tools)* Update-version.bat tag with version.txt
+- *(tools)* Update-version.bat restore version
+- *(tools)* Update-changelog.sh managed 'latest'
+- *(tools)* Update-changelog.sh restore $1 in awk
+- *(tools)* No need for double-quotes with date
+- *(tools)* Update-version.bat avoid creating tag twice
+
+### 📚 Documentation
+
+- *(setup)* Describe SCP step
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tools)* Remote old updateChangelog.sh
+- *(git)* Update CHANGELOG.md
+- *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
+- *(git)* Update CHANGELOG.md
+- *(git)* Version.txt update release goal
+
+## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
+
+Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
+A `git tag -n v.0.4.0` will show all those informations.  
+Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
+Update the CHANGELOG.md accordingly
+
+### 🚀 Features
+
+- *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
+- *(tools)* Update-tag-message updated tag annotation message
+- *(tools)* Update-changelog.sh make_new_release means release header
+- *(tools)* Update-version.bat release tag with date
+
+### 🐛 Bug Fixes
+
+- *(tools)* Update-version.bat fix multi-line release description
+- *(bat)* T_build.bat echo fatal call path was incorrect
+- *(tools)* Get-version.bat detects SNAPSHOT
+- *(tools)* Update-version.bat git cmd must use -C
+- *(tools)* Update-version.bat update version pattern
+- *(tools)* Update-version.bat tag with version.txt
+- *(tools)* Update-version.bat restore version
+- *(tools)* Update-changelog.sh managed 'latest'
+- *(tools)* Update-changelog.sh restore $1 in awk
+- *(tools)* No need for double-quotes with date
+
+### 📚 Documentation
+
+- *(setup)* Describe SCP step
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tools)* Remote old updateChangelog.sh
+- *(git)* Update CHANGELOG.md
+- *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
+- *(git)* Update CHANGELOG.md
+- *(git)* Version.txt update release goal
+
+## [v0.5.0] - "2025-01-21" - CHANGELOG and tag updates with new version.txt format
+
+Add `tools/git` script folder, to update old tag annotated messages: they not only includes the version and release title, but also the release description.  
+A `git tag -n v.0.4.0` will show all those informations.  
+Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
+Update the CHANGELOG.md accordingly
+
+### 🚀 Features
+
+- *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
+- *(tools)* Update-tag-message updated tag annotation message
+- *(tools)* Update-changelog.sh make_new_release means release header
+- *(tools)* Update-version.bat release tag with date
+
+### 🐛 Bug Fixes
+
+- *(tools)* Update-version.bat fix multi-line release description
+- *(bat)* T_build.bat echo fatal call path was incorrect
+- *(tools)* Get-version.bat detects SNAPSHOT
+- *(tools)* Update-version.bat git cmd must use -C
+- *(tools)* Update-version.bat update version pattern
+- *(tools)* Update-version.bat tag with version.txt
+- *(tools)* Update-version.bat restore version
+- *(tools)* Update-changelog.sh managed 'latest'
+- *(tools)* Update-changelog.sh restore $1 in awk
+
+### 📚 Documentation
+
+- *(setup)* Describe SCP step
+
+### ⚙️ Miscellaneous Tasks
+
+- *(tools)* Remote old updateChangelog.sh
+- *(git)* Update CHANGELOG.md
+- *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
+- *(git)* Update CHANGELOG.md
+- *(git)* Version.txt update release goal
 
 ## [v0.4.0] - 2025-01-19 - First step check SSH connexion, `update-changelog.sh` refactor
 
