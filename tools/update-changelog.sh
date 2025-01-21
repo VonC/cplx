@@ -61,7 +61,7 @@ main() {
     if [[ -z "${make_new_release}" ]]; then
       sed -i "s/## \[unreleased\] -/## [v${version} unreleased] ${version_title} - ${commit_hash}/" "${PROJECT_DIR}/CHANGELOG.tmp.md"
     else
-      sed -i "s/## \[unreleased\] -/## [v${version}] - $(date +\"%Y-%m-%d\") - ${version_title}/" "${PROJECT_DIR}/CHANGELOG.tmp.md"
+      sed -i "s/## \[unreleased\] -/## [v${version}] - $(date +%Y-%m-%d) - ${version_title}/" "${PROJECT_DIR}/CHANGELOG.tmp.md"
     fi
   fi
 

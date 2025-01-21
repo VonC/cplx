@@ -333,7 +333,7 @@ if defined existing_tag (
   %_fatal% "Git tag 'v%version_release%' already exists" 344
 )
 %_task% "Creating git tag 'v%version_release%'"
-bash -c "sed \"1s/^.*\? -- /$(date +"%Y-%m-%d-%p") -- /\" \"%project_path%/version.txt\"" | sed "1s/-[AP]M / /" | git tag -a -F - -- "v%version_release%" HEAD
+bash -c "sed \"1s/^.*\? -- /$(date +%Y-%m-%d-%p) -- /\" \"%project_path%/version.txt\"" | sed "1s/-[AP]M / /" | git tag -a -F - -- "v%version_release%" HEAD
 type "%project_dir%\version.txt" | sed "1s/^/v/" | git tag -a -F - -- "v%version_release%" HEAD
 if errorlevel 1 (
   %_fatal% "Unable to create git tag 'v%version_release%'" 343
