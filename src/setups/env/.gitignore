@@ -1,0 +1,15 @@
+/certs/*
+!/certs/.keep
+bare/
+a
+aa
+log
+logs/
+sources/
+done/
+*.log
+*_check
+temp.txt
+0
+*.swp
+*.zip

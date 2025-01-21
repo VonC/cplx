@@ -1,0 +1,2 @@
+Put your certificates to copy over to ~/certs/
+That content is ignored in the current Git repository (certificates are private to the company which needs them)
