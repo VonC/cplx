@@ -255,7 +255,7 @@ goto:eof
 ::##################################################
 :restore-version
 %_task% "Must restore version.txt (to '%project_version%')"
-echo %project_version% -- %project_title%> "%project_dir%\version.txt"
+sed -i "1s/^.*\?--/%project_version% --/" "%project_dir%\version.txt"
 if errorlevel 1 (
   %_fatal% "Unable to restore %project_version% in '%project_dir%\version.txt'" 256
 )
