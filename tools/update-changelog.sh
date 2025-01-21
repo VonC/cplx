@@ -11,19 +11,22 @@ main() {
   info "gcliff='${gcliff[*]}'"
   "${gcliff[@]}" -V
 
+  v_tag_name="${1}"
+  if [[ "${v_tag_name}" == "latest" ]]; then v_tag_name=""; fi
+
   previous_tag=""
   if [[ ! -e "${PROJECT_DIR}/CHANGELOG.md" ]]; then
     range=()
     "${gcliff[@]}" --
-  elif [[ -z "${1}" ]]; then
+  elif [[ -z "${v_tag_name}" ]]; then
     range=(-- "$(git -C "${PROJECT_DIR}" describe --abbrev=0 --tags)..HEAD")
     "${gcliff[@]}" "${range[@]}"
-  elif git show-ref --tags --quiet --verify "refs/tags/$1" && [ "$(git cat-file -t "$1")" = "tag" ]; then
-    previous_tag=$(git tag --sort=-version:refname | awk "/^${1}\$/ {getline; print; exit}")
-    info "Previous tag of '${1}' is '${previous_tag}'"
+  elif git show-ref --tags --quiet --verify "refs/tags/${v_tag_name}" && [ "$(git cat-file -t "${v_tag_name}")" = "tag" ]; then
+    previous_tag=$(git tag --sort=-version:refname | awk "/^${v_tag_name}\$/ {getline; print; exit}")
+    info "Previous tag of '${v_tag_name}' is '${previous_tag}'"
     if [[ -z "${previous_tag}" ]]; then
-      fatal "Failed to retrieve previous tag of '${1}'" 1
-    elif [[ "${previous_tag}" == "${1}" ]]; then
+      fatal "Failed to retrieve previous tag of '${v_tag_name}'" 1
+    elif [[ "${previous_tag}" == "${v_tag_name}" ]]; then
       # no previous tag: get the first commit of the current branch
       range=()
       "${gcliff[@]}" --
@@ -32,7 +35,7 @@ main() {
       "${gcliff[@]}" "${range[@]}"
     fi
   else
-    fatal "Tag '${1}' not found" 1
+    fatal "Tag '${v_tag_name}' not found" 1
   fi
 
   sed -i "s/### Build/### 🔨 Build/g" "${PROJECT_DIR}/CHANGELOG.tmp.md"
@@ -52,7 +55,7 @@ main() {
     sed -i "/## \[unreleased\] -/r ${PROJECT_DIR}/version.tmp.txt" "${PROJECT_DIR}/CHANGELOG.tmp.md"
 
     # Extract the version and title from the first line of version.txt
-    read -r version version_title < <(head -n 1 "${PROJECT_DIR}/version.txt" | awk -F ' -- ' '{print $1, $2}')
+    read -r version version_title < <(head -n 1 "${PROJECT_DIR}/version.txt" | awk -F ' -- ' '{print ${v_tag_name}, $2}')
 
     # Modify the ## [unreleased] - line with the version, title, and commit hash
     sed -i "s/## \[unreleased\] -/## [v${version} unreleased] ${version_title} - ${commit_hash}/" "${PROJECT_DIR}/CHANGELOG.tmp.md"    
