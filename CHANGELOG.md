@@ -4,7 +4,7 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.6.0-SNAPSHOT unreleased] SCP to remote host - 8822d9d02abfcc755fe6c9d43cfdba19292d72cc
+## [v0.6.0-SNAPSHOT unreleased] SCP to remote host -
 
 scp all files needed for an sshe session
 Include all rc files like a .env and .vimrc

@@ -32,6 +32,7 @@ set "project_dir=%project_dir:~0,-1%"
 cd "%project_dir%" || echo "unable to cd to '%project_dir%'"&& exit /b 1
 for /f "tokens=* delims=\" %%i in ("%project_dir%") do SET "project_dir_name=%%~ni"
 
+
 doskey cdc=cd %project_dir%
 
 if "%~1"=="unset" (
@@ -56,6 +57,19 @@ if not defined echos_stack_emptied (
   set "echos_stack_emptied=1"
 )
 
+set "filter_smudge="
+for /f "tokens=* delims=" %%i in ('git config filter."changelog".smudge) do SET "filter_smudge=%%~ni"
+if not defined filter_smudge (
+  %_task% "Must set git config filter.changelog filter for changelog diff"
+  git config filter.changelog.smudge "cat"
+  git config filter.changelog.clean "sed -E 's/(## \[v.*?-SNAPSHOT unreleased\].*-).*$/\1/'"
+  if errorlevel 1 (
+    %_fatal% "git config filter.changelog filters failed for changelog diff" 231
+  )
+  %_ok% "git config filter.changelog filters set for changelog diff"
+) else (
+  %_ok% "git config filter.changelog filters already set for changelog diff"
+)
 
 ::##################################################
 ::  SET PATH

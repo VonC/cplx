@@ -9,3 +9,5 @@
 *.yaml text eol=lf
 *.properties text eol=lf
 *.ini text eol=lf
+
+CHANGELOG.md filter=changelog
