@@ -4,10 +4,14 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.6.0-SNAPSHOT unreleased] SCP to remote host -
+## [v0.6.0-SNAPSHOT unreleased] SCP to remote host, senv updates -
 
-scp all files needed for an sshe session
-Include all rc files like a .env and .vimrc
+`scp` all files needed for an `sshe` (I.e, "SSH Extended", an `senv` utility `ssh` wrapper) session.  
+- Include all rc files like a `.env` and `.vimrc`
+- Include `get_env.sh` and `get_service_name.sh` in `bin/` to get the environment (dev,qal, ...) and service name (cplx, git_cpl, python_cpl, depending on where you are in the tree)
+
+On senv updates, tools aliases (uv, uc and crel) are available even outside lsenv (no need to add `tools` to the `PATH`).
+`senv.bat` and `init.bat` or `update-version.bat` no longer change the `cwd` (current working directory)
 
 ### 🚀 Features
 
@@ -20,6 +24,8 @@ Include all rc files like a .env and .vimrc
 - *(tools)* Avoid adding description
 - *(bat)* Senv.bat avoid ok msg on filter.changelog
 - *(bat)* Avoid any cd on senv and init
+- *(tools)* Update-changelog.bat avoid cd
+- *(bat)* Remove old alias, ignore RELFORCE
 
 ## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
 

@@ -20,6 +20,14 @@ doskey usenv=%~dp0senv.bat unset
 doskey rsenv=%~dp0senv.bat restore
 doskey crel=
 
+doskey gv=get-version
+doskey uv="%project_dir%\tools\update-version.bat"
+doskey uvr="%project_dir%\tools\update-version" rel
+doskey uvf=cmd /V /C "set "FORCE_UC=1" && "%project_dir%\tools\update-version.bat" $*"
+doskey uc="%project_dir%\tools\update-changelog.bat" $*
+doskey crel=bash -c "git tag --sort=-creatordate | head -n 1 | xargs -I {} sh -c 'git reset $(git rev-list -n 1 {}^); git tag -d {}'"
+
+
 set "CHECK_QUIET_PRJ=echo %QUIET_PRJ% | findstr /C:true >nul ||"
 set "CHECK_DEBUG_PRJ=echo %DEBUG_PRJ% | findstr /C:true >nul &&"
 
@@ -95,12 +103,6 @@ if defined local_path (
   if errorlevel 1 (
     set "PATH=%project_dir%\tools;%PATH%"
   )
-  doskey gv=get-version
-  doskey uv=update-version
-  doskey uvr=update-version rel
-  doskey uvf=cmd /V /C "set "FORCE_UC=1" && update-version.bat $*"
-  doskey uc=update-changelog.bat $*
-  doskey crel=bash -c "git tag --sort=-creatordate | head -n 1 | xargs -I {} sh -c 'git reset $(git rev-list -n 1 {}^); git tag -d {}'"
 )
 
 ::  ===============================================
@@ -108,12 +110,6 @@ if defined local_path (
 ::  ===============================================
 if not defined local_path (
   call:set_path
-  doskey gv=
-  doskey uv=
-  doskey uvr=
-  doskey uvf=
-  doskey uc=
-  doskey crel=
 )
 set "local_path="
 
@@ -285,6 +281,10 @@ if "%~1"=="restore" (
   doskey uv=
   doskey uvf=
   doskey uc=
+  doskey gv=
+  doskey uvr=
+  doskey crel=
+
   if exist "%HOME%\bin\senv.bat" ( call "%HOME%\bin\senv.bat" )
   if defined project_path (
     set "PATH=%project_path%"
@@ -319,6 +319,7 @@ set "RELFORCE="
 set "project_version="
 set "project_title="
 set "project_release_notes="
+set "QUIET_PRJ="
 
 
 
