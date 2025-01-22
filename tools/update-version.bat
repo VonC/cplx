@@ -380,13 +380,10 @@ goto:eof
 ::##################################################
 :generate-changelog
 %_task% "(update-changelog) Must update/refresh CHANGELOG.md for %~1"
-set "RELFORCE=1"
 call "%project_dir%\tools\update-changelog.bat" latest
 if errorlevel 1 (
-  set "RELFORCE="
   %_fatal% "Unable to update '%project_dir%\CHANGELOG.md'" 129
 )
-set "RELFORCE="
 %_ok% "'%project_dir%\CHANGELOG.md' updated/refreshed"
 goto:eof
 

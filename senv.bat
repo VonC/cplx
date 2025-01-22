@@ -100,10 +100,6 @@ if defined local_path (
   doskey uvr=update-version rel
   doskey uvf=cmd /V /C "set "FORCE_UC=1" && update-version.bat $*"
   doskey uc=update-changelog.bat $*
-  doskey u=updateChangelog.bat $*
-  doskey uf=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat $*"
-  doskey ul=updateChangelog.bat latest $*
-  doskey ufl=cmd /V /C "set "RELFORCE=1" && updateChangelog.bat latest $*"
   doskey crel=bash -c "git tag --sort=-creatordate | head -n 1 | xargs -I {} sh -c 'git reset $(git rev-list -n 1 {}^); git tag -d {}'"
 )
 
@@ -117,10 +113,6 @@ if not defined local_path (
   doskey uvr=
   doskey uvf=
   doskey uc=
-  doskey u=
-  doskey uf=
-  doskey ul=
-  doskey ufl=
   doskey crel=
 )
 set "local_path="
@@ -292,8 +284,7 @@ if "%~1"=="restore" (
   doskey rsenv=
   doskey uv=
   doskey uvf=
-  doskey u=
-  doskey uf=
+  doskey uc=
   if exist "%HOME%\bin\senv.bat" ( call "%HOME%\bin\senv.bat" )
   if defined project_path (
     set "PATH=%project_path%"
@@ -324,6 +315,7 @@ set "git_tag="
 set "commit_count="
 set "FORCE_UC="
 set "REL_FORCE="
+set "RELFORCE="
 set "project_version="
 set "project_title="
 set "project_release_notes="
