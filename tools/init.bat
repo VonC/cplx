@@ -15,8 +15,6 @@ if "%~1"=="unset" (
   goto:eof
 )
 
-cd "%init_dir%" || echo "unable to cd to '%init_dir%'"&& exit /b 1
-
 set "okInit="
 if not exist "%init_dir%\batcolors\echos.bat" (
     echo "WARN: Missing submodules"

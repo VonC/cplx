@@ -29,7 +29,6 @@ set "CHECK_DEBUG_PRJ=echo %DEBUG_PRJ% | findstr /C:true >nul &&"
 ::##################################################
 for %%i in ("%~dp0") do SET "project_dir=%%~fi"
 set "project_dir=%project_dir:~0,-1%"
-cd "%project_dir%" || echo "unable to cd to '%project_dir%'"&& exit /b 1
 for /f "tokens=* delims=\" %%i in ("%project_dir%") do SET "project_dir_name=%%~ni"
 
 
