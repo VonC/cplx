@@ -58,7 +58,7 @@ if not defined echos_stack_emptied (
 )
 
 set "filter_smudge="
-for /f "tokens=* delims=" %%i in ('git config filter."changelog".smudge) do SET "filter_smudge=%%~ni"
+for /f "tokens=* delims=" %%i in ('git config filter."changelog".smudge') do SET "filter_smudge=%%~ni"
 if not defined filter_smudge (
   %_task% "Must set git config filter.changelog filter for changelog diff"
   git config filter.changelog.smudge "cat"
@@ -67,8 +67,6 @@ if not defined filter_smudge (
     %_fatal% "git config filter.changelog filters failed for changelog diff" 231
   )
   %_ok% "git config filter.changelog filters set for changelog diff"
-) else (
-  %_ok% "git config filter.changelog filters already set for changelog diff"
 )
 
 ::##################################################
