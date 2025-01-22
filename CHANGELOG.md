@@ -18,6 +18,8 @@ Include all rc files like a .env and .vimrc
 ### 🐛 Bug Fixes
 
 - *(tools)* Avoid adding description
+- *(bat)* Senv.bat avoid ok msg on filter.changelog
+- *(bat)* Avoid any cd on senv and init
 
 ## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
 
