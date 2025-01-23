@@ -12,6 +12,7 @@ doskey r=run.bat $*
 doskey t=test.bat $
 doskey s=setup.bat $
 doskey lsenv=%~dp0senv.bat local
+doskey senvle="%PRGS%\vscodes\current\bin\code.cmd" "%~dp0senv.local.bat"
 doskey senv=%~dp0senv.bat $*
 doskey psenv=%~dp0senv.bat $*
 doskey hsenv=%HOME%\bin\senv.bat $*
@@ -272,6 +273,7 @@ if "%~1"=="restore" (
   doskey t=
   doskey s=
   doskey lsenv=
+  doskey senvle=
   doskey senv=
   doskey psenv=
   doskey hsenv=
