@@ -10,6 +10,16 @@ source "${SETUP_DIR}/../utils/steps.sh"
 main() {
     steps_file="${SETUP_DIR}/steps.md"
     properties_file="${SETUP_DIR}/setup.properties"
+    if [[ -n "${CPLX_REPEAT_STEP}" ]]; then
+        info "CPLX_REPEAT_STEP is set to '${CPLX_REPEAT_STEP}': repeat those steps"
+        task "Must repeat '${CPLX_REPEAT_STEP}'"
+        if ! repeat_step "${CPLX_REPEAT_STEP}"; then
+            fatal "Could not repeat '${CPLX_REPEAT_STEP}'" 111
+        fi
+        ok "Repeated '${CPLX_REPEAT_STEP}'"
+    else
+        info "CPLX_REPEAT_STEP is not set: no step to repeat"
+    fi
     validate-the-ssh-connection "$@"
     scp-env "$@"
 }
