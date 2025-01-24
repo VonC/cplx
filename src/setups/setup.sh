@@ -14,6 +14,47 @@ main() {
     scp-env "$@"
 }
 
+scp-env() {
+    if step_is_done "copy-the-environment"; then
+        ok "copy-the-environment is already done"
+        return 0
+    fi
+
+    if step_is_done "create-the-remote-project-folder"; then
+        ok "project_path '${project_path}' already created on '${hostname}'"
+    else
+        task "Must create remote project directory: ${hostname}/${project_path}"
+        # shellcheck disable=SC2029
+        ssh "${SSH_CONFIG_ENTRY}" "mkdir -p \"${project_path}\"" || fatal "Could not create remote directory" 11
+        if ! step_done "create-the-remote-project-folder"; then
+            fatal "Could not mark create-the-remote-project-folder as done" 6
+        fi
+        ok "Remote directory '${project_path}' created on '${hostname}'"
+    fi
+
+    if step_is_done "transfer-env-to-the-remote-project-folder"; then
+        ok "transfer-env-to-the-remote-project-folder is already done"
+    else
+        task "Must copy the environment to ${hostname}/${project_path}"
+        set -o pipefail
+        # Normalize any repeated slashes:
+        normalized_path="$(echo "${SETUP_DIR}/env" | tr -s '/')"
+        # Count the slashes to determine the number of components:
+        component_count="$(echo "$normalized_path" | grep -o '/' | wc -l)"
+
+        # shellcheck disable=SC2029
+        ( tar cvf - "${SETUP_DIR}/env/" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}\" --strip-components=${component_count}" ) || fatal "Could not copy environment" 11
+        if ! step_done "transfer-env-to-the-remote-project-folder"; then
+            fatal "Could not mark transfer-env-to-the-remote-project-folder as done" 6
+        fi
+        ok "Local env transferred to the Remote directory '${project_path}' on '${hostname}'"
+    fi
+    if ! step_done "transfer-env-to-the-remote-project-folder"; then
+        fatal "Could not mark transfer-env-to-the-remote-project-folder as done" 6
+    fi
+    ok "copy-the-environment is done"
+}
+
 validate-the-ssh-connection() {
     if step_is_done "validate-the-ssh-connection"; then
         get_properties "SSH_CONFIG_ENTRY,hostname,project_path"
