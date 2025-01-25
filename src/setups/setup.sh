@@ -6,6 +6,7 @@ SETUP_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 source "${SETUP_DIR}/../echos/echos"
 source "${SETUP_DIR}/../utils/properties.sh"
 source "${SETUP_DIR}/../utils/steps.sh"
+SRC_DIR="$( cd "$( dirname "${SETUP_DIR}" )" && pwd )"
 
 main() {
     steps_file="${SETUP_DIR}/steps.md"
@@ -35,7 +36,7 @@ scp-env() {
     else
         task "Must create remote project directory: ${hostname}/${project_path}"
         # shellcheck disable=SC2029
-        ssh "${SSH_CONFIG_ENTRY}" "mkdir -p \"${project_path}\"" || fatal "Could not create remote directory" 11
+        ssh "${SSH_CONFIG_ENTRY}" "mkdir -p \"${project_path}/echos\"" || fatal "Could not create remote directory" 11
         if ! step_done "create-the-remote-project-folder"; then
             fatal "Could not mark create-the-remote-project-folder as done" 6
         fi
@@ -50,10 +51,16 @@ scp-env() {
         # Normalize any repeated slashes:
         normalized_path="$(echo "${SETUP_DIR}/env" | tr -s '/')"
         # Count the slashes to determine the number of components:
-        component_count="$(echo "$normalized_path" | grep -o '/' | wc -l)"
+        component_count="$(echo "${normalized_path}" | grep -o '/' | wc -l)"
+        normalized_path="$(echo "${SRC_DIR}/utils" | tr -s '/')"
+        component_count_utils="$(echo "${normalized_path}" | grep -o '/' | wc -l)"
 
         # shellcheck disable=SC2029
         ( tar cvf - "${SETUP_DIR}/env/" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}\" --strip-components=${component_count}" ) || fatal "Could not copy environment" 11
+        # shellcheck disable=SC2029
+        ( tar cvf - "${SRC_DIR}/utils" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}/bin\" --strip-components=${component_count_utils}" ) || fatal "Could not copy utils environment" 12
+        # shellcheck disable=SC2029
+        ( tar cvf - "${SRC_DIR}/echos" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}/echos\" --strip-components=${component_count_utils}" ) || fatal "Could not copy echos environment" 13
         if ! step_done "transfer-env-to-the-remote-project-folder"; then
             fatal "Could not mark transfer-env-to-the-remote-project-folder as done" 6
         fi
