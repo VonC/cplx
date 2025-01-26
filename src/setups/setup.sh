@@ -21,30 +21,30 @@ main() {
     else
         info "CPLX_REPEAT_STEP is not set: no step to repeat"
     fi
-    validate-the-ssh-connection "$@"
-    scp-env "$@"
+    validate_the_ssh_connection "$@"
+    copy_the_environment "$@"
 }
 
-scp-env() {
-    if step_is_done "copy-the-environment"; then
-        ok "copy-the-environment is already done"
+copy_the_environment() {
+    if step_is_done "copy_the_environment"; then
+        ok "copy_the_environment is already done"
         return 0
     fi
 
-    if step_is_done "create-the-remote-project-folder"; then
+    if step_is_done "create_the_remote_project_folder"; then
         ok "project_path '${project_path}' already created on '${hostname}'"
     else
         task "Must create remote project directory: ${hostname}/${project_path}"
         # shellcheck disable=SC2029
         ssh "${SSH_CONFIG_ENTRY}" "mkdir -p \"${project_path}/echos\"" || fatal "Could not create remote directory" 11
-        if ! step_done "create-the-remote-project-folder"; then
-            fatal "Could not mark create-the-remote-project-folder as done" 6
+        if ! step_done "create_the_remote_project_folder"; then
+            fatal "Could not mark create_the_remote_project_folder as done" 6
         fi
         ok "Remote directory '${project_path}' created on '${hostname}'"
     fi
 
-    if step_is_done "transfer-env-to-the-remote-project-folder"; then
-        ok "transfer-env-to-the-remote-project-folder is already done"
+    if step_is_done "transfer_env_to_the_remote_project_folder"; then
+        ok "transfer_env_to_the_remote_project_folder is already done"
     else
         task "Must copy the environment to ${hostname}/${project_path}"
         set -o pipefail
@@ -61,21 +61,21 @@ scp-env() {
         ( tar cvf - "${SRC_DIR}/utils" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}/bin\" --strip-components=${component_count_utils}" ) || fatal "Could not copy utils environment" 12
         # shellcheck disable=SC2029
         ( tar cvf - "${SRC_DIR}/echos" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}/echos\" --strip-components=${component_count_utils}" ) || fatal "Could not copy echos environment" 13
-        if ! step_done "transfer-env-to-the-remote-project-folder"; then
-            fatal "Could not mark transfer-env-to-the-remote-project-folder as done" 6
+        if ! step_done "transfer_env_to_the_remote_project_folder"; then
+            fatal "Could not mark transfer_env_to_the_remote_project_folder as done" 6
         fi
         ok "Local env transferred to the Remote directory '${project_path}' on '${hostname}'"
     fi
-    if ! step_done "transfer-env-to-the-remote-project-folder"; then
-        fatal "Could not mark transfer-env-to-the-remote-project-folder as done" 6
+    if ! step_done "transfer_env_to_the_remote_project_folder"; then
+        fatal "Could not mark transfer_env_to_the_remote_project_folder as done" 6
     fi
-    ok "copy-the-environment is done"
+    ok "copy_the_environment is done"
 }
 
-validate-the-ssh-connection() {
-    if step_is_done "validate-the-ssh-connection"; then
+validate_the_ssh_connection() {
+    if step_is_done "validate_the_ssh_connection"; then
         get_properties "SSH_CONFIG_ENTRY,hostname,project_path"
-        ok "validate-the-ssh-connection is already done"
+        ok "validate_the_ssh_connection is already done"
         info "SSH_CONFIG_ENTRY='${SSH_CONFIG_ENTRY}', hostname='${hostname}', project_path='${project_path}'"
         return 0
     fi
@@ -120,10 +120,10 @@ validate-the-ssh-connection() {
     set_property "SSH_CONFIG_ENTRY" "${SSH_CONFIG_ENTRY}"
     set_property "hostname" "${hostname}"
     set_property "project_path" "${project_path}"
-    if ! step_done "validate-the-ssh-connection"; then
-        fatal "Could not mark validate-the-ssh-connection as done" 5
+    if ! step_done "validate_the_ssh_connection"; then
+        fatal "Could not mark validate_the_ssh_connection as done" 5
     fi
-    ok "validate-the-ssh-connection is done"
+    ok "validate_the_ssh_connection is done"
 }
 
 main "$@"

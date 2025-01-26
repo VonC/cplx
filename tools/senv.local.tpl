@@ -15,6 +15,9 @@ set SSH_CONFIG_ENTRY=centos8
 doskey s="%project_dir%\src\setups\setup.bat" $*
 set "CPLX_REPEAT_STEP="
 rem set "CPLX_REPEAT_STEP=transfer-env-to-the-remote-project-folder"
+set "CPLX_TOOL=python"
+set "CPLX_TOOL_RC="
+rem set "CPLX_TOOL_RC=1"
 
 goto:eof
 

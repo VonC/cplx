@@ -2,3 +2,5 @@
 
 Check CPLX_TOOL environment variable against declared services
 Get the latest sources (with -rc, if CPLX_TOOL_RC is set)
+
+`src/setup/steps.md` steps ID have been updated to match their titles, using the alias `sfa`

@@ -20,7 +20,6 @@ doskey fsenv=%~dp0senv.bat force
 doskey usenv=%~dp0senv.bat unset
 doskey rsenv=%~dp0senv.bat restore
 doskey crel=
-doskey sfa=bash -c "./steps_format_anchors.sh $1"
 doskey steps=bash -c "./steps.sh %1"
 doskey props=bash -c "./properties.sh %1"
 
@@ -42,7 +41,8 @@ set "CHECK_DEBUG_PRJ=echo %DEBUG_PRJ% | findstr /C:true >nul &&"
 for %%i in ("%~dp0") do SET "project_dir=%%~fi"
 set "project_dir=%project_dir:~0,-1%"
 for /f "tokens=* delims=\" %%i in ("%project_dir%") do SET "project_dir_name=%%~ni"
-
+for /f "tokens=* delims=" %%i in ('cygpath -u "%project_dir%"') do SET "project_dir_unix=%%~i"
+doskey sfa=bash -c "%project_dir_unix%/src/utils/steps_format_anchors.sh $1"
 
 doskey cdc=cd %project_dir%
 

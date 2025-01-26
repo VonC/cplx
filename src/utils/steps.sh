@@ -167,6 +167,7 @@ clear_ancestors_done_status() {
     while [[ "$current_level" -gt 2 ]]; do
         # Find the parent step: the nearest step above current_step with level less than current_level
         parent_step=$(awk -v level="$current_level" -v name="${current_step}" -f "${STEPS_DIR}/steps_get_parent.awk" "${steps_file}")
+        # shellcheck disable=SC2181
         if [[ $? -gt 0 ]]; then
             fatal "Unable to get parent step for '${current_step}' in '${steps_file}'" 108
         fi
