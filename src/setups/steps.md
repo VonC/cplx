@@ -18,3 +18,12 @@ That folder (typically `cplx`) is where the various tools will be compiled, each
 ### Transfer env to the remote project folder [🔗](#transfer_env_to_the_remote_project_folder) (done: ✅)
 
 Once the project folder exists, the environment folder is copied to the remote host through `tar` + `ssh`.
+
+## Copy the sources [🔗](#copy_the_sources) (done: ✅)
+
+Check the latests tag, and copies the sources to the remote host.
+
+### Get the latest tag [🔗](#get_the_latest_tag) (done: ✅)
+
+It fetches the latest tag from the tool development repository.  
+It the tag differs from what has been recorded in the cplx.properties file, or if the file is missing, it will update the file.
