@@ -5,7 +5,8 @@ a
 aa
 log
 logs/
-sources/
+sources/*
+!sources/.keep
 done/
 *.log
 *_check
