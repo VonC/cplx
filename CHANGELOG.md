@@ -4,7 +4,7 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.6.0-SNAPSHOT unreleased] SCP to remote host, senv updates -
+## [v0.6.0] - 2025-01-26 - SCP to remote host, senv updates, steps tests
 
 `scp` all files needed for an `sshe` (I.e, "SSH Extended", an `senv` utility `ssh` wrapper) session.  
 - Include all rc files like a `.env` and `.vimrc`
@@ -13,11 +13,25 @@ By using our own static libraries, compatible with the RHEL server version, we c
 On senv updates, tools aliases (uv, uc and crel) are available even outside lsenv (no need to add `tools` to the `PATH`).
 `senv.bat` and `init.bat` or `update-version.bat` no longer change the `cwd` (current working directory)
 
+`steps` tests are using more expressive anchor names, enforced by the `sfa` alias, for `bash -c "./steps_format_anchors.sh $1"`
+
 ### 🚀 Features
 
 - *(tools)* Cliff.toml skip CHANGELOG updates entries
 - *(setup)* Initial files for env to scp
 - *(bat)* Senv.bat add CHANGELOG.md content filter driver
+- *(bat)* Tools aliases available outside lsenv
+- *(bat)* Add senvle alias for local senv edit
+- *(setup)* Robust environment transfer with tar
+- *(utils)* Implement step management functions
+- *(setup)* Repeat setup steps if CPLX_REPEAT_STEP is set
+- *(setup)* Env Dynamically determine service in PS1
+- *(env)* Add `tools_to_recompile` property
+- *(setup)* Add `services` to properties file
+- *(setup)* Enhance `.env` setup with properties and dynamic service
+- *(setup)* Add env and service name retrieval scripts
+- *(utils)* Improve repeat step handling
+- *(tools)* Add setup shortcut and repeat step var
 
 ### 🐛 Bug Fixes
 
@@ -26,6 +40,12 @@ On senv updates, tools aliases (uv, uc and crel) are available even outside lsen
 - *(bat)* Avoid any cd on senv and init
 - *(tools)* Update-changelog.bat avoid cd
 - *(bat)* Remove old alias, ignore RELFORCE
+- *(setup)* Setup.bat use _fatal properly
+- *(setup)* Set `HOME` variable in `.env` file
+- *(setup)* Move `gitconfig` to `.gitconfig` standard
+- *(setup)* Copy `utils` and `echos` to remote server
+- *(utils)* Improve step management and testing
+- *(utils)* Improve steps management script and tests
 
 ## [v0.5.0] - 2025-01-21 - CHANGELOG and tag updates with new version.txt format
 

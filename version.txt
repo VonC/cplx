@@ -1,4 +1,4 @@
-0.6.0-SNAPSHOT -- SCP to remote host, senv updates, steps tests
+0.6.0 -- SCP to remote host, senv updates, steps tests
 
 `scp` all files needed for an `sshe` (I.e, "SSH Extended", an `senv` utility `ssh` wrapper) session.  
 - Include all rc files like a `.env` and `.vimrc`
