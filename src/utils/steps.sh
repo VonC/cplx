@@ -136,25 +136,30 @@ next_step() {
 
 test_steps() {
     steps_file="${STEPS_DIR}/steps.test.md"
-    if step_is_done step-is-done; then
-        ok "step-is-done is already done in '${steps_file}'"
+    if step_is_done step_is_done; then
+        ok "step_is_done is already done in '${steps_file}'"
     else
-        fatal "step-is-done is not done, and should be done in '${steps_file}'" $?
+        fatal "step_is_done is not done, and should be done in '${steps_file}'" $?
     fi
-    if step_exists "unknown-step"; then
-        fatal "unknown-step should not exist in '${steps_file}'" $?
+    if ! step_is_done step_is_not_done; then
+        ok "step_is_not_done is not already done in '${steps_file}'"
     else
-        ok "unknown-step does not exist in '${steps_file}'"
+        fatal "step_is_not_done is done, and should not be done in '${steps_file}'" $?
+    fi
+    if step_exists "unknown_step"; then
+        fatal "unknown_step should not exist in '${steps_file}'" $?
+    else
+        ok "unknown_step does not exist in '${steps_file}'"
     fi
     cp "${steps_file}" "${STEPS_DIR}/steps.test.repeat.tmp.md"
     steps_file="${STEPS_DIR}/steps.test.repeat.tmp.md"
-    if ! repeat_step topic-2; then
-        fatal "Unable to repeat topic-2 in '${steps_file}'" $?
+    if ! repeat_step topic_2; then
+        fatal "Unable to repeat topic_2 in '${steps_file}'" $?
     fi
-    if ! steps_are_done topic-2 topic-2-1 topic-2-2; then
-        ok "topic-2 topic-2-1 topic-2-2 are not done as part of repeat topic-2 in '${steps_file}'"
+    if ! steps_are_done topic_2 topic_2_1 topic_2_2; then
+        ok "topic_2 topic_2_1 topic_2_2 are not done as part of repeat topic_2 in '${steps_file}'"
     else
-        fatal "${steps_err} should not be done as part of repeat topic-2 in '${steps_file}'" $?
+        fatal "${steps_err} should not be done as part of repeat topic_2 in '${steps_file}'" $?
     fi
 }
 
