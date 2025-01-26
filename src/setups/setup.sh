@@ -21,6 +21,24 @@ main() {
     else
         info "CPLX_REPEAT_STEP is not set: no step to repeat"
     fi
+    get_property tools_to_recompile
+    if [[ -z "${tools_to_recompile}" ]]; then
+        fatal "tools_to_recompile not found in file '${properties_file}'" 1
+    fi
+    if [[ -z "${CPLX_TOOL}" ]]; then
+        fatal "CPLX_TOOL not found in file '${properties_file}': must be one of '${tools_to_recompile}'" 2
+    fi
+    tools_names="$(echo "${tools_to_recompile}" | tr ',' ' ')"
+    for tool_name in ${tools_names}; do
+        if [[ "${tool_name}" == "${CPLX_TOOL}" ]]; then
+            ok "CPLX_TOOL='${CPLX_TOOL}' is in the list of services ('${tools_to_recompile}')"
+            break
+        fi
+        tool_name=""
+    done
+    if [[ -z "${tool_name}" ]]; then
+        fatal "CPLX_TOOL='${CPLX_TOOL}' is not in the list of services: '${tools_to_recompile}'" 3
+    fi
     validate_the_ssh_connection "$@"
     copy_the_environment "$@"
 }
