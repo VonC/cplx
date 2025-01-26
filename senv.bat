@@ -20,6 +20,9 @@ doskey fsenv=%~dp0senv.bat force
 doskey usenv=%~dp0senv.bat unset
 doskey rsenv=%~dp0senv.bat restore
 doskey crel=
+doskey sfa=bash -c "./steps_format_anchors.sh $1"
+doskey steps=bash -c "./steps.sh %1"
+doskey props=bash -c "./properties.sh %1"
 
 doskey gv=get-version
 doskey uv="%project_dir%\tools\update-version.bat"
@@ -280,6 +283,9 @@ if "%~1"=="restore" (
   doskey fsenv=
   doskey usenv=
   doskey rsenv=
+  doskey sfa=
+  doskey steps=
+  doskey props=
   doskey uv=
   doskey uvf=
   doskey uc=
