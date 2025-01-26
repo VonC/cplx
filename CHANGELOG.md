@@ -4,6 +4,24 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.7.0] - 2025-01-26 - Download, then SCP tool sources to the remote server
+
+Check `CPLX_TOOL` environment variable against declared services
+Get the latest sources (with `-rc`, if `CPLX_TOOL_RC` is set), download and scp them.
+Local `env` folder includes the right tree sources for the tools (python, git)
+
+`src/setup/steps.md` steps ID have been updated to match their titles, using the alias `sfa`
+
+### 🚀 Features
+
+- *(setup)* Check services/tools to setup script
+- *(setup)* Setup.sh scp sources
+- *(setup)* Env keep `tools/sources` folder
+
+### 🐛 Bug Fixes
+
+- *(setup)* Update steps IDs to match their titles
+
 ## [v0.6.0] - 2025-01-26 - SCP to remote host, senv updates, steps tests
 
 `scp` all files needed for an `sshe` (I.e, "SSH Extended", an `senv` utility `ssh` wrapper) session.  
