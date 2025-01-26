@@ -12,6 +12,9 @@ rem ...
 ::  SET PROJECT VARIABLES
 ::##################################################
 set SSH_CONFIG_ENTRY=centos8
+doskey s="%project_dir%\src\setups\setup.bat" $*
+set "CPLX_REPEAT_STEP="
+rem set "CPLX_REPEAT_STEP=transfer-env-to-the-remote-project-folder"
 
 goto:eof
 
