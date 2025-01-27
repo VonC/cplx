@@ -44,7 +44,8 @@ for /f "tokens=* delims=\" %%i in ("%project_dir%") do SET "project_dir_name=%%~
 for /f "tokens=* delims=" %%i in ('cygpath -u "%project_dir%"') do SET "project_dir_unix=%%~i"
 doskey sfa=bash -c "%project_dir_unix%/src/utils/steps_format_anchors.sh $1"
 
-doskey cdc=cd %project_dir%
+doskey cdcp=cd /d "%project_dir%"
+doskey cdp=cd /d "%project_dir%"
 
 if "%~1"=="unset" (
   call:unset_senv
@@ -259,7 +260,8 @@ set "batdir="
 set "called_from_init="
 set "called_from_env="
 set "ccd="
-set "cdc="
+set "cdcp="
+set "cdp="
 set "err="
 set "local_path_msg="
 set "all_dir="
