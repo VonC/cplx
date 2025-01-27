@@ -1,0 +1,104 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+#echo "${DIR}"
+# shellcheck source=/dev/null
+source "${DIR}/../.env"
+# shellcheck source=/dev/null
+source "${DIR}/echos"
+
+NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
+LOGIN="$(/usr/bin/id -un)"
+
+prj="${DIR}"
+logs="${prj}/logs"
+mkdir -p "${logs}"
+
+PATH_LOG="${logs}/${LOGIN}-$(basename "$0" .bash)-${NOW}.log"
+ln -nfs "${PATH_LOG}" "${prj}/log"
+
+info "Script Execution DIR '$DIR'"
+ok "Logging execution in '$PATH_LOG'"
+
+function displayLog() {
+    res=$?
+    if [[ ${res} != 0 ]]; then tail -15 "${prj}/log" >&3; fi
+    /usr/bin/date >&3
+}
+trap displayLog EXIT
+
+cd "${DIR}" || fatal "unable to access '${DIR}'" 111
+
+# shellcheck source=/dev/null
+source "${DIR}/echoslog"
+exec 3>&2
+exec 1> "$PATH_LOG"
+exec 2>&1
+
+set -o xtrace
+
+function getArg() {
+    local search_param="$1"
+    shift
+    for param in "$@"; do
+        if [[ "$param" == "$search_param"  || "$param" == "$search_param="* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+function configure() {
+    task "config.log not present: reconfigure"
+    if ! ./configure --prefix=${py312} --with-openssl=${py312}/usr --with-openssl-rpath=${py312}/usr/lib64 --enable-shared=yes; then
+        fatal "configure ERROR" 3
+    fi
+    ok "configure done"
+}
+
+function clean() {
+    task "Must make clean"
+    if ! make clean; then
+        fatal "clean ERROR" 4
+    fi
+    ok "Clean done"
+}
+
+function setenv() {
+
+    export pythons="/project/regexec1/my-project/pythons"
+    export py312="${pythons}/python3.12.6"
+    export py312src="${pythons}/Python-3.12.6"
+
+    export LD_LIBRARY_PATH="/usr/lib64:/usr/lib:${py312}/usr/lib64:${py312}/lib64"
+    export PKG_CONFIG_PATH="${py312}/usr/lib64/pkgconfig"
+}
+
+# main: Acts as the central execution point, orchestrating the overall setup process including dependency checks, installations, and environmental configurations, ensuring the script achieves its purpose of preparing the environment or updating software as required.
+function main() {
+    info "main: Start build at '${NOW}'"
+    setenv
+    cd "${py312src}" || fatal "Unable to access py312src '${py312src}'" 2
+    pwd
+    reconfigure=false
+    if getArg "--reconfigure" "$@"; then
+        reconfigure=true
+    fi
+    info "main: reconfigure='${reconfigure}'"
+    if [[ -e "${py312src}/config.log" && ${reconfigure} == false ]]; then
+        ok "main: config.log present, do not reconfigure"
+    else
+        configure
+    fi
+    clean
+    return $?
+}
+
+# if one of the parameter is "--reconfigure", shift, and set reconfigure=true, then pass the rest to main
+main "$@"
+res=$?
+# echo "res='${res}'" >&3
+if [[ ${res} != 0 ]]; then
+    exit "${res}"
+fi
+ok "All done"
