@@ -28,7 +28,7 @@ Check the latests tag, and copies the sources to the remote host.
 It fetches the latest tag from the tool development repository.  
 It the tag differs from what has been recorded in the cplx.properties file, or if the file is missing, it will update the file.
 
-### Transfer the sources to the remote project folder [🔗](#transfer_the_sources_to_the_remote_project_folder)
+### Transfer the sources to the remote project folder [🔗](#transfer_the_sources_to_the_remote_project_folder) (done: ✅)
 
 Check if the source file exists on the remote server side.  
 If not, copy it.

@@ -12,7 +12,7 @@ main() {
     steps_file="${SETUP_DIR}/steps.md"
     properties_file="${SETUP_DIR}/setup.properties"
     if [[ -n "${CPLX_REPEAT_STEP}" ]]; then
-        info "CPLX_REPEAT_STEP is set to '${CPLX_REPEAT_STEP}': repeat those steps"
+        info "CPLX_REPEAT_STEP is set to '${CPLX_REPEAT_STEP}': repeat that step"
         task "Must repeat '${CPLX_REPEAT_STEP}'"
         if ! repeat_step "${CPLX_REPEAT_STEP}"; then
             fatal "Could not repeat '${CPLX_REPEAT_STEP}'" 111
@@ -20,6 +20,16 @@ main() {
         ok "Repeated '${CPLX_REPEAT_STEP}'"
     else
         info "CPLX_REPEAT_STEP is not set: no step to repeat"
+    fi
+    if [[ -n "${CPLX_RESET_STEP}" ]]; then
+        info "CPLX_RESET_STEP is set to '${CPLX_RESET_STEP}': reset that step and all subsequent steps"
+        task "Must reset '${CPLX_RESET_STEP}'"
+        if ! reset_step "${CPLX_RESET_STEP}"; then
+            fatal "Could not reset '${CPLX_RESET_STEP}'" 111
+        fi
+        ok "Reset '${CPLX_RESET_STEP}'"
+    else
+        info "CPLX_RESET_STEP is not set: no step to repeat"
     fi
     get_property tools_to_recompile
     if [[ -z "${tools_to_recompile}" ]]; then
@@ -147,57 +157,82 @@ validate_the_ssh_connection() {
 
 copy_the_sources() {
     info "Repository for tool '${CPLX_TOOL}' is '${repository}'"
+
     if step_is_done "copy_the_sources"; then
-        ok "copy_the_sources is already done for tool '${CPLX_TOOL}'"
+        ok "'copy_the_sources' is already done for tool '${CPLX_TOOL}'"
         return 0
     fi
-    if step_is_done "get_the_latest_tag"; then
-        ok "get_the_latest_tag already fetched for tool '${CPLX_TOOL}'"
-    else
-        task "Must fetch the latest tag for tool: ${CPLX_TOOL}/${project_path}"
-        if ! get_property "${CPLX_TOOL}_repository"; then
-            fatal "Could not get the repository for tool '${CPLX_TOOL}'" 30
-        fi
-        repository=$(eval "echo \"\${${CPLX_TOOL}_repository}\"")
 
-        set -o pipefail
-        gh=$(cygpath -u "${PRGS}/ghs/current/gh.exe")
-        url=$("${gh}" api "repos/${repository}/tags" --jq ".[] | {name, zipball_url}" | awk -v "rc=false" -f "${SETUP_DIR}/zipball_url.awk")
-        if [[ -z "${url}" ]]; then
-            fatal "Could not get the latest tag for tool '${CPLX_TOOL}'" 40
-        fi
-        version=$(echo "${url}" | awk -F/ '{print $(NF)}')
-        info "Latest tag for tool '${CPLX_TOOL}' is '${version}'"
-        sources="${SETUP_DIR}/sources"
-        if [[ -e "${sources}/${CPLX_TOOL}-src-${version}.zip" ]]; then
-            ok "Sources '${version}' already fetched for tool '${CPLX_TOOL}'"
-        else
-            task "Must fetch sources for tool '${CPLX_TOOL}'"
-            if ! curl -kL -o "${sources}/${CPLX_TOOL}-src-${version}.zip" "${url}"; then
-                fatal "Could not fetch sources for tool '${CPLX_TOOL}' at url '${url}'" 41
-            fi
-            ok "Sources fetched for tool '${CPLX_TOOL}' at version '${version}'"
-        fi
-        # shellcheck disable=SC2029
-        if ssh "${SSH_CONFIG_ENTRY}" "[ -e \"${project_path}/tools/${CPLX_TOOL}/sources/${CPLX_TOOL}-src-${version}.zip\" ]"; then
-            ok "Sources '${version}' already copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}"
-        else
-            task "Must copy sources for tool '${CPLX_TOOL}'"
-            if ! scp "${sources}/${CPLX_TOOL}-src-${version}.zip" "${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/"; then
-                fatal "Could not copy sources for tool '${CPLX_TOOL}'" 42
-            fi
-            ok "Sources copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}"
-        fi
-        if ! step_done "get_the_latest_tag"; then
-            fatal "Could not mark get_the_latest_tag as done" 60
-        fi
-        ok "Sources fetched for tool '${CPLX_TOOL}'"
-    fi
+    get_the_latest_tag
+    transfer_the_sources_to_the_remote_project_folder
 
     if ! step_done "copy_the_sources"; then
-        fatal "Could not mark copy_the_sources as done" 50
+        fatal "Could not mark 'copy_the_sources' as done" 50
     fi
-    ok "copy_the_sources is done"
-}    
+    ok "'copy_the_sources' is done"
+}
+
+transfer_the_sources_to_the_remote_project_folder() {
+    if step_is_done "transfer_the_sources_to_the_remote_project_folder"; then
+        ok "transfer_the_sources_to_the_remote_project_folder already copied to ${SSH_CONFIG_ENTRY} for tool '${CPLX_TOOL}'"
+        return 0
+    fi
+    sources="${SETUP_DIR}/sources/${CPLX_TOOL}"
+    # shellcheck disable=SC2012
+    filepath="$(ls -1rt "${sources}/${CPLX_TOOL}-src-"*".zip" | tail -1)"
+    #file=$(find "${sources}" -type f -name "${CPLX_TOOL}-src-*.zip" -printf '%T@ %p\0' | sort -z -n | tail -z -n1 | cut -z -d' ' -f2-)
+    filename=$(basename "${filepath}")
+    
+    # shellcheck disable=SC2029
+    if ssh "${SSH_CONFIG_ENTRY}" "[ -e \"${project_path}/tools/${CPLX_TOOL}/sources/${filename}\" ]"; then
+        ok "Sources '${filename}' already copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/"
+    else
+        task "Must copy sources '${filename}' for tool '${CPLX_TOOL}'"
+        if ! scp "${filepath}" "${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/"; then
+            fatal "Could not copy sources '${filename}' for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/" 42
+        fi
+        ok "Sources '${filename}' copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/"
+    fi
+    if ! step_done "transfer_the_sources_to_the_remote_project_folder"; then
+        fatal "Could not mark 'transfer_the_sources_to_the_remote_project_folder' as done" 60
+    fi
+    ok "'transfer_the_sources_to_the_remote_project_folder' is done"
+}
+
+get_the_latest_tag() {
+    if step_is_done "get_the_latest_tag"; then
+        ok "'get_the_latest_tag' already fetched for tool '${CPLX_TOOL}'"
+        return 0
+    fi
+    task "Must fetch the latest tag for tool: ${CPLX_TOOL}/${project_path}"
+    if ! get_property "${CPLX_TOOL}_repository"; then
+        fatal "Could not get the repository for tool '${CPLX_TOOL}'" 30
+    fi
+    repository=$(eval "echo \"\${${CPLX_TOOL}_repository}\"")
+
+    set -o pipefail
+    gh=$(cygpath -u "${PRGS}/ghs/current/gh.exe")
+    url=$("${gh}" api "repos/${repository}/tags" --jq ".[] | {name, zipball_url}" | awk -v "rc=false" -f "${SETUP_DIR}/zipball_url.awk")
+    if [[ -z "${url}" ]]; then
+        fatal "Could not get the latest tag for tool '${CPLX_TOOL}'" 40
+    fi
+    version=$(echo "${url}" | awk -F/ '{print $(NF)}')
+    info "Latest tag for tool '${CPLX_TOOL}' is '${version}'"
+    sources="${SETUP_DIR}/sources/${CPLX_TOOL}"
+    if [[ -e "${sources}/${CPLX_TOOL}-src-${version}.zip" ]]; then
+        ok "Sources '${version}' already fetched for tool '${CPLX_TOOL}'"
+    else
+        task "Must fetch sources for tool '${CPLX_TOOL}'"
+        if ! curl -kL -o "${sources}/${CPLX_TOOL}-src-${version}.zip" "${url}"; then
+            fatal "Could not fetch sources for tool '${CPLX_TOOL}' at url '${url}'" 41
+        fi
+        ok "Sources fetched for tool '${CPLX_TOOL}' at version '${version}'"
+    fi
+    if ! step_done "get_the_latest_tag"; then
+        fatal "Could not mark get_the_latest_tag as done" 60
+    fi
+    ok "'get_the_latest_tag' is done"
+}
+
 main "$@"
 

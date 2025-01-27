@@ -207,10 +207,10 @@ reset_step() {
         local n_level
         n_level="$(step_level "${n_step}")"
 
-        # Reset  the next step to be repeated
+        # Reset  the next step to be reset
         sed -i -E "s/\(#${n_step}\).*$/\(#${n_step}\)/" "${steps_file}" || return 1
-        ok "Repeating step '${n_step}' at level '${n_level}' in '${steps_file}'"
-        # move on to the newly repeated step
+        ok "Reset step '${n_step}' at level '${n_level}' in '${steps_file}'"
+        # move on to the newly reset step
         step_name="${n_step}"
     done
     # set -x
