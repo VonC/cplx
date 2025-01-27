@@ -1,7 +1,5 @@
-0.7.0 -- Download, then SCP tool sources to the remote server
+0.8.0-SNAPSHOT -- First installation step
 
-Check `CPLX_TOOL` environment variable against declared services
-Get the latest sources (with `-rc`, if `CPLX_TOOL_RC` is set), download and scp them.
-Local `env` folder includes the right tree sources for the tools (python, git)
-
-`src/setup/steps.md` steps ID have been updated to match their titles, using the alias `sfa`
+Copy of the installation scripts.
+Execution of a first installation step (unarchive source file)
+Check the installation log are copied back to the PC and opened in IDE
