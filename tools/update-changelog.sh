@@ -43,6 +43,7 @@ main() {
   sed -i -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "${PROJECT_DIR}/CHANGELOG.tmp.md"
   sed -i 's/\r$//' "${PROJECT_DIR}/CHANGELOG.tmp.md"
   sed -i 's/ - v[0-9]\+.*\? - / - /g' "${PROJECT_DIR}/CHANGELOG.tmp.md"
+  sed -i 's/\] - [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} -/\] -/g' "${PROJECT_DIR}/CHANGELOG.tmp.md"
 
   # check if the current commit is tagged
   if ! git describe --exact-match --tags HEAD >/dev/null 2>&1; then
