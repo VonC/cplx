@@ -8,6 +8,9 @@ if "%~1"=="unset" (
 
 rem set "ECHOS_STACK=true"
 rem ...
+rem Keep local senv dev in PATH if needed
+rem bash -c "echo ${PATH} | grep -q \"$(cygpath -u "${PRGS}/senv/bin")\""
+rem if errorlevel 1 ( set "PATH=%PATH%;%PRGS%\senv\bin" )
 ::##################################################
 ::  SET PROJECT VARIABLES
 ::##################################################

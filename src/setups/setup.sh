@@ -158,7 +158,6 @@ validate_the_ssh_connection() {
 }
 
 copy_the_sources() {
-    info "Repository for tool '${CPLX_TOOL}' is '${repository}'"
 
     if step_is_done "copy_the_sources"; then
         ok "'copy_the_sources' is already done for tool '${CPLX_TOOL}'"
@@ -211,9 +210,12 @@ get_the_latest_tag() {
         fatal "Could not get the repository for tool '${CPLX_TOOL}'" 30
     fi
     repository=$(eval "echo \"\${${CPLX_TOOL}_repository}\"")
+    info "Repository for tool '${CPLX_TOOL}' is '${repository}'"
 
     set -o pipefail
     gh=$(cygpath -u "${PRGS}/ghs/current/gh.exe")
+    if [[ ! -e "${gh}" ]]; then gh="$(cygpath -u "${PRGS}/ghs/gh-cli/bin/gh.exe")"; fi
+    if [[ ! -e "${gh}" ]]; then fatal "GitHub gh CLI not found in '$(cygpath -u "${PRGS}/ghs")'" 39; fi
     url=$("${gh}" api "repos/${repository}/tags" --jq ".[] | {name, zipball_url}" | awk -v "rc=false" -f "${SETUP_DIR}/zipball_url.awk")
     if [[ -z "${url}" ]]; then
         fatal "Could not get the latest tag for tool '${CPLX_TOOL}'" 40

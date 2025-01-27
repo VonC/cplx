@@ -6,7 +6,7 @@ This document list all the necessary steps to setup the compilation project on a
 
 It makes sure the SSH connection reference a reachable remote Linux host (say '`myHost`'), and that it includes a path (`# cd_[hostname] /path/to/remote/project`) in the `~/.ssh/config`.
 
-## Copy the environment [🔗](#copy_the_environment)
+## Copy the environment [🔗](#copy_the_environment) (done: ✅)
 
 It copies the local "environment" folder (`src/setup/env`) to the remote host, with a bashrc-like file named `.env`, and various settings files like a `.vimrc`.
 
@@ -28,7 +28,7 @@ Check the latests tag, and copies the sources to the remote host.
 It fetches the latest tag from the tool development repository.  
 It the tag differs from what has been recorded in the cplx.properties file, or if the file is missing, it will update the file.
 
-### Transfer the sources to the remote project folder [🔗](#git s) (done: ✅)
+### Transfer the sources to the remote project folder [🔗](#transfer_the_sources_to_the_remote_project_folder) (done: ✅)
 
 Check if the source file exists on the remote server side.  
 If not, copy it.
