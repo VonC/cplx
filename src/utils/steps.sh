@@ -185,6 +185,40 @@ clear_ancestors_done_status() {
     done
 }
 
+reset_step() {
+    local step_name="$1"
+    local initial_step_name="$1"
+    if ! step_exists "${step_name}"; then
+        fatal "Unable to reset step, step '${step_name}' does not exist in '${steps_file}'" 103
+    fi
+    if ! sed -i -E "s/\(#${step_name}\).*$/\(#${step_name}\)/" "${steps_file}"; then
+        return 1
+    fi
+    local level
+    level=$(step_level "${step_name}")
+    ok "Reset step '${step_name}' at level '${level}' in '${steps_file}'"
+    # loop as long as next step is not empty
+    while :; do
+        local n_step
+        n_step="$(next_step "${step_name}")"
+        [[ -z "${n_step}" ]] && break
+        info "Next step for '${step_name}': '${n_step}'"
+
+        local n_level
+        n_level="$(step_level "${n_step}")"
+
+        # Reset  the next step to be repeated
+        sed -i -E "s/\(#${n_step}\).*$/\(#${n_step}\)/" "${steps_file}" || return 1
+        ok "Repeating step '${n_step}' at level '${n_level}' in '${steps_file}'"
+        # move on to the newly repeated step
+        step_name="${n_step}"
+    done
+    # set -x
+    clear_ancestors_done_status "${initial_step_name}"
+    # set +x
+}
+
+
 next_step() {
     local step_name="$1"
     if ! step_exists "${step_name}"; then
@@ -200,7 +234,6 @@ next_step() {
 }
 
 test_steps() {
-    steps_file="${STEPS_DIR}/steps.test.md"
     if step_is_done this_step_is_done; then
         ok "this_step_is_done is already done in '${steps_file}'"
     else
@@ -216,7 +249,9 @@ test_steps() {
     else
         ok "unknown_step does not exist in '${steps_file}'"
     fi
+}
 
+test_steps_repeat() {
     cp "${steps_file}" "${STEPS_DIR}/steps.test.repeat.tmp.md"
     steps_file="${STEPS_DIR}/steps.test.repeat.tmp.md"
     if ! repeat_step step_to_be_repeated; then
@@ -227,7 +262,9 @@ test_steps() {
     else
         fatal "${steps_err} should not be done as part of repeat step_to_be_repeated in '${steps_file}'" $?
     fi
+}
 
+test_steps_repeat_child() {
     cp "${steps_file}" "${STEPS_DIR}/steps.test.repeat.child.tmp.md"
     steps_file="${STEPS_DIR}/steps.test.repeat.child.tmp.md"
 
@@ -241,7 +278,30 @@ test_steps() {
     fi
 }
 
+test_steps_reset() {
+    cp "${steps_file}" "${STEPS_DIR}/steps.test.reset.child.tmp.md"
+    steps_file="${STEPS_DIR}/steps.test.reset.child.tmp.md"
+
+    if ! reset_step this_child_should_be_reset; then
+        fatal "Unable to reset 'this_child_should_be_reset' in '${steps_file}'" $?
+    fi
+    if steps_are_not_done this_step_should_be_not_done_because_of_a_child_reset this_grandchild_should_be_reset this_other_child_should_be_reset this_step_should_also_be_reset; then
+        ok "'this_step_should_be_not_done_because_of_a_child_reset', 'this_grandchild_should_be_reset' 'this_other_child_should_be_reset' and 'this_step_should_also_be_reset' are not done as part of reset 'this_child_should_be_reset' in '${steps_file}'"
+    else
+        fatal "${steps_err} should be 'not done' as part of reset 'this_child_should_be_reset' in '${steps_file}'" $?
+    fi
+    if steps_are_done this_child_should_still_be_done_despite_brother_reset; then
+        ok "'this_child_should_still_be_done_despite_brother_reset' is still done despite a reset 'this_child_should_be_reset' in '${steps_file}'"
+    else
+        fatal "${steps_err} should still be done despite a reset of 'this_child_should_be_reset' in '${steps_file}'" $?
+    fi
+}
+
 # Only run if script is not being sourced
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+    steps_file="${STEPS_DIR}/steps.test.md"
     test_steps
+    test_steps_repeat
+    test_steps_repeat_child
+    test_steps_reset
 fi

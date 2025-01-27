@@ -21,3 +21,15 @@
 #### This grandchild should be repeated [🔗](#this_grandchild_should_be_repeated) (done: ✅)
 
 ### This other child should not be repeated [🔗](#this_other_child_should_not_be_repeated) (done: ✅)
+
+## This step should be not done because of a child reset [🔗](#this_step_should_be_not_done_because_of_a_child_reset) (done: ✅)
+
+### This child should still be done despite brother reset [🔗](#this_child_should_still_be_done_despite_brother_reset) (done: ✅)
+
+### This child should be reset [🔗](#this_child_should_be_reset) (done: ✅)
+
+#### This grandchild should be reset [🔗](#this_grandchild_should_be_reset) (done: ✅)
+
+### This other child should be reset [🔗](#this_other_child_should_be_reset) (done: ✅)
+
+## This step should also be reset [🔗](#this_step_should_also_be_reset) (done: ✅)
