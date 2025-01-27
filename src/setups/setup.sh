@@ -130,8 +130,8 @@ validate_the_ssh_connection() {
         BEGIN {IGNORECASE=1}
         \$0 ~ \"^Host[[:space:]]+\" host \"\$\" {found=1; next}
         found && /^[[:space:]]*\$/ {exit}
-        found && \$0 ~ (\"# \" host \"_cd\") {
-        sub(\".*# \" host \"_cd[[:space:]]+\", \"\", \$0)
+        found && \$0 ~ (\"#\" host \"_cd\") {
+        sub(\".*#\" host \"_cd[[:space:]]+\", \"\", \$0)
         sub(/[[:space:]]+\$/, \"\", \$0)
         print
         exit
@@ -141,6 +141,8 @@ validate_the_ssh_connection() {
 
     # Access it via an intermediate variable
     eval "project_path=\"\${cd_${SSH_CONFIG_ENTRY}}\""
+    # shellcheck disable=SC2001
+    project_path="$(echo "$project_path" | sed 's/^[[:space:]]*//')"
 
     if [[ -z "${project_path}" ]]; then
         fatal "No 'cd_${SSH_CONFIG_ENTRY}' found in SSH config under 'Host ${SSH_CONFIG_ENTRY}'" 4
