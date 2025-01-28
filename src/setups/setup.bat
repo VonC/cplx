@@ -15,6 +15,10 @@ if "%SSH_CONFIG_ENTRY%" == "" (
     %_fatal% "SSH_CONFIG_ENTRY is not defined (must be an SSH alias as alias to remote Linux server where a program is compiled)" 1
 )
 bash -c "$(cygpath -u '%setup_dir%')setup.sh %*"
+if errorlevel 1 (
+    %_error% "Issue when calling '%setup_dir%\setup.sh'"
+    exit /b 119
+)
 goto:eof
 
 :call_echos_stack
