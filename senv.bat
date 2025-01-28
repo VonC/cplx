@@ -127,6 +127,18 @@ rem %CHECK_QUIET_PRJ% %_ok% "project '%project_dir_name%' senv activated%local_p
 if not defined QUIET_PRJ ( %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'" )
 )
 set "called_from_init="
+
+if not exist "%project_dir%\src\setups\setup.properties" (
+  %_task% "Must Copy '%project_dir%\src\setups\setup.tpl.properties' to '%project_dir%\src\setups\setup.properties'"
+  copy "%project_dir%\src\setups\setup.tpl.properties" "%project_dir%\src\setups\setup.properties"
+  if errorlevel 1 (
+    %_fatal% "Failed to copy '%project_dir%\src\setups\setup.tpl.properties' to '%project_dir%\src\setups\setup.properties'" 231
+  )
+  %_ok% "'%project_dir%\src\setups\setup.tpl.properties' copied to '%project_dir%\src\setups\setup.properties'"
+) else (
+  %_ok% "'%project_dir%\src\setups\setup.properties' already exists"
+)
+
 goto:eof
 
 ::##################################################
@@ -151,17 +163,6 @@ if defined project_path (
     %_unstack% senv.bat
   )
   goto:eof
-)
-
-if not exist "%project_dir%\src\setups\setup.properties" (
-  %_task% "Must Copy '%project_dir%\src\setups\setup.tpl.properties' to '%project_dir%\src\setups\setup.properties'"
-  copy "%project_dir%\src\setups\setup.tpl.properties" "%project_dir%\src\setups\setup.properties"
-  if errorlevel 1 (
-    %_fatal% "Failed to copy '%project_dir%\src\setups\setup.tpl.properties' to '%project_dir%\src\setups\setup.properties'" 231
-  )
-  %_ok% "'%project_dir%\src\setups\setup.tpl.properties' copied to '%project_dir%\src\setups\setup.properties'"
-) else (
-  %_ok% "'%project_dir%\src\setups\setup.properties' already exists"
 )
 
 :skip_read_path_ini
