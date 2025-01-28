@@ -15,3 +15,8 @@ if "%SSH_CONFIG_ENTRY%" == "" (
     %_fatal% "SSH_CONFIG_ENTRY is not defined (must be an SSH alias as alias to remote Linux server where a program is compiled)" 1
 )
 bash -c "$(cygpath -u '%setup_dir%')setup.sh %*"
+goto:eof
+
+:call_echos_stack
+if not defined ECHOS_STACK ( set "CURRENT_SCRIPT=%~nx0" & goto:eof ) else ( call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0 )
+goto:eof

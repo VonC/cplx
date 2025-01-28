@@ -31,3 +31,9 @@ if not %lastLine%==0 (
     %_fatal% "Installation failed" 2
 )
 %_ok% "Installation executed"
+
+goto:eof
+
+:call_echos_stack
+if not defined ECHOS_STACK ( set "CURRENT_SCRIPT=%~nx0" & goto:eof ) else ( call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0 )
+goto:eof
