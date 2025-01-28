@@ -18,3 +18,4 @@ temp.*
 temp
 senv.local.bat
 *.bak
+setup.properties

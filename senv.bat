@@ -153,6 +153,17 @@ if defined project_path (
   goto:eof
 )
 
+if not exist "%project_dir%\src\setups\setup.properties" (
+  %_task% "Must Copy '%project_dir%\src\setups\setup.tpl.properties' to '%project_dir%\src\setups\setup.properties'"
+  copy "%project_dir%\src\setups\setup.tpl.properties" "%project_dir%\src\setups\setup.properties"
+  if errorlevel 1 (
+    %_fatal% "Failed to copy '%project_dir%\src\setups\setup.tpl.properties' to '%project_dir%\src\setups\setup.properties'" 231
+  )
+  %_ok% "'%project_dir%\src\setups\setup.tpl.properties' copied to '%project_dir%\src\setups\setup.properties'"
+) else (
+  %_ok% "'%project_dir%\src\setups\setup.properties' already exists"
+)
+
 :skip_read_path_ini
 set "force_project_path="
 ::  ===============================================
