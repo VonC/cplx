@@ -16,6 +16,7 @@ doskey senvle="%PRGS%\vscodes\current\bin\code.cmd" "%~dp0senv.local.bat"
 doskey senv=%~dp0senv.bat $*
 doskey psenv=%~dp0senv.bat $*
 doskey hsenv=%HOME%\bin\senv.bat $*
+doskey hlsenv=%HOME%\bin\lsenv.bat $*
 doskey fsenv=%~dp0senv.bat force
 doskey usenv=%~dp0senv.bat unset
 doskey rsenv=%~dp0senv.bat restore
@@ -294,6 +295,7 @@ if "%~1"=="restore" (
   doskey senv=
   doskey psenv=
   doskey hsenv=
+  doskey hlsenv=
   doskey fsenv=
   doskey usenv=
   doskey rsenv=
