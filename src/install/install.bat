@@ -19,14 +19,14 @@ if "%CPLX_TOOL%" == "" (
 )
 for %%i in ("%~dp0") do SET "script_dir=%%~fi"
 
-scp "%script_dir%/install" %SSH_CONFIG_ENTRY%:%project_path%/install
-ssh %SSH_CONFIG_ENTRY% "cd %project_path% && chmod 755 ./install && bash %project_path%/install; echo $?" | tee "%install_dir%\temp.txt"
+scp -r "%script_dir%/install/env/." %SSH_CONFIG_ENTRY%:%project_path%/tools/
+ssh %SSH_CONFIG_ENTRY% "cd %project_path%/tools && chmod 755 ./install && bash %project_path%/tools/install; echo $?" | tee "%install_dir%\temp.txt"
 FOR /F "delims=" %%i IN (temp.txt) DO SET "lastLine=%%i"
 %_info% "vvvvvvvvvvvvvvvvvvvvvvvvvvv"
 %_info% "Exit status: %lastLine%"
 %_info% "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 scp "%SSH_CONFIG_ENTRY%:%project_path%/log" log
-start /b "VSCode" "%vscodei%\bin\code.cmd" log
+start /b "VSCode" "%PRGS%\vscodes\current\bin\code.cmd" log
 if not %lastLine%==0 (
     %_fatal% "Installation failed" 2
 )

@@ -1,0 +1,240 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+#echo "${DIR}"
+# shellcheck source=/dev/null
+source "${DIR}/../.env"
+# shellcheck source=/dev/null
+source "${DIR}/../echos/echos"
+
+# Check if exactly one parameter is provided
+if [[ $# -ne 2 ]]; then
+    fatal "Usage: install <tool_name> <version>" 1
+fi
+
+tool="$1"
+
+# Retrieve the list of valid services (comma-separated)
+services=$(get_property services)  # Example: "service1,service2,service3"
+
+# Convert the comma-separated services into an array
+IFS=',' read -r -a service_array <<< "$services"
+
+# Flag to indicate if the tool is valid
+valid=false
+
+# Iterate through the services to check for a match
+for service in "${service_array[@]}"; do
+    if [[ "$service" == "$tool" ]]; then
+        valid=true
+        break
+    fi
+done
+
+# If the tool is not valid, use fatal to exit with an error message
+if [[ "$valid" == false ]]; then
+    fatal "Invalid tool name: '${tool}'. Available tools are: ${services}" 1
+fi
+
+if [[ ! -e "${DIR}/${tool}/install" ]]; then
+    fatal "Tool '${tool}' install script not found at '${DIR}/${tool}/install'" 2
+fi
+
+# Define the sources directory
+sources_dir="${DIR}/${tool}/sources"
+
+# Enable nullglob to handle cases with no matching files
+shopt -s nullglob
+
+# Array of possible archive extensions
+declare -a archive_extensions=("zip" "tar.gz" "tar")
+
+# Initialize an empty array to hold matching archives
+matching_archives=()
+
+version="$2"
+
+# Iterate over each extension to find matching archives
+for ext in "${archive_extensions[@]}"; do
+    # Handle double extensions like tar.gz
+    if [[ "$ext" == "tar.gz" ]]; then
+        pattern="*${version}*.tar.gz"
+    else
+        pattern="*${version}*.${ext}"
+    fi
+
+    # Append matching files to the array
+    matching_archives+=("$sources_dir/$pattern")
+done
+
+# Disable nullglob after usage
+shopt -u nullglob
+
+# Remove any non-existent files from the array
+existing_archives=()
+for archive in "${matching_archives[@]}"; do
+    if [[ -f "$archive" ]]; then
+        existing_archives+=("$archive")
+    fi
+done
+
+# Check that exactly one archive exists
+if [[ ${#existing_archives[@]} -ne 1 ]]; then
+    fatal "Exactly one archive for version '${version}' must exist in '${sources_dir}'. Found: ${#existing_archives[@]}" 1
+fi
+
+archive_file="${existing_archives[0]}"
+echo "Found archive: ${archive_file}"
+
+# Define the extraction folder (same name as version)
+archive_folder="${sources_dir}/${version}"
+
+# Function to uncompress the archive
+uncompress_archive() {
+    local archive="$1"
+    local destination="$2"
+
+    case "$archive" in
+        *.zip)
+            echo "Unzipping '${archive}' to '${destination}'..."
+            mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
+            unzip -q "$archive" -d "$destination" || fatal "Failed to unzip '${archive}'" 4
+            ;;
+        *.tar.gz)
+            echo "Extracting '${archive}' to '${destination}'..."
+            mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
+            tar -xzf "$archive" -C "$destination" --strip-components=1 || fatal "Failed to extract '${archive}'" 4
+            ;;
+        *.tar)
+            echo "Extracting '${archive}' to '${destination}'..."
+            mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
+            tar -xf "$archive" -C "$destination" --strip-components=1 || fatal "Failed to extract '${archive}'" 4
+            ;;
+        *)
+            fatal "Unsupported archive format for '${archive}'" 5
+            ;;
+    esac
+}
+
+# Check if the extraction folder exists
+if [[ ! -d "$archive_folder" ]]; then
+    echo "Extraction folder '${archive_folder}' does not exist. Proceeding to extract..."
+
+    # Uncompress the archive
+    uncompress_archive "$archive_file" "$archive_folder"
+else
+    echo "Extraction folder '${archive_folder}' already exists. Skipping extraction."
+fi
+
+# Function to create or update the 'current' symlink
+update_current_symlink() {
+    local target_dir="$1"
+    local symlink_path="$2"
+
+    # Check if the target directory contains only one subdirectory and no files
+    shopt -s nullglob
+    subdirs=("$target_dir"/*/)
+    files=("$target_dir"/*)
+
+    # Count only directories in files array
+    file_count=0
+    for f in "${files[@]}"; do
+        if [[ ! -d "$f" ]]; then
+            ((file_count++))
+        fi
+    done
+
+    if [[ ${#subdirs[@]} -eq 1 && ${file_count} -eq 0 ]]; then
+        # If only one subdirectory exists and no other files, symlink to the subdirectory
+        target="${subdirs[0]}"
+        echo "Single subdirectory '${target}' found. Symlinking 'current' to '${target}'."
+    else
+        # Otherwise, symlink to the target directory itself
+        target="${target_dir}"
+        echo "Symlinking 'current' to '${target}'."
+    fi
+
+    # Create or update the symlink
+    ln -sfn "${target}" "${symlink_path}" || fatal "Failed to create/update symlink '${symlink_path}' pointing to '${target}'" 6
+
+    shopt -u nullglob
+}
+
+# Define the 'current' symlink path
+current_symlink="${sources_dir}/current"
+
+# Update the 'current' symlink accordingly
+update_current_symlink "$archive_folder" "$current_symlink"
+
+
+NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
+LOGIN="$(/usr/bin/id -un)"
+
+prj="${DIR}/${tool}"
+logs="${prj}/logs"
+mkdir -p "${logs}"
+
+PATH_LOG="${logs}/${LOGIN}-$(basename "$0" .bash)-${NOW}.log"
+ln -nfs "${PATH_LOG}" "${prj}/log"
+
+info "Script Execution DIR '$prj'"
+ok "Logging execution in '$PATH_LOG' (ln -nfs '${prj}/log')"
+
+function displayLog() {
+    res=$?
+    if [[ ${res} != 0 ]]; then tail -15 "${prj}/log" >&3; fi
+    /usr/bin/date >&3
+}
+trap displayLog EXIT
+
+cd "${prj}" || fatal "unable to access '${prj}'" 111
+
+# shellcheck source=/dev/null
+source "${DIR}/../echos/echoslog"
+exec 3>&2
+exec 1> "$PATH_LOG"
+exec 2>&1
+
+set -o xtrace
+
+function getArg() {
+    local search_param="$1"
+    shift
+    for param in "$@"; do
+        if [[ "$param" == "$search_param"  || "$param" == "$search_param="* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+
+# main: Acts as the central execution point, orchestrating the overall setup process including dependency checks, installations, and environmental configurations, ensuring the script achieves its purpose of preparing the environment or updating software as required.
+function main() {
+    info "main: Start build at '${NOW}'"
+    setenv "$@"
+    # shellcheck disable=SC2154
+    cd "${tool_src}" || fatal "Unable to access tool_src '${tool_src}'" 22
+    pwd
+    reconfigure=false
+    if getArg "--reconfigure" "$@"; then
+        reconfigure=true
+    fi
+    info "main: reconfigure='${reconfigure}'"
+    if [[ -e "${tool_src}/config.log" && ${reconfigure} == false ]]; then
+        ok "main: config.log present, do not reconfigure"
+    else
+        configure
+    fi
+    clean
+    return $?
+}
+
+# if one of the parameter is "--reconfigure", shift, and set reconfigure=true, then pass the rest to main
+main "$@"
+res=$?
+# echo "res='${res}'" >&3
+if [[ ${res} != 0 ]]; then
+    exit "${res}"
+fi
+ok "All done"
