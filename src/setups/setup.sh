@@ -61,21 +61,21 @@ copy_the_environment() {
     fi
 
     if step_is_done "create_the_remote_project_folder"; then
-        ok "project_path '${project_path}' already created on '${hostname}'"
+        ok "cplx_path '${cplx_path}' already created on '${hostname}'"
     else
-        task "Must create remote project directory: ${hostname}/${project_path}"
+        task "Must create remote project directory: ${hostname}/${cplx_path}"
         # shellcheck disable=SC2029
-        ssh "${SSH_CONFIG_ENTRY}" "mkdir -p \"${project_path}/echos\"" || fatal "Could not create remote directory" 11
+        ssh "${SSH_CONFIG_ENTRY}" "mkdir -p \"${cplx_path}/echos\"" || fatal "Could not create remote directory" 11
         if ! step_done "create_the_remote_project_folder"; then
             fatal "Could not mark create_the_remote_project_folder as done" 6
         fi
-        ok "Remote directory '${project_path}' created on '${hostname}'"
+        ok "Remote directory '${cplx_path}' created on '${hostname}'"
     fi
 
     if step_is_done "transfer_env_to_the_remote_project_folder"; then
         ok "transfer_env_to_the_remote_project_folder is already done"
     else
-        task "Must copy the environment to ${hostname}/${project_path}"
+        task "Must copy the environment to ${hostname}/${cplx_path}"
         set -o pipefail
         # Normalize any repeated slashes:
         normalized_path="$(echo "${SETUP_DIR}/env" | tr -s '/')"
@@ -85,15 +85,15 @@ copy_the_environment() {
         component_count_utils="$(echo "${normalized_path}" | grep -o '/' | wc -l)"
 
         # shellcheck disable=SC2029
-        ( tar cvf - "${SETUP_DIR}/env/" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}\" --strip-components=${component_count}" ) || fatal "Could not copy environment" 11
+        ( tar cvf - "${SETUP_DIR}/env/" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}\" --strip-components=${component_count}" ) || fatal "Could not copy environment" 11
         # shellcheck disable=SC2029
-        ( tar cvf - "${SRC_DIR}/utils" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}/bin\" --strip-components=${component_count_utils}" ) || fatal "Could not copy utils environment" 12
+        ( tar cvf - "${SRC_DIR}/utils" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}/bin\" --strip-components=${component_count_utils}" ) || fatal "Could not copy utils environment" 12
         # shellcheck disable=SC2029
-        ( tar cvf - "${SRC_DIR}/echos" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${project_path}/echos\" --strip-components=${component_count_utils}" ) || fatal "Could not copy echos environment" 13
+        ( tar cvf - "${SRC_DIR}/echos" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}/echos\" --strip-components=${component_count_utils}" ) || fatal "Could not copy echos environment" 13
         if ! step_done "transfer_env_to_the_remote_project_folder"; then
             fatal "Could not mark transfer_env_to_the_remote_project_folder as done" 6
         fi
-        ok "Local env transferred to the Remote directory '${project_path}' on '${hostname}'"
+        ok "Local env transferred to the Remote directory '${cplx_path}' on '${hostname}'"
     fi
     if ! step_done "transfer_env_to_the_remote_project_folder"; then
         fatal "Could not mark transfer_env_to_the_remote_project_folder as done" 6
@@ -103,9 +103,9 @@ copy_the_environment() {
 
 validate_the_ssh_connection() {
     if step_is_done "validate_the_ssh_connection"; then
-        get_properties "SSH_CONFIG_ENTRY,hostname,project_path"
+        get_properties "SSH_CONFIG_ENTRY,hostname,cplx_path"
         ok "validate_the_ssh_connection is already done"
-        info "SSH_CONFIG_ENTRY='${SSH_CONFIG_ENTRY}', hostname='${hostname}', project_path='${project_path}'"
+        info "SSH_CONFIG_ENTRY='${SSH_CONFIG_ENTRY}', hostname='${hostname}', cplx_path='${cplx_path}'"
         return 0
     fi
     info "SSH_CONFIG_ENTRY='${SSH_CONFIG_ENTRY}'"
@@ -140,17 +140,17 @@ validate_the_ssh_connection() {
     )\""
 
     # Access it via an intermediate variable
-    eval "project_path=\"\${cd_${SSH_CONFIG_ENTRY}}\""
+    eval "cplx_path=\"\${cd_${SSH_CONFIG_ENTRY}}\""
     # shellcheck disable=SC2001
-    project_path="$(echo "$project_path" | sed 's/^[[:space:]]*//')"
+    cplx_path="$(echo "$cplx_path" | sed 's/^[[:space:]]*//')"
 
-    if [[ -z "${project_path}" ]]; then
+    if [[ -z "${cplx_path}" ]]; then
         fatal "No 'cd_${SSH_CONFIG_ENTRY}' found in SSH config under 'Host ${SSH_CONFIG_ENTRY}'" 4
     fi
-    ok "Found cd_${SSH_CONFIG_ENTRY}='${project_path}'"
+    ok "Found cd_${SSH_CONFIG_ENTRY}='${cplx_path}'"
     set_property "SSH_CONFIG_ENTRY" "${SSH_CONFIG_ENTRY}"
     set_property "hostname" "${hostname}"
-    set_property "project_path" "${project_path}"
+    set_property "cplx_path" "${cplx_path}"
     if ! step_done "validate_the_ssh_connection"; then
         fatal "Could not mark validate_the_ssh_connection as done" 5
     fi
@@ -185,14 +185,14 @@ transfer_the_sources_to_the_remote_project_folder() {
     filename=$(basename "${filepath}")
     
     # shellcheck disable=SC2029
-    if ssh "${SSH_CONFIG_ENTRY}" "[ -e \"${project_path}/tools/${CPLX_TOOL}/sources/${filename}\" ]"; then
-        ok "Sources '${filename}' already copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/"
+    if ssh "${SSH_CONFIG_ENTRY}" "[ -e \"${cplx_path}/tools/${CPLX_TOOL}/sources/${filename}\" ]"; then
+        ok "Sources '${filename}' already copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/sources/"
     else
         task "Must copy sources '${filename}' for tool '${CPLX_TOOL}'"
-        if ! scp "${filepath}" "${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/"; then
-            fatal "Could not copy sources '${filename}' for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/" 42
+        if ! scp "${filepath}" "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/sources/"; then
+            fatal "Could not copy sources '${filename}' for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/sources/" 42
         fi
-        ok "Sources '${filename}' copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${project_path}/tools/${CPLX_TOOL}/sources/"
+        ok "Sources '${filename}' copied for tool '${CPLX_TOOL}' to ${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/sources/"
     fi
     if ! step_done "transfer_the_sources_to_the_remote_project_folder"; then
         fatal "Could not mark 'transfer_the_sources_to_the_remote_project_folder' as done" 60
@@ -205,7 +205,7 @@ get_the_latest_tag() {
         ok "'get_the_latest_tag' already fetched for tool '${CPLX_TOOL}'"
         return 0
     fi
-    task "Must fetch the latest tag for tool: ${CPLX_TOOL}/${project_path}"
+    task "Must fetch the latest tag for tool: ${CPLX_TOOL}/${cplx_path}"
     if ! get_property "${CPLX_TOOL}_repository"; then
         fatal "Could not get the repository for tool '${CPLX_TOOL}'" 30
     fi
