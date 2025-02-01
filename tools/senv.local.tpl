@@ -23,6 +23,8 @@ rem set "CPLX_RESET_STEP=copy_the_sources"
 set "CPLX_TOOL=python"
 set "CPLX_TOOL_RC="
 rem set "CPLX_TOOL_RC=1"
+set "CPLX_VERSION="
+rem set "CPLX_VERSION=v3.13.1"
 
 goto:eof
 
