@@ -14,9 +14,12 @@ call <NUL "%setup_dir%\..\..\senv.bat"
 if "%SSH_CONFIG_ENTRY%" == "" (
     %_fatal% "SSH_CONFIG_ENTRY is not defined (must be an SSH alias as alias to remote Linux server where a program is compiled)" 1
 )
-bash -c "$(cygpath -u '%setup_dir%')setup.sh %*"
+set "setup_prg=setup.sh"
+if "%~1"=="packages" ( set "setup_prg=setup_packages.sh" )
+    
+bash -c "$(cygpath -u '%setup_dir%')%setup_prg% %*"
 if errorlevel 1 (
-    %_error% "Issue when calling '%setup_dir%\setup.sh'"
+    %_error% "Issue when calling '%setup_dir%\%setup_prg%'"
     exit /b 119
 )
 goto:eof
