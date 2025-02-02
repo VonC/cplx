@@ -6,6 +6,8 @@ DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 source "${DIR}/../.env"
 # shellcheck source=/dev/null
 source "${DIR}/../echos/echos"
+# shellcheck source=/dev/null
+source "${DIR}/../bin/properties.sh"
 
 # Check if exactly one parameter is provided
 if [[ $# -ne 2 ]]; then
@@ -14,8 +16,13 @@ fi
 
 tool="$1"
 
+# shellcheck disable=SC2034
+properties_file="${DIR}/../cplx.properties"
 # Retrieve the list of valid services (comma-separated)
 services=$(get_property services)  # Example: "service1,service2,service3"
+if [[ -z "$services" ]]; then
+    fatal "No services found in the properties file '${DIR}/../cplx.properties'" 1
+fi
 
 # Convert the comma-separated services into an array
 IFS=',' read -r -a service_array <<< "$services"
