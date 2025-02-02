@@ -238,8 +238,18 @@ function main() {
         ok "main: config.log present, do not reconfigure"
     else
         configure
+        res_config=$?
+        if [[ ${res_config} != 0 ]]; then
+            error "main: configure failed with '${res_config}'"
+            return "${res_config}"
+        fi
     fi
     clean
+    res_clean=$?
+    if [[ ${res_clean} != 0 ]]; then
+        error "main: clean failed with '${res_clean}'"
+        return "${res_clean}"
+    fi
     return $?
 }
 
