@@ -76,8 +76,10 @@ for ext in "${archive_extensions[@]}"; do
         pattern="*${version}*.${ext}"
     fi
 
-    # Append matching files to the array
-    matching_archives+=("$sources_dir/$pattern")
+    # Use find to collect matching files and append to the array
+    while IFS= read -r -d '' file; do
+        matching_archives+=("$file")
+    done < <(find "$sources_dir" -type f -name "$pattern" -print0)
 done
 
 # Disable nullglob after usage
