@@ -2,7 +2,7 @@
 
 function configure() {
     task "config.log not present: reconfigure"
-    if ! ${tool_src}/configure --prefix="${tool_bin}" --with-openssl="${tool_bin}/usr" --with-openssl-rpath="${tool_bin}/usr/lib64" --enable-shared=yes; then
+    if ! "${tool_src}/configure" --prefix="${tool_bin}" --with-openssl="${tool_bin}/usr" --with-openssl-rpath="${tool_bin}/usr/lib64" --enable-shared=yes; then
         fatal "configure ERROR" 3
     fi
     ok "configure done"
