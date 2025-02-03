@@ -152,9 +152,15 @@ validate_the_ssh_connection() {
     set_property "hostname" "${hostname}"
     set_property "cplx_path" "${cplx_path}"
     # shellcheck disable=SC2029
-    architecture="$(ssh "${SSH_CONFIG_ENTRY}" "source /etc/os-release; echo $ID $VERSION_ID $(uname -m)")"
+    # shellcheck disable=SC2140
+    architecture="$(ssh "${SSH_CONFIG_ENTRY}" 'source /etc/os-release; printf "%s_%s_%s" $ID $VERSION_ID $(uname -m)')"
     architecture="${architecture// /_}"
-    set_property "architecture" "${architecture}"
+    if [[ -z "${architecture}" ]]; then
+        fatal "Could not get the architecture from the remote server" 55
+    fi
+    if ! set_property "architecture" "${architecture}"; then
+        fatal "Could not set the architecture in the properties file" 56
+    fi
     if ! step_done "validate_the_ssh_connection"; then
         fatal "Could not mark validate_the_ssh_connection as done" 5
     fi
