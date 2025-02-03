@@ -5,7 +5,11 @@ STEPS_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 # shellcheck source=/dev/null
 source "${STEPS_DIR}/../echos/echos"
 
-steps_file="${STEPS_DIR}/steps.test.md"
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+    if [ $# -eq 0 ]; then
+        steps_file="${STEPS_DIR}/steps.test.md"
+    fi
+fi
 steps_err=""
 
 step_exists() {
@@ -233,6 +237,48 @@ next_step() {
     echo "${next_step_name}"
 }
 
+repeat_or_reset_step() {
+    local step="$1"
+    local reset_needed=false
+
+    # Check if the argument starts with r_
+    if [[ "$step" == r_* ]]; then
+        reset_needed=true
+        step="${step#r_}"
+    fi
+
+    # Extract steps from steps.md
+    grep_steps=$(grep -oP "\]\((.*?)\)" "${steps_file}" | grep -i "$step")
+    if [[ -z "$grep_steps" ]]; then
+        fatal "Error: No steps found matching '$step'" 10
+    fi
+    # Check the number of steps found
+    step_count=$(echo "$grep_steps" | wc -l)
+    if [[ $step_count -eq 0 ]]; then
+        fatal "Error: No steps found matching '$step'" 11
+    elif [[ $step_count -gt 1 ]]; then
+        fatal "Error: More than one step found matching '$step'" 12
+    fi
+
+    # Get the exact step name
+    exact_step=$(echo "$grep_steps" | head -n 1)
+    # shellcheck disable=SC2001
+    exact_step=$(echo "$exact_step" | sed 's/[^a-zA-Z_]//g')
+
+    # Perform repeat or reset
+    if ${reset_needed}; then
+        task "Must reset step: ${exact_step}"
+        if ! reset_step "${exact_step}"; then
+            fatal "Unable to reset step '${exact_step}' from '${step}' original name" 222
+        fi
+    else
+        task "Must repeat step: ${exact_step}"
+        if ! repeat_step "${exact_step}"; then
+            fatal "Unable to repeat step '${exact_step}' from '${step}' original name" 223
+        fi
+    fi
+}
+
 test_steps() {
     if step_is_done this_step_is_done; then
         ok "this_step_is_done is already done in '${steps_file}'"
@@ -299,9 +345,23 @@ test_steps_reset() {
 
 # Only run if script is not being sourced
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
-    steps_file="${STEPS_DIR}/steps.test.md"
-    test_steps
-    test_steps_repeat
-    test_steps_repeat_child
-    test_steps_reset
+    if [ $# -eq 0 ]; then
+        steps_file="${STEPS_DIR}/steps.test.md"
+        test_steps
+        test_steps_repeat
+        test_steps_repeat_child
+        test_steps_reset
+    else
+        func="$1"
+        shift
+        if declare -f "$func" > /dev/null; then
+            "$func" "$@"
+            ret=$?
+            if [ ${ret} -ne 0 ]; then
+                echo "${ret}"
+            fi
+        else
+            fatal "Error: function '${func}' does not exist." 22
+        fi
+    fi
 fi
