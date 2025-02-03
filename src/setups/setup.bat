@@ -15,9 +15,19 @@ if "%SSH_CONFIG_ENTRY%" == "" (
     %_fatal% "SSH_CONFIG_ENTRY is not defined (must be an SSH alias as alias to remote Linux server where a program is compiled)" 1
 )
 set "setup_prg=setup.sh"
-if "%~1"=="packages" ( set "setup_prg=setup_packages.sh" )
+if "%~1"=="packages" (
+    set "setup_prg=setup_packages.sh"
+    shift
+)
+
+if not "%~1"=="" (
+    bash.exe -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; "%project_dir_unix%/src/utils/steps.sh" repeat_or_reset_step %~1"
+    if errorlevel 1 (
+        %_fatal% "Unable to repeat or reset step '%~1'" 119
+    )
+)
     
-bash -c "$(cygpath -u '%setup_dir%')%setup_prg% %*"
+bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')%setup_prg% %*"
 if errorlevel 1 (
     %_error% "Issue when calling '%setup_dir%\%setup_prg%'"
     exit /b 119
