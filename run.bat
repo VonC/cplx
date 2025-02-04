@@ -11,12 +11,11 @@ setlocal enabledelayedexpansion
 set "params="
 set "sp="
 :loop
-if "%~1"=="" goto end
-    set "params=!params!!sp!%1"
-    shift
-    set "sp= "
-    goto loop
-)
+  if "%~1"=="" goto:end
+  set "params=!params!!sp!%1"
+  shift
+  set "sp= "
+  goto loop
 :end
 endlocal & set "params=%params%"
 %_info% "params='%params%' for run"
