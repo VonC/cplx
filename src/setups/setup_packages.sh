@@ -71,5 +71,12 @@ download_packages_list() {
     ok "Filtered URLs saved to '${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt'"
 }
 
+sync_packages() {
+    packages_for_tools="${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}_${arch}.txt"
+    if [[ ! -e "${packages_for_tools}" ]]; then
+        fatal "File '${packages_for_tools}' not found" 1
+    fi
+    ok "Processing File '${packages_for_tools}'"
+}
 main "$@"
 
