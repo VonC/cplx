@@ -34,7 +34,10 @@ download_packages_list() {
     fi
 
     # URL of the HTML page
-    url="https://vault.centos.org/8-stream/BaseOS/x86_64/os/Packages/"
+    pkgs_url_name="${arch/\./_}_pkgs_url"
+    get_property "${pkgs_url_name}"
+    url=${!pkgs_url_name}
+    info "url='${url}' for arch='${arch}'"
 
     # Fetch the HTML content using curl
     html_content=$(curl -s "$url")
