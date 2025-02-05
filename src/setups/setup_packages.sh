@@ -44,8 +44,13 @@ download_packages_list() {
 
     # Extract URLs from the table rows using grep and sed
     set -o pipefail
-    echo "$html_content" | grep -oP '<tr class="(even|odd)">.*?<a href="\K[^"]+' | if ! grep -v '^\.\./$' | grep 'x86_64' > "${SETUP_PKGS_DIR}/pkgs/urls.txt"; then
-        fatal "Failed to extract URLs from the HTML content" 118
+    echo "$html_content" | grep -oP '<tr class="(even|odd)">.*?<a href="\K[^"]+' | grep -v '^\.\./$' | grep 'x86_64' > "${SETUP_PKGS_DIR}/pkgs/urls.txt"
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+        echo "$html_content" | grep -oP '<a href="\K[^"]*x86_64[^"]*' | grep -v '^../$' > "${SETUP_PKGS_DIR}/pkgs/urls.txt"
+        if [ $? -ne 0 ]; then
+            fatal "Failed to extract URLs from the HTML content" 118
+        fi
     fi
 
     # Process the URLs to keep only the last entry for each common prefix
