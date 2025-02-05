@@ -104,7 +104,7 @@ download_packages_list() {
 sync_packages() {
     local arch="$1"
     local pkgs_tool_dir="${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}"
-    packages_for_tools="${pkgs_tool_dir}/${CPLX_TOOL}_${arch}.txt"
+    local packages_for_tools="${pkgs_tool_dir}/${CPLX_TOOL}_${arch}.txt"
     if [[ ! -e "${packages_for_tools}" ]]; then
         fatal "File '${packages_for_tools}' not found" 1
     fi
@@ -130,6 +130,9 @@ sync_packages() {
 
         # Process the line (actual processing logic goes here)
         task "Must process line: '${line}'"
+        if ! sync_package "${arch}" "${line}"; then
+            fatal "Failed to process line: '${line}'" 1
+        fi
 
         # Optionally, update the 'last' file with the current processed value.
         # echo "${line}" > last
@@ -140,5 +143,33 @@ sync_packages() {
         ok "All lines have been processed."
     fi
 }
+
+sync_package() {
+    local arch="$1"
+    local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
+    local pkg_name="$2"
+
+    if [[ ! -e "${packages_file}" ]]; then
+        fatal "File '${packages_file}' not found" 1
+    fi
+
+    # Grep for lines starting with pkg_name followed by a dash and a digit
+    task "Must find package: '${pkg_name}' in file '${packages_file}'"
+    local matches count found_pkg
+    matches=$(grep -E "^${pkg_name}-[0-9]" "${packages_file}")
+    count=$(echo "$matches" | awk 'NF {count++} END {print count+0}')
+
+    if [[ "$count" -eq 0 ]]; then
+        fatal "No package matching '${pkg_name}' found in ${packages_file}" 301
+    elif [[ "$count" -gt 1 ]]; then
+        fatal "Multiple packages matching '${pkg_name}' found in ${packages_file}" 302
+    fi
+
+    found_pkg=$(echo "$matches" | head -n1)
+    ok "Found package: '${found_pkg}'"
+
+}
+
+
 main "$@"
 
