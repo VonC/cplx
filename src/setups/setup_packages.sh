@@ -168,6 +168,34 @@ sync_package() {
     found_pkg=$(echo "$matches" | head -n1)
     ok "Found package: '${found_pkg}'"
 
+    download_package "${arch}" "${found_pkg}"
+
+}
+
+download_package() {
+    local arch="$1"
+    local pkg_name="$2"
+
+    if [[ -e  "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" ]]; then
+        ok "Package '${pkg_name}' already downloaded in '${SETUP_PKGS_DIR}/pkgs/${arch}'"
+        return 0
+    fi
+
+    local pkgs_url_name="${arch/\./_}_pkgs_url"
+    get_property "${pkgs_url_name}"
+    url=${!pkgs_url_name}/${pkg_name}
+    info "url='${url}' for arch='${arch}' and package '${pkg_name}'"
+
+    if ! curl -kLs -o "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" "$url"; then
+        fatal "Failed to download package '${pkg_name}' from '${url}'" 1
+    else
+        file_size=$(stat -c%s "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}")
+        if [ "$file_size" -lt 9216 ]; then
+            fatal "Downloaded package '${pkg_name}' is only ${file_size} bytes (<9KB), something went wrong" 2
+        fi
+        ok "Package '${pkg_name}' downloaded successfully to '${SETUP_PKGS_DIR}/pkgs/${arch}'"
+    fi
+
 }
 
 
