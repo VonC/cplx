@@ -119,6 +119,10 @@ sync_packages() {
     # If last_value is empty, start processing immediately.
     [ -z "$last_value" ] && process=1
 
+    if ! get_property cplx_path; then
+        fatal "cplx_path not found in file '${properties_file}'" 101
+    fi
+
     while IFS= read -r line || [ -n "$line" ]; do
         # If we have not yet reached the last processed value, check for it.
         if [ "$process" -eq 0 ]; then
@@ -169,6 +173,7 @@ sync_package() {
     ok "Found package: '${found_pkg}'"
 
     download_package "${arch}" "${found_pkg}"
+    scp_package "${arch}" "${found_pkg}"
 
 }
 
@@ -198,6 +203,31 @@ download_package() {
 
 }
 
+scp_package() {
+
+    local arch="$1"
+    local pkg_name="$2"
+
+    local local_pkg="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
+
+    if [[ -z "${cplx_path}" ]]; then
+        fatal "cplx_path not found in file '${properties_file}'" 801
+    fi
+    # Test if pkg_name exists on the remote host at ${cplx_path}/tools/pkgs/
+    remote_pkg="${cplx_path}/tools/pkgs/${pkg_name}"
+    # shellcheck disable=SC2029
+    if ssh "${SSH_CONFIG_ENTRY}" "test -e '${remote_pkg}'"; then
+        info "Package '${pkg_name}' already exists at ${SSH_CONFIG_ENTRY}:${remote_pkg}"
+    else
+        task "Must copy package '${pkg_name}' to ${SSH_CONFIG_ENTRY}:${remote_pkg}"
+        if ! scp "${local_pkg}" "${SSH_CONFIG_ENTRY}:${remote_pkg}"; then
+            fatal "Failed to copy package '${pkg_name}' to ${SSH_CONFIG_ENTRY}:${remote_pkg}" 802
+        else
+            ok "Package '${pkg_name}' copied successfully to ${SSH_CONFIG_ENTRY}:${remote_pkg}"
+        fi
+    fi
+
+}
 
 main "$@"
 
