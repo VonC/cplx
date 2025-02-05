@@ -41,17 +41,38 @@ download_packages_list() {
     info "url='${url}' for arch='${arch}'"
 
     # Fetch the HTML content using curl
-    html_content=$(curl -s "$url")
+    html_content=$(curl -kLs "$url")
 
-    # Extract URLs from the table rows using grep and sed
-    set -o pipefail
-    echo "$html_content" | grep -oP '<tr class="(even|odd)">.*?<a href="\K[^"]+' | grep -v '^\.\./$' | grep 'x86_64' > "${SETUP_PKGS_DIR}/pkgs/urls.txt"
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ]; then
-        echo "$html_content" | grep -oP '<a href="\K[^"]*x86_64[^"]*' | grep -v '^../$' > "${SETUP_PKGS_DIR}/pkgs/urls.txt"
-        if [ $? -ne 0 ]; then
-            fatal "Failed to extract URLs from the HTML content" 118
+    # Count the number of lines in html_content
+    line_count=$(echo "$html_content" | wc -l)
+    info "HTML content line count: ${line_count} for '${url}'"
+
+    if [ "$line_count" -lt 50 ]; then
+        fatal "HTML content has only ${line_count} lines (<50), something went wrong" 119
+    fi
+
+    # Extract URLs from the table rows using grep
+    # Define an array of grep pipelines (as strings) to extract URLs
+    grep_pipelines=(
+        'grep -oP '"'"'<tr class="(even|odd)">.*?<a href="\K[^"]+'"'"' | grep -v "^\.\./$" | grep "x86_64"' # https://vault.centos.org/8-stream/BaseOS/x86_64/os/Packages/
+        'grep -oP '"'"'<a href="\K[^"]*x86_64[^"]*'"'"' | grep -v "^../$"' # https://dl.rockylinux.org/vault/centos/7.9.2009/updates/x86_64/Packages/
+        'grep -oP '"'"'<a href="\K[^"]+'"'"' | grep "x86_64"' # https://mirror.chpc.utah.edu/pub/centos/7/os/x86_64/Packages/
+    )
+    # Print the size of the grep_pipelines array
+    info "grep_pipelines array size: ${#grep_pipelines[@]}"
+    output=""
+    for pipeline in "${grep_pipelines[@]}"; do
+        # Use eval to run the pipeline on html_content
+        output=$(echo "$html_content" | eval "$pipeline")
+        # shellcheck disable=SC2181
+        if [ $? -eq 0 ] && [ -n "$output" ]; then
+            info "Pipeline '${pipeline}' has succeeded"
+            echo "$output" > "${SETUP_PKGS_DIR}/pkgs/urls.txt"
+            break
         fi
+    done
+    if [ -z "$output" ]; then
+        fatal "Failed to extract URLs from the HTML content" 118
     fi
 
     # Process the URLs to keep only the last entry for each common prefix
