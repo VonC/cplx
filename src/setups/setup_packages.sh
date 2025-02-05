@@ -16,6 +16,7 @@ main() {
         fatal "architecture not found in file '${properties_file}'" 1
     fi
     download_packages_list "${architecture}"
+    sync_packages "${architecture}"
 }
 
 download_packages_list() {
@@ -80,11 +81,43 @@ download_packages_list() {
 }
 
 sync_packages() {
-    packages_for_tools="${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}_${arch}.txt"
+    local arch="$1"
+    local pkgs_tool_dir="${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}"
+    packages_for_tools="${pkgs_tool_dir}/${CPLX_TOOL}_${arch}.txt"
     if [[ ! -e "${packages_for_tools}" ]]; then
         fatal "File '${packages_for_tools}' not found" 1
     fi
     ok "Processing File '${packages_for_tools}'"
+
+    last_value=""
+    if [ -f "${pkgs_tool_dir}/last" ]; then
+        last_value=$(cat "${pkgs_tool_dir}/last")
+    fi
+
+    process=0
+    # If last_value is empty, start processing immediately.
+    [ -z "$last_value" ] && process=1
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        # If we have not yet reached the last processed value, check for it.
+        if [ "$process" -eq 0 ]; then
+            if [ "$line" = "$last_value" ]; then
+                process=1
+            fi
+            continue
+        fi
+
+        # Process the line (actual processing logic goes here)
+        task "Must process line: '${line}'"
+
+        # Optionally, update the 'last' file with the current processed value.
+        # echo "${line}" > last
+    done < "${packages_for_tools}"
+    if [ "$process" -eq 0 ]; then
+        warning "All lines have already been processed."
+    else
+        ok "All lines have been processed."
+    fi
 }
 main "$@"
 
