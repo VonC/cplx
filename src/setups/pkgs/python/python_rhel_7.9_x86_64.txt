@@ -1,0 +1,3 @@
+unzip
+make
+make-devel
