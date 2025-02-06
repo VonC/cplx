@@ -174,7 +174,7 @@ sync_package() {
 
     download_package "${arch}" "${found_pkg}"
     scp_package "${arch}" "${found_pkg}"
-
+    install_package "${found_pkg}"
 }
 
 download_package() {
@@ -227,6 +227,41 @@ scp_package() {
         fi
     fi
 
+}
+
+install_package() {
+    local pkg_name="$1"
+    local remote_tools="${cplx_path}/tools/"
+    task "Must copy install_package script to ${SSH_CONFIG_ENTRY}:${remote_tools}"
+    if ! scp "${SETUP_PKGS_DIR}/install_package" "${SSH_CONFIG_ENTRY}:${remote_tools}"; then
+        fatal "Failed to copy package 'install_package' to ${SSH_CONFIG_ENTRY}:${remote_tools}" 902
+    else
+        ok "Package 'install_package' copied successfully to ${SSH_CONFIG_ENTRY}:${remote_tools}"
+    fi
+    # shellcheck disable=SC2029
+    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools && chmod 755 ./install_package && bash ./install_package \"${pkg_name}\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}\temp.pkgs.txt"
+
+    # Get the last line from temp.txt as exit status
+    lastLine=$(tail -n 1 "${SETUP_PKGS_DIR}/temp.pkgs.txt")
+    info "vvvvvvvvvvvvvvvvvvvvvvvvvvv"
+    info "Exit pkgs status: $lastLine"
+    info "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+
+    if [[ "${lastLine}" != "253" ]]; then
+        # Copy the remote log file locally
+        if scp "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/pkgs.log" "${SETUP_PKGS_DIR}/pkgs.log"; then
+            # Open the log folder in VSCode in background
+            "${PRGS}/vscodes/current/bin/code" "${SETUP_PKGS_DIR}/pkgs.log" &
+        else
+            warning "Failed to open 'pkgs.log' file at '${SETUP_PKGS_DIR}'"
+        fi
+    fi
+    if [ "${lastLine}" != "0" ]; then
+        tail -n 10 "${SETUP_PKGS_DIR}/temp.pkgs.txt"
+        fatal "Installation package '${pkg_name}' failed" 5
+    fi
+
+    ok "Installation package '${pkg_name}' executed"
 }
 
 main "$@"
