@@ -188,6 +188,9 @@ download_package() {
 
     local pkgs_url_name="${arch/\./_}_pkgs_url"
     get_property "${pkgs_url_name}"
+    if [[ "${!pkgs_url_name}" == "" ]]; then
+        fatal "Property '${pkgs_url_name}' not found in file '${properties_file}'" 1
+    fi
     url=${!pkgs_url_name}/${pkg_name}
     info "url='${url}' for arch='${arch}' and package '${pkg_name}'"
 
