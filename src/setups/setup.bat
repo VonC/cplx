@@ -3,6 +3,7 @@
 setlocal enabledelayedexpansion
 
 for %%i in ("%~dp0") do SET "setup_dir=%%~fi"
+set "setup_dir=%setup_dir:~0,-1%"
 call <NUL "%setup_dir%\..\..\senv.bat"
 
 %_info% "----------------------------------------"
@@ -27,7 +28,7 @@ if not "%~1"=="" (
     )
 )
     
-bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')%setup_prg% %*"
+bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% %*"
 if errorlevel 1 (
     %_error% "Issue when calling '%setup_dir%\%setup_prg%'"
     exit /b 119
