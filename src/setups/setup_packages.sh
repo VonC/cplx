@@ -192,9 +192,10 @@ download_package() {
         fatal "Property '${pkgs_url_name}' not found in file '${properties_file}'" 1
     fi
     url=${!pkgs_url_name}/${pkg_name}
+    url="${url//\/\//\/}"
     info "url='${url}' for arch='${arch}' and package '${pkg_name}'"
 
-    if ! curl -kLs -o "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" "$url"; then
+    if ! curl -kLv -o "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" "$url"; then
         fatal "Failed to download package '${pkg_name}' from '${url}'" 1
     else
         file_size=$(stat -c%s "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}")
