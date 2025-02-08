@@ -194,8 +194,24 @@ download_package() {
     url=${!pkgs_url_name}/${pkg_name}
     url="${url//\/\//\/}"
     info "url='${url}' for arch='${arch}' and package '${pkg_name}'"
-
-    if ! curl -kLv -o "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" "$url"; then
+    # Avoid any 403 from Cloudflare (protecting, for instance, vault.centos.org) by adding headers
+    curl_headers=(
+        -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+        -H "Accept-Encoding: gzip, deflate"
+        -H "Accept-Language: en-US,en;q=0.5"
+        -H "Connection: keep-alive"
+        -H 'Sec-Ch-Ua: "Chromium";v="128", "Not;A=Brand";v="24", "Brave";v="128"'
+        -H "Sec-Ch-Ua-Mobile: ?0"
+        -H 'Sec-Ch-Ua-Platform: "Windows"'
+        -H "Sec-Fetch-Dest: document"
+        -H "Sec-Fetch-Mode: navigate"
+        -H "Sec-Fetch-Site: none"
+        -H "Sec-Fetch-User: ?1"
+        -H "Sec-Gpc: 1"
+        -H "Upgrade-Insecure-Requests: 1"
+        -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+    )
+    if ! curl -kLs "${curl_headers[@]}" -o "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" "$url"; then
         fatal "Failed to download package '${pkg_name}' from '${url}'" 1
     else
         file_size=$(stat -c%s "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}")
