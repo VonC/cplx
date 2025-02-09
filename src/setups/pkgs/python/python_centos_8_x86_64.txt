@@ -1,3 +1,4 @@
 unzip
 make
 make-devel
+gcc
