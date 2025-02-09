@@ -267,11 +267,11 @@ install_package() {
     info "Exit pkgs status: $lastLine"
     info "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
+    rm -f "${SETUP_PKGS_DIR}/pkgs.log" 2>/dev/null
     if [[ "${lastLine}" != "253" ]]; then
         # Copy the remote log file locally
         if scp "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/pkgs.log" "${SETUP_PKGS_DIR}/pkgs.log"; then
-            # Open the log folder in VSCode in background
-            "${PRGS}/vscodes/current/bin/code" "${SETUP_PKGS_DIR}/pkgs.log" &
+            ok "Log file 'pkgs.log' copied successfully to '${SETUP_PKGS_DIR}'"
         else
             warning "Failed to open 'pkgs.log' file at '${SETUP_PKGS_DIR}'"
         fi
