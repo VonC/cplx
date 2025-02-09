@@ -52,14 +52,17 @@ if not defined cplx_path (
 scp -r "%install_dir_unix%/env/." %SSH_CONFIG_ENTRY%:%cplx_path%/tools/
 ssh %SSH_CONFIG_ENTRY% "cd %cplx_path%/tools && chmod 755 ./install && bash ./install %CPLX_TOOL% %CPLX_VERSION%; echo $?" | tee "%install_dir%\temp.txt"
 FOR /F "tokens=* delims=" %%i IN ('type "%install_dir%\temp.txt"') DO SET "lastLine=%%i"
-%_info% "vvvvvvvvvvvvvvvvvvvvvvvvvvv"
-%_info% "Exit status: %lastLine%"
-%_info% "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-scp "%SSH_CONFIG_ENTRY%:%cplx_path%/tools/python/log" "%install_dir_unix%/log"
+%_info% "vvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+%_info% "Exit status: '%lastLine%'"
+%_info% "^^^^^^^^^^^^^^"
+if "%lastLine%"=="4" (
+    %_fatal% "Pre-Installation steps failed" 55
+)
+scp "%SSH_CONFIG_ENTRY%:%cplx_path%/tools/%CPLX_TOOL%/log" "%install_dir_unix%/install.log"
 if not errorlevel 1 (
-    start /b "VSCode" "%PRGS%\vscodes\current\bin\code.cmd" "%install_dir%\log"
+    "%PRGS%\vscodes\current\bin\code.cmd" "%install_dir%\install.log"
 ) else (
-    %_warning% "Failed to open log file at '%install_dir%'"
+    %_warning% "Failed to open install.log file at '%install_dir%'"
 )
 if not %lastLine%==0 ( tail -10 "%install_dir%\temp.txt" && %_fatal% "Installation failed" 5 )
 %_ok% "Installation executed"
