@@ -9,6 +9,17 @@ source "${DIR}/../echos/echos"
 # shellcheck source=/dev/null
 source "${DIR}/../bin/properties.sh"
 
+# Check if ${DIR}/root/usr/bin is part of the $PATH. If not, add it at the end of the $PATH
+bin_dir="${DIR}/root/usr/bin"
+# Wrap PATH in colons for the check so that boundaries are properly detected,
+# even if PATH does not end with a colon.
+if [[ ":$PATH:" != *":${bin_dir}:"* ]]; then
+    export PATH="${PATH}:${bin_dir}"
+    info "Added '${bin_dir}' to PATH."
+else
+    ok "'${bin_dir}' is already in the PATH."
+fi
+
 # Check if exactly one parameter is provided
 if [[ $# -ne 2 ]]; then
     fatal "Usage: install <tool_name> <version>" 1
