@@ -257,6 +257,10 @@ function main() {
     if getArg "--reconfigure" "$@"; then
         reconfigure=true
     fi
+    if grep "error: " "${tool_src}/config.log"; then
+        warning "main: existing config.log contains errors, force reconfiguring in '$(pwd)'"
+        reconfigure=true
+    fi
     info "main: reconfigure='${reconfigure}'"
     if [[ -e "${tool_src}/config.log" && ${reconfigure} == false ]]; then
         ok "main: config.log present, do not reconfigure"
