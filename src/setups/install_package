@@ -128,10 +128,14 @@ list_archive_content_to_mirror() {
 
     info "Listing contents of archive '${archive}':"
     if [[ "${archive%.rpm}" != "${archive}" ]]; then
-        rpm2cpio "${pkg_file}" | cpio -itv | while IFS= read -r line; do
+        # Open file descriptor 8 with the command output, ensuring the while read runs in the current shell.
+        exec 9< <(rpm2cpio "${pkg_file}" | cpio -itv)
+        while IFS= read -r line <&9 || [ -n "$line" ]; do
             # Process each line (you can add custom processing here)
+            # info "call mirror_system_executable '${line}' with clean_ldd='${clean_ldd}'"
             if ! mirror_system_executable "${line}"; then clean_ldd=1; fi
         done
+        exec 9<&-
     elif [[ "${archive%.tar.gz}" != "${archive}" ]]; then
         tar tzvf "${pkg_file}" | while IFS= read -r line; do
             # Process each line (custom processing can be added here)
@@ -150,7 +154,8 @@ list_archive_content_to_mirror() {
         fatal "Unknown archive extension for '${archive}'" 11
     fi
 
-    if ! clean_ldd; then
+    #info "Final clean_ldd='${clean_ldd}'"
+    if [[ "${clean_ldd}" != "0" ]]; then
         fatal "Some files in the archive have absolute system paths or unresolved paths" 199
     fi
 
