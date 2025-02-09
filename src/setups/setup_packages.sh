@@ -128,11 +128,11 @@ sync_packages() {
     while IFS= read -r line <&8 || [ -n "$line" ]; do
         # If we have not yet reached the last processed value, check for it.
         if [ "$process" -eq 0 ]; then
-            if [ "$line" = "$last_value" ]; then
+            if [[ "$line" ==  "$last_value" || "${line}" == "${CPLX_SP_REPEAT}"  ]]; then
                 ok "Resuming processing after line: '${line}'"
                 process=1
             else
-                info "Skipping line: '${line}'"
+                info "Skipping line: '${line}' (CPLX_SP_REPEAT='${CPLX_SP_REPEAT}')"
             fi
             continue
         fi
