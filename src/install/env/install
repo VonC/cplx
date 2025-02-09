@@ -118,17 +118,26 @@ uncompress_archive() {
         *.zip)
             echo "Unzipping '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
-            unzip -q "$archive" -d "$destination" || fatal "Failed to unzip '${archive}'" 4
+            if ! unzip -q "$archive" -d "$destination"; then
+                rmdir "$destination" 2>/dev/null
+                fatal "Failed to unzip '${archive}'" 4
+            fi
             ;;
         *.tar.gz)
             echo "Extracting '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
-            tar -xzf "$archive" -C "$destination" --strip-components=1 || fatal "Failed to extract '${archive}'" 4
+            if ! tar -xzf "$archive" -C "$destination" --strip-components=1; then
+                rmdir "$destination" 2>/dev/null
+                fatal "Failed to extract '${archive}'" 41
+            fi
             ;;
         *.tar)
             echo "Extracting '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
-            tar -xf "$archive" -C "$destination" --strip-components=1 || fatal "Failed to extract '${archive}'" 4
+            if ! tar -xf "$archive" -C "$destination" --strip-components=1; then
+                rmdir "$destination" 2>/dev/null
+                fatal "Failed to extract '${archive}'" 42
+            fi
             ;;
         *)
             fatal "Unsupported archive format for '${archive}'" 5
