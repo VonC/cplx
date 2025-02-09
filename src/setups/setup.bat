@@ -27,6 +27,8 @@ if not "%~1"=="" (
         %_fatal% "Unable to repeat or reset step '%~1'" 119
     )
 )
+
+if exist "%setup_dir%\pkgs.log" ( del /q "%setup_dir%\pkgs.log" )
     
 bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% %*"
 if errorlevel 1 (
