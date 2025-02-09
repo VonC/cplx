@@ -64,6 +64,8 @@ else
     source "${DIR}/${tool}/install_functions.sh"
 fi
 
+ln -fs "${DIR}/${tool}" "${DIR}/tool"
+
 # Define the sources directory
 sources_dir="${DIR}/${tool}/sources"
 
