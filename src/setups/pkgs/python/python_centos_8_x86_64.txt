@@ -10,3 +10,4 @@ libgcc
 glibc
 libstdc\+\+
 binutils
+glibc-devel
