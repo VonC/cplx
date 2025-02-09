@@ -254,6 +254,12 @@ check_ldd() {
 
         # Check for an absolute system path. We look for a slash prefixed word.
         if [[ "${line}" =~ (^|[[:space:]])(/[^[:space:]]+) ]]; then
+            if [[ "${line}" =~ [[:space:]]*(/[^[:space:]]+) ]]; then
+                abs_path="${BASH_REMATCH[1]}"
+                if [[ -e "${DIR}/root${abs_path}" || -e "${DIR}/root/usr${abs_path}" ]]; then
+                    continue # Skip if the path exists
+                fi
+            fi
             warning "Absolute system path detected in ldd output: '$line' for file '${file}'"
             ret=1
         fi
