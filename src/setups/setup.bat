@@ -30,8 +30,23 @@ if not "%~1"=="" (
     
 bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% %*"
 if errorlevel 1 (
-    %_error% "Issue when calling '%setup_dir%\%setup_prg%'"
-    exit /b 119
+    call:display_logs
+    %_fatal% "Issue when calling '%setup_dir%\%setup_prg%'" 119
+)
+%_ok% "Setup '%project_dir_name%' done"
+call:display_logs
+goto:eof
+
+:display_logs
+if exist "%setup_dir%\pkgs.log" (
+    %_task% "Must display '%setup_dir%\pkgs.log'"
+    @echo on
+    "%PRGS%\vscodes\current\bin\code.cmd" "%setup_dir%\pkgs.log"
+    if errorlevel 1 (
+        %_fatal% "Unable to display '%setup_dir%\pkgs.log'" 122
+    )
+    @echo off
+    %_ok% "Display '%setup_dir%\pkgs.log' done"
 )
 goto:eof
 
