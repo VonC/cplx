@@ -5,3 +5,8 @@ zlib
 gmp
 gcc
 cpp
+libmpc
+libgcc
+glibc
+libstdc\+\+
+binutils
