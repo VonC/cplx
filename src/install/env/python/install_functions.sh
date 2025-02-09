@@ -9,6 +9,10 @@ function configure() {
 }
 
 function clean() {
+    if [[ ! -e Makefile ]]; then
+        ok "Skip clean, no Makefile in '$(pwd)'"
+        return 0
+    fi
     task "Must make clean"
     if ! make clean; then
         fatal "clean ERROR" 4
