@@ -21,7 +21,8 @@ function setenv() {
     export tools="${HOME}/tools/$1"
     export tool_bin="${tools}/python-$2"
     export tool_src="${tools}/sources/current"
+    export root="${HOME}/tools/root"
 
-    export LD_LIBRARY_PATH="/usr/lib64:/usr/lib:${tool_bin}/usr/lib64:${tool_bin}/lib64"
+    export LD_LIBRARY_PATH="${root}/usr/lib64:${root}/usr/lib:${root}/lib64:${tool_bin}/usr/lib64:${tool_bin}/lib64"
     export PKG_CONFIG_PATH="${tool_bin}/usr/lib64/pkgconfig"
 }
