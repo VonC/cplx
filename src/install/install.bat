@@ -58,12 +58,44 @@ FOR /F "tokens=* delims=" %%i IN ('type "%install_dir%\temp.txt"') DO SET "lastL
 if "%lastLine%"=="4" (
     %_fatal% "Pre-Installation steps failed" 55
 )
+
 scp "%SSH_CONFIG_ENTRY%:%cplx_path%/tools/%CPLX_TOOL%/log" "%install_dir_unix%/install.log"
-if not errorlevel 1 (
-    "%PRGS%\vscodes\current\bin\code.cmd" "%install_dir%\install.log"
-) else (
-    %_warning% "Failed to open install.log file at '%install_dir%'"
+if errorlevel 1 (
+    %_fatal% "Failed to open install.log file at '%install_dir%'" 56
 )
+
+if "%lastLine%"=="199" (
+    %_task% "Must append remote ~/tools/tool/sources/current/config.log to '%install_dir%\install.log'"
+
+    REM scp the remote config.log to a temporary file
+    scp "%SSH_CONFIG_ENTRY%:%cplx_path%/tools/%CPLX_TOOL%/sources/current/config.log" "%install_dir%\temp_config.log"
+    if errorlevel 1 (
+        %_fatal% "Failed to scp remote '%cplx_path%/tools/%CPLX_TOOL%/sources/current/config.log'" 57
+    )
+
+    echo.>>"%install_dir%\install.log"
+    echo.>>"%install_dir%\install.log"
+    echo.>>"%install_dir%\install.log"
+    echo ---------------------------------------->>"%install_dir%\install.log"
+    echo "Config.log from remote server">>"%install_dir%\install.log"
+    echo ---------------------------------------->>"%install_dir%\install.log"
+    echo.>>"%install_dir%\install.log"
+    echo.>>"%install_dir%\install.log"
+
+    REM Append the temporary file to the local install.log
+    type "%install_dir%\temp_config.log" >> "%install_dir%\install.log"
+    if errorlevel 1 (
+        %_fatal% "Failed to append temp_config.log to install.log" 58
+    )
+
+    REM Remove the temporary file
+    del "%install_dir%\temp_config.log"
+)
+
+rem https://stackoverflow.com/questions/6814075/windows-start-b-command-problem
+rem https://stackoverflow.com/questions/51132235/opening-project-in-vscode-using-batch-file
+"%PRGS%\vscodes\current\bin\code.cmd" "" "%install_dir%\install.log" | exit
+
 if not %lastLine%==0 ( tail -10 "%install_dir%\temp.txt" && %_fatal% "Installation failed" 5 )
 %_ok% "Installation executed"
 
