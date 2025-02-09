@@ -123,11 +123,16 @@ sync_packages() {
         fatal "cplx_path not found in file '${properties_file}'" 101
     fi
 
-    while IFS= read -r line || [ -n "$line" ]; do
+    # Open the file on file descriptor 8
+    exec 8< "${packages_for_tools}"
+    while IFS= read -r line <&8 || [ -n "$line" ]; do
         # If we have not yet reached the last processed value, check for it.
         if [ "$process" -eq 0 ]; then
             if [ "$line" = "$last_value" ]; then
+                ok "Resuming processing after line: '${line}'"
                 process=1
+            else
+                info "Skipping line: '${line}'"
             fi
             continue
         fi
@@ -136,11 +141,16 @@ sync_packages() {
         task "Must process line: '${line}'"
         if ! sync_package "${arch}" "${line}"; then
             fatal "Failed to process line: '${line}'" 1
+        else
+            ok "Line '${line}' processed successfully in '${packages_for_tools}'"
         fi
+        process=1
 
-        # Optionally, update the 'last' file with the current processed value.
-        # echo "${line}" > last
-    done < "${packages_for_tools}"
+        # Update the 'last' file with the current processed value.
+        echo "${line}"> "${pkgs_tool_dir}/last"
+    done
+    # Close file descriptor 8.
+    exec 8<&-
     if [ "$process" -eq 0 ]; then
         warning "All lines have already been processed."
     else
