@@ -73,6 +73,34 @@ function main() {
     # shellcheck disable=SC2154
     cd "${DIR}/root" || fatal "Unable to access pkgs_dir '${DIR}/root'" 22
 
+    if ! check_flag_exists "${package_name}" "installed"; then
+        install_package
+    fi
+    if ! check_flag_exists "${package_name}" "mirrored"; then
+        list_archive_content_to_mirror "${package_name}"
+    fi
+
+    return $?
+}
+
+check_flag_exists() {
+    local pkg="$1"
+    local flag_suffix="$2"
+    local pattern="${pkg%.rpm}*${flag_suffix}*"
+    shopt -s nullglob
+    # shellcheck disable=SC2206
+    local flags=( ${pattern} )
+    shopt -u nullglob
+    if (( ${#flags[@]} > 0 )); then
+        info "A file matching '${pattern}' already exists in '${DIR}/root'"
+        ok "'${pkg}' already '${flag_suffix}' in '${DIR}/root'"
+        return 0
+    fi
+    return 1
+}
+
+function install_package() {
+
     local flag="${package_name%.rpm}.installed"
     if [[ "${package_name%.rpm}" != "${package_name}" ]]; then
     if ! rpm2cpio "${pkgs_dir}/${package_name}" | cpio -idmv; then fatal "Unable to install '${package_name}'" 2; fi
@@ -84,10 +112,70 @@ function main() {
     else
         fatal "unknown extension for archive '${package_name}'" 11
     fi
-    touch "${flag}"
+    touch "${flag}" || fatal "Unable to create flag file '${flag}'" 3
     ok "'${flag}' installed in '${DIR}/root'"
 
-    return $?
+}
+
+list_archive_content_to_mirror() {
+    local archive="$1"
+    local pkg_file="${pkgs_dir}/${archive}"
+
+    if [[ ! -e "${pkg_file}" ]]; then
+        fatal "Archive file '${pkg_file}' not found" 1
+    fi
+
+    info "Listing contents of archive '${archive}':"
+    if [[ "${archive%.rpm}" != "${archive}" ]]; then
+        rpm2cpio "${pkg_file}" | cpio -itv | while IFS= read -r line; do
+            # Process each line (you can add custom processing here)
+            mirror_system_executable "${line}"
+        done
+    elif [[ "${archive%.tar.gz}" != "${archive}" ]]; then
+        tar tzvf "${pkg_file}" | while IFS= read -r line; do
+            # Process each line (custom processing can be added here)
+            info "tar.gz contains: ${line}"
+        done
+    elif [[ "${archive%.xz}" != "${archive}" ]]; then
+        # Assuming it's a tar.xz archive
+        if file "${pkg_file}" | grep -qi "tar archive"; then
+            tar --xz -tzvf "${pkg_file}" | while IFS= read -r line; do
+                info "tar.xz contains: ${line}"
+            done
+        else
+            fatal "Unsupported xz archive type for '${archive}'" 1
+        fi
+    else
+        fatal "Unknown archive extension for '${archive}'" 11
+    fi
+    mv "${package_name%.rpm}.installed" "${package_name%.rpm}.installed.mirrored" || fatal "Unable to rename flag file '${package_name%.rpm}.installed' to '${package_name%.rpm}.installed.mirrored'" 12
+
+}
+
+mirror_system_executable() {
+    local src_line="$1"
+    # Remove everything before the first '/' and prepend '/' (if not already)
+    local src_file="/${src_line#*/}"
+
+    # Check that src_file exists and is a regular file (not a symlink)
+    if [[ -f "${src_file}" && ! -L "${src_file}" ]]; then
+        # Construct the destination path by prefixing the current folder path.
+        # For example, for /usr/bin/unzipsfx, it will be copied to ./usr/bin/unzipsfx
+        task "Must copy '${src_file}' to mirror folder '$(pwd)'"
+        local dest_file="./${src_file#/}"  # removes leading /
+        local dest_dir
+        dest_dir=$(dirname "${dest_file}")
+        mkdir -p "${dest_dir}" || fatal "Unable to create directory '${dest_dir}'" 31
+
+        cp "${src_file}" "${dest_file}" || fatal "Unable to copy '${src_file}' to '${dest_file}'" 32
+        # Create a dummy file to indicate the file was copied
+        touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
+        info "Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
+    else
+        info "No action: '${src_file}' either does not exist, is not a regular file, or is a symlink."
+    fi
+
+    return 0
 }
 
 # if one of the parameter is "--reconfigure", shift, and set reconfigure=true, then pass the rest to main
