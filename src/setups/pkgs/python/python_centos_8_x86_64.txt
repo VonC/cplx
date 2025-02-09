@@ -1,4 +1,6 @@
 unzip
 make
 make-devel
+zlib
+gmp
 gcc
