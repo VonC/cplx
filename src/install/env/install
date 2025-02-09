@@ -56,6 +56,11 @@ fi
 # Define the sources directory
 sources_dir="${DIR}/${tool}/sources"
 
+# Remove any old log
+prj="${DIR}/${tool}"
+logs="${prj}/logs"
+rm -f "${prj}/log" 2>/dev/null
+
 # Enable nullglob to handle cases with no matching files
 shopt -s nullglob
 
@@ -184,9 +189,6 @@ update_current_symlink "$archive_folder" "$current_symlink"
 
 NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
 LOGIN="$(/usr/bin/id -un)"
-
-prj="${DIR}/${tool}"
-logs="${prj}/logs"
 mkdir -p "${logs}"
 
 PATH_LOG="${logs}/${LOGIN}-$(basename "$0" .bash)-${NOW}.log"
