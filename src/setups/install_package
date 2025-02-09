@@ -12,7 +12,7 @@ source "${DIR}/../bin/properties.sh"
 rm -f "${DIR}/pkgs.log"
 
 # Check if exactly one parameter is provided
-if [[ $# -ne 2 ]]; then
+if [[ $# -ne 1 ]]; then
     fatal "Usage: install_package <package_name>" 253
 fi
 
@@ -71,8 +71,22 @@ function getArg() {
 function main() {
     info "main: Start install package '${package_name} at '${NOW}'"
     # shellcheck disable=SC2154
-    cd "${pkgs_dir}" || fatal "Unable to access pkgs_dir '${pkgs_dir}'" 22
-    pwd
+    cd "${DIR}/root" || fatal "Unable to access pkgs_dir '${DIR}/root'" 22
+
+    local flag="${package_name%.rpm}.installed"
+    if [[ "${package_name%.rpm}" != "${package_name}" ]]; then
+    if ! rpm2cpio "${pkgs_dir}/${package_name}" | cpio -idmv; then fatal "Unable to install '${package_name}'" 2; fi
+    elif [[ "${package_name%.xz}" != "${package_name}" ]]; then
+        if ! xzcat "${pkgs_dir}/${package_name}" > "${name,,}"; then fatal "Unable to unxz '${package_name}'" 2; fi
+        chmod 755 "${name,,}"
+    elif [[ "${package_name%.tar.gz}" != "${package_name}" ]]; then
+        if ! tar xpvf "${pkgs_dir}/${package_name}"; then fatal "Unable to untar gz '${package_name}'" 2; fi
+    else
+        fatal "unknown extension for archive '${package_name}'" 11
+    fi
+    touch "${flag}"
+    ok "'${flag}' installed in '${DIR}/root'"
+
     return $?
 }
 
