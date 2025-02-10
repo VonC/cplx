@@ -1,9 +1,11 @@
-0.8.0-SNAPSHOT -- First installation step
+0.8.0 -- First installation step, configure works
 
 Copy of the installation scripts.
-Execution of a first installation step (unarchive source file)
+Execution of a first installation step (unarchive source file, configure and make clean)
 Check the installation log are copied back to the PC and opened in IDE
 
 - A step can be reset.
 - `cdp` is an alias to cd back to the project root folder.
 - changelog is cleanup (no more double date before title)
+- `sp` alias triggers a download, scp and unarchive of a rpm package from python_centos_8_x86_64.txt
+- `i` alias triggers the scp of `install`, and `install_functions.sh`, launching the installation process

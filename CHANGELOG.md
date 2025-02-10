@@ -4,15 +4,130 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.8.0-SNAPSHOT unreleased] First installation step -
+## [v0.8.0] - 2025-02-10 - First installation step, configure works
 
 Copy of the installation scripts.
-Execution of a first installation step (unarchive source file)
+Execution of a first installation step (unarchive source file, configure and make clean)
 Check the installation log are copied back to the PC and opened in IDE
+
+- A step can be reset.
+- `cdp` is an alias to cd back to the project root folder.
+- changelog is cleanup (no more double date before title)
+- `sp` alias triggers a download, scp and unarchive of a rpm package from python_centos_8_x86_64.txt
+- `i` alias triggers the scp of `install`, and `install_functions.sh`, launching the installation process
+
+### 🚀 Features
+
+- *(utils)* Add step reset functionality
+- *(install)* Add installation scripts
+- *(install)* Add installation scripts
+- *(setup)* Make setup properties private
+- *(setup)* Improve setup.bat error handling
+- *(bat)* Senv.bat adds `hlsenv` alias
+- *(install)* Installation script first implem.
+- *(setups)* Rename project_path to cplx_path
+- *(tools)* Add `CPLX_VERSION` to `senv.local.tpl`
+- *(install)* Improve Windows installer
+- *(install)* Add properties file loading
+- *(setup)* Enhance setup.bat aliases
+- *(setups)* Retrieve remote host architecture
+- *(utils)* Enhance steps.sh with repeat/reset
+- *(setup)* Improve setup.bat script
+- *(setups,pkgs)* Add CentOS 8 packages list
+- *(setup)* Add Python packages for CentOS 8
+- *(setup)* Add CentOS and RHEL package URLs
+- *(setup)* Add RHEL 7.9 x86_64 packages list
+- *(setup)* Package synchronization reads pkgs file
+- *(setup)* Add Python RHEL 7.9 x86_64 packages
+- *(setup)* Start package synchronization code
+- Update RHEL 7.9 x86_64 packages list
+- *(setup)* Add package download functionality
+- *(setup)* Add scp functionality for packages
+- *(echos)* Add caller function to echoslog
+- *(setup)* Add install_package script and integration
+- *(setup)* Add CentOS/RHEL x86_64 packages folders
+- *(setup)* Add .keep file for `root` tools directory
+- *(setup)* Improve package installation
+- *(setup)* Package installation mirroring and flag
+- *(install)* Improve log file management
+- Improve packages synchronization
+- *(install)* Defined tools/tool symlink
+- *(install)* Detects unclean ldd when inst package
+- *(install)* Add config.log to local log file
+- *(setup)* Add CPLX_SP_REPEAT env var to repeat
+- *(setup)* Add install package post step
+- *(install)* Enhance Python environment setup
+- *(env)* Add alias to tail config log
+
+### 🐛 Bug Fixes
+
+- *(tools)* Remove date from changelog entries
+- *(bat)* Change cdc alias to cdp or cdcp
+- *(setup)* Project path from SSH config
+- *(bat)* Build.bat is quiet after build.
+- *(bat)* Move setup.properties copy logic in `senv.bat`
+- *(install)* Install_functions.sh add quotes around variables
+- *(install)* Get services
+- *(install)* Get install tee output last line
+- *(install)* Use install_functions.sh for tool installation
+- *(install)* Improve archive detection in installer
+- *(setup)* Improve architecture detection in setup.sh
+- *(setup)* Use external URL for packages
+- *(setup)* Improve package URL extraction
+- *(setup)* Improve package URL extraction robustness
+- *(python)* Remove unnecessary make commands
+- *(setup)* Handle missing package URL property
+- *(setups)* Correct setup.bat path handling
+- *(setup)* Improve package download URL
+- *(setup)* Add headers to avoid curl 403 errors
+- *(setup)* Remove VSCode automatic opening
+- *(setup.bat)* Improve error handling and logs display
+- *(install)* Bat improve remote installation logging
+- *(install)* Handle unzip/tar extraction failures
+- Add root/usr/bin to PATH if missing
+- Adjust LD_LIBRARY_PATH for python installation
+- *(setup)* Delete pkgs.log before any call
+- *(install)* Handle missing Makefile in clean
+- *(install)* Handle config.log errors
+- *(install)* Update aliases in .env file
+- *(setups)* Add libdl to the ldd exclude list
+- *(setup)* Add missing packages for gcc
+- *(install)* Make sure to fail on ldd warning
+- *(setup)* Improve ldd check in package installer
+- *(install)* Add glibc-devel to Python CentOS 8 setup
+- *(install)* Display parameters
+- *(setup)* Adjust PATH environment variable in .env
+- *(install)* Improve Python install logging
+- *(setup)* Handle `.pc` files in ldd check
+- *(install)* Avoid error in Python installation
+
+### 🚜 Refactor
+
+- *(setup)* Split copy_the_sources step
 
 ### 📚 Documentation
 
 - *(md)* Add installation and complete setup steps
+- *(md)* Add download packages list step
+
+### ⚙️ Miscellaneous Tasks
+
+- *(md)* CHANGELOG updated, trimmed and formatted
+- *(bat)* Run.bat format loop
+- *(git)* Add 'last' to .gitignore entries
+- *(install)* Add missing packages for CentOS 8
+- *(md)* Document build issues on CentOS 8
+- *(setup)* Add openssl-devel dependency
+
+### Fix
+
+- *(bat)* Add trace logging to install and setup bat
+- *(install)* Improve error handling in install script
+- Add cpp package for CentOS 8
+
+### Refactor
+
+- *(bat)* Simplify senv.bat and init.bat
 
 ## [v0.7.0] - 2025-01-26 -- Download, then SCP tool sources to the remote server
 
