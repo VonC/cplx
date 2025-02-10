@@ -11,3 +11,6 @@ glibc
 libstdc\+\+
 binutils
 glibc-devel
+glibc-headers
+kernel-headers
+ncurses-devel
