@@ -1,6 +1,6 @@
 @echo off
 
-call %~dp0\tools\init.bat "%~1"
+call %~dp0tools\init.bat "%~1"
 doskey steps=bash -c "./steps.sh %1"
 doskey props=bash -c "./properties.sh %1"
 doskey sfa=bash -c "%project_dir_unix%/src/utils/steps_format_anchors.sh $1"
@@ -22,7 +22,8 @@ goto:eof
 ::  UNSET PROJECT VARIABLES IF REQUESTED
 ::##################################################
 :unset_senv
-call "%project_dir%\tools\init.bat" unset
+rem already done by line 3: `call %~dp0tools\init.bat "%~1"`
+rem call "%project_dir%\tools\init.bat" unset
 doskey sfa=
 goto:eof
 
