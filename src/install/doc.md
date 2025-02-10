@@ -71,7 +71,7 @@ conftest.c:468:10: fatal error: ncursesw/panel.h: No such file or directory
  #include <ncursesw/panel.h>
  ```
 
-### `openssl/ssl.h: No such file or directory`
+### `openssl/ssl.h: No such file or directory`: openssl-devel
 
 ```bash
 collect2: error: ld returned 1 exit status
@@ -79,4 +79,4 @@ conftest.c:449:10: fatal error: openssl/ssl.h: No such file or directory
 configure:28229: error: --with-openssl-rpath "/home/vonc/cplx/tools/python/python-v3.13.1/usr/lib64" is not a directory
 ```
 
-
+openssl-devel

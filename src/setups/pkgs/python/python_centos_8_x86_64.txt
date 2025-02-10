@@ -14,3 +14,4 @@ glibc-devel
 glibc-headers
 kernel-headers
 ncurses-devel
+openssl-devel
