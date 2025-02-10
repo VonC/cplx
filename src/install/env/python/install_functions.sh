@@ -2,7 +2,20 @@
 
 function configure() {
     task "config.log not present: reconfigure"
-    if ! "${tool_src}/configure" --prefix="${tool_bin}" --with-openssl="${tool_bin}/usr" --with-openssl-rpath="${tool_bin}/usr/lib64" --enable-shared=yes; then
+
+    # Build the configure command as an array
+    local configure_cmd=( "${tool_src}/configure"
+                          "--prefix=${tool_bin}"
+                          "--with-openssl=${tool_bin}/usr"
+                          "--with-openssl-rpath=${tool_bin}/usr/lib64"
+                          "--enable-shared=yes" )
+
+
+    # Display the command with its parameters.
+    info "Running configure command: ${configure_cmd[*]}"
+
+    # Execute the configure command.
+    if ! "${configure_cmd[@]}"; then
         fatal "configure ERROR" 199
     fi
     ok "configure done"
