@@ -92,6 +92,10 @@ function setenv() {
         sed -i "s/^EXTLIBS =.*\?$/EXTLIBS = ${elibs}/g" "${tool_src}/Makefile" || fatal "Unable to update '${tool_src}/Makefile' EXTLIBS with '${elibs}' in '$(pwd)'" 18 # -lintl
         info "Makefile EXTLIBS updated with '${elibs}'"
     fi
+
+    # To avoid the error:
+    # configure:28229: error: --with-openssl-rpath "/home/vonc/cplx/tools/python/python-v3.13.1/usr/lib64" is not a directory
+    mkdir -p "${tool_bin}/usr/lib64"
 }
 
 #-------------------------------------------------------------------------
