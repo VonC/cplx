@@ -1,11 +1,6 @@
-0.8.0 -- First installation step, configure works
+0.9.0-SNAPSHOT -- Compile Python
 
-Copy of the installation scripts.
-Execution of a first installation step (unarchive source file, configure and make clean)
-Check the installation log are copied back to the PC and opened in IDE
-
-- A step can be reset.
-- `cdp` is an alias to cd back to the project root folder.
-- changelog is cleanup (no more double date before title)
-- `sp` alias triggers a download, scp and unarchive of a rpm package from python_centos_8_x86_64.txt
-- `i` alias triggers the scp of `install`, and `install_functions.sh`, launching the installation process
+Now that the install script works, and configure Python,
+generating a Makefile, the goal is to compile it,
+addressing the final binary structure, once compiled
+and installed.
