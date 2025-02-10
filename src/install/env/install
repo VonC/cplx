@@ -250,7 +250,7 @@ function getArg() {
 
 # main: Acts as the central execution point, orchestrating the overall setup process including dependency checks, installations, and environmental configurations, ensuring the script achieves its purpose of preparing the environment or updating software as required.
 function main() {
-    info "main: Start build at '${NOW}'"
+    info "main: Start build at '${NOW}', parameters: $*"
     setenv "$@"
     # shellcheck disable=SC2154
     cd "${tool_src}" || fatal "Unable to access tool_src '${tool_src}'" 22
