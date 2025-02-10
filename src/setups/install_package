@@ -112,10 +112,10 @@ function install_package() {
 
     local flag="${package_name%.rpm}.installed"
     if [[ "${package_name%.rpm}" != "${package_name}" ]]; then
-    if ! rpm2cpio "${pkgs_dir}/${package_name}" | cpio -idmv; then fatal "Unable to install '${package_name}'" 2; fi
+        if ! rpm2cpio "${pkgs_dir}/${package_name}" | cpio -idmv; then fatal "Unable to install '${package_name}'" 2; fi
     elif [[ "${package_name%.xz}" != "${package_name}" ]]; then
-        if ! xzcat "${pkgs_dir}/${package_name}" > "${name,,}"; then fatal "Unable to unxz '${package_name}'" 2; fi
-        chmod 755 "${name,,}"
+        if ! xzcat "${pkgs_dir}/${package_name}" > "${package_name%.xz,,}"; then fatal "Unable to unxz '${package_name}'" 2; fi
+        chmod 755 "${package_name%.xz,,}"
     elif [[ "${package_name%.tar.gz}" != "${package_name}" ]]; then
         if ! tar xpvf "${pkgs_dir}/${package_name}"; then fatal "Unable to untar gz '${package_name}'" 2; fi
     else
@@ -225,7 +225,7 @@ check_ldd() {
     # If the file extension is h, hpp, or similar, no need to run ldd
     local ext="${file##*.}"
     case "$ext" in
-        h|hpp|c|so|bz2|o|a|mo|gz|1.gz|LIB)
+        h|hpp|c|so|bz2|o|a|mo|gz|1.gz|LIB|pc)
             # info "'$file' is a header file; skipping ldd check"
             return 0
             ;;
