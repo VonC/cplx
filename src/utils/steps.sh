@@ -343,10 +343,57 @@ test_steps_reset() {
     fi
 }
 
+test_steps_done() {
+    cp "${steps_file}" "${STEPS_DIR}/steps.test.done.child.tmp.md"
+    steps_file="${STEPS_DIR}/steps.test.done.child.tmp.md"
+    if ! repeat_step this_second_step_should_be_repeated; then
+        fatal "Unable to reset 'this_second_step_should_be_repeated' in '${steps_file}'" $?
+    fi
+
+    if step_is_done this_step_should_be_done_again; then
+        fatal "'this_step_should_be_done_again' should not be done in '${steps_file}'" $?
+    else
+        ok "'this_step_should_be_done_again' is not done (child to be repeated) in '${steps_file}'"
+    fi
+    if ! step_is_done this_first_step_should_not_be_repeated; then
+        fatal "'this_first_step_should_not_be_repeated' should done in '${steps_file}'" $?
+    else
+        ok "'this_first_step_should_not_be_repeated' is still done (not to be repeated) in '${steps_file}'"
+    fi
+    if step_is_done this_second_step_should_be_repeated; then
+        fatal "'this_second_step_should_be_repeated' should not be done in '${steps_file}'" $?
+    else
+        ok "'this_second_step_should_be_repeated' is not done (to be repeated) in '${steps_file}'"
+    fi
+    if ! step_is_done this_third_step_should_not_be_repeated; then
+        fatal "'this_third_step_should_not_be_repeated' should be done in '${steps_file}'" $?
+    else
+        ok "'this_third_step_should_not_be_repeated' is done (not to be repeated) in '${steps_file}'"
+    fi
+
+    if ! step_done this_second_step_should_be_repeated; then
+        fatal "Unable to mark 'this_second_step_should_be_repeated' as done in '${steps_file}'" $?
+    fi
+
+    if ! step_is_done this_third_step_should_not_be_repeated; then
+        fatal "'this_third_step_should_not_be_repeated' should still be done in '${steps_file}'" $?
+    else
+        ok "'this_third_step_should_not_be_repeated' is still done (has been repeated) in '${steps_file}'"
+    fi
+    if ! step_is_done this_step_should_be_done_again; then
+        fatal "'this_step_should_be_done_again' should be done in '${steps_file}'" $?
+    else
+        ok "'this_step_should_be_done_again' is done (all children repeated) in '${steps_file}'"
+    fi
+
+}
+
 # Only run if script is not being sourced
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     if [ $# -eq 0 ]; then
         steps_file="${STEPS_DIR}/steps.test.md"
+        test_steps_done
+        exit 0
         test_steps
         test_steps_repeat
         test_steps_repeat_child

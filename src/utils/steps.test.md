@@ -33,3 +33,11 @@
 ### This other child should be reset [🔗](#this_other_child_should_be_reset) (done: ✅)
 
 ## This step should also be reset [🔗](#this_step_should_also_be_reset) (done: ✅)
+
+## This step should be done again [🔗](#this_step_should_be_done_again) (done: ✅)
+
+### This first step should not be repeated [🔗](#this_first_step_should_not_be_repeated) (done: ✅)
+
+### This second step should be repeated [🔗](#this_second_step_should_be_repeated) (done: ✅)
+
+### This third step should not be repeated [🔗](#this_third_step_should_not_be_repeated) (done: ✅)
