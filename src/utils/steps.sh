@@ -315,7 +315,6 @@ steps_list_one_step() {
         echo "${grep_steps}"
         fatal "More than one step found matching '$step'" 12
     fi
-
     # Get the exact step name
     local exact_step
     exact_step=$(echo "$grep_steps" | head -n 1)
@@ -336,6 +335,7 @@ repeat_or_reset_step() {
 
     # Get the exact step name
     local exact_step
+    if ! steps_list_one_step "${step}"; then exit 1; fi
     exact_step=$(steps_list_one_step "${step}")
 
     # Perform repeat or reset
