@@ -24,7 +24,7 @@ if "%~1"=="packages" (
 if not "%~1"=="" (
     bash.exe -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; "%project_dir_unix%/src/utils/steps.sh" repeat_or_reset_step %~1"
     if errorlevel 1 (
-        %_fatal% "Unable to repeat or reset step '%~1'" 119
+        %_fatal% "Unable to repeat or reset step '%~1' (r_xxx means reset, xxx means repeat)" 119
     )
 )
 
