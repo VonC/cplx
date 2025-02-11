@@ -280,6 +280,50 @@ next_step() {
     echo "${next_step_name}"
 }
 
+steps_list() {
+    if [[ ! -e "${steps_file}" ]]; then
+        echo ""
+        return
+    fi
+    # Extract the step names from markdown links of the form: ](#step_name)
+    grep_output=$(grep -oP '(?<=]\(#)[^)]+' "${steps_file}")
+    if [[ -z "$grep_output" ]]; then
+        echo ""
+    else
+        echo "$grep_output"
+    fi
+}
+
+steps_list_one_step() {
+    local step="$1"
+    # Get all steps via steps_list and filter for a match
+    local all_steps
+    all_steps=$(steps_list)
+    local grep_steps
+    grep_steps=$(echo "$all_steps" | grep -i "$step")
+    if [[ -z "$grep_steps" ]]; then
+        fatal "Error: No steps found matching '$step'" 10
+    fi
+
+    # Count the number of matching steps
+    local step_count
+    step_count=$(echo "$grep_steps" | wc -l)
+    if [[ "$step_count" -eq 0 ]]; then
+        fatal "Error: No steps found matching '$step'" 11
+    elif [[ "$step_count" -gt 1 ]]; then
+        error "Multiple steps found matching '$step'"
+        echo "${grep_steps}"
+        fatal "More than one step found matching '$step'" 12
+    fi
+
+    # Get the exact step name
+    local exact_step
+    exact_step=$(echo "$grep_steps" | head -n 1)
+    # shellcheck disable=SC2001
+    exact_step=$(echo "$exact_step" | sed 's/[^a-zA-Z_]//g')
+    echo "${exact_step}"
+}
+
 repeat_or_reset_step() {
     local step="$1"
     local reset_needed=false
@@ -290,23 +334,9 @@ repeat_or_reset_step() {
         step="${step#r_}"
     fi
 
-    # Extract steps from steps.md
-    grep_steps=$(grep -oP "\]\((.*?)\)" "${steps_file}" | grep -i "$step")
-    if [[ -z "$grep_steps" ]]; then
-        fatal "Error: No steps found matching '$step'" 10
-    fi
-    # Check the number of steps found
-    step_count=$(echo "$grep_steps" | wc -l)
-    if [[ $step_count -eq 0 ]]; then
-        fatal "Error: No steps found matching '$step'" 11
-    elif [[ $step_count -gt 1 ]]; then
-        fatal "Error: More than one step found matching '$step'" 12
-    fi
-
     # Get the exact step name
-    exact_step=$(echo "$grep_steps" | head -n 1)
-    # shellcheck disable=SC2001
-    exact_step=$(echo "$exact_step" | sed 's/[^a-zA-Z_]//g')
+    local exact_step
+    exact_step=$(steps_list_one_step "${step}")
 
     # Perform repeat or reset
     if ${reset_needed}; then
