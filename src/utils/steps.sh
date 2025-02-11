@@ -90,7 +90,50 @@ step_done() {
     if ! sed -i -E "s/\(#${name}\)/\(#${name}\) (done: ✅)/" "${steps_file}"; then
         return 1
     fi
+    if step_parent_should_be_done "${name}"; then
+        local parent
+        step_parent_of "${name}" "parent"
+        step_done "${parent}"
+    fi
     return 0
+}
+
+step_parent_should_be_done() {
+    local name="$1"
+    local parent
+    step_parent_of "${name}" "parent"
+    # if no parent, return false
+    if [[ "${parent}" == "" ]]; then return 1; fi
+    awk -v "target=parent" -f "${STEPS_DIR}/steps_get_parent.awk" "${steps_file}"
+    local should_be_done=0
+    while IFS= read -r child; do
+        if ! step_is_done "${child}"; then
+             should_be_done=1
+             break
+        fi
+    done < <(awk -v target="parent" -f "${STEPS_DIR}/steps_get_parent.awk" "${steps_file}")
+    return ${should_be_done}
+}
+
+step_parent_of() {
+    local current_step_name="$1"
+    local parent_var="$2"
+    local current_level
+    current_level=$(step_level "${current_step_name}")
+    if [ "${current_level}" -le 2 ]; then
+        # a level 2 item has no parent
+        # assign to the variable named after parent_var value to ""
+        printf -v "$parent_var" ""
+        return 0
+    fi
+    # Find the parent step: the nearest step above current_step_name with level less than current_level
+    parent_step=$(awk -v level="$current_level" -v name="${current_step_name}" -f "${STEPS_DIR}/steps_get_parent.awk" "${steps_file}")
+    # shellcheck disable=SC2181
+    if [[ $? -gt 0 ]]; then
+        fatal "Unable to get parent step for '${current_step_name}' in '${steps_file}'" 108
+    fi
+    printf -v "$parent_var" "%s" "$parent_step"
+    set +x
 }
 
 step_level() {
@@ -101,11 +144,11 @@ step_level() {
     local level
     set -o pipefail
     level=$(grep -E "\(#${name}\)" "${steps_file}" | grep -Eo "^#+" | wc -c)
-    level=$((level - 1))
     # shellcheck disable=SC2181
     if [ $? -gt 0 ]; then
         fatal "Unable to get step level, step '${name}' # prefix not found in '${steps_file}'" 106
     fi
+    level=$((level - 1))
     if [ "${level}" -eq 0 ]; then
         fatal "Unable to get step level, step '${name}' does not have a level in '${steps_file}'" 105
     fi
@@ -388,10 +431,22 @@ test_steps_done() {
 
 }
 
+
+test_steps_parent_of() {
+    local test_parent
+    step_parent_of "cascading_repeat_1" "test_parent"
+    if [[ "${test_parent}" == "step_to_be_repeated" ]]; then
+        ok "Parent of cascading_repeat_1 is step_to_be_repeated"
+    else
+        fatal "Parent of cascading_repeat_1 should be 'step_to_be_repeated', not '${test_parent}'" 1
+    fi
+}
+
 # Only run if script is not being sourced
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     if [ $# -eq 0 ]; then
         steps_file="${STEPS_DIR}/steps.test.md"
+        test_steps_parent_of
         test_steps_done
         exit 0
         test_steps
