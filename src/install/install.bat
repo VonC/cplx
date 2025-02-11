@@ -38,7 +38,7 @@ if "%CPLX_TOOL%" == "" (
 )
 if "%CPLX_VERSION%" == "" ( set "CPLX_VERSION=%~2" )
 if "%CPLX_VERSION%" == "" (
-    %_fatal% "CPLX_VERSION is not defined (must be one of '%cplx_services%')" 3
+    %_fatal% "CPLX_VERSION is not defined (must be a version of '%CPLX_TOOL%')" 3
 )
 
 rem echo "install_dir_unix='%install_dir_unix%', src_dir_unix='%src_dir_unix%'"
