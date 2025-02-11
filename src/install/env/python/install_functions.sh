@@ -85,7 +85,7 @@ function setenv() {
     update_xxpath "ldpaths" "libc_nonshared.a"
     #local ldlinpath
     #update_xxpath "ldlinpath" "ld-linux-x86-64.so.2"
-    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O -U_FORTIFY_SOURCE -m64"
+    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2"
     export ZLIB_PATH="${root}/usr"
     export CURLDIR="${root}/usr"
     export OPENSSLDIR="${root}/usr"
