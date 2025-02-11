@@ -371,7 +371,7 @@ test_steps() {
 }
 
 test_steps_repeat() {
-    cp "${steps_file}" "${STEPS_DIR}/steps.test.repeat.tmp.md"
+    cp "${STEPS_DIR}/steps.test.md" "${STEPS_DIR}/steps.test.repeat.tmp.md"
     steps_file="${STEPS_DIR}/steps.test.repeat.tmp.md"
     if ! repeat_step step_to_be_repeated; then
         fatal "Unable to repeat step_to_be_repeated in '${steps_file}'" $?
@@ -384,7 +384,7 @@ test_steps_repeat() {
 }
 
 test_steps_repeat_child() {
-    cp "${steps_file}" "${STEPS_DIR}/steps.test.repeat.child.tmp.md"
+    cp "${STEPS_DIR}/steps.test.md" "${STEPS_DIR}/steps.test.repeat.child.tmp.md"
     steps_file="${STEPS_DIR}/steps.test.repeat.child.tmp.md"
 
     if ! repeat_step this_child_should_be_repeated; then
@@ -398,7 +398,7 @@ test_steps_repeat_child() {
 }
 
 test_steps_reset() {
-    cp "${steps_file}" "${STEPS_DIR}/steps.test.reset.child.tmp.md"
+    cp "${STEPS_DIR}/steps.test.md" "${STEPS_DIR}/steps.test.reset.child.tmp.md"
     steps_file="${STEPS_DIR}/steps.test.reset.child.tmp.md"
 
     if ! reset_step this_child_should_be_reset; then
@@ -417,7 +417,7 @@ test_steps_reset() {
 }
 
 test_steps_done() {
-    cp "${steps_file}" "${STEPS_DIR}/steps.test.done.child.tmp.md"
+    cp "${STEPS_DIR}/steps.test.md" "${STEPS_DIR}/steps.test.done.child.tmp.md"
     steps_file="${STEPS_DIR}/steps.test.done.child.tmp.md"
     if ! repeat_step this_second_step_should_be_repeated; then
         fatal "Unable to reset 'this_second_step_should_be_repeated' in '${steps_file}'" $?
@@ -476,13 +476,12 @@ test_steps_parent_of() {
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     if [ $# -eq 0 ]; then
         steps_file="${STEPS_DIR}/steps.test.md"
-        test_steps_parent_of
-        test_steps_done
-        exit 0
         test_steps
         test_steps_repeat
         test_steps_repeat_child
         test_steps_reset
+        test_steps_parent_of
+        test_steps_done
     else
         func="$1"
         shift
