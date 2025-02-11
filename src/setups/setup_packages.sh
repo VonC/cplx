@@ -126,6 +126,12 @@ sync_packages() {
     # Open the file on file descriptor 8
     exec 8< "${packages_for_tools}"
     while IFS= read -r line <&8 || [ -n "$line" ]; do
+        # Trim leading spaces for checking
+        trimmed_line="${line#"${line%%[![:space:]]*}"}"
+        if [[ "$trimmed_line" == \#* ]]; then
+            info "Skipping commented line: '${trimmed_line}'"
+            continue
+        fi
         # If we have not yet reached the last processed value, check for it.
         if [ "$process" -eq 0 ]; then
             if [[ "$line" ==  "$last_value" || "${line}" == "${CPLX_SP_REPEAT}"  ]]; then
