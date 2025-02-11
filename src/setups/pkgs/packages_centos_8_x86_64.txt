@@ -1,3 +1,4 @@
+<!--- cSpell:disable --->
 ModemManager-1.20.2-1.el8.x86_64.rpm
 ModemManager-glib-1.20.2-1.el8.x86_64.rpm
 NetworkManager-1.40.16-15.el8.x86_64.rpm
