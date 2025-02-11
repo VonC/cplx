@@ -184,6 +184,75 @@ https://gcc.gnu.org/onlinedocs/gccint/Integer-library-routines.html
 
 Not blocking.
 
+It seems you're encountering another undefined symbol error, this time with `__umodti3`. This function is related to 128-bit integer modulo division, which is not directly supported by some older CPUs.
+
+Here's how you can determine which `compiler-rt` your GCC is using and address the `__umodti3` error:
+
+**1. Check GCC's link options:**
+
+* Use the `-###` flag to see the detailed commands GCC executes during compilation. This will reveal the libraries it's linking against, including `compiler-rt` if it's being used.
+
+```bash
+gcc -### -march=sse4.2... (rest of your compilation flags)
+```
+
+Look for a line similar to:
+
+```
+-lclang_rt.builtins-x86_64
+```
+
+This indicates that GCC is using `compiler-rt`. The exact library name might vary depending on your system and GCC configuration.
+
+**2. Check for `compiler-rt` installation:**
+
+* If the previous step confirms `compiler-rt` usage, locate its installation directory. It might be within your GCC installation or a separate location like `/usr/lib/clang/`.
+
+**3. Address the `__umodti3` error:**
+
+* **Upgrade GCC:** Newer GCC versions often include updated `compiler-rt` libraries with better support for extended integer operations. If possible, consider upgrading to a more recent GCC version.
+* **Link `libgcc` explicitly:** In some cases, linking `libgcc` explicitly might resolve the issue, as it might contain the necessary definitions for `__umodti3`. Add `-lgcc` to your `LDFLAGS`.
+* **Rebuild Python:** If you have access to the Python source code, rebuilding it with your updated GCC and `-march=sse4.2` flag might resolve the issue. This will ensure that the `_decimal` library is compiled with the necessary support for extended integer operations.
+
+**Important notes:**
+
+* **Compatibility:** If upgrading GCC or rebuilding Python is not feasible, you might need to explore alternative solutions or consider using a different Python version with better compatibility with your current environment.
+* **Thorough investigation:** Carefully examine the output of the `-###` flag and the contents of your `compiler-rt` installation to pinpoint the exact cause of the error and identify the appropriate solution.
+
+If you provide the output of the `-###` command and the location of your `compiler-rt` installation, I can offer more specific guidance.
+
+No, `-lclang_rt.builtins-x86_64` should not be added to the `CLANG` variable. 
+
+Here's why:
+
+* **`CLANG`**: This variable usually specifies the path to the Clang compiler executable, not linker flags or libraries.
+* **Linker flags**: `-lclang_rt.builtins-x86_64` is a linker flag that tells the linker to link against the `clang_rt.builtins-x86_64` library.
+
+**Where to add it:**
+
+You should add `-lclang_rt.builtins-x86_64` to your `LDFLAGS` variable. This variable is specifically for passing flags to the linker.
+
+**How to add it:**
+
+```bash
+export LDFLAGS="$LDFLAGS -lclang_rt.builtins-x86_64"
+```
+
+This will append the flag to your existing `LDFLAGS`.
+
+**Important notes:**
+
+* **Order matters:** The order of flags in `LDFLAGS` can be important. If you encounter any issues, try placing `-lclang_rt.builtins-x86_64` at the end of the `LDFLAGS` string.
+* **Recompile:** After modifying `LDFLAGS`, make sure to recompile your entire project to ensure the changes take effect.
+
+If you're still encountering the `__umodti3` undefined symbol error after adding this flag, please provide the following information so I can assist you further:
+
+* **Full GCC command line:** The complete command line you're using to compile your project.
+* **Output of `-###` flag:** The output of running your GCC command with the `-###` flag.
+* **`compiler-rt` location:** The directory where `compiler-rt` is installed on your system.
+
+With this information, I can help you pinpoint the exact cause of the error and suggest the most appropriate solution.
+
 ### Modules to activate:
 
 ```bash
