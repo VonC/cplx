@@ -36,4 +36,4 @@ service_name() {
   echo "${service}"
 }
 
-export -f service_name
+export service_name

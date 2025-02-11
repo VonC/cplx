@@ -23,4 +23,4 @@ env_name() {
   esac
 }
 
-export -f env_name
+export env_name
