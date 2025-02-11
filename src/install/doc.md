@@ -183,3 +183,18 @@ https://issues.chromium.org/issues/41334980
 https://gcc.gnu.org/onlinedocs/gccint/Integer-library-routines.html
 
 Not blocking.
+
+### Modules to activate:
+
+```bash
+The following modules are *disabled* in configure script:
+_sqlite3
+
+The necessary bits to build these optional modules were not found:
+_bz2                      _ctypes                   _ctypes_test
+_curses                   _curses_panel             _dbm
+_gdbm                     _hashlib                  _lzma
+_ssl                      _tkinter                  _uuid
+readline                  zlib
+To find the necessary bits, look in configure.ac and config.log.
+```
