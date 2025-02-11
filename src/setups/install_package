@@ -188,7 +188,17 @@ mirror_system_executable() {
         dest_dir=$(dirname "${dest_file}")
         mkdir -p "${dest_dir}" || fatal "Unable to create directory '${dest_dir}'" 31
 
-        cp "${src_file}" "${dest_file}" || fatal "Unable to copy '${src_file}' to '${dest_file}'" 32
+        local cp_output
+        cp_output=$(cp "${src_file}" "${dest_file}" 2>&1)
+        rc=$?
+        if [ $rc -ne 0 ]; then
+            if echo "$cp_output" | grep -qi "Permission denied"; then
+                warning "Permission denied copying '${src_file}' to '${dest_file}', skipping marker creation"
+                return 0
+            else
+                fatal "Unable to copy '${src_file}' to '${dest_file}': ${cp_output}" 32
+            fi
+        fi
         # Create a dummy file to indicate the file was copied
         touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
         info "Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
