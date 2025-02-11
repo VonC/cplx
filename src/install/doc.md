@@ -169,3 +169,17 @@ The clang and GCC builtin function can use the x86 POPCNT instruction if the tar
 
 -    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O -U_FORTIFY_SOURCE -m64"
 +    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2"
+
+### `undefined symbol: __umodti3`
+
+```bash
+[ERROR] _decimal failed to import: /home/vonc/cplx/tools/python/sources/v3.13.1/python-cpython-7795862/build/lib.linux-x86_64-3.13/_decimal.cpython-313-x86_64-linux-gnu.so: undefined symbol: __umodti3
+
+find . -type f -name "*.so.[0-1]" -o -name "*.so" -o -name "*.a" 2>/dev/null | xargs nm -A -u 2>/dev/null | grep -i umodti3
+```
+
+https://bugzilla.mozilla.org/show_bug.cgi?id=1631627
+https://issues.chromium.org/issues/41334980
+https://gcc.gnu.org/onlinedocs/gccint/Integer-library-routines.html
+
+Not blocking.
