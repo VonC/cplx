@@ -46,6 +46,7 @@ function clean() {
 
 function setenv() {
 
+    if [[ "$2" == "" ]]; then fatal "setenv() must be called with tool + version, i.e, 'python v3.13.1'"; fi
     export tools="${HOME}/tools/python"
     export tool_bin="${tools}/python-$2"
     export tool_src="${tools}/sources/current"
