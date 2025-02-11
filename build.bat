@@ -60,18 +60,9 @@ goto:eof
 
 :build_unset
 set "cmd="
-set "QUIET_PRJ=true"
-for %%i in ("%~dp0") do SET "build_dir=%%~fi"
-set "build_dir=%build_dir:~0,-1%"
-%_task% "Must unset t_build"
-call "%build_dir%\tools\t_build.bat" :build_unset
-
-set "QUIET_PRJ=true"
-call "%~dp0tools\batcolors\echos.bat" :task "Must unset senv"
 call "%build_dir%\senv.bat" unset
+call "%build_dir%\tools\t_build.bat" :build_unset
 set "build_dir="
-set "build_status="
-call "%~dp0tools\batcolors\echos.bat" :ok "Must unset senv"
 goto:eof
 
 :call_echos_stack
