@@ -280,6 +280,12 @@ function main() {
         error "main: clean failed with '${res_clean}'"
         return "${res_clean}"
     fi
+    build
+    res_build=$?
+    if [[ ${res_build} != 0 ]]; then
+        error "main: build failed with '${res_build}'"
+        return "${res_build}"
+    fi
     return $?
 }
 

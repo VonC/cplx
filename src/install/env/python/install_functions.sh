@@ -21,6 +21,17 @@ function configure() {
     ok "configure done"
 }
 
+function build() {
+    if [[ ! -e git-add && ! -e python ]]; then
+        task "Must make all in '$(pwd)'"
+        #make -d v=1 -d DEVELOPER=1 all || fatal "Unable to make all in '$(pwd)'" 19
+        make all || fatal "Unable to make all in '$(pwd)'" 19
+        ok "make all is now done in '$(pwd)'"
+    else
+        ok "python already compiled in '$(pwd)'"
+    fi
+}
+
 function clean() {
     if [[ ! -e Makefile ]]; then
         ok "Skip clean, no Makefile in '$(pwd)'"
