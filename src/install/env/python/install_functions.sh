@@ -93,7 +93,7 @@ function setenv() {
     #export LDFLAGS="-L$CURLDIR/lib64 -L$OPENSSLDIR/lib64 -L$LIBPCREDIR/lib64 -L${ldpaths}"
     #export LDFLAGS="-L${ldpaths} -L${root}/lib64 -nodefaultlibs -Wl,--export-dynamic,--dynamic-linker=${ldlinpath}/ld-linux-x86-64.so.2"
     # https://stackoverflow.com/questions/6562403/i-dont-understand-wl-rpath-wl
-    export LDFLAGS="-L${ldpaths} -L${root}/lib64 -nodefaultlibs -Wl,-rpath,${ldpaths}:${root}/lib64 -Wl,--export-dynamic -lc_nonshared -ldl -lc -lm -lc_nonshared -lpthread -B${root}/usr  -B${root} -B${root}/usr/lib64 --sysroot=${root}"
+    export LDFLAGS="-L${ldpaths} -L${root}/lib64 -nodefaultlibs -Wl,-rpath,${ldpaths}:${root}/lib64 -Wl,--export-dynamic -lc_nonshared -ldl -lgcc -lc -lm -lc_nonshared -lpthread -B${root}/usr  -B${root} -B${root}/usr/lib64 --sysroot=${root}"
     #export LIBS="-lc -ldl -l:libc_nonshared.a -lc_nonshared -lc"
     #export LIBS="-lc_nonshared -lc -lc_nonshared -lm"
     export LIBS="-Wl,-rpath,${ldpaths}:${root}/lib64 -Wl,--export-dynamic -lc_nonshared -ldl -lc -lm -lc_nonshared -lpthread"
