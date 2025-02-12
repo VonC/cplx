@@ -279,3 +279,42 @@ _ssl                      _tkinter                  _uuid
 readline                  zlib
 To find the necessary bits, look in configure.ac and config.log.
 ```
+
+### sqlite3
+
+https://stackoverflow.com/questions/32779768/python-build-from-source-cannot-build-optional-module-sqlite3
+
+This link provided the solution for me building Python 3.5.  Specifically for Ubuntu but helped figure it out for CentOS6 as well.
+
+[Install missing packages before compiling Python3][1]
+
+
+  [1]: https://stackoverflow.com/questions/12023773/python-3-3-source-code-setup-modules-were-not-found-lzma-sqlite3-tkinter
+
+More specifically for Ubuntu server 16.04:
+
+    apt-get -y install build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev
+
+Note that none of these packages will be found on RedHat/Fedora.
+
+possible include directories for sqlite3 is taken from setup.py (for Python-3.5.0):
+
+To fix the issue, add in `/path/to/my/personal/sqlite/include` into the above sqlite_inc_paths array:
+```ini
+sqlite_inc_paths = ['/path/to/my/personal/sqlite/include',
+                   ...]
+```
+
+### bz2
+
+LDFLAGS and LIBS serve different purposes during the linking phase:
+
+- **LDFLAGS** are passed to the linker to specify options such as library search paths (`-L/path/to/libs`), linker behavior (e.g., `-Wl,option`), and other flags that affect the linking process.
+
+- **LIBS** are used to indicate which libraries to link against (e.g., `-lbz2`, `-lm`, etc.). They are typically appended after your object files so that the linker can resolve symbols.
+
+For a RHEL 7 compilation with gcc 4.8.5, if your code uses functions from libbz2 (the bzip2 library), you would need to supply `-lbz2` in **LIBS**, but only if your build system doesn't already include it, or if the library is in a nonstandard location (in which case you’d also add an appropriate `-L` flag in LDFLAGS).
+
+Usually, you add `-lbz2` in LIBS rather than LDFLAGS. In short, if your code requires libbz2, and it’s not automatically linked, add it to LIBS; there’s no need to specify it in LDFLAGS unless you also need to adjust the library search path.
+
+=> I did not add -lbz2, it was still picked up, after installing bzip2, bzip2-libs and bzip2-devel packages
