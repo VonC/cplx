@@ -41,6 +41,7 @@ function clean() {
     if ! make clean; then
         fatal "clean ERROR" 4
     fi
+    rm python || fatal "Unable to remove python in '$(pwd)'" 5
     ok "Clean done"
 }
 
