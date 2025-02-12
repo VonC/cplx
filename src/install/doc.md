@@ -402,3 +402,12 @@ configure:14695: checking for libmpdec >= 2.5.0
 configure:14756: result: no
 configure:14761: error: libmpdec >= 2.5.0 not found
 ```
+
+## install
+
+### modules
+
+```bash
+[CPLX-PYTHON-DEV] vonc@voncfm:~/tools/python/sources/v3.13.1/python-cpython-7795862$ ./python -c "import sys; print(sys.builtin_module_names)"
+('_abc', '_ast', '_codecs', '_collections', '_functools', '_imp', '_io', '_locale', '_operator', '_signal', '_sre', '_stat', '_string', '_suggestions', '_symtable', '_sysconfig', '_thread', '_tokenize', '_tracemalloc', '_typing', '_warnings', '_weakref', 'atexit', 'builtins', 'errno', 'faulthandler', 'gc', 'itertools', 'marshal', 'posix', 'pwd', 'sys', 'time')
+```
