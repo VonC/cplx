@@ -51,11 +51,26 @@ function setenv() {
     if [[ "$2" == "" ]]; then error "setenv() must be called with tool + version, i.e, 'python v3.13.1'"; return 1; fi
     export tools="${HOME}/tools/python"
     export tool_bin="${tools}/python-$2"
+    ln -fs "${tool_bin}" "${tools}/current"
     export tool_src="${tools}/sources/current"
     export root="${HOME}/tools/root"
 
-    export LD_LIBRARY_PATH="${root}/usr/lib64:${root}/usr/lib:${root}/lib64:${tool_bin}/usr/lib64:${tool_bin}/lib64"
+    export LD_LIBRARY_PATH="${root}/usr/lib64:${root}/usr/lib:${root}/lib64:${tool_bin}/usr/lib64:${tool_bin}/lib64:${tool_bin}/lib"
+
     export PKG_CONFIG_PATH="${tool_bin}/usr/lib64/pkgconfig"
+    if [[ -e "${tool_bin}/bin" ]]; then
+        if [[ "${PATH#*"${tool_bin}"/bin}" == "${PATH}" ]]; then
+            export PATH="${PATH}:${tool_bin}/bin"
+        fi
+        python_exe=$(find "${tool_bin}/bin" -maxdepth 1 -type f -executable \
+            -name 'python[0-9]*.[0-9][0-9]' 2>/dev/null | head -n 1)
+        if [[ -n "${python_exe}" ]]; then
+            ln -sf "${python_exe}" "${tool_bin}/bin/python"
+            info "Created symlink: python -> $(basename "${python_exe}")"
+        else
+            warning "No versioned python executable found in ${tool_bin}"
+        fi
+    fi
 
     export AUTOM4TE="${root}/usr/bin/autom4te"
     export PERLLIB="${PERLLIB}:${root}/usr/share/autoconf:${root}/usr/lib64/perl5/vendor_perl"
@@ -69,13 +84,13 @@ function setenv() {
     update_xxpath "COMPILER_PATH" "cc1"
     export COMPILER_PATH
 
-    export LD_LIBRARY_PATH=""
-    update_xxpath "LD_LIBRARY_PATH" "libmpc.so.?"
-    update_xxpath "LD_LIBRARY_PATH" "libmpfr.so.?"
-    update_xxpath "LD_LIBRARY_PATH" "crti.o"
-    update_xxpath "LD_LIBRARY_PATH" "libopcodes*"
-    update_xxpath "LD_LIBRARY_PATH" "libSegFault.so"
-    update_xxpath "LD_LIBRARY_PATH" "ld-2.17.so"
+    # export LD_LIBRARY_PATH=""
+    # update_xxpath "LD_LIBRARY_PATH" "libmpc.so.?"
+    # update_xxpath "LD_LIBRARY_PATH" "libmpfr.so.?"
+    # update_xxpath "LD_LIBRARY_PATH" "crti.o"
+    # update_xxpath "LD_LIBRARY_PATH" "libopcodes*"
+    # update_xxpath "LD_LIBRARY_PATH" "libSegFault.so"
+    # update_xxpath "LD_LIBRARY_PATH" "ld-2.17.so"
     export LD_LIBRARY_PATH
     export LIBRARY_PATH="${LD_LIBRARY_PATH}"
     export LD_RUN_PATH="${LD_LIBRARY_PATH}"
