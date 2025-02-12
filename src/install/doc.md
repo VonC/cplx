@@ -81,6 +81,16 @@ configure:28229: error: --with-openssl-rpath "/home/vonc/cplx/tools/python/pytho
 
 openssl-devel
 
+### `stdatomic.h`
+
+https://github.com/python/cpython/issues/118034
+
+CPython now requires #include <stdatomic.h> (an optional C11 feature) or MSVC. (Mimalloc can use C++ atomics, C11 atomics, or MSVC atomics. And pyatomic.h requires C11 atomics, MSVC atomics, or GCC atomics. The intersection is C11 or MSVC.)
+
+This means CPython can't compile with GCC 4.8, as [C11 atomics were added in GCC 4.9](https://gcc.gnu.org/wiki/C11Status)
+
+You can build CPython with GCC 4.8. Mimalloc is optional in the default build and is disabled by configure if stdatomic.h is not available.
+
 ## Compilation step
 
 ### `python undefined reference to __popcountdi2`: `-march=x86-64 -msse4.2`
@@ -118,6 +128,8 @@ find . -type f -name "*.so.[0-1]" -o -name "*.so" -o -name "*.a" 2>/dev/null | x
 
 ~/tools/root$ grep -nRHIi popc[no] * 2>/dev/null
 ```
+
+Implementation: https://web.mit.edu/freebsd/head/contrib/compiler-rt/lib/popcountdi2.c
 
 https://stackoverflow.com/questions/52161596/why-is-builtin-popcount-slower-than-my-own-bit-counting-function
 
