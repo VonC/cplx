@@ -50,7 +50,7 @@ if not defined cplx_path (
 )
 
 scp -r "%install_dir_unix%/env/." %SSH_CONFIG_ENTRY%:%cplx_path%/tools/
-ssh %SSH_CONFIG_ENTRY% "cd %cplx_path%/tools && chmod 755 ./install && bash ./install %CPLX_TOOL% %CPLX_VERSION%; echo $?" | tee "%install_dir%\temp.txt"
+ssh %SSH_CONFIG_ENTRY% "cd %cplx_path%/tools && chmod 755 ./install && bash ./install %CPLX_TOOL% %CPLX_VERSION% %*; echo $?" | tee "%install_dir%\temp.txt"
 FOR /F "tokens=* delims=" %%i IN ('type "%install_dir%\temp.txt"') DO SET "lastLine=%%i"
 %_info% "vvvvvvvvvvvvvvvvvvvvvvvvvvvv"
 %_info% "Exit status: '%lastLine%'"
