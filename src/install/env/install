@@ -282,7 +282,7 @@ function main() {
     # shellcheck disable=SC2154
     cd "${tool_src}" || fatal "Unable to access tool_src '${tool_src}'" 22
     pwd
-    setOption _reconfigure "configure" "cfg"
+    setOption _reconfigure "configure" "cfg" "rc" "reconfigure"
     setOption _reclean "clean" "cl"
     if ! grep "creating Makefile$" "${tool_src}/config.log"; then
         warning "main: existing config.log has not created a Makefile yet, force reconfiguring in '$(pwd)'"
