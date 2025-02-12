@@ -6,8 +6,8 @@ function configure() {
     # Build the configure command as an array
     local configure_cmd=( "${tool_src}/configure"
                           "--prefix=${tool_bin}"
-                          "--with-openssl=${tool_bin}/usr"
-                          "--with-openssl-rpath=${tool_bin}/usr/lib64"
+                          "--with-openssl=${root}/usr"
+                          "--with-openssl-rpath=${root}/usr/lib64"
                           "--enable-shared=yes" )
 
 
@@ -90,6 +90,7 @@ function setenv() {
     export ZLIB_PATH="${root}/usr"
     export CURLDIR="${root}/usr"
     export OPENSSLDIR="${root}/usr"
+    export OPENSSL_LDFLAGS="-L${root}/usr/lib64"
     export LIBPCREDIR="${root}/usr"
     #export LDFLAGS="-L$CURLDIR/lib64 -L$OPENSSLDIR/lib64 -L$LIBPCREDIR/lib64 -L${ldpaths}"
     #export LDFLAGS="-L${ldpaths} -L${root}/lib64 -nodefaultlibs -Wl,--export-dynamic,--dynamic-linker=${ldlinpath}/ld-linux-x86-64.so.2"
