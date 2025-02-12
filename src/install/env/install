@@ -21,7 +21,7 @@ else
 fi
 
 # Check if exactly one parameter is provided
-if [[ $# -ne 2 ]]; then
+if [[ $# -lt 2 ]]; then
     fatal "Usage: install <tool_name> <version>" 1
 fi
 
@@ -282,16 +282,19 @@ function main() {
     # shellcheck disable=SC2154
     cd "${tool_src}" || fatal "Unable to access tool_src '${tool_src}'" 22
     pwd
-    reconfigure=false
-    if getArg "--reconfigure" "$@"; then
-        reconfigure=true
-    fi
+    setOption _reconfigure "configure" "cfg"
+    setOption _reclean "clean" "cl"
     if ! grep "creating Makefile$" "${tool_src}/config.log"; then
         warning "main: existing config.log has not created a Makefile yet, force reconfiguring in '$(pwd)'"
-        reconfigure=true
+        _reconfigure=0
     fi
-    info "main: reconfigure='${reconfigure}'"
-    if [[ -e "${tool_src}/config.log" && ${reconfigure} == false ]]; then
+    info "main: reconfigure='${_reconfigure}'"
+    if reconfigure; then
+        warning "main: reconfigure is true, so force reclean"
+        _reclean=0
+    fi
+    info "main: reclean='${_reclean}'"
+    if [[ -e "${tool_src}/config.log" ]] && ! reconfigure; then
         ok "main: config.log present, do not reconfigure"
     else
         configure
@@ -301,11 +304,15 @@ function main() {
             return "${res_config}"
         fi
     fi
-    clean
-    res_clean=$?
-    if [[ ${res_clean} != 0 ]]; then
-        error "main: clean failed with '${res_clean}'"
-        return "${res_clean}"
+    if reclean; then
+        clean
+        res_clean=$?
+        if [[ ${res_clean} != 0 ]]; then
+            error "main: clean failed with '${res_clean}'"
+            return "${res_clean}"
+        fi
+    else
+        info "reclean is false, so no clean performed before build"
     fi
     build
     res_build=$?
