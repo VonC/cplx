@@ -15,3 +15,6 @@ glibc-headers
 kernel-headers
 ncurses-devel
 openssl-devel
+bzip2
+bzip2-libs
+bzip2-devel
