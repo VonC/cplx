@@ -91,6 +91,21 @@ This means CPython can't compile with GCC 4.8, as [C11 atomics were added in GCC
 
 You can build CPython with GCC 4.8. Mimalloc is optional in the default build and is disabled by configure if stdatomic.h is not available.
 
+### /lib64/liboneagentproc.so
+
+Dynatrace OneAgent changed the "`/etc/ld.so.preload`" file in OS:
+
+```bash
+/$LIB/liboneagentproc.so
+
+cat /etc/ld.so.preload
+/lib64/liboneagentproc.so
+```
+
+"`/etc/ld.so.preload`" and env variable "`LD_PRELOAD`" are used to preload specified lib when starting new process.
+
+=> For now, skip that check in install_package#check_ldd() `local exclude_tokens=("libm" "libc" "libdl" "ld-linux" "linux-vdso" "liboneagentproc")`
+
 ## Compilation step
 
 ### `python undefined reference to __popcountdi2`: `-march=x86-64 -msse4.2`
@@ -318,3 +333,43 @@ For a RHEL 7 compilation with gcc 4.8.5, if your code uses functions from libb
 Usually, you add `-lbz2` in LIBS rather than LDFLAGS. In short, if your code requires libbz2, and it’s not automatically linked, add it to LIBS; there’s no need to specify it in LDFLAGS unless you also need to adjust the library search path.
 
 => I did not add -lbz2, it was still picked up, after installing bzip2, bzip2-libs and bzip2-devel packages
+
+### ctypes: libffi
+
+### openssl_hashlib
+
+```bash
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether OpenSSL provides required hashlib module APIs" >&5
+printf %s "checking whether OpenSSL provides required hashlib module APIs... " >&6; }
+if test ${ac_cv_working_openssl_hashlib+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+      #include <openssl/opensslv.h>
+      #include <openssl/evp.h>
+      #if OPENSSL_VERSION_NUMBER < 0x10101000L
+        #error "OpenSSL >= 1.1.1 is required"
+```
+
+But:
+
+```bash
+~/tools/root$ rgrep OPENSSL_VERSION_NUMBER
+usr/share/doc/openssl-devel-1.0.2k/CHANGES:11285:  *) Added OPENSSL_VERSION_NUMBER to crypto/crypto.h and
+usr/include/openssl/crypto.h:152:# define SSLEAY_VERSION_NUMBER   OPENSSL_VERSION_NUMBER
+usr/include/openssl/opensslv.h:33:# define OPENSSL_VERSION_NUMBER  0x100020bfL
+```
+
+Your defined version (0x100020bfL) is lower than 0x10101000L. In other words, your OpenSSL version is older than the minimum expected (1.1.1 or newer).
+
+=> Must recompile OpenSSL on RHEL 7.x!
+https://gist.github.com/Bill-tran/5e2ab062a9028bf693c934146249e68c
+
+```bash
+yum install -y make gcc perl-core pcre-devel wget zlib-devel
+./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
+```
