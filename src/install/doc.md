@@ -373,3 +373,32 @@ https://gist.github.com/Bill-tran/5e2ab062a9028bf693c934146249e68c
 yum install -y make gcc perl-core pcre-devel wget zlib-devel
 ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
 ```
+
+wget https://ftp.openssl.org/source/openssl-1.1.1k.tar.gz
+openssl-3.2.2.tar.gz
+https://openssl-library.org/source/
+https://github.com/openssl/openssl/releases/download/openssl-3.4.1/openssl-3.4.1.tar.gz
+
+But: https://stackoverflow.com/questions/67972269/openssl-upgrade-centos-7/69187544#69187544
+https://bugzilla.redhat.com/show_bug.cgi?id=1416715
+https://bugzilla.redhat.com/show_bug.cgi?id=1792741 https://src.fedoraproject.org/rpms/openssl11
+ftp://ftp.icm.edu.pl/packages/linux-pbone/archive.fedoraproject.org/epel/7.2020-10-05/x86_64/Packages/o/openssl11-libs-1.1.1c-2.el7.x86_64.rpm (https://rpm.pbone.net/info_idpl_71941238_distro_redhatel7_com_openssl11-libs-1.1.1c-2.el7.x86_64.rpm.html)
+
+https://download.fedora.devel.redhat.com/pub/archive/epel/7.8/x86_64/Packages/o/openssl11-devel-1.1.1c-2.el7.x86_64.rpm
+https://download.fedora.devel.redhat.com/pub/archive/epel/7.8/x86_64/Packages/o/openssl11-libs-1.1.1c-2.el7.x86_64.rpm
+
+
+### decimal
+
+https://gitlab.com/redhat/centos-stream/rpms/mpdecimal/-/blob/c8s/mpdecimal.spec?ref_type=heads
+http://www.bytereef.org/software/mpdecimal/releases/mpdecimal-2.5.1.tar.gz
+
+To hope resolve:
+
+```bash	
+configure:14675: checking for --with-system-libmpdec
+configure:14686: result: yes
+configure:14695: checking for libmpdec >= 2.5.0
+configure:14756: result: no
+configure:14761: error: libmpdec >= 2.5.0 not found
+```

@@ -50,3 +50,9 @@ libtasn1
 nettle
 gnutls
 libidn2
+libuuid
+libuuid-devel
+zlib
+zlib-devel
+readline
+readline-devel

@@ -14,7 +14,9 @@ glibc-devel
 glibc-headers
 kernel-headers
 ncurses-devel
+openssl-libs
 openssl-devel
+openssl
 bzip2-libs
 bzip2
 bzip2-devel
@@ -82,3 +84,9 @@ xmlsec1-nss
 xmlsec1-nss-devel
 xmlsec1-openssl
 xmlsec1-openssl-devel
+uuid
+uuid-devel
+zlib
+zlib-devel
+readline
+readline-devel
