@@ -123,6 +123,9 @@ sync_packages() {
         fatal "cplx_path not found in file '${properties_file}'" 101
     fi
 
+    # Before the while loop, initialize the array (if not already declared)
+    skipped=()
+
     # Open the file on file descriptor 8
     exec 8< "${packages_for_tools}"
     while IFS= read -r line <&8 || [ -n "$line" ]; do
@@ -134,11 +137,18 @@ sync_packages() {
         fi
         # If we have not yet reached the last processed value, check for it.
         if [ "$process" -eq 0 ]; then
-            if [[ "$line" ==  "$last_value" || "${line}" == "${CPLX_SP_REPEAT}"  ]]; then
+            if [[ "$line" == "$last_value" || "$line" == "${CPLX_SP_REPEAT}" ]]; then
                 ok "Resuming processing after line: '${line}'"
                 process=1
+                # Display all skipped lines
+                for skipped_line in "${skipped[@]}"; do
+                    info "Skipped line: '${skipped_line}' (CPLX_SP_REPEAT='${CPLX_SP_REPEAT}')"
+                done
+                # Clear the array if needed.
+                skipped=()
             else
-                info "Skipping line: '${line}' (CPLX_SP_REPEAT='${CPLX_SP_REPEAT}')"
+                # Instead of displaying, store the line in the array.
+                skipped+=("$line")
             fi
             continue
         fi
