@@ -10,6 +10,7 @@ function configure() {
                           "--with-openssl-rpath=${root}/usr/lib64"
                           "--enable-shared=yes" )
 
+    sed -i "s,ssldir/lib\",ssldir/lib64\",g" configure || fatal "Unable to update 'configure' ssldir/lib to ssldir/lib64 in '$(pwd)'" 16
 
     # Display the command with its parameters.
     info "Running configure command: ${configure_cmd[*]}"

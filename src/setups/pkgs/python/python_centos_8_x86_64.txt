@@ -14,7 +14,12 @@ glibc-devel
 glibc-headers
 kernel-headers
 ncurses-devel
+openssl-libs
+openssl
 openssl-devel
+openssl-pkcs11
+openssl-ibmpkcs11
+openssl-perl
 bzip2-libs
 bzip2
 bzip2-devel
