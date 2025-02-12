@@ -4,6 +4,73 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.9.0] - 2025-02-12 - Compile Python
+
+Now that the install script works, and configure Python,
+generating a Makefile, the goal is to compile it.  
+It does, but cannot use hashlib based on openssl, 
+because CentOS/RHEL 7 use an old 1.0.2, instead of 1.1.1+
+
+### 🚀 Features
+
+- *(setup)* Skip commented lines in package list
+- Prepare repeat/done steps test
+- *(steps)* Improve step done management steps.sh
+- *(install)* Add build step to installation
+- *(env)* Add useful aliases to `.env`
+- *(setup)* Add alternative RHEL 7.9 package URLs
+- *(bin)* Add alias command wrapper
+- *(steps)* Add steps_list and steps_list_one_step
+- *(bin)* Improve alias command output, using color
+- *(install)* Improve install script option parsing
+- *(install)* Process options --clean and --configure
+- *(env)* Add `fd` function to `.env` file
+- *(env)* Improve file search functions
+- *(env)* Symbol lookup, find and grep finctions
+
+### 🐛 Bug Fixes
+
+- *(build)* Improve build.bat and senv.bat unset
+- *(install)* Improve config.log check
+- Install package do not fail on 'cp perm denied'
+- *(python)* Add missing dependencies for RHEL 7.9
+- *(install)* Fix CPLX_VERSION error msg install.bat
+- Setenv() must have a version
+- *(env)* Remove `export -f` from shell functions
+- Remove unnecessary sys folder creation
+- *(utils)* Steps.sh tests reset from the same file
+- *(steps)* Exit early if steps_list_one_step fails
+- *(setup)* Adjust bash command quote on step rep
+- *(env)* Update alias command references
+- *(install)* Add SSE4.2 flags to CFLAGS
+- *(install)* Update `LDFLAGS` to include `-lgcc`
+- *(install)* Pass all args to remote install script
+- *(install)* Remove python after clean
+- *(install)* Extend reconfigure options
+- *(install)* Add bz2 pkgs for Python build RHEL 7.9
+- *(install)* Ignore liboneagentproc in ldd check
+- *(setup_packages)* Display skipped lines when resuming processing
+- *(python)* Add missing dependencies for xmlsec1
+- *(install)* Document liboneagentproc and openssl_hashlib
+
+### 🚜 Refactor
+
+- *(build)* Simplify cleanup routine
+
+### 📚 Documentation
+
+- *(md)* Compilation issues on RHEL 7.9
+- Avoid cSpell on doc and CentOS packages details
+
+### ⚙️ Miscellaneous Tasks
+
+- *(md)* Non-blocking error __umodti3
+- *(md)* Add modules to activate
+- *(md)* Add LDFLAGS possible new options for compiler-rt
+- *(setup)* Diable Code Spell Checker on pkgs list
+- *(md)* Add doc on stdatomic.h
+- *(md)* Add doc on bz2
+
 ## [v0.8.0] - 2025-02-10 - First installation step, configure works
 
 Copy of the installation scripts.
