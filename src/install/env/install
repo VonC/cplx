@@ -236,17 +236,44 @@ exec 2>&1
 
 set -o xtrace
 
-function getArg() {
-    local search_param="$1"
+# Before calling setOption, store the install script parameters globally:
+install_args=("$@")
+
+function setOption() {
+    local varname="$1"
     shift
-    for param in "$@"; do
-        if [[ "$param" == "$search_param"  || "$param" == "$search_param="* ]]; then
-            return 0
-        fi
+    # Set the option to false (1) by default
+    printf -v "$varname" "1"
+
+    local term arg
+    # For each term to search for
+    for term in "$@"; do
+        # Check against each install argument
+        for arg in "${install_args[@]}"; do
+            case "$arg" in
+                "$term" | "$term="* | "--$term" | "--$term="* | "-$term" | "-$term="* )
+                    # Found a match: set the option to true (0) and exit
+                    printf -v "$varname" "0"
+                    return 0
+                    ;;
+            esac
+        done
     done
+    return 0
+}
+
+_reconfigure=0
+_reclean=0
+
+function reconfigure() {
+    if (( _reconfigure == 0 )); then return 0; fi
     return 1
 }
 
+function reclean() {
+    if (( _reclean == 0 )); then return 0; fi
+    return 1
+}
 
 # main: Acts as the central execution point, orchestrating the overall setup process including dependency checks, installations, and environmental configurations, ensuring the script achieves its purpose of preparing the environment or updating software as required.
 function main() {
