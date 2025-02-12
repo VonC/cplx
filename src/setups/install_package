@@ -235,7 +235,6 @@ check_ldd() {
             return 0
             ;;
     esac
-
     local output ret
     # Run ldd and capture output and exit code.
     output=$(ldd "$file" 2>&1)
@@ -252,7 +251,7 @@ check_ldd() {
     fi
 
     # Exclude list: if a line contains any of these strings, skip further tests.
-    local exclude_tokens=("libm" "libc" "libdl" "ld-linux" "linux-vdso")
+    local exclude_tokens=("libm" "libc" "libdl" "ld-linux" "linux-vdso" "liboneagentproc")
     while IFS= read -r line || [ -n "$line" ]; do
         # If the line contains a '?' character, warn about an unresolved path.
         if [[ "$line" == *"?"* ]]; then
