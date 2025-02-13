@@ -11,3 +11,4 @@
 *.ini text eol=lf
 
 CHANGELOG.md filter=changelog
+steps.md=remove_done
