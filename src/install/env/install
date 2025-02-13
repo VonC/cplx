@@ -20,7 +20,7 @@ else
     ok "'${bin_dir}' is already in the PATH."
 fi
 
-# Check if exactly one parameter is provided
+# Check if exactly at least two parameter is provided
 if [[ $# -lt 2 ]]; then
     fatal "Usage: install <tool_name> <version>" 1
 fi
