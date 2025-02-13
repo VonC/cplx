@@ -68,11 +68,24 @@ function main() {
     # shellcheck disable=SC2154
     cd "${DIR}/root" || fatal "Unable to access pkgs_dir '${DIR}/root'" 22
 
+    local i_log
+    i_log="${DIR}/logs/install_package.log"
+    rm -f "${i_log}"
+    local m_log
+    m_log="${DIR}/logs/mirror_package.log"
+    rm -f "${m_log}"
     if ! check_flag_exists "${package_name}" "installed"; then
-        install_package
+        ( install_package ) 2>&1 | tee -a "${i_log}"
+        if check_flag_exists "${package_name}" "installed" && [[ -e "${i_log}" ]]; then
+            cat "${i_log}" > "${package_name%.rpm}.installed"
+        fi
     fi
     if ! check_flag_exists "${package_name}" "mirrored"; then
-        list_archive_content_to_mirror "${package_name}"
+        ( list_archive_content_to_mirror "${package_name}" ) 2>&1 | tee -a "${m_log}"
+        if check_flag_exists "${package_name}" "mirrored" && [[ -e "${m_log}" ]]; then
+            echo "-------------------">> "${package_name%.rpm}.installed.mirrored"
+            cat "${m_log}" >> "${package_name%.rpm}.installed.mirrored"
+        fi
     fi
     post_install "${package_name}"
     return $?
