@@ -50,6 +50,7 @@ main() {
         fatal "CPLX_TOOL='${CPLX_TOOL}' is not in the list of services: '${tools_to_recompile}'" 3
     fi
     validate_the_ssh_connection "$@"
+    get_the_version
     copy_the_environment "$@"
     copy_the_sources "$@"
 }
@@ -58,6 +59,13 @@ copy_the_environment() {
     if step_is_done "copy_the_environment"; then
         ok "copy_the_environment is already done"
         return 0
+    fi
+
+    if [[ -z "${CPLX_TOOL}" ]]; then
+        fatal "CPLX_TOOL not defined" 121
+    fi
+    if [[ -z "${CPLX_VERSION}" ]]; then
+        fatal "CPLX_VERSION not defined" 122
     fi
 
     if step_is_done "create_the_remote_project_folder"; then
@@ -90,13 +98,19 @@ copy_the_environment() {
         ( tar cvf - "${SRC_DIR}/utils" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}/bin\" --strip-components=${component_count_utils}" ) || fatal "Could not copy utils environment" 12
         # shellcheck disable=SC2029
         ( tar cvf - "${SRC_DIR}/echos" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}/echos\" --strip-components=${component_count_utils}" ) || fatal "Could not copy echos environment" 13
+        task "Must execute setup on the remote server '${SSH_CONFIG_ENTRY}'"
+        # shellcheck disable=SC2029
+        res=$(ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools && chmod 755 ./setup && bash ./setup \"${CPLX_TOOL}\" \"${CPLX_VERSION}\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_DIR}\setup.log" | tail -1)
+        if [[ ${res} -ne 0 ]]; then
+            fatal "Could not execute setup on the remote server '${SSH_CONFIG_ENTRY}'" 14
+        fi
         if ! step_done "transfer_env_to_the_remote_project_folder"; then
             fatal "Could not mark transfer_env_to_the_remote_project_folder as done" 6
         fi
-        ok "Local env transferred to the Remote directory '${cplx_path}' on '${hostname}'"
+        ok "Local env transferred to the Remote directory '${cplx_path}' on '${SSH_CONFIG_ENTRY}'"
     fi
-    if ! step_done "transfer_env_to_the_remote_project_folder"; then
-        fatal "Could not mark transfer_env_to_the_remote_project_folder as done" 6
+    if ! step_is_done "copy_the_environment"; then
+        fatal "copy_the_environment should be done done" 6
     fi
     ok "copy_the_environment is done"
 }
@@ -213,7 +227,8 @@ transfer_the_sources_to_the_remote_project_folder() {
 
 get_the_version() {
     if step_is_done "get_the_version"; then
-        ok "'get_the_version' already fetched for tool '${CPLX_TOOL}'"
+        CPLX_VERSION=${version}
+        ok "'get_the_version' already fetched for tool '${CPLX_TOOL}': '${CPLX_VERSION}'"
         return 0
     fi
     if [[ -n "${CPLX_VERSION}" ]]; then
@@ -237,7 +252,13 @@ get_the_version() {
         fatal "Could not get the latest tag for tool '${CPLX_TOOL}'" 40
     fi
     version=$(echo "${url}" | awk -F/ '{print $(NF)}')
+    CPLX_VERSION="${version}"
     info "Latest tag for tool '${CPLX_TOOL}' is '${version}'"
+
+    if ! step_done "get_the_version"; then
+        fatal "Could not mark 'get_the_version' as done" 61
+    fi
+    ok "'get_the_version' is done"
 }
 
 download_sources() {
@@ -257,6 +278,7 @@ download_sources() {
     fi
 
     sources="${SETUP_DIR}/sources/${CPLX_TOOL}"
+    mkdir -p "${sources}"
     if [[ -e "${sources}/${CPLX_TOOL}-src-${version}.zip" ]]; then
         ok "Sources '${version}' already fetched for tool '${CPLX_TOOL}'"
     else
@@ -266,10 +288,10 @@ download_sources() {
         fi
         ok "Sources fetched for tool '${CPLX_TOOL}' at version '${version}'"
     fi
-    if ! step_done "get_the_latest_tag"; then
-        fatal "Could not mark get_the_latest_tag as done" 60
+    if ! step_done "download_sources"; then
+        fatal "Could not mark 'download_sources' as done" 62
     fi
-    ok "'get_the_latest_tag' is done"
+    ok "'download_sources' is done"
 }
 
 main "$@"
