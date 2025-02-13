@@ -51,7 +51,6 @@ function setenv() {
     if [[ "$2" == "" ]]; then error "setenv() must be called with tool + version, i.e, 'python v3.13.1'"; return 1; fi
     export tools="${HOME}/tools/python"
     export tool_bin="${tools}/python-$2"
-    ln -fs "${tool_bin}" "${tools}/current"
     export tool_src="${tools}/sources/current"
     export root="${HOME}/tools/root"
 
