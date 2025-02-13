@@ -23,10 +23,14 @@ Once the project folder exists, the environment folder is copied to the remote h
 
 Check the latests tag, and copies the sources to the remote host.
 
-### Get the latest tag [🔗](#get_the_latest_tag) (done: ✅)
+### Get the version [🔗](#get_the_version) (done: ✅)
 
-It fetches the latest tag from the tool development repository.  
-It the tag differs from what has been recorded in the cplx.properties file, or if the file is missing, it will update the file.
+It fetches the latest tag from the tool development repository, if CPLX_VERSION is not yet set (or set to latest) in `setup.local.bat`.
+
+### Download sources [🔗](#download_sources) (done: ✅)
+
+It checks if the source file exists locally.  
+If not, downloads it.
 
 ### Transfer the sources to the remote project folder [🔗](#transfer_the_sources_to_the_remote_project_folder) (done: ✅)
 
