@@ -29,6 +29,7 @@ if not "%~1"=="" (
 )
 
 if exist "%setup_dir%\pkgs.log" ( del /q "%setup_dir%\pkgs.log" )
+if exist "%setup_dir%\setup.log" ( del /q "%setup_dir%\setup.log" )
     
 bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% %*"
 if errorlevel 1 (
@@ -40,15 +41,18 @@ call:display_logs
 goto:eof
 
 :display_logs
-if exist "%setup_dir%\pkgs.log" (
-    %_task% "Must display '%setup_dir%\pkgs.log'"
+set "flog="
+if exist "%setup_dir%\pkgs.log" ( set "flog=%setup_dir%\pkgs.log" )
+if exist "%setup_dir%\setup.log" ( set "flog=%setup_dir%\setup.log" )
+if defined flog (
+    %_task% "Must display '%flog%'"
     @echo on
-    "%PRGS%\vscodes\current\bin\code.cmd" "%setup_dir%\pkgs.log"
+    "%PRGS%\vscodes\current\bin\code.cmd" "%flog%"
     if errorlevel 1 (
-        %_fatal% "Unable to display '%setup_dir%\pkgs.log'" 122
+        %_fatal% "Unable to display '%flog%'" 122
     )
     @echo off
-    %_ok% "Display '%setup_dir%\pkgs.log' done"
+    %_ok% "Display '%flog%' done"
 )
 goto:eof
 
