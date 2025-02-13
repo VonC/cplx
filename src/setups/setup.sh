@@ -174,7 +174,8 @@ copy_the_sources() {
         return 0
     fi
 
-    get_the_latest_tag
+    get_the_version
+    download_sources
     transfer_the_sources_to_the_remote_project_folder
 
     if ! step_done "copy_the_sources"; then
@@ -210,14 +211,19 @@ transfer_the_sources_to_the_remote_project_folder() {
     ok "'transfer_the_sources_to_the_remote_project_folder' is done"
 }
 
-get_the_latest_tag() {
-    if step_is_done "get_the_latest_tag"; then
-        ok "'get_the_latest_tag' already fetched for tool '${CPLX_TOOL}'"
+get_the_version() {
+    if step_is_done "get_the_version"; then
+        ok "'get_the_version' already fetched for tool '${CPLX_TOOL}'"
+        return 0
+    fi
+    if [[ -n "${CPLX_VERSION}" ]]; then
+        version="${CPLX_VERSION}"
+        ok "Version '${version}' already defined for tool '${CPLX_TOOL}' by CPLX_VERSION variable"
         return 0
     fi
     task "Must fetch the latest tag for tool: ${CPLX_TOOL}/${cplx_path}"
     if ! get_property "${CPLX_TOOL}_repository"; then
-        fatal "Could not get the repository for tool '${CPLX_TOOL}'" 30
+        fatal "Could not get the GitHub repository for tool '${CPLX_TOOL}'" 30
     fi
     repository=$(eval "echo \"\${${CPLX_TOOL}_repository}\"")
     info "Repository for tool '${CPLX_TOOL}' is '${repository}'"
@@ -232,6 +238,24 @@ get_the_latest_tag() {
     fi
     version=$(echo "${url}" | awk -F/ '{print $(NF)}')
     info "Latest tag for tool '${CPLX_TOOL}' is '${version}'"
+}
+
+download_sources() {
+    if [[ ${version} == "" ]]; then version="${CPLX_VERSION}"; fi
+    if [[ ${version} == "" ]]; then
+        fatal "download_sources: version should be defined at this point" 42
+    fi
+
+    if [[ -z "${url}" && -z "${CPLX_URL}" ]]; then
+        fatal "URL not defined for tool '${CPLX_TOOL}': set CPLX_URL in senv.local.bat" 43
+    fi
+
+    if [[ -n "${CPLX_URL}" ]]; then
+        url="${CPLX_URL}"
+        url="${url//\[version\]/${version}}"
+        info "Set URL to CPLX_URL, using CPLX_VERSION to replace any '[version]': '${url}'"
+    fi
+
     sources="${SETUP_DIR}/sources/${CPLX_TOOL}"
     if [[ -e "${sources}/${CPLX_TOOL}-src-${version}.zip" ]]; then
         ok "Sources '${version}' already fetched for tool '${CPLX_TOOL}'"
