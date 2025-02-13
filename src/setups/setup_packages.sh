@@ -15,6 +15,7 @@ main() {
     if [[ -z "${architecture}" ]]; then
         fatal "architecture not found in file '${properties_file}'" 1
     fi
+    rm -f "${SETUP_PKGS_DIR}/pkgs.log"
     download_packages_list "${architecture}"
     sync_packages "${architecture}"
 }
@@ -293,13 +294,13 @@ install_package() {
     info "Exit pkgs status: $lastLine"
     info "^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
-    rm -f "${SETUP_PKGS_DIR}/pkgs.log" 2>/dev/null
     if [[ "${lastLine}" != "253" ]]; then
         # Copy the remote log file locally
-        if scp "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/pkgs.log" "${SETUP_PKGS_DIR}/pkgs.log"; then
-            ok "Log file 'pkgs.log' copied successfully to '${SETUP_PKGS_DIR}'"
+        # shellcheck disable=SC2029
+        if ssh "${SSH_CONFIG_ENTRY}" "cat ${cplx_path}/tools/pkgs.log" >> "${SETUP_PKGS_DIR}/pkgs.log"; then
+            ok "Remote ('${SSH_CONFIG_ENTRY}') log file 'pkgs.log' appended successfully to '${SETUP_PKGS_DIR}/pkgs.log'"
         else
-            warning "Failed to open 'pkgs.log' file at '${SETUP_PKGS_DIR}'"
+            warning "Failed to access remote ('${SSH_CONFIG_ENTRY}') log file or to open 'pkgs.log' file at '${SETUP_PKGS_DIR}'"
         fi
     fi
     if [ "${lastLine}" != "0" ]; then
