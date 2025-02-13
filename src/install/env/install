@@ -156,6 +156,12 @@ uncompress_archive() {
             fatal "Unsupported archive format for '${archive}'" 5
             ;;
     esac
+    first_folder=$(find "$destination" -type f -name 'config*' -printf '%h\n' | sort -u | head -n 1)
+    if [[ -z "$first_folder" ]]; then
+        fatal "No folder with config found in '$destination'" 6
+    fi
+    rm -f "$destination/current"
+    ln -sfn "$first_folder" "$destination/current"
 }
 
 # Check if the extraction folder exists
