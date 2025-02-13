@@ -1,0 +1,55 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+#echo "${DIR}"
+# shellcheck source=/dev/null
+source "${DIR}/../.env"
+# shellcheck source=/dev/null
+source "${DIR}/../echos/echos"
+# shellcheck source=/dev/null
+source "${DIR}/../bin/properties.sh"
+# shellcheck source=/dev/null
+source "${DIR}/../bin/is_tool_name_valid.sh"
+
+# Check if exactly at least two parameter is provided
+if [[ $# -lt 2 ]]; then
+  fatal "Usage: setup <tool_name> <version>" 1
+fi
+
+tool="$1"
+version="$2"
+
+# shellcheck disable=SC2034
+properties_file="${DIR}/../cplx.properties"
+# Resolve to canonical, normalized path
+properties_file=$(readlink -f "$properties_file")
+export properties_file
+# Retrieve the list of valid services (comma-separated)
+get_property services  # Example: "service1,service2,service3"
+if [[ -z "$services" ]]; then
+    fatal "No services found in the properties file '${properties_file}'" 1
+fi
+
+# Convert the comma-separated services into an array
+IFS=',' read -r -a service_array <<< "$services"
+
+# Flag to indicate if the tool is valid
+valid=false
+
+# Iterate through the services to check for a match
+for service in "${service_array[@]}"; do
+    if [[ "$service" == "$tool" ]]; then
+        valid=true
+        break
+    fi
+done
+
+# If the tool is not valid, use fatal to exit with an error message
+if [[ "$valid" == false ]]; then
+    fatal "Invalid tool name: '${tool}'. Available tools are: ${services}" 1
+fi
+
+mkdir -p "${DIR}/tools/${tool}/${tool}-${version}/usr/bin"
+mkdir -p "${DIR}/tools/${tool}/logs"
+ln -fs "${DIR}/tools/${tool}" "${DIR}/tools/tool"
+ln -fs "${DIR}/tools/${tool}/${tool}-${version}" "${DIR}/tools/${tool}/current"
