@@ -8,8 +8,6 @@ source "${DIR}/../.env"
 source "${DIR}/../echos/echos"
 # shellcheck source=/dev/null
 source "${DIR}/../bin/properties.sh"
-# shellcheck source=/dev/null
-source "${DIR}/../bin/is_tool_name_valid.sh"
 
 # Check if exactly at least two parameter is provided
 if [[ $# -lt 2 ]]; then
@@ -49,7 +47,11 @@ if [[ "$valid" == false ]]; then
     fatal "Invalid tool name: '${tool}'. Available tools are: ${services}" 1
 fi
 
-mkdir -p "${DIR}/tools/${tool}/${tool}-${version}/usr/bin"
-mkdir -p "${DIR}/tools/${tool}/logs"
-ln -fs "${DIR}/tools/${tool}" "${DIR}/tools/tool"
-ln -fs "${DIR}/tools/${tool}/${tool}-${version}" "${DIR}/tools/${tool}/current"
+info "Setting up tree structures and symlinks for ${tool} version ${version}"
+mkdir -p "${DIR}/${tool}/${tool}-${version}/usr/bin"
+mkdir -p "${DIR}/${tool}/logs"
+mkdir -p "${DIR}/${tool}/sources"
+rm -f "${DIR}/tool"
+ln -fs "${DIR}/${tool}" "${DIR}/tool"
+rm -f "${DIR}/${tool}/current"
+ln -fs "${DIR}/${tool}/${tool}-${version}" "${DIR}/${tool}/current"
