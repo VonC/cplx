@@ -374,7 +374,8 @@ yum install -y make gcc perl-core pcre-devel wget zlib-devel
 ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
 ```
 
-wget https://ftp.openssl.org/source/openssl-1.1.1k.tar.gz
+wget https://ftp.openssl.org/source/openssl-1.1.1k.tar.gz Now https://openssl-library.org/source/old/1.1.1/index.html: https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz
+
 openssl-3.2.2.tar.gz
 https://openssl-library.org/source/
 https://github.com/openssl/openssl/releases/download/openssl-3.4.1/openssl-3.4.1.tar.gz
@@ -400,8 +401,16 @@ configure:14675: checking for --with-system-libmpdec
 configure:14686: result: yes
 configure:14695: checking for libmpdec >= 2.5.0
 configure:14756: result: no
-configure:14761: error: libmpdec >= 2.5.0 not found
+configure:14761: error: libmpdec >= 2.5.0 not found https://www.bytereef.org/mpdecimal/download.html https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-2.5.1.zip
 ```
+
+https://github.com/lucasLMT/libmpdec: libmpdec is a fast C/C++ library for correctly-rounded arbitrary precision
+decimal floating point arithmetic.  It is a complete implementation of
+Mike Cowlishaw/IBM's General Decimal Arithmetic Specification. The full
+specification is available here:
+
+http://speleotrove.com/decimal/ => https://www.bytereef.org/mpdecimal/
+
 
 ## install
 
