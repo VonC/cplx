@@ -28,7 +28,9 @@ logs="${DIR}/logs"
 mkdir -p "${logs}"
 
 PATH_LOG="${logs}/${LOGIN}-$(basename "$0" .bash)-${NOW}.pkgs.log"
-ln -nfs "${PATH_LOG}" "${DIR}/pkgs.log"
+REL_PATH_LOG="logs/${LOGIN}-$(basename "$0" .bash)-${NOW}.pkgs.log"
+rm -f "${DIR}/pkgs.log"
+ln -nfs "${REL_PATH_LOG}" "${DIR}/pkgs.log"
 
 info "Script Execution DIR '${DIR}'"
 ok "Logging execution in '$PATH_LOG' (ln -nfs '${DIR}/pkgs.log')"
@@ -95,7 +97,7 @@ post_install() {
     local package_name="$1"
     if [[ "$package_name" =~ ^binutils-[0-9] ]]; then
         if [[ ! -e "${DIR}/root/usr/bin/ld" ]]; then
-            ln -s "${DIR}/root/usr/bin/ld.bfd" "${DIR}/root/usr/bin/ld"
+            ln -nfs "usr/bin/ld.bfd" "${DIR}/root/usr/bin/ld"
         fi
     fi
 }

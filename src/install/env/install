@@ -63,8 +63,8 @@ else
     # shellcheck source=/dev/null
     source "${DIR}/${tool}/install_functions.sh"
 fi
-
-ln -fs "${DIR}/${tool}" "${DIR}/tool"
+rm -f "${DIR}/tool"
+ln -nfs "${tool}" "${DIR}/tool"
 
 # Define the sources directory
 sources_dir="${DIR}/${tool}/sources"
@@ -161,7 +161,7 @@ uncompress_archive() {
         fatal "No folder with config found in '$destination'" 6
     fi
     rm -f "$destination/current"
-    ln -sfn "$first_folder" "$destination/current"
+    ln -nfs "$first_folder" "$destination/current"
 }
 
 # Check if the extraction folder exists
@@ -203,7 +203,8 @@ update_current_symlink() {
     fi
 
     # Create or update the symlink
-    ln -sfn "${target}" "${symlink_path}" || fatal "Failed to create/update symlink '${symlink_path}' pointing to '${target}'" 6
+    rm -f "${symlink_path}"
+    ln -nfs "${target}" "${symlink_path}" || fatal "Failed to create/update symlink '${symlink_path}' pointing to '${target}'" 6
 
     shopt -u nullglob
 }
@@ -220,7 +221,9 @@ LOGIN="$(/usr/bin/id -un)"
 mkdir -p "${logs}"
 
 PATH_LOG="${logs}/${LOGIN}-$(basename "$0" .bash)-${NOW}.log"
-ln -nfs "${PATH_LOG}" "${prj}/log"
+REL_PATH_LOG="logs/${LOGIN}-$(basename "$0" .bash)-${NOW}.log"
+rm -f "${prj}/log"
+ln -nfs "${REL_PATH_LOG}" "${prj}/log"
 
 info "Script Execution DIR '$prj'"
 ok "Logging execution in '$PATH_LOG' (ln -nfs '${prj}/log')"
