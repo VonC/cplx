@@ -227,7 +227,10 @@ transfer_the_sources_to_the_remote_project_folder() {
 
 get_the_version() {
     if step_is_done "get_the_version"; then
-        CPLX_VERSION=${version}
+        if [[ -z "${CPLX_VERSION}" ]]; then
+            fatal "get_the_version is done but CPLX_VERSION is not defined" 31
+        fi
+        version="${CPLX_VERSION}"
         ok "'get_the_version' already fetched for tool '${CPLX_TOOL}': '${CPLX_VERSION}'"
         return 0
     fi

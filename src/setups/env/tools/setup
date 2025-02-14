@@ -49,6 +49,7 @@ fi
 
 info "Setting up tree structures and symlinks for ${tool} version ${version}"
 mkdir -p "${DIR}/${tool}/${tool}-${version}/usr/bin"
+mkdir -p "${DIR}/${tool}/root"
 mkdir -p "${DIR}/${tool}/logs"
 mkdir -p "${DIR}/${tool}/sources"
 rm -f "${DIR}/tool"
