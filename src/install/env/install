@@ -58,7 +58,7 @@ if [[ "$valid" == false ]]; then
 fi
 
 if [[ ! -e "${DIR}/${tool}/install_functions.sh" ]]; then
-    fatal "Tool '${tool}' install_functions.sh script not found at '${DIR}/${tool}/install'" 2
+    fatal "Tool '${tool}' install_functions.sh script not found at '${DIR}/${tool}'" 2
 else
     # shellcheck source=/dev/null
     source "${DIR}/${tool}/install_functions.sh"
