@@ -50,3 +50,24 @@ function clean() {
     fi
     ok "Clean done"
 }
+
+function install() {
+    if [[ ! -e "${tool_prefix}" ]]; then
+        mkdir -p "${tool_prefix}" || fatal "Unable to create '${tool_prefix}'" 17
+        info "Created '${tool_prefix}': install 'mpdecimal' needed"
+    fi
+    # check if "${tool_prefix}/lib/libmpdec.so" exists, and if it is newer than "${tool_src}/libmpdec/libmpdec.so": if so, _must_install=1
+    if [[ -e "${tool_prefix}/lib/libmpdec.so" ]]; then
+        if [[ "${tool_prefix}/lib/libmpdec.so" -nt "${tool_src}/libmpdec/libmpdec.so" ]]; then
+            ok "No need to install 'mpdecimal' in '${tool_prefix}': lib/libmpdec.so newer than '${tool_src}/libmpdec/libmpdec.so'"
+            return 0
+        else
+            info "lib/libmpdec.so is older than '${tool_src}/libmpdec/libmpdec.so': install 'mpdecimal' in '${tool_prefix}'"
+        fi
+    else
+        info "No lib/libmpdec.so in '${tool_prefix}': install 'mpdecimal' in '${tool_prefix}'"
+    fi
+    task "Must install 'mpdecimal' in '${tool_prefix}'"
+    make install || fatal "Unable to make install in '${tool_prefix}'" 19
+    ok "make install is now done in '${tool_prefix}'"
+}

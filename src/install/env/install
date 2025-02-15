@@ -290,6 +290,12 @@ function main() {
         error "main: build failed with '${res_build}'"
         return "${res_build}"
     fi
+    install
+    res_install=$?
+    if [[ ${res_install} != 0 ]]; then
+        error "main: install failed with '${res_install}'"
+        return "${res_install}"
+    fi
     return $?
 }
 
