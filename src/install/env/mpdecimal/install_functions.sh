@@ -72,31 +72,31 @@ function install() {
     ok "make install is now done in '${tool_prefix}'"
 }
 
-function archive() {
-    local archive_name
-    local archive_name_prefix
-    archive_name_prefix=$(basename "${tool_prefix}")
-    if [[ -z "${archive_name_prefix}" ]]; then
-        warning "No current symlink in '${tool_prefix}', no archive"
+function package() {
+    local package_name
+    local package_name_prefix
+    package_name_prefix=$(basename "${tool_prefix}")
+    if [[ -z "${package_name_prefix}" ]]; then
+        warning "No current symlink in '${tool_prefix}', no package"
         return 1
     fi
     get_property CPLX_ARCH_EXT
     if [[ -z "${CPLX_ARCH_EXT}" ]]; then
-        fatal "No CPLX_ARCH_EXT defined (like 'el8.x86_64'), unable to archive 'mpdecimal'" 18
+        fatal "No CPLX_ARCH_EXT defined (like 'el8.x86_64'), unable to package 'mpdecimal'" 18
     fi
-    archive_name="${archive_name_prefix}-0.${CPLX_ARCH_EXT}.tar.gz"
+    package_name="${package_name_prefix}-0.${CPLX_ARCH_EXT}.tar.gz"
     # shellcheck disable=SC2154
-    if [[ -e "${tool}/${archive_name}" ]]; then
-        if [[ "${tool}/${archive_name}" -nt "${tool_prefix}/lib/libmpdec.so" ]]; then
-            ok "No need to archive 'mpdecimal' in '${archive_name}': archive newer than lib/libmpdec.so"
+    if [[ -e "${tool}/${package_name}" ]]; then
+        if [[ "${tool}/${package_name}" -nt "${tool_prefix}/lib/libmpdec.so" ]]; then
+            ok "No need to package 'mpdecimal' in '${package_name}': package newer than lib/libmpdec.so"
             return 0
         else
-            info "Archive '${archive_name}' is older than lib/libmpdec.so: archive 'mpdecimal' in '${archive_name}'"
+            info "Package '${package_name}' is older than lib/libmpdec.so: package 'mpdecimal' in '${package_name}'"
         fi
     else
-        info "No archive '${archive_name}' in '${tool}': archive 'mpdecimal' in '${archive_name}'"
+        info "No package '${package_name}' in '${tool}': package 'mpdecimal' in '${package_name}'"
     fi
-    task "Must archive 'mpdecimal' in '${archive_name}'"
-    tar czf "${tool}/${archive_name}" -C "${tool_prefix}" . || fatal "Unable to archive 'mpdecimal' in '${archive_name}'" 19
-    ok "Archive is now done in '${archive_name}'"
+    task "Must package 'mpdecimal' in '${package_name}'"
+    tar czf "${tool}/${package_name}" -C "${tool_prefix}" . || fatal "Unable to package 'mpdecimal' in '${package_name}'" 19
+    ok "Package is now done in '${package_name}'"
 }

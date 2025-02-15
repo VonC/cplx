@@ -296,11 +296,11 @@ function main() {
         error "main: install failed with '${res_install}'"
         return "${res_install}"
     fi
-    archive
-    res_archive=$?
-    if [[ ${res_archive} != 0 ]]; then
-        error "main: archive failed with '${res_archive}'"
-        return "${res_archive}"
+    package
+    res_package=$?
+    if [[ ${res_package} != 0 ]]; then
+        error "main: package failed with '${res_package}'"
+        return "${res_package}"
     fi
     return $?
 }
