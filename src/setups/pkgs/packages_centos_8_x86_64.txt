@@ -1128,3 +1128,4 @@ zip-3.0-23.el8.x86_64.rpm
 zlib-1.2.11-25.el8.x86_64.rpm
 zlib-devel-1.2.11-25.el8.x86_64.rpm
 zsh-5.5.1-10.el8.x86_64.rpm
+_mpdecimal-2.5.1-0.el8.x86_64.tar.gz

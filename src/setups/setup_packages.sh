@@ -199,8 +199,12 @@ sync_package() {
     found_pkg=$(echo "$matches" | head -n1)
     ok "Found package: '${found_pkg}'"
 
-    download_package "${arch}" "${found_pkg}"
-    scp_package "${arch}" "${found_pkg}"
+    if [[ "${found_pkg}" != _* ]]; then
+        download_package "${arch}" "${found_pkg}"
+        scp_package "${arch}" "${found_pkg}"
+    else
+        ok "Package '${found_pkg}' is a remote built package: no download or scp needed"
+    fi
     install_package "${found_pkg}"
 }
 
