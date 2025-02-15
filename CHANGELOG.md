@@ -4,6 +4,96 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.10.0] - 2025-02-15 - Refactor, compile, and archive mpdecimal
+
+Refactor: root is now per tool, not common to tools
+mpdecimal: needed for Python to import _decimal module
+archive: a tar.gz of the tool installed
+
+Note: opening logs with VSCode no longer steam the focus of the current Windows which initiated the setup or installation.
+
+### 🚀 Features
+
+- *(env)* Add senvi alias for install functions
+- *(install)* Improve Python environment setup
+- *(env)* Add cdttc alias for current tool directory
+- *(setups)* Improve install packages logging
+- Remove env/tools and its unused .keep files
+- Add mpdecimal and openssl to services to build
+- *(setup)* Add setup script for remote server
+- *(setup)* Get_the_latest_tag split in two steps
+- Add download URL (CPLX_URL) in senv.local.bat
+- *(setup)* Split get_the_latest_tag in two steps
+- *(env)* Add mpdecimal and openssl services
+- *(setup)* Improve setup.bat log display
+- *(setup)* Improve setup.sh script, call remote setup
+- *(install)* Create config symlink 'sources/current'
+- Add steps.md to .gitattributes
+- *(setup)* Add packages management script
+- *(setup)* Enhance .env with package management
+- *(setup)* .env source echos and install functions
+- *(setup)* Improve directory structure for tools
+- *(setup)* Setup script now adds install dir
+- *(install)* Simplify current symlink update
+- *(setup)* Add missing packages for CentOS 8 mpdecimal
+- *(setup)* Support various source archive extensions
+- *(env)* Add rg and rgi aliases
+- *(bat)* Add scpe doskey command to senv.bat
+- *(install)* Add make install, with mpdecimal
+- *(tools)* Add `CPLX_ARCH_EXT` to `senv.local.tpl`
+- *(install)* Add mpdecimal archive step
+
+### 🐛 Bug Fixes
+
+- *(python)* Adjust setenv error handling
+- *(install)* Correct OpenSSL paths in Python installation
+- *(install)* Missing Python deps for RHEL7 and CentOS8
+- *(python)* Adjust OpenSSL paths and deps for CentOS 8
+- *(install)* Update install docs and package lists
+- *(setup)* Improve pkgs log file handling
+- *(install)* Remove unnecessary symlink 'current'
+- *(setup)* Add `tool/root`, check `CPLX_VERSION`
+- *(setup)* Improve package lookup
+- *(setup)* Setup_packages.sh update last one when OK
+- *(setup)* Packages are logged and installed per tool
+- *(install)* Adjust current symlink path for src
+- *(setup)* Correct symbolic link path for ld
+- Correct alias cds definition
+- *(setups)* Add missing mpdecimal deps on CentOS 8
+- *(install)* Enhance `LD_LIBRARY_PATH` and `LDFLAGS`
+- *(install)* Correct installation prefix for tools
+- *(mpdecimal)* Disable C++ support during build
+- *(mpdecimal)* Improve mpdecimal build and clean
+
+### 🚜 Refactor
+
+- *(install)* Install_functions at tools level
+
+### ⚙️ Miscellaneous Tasks
+
+- *(md)* Start install section
+- *(install)* Typo on comment
+- *(doc)* Add mpdecimal source URL
+- *(git)* Improve steps.md handling in Git attributes
+- *(typo)* Correct hostname message in setup script
+- *(doc)* Update version.txt
+
+### Feat
+
+- Setup.bat log display restore focus to window
+- *(install)* Restore window focus after VSCode launch
+
+### Fix
+
+- *(src)* Use ln -nfs for symlinks
+- *(setup)* .env shellchecks updates
+- *(setup)* .env corrects root path
+- *(setup)* Improve error handling in packages_management.sh
+
+### Refactor
+
+- *(setup)* Move setup file and improve structure
+
 ## [v0.9.0] - 2025-02-12 - Compile Python
 
 Now that the install script works, and configure Python,
