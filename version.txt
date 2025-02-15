@@ -1,7 +1,4 @@
-0.10.0 -- Refactor, compile, and archive mpdecimal
+0.11.0-SNAPSHOT -- Build Python with mpdecimal, add archive
 
-Refactor: root is now per tool, not common to tools
-mpdecimal: needed for Python to import _decimal module
-archive: a tar.gz of the tool installed
-
-Note: opening logs with VSCode no longer steam the focus of the current Windows which initiated the setup or installation.
+Check if mpdecimal help for the Python decimal module
+Add a package step to include all runtime dependencies and python wrapper script
