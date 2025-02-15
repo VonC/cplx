@@ -173,9 +173,9 @@ if [[ -z "$first_folder" ]]; then
     fatal "No folder with config found in '$archive_folder'" 6
 fi
 # shellcheck disable=SC2001
-first_folder=$(echo "${first_folder}" | sed "s|^${archive_folder}/||")
+first_folder=$(echo "${first_folder}" | sed "s|^${sources_dir}/||")
 rm -f "$sources_dir/current"
-ln -nfs "${version}/$first_folder" "$sources_dir/current"
+ln -nfs "$first_folder" "$sources_dir/current"
 
 NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
 LOGIN="$(/usr/bin/id -un)"
