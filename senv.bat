@@ -7,6 +7,7 @@ doskey sfa=bash -c "%project_dir_unix%/src/utils/steps_format_anchors.sh $1"
 doskey i="%project_dir%/src/install/install.bat" $*
 doskey s="%project_dir%/src/setups/setup.bat" $*
 doskey sp="%project_dir%/src/setups/setup.bat" packages $*
+doskey scpe="%project_dir%/src/setups/setup.bat" "copy.*env" $*
 
 if "%~1"=="unset" (
   call:unset_senv
