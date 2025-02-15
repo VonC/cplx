@@ -5,7 +5,7 @@ function configure() {
 
     # Build the configure command as an array
     local configure_cmd=( "${tool_src}/configure"
-                          "--prefix=${tool_bin}"
+                          "--prefix=${tool_prefix}"
                           "--with-openssl=${root}/usr"
                           "--with-openssl-rpath=${root}/usr/lib64"
                           "--enable-shared=yes" )
