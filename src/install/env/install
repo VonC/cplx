@@ -156,12 +156,6 @@ uncompress_archive() {
             fatal "Unsupported archive format for '${archive}'" 5
             ;;
     esac
-    first_folder=$(find "$destination" -type f -name 'config*' -printf '%h\n' | sort -u | head -n 1)
-    if [[ -z "$first_folder" ]]; then
-        fatal "No folder with config found in '$destination'" 6
-    fi
-    rm -f "$destination/current"
-    ln -nfs "$first_folder" "$destination/current"
 }
 
 # Check if the extraction folder exists
@@ -174,47 +168,14 @@ else
     echo "Extraction folder '${archive_folder}' already exists. Skipping extraction."
 fi
 
-# Function to create or update the 'current' symlink
-update_current_symlink() {
-    local target_dir="$1"
-    local symlink_path="$2"
-
-    # Check if the target directory contains only one subdirectory and no files
-    shopt -s nullglob
-    subdirs=("$target_dir"/*/)
-    files=("$target_dir"/*)
-
-    # Count only directories in files array
-    file_count=0
-    for f in "${files[@]}"; do
-        if [[ ! -d "$f" ]]; then
-            ((file_count++))
-        fi
-    done
-
-    if [[ ${#subdirs[@]} -eq 1 && ${file_count} -eq 0 ]]; then
-        # If only one subdirectory exists and no other files, symlink to the subdirectory
-        target="${subdirs[0]}"
-        echo "Single subdirectory '${target}' found. Symlinking 'current' to '${target}'."
-    else
-        # Otherwise, symlink to the target directory itself
-        target="${target_dir}"
-        echo "Symlinking 'current' to '${target}'."
-    fi
-
-    # Create or update the symlink
-    rm -f "${symlink_path}"
-    ln -nfs "${target}" "${symlink_path}" || fatal "Failed to create/update symlink '${symlink_path}' pointing to '${target}'" 6
-
-    shopt -u nullglob
-}
-
-# Define the 'current' symlink path
-current_symlink="${sources_dir}/current"
-
-# Update the 'current' symlink accordingly
-update_current_symlink "$archive_folder" "$current_symlink"
-
+first_folder=$(find "$archive_folder" -type f -name 'config*' -printf '%h\n' | sort -u | head -n 1)
+if [[ -z "$first_folder" ]]; then
+    fatal "No folder with config found in '$archive_folder'" 6
+fi
+# shellcheck disable=SC2001
+first_folder=$(echo "${first_folder}" | sed "s|^${archive_folder}/||")
+rm -f "$sources_dir/current"
+ln -nfs "${version}/$first_folder" "$sources_dir/current"
 
 NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
 LOGIN="$(/usr/bin/id -un)"
