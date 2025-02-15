@@ -2,12 +2,10 @@
 
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 #echo "${DIR}"
+tool="dummy"
+root="dummy"
 # shellcheck source=/dev/null
 source "${DIR}/../.env"
-# shellcheck source=/dev/null
-source "${DIR}/../echos/echos"
-# shellcheck source=/dev/null
-source "${DIR}/../bin/properties.sh"
 
 rm -f "${DIR}/pkgs.log"
 
@@ -25,6 +23,7 @@ NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
 LOGIN="$(/usr/bin/id -un)"
 
 logs="${DIR}/logs"
+tool_pkgs="${tool}/pkgs"
 mkdir -p "${logs}"
 
 PATH_LOG="${logs}/${LOGIN}-$(basename "$0" .bash)-${NOW}.pkgs.log"
@@ -66,20 +65,23 @@ function getArg() {
 
 # main: Acts as the central execution point, orchestrating the overall setup process including dependency checks, installations, and environmental configurations, ensuring the script achieves its purpose of preparing the environment or updating software as required.
 function main() {
-    info "main: Start install package '${package_name} at '${NOW}'"
+
+    info "main: Start install package '${package_name} at '${NOW}' for root='${root}'"
     # shellcheck disable=SC2154
-    cd "${DIR}/root" || fatal "Unable to access pkgs_dir '${DIR}/root'" 22
+    cd "${root}" || fatal "Unable to access pkgs_dir '${root}'" 22
 
     local i_log
-    i_log="${DIR}/logs/install_package.log"
+    i_log="${tool}/logs/install_package.log"
     rm -f "${i_log}"
     local m_log
-    m_log="${DIR}/logs/mirror_package.log"
+    m_log="${tool}/logs/mirror_package.log"
     rm -f "${m_log}"
     if ! check_flag_exists "${package_name}" "installed"; then
         ( install_package ) 2>&1 | tee -a "${i_log}"
         if check_flag_exists "${package_name}" "installed" && [[ -e "${i_log}" ]]; then
             cat "${i_log}" > "${package_name%.rpm}.installed"
+        else
+            fatal "Unable to install '${package_name}'" 28
         fi
     fi
     if ! check_flag_exists "${package_name}" "mirrored"; then
@@ -87,6 +89,8 @@ function main() {
         if check_flag_exists "${package_name}" "mirrored" && [[ -e "${m_log}" ]]; then
             echo "-------------------">> "${package_name%.rpm}.installed.mirrored"
             cat "${m_log}" >> "${package_name%.rpm}.installed.mirrored"
+        else
+            fatal "Unable to mirror '${package_name}'" 29
         fi
     fi
     post_install "${package_name}"
@@ -96,8 +100,8 @@ function main() {
 post_install() {
     local package_name="$1"
     if [[ "$package_name" =~ ^binutils-[0-9] ]]; then
-        if [[ ! -e "${DIR}/root/usr/bin/ld" ]]; then
-            ln -nfs "usr/bin/ld.bfd" "${DIR}/root/usr/bin/ld"
+        if [[ ! -e "${root}/usr/bin/ld" ]]; then
+            ln -nfs "usr/bin/ld.bfd" "${root}/usr/bin/ld"
         fi
     fi
 }
@@ -106,21 +110,24 @@ check_flag_exists() {
     local pkg="$1"
     local flag_suffix="$2"
     local pattern="${pkg%.rpm}*${flag_suffix}*"
+    cd ${tool_pkgs} || fatal "Unable to access pkgs_dir '${tool_pkgs}'" 32
     shopt -s nullglob
     # shellcheck disable=SC2206
     local flags=( ${pattern} )
     shopt -u nullglob
     if (( ${#flags[@]} > 0 )); then
-        info "A file matching '${pattern}' already exists in '${DIR}/root'"
-        ok "'${pkg}' already '${flag_suffix}' in '${DIR}/root'"
+        info "A file matching '${pattern}' already exists in '${tool_pkgs}'"
+        ok "'${pkg}' already '${flag_suffix}' in '${tool_pkgs}'"
+        cd "${root}" || fatal "Unable to access pkgs_dir '${root}'" 32
         return 0
     fi
+    cd "${root}" || fatal "Unable to access pkgs_dir '${root}'" 33
     return 1
 }
 
 function install_package() {
 
-    local flag="${package_name%.rpm}.installed"
+    local flag="${tool_pkgs}/${package_name%.rpm}.installed"
     if [[ "${package_name%.rpm}" != "${package_name}" ]]; then
         if ! rpm2cpio "${pkgs_dir}/${package_name}" | cpio -idmv; then fatal "Unable to install '${package_name}'" 2; fi
     elif [[ "${package_name%.xz}" != "${package_name}" ]]; then
@@ -132,7 +139,7 @@ function install_package() {
         fatal "unknown extension for archive '${package_name}'" 11
     fi
     touch "${flag}" || fatal "Unable to create flag file '${flag}'" 3
-    ok "'${flag}' installed in '${DIR}/root'"
+    ok "'${flag}' installed in '${tool_pkgs}'"
 
 }
 
@@ -178,7 +185,7 @@ list_archive_content_to_mirror() {
         fatal "Some files in the archive have absolute system paths or unresolved paths" 199
     fi
 
-    mv "${package_name%.rpm}.installed" "${package_name%.rpm}.installed.mirrored" || fatal "Unable to rename flag file '${package_name%.rpm}.installed' to '${package_name%.rpm}.installed.mirrored'" 12
+    mv "${tool_pkgs}/${package_name%.rpm}.installed" "${tool_pkgs}/${package_name%.rpm}.installed.mirrored" || fatal "Unable to rename flag file '${package_name%.rpm}.installed' to '${tool_pkgs}/${package_name%.rpm}.installed.mirrored'" 12
 
 }
 
@@ -284,7 +291,7 @@ check_ldd() {
         if [[ "${line}" =~ (^|[[:space:]])(/[^[:space:]]+) ]]; then
             if [[ "${line}" =~ [[:space:]]*(/[^[:space:]]+) ]]; then
                 abs_path="${BASH_REMATCH[1]}"
-                if [[ -e "${DIR}/root${abs_path}" || -e "${DIR}/root/usr${abs_path}" ]]; then
+                if [[ -e "${root}${abs_path}" || -e "${root}/usr${abs_path}" ]]; then
                     continue # Skip if the path exists
                 fi
             fi
