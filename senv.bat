@@ -16,7 +16,7 @@ if "%~1"=="unset" (
 %_unstack% senv.bat
 
 if not defined QUIET_PRJ (  %_info% "project PATH '%PATH%'" )
-if not defined QUIET_PRJ ( %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%'" )
+if not defined QUIET_PRJ ( %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%', for tool '%CPLX_TOOL%'" )
 goto:eof
 
 ::##################################################

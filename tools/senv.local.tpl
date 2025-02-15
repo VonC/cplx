@@ -17,20 +17,27 @@ rem if errorlevel 1 ( set "PATH=%PATH%;%PRGS%\senv\bin" )
 set SSH_CONFIG_ENTRY=centos8
 doskey s="%project_dir%\src\setups\setup.bat" $*
 set "CPLX_REPEAT_STEP="
-rem set "CPLX_REPEAT_STEP=transfer-env-to-the-remote-project-folder"
+rem set "CPLX_REPEAT_STEP=transfer_env_to_the_remote_project_folder"
+set "CPLX_REPEAT_STEP=validate_the_ssh_connection"
 set "CPLX_RESET_STEP="
-rem set "CPLX_RESET_STEP=copy_the_sources"
-set "CPLX_TOOL=python"
 set "CPLX_TOOL_RC="
-rem set "CPLX_TOOL_RC=1"
-set "CPLX_VERSION="
-rem set "CPLX_VERSION=v3.13.1"
-rem set "CPLX_URL=https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-[version].zip"
-# if not provided, source extension is zip by default
-set "CPLX_SRC_EXT=tar.gz"
-# needed to build an archive or a package
-set "CPLX_ARCH_EXT=el8.x86_64"
+rem set CPLX_TOOL_RC=1
+rem set "CPLX_RESET_STEP=copy_the_sources"
 
+set "CPLX_SRC_EXT=zip"
+set "CPLX_ARCH_EXT=el8.x86_64"
+set "CPLX_URL="
+
+rem set "CPLX_TOOL=python"
+if "%CPLX_TOOL%" == "python" (
+  set "CPLX_VERSION=v3.13.1"
+)
+rem set "CPLX_TOOL=mpdecimal"
+if "%CPLX_TOOL%" == "mpdecimal" (
+  set "CPLX_VERSION=2.5.1"
+  set "CPLX_URL=https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-[version].tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
+)  
 goto:eof
 
 
