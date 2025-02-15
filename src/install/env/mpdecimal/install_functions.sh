@@ -24,13 +24,15 @@ function configure() {
 }
 
 function build() {
-    if [[ ! -e git-add && ! -e python ]]; then
-        task "Must make all in '$(pwd)'"
+    local target
+    target="lib"
+    if [[ ! -e "libmpdec/sixstep.o" ]]; then
+        task "Must make '${target}' in '$(pwd)' (avoid libcxx which needs g++)"
         #make -d v=1 -d DEVELOPER=1 all || fatal "Unable to make all in '$(pwd)'" 19
-        make all || fatal "Unable to make all in '$(pwd)'" 19
-        ok "make all is now done in '$(pwd)'"
+        make ${target} || fatal "Unable to make '${target}' in '$(pwd)'" 19
+        ok "make '${target}' is now done in '$(pwd)'"
     else
-        ok "python already compiled in '$(pwd)'"
+        ok "mpdecimal already compiled in '$(pwd)'"
     fi
 }
 
@@ -43,6 +45,8 @@ function clean() {
     if ! make clean; then
         fatal "clean ERROR" 4
     fi
-    rm python || fatal "Unable to remove python in '$(pwd)'" 5
+    if [[ -e mpdecimal ]]; then
+        rm mpdecimal || fatal "Unable to remove mpdecimal in '$(pwd)'" 5
+    fi
     ok "Clean done"
 }
