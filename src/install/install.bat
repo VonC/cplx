@@ -94,7 +94,17 @@ if "%lastLine%"=="199" (
 
 rem https://stackoverflow.com/questions/6814075/windows-start-b-command-problem
 rem https://stackoverflow.com/questions/51132235/opening-project-in-vscode-using-batch-file
-"%PRGS%\vscodes\current\bin\code.cmd" "" "%install_dir%\install.log" | exit
+rem "%PRGS%\vscodes\current\bin\code.cmd" "" "%install_dir%\install.log" | exit
+%_task% "Must display '%install_dir%\install.log'"
+set VSCODE_DEV=
+set ELECTRON_RUN_AS_NODE=1
+rem cmd /C start /B "C:\Users\vonc\prgs\vscodes\current\bin\code.cmd" "%install_dir%\install.log"
+"%PRGS%\vscodes\current\Code.exe" "%PRGS%\vscodes\current\resources\app\out\cli.js" "%install_dir%\install.log"
+if errorlevel 1 (
+    %_fatal% "Unable to display '%install_dir%\install.log'" 132
+)
+%_ok% "Display '%install_dir%\install.log' done"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%install_dir%\..\utils\alt_tab.ps1"
 
 if not %lastLine%==0 ( tail -10 "%install_dir%\temp.txt" && %_fatal% "Installation failed" 5 )
 %_ok% "Installation executed"
