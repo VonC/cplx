@@ -1,4 +1,8 @@
-0.10.0-SNAPSHOT -- Refactor and compile mpdecimal
+0.10.0-SNAPSHOT -- Refactor, compile, archive and package mpdecimal
 
 Refactor: root is now per tool, not common to tools
 mpdecimal: needed for Python to import _decimal module
+archive: a tar.gz of the tool installed
+package: a portable zip of the tool, its runtime packages dependencies (root/usr/...) and its environment (like bin wrapper)
+
+Note: opening logs with VSCode no longer steam the focus of the current Windows which initiated the setup or installation.
