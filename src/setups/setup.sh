@@ -1,12 +1,14 @@
 #!/bin/bash
-# shellcheck source-path=SCRIPTDIR
+# shellcheck source-path=CPLX_DIR
+# shellcheck disable=SC1091
 
 SETUP_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
-# echo "SETUP_DIR='${SETUP_DIR}'"
-source "${SETUP_DIR}/../echos/echos"
-source "${SETUP_DIR}/../utils/properties.sh"
-source "${SETUP_DIR}/../utils/steps.sh"
 SRC_DIR="$( cd "$( dirname "${SETUP_DIR}" )" && pwd )"
+INST_DIR="${SRC_DIR}/install"
+# echo "SETUP_DIR='${SETUP_DIR}'"
+source "${SRC_DIR}/echos/echos"
+source "${SRC_DIR}/utils/properties.sh"
+source "${SRC_DIR}/utils/steps.sh"
 
 main() {
     steps_file="${SETUP_DIR}/steps.md"
@@ -17,7 +19,7 @@ main() {
         if ! repeat_step "${CPLX_REPEAT_STEP}"; then
             fatal "Could not repeat '${CPLX_REPEAT_STEP}'" 111
         fi
-        ok "Repeated '${CPLX_REPEAT_STEP}'"
+        ok "Repeated '${CPLX_REPEAT_STEP}' (steps file: '${steps_file}')"
     else
         info "CPLX_REPEAT_STEP is not set: no step to repeat"
     fi
@@ -27,7 +29,7 @@ main() {
         if ! reset_step "${CPLX_RESET_STEP}"; then
             fatal "Could not reset '${CPLX_RESET_STEP}'" 111
         fi
-        ok "Reset '${CPLX_RESET_STEP}'"
+        ok "Reset '${CPLX_RESET_STEP}' (steps file: '${steps_file}')"
     else
         info "CPLX_RESET_STEP is not set: no step to repeat"
     fi
@@ -98,6 +100,8 @@ copy_the_environment() {
         ( tar cvf - "${SRC_DIR}/utils" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}/bin\" --strip-components=${component_count_utils}" ) || fatal "Could not copy utils environment" 12
         # shellcheck disable=SC2029
         ( tar cvf - "${SRC_DIR}/echos" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}/echos\" --strip-components=${component_count_utils}" ) || fatal "Could not copy echos environment" 13
+        # shellcheck disable=SC2029
+        ( tar cvf - "${INST_DIR}/env" | ssh "${SSH_CONFIG_ENTRY}" "tar xpvf - -C \"${cplx_path}/tools\" --strip-components=${component_count}" ) || fatal "Could not copy install environment" 19
         task "Must execute setup on the remote server '${SSH_CONFIG_ENTRY}'"
         # shellcheck disable=SC2029
         res=$(ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools && chmod 755 ./setup && bash ./setup \"${CPLX_TOOL}\" \"${CPLX_VERSION}\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_DIR}\setup.log" | tail -1)
