@@ -96,7 +96,7 @@ function lookup_file_in_package_archive() {
     if [[ "$search_pattern" == *"*"* || "$search_pattern" == *"?"* ]]; then
         result=$(grep -E "$search_pattern" "${full_list_file}" | head -n 1)
     else
-        result=$(awk -F/ -v pat="$search_pattern" '$NF==pat { print $0; exit }' "${full_list_file}")
+        result=$(awk -v pat="$search_pattern" '$0 ~ ("/" pat "(/| )") { print $0; exit }' "${full_list_file}")
     fi
 
     echo "$result"
