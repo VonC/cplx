@@ -101,7 +101,7 @@ post_install() {
     local package_name="$1"
     if [[ "$package_name" =~ ^binutils-[0-9] ]]; then
         if [[ ! -e "${root}/usr/bin/ld" ]]; then
-            ln -nfs "usr/bin/ld.bfd" "${root}/usr/bin/ld"
+            ln -nfs "ld.bfd" "${root}/usr/bin/ld"
         fi
     fi
 }
