@@ -26,7 +26,11 @@ rem set "CPLX_TOOL_RC=1"
 set "CPLX_VERSION="
 rem set "CPLX_VERSION=v3.13.1"
 rem set "CPLX_URL=https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-[version].zip"
-rem set "CPLX_SRC_EXT=tar.gz"
+# if not provided, source extension is zip by default
+set "CPLX_SRC_EXT=tar.gz"
+# needed to build an archive or a package
+set "CPLX_ARCH_EXT=el8.x86_64"
+
 goto:eof
 
 
