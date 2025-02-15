@@ -208,9 +208,10 @@ transfer_the_sources_to_the_remote_project_folder() {
         return 0
     fi
     sources="${SETUP_DIR}/sources/${CPLX_TOOL}"
+    src_ext=$(get_resource_extension)
     # shellcheck disable=SC2012
-    filepath="$(ls -1rt "${sources}/${CPLX_TOOL}-src-"*".zip" | tail -1)"
-    #file=$(find "${sources}" -type f -name "${CPLX_TOOL}-src-*.zip" -printf '%T@ %p\0' | sort -z -n | tail -z -n1 | cut -z -d' ' -f2-)
+    filepath="$(ls -1rt "${sources}/${CPLX_TOOL}-src-"*".${src_ext}" | tail -1)"
+    #file=$(find "${sources}" -type f -name "${CPLX_TOOL}-src-*.${src_ext}" -printf '%T@ %p\0' | sort -z -n | tail -z -n1 | cut -z -d' ' -f2-)
     filename=$(basename "${filepath}")
     
     # shellcheck disable=SC2029
@@ -268,6 +269,14 @@ get_the_version() {
     ok "'get_the_version' is done"
 }
 
+function get_resource_extension() {
+    if [[ -z "${CPLX_SRC_EXT}" ]]; then
+        echo "zip"
+        return 0
+    fi
+    echo "${CPLX_SRC_EXT}"
+}
+
 download_sources() {
     if [[ ${version} == "" ]]; then version="${CPLX_VERSION}"; fi
     if [[ ${version} == "" ]]; then
@@ -284,13 +293,15 @@ download_sources() {
         info "Set URL to CPLX_URL, using CPLX_VERSION to replace any '[version]': '${url}'"
     fi
 
+    url_ext=$(get_resource_extension)
+
     sources="${SETUP_DIR}/sources/${CPLX_TOOL}"
     mkdir -p "${sources}"
-    if [[ -e "${sources}/${CPLX_TOOL}-src-${version}.zip" ]]; then
+    if [[ -e "${sources}/${CPLX_TOOL}-src-${version}.${url_ext}" ]]; then
         ok "Sources '${version}' already fetched for tool '${CPLX_TOOL}'"
     else
         task "Must fetch sources for tool '${CPLX_TOOL}'"
-        if ! curl -kL -o "${sources}/${CPLX_TOOL}-src-${version}.zip" "${url}"; then
+        if ! curl -kL -o "${sources}/${CPLX_TOOL}-src-${version}.${url_ext}" "${url}"; then
             fatal "Could not fetch sources for tool '${CPLX_TOOL}' at url '${url}'" 41
         fi
         ok "Sources fetched for tool '${CPLX_TOOL}' at version '${version}'"
