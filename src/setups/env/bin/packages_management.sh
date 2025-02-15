@@ -7,7 +7,7 @@ get_package_name() {
     local tools
     tools="${services}"
     if [[ -z ${tools} ]]; then
-        fatal "No tools retrieved for cplx" 1
+        error "No tools retrieved for cplx"; return 1
     fi
     local cwd
     cwd=$(pwd)
@@ -36,12 +36,12 @@ get_package_name() {
     fi
 
     if [[ -z ${tool} ]]; then
-        fatal "No tool provided or extracted from cwd '${cwd}'" 2
+        error "No tool provided or extracted from cwd '${cwd}'"; return 2
     fi
     if [[ -z ${file} ]]; then
-        fatal "No file provided to search into packages" 2
+        error "No file provided to search into packages"; return 3
     fi
-    task "Must look for file '${file}' in '${tools}' packages"
+    task "Must look for file '${file}' in '${tool}' packages"
 
     local pkgs_dir
     pkgs_dir="${HOME}/tools/pkgs"
