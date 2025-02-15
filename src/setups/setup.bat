@@ -30,7 +30,7 @@ if not "%~1"=="" (
 
 if exist "%setup_dir%\pkgs.log" ( del /q "%setup_dir%\pkgs.log" )
 if exist "%setup_dir%\setup.log" ( del /q "%setup_dir%\setup.log" )
-    
+
 bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% %*"
 if errorlevel 1 (
     call:display_logs
@@ -46,13 +46,15 @@ if exist "%setup_dir%\pkgs.log" ( set "flog=%setup_dir%\pkgs.log" )
 if exist "%setup_dir%\setup.log" ( set "flog=%setup_dir%\setup.log" )
 if defined flog (
     %_task% "Must display '%flog%'"
-    @echo on
-    "%PRGS%\vscodes\current\bin\code.cmd" "%flog%"
+    set VSCODE_DEV=
+    set ELECTRON_RUN_AS_NODE=1
+    rem cmd /C start /B "C:\Users\vonc\prgs\vscodes\current\bin\code.cmd" "%flog%"
+    "%PRGS%\vscodes\current\Code.exe" "%PRGS%\vscodes\current\resources\app\out\cli.js" "%flog%"
     if errorlevel 1 (
         %_fatal% "Unable to display '%flog%'" 122
     )
-    @echo off
     %_ok% "Display '%flog%' done"
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%setup_dir%\..\utils\alt_tab.ps1"
 )
 goto:eof
 
