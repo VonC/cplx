@@ -85,7 +85,7 @@ copy_the_environment() {
     if step_is_done "transfer_env_to_the_remote_project_folder"; then
         ok "transfer_env_to_the_remote_project_folder is already done"
     else
-        task "Must copy the environment to ${hostname}/${cplx_path}"
+        task "Must copy the environment to ${hostname}@${cplx_path}"
         set -o pipefail
         # Normalize any repeated slashes:
         normalized_path="$(echo "${SETUP_DIR}/env" | tr -s '/')"
