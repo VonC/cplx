@@ -160,11 +160,11 @@ sync_packages() {
             fatal "Failed to process line: '${line}'" 1
         else
             ok "Line '${line}' processed successfully in '${packages_for_tools}'"
+            # Update the 'last' file with the current processed value.
+            echo "${line}"> "${pkgs_tool_dir}/last"
         fi
         process=1
 
-        # Update the 'last' file with the current processed value.
-        echo "${line}"> "${pkgs_tool_dir}/last"
     done
     # Close file descriptor 8.
     exec 8<&-
