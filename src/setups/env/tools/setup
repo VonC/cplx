@@ -4,10 +4,6 @@ DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 #echo "${DIR}"
 # shellcheck source=/dev/null
 source "${DIR}/../.env"
-# shellcheck source=/dev/null
-source "${DIR}/../echos/echos"
-# shellcheck source=/dev/null
-source "${DIR}/../bin/properties.sh"
 
 # Check if exactly at least two parameter is provided
 if [[ $# -lt 2 ]]; then
@@ -51,6 +47,7 @@ info "Setting up tree structures and symlinks for ${tool} version ${version}"
 mkdir -p "${DIR}/${tool}/${tool}-${version}/usr/bin"
 mkdir -p "${DIR}/${tool}/root"
 mkdir -p "${DIR}/${tool}/logs"
+mkdir -p "${DIR}/${tool}/pkgs"
 mkdir -p "${DIR}/${tool}/sources"
 rm -f "${DIR}/tool"
 ln -nfs "${tool}" "${DIR}/tool"
