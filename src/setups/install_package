@@ -3,6 +3,7 @@
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 #echo "${DIR}"
 tool="dummy"
+tools="dummy"
 root="dummy"
 tool_pkgs="dummy"
 tools_pkgs="dummy"
@@ -348,7 +349,11 @@ check_ldd() {
                     continue # Skip if the path exists
                 fi
             fi
-            warning "Absolute system path detected in ldd output: '$line' for file '${file}'"
+            # if abs_path starts with ${tools}; then continue
+            if [[ "${abs_path}" == "${tools}"* ]]; then
+                continue  # Skip if abs_path starts with ${tools}
+            fi
+            warning "Absolute system path '${abs_path}' detected (tools='${tools}') in ldd output: '$line' for file '${file}'"
             ret=1
         fi
     done <<< "${output}"
