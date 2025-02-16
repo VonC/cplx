@@ -280,6 +280,52 @@ If you're still encountering the `__umodti3` undefined symbol error after adding
 
 With this information, I can help you pinpoint the exact cause of the error and suggest the most appropriate solution.
 
+
+Note: Fro gcc-8.5.0-22.el8.x86_64.list:
+
+```bash
+[CPLX-DEV] vonc@voncfm:~/tools/tool/root$ nm ./usr/lib/gcc/x86_64-redhat-linux/8/libgcc.a|grep mod
+_moddi3.o:
+0000000000000000 T __modti3
+_divmoddi4.o:
+0000000000000000 T __divmodti4
+_umoddi3.o:
+0000000000000000 T __umodti3
+_udivmoddi4.o:
+0000000000000000 T __udivmodti4
+0000000000000000 B __cpu_model
+```
+
+So using -lgcc_s is key. with -lgcc, you would get:
+
+```
+5788 configure:14804: gcc -o conftest -DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=/home/vonc/cplx/tools/tool/root -fPIC -O -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2 -I/home/vonc/cplx/tools/tool/root/incl      ude -DCONFIG_64=1 -DANSI=1 -DHAVE_UINT128_T=1 -I/home/vonc/cplx/tools/tool/root/usr/include -L/home/vonc/cplx/tools/tool/root/usr/lib64 -L/home/vonc/cplx/tools/tool/root/usr/lib64 -L/home/vonc/cplx/tools      /tool/root/usr/lib -L/home/vonc/cplx/tools/tool/root/lib64 -L/home/vonc/cplx/tools/tool/root/lib -L/home/vonc/cplx/tools/tool/root/usr/lib/gcc/x86_64-redhat-linux/8 -nodefaultlibs -Wl,-rpath,/home/vonc/c      plx/tools/tool/root/usr/lib64:/home/vonc/cplx/tools/tool/root/usr/lib64:/home/vonc/cplx/tools/tool/root/usr/lib:/home/vonc/cplx/tools/tool/root/lib64:/home/vonc/cplx/tools/tool/root/lib -Wl,--export-dyna      mic -lc_nonshared -ldl -lgcc -lc -lm -lc_nonshared -lpthread -B/home/vonc/cplx/tools/tool/root -B/home/vonc/cplx/tools/tool/root/usr -B/home/vonc/cplx/tools/tool/root/usr/lib64 -B/home/vonc/cplx/tools/to      ol/root/usr/lib -B/home/vonc/cplx/tools/tool/root/lib64 -B/home/vonc/cplx/tools/tool/root/lib --sysroot=/home/vonc/cplx/tools/tool/root conftest.c -L/home/vonc/cplx/tools/tool/root/lib -lmpdec -L/home/vo      nc/cplx/tools/tool/root/lib64 -lm -L/home/vonc/cplx/tools/tool/root/usr/lib/gcc/x86_64-redhat-linux/8 -lgcc -ldl -Wl,-rpath,/home/vonc/cplx/tools/tool/root/usr/lib64:/home/vonc/cplx/tools/tool/root/lib64      :/home/vonc/cplx/tools/tool/root/lib:/home/vonc/cplx/tools/tool/root/usr/lib64:/home/vonc/cplx/tools/tool/root/usr/lib -Wl,--export-dynamic -lc_nonshared -ldl -lc -lm -lc_nonshared -lpthread >&5
+ 5789 /home/vonc/cplx/tools/tool/root/usr/bin/ld: conftest: hidden symbol `__umodti3' in /home/vonc/cplx/tools/tool/root/usr/lib/gcc/x86_64-redhat-linux/8/libgcc.a(_umoddi3.o) is referenced by DSO
+ 5790 /home/vonc/cplx/tools/tool/root/usr/bin/ld: final link failed: Bad value
+ 5791 collect2: error: ld returned 1 exit status
+ ```
+with:
+
+```c
+5943 | /* end confdefs.h.  */
+ 5944 |
+ 5945 |
+ 5946 |         #include <mpdecimal.h>
+ 5947 |         #if MPD_VERSION_HEX < 0x02050000
+ 5948 |         #  error "mpdecimal 2.5.0 or higher required"
+ 5949 |         #endif
+ 5950 |
+ 5951 | int
+ 5952 | main (void)
+ 5953 | {
+ 5954 | const char *x = mpd_version();
+ 5955 |   ;
+ 5956 |   return 0;
+ 5957 | }>
+ ```
+
+ -shared-libgcc? Or simply -lgcc_s, which works.
+
 ### Modules to activate:
 
 ```bash
@@ -411,6 +457,31 @@ specification is available here:
 
 http://speleotrove.com/decimal/ => https://www.bytereef.org/mpdecimal/
 
+But:
+
+```bash
+pkg_failed=no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libmpdec >= 2.5.0" >&5
+printf %s "checking for libmpdec >= 2.5.0... " >&6; }
+
+if test -n "$LIBMPDEC_CFLAGS"; then
+    pkg_cv_LIBMPDEC_CFLAGS="$LIBMPDEC_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libmpdec >= 2.5.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libmpdec >= 2.5.0") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBMPDEC_CFLAGS=`$PKG_CONFIG --cflags "libmpdec >= 2.5.0" 2>/dev/null`
+                      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+```
 
 ## install
 
