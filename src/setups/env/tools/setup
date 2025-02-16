@@ -52,4 +52,5 @@ if [[ "${CPLX_BIN}" == "true" ]]; then
     mkdir -p "${DIR}/${tool}/bin"
     cp "${DIR}/../echos/echos" "${DIR}/${tool}/bin" || fatal "Failed to copy echos to ${DIR}/${tool}/bin" 1
     ln -nfs "../${tool}-${version}" "${DIR}/${tool}/bin/current"
+    ln -nfs "../root" "${DIR}/${tool}/bin/root"
 fi
