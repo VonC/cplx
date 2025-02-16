@@ -141,10 +141,6 @@ sync_packages() {
             if [[ "$line" == "$last_value" || "$line" == "${CPLX_SP_REPEAT}" ]]; then
                 ok "Resuming processing after line: '${line}'"
                 process=1
-                # Display all skipped lines
-                for skipped_line in "${skipped[@]}"; do
-                    info "Skipped line: '${skipped_line}' (CPLX_SP_REPEAT='${CPLX_SP_REPEAT}')"
-                done
                 # Clear the array if needed.
                 skipped=()
             else
