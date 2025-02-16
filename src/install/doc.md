@@ -547,3 +547,284 @@ pip 25.0.1 from /home/vonc/cplx/tools/python/bin/current/lib/python3.13/site-pac
 
 ### venv
 
+```bash
+python -m venv python_3.13.1
+source python_3.13.1/bin/activate
+```
+
+### my-project
+
+**Prompt**: I need to copy the my-project content, except my-project/venvs/ folder, to ssh centos8@/home/vonc/cplx/tests/my-project: can I use tar with pipe ssh tar for that?
+
+**Assistant**: Yes, you can achieve this using `tar` with a pipe to `ssh` and another `tar`. Here's how:
+
+```bash
+tar --exclude='my-project/venvs' -cvf - my-project | ssh centos8@<IP_ADDRESS> "tar -C /home/vonc/cplx/tests -xvf -"
+```
+
+**Explanation:**
+
+1. **`tar --exclude='my-project/venvs' -cvf - my-project`**: This command creates a tar archive.
+    * `--exclude='my-project/venvs'` excludes the `venvs` directory and its contents.  Crucially, ensure the path is relative to the directory being archived (`my-project`).
+    * `-c` creates an archive.
+    * `-v` verbose mode (optional, but useful to see what's being archived).
+    * `-f -` uses standard output (stdout) as the archive file, represented by `-`.  This is what allows piping to `ssh`.
+    * `my-project` is the directory to be archived.
+
+2. **`|`**: This is the pipe operator. It takes the standard output of the first command (the tar archive) and feeds it as standard input to the second command.
+
+3. **`ssh centos8@<IP_ADDRESS>`**: This establishes an SSH connection to your remote server. Replace `<IP_ADDRESS>` with the actual IP address or hostname of your CentOS 8 server.
+
+4. **`"tar -C /home/vonc/cplx/tests -xvf -"`**: This command is executed on the remote server.
+    * `tar -xvf -` extracts the archive received from the pipe. The `-` signifies that the archive is being read from standard input.
+    * `-C /home/vonc/cplx/tests`  This is the *crucial* part.  The `-C` option changes the directory *before* extracting the archive.  This ensures the `my-project` directory structure is created *within* `/home/vonc/cplx/tests`.  Without this, the `my-project` directory would be created at the root level.
+
+
+**Example illustrating the `-C` option's importance:**
+
+Let's imagine your `my-project` directory looks like this:
+
+```
+my-project/
+├── file1.txt
+└── subfolder/
+    └── file2.txt
+```
+
+* **Without `-C`:**  The extraction would create these files on the remote server:
+
+```
+/my-project/
+├── file1.txt
+└── subfolder/
+    └── file2.txt
+```
+
+* **With `-C /home/vonc/cplx/tests`:** The extraction would create these files:
+
+```
+/home/vonc/cplx/tests/my-project/
+├── file1.txt
+└── subfolder/
+    └── file2.txt
+```
+
+**Important considerations:**
+
+* **SSH Keys:** For convenient and secure access, set up SSH keys to avoid entering your password each time.
+* **Permissions:** Ensure the user `centos8` has the necessary write permissions to `/home/vonc/cplx/tests`.
+* **rsync Alternative:** `rsync` is often a more efficient option for transferring files, especially if you need to synchronize changes in the future.   The equivalent `rsync` command would be: `rsync -av --exclude='venvs/' my-project/ centos8@<IP_ADDRESS>:/home/vonc/cplx/tests/my-project`
+
+
+This combined `tar` and `ssh` command provides a concise and effective way to copy your directory while excluding the `venvs` folder. Remember to replace the placeholder IP address with your server's actual IP address or hostname.
+
+### my-project/venvs
+
+https://tsn.miraclelinux.com/en/node/15276 for https://tsn.miraclelinux.com/system/files/AXS8/x86_64/UPDATE/RPMS/gcc-c%2B%2B-8.5.0-15.el8.x86_64.rpm
+
+climits means https://rpm.pbone.net/content_idpl_77651986_distro_centos8_com_libstdc++-devel-8.5.0-4.el8_5.x86_64.rpm.html
+
+https://tsn.miraclelinux.com/en/node/15276
+https://tsn.miraclelinux.com/system/files/AXS8/x86_64/UPDATE/RPMS/libstdc%2B%2B-devel-8.5.0-15.el8.x86_64.rpm
+
+
+https://stackoverflow.com/questions/66304331/usr-include-c-8-cstdlib7515-fatal-error-stdlib-h-no-such-file-or-directo
+
+```bash	
+(python_3.13.1) [CPLX-DEV] vonc@voncfm:~/tests/my-project$ export CPLUS_INCLUDE_PATH=/home/vonc/cplx/tools/tool/root/usr/include/c++/8
+(python_3.13.1) [CPLX-DEV] vonc@voncfm:~/tests/my-project$ pip install -r requirements.txt
+```
+
+When using a sysroot (via --sysroot), GCC remaps system include paths relative to the sysroot. This tends to override or ignore environment variables like CPLUS_INCLUDE_PATH. Instead, you should add the directory explicitly to your compiler flags. For example, add an explicit -I flag:
+
+```bash
+g++ -I/home/vonc/cplx/tools/tool/root/usr/include/c++/8 --sysroot=/home/vonc/cplx/tools/tool/root ...
+```
+
+Alternatively, you can set the CPATH variable (which applies to both C and C++ code):
+
+```bash
+export CPATH=/home/vonc/cplx/tools/tool/root/usr/include/c++/8${CPATH:+:$CPATH}
+```
+
+Either method ensures that the folder is considered during inclusion.
+
+https://stackoverflow.com/questions/56318759/how-do-i-fix-the-include-next-of-stdlib-h-from-cstdlib
+
+I tried to fix this issue, but wasted 5 hours. Finally, I manually replaced #include_next with #include in three files.
+
+Replaced #include_next <stdlib.h> with #include <stdlib.h> in cstdlib and std_abs.h
+
+Same in https://stackoverflow.com/questions/51350998/7515-fatal-error-stdlib-h-no-such-file-or-directory-include-next-stdlib-h
+
+CPPFLAGS=-I/home/vonc/cplx/tools/tool/root/usr/include/c++/8
+CPLUS_INCLUDE_PATH=/home/vonc/cplx/tools/tool/root/usr/include/c++/8
+
+Most complete explanation: https://stackoverflow.com/questions/62055143/permanently-and-reliably-set-gcc-include-path-globally
+
+Here is a [minimal repro](https://stackoverflow.com/help/minimal-reproducible-example) of your problem on Ubuntu 20.04.
+
+    $ g++ --version
+    g++ (Ubuntu 9.3.0-10ubuntu2) 9.3.0
+    ...
+
+    $ cat main.cpp
+    #include <cstdlib>
+
+    int main ()
+    {
+      return EXIT_SUCCESS;
+    }
+
+    $ export CPLUS_INCLUDE_PATH="/usr/include"; g++ -c main.cpp
+    In file included from main.cpp:1:
+    /usr/include/c++/9/cstdlib:75:15: fatal error: stdlib.h: No such file or directory
+       75 | #include_next <stdlib.h>
+          |               ^~~~~~~~~~
+    compilation terminated.
+
+
+Note that `export CPLUS_INCLUDE_PATH="/usr/include"` here has the same effect as your
+identical setting in your `.bashrc`.
+
+The error does not occur if we remove that environment setting:
+
+    $ export CPLUS_INCLUDE_PATH=; g++ -c main.cpp; echo Done
+    Done
+
+The effect of that environment setting, as per [the GCC Manual: 3.21 Environment Variables Affecting GCC](https://gcc.gnu.org/onlinedocs/gcc/Environment-Variables.html)
+is the same as:
+
+    $ g++ -isystem /usr/include -c main.cpp
+    In file included from main.cpp:1:
+    /usr/include/c++/9/cstdlib:75:15: fatal error: stdlib.h: No such file or directory
+       75 | #include_next <stdlib.h>
+          |               ^~~~~~~~~~
+    compilation terminated.
+
+which accordingly reproduces the error.
+
+The `-isystem` option is documented in [the GCC Manual: 3.16 Options for Directory Search](https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html)
+
+The *general* solution to your problem is: *Don't run a `g++` compilation in any way
+that has the effect of* `g++ ... -isystem /usr/include ... `
+
+You *can* avoid running a `g++` command in such a way because the option
+`-isystem /usr/include` is unnecessary. `/usr/include` is a default search directory
+for the preprocessor. You don't need to tell it to look for system header files there -
+either via environment settings, or via a VS Code configuration, or any other way.
+
+See the preprocessor's default search order for C++:-
+
+    $ echo | g++ -x c++ -E -Wp,-v -
+    ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/9"
+    ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+    ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed"
+    ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/include"
+    #include "..." search starts here:
+    #include <...> search starts here:
+     /usr/include/c++/9
+     /usr/include/x86_64-linux-gnu/c++/9
+     /usr/include/c++/9/backward
+     /usr/lib/gcc/x86_64-linux-gnu/9/include
+     /usr/local/include
+     /usr/include/x86_64-linux-gnu
+     /usr/include           ### <- There it is ###
+    End of search list.
+    ...
+    
+So your comment:
+
+>I am pretty sure that all the .bashrc exports are already a dirty workaround
+
+is on the money<sup>1</sup>. But what's worse, the `.bashrc` setting:
+
+    export CPLUS_INCLUDE_PATH="/usr/include"
+
+turns the problem into *a persistent feature of your bash profile*.
+
+**How does the error happen?**
+
+The difference that is made to the preprocessor's search order by `-isystem /usr/include`
+can be seen here:
+
+    $ echo | g++ -x c++ -isystem /usr/include -E -Wp,-v -
+    ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/9"
+    ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+    ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed"
+    ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/include"
+    ignoring duplicate directory "/usr/include"
+    #include "..." search starts here:
+    #include <...> search starts here:
+     /usr/include           ### <- Was previously last, now is first ###
+     /usr/include/c++/9
+     /usr/include/x86_64-linux-gnu/c++/9
+     /usr/include/c++/9/backward
+     /usr/lib/gcc/x86_64-linux-gnu/9/include
+     /usr/local/include
+     /usr/include/x86_64-linux-gnu
+    End of search list.
+    ...
+
+As you see, `/usr/include` is detected now as a *duplicated* directory in the `<...>` search
+order; the second occurrence - which was *last*, previously - is deleted and the first occurrence is
+retained, coming *first* in the search order.
+
+Now recall the diagnostic:
+
+    /usr/include/c++/9/cstdlib:75:15: fatal error: stdlib.h: No such file or directory
+       75 | #include_next <stdlib.h>
+          |               ^~~~~~~~~~
+
+The preprocessor directive `#include_next` is not a standard directive, it is
+a GCC extension, documented in [the GCC manual: 2.7 Wrapper Headers](https://gcc.gnu.org/onlinedocs/cpp/Wrapper-Headers.html#Wrapper-Headers)
+
+Whereas `#include <stdlib.h>` means:
+
+*Include the first file called `stdlib.h` discovered in the `<...>` search order, starting from the start*
+
+`#include_next <stdlib.h>` means:
+
+*Include the next file called `stdlib.h` discovered in the `<...>` search order, starting from the
+directory right after that of the file being processed now.*
+
+The only directory in the `<...>` search order that contains `stdlib.h` is `/usr/include`. So,
+if `#include_next <stdlib.h>` is encountered by the preprocessor in any file in any directory `dir` in the `<...>`
+search order, while `/usr/include` is *first* in the `<...>` search order, there can be no directory
+later than `dir` in the `<...>` search order where `<stdlib.h>` will be found. And so the error.
+
+`#include_next <foobar.h>` can only work if the `<...>` search order places the directory containing
+`<foobar.h>` after the one that contains the file that contains the directive. As a rule of thumb,
+just don't mess with the `<...>` search order.
+
+The problem just discussed was the subject of [a regression bug-report raised against GCC 6.0](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129).
+As you can see there, the resolution was `WONTFIX`.
+
+<hr>
+[1] All of your `.bashrc` exports as posted are, as you suspect, poor practice.
+
+- It isn't necessary to tell the preprocessor about any search directories in
+its default search order. You can only make things wrong.
+
+- Directories that will *not* be found by default *should* be specified by
+`-I dir` options specified on the commandline (typically injected via parameters
+of the build configuration), so that these non-default options are visible in build logs
+for trouble shooting. "Invisible hands" are to be avoided in build systems to the
+utmost practical extent.
+
+Try wheel:
+
+```bash	
+(python_3.13.1) [CPLX-DEV] vonc@voncfm:~/tests/my-project$ python -m pip install pymupdf-1.25.3-cp39-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+Processing ./pymupdf-1.25.3-cp39-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+Installing collected packages: pymupdf
+Successfully installed pymupdf-1.25.3
+python -m pip install numpy-2.2.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+```
+
+
+### pkg-config
+
+pkgconf-pkg-config-1.4.2-1.el8.x86_64.rpm
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

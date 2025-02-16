@@ -57,3 +57,5 @@ zlib-devel
 readline
 readline-devel
 _mpdecimal
+_gcc-c\+\+
+_libstdc\+\+-devel

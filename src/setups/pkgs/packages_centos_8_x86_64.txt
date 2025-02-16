@@ -1129,3 +1129,5 @@ zlib-1.2.11-25.el8.x86_64.rpm
 zlib-devel-1.2.11-25.el8.x86_64.rpm
 zsh-5.5.1-10.el8.x86_64.rpm
 _mpdecimal-2.5.1-0.el8.x86_64.tar.gz
+_gcc-c++-8.5.0-15.el8.x86_64.rpm
+_libstdc++-devel-8.5.0-15.el8.x86_64.rpm
