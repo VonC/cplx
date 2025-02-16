@@ -16,3 +16,4 @@ if &t_Co > 2 || has("gui_running")
 endif
 :set paste
 :set background=dark
+:set number
