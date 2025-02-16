@@ -54,8 +54,12 @@ main() {
     fi
     ok "CPLX_TOOL='${CPLX_TOOL}'-tool_name='${tool_name}' is in the list of services ('${tools_to_recompile}')"
 
-
     properties_file="${SETUP_DIR}/env/cplx.properties"
+    if [[ ! -e "${properties_file}" ]]; then
+        error "Properties file '${properties_file}' empty, see '${SETUP_DIR}/env/cplx.tpl.properties' as an example"
+        touch "${properties_file}"
+        fatal "Properties file '${properties_file}' not found" 4
+    fi
     if [[ -z "${CPLX_ARCH_EXT}" ]]; then
         fatal "CPLX_ARCH_EXT not defined for CPLX_TOOL='${CPLX_TOOL}' (should be el8.x86_64 or el7.x86_64, for instance)" 57
     fi
