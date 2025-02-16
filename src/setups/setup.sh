@@ -37,6 +37,7 @@ main() {
     if [[ -z "${tools_to_recompile}" ]]; then
         fatal "tools_to_recompile not found in file '${properties_file}'" 1
     fi
+    ok "tools_to_recompile='${tools_to_recompile}' found in properties_file '${properties_file}'"
     if [[ -z "${CPLX_TOOL}" ]]; then
         fatal "CPLX_TOOL not found in file '${properties_file}': must be one of '${tools_to_recompile}'" 2
     fi
@@ -51,6 +52,35 @@ main() {
     if [[ -z "${tool_name}" ]]; then
         fatal "CPLX_TOOL='${CPLX_TOOL}' is not in the list of services: '${tools_to_recompile}'" 3
     fi
+    ok "CPLX_TOOL='${CPLX_TOOL}'-tool_name='${tool_name}' is in the list of services ('${tools_to_recompile}')"
+
+
+    properties_file="${SETUP_DIR}/env/cplx.properties"
+    if [[ -z "${CPLX_ARCH_EXT}" ]]; then
+        fatal "CPLX_ARCH_EXT not defined for CPLX_TOOL='${CPLX_TOOL}' (should be el8.x86_64 or el7.x86_64, for instance)" 57
+    fi
+    if ! set_property "CPLX_ARCH_EXT" "${CPLX_ARCH_EXT}"; then
+        fatal "Could not set the CPLX_ARCH_EXT '${CPLX_ARCH_EXT}' in the properties file '${properties_file}'" 56
+    fi
+    ok "CPLX_ARCH_EXT='${CPLX_ARCH_EXT}' set in the properties_file '${properties_file}'"
+    if [[ -z "${CPLX_CHECK_PREFIX}" ]]; then
+        fatal "CPLX_CHECK_PREFIX not defined for CPLX_TOOL='${CPLX_TOOL}' : path of an element in installation directory" 58
+    fi
+    if ! set_property "CPLX_CHECK_PREFIX" "${CPLX_CHECK_PREFIX}"; then
+        fatal "Could not set the CPLX_CHECK_PREFIX '${CPLX_CHECK_PREFIX}' in the properties file '${properties_file}'" 56
+    fi
+    ok "CPLX_CHECK_PREFIX='${CPLX_CHECK_PREFIX}' set in the properties_file '${properties_file}'"
+    if [[ -z "${CPLX_CHECK_SRC}" ]]; then
+        fatal "CPLX_CHECK_SRC not defined for CPLX_TOOL='${CPLX_TOOL}' : path of an element in source directory, " 58
+    fi
+    if [[ ! "$(basename "${CPLX_CHECK_PREFIX}")" == "$(basename "${CPLX_CHECK_SRC}")" ]]; then
+        fatal "CPLX_CHECK_PREFIX '${CPLX_CHECK_PREFIX}' and CPLX_CHECK_SRC '${CPLX_CHECK_SRC}' should reference the same file" 59
+    fi
+    if ! set_property "CPLX_CHECK_SRC" "${CPLX_CHECK_SRC}"; then
+        fatal "Could not set the CPLX_CHECK_SRC '${CPLX_CHECK_SRC}' in the properties file '${properties_file}'" 56
+    fi
+    ok "CPLX_CHECK_SRC='${CPLX_CHECK_SRC}' set in the properties_file '${properties_file}'"
+
     validate_the_ssh_connection "$@"
     get_the_version
     copy_the_environment "$@"
