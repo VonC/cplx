@@ -4,6 +4,8 @@ DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 #echo "${DIR}"
 tool="dummy"
 root="dummy"
+tool_pkgs="dummy"
+tools_pkgs="dummy"
 # shellcheck source=/dev/null
 source "${DIR}/../.env"
 
@@ -16,14 +18,10 @@ fi
 
 package_name="$1"
 
-# Define the sources directory
-pkgs_dir="${DIR}/pkgs"
-
 NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
 LOGIN="$(/usr/bin/id -un)"
 
 logs="${DIR}/logs"
-tool_pkgs="${tool}/pkgs"
 mkdir -p "${logs}"
 
 PATH_LOG="${logs}/${LOGIN}-$(basename "$0" .bash)-${NOW}.pkgs.log"
@@ -66,12 +64,17 @@ function getArg() {
 # main: Acts as the central execution point, orchestrating the overall setup process including dependency checks, installations, and environmental configurations, ensuring the script achieves its purpose of preparing the environment or updating software as required.
 function main() {
 
-    info "main: Start install package '${package_name} at '${NOW}' for root='${root}'"
     # shellcheck disable=SC2154
-    cd "${root}" || fatal "Unable to access pkgs_dir '${root}'" 22
+    cd "${root}" || fatal "Unable to access root '${root}'" 22
+
+    # Check if the package is a remotely built one, starting with _
+    resolve_remote_package
 
     local pkg_base
     pkg_base=$(pkg_base "${package_name}")
+
+    info "main: Start install package '${package_name}' (pkg_base '${pkg_base}') at '${NOW}' for root='${root}'"
+
     local i_log
     i_log="${tool}/logs/install_package.log"
     rm -f "${i_log}"
@@ -127,7 +130,7 @@ check_flag_exists() {
     local pkg="$1"
     local flag_suffix="$2"
     local pattern="${pkg%.rpm}*${flag_suffix}*"
-    cd ${tool_pkgs} || fatal "Unable to access pkgs_dir '${tool_pkgs}'" 32
+    cd ${tool_pkgs} || fatal "Unable to access tools_pkgs '${tool_pkgs}'" 32
     shopt -s nullglob
     # shellcheck disable=SC2206
     local flags=( ${pattern} )
@@ -135,10 +138,10 @@ check_flag_exists() {
     if (( ${#flags[@]} > 0 )); then
         info "A file matching '${pattern}' already exists in '${tool_pkgs}'"
         ok "'${pkg}' already '${flag_suffix}' in '${tool_pkgs}'"
-        cd "${root}" || fatal "Unable to access pkgs_dir '${root}'" 32
+        cd "${root}" || fatal "Unable to access root '${root}'" 32
         return 0
     fi
-    cd "${root}" || fatal "Unable to access pkgs_dir '${root}'" 33
+    cd "${root}" || fatal "Unable to access root '${root}'" 33
     return 1
 }
 
@@ -148,12 +151,12 @@ function install_package() {
     pkg_base=$(pkg_base "${package_name}")
     local flag="${tool_pkgs}/${pkg_base}.installed"
     if [[ "${package_name%.rpm}" != "${package_name}" ]]; then
-        if ! rpm2cpio "${pkgs_dir}/${package_name}" | cpio -idmv; then fatal "Unable to install '${package_name}'" 2; fi
+        if ! rpm2cpio "${tools_pkgs}/${package_name}" | cpio -idmv; then fatal "Unable to install '${package_name}'" 2; fi
     elif [[ "${package_name%.xz}" != "${package_name}" ]]; then
-        if ! xzcat "${pkgs_dir}/${package_name}" > "${package_name%.xz,,}"; then fatal "Unable to unxz '${package_name}'" 4; fi
+        if ! xzcat "${tools_pkgs}/${package_name}" > "${package_name%.xz,,}"; then fatal "Unable to unxz '${package_name}'" 4; fi
         chmod 755 "${package_name%.xz,,}"
     elif [[ "${package_name%.tar.gz}" != "${package_name}" ]]; then
-        if ! tar xpvf "${pkgs_dir}/${package_name}"; then fatal "Unable to untar gz '${package_name}'" 5; fi
+        if ! tar xpvf "${tools_pkgs}/${package_name}"; then fatal "Unable to untar gz '${package_name}'" 5; fi
     else
         fatal "unknown extension for archive '${package_name}'" 11
     fi
@@ -164,7 +167,7 @@ function install_package() {
 
 list_archive_content_to_mirror() {
     local archive="$1"
-    local pkg_file="${pkgs_dir}/${archive}"
+    local pkg_file="${tools_pkgs}/${archive}"
     local clean_ldd=0
 
     if [[ ! -e "${pkg_file}" ]]; then
