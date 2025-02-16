@@ -521,3 +521,29 @@ collect2: error: ld returned 1 exit status
 ```
 
 Works by adding `-Wl,--sysroot=/home/vonc/cplx/tools/tool/root'`, as in: `cmd = ['gcc', '-o', dstname, '--shared', '-Wl,-soname,lib%s.so' % libname, '-Wl,--sysroot=/home/vonc/cplx/tools/tool/root', srcname]`
+
+## Python exploitation
+
+### pip/pip3 version and upgrade
+
+```bash
+[CPLX-DEV] vonc@voncfm:~$ python -m pip install --upgrade pip
+Requirement already satisfied: pip in ./tools/python/bin/current/lib/python3.13/site-packages (24.3.1)
+Collecting pip
+  Downloading pip-25.0.1-py3-none-any.whl.metadata (3.7 kB)
+Downloading pip-25.0.1-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 33.2 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 24.3.1
+    Uninstalling pip-24.3.1:
+      Successfully uninstalled pip-24.3.1
+Successfully installed pip-25.0.1
+[CPLX-DEV] vonc@voncfm:~$ python -c "import pip; print(pip.__version__)"
+25.0.1
+[CPLX-DEV] vonc@voncfm:~$ python -m pip --version
+pip 25.0.1 from /home/vonc/cplx/tools/python/bin/current/lib/python3.13/site-packages/pip (python 3.13)
+```
+
+### venv
+
