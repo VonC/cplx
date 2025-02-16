@@ -1,0 +1,9 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+# shellcheck source=/dev/null
+source "${DIR}/echos"
+# shellcheck source=/dev/null
+source "${DIR}/setenv"
+
+command man "$@"
+exit $?
