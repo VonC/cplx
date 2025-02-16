@@ -81,19 +81,19 @@ function main() {
     local m_log
     m_log="${tool}/logs/mirror_package.log"
     rm -f "${m_log}"
-    if ! check_flag_exists "${package_name}" "installed"; then
+    if ! check_flag_exists "${pkg_base}" "installed"; then
         ( install_package ) 2>&1 | tee -a "${i_log}"
-        if check_flag_exists "${package_name}" "installed" && [[ -e "${i_log}" ]]; then
-            cat "${i_log}" > "${pkg_base}.installed"
+        if check_flag_exists "${pkg_base}" "installed" && [[ -e "${i_log}" ]]; then
+            cat "${i_log}" > "${tool_pkgs}/${pkg_base}.installed"
         else
             fatal "Unable to install '${package_name}'" 28
         fi
     fi
-    if ! check_flag_exists "${package_name}" "mirrored"; then
+    if ! check_flag_exists "${pkg_base}" "mirrored"; then
         ( list_package_content_to_mirror "${package_name}" ) 2>&1 | tee -a "${m_log}"
-        if check_flag_exists "${package_name}" "mirrored" && [[ -e "${m_log}" ]]; then
-            echo "-------------------">> "${pkg_base}.installed.mirrored"
-            cat "${m_log}" >> "${pkg_base}.installed.mirrored"
+        if check_flag_exists "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
+            echo "-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
+            cat "${m_log}" >> "${tool_pkgs}/${pkg_base}.installed.mirrored"
         else
             fatal "Unable to mirror '${package_name}'" 29
         fi
@@ -127,9 +127,9 @@ post_install() {
 }
 
 check_flag_exists() {
-    local pkg="$1"
+    local pkg_base="$1"
     local flag_suffix="$2"
-    local pattern="${pkg%.rpm}*${flag_suffix}*"
+    local pattern="${pkg_base}*${flag_suffix}*"
     cd ${tool_pkgs} || fatal "Unable to access tools_pkgs '${tool_pkgs}'" 32
     shopt -s nullglob
     # shellcheck disable=SC2206
@@ -137,10 +137,11 @@ check_flag_exists() {
     shopt -u nullglob
     if (( ${#flags[@]} > 0 )); then
         info "A file matching '${pattern}' already exists in '${tool_pkgs}'"
-        ok "'${pkg}' already '${flag_suffix}' in '${tool_pkgs}'"
+        ok "'${pkg_base}' already '${flag_suffix}' in '${tool_pkgs}'"
         cd "${root}" || fatal "Unable to access root '${root}'" 32
         return 0
     fi
+    error "No file matching '${pattern}' found in '${tool_pkgs}'"
     cd "${root}" || fatal "Unable to access root '${root}'" 33
     return 1
 }
@@ -161,7 +162,7 @@ function install_package() {
         fatal "unknown extension for archive '${package_name}'" 11
     fi
     touch "${flag}" || fatal "Unable to create flag file '${flag}'" 3
-    ok "'${flag}' installed in '${tool_pkgs}'"
+    ok "'${flag}' installed in '${root}': pwd '$(pwd)'"
 
 }
 
