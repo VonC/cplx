@@ -88,6 +88,14 @@ main() {
         fatal "Could not set the CPLX_CHECK_SRC '${CPLX_CHECK_SRC}' in the properties file '${properties_file}'" 56
     fi
     ok "CPLX_CHECK_SRC='${CPLX_CHECK_SRC}' set in the properties_file '${properties_file}'"
+    if [[ -n "${CPLX_BIN}" ]]; then
+        if ! set_property "CPLX_BIN" "${CPLX_BIN}"; then
+            fatal "Could not set the CPLX_BIN '${CPLX_BIN}' in the properties file '${properties_file}'" 56
+        fi
+        ok "CPLX_BIN='${CPLX_BIN}' set in the properties_file '${properties_file}'"
+    else
+        ok "CPLX_BIN not defined for CPLX_TOOL='${CPLX_TOOL}' : no bin wrapper script needed"
+    fi
 
     validate_the_ssh_connection "$@"
     get_the_version

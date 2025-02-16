@@ -2,6 +2,7 @@
 
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 #echo "${DIR}"
+properties_file="dummy"
 # shellcheck source=/dev/null
 source "${DIR}/../.env"
 
@@ -13,13 +14,6 @@ fi
 tool="$1"
 version="$2"
 
-# shellcheck disable=SC2034
-properties_file="${DIR}/../cplx.properties"
-# Resolve to canonical, normalized path
-properties_file=$(readlink -f "$properties_file")
-export properties_file
-# Retrieve the list of valid services (comma-separated)
-get_property services  # Example: "service1,service2,service3"
 if [[ -z "$services" ]]; then
     fatal "No services found in the properties file '${properties_file}'" 1
 fi
@@ -53,3 +47,9 @@ rm -f "${DIR}/tool"
 ln -nfs "${tool}" "${DIR}/tool"
 rm -f "${DIR}/${tool}/current"
 ln -nfs "${tool}-${version}" "${DIR}/${tool}/current"
+
+if [[ "${CPLX_BIN}" == "true" ]]; then
+    mkdir -p "${DIR}/${tool}/bin"
+    cp "${DIR}/../echos/echos" "${DIR}/${tool}/bin" || fatal "Failed to copy echos to ${DIR}/${tool}/bin" 1
+    ln -nfs "../${tool}-${version}" "${DIR}/${tool}/bin/current"
+fi
