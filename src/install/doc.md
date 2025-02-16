@@ -491,3 +491,33 @@ fi
 [CPLX-PYTHON-DEV] vonc@voncfm:~/tools/python/sources/v3.13.1/python-cpython-7795862$ ./python -c "import sys; print(sys.builtin_module_names)"
 ('_abc', '_ast', '_codecs', '_collections', '_functools', '_imp', '_io', '_locale', '_operator', '_signal', '_sre', '_stat', '_string', '_suggestions', '_symtable', '_sysconfig', '_thread', '_tokenize', '_tracemalloc', '_typing', '_warnings', '_weakref', 'atexit', 'builtins', 'errno', 'faulthandler', 'gc', 'itertools', 'marshal', 'posix', 'pwd', 'sys', 'time')
 ```
+
+### python test: cannot find /usr/lib64/libc_nonshared.a
+
+
+```bash
+0:10:04 load avg: 0.00 Re-running 2 failed tests in verbose mode in subprocesses
+0:10:04 load avg: 0.00 Run 2 tests in parallel using 2 worker processes (timeout: 10 min, worker timeout: 15 min)
+0:10:04 load avg: 0.00 [1/2/1] test_ctypes failed (2 errors)
+Re-running test_ctypes in verbose mode (matching: test_null_dlsym, test_find_on_libpath)
+test_null_dlsym (test.test_ctypes.test_dlerror.TestNullDlsym.test_null_dlsym) ... ERROR
+test_find_on_libpath (test.test_ctypes.test_find.FindLibraryLinux.test_find_on_libpath) ... /home/vonc/cplx/tools/tool/root/usr/bin/ld: cannot find /usr/lib64/libc_nonshared.a
+collect2: error: ld returned 1 exit status
+```
+
+And:
+
+```bash
+[CPLX-DEV] vonc@voncfm:~/tools/tool/sources/v3.13.1/python-cpython-7795862/Lib$ rg "'gcc'"
+ctypes/util.py:121:        c_compiler = shutil.which('gcc')
+_osx_support.py:235:    elif os.path.basename(cc).startswith('gcc'):
+test/test_ctypes/test_dlerror.py:81:            args = ['gcc', '-fPIC', '-Wl,--sysroot=/home/vonc/cplx/tools/tool/root', '-shared', '-o', dstname, srcname]
+test/test_ctypes/test_find.py:86:            p = subprocess.Popen(['gcc', '--version'], stdout=subprocess.PIPE,
+test/test_ctypes/test_find.py:100:            cmd = ['gcc', '-o', dstname, '--shared',
+
+[CPLX-DEV] vonc@voncfm:~/tools/tool/sources/v3.13.1/python-cpython-7795862$ python3 /home/vonc/cplx/tools/python/sources/v3.13.1/python-cpython-7795862/Lib/test/test_ctypes/test_find.py
+s../home/vonc/cplx/tools/tool/root/usr/bin/ld: cannot find /usr/lib64/libc_nonshared.a
+collect2: error: ld returned 1 exit status
+```
+
+Works by adding `-Wl,--sysroot=/home/vonc/cplx/tools/tool/root'`, as in: `cmd = ['gcc', '-o', dstname, '--shared', '-Wl,-soname,lib%s.so' % libname, '-Wl,--sysroot=/home/vonc/cplx/tools/tool/root', srcname]`
