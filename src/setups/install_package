@@ -90,7 +90,7 @@ function main() {
         fi
     fi
     if ! check_flag_exists "${package_name}" "mirrored"; then
-        ( list_archive_content_to_mirror "${package_name}" ) 2>&1 | tee -a "${m_log}"
+        ( list_package_content_to_mirror "${package_name}" ) 2>&1 | tee -a "${m_log}"
         if check_flag_exists "${package_name}" "mirrored" && [[ -e "${m_log}" ]]; then
             echo "-------------------">> "${pkg_base}.installed.mirrored"
             cat "${m_log}" >> "${pkg_base}.installed.mirrored"
@@ -165,20 +165,20 @@ function install_package() {
 
 }
 
-list_archive_content_to_mirror() {
-    local archive="$1"
-    local pkg_file="${tools_pkgs}/${archive}"
+list_package_content_to_mirror() {
+    local pkg_name="$1"
+    local pkg_file="${tools_pkgs}/${pkg_name}"
     local clean_ldd=0
 
     if [[ ! -e "${pkg_file}" ]]; then
-        fatal "Archive file '${pkg_file}' not found" 1
+        fatal "pkg_name file '${pkg_file}' not found" 1
     fi
 
     local pkg_base
     pkg_base=$(pkg_base "${package_name}")
 
-    info "Listing contents of archive '${archive}':"
-    if [[ "${archive%.rpm}" != "${archive}" ]]; then
+    info "Listing contents of pkg_name '${pkg_name}':"
+    if [[ "${pkg_name%.rpm}" != "${pkg_name}" ]]; then
         # Open file descriptor 8 with the command output, ensuring the while read runs in the current shell.
         exec 9< <(rpm2cpio "${pkg_file}" | cpio -itv)
         while IFS= read -r line <&9 || [ -n "$line" ]; do
@@ -187,27 +187,27 @@ list_archive_content_to_mirror() {
             if ! mirror_system_executable "${line}"; then clean_ldd=1; fi
         done
         exec 9<&-
-    elif [[ "${archive%.tar.gz}" != "${archive}" ]]; then
+    elif [[ "${pkg_name%.tar.gz}" != "${pkg_name}" ]]; then
         tar tzvf "${pkg_file}" | while IFS= read -r line; do
             # Process each line (custom processing can be added here)
             info "tar.gz contains: ${line}"
         done
-    elif [[ "${archive%.xz}" != "${archive}" ]]; then
-        # Assuming it's a tar.xz archive
+    elif [[ "${pkg_name%.xz}" != "${pkg_name}" ]]; then
+        # Assuming it's a tar.xz package
         if file "${pkg_file}" | grep -qi "tar archive"; then
             tar --xz -tzvf "${pkg_file}" | while IFS= read -r line; do
                 info "tar.xz contains: ${line}"
             done
         else
-            fatal "Unsupported xz archive type for '${archive}'" 1
+            fatal "Unsupported xz archive type for pkg_name '${pkg_name}'" 1
         fi
     else
-        fatal "Unknown archive extension for '${archive}'" 11
+        fatal "Unknown archive extension for pkg_name '${pkg_name}'" 11
     fi
 
     #info "Final clean_ldd='${clean_ldd}'"
     if [[ "${clean_ldd}" != "0" ]]; then
-        fatal "Some files in the archive have absolute system paths or unresolved paths" 199
+        fatal "Some files in the package '${pkg_name}' have absolute system paths or unresolved paths" 199
     fi
 
     mv "${tool_pkgs}/${pkg_base}.installed" "${tool_pkgs}/${pkg_base}.installed.mirrored" || fatal "Unable to rename flag file '${pkg_base}.installed' to '${tool_pkgs}/${pkg_base}.installed.mirrored'" 12
