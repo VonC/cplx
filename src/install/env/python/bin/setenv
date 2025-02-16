@@ -14,6 +14,8 @@ export PATH="${senvDIR}/current/bin:${senvDIR}/current/libexec/git-core:${PATH}"
 export LD_LIBRARY_PATH="${senvDIR}/root/usr/lib64:${senvDIR}/root/usr/lib:${senvDIR}/root/lib64:${senvDIR}/root/lib:${senvDIR}/current/usr/lib64:${senvDIR}/current/lib64:${senvDIR}/current/usr/lib:${senvDIR}/current/lib"
 
 
+export CPLUS_INCLUDE_PATH=/home/vonc/cplx/tools/tool/root/usr/include/c++/8
+
 if [[ ":${MANPATH}:" != *":${senvDIR}/current/share/man:"* ]]; then
     export MANPATH="${senvDIR}/current/share/man:${MANPATH}"
 fi
