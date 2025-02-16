@@ -55,14 +55,10 @@ main() {
     ok "CPLX_TOOL='${CPLX_TOOL}'-tool_name='${tool_name}' is in the list of services ('${tools_to_recompile}')"
 
     properties_file="${SETUP_DIR}/env/cplx.properties"
-    if [[ ! -e "${properties_file}" ]]; then
-        if ! cp "${SETUP_DIR}/env/cplx.tpl.properties" "${SETUP_DIR}/env/cplx.properties"; then
-            fatal "Could not copy the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'" 5
-        else
-            ok "Copied the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'"
-        fi
+    if ! cp "${SETUP_DIR}/env/cplx.tpl.properties" "${SETUP_DIR}/env/cplx.properties"; then
+        fatal "Could not copy the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'" 5
     else
-        ok "Properties file '${properties_file}' already exists"
+        ok "Copied the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'"
     fi
     if [[ -z "${CPLX_ARCH_EXT}" ]]; then
         fatal "CPLX_ARCH_EXT not defined for CPLX_TOOL='${CPLX_TOOL}' (should be el8.x86_64 or el7.x86_64, for instance)" 57
