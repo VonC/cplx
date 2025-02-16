@@ -102,6 +102,33 @@ function main() {
     return $?
 }
 
+# Check if the package is a remotely built one, starting with _
+# if so, remove the _ from its name, and look in tool/pkgs for it, replacing 0.el8.x86_64 with '*.el8.x86_64', and picking up the most recent found, or fatal if none found.
+function resolve_remote_package() {
+    # If package_name starts with an underscore, it's a remotely built package.
+    if [[ "${package_name}" =~ ^_ ]]; then
+        # Remove the leading underscore.
+        local base_pkg="${package_name#_}"
+        # Replace literal "0.el8.x86_64" with a glob pattern.
+        local remote_pattern="${base_pkg/0.el8.x86_64/*.el8.x86_64}"
+        info "Looking for remotely built package in '${tools_pkgs}' matching pattern '${remote_pattern}'"
+
+        # Use find with -printf to output modification time and file path,
+        # sort numerically so that the oldest is first and the most recent is last,
+        # then extract the file path.
+        mapfile -t matches < <(find "${tools_pkgs}" -maxdepth 1 -type f -name "${remote_pattern}" -printf "%T@ %p\n" | sort -n | awk '{print $2}')
+        if (( ${#matches[@]} == 0 )); then
+            fatal "No remotely built package found matching pattern '${remote_pattern}' in '${tools_pkgs}'" 100
+        fi
+
+        # Pick up the most recent found (last element after numeric sort by modification time).
+        package_name=$(basename "${matches[-1]}")
+        ok "Using remotely built package '${package_name}'"
+    else
+        ok "Using local package '${package_name}' (no '_' prefix)"
+    fi
+}
+
 pkg_base() {
     local pkg_base
     # Example: extracting the package name base without its extension
