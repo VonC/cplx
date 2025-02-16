@@ -31,12 +31,16 @@ set "CPLX_URL="
 rem set "CPLX_TOOL=python"
 if "%CPLX_TOOL%" == "python" (
   set "CPLX_VERSION=v3.13.1"
+  set "CPLX_CHECK_PREFIX=lib/libpython3.so"
+  set "CPLX_CHECK_SRC=libpython3.so"
 )
 rem set "CPLX_TOOL=mpdecimal"
 if "%CPLX_TOOL%" == "mpdecimal" (
   set "CPLX_VERSION=2.5.1"
   set "CPLX_URL=https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-[version].tar.gz"
   set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/libmpdec.so"
+  set "CPLX_CHECK_SRC=libmpdec/libmpdec.so"
 )  
 goto:eof
 
