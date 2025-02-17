@@ -1,0 +1,5 @@
+glibc-headers
+glibc-devel
+glibc
+kernel-headers
+glibc-static
