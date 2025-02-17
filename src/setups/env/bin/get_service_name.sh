@@ -15,6 +15,8 @@ service_name() {
     else
     service="${service}-CPLX"
   fi
+  # no need for the account for now
+  service="CPLX"
   
   # Split the tools string into an array using comma as the delimiter
   IFS=',' read -ra tool_array <<< "${tools}"
