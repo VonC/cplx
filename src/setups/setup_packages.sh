@@ -180,16 +180,17 @@ sync_package() {
         fatal "File '${packages_file}' not found" 1
     fi
 
+    escaped_pkg_name=$(echo "$pkg_name" | sed -E 's/(^|[^\\])\+/\1\\+/g')
     # Grep for lines starting with pkg_name followed by a dash and a digit
-    task "Must find package: '${pkg_name}' in file '${packages_file}'"
+    task "Must find package: '${escaped_pkg_name}' in file '${packages_file}'"
     local matches count found_pkg
-    matches=$(grep -E "^${pkg_name}-[0-9]" "${packages_file}")
+    matches=$(grep -E "^${escaped_pkg_name}-[0-9]" "${packages_file}")
     count=$(echo "$matches" | awk 'NF {count++} END {print count+0}')
 
     if [[ "$count" -eq 0 ]]; then
-        fatal "No package matching '${pkg_name}' found in ${packages_file}" 301
+        fatal "No package matching '${escaped_pkg_name}' found in ${packages_file}" 301
     elif [[ "$count" -gt 1 ]]; then
-        fatal "Multiple packages matching '${pkg_name}' found in ${packages_file}" 302
+        fatal "Multiple packages matching '${escaped_pkg_name}' found in ${packages_file}" 302
     fi
 
     found_pkg=$(echo "$matches" | head -n1)
