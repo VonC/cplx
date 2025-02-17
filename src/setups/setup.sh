@@ -54,12 +54,36 @@ main() {
     fi
     ok "CPLX_TOOL='${CPLX_TOOL}'-tool_name='${tool_name}' is in the list of services ('${tools_to_recompile}')"
 
-    properties_file="${SETUP_DIR}/env/cplx.properties"
-    if ! cp "${SETUP_DIR}/env/cplx.tpl.properties" "${SETUP_DIR}/env/cplx.properties"; then
-        fatal "Could not copy the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'" 5
-    else
-        ok "Copied the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'"
+    if ! get_property SSH_CONFIG_ENTRY; then
+        fatal "Could not get the SSH_CONFIG_ENTRY from the properties file '${properties_file}'" 4
     fi
+    if ! get_property cplx_path; then
+        fatal "Could not get the cplx_path from the properties file '${properties_file}'" 5
+    fi
+    if ! get_property architecture; then
+        fatal "Could not get the architecture from the properties file '${properties_file}'" 6
+    fi
+
+    properties_file="${SETUP_DIR}/env/cplx.properties"
+    if [[ ! -e "${properties_file}" ]]; then
+        if ! cp "${SETUP_DIR}/env/cplx.tpl.properties" "${SETUP_DIR}/env/cplx.properties"; then
+            fatal "Could not copy the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'" 5
+        else
+            ok "Copied the properties file '${SETUP_DIR}/env/cplx.tpl.properties' to '${SETUP_DIR}/env/cplx.properties'"
+        fi
+    else
+        ok "Properties file '${properties_file}' already exists"
+    fi
+    if ! set_property "SSH_CONFIG_ENTRY" "${SSH_CONFIG_ENTRY}"; then
+        fatal "Could not set the SSH_CONFIG_ENTRY '${SSH_CONFIG_ENTRY}' in the properties file '${properties_file}'" 56
+    fi
+    if ! set_property "cplx_path" "${cplx_path}"; then
+        fatal "Could not set the cplx_path '${cplx_path}' in the properties file '${properties_file}'" 56
+    fi
+    if ! set_property "architecture" "${architecture}"; then
+        fatal "Could not set the architecture '${architecture}' in the properties file '${properties_file}'" 56
+    fi
+
     if [[ -z "${CPLX_ARCH_EXT}" ]]; then
         fatal "CPLX_ARCH_EXT not defined for CPLX_TOOL='${CPLX_TOOL}' (should be el8.x86_64 or el7.x86_64, for instance)" 57
     fi
