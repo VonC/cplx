@@ -1,4 +1,4 @@
-0.11.0 -- Build Python with mpdecimal, add archive
+0.12.0-SNAPSHOT -- Compile OpenSSL 1.1.1w needed for Python on RHEL 7.9
 
-Check if mpdecimal help for the Python decimal module
-Add a package step to include all runtime dependencies and python wrapper script
+Add openssl111 as a tool to compile
+Upgrade python wrapper scripts to better handle venv (which copies its own set of python executables)
