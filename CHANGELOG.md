@@ -4,6 +4,69 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.11.0] - 2025-02-17 - Build Python with mpdecimal, add archive
+
+Check if mpdecimal help for the Python decimal module
+Add a package step to include all runtime dependencies and python wrapper script
+
+### 🚀 Features
+
+- *(install)* Rename archive to package in install scripts
+- Enhance senv.bat with tool info
+- Add mpdecimal package (remotely built: '_' prefix)
+- *(env)* Add tools packages paths to `.env` file
+- *(env)* Add alias to navigate to tool pkgs
+- *(env)* Improve vimrc configuration with line #
+- *(setup)* Support remote package installation
+- *(env)* Compute tool name to `.env` file
+- *(install)* Add install and package functions
+- Get CPLX properties and add checks
+- *(setup)* Setup.sh add arch and checks var to props
+- Rename `cplx.properties` to `cplx.tpl.properties`
+- *(setup)* Add `cplx.properties` to `.gitignore`
+- *(setup)* Setup.sh creates cplx.properties
+- *(setup)* Add `CPLX_BIN` property and `bin` directory
+- Add Python 3 wrapper scripts
+- *(setup)* Add root symlink in tool setup
+- *(setup)* Create symbolic link for python.1 man page
+- *(install)* CentOS 8 setup and doc
+- Add mpdecimal package for RHEL 7.9 x86_64
+- *(env)* Add `rgp` function to `.env` file
+
+### 🐛 Bug Fixes
+
+- *(setup)* Improve package extension handling
+- *(setup)* Remove debug messages for skipped pkg
+- *(setyp)* Improve package installation flags
+- *(install)* Link libmpdec and correct LDFLAGS
+- *(nev)* Enhance fd function in .env file
+- *(setup)* Always create `cplx.properties`
+- *(setups)* Improve ldd check in install_package
+- *(install)* Add CPLUS_INCLUDE_PATH to setenv script
+- *(setup)* Simplify service name retrieval
+- *(setup)* Get_service_name.sh service name detection
+- *(setup)* Escape special characters in package names
+- *(env)* Enhance senv.bat to remove done markers
+- *(setup)* Use realpath for cwd in packages_management.sh
+- *(mpdecimal)* Add missing dependencies for RHEL 7.9
+
+### ⚙️ Miscellaneous Tasks
+
+- *(docs)* Correct `-lgcc` to `-lgcc_s` in doc
+- *(doc)* Address python test failures on Linux
+- *(doc)* Python expoitation with pip upgrade
+
+### Fix
+
+- *(setup)* Add checks vars for Python and mpdecimal
+- *(setup)* Setup.sh update `cplx.properties`
+
+### Refactor
+
+- `pkgs_dir` is actually `tools_pkgs`
+- *(setup)* Rename archive to package
+- *(setup)* Mutualize install and package functions
+
 ## [v0.10.0] - 2025-02-15 - Refactor, compile, and archive mpdecimal
 
 Refactor: root is now per tool, not common to tools

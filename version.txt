@@ -1,4 +1,4 @@
-0.11.0-SNAPSHOT -- Build Python with mpdecimal, add archive
+0.11.0 -- Build Python with mpdecimal, add archive
 
 Check if mpdecimal help for the Python decimal module
 Add a package step to include all runtime dependencies and python wrapper script
