@@ -5,7 +5,7 @@ service_name() {
   local tools
   tools="${1}"
   local cwd
-  cwd=$(pwd)
+  cwd=$(pwd -P)
   local service
 
   service=$(printf "%s" "${USER}"|head -c 3)
@@ -27,7 +27,8 @@ service_name() {
     tool=$(echo "$tool" | xargs)
 
     # Check if the current working directory matches the tool
-    if [[ "$cwd" == */$tool/* || "$cwd" == */$tool ]]; then
+    # no glob: if [[ "$cwd" == */$tool/* || "$cwd" == */$tool ]]; then
+    if [[ "$cwd" =~ /${tool}(/|$) ]]; then
       # Convert the tool name to uppercase and append it to the service
       echo "${service}-$(echo "$tool" | tr '[:lower:]' '[:upper:]')"
       return
