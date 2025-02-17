@@ -90,3 +90,5 @@ zlib
 zlib-devel
 readline
 readline-devel
+_mpdecimal
+_openssl111
