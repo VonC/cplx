@@ -355,7 +355,17 @@ download_sources() {
 
     if [[ -n "${CPLX_URL}" ]]; then
         url="${CPLX_URL}"
+
+        # Replace [version] with version normally
         url="${url//\[version\]/${version}}"
+
+        # Create a version string with dots converted to underscores
+        version_mod="${version//./_}"
+
+        # Replace any [_version] or [version_] substring with the modified version
+        url="${url//\[_version\]/${version_mod}}"
+        url="${url//\[version_\]/${version_mod}}"
+
         info "Set URL to CPLX_URL, using CPLX_VERSION to replace any '[version]': '${url}'"
     fi
 
