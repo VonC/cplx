@@ -10,7 +10,7 @@ get_package_name() {
         error "No tools retrieved for cplx"; return 1
     fi
     local cwd
-    cwd=$(pwd)
+    cwd=$(pwd -P)
     
     # Split the tools string into an array using comma as the delimiter
     IFS=',' read -ra tool_array <<< "${tools}"
