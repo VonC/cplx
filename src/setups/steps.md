@@ -23,7 +23,7 @@ Once the project folder exists, the environment folder is copied to the remote h
 
 Check the latests tag, and copies the sources to the remote host.
 
-### Get the version [🔗](#get_the_version) (done: ✅)
+### Get the version [🔗](#get_the_version)
 
 It fetches the latest tag from the tool development repository, if CPLX_VERSION is not yet set (or set to latest) in `setup.local.bat`.
 
@@ -37,6 +37,6 @@ If not, downloads it.
 Check if the source file exists on the remote server side.  
 If not, copy it.
 
-## Download packages List [🔗](#download_packages_list) (done: ✅)
+## Download packages List [🔗](#download_packages_list)
 
 Download the list of packages from a given URL, and store it in a file named after the architecture of the remote server.
