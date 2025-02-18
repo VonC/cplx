@@ -61,15 +61,19 @@ function getArg() {
     return 1
 }
 
-
+_do_mirror=0
+function do_mirror() { return ${_do_mirror}; }
 # main: Acts as the central execution point, orchestrating the overall setup process including dependency checks, installations, and environmental configurations, ensuring the script achieves its purpose of preparing the environment or updating software as required.
 function main() {
 
     # shellcheck disable=SC2154
     cd "${root}" || fatal "Unable to access root '${root}'" 22
 
+    _do_mirror=0
     # Check if the package is a remotely built one, starting with _
-    resolve_remote_package
+    if resolve_remote_package; then
+        _do_mirror=1
+    fi
 
     local pkg_base
     pkg_base=$(pkg_base "${package_name}")
@@ -90,7 +94,7 @@ function main() {
             fatal "Unable to install '${package_name}'" 28
         fi
     fi
-    if ! check_flag_exists "${pkg_base}" "mirrored"; then
+    if do_mirror && ! check_flag_exists "${pkg_base}" "mirrored"; then
         ( list_package_content_to_mirror "${package_name}" ) 2>&1 | tee -a "${m_log}"
         if check_flag_exists "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
             echo "-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
@@ -125,8 +129,10 @@ function resolve_remote_package() {
         # Pick up the most recent found (last element after numeric sort by modification time).
         package_name=$(basename "${matches[-1]}")
         ok "Using remotely built package '${package_name}'"
+        return 0
     else
         ok "Using local package '${package_name}' (no '_' prefix)"
+        return 1
     fi
 }
 
