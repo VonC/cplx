@@ -8,6 +8,8 @@ senvDIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 senvDIR="$(dirname "${senvDIR}")"
 export senvDIR
 
+if [[ ! -e "${senvDIR}/current/usr/bin/python3" ]]; then return; fi
+
 export PERLLIB="${senvDIR}/root/share/perl5:${senvDIR}/root/lib64/perl5/vendor_perl"
 export PATH="${senvDIR}/current/bin:${senvDIR}/current/libexec/git-core:${PATH}"
 
