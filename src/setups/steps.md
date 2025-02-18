@@ -6,16 +6,16 @@ This document list all the necessary steps to setup the compilation project on a
 
 It makes sure the SSH connection reference a reachable remote Linux host (say '`myHost`'), and that it includes a path (`# cd_[hostname] /path/to/remote/project`) in the `~/.ssh/config`.
 
-## Copy the environment [🔗](#copy_the_environment)
+## Copy the environment [🔗](#copy_the_environment) (done: ✅)
 
 It copies the local "environment" folder (`src/setup/env`) to the remote host, with a bashrc-like file named `.env`, and various settings files like a `.vimrc`.
 
-### Create the remote project folder [🔗](#create_the_remote_project_folder)
+### Create the remote project folder [🔗](#create_the_remote_project_folder) (done: ✅)
 
 It creates the remote project folder, if it does not exist yet.  
 That folder (typically `cplx`) is where the various tools will be compiled, each in their own subfolder.
 
-### Transfer env to the remote project folder [🔗](#transfer_env_to_the_remote_project_folder)
+### Transfer env to the remote project folder [🔗](#transfer_env_to_the_remote_project_folder) (done: ✅)
 
 Once the project folder exists, the environment folder is copied to the remote host through `tar` + `ssh`.
 
