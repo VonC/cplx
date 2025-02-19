@@ -8,9 +8,10 @@ senvDIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 senvDIR="$(dirname "${senvDIR}")"
 export senvDIR
 
+if [[ -z "${VIRTUAL_ENV}" ]]; then
+    export PATH="${senvDIR}/current/bin:${PATH}"
+fi
 export PERLLIB="${senvDIR}/root/share/perl5:${senvDIR}/root/lib64/perl5/vendor_perl"
-export PATH="${senvDIR}/current/bin:${senvDIR}/current/libexec/git-core:${PATH}"
-
 export LD_LIBRARY_PATH="${senvDIR}/root/usr/lib64:${senvDIR}/root/usr/lib:${senvDIR}/root/lib64:${senvDIR}/root/lib:${senvDIR}/current/usr/lib64:${senvDIR}/current/lib64:${senvDIR}/current/usr/lib:${senvDIR}/current/lib"
 
 
