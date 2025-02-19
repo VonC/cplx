@@ -1,7 +1,26 @@
 #!/bin/bash
+# filepath: /c:/Users/vonc/prog/git/cplx/src/install/env/python/bin/python
 
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 # shellcheck source=/dev/null
 source "${DIR}/setenv"
 
-"${DIR}/current/bin/python3" "$@"
+python3_target="$(readlink "${DIR}/current/bin/python3")"
+# If "${DIR}/current/bin/python3" is a file, move it and create a symlink pointing back to "${DIR}/python"
+if [ "${python3_target}" != "../../bin/python" ]; then
+    mv "${DIR}/current/bin/${python3_target}" "${DIR}/current/bin/${python3_target}_bin"
+    ln -nfs "../../bin/python" "${DIR}/current/bin/python3"
+    ln -nfs "../../bin/python" "${DIR}/current/bin/${python3_target}"
+    ln -nfs "${python3_target}_bin" "${DIR}/current/bin/python3_target"
+    python3_target="${python3_target}_bin"
+else
+    python3_target="$(readlink "${DIR}/current/bin/python3_target")"
+fi
+
+if [[ ! -e "${DIR}/pip" ]]; then
+    ln -nfs "current/bin/pip" "${DIR}/pip"
+    ln -nfs "current/bin/pip3" "${DIR}/pip3"
+fi
+
+# Finally, call the new binary
+"${DIR}/current/bin/${python3_target}" "$@"
