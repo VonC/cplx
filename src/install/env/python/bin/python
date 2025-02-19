@@ -5,6 +5,16 @@ DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 # shellcheck source=/dev/null
 source "${DIR}/setenv"
 
+# Check if any of the parameters are, in that order, '-m venv'
+args=("$@")
+venv=""
+for (( i=0; i < ${#args[@]} - 2; i++ )); do
+    if [[ "${args[i]}" == "-m" && "${args[i+1]}" == "venv" ]]; then
+        venv="${args[i+2]}"
+        break
+    fi
+done
+
 python3_target="$(readlink "${DIR}/current/bin/python3")"
 # If "${DIR}/current/bin/python3" is a file, move it and create a symlink pointing back to "${DIR}/python"
 if [ "${python3_target}" != "../../bin/python" ]; then
@@ -23,4 +33,14 @@ if [[ ! -e "${DIR}/pip" ]]; then
 fi
 
 # Finally, call the new binary
-"${DIR}/current/bin/${python3_target}" "$@"
+if [[ -z "${VIRTUAL_ENV}" ]]; then
+  "${DIR}/current/bin/${python3_target}" "$@"
+else
+  "${VIRTUAL_ENV}/bin/${python3_target}_bin" "$@"
+fi
+if [[ -n "${venv}" ]]; then
+    python3_target="$(readlink "$(pwd)/${venv}/bin/python3")"
+    ln -nfs "${DIR}/python" "$(pwd)/${venv}/bin/${python3_target}"
+    cp "${DIR}/current/bin/${python3_target}" "$(pwd)/${venv}/bin/${python3_target}_bin"
+    sed -i "s/${python3_target}_bin/${python3_target}/g" "$(pwd)/${venv}/bin/pip"*
+fi
