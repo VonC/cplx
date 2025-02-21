@@ -17,8 +17,8 @@ if "%~1"=="unset" (
 
 set "okInit="
 if not exist "%init_dir%\batcolors\echos.bat" (
-    echo "WARN: Missing submodules"
-    if not exist "%project_dir%\.gitmodules" (
+    echo WARN: Missing submodules
+    if not exist "%init_dir%\..\.gitmodules" (
       echo INFO: Executing  in %CD%' 'git submodule add -b legacy -- https://github.com/VonC/batcolors tools/batcolors'
       git config advice.addIgnoredFile false
       git submodule add -b legacy -- https://github.com/VonC/batcolors tools/batcolors
