@@ -7,7 +7,7 @@ get_package_name() {
     local tools
     tools="${services}"
     if [[ -z ${tools} ]]; then
-        error "No tools retrieved for cplx"; return 1
+        fatal "No tools retrieved for cplx" 1
     fi
     local cwd
     cwd=$(pwd -P)
@@ -36,10 +36,10 @@ get_package_name() {
     fi
 
     if [[ -z ${tool} ]]; then
-        error "No tool provided or extracted from cwd '${cwd}'"; return 2
+        fatal "No tool provided or extracted from cwd '${cwd}'" 2
     fi
     if [[ -z ${file} ]]; then
-        error "No file provided to search into packages"; return 3
+        fatal "No file provided to search into packages" 3
     fi
     task "Must look for file '${file}' in '${tool}' packages"
 
@@ -79,7 +79,7 @@ function lookup_file_in_package_archive() {
     # Build the list file if it does not exist
     if [[ ! -f "${full_list_file}" || $(stat -c%s "${full_list_file}") -lt 500 ]]; then
         if [[ "$package_name" =~ \.rpm$ ]]; then
-            rpm2cpio "${package_name}" | cpio -itv > "${full_list_file}" \
+            rpm2cpio "${package_name}" | cpio -itv > "${full_list_file}" 2>/dev/null \
                 || fatal "Failed to list rpm archive '${package_name}'" 50
         elif [[ "$package_name" =~ \.tar\.gz$ ]]; then
             tar tzvf "${package_name}" > "${full_list_file}" \
