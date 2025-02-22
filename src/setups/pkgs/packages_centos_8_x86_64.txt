@@ -37,6 +37,7 @@ augeas-1.12.0-8.el8.x86_64.rpm
 augeas-libs-1.12.0-8.el8.x86_64.rpm
 authselect-1.2.6-2.el8.x86_64.rpm
 authselect-libs-1.2.6-2.el8.x86_64.rpm
+autoconf2.7x-2.71-1.el8.noarch.rpm
 autofs-5.1.4-113.el8.x86_64.rpm
 avahi-0.7-27.el8.x86_64.rpm
 avahi-autoipd-0.7-27.el8.x86_64.rpm

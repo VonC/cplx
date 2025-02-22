@@ -1,0 +1,8 @@
+bzip2-libs
+unzip
+make
+make-devel
+zlib
+gmp
+gcc
+autoconf2.7x

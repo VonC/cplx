@@ -1409,4 +1409,8 @@ By using the `-l` options in the `./Configure` command, you correctly inject the
 
 You said: The `--libdir=lib64` is important to install in the lib64, instead of the lib folder. Should't I use the full path though? Like `/home/gitea2/cplx/tools/openssl111/openssl111-1.1.1w/usr/lib64`?
 
-~~ ~~
+## Git
+
+### Configuration/autoconf
+
+Needed for the make configure.  
