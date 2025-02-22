@@ -209,7 +209,17 @@ download_package() {
     local arch="$1"
     local pkg_name="$2"
 
+    local package_file_name="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
+    local package_file_size
+    package_file_size=$(stats -c%s "${package_file_name}" 2>/dev/null || echo 0)
+    local package_file_size_limit=$((9 * 1024))  # 9KB
+
     if [[ -e  "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" ]]; then
+        if [[ "${package_file_size}" -lt "${package_file_size_limit}" ]]; then
+            mv "${package_file_name}" "${package_file_name}._to_delete"
+            echo "File renamed to ${package_file_name}._to_delete because its size is ${package_file_size_limit} bytes."
+            fatal "Package '${pkg_name}' is only ${package_file_size} bytes (<25KB), something went wrong" 2
+        fi
         ok "Package '${pkg_name}' already downloaded in '${SETUP_PKGS_DIR}/pkgs/${arch}'"
         return 0
     fi
