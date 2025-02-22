@@ -1,4 +1,3 @@
-0.12.0-SNAPSHOT -- Compile OpenSSL 1.1.1w needed for Python on RHEL 7.9
+0.13.0-SNAPSHOT -- Git compilation
 
-Add openssl111 as a tool to compile
-Upgrade python wrapper scripts to better handle venv (which copies its own set of python executables)
+Generate Makefile for the Git compilation
