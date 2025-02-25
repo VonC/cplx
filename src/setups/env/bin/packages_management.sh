@@ -1,33 +1,8 @@
 #!/bin/bash
 
 get_package_name() {
-    local services
-    get_property services
-    # shellcheck disable=SC2154
-    local tools
-    tools="${services}"
-    if [[ -z ${tools} ]]; then
-        fatal "No tools retrieved for cplx" 1
-    fi
-    local cwd
-    cwd=$(pwd -P)
-    
-    # Split the tools string into an array using comma as the delimiter
-    IFS=',' read -ra tool_array <<< "${tools}"
-
     local tool
-    # Loop over each tool in the array
-    for tool in "${tool_array[@]}"; do
-      # Trim any leading/trailing whitespace
-      tool=$(echo "${tool}" | xargs)
-
-      # Check if the current working directory matches the tool
-      if [[ "$cwd" == */${tool}/* || "$cwd" == */${tool} ]]; then
-        break
-      fi
-      tool=""
-    done
-
+    tool=current_tool
     local file
     file="${1}"
     if [[ -z ${tool} ]]; then
@@ -100,6 +75,37 @@ function lookup_file_in_package_archive() {
     fi
 
     echo "$result"
+}
+
+
+function current_tool() {
+    local services
+    get_property services
+    # shellcheck disable=SC2154
+    local tools
+    tools="${services}"
+    if [[ -z ${tools} ]]; then
+        fatal "No tools retrieved for cplx" 1
+    fi
+    local cwd
+    cwd=$(pwd -P)
+
+    # Split the tools string into an array using comma as the delimiter
+    IFS=',' read -ra tool_array <<< "${tools}"
+
+    local tool
+    # Loop over each tool in the array
+    for tool in "${tool_array[@]}"; do
+      # Trim any leading/trailing whitespace
+      tool=$(echo "${tool}" | xargs)
+
+      # Check if the current working directory matches the tool
+      if [[ "$cwd" == */${tool}/* || "$cwd" == */${tool} ]]; then
+        break
+      fi
+      tool=""
+    done
+    echo "${tool}"
 }
 
 function remove_package() {
