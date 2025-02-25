@@ -108,6 +108,40 @@ function current_tool() {
     echo "${tool}"
 }
 
+function find_file_in_packages() {
+    local file="${1}"
+    if [[ -z "${file}" ]]; then
+        fatal "No file provided" 101
+    fi
+
+    local pkgs_dir="${HOME}/tools/pkgs"
+    local list_file
+    # For each .list file under the packages directory
+    for list_file in "${pkgs_dir}"/*.list; do
+        # Make sure the file exists
+        [[ -f "${list_file}" ]] || continue
+
+        local archive_file
+        local grep_output
+        grep_output=$(grep --color=always -E "$file" "${list_file}")
+        if [[ -n "${grep_output}" ]]; then
+            # Print the list file only once as header
+            archive_file=$(basename "${list_file%.list}")
+            if [[ -e "${archive_file}.rpm" ]]; then archive_file="${archive_file}.rpm"; fi
+            if [[ -e "${archive_file}.tar.gz" ]]; then archive_file="${archive_file}.tar.gz"; fi
+            if [[ -e "${archive_file}.xz" ]]; then archive_file="${archive_file}.xz"; fi
+            echo "${archive_file}"
+            # Process each matching line: extract the portion after the first "./"
+            while IFS= read -r line; do
+                # Use sed to remove everything up to and including the first "./"
+                local extracted
+                extracted=$(echo "$line" | sed -E 's/^.*\.\///')
+                echo "  ${extracted}"
+            done <<< "${grep_output}"
+        fi
+    done
+}
+
 function list_package() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
