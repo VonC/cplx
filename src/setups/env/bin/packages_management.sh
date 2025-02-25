@@ -2,7 +2,7 @@
 
 get_package_name() {
     local tool
-    tool=current_tool
+    tool=$("current_tool")
     local file
     file="${1}"
     if [[ -z ${tool} ]]; then
@@ -106,6 +106,63 @@ function current_tool() {
       tool=""
     done
     echo "${tool}"
+}
+
+function get_full_package_name() {
+    local package_name="${1}"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided" 101
+    fi
+    local full_package_name
+    local tool
+    tool=$(current_tool)
+    if [[ -n ${tool} ]]; then
+        full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/${tool}/pkgs")"
+    fi
+    if [[ -z ${full_package_name} ]]; then
+        full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/${tool}/pkgs/removed")"
+    fi
+    if [[ -z ${full_package_name} ]]; then
+        full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/pkgs")"
+    fi
+    if [[ -z ${full_package_name} ]]; then
+        echo ""
+        return
+    fi
+    # keep only the filename, not the full path. And remove any .list or .installed* extension local base
+    base=$(basename "$full_package_name")
+    base="${base%%.list}"
+    base="${base%%.installed*}"
+    local candidates
+    candidates=$(find "${HOME}/tools/pkgs" -maxdepth 1 -type f -name "${base}.*" | grep -v "\.list")
+    local count
+    count=$(echo "${candidates}" | grep -c '^')
+    if [ "$count" -gt 1 ]; then
+        fatal "Expected one candidate file for '${base}', found ${count}" 104
+    fi
+    full_package_name=$(basename "${candidates}")
+    echo "${full_package_name}"
+}
+
+search_full_package_name_in_folder() {
+    local package_name="${1}"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided" 102
+    fi
+    local folder="${2}"
+    if [[ -z "${folder}" ]]; then
+        fatal "No folder provided" 103
+    fi
+    if [[ ! -e "${folder}" ]]; then
+        echo ""
+        return
+    fi
+    local full_package_name
+    full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${package_name}-[0-9]*.installed*" | head -n 1)
+    if [[ -z "${full_package_name}" ]]; then
+        full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${package_name}-[0-9]*.list" | head -n 1)
+    fi
+    echo "${full_package_name}"
 }
 
 function remove_package() {
