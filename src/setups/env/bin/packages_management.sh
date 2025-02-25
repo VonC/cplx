@@ -108,6 +108,37 @@ function current_tool() {
     echo "${tool}"
 }
 
+function list_package() {
+    local package_name="${1}"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided" 111
+    fi
+    local full_package_name
+    full_package_name="$(get_full_package_name "${package_name}")"
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "No package found for '${package_name}'" 112
+    fi
+    local base_package_name
+    base_package_name="${full_package_name}"
+    base_package_name="${base_package_name%.tar.gz}"
+    base_package_name="${base_package_name%.rpm}"
+    base_package_name="${base_package_name%.xz}"
+    local list_file
+    list_file="${HOME}/tools/pkgs/${base_package_name}.list"
+    if [[ ! -f "${list_file}" ]]; then
+        fatal "No list file found for package '${full_package_name}'" 113
+    fi
+    awk 'BEGIN {count=0}
+     # Process only lines where the last field starts with "./" and does not end with "/"
+     $NF ~ /^\.\// && $NF !~ /\/$/ {
+         line = $NF
+         sub(/^\.\//, "", line)
+         print line
+         count++
+         # if (count >= 100) exit
+     }' "${list_file}"
+}
+
 function get_full_package_name() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
