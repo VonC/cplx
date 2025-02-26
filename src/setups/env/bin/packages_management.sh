@@ -142,6 +142,42 @@ function find_file_in_packages() {
     done
 }
 
+function is_package_installed() {
+    local package_name="${1}"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided" 101
+    fi
+    local full_package_name
+    full_package_name=$(get_full_package_name "${package_name}")
+    if [[ -z "${full_package_name}" ]]; then
+        return 1
+    fi
+    local tool
+    tool="$(current_tool)"
+    if [[ -z "${tool}" ]]; then
+        return 1
+    fi
+    local missing
+    local present
+    files=$(list_package "${package_name}")
+    while IFS= read -r file; do
+        local full_file="${tools}/${tool}/root/${file}"
+        if [[ ! -e "${full_file}" && ! -L "${full_file}" ]]; then
+            missing=1
+        else
+            present=1
+        fi
+    done <<< "$files"
+
+    if [[ ${missing} -eq 1 && ${present} -ne 1 ]]; then
+        return 1
+    fi
+    if [[ ${missing} -eq 1 && ${present} -eq 1 ]]; then
+        return 2
+    fi
+    return 0
+}
+
 function list_package() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
