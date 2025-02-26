@@ -265,6 +265,26 @@ search_full_package_name_in_folder() {
     if [[ -z "${full_package_name}" ]]; then
         full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${package_name}-[0-9]*.list" | head -n 1)
     fi
+    # If package_name starts with an underscore, it's a built package.
+    if [[ -n "${full_package_name}" && "${package_name}" =~ ^_ ]]; then
+        # Replace literal "0.el8.x86_64" with a glob pattern.
+        local build_pattern="${package_name}*"
+        if [[ "${full_package_name}" =~ \.list$ ]]; then build_pattern="${build_pattern}.list"; fi
+        if [[ "${full_package_name}" =~ \.installed*$ ]]; then build_pattern="${build_pattern}.installed*"; fi
+        # info "Looking for built package in '${folder}' matching pattern '${build_pattern}'"
+
+        # Use find with -printf to output modification time and file path,
+        # sort numerically so that the oldest is first and the most recent is last,
+        # then extract the file path.
+        mapfile -t matches < <(find "${folder}" -maxdepth 1 -type f -name "${build_pattern}" -printf "%T@ %p\n" | sort -n | awk '{print $2}')
+        if (( ${#matches[@]} == 0 )); then
+            fatal "No built package found matching pattern '${build_pattern}' in '${folder}'" 100
+        fi
+
+        # Pick up the most recent found (last element after numeric sort by modification time).
+        full_package_name=$(basename "${matches[-1]}")
+        # ok "Using built package '${full_package_name}'"
+    fi
     echo "${full_package_name}"
 }
 
