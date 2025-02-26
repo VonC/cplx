@@ -240,6 +240,7 @@ function get_full_package_name() {
     local count
     count=$(echo "${candidates}" | grep -c '^')
     if [ "$count" -gt 1 ]; then
+        echo "${candidates}"
         fatal "Expected one candidate file for '${base}', found ${count}" 104
     fi
     full_package_name=$(basename "${candidates}")
