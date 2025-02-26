@@ -158,24 +158,25 @@ function is_package_installed() {
         return 1
     fi
     local missing
-    local present
+    local present_file
     files=$(list_package "${package_name}")
     while IFS= read -r file; do
         local full_file="${tools}/${tool}/root/${file}"
         if [[ ! -e "${full_file}" && ! -L "${full_file}" ]]; then
             missing=1
-        else
-            present=1
+        elif [[ -f "${full_file}" ]]; then
+            present_file=1
         fi
     done <<< "$files"
 
-    if [[ ${missing} -eq 1 && ${present} -ne 1 ]]; then
-        return 1
+    if [[ ${missing} -ne 1 ]]; then
+        return 0
     fi
-    if [[ ${missing} -eq 1 && ${present} -eq 1 ]]; then
+
+    if [[ ${present_file} -eq 1 ]]; then
         return 2
     fi
-    return 0
+    return 1
 }
 
 function list_package() {
