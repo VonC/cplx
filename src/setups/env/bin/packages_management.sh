@@ -310,7 +310,7 @@ function remove_package() {
             # Determine the absolute path (assuming ${root} is set)
             # shellcheck disable=SC2154
             local file_to_remove="${root}/${line#./}"
-            if [[ -e "${file_to_remove}" || -L "${file_to_remove}" ]]; then
+            if [[ -f "${file_to_remove}" || -L "${file_to_remove}" ]]; then
                 command rm "${file_to_remove}" || fatal "Failed to remove file '${file_to_remove}'" 106
                 ok "Removed file '${file_to_remove}'"
                 # Check for an accompanying .copied file in the same path
@@ -320,7 +320,7 @@ function remove_package() {
                     ok "Removed copied file '${copied_file}'"
                 fi
             else
-                warning "File '${file_to_remove}' is missing"
+                warning "Skipping removal: '${file_to_remove}' is not a file or symlink or present"
             fi
         else
             # Once we start processing './' lines, stop when a different line is reached
