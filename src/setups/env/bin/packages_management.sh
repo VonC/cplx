@@ -337,3 +337,23 @@ function remove_package() {
     mv "${f1}" "${removed_dir}/" || fatal "Failed to move '${f1}' to '${removed_dir}'" 105
     ok "Moved '${f1}' to '${removed_dir}'"
 }
+
+function install_package_from_name() {
+    local tool
+    tool="$(current_tool)"
+    if [[ -z "${tool}" ]]; then
+        fatal "No tool to install '${1}' into: $(pwd)" 143
+    fi
+    local package_name="${1}"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided to be installed in '${tool}'" 141
+    fi
+    local full_package_name
+    full_package_name=$(get_full_package_name "${package_name}")
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "No package found for name '${package_name}' to be installed in '${tool}'" 142
+    fi
+
+    task "Must install package '${full_package_name}' in '${tool}'"
+
+}
