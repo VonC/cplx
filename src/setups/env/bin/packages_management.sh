@@ -232,11 +232,9 @@ function get_full_package_name() {
         return
     fi
     # keep only the filename, not the full path. And remove any .list or .installed* extension local base
-    base=$(basename "$full_package_name")
-    base="${base%%.list}"
-    base="${base%%.installed*}"
+    base=$(search_pattern_for_package "$full_package_name")
     local candidates
-    candidates=$(find "${HOME}/tools/pkgs" -maxdepth 1 -type f -name "${base}.*" | grep -v "\.list")
+    candidates=$(find "${HOME}/tools/pkgs" -maxdepth 1 -type f -name "${base}" | grep -v "\.list")
     local count
     count=$(echo "${candidates}" | grep -c '^')
     if [ "$count" -gt 1 ]; then
@@ -245,6 +243,26 @@ function get_full_package_name() {
     fi
     full_package_name=$(basename "${candidates}")
     echo "${full_package_name}"
+}
+
+search_pattern_for_package() {
+    local package_name
+    package_name="$(basename "${1}")"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided" 162
+    fi
+    local search_pattern
+    if [[ "${package_name}" =~ -[0-9] ]]; then
+        search_pattern="${package_name%.installed*}"
+        search_pattern="${search_pattern%.list}"
+        search_pattern="${search_pattern%.rpm}"
+        search_pattern="${search_pattern%.tar.gz}"
+        search_pattern="${search_pattern%.xz}"
+        search_pattern="${search_pattern}*"
+    else
+        search_pattern="${package_name}-[0-9]*"
+    fi
+    echo "${search_pattern}"
 }
 
 search_full_package_name_in_folder() {
@@ -260,17 +278,18 @@ search_full_package_name_in_folder() {
         echo ""
         return
     fi
+    local search_pattern
+    search_pattern=$(search_pattern_for_package "${package_name}")
     local full_package_name
-    full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${package_name}-[0-9]*.installed*" | head -n 1)
+    full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${search_pattern}.installed*" | head -n 1)
     if [[ -z "${full_package_name}" ]]; then
-        full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${package_name}-[0-9]*.list" | head -n 1)
+        full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${search_pattern}.list" | head -n 1)
     fi
     # If package_name starts with an underscore, it's a built package.
     if [[ -n "${full_package_name}" && "${package_name}" =~ ^_ ]]; then
         # Replace literal "0.el8.x86_64" with a glob pattern.
-        local build_pattern="${package_name}*"
-        if [[ "${full_package_name}" =~ \.list$ ]]; then build_pattern="${build_pattern}.list"; fi
-        if [[ "${full_package_name}" =~ \.installed*$ ]]; then build_pattern="${build_pattern}.installed*"; fi
+        local build_pattern
+        build_pattern="$(search_pattern_for_package "${full_package_name}")"
         # info "Looking for built package in '${folder}' matching pattern '${build_pattern}'"
 
         # Use find with -printf to output modification time and file path,
