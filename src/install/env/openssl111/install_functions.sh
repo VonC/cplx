@@ -10,8 +10,9 @@ function configure() {
 
     # Build the configure command as an array
     local configure_cmd=( "${tool_src}/config"
-                          "--prefix=${tool_prefix}"
-                          "--openssldir=${tool_prefix}"
+                          "--prefix=${tool_prefix}/usr"
+                          "--openssldir=${tool_prefix}/usr"
+                          "--libdir=lib64"
                           "shared"
                           "-v"
                           "-lgcc_s"
