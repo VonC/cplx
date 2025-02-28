@@ -385,12 +385,19 @@ function remove_package() {
     ok "Moved '${f1}' to '${removed_dir}'"
 }
 
+_do_mirror=0
+function do_mirror() { return ${_do_mirror}; }
+
 function install_package_from_name() {
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
         fatal "No tool to install '${1}' into: $(pwd)" 143
     fi
+    tool="${HOME}/tools/${tool}"
+    local tool_pkgs
+    tool_pkgs="${tool}/pkgs"
+
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
         fatal "No package name provided to be installed in '${tool}'" 141
@@ -402,5 +409,301 @@ function install_package_from_name() {
     fi
 
     task "Must install package '${full_package_name}' in '${tool}'"
+    local pkg_base
+    pkg_base="$(base_package_name "${full_package_name}")"
 
+    local i_log
+    i_log="${tool}/logs/install_package.log"
+    rm -f "${i_log}"
+    local m_log
+    m_log="${tool}/logs/mirror_package.log"
+    rm -f "${m_log}"
+    if ! is_package_flagged_as "${pkg_base}" "installed"; then
+        ( install_tool_package "${pkg_base}" ) 2>&1 | tee -a "${i_log}"
+        if is_package_flagged_as "${pkg_base}" "installed" && [[ -e "${i_log}" ]]; then
+            cat "${i_log}" > "${tool_pkgs}/${pkg_base}.installed"
+        else
+            fatal "Unable to install '${full_package_name}'" 28
+        fi
+    fi
+    _do_mirror=0
+    if [[ "${pkg_base}" =~ ^_ ]]; then
+        warning "Built package '${full_package_name}', skip mirroring"
+        _do_mirror=1;
+    fi
+    if do_mirror && ! is_package_flagged_as "${pkg_base}" "mirrored"; then
+        ( mirror_tool_package "${full_package_name}" ) 2>&1 | tee -a "${m_log}"
+        if is_package_flagged_as "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
+            echo "-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
+            cat "${m_log}" >> "${tool_pkgs}/${pkg_base}.installed.mirrored"
+        else
+            fatal "Unable to mirror '${full_package_name}'" 29
+        fi
+    fi
+    post_install_tool "${package_name}"
+    return $?
+}
+
+
+post_install_tool() {
+    local package_name="$1"
+    if [[ "$package_name" =~ ^binutils-[0-9] ]]; then
+        if [[ ! -e "${root}/usr/bin/ld" ]]; then
+            ln -nfs "ld.bfd" "${root}/usr/bin/ld"
+        fi
+    fi
+}
+
+function install_tool_package() {
+    local tool
+    tool="$(current_tool)"
+    if [[ -z "${tool}" ]]; then
+        fatal "No tool to install '${1}' into: $(pwd)" 193
+    fi
+    tool="${HOME}/tools/${tool}"
+    local tool_pkgs
+    tool_pkgs="${tool}/pkgs"
+
+    local package_name="${1}"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided to be installed in '${tool}'" 141
+    fi
+    local full_package_name
+    full_package_name=$(get_full_package_name "${1}")
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "No package found for name '${package_name}' to be tool-installed in '${tool}'" 192
+    fi
+
+    local pkg_base
+    pkg_base="$(base_package_name "${full_package_name}")"
+    local flag="${tool_pkgs}/${pkg_base}.installed"
+    if [[ "${full_package_name%.rpm}" != "${full_package_name}" ]]; then
+        if ! rpm2cpio "${tools_pkgs}/${full_package_name}" | cpio -idmv; then fatal "Unable to install '${full_package_name}'" 2; fi
+    elif [[ "${full_package_name%.xz}" != "${full_package_name}" ]]; then
+        if ! xzcat "${tools_pkgs}/${full_package_name}" > "${full_package_name%.xz,,}"; then fatal "Unable to unxz '${full_package_name}'" 4; fi
+        chmod 755 "${full_package_name%.xz,,}"
+    elif [[ "${full_package_name%.tar.gz}" != "${full_package_name}" ]]; then
+        if ! tar xpvf "${tools_pkgs}/${full_package_name}"; then fatal "Unable to untar gz '${full_package_name}'" 5; fi
+    else
+        fatal "unknown extension for archive '${full_package_name}'" 11
+    fi
+    touch "${flag}" || fatal "Unable to create flag file '${flag}'" 3
+    ok "'${flag}' installed in '${root}': pwd '$(pwd)'"
+
+}
+
+function is_package_flagged_as() {
+    
+    local tool
+    tool="$(current_tool)"
+    if [[ -z "${tool}" ]]; then
+        fatal "No tool to install '${1}' into: $(pwd)" 183
+    fi
+    tool="${HOME}/tools/${tool}"
+
+    local full_package_name
+    full_package_name=$(get_full_package_name "${1}")
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "No package found for name '${package_name}' to be flag checked in '${tool}'" 182
+    fi
+
+    local pkg_base
+    pkg_base="$(base_package_name "${full_package_name}")"
+
+    local flag_suffix="$2"
+    local pattern="${pkg_base}*${flag_suffix}*"
+    local tool_pkgs
+    tool_pkgs="${tool}/pkgs"
+    cd "${tool_pkgs}" || fatal "Unable to access tools_pkgs '${tool_pkgs}'" 181
+    shopt -s nullglob
+    # shellcheck disable=SC2206
+    local flags=( ${pattern} )
+    shopt -u nullglob
+    if (( ${#flags[@]} > 0 )); then
+        info "A file matching '${pattern}' already exists in '${tool_pkgs}'"
+        ok "'${pkg_base}' already '${flag_suffix}' in '${tool_pkgs}'"
+        return 0
+    fi
+    error "No file matching '${pattern}' found in '${tool_pkgs}'"
+    return 1
+}
+
+mirror_tool_package() {
+
+    local tool
+    tool="$(current_tool)"
+    if [[ -z "${tool}" ]]; then
+        fatal "No tool to install '${1}' into: $(pwd)" 203
+    fi
+    tool="${HOME}/tools/${tool}"
+
+    local full_package_name
+    full_package_name=$(get_full_package_name "${1}")
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "No package found for name '${package_name}' to be flag checked in '${tool}'" 202
+    fi
+
+    local pkg_name="${full_package_name}"
+    local pkg_file="${tools_pkgs}/${pkg_name}"
+    local clean_ldd=0
+
+    if [[ ! -e "${pkg_file}" ]]; then
+        fatal "pkg_name file '${pkg_file}' not found" 1
+    fi
+
+    local pkg_base
+    pkg_base=$(pkg_base "${package_name}")
+
+    info "Listing contents of pkg_name '${pkg_name}':"
+    if [[ "${pkg_name%.rpm}" != "${pkg_name}" ]]; then
+        # Open file descriptor 8 with the command output, ensuring the while read runs in the current shell.
+        exec 9< <(rpm2cpio "${pkg_file}" | cpio -itv)
+        while IFS= read -r line <&9 || [ -n "$line" ]; do
+            # Process each line (you can add custom processing here)
+            # info "call mirror_system_executable '${line}' with clean_ldd='${clean_ldd}'"
+            if ! mirror_system_executable "${line}"; then clean_ldd=1; fi
+        done
+        exec 9<&-
+    elif [[ "${pkg_name%.tar.gz}" != "${pkg_name}" ]]; then
+        tar tzvf "${pkg_file}" | while IFS= read -r line; do
+            # Process each line (custom processing can be added here)
+            info "tar.gz contains: ${line}"
+        done
+    elif [[ "${pkg_name%.xz}" != "${pkg_name}" ]]; then
+        # Assuming it's a tar.xz package
+        if file "${pkg_file}" | grep -qi "tar archive"; then
+            tar --xz -tzvf "${pkg_file}" | while IFS= read -r line; do
+                info "tar.xz contains: ${line}"
+            done
+        else
+            fatal "Unsupported xz archive type for pkg_name '${pkg_name}'" 1
+        fi
+    else
+        fatal "Unknown archive extension for pkg_name '${pkg_name}'" 11
+    fi
+
+    #info "Final clean_ldd='${clean_ldd}'"
+    if [[ "${clean_ldd}" != "0" ]]; then
+        fatal "Some files in the package '${pkg_name}' have absolute system paths or unresolved paths" 199
+    fi
+
+    mv "${tool_pkgs}/${pkg_base}.installed" "${tool_pkgs}/${pkg_base}.installed.mirrored" || fatal "Unable to rename flag file '${pkg_base}.installed' to '${tool_pkgs}/${pkg_base}.installed.mirrored'" 12
+
+}
+
+mirror_system_executable() {
+    local src_line="$1"
+    # Remove everything before the first '/' and prepend '/' (if not already)
+    local src_file="/${src_line#*/}"
+    local ret=0
+
+    # Check that src_file exists and is a regular file (not a symlink)
+    if [[ -f "${src_file}" && ! -L "${src_file}" ]]; then
+        # Construct the destination path by prefixing the current folder path.
+        # For example, for /usr/bin/unzipsfx, it will be copied to ./usr/bin/unzipsfx
+        task "Must copy '${src_file}' to mirror folder '$(pwd)'"
+        local dest_file="./${src_file#/}"  # removes leading /
+        local dest_dir
+        dest_dir=$(dirname "${dest_file}")
+        mkdir -p "${dest_dir}" || fatal "Unable to create directory '${dest_dir}'" 31
+
+        local cp_output
+        cp_output=$(cp "${src_file}" "${dest_file}" 2>&1)
+        rc=$?
+        if [ $rc -ne 0 ]; then
+            if echo "$cp_output" | grep -qi "Permission denied"; then
+                warning "Permission denied copying '${src_file}' to '${dest_file}', skipping marker creation"
+                return 0
+            else
+                fatal "Unable to copy '${src_file}' to '${dest_file}': ${cp_output}" 32
+            fi
+        fi
+        # Create a dummy file to indicate the file was copied
+        touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
+        info "Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
+    else
+        # info "No action: '${src_file}' either does not exist, is not a regular file, or is a symlink."
+        if [[  -f "./${src_file#/}" && ! -L "./${src_file#/}" ]]; then
+            if ! check_ldd "./${src_file#/}"; then ret=1; fi
+        fi
+    fi
+
+    return ${ret}
+}
+
+contains_any() {
+    local line="$1"
+    shift
+    for token in "$@"; do
+        if [[ "$line" == *"$token"* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+check_ldd() {
+    local file="$1"
+
+    # If the file name includes ' -> ', treat it as a symlink and skip ldd check.
+    local exclude_tokens=(" -> " " => " "share/man" "share/doc" "share/licenses")
+    if contains_any "${file}" "${exclude_tokens[@]}"; then
+        return 0
+    fi
+
+    # If the file extension is h, hpp, or similar, no need to run ldd
+    local ext="${file##*.}"
+    case "$ext" in
+        h|hpp|c|so|bz2|o|a|mo|gz|1.gz|LIB|pc)
+            # info "'$file' is a header file; skipping ldd check"
+            return 0
+            ;;
+    esac
+    local output ret
+    # Run ldd and capture output and exit code.
+    output=$(ldd "$file" 2>&1)
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        # If ldd failed because the file is not a dynamic executable, we're done.
+        if echo "$output" | grep -q "not a dynamic executable"; then
+            info "'$file' is not a dynamic executable: no ldd check needed"
+            return 0
+        else
+            warning "ldd unexpectedly failed for '$file': '${output}'"
+            return $ret
+        fi
+    fi
+
+    # Exclude list: if a line contains any of these strings, skip further tests.
+    local exclude_tokens=("libm" "libc" "libdl" "ld-linux" "linux-vdso" "liboneagentproc")
+    while IFS= read -r line || [ -n "$line" ]; do
+        # If the line contains a '?' character, warn about an unresolved path.
+        if [[ "$line" == *"?"* ]]; then
+            warning "Unresolved path in ldd output: '$line'"
+            ret=1
+            continue
+        fi
+
+        # If the line includes any of the exclude tokens, do nothing.
+        if contains_any "$line" "${exclude_tokens[@]}"; then
+            continue
+        fi
+
+        # Check for an absolute system path. We look for a slash prefixed word.
+        if [[ "${line}" =~ (^|[[:space:]])(/[^[:space:]]+) ]]; then
+            if [[ "${line}" =~ [[:space:]]*(/[^[:space:]]+) ]]; then
+                abs_path="${BASH_REMATCH[1]}"
+                if [[ -e "${root}${abs_path}" || -e "${root}/usr${abs_path}" ]]; then
+                    continue # Skip if the path exists
+                fi
+            fi
+            # if abs_path starts with ${tools}; then continue
+            if [[ "${abs_path}" == "${tools}"* ]]; then
+                continue  # Skip if abs_path starts with ${tools}
+            fi
+            warning "Absolute system path '${abs_path}' detected (tools='${tools}') in ldd output: '$line' for file '${file}'"
+            ret=1
+        fi
+    done <<< "${output}"
+    return $ret
 }
