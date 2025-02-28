@@ -179,6 +179,21 @@ function is_package_installed() {
     return 1
 }
 
+function base_package_name() {
+    local package_name
+    package_name="$(basename "${1}")"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided" 171
+    fi
+    local base_package_name
+    base_package_name="${package_name%.installed*}"
+    base_package_name="${base_package_name%.list}"
+    base_package_name="${base_package_name%.rpm}"
+    base_package_name="${base_package_name%.tar.gz}"
+    base_package_name="${base_package_name%.xz}"
+    echo "${base_package_name}"
+}
+
 function list_package() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
@@ -190,10 +205,7 @@ function list_package() {
         fatal "No package found for '${package_name}'" 112
     fi
     local base_package_name
-    base_package_name="${full_package_name}"
-    base_package_name="${base_package_name%.tar.gz}"
-    base_package_name="${base_package_name%.rpm}"
-    base_package_name="${base_package_name%.xz}"
+    base_package_name="$(base_package_name "${full_package_name}" )"
     local list_file
     list_file="${HOME}/tools/pkgs/${base_package_name}.list"
     if [[ ! -f "${list_file}" ]]; then
@@ -253,11 +265,7 @@ search_pattern_for_package() {
     fi
     local search_pattern
     if [[ "${package_name}" =~ -[0-9] ]]; then
-        search_pattern="${package_name%.installed*}"
-        search_pattern="${search_pattern%.list}"
-        search_pattern="${search_pattern%.rpm}"
-        search_pattern="${search_pattern%.tar.gz}"
-        search_pattern="${search_pattern%.xz}"
+        search_pattern="$(base_package_name "${package_name}")"
         search_pattern="${search_pattern}*"
     else
         search_pattern="${package_name}-[0-9]*"
