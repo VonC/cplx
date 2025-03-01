@@ -232,9 +232,9 @@ function get_full_package_name() {
     tool=$(current_tool)
     if [[ -n ${tool} ]]; then
         full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/${tool}/pkgs")"
-    fi
-    if [[ -z ${full_package_name} ]]; then
-        full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/${tool}/pkgs/removed")"
+        if [[ -z ${full_package_name} ]]; then
+            full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/${tool}/pkgs/removed")"
+        fi
     fi
     if [[ -z ${full_package_name} ]]; then
         full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/pkgs")"
@@ -267,8 +267,9 @@ search_pattern_for_package() {
     if [[ "${package_name}" =~ -[0-9] ]]; then
         search_pattern="$(base_package_name "${package_name}")"
         search_pattern="${search_pattern}*"
+        search_pattern="${search_pattern/-????????.????./-*.*.}"
     else
-        search_pattern="${package_name}-[0-9]*"
+        search_pattern="${package_name}*-[0-9]*"
     fi
     echo "${search_pattern}"
 }
