@@ -432,7 +432,7 @@ function install_package_from_name() {
         fi
     fi
     _do_mirror=0
-    if [[ "${pkg_base}" =~ ^_ ]]; then
+    if [[ "${pkg_base}" =~ -[0-9]{8}.[0-9]{4}. ]]; then
         warning "Built package '${full_package_name}', skip mirroring"
         _do_mirror=1;
     fi
@@ -557,7 +557,7 @@ mirror_tool_package() {
     fi
 
     local pkg_base
-    pkg_base=$(pkg_base "${package_name}")
+    pkg_base=$(pkg_base "${pkg_name}")
 
     info "Listing contents of pkg_name '${pkg_name}':"
     if [[ "${pkg_name%.rpm}" != "${pkg_name}" ]]; then
