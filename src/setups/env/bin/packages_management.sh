@@ -290,12 +290,16 @@ search_full_package_name_in_folder() {
     local search_pattern
     search_pattern=$(search_pattern_for_package "${package_name}")
     local full_package_name
-    full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${search_pattern}.installed*" | head -n 1)
-    if [[ -z "${full_package_name}" ]]; then
-        full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${search_pattern}.list" | head -n 1)
-    fi
-    # If package_name starts with an underscore, it's a built package.
-    if [[ -n "${full_package_name}" && "${package_name}" =~ ^_ ]]; then
+    local ext
+    for ext in ".installed*" ".list" ".rpm" ".tar.gz" ".xz"; do
+        full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${search_pattern}${ext}" | head -n 1)
+        if [[ -n "${full_package_name}" ]]; then
+            break
+        fi
+    done
+    # If package_name includes a timestamp, it's a built package.
+    # Example: openssl111-1.1.1w-20250301.0216.el7.x86_64.tar.gz
+    if [[ -n "${full_package_name}" && "${full_package_name}" =~ -[0-9]{8}.[0-9]{4}. ]]; then
         # Replace literal "0.el8.x86_64" with a glob pattern.
         local build_pattern
         build_pattern="$(search_pattern_for_package "${full_package_name}")"
