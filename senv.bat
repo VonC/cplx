@@ -9,6 +9,8 @@ doskey s="%project_dir%/src/setups/setup.bat" $*
 doskey sp="%project_dir%/src/setups/setup.bat" packages $*
 doskey scpe="%project_dir%/src/setups/setup.bat" "copy.*env" $*
 
+doskey st="%project_dir%/tools/switchtool.bat" $*
+
 if "%~1"=="unset" (
   call:unset_senv
   goto:eof
