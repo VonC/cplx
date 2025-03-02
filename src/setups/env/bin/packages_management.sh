@@ -33,23 +33,95 @@ get_package_name() {
     done
 }
 
+function has_package_extension() {
+    local package_name="$1"
+    if [[ -z "${package_name}" ]]; then
+        fatal "has_package_extension: No package_name provided" 90
+    fi
+    package_name=$(basename "${package_name}")
+    if [[ "${package_name}" =~ \.rpm$ || "${package_name}" =~ \.tar\.gz$ || "${package_name}" =~ \.xz$ ]]; then
+        return 0
+    fi
+    return 1
+}
+
+function make_package_list() {
+    local package_name="$1"
+    if [[ -z "${package_name}" ]]; then
+        fatal "make_package_list: No package_name provided" 91
+    fi
+    local verbose="$2"
+    package_name=$(basename "${package_name}")
+    local full_package_name
+    full_package_name="$(get_full_package_name "${package_name}")"
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "make_package_list: No full package name found for '${package_name}'" 94
+    fi
+    if ! has_package_extension "${full_package_name}"; then
+        fatal "make_package_list: full_package_name '${full_package_name}' must have a known extension (.rpm, .tar.gz, .xz)" 93
+    fi
+    local tools_pkgs
+    tools_pkgs="${HOME}/tools/pkgs"
+    if [[ ! -e "${tools_pkgs}/${full_package_name}" ]]; then
+        fatal "make_package_list: No package found for full_package_name '${full_package_name}' in '${tools_pkgs}'" 92
+    fi
+    local list_file
+    local base_package_name
+    base_package_name="$(base_package_name "${full_package_name}" )"
+    if [[ -z "${base_package_name}" ]]; then
+        fatal "make_package_list: No base package name found for '${full_package_name}'" 95
+    fi
+    list_file="${tools_pkgs}/${base_package_name}.list"
+    if [[ -f "${list_file}" ]]; then
+        if [[ -n "${verbose}" ]]; then
+            ok "make_package_list: List file '${list_file}' already exists"
+        fi
+        return 0
+    fi
+    if [[ "${full_package_name}" =~ \.rpm$ ]]; then
+        rpm2cpio "${tools_pkgs}/${full_package_name}" | cpio -itv > "${list_file}" 2>/dev/null \
+            || fatal "make_package_list: Failed to list rpm archive '${full_package_name}'" 94
+    elif [[ "${full_package_name}" =~ \.tar\.gz$ ]]; then
+        tar tzvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
+            || fatal "make_package_list: Failed to list tar.gz archive '${full_package_name}'" 95
+    elif [[ "${full_package_name}" =~ \.xz$ ]]; then
+        tar --xz -tzvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
+            || fatal "make_package_list: Failed to list xz archive '${full_package_name}'" 96
+    fi
+    if [[ -n "${verbose}" ]]; then
+        ok "make_package_list: List file '${list_file}' created"
+    fi
+}
+
 function lookup_file_in_package_archive() {
     local search_pattern="$1"
-    local package_name="$2"
-    local list_file
-
-    # Determine list_file based on known archive extensions
-    if [[ "$package_name" =~ \.rpm$ ]]; then
-        list_file="${package_name%.rpm}.list"
-    elif [[ "$package_name" =~ \.tar\.gz$ ]]; then
-        list_file="${package_name%.tar.gz}.list"
-    elif [[ "$package_name" =~ \.xz$ ]]; then
-        list_file="${package_name%.xz}.list"
-    else
-        fatal "Unsupported package extension for '${package_name}'" 99
+    if [[ -z "${search_pattern}" ]]; then
+        fatal "lookup_file_in_package_archive: No search pattern provided" 51
     fi
+    local package_name="$2"
+    if [[ -z "${package_name}" ]]; then
+        fatal "lookup_file_in_package_archive: No package name provided" 53
+    fi
+    package_name=$(basename "${package_name}")
+    local full_package_name
+    full_package_name="$(get_full_package_name "${package_name}")"
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "lookup_file_in_package_archive: No full package name found for '${package_name}'" 54
+    fi
+    local base_package_name
+    base_package_name="$(base_package_name "${full_package_name}" )"
+    if [[ -z "${base_package_name}" ]]; then
+        fatal "make_package_list: No base package name found for '${full_package_name}'" 95
+    fi
+    local tools_pkgs
+    tools_pkgs="${HOME}/tools/pkgs"
+    full_list_file="${tools_pkgs}/${base_package_name}.list"
 
-    local full_list_file="${list_file}"
+    if [[ ! -e "${full_list_file}" ]]; then
+        if ! make_package_list "${full_package_name}"; then
+            fatal "lookup_file_in_package_archive: Failed to create list file '${full_list_file}'" 55
+        fi
+    fi
 
     # Build the list file if it does not exist
     if [[ ! -f "${full_list_file}" || $(stat -c%s "${full_list_file}") -lt 500 ]]; then
@@ -197,17 +269,23 @@ function base_package_name() {
 function list_package() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
-        fatal "No package name provided" 111
+        fatal "list_package: No package name provided" 111
     fi
     local full_package_name
     full_package_name="$(get_full_package_name "${package_name}")"
     if [[ -z "${full_package_name}" ]]; then
-        fatal "No package found for '${package_name}'" 112
+        fatal "list_package: No package found for '${package_name}'" 112
     fi
     local base_package_name
     base_package_name="$(base_package_name "${full_package_name}" )"
     local list_file
     list_file="${HOME}/tools/pkgs/${base_package_name}.list"
+    
+    if [[ ! -f "${full_list_file}" ]]; then
+        if ! make_package_list "${full_package_name}"; then
+            fatal "list_package: Failed to create list file '${full_list_file}'" 115
+        fi
+    fi
     if [[ ! -f "${list_file}" ]]; then
         fatal "No list file found for package '${full_package_name}'" 113
     fi
