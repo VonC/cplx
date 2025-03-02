@@ -352,6 +352,15 @@ search_pattern_for_package() {
     echo "${search_pattern}"
 }
 
+function is_package_built() {
+    local package_name
+    package_name="$(basename "${1}")"
+    if [[ -n "${package_name}" && "${package_name}" =~ -[0-9]{8}.[0-9]{4}. ]]; then
+        return 0
+    fi
+    return 1
+}
+
 search_full_package_name_in_folder() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
@@ -377,7 +386,7 @@ search_full_package_name_in_folder() {
     done
     # If package_name includes a timestamp, it's a built package.
     # Example: openssl111-1.1.1w-20250301.0216.el7.x86_64.tar.gz
-    if [[ -n "${full_package_name}" && "${full_package_name}" =~ -[0-9]{8}.[0-9]{4}. ]]; then
+    if [[ -n "${full_package_name}" ]] && is_package_built "${full_package_name}"; then
         # Replace literal "0.el8.x86_64" with a glob pattern.
         local build_pattern
         build_pattern="$(search_pattern_for_package "${full_package_name}")"
@@ -510,7 +519,7 @@ function install_package_from_name() {
         fi
     fi
     _do_mirror=0
-    if [[ "${pkg_base}" =~ -[0-9]{8}.[0-9]{4}. ]]; then
+    if is_package_built "${pkg_base}"; then
         warning "Built package '${full_package_name}', skip mirroring"
         _do_mirror=1;
     fi
