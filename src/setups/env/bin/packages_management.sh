@@ -325,13 +325,15 @@ function get_full_package_name() {
     base=$(search_pattern_for_package "$full_package_name")
     local candidates
     candidates=$(find "${HOME}/tools/pkgs" -maxdepth 1 -type f -name "${base}" | grep -v "\.list")
+    local candidate
+    candidate="$(printf "%s" "${candidates}"|tail -1)"
     local count
     count=$(echo "${candidates}" | grep -c '^')
-    if [ "$count" -gt 1 ]; then
+    if ! is_package_built "${full_package_name}" && [ "${count}" -gt 1 ]; then
         echo "${candidates}"
         fatal "Expected one candidate file for '${base}', found ${count}" 104
     fi
-    full_package_name=$(basename "${candidates}")
+    full_package_name=$(basename "${candidate}")
     echo "${full_package_name}"
 }
 
