@@ -306,16 +306,16 @@ function get_full_package_name() {
         fatal "No package name provided" 101
     fi
     local full_package_name
+    if [[ -z ${full_package_name} ]]; then
+        full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/pkgs")"
+    fi
     local tool
     tool=$(current_tool)
-    if [[ -n ${tool} ]]; then
+    if [[ -z ${full_package_name} && -n ${tool} ]]; then
         full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/${tool}/pkgs")"
         if [[ -z ${full_package_name} ]]; then
             full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/${tool}/pkgs/removed")"
         fi
-    fi
-    if [[ -z ${full_package_name} ]]; then
-        full_package_name="$(search_full_package_name_in_folder "${package_name}" "${HOME}/tools/pkgs")"
     fi
     if [[ -z ${full_package_name} ]]; then
         echo ""
@@ -512,7 +512,7 @@ function install_package_from_name() {
     local m_log
     m_log="${tool}/logs/mirror_package.log"
     rm -f "${m_log}"
-    if ! is_package_flagged_as "${pkg_base}" "installed"; then
+    if ! is_package_flagged_as "${pkg_base}" "installed" "true"; then
         ( install_tool_package "${pkg_base}" ) 2>&1 | tee -a "${i_log}"
         if is_package_flagged_as "${pkg_base}" "installed" && [[ -e "${i_log}" ]]; then
             cat "${i_log}" > "${tool_pkgs}/${pkg_base}.installed"
@@ -525,7 +525,7 @@ function install_package_from_name() {
         warning "Built package '${full_package_name}', skip mirroring"
         _do_mirror=1;
     fi
-    if do_mirror && ! is_package_flagged_as "${pkg_base}" "mirrored"; then
+    if do_mirror && ! is_package_flagged_as "${pkg_base}" "mirrored" "true"; then
         ( mirror_tool_package "${full_package_name}" ) 2>&1 | tee -a "${m_log}"
         if is_package_flagged_as "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
             echo "-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
@@ -587,7 +587,8 @@ function install_tool_package() {
 }
 
 function is_package_flagged_as() {
-    
+    local verbose=""
+    if [[ -n "${3}" ]]; then verbose="true"; fi
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
@@ -614,11 +615,15 @@ function is_package_flagged_as() {
     local flags=( ${pattern} )
     shopt -u nullglob
     if (( ${#flags[@]} > 0 )); then
-        info "A file matching '${pattern}' already exists in '${tool_pkgs}'"
-        ok "'${pkg_base}' already '${flag_suffix}' in '${tool_pkgs}'"
+        if [[ -n "${verbose}" ]]; then
+            info "A file matching '${pattern}' already exists in '${tool_pkgs}'"
+            ok "'${pkg_base}' already '${flag_suffix}' in '${tool_pkgs}'"
+        fi
         return 0
     fi
-    error "No file matching '${pattern}' found in '${tool_pkgs}'"
+    if [[ -n "${verbose}" ]]; then
+        warning "No file matching '${pattern}' found in '${tool_pkgs}'"
+    fi
     return 1
 }
 
