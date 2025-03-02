@@ -203,7 +203,7 @@ function package() {
     if [[ -z "${CPLX_ARCH_EXT}" ]]; then
         fatal "No CPLX_ARCH_EXT defined (like 'el8.x86_64'), unable to package '${tool_name}'" 28
     fi
-    package_name="${package_name_prefix}-$(date +'%Y%m%d_%H%M').${CPLX_ARCH_EXT}.tar.gz"
+    package_name="${package_name_prefix}-$(date +'%Y%m%d.%H%M').${CPLX_ARCH_EXT}.tar.gz"
 
     if [[ -z "${CPLX_CHECK_PREFIX}" ]]; then
         fatal "No CPLX_CHECK_PREFIX defined (element in installation directory), unable to install '${tool_name}'" 18
