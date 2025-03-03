@@ -611,6 +611,12 @@ function install_package_from_name() {
             fatal "Unable to mirror '${full_package_name}'" 29
         fi
     fi
+    if [[ ! -e "${HOME}/tools/pkgs/${pkg_base}.list" ]]; then
+        task "Must create list file for package '${pkg_base}'"
+        make_package_list "${full_package_name}" "true"
+    else
+        ok "Package '${pkg_base}' already has a list file"
+    fi
     post_install_tool "${package_name}"
     return $?
 }
