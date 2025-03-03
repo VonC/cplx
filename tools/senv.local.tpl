@@ -51,8 +51,8 @@ if "%CPLX_TOOL%" == "openssl111" (
   rem https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz
   set "CPLX_URL=https://github.com/openssl/openssl/releases/download/OpenSSL_[version_]/openssl-[version].tar.gz
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_CHECK_PREFIX="
-  set "CPLX_CHECK_SRC="
+  set "CPLX_CHECK_PREFIX=dummy"
+  set "CPLX_CHECK_SRC=dummy"
   set "CPLX_BIN="
 )
 goto:eof
