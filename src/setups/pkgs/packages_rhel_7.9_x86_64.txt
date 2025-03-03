@@ -4607,5 +4607,3 @@ zsh-html-5.0.2-34.el7_8.2.x86_64.rpm
 zziplib-0.13.62-12.el7.x86_64.rpm
 zziplib-devel-0.13.62-12.el7.x86_64.rpm
 zziplib-utils-0.13.62-12.el7.x86_64.rpm
-_mpdecimal-2.5.1-0.el8.x86_64.tar.gz
-_openssl111-1.1.1w-0.el8.x86_64.tar.gz
