@@ -20,3 +20,4 @@ senv.local.bat
 *.bak
 setup.properties
 last
+*._to_delete
