@@ -81,8 +81,6 @@ xmlsec1-nss
 xmlsec1-nss-devel
 xmlsec1-openssl
 xmlsec1-openssl-devel
-uuid
-uuid-devel
 zlib
 zlib-devel
 readline
