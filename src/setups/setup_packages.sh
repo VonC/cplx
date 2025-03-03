@@ -290,16 +290,22 @@ scp_package() {
 
 install_package() {
     local pkg_name="$1"
-    local remote_tools="${cplx_path}/tools/"
-    task "Must copy install_package script to ${SSH_CONFIG_ENTRY}:${remote_tools}"
-    if ! scp "${SETUP_PKGS_DIR}/install_package" "${SSH_CONFIG_ENTRY}:${remote_tools}"; then
-        fatal "Failed to copy package 'install_package' to ${SSH_CONFIG_ENTRY}:${remote_tools}" 902
-    else
-        ok "Package 'install_package' copied successfully to ${SSH_CONFIG_ENTRY}:${remote_tools}"
+    # shellcheck disable=SC2001
+    pkg_name="$(echo "$pkg_name" | sed 's,^_*,,')"
+    if ! get_property cplx_path; then
+        fatal "cplx_path not found in file '${properties_file}'" 101
     fi
+    local remote_bin="${cplx_path}/bin/"
+    task "Must copy 'packages_management.sh' script to ${SSH_CONFIG_ENTRY}:${remote_bin}"
+    if ! scp "${SETUP_PKGS_DIR}/env/bin/packages_management.sh" "${SSH_CONFIG_ENTRY}:${remote_bin}"; then
+        fatal "Failed to copy 'packages_management.sh' to ${SSH_CONFIG_ENTRY}:${remote_bin}" 902
+    else
+        ok "Script 'packages_management.sh' copied successfully to ${SSH_CONFIG_ENTRY}:${remote_bin}"
+    fi
+    set -x
     # shellcheck disable=SC2029
-    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools && chmod 755 ./install_package && bash ./install_package \"${pkg_name}\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}\temp.pkgs.txt"
-
+    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools/${CPLX_TOOL} && chmod 755 ${cplx_path}/bin/packages_management.sh && bash -c \"source ${cplx_path}/.env; pkg_log=1; install_package_from_name \"${pkg_name}\"\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}\temp.pkgs.txt"
+    set +x
     # Get the last line from temp.txt as exit status
     lastLine=$(tail -n 1 "${SETUP_PKGS_DIR}/temp.pkgs.txt")
     info "vvvvvvvvvvvvvvvvvvvvvvvvvvv"
