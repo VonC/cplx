@@ -173,17 +173,51 @@ sync_packages() {
 
 sync_package() {
     local arch="$1"
-    local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
+    if [[ -z "${arch}" ]]; then
+        fatal "sync_package: arch must be provided (rhel_7.9_x86_64, centos_8_x86_64, ...)" 224
+    fi
     local pkg_name="$2"
+    if [[ -z "${pkg_name}" ]]; then
+        fatal "sync_package: pkg_name must be provided" 225
+    fi
+
+    local found_pkg=""
+    if [[ "${pkg_name}" =~ ^[[:space:]]*_ ]]; then
+        warning "No need to search built package '${pkg_name}' in a pkg archive list"
+        found_pkg="${pkg_name}"
+    else
+        find_package_in_arch "${arch}" "${pkg_name}" "found_pkg"
+    fi
+    if [[ -z "${found_pkg}" ]]; then
+        fatal "sync_package: found_pkg not found for pkg_name '${pkg_name}'" 227
+    fi
+
+    if [[ "${found_pkg}" != _* ]]; then
+        download_package "${arch}" "${found_pkg}"
+        scp_package "${arch}" "${found_pkg}"
+    else
+        ok "Package '${found_pkg}' is a remote built package: no download or scp needed"
+    fi
+    install_package "${found_pkg}"
+}
+
+find_package_in_arch() {
+    local arch="$1"
+    local pkg_name="$2"
+    local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
+    local pkg_res_var_name="$3"
 
     if [[ ! -e "${packages_file}" ]]; then
         fatal "File '${packages_file}' not found" 1
     fi
 
+    # Escape any unescaped plus signs
+    local escaped_pkg_name
     escaped_pkg_name=$(echo "$pkg_name" | sed -E 's/(^|[^\\])\+/\1\\+/g')
-    # Grep for lines starting with pkg_name followed by a dash and a digit
+
     task "Must find package: '${escaped_pkg_name}' in file '${packages_file}'"
-    local matches count found_pkg
+    local matches count found_pkg_in_arch
+    # Grep for lines starting with pkg_name followed by a dash and a digit
     matches=$(grep -E "^${escaped_pkg_name}-[0-9]" "${packages_file}")
     count=$(echo "$matches" | awk 'NF {count++} END {print count+0}')
 
@@ -193,16 +227,10 @@ sync_package() {
         fatal "Multiple packages matching '${escaped_pkg_name}' found in ${packages_file}" 302
     fi
 
-    found_pkg=$(echo "$matches" | head -n1)
-    ok "Found package: '${found_pkg}'"
+    found_pkg_in_arch=$(echo "$matches" | head -n1)
+    ok "Found package: '${found_pkg_in_arch}'"
 
-    if [[ "${found_pkg}" != _* ]]; then
-        download_package "${arch}" "${found_pkg}"
-        scp_package "${arch}" "${found_pkg}"
-    else
-        ok "Package '${found_pkg}' is a remote built package: no download or scp needed"
-    fi
-    install_package "${found_pkg}"
+    eval "${pkg_res_var_name}=\"${found_pkg_in_arch}\""
 }
 
 download_package() {
