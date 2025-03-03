@@ -55,6 +55,16 @@ if "%CPLX_TOOL%" == "openssl111" (
   set "CPLX_CHECK_SRC=dummy"
   set "CPLX_BIN="
 )
+
+if "%CPLX_TOOL%" == "git" (
+  set "CPLX_VERSION=2.48.1"
+  rem https://github.com/git/git/archive/refs/tags/v2.48.1.zip
+  set "CPLX_URL=https://github.com/git/git/archive/refs/tags/v[version].zip"
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN=true"
+)
+
 goto:eof
 
 
