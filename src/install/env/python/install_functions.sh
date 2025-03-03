@@ -12,6 +12,8 @@ function configure() {
         "--with-openssl=${root}/usr" \
         "--with-openssl-rpath=${root}/usr/lib64" \
         "--enable-shared=yes" \
+        # implicit declaration of function 'uuid_generate_time_safe'
+        "--disable-uuid"
         "--with-system-libmpdec=yes" )
 
     sed -i "s,ssldir/lib\",ssldir/lib64\",g" configure || fatal "Unable to update 'configure' ssldir/lib to ssldir/lib64 in '$(pwd)'" 16
