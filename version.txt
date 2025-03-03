@@ -1,4 +1,5 @@
-0.12.0-SNAPSHOT -- Compile OpenSSL 1.1.1w needed for Python on RHEL 7.9
+0.12.0 -- Compile OpenSSL 1.1.1w needed for Python on RHEL 7.9
 
 Add openssl111 as a tool to compile
 Upgrade python wrapper scripts to better handle venv (which copies its own set of python executables)
+Add many functions to `packages_management.sh`, including the `install_package_from_name()` function, which means the `install_package` script is now obsolete, and removed.
