@@ -482,7 +482,54 @@ function remove_package() {
 _do_mirror=0
 function do_mirror() { return ${_do_mirror}; }
 
+function displayLog() {
+    res=$?
+    if [[ ${res} != 0 ]]; then tail -15 "${HOME}/tools/pkgs.log" >&3; fi
+    /usr/bin/date >&3
+}
+
+function set_pkgs_log() {
+    local DIR_tools
+    DIR_tools="${HOME}/tools"
+    local NOW
+    NOW="$(/usr/bin/date +%Y%m%d-%H%M%S)"
+    local LOGIN
+    LOGIN="$(/usr/bin/id -un)"
+    local log_action_name="${1}"
+    if [[ -z "${log_action_name}" ]]; then
+        fatal "set_pkgs_log: No log action name provided" 101
+    fi
+
+    logs="${DIR_tools}/logs"
+    mkdir -p "${logs}"
+
+    PATH_LOG="${logs}/${LOGIN}-${log_action_name}-${NOW}.pkgs.log"
+    REL_PATH_LOG="logs/${LOGIN}-${log_action_name}-${NOW}.pkgs.log"
+    rm -f "${DIR_tools}/pkgs.log"
+    ln -nfs "${REL_PATH_LOG}" "${DIR_tools}/pkgs.log"
+
+    info "Script Execution DIR '${DIR_tools}'"
+    ok "Logging execution in '$PATH_LOG' (ln -nfs '${DIR_tools}/pkgs.log')"
+
+    trap displayLog EXIT
+
+    # shellcheck source=/dev/null
+    source "${HOME}/echos/echoslog"
+    # duplicates the current stderr (file descriptor 2) to file descriptor 3, saving the original stderr so it is used in the displayLog function).
+    exec 3>&2
+    # redirects standard output (stdout, file descriptor 1) to the file specified by PATH_LOG. After this, anything written to stdout goes into that log file.
+    exec 1> "$PATH_LOG"
+    # makes stderr (file descriptor 2) point to where stdout (file descriptor 1) currently goes—in this case, the log file.
+    exec 2>&1
+
+    set -o xtrace
+
+}
+
 function install_package_from_name() {
+    if [[ -n ${pkg_log} ]]; then
+        set_pkgs_log "install_package2"
+    fi
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
@@ -549,7 +596,6 @@ post_install_tool() {
 }
 
 function install_tool_package() {
-
     # shellcheck disable=SC2154
     cd "${root}" || fatal "install_tool_package: Unable to access root '${root}'" 199
 
