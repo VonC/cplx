@@ -31,6 +31,7 @@ set "CPLX_URL="
 rem set "CPLX_TOOL=python"
 if "%CPLX_TOOL%" == "python" (
   set "CPLX_VERSION=v3.13.1"
+  set "CPLX_URL=https://www.python.org/ftp/python/[version]/Python-[version].tgz"
   set "CPLX_CHECK_PREFIX=lib/libpython3.so"
   set "CPLX_CHECK_SRC=libpython3.so"
   set "CPLX_BIN=true"
