@@ -549,6 +549,10 @@ post_install_tool() {
 }
 
 function install_tool_package() {
+
+    # shellcheck disable=SC2154
+    cd "${root}" || fatal "install_tool_package: Unable to access root '${root}'" 199
+
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
@@ -628,6 +632,9 @@ function is_package_flagged_as() {
 }
 
 mirror_tool_package() {
+
+    # shellcheck disable=SC2154
+    cd "${root}" || fatal "mirror_tool_package: Unable to access root '${root}'" 209
 
     local tool
     tool="$(current_tool)"
