@@ -212,13 +212,14 @@ download_package() {
     local package_file_name="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
     local package_file_size
     package_file_size=$(stats -c%s "${package_file_name}" 2>/dev/null || echo 0)
-    local package_file_size_limit=$((9 * 1024))  # 9KB
+    local min_pkg_size=9
+    local package_file_size_limit=$((min_pkg_size * 1024))  # 9KB
 
     if [[ -e  "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" ]]; then
         if [[ "${package_file_size}" -lt "${package_file_size_limit}" ]]; then
             mv "${package_file_name}" "${package_file_name}._to_delete"
             echo "File renamed to ${package_file_name}._to_delete because its size is ${package_file_size_limit} bytes."
-            fatal "Package '${pkg_name}' is only ${package_file_size} bytes (<25KB), something went wrong" 2
+            fatal "Package '${pkg_name}' is only ${package_file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
         fi
         ok "Package '${pkg_name}' already downloaded in '${SETUP_PKGS_DIR}/pkgs/${arch}'"
         return 0
@@ -253,8 +254,8 @@ download_package() {
         fatal "Failed to download package '${pkg_name}' from '${url}'" 1
     else
         file_size=$(stat -c%s "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}")
-        if [ "$file_size" -lt 9216 ]; then
-            fatal "Downloaded package '${pkg_name}' is only ${file_size} bytes (<9KB), something went wrong" 2
+        if [ "$file_size" -lt "${package_file_size_limit}" ]; then
+            fatal "Downloaded package '${pkg_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
         fi
         ok "Package '${pkg_name}' downloaded successfully to '${SETUP_PKGS_DIR}/pkgs/${arch}'"
     fi
