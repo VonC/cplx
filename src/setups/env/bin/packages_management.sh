@@ -704,7 +704,7 @@ mirror_tool_package() {
     fi
 
     local pkg_base
-    pkg_base=$(pkg_base "${pkg_name}")
+    pkg_base=$(base_package_name "${pkg_name}")
 
     info "Listing contents of pkg_name '${pkg_name}':"
     if [[ "${pkg_name%.rpm}" != "${pkg_name}" ]]; then
