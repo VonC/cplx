@@ -239,7 +239,7 @@ download_package() {
 
     local package_file_name="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
     local package_file_size
-    package_file_size=$(stats -c%s "${package_file_name}" 2>/dev/null || echo 0)
+    package_file_size=$(stat -c%s "${package_file_name}" 2>/dev/null || echo 0)
     local min_pkg_size=9
     local package_file_size_limit=$((min_pkg_size * 1024))  # 9KB
 
