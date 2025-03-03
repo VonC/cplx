@@ -219,14 +219,23 @@ function is_package_installed() {
     if [[ -z "${package_name}" ]]; then
         fatal "No package name provided" 101
     fi
+    if [[ -z "${verbose}" ]]; then
+        if [[ -n "${3}" || "${2}" == "true" || "${2}" == "verbose" ]]; then verbose="true"; fi
+    fi
     local full_package_name
     full_package_name=$(get_full_package_name "${package_name}")
     if [[ -z "${full_package_name}" ]]; then
+        if [[ -n "${verbose}" ]]; then
+            error "No package found for name '${package_name}'"
+        fi
         return 1
     fi
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
+        if [[ -n "${verbose}" ]]; then
+            error "No tool found for package '${package_name}'"
+        fi
         return 1
     fi
     local missing
@@ -239,14 +248,35 @@ function is_package_installed() {
         elif [[ -f "${full_file}" ]]; then
             present_file=1
         fi
+        if [[ "${verbose}" == "vv" ]]; then
+            if [[ -L "${full_file}" ]]; then
+                info "Symlink exists   : '${full_file}'"
+            elif [[ -f "${full_file}" ]]; then
+                info "File exists      : '${full_file}'"
+                present_file=1
+            elif [[ -d "${full_file}" ]]; then
+                info "Directory exists : '${full_file}'"
+            else
+                warning "full_file missing: '${full_file}'"
+            fi
+        fi
     done <<< "$files"
 
     if [[ ${missing} -ne 1 ]]; then
+        if [[ -n "${verbose}" ]]; then
+            ok "'${package_name}' is installed. No missing file. verbose=vv for the list"
+        fi
         return 0
     fi
 
     if [[ ${present_file} -eq 1 ]]; then
+        if [[ -n "${verbose}" ]]; then
+            error "'${package_name}' is NOT fully installed. Some file or folder are missing. Status 2. verbose=vv for the list"
+        fi
         return 2
+    fi
+    if [[ -n "${verbose}" ]]; then
+        error "'${package_name}' is NOT installed at all. All files are missing. verbose=vv for the list"
     fi
     return 1
 }
