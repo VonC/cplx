@@ -4,6 +4,84 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.12.0] - 2025-03-04 - Compile OpenSSL 1.1.1w needed for Python on RHEL 7.9
+
+Add openssl111 as a tool to compile
+Upgrade python wrapper scripts to better handle venv (which copies its own set of python executables)
+Add many functions to `packages_management.sh`, including the `install_package_from_name()` function, which means the `install_package` script is now obsolete, and removed.
+
+### 🚀 Features
+
+- *(setup)* Update OpenSSL tool name in props
+- *(setup)* Add OpenSSL 1.1.1w support in props tpl
+- *(setup)* Improve remote package handling
+- *(setup)* Add package removal function
+- Add aliases for package management
+- *(setup)* Python wrapper script with symlinks
+- *(setup)* Improve venv handling in python launcher
+- *(tools)* Introduce command to get current tool name
+- *(bin)* Add `get_full_package_name` command
+- *(bin)* Add `lp` alias and `list_package` func
+- Implement find_file_in_packages function
+- *(bin)* Add `is_package_installed` function
+- *(bin)* Add alias to install package from name
+- *(bin)* Implement pkg mirroring and instal logging
+- *(tools)* Add switchtool
+- *(bin)* Add package list creation and check extension
+- *(bin)* Implement logging for pkg mgt script
+- *(packages)* Improve package installation check
+
+### 🐛 Bug Fixes
+
+- *(setup)* Improve CPLX URL handling in setup.sh
+- *(build)* Correct OpenSSL linking order and libraries
+- *(setup)* Add missing deps for Python on RHEL 7.9
+- *(setup)* Ensure python3 exists before using
+- *(python)* Remove obsolete openssl packages
+- *(setup)* Error management in get_package_name
+- *(setup)* Handle incomplete package downloads
+- *(packages)* Fix partial installation detection
+- *(bin)* Correctly handle file removal
+- *(bin)* Handle multiple package candidate files
+- *(env)* Use debug variable in aliases
+- *(packages)* Handle built packages correctly
+- *(openssl)* Use /usr prefix and lib64 for openssl 1.1.1
+- *(bin)* Package naming now includes timestamp
+- *(bin)* Improve built package detection
+- *(bin)* Mirroring failed for built packages
+- *(install)* Fix package name format
+- *(bin)* Handle multiple /built/ package candidates
+- *(bin)* Handle package lookup and flag checking
+- *(bin)* Package management install means root folder
+- *(setup)* Setup_packages handle small corrupted pkg
+- *(setup)* Improve package installation process
+- *(setup)* Openssl variables
+- *(setup)* Handle remote built packages correctly
+- *(setup)* `base_package_name` to extract base name
+- *(setup)* Setup_packages.sh fix package size check
+- *(pkgs)* Correct packages for Python RHEL 7.9
+- *(python)* Disable UUID generation in Python build
+- *(env)* Handle multiple arguments in aliases
+- *(env)* Pass verbose var to `is_package_installed`
+- *(python)* Remove uuid dependency on RHEL 7.9
+- *(instal)* Python build fix uuid
+- *(setup)* Remove install_package script
+- *(bin)* Handle pre-installed package list
+
+### 🚜 Refactor
+
+- *(bin)* Improve package searching
+- *(bin)* Extract `base_package_name` function
+- *(bin)* Improve built package detection
+
+### ⚙️ Miscellaneous Tasks
+
+- *(md)* Markdown lint of doc.md
+- *(tools)* Fix submodule initialization check
+- *(bin)* Fix indentation in install_package
+- *(setup)* Update python installation script
+- *(git)* Update `.gitignore`
+
 ## [v0.11.0] - 2025-02-17 - Build Python with mpdecimal, add archive
 
 Check if mpdecimal help for the Python decimal module
