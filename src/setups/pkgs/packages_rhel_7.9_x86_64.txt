@@ -190,6 +190,7 @@ augeas-libs-1.4.0-10.el7.x86_64.rpm
 authconfig-6.2.8-30.el7.x86_64.rpm
 authconfig-gtk-6.2.8-30.el7.x86_64.rpm
 authd-1.4.3-42.el7.x86_64.rpm
+autoconf-2.69-11.el7.noarch.rpm
 autofs-5.0.7-113.el7.x86_64.rpm
 autogen-5.18-5.el7.x86_64.rpm
 autogen-libopts-5.18-5.el7.x86_64.rpm
