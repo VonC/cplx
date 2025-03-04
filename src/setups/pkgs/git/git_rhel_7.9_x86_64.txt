@@ -1,0 +1,13 @@
+bzip2-libs
+unzip
+make
+zlib
+zlib-devel
+gmp
+gcc
+autoconf
+cpp
+glibc
+glibc-devel
+glibc-headers
+kernel-headers
