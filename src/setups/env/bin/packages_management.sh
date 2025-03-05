@@ -310,7 +310,7 @@ function list_package() {
     base_package_name="$(base_package_name "${full_package_name}" )"
     local list_file
     list_file="${HOME}/tools/pkgs/${base_package_name}.list"
-    
+
     if [[ ! -f "${full_list_file}" ]]; then
         if ! make_package_list "${full_package_name}"; then
             fatal "list_package: Failed to create list file '${full_list_file}'" 115
@@ -795,28 +795,82 @@ mirror_system_executable() {
         dest_dir=$(dirname "${dest_file}")
         mkdir -p "${dest_dir}" || fatal "Unable to create directory '${dest_dir}'" 31
 
-        local cp_output
-        cp_output=$(cp "${src_file}" "${dest_file}" 2>&1)
-        rc=$?
-        if [ $rc -ne 0 ]; then
-            if echo "$cp_output" | grep -qi "Permission denied"; then
-                warning "Permission denied copying '${src_file}' to '${dest_file}', skipping marker creation"
-                return 0
-            else
-                fatal "Unable to copy '${src_file}' to '${dest_file}': ${cp_output}" 32
-            fi
-        fi
-        # Create a dummy file to indicate the file was copied
-        touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
-        info "Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
+        _copy_element "${src_file}" "${dest_file}" "mirror cp"
+        # Since it comes from the system, import also its ldd dependencies
+        if check_ldd "./${src_file#/}" "${dest_dir}"; then ret=1; fi
     else
         # info "No action: '${src_file}' either does not exist, is not a regular file, or is a symlink."
+        # Nothing to copy from system /usr,
+        # so check only dependencies of the installed library file
+        # if there are any absolute path, exit fatal
         if [[  -f "./${src_file#/}" && ! -L "./${src_file#/}" ]]; then
             if ! check_ldd "./${src_file#/}"; then ret=1; fi
         fi
     fi
 
     return ${ret}
+}
+
+_copy_element() {
+    local src_file="${1}"
+    local dest_file="${2}"
+    local msg="${3}"
+
+    # If source is a symlink, create a symlink at the destination
+    if [[ -L "${src_file}" ]]; then
+        local target
+        target=$(readlink "${src_file}")
+
+        # Create destination directory if needed
+        local dest_dir
+        dest_dir=$(dirname "${dest_file}")
+        mkdir -p "${dest_dir}" || fatal "Unable to create directory '${dest_dir}'" 31
+
+        # Create the symlink
+        ln -sf "${target}" "${dest_file}" || fatal "[${msg}] Unable to create symlink '${dest_file}'" 34
+        touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
+        ok "[${msg}] Created symlink '${dest_file}' -> '${target}' and created marker file '${dest_file}.copied'"
+
+        # If we want to handle the target recursively
+        local target_path
+
+        # Determine if target is absolute or relative
+        if [[ "${target}" == /* ]]; then
+            # Absolute path
+            target_path="${target}"
+        else
+            # Relative path - resolve relative to the source directory
+            target_path="$(dirname "${src_file}")/${target}"
+        fi
+
+        # Only proceed if target exists
+        if [[ -e "${target_path}" ]]; then
+            local target_dest
+            target_dest="${dest_dir}/$(basename "${target}")"
+
+            # Recursively call _copy_element for the symlink target
+            _copy_element "${target_path}" "${target_dest}" "${msg} (symlink target)"
+            return $?
+        fi
+
+        return 0
+    fi
+
+    # Original copy logic for regular files
+    local cp_output
+    cp_output=$(cp "${src_file}" "${dest_file}" 2>&1)
+    rc=$?
+    if [ $rc -ne 0 ]; then
+        if echo "$cp_output" | grep -qi "Permission denied"; then
+            warning "[${msg}] Permission denied copying '${src_file}' to '${dest_file}', skipping marker creation"
+            return 0
+        else
+            fatal "[${msg}] Unable to copy '${src_file}' to '${dest_file}': ${cp_output}" 32
+        fi
+    fi
+    # Create a dummy file to indicate the file was copied
+    touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
+    ok "[${msg}] Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
 }
 
 contains_any() {
@@ -830,8 +884,20 @@ contains_any() {
     return 1
 }
 
+_is_regular_file() {
+    local file="$1"
+
+    # Test if the file exists, is a regular file, and is not a symlink
+    if [[ -f "${file}" && ! -L "${file}" ]]; then
+        return 0  # True, it is a regular file and not a symlink
+    else
+        return 1  # False, it's either not a file or is a symlink
+    fi
+}
+
 check_ldd() {
     local file="$1"
+    local dest_dir="$2"
 
     # If the file name includes ' -> ', treat it as a symlink and skip ldd check.
     local exclude_tokens=(" -> " " => " "share/man" "share/doc" "share/licenses")
@@ -881,8 +947,34 @@ check_ldd() {
         if [[ "${line}" =~ (^|[[:space:]])(/[^[:space:]]+) ]]; then
             if [[ "${line}" =~ [[:space:]]*(/[^[:space:]]+) ]]; then
                 abs_path="${BASH_REMATCH[1]}"
-                if [[ -e "${root}${abs_path}" || -e "${root}/usr${abs_path}" ]]; then
-                    continue # Skip if the path exists
+                if _is_regular_file "${abs_path}"; then
+                    if _is_regular_file "${root}${abs_path}" || _is_regular_file "${root}/usr${abs_path}"; then
+                        continue # Skip since the dest_file exists
+                    elif [[ -L "${root}${abs_path}" || -L "${root}/usr${abs_path}" ]]; then
+                        if [[ -z "${dest_dir}" ]]; then
+                            fatal "Dependency file '${abs_path}' is mirrored by symlink in '${root}'" 121
+                        else
+                            error "Dependency file '${abs_path}' is mirrored by symlink in '${root}': will copy again, as file this time"
+                        fi
+                    else
+                        # nothing do do since dest file is missing: proceed to mirror
+                        # shellcheck disable=SC2269
+                        abs_path="${abs_path}"
+                    fi
+                elif [[ -L "${abs_path}" ]]; then
+                    if [[ -L "${root}${abs_path}" || -L "${root}/usr${abs_path}" ]]; then
+                        continue # Skip since the dest_symlink exists
+                    elif _is_regular_file "${root}${abs_path}" || _is_regular_file "${root}/usr${abs_path}"; then
+                        if [[ -z "${dest_dir}" ]]; then
+                            fatal "Dependency symlink '${abs_path}' is mirrored by file in '${root}'" 121
+                        else
+                            error "Dependency symlink '${abs_path}' is mirrored by file in '${root}': will copy again, as symlink this time"
+                        fi
+                    else
+                        # nothing do do since dest symlink is missing: proceed to mirror
+                        # shellcheck disable=SC2269
+                        abs_path="${abs_path}"
+                    fi
                 fi
             fi
             # if abs_path starts with ${tools}; then continue
@@ -890,7 +982,15 @@ check_ldd() {
                 continue  # Skip if abs_path starts with ${tools}
             fi
             warning "Absolute system path '${abs_path}' detected (tools='${tools}') in ldd output: '$line' for file '${file}'"
-            ret=1
+            if [[ -n "${dest_dir}" ]]; then
+                local dest1_file
+                dest1_file="${dest_dir}/$(basename "${abs_path}")"
+                task "Must import from '${abs_path}' to1 '${dest1_file}' this '${file}' dependency (${ret})"
+                _copy_element "${abs_path}" "${dest1_file}" "check_ldd cp"
+                ret=$?
+            else
+                ret=1
+            fi
         fi
     done <<< "${output}"
     return $ret
