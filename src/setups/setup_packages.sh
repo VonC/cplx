@@ -218,7 +218,7 @@ find_package_in_arch() {
     task "Must find package: '${escaped_pkg_name}' in file '${packages_file}'"
     local matches count found_pkg_in_arch
     # Grep for lines starting with pkg_name followed by a dash and a digit
-    matches=$(grep -E "^${escaped_pkg_name}-[0-9]" "${packages_file}")
+    matches=$(grep -E "^_?${escaped_pkg_name}-[0-9]" "${packages_file}")
     count=$(echo "$matches" | awk 'NF {count++} END {print count+0}')
 
     if [[ "$count" -eq 0 ]]; then
