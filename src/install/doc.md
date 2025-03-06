@@ -1414,3 +1414,53 @@ You said: The `--libdir=lib64` is important to install in the lib64, instead of 
 ### Configuration/autoconf
 
 Needed for the make configure.  
+
+### SSL
+
+https://gemini.google.com/app/2930f8c8cfb6e588
+
+```
+gcc -o conftest -DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=/home/gitea2/cplx/tools/tool/root -fPIC -O2 -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2 -I/home/gitea2/cplx/tools/tool/root/usr/include -I/home/gitea2/cplx/tools/tool/root/usr/include -L/home/gitea2/cplx/tools/tool/root/usr/lib -Wl,--sysroot=/home/gitea2/cplx/tools/tool/root -Wl,-rpath=/home/gitea2/cplx/tools/tool/root/usr/lib64:/home/gitea2/cplx/tools/tool/root/usr/lib:/home/gitea2/cplx/tools/tool/root/lib64:/home/gitea2/cplx/tools/tool/root/lib:/home/gitea2/cplx/tools/git/git-2.48.1/usr/lib64:/home/gitea2/cplx/tools/git/git-2.48.1/lib64:/home/gitea2/cplx/tools/git/git-2.48.1/usr/lib:/home/gitea2/cplx/tools/git/git-2.48.1/lib -Wl,--dynamic-linker=/home/gitea2/cplx/tools/tool/root/lib64/ld-linux-x86-64.so.2 -Wl,--export-dynamic -L/home/gitea2/cplx/tools/tool/root/usr/lib64 -L/home/gitea2/cplx/tools/tool/root/usr/lib -L/home/gitea2/cplx/tools/tool/root/lib64 -L/home/gitea2/cplx/tools/tool/root/lib -lssl -lcrypto -Wl,-verbose conftest.c -lcurl  -lgcc_s -ldl -lpthread -lc -lm -lc_nonshared
+```
+
+```c
+/* confdefs.h */
+#define PACKAGE_NAME "git"
+#define PACKAGE_TARNAME "git"
+#define PACKAGE_VERSION "2.48.1"
+#define PACKAGE_STRING "git 2.48.1"
+#define PACKAGE_BUGREPORT "git@vger.kernel.org"
+#define PACKAGE_URL ""
+#define STDC_HEADERS 1
+#define HAVE_SYS_TYPES_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_MEMORY_H 1
+#define HAVE_STRINGS_H 1
+#define HAVE_INTTYPES_H 1
+#define HAVE_STDINT_H 1
+#define HAVE_UNISTD_H 1
+#define HAVE_ALLOCA_H 1
+#define HAVE_ALLOCA 1
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char curl_global_init ();
+int
+main ()
+{
+return curl_global_init ();
+  ;
+  return 0;
+}
+```
+
+https://www.openldap.org/software/download/
+https://www.openldap.org/faq/data/cache/18.html
+
