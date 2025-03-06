@@ -797,13 +797,17 @@ mirror_system_executable() {
 
         _copy_element "${src_file}" "${dest_file}" "mirror cp"
         # Since it comes from the system, import also its ldd dependencies
-        if check_ldd "./${src_file#/}" "${dest_dir}"; then ret=1; fi
+        if ! check_ldd "./${src_file#/}" "${dest_dir}"; then
+            warning "mirror_system_executable ret=1 after ldd import of './${src_file#/}' to '${dest_dir}'"
+            ret=1;
+        fi
     else
         # info "No action: '${src_file}' either does not exist, is not a regular file, or is a symlink."
         # Nothing to copy from system /usr,
         # so check only dependencies of the installed library file
         # if there are any absolute path, exit fatal
         if [[  -f "./${src_file#/}" && ! -L "./${src_file#/}" ]]; then
+            warning "mirror_system_executable ret=1 after ldd check of './${src_file#/}'"
             if ! check_ldd "./${src_file#/}"; then ret=1; fi
         fi
     fi
@@ -871,6 +875,7 @@ _copy_element() {
     # Create a dummy file to indicate the file was copied
     touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
     ok "[${msg}] Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
+    return 0
 }
 
 contains_any() {
