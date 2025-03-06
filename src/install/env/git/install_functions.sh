@@ -31,13 +31,13 @@ function configure() {
 }
 
 function build() {
-    if [[ ! -e git-add && ! -e python ]]; then
+    if [[ ! -e git-add && ! -e ${CPLX_TOOL} ]]; then
         task "Must make all in '$(pwd)'"
         #make -d v=1 -d DEVELOPER=1 all || fatal "Unable to make all in '$(pwd)'" 19
         make all || fatal "Unable to make all in '$(pwd)'" 19
         ok "make all is now done in '$(pwd)'"
     else
-        ok "python already compiled in '$(pwd)'"
+        ok "${CPLX_TOOL} already compiled in '$(pwd)'"
     fi
 }
 
