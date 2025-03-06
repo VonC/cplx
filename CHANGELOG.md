@@ -4,6 +4,50 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.13.0] - 2025-03-06 - Git compilation
+
+Generate Makefile for the Git compilation
+Compile Git.  
+Still fails to include curl, so no git-remote-https generated.
+
+### 🚀 Features
+
+- *(setup)* Add git to senv.local.tpl
+- *(setup)* Add Git installation support
+- *(git)* Add Git compilation support
+- *(git)* Implement Git wrappers
+- *(install)* Add ic alias, CPLX_INSTALL_COPY_ONLY
+- *(install)* Add git wrapper script
+- *(install)* Handle system executables and symlinks
+- *(setup)* Add `mtp` alias to mirror tool packages
+- Improve linking of OpenSSL libraries
+
+### 🐛 Bug Fixes
+
+- *(install)* Add git dependencies for RHEL 7.9
+- *(scripts)* Correct ffip alias definition
+- *(install)* Remove unnecessary python removal
+- *(setup)* Handle packages with underscore prefix
+- *(git)* Improve git log alias
+- *(install)* Correct library loading and linking
+- *(install)* Remove unknown Git configuration options
+- *(env)* Correctly handle return code of check_ldd
+- *(openssl111)* Add zlib and cpp dependencies
+- *(setup)* Update fnm alias
+
+### 📚 Documentation
+
+- *(md)* Add SSL documentation
+
+### ⚙️ Miscellaneous Tasks
+
+- *(git)* Bump version to 0.13.0-SNAPSHOT
+- *(install)* Update sshgitwrapper local template
+
+### 🔨 Build
+
+- Add curl dependencies for Git on RHEL 7.9
+
 ## [v0.12.0] - 2025-03-04 - Compile OpenSSL 1.1.1w needed for Python on RHEL 7.9
 
 Add openssl111 as a tool to compile
