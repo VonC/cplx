@@ -9,9 +9,17 @@ function setenv() {
     export tool_src="${tool}/sources/current"
     export root="${tool}/root"
 
+    # --- Library Paths ---
+    # Use a single LD_LIBRARY_PATH, consistently constructed.
     export LD_LIBRARY_PATH="${root}/usr/lib64:${root}/usr/lib:${root}/lib64:${root}/lib:${tool_prefix}/usr/lib64:${tool_prefix}/lib64:${tool_prefix}/usr/lib:${tool_prefix}/lib"
+    export LIBRARY_PATH="${LD_LIBRARY_PATH}"
+    export LD_RUN_PATH="${LD_LIBRARY_PATH}"
+    export DT_RUNPATH="${LD_LIBRARY_PATH}"
 
+    # --- pkg-config ---
     export PKG_CONFIG_PATH="${tool_prefix}/usr/lib64/pkgconfig"
+
+    # --- PATH (for binaries) ---
     if [[ -e "${tool_prefix}/bin" ]]; then
         # Wrap PATH in colons for the check so that boundaries are properly detected,
         # even if PATH does not end with a colon.
@@ -20,6 +28,7 @@ function setenv() {
         fi
     fi
 
+    # --- autotools/autoconf ---
     export AUTOM4TE="${root}/usr/bin/autom4te"
     export PERLLIB="${PERLLIB}:${root}/usr/share/autoconf:${root}/usr/lib64/perl5/vendor_perl"
     export AUTOM4TE_CFG="${root}/usr/share/autoconf/autom4te.cfg"
@@ -28,44 +37,54 @@ function setenv() {
     if [[ -e "${root}/usr/share/autoconf/autom4te.cfg" ]]; then
         sed -i "s,prepend-include.*,prepend-include '${root}/usr/share/autoconf',g" "${root}/usr/share/autoconf/autom4te.cfg" || fatal "unable to update '${root}/usr/share/autoconf/autom4te.cfg' prepend-include directive" 17
     fi
-    export COMPILER_PATH=""
-    update_xxpath "COMPILER_PATH" "cc1"
-    export COMPILER_PATH
 
-    # export LD_LIBRARY_PATH=""
-    # update_xxpath "LD_LIBRARY_PATH" "libmpc.so.?"
-    # update_xxpath "LD_LIBRARY_PATH" "libmpfr.so.?"
-    # update_xxpath "LD_LIBRARY_PATH" "crti.o"
-    # update_xxpath "LD_LIBRARY_PATH" "libopcodes*"
-    # update_xxpath "LD_LIBRARY_PATH" "libSegFault.so"
-    # update_xxpath "LD_LIBRARY_PATH" "ld-2.17.so"
-    export LD_LIBRARY_PATH
-    export LIBRARY_PATH="${LD_LIBRARY_PATH}"
-    export LD_RUN_PATH="${LD_LIBRARY_PATH}"
-    export DT_RUNPATH="${LD_LIBRARY_PATH}"
+    # --- Compiler Paths ---
+    # COMPILER_PATH is often used for include paths, not library paths.
+    # update_xxpath is likely overkill for cc1.  Directly setting is clearer.
+    local cc1_path
+    cc1_path=$(find "${root}" -name "cc1" 2>/dev/null | head -n 1) # Find the FIRST cc1, handle not found. 2>/dev/null suppresses errors
+    if [[ -n "$cc1_path" ]]; then
+        COMPILER_PATH=$(dirname "$cc1_path")
+        export COMPILER_PATH
+    else
+        fatal "cc1 not found in '${root}'" 18
+    fi
+
+    # --- Flags ---
     export GCC_PATH="${root}"
-    export CPPFLAGS="-I${GCC_PATH}/usr/include"
+    export CPPFLAGS="-I${GCC_PATH}/usr/include" # Include paths for the preprocessor.
 
-    local ldpaths
-    update_xxpath "ldpaths" "libc_nonshared.a"
-    #local ldlinpath
-    #update_xxpath "ldlinpath" "ld-linux-x86-64.so.2"
-    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2"
+    # CFLAGS: Correctly set sysroot, PIC, and optimization.
+    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O2 -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2"  # Use -O2 for optimization
+
+    # --- Dynamic Linker (Important!) ---
+    local dynamic_linker
+    dynamic_linker=$(find "${root}/lib64" -name 'ld-linux-x86-64.so*' -print 2>/dev/null | head -n1)
+    if [[ -z "${dynamic_linker}" ]]; then
+        fatal "Unable to find dynamic linker in '${root}/lib64'" 19
+    fi
+
+    # --- LDFLAGS (Crucial) ---
+    # Construct LDFLAGS carefully.
+    # https://stackoverflow.com/questions/6562403/i-dont-understand-wl-rpath-wl
+    export LDFLAGS="-Wl,--sysroot=${root} \
+                    -Wl,-rpath=${LD_LIBRARY_PATH} \
+                    -Wl,--dynamic-linker=${dynamic_linker} \
+                    -Wl,--export-dynamic \
+                    -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib" #Standard lib directories.  Should not be needed, but kept just in case
+                    # No -nodefaultlibs needed with a proper sysroot.
+                    # -B options are generally not needed when using --sysroot.
+
+    # -lssl -lcrypto *MUST* be at the END of LIBS (or LDFLAGS, if that's where libs get added).
+    export LIBS="-lssl -lcrypto -lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"  # Correct order, explicit libs.
+
     export ZLIB_PATH="${root}/usr"
     export CURLDIR="${root}/usr"
     export OPENSSLDIR="${root}/usr"
     export OPENSSL_LDFLAGS="-L${root}/usr/lib64"
     export LIBPCREDIR="${root}/usr"
-    #export LDFLAGS="-L$CURLDIR/lib64 -L$OPENSSLDIR/lib64 -L$LIBPCREDIR/lib64 -L${ldpaths}"
-    #export LDFLAGS="-L${ldpaths} -L${root}/lib64 -nodefaultlibs -Wl,--export-dynamic,--dynamic-linker=${ldlinpath}/ld-linux-x86-64.so.2"
-    # https://stackoverflow.com/questions/6562403/i-dont-understand-wl-rpath-wl
-    export LDFLAGS="-L${ldpaths} -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib -L${root}/usr/lib/gcc/x86_64-redhat-linux/8 -nodefaultlibs -Wl,-rpath,${ldpaths}:${root}/usr/lib64:${root}/usr/lib:${root}/lib64:${root}/lib -Wl,--export-dynamic -B${root} -B${root}/usr -B${root}/usr/lib64 -B${root}/usr/lib -B${root}/lib64 -B${root}/lib --sysroot=${root} -lssl -lcrypto -lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"
-    export LDFLAGS="-L${ldpaths} -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib -L${root}/usr/lib/gcc/x86_64-redhat-linux/8 -nodefaultlibs -Wl,-rpath,${ldpaths}:${root}/usr/lib64:${root}/usr/lib:${root}/lib64:${root}/lib -Wl,--export-dynamic --sysroot=${root} -Wl,-v"
-    #export LIBS="-lc -ldl -l:libc_nonshared.a -lc_nonshared -lc"
-    #export LIBS="-lc_nonshared -lc -lc_nonshared -lm"
-    export LIBS="-Wl,-rpath,${ldpaths}:${root}/lib64:${root}/lib:${root}/usr/lib64:${root}/usr/lib -Wl,--export-dynamic -lssl -lcrypto -lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"
-    export LIBS="-lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"  # Correct Order!
 
+    # --- Makefile modification
     local elibs
     elibs="-lm -lc -lpthread"
     if [[ -e "${tool_src}/Makefile" ]]; then
@@ -73,6 +92,7 @@ function setenv() {
         info "Makefile EXTLIBS updated with '${elibs}'"
     fi
 
+    # --- Source tool-specific install functions ---
     if [[ ! -e "${tool}/install_functions.sh" ]]; then
         fatal "Missing '${tool}/install_functions.sh' file" 20
     fi
