@@ -1,3 +1,5 @@
-0.13.0-SNAPSHOT -- Git compilation
+0.13.0 -- Git compilation
 
 Generate Makefile for the Git compilation
+Compile Git.  
+Still fails to include curl, so no git-remote-https generated.
