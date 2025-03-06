@@ -373,19 +373,48 @@ download_sources() {
 
     sources="${SETUP_DIR}/sources/${CPLX_TOOL}"
     mkdir -p "${sources}"
-    if [[ -e "${sources}/${CPLX_TOOL}-src-${version}.${url_ext}" ]]; then
-        ok "Sources '${version}' already fetched for tool '${CPLX_TOOL}'"
-    else
-        task "Must fetch sources for tool '${CPLX_TOOL}'"
-        if ! curl -kL -o "${sources}/${CPLX_TOOL}-src-${version}.${url_ext}" "${url}"; then
+    local source_file_full_path="${sources}/${CPLX_TOOL}-src-${version}.${url_ext}"
+    if ! _validate_source_size "${source_file_full_path}"; then
+        task "Must fetch sources for tool '${CPLX_TOOL}' from URL '${url}'"
+        if ! curl -kL -o "${source_file_full_path}" "${url}"; then
             fatal "Could not fetch sources for tool '${CPLX_TOOL}' at url '${url}'" 41
         fi
+        _validate_source_size "${source_file_full_path}" "true"
         ok "Sources fetched for tool '${CPLX_TOOL}' at version '${version}'"
     fi
+
     if ! step_done "download_sources"; then
         fatal "Could not mark 'download_sources' as done" 62
     fi
     ok "'download_sources' is done"
+}
+
+function _validate_source_size() {
+    local source_file_full_path="${1}"
+    local must_fatal="${2}"
+    local source_file_size
+    source_file_size=$(stat -c%s "${source_file_full_path}" 2>/dev/null || echo 0)
+    local min_src_size=9
+    local source_file_size_limit=$((min_src_size * 1024))  # 9KB
+    local source_file_name
+    source_file_name="$(basename "${source_file_full_path}")"
+    local source_file_dir
+    source_file_dir="$(dirname "${source_file_full_path}")"
+
+    if [[ -e  "${source_file_full_path}" ]]; then
+        if [[ "${source_file_size}" -lt "${source_file_size_limit}" ]]; then
+            mv "${source_file_full_path}" "${source_file_full_path}._to_delete"
+            echo "File renamed to ${source_file_name}._to_delete because its size is ${source_file_size_limit} bytes (in '${source_file_dir}')."
+            if [[ -n "${must_fatal}" ]]; then
+                fatal "Package '${source_file_name}' is only ${source_file_size} bytes (<${min_src_size}KB), something went wrong" 222
+            fi
+            error "Package '${source_file_name}' is only ${source_file_size} bytes (<${min_src_size}KB), something went wrong. Moved and proceed"
+            return 1
+        fi
+        ok "Source '${source_file_dir}' already downloaded in '${source_file_dir}'"
+        return 0
+    fi
+    return 1
 }
 
 main "$@"
