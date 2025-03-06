@@ -19,7 +19,7 @@ That folder (typically `cplx`) is where the various tools will be compiled, each
 
 Once the project folder exists, the environment folder is copied to the remote host through `tar` + `ssh`.
 
-## Copy the sources [🔗](#copy_the_sources)
+## Copy the sources [🔗](#copy_the_sources) (done: ✅)
 
 Check the latests tag, and copies the sources to the remote host.
 
@@ -27,12 +27,12 @@ Check the latests tag, and copies the sources to the remote host.
 
 It fetches the latest tag from the tool development repository, if CPLX_VERSION is not yet set (or set to latest) in `setup.local.bat`.
 
-### Download sources [🔗](#download_sources)
+### Download sources [🔗](#download_sources) (done: ✅)
 
 It checks if the source file exists locally.  
 If not, downloads it.
 
-### Transfer the sources to the remote project folder [🔗](#transfer_the_sources_to_the_remote_project_folder)
+### Transfer the sources to the remote project folder [🔗](#transfer_the_sources_to_the_remote_project_folder) (done: ✅)
 
 Check if the source file exists on the remote server side.  
 If not, copy it.
