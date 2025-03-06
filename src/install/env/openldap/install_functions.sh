@@ -32,10 +32,13 @@ function configure() {
 
 function build() {
     if [[ ! -e git-add && ! -e ${CPLX_TOOL} ]]; then
-        task "Must make all in '$(pwd)'"
-        #make -d v=1 -d DEVELOPER=1 all || fatal "Unable to make all in '$(pwd)'" 19
-        make all || fatal "Unable to make all in '$(pwd)'" 19
-        ok "make all is now done in '$(pwd)'"
+        task "Must make depend in '$(pwd)'"
+        make depend || fatal "Unable to make depend in '$(pwd)'" 19
+        ok "make is now done in '$(pwd)'"
+
+        task "Must make in '$(pwd)'"
+        make || fatal "Unable to make in '$(pwd)'" 19
+        ok "make is now done in '$(pwd)'"
     else
         ok "${CPLX_TOOL} already compiled in '$(pwd)'"
     fi

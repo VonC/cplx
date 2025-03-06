@@ -139,7 +139,7 @@ copy_the_environment() {
     if step_is_done "create_the_remote_project_folder"; then
         ok "cplx_path '${cplx_path}' already created on '${hostname}'"
     else
-        task "Must create remote project directory: ${hostname}/${cplx_path}"
+        task "Must create remote project directory: ${hostname}@${cplx_path}"
         # shellcheck disable=SC2029
         ssh "${SSH_CONFIG_ENTRY}" "mkdir -p \"${cplx_path}/echos\"" || fatal "Could not create remote directory" 11
         if ! step_done "create_the_remote_project_folder"; then
