@@ -16,9 +16,7 @@ function configure() {
         "${tool_src}/configure" \
         "--prefix=${tool_prefix}" \
         "--with-openssl=${root}/usr" \
-        "--with-openssl-rpath=${root}/usr/lib64" \
-        "--enable-shared=yes" \
-        "--with-system-libmpdec=yes" )
+    )
 
     sed -i "s,ssldir/lib\",ssldir/lib64\",g" configure || fatal "Unable to update 'configure' ssldir/lib to ssldir/lib64 in '$(pwd)'" 16
 
