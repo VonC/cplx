@@ -71,12 +71,15 @@ function setenv() {
                     -Wl,-rpath=${LD_LIBRARY_PATH} \
                     -Wl,--dynamic-linker=${dynamic_linker} \
                     -Wl,--export-dynamic \
-                    -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib" #Standard lib directories.  Should not be needed, but kept just in case
+                    -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib \
+                    -lssl -lcrypto \
+                    -Wl,-verbose"
+                    # Standard lib directories.
                     # No -nodefaultlibs needed with a proper sysroot.
                     # -B options are generally not needed when using --sysroot.
 
     # -lssl -lcrypto *MUST* be at the END of LIBS (or LDFLAGS, if that's where libs get added).
-    export LIBS="-lssl -lcrypto -lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"  # Correct order, explicit libs.
+    export LIBS="-lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"  # Correct order, explicit libs.
 
     export ZLIB_PATH="${root}/usr"
     export CURLDIR="${root}/usr"
