@@ -1,5 +1,3 @@
-0.13.0 -- Git compilation
+0.14.0-SNAPSHOT -- Openldap compilation
 
-Generate Makefile for the Git compilation
-Compile Git.  
-Still fails to include curl, so no git-remote-https generated.
+Since ldap uses openssl, it needs to use the right version of openssl
