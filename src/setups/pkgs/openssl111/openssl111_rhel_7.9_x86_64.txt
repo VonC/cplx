@@ -3,3 +3,5 @@ glibc-devel
 glibc
 kernel-headers
 glibc-static
+zlib
+cpp
