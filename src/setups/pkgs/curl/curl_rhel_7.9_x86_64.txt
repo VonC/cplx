@@ -1,0 +1,11 @@
+glibc-headers
+glibc-devel
+glibc
+kernel-headers
+glibc-static
+zlib
+cpp
+openssl111
+gcc
+zlib
+zlib-devel

@@ -10,9 +10,6 @@ function configure() {
     else
         ok "'configure' is present in '$(pwd)'"
     fi
-
-    # shellcheck disable=SC2154
-    LDFLAGS="${LDFLAGS} -L${root}/usr/lib/gcc/x86_64-redhat-linux/4.8.5"
     
     # Build the configure command as an array
     local configure_cmd=( 
@@ -20,6 +17,8 @@ function configure() {
         "--prefix=${tool_prefix}" \
         "--with-openssl=${root}/usr" \
     )
+
+    
 
     sed -i "s,ssldir/lib\",ssldir/lib64\",g" configure || fatal "Unable to update 'configure' ssldir/lib to ssldir/lib64 in '$(pwd)'" 16
 
@@ -35,10 +34,13 @@ function configure() {
 
 function build() {
     if [[ ! -e git-add && ! -e ${CPLX_TOOL} ]]; then
-        task "Must make all in '$(pwd)'"
-        #make -d v=1 -d DEVELOPER=1 all || fatal "Unable to make all in '$(pwd)'" 19
-        make all || fatal "Unable to make all in '$(pwd)'" 19
-        ok "make all is now done in '$(pwd)'"
+        task "Must make depend in '$(pwd)'"
+        make depend || fatal "Unable to make depend in '$(pwd)'" 19
+        ok "make is now done in '$(pwd)'"
+
+        task "Must make in '$(pwd)'"
+        make || fatal "Unable to make in '$(pwd)'" 19
+        ok "make is now done in '$(pwd)'"
     else
         ok "${CPLX_TOOL} already compiled in '$(pwd)'"
     fi
