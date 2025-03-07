@@ -10,6 +10,9 @@ function configure() {
     else
         ok "'configure' is present in '$(pwd)'"
     fi
+
+    # shellcheck disable=SC2154
+    LDFLAGS="${LDFLAGS} -L${root}/usr/lib/gcc/x86_64-redhat-linux/4.8.5"
     
     # Build the configure command as an array
     local configure_cmd=( 

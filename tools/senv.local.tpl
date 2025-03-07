@@ -79,7 +79,7 @@ if "%CPLX_TOOL%" == "curl" (
   set "CPLX_VERSION=8.12.1"
   rem https://curl.se/download/curl-8.12.1.tar.gz
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_URL=https://curl.se/download/-[version].tgz"
+  set "CPLX_URL=https://curl.se/download/curl-[version].tgz"
   set "CPLX_CHECK_PREFIX=lib/aa"
   set "CPLX_CHECK_SRC=lib/aa"
   set "CPLX_BIN="
