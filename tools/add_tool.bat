@@ -16,7 +16,12 @@
 
 for %%i in ("%~dp0") do SET "add_tool_dir=%%~fi"
 set "add_tool_dir=%add_tool_dir:~0,-1%"
+call <NUL "%add_tool_dir%\..\senv.bat"
 for %%i in ("%~dp0..") do SET "cplx_dir=%%~fi"
+for %%i in ("%~dp0..\src") do SET "src_dir=%%~fi"
+for /f "tokens=* delims=" %%a in ('cygpath -u "%src_dir%"') do (
+    SET "src_dir_unix=%%~a"
+)
 
 call :main
 goto:eof
@@ -59,6 +64,8 @@ if not defined CPLX_TOOL_NEW (
 ) else (
     call:gum_echo --foreground 45 "Using existing tool: '" --foreground 226 "!CPLX_TOOL_NEW!" --foreground 45 "'"
 )
+
+call:update_tool_properties
 
 rem echo grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%add_tool_dir%\senv.local.tpl" ^>nul 2^>^&1
 grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%add_tool_dir%\senv.local.tpl" >nul 2>&1
@@ -120,6 +127,69 @@ set cplx
 endlocal & set "CPLX_TOOL_NEW=%CPLX_TOOL_NEW%"
 goto:eof
 
+::------------------------------------------------------------------------------
+:: Tool Properties Update Function
+::------------------------------------------------------------------------------
+:: Coordinates updates to multiple property files to register the new tool in
+:: various configuration locations. This ensures the tool is properly integrated
+:: into build processes and deployment pipelines.
+::
+:: This function acts as a coordinator for the more specific property file
+:: update operations, maintaining a consistent tool registration pattern.
+::------------------------------------------------------------------------------
+:update_tool_properties
+call:update_tool_properties_file "services" "%src_dir_unix%/setups/setup.properties"
+call:update_tool_properties_file "tools_to_recompile" "%src_dir_unix%/setups/setup.properties"
+call:update_tool_properties_file "services" "%src_dir_unix%/setups/setup.tpl.properties"
+call:update_tool_properties_file "tools_to_recompile" "%src_dir_unix%/setups/setup.tpl.properties"
+call:update_tool_properties_file "services" "%src_dir_unix%/setups/env/cplx.properties"
+call:update_tool_properties_file "services" "%src_dir_unix%/setups/env/cplx.tpl.properties"
+goto:eof
+
+::----- Subfunctions ---------------------------------------------------------
+
+::- Property File Update Helper
+::-
+::- Updates a specific property in a properties file with the new tool name.
+::- This function handles checking if the tool already exists in the property
+::- and adds it only if needed, avoiding redundant entries.
+::-
+::- Parameters:
+::-   %~1 - Property key to update (e.g., "services", "tools_to_recompile")
+::-   %~2 - Unix-style path to the properties file
+::-
+:update_tool_properties_file
+setlocal EnableDelayedExpansion
+set "key=%~1"
+set "unix_file=%~2"
+%_task% "Must check property '%key%' from '%unix_file%'"
+for /f "tokens=* delims=" %%a in ('bash -c "source "${src_dir_unix}/utils/properties.sh"; properties_file="${unix_file}"; export properties_file; get_property %key%; export key; printf "%%s" ${%key%}"') do (
+    SET "cplx_key=%%~a"
+    SET "cplx_key_with_comma=,%%~a,"
+)
+if not "!cplx_key_with_comma:,%CPLX_TOOL_NEW%,=!" == "!cplx_key_with_comma!" (
+    %_ok% "cplx_key '%cplx_key%' includes '%CPLX_TOOL_NEW%' (!CPLX_TOOL_NEW!)"
+    rem echo __%cplx_key_with_comma:,!CPLX_TOOL_NEW!,=%__
+    goto:eof
+)
+%_warning% "cplx_key '%cplx_key%' does not include '%CPLX_TOOL_NEW%' (!CPLX_TOOL_NEW!)"
+rem echo ko: __%cplx_key_with_comma:,CPLX_TOOL_NEW%,=%__
+rem echo vs: __%cplx_key_with_comma%__
+if not defined cplx_key (
+    set "cplx_key=%CPLX_TOOL_NEW%"
+) else (
+    set "cplx_key=%cplx_key%,%CPLX_TOOL_NEW%"
+)
+%_task% "Must add '%CPLX_TOOL_NEW%' to '%key%' in '%unix_file%', cplx_key='%cplx_key%'"
+for /f "tokens=* delims=" %%a in ('bash -c "source "${src_dir_unix}/utils/properties.sh"; properties_file="${unix_file}"; export properties_file; set_property %key% "!cplx_key!"; echo $?"') do (
+    SET "cplx_key_res=%%a"
+)
+if not "%cplx_key_res%" == "0" (
+    %_fatal% "Issue during setting '%key%' in '%unix_file%' (cplx_key_res='%cplx_key_res%')" 65
+) else (
+    %_ok% "Set '%key%' in '%unix_file%' to '%cplx_key%'"
+)
+goto:eof
 
 ::------------------------------------------------------------------------------
 :: Configuration File Update Function
