@@ -85,6 +85,15 @@ if "%CPLX_TOOL%" == "curl" (
   set "CPLX_BIN="
 )
 
+if "%CPLX_TOOL%" == "libpsl" (
+  set "CPLX_VERSION=_tbd_libpsl"
+  rem https://
+  set "CPLX_URL="
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN=_tbd_libpsl"
+)
+
 goto:eof
 
 
