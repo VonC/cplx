@@ -1,4 +1,18 @@
 @echo off
+::==============================================================================
+:: Tool Configuration Wizard
+::==============================================================================
+:: This script facilitates the addition and configuration of new development 
+:: tools within the CPLX environment. It provides an interactive wizard that 
+:: guides the user through tool setup and ensures proper integration with the
+:: environment configuration files (senv.local.tpl and senv.local.bat).
+::
+:: The wizard handles:
+:: - Tool name selection/validation
+:: - Configuration template creation
+:: - Updating configuration files
+:: - Extracting and setting tool-specific variables
+::==============================================================================
 
 for %%i in ("%~dp0") do SET "add_tool_dir=%%~fi"
 set "add_tool_dir=%add_tool_dir:~0,-1%"
@@ -7,6 +21,15 @@ for %%i in ("%~dp0..") do SET "cplx_dir=%%~fi"
 call :main
 goto:eof
 
+::------------------------------------------------------------------------------
+:: Main Process Function
+::------------------------------------------------------------------------------
+:: Orchestrates the overall tool addition process by coordinating the wizard
+:: flow, from initial setup through configuration generation and application.
+::
+:: This function manages state transitions and ensures all configuration steps
+:: complete successfully or exit gracefully on failure.
+::------------------------------------------------------------------------------
 :main
 %_info% "Processing new tool addition"
 if not exist "%PRGS%\gums\current\gum.exe" (
@@ -56,6 +79,13 @@ echo ^)
 
 call:update_conf_file "%add_tool_dir%\senv.local.tpl" "%add_tool_dir%\senv.local.tpl.tmp"
 
+::------------------------------------------------------------------------------
+:: Update Local Environment Configuration
+::------------------------------------------------------------------------------
+:: Ensures the local environment configuration file (senv.local.bat) includes
+:: the newly created tool configuration. This maintains consistency between
+:: template and actual environment settings.
+::------------------------------------------------------------------------------
 :update_senv_local
 echo grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%cplx_dir%\senv.local.bat" ^>nul 2^>^&1
 grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%cplx_dir%\senv.local.bat" >nul 2>&1
@@ -65,6 +95,12 @@ if not errorlevel 1 (
 )
 call:update_conf_file "%cplx_dir%\senv.local.bat" "%add_tool_dir%\senv.local.tpl.tmp"
 
+::------------------------------------------------------------------------------
+:: Tool Section Validation
+::------------------------------------------------------------------------------
+:: Verifies that the tool's configuration is properly added and extracts any
+:: existing variables to ensure they're applied correctly to the environment.
+::------------------------------------------------------------------------------
 :check_tool_section
 rem set cplx
 for /f "tokens=*" %%a in ('type "%cplx_dir%\senv.local.bat"') do (
@@ -85,6 +121,17 @@ endlocal & set "CPLX_TOOL_NEW=%CPLX_TOOL_NEW%"
 goto:eof
 
 
+::------------------------------------------------------------------------------
+:: Configuration File Update Function
+::------------------------------------------------------------------------------
+:: Updates the specified configuration file with new tool settings by inserting
+:: content at the appropriate location. This function maintains file structure
+:: while ensuring new content is properly integrated.
+::
+:: Parameters:
+::   %~1 - Target configuration file path
+::   %~2 - File containing the content to insert
+::------------------------------------------------------------------------------
 :update_conf_file
 set "conf_file=%~1"
 set "conf_file_to_insert=%~2"
@@ -120,11 +167,26 @@ if exist "%temp_output%" (
 goto:eof
 
 
+::----- Utility Functions -----------------------------------------------------
+
+::------------------------------------------------------------------------------
+:: Pretty Print Function
+::------------------------------------------------------------------------------
+:: Provides visually consistent and attractive output for the wizard interface
+:: by handling color formatting and multi-segment text display. This centralizes
+:: styling logic for a more maintainable user interface.
+::
+:: Accepts gum style parameters to properly format and display text segments
+:: with varying colors and styles while maintaining a single-line output.
+::------------------------------------------------------------------------------
 :gum_echo
 setlocal EnableDelayedExpansion
 set "cmd=%gum% style"
 set "output_count=0"
 
+::----- Subfunctions ---------------------------------------------------------
+
+::- Process arguments and build output array for joined display
 :gum_echo_loop
 set "arg=%~1"
 rem echo %arg%
@@ -170,6 +232,13 @@ rem @echo off
 endlocal
 goto:eof
 
+::------------------------------------------------------------------------------
+:: Debug Stack Trace Helper
+::------------------------------------------------------------------------------
+:: Provides enhanced debugging capabilities by generating stack traces when
+:: errors occur, but only if debugging is enabled. This helps troubleshoot
+:: issues without affecting normal operation.
+::------------------------------------------------------------------------------
 :call_echos_stack
 if not defined ECHOS_STACK ( set "CURRENT_SCRIPT=%~nx0" & goto:eof ) else ( call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0 )
 goto:eof
