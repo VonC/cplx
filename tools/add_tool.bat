@@ -66,6 +66,20 @@ if not errorlevel 1 (
 call:update_conf_file "%cplx_dir%\senv.local.bat" "%add_tool_dir%\senv.local.tpl.tmp"
 
 :check_tool_section
+rem set cplx
+for /f "tokens=*" %%a in ('type "%cplx_dir%\senv.local.bat"') do (
+    set "line=%%a"
+    if defined CPLX_TOOL_FOUND (
+        if "!line!"==")" ( goto:end_loop_senv_local )
+        if not "!line:set =!"=="!line!" (
+          !line!
+        )
+    )
+    if "!line:libpsl=!" neq "!line!" (
+        set "CPLX_TOOL_FOUND=true"
+    )
+)
+:end_loop_senv_local
 set cplx
 endlocal & set "CPLX_TOOL_NEW=%CPLX_TOOL_NEW%"
 goto:eof
