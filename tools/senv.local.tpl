@@ -91,7 +91,7 @@ if "%CPLX_TOOL%" == "libpsl" (
   set "CPLX_URL="
   set "CPLX_CHECK_PREFIX=lib/aa"
   set "CPLX_CHECK_SRC=lib/aa"
-  set "CPLX_BIN=_tbd_libpsl"
+  set "CPLX_BIN="
 )
 
 goto:eof
