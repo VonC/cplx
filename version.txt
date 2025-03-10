@@ -1,3 +1,5 @@
-0.14.0-SNAPSHOT -- Openldap compilation
+0.14.0 -- Openldap compilation, add_tool script
 
 Since ldap uses openssl, it needs to use the right version of openssl
+Openldap will need many dependencies to be recompiled, so we need to add many additional tools.
+The add_tool script is used to add the necessary tools to the build environment.
