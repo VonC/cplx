@@ -77,7 +77,7 @@ if not errorlevel 1 (
 echo if "%%CPLX_TOOL%%" == "%CPLX_TOOL_NEW%" ^(
 echo   set "CPLX_VERSION=_tbd_%CPLX_TOOL_NEW%"
 echo   rem https://
-echo   set "CPLX_URL=%CPLX_URL%"
+echo   set "CPLX_URL=_tbd_%CPLX_TOOL_NEW%"
 echo   set "CPLX_CHECK_PREFIX=lib/aa"
 echo   set "CPLX_CHECK_SRC=lib/aa"
 echo   set "CPLX_BIN=_tbd_%CPLX_TOOL_NEW%"
@@ -124,6 +124,21 @@ for /f "tokens=*" %%a in ('type "%cplx_dir%\senv.local.bat"') do (
 )
 :end_loop_senv_local
 
+::------------------------------------------------------------------------------
+:: Tool Configuration Validation Functions
+::------------------------------------------------------------------------------
+:: The following sections validate and complete tool configuration by checking
+:: required variables and prompting for missing information. These validation
+:: steps ensure a properly configured tool before integration.
+::------------------------------------------------------------------------------
+
+::------------------------------------------------------------------------------
+:: Binary Type Validation
+::------------------------------------------------------------------------------
+:: Determines if the tool is a binary executable or a library by checking
+:: configuration or prompting the user for selection. This affects how the
+:: tool is built and integrated into the environment.
+::------------------------------------------------------------------------------
 :check_cplx_bin
 if not defined CPLX_BIN (
   %_ok% "CPLX_BIN is a lib: not defined for '%CPLX_TOOL_NEW%'"
@@ -141,24 +156,34 @@ if not "%CPLX_BIN:_tbd_=%"=="%CPLX_BIN%" (
       "%gum%" style --foreground 82 "✓ Configured '%CPLX_TOOL_NEW%' as library"
     )
   )
-  sed -i "s/CPLX_BIN=_tbd_%CPLX_TOOL_NEW%/CPLX_BIN=!CPLX_BIN!/" "%cplx_dir%\senv.local.bat"
-  if errorlevel 1 (
-    %_fatal% "Issue during setting CPLX_BIN in '%cplx_dir%\senv.local.bat'" 122
-  ) else (
-    %_ok% "Set CPLX_BIN in '%cplx_dir%\senv.local.bat' to '!CPLX_BIN!'"
-  )
-  sed -i "s/CPLX_BIN=_tbd_%CPLX_TOOL_NEW%/CPLX_BIN=!CPLX_BIN!/" "%add_tool_dir%\senv.local.tpl"
-  if errorlevel 1 (
-    %_fatal% "Issue during setting CPLX_BIN in '%add_tool_dir%\senv.local.tpl'" 123
-  ) else (
-    %_ok% "Set CPLX_BIN in '%add_tool_dir%\senv.local.tpl' to '!CPLX_BIN!'"
-  )
+  call:update_senv_local_variable "CPLX_BIN" "!CPLX_BIN!"
 ) else (
   %_ok% "CPLX_BIN is defined as '!CPLX_BIN!'"
 )
 
+::------------------------------------------------------------------------------
+:: URL Validation
+::------------------------------------------------------------------------------
+:: Validates that a source URL is provided for the tool or prompts the user
+:: to enter one. The URL is essential for downloading source code during the
+:: build process.
+::------------------------------------------------------------------------------
 :check_cplx_url
+if not defined CPLX_URL (
+  %_fatal% "CPLX_URL is not defined for '%CPLX_TOOL_NEW%'" 121
+)
+if "%CPLX_URL:_tbd_=%"=="%CPLX_URL%" (
+  %_ok% "CPLX_URL is defined as '!CPLX_URL!'"
+  goto:check_cplx_version
+)
+%_task% "Must ask for '%CPLX_TOOL_NEW%' URL"
+"%gum%" style --foreground 45 "Step: Provide the URL for '%CPLX_TOOL_NEW%'" --bold
+for /f "tokens=*" %%a in ('%gum% input --placeholder "Tool URL"') do (
+  set "CPLX_URL=%%a"
+)
+call:update_senv_local_variable "CPLX_URL" "!CPLX_URL!"
 
+:check_cplx_version
 
 echo ----------------
 set cplx
@@ -185,6 +210,36 @@ call:update_tool_properties_file "services" "%src_dir_unix%/setups/env/cplx.tpl.
 goto:eof
 
 ::----- Subfunctions ---------------------------------------------------------
+
+::------------------------------------------------------------------------------
+:: Environment Variable Update Function
+::------------------------------------------------------------------------------
+:: Updates specific tool variables in both the local and template configuration
+:: files to maintain consistency across the environment. This ensures changes
+:: made through the wizard are properly persisted and available for future
+:: tool operations.
+::
+:: Parameters:
+::   %~1 - Variable name to update (e.g., "CPLX_BIN", "CPLX_URL")
+::   %~2 - New value to set for the variable
+::------------------------------------------------------------------------------
+:update_senv_local_variable
+set "variable=%~1"
+set "value=%~2"
+
+sed -i "s,%variable%=_tbd_%CPLX_TOOL_NEW%,%variable%=%value%," "%cplx_dir%\senv.local.bat"
+if errorlevel 1 (
+  %_fatal% "Issue during setting %variable% in '%cplx_dir%\senv.local.bat'" 122
+) else (
+  %_ok% "Set %variable% in '%cplx_dir%\senv.local.bat' to '%value%'"
+)
+sed -i "s,%variable%=_tbd_%CPLX_TOOL_NEW%,%variable%=%value%," "%add_tool_dir%\senv.local.tpl"
+if errorlevel 1 (
+  %_fatal% "Issue during setting %variable% in '%add_tool_dir%\senv.local.tpl'" 123
+) else (
+  %_ok% "Set %variable% in '%add_tool_dir%\senv.local.tpl' to '%value%'"
+)
+goto:eof
 
 ::- Property File Update Helper
 ::-
