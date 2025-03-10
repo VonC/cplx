@@ -284,30 +284,12 @@ if not "!CPLX_URL:%CPLX_VERSION%=!"=="!CPLX_URL!" (
 :: across the environment.
 ::------------------------------------------------------------------------------
 :check_install_folders
-if exist "%src_dir%\install\env\%CPLX_TOOL_NEW%" (
-  %_ok% "Install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%' already exists"
-) else (
-  %_task% "Must create install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%'"
-  mkdir "%src_dir%\install\env\%CPLX_TOOL_NEW%"
-  if not exist "%src_dir%\install\env\%CPLX_TOOL_NEW%" (
-    %_fatal% "Issue during creating install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%'" 65
-  ) else (
-    %_ok% "Created install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%'"
-  )
-)
+call:check_or_create_resource "%src_dir%\install\env\%CPLX_TOOL_NEW%" "install"
+call:check_or_create_resource "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh" "install functions file" "%src_dir%\install\env\install_functions.tpl.sh"
 
-if exist "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh" (
-  %_ok% "Install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh' already exists"
-) else (
-  %_task% "Must create install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh'"
-  copy "%src_dir%\install\env\openldap\install_functions.sh" "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh"
-  if not exist "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh" (
-    %_fatal% "Issue during creating install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh'" 65
-  ) else (
-    %_ok% "Created install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh'"
-  )
-) 
-
+call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%" "setups pkgs"
+call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%\%CPLX_TOOL_NEW%_centos_8_x86_64.txt" "setups pkgs file" "%src_dir%\setups\pkgs\minimal_centos_8_x86_64.txt"
+call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%\%CPLX_TOOL_NEW%_rhel_7.9_x86_64.txt" "setups pkgs file" "%src_dir%\setups\pkgs\minimal_rhel_7.9_x86_64.txt"
 
 :end_game
 echo ----------------
@@ -335,6 +317,45 @@ call:update_tool_properties_file "services" "%src_dir_unix%/setups/env/cplx.tpl.
 goto:eof
 
 ::----- Subfunctions ---------------------------------------------------------
+
+::------------------------------------------------------------------------------
+:: Resource Creation Helper
+::------------------------------------------------------------------------------
+:: Ensures that required directories and files exist for the tool, creating them
+:: if necessary using appropriate templates. This centralizes resource management
+:: logic to maintain consistent resource structure across all tools.
+::
+:: The function handles both directory and file resources intelligently, applying
+:: the appropriate creation method based on resource type and providing clear
+:: feedback on status.
+::
+:: Parameters:
+::   %~1 - Full path to the resource to check/create
+::   %~2 - Descriptive name for the resource (used in status messages)
+::   %~3 - (Optional) Template file path if resource is a file
+::------------------------------------------------------------------------------
+:check_or_create_resource
+set "resource=%~1"
+set "resource_name=%~2"
+set "resource_file=%~3"
+set "resource_nature=folder"
+if defined resource_file ( set "resource_nature=file" )
+if exist "%resource%" (
+  %_ok% "%resource_name% %resource_nature% '%resource%' already exists"
+) else (
+  %_task% "Must create %resource_name% %resource_nature% '%resource%'"
+  if "%resource_nature%"=="folder" (
+    mkdir "%resource%"
+  ) else (
+    copy "%resource_file%" "%resource%"
+  )
+  if not exist "%resource%" (
+    %_fatal% "Issue during creating %resource_name% %resource_nature% '%resource%'" 65
+  ) else (
+    %_ok% "Created %resource_name% %resource_nature% '%resource%'"
+  )
+)
+goto:eof
 
 ::------------------------------------------------------------------------------
 :: Environment Variable Update Function
