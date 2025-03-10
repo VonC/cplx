@@ -4,6 +4,38 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.14.0] - 2025-03-10 - Openldap compilation, add_tool script
+
+Since ldap uses openssl, it needs to use the right version of openssl
+Openldap will need many dependencies to be recompiled, so we need to add many additional tools.
+The add_tool script is used to add the necessary tools to the build environment.
+
+### 🚀 Features
+
+- Add and compile openldap to supported services
+- *(curl)* Add curl installation scripts
+- *(tools)* Add `add_tool` script
+- *(tools)* Add interactive tool setup
+- *(tools)* Add libpsl to senv.local.tpl
+- *(setup)* Add libpsl to setup and env properties
+- *(tools)* Update tool properties
+- *(tools)* Handle binary/lib for new tools
+- *(tools)* Add_tool manages source URL
+- *(tools)* Enhance add_tool script with format detection
+- *(install)* Add tool install scripts
+- *(install)* Add configure, build, and clean functions
+- *(tools)* Refactor resource creation in add_tool.bat
+
+### 🐛 Bug Fixes
+
+- *(setup)* Validate downloaded source size
+- *(tool)* Set en var from tool section in add_tool.bat
+- Handle CPLX_URL version placeholder
+
+### 📚 Documentation
+
+- *(tools)* Add_tool.bat comments
+
 ## [v0.13.0] - 2025-03-06 - Git compilation
 
 Generate Makefile for the Git compilation
