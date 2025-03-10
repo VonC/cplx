@@ -226,6 +226,51 @@ if "!CPLX_URL!" NEQ "" (
   )
 )
 
+::------------------------------------------------------------------------------
+:: Version Validation
+::------------------------------------------------------------------------------
+:: Ensures the tool has a properly defined version number by checking for
+:: existing version information or prompting the user to provide it. Version
+:: information is critical for proper source download and build operations.
+::
+:: Accurate version tracking allows for reproducible builds and proper dependency
+:: management across the development environment.
+::------------------------------------------------------------------------------
+:check_cplx_version
+if not defined CPLX_VERSION (
+  %_fatal% "CPLX_VERSION is not defined for '%CPLX_TOOL_NEW%'" 121
+)
+if "%CPLX_VERSION:_tbd_=%"=="%CPLX_VERSION%" (
+  %_ok% "CPLX_VERSION is defined as '!CPLX_VERSION!'"
+  goto:update_cplx_url_version_placeholder
+)
+%_task% "Must ask for '%CPLX_TOOL_NEW%' version"
+"%gum%" style --foreground 45 "Step: Provide the URL for '%CPLX_TOOL_NEW%'" --bold
+for /f "tokens=*" %%a in ('%gum% input --placeholder "Tool version"') do (
+  set "CPLX_VERSION=%%a"
+)
+call:update_senv_local_variable "CPLX_VERSION" "!CPLX_VERSION!"
+
+::------------------------------------------------------------------------------
+:: URL Version Placeholder Substitution
+::------------------------------------------------------------------------------
+:: Replaces explicit version numbers in URLs with a [version] placeholder to
+:: create more flexible URL templates. This enables the build system to
+:: dynamically substitute version numbers when downloading source files.
+::
+:: This templating approach simplifies future version upgrades and maintains
+:: consistent URL patterns across different tools and versions.
+::------------------------------------------------------------------------------
+:update_cplx_url_version_placeholder
+if not "!CPLX_URL:%CPLX_VERSION%=!"=="!CPLX_URL!" (
+  %_warning% "CPLX_URL includes '%CPLX_VERSION%' (!CPLX_VERSION!)"
+  set "CPLX_URL=!CPLX_URL:%CPLX_VERSION%=[version]!"
+  %_info% "Set CPLX_URL to !CPLX_URL!"
+  call:update_senv_local_variable "CPLX_URL" "!CPLX_URL!" "https://.*/%CPLX_TOOL_NEW%/.*$"
+  goto:check_install_folders
+) else (
+  %_ok% "CPLX_URL does not include '%CPLX_VERSION%' (!CPLX_VERSION!)"
+)
 
 :end_game
 echo ----------------
