@@ -94,7 +94,7 @@ call:update_conf_file "%add_tool_dir%\senv.local.tpl" "%add_tool_dir%\senv.local
 :: template and actual environment settings.
 ::------------------------------------------------------------------------------
 :update_senv_local
-echo grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%cplx_dir%\senv.local.bat" ^>nul 2^>^&1
+rem echo grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%cplx_dir%\senv.local.bat" ^>nul 2^>^&1
 grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%cplx_dir%\senv.local.bat" >nul 2>&1
 if not errorlevel 1 (
   "%gum%" style --foreground 82 "✓ '%cplx_dir%\senv.local.bat' already includes a '%CPLX_TOOL_NEW%' section"
@@ -123,6 +123,44 @@ for /f "tokens=*" %%a in ('type "%cplx_dir%\senv.local.bat"') do (
     )
 )
 :end_loop_senv_local
+
+:check_cplx_bin
+if not defined CPLX_BIN (
+  %_ok% "CPLX_BIN is a lib: not defined for '%CPLX_TOOL_NEW%'"
+  goto:check_cplx_url
+)
+if not "%CPLX_BIN:_tbd_=%"=="%CPLX_BIN%" (
+  %_task% "Must ask if '%CPLX_TOOL_NEW%' is binary or lib"
+  "%gum%" style --foreground 45 "Step: Determine if '%CPLX_TOOL_NEW%' is a binary or library"
+  for /f "tokens=*" %%a in ('%gum% choose "Binary (executable)" "Library (linked)"') do (
+    if "%%a"=="Binary (executable)" (
+      set "CPLX_BIN=true"
+      "%gum%" style --foreground 82 "✓ Configured '%CPLX_TOOL_NEW%' as binary"
+    ) else (
+      set "CPLX_BIN="
+      "%gum%" style --foreground 82 "✓ Configured '%CPLX_TOOL_NEW%' as library"
+    )
+  )
+  sed -i "s/CPLX_BIN=_tbd_%CPLX_TOOL_NEW%/CPLX_BIN=!CPLX_BIN!/" "%cplx_dir%\senv.local.bat"
+  if errorlevel 1 (
+    %_fatal% "Issue during setting CPLX_BIN in '%cplx_dir%\senv.local.bat'" 122
+  ) else (
+    %_ok% "Set CPLX_BIN in '%cplx_dir%\senv.local.bat' to '!CPLX_BIN!'"
+  )
+  sed -i "s/CPLX_BIN=_tbd_%CPLX_TOOL_NEW%/CPLX_BIN=!CPLX_BIN!/" "%add_tool_dir%\senv.local.tpl"
+  if errorlevel 1 (
+    %_fatal% "Issue during setting CPLX_BIN in '%add_tool_dir%\senv.local.tpl'" 123
+  ) else (
+    %_ok% "Set CPLX_BIN in '%add_tool_dir%\senv.local.tpl' to '!CPLX_BIN!'"
+  )
+) else (
+  %_ok% "CPLX_BIN is defined as '!CPLX_BIN!'"
+)
+
+:check_cplx_url
+
+
+echo ----------------
 set cplx
 endlocal & set "CPLX_TOOL_NEW=%CPLX_TOOL_NEW%"
 goto:eof
