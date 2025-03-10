@@ -86,9 +86,9 @@ if "%CPLX_TOOL%" == "curl" (
 )
 
 if "%CPLX_TOOL%" == "libpsl" (
-  set "CPLX_VERSION=_tbd_libpsl"
+  set "CPLX_VERSION=0.21.5"
   rem https://
-  set "CPLX_URL=https://github.com/rockdaboot/libpsl/releases/download/0.21.5/libpsl-0.21.5.tar.gz"
+  set "CPLX_URL=https://github.com/rockdaboot/libpsl/releases/download/[version]/libpsl-[version].tar.gz
   set "CPLX_SRC_EXT=tar.gz"
   set "CPLX_CHECK_PREFIX=lib/aa"
   set "CPLX_CHECK_SRC=lib/aa"
