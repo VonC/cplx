@@ -272,6 +272,43 @@ if not "!CPLX_URL:%CPLX_VERSION%=!"=="!CPLX_URL!" (
   %_ok% "CPLX_URL does not include '%CPLX_VERSION%' (!CPLX_VERSION!)"
 )
 
+::------------------------------------------------------------------------------
+:: Installation Directory Setup
+::------------------------------------------------------------------------------
+:: Creates and configures the necessary installation directories and support
+:: files for the new tool. These directories serve as the foundation for tool
+:: installation, build artifacts, and runtime components.
+::
+:: Proper directory structure ensures consistent organization across tools and
+:: enables standardized build and installation processes that work reliably
+:: across the environment.
+::------------------------------------------------------------------------------
+:check_install_folders
+if exist "%src_dir%\install\env\%CPLX_TOOL_NEW%" (
+  %_ok% "Install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%' already exists"
+) else (
+  %_task% "Must create install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%'"
+  mkdir "%src_dir%\install\env\%CPLX_TOOL_NEW%"
+  if not exist "%src_dir%\install\env\%CPLX_TOOL_NEW%" (
+    %_fatal% "Issue during creating install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%'" 65
+  ) else (
+    %_ok% "Created install folder '%src_dir%\install\env\%CPLX_TOOL_NEW%'"
+  )
+)
+
+if exist "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh" (
+  %_ok% "Install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh' already exists"
+) else (
+  %_task% "Must create install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh'"
+  copy "%src_dir%\install\env\openldap\install_functions.sh" "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh"
+  if not exist "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh" (
+    %_fatal% "Issue during creating install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh'" 65
+  ) else (
+    %_ok% "Created install functions file '%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh'"
+  )
+) 
+
+
 :end_game
 echo ----------------
 set cplx
