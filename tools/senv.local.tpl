@@ -24,7 +24,7 @@ set "CPLX_TOOL_RC="
 rem set CPLX_TOOL_RC=1
 rem set "CPLX_RESET_STEP=copy_the_sources"
 
-set "CPLX_SRC_EXT=zip"
+set "CPLX_SRC_EXT=tar.gz"
 set "CPLX_ARCH_EXT=el8.x86_64"
 set "CPLX_URL="
 
@@ -89,6 +89,7 @@ if "%CPLX_TOOL%" == "libpsl" (
   set "CPLX_VERSION=_tbd_libpsl"
   rem https://
   set "CPLX_URL=https://github.com/rockdaboot/libpsl/releases/download/0.21.5/libpsl-0.21.5.tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
   set "CPLX_CHECK_PREFIX=lib/aa"
   set "CPLX_CHECK_SRC=lib/aa"
   set "CPLX_BIN="

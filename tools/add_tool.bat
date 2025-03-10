@@ -78,6 +78,7 @@ echo if "%%CPLX_TOOL%%" == "%CPLX_TOOL_NEW%" ^(
 echo   set "CPLX_VERSION=_tbd_%CPLX_TOOL_NEW%"
 echo   rem https://
 echo   set "CPLX_URL=_tbd_%CPLX_TOOL_NEW%"
+echo   set "CPLX_SRC_EXT=zip"
 echo   set "CPLX_CHECK_PREFIX=lib/aa"
 echo   set "CPLX_CHECK_SRC=lib/aa"
 echo   set "CPLX_BIN=_tbd_%CPLX_TOOL_NEW%"
@@ -174,7 +175,7 @@ if not defined CPLX_URL (
 )
 if "%CPLX_URL:_tbd_=%"=="%CPLX_URL%" (
   %_ok% "CPLX_URL is defined as '!CPLX_URL!'"
-  goto:check_cplx_version
+  goto:check_cplx_url_extension
 )
 %_task% "Must ask for '%CPLX_TOOL_NEW%' URL"
 "%gum%" style --foreground 45 "Step: Provide the URL for '%CPLX_TOOL_NEW%'" --bold
@@ -183,8 +184,50 @@ for /f "tokens=*" %%a in ('%gum% input --placeholder "Tool URL"') do (
 )
 call:update_senv_local_variable "CPLX_URL" "!CPLX_URL!"
 
-:check_cplx_version
+::------------------------------------------------------------------------------
+:: Source Archive Format Detection
+::------------------------------------------------------------------------------
+:: Analyzes the tool's URL to automatically detect the appropriate archive format
+:: (tar.gz or zip) or prompts the user to select one if detection fails. This
+:: ensures the build process uses the correct extraction method for source files.
+::
+:: This functionality improves user experience by reducing manual configuration
+:: while providing fallback options when automatic detection isn't possible.
+::------------------------------------------------------------------------------
+:check_cplx_url_extension
+rem if URL extension is .tgz or .tar.gz, then call:update_senv_local_variable "CPLX_SRC_EXT" "tar.gz" "zip"
 
+:: Auto-detect source extension from URL
+"%gum%" style --foreground 45 "Checking URL extension to determine source format..."
+if "!CPLX_URL!" NEQ "" (
+  :: Check if URL contains .tar.gz or .tgz extension
+  echo "!CPLX_URL!" | findstr /i /c:".tar.gz" /c:".tgz" >nul
+  if not errorlevel 1 (
+    "%gum%" style --foreground 82 "✓ Detected tar.gz format from URL"
+    if "%CPLX_SRC_EXT%"=="tar.gz" (
+      "%gum%" style --foreground 82 "✓ Confirmed tar.gz format from URL already in pace"
+    )
+    call:update_senv_local_variable "CPLX_SRC_EXT" "tar.gz" "zip"
+  ) else (
+    :: Check if URL contains .zip extension
+    echo "!CPLX_URL!" | findstr /i /c:".zip" >nul
+    if not errorlevel 1 (
+      "%gum%" style --foreground 82 "✓ Confirmed zip format from URL"
+    ) else (
+      :: Ask user for extension if not detected
+      "%gum%" style --foreground 226 "! Could not auto-detect source format from URL"
+      "%gum%" style --foreground 45 "Step: Select source archive format for '%CPLX_TOOL_NEW%'"
+      for /f "tokens=*" %%a in ('%gum% choose "tar.gz" "zip"') do (
+        set "CPLX_SRC_EXT=%%a"
+        "%gum%" style --foreground 82 "✓ Using !CPLX_SRC_EXT! format for source archives"
+        call:update_senv_local_variable "CPLX_SRC_EXT" "!CPLX_SRC_EXT!" "zip"
+      )
+    )
+  )
+)
+
+
+:end_game
 echo ----------------
 set cplx
 endlocal & set "CPLX_TOOL_NEW=%CPLX_TOOL_NEW%"
@@ -226,14 +269,17 @@ goto:eof
 :update_senv_local_variable
 set "variable=%~1"
 set "value=%~2"
+set "placeholder=%~3"
 
-sed -i "s,%variable%=_tbd_%CPLX_TOOL_NEW%,%variable%=%value%," "%cplx_dir%\senv.local.bat"
+if not defined placeholder ( set "placeholder=_tbd_%CPLX_TOOL_NEW%" )
+
+sed -i "s,%variable%=%placeholder%,%variable%=%value%," "%cplx_dir%\senv.local.bat"
 if errorlevel 1 (
   %_fatal% "Issue during setting %variable% in '%cplx_dir%\senv.local.bat'" 122
 ) else (
   %_ok% "Set %variable% in '%cplx_dir%\senv.local.bat' to '%value%'"
 )
-sed -i "s,%variable%=_tbd_%CPLX_TOOL_NEW%,%variable%=%value%," "%add_tool_dir%\senv.local.tpl"
+sed -i "s,%variable%=%placeholder%,%variable%=%value%," "%add_tool_dir%\senv.local.tpl"
 if errorlevel 1 (
   %_fatal% "Issue during setting %variable% in '%add_tool_dir%\senv.local.tpl'" 123
 ) else (
