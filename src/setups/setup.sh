@@ -108,6 +108,9 @@ main() {
         fatal "Could not set the CPLX_CHECK_SRC '${CPLX_CHECK_SRC}' in the properties file '${properties_file}'" 56
     fi
     ok "CPLX_CHECK_SRC='${CPLX_CHECK_SRC}' set in the properties_file '${properties_file}'"
+    if [[ -z "${CPLX_BIN}" ]]; then
+        CPLX_BIN=false
+    fi
     if [[ -n "${CPLX_BIN}" ]]; then
         if ! set_property "CPLX_BIN" "${CPLX_BIN}"; then
             fatal "Could not set the CPLX_BIN '${CPLX_BIN}' in the properties file '${properties_file}'" 56
