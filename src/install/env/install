@@ -302,6 +302,19 @@ function main() {
         error "main: package failed with '${res_package}'"
         return "${res_package}"
     fi
+    get_property CPLX_BIN
+    if [[ -z "$CPLX_BIN" ]]; then
+        error "No CPLX_BIN found in the properties file '${properties_file}'"
+        return 126
+    fi
+    if [[ ! "${CPLX_BIN}" == "true" ]]; then
+        deploy
+        res_deploy=$?
+        if [[ ${res_deploy} != 0 ]]; then
+            error "main: deploy failed with '${res_deploy}'"
+            return "${res_deploy}"
+        fi
+    fi
     return $?
 }
 
