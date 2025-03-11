@@ -23,6 +23,9 @@ for /f "tokens=* delims=" %%a in ('cygpath -u "%src_dir%"') do (
     SET "src_dir_unix=%%~a"
 )
 
+if not "%~1" == "" (
+    set "CPLX_TOOL_NEW=%~1"
+)
 call :main
 goto:eof
 
@@ -116,12 +119,16 @@ for /f "tokens=*" %%a in ('type "%cplx_dir%\senv.local.bat"') do (
     if defined CPLX_TOOL_FOUND (
         if "!line!"==")" ( goto:end_loop_senv_local )
         if not "!line:set =!"=="!line!" (
-          !line!
+            %_info% "Apply '!line!' from '%CPLX_TOOL_NEW%' section in '%cplx_dir%\senv.local.bat'"
+            !line!
         )
     )
-    if "!line:libpsl=!" neq "!line!" (
+    if "!line:%CPLX_TOOL_NEW%=!" neq "!line!" (
         set "CPLX_TOOL_FOUND=true"
     )
+)
+if not defined CPLX_TOOL_FOUND (
+    %_fatal% "Could not find '%CPLX_TOOL_NEW%' section in '%cplx_dir%\senv.local.bat'" 131
 )
 :end_loop_senv_local
 
