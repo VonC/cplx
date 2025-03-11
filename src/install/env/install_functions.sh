@@ -226,8 +226,13 @@ function package() {
     if [[ -z "${CPLX_ARCH_EXT}" ]]; then
         fatal "No CPLX_ARCH_EXT defined (like 'el8.x86_64'), unable to package '${tool_name}'" 28
     fi
-    package_name="${package_name_prefix}-$(date +'%Y%m%d.%H%M').${CPLX_ARCH_EXT}.tar.gz"
 
+    # Store the function output in a variable
+    package_name=$(find_package)
+    find_pkg_status=$?  # Capture the return code right after calling the function
+    if [[ $find_pkg_status -ne 0 ]]; then
+        package_name="${package_name_prefix}-$(date +'%Y%m%d.%H%M').${CPLX_ARCH_EXT}.tar.gz"
+    fi
     if [[ -z "${CPLX_CHECK_PREFIX}" ]]; then
         fatal "No CPLX_CHECK_PREFIX defined (element in installation directory), unable to install '${tool_name}'" 18
     fi
@@ -240,6 +245,7 @@ function package() {
             return 0
         else
             info "Package '${package_name}' is older than '${file_check_prefix}': package '${tool_name}' in '${package_name}'"
+            package_name="${package_name_prefix}-$(date +'%Y%m%d.%H%M').${CPLX_ARCH_EXT}.tar.gz"
         fi
     else
         info "No package '${package_name}' in '${tool}': package '${tool_name}' in '${package_name}'"
@@ -247,4 +253,73 @@ function package() {
     task "Must package '${tool_name}' in '${package_name}'"
     tar czf "${tool}/${package_name}" -C "${tool_prefix}" . || fatal "Unable to package '${tool_name}' in '${package_name}'" 19
     ok "Package is now done in '${package_name}'"
+}
+
+function find_package() {
+    local package_name_prefix
+    package_name_prefix=$(basename "${tool_prefix}")
+
+    if [[ -z "${package_name_prefix}" ]]; then
+        warning "No current symlink in '${tool_prefix}', cannot find package"
+        return 1
+    fi
+
+    if [[ -z "${CPLX_ARCH_EXT}" ]]; then
+        fatal "No CPLX_ARCH_EXT defined (like 'el8.x86_64'), unable to find package for '${tool_name}'" 28
+    fi
+
+    # Find the most recent package matching the pattern
+    local latest_package
+    latest_package=$(find "${tool}/" -maxdepth 1 -type f -name "${package_name_prefix}-*.${CPLX_ARCH_EXT}.tar.gz" | sort -r | head -n 1)
+
+    if [[ -z "${latest_package}" ]]; then
+        warning "No package found for '${package_name_prefix}' with extension '${CPLX_ARCH_EXT}' in '${tool}'"
+        return 1
+    fi
+
+    # Extract just the filename from the full path
+    local package_name
+    package_name=$(basename "${latest_package}")
+    echo "${package_name}"
+    return 0
+}
+
+function deploy() {
+    # Make sure the destination directory exists
+    local pkgs_dir="${HOME}/tools/pkgs"
+    mkdir -p "${pkgs_dir}" || fatal "Unable to create directory '${pkgs_dir}'" 30
+
+    # Find the latest package
+    local latest_package
+    latest_package=$(find_package)
+    find_pkg_status=$?  # Capture the return code
+
+    if [[ $find_pkg_status -ne 0 ]]; then
+        fatal "No package found for deployment" 31
+    fi
+
+    # Extract just the filename from the full path
+    local package_name
+    package_name=$(basename "${latest_package}")
+    local dest_file="${pkgs_dir}/${package_name}"
+    latest_package="${tool}/${package_name}"
+
+    # Check if the package is already in the destination directory
+    if [[ -e "${dest_file}" ]]; then
+        # Compare file sizes and modification times for a basic equality check
+        if [[ "${dest_file}" -nt "${latest_package}" ]]; then
+            ok "A more recent package '${package_name}' already exists in '${pkgs_dir}'"
+            return 0
+        else
+            # Files exist with same name but are different - create a new version
+            info "'${package_name}' found in '${pkgs_dir}' is older, updating it"
+        fi
+    fi
+
+    # Copy the package to the destination
+    task "Deploying package '${package_name}' to '${pkgs_dir}'"
+    cp "${latest_package}" "${dest_file}" || fatal "Failed to copy '${package_name}' to '${pkgs_dir}'" 32
+    ok "Package '${package_name}' successfully deployed to '${pkgs_dir}'"
+
+    return 0
 }
