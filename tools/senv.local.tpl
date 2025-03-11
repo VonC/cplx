@@ -100,8 +100,8 @@ if "%CPLX_TOOL%" == "libunistring" (
   rem https://
   set "CPLX_URL=https://mirror.team-cymru.com/gnu/libunistring/libunistring-[version].tar.gz
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=lib/libunistring.la"
+  set "CPLX_CHECK_SRC=lib/libunistring.la"
   set "CPLX_BIN="
 )
 
