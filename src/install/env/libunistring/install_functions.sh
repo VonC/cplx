@@ -11,11 +11,23 @@ function configure() {
         ok "'configure' is present in '$(pwd)'"
     fi
     
+    # shellcheck disable=SC2154
+    LDFLAGS="${LDFLAGS} -L${root}/usr/lib/gcc/x86_64-redhat-linux/4.8.5"
+
+    # In case they appear separately or in different order
+    LDFLAGS="${LDFLAGS//-lssl/}"
+    LDFLAGS="${LDFLAGS//-lcrypto/}"
+
+    # Clean up any double spaces that might have been created
+    LDFLAGS="${LDFLAGS//  / }"
+
+    # Export the new LDFLAGS
+    export LDFLAGS
+    
     # Build the configure command as an array
     local configure_cmd=( 
         "${tool_src}/configure" \
         "--prefix=${tool_prefix}" \
-        "--with-openssl=${root}/usr" \
     )
 
     sed -i "s,ssldir/lib\",ssldir/lib64\",g" configure || fatal "Unable to update 'configure' ssldir/lib to ssldir/lib64 in '$(pwd)'" 16
@@ -31,11 +43,7 @@ function configure() {
 }
 
 function build() {
-    if [[ ! -e git-add && ! -e ${CPLX_TOOL} ]]; then
-        task "Must make depend in '$(pwd)'"
-        make depend || fatal "Unable to make depend in '$(pwd)'" 19
-        ok "make is now done in '$(pwd)'"
-
+    if [[ ! -e "lib/libunistring.la" ]]; then
         task "Must make in '$(pwd)'"
         make || fatal "Unable to make in '$(pwd)'" 19
         ok "make is now done in '$(pwd)'"
