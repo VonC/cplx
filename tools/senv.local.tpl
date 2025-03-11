@@ -95,6 +95,16 @@ if "%CPLX_TOOL%" == "libpsl" (
   set "CPLX_BIN="
 )
 
+if "%CPLX_TOOL%" == "libunistring" (
+  set "CPLX_VERSION=1.3"
+  rem https://
+  set "CPLX_URL=https://mirror.team-cymru.com/gnu/libunistring/libunistring-[version].tar.gz
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN="
+)
+
 goto:eof
 
 
