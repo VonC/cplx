@@ -30,7 +30,7 @@ function setenv() {
 
     # --- autotools/autoconf ---
     export AUTOM4TE="${root}/usr/bin/autom4te"
-    export PERLLIB="${PERLLIB}:${root}/usr/share/autoconf:${root}/usr/lib64/perl5/vendor_perl"
+    export PERLLIB="${PERLLIB}:${root}/usr/share/autoconf:${root}/usr/lib64/perl5/vendor_perl:${root}/usr/share/perl5/vendor_perl"
     export AUTOM4TE_CFG="${root}/usr/share/autoconf/autom4te.cfg"
     export autom4te_perllibdir="${root}/usr/share/autoconf"
     export AC_MACRODIR="${root}/usr/share/autoconf"
