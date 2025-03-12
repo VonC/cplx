@@ -70,12 +70,6 @@ if not defined CPLX_TOOL_NEW (
 
 call:update_tool_properties
 
-rem echo grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%add_tool_dir%\senv.local.tpl" ^>nul 2^>^&1
-grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%add_tool_dir%\senv.local.tpl" >nul 2>&1
-if not errorlevel 1 (
-  "%gum%" style --foreground 82 "✓ '%add_tool_dir%\senv.local.tpl' already includes a '%CPLX_TOOL_NEW%' section"
-  goto:update_senv_local
-)
 (
 echo if "%%CPLX_TOOL%%" == "%CPLX_TOOL_NEW%" ^(
 echo   set "CPLX_VERSION=_tbd_%CPLX_TOOL_NEW%"
@@ -88,6 +82,12 @@ echo   set "CPLX_BIN=_tbd_%CPLX_TOOL_NEW%"
 echo ^)
 ) >"%add_tool_dir%\senv.local.tpl.tmp"
 
+rem echo grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%add_tool_dir%\senv.local.tpl" ^>nul 2^>^&1
+grep -E "CPLX_TOOL.*%CPLX_TOOL_NEW%" "%add_tool_dir%\senv.local.tpl" >nul 2>&1
+if not errorlevel 1 (
+  "%gum%" style --foreground 82 "✓ '%add_tool_dir%\senv.local.tpl' already includes a '%CPLX_TOOL_NEW%' section"
+  goto:update_senv_local
+)
 call:update_conf_file "%add_tool_dir%\senv.local.tpl" "%add_tool_dir%\senv.local.tpl.tmp"
 
 ::------------------------------------------------------------------------------
@@ -252,7 +252,7 @@ if "%CPLX_VERSION:_tbd_=%"=="%CPLX_VERSION%" (
   goto:update_cplx_url_version_placeholder
 )
 %_task% "Must ask for '%CPLX_TOOL_NEW%' version"
-"%gum%" style --foreground 45 "Step: Provide the URL for '%CPLX_TOOL_NEW%'" --bold
+"%gum%" style --foreground 45 "Step: Provide the version for '%CPLX_TOOL_NEW%'" --bold
 for /f "tokens=*" %%a in ('%gum% input --placeholder "Tool version"') do (
   set "CPLX_VERSION=%%a"
 )
