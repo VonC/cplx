@@ -15,7 +15,6 @@ function configure() {
     local configure_cmd=( 
         "${tool_src}/configure" \
         "--prefix=${tool_prefix}" \
-        "--with-openssl=${root}/usr" \
     )
 
     sed -i "s,ssldir/lib\",ssldir/lib64\",g" configure || fatal "Unable to update 'configure' ssldir/lib to ssldir/lib64 in '$(pwd)'" 16
@@ -32,10 +31,6 @@ function configure() {
 
 function build() {
     if [[ ! -e git-add && ! -e ${CPLX_TOOL} ]]; then
-        task "Must make depend in '$(pwd)'"
-        make depend || fatal "Unable to make depend in '$(pwd)'" 19
-        ok "make is now done in '$(pwd)'"
-
         task "Must make in '$(pwd)'"
         make || fatal "Unable to make in '$(pwd)'" 19
         ok "make is now done in '$(pwd)'"
