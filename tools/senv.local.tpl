@@ -105,6 +105,16 @@ if "%CPLX_TOOL%" == "libunistring" (
   set "CPLX_BIN="
 )
 
+if "%CPLX_TOOL%" == "libidn2" (
+  set "CPLX_VERSION=2.3.7"
+  rem https://
+  set "CPLX_URL=https://mirror.team-cymru.com/gnu/libidn/libidn2-2.3.7.tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/libidn2.la"
+  set "CPLX_CHECK_SRC=lib/libidn2.la"
+  set "CPLX_BIN="
+)
+
 goto:eof
 
 
