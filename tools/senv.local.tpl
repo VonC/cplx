@@ -35,6 +35,7 @@ if "%CPLX_TOOL%" == "python" (
   set "CPLX_CHECK_PREFIX=lib/libpython3.so"
   set "CPLX_CHECK_SRC=libpython3.so"
   set "CPLX_BIN=true"
+  set "CPLX_CONFIG_DONE=default"
 )
 rem set "CPLX_TOOL=mpdecimal"
 if "%CPLX_TOOL%" == "mpdecimal" (
@@ -44,6 +45,7 @@ if "%CPLX_TOOL%" == "mpdecimal" (
   set "CPLX_CHECK_PREFIX=lib/libmpdec.so"
   set "CPLX_CHECK_SRC=libmpdec/libmpdec.so"
   set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
 )
 
 if "%CPLX_TOOL%" == "openssl111" (
@@ -54,6 +56,7 @@ if "%CPLX_TOOL%" == "openssl111" (
   set "CPLX_CHECK_PREFIX=usr/lib64/libssl.so.1.1"
   set "CPLX_CHECK_SRC=libssl.so.1.1"
   set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
 )
 
 if "%CPLX_TOOL%" == "git" (
@@ -63,6 +66,7 @@ if "%CPLX_TOOL%" == "git" (
   set "CPLX_CHECK_PREFIX=libexec/git-core/git-add"
   set "CPLX_CHECK_SRC=git-add"
   set "CPLX_BIN=true"
+  set "CPLX_CONFIG_DONE=configure: exit 0 config.log"
 )
 
 if "%CPLX_TOOL%" == "openldap" (
@@ -73,6 +77,7 @@ if "%CPLX_TOOL%" == "openldap" (
   set "CPLX_CHECK_PREFIX=lib/libldap.la"
   set "CPLX_CHECK_SRC=libraries/libldap/libldap.la"
   set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
 )
 
 if "%CPLX_TOOL%" == "curl" (
@@ -83,6 +88,7 @@ if "%CPLX_TOOL%" == "curl" (
   set "CPLX_CHECK_PREFIX=lib/libcurl.la"
   set "CPLX_CHECK_SRC=lib/libcurl.la"
   set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
 )
 
 if "%CPLX_TOOL%" == "libpsl" (
@@ -93,6 +99,7 @@ if "%CPLX_TOOL%" == "libpsl" (
   set "CPLX_CHECK_PREFIX=lib/libpsl.la"
   set "CPLX_CHECK_SRC=lib/libpsl.la"
   set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
 )
 
 if "%CPLX_TOOL%" == "libunistring" (
@@ -103,6 +110,7 @@ if "%CPLX_TOOL%" == "libunistring" (
   set "CPLX_CHECK_PREFIX=lib/libunistring.la"
   set "CPLX_CHECK_SRC=lib/libunistring.la"
   set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
 )
 
 if "%CPLX_TOOL%" == "libidn2" (
@@ -113,6 +121,7 @@ if "%CPLX_TOOL%" == "libidn2" (
   set "CPLX_CHECK_PREFIX=lib/libidn2.la"
   set "CPLX_CHECK_SRC=lib/libidn2.la"
   set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
 )
 
 goto:eof

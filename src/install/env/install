@@ -254,8 +254,38 @@ function main() {
     pwd
     setOption _reconfigure "configure" "cfg" "rc" "reconfigure"
     setOption _reclean "clean" "cl"
-    if ! grep "creating Makefile$" "${tool_src}/config.log"; then
-        warning "main: existing config.log has not created a Makefile yet, force reconfiguring in '$(pwd)'"
+    # TODO: check if CPLX_CONFIG_DONE is defined (e.g. 'configure: exit 0')
+    # if not, search 'creating Makefile$' by default.
+
+    get_property CPLX_CONFIG_DONE
+    local CPLX_CONFIG_DONE_CMD
+    if [[ -z  "${CPLX_CONFIG_DONE}" ]]; then
+        fatal "CPLX_CONFIG_DONE is not defined: no way to know if configure completed successfully" 211
+    fi
+    if [[ "${CPLX_CONFIG_DONE}" == "default" ]]; then
+        CPLX_CONFIG_DONE_CMD="grep \"creating Makefile\$\" \"${tool_src}/config.log\""
+    else
+        # Extract the last word as the file part
+        file_part="${CPLX_CONFIG_DONE##* }"
+        
+        # Extract everything except the last word as the command part
+        value_part="${CPLX_CONFIG_DONE% *}"
+        CPLX_CONFIG_DONE_CMD="grep \"${value_part}\" \"${tool_src}/${file_part}\""
+    fi
+
+    task "Must evaluate CPLX_CONFIG_DONE_CMD '${CPLX_CONFIG_DONE_CMD}'"
+
+    # Execute the command and capture its return code
+    local config_result
+    eval "${CPLX_CONFIG_DONE_CMD}"
+    config_result=$?
+
+
+    # Check if the command succeeded (return code 0) or failed (non-zero)
+    if [[ ${config_result} -eq 0 ]]; then
+        ok "Configuration has successfully finished"
+    else
+        warning "main: existing config.log has not finished yet, force reconfiguring in '$(pwd)'"
         _reconfigure=0
     fi
     info "main: reconfigure='${_reconfigure}'"
@@ -284,6 +314,7 @@ function main() {
     else
         info "reclean is false, so no clean performed before build"
     fi
+
     build
     res_build=$?
     if [[ ${res_build} != 0 ]]; then

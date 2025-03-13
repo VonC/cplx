@@ -119,6 +119,16 @@ main() {
     else
         ok "CPLX_BIN not defined for CPLX_TOOL='${CPLX_TOOL}' : no bin wrapper script needed"
     fi
+    if [[ -z "${CPLX_CONFIG_DONE}" ]]; then
+        warning "CPLX_CONFIG_DONE not defined for CPLX_TOOL='${CPLX_TOOL}' : set to default"
+        CPLX_CONFIG_DONE="default"
+    fi
+    if [[ -n "${CPLX_CONFIG_DONE}" ]]; then
+        if ! set_property "CPLX_CONFIG_DONE" "${CPLX_CONFIG_DONE}"; then
+            fatal "Could not set the CPLX_CONFIG_DONE '${CPLX_CONFIG_DONE}' in the properties file '${properties_file}'" 56
+        fi
+        ok "CPLX_CONFIG_DONE='${CPLX_CONFIG_DONE}' set in the properties_file '${properties_file}'"
+    fi
 
     validate_the_ssh_connection "$@"
     get_the_version
