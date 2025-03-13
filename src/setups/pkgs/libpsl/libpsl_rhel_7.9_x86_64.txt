@@ -2,3 +2,6 @@ glibc-headers
 glibc-devel
 glibc
 kernel-headers
+cpp
+_libidn2
+_libunistring
