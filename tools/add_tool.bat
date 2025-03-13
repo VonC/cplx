@@ -68,6 +68,13 @@ if not defined CPLX_TOOL_NEW (
     call:gum_echo --foreground 45 "Using existing tool: '" --foreground 226 "!CPLX_TOOL_NEW!" --foreground 45 "'"
 )
 
+rem Example of testing one specific function of add_tool:
+rem @echo on
+rem set "ECHO_STATE=ON"
+rem call:check_cplx_config_done
+rem exit /b 1
+
+rem Second step: update the configuration files
 call:update_tool_properties
 
 (
@@ -79,6 +86,7 @@ echo   set "CPLX_SRC_EXT=zip"
 echo   set "CPLX_CHECK_PREFIX=lib/aa"
 echo   set "CPLX_CHECK_SRC=lib/aa"
 echo   set "CPLX_BIN=_tbd_%CPLX_TOOL_NEW%"
+echo   set "CPLX_CONFIG_DONE=_tbd_%CPLX_TOOL_NEW%"
 echo ^)
 ) >"%add_tool_dir%\senv.local.tpl.tmp"
 
@@ -297,6 +305,20 @@ call:check_or_create_resource "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_fun
 call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%" "setups pkgs"
 call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%\%CPLX_TOOL_NEW%_centos_8_x86_64.txt" "setups pkgs file" "%src_dir%\setups\pkgs\minimal_centos_8_x86_64.txt"
 call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%\%CPLX_TOOL_NEW%_rhel_7.9_x86_64.txt" "setups pkgs file" "%src_dir%\setups\pkgs\minimal_rhel_7.9_x86_64.txt"
+
+:check_cplx_config_done
+if not defined CPLX_CONFIG_DONE (
+  %_fatal% "CPLX_CONFIG_DONE is not defined for '%CPLX_TOOL_NEW%'" 121
+)
+if not "%CPLX_CONFIG_DONE:_tbd_=%"=="%CPLX_CONFIG_DONE%" (
+  %_task% "Must ask for '%CPLX_TOOL_NEW%' version"
+  "%gum%" style --foreground 45 "Step: Provide the command to check if configure has completed successfully for '%CPLX_TOOL_NEW%'" --bold
+  for /f "tokens=*" %%a in ('%gum% input --value "default"') do (
+    set "CPLX_CONFIG_DONE=%%a"
+  )
+)
+%_ok% "CPLX_CONFIG_DONE is defined as '!CPLX_CONFIG_DONE!'"
+call:update_senv_local_variable "CPLX_CONFIG_DONE" "!CPLX_CONFIG_DONE!"
 
 :end_game
 echo ----------------
