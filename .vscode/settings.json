@@ -19,5 +19,8 @@
     "titleBar.inactiveBackground": "#92d28499",
     "titleBar.inactiveForeground": "#15202b99"
   },
-  "peacock.color": "#92d284"
+  "peacock.color": "#92d284",
+  "cSpell.enabledFileTypes": {
+    "plaintext": true
+  }
 }
