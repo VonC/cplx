@@ -9,6 +9,9 @@ function setenv() {
     export tool_src="${tool}/sources/current"
     export root="${tool}/root"
 
+    update_path "${root}/usr/bin"
+    update_path "${root}/bin"
+
     # --- Library Paths ---
     # Use a single LD_LIBRARY_PATH, consistently constructed.
     export LD_LIBRARY_PATH="${root}/usr/lib64:${root}/usr/lib:${root}/lib64:${root}/lib:${tool_prefix}/usr/lib64:${tool_prefix}/lib64:${tool_prefix}/usr/lib:${tool_prefix}/lib"
@@ -82,7 +85,7 @@ function setenv() {
     export LIBS="-lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"  # Correct order, explicit libs.
 
     export ZLIB_PATH="${root}/usr"
-    export CURLDIR="${root}/usr"
+    export CURLDIR="${root}"
     export OPENSSLDIR="${root}/usr"
     export OPENSSL_LDFLAGS="-L${root}/usr/lib64"
     export LIBPCREDIR="${root}/usr"
@@ -111,71 +114,18 @@ function setenv() {
     fi
 }
 
-#-------------------------------------------------------------------------
-# Function: update_xxpath
-#
-# Purpose:
-#   This function updates an environment (or shell) variable that holds a series of
-#   colon-separated paths (e.g., LD_LIBRARY_PATH or COMPILER_PATH). It does so by:
-#
-#   1. Searching the directory "${root}" for a file matching a given search
-#      pattern (query).
-#   2. Extracting the directory that contains this file.
-#   3. Prepending that directory to the specified variable, provided it is not already
-#      included.
-#
-#   By ensuring the required directory is at the beginning of the variable, tools like
-#   gcc or ld can find the necessary files during compilation/linking.
-#
-# Why use `printf -v`?
-#   'printf -v' is used for its ability to directly format and assign a string to a variable.
-#   This method is safer than using command substitution because it avoids issues with word
-#   splitting and preserves the exact string structure, without spawning a separate subshell.
-#-------------------------------------------------------------------------
-function update_xxpath() {
-    # The first argument is the name of the variable (e.g., LD_LIBRARY_PATH) to update.
-    local name
-    name="${1}"
-
-    # The second argument is the pattern (query) used to find the desired file (e.g., "cc1").
-    local query
-    query="${2}"
-
-    # Search for a file matching the query under "${root}". If not found, call fatal.
-    local libp
-    libp="$(find "${root}" -name "${query}" || fatal "${query} missing for '${name}' in '${root}'" 41)"
-
-    # Extract the directory part of the found file’s path.
-    libp="$(dirname "${libp}")"
-
-    # Retrieve the current value of the variable referenced by name using indirect expansion.
-    avalue="${!name}"
-
-    # Check if the variable already starts with the directory (libp).
-    # Parameter expansion here strips libp plus a trailing colon if present.
-    # If the stripped value is not equal to the original, libp is already prepended.
-    if [[ "${avalue#"${libp}":}" != "${avalue}" ]]; then
-        return 0
-    fi
-
-    # Also, if the whole variable exactly equals libp, no update is necessary.
-    if [[ "${avalue}" == "${libp}" ]]; then
-        return 0
-    fi
-
-    # If the variable is empty, simply assign the new directory.
-    if [[ "${avalue}" == "" ]]; then
-        # 'printf -v' is used here to directly assign the formatted string to the variable named in $name.
-        # This avoids additional commands that might cause word splitting or subshell execution.
-        printf -v "$name" "%s" "${libp}"
+function update_path() {
+    local folder
+    folder="${1}"
+    # Wrap PATH in colons for the check so that boundaries are properly detected,
+    # even if PATH does not end with a colon.
+    if [[ ":$PATH:" != *":${folder}:"* ]]; then
+        export PATH="${PATH}:${folder}"
+        info "Added '${folder}' to PATH (ii)."
     else
-        # Otherwise, prepend the new directory (libp) to the existing paths, separated by a colon.
-        printf -v "$name" "%s:%s" "${libp}" "${!name}"
+        ok "'${folder}' is already in the PATH (ii)."
     fi
-
-    # Note: The export of the variable is left to the caller if needed.
 }
-
 
 function install() {
     if [[ ! -e "${tool_prefix}" ]]; then
