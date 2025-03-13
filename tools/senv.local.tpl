@@ -90,8 +90,8 @@ if "%CPLX_TOOL%" == "libpsl" (
   rem https://
   set "CPLX_URL=https://github.com/rockdaboot/libpsl/releases/download/[version]/libpsl-[version].tar.gz
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=lib/libpsl.la"
+  set "CPLX_CHECK_SRC=lib/libpsl.la"
   set "CPLX_BIN="
 )
 
