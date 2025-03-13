@@ -124,6 +124,17 @@ if "%CPLX_TOOL%" == "libidn2" (
   set "CPLX_CONFIG_DONE=default"
 )
 
+if "%CPLX_TOOL%" == "openssl3" (
+  set "CPLX_VERSION=3.4.1"
+  rem https://
+  set "CPLX_URL=https://github.com/openssl/openssl/releases/download/openssl-3.4.1/openssl-3.4.1.tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=usr/lib64/libssl.so"
+  set "CPLX_CHECK_SRC=libssl.so"
+  set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=LIBS=apps/libapps.a Makefile"
+)
+
 goto:eof
 
 
