@@ -300,7 +300,7 @@ if not "!CPLX_URL:%CPLX_VERSION%=!"=="!CPLX_URL!" (
 ::------------------------------------------------------------------------------
 :check_install_folders
 call:check_or_create_resource "%src_dir%\install\env\%CPLX_TOOL_NEW%" "install"
-call:check_or_create_resource "%src_dir%\install\env\%CPLX_TOOL_NEW%\install_functions.sh" "install functions file" "%src_dir%\install\env\install_functions.tpl.sh"
+call:check_or_create_resource "%src_dir%\install\env\%CPLX_TOOL_NEW%\%CPLX_TOOL_NEW%_install_functions.sh" "install functions file" "%src_dir%\install\env\tool_install_functions.tpl.sh"
 
 call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%" "setups pkgs"
 call:check_or_create_resource "%src_dir%\setups\pkgs\%CPLX_TOOL_NEW%\%CPLX_TOOL_NEW%_centos_8_x86_64.txt" "setups pkgs file" "%src_dir%\setups\pkgs\minimal_centos_8_x86_64.txt"

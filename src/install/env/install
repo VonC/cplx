@@ -57,11 +57,11 @@ if [[ "$valid" == false ]]; then
     fatal "Invalid tool name: '${tool}'. Available tools are: ${services}" 1
 fi
 
-if [[ ! -e "${DIR}/${tool}/install_functions.sh" ]]; then
-    fatal "Tool '${tool}' install_functions.sh script not found at '${DIR}/${tool}'" 2
+if [[ ! -e "${DIR}/${tool}/${tool}_install_functions.sh" ]]; then
+    fatal "Tool '${tool}_install_functions.sh' script not found at '${DIR}/${tool}'" 2
 else
     # shellcheck source=/dev/null
-    source "${DIR}/${tool}/install_functions.sh"
+    source "${DIR}/${tool}/${tool}_install_functions.sh"
 fi
 rm -f "${DIR}/tool"
 ln -nfs "${tool}" "${DIR}/tool"
