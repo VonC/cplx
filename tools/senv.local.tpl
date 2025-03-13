@@ -60,7 +60,7 @@ if "%CPLX_TOOL%" == "git" (
   set "CPLX_VERSION=2.48.1"
   rem https://github.com/git/git/archive/refs/tags/v2.48.1.zip
   set "CPLX_URL=https://github.com/git/git/archive/refs/tags/v[version].zip"
-  set "CPLX_CHECK_PREFIX=git-add"
+  set "CPLX_CHECK_PREFIX=libexec/git-core/git-add"
   set "CPLX_CHECK_SRC=git-add"
   set "CPLX_BIN=true"
 )

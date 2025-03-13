@@ -34,13 +34,16 @@ function configure() {
 }
 
 function build() {
-    if [[ ! -e git-add && ! -e ${CPLX_TOOL} ]]; then
-        task "Must make all in '$(pwd)'"
-        #make -d v=1 -d DEVELOPER=1 all || fatal "Unable to make all in '$(pwd)'" 19
-        make all || fatal "Unable to make all in '$(pwd)'" 19
+    get_property CPLX_CHECK_SRC
+    if [[ -z ${CPLX_CHECK_SRC} ]]; then
+        fatal "CPLX_CHECK_SRC is not set" 20
+    fi
+    if [[ ! -e "${CPLX_CHECK_SRC}" ]]; then
+        task "Must make all in '$(pwd)' (CPLX_CHECK_SRC='${CPLX_CHECK_SRC}' is missing in '$(pwd)')"
+        make all || fatal "Unable to make in '$(pwd)'" 19
         ok "make all is now done in '$(pwd)'"
     else
-        ok "${CPLX_TOOL} already compiled in '$(pwd)'"
+        ok "${CPLX_TOOL} already compiled in '$(pwd)' (CPLX_CHECK_SRC='${CPLX_CHECK_SRC}' is there)"
     fi
 }
 
