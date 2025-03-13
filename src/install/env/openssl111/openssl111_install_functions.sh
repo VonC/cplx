@@ -1,7 +1,8 @@
 #!/bin/bash
 
 function configure() {
-    task "config.log not present: reconfigure"
+    # shellcheck disable=SC2154
+    task "'${tool_name}' reconfigure"
     unset OPENSSL_LDFLAGS
     # https://wiki.openssl.org/index.php/Compilation_and_Installation#PREFIX_and_OPENSSLDIR
 
