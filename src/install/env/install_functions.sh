@@ -52,7 +52,7 @@ function setenv() {
 
     # --- Flags ---
     export GCC_PATH="${root}"
-    export CPPFLAGS="-I${GCC_PATH}/usr/include" # Include paths for the preprocessor.
+    export CPPFLAGS="-I${GCC_PATH}/usr/include -I${GCC_PATH}/include" # Include paths for the preprocessor.
 
     # CFLAGS: Correctly set sysroot, PIC, and optimization.
     export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O2 -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2"  # Use -O2 for optimization
