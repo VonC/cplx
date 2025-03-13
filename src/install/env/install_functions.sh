@@ -74,8 +74,8 @@ function setenv() {
                     -Wl,-rpath=${LD_LIBRARY_PATH} \
                     -Wl,--dynamic-linker=${dynamic_linker} \
                     -Wl,--export-dynamic \
-                    -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib \
-                    -lssl -lcrypto"
+                    -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib"
+                    # -lssl -lcrypto"
                     # -Wl,-verbose"
                     # Standard lib directories.
                     # No -nodefaultlibs needed with a proper sysroot.
