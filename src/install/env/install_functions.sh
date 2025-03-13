@@ -99,18 +99,21 @@ function setenv() {
     fi
 
     # --- Source tool-specific install functions ---
-    if [[ ! -e "${tool}/install_functions.sh" ]]; then
-        fatal "Missing '${tool}/install_functions.sh' file" 20
+    # shellcheck disable=SC2154
+    if [[ ! -e "${tool}/${tool_name}_install_functions.sh" ]]; then
+        fatal "Missing '${tool}/${tool_name}_install_functions.sh' file" 20
     fi
-    source "${tool}/install_functions.sh" || fatal "Unable to source '${tool}/install_functions.sh'" 21
+    # shellcheck disable=SC1090
+    # shellcheck disable=SC2154
+    source "${tool}/${tool_name}_install_functions.sh" || fatal "Unable to source '${tool}/${tool_name}_install_functions.sh'" 21
     if ! declare -f configure &>/dev/null; then
-        fatal "Missing 'configure' function in '${tool}/install_functions.sh'" 22
+        fatal "Missing 'configure' function in '${tool}/${tool_name}_install_functions.sh'" 22
     fi
     if ! declare -f clean &>/dev/null; then
-        fatal "Missing 'clean' function in '${tool}/install_functions.sh'" 23
+        fatal "Missing 'clean' function in '${tool}/${tool_name}_install_functions.sh'" 23
     fi
     if ! declare -f build &>/dev/null; then
-        fatal "Missing 'build' function in '${tool}/install_functions.sh'" 24
+        fatal "Missing 'build' function in '${tool}/${tool_name}_install_functions.sh'" 24
     fi
 }
 
