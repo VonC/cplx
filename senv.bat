@@ -10,6 +10,7 @@ doskey sp="%project_dir%/src/setups/setup.bat" packages $*
 doskey scpe="%project_dir%/src/setups/setup.bat" "copy.*env" $*
 doskey ic=cmd /V /C "set CPLX_INSTALL_COPY_ONLY=1 && "%project_dir%/src/install/install.bat""
 doskey at="%project_dir%/tools/add_tool.bat" $*
+doskey utm="%project_dir%/tools/git/update-tag-message.bat" $*
 
 doskey st="%project_dir%/tools/switchtool.bat" $*
 
