@@ -5,7 +5,10 @@ kernel-headers
 glibc-static
 zlib
 cpp
-openssl111
+_openssl111
 gcc
 zlib
 zlib-devel
+_libpsl
+_libunistring
+_libidn2

@@ -16,9 +16,22 @@ function configure() {
         "${tool_src}/configure" \
         "--prefix=${tool_prefix}" \
         "--with-openssl=${root}/usr" \
+        "--enable-threaded-resolver" \
+        "--with-ca-path=/etc/ssl/certs" \
     )
 
+    # shellcheck disable=SC2154
+    LDFLAGS="${LDFLAGS} -L${root}/usr/lib/gcc/x86_64-redhat-linux/4.8.5"
+
+    # In case they appear separately or in different order
+    LDFLAGS="${LDFLAGS//-lssl/}"
+    LDFLAGS="${LDFLAGS//-lcrypto/}"
+
+    # Clean up any double spaces that might have been created
+    LDFLAGS="${LDFLAGS//  / }"
     
+    # Export the new LDFLAGS
+    export LDFLAGS
 
     sed -i "s,ssldir/lib\",ssldir/lib64\",g" configure || fatal "Unable to update 'configure' ssldir/lib to ssldir/lib64 in '$(pwd)'" 16
 
@@ -33,16 +46,16 @@ function configure() {
 }
 
 function build() {
-    if [[ ! -e git-add && ! -e ${CPLX_TOOL} ]]; then
-        task "Must make depend in '$(pwd)'"
-        make depend || fatal "Unable to make depend in '$(pwd)'" 19
-        ok "make is now done in '$(pwd)'"
-
-        task "Must make in '$(pwd)'"
+    get_property CPLX_CHECK_SRC
+    if [[ -z ${CPLX_CHECK_SRC} ]]; then
+        fatal "CPLX_CHECK_SRC is not set" 20
+    fi
+    if [[ ! -e "${CPLX_CHECK_SRC}" ]]; then
+        task "Must make in '$(pwd)' (CPLX_CHECK_SRC='${CPLX_CHECK_SRC}' is missing in '$(pwd)')"
         make || fatal "Unable to make in '$(pwd)'" 19
         ok "make is now done in '$(pwd)'"
     else
-        ok "${CPLX_TOOL} already compiled in '$(pwd)'"
+        ok "${CPLX_TOOL} already compiled in '$(pwd)' (CPLX_CHECK_SRC='${CPLX_CHECK_SRC}' is there)"
     fi
 }
 
