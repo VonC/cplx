@@ -51,8 +51,8 @@ if "%CPLX_TOOL%" == "openssl111" (
   rem https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1w/openssl-1.1.1w.tar.gz
   set "CPLX_URL=https://github.com/openssl/openssl/releases/download/OpenSSL_[version_]/openssl-[version].tar.gz
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_CHECK_PREFIX=dummy"
-  set "CPLX_CHECK_SRC=dummy"
+  set "CPLX_CHECK_PREFIX=usr/lib64/libssl.so.1.1"
+  set "CPLX_CHECK_SRC=libssl.so.1.1"
   set "CPLX_BIN="
 )
 
@@ -60,8 +60,8 @@ if "%CPLX_TOOL%" == "git" (
   set "CPLX_VERSION=2.48.1"
   rem https://github.com/git/git/archive/refs/tags/v2.48.1.zip
   set "CPLX_URL=https://github.com/git/git/archive/refs/tags/v[version].zip"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=git-add"
+  set "CPLX_CHECK_SRC=git-add"
   set "CPLX_BIN=true"
 )
 
@@ -70,8 +70,8 @@ if "%CPLX_TOOL%" == "openldap" (
   rem https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.5.19.tgz
   set "CPLX_SRC_EXT=tar.gz"
   set "CPLX_URL=https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-[version].tgz"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=lib/libldap.la"
+  set "CPLX_CHECK_SRC=libraries/libldap/libldap.la"
   set "CPLX_BIN="
 )
 
@@ -80,8 +80,8 @@ if "%CPLX_TOOL%" == "curl" (
   rem https://curl.se/download/curl-8.12.1.tar.gz
   set "CPLX_SRC_EXT=tar.gz"
   set "CPLX_URL=https://curl.se/download/curl-[version].tgz"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=lib/libcurl.la"
+  set "CPLX_CHECK_SRC=lib/libcurl.la"
   set "CPLX_BIN="
 )
 
