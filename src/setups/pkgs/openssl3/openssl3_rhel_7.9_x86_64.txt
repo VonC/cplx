@@ -1,0 +1,6 @@
+glibc-headers
+glibc-devel
+glibc
+kernel-headers
+zlib
+cpp
