@@ -1,20 +1,4 @@
-0.15.0 -- curl dependencies compil, Git and openssl3
+0.16.0-SNAPSHOT -- Git credential manager study
 
-Start with libpsl and its own dependencies (libidn2, libunistring).  
-Then install openldap, curl, libpsl and libunistring in Git: it works, and 
-`git-remote-https` is finally compiled.
-Test also openssl3 (3.4.1) not yet included in Git.
-
-Notes:
-* Refactor the `install_functions.sh` to include the name of the tool in their
-  name: easier to distinguish them.
-* `CPLX_CONFIG_DONE` helps grep a string in a file (by default,
-  'Creating Makefile' in '`config.log`') to better determine if a re-configure
-  is needed.
-* PATH now includes also `root/bin`, not just `root/usr/bin`.
-* A built package is now deployed to tools/pkgs automatically, when `CPLX_BIN` 
-  is not 'true'. `find_package` knows to select the most recent package when it
-  is a built one (as opposed to system ones, which should be unique)
-* The alias `utm` allows to update a past tag, or recreate a missing one with,
-  as message, the content of the version.txt at that past commit.  
-  The script is `tools/git/update-tag-message(.bat/.sh)`.
+Where to store credentials?
+Also check if additional modules can be activated for OpenSSL3
