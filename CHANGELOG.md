@@ -4,7 +4,68 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.14.0] - 2025-03-10 - Openldap compilation, add_tool script
+## [v0.15.0] - 2025-03-14 - curl dependencies compil, Git and openssl3
+
+Start with libpsl and its own dependencies (libidn2, libunistring).  
+Then install openldap, curl, libpsl and libunistring in Git: it works, and 
+`git-remote-https` is finally compiled.
+Test also openssl3 (3.4.1) not yet included in Git.
+
+Notes:
+* Refactor the `install_functions.sh` to include the name of the tool in their
+  name: easier to distinguish them.
+* `CPLX_CONFIG_DONE` helps grep a string in a file (by default,
+  'Creating Makefile' in '`config.log`') to better determine if a re-configure
+  is needed.
+* PATH now includes also `root/bin`, not just `root/usr/bin`.
+* A built package is now deployed to tools/pkgs automatically, when `CPLX_BIN` 
+  is not 'true'. `find_package` knows to select the most recent package when it
+  is a built one (as opposed to system ones, which should be unique)
+* The alias `utm` allows to update a past tag, or recreate a missing one with,
+  as message, the content of the version.txt at that past commit.  
+  The script is `tools/git/update-tag-message(.bat/.sh)`.
+
+### 🚀 Features
+
+- *(setup)* Add libunistring
+- *(install)* Implement package search and deploy
+- *(install)* Deploy cplx-bin conditionally
+- *(setups)* Add libidn2
+- *(install)* Update PATH in install script
+- *(install)* Add CPLX_CONFIG_DONE property
+- *(install)* Add openssl3 support
+- *(tools)* `utm` alias for update tag message script
+
+### 🐛 Bug Fixes
+
+- *(tools)* Pass tool name to add_tool.bat
+- *(tools)* Correct libunistring check prefix
+- *(setup)* Add cpp dependency for libunistring pkgs
+- *(install)* Correctly link libunistring with cc1
+- *(setup)* Handle empty CPLX_BIN variable
+- *(install)* Configure and build template process
+- *(install)* Update PERLLIB for perl modules
+- *(tools)* Correctly place version query in add_tool
+- *(install)* Add missing include path
+- *(install)* Fix libpsl build on RHEL 7.9
+- *(install)* Resolve curl build issues on RHEL7.9
+- *(setups)* Correct Git dependencies and tools checks
+- *(setups)* Openldap, correct openssl111 pkg name
+- *(setups)* Update PATH env var
+- *(install)* Build Git process reliability
+- *(install)* Do not impose `-lssl`/`-lcrypto`
+- *(install)* Openssl111 reconfigure message
+- *(changelog)* Description message for range
+
+### 🚜 Refactor
+
+- *(install)* Rename tools install fct scripts
+
+### ⚙️ Miscellaneous Tasks
+
+- *(vscode)* Enable spell checking for plain text files
+
+## [v0.14.0] - 2025-03-10 -- Openldap compilation, add_tool script
 
 Since ldap uses openssl, it needs to use the right version of openssl
 Openldap will need many dependencies to be recompiled, so we need to add many additional tools.
