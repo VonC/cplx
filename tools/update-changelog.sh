@@ -15,11 +15,14 @@ main() {
   if [[ "${v_tag_name}" == "latest" ]]; then v_tag_name=""; fi
 
   previous_tag=""
-  if [[ ! -e "${PROJECT_DIR}/CHANGELOG.md" ]]; then
+if [[ ! -e "${PROJECT_DIR}/CHANGELOG.md" ]]; then
     range=()
+    info "Generating full changelog (no range specified - includes all commits)"
     "${gcliff[@]}" --
   elif [[ -z "${v_tag_name}" ]]; then
-    range=(-- "$(git -C "${PROJECT_DIR}" describe --abbrev=0 --tags)..HEAD")
+    latest_tag=$(git -C "${PROJECT_DIR}" describe --abbrev=0 --tags)
+    range=(-- "${latest_tag}..HEAD")
+    info "Generating changelog from latest tag '${latest_tag}' to HEAD"
     "${gcliff[@]}" "${range[@]}"
   elif git show-ref --tags --quiet --verify "refs/tags/${v_tag_name}" && [ "$(git cat-file -t "${v_tag_name}")" = "tag" ]; then
     previous_tag=$(git tag --sort=-version:refname | awk "/^${v_tag_name}\$/ {getline; print; exit}")
@@ -29,9 +32,11 @@ main() {
     elif [[ "${previous_tag}" == "${v_tag_name}" ]]; then
       # no previous tag: get the first commit of the current branch
       range=()
+      info "Generating full changelog (no previous tag found for '${v_tag_name}')"
       "${gcliff[@]}" --
     else
       range=(-- "${previous_tag}..HEAD")
+      info "Generating changelog for range: '${previous_tag}' to HEAD"
       "${gcliff[@]}" "${range[@]}"
     fi
   else
