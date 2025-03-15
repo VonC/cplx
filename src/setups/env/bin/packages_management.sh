@@ -1107,6 +1107,7 @@ function fix_pkgconfig_pc() {
     # Match everything up to and including /root/
     if [[ "${pkg_file}" =~ ^(.*\/root\/) ]]; then
         root_path="${BASH_REMATCH[1]}"
+        root_path="$(readlink -f "${root_path}")/"
         info "Root path extracted: ${root_path}"
     else
         fatal "Failed to extract root path from '${pkg_file}'" 174
@@ -1130,70 +1131,69 @@ function fix_pkgconfig_pc() {
     local tmp_file="${pkg_file}.tmp"
     awk -v root="${root_path}" '
     BEGIN {
-        # Prepare a regex-safe version of root for pattern matching
+        # Store the current root - escape special characters for regex
         root_safe = root
         gsub(/[\/\.]/, "\\\\&", root_safe)
     }
 
-    # Helper function to clean up duplicate roots
-    function clean_duplicates(path, r_safe, r) {
-        # First cleanup multiple consecutive occurrences of root
-        while (path ~ r_safe r_safe) {
-            sub(r_safe r_safe, r, path)
-        }
-
-        # Then clean any remaining duplicates by getting substrings
-        root_len = length(r)
-        while (1) {
-            # Try to find a duplicate root starting at position root_len+1
-            pos = index(substr(path, root_len + 1), r)
-            if (pos == 0) break  # No more duplicates
-
-            # Remove the duplicate root
-            path = substr(path, 1, root_len) substr(path, root_len + pos + root_len)
-        }
-
-        return path
-    }
-
-    # For lines containing "=/"
+    # For lines with assignment and absolute path (contains "=/")
     $0 ~ /=\// {
         # Split the line at the equals sign
         split($0, parts, /=/)
         left_part = parts[1]
         right_part = parts[2]
 
-        # First check if path already starts with the root path
-        if (right_part ~ "^" root_safe) {
-            # Clean up any duplicates in the path
-            right_part = clean_duplicates(right_part, root_safe, root)
+        # Check if path already contains any form of a root path
+        if (right_part ~ "/[^/]*/root/") {
+            # Replace with the current clean root, ignoring whatever was there
+            # First extract standard path components
+            # Look for patterns like /usr, /lib, /etc at the end
+            match_usr = match(right_part, "/usr$")
+            match_usr_lib = match(right_part, "/usr/lib$")
+            match_usr_lib64 = match(right_part, "/usr/lib64$")
+            match_usr_include = match(right_part, "/usr/include$")
+            match_lib = match(right_part, "/lib$")
+            match_lib64 = match(right_part, "/lib64$")
+            match_etc = match(right_part, "/etc$")
+
+            # Based on the match, construct a clean path
+            if (match_usr_lib64 > 0) {
+                right_part = root "usr/lib64"
+            } else if (match_usr_lib > 0) {
+                right_part = root "usr/lib"
+            } else if (match_usr_include > 0) {
+                right_part = root "usr/include"
+            } else if (match_usr > 0) {
+                right_part = root "usr"
+            } else if (match_lib64 > 0) {
+                right_part = root "lib64"
+            } else if (match_lib > 0) {
+                right_part = root "lib"
+            } else if (match_etc > 0) {
+                right_part = root "etc"
+            } else {
+                # Default to just the root if no standard path is found
+                right_part = root
+            }
             print left_part "=" right_part
         }
-        # Process the path part based on your rules
-        else if (right_part ~ /^\/usr/) {
-            # Path starts with /usr - replace with root/usr
-            gsub(/^\/usr/, root "usr", right_part)
-            # Clean up any duplicate roots
-            right_part = clean_duplicates(right_part, root_safe, root)
-            print left_part "=" right_part
+        # Process original paths
+        else if (right_part ~ /^\/usr\/lib64/) {
+            print left_part "=" root "usr/lib64"
+        } else if (right_part ~ /^\/usr\/lib/) {
+            print left_part "=" root "usr/lib"
+        } else if (right_part ~ /^\/usr\/include/) {
+            print left_part "=" root "usr/include"
+        } else if (right_part ~ /^\/usr/) {
+            print left_part "=" root "usr"
+        } else if (right_part ~ /^\/lib64/) {
+            print left_part "=" root "lib64"
         } else if (right_part ~ /^\/lib/) {
-            # Path starts with /lib - replace with root/lib
-            gsub(/^\/lib/, root "lib", right_part)
-            right_part = clean_duplicates(right_part, root_safe, root)
-            print left_part "=" right_part
+            print left_part "=" root "lib"
         } else if (right_part ~ /^\/etc/) {
-            # Path starts with /etc - replace with root/etc
-            gsub(/^\/etc/, root "etc", right_part)
-            right_part = clean_duplicates(right_part, root_safe, root)
-            print left_part "=" right_part
-        } else if (right_part ~ /\/usr$/) {
-            # Path ends with /usr - replace with root/usr
-            gsub(/\/usr$/, root "usr", right_part)
-            right_part = clean_duplicates(right_part, root_safe, root)
-            print left_part "=" right_part
+            print left_part "=" root "etc"
         } else {
-            # Any other absolute path - replace with just root (not root + path)
-            # The rule is to replace /xxx with root, not root + xxx
+            # Any other absolute path - replace with just root
             print left_part "=" root
         }
         next
