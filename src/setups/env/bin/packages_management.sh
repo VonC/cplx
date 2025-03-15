@@ -590,6 +590,10 @@ function install_package_from_name() {
         fatal "No package found for name '${package_name}' to be installed in '${tool}'" 142
     fi
 
+    local force
+    force="false"
+    if [[ "${2}" == "true" ]]; then force="true"; fi
+
     task "Must install package '${full_package_name}' in '${tool}'"
     local pkg_base
     pkg_base="$(base_package_name "${full_package_name}")"
@@ -603,7 +607,7 @@ function install_package_from_name() {
     local m_log
     m_log="${tool}/logs/mirror_package.log"
     rm -f "${m_log}"
-    if ! is_package_flagged_as "${pkg_base}" "installed" "true"; then
+    if [[ "${force}" == "true" ]] || ! is_package_flagged_as "${pkg_base}" "installed" "true"; then
         ( install_tool_package "${pkg_base}" ) 2>&1 | tee -a "${i_log}"
         if is_package_flagged_as "${pkg_base}" "installed" && [[ -e "${i_log}" ]]; then
             cat "${i_log}" > "${tool_pkgs}/${pkg_base}.installed"
@@ -616,13 +620,15 @@ function install_package_from_name() {
         warning "${sp}Built package '${full_package_name}', skip mirroring"
         _do_mirror=1;
     fi
-    if do_mirror && ! is_package_flagged_as "${pkg_base}" "mirrored" "true"; then
-        ( mirror_tool_package "${full_package_name}" ) 2>&1 | tee -a "${m_log}"
-        if is_package_flagged_as "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
-            echo "${sp}-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
-            cat "${m_log}" >> "${tool_pkgs}/${pkg_base}.installed.mirrored"
-        else
-            fatal "${sp}Unable to mirror '${full_package_name}'" 29
+    if do_mirror; then
+        if  [[ "${force}" == "true" ]] || ! is_package_flagged_as "${pkg_base}" "mirrored" "true"; then
+            ( mirror_tool_package "${full_package_name}" ) 2>&1 | tee -a "${m_log}"
+            if is_package_flagged_as "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
+                echo "${sp}-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
+                cat "${m_log}" >> "${tool_pkgs}/${pkg_base}.installed.mirrored"
+            else
+                fatal "${sp}Unable to mirror '${full_package_name}'" 29
+            fi
         fi
     fi
     if [[ ! -e "${HOME}/tools/pkgs/${pkg_base}.list" ]]; then
