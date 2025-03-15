@@ -645,14 +645,71 @@ function install_package_from_name() {
     return ${pi_exit_status}
 }
 
-
-post_install_tool() {
+# Update post_install_tool to use the new function
+function post_install_tool() {
     local package_name="$1"
     if [[ "$package_name" =~ ^binutils-[0-9] ]]; then
         if [[ ! -e "${root}/usr/bin/ld" ]]; then
             ln -nfs "ld.bfd" "${root}/usr/bin/ld"
         fi
     fi
+
+    # Process all pkg-config files in the package
+    fix_package_pkgconfig_paths "${package_name}"
+
+    return $?
+}
+
+# Function to process all .pc files in a package
+function fix_package_pkgconfig_paths() {
+    local package_name="$1"
+    if [[ -z "${package_name}" ]]; then
+        fatal "fix_package_pkgconfig_paths: No package name provided" 180
+        return 1
+    fi
+
+    # Get full package name and base package name
+    local full_package_name
+    full_package_name=$(get_full_package_name "${package_name}")
+    if [[ -z "${full_package_name}" ]]; then
+        warning "No full package name found for '${package_name}', skipping pkg-config processing"
+        return 0
+    fi
+
+    local pkg_base
+    pkg_base="$(base_package_name "${full_package_name}")"
+    info "Processing pkg-config files for package '${pkg_base}'"
+
+    # Get the list of files in the package
+    local files
+    files=$(list_package "${package_name}")
+    if [[ -z "${files}" ]]; then
+        info "No files found in package '${package_name}'"
+        return 0
+    fi
+
+    # Process each file, looking for .pc files
+    local pc_count=0
+    while IFS= read -r file; do
+        if [[ "${file}" == *.pc ]]; then
+            local pc_file="${root}/${file}"
+            if [[ -f "${pc_file}" ]]; then
+                info "Found pkg-config file: ${pc_file}"
+                fix_pkgconfig_pc "${pc_file}"
+                pc_count=$((pc_count + 1))
+            else
+                warning "Package lists .pc file but it doesn't exist at '${pc_file}'"
+            fi
+        fi
+    done <<< "${files}"
+
+    if [[ ${pc_count} -gt 0 ]]; then
+        ok "Processed ${pc_count} pkg-config files from package '${package_name}'"
+    else
+        info "No pkg-config files found in package '${package_name}'"
+    fi
+
+    return 0
 }
 
 function install_tool_package() {
