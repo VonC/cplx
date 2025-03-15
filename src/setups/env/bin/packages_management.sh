@@ -296,6 +296,17 @@ function base_package_name() {
     echo "${base_package_name}"
 }
 
+function short_package_name() {
+    local package_name
+    package_name="$(basename "${1}")"
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided" 171
+    fi
+    # Extract the core package name before the first version number
+    # Use awk to split at the first dash followed by a digit
+    echo "$package_name" | awk 'BEGIN{FS="-[0-9]"; OFS="-"} {print $1}'
+}
+
 function list_package() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
@@ -582,6 +593,9 @@ function install_package_from_name() {
     task "Must install package '${full_package_name}' in '${tool}'"
     local pkg_base
     pkg_base="$(base_package_name "${full_package_name}")"
+    local sp
+    sp="$(short_package_name "${pkg_base}")"
+    sp="[${sp}] "
 
     local i_log
     i_log="${tool}/logs/install_package.log"
@@ -594,31 +608,35 @@ function install_package_from_name() {
         if is_package_flagged_as "${pkg_base}" "installed" && [[ -e "${i_log}" ]]; then
             cat "${i_log}" > "${tool_pkgs}/${pkg_base}.installed"
         else
-            fatal "Unable to install '${full_package_name}'" 28
+            fatal "${sp}Unable to install '${full_package_name}'" 28
         fi
     fi
     _do_mirror=0
     if is_package_built "${pkg_base}"; then
-        warning "Built package '${full_package_name}', skip mirroring"
+        warning "${sp}Built package '${full_package_name}', skip mirroring"
         _do_mirror=1;
     fi
     if do_mirror && ! is_package_flagged_as "${pkg_base}" "mirrored" "true"; then
         ( mirror_tool_package "${full_package_name}" ) 2>&1 | tee -a "${m_log}"
         if is_package_flagged_as "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
-            echo "-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
+            echo "${sp}-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
             cat "${m_log}" >> "${tool_pkgs}/${pkg_base}.installed.mirrored"
         else
-            fatal "Unable to mirror '${full_package_name}'" 29
+            fatal "${sp}Unable to mirror '${full_package_name}'" 29
         fi
     fi
     if [[ ! -e "${HOME}/tools/pkgs/${pkg_base}.list" ]]; then
-        task "Must create list file for package '${pkg_base}'"
+        task "${sp}Must create list file for package '${pkg_base}'"
         make_package_list "${full_package_name}" "true"
     else
-        ok "Package '${pkg_base}' already has a list file"
+        ok "${sp}Package '${pkg_base}' already has a list file"
     fi
     post_install_tool "${package_name}"
-    return $?
+    local pi_exit_status=$?
+    info "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+    info "${sp} (${package_name}) install exit status: [${pi_exit_status}]"
+    info "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+    return ${pi_exit_status}
 }
 
 
@@ -633,12 +651,12 @@ post_install_tool() {
 
 function install_tool_package() {
     # shellcheck disable=SC2154
-    cd "${root}" || fatal "install_tool_package: Unable to access root '${root}'" 199
+    cd "${root}" || fatal "${sp}install_tool_package: Unable to access root '${root}'" 199
 
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
-        fatal "No tool to install '${1}' into: $(pwd)" 193
+        fatal "${sp}No tool to install '${1}' into: $(pwd)" 193
     fi
     tool="${HOME}/tools/${tool}"
     local tool_pkgs
@@ -646,12 +664,12 @@ function install_tool_package() {
 
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
-        fatal "No package name provided to be installed in '${tool}'" 141
+        fatal "${sp}No package name provided to be installed in '${tool}'" 141
     fi
     local full_package_name
     full_package_name=$(get_full_package_name "${1}")
     if [[ -z "${full_package_name}" ]]; then
-        fatal "No package found for name '${package_name}' to be tool-installed in '${tool}'" 192
+        fatal "${sp}No package found for name '${package_name}' to be tool-installed in '${tool}'" 192
     fi
 
     local pkg_base
@@ -665,10 +683,10 @@ function install_tool_package() {
     elif [[ "${full_package_name%.tar.gz}" != "${full_package_name}" ]]; then
         if ! tar xpvf "${tools_pkgs}/${full_package_name}"; then fatal "Unable to untar gz '${full_package_name}'" 5; fi
     else
-        fatal "unknown extension for archive '${full_package_name}'" 11
+        fatal "${sp}unknown extension for archive '${full_package_name}'" 11
     fi
     touch "${flag}" || fatal "Unable to create flag file '${flag}'" 3
-    ok "'${flag}' installed in '${root}': pwd '$(pwd)'"
+    ok "${sp}'${flag}' installed in '${root}': pwd '$(pwd)'"
 
 }
 
@@ -678,14 +696,14 @@ function is_package_flagged_as() {
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
-        fatal "No tool to install '${1}' into: $(pwd)" 183
+        fatal "${sp}No tool to install '${1}' into: $(pwd)" 183
     fi
     tool="${HOME}/tools/${tool}"
 
     local full_package_name
     full_package_name=$(get_full_package_name "${1}")
     if [[ -z "${full_package_name}" ]]; then
-        fatal "No package found for name '${package_name}' to be flag checked in '${tool}'" 182
+        fatal "${sp}No package found for name '${package_name}' to be flag checked in '${tool}'" 182
     fi
 
     local pkg_base
@@ -702,8 +720,8 @@ function is_package_flagged_as() {
     shopt -u nullglob
     if (( ${#flags[@]} > 0 )); then
         if [[ -n "${verbose}" ]]; then
-            info "A file matching '${pattern}' already exists in '${tool_pkgs}'"
-            ok "'${pkg_base}' already '${flag_suffix}' in '${tool_pkgs}'"
+            info "${sp}A file matching '${pattern}' already exists in '${tool_pkgs}'"
+            ok "${sp}'${pkg_base}' already '${flag_suffix}' in '${tool_pkgs}'"
         fi
         return 0
     fi
@@ -755,27 +773,27 @@ mirror_tool_package() {
     elif [[ "${pkg_name%.tar.gz}" != "${pkg_name}" ]]; then
         tar tzvf "${pkg_file}" | while IFS= read -r line; do
             # Process each line (custom processing can be added here)
-            info "tar.gz contains: ${line}"
+            info "${sp}tar.gz contains: ${line}"
         done
     elif [[ "${pkg_name%.xz}" != "${pkg_name}" ]]; then
         # Assuming it's a tar.xz package
         if file "${pkg_file}" | grep -qi "tar archive"; then
             tar --xz -tzvf "${pkg_file}" | while IFS= read -r line; do
-                info "tar.xz contains: ${line}"
+                info "${sp}tar.xz contains: ${line}"
             done
         else
-            fatal "Unsupported xz archive type for pkg_name '${pkg_name}'" 1
+            fatal "${sp}Unsupported xz archive type for pkg_name '${pkg_name}'" 1
         fi
     else
-        fatal "Unknown archive extension for pkg_name '${pkg_name}'" 11
+        fatal "${sp}Unknown archive extension for pkg_name '${pkg_name}'" 11
     fi
 
     #info "Final clean_ldd='${clean_ldd}'"
     if [[ "${clean_ldd}" != "0" ]]; then
-        fatal "Some files in the package '${pkg_name}' have absolute system paths or unresolved paths" 199
+        fatal "${sp}Some files in the package '${pkg_name}' have absolute system paths or unresolved paths" 199
     fi
 
-    mv "${tool_pkgs}/${pkg_base}.installed" "${tool_pkgs}/${pkg_base}.installed.mirrored" || fatal "Unable to rename flag file '${pkg_base}.installed' to '${tool_pkgs}/${pkg_base}.installed.mirrored'" 12
+    mv "${tool_pkgs}/${pkg_base}.installed" "${tool_pkgs}/${pkg_base}.installed.mirrored" || fatal "${sp}Unable to rename flag file '${pkg_base}.installed' to '${tool_pkgs}/${pkg_base}.installed.mirrored'" 12
 
 }
 
@@ -793,12 +811,12 @@ mirror_system_executable() {
         local dest_file="./${src_file#/}"  # removes leading /
         local dest_dir
         dest_dir=$(dirname "${dest_file}")
-        mkdir -p "${dest_dir}" || fatal "Unable to create directory '${dest_dir}'" 31
+        mkdir -p "${dest_dir}" || fatal "${sp}Unable to create directory '${dest_dir}'" 31
 
         _copy_element "${src_file}" "${dest_file}" "mirror cp"
         # Since it comes from the system, import also its ldd dependencies
         if ! check_ldd "./${src_file#/}" "${dest_dir}"; then
-            warning "mirror_system_executable ret=1 after ldd import of './${src_file#/}' to '${dest_dir}'"
+            warning "${sp}mirror_system_executable ret=1 after ldd import of './${src_file#/}' to '${dest_dir}'"
             ret=1;
         fi
     else
@@ -807,7 +825,7 @@ mirror_system_executable() {
         # so check only dependencies of the installed library file
         # if there are any absolute path, exit fatal
         if [[  -f "./${src_file#/}" && ! -L "./${src_file#/}" ]]; then
-            warning "mirror_system_executable ret=1 after ldd check of './${src_file#/}'"
+            warning "${sp}mirror_system_executable ret=1 after ldd check of './${src_file#/}'"
             if ! check_ldd "./${src_file#/}"; then ret=1; fi
         fi
     fi
@@ -828,12 +846,12 @@ _copy_element() {
         # Create destination directory if needed
         local dest_dir
         dest_dir=$(dirname "${dest_file}")
-        mkdir -p "${dest_dir}" || fatal "Unable to create directory '${dest_dir}'" 31
+        mkdir -p "${dest_dir}" || fatal "${sp}Unable to create directory '${dest_dir}'" 31
 
         # Create the symlink
-        ln -sf "${target}" "${dest_file}" || fatal "[${msg}] Unable to create symlink '${dest_file}'" 34
-        touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
-        ok "[${msg}] Created symlink '${dest_file}' -> '${target}' and created marker file '${dest_file}.copied'"
+        ln -sf "${target}" "${dest_file}" || fatal "${sp}[${msg}] Unable to create symlink '${dest_file}'" 34
+        touch "${dest_file}.copied" || fatal "${sp}Unable to create marker file '${dest_file}.copied'" 33
+        ok "${sp}[${msg}] Created symlink '${dest_file}' -> '${target}' and created marker file '${dest_file}.copied'"
 
         # If we want to handle the target recursively
         local target_path
@@ -866,15 +884,15 @@ _copy_element() {
     rc=$?
     if [ $rc -ne 0 ]; then
         if echo "$cp_output" | grep -qi "Permission denied"; then
-            warning "[${msg}] Permission denied copying '${src_file}' to '${dest_file}', skipping marker creation"
+            warning "${sp}[${msg}] Permission denied copying '${src_file}' to '${dest_file}', skipping marker creation"
             return 0
         else
-            fatal "[${msg}] Unable to copy '${src_file}' to '${dest_file}': ${cp_output}" 32
+            fatal "${sp}[${msg}] Unable to copy '${src_file}' to '${dest_file}': ${cp_output}" 32
         fi
     fi
     # Create a dummy file to indicate the file was copied
     touch "${dest_file}.copied" || fatal "Unable to create marker file '${dest_file}.copied'" 33
-    ok "[${msg}] Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
+    ok "${sp}[${msg}] Copied '${src_file}' to '${dest_file}' and created marker file '${dest_file}.copied'"
     return 0
 }
 
@@ -925,10 +943,10 @@ check_ldd() {
     if [ $ret -ne 0 ]; then
         # If ldd failed because the file is not a dynamic executable, we're done.
         if echo "$output" | grep -q "not a dynamic executable"; then
-            info "'$file' is not a dynamic executable: no ldd check needed"
+            info "${sp}'$file' is not a dynamic executable: no ldd check needed"
             return 0
         else
-            warning "ldd unexpectedly failed for '$file': '${output}'"
+            warning "${sp}ldd unexpectedly failed for '$file': '${output}'"
             return $ret
         fi
     fi
@@ -938,7 +956,7 @@ check_ldd() {
     while IFS= read -r line || [ -n "$line" ]; do
         # If the line contains a '?' character, warn about an unresolved path.
         if [[ "$line" == *"?"* ]]; then
-            warning "Unresolved path in ldd output: '$line'"
+            warning "${sp}Unresolved path in ldd output: '$line'"
             ret=1
             continue
         fi
@@ -957,9 +975,9 @@ check_ldd() {
                         continue # Skip since the dest_file exists
                     elif [[ -L "${root}${abs_path}" || -L "${root}/usr${abs_path}" ]]; then
                         if [[ -z "${dest_dir}" ]]; then
-                            fatal "Dependency file '${abs_path}' is mirrored by symlink in '${root}'" 121
+                            fatal "${sp}Dependency file '${abs_path}' is mirrored by symlink in '${root}'" 121
                         else
-                            error "Dependency file '${abs_path}' is mirrored by symlink in '${root}': will copy again, as file this time"
+                            error "${sp}Dependency file '${abs_path}' is mirrored by symlink in '${root}': will copy again, as file this time"
                         fi
                     else
                         # nothing do do since dest file is missing: proceed to mirror
@@ -971,9 +989,9 @@ check_ldd() {
                         continue # Skip since the dest_symlink exists
                     elif _is_regular_file "${root}${abs_path}" || _is_regular_file "${root}/usr${abs_path}"; then
                         if [[ -z "${dest_dir}" ]]; then
-                            fatal "Dependency symlink '${abs_path}' is mirrored by file in '${root}'" 121
+                            fatal "${sp}Dependency symlink '${abs_path}' is mirrored by file in '${root}'" 121
                         else
-                            error "Dependency symlink '${abs_path}' is mirrored by file in '${root}': will copy again, as symlink this time"
+                            error "${sp}Dependency symlink '${abs_path}' is mirrored by file in '${root}': will copy again, as symlink this time"
                         fi
                     else
                         # nothing do do since dest symlink is missing: proceed to mirror
@@ -986,11 +1004,11 @@ check_ldd() {
             if [[ "${abs_path}" == "${tools}"* ]]; then
                 continue  # Skip if abs_path starts with ${tools}
             fi
-            warning "Absolute system path '${abs_path}' detected (tools='${tools}') in ldd output: '$line' for file '${file}'"
+            error "${sp}Absolute system path '${abs_path}' detected (tools='${tools}') in ldd output: '$line' for file '${file}'"
             if [[ -n "${dest_dir}" ]]; then
                 local dest1_file
                 dest1_file="${dest_dir}/$(basename "${abs_path}")"
-                task "Must import from '${abs_path}' to1 '${dest1_file}' this '${file}' dependency (${ret})"
+                task "${sp}Must import from '${abs_path}' to1 '${dest1_file}' this '${file}' dependency (${ret})"
                 _copy_element "${abs_path}" "${dest1_file}" "check_ldd cp"
                 ret=$?
             else
