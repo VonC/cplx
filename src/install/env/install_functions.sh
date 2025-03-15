@@ -20,7 +20,7 @@ function setenv() {
     export DT_RUNPATH="${LD_LIBRARY_PATH}"
 
     # --- pkg-config ---
-    export PKG_CONFIG_PATH="${tool_prefix}/usr/lib64/pkgconfig"
+    export PKG_CONFIG_PATH="${tool_prefix}/usr/lib64/pkgconfig:${tool_prefix}/lib/pkgconfig:${root}/usr/lib64/pkgconfig:${root}/lib/pkgconfig"
 
     # --- PATH (for binaries) ---
     if [[ -e "${tool_prefix}/bin" ]]; then

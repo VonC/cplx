@@ -1018,3 +1018,147 @@ check_ldd() {
     done <<< "${output}"
     return $ret
 }
+
+function fix_pkgconfig_pc() {
+    local pkg_file="${1}"
+    # check it is a pc file
+    if [[ "${pkg_file}" != *.pc ]]; then
+        fatal "Only process *.pc file (in tool/root folder)" 173
+        return 1
+    fi
+
+    # Make sure to have the full pathname of the pc file
+    if [[ "${pkg_file:0:1}" != "/" ]]; then
+        # Convert relative path to absolute path
+        pkg_file="$(readlink -f "${pkg_file}")"
+        info "Converting relative path to absolute path: ${pkg_file}"
+    fi
+
+    if [[ "${pkg_file}" != */root/* ]]; then
+        fatal "This pc file must be in a tool/root subfolder" 174
+        return 1
+    fi
+
+    # extract the path up to /root from pkg_file
+    local root_path
+    # Match everything up to and including /root/
+    if [[ "${pkg_file}" =~ ^(.*\/root\/) ]]; then
+        root_path="${BASH_REMATCH[1]}"
+        info "Root path extracted: ${root_path}"
+    else
+        fatal "Failed to extract root path from '${pkg_file}'" 174
+        return 1
+    fi
+
+    # Example of pc file: [CPLX-GIT-DEV] gitea2@cactislux801:~/tools/tool/root$ cat ./usr/lib64/pkgconfig/expat.pc
+    # prefix=/usr
+    # exec_prefix=/usr
+    # libdir=/usr/lib64
+    # includedir=/usr/include
+
+    # Name: expat
+    # Version: 2.1.0
+    # Description: expat XML parser
+    # URL: http://www.libexpat.org
+    # Libs: -L${libdir} -lexpat
+    # Cflags: -I${includedir}
+
+    # Process the pc file with awk to modify paths
+    local tmp_file="${pkg_file}.tmp"
+    awk -v root="${root_path}" '
+    BEGIN {
+        # Prepare a regex-safe version of root for pattern matching
+        root_safe = root
+        gsub(/[\/\.]/, "\\\\&", root_safe)
+    }
+
+    # Helper function to clean up duplicate roots
+    function clean_duplicates(path, r_safe, r) {
+        # First cleanup multiple consecutive occurrences of root
+        while (path ~ r_safe r_safe) {
+            sub(r_safe r_safe, r, path)
+        }
+
+        # Then clean any remaining duplicates by getting substrings
+        root_len = length(r)
+        while (1) {
+            # Try to find a duplicate root starting at position root_len+1
+            pos = index(substr(path, root_len + 1), r)
+            if (pos == 0) break  # No more duplicates
+
+            # Remove the duplicate root
+            path = substr(path, 1, root_len) substr(path, root_len + pos + root_len)
+        }
+
+        return path
+    }
+
+    # For lines containing "=/"
+    $0 ~ /=\// {
+        # Split the line at the equals sign
+        split($0, parts, /=/)
+        left_part = parts[1]
+        right_part = parts[2]
+
+        # First check if path already starts with the root path
+        if (right_part ~ "^" root_safe) {
+            # Clean up any duplicates in the path
+            right_part = clean_duplicates(right_part, root_safe, root)
+            print left_part "=" right_part
+        }
+        # Process the path part based on your rules
+        else if (right_part ~ /^\/usr/) {
+            # Path starts with /usr - replace with root/usr
+            gsub(/^\/usr/, root "usr", right_part)
+            # Clean up any duplicate roots
+            right_part = clean_duplicates(right_part, root_safe, root)
+            print left_part "=" right_part
+        } else if (right_part ~ /^\/lib/) {
+            # Path starts with /lib - replace with root/lib
+            gsub(/^\/lib/, root "lib", right_part)
+            right_part = clean_duplicates(right_part, root_safe, root)
+            print left_part "=" right_part
+        } else if (right_part ~ /^\/etc/) {
+            # Path starts with /etc - replace with root/etc
+            gsub(/^\/etc/, root "etc", right_part)
+            right_part = clean_duplicates(right_part, root_safe, root)
+            print left_part "=" right_part
+        } else if (right_part ~ /\/usr$/) {
+            # Path ends with /usr - replace with root/usr
+            gsub(/\/usr$/, root "usr", right_part)
+            right_part = clean_duplicates(right_part, root_safe, root)
+            print left_part "=" right_part
+        } else {
+            # Any other absolute path - replace with just root (not root + path)
+            # The rule is to replace /xxx with root, not root + xxx
+            print left_part "=" root
+        }
+        next
+    }
+
+    # Default action for lines not matching "=/"
+    {
+        print $0
+    }
+    ' "${pkg_file}" > "${tmp_file}"
+
+    # Check if the AWK command was successful
+    # shellcheck disable=SC2181
+    if [[ $? -ne 0 ]]; then
+        fatal "Failed to process pkg-config file with awk" 175
+        rm -f "${tmp_file}"
+        return 1
+    fi
+
+    # Check if the content has changed
+    if cmp -s "${pkg_file}" "${tmp_file}"; then
+        # Files are identical, no changes needed
+        info "No changes needed for '${pkg_file}'"
+        rm -f "${tmp_file}"
+    else
+        # Files differ, update the original
+        mv "${tmp_file}" "${pkg_file}"
+        info "Successfully updated paths in '${pkg_file}'"
+    fi
+    return 0
+}
