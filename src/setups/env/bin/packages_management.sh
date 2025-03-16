@@ -1238,13 +1238,13 @@ function fix_pkgconfig_pc() {
 # packages_removed environment variables.
 #
 # Output format:
-#   [global]: [short_name] [full_name]  - For packages in global repository
-#   [toolname]: [short_name] [full_name] - For installed packages
-#   [toolname][r]: [short_name] [full_name] - For removed packages
+#   [global]      : [short_name] [full_name] - For packages in global repository
+#   [tool_name]   : [short_name] [full_name] - For installed packages
+#   [tool_name][r]: [short_name] [full_name] - For removed packages
 #
 # Globals:
 #   packages_installed - If set, lists only installed packages (default)
-#   packages_removed - If set, lists only removed packages
+#   packages_removed   - If set, lists only removed packages
 #
 # Arguments:
 #   $1 - Optional tool name
