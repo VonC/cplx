@@ -240,7 +240,7 @@ function is_package_installed() {
     fi
     local missing
     local present_file
-    files=$(list_package "${package_name}")
+    files=$(list_files_in_package "${package_name}")
     while IFS= read -r file; do
         local full_file="${tools}/${tool}/root/${file}"
         if [[ ! -e "${full_file}" && ! -L "${full_file}" ]]; then
@@ -308,15 +308,15 @@ function short_package_name() {
     echo "${package_name%%-[0-9]*}"
 }
 
-function list_package() {
+function list_files_in_package() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
-        fatal "list_package: No package name provided" 111
+        fatal "list_files_in_package: No package name provided" 111
     fi
     local full_package_name
     full_package_name="$(get_full_package_name "${package_name}")"
     if [[ -z "${full_package_name}" ]]; then
-        fatal "list_package: No package found for '${package_name}'" 112
+        fatal "list_files_in_package: No package found for '${package_name}'" 112
     fi
     local base_package_name
     base_package_name="$(base_package_name "${full_package_name}" )"
@@ -325,7 +325,7 @@ function list_package() {
 
     if [[ ! -f "${full_list_file}" ]]; then
         if ! make_package_list "${full_package_name}"; then
-            fatal "list_package: Failed to create list file '${full_list_file}'" 115
+            fatal "list_files_in_package: Failed to create list file '${full_list_file}'" 115
         fi
     fi
     if [[ ! -f "${list_file}" ]]; then
@@ -683,7 +683,7 @@ function fix_package_pkgconfig_paths() {
 
     # Get the list of files in the package
     local files
-    files=$(list_package "${package_name}")
+    files=$(list_files_in_package "${package_name}")
     if [[ -z "${files}" ]]; then
         info "No files found in package '${package_name}'"
         return 0
