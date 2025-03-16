@@ -1088,6 +1088,29 @@ check_ldd() {
     return $ret
 }
 
+#######################################################################
+# Fixes paths in pkg-config (.pc) files to reference the correct sysroot
+#
+# When installing packages into a tool-specific root directory, pkg-config 
+# files contain absolute paths pointing to system locations (/usr/lib, etc.).
+# These need to be modified to point to the tool's root directory instead,
+# so that when compiling against these libraries, the tool's isolated 
+# environment is used rather than the host system.
+#
+# The function:
+# 1. Identifies the tool's root directory from the .pc file path
+# 2. Creates a backup of the original .pc file if it doesn't exist
+# 3. Processes each line containing an absolute path assignment (=/)
+# 4. Preserves the original path structure but prefixes it with the tool's root
+#    e.g., "/usr/lib64" becomes "/path/to/tool/root/usr/lib64"
+# 5. Preserves lines that already contain a root path
+#
+# Arguments:
+#   $1 - Path to the pkg-config (.pc) file to process
+#
+# Returns:
+#   0 on success, non-zero on failure
+#######################################################################
 function fix_pkgconfig_pc() {
     local pkg_file="${1}"
     # check it is a pc file
@@ -1156,53 +1179,16 @@ function fix_pkgconfig_pc() {
 
         # Check if path already contains any form of a root path
         if (right_part ~ "/[^/]*/root/") {
-            # Replace with the current clean root, ignoring whatever was there
-            # First extract standard path components
-            # Look for patterns like /usr, /lib, /etc at the end
-            match_usr = match(right_part, "/usr$")
-            match_usr_lib = match(right_part, "/usr/lib$")
-            match_usr_lib64 = match(right_part, "/usr/lib64$")
-            match_usr_include = match(right_part, "/usr/include$")
-            match_lib = match(right_part, "/lib$")
-            match_lib64 = match(right_part, "/lib64$")
-            match_etc = match(right_part, "/etc$")
-
-            # Based on the match, construct a clean path
-            if (match_usr_lib64 > 0) {
-                right_part = root "usr/lib64"
-            } else if (match_usr_lib > 0) {
-                right_part = root "usr/lib"
-            } else if (match_usr_include > 0) {
-                right_part = root "usr/include"
-            } else if (match_usr > 0) {
-                right_part = root "usr"
-            } else if (match_lib64 > 0) {
-                right_part = root "lib64"
-            } else if (match_lib > 0) {
-                right_part = root "lib"
-            } else if (match_etc > 0) {
-                right_part = root "etc"
-            } else {
-                # Default to just the root if no standard path is found
-                right_part = root
-            }
             print left_part "=" right_part
         }
-        # Process original paths
-        else if (right_part ~ /^\/usr\/lib64/) {
-            print left_part "=" root "usr/lib64"
-        } else if (right_part ~ /^\/usr\/lib/) {
-            print left_part "=" root "usr/lib"
-        } else if (right_part ~ /^\/usr\/include/) {
-            print left_part "=" root "usr/include"
-        } else if (right_part ~ /^\/usr/) {
-            print left_part "=" root "usr"
-        } else if (right_part ~ /^\/lib64/) {
-            print left_part "=" root "lib64"
-        } else if (right_part ~ /^\/lib/) {
-            print left_part "=" root "lib"
-        } else if (right_part ~ /^\/etc/) {
-            print left_part "=" root "etc"
+        # Process with a simpler, more generic pattern that captures the whole path
+        else if (right_part ~ /^\/(.*)/) {
+            # Extract everything after the leading slash
+            match(right_part, /^\/(.*)/, path_parts)
+            rest_path = path_parts[1]
+
+            # Keep the original path structure but prefix with root
+            print left_part "=" root rest_path
         } else {
             # Any other absolute path - replace with just root
             print left_part "=" root
