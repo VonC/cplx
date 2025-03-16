@@ -304,7 +304,8 @@ function short_package_name() {
     fi
     # Extract the core package name before the first version number
     # Use awk to split at the first dash followed by a digit
-    echo "$package_name" | awk 'BEGIN{FS="-[0-9]"; OFS="-"} {print $1}'
+    # | awk 'BEGIN{FS="-[0-9]"; OFS="-"} {print $1}': no, too slow
+    echo "${package_name%%-[0-9]*}"
 }
 
 function list_package() {
@@ -1225,3 +1226,103 @@ function fix_pkgconfig_pc() {
     fi
     return 0
 }
+
+#######################################################################
+# Lists packages according to the specified tool name
+#
+# When no tool name is provided, it uses the current tool or lists 
+# global packages from ${HOME}/tools/pkgs if no current tool is detected.
+#
+# When a tool name is provided, it lists installed or removed packages
+# for that specific tool, depending on the packages_installed or 
+# packages_removed environment variables.
+#
+# Output format:
+#   [global]: [short_name] [full_name]  - For packages in global repository
+#   [toolname]: [short_name] [full_name] - For installed packages
+#   [toolname][r]: [short_name] [full_name] - For removed packages
+#
+# Globals:
+#   packages_installed - If set, lists only installed packages (default)
+#   packages_removed - If set, lists only removed packages
+#
+# Arguments:
+#   $1 - Optional tool name
+#
+# Returns:
+#   0 on success, non-zero on failure
+#######################################################################
+function list_packages() {
+    local tool_name="${1}"
+    local exit_code=0
+
+    # If tool name is empty, set it to current tool
+    if [[ -z "${tool_name}" ]]; then
+        tool_name="$(current_tool)"
+    fi
+
+    # If tool name is still empty
+    if [[ -z "${tool_name}" ]]; then
+        # If qualifiers are defined and tool is empty, exit with error
+        if [[ -n "${packages_installed}" || -n "${packages_removed}" ]]; then
+            fatal "You need to specify a tool to list installed or removed packages" 201
+            return 1
+        fi
+
+        # List packages from ~/pkgs, excluding *.list files
+        # info "Listing packages in ${HOME}/tools/pkgs"
+        find "${HOME}/tools/pkgs" -maxdepth 1 -type f ! -name "*.list" ! -name "*.installed*" ! -name "*.keep" | while read -r pkg_file; do
+            _echo_from_pkg_file "global" "${pkg_file}"
+        done
+        return 0
+    fi
+
+    # Validate tool name against services property
+    local services
+    get_property services
+    # Split the services string into an array using comma as delimiter
+    IFS=',' read -ra tool_array <<< "${services}"
+    local tool_valid=0
+    for t in "${tool_array[@]}"; do
+        t=$(echo "${t}" | xargs)  # Trim whitespace
+        if [[ "${t}" == "${tool_name}" ]]; then
+            tool_valid=1
+            break
+        fi
+    done
+
+    if [[ ${tool_valid} -eq 0 ]]; then
+        fatal "Unknown tool name '${tool_name}'" 202
+        return 1
+    fi
+
+    local tool_path="${HOME}/tools/${tool_name}"
+
+    # List installed packages
+    if [[ -n "${packages_removed}" ]]; then
+        if [[ -d "${tool_path}/pkgs/removed" ]]; then
+            # info "Listing removed packages for tool '${tool_name}'"
+            find "${tool_path}/pkgs/removed" -maxdepth 1 -name "*.installed*" | while read -r pkg_file; do
+                _echo_from_pkg_file "${tool_name}[r]" "${pkg_file}"
+            done
+        fi
+    else
+        # info "Listing installed packages for tool '${tool_name}'"
+        find "${tool_path}/pkgs" -maxdepth 1 -name "*.installed*" | while read -r pkg_file; do
+            _echo_from_pkg_file "${tool_name}" "${pkg_file}"
+        done
+    fi
+
+    return ${exit_code}
+}
+
+_echo_from_pkg_file() {
+    local type="${1}"
+    local pkg_file="${2}"
+    local full_package_name
+    full_package_name="$(base_package_name "$(basename "${pkg_file}")")"
+    local short_package_name
+    short_package_name="$(short_package_name "${full_package_name}")"
+    echo "${type}: ${short_package_name} ${full_package_name}"
+}
+
