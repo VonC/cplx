@@ -1322,3 +1322,226 @@ _echo_from_pkg_file() {
     echo "${type}: ${short_package_name} ${full_package_name}"
 }
 
+#######################################################################
+# Reinstalls a package for a specific tool
+#
+# This function handles package reinstallation by first removing any existing
+# installation and then performing a clean install. This is useful when:
+# - A package's files are corrupted or inconsistent
+# - A newer version of the same package needs to be installed
+# - Configuration needs to be reset to default
+# - Dependencies have changed and need to be updated
+#
+# The function:
+# 1. Validates the tool name or uses the current tool context
+# 2. Removes any existing installation of the package
+# 3. Installs a fresh copy of the package with forced install flag
+# 4. Cleans up any files from the removed packages folder
+# 5. Processes any post-install configurations and pkg-config files
+#
+# Arguments:
+#   $1 - Tool name or package name if $2 is empty
+#   $2 - Package name (optional if $1 is package name)
+#
+# Returns:
+#   0 on success, non-zero on failure
+#######################################################################
+function reinstall_package() {
+    local tool_name="${1}"
+    local package_name="${2}"
+
+    if [[ -z "${tool_name}" ]]; then
+        tool_name="$(current_tool)"
+        if [[ -z "${tool_name}" ]]; then
+            fatal "No tool name provided or determined from current directory" 301
+            return 1
+        fi
+    elif ! _is_valid_tool_name "${tool_name}"; then
+        if [[ -n "${package_name}" ]]; then
+            fatal "Unknown tool name '${tool_name}'" 302
+            return 1
+        fi
+        tool_name="$(current_tool)"
+        if [[ -z "${tool_name}" ]]; then
+            fatal "No tool name provided or determined from current directory" 311
+            return 1
+        fi
+        package_name="${1}"
+    fi
+
+    if [[ -z "${package_name}" ]]; then
+        fatal "No package name provided for reinstallation" 302
+        return 1
+    fi
+
+    task "Reinstalling package '${package_name}' for tool '${tool_name}'"
+
+    # Get the full package name
+    local full_package_name
+    full_package_name=$(get_full_package_name "${package_name}")
+    if [[ -z "${full_package_name}" ]]; then
+        fatal "No package found for name '${package_name}' to be reinstalled in '${tool_name}'" 304
+        return 1
+    fi
+
+    local base_package_name
+    base_package_name="$(base_package_name "${full_package_name}")"
+
+    # First remove the package if it's installed
+    local tool_path="${HOME}/tools/${tool_name}"
+    local installed_flag="${tool_path}/pkgs/${base_package_name}.installed"
+    local mirrored_flag="${tool_path}/pkgs/${base_package_name}.installed.mirrored"
+
+    if [[ -f "${installed_flag}" || -f "${mirrored_flag}" ]]; then
+        info "Removing existing installation of '${base_package_name}'"
+        if ! remove_package "${base_package_name}"; then
+            error "Failed to remove package '${base_package_name}'"
+            return 1
+        fi
+    fi
+
+    # Check if the package is in the removed folder
+    local removed_dir="${tool_path}/pkgs/removed"
+    local was_removed=0
+    if [[ -d "${removed_dir}" ]] && find "${removed_dir}" -maxdepth 1 -name "${base_package_name}.installed*" | grep -q .; then
+        was_removed=1
+        info "Package '${base_package_name}' found in removed folder, will clean up after reinstall"
+    fi
+
+    # Install the package
+    info "Installing package '${base_package_name}'"
+    install_package_from_name "${package_name}" "true" || {
+        error "Failed to install package '${base_package_name}'"
+        return 1
+    }
+
+    # If the package was previously in the removed folder, clean it up
+    if [[ ${was_removed} -eq 1 ]]; then
+        info "Cleaning up previously removed package '${base_package_name}'"
+        rm -f "${removed_dir}/${base_package_name}.installed"*
+        ok "Removed '${base_package_name}' from the removed folder"
+    fi
+
+    ok "Successfully reinstalled package '${base_package_name}' for tool '${tool_name}'"
+    return 0
+}
+
+#######################################################################
+# Reinstalls all packages for a specific tool
+#
+# This function performs a complete refresh of all packages installed for
+# a tool by reinstalling them one by one. This is useful when:
+# - Upgrading or changing the tool's environment
+# - Fixing consistency issues across multiple packages
+# - Ensuring all post-install configurations are properly applied
+# - Rebuilding a tool environment after system changes
+#
+# The function:
+# 1. Validates the tool name or uses the current tool context
+# 2. Gets a list of all currently installed packages for the tool
+# 3. Processes each package sequentially through the reinstall_package function
+# 4. Tracks successful and failed reinstallations
+# 5. Provides a summary of the operation results
+#
+# Arguments:
+#   $1 - Tool name (optional, uses current tool if not provided)
+#
+# Returns:
+#   0 on success (all packages reinstalled), non-zero if any package fails
+#######################################################################
+function reinstall_all_packages() {
+    local tool_name="${1}"
+    local exit_code=0
+    local reinstall_count=0
+    local failed_count=0
+
+    if [[ -z "${tool_name}" ]]; then
+        tool_name="$(current_tool)"
+        if [[ -z "${tool_name}" ]]; then
+            fatal "No tool name provided or determined from current directory" 311
+            return 1
+        fi
+    elif ! _is_valid_tool_name "${tool_name}"; then
+        fatal "Unknown tool name '${tool_name}'" 312
+        return 1
+    fi
+
+    task "Reinstalling all packages for tool '${tool_name}'"
+
+    # Get a list of all installed packages for the tool
+    # Use list_packages and parse its output format "tool_name: short_name full_package_name"
+    local packages_output
+    packages_output=$(list_packages "${tool_name}")
+
+    # Process each package
+    while IFS= read -r line; do
+        # Skip empty lines
+        [[ -z "${line}" ]] && continue
+
+        # Extract the full package name (third field)
+        local full_package_name
+        full_package_name=$(echo "${line}" | awk '{print $3}')
+
+        if [[ -n "${full_package_name}" ]]; then
+            info "Reinstalling package '${full_package_name}'"
+
+            # Call reinstall_package function
+            if reinstall_package "${tool_name}" "${full_package_name}"; then
+                ((reinstall_count++))
+                ok "Package '${full_package_name}' reinstalled successfully"
+            else
+                ((failed_count++))
+                error "Failed to reinstall package '${full_package_name}'"
+                exit_code=1
+            fi
+        fi
+    done <<< "${packages_output}"
+
+    # Summary
+    if [[ ${reinstall_count} -gt 0 ]]; then
+        ok "Successfully reinstalled ${reinstall_count} packages for tool '${tool_name}'"
+    else
+        warning "No packages were reinstalled for tool '${tool_name}'"
+    fi
+
+    if [[ ${failed_count} -gt 0 ]]; then
+        error "Failed to reinstall ${failed_count} packages for tool '${tool_name}'"
+        exit_code=1
+    fi
+
+    return ${exit_code}
+}
+
+#######################################################################
+# Validates if a string is a recognized tool name
+#
+# This helper function checks if the provided string matches one of the
+# registered tool names in the system configuration. It's used to:
+# - Ensure operations target valid tool environments
+# - Prevent script errors when working with non-existent tools
+# - Standardize tool name validation across multiple functions
+#
+# The function:
+# 1. Retrieves the list of configured services/tools from properties
+# 2. Splits the comma-separated list into individual tool names
+# 3. Compares the provided name against each known tool name
+# 4. Returns success (0) on match, failure (1) otherwise
+#
+# Arguments:
+#   $1 - Tool name string to validate
+#
+# Returns:
+#   0 if tool name is valid, 1 otherwise
+#######################################################################
+_is_valid_tool_name() {
+    local services
+    get_property services
+    IFS=',' read -ra tool_array <<< "${services}"
+    for t in "${tool_array[@]}"; do
+        t=$(echo "${t}" | xargs)  # Trim whitespace
+        if [[ "${t}" == "${tool_name}" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
