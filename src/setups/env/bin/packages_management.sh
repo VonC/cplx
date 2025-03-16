@@ -1108,6 +1108,11 @@ function fix_pkgconfig_pc() {
         return 1
     fi
 
+    if [[ ! -e "${pkg_file}.ori" ]]; then
+        cp "${pkg_file}" "${pkg_file}.ori" || fatal "Failed to copy '${pkg_file}' to '${pkg_file}.ori'" 175
+        info "Created backup of '${pkg_file}' as '${pkg_file}.ori'"
+    fi
+
     # extract the path up to /root from pkg_file
     local root_path
     # Match everything up to and including /root/
