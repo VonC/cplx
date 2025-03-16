@@ -456,6 +456,7 @@ function remove_package() {
     if [[ -z "${package_name}" ]]; then
         fatal "No package name provided" 101
     fi
+    package_name="$(short_package_name "${package_name}")"
 
     # Build f1_matches array using process substitution
     local f1_matches=()
@@ -497,6 +498,10 @@ function remove_package() {
             if [[ -f "${file_to_remove}" || -L "${file_to_remove}" ]]; then
                 command rm "${file_to_remove}" || fatal "Failed to remove file '${file_to_remove}'" 106
                 ok "Removed file '${file_to_remove}'"
+                if [[ -e "${file_to_remove}.ori" ]]; then
+                    command rm "${file_to_remove}.ori" || fatal "Failed to remove original file '${file_to_remove}.ori'" 108
+                    ok "Also removed original file '${file_to_remove}.ori'"
+                fi
                 # Check for an accompanying .copied file in the same path
                 local copied_file="${file_to_remove}.copied"
                 if [[ -f "${copied_file}" ]]; then
