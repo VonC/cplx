@@ -1242,7 +1242,7 @@ function fix_pkgconfig_pc() {
             print left_part "=" right_part
         }
         # process built-in packages path, like /home/gitea2/cplx/tools/openssl111/openssl111-1.1.1w/usr
-        else if (right_part ~ "/tools/[^/]+/[^/]+/") {
+        else if (right_part ~ "/tools/[^/]+/[^/]+") {
             # For paths with /tools/{tool}/{version}/..., extract everything after the version
             match(right_part, "/tools/[^/]+/[^/]+/(.*)", tool_parts)
             if (tool_parts[1]) {
