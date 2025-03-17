@@ -1,13 +1,5 @@
-0.16.0 -- libsecret, pkgconfig pc file and pkgs reinstall
+0.17.0-SNAPSHOT -- pass credential backend
 
-* Where to store credentials?
-
-  I have added the dependencies for libsecret and glib2 to work, and
-  `~/tools/tool/sources/2.48.1/git-2.48.1/contrib/credential/libsecret$ make`: works
-
-  But it does require a D-BUS session (which needs an X11 $DISPLAY
-  and either a gnome-keyring or a KDE kwallet. So no vault backend for now.
-
-* pkgconfig pc files are correctly updated during pkg installation process.
-
-* you now can re-install all packages for a given tool: remove + install back.
+Check if a pass credential backend van be setup
+Also check out meson build system
+EOF
