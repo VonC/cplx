@@ -1241,6 +1241,18 @@ function fix_pkgconfig_pc() {
         if (right_part ~ "/[^/]*/root/") {
             print left_part "=" right_part
         }
+        # process built-in packages path, like /home/gitea2/cplx/tools/openssl111/openssl111-1.1.1w/usr
+        else if (right_part ~ "/tools/[^/]+/[^/]+/") {
+            # For paths with /tools/{tool}/{version}/..., extract everything after the version
+            match(right_part, "/tools/[^/]+/[^/]+/(.*)", tool_parts)
+            if (tool_parts[1]) {
+                # Use the portion after the tool directory
+                print left_part "=" root tool_parts[1]
+            } else {
+                # Fallback if the regex does not match correctly
+                print left_part "=" root
+            }
+        }
         # Process with a simpler, more generic pattern that captures the whole path
         else if (right_part ~ /^\/(.*)/) {
             # Extract everything after the leading slash
