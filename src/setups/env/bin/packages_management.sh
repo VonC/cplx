@@ -1409,24 +1409,33 @@ _echo_from_pkg_file() {
 function reinstall_package() {
     local tool_name="${1}"
     local package_name="${2}"
+    local current_tool
+    current_tool="$(current_tool)"
 
     if [[ -z "${tool_name}" ]]; then
-        tool_name="$(current_tool)"
-        if [[ -z "${tool_name}" ]]; then
-            fatal "No tool name provided or determined from current directory" 301
-            return 1
-        fi
-    elif ! _is_valid_tool_name "${tool_name}"; then
+        fatal "No tool name provided or determined from current directory" 301
+        return 1
+    fi
+
+    if ! _is_valid_tool_name "${tool_name}"; then
         if [[ -n "${package_name}" ]]; then
             fatal "Unknown tool name '${tool_name}'" 302
             return 1
         fi
-        tool_name="$(current_tool)"
+        tool_name="${current_tool}"
         if [[ -z "${tool_name}" ]]; then
             fatal "No tool name provided or determined from current directory" 311
             return 1
         fi
         package_name="${1}"
+    elif [[ -z "${package_name}" ]]; then
+        if [[ "${tool_name}" != "${current_tool}" ]]; then
+            tool_name="${current_tool}"
+            package_name="${1}"
+        else
+            fatal "No package name provided for reinstallation (already in tool '${current_tool}')" 302
+            return 1
+        fi
     fi
 
     if [[ -z "${package_name}" ]]; then
