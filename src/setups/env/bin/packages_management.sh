@@ -464,8 +464,38 @@ function remove_package() {
     while IFS='' read -r line; do
         f1_matches+=("$line")
     done < <(find "${tool_pkgs}" -maxdepth 1 -type f -name "${package_name}-[0-9]*.installed*")
-    if [[ ${#f1_matches[@]} -ne 1 ]]; then
-        fatal "Expected one .installed file for package '${package_name}' in '${tool_pkgs}', found ${#f1_matches[@]}" 102
+    # Handle multiple matches for built packages - keep only the most recent
+    if [[ ${#f1_matches[@]} -gt 1 ]]; then
+        # Check if these are built packages
+        if is_package_built "${f1_matches[0]}"; then
+            # Find the most recent file using sorting by modification time
+            local most_recent=""
+            local timestamp=0
+            local file_timestamp=0
+            for file in "${f1_matches[@]}"; do
+                file_timestamp=$(stat -c %Y "$file")
+                if (( file_timestamp > timestamp )); then
+                    timestamp=$file_timestamp
+                    most_recent="$file"
+                fi
+            done
+
+            # Delete older built packages
+            for file in "${f1_matches[@]}"; do
+                if [[ "$file" != "$most_recent" ]]; then
+                    info "Removing older installed flag for built package: $(basename "$file")"
+                    rm -f "$file"
+                fi
+            done
+
+            # Update f1_matches to contain only the most recent file
+            f1_matches=("${most_recent}")
+        else
+            # Not built packages, so this is an error
+            fatal "Expected one .installed file for package '${package_name}' in '${tool_pkgs}', found ${#f1_matches[@]}" 102
+        fi
+    elif [[ ${#f1_matches[@]} -ne 1 ]]; then
+        fatal "Expected one .installed file for package '${package_name}' in '${tool_pkgs}', none" 102
     fi
     local f1="${f1_matches[0]}"
 
@@ -480,8 +510,38 @@ function remove_package() {
     while IFS='' read -r line; do
         f2_matches+=("$line")
     done < <(find "${tools_pkgs}" -maxdepth 1 -type f \( -name "${base}.rpm" -o -name "${base}.tar.gz" -o -name "${base}.xz" \))
-    if [[ ${#f2_matches[@]} -ne 1 ]]; then
-        fatal "Expected one package file for '${base}' in '${tools_pkgs}', found ${#f2_matches[@]}" 103
+    # Handle multiple matches for built packages - keep only the most recent
+    if [[ ${#f2_matches[@]} -gt 1 ]]; then
+        # Check if these are built packages
+        if is_package_built "${base}"; then
+            # Find the most recent file using sorting by modification time
+            local most_recent=""
+            local timestamp=0
+            local file_timestamp=0
+            for file in "${f2_matches[@]}"; do
+                file_timestamp=$(stat -c %Y "$file")
+                if (( file_timestamp > timestamp )); then
+                    timestamp=$file_timestamp
+                    most_recent="$file"
+                fi
+            done
+
+            # Delete older built packages
+            for file in "${f2_matches[@]}"; do
+                if [[ "$file" != "$most_recent" ]]; then
+                    info "Removing older built package: $(basename "$file")"
+                    rm -f "$file"
+                fi
+            done
+
+            # Update f2_matches to contain only the most recent file
+            f2_matches=("$most_recent")
+        else
+            # Not built packages, so this is an error
+            fatal "Expected one package file for '${base}' in '${tools_pkgs}', found ${#f2_matches[@]}" 103
+        fi
+    elif [[ ${#f2_matches[@]} -ne 1 ]]; then
+        fatal "Expected one package file for '${base}' in '${tools_pkgs}', found none" 104
     fi
     local f2="${f2_matches[0]}"
 
