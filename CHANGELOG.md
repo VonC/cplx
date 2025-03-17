@@ -4,6 +4,52 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.16.0] - 2025-03-17 - libsecret, pkgconfig pc file and pkgs reinstall
+
+* Where to store credentials?
+
+  I have added the dependencies for libsecret and glib2 to work, and
+  `~/tools/tool/sources/2.48.1/git-2.48.1/contrib/credential/libsecret$ make`: works
+
+  But it does require a D-BUS session (which needs an X11 $DISPLAY
+  and either a gnome-keyring or a KDE kwallet. So no vault backend for now.
+
+* pkgconfig pc files are correctly updated during pkg installation process.
+
+* you now can re-install all packages for a given tool: remove + install back.
+
+### 🚀 Features
+
+- *(install)* Add `short_package_name()` improve log
+- *(setups)* Add force option to install packages cmd
+- *(install)* Post-install updates pkg-config paths
+- *(env)* Add alias for fix_package_pkgconfig_paths
+- *(setups)* Build Git with libsecret
+- *(install)* List installed/removed packages
+- *(packages)* Rename lp to list_files_in_package
+- *(install)* Reinstall pkg and reinstall all pkgs
+
+### 🐛 Bug Fixes
+
+- `pkg-config` path and `.pc` files
+- *(setups)* Vim fix backspace
+- *(setups)* Enhance pkgconfig path resolution
+- *(install)* `remove_package` handles `.ori` files
+- *(install)* Backup pkgconfig files before modification
+- *(install)* Fix_pkgconfig_pc simplify path fixing
+- *(install)* Multiple built packages during removal
+- *(install)* Reinstall_package handle missing pkg name
+- *(install)* Handle built-in packages in pkg-config
+- *(install)* Handle root built-in pkg-config paths
+
+### 🚜 Refactor
+
+- *(env)* Rename lfpi to lfip, add rp and rap aliases
+
+### ⚙️ Miscellaneous Tasks
+
+- *(src)* Format comment
+
 ## [v0.15.0] - 2025-03-14 - curl dependencies compil, Git and openssl3
 
 Start with libpsl and its own dependencies (libidn2, libunistring).  
