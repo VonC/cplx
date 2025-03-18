@@ -385,14 +385,10 @@ search_pattern_for_package() {
     if [[ -z "${package_name}" ]]; then
         fatal "No package name provided" 162
     fi
+    local short_package_name
+    short_package_name="$(short_package_name "${package_name}")"
     local search_pattern
-    if [[ "${package_name}" =~ -[0-9] ]]; then
-        search_pattern="$(base_package_name "${package_name}")"
-        search_pattern="${search_pattern}*"
-        search_pattern="${search_pattern/-????????.????./-*.*.}"
-    else
-        search_pattern="${package_name}*-[0-9]*"
-    fi
+    search_pattern="${short_package_name}-[0-9]*"
     echo "${search_pattern}"
 }
 
