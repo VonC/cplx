@@ -57,3 +57,9 @@ libsecret
 libsecret-devel
 libmount
 libmount-devel
+pcre2
+pcre2-devel
+pcre2-static
+readline
+readline-devel
+pcre2-tools
