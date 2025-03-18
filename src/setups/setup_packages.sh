@@ -18,6 +18,7 @@ main() {
     rm -f "${SETUP_PKGS_DIR}/pkgs.log"
     download_packages_list "${architecture}"
     sync_packages "${architecture}"
+    install_packages
 }
 
 download_packages_list() {
@@ -198,7 +199,6 @@ sync_package() {
     else
         ok "Package '${found_pkg}' is a remote built package: no download or scp needed"
     fi
-    install_package "${found_pkg}"
 }
 
 find_package_in_arch() {
@@ -316,10 +316,7 @@ scp_package() {
 
 }
 
-install_package() {
-    local pkg_name="$1"
-    # shellcheck disable=SC2001
-    pkg_name="$(echo "$pkg_name" | sed 's,^_*,,')"
+install_packages() {
     if ! get_property cplx_path; then
         fatal "cplx_path not found in file '${properties_file}'" 101
     fi
@@ -330,9 +327,16 @@ install_package() {
     else
         ok "Script 'packages_management.sh' copied successfully to ${SSH_CONFIG_ENTRY}:${remote_bin}"
     fi
+    local dep_list="${CPLX_TOOL}_${architecture}.txt"
+    task "Must copy '${dep_list}' script to ${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/"
+    if ! scp "${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}/${dep_list}" "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list"; then
+        fatal "Failed to copy '${dep_list}' to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/'" 902
+    else
+        ok "List '${dep_list}' copied successfully to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list'"
+    fi
     set -x
     # shellcheck disable=SC2029
-    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools/${CPLX_TOOL} && chmod 755 ${cplx_path}/bin/packages_management.sh && bash -c \"source ${cplx_path}/.env; pkg_log=1; install_package_from_name \"${pkg_name}\"\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}\temp.pkgs.txt"
+    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools/${CPLX_TOOL} && chmod 755 ${cplx_path}/bin/packages_management.sh && bash -c \"source ${cplx_path}/.env; pkg_log=1; install_packages_for_tool \"${CPLX_TOOL}\"\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}\temp.pkgs.txt"
     set +x
     # Get the last line from temp.txt as exit status
     lastLine=$(tail -n 1 "${SETUP_PKGS_DIR}/temp.pkgs.txt")
