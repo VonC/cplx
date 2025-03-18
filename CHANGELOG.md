@@ -4,6 +4,59 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [unreleased] -
+
+Check out meson build system.  
+Why meson?
+
+- https://public-inbox.org/git/ac327d98e9c287b07b8d4ab0647adbefea53ed82.1729254070.git.ps@pks.im/, 
+- https://public-inbox.org/git/508e3783d284fd2d3bd4840907ed0bdc20bc1b23.1727881164.git.ps@pks.im/
+
+The meson build works:
+    
+```bash
+~/tools/python/bin/python -m venv venv_git
+~/tools/tool/venv_git/bin$ source activate
+pip config -v --user set global.cert /home/path/to/certs/YourCompany.pem
+pip config -v --user set global.index-url https://nexus.company.com/repository/pnexus/simple/
+pip config -v --user set global.trusted-host nexus.company.com/repository/pnexus/simple/
+
+That needs Ninja: https://github.com/ninja-build/ninja/:
+https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+~/tools/git/venv_git/bin$ unzip ninja-linux.zip
+pip install meson
+sed -i "s/python3.13_bin_bin/python3.13_bin/g" meson
+./meson --version
+1.7.0
+~/tools/tool/sources/2.48.1/git-2.48.1/$ meson setup --wipe -Dc_std=c99 build/
+~/tools/tool/sources/2.48.1/git-2.48.1/build$
+meson configure --prefix ~/tools/git/git-2.48.1-meson
+options can be discovered by running `meson configure` in either a build
+directory or the source directory.
+meson compile
+meson install --no-rebuild
+meson test
+https://public-inbox.org/git/Z5sWCxEF3J7t8WvW@pks.im/
+https://public-inbox.org/git/20241213-pks-meson-ci-v2-7-634affccc694@pks.im/
+meson test -i --test-args=-vdVix -v --no-rebuild --print-errorlogs \
+      --maxfail 1 t0000-basic
+```
+
+### 🚀 Features
+
+- *(install)* Implement install_packages_for_tool
+
+### 🐛 Bug Fixes
+
+- *(setup)* Refine search pattern for packages
+- *(install)* Check_ldd handle empty `LD_LIBRARY_PATH`
+- *(install)* Rename alias rp to rip
+- *(git)* Update meson Git dependencies for RHEL 7.9
+
+### 🚜 Refactor
+
+- *(setup)* Setup packages after copy completed
+
 ## [v0.16.0] - 2025-03-17 - libsecret, pkgconfig pc file and pkgs reinstall
 
 * Where to store credentials?
