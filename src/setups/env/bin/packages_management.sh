@@ -1047,6 +1047,15 @@ check_ldd() {
     local file="$1"
     local dest_dir="$2"
 
+    if [[ -z "${LD_LIBRARY_PATH}" ]]; then
+        if ! setenv; then
+            fatal "check_ldd: ${sp}Unable to set environment variables" 123
+        fi
+    fi
+    if [[ -z "${LD_LIBRARY_PATH}" ]]; then
+        fatal "check_ldd: ${sp}LD_LIBRARY_PATH is empty" 124
+    fi
+
     # If the file name includes ' -> ', treat it as a symlink and skip ldd check.
     local exclude_tokens=(" -> " " => " "share/man" "share/doc" "share/licenses")
     if contains_any "${file}" "${exclude_tokens[@]}"; then
@@ -1141,6 +1150,11 @@ check_ldd() {
             fi
         fi
     done <<< "${output}"
+    if [[ ! "${ret}" == "0" ]]; then
+        env|grep LD
+        echo "--------------"
+        ldd "$file"
+    fi
     return $ret
 }
 
