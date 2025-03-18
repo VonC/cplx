@@ -629,10 +629,157 @@ function set_pkgs_log() {
 
 }
 
-function install_package_from_name() {
+#######################################################################
+# Installs all packages defined in a tool's dependencies list file
+#
+# This function handles the installation of packages for a specific tool
+# based on the contents of its dependencies.list file. It:
+# - Validates the tool name or uses the current tool context
+# - Reads the dependencies.list file line by line
+# - Tracks which packages are already installed
+# - Handles special '>' prefix to force reinstallation of packages
+# - Provides progress reporting during installation
+# - Displays a summary of the operation results
+#
+# The dependencies.list format:
+# - One package name per line
+# - Lines starting with '>' indicate forced reinstallation
+# - All packages after a forced reinstall line are also reinstalled
+#
+# Arguments:
+#   $1 - Tool name (optional, uses current tool if not provided)
+#
+# Returns:
+#   0 on success (all necessary packages installed), non-zero on failure
+#######################################################################
+function install_packages_for_tool() {
+
     if [[ -n ${pkg_log} ]]; then
-        set_pkgs_log "install_package2"
+        set_pkgs_log "install_packages_for_tool"
     fi
+
+    local tool_name="${1}"
+    local exit_code=0
+    local force_install=0
+    local total_packages=0
+    local installed_count=0
+
+    # Determine the tool name
+    if [[ -z "${tool_name}" ]]; then
+        tool_name="$(current_tool)"
+        if [[ -z "${tool_name}" ]]; then
+            fatal "No tool name provided or determined from current directory" 401
+            return 1
+        fi
+    elif ! _is_valid_tool_name "${tool_name}"; then
+        fatal "Unknown tool name '${tool_name}'" 402
+        return 1
+    fi
+
+    # Set paths
+    local tool_path="${HOME}/tools/${tool_name}"
+    local deps_file="${tool_path}/dependencies.list"
+    local tool_pkgs="${tool_path}/pkgs"
+
+    # Check if dependencies.list exists
+    if [[ ! -f "${deps_file}" ]]; then
+        fatal "Dependencies file not found: '${deps_file}'" 403
+        return 1
+    fi
+
+    # Change to the tool directory
+    cd "${tool_path}" || {
+        fatal "Failed to change directory to '${tool_path}'" 404
+        return 1
+    }
+
+    # First pass: count packages and build list of packages to install
+    local packages_to_install=()
+
+    # Read the dependencies file
+    while IFS= read -r line || [[ -n "${line}" ]]; do
+        # Skip empty lines and comments
+        [[ -z "${line}" || "${line}" =~ ^[[:space:]]*# ]] && continue
+
+        # Trim whitespace
+        line=$(echo "${line}" | xargs)
+        ((total_packages++))
+
+        # Check if this package has the '>' prefix for forced reinstall
+        if [[ "${line:0:1}" == ">" ]]; then
+            # Remove the '>' prefix
+            line="${line:1}"
+            force_install=1
+        fi
+        # Check if this package name starts with _ (built package)
+        if [[ "${line:0:1}" == "_" ]]; then
+            # Remove the '_' prefix
+            line="${line:1}"
+        fi
+
+        # Check if the package is already installed (unless force_install is set)
+        local full_package_name
+        full_package_name=$(get_full_package_name "${line}")
+
+        if [[ -z "${full_package_name}" ]]; then
+            error "No package found for name '${line}' in dependencies list"
+            exit_code=1
+            continue
+        fi
+
+        local base_package_name
+        base_package_name="$(base_package_name "${full_package_name}")"
+
+        # If force_install is set or package is not installed, add to install list
+        if [[ ${force_install} -eq 1 ]] || ! is_package_flagged_as "${base_package_name}" "installed"; then
+            packages_to_install+=("${line}")
+        else
+            ((installed_count++))
+            ok "Package '${line}' is already installed (base_package_name='${base_package_name}')"
+        fi
+    done < "${deps_file}"
+
+    # If all packages are already installed, we're done
+    if [[ ${#packages_to_install[@]} -eq 0 ]]; then
+        ok "All ${total_packages} packages are already installed for tool '${tool_name}'"
+        return 0
+    fi
+
+    # Install the packages
+    local count=1
+    for package in "${packages_to_install[@]}"; do
+        # Display a banner for the current package
+        local banner="
+╔════════════════════════════════════════════════════════════════╗
+║  Installing package #${count}/${#packages_to_install[@]} for tool '${tool_name}'
+║  Package: ${package}
+╚════════════════════════════════════════════════════════════════╝"
+        echo "${banner}"
+
+        # Install the package
+        if ! install_package_from_name "${package}"; then
+            error "Failed to install package '${package}'"
+            exit_code=1
+        else
+            ok "Successfully installed package '${package}'"
+        fi
+
+        ((count++))
+    done
+
+    # Final summary
+    if [[ ${exit_code} -eq 0 ]]; then
+        ok "Successfully installed all required packages for tool '${tool_name}'"
+        ok "${#packages_to_install[@]} packages installed, ${installed_count} packages were already installed"
+    else
+        error "Failed to install some packages for tool '${tool_name}'"
+        error "Please check the log for details"
+    fi
+
+    return ${exit_code}
+}
+
+function install_package_from_name() {
     local tool
     tool="$(current_tool)"
     if [[ -z "${tool}" ]]; then
