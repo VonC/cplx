@@ -1,3 +1,10 @@
-0.20.0 -- libgpg-error
+0.21.0-SNAPSHOT -- Git credential pass-based helper
 
-Needed by pinentry
+Test if GCM - Git Credential Manager can be used as is (no recompilation): no.
+
+I tried:
+
+- pass (using a trusted gpg2 key, with passphrase pre-registered to the gpg-agent: works with pintentry-curses, provided GPG_TTY is set to $(tty))
+- https://github.com/languitar/pass-git-helper, a python script, which uses a 
+ ~/.config/pass-git-helper/git-pass-mapping.ini, but only matches `host`, not `user@host`
+Hence 
