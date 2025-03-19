@@ -168,7 +168,7 @@ else
     echo "Extraction folder '${archive_folder}' already exists. Skipping extraction."
 fi
 
-first_folder=$(find "$archive_folder" -type f -name 'config*' -printf '%h\n' | sort -u | head -n 1)
+first_folder=$(find "$archive_folder" -type f \( -name 'config*' -o -name 'Makefile' -o -name 'meson.build' \) -printf '%h\n' | sort -u | head -n 1)
 if [[ -z "$first_folder" ]]; then
     fatal "No folder with config found in '$archive_folder'" 6
 fi
