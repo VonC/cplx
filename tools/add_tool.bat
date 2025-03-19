@@ -214,30 +214,41 @@ rem if URL extension is .tgz or .tar.gz, then call:update_senv_local_variable "C
 
 :: Auto-detect source extension from URL
 "%gum%" style --foreground 45 "Checking URL extension to determine source format..."
-if "!CPLX_URL!" NEQ "" (
-  :: Check if URL contains .tar.gz or .tgz extension
-  echo "!CPLX_URL!" | findstr /i /c:".tar.gz" /c:".tgz" >nul
-  if not errorlevel 1 (
-    "%gum%" style --foreground 82 "✓ Detected tar.gz format from URL"
-    if "%CPLX_SRC_EXT%"=="tar.gz" (
-      "%gum%" style --foreground 82 "✓ Confirmed tar.gz format from URL already in pace"
-    )
-    call:update_senv_local_variable "CPLX_SRC_EXT" "tar.gz" "zip"
-  ) else (
-    :: Check if URL contains .zip extension
-    echo "!CPLX_URL!" | findstr /i /c:".zip" >nul
-    if not errorlevel 1 (
-      "%gum%" style --foreground 82 "✓ Confirmed zip format from URL"
-    ) else (
-      :: Ask user for extension if not detected
-      "%gum%" style --foreground 226 "! Could not auto-detect source format from URL"
-      "%gum%" style --foreground 45 "Step: Select source archive format for '%CPLX_TOOL_NEW%'"
-      for /f "tokens=*" %%a in ('%gum% choose "tar.gz" "zip"') do (
-        set "CPLX_SRC_EXT=%%a"
-        "%gum%" style --foreground 82 "✓ Using !CPLX_SRC_EXT! format for source archives"
-        call:update_senv_local_variable "CPLX_SRC_EXT" "!CPLX_SRC_EXT!" "zip"
-      )
-    )
+if "!CPLX_URL!" == "" (
+  %_fatal% "CPLX_URL is empty for '%CPLX_TOOL_NEW%': no source extension detection possible" 121
+)
+:: Check if URL contains .tar.gz or .tgz extension
+echo "!CPLX_URL!" | findstr /i /c:".tar.gz" /c:".tgz" >nul
+if not errorlevel 1 (
+  "%gum%" style --foreground 82 "✓ Detected tar.gz format from URL"
+  if "%CPLX_SRC_EXT%"=="tar.gz" (
+    "%gum%" style --foreground 82 "✓ Confirmed tar.gz format from URL already in pace"
+  )
+  call:update_senv_local_variable "CPLX_SRC_EXT" "tar.gz" "zip"
+  goto:check_cplx_version
+)
+:: Check if URL contains .tar.gz or .tgz extension
+echo "!CPLX_URL!" | findstr /i /c:".tar.xz" >nul
+if not errorlevel 1 (
+  "%gum%" style --foreground 82 "✓ Detected tar.xz format from URL"
+  if "%CPLX_SRC_EXT%"=="tar.xz" (
+    "%gum%" style --foreground 82 "✓ Confirmed tar.xz format from URL already in pace"
+  )
+  call:update_senv_local_variable "CPLX_SRC_EXT" "tar.xz" "zip"
+  goto:check_cplx_version
+)
+:: Check if URL contains .zip extension
+echo "!CPLX_URL!" | findstr /i /c:".zip" >nul
+if not errorlevel 1 (
+  "%gum%" style --foreground 82 "✓ Confirmed zip format from URL"
+) else (
+  :: Ask user for extension if not detected
+  "%gum%" style --foreground 226 "! Could not auto-detect source format from URL"
+  "%gum%" style --foreground 45 "Step: Select source archive format for '%CPLX_TOOL_NEW%'"
+  for /f "tokens=*" %%a in ('%gum% choose "tar.gz" "tar.xz" "zip"') do (
+    set "CPLX_SRC_EXT=%%a"
+    "%gum%" style --foreground 82 "✓ Using !CPLX_SRC_EXT! format for source archives"
+    call:update_senv_local_variable "CPLX_SRC_EXT" "!CPLX_SRC_EXT!" "zip"
   )
 )
 
