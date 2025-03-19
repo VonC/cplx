@@ -4,6 +4,19 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.19.0] - 2025-03-19 - pinentry
+
+Needed for GPG2 operation.  
+Used by pass (the password storage utility)
+
+### 🚀 Features
+
+- *(pinentry)* Add pinentry tool support
+
+### 🐛 Bug Fixes
+
+- *(install)* Update environment variables for autotools
+
 ## [v0.18.0] - 2025-03-19 - Pass (password store) and GPG2
 
 Needed for https://github.com/languitar/pass-git-helper
