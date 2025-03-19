@@ -4,6 +4,14 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.20.0] - 2025-03-19 - libgpg-error
+
+Needed by pinentry
+
+### 🚀 Features
+
+- *(libgpg-error)* Add libgpg-error service
+
 ## [v0.19.0] - 2025-03-19 - pinentry
 
 Needed for GPG2 operation.  
