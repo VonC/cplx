@@ -140,8 +140,8 @@ if "%CPLX_TOOL%" == "pass" (
   rem https://
   set "CPLX_URL=https://git.zx2c4.com/password-store/snapshot/password-store-1.7.4.tar.xz"
   set "CPLX_SRC_EXT=tar.xz"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=share/man/man1/pass.1"
+  set "CPLX_CHECK_SRC=man/pass.1"
   set "CPLX_BIN=true"
   set "CPLX_CONFIG_DONE=default"
 )
