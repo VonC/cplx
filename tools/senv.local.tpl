@@ -146,6 +146,17 @@ if "%CPLX_TOOL%" == "pass" (
   set "CPLX_CONFIG_DONE=default"
 )
 
+if "%CPLX_TOOL%" == "pinentry" (
+  set "CPLX_VERSION=1.3.1"
+  rem https://
+  set "CPLX_URL=https://github.com/gpg/pinentry/archive/refs/tags/pinentry-[version].tar.gz
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN=true"
+  set "CPLX_CONFIG_DONE=default"
+)
+
 goto:eof
 
 

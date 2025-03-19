@@ -195,6 +195,7 @@ autofs-5.0.7-113.el7.x86_64.rpm
 autogen-5.18-5.el7.x86_64.rpm
 autogen-libopts-5.18-5.el7.x86_64.rpm
 autogen-libopts-devel-5.18-5.el7.x86_64.rpm
+automake-1.13.4-3.el7.noarch.rpm
 automoc-1.0-0.20.rc3.el7.x86_64.rpm
 autotrace-0.31.1-38.el7.x86_64.rpm
 autotrace-devel-0.31.1-38.el7.x86_64.rpm
@@ -1680,7 +1681,7 @@ libarchive-devel-3.1.2-14.el7_7.x86_64.rpm
 libart_lgpl-2.3.21-10.el7.x86_64.rpm
 libart_lgpl-devel-2.3.21-10.el7.x86_64.rpm
 libasan-4.8.5-44.el7.x86_64.rpm
-libasan-static-4.8.5-44.el7.x86_64.rpm
+libasan-static-4.8  .5-44.el7.x86_64.rpm
 libassuan-2.1.0-3.el7.x86_64.rpm
 libassuan-devel-2.1.0-3.el7.x86_64.rpm
 libasyncns-0.8-7.el7.x86_64.rpm

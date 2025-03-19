@@ -1,0 +1,14 @@
+glibc-headers
+glibc-devel
+glibc
+kernel-headers
+cpp
+libtool
+automake
+autoconf
+libassuan
+libassuan-devel
+gettext
+gettext-devel
+libgpg-error
+libgpg-error-devel
