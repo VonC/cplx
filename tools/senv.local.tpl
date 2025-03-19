@@ -135,6 +135,17 @@ if "%CPLX_TOOL%" == "openssl3" (
   set "CPLX_CONFIG_DONE=LIBS=apps/libapps.a Makefile"
 )
 
+if "%CPLX_TOOL%" == "pass" (
+  set "CPLX_VERSION=1.7.4"
+  rem https://
+  set "CPLX_URL=https://git.zx2c4.com/password-store/snapshot/password-store-1.7.4.tar.xz"
+  set "CPLX_SRC_EXT=tar.xz"
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN=true"
+  set "CPLX_CONFIG_DONE=default"
+)
+
 goto:eof
 
 
