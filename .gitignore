@@ -21,3 +21,5 @@ senv.local.bat
 setup.properties
 last
 *._to_delete
+*.xz
+*.tar.xz
