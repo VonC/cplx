@@ -1,6 +1,4 @@
-0.18.0 -- Pass (password store) and GPG2
+0.19.0-SNAPSHOT -- pinentry
 
-Needed for https://github.com/languitar/pass-git-helper
-Goal is to store HTTPS credential encrypted.
-Install everything to configure cplx own gpg2 keyring/secret-keyring
-But it still need a pinentry-tty
+Needed for GPG2 operation.  
+Used by pass (the password storage utility)
