@@ -157,6 +157,17 @@ if "%CPLX_TOOL%" == "pinentry" (
   set "CPLX_CONFIG_DONE=default"
 )
 
+if "%CPLX_TOOL%" == "libgpg-error" (
+  set "CPLX_VERSION=1.51"
+  rem https://
+  set "CPLX_URL=https://github.com/gpg/libgpg-error/archive/refs/tags/libgpg-error-[version].tar.gz
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
+)
+
 goto:eof
 
 
