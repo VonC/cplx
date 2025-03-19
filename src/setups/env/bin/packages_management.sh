@@ -58,7 +58,7 @@ function make_package_list() {
         fatal "make_package_list: No full package name found for '${package_name}'" 94
     fi
     if ! has_package_extension "${full_package_name}"; then
-        fatal "make_package_list: full_package_name '${full_package_name}' must have a known extension (.rpm, .tar.gz, .xz)" 93
+        fatal "make_package_list: full_package_name '${full_package_name}' must have a known extension (.rpm, .tar.gz, .tar.xz, .xz)" 93
     fi
     local tools_pkgs
     tools_pkgs="${HOME}/tools/pkgs"
@@ -85,8 +85,14 @@ function make_package_list() {
         tar tzvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
             || fatal "make_package_list: Failed to list tar.gz archive '${full_package_name}'" 95
     elif [[ "${full_package_name}" =~ \.xz$ ]]; then
-        tar --xz -tzvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
-            || fatal "make_package_list: Failed to list xz archive '${full_package_name}'" 96
+        if [[ "${full_package_name}" =~ \.tar\.xz$ ]] || file "${tools_pkgs}/${full_package_name}" | grep -q "XZ compressed data.*tar archive"; then
+            tar tJvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
+                || fatal "make_package_list: Failed to list tar.xz archive '${full_package_name}'" 96
+        else
+            # For non-tar xz files (less common case), assume zip archive behind the xz compression
+            tar --xz -tzvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
+                || fatal "make_package_list: Failed to list xz archive '${full_package_name}'" 97
+        fi
     fi
     if [[ -n "${verbose}" ]]; then
         ok "make_package_list: List file '${list_file}' created"
@@ -131,6 +137,9 @@ function lookup_file_in_package_archive() {
         elif [[ "$package_name" =~ \.tar\.gz$ ]]; then
             tar tzvf "${package_name}" > "${full_list_file}" \
                 || fatal "Failed to list tar.gz archive '${package_name}'" 51
+        elif [[ "$package_name" =~ \.tar\.xz$ ]]; then
+            tar tJvf "${package_name}" > "${full_list_file}" \
+                || fatal "Failed to list xz archive '${package_name}'" 52
         elif [[ "$package_name" =~ \.xz$ ]]; then
             tar --xz -tzvf "${package_name}" > "${full_list_file}" \
                 || fatal "Failed to list xz archive '${package_name}'" 52
@@ -201,6 +210,7 @@ function find_file_in_packages() {
             archive_file=$(basename "${list_file%.list}")
             if [[ -e "${archive_file}.rpm" ]]; then archive_file="${archive_file}.rpm"; fi
             if [[ -e "${archive_file}.tar.gz" ]]; then archive_file="${archive_file}.tar.gz"; fi
+            if [[ -e "${archive_file}.tar.xz" ]]; then archive_file="${archive_file}.tar.xz"; fi
             if [[ -e "${archive_file}.xz" ]]; then archive_file="${archive_file}.xz"; fi
             echo "${archive_file}"
             # Process each matching line: extract the portion after the first "./"
@@ -292,6 +302,7 @@ function base_package_name() {
     base_package_name="${base_package_name%.list}"
     base_package_name="${base_package_name%.rpm}"
     base_package_name="${base_package_name%.tar.gz}"
+    base_package_name="${base_package_name%.tar.xz}"
     base_package_name="${base_package_name%.xz}"
     echo "${base_package_name}"
 }
@@ -418,7 +429,7 @@ search_full_package_name_in_folder() {
     search_pattern=$(search_pattern_for_package "${package_name}")
     local full_package_name
     local ext
-    for ext in ".installed*" ".list" ".rpm" ".tar.gz" ".xz"; do
+    for ext in ".installed*" ".list" ".rpm" ".tar.gz" ".tar.xz" ".xz"; do
         full_package_name=$(find "${folder}" -maxdepth 1 -type f -name "${search_pattern}${ext}" | head -n 1)
         if [[ -n "${full_package_name}" ]]; then
             break
@@ -500,12 +511,12 @@ function remove_package() {
     f1_basename=$(basename "${f1}")
     local base="${f1_basename%%.installed*}"
 
-    # Build f2_matches array using process substitution (supports .rpm, .tar.gz, or .xz)
+    # Build f2_matches array using process substitution (supports .rpm, .tar.gz, .tar.xz or .xz)
     local f2_matches=()
     # shellcheck disable=SC2154
     while IFS='' read -r line; do
         f2_matches+=("$line")
-    done < <(find "${tools_pkgs}" -maxdepth 1 -type f \( -name "${base}.rpm" -o -name "${base}.tar.gz" -o -name "${base}.xz" \))
+    done < <(find "${tools_pkgs}" -maxdepth 1 -type f \( -name "${base}.rpm" -o -name "${base}.tar.gz" -o -name "${base}.tar.xz" -o -name "${base}.xz" \))
     # Handle multiple matches for built packages - keep only the most recent
     if [[ ${#f2_matches[@]} -gt 1 ]]; then
         # Check if these are built packages
@@ -949,11 +960,13 @@ function install_tool_package() {
     local flag="${tool_pkgs}/${pkg_base}.installed"
     if [[ "${full_package_name%.rpm}" != "${full_package_name}" ]]; then
         if ! rpm2cpio "${tools_pkgs}/${full_package_name}" | cpio -idmv; then fatal "Unable to install '${full_package_name}'" 2; fi
+    elif [[ "${full_package_name%.tar.gz}" != "${full_package_name}" ]]; then
+        if ! tar xpvf "${tools_pkgs}/${full_package_name}"; then fatal "Unable to untar gz '${full_package_name}'" 5; fi
+    elif [[ "${full_package_name%.tar.xz}" != "${full_package_name}" ]]; then
+        if ! tar xJvf "${tools_pkgs}/${full_package_name}"; then fatal "Unable to untar tar.xz '${full_package_name}'" 5; fi
     elif [[ "${full_package_name%.xz}" != "${full_package_name}" ]]; then
         if ! xzcat "${tools_pkgs}/${full_package_name}" > "${full_package_name%.xz,,}"; then fatal "Unable to unxz '${full_package_name}'" 4; fi
         chmod 755 "${full_package_name%.xz,,}"
-    elif [[ "${full_package_name%.tar.gz}" != "${full_package_name}" ]]; then
-        if ! tar xpvf "${tools_pkgs}/${full_package_name}"; then fatal "Unable to untar gz '${full_package_name}'" 5; fi
     else
         fatal "${sp}unknown extension for archive '${full_package_name}'" 11
     fi
@@ -1047,11 +1060,16 @@ mirror_tool_package() {
             # Process each line (custom processing can be added here)
             info "${sp}tar.gz contains: ${line}"
         done
+    elif [[ "${pkg_name%.tar.xz}" != "${pkg_name}" ]]; then
+        tar tJvf "${pkg_file}" | while IFS= read -r line; do
+            # Process each line (custom processing can be added here)
+            info "${sp}tar.xz contains: ${line}"
+        done
     elif [[ "${pkg_name%.xz}" != "${pkg_name}" ]]; then
         # Assuming it's a tar.xz package
         if file "${pkg_file}" | grep -qi "tar archive"; then
             tar --xz -tzvf "${pkg_file}" | while IFS= read -r line; do
-                info "${sp}tar.xz contains: ${line}"
+                info "${sp}[tar].xz contains: ${line}"
             done
         else
             fatal "${sp}Unsupported xz archive type for pkg_name '${pkg_name}'" 1

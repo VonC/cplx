@@ -78,7 +78,7 @@ rm -f "${prj}/log" 2>/dev/null
 shopt -s nullglob
 
 # Array of possible archive extensions
-declare -a archive_extensions=("zip" "tar.gz" "tar")
+declare -a archive_extensions=("zip" "tar.gz" "tar.xz" "tar")
 
 # Initialize an empty array to hold matching archives
 matching_archives=()
@@ -87,12 +87,7 @@ version="$2"
 
 # Iterate over each extension to find matching archives
 for ext in "${archive_extensions[@]}"; do
-    # Handle double extensions like tar.gz
-    if [[ "$ext" == "tar.gz" ]]; then
-        pattern="*${version}*.tar.gz"
-    else
-        pattern="*${version}*.${ext}"
-    fi
+    pattern="*${version}*.${ext}"
 
     # Use find to collect matching files and append to the array
     while IFS= read -r -d '' file; do
@@ -129,7 +124,7 @@ uncompress_archive() {
 
     case "$archive" in
         *.zip)
-            echo "Unzipping '${archive}' to '${destination}'..."
+            echo "Unzipping zip '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
             if ! unzip -q "$archive" -d "$destination"; then
                 rmdir "$destination" 2>/dev/null
@@ -137,15 +132,23 @@ uncompress_archive() {
             fi
             ;;
         *.tar.gz)
-            echo "Extracting '${archive}' to '${destination}'..."
+            echo "Extracting tar.gz '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
             if ! tar -xzf "$archive" -C "$destination" --strip-components=1; then
                 rmdir "$destination" 2>/dev/null
                 fatal "Failed to extract '${archive}'" 41
             fi
             ;;
+        *.tar.xz)
+            echo "Extracting tar.xz '${archive}' to '${destination}'..."
+            mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
+            if ! tar -xJf "$archive" -C "$destination" --strip-components=1; then
+                rmdir "$destination" 2>/dev/null
+                fatal "Failed to extract '${archive}'" 41
+            fi
+            ;;
         *.tar)
-            echo "Extracting '${archive}' to '${destination}'..."
+            echo "Extracting tar '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
             if ! tar -xf "$archive" -C "$destination" --strip-components=1; then
                 rmdir "$destination" 2>/dev/null
