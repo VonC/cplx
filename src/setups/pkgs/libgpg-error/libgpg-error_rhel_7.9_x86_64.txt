@@ -1,0 +1,10 @@
+glibc-headers
+glibc-devel
+glibc
+kernel-headers
+cpp
+libtool
+automake
+autoconf
+gettext
+gettext-devel
