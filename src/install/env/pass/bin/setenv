@@ -1,0 +1,28 @@
+#!/bin/bash
+# shellcheck disable=SC2139
+
+unset BASH_ENV
+export BASH_ENV
+
+tool_dir="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+tool_dir="$(dirname "${tool_dir}")"
+export tool_dir
+
+#echo "tool_dir='${tool_dir}'"
+
+export PERLLIB="${tool_dir}/current/share/perl5:${tool_dir}/current/lib64/perl5/vendor_perl"
+export PATH="${tool_dir}/current/bin:${tool_dir}/current/libexec/git-core:${PATH}"
+export LD_LIBRARY_PATH="${tool_dir}/current/lib64"
+export GIT_EXEC_PATH="${tool_dir}/current/libexec/git-core"
+if ! echo "${MANPATH}" | grep "${tool_dir}/current/share/man">/dev/null; then
+    export MANPATH="${tool_dir}/current/share/man:${MANPATH}"
+fi
+alias man='BASH_ENV= "${tool_dir}/bin/manw.sh"'
+
+#find ${PERLLIB}
+#which git
+#which git-add
+#git version
+#git ls-remote
+#git add -p .
+#export GIT_TRACE2=1
