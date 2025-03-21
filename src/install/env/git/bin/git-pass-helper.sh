@@ -106,6 +106,7 @@ init_pass_store() {
   fi
 }
 
+
 # Function to get the password from the pass store
 get_password_from_store() {
   local uid="$1"
@@ -222,13 +223,14 @@ while IFS='=' read -r key value; do
   request_data+=("$key=$value")
 done
 
-request=$(printf "%s\n" "${request_data[@]}")
-
 host=""
 username=""
 password=""
 
-while IFS='=' read -r key value <<< "$request"; do
+# Process each key-value pair separately
+for pair in "${request_data[@]}"; do
+  key="${pair%%=*}"
+  value="${pair#*=}"
   case "$key" in
     host) host="$value" ;;
     username) username="$value" ;;
