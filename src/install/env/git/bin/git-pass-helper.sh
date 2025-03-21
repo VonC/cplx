@@ -22,7 +22,7 @@ fatal_error() {
 # Function to check if a GPG key with the given UID exists
 check_gpg_key() {
   local uid="$1"
-  if "$GPG_COMMAND" --list-keys --with-colons | grep "^uid.*$uid" > /dev/null; then
+  if "$GPG_COMMAND" --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --list-keys --with-colons | grep "^uid.*$uid" > /dev/null; then
     return 0 # Key exists
   else
     return 1 # Key does not exist
@@ -35,14 +35,14 @@ generate_gpg_key() {
   local real_name
   local passphrase
 
-  echo "Generating OpenPGP key for user: $uid"
+  echo "Generating2 OpenPGP key for user: $uid"
 
   # Automatically use uid as real_name
   local real_name="$uid"
   
-  # Only prompt for passphrase
+  # Only prompt for passphrase, redirecting input from /dev/tty
   while true; do
-    read -r -s -p "Enter a passphrase for your key (non-empty): " passphrase
+    read -r -s -p "Enter a passphrase for your key (non-empty): " passphrase < /dev/tty
     echo # To move the cursor to the next line after the hidden input
     if [[ -n "$passphrase" ]]; then
       break
@@ -51,24 +51,32 @@ generate_gpg_key() {
     fi
   done
 
-# Name-Email: ${uid}@dummy.local  # Optional, but GPG might complain without it
-# Removing email entry to ensure simple UID
-  cat <<EOF | "$GPG_COMMAND" --batch --gen-key -
+  # Write the key generation parameters to the temporary file
+  cat <<EOF > k.cmd
+%echo Generating OpenPGP key for ${uid}
 Key-Type: RSA
 Key-Length: 4096
 Expire-Date: 0
 Name-Real: $real_name
+Name-Email: ${uid}@dummy.local
 Passphrase: $passphrase
-%pubring ${uid}.pub
-%secring ${uid}.sec
+%pubring ${HOME}/certs/$uid.pub
+%secring ${HOME}/certs/$uid.sec
 %commit
 EOF
+# Name-Email: ${uid}@dummy.local  # Optional, but GPG might complain without it
+# Removing email entry to ensure simple UID
+  gpg_output=$("$GPG_COMMAND" --batch --gen-key k.cmd 2>&1)
 
   if check_gpg_key "$uid"; then
     echo "$uid OpenPGP key generation done."
   else
+    echo "GPG key generation failed for $uid. Output from gpg:"
+    echo "$gpg_output"
     fatal_error "Failed to generate GPG key for $uid."
   fi
+
+  fatal_error "stop for now" 22
 }
 
 # Function to check if the pass store exists
@@ -152,6 +160,8 @@ erase_password_from_store() {
   "$PASS_COMMAND" rm -f "$password_path" 2>/dev/null
   unset PASSWORD_STORE_DIR
 }
+
+
 
 # Main script logic
 action="$1"
