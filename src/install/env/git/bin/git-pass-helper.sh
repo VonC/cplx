@@ -161,7 +161,35 @@ erase_password_from_store() {
   unset PASSWORD_STORE_DIR
 }
 
+check_and_set_ultimate_trust() {
+  local key_id_or_uid="$1"
+  local fingerprint
+  local owner_trust
 
+  # Get the fingerprint of the key
+  fingerprint=$(gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --fingerprint "$key_id_or_uid" | grep "^ *Key fingerprint ="| awk -F '=' '{gsub(/ /, "", $2); print $2}')
+  if [[ -z "$fingerprint" ]]; then
+    echo "Error: Could not retrieve fingerprint for '$key_id_or_uid'."
+    return 1
+  fi
+
+  # Get the owner trust level
+  owner_trust=$(gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --list-keys --with-colons "$key_id_or_uid" | awk -F: '/^pub:/ {print $9}')
+
+  if [[ "$owner_trust" != "u" ]]; then
+    echo "Key '$key_id_or_uid' (fingerprint: '${fingerprint}') does not have ultimate trust (level 6/u vs. '${owner_trust}'). Setting it..."
+    echo "${fingerprint}:6:" | gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --import-ownertrust
+    if [[ $? -eq 0 ]]; then
+      echo "Successfully set ultimate trust for key '$key_id_or_uid'."
+    else
+      echo "Error setting ultimate trust for key '$key_id_or_uid'."
+      return 1
+    fi
+  else
+    echo "Key '$key_id_or_uid' already has ultimate trust (level 6)."
+  fi
+  return 0
+}
 
 # Main script logic
 action="$1"
@@ -179,6 +207,10 @@ git_login="${GIT_LOGIN}"
 
 if ! check_gpg_key "${git_login}"; then
   generate_gpg_key "${git_login}"
+fi
+
+if ! check_and_set_ultimate_trust "${git_login}"; then
+  fatal_error "Unable to trust the GPG key for ${git_login}."
 fi
 
 if ! check_pass_store "${git_login}"; then
