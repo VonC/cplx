@@ -18,7 +18,7 @@ MAX_LEVELS=4
 
 for ((i=0; i<=MAX_LEVELS; i++)); do
   if [[ -f "${CURRENT_DIR}/.env" ]]; then
-    ENV_PATH="${CURRENT_DIR}/.env"
+    ENV_PATH="${CURRENT_DIR}"
     break
   fi
   # Stop if we're at root directory
@@ -46,7 +46,8 @@ fi
 source "${ENV_PATH}/.env" || fatal "Error loading .env file: ${ENV_PATH}" 3
 
 if [[ "${SSH_ORIGINAL_COMMAND}" == "" ]]; then
-  /bin/bash --init-file <(echo "cd \"${ENV_PATH}\";pwd;source .env")
+  printf 'cd "%s"\npwd\nsource .env\n' "$ENV_PATH" > /tmp/init_commands
+  /bin/bash --init-file /tmp/init_commands
 else
   # eval "args=($SSH_ORIGINAL_COMMAND)"
   IFS=$'\n' read -d '' -r -a args < <(python -c "import shlex, sys; print('\n'.join(shlex.split(sys.argv[1])))" "${SSH_ORIGINAL_COMMAND}")
