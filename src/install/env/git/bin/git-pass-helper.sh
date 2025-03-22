@@ -3,7 +3,6 @@
 # pass-git-helper.sh for multi-user SSH service account
 
 VERSION="2.0"
-PASS_COMMAND="pass"
 GPG_COMMAND="gpg2"
 PASSWORD_STORE_BASE="$HOME/.password-store"
 
@@ -39,7 +38,7 @@ generate_gpg_key() {
 
   # Automatically use uid as real_name
   local real_name="$uid"
-  
+
   # Only prompt for passphrase, redirecting input from /dev/tty
   while true; do
     read -r -s -p "Enter a passphrase for your key (non-empty): " passphrase < /dev/tty
@@ -82,7 +81,7 @@ EOF
 # Function to check if the pass store exists
 check_pass_store() {
   local user_store_dir="$PASSWORD_STORE_BASE/$1"
-  if [[ -d "$user_store_dir" ]]; then
+  if [[ -f "$user_store_dir/.gpg-id" ]]; then
     return 0 # Pass store exists
   else
     return 1 # Pass store does not exist
@@ -95,14 +94,17 @@ init_pass_store() {
   local user_store_dir="$PASSWORD_STORE_BASE/$uid"
 
   mkdir -p "$user_store_dir"
-  export PASSWORD_STORE_DIR="$user_store_dir"
-  "$PASS_COMMAND" init "$uid"
-  unset PASSWORD_STORE_DIR
+  if [[ -f "$user_store_dir/.gpg-id" ]]; then
+    echo "Pass password store already initialized for user: $uid"
+    return 0
+  else
+    echo "$uid" > "$user_store_dir/.gpg-id"
+  fi
 
   if check_pass_store "$uid"; then
     echo "Pass password store initialized for user: $uid"
   else
-    fatal_error "Failed to initialize pass password store for $uid."
+    fatal_error "Failed to initialize password store for $uid."
   fi
 }
 
@@ -113,16 +115,28 @@ get_password_from_store() {
   local host="$2"
   local user_store_dir="$PASSWORD_STORE_BASE/$uid"
   local password_path="$host"
-
-  export PASSWORD_STORE_DIR="$user_store_dir"
+  local username_path="${username}@${host}"
+  local gpg_file_path
   local output
 
-  if output=$("$PASS_COMMAND" show "$password_path" 2>/dev/null); then
+  # Check if we have a username@host format file first
+  if [[ -f "$user_store_dir/$username_path.gpg" ]]; then
+    gpg_file_path="$user_store_dir/$username_path.gpg"
+  # Otherwise use just host
+  elif [[ -f "$user_store_dir/$password_path.gpg" ]]; then
+    gpg_file_path="$user_store_dir/$password_path.gpg"
+  else
+    return 1
+  fi
+
+  # Decrypt the armored file using gpg2
+  if output=$("$GPG_COMMAND" --quiet --batch --use-agent \
+              --keyring ~/certs/"${GIT_LOGIN}.pub" \
+              --secret-keyring ~/certs/"${GIT_LOGIN}.sec" \
+              --decrypt "$gpg_file_path" 2>/dev/null); then
     echo "$output"
-    unset PASSWORD_STORE_DIR
     return 0
   else
-    unset PASSWORD_STORE_DIR
     return 1
   fi
 }
@@ -135,17 +149,32 @@ store_password_in_store() {
   local password="$4"
   local user_store_dir="$PASSWORD_STORE_BASE/$uid"
   local password_path="$host"
+  if [[ -n "$username" ]]; then
+    password_path="${username}@${host}"
+  fi
   local content="$password"
   if [[ -n "$username" ]]; then
     content="$username"$'\n'"$content"
   fi
 
   export PASSWORD_STORE_DIR="$user_store_dir"
-  if "$PASS_COMMAND" insert -f "$password_path" <<< "$content"; then
-    unset PASSWORD_STORE_DIR
+
+  # Encrypt password with the gpg2 key of uid: put it in an armored text at PASSWORD_STORE_DIR/username@host (or just host if no username provided)
+
+  # Full file path for the encrypted password
+  local gpg_file_path="$user_store_dir/$password_path.gpg"
+
+  # Encrypt password with the gpg2 key of uid and save as armored text
+  if echo -n "$content" | "$GPG_COMMAND" --keyring ~/certs/"${GIT_LOGIN}.pub" \
+     --secret-keyring ~/certs/"${GIT_LOGIN}.sec" \
+     --recipient "$uid" \
+     --armor \
+     --encrypt \
+     --yes \
+     --output "$gpg_file_path"; then
+    chmod 600 "$gpg_file_path"
     return 0
   else
-    unset PASSWORD_STORE_DIR
     return 1
   fi
 }
@@ -154,12 +183,14 @@ store_password_in_store() {
 erase_password_from_store() {
   local uid="$1"
   local host="$2"
+  local username="$3"
   local user_store_dir="$PASSWORD_STORE_BASE/$uid"
   local password_path="$host"
+  if [[ -n "$username" ]]; then
+    password_path="${username}@${host}"
+  fi
 
-  export PASSWORD_STORE_DIR="$user_store_dir"
-  "$PASS_COMMAND" rm -f "$password_path" 2>/dev/null
-  unset PASSWORD_STORE_DIR
+  rm -f "$user_store_dir/$password_path.gpg" 2>/dev/null
 }
 
 check_and_set_ultimate_trust() {
@@ -179,15 +210,14 @@ check_and_set_ultimate_trust() {
 
   if [[ "$owner_trust" != "u" ]]; then
     echo "Key '$key_id_or_uid' (fingerprint: '${fingerprint}') does not have ultimate trust (level 6/u vs. '${owner_trust}'). Setting it..."
-    echo "${fingerprint}:6:" | gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --import-ownertrust
-    if [[ $? -eq 0 ]]; then
+    if echo "${fingerprint}:6:" | gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --import-ownertrust; then
       echo "Successfully set ultimate trust for key '$key_id_or_uid'."
     else
       echo "Error setting ultimate trust for key '$key_id_or_uid'."
       return 1
     fi
-  else
-    echo "Key '$key_id_or_uid' already has ultimate trust (level 6)."
+  #else
+  #  echo "Key '$key_id_or_uid' already has ultimate trust (level 6)."
   fi
   return 0
 }
@@ -238,24 +268,28 @@ for pair in "${request_data[@]}"; do
   esac
 done
 
+if [[ -z "${username}" ]]; then username="${git_login}"; fi
+
 case "$action" in
   get)
-    if get_password_from_store "${git_login}" "$host"; then
-      # Password found, output it
-      output=$(get_password_from_store "${git_login}" "$host")
-      IFS=$'\n' read -r stored_username stored_password <<< "$output"
-      if [[ -n "$stored_username" ]]; then
-        echo "username=$stored_username"
-      fi
-      if [[ -n "$stored_password" ]]; then
-        echo "password=$stored_password"
-      fi
+    output=$(get_password_from_store "${git_login}" "$host")
+
+    # Split the output by newlines into an array
+    mapfile -t output_lines <<< "$output"
+
+    # If we have multiple lines, first line is username, second is password
+    if [[ ${#output_lines[@]} -gt 1 ]]; then
+      echo "username=${output_lines[0]}"
+      echo "password=${output_lines[1]}"
+    # If only one line, assume it's just the password
+    else
+      echo "password=$output"
     fi
     ;;
   store)
     if [[ -n "$password" ]]; then
       if store_password_in_store "${git_login}" "$host" "$username" "$password"; then
-        echo "Stored password for $host in pass for user ${git_login}."
+        echo "Stored password for [${username}@]$host in '${PASSWORD_STORE_BASE}/${git_login}' for user ${git_login}."
       else
         fatal_error "Failed to store password."
       fi
