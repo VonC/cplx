@@ -40,6 +40,8 @@ if [[ "$1" != "" ]]; then
   export GIT_LOGIN="$1"
   # shellcheck source=/dev/null
   source "${DIR}/sshgitwrapper.local"
+  export GIT_COMMITTER_EMAIL="${GIT_AUTHOR_EMAIL}"
+  export GIT_COMMITTER_NAME="${GIT_AUTHOR_NAME}"
 fi
 
 # shellcheck disable=SC1091
