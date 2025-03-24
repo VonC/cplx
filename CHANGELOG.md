@@ -4,6 +4,73 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.21.0] - 2025-03-24 - Git cred helper and ssh wrapper
+
+Test if GCM - Git Credential Manager can be used as is (no recompilation): no.
+
+I tried:
+
+- pass (using a trusted gpg2 key, with passphrase pre-registered to the
+  `gpg-agent`: works with pinentry-curses, provided `GPG_TTY` is set to `$(tty)`)
+- https://github.com/languitar/pass-git-helper, a python script, which uses a 
+ `~/.config/pass-git-helper/git-pass-mapping.ini`, but only matches `host`,
+ not `user@host`
+
+So implement a Git credential helper using GPG2 only (not pass), and it works 
+just fine: `src\install\env\git\bin\git-pass-helper.sh`.  
+It will create and trust a GPG2, with passphrase, said passphrase acting as a
+local password. It will help encrypt a remote Git repository server token forced
+the SSH GIT_LOGIN identified user.  
+(through an SSH forced command script, as described next)
+
+Add an SSH wrapper which will set:
+- `GIT_LOGIN` (from the `.ssh/authorized_keys` forced command parameter of
+`./tools/git/bin/sshwrapper.sh`)
+- `GIT_AUTHOR_NAME` and `GIT_AUTHOR_EMAIL`
+  (from `./tools/git/bin/sshgitwrapper.local`)
+- `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL`  
+(in `./tools/git/bin/sshwrapper.sh`, after sourcing `sshgitwrapper.local`)
+
+An sshe cplxgit will work, with a local PC `~/.ssh/config` of:
+
+```
+Host cplxgit
+  Hostname cactislux801.prod.lux.ca-indosuez.com
+  User gitea2
+  IdentityFile ~/.ssh/cplxgit
+  PreferredAuthentications publickey
+  LogLevel ERROR
+  #cplxgit_cd forced
+```
+
+The `#cplxgit_cd forced` will make the `sshe.bat` to open an SSH shell, and the
+remote SSH forced command `sshwrapper.sh` will make the appropriate `cd` + 
+`source .env` (as well as set the GIT variables).
+
+### 🚀 Features
+
+- *(install)* Add gpg-restart script
+- *(install)* Add git credential helper using `pass`
+- *(install)* Use GIT_LOGIN for pass-git-helper
+- *(setups)* Update git credential helper
+
+### 🐛 Bug Fixes
+
+- *(setups)* Set `GPG_TTY` and extend `PATH`
+- *(install)* Update gpg-agent to use pinentry-curses
+- *(install)* Sshwrapper must source `.env`
+- *(install)* Improve GPG key generation and storage
+- *(install)* Ensure gpg key has ultimate trust
+- Git-pass-helper parsing fix
+- *(install)* `git-pass-helper` use GPG2, not `pass`
+- *(install)* Sshwrapper sourcing `.env` and init file
+- *(install)* SSH set committer email and name
+
+### ⚙️ Miscellaneous Tasks
+
+- *(version)* Typos
+- *(git)* Ignore PDF files
+
 ## [v0.20.0] - 2025-03-19 - libgpg-error
 
 Needed by pinentry
