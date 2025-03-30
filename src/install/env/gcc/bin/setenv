@@ -52,6 +52,10 @@ update_path_variable() {
 tool_dir="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 tool_dir="$(dirname "${tool_dir}")"
 export tool_dir
+tool_root="${tool_dir}/root"
+export tool_root
+tool_current="${tool_dir}/current"
+export tool_current
 
 if ! [ -d "${tool_dir}/current" ]; then
     ln -nfs ../current "${tool_dir}/current"
@@ -63,10 +67,8 @@ fi
 export PERLLIB="${tool_dir}/root/usr/lib64/perl5/vendor_perl:${tool_dir}/root/usr/share/perl5/vendor_perl"
 update_path_variable "PATH" "${tool_dir}/current/libexec"
 update_path_variable "PATH" "${tool_dir}/current/bin"
-find "${tool_dir}/root" -name "*.so" -o -name "*.la" | awk '{gsub(/\.\//, ""); gsub(/\/[^\/]+\.(so|la)/, ""); print}' | sort | uniq | while read -r folder; do
-    update_path_variable "LD_LIBRARY_PATH" "${folder}"
-done
-update_path "MANPATH" "${tool_dir}/current/share/man"
+export LD_LIBRARY_PATH="${tool_current}/lib64:${tool_root}/usr/lib64:${tool_root}/usr/lib:${tool_root}/lib64:${tool_root}/lib"
+update_path_variable "MANPATH" "${tool_dir}/current/share/man"
 alias man='BASH_ENV= "${tool_dir}/bin/manw.sh"'
 
 #find ${PERLLIB}
