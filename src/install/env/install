@@ -298,8 +298,9 @@ function main() {
     fi
     info "main: reclean='${_reclean}'"
     if [[ -e "${tool_src}/config.log" ]] && ! reconfigure; then
-        ok "main: config.log present, do not reconfigure"
+        ok "main: config.log present, Makefile present, do not reconfigure"
     else
+        task "Must configure"
         configure
         res_config=$?
         if [[ ${res_config} != 0 ]]; then
@@ -308,6 +309,7 @@ function main() {
         fi
     fi
     if reclean; then
+        task "Must clean"
         clean
         res_clean=$?
         if [[ ${res_clean} != 0 ]]; then
@@ -317,7 +319,6 @@ function main() {
     else
         info "reclean is false, so no clean performed before build"
     fi
-
     build
     res_build=$?
     if [[ ${res_build} != 0 ]]; then
