@@ -1,0 +1,17 @@
+glibc-headers
+glibc-devel
+glibc
+kernel-headers
+cpp
+texinfo-tex
+texinfo
+texlive
+texlive-tex-bin-svn26912.0
+texlive-kpathsea-bin-svn27347.0
+texlive-kpathsea-lib
+texlive-kpathsea-lib-devel
+texlive-tetex-bin-svn27344.0
+texlive-texconfig-bin-svn27344.0
+texlive-texconfig-svn29349.0
+texlive-tetex-svn29585.3.0
+texlive-kpathsea-svn28792.0
