@@ -33,10 +33,19 @@ def main(target_folder):
                 if not os.path.exists(wrapper_path):
                     create_wrapper_script(file_path, wrapper_path)
                     print(f"Created wrapper for {file_path} at {wrapper_path}")
-                    sys.exit(1)
+                    # sys.exit(1)
                 else:
                     print(f"Wrapper already exists for {file_path} at {wrapper_path}, skipping.")
 
 if __name__ == "__main__":
-    target_folder = input("Enter the target folder: ")
+    if len(sys.argv) != 2:
+        print("Error: Exactly one argument (target folder) is required.")
+        sys.exit(1)
+    
+    target_folder = sys.argv[1]
+
+    if not os.path.exists(target_folder):
+        print(f"Error: The target folder '{target_folder}' does not exist.")
+        sys.exit(1)
+
     main(target_folder)
