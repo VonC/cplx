@@ -4300,6 +4300,7 @@ texlive-gsftopk-bin-svn26509.0-45.20130427_r30134.el7.x86_64.rpm
 texlive-kpathsea-bin-svn27347.0-45.20130427_r30134.el7.x86_64.rpm
 texlive-kpathsea-lib-2012-45.20130427_r30134.el7.x86_64.rpm
 texlive-kpathsea-lib-devel-2012-45.20130427_r30134.el7.x86_64.rpm
+texlive-kpathsea-svn28792.0-45.el7.noarch.rpm
 texlive-luatex-bin-svn26912.0-45.20130427_r30134.el7.x86_64.rpm
 texlive-makeindex-bin-svn26509.0-45.20130427_r30134.el7.x86_64.rpm
 texlive-metafont-bin-svn26912.0-45.20130427_r30134.el7.x86_64.rpm
@@ -4311,6 +4312,10 @@ texlive-tex4ht-bin-svn26509.0-45.20130427_r30134.el7.x86_64.rpm
 texlive-texlive.infra-bin-svn22566.0-45.20130427_r30134.el7.x86_64.rpm
 texlive-xdvi-bin-svn26509.0-45.20130427_r30134.el7.x86_64.rpm
 texlive-xetex-bin-svn26912.0-45.20130427_r30134.el7.x86_64.rpm
+texlive-bin-svn27344.0-45.20130427_r30134.el7.noarch.rpm
+texlive-texconfig-bin-svn27344.0-45.20130427_r30134.el7.noarch.rpm
+texlive-texconfig-svn29349.0-45.el7.noarch.rpm
+texlive-tetex-svn29585.3.0-45.el7.noarch.rpm
 tftp-5.2-22.el7.x86_64.rpm
 tftp-server-5.2-22.el7.x86_64.rpm
 theora-tools-1.1.1-8.el7.x86_64.rpm
