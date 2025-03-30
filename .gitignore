@@ -24,3 +24,4 @@ last
 *.xz
 *.tar.xz
 *.pdf
+/t/
