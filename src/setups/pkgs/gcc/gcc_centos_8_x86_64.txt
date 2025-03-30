@@ -1,0 +1,16 @@
+bzip2-libs
+unzip
+make
+make-devel
+zlib
+gmp
+gcc
+cpp
+libmpc
+libgcc
+glibc
+libstdc\+\+
+binutils
+glibc-devel
+glibc-headers
+kernel-headers
