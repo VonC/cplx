@@ -168,6 +168,17 @@ if "%CPLX_TOOL%" == "libgpg-error" (
   set "CPLX_CONFIG_DONE=default"
 )
 
+if "%CPLX_TOOL%" == "glibc" (
+  set "CPLX_VERSION=2.28"
+  rem https://
+  set "CPLX_URL=https://github.com/bminor/glibc/archive/refs/tags/glibc-[version].tar.gz
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
+)
+
 if "%CPLX_TOOL%" == "flex2" (
   set "CPLX_VERSION=2.5.39"
   rem https://
