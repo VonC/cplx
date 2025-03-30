@@ -13,12 +13,13 @@ def is_elf_executable(file_path):
 def create_wrapper_script(executable_path, wrapper_path):
     DIR="a"
     BASH_SOURCE="a"
-    script_content = f"""#!/bin/bash
+    script_content = """#!/bin/bash
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 # shellcheck source=/dev/null
-source "${DIR}/setenv" # type: ignore
-exec "{executable_path}" "$@"
+source "${DIR}/setenv"
+exec \"""" + executable_path + """\" "$@"
 """
+
     with open(wrapper_path, 'w') as wrapper_file:
         wrapper_file.write(script_content)
     os.chmod(wrapper_path, 0o755)
