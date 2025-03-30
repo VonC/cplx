@@ -118,6 +118,13 @@ function setenv() {
     if ! declare -f build &>/dev/null; then
         fatal "Missing 'build' function in '${tool}/${tool_name}_install_functions.sh'" 24
     fi
+
+    if declare -f "${tool_name}_setenv" &>/dev/null; then
+        "${tool_name}_setenv"
+    fi
+
+    info "Final CPPFLAGS = '${CPPFLAGS}'"
+    info "Final LDFLAGS  = '${LDFLAGS}'"
 }
 
 function update_path() {
