@@ -159,18 +159,25 @@ function install() {
     fi
 
     file_check_prefix="${CPLX_CHECK_PREFIX}"
-    file_check_src="${CPLX_CHECK_SRC}"
+    file_check_src="${tool_src}/${CPLX_CHECK_SRC}"
+    if [[ -e "${tool_src}/../build/${CPLX_CHECK_SRC}" ]]; then
+        file_check_src=$(readlink -f "${tool_src}/../build/${CPLX_CHECK_SRC}")
+    fi
+    if [[ ! -e "${file_check_src}" ]]; then
+        fatal "No '${file_check_src}'" 19
+    fi
     if [[ -e "${tool_prefix}/${file_check_prefix}" ]]; then
-        if [[ "${tool_prefix}/${file_check_prefix}" -nt "${tool_src}/${file_check_src}" ]]; then
-            ok "No need to install '${tool_name}' in '${tool_prefix}': '${file_check_prefix}' newer than '${tool_src}/${file_check_src}'"
+        if [[ "${tool_prefix}/${file_check_prefix}" -nt "${file_check_src}" ]]; then
+            ok "No need to install '${tool_name}' in '${tool_prefix}': '${file_check_prefix}' newer than '${file_check_src}'"
             return 0
         else
-            info "'${file_check_prefix}' is older than '${tool_src}/${file_check_src}': install '${tool_name}' in '${tool_prefix}'"
+            info "'${file_check_prefix}' is older than '${file_check_src}': install '${tool_name}' in '${tool_prefix}'"
         fi
     else
         info "No '${file_check_prefix}' in '${tool_prefix}': install '${tool_name}' in '${tool_prefix}'"
     fi
     task "Must cleanup '${tool_prefix}' first:"
+    fatal "Stop before cleanup and install" 125
     rm -Rf "${tool_prefix:?}/*" || fatal "Unable to remove '${tool_prefix} content'" 18
     task "Must install '${tool_name}' in '${tool_prefix}'"
     make install || fatal "Unable to make install in '${tool_prefix}'" 19
