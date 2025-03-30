@@ -179,6 +179,17 @@ if "%CPLX_TOOL%" == "glibc" (
   set "CPLX_CONFIG_DONE=default"
 )
 
+if "%CPLX_TOOL%" == "gcc" (
+  set "CPLX_VERSION=4.9.4"
+  rem https://
+  set "CPLX_URL=https://github.com/gcc-mirror/gcc/archive/refs/tags/releases/gcc-[version].tar.gz
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib64/libatomic.la"
+  set "CPLX_CHECK_SRC=x86_64-unknown-linux-gnu/libatomic/libatomic.la"
+  set "CPLX_BIN=true"
+  set "CPLX_CONFIG_DONE=default"
+)
+
 if "%CPLX_TOOL%" == "flex2" (
   set "CPLX_VERSION=2.5.39"
   rem https://
