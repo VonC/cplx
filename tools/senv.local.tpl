@@ -201,6 +201,17 @@ if "%CPLX_TOOL%" == "flex2" (
   set "CPLX_CONFIG_DONE=default"
 )
 
+if "%CPLX_TOOL%" == "make4" (
+  set "CPLX_VERSION=4.2.93"
+  rem https://
+  set "CPLX_URL=https://github.com/mirror/make/archive/refs/tags/4.2.93.tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/aa"
+  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_BIN=true"
+  set "CPLX_CONFIG_DONE=default"
+)
+
 goto:eof
 
 
