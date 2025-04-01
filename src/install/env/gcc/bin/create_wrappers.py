@@ -24,14 +24,14 @@ exec \"${DIR}/""" + executable_path + """\" "$@"
         wrapper_file.write(script_content)
     os.chmod(wrapper_path, 0o755)
 
-def main(target_folder):
+def main(target_folder, force=False):
     current_folder = os.getcwd()
     for root, dirs, files in os.walk(target_folder):
         for file in files:
             file_path = os.path.join(root, file)
             if is_elf_executable(file_path):
                 wrapper_path = os.path.join(current_folder, file)
-                if not os.path.exists(wrapper_path):
+                if not os.path.exists(wrapper_path) or force:
                     create_wrapper_script(file_path, wrapper_path)
                     print(f"Created wrapper for {file_path} at {wrapper_path}")
                     # sys.exit(1)
@@ -39,14 +39,22 @@ def main(target_folder):
                     print(f"Wrapper already exists for {file_path} at {wrapper_path}, skipping.")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Error: Exactly one argument (target folder) is required.")
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print("Usage: python create_wrappers.py <target_folder> [--force]")
         sys.exit(1)
-    
+
     target_folder = sys.argv[1]
 
     if not os.path.exists(target_folder):
         print(f"Error: The target folder '{target_folder}' does not exist.")
         sys.exit(1)
 
-    main(target_folder)
+    force = False
+    if len(sys.argv) == 3:
+        if sys.argv[2] == "--force":
+            force = True
+        else:
+            print(f"Error: Unknown option '{sys.argv[2]}'. Expected '--force'.")
+            sys.exit(1)
+
+    main(target_folder, force)
