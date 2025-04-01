@@ -56,6 +56,16 @@ tool_root="${tool_dir}/root"
 export tool_root
 tool_current="${tool_dir}/current"
 export tool_current
+tools="$(dirname "${tool_dir}")"
+
+# shellcheck disable=SC1091
+source "${tools}/echos/echos"
+
+# shellcheck disable=SC1091
+source "${tools}/update_path_variables.sh"
+if ! declare -f update_path_variable >/dev/null 2>&1; then
+    fatal "No path var function present" 116
+fi
 
 if ! [ -d "${tool_dir}/current" ]; then
     ln -nfs ../current "${tool_dir}/current"
