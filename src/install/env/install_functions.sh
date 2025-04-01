@@ -177,7 +177,7 @@ function install() {
         info "No '${file_check_prefix}' in '${tool_prefix}': install '${tool_name}' in '${tool_prefix}'"
     fi
     task "Must cleanup '${tool_prefix}' first:"
-    fatal "Stop before cleanup and install" 125
+    # fatal "Stop before cleanup and install" 125
     rm -Rf "${tool_prefix:?}/*" || fatal "Unable to remove '${tool_prefix} content'" 18
     task "Must install '${tool_name}' in '${tool_prefix}'"
     make install || fatal "Unable to make install in '${tool_prefix}'" 19
