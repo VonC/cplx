@@ -17,7 +17,7 @@ def create_wrapper_script(executable_path, wrapper_path):
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 # shellcheck source=/dev/null
 source "${DIR}/setenv"
-exec \"""" + executable_path + """\" "$@"
+exec \"${DIR}/""" + executable_path + """\" "$@"
 """
 
     with open(wrapper_path, 'w') as wrapper_file:
