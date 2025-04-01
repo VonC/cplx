@@ -1,10 +1,3 @@
-0.22.0 -- Glibc, GCC and flex compilations
+0.23.0-SNAPSHOT -- make compilations
 
-I need a more recent glibc than the one provided by the system (2.17 for RHEL 7.x), for running recent version of nodes.  
-But, to compile glibc 2.28, I need a gcc 4.9.4. Of course, RHEL has 4.8.5, so I also need a more recent GCC and flex. 
-
-This release has successfully recompiled gcc (using flex2, a more recent version of flex), and has produced wrapper scripts for all gcc-related command, so that gcc can be used by other tools (like the compilation of glibc) without setting the new gcc PATH and LD_LIBRARY_PATH: the wrapper scripts do that for you.
-
-But glibc is still not compilable. Next step: compiling make 4.x (instead of the make 3.x provided by RHEL 7.x)
-
-.env comes with install-related aliases (configure, build, install, package, deploy), and an alias to copy a tool source code (scps), complementing the existing scpe for environment setup files.
+Following the incomplete compilation of glib (2.28 instead of 2.17 on RHEL 7.x, for running nodes 18), I need a make 4.x instead of 3.x.
