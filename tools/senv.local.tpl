@@ -212,6 +212,17 @@ if "%CPLX_TOOL%" == "make4" (
   set "CPLX_CONFIG_DONE=default"
 )
 
+if "%CPLX_TOOL%" == "automake116" (
+  set "CPLX_VERSION=1.16.1"
+  rem https://
+  set "CPLX_URL=https://github.com/autotools-mirror/automake/archive/refs/tags/v1.16.1.tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=bin/automake"
+  set "CPLX_CHECK_SRC=bin/automake"
+  set "CPLX_BIN=true"
+  set "CPLX_CONFIG_DONE=default"
+)
+
 goto:eof
 
 

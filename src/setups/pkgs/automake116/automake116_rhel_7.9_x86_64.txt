@@ -1,0 +1,8 @@
+glibc-headers
+glibc-devel
+glibc
+kernel-headers
+cpp
+autoconf
+texinfo
+perl-libintl
