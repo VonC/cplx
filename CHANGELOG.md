@@ -4,7 +4,56 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.21.0] - 2025-03-24 - Git cred helper and ssh wrapper
+## [v0.22.0] - 2025-04-01 -- Glibc, GCC and flex compilations
+
+I need a more recent glibc than the one provided by the system (2.17 for RHEL 7.x), for running recent version of nodes.
+But, to compile glibc 2.28, I need a gcc 4.9.4. Of course, RHEL has 4.8.5, so I also need a more recent GCC and flex.
+
+This release has successfully recompiled gcc (using flex2, a more recent version of flex), and has produced wrapper scripts for all gcc-related command, so that gcc can be used by other tools (like the compilation of glibc) without setting the new gcc PATH and LD_LIBRARY_PATH: the wrapper scripts do that for you.
+
+But glibc is still not compilable. Next step: compiling make 4.x (instead of the make 3.x provided by RHEL 7.x)
+
+.env comes with install-related aliases (configure, build, install, package, deploy), and an alias to copy a tool source code (scps), complementing the existing scpe for environment setup files.
+
+### 🚀 Features
+
+- *(env)* Add scps alias to copy source files
+- *(cplx)* Add glibc, gcc and flex2 to cplx services
+- *(flex)* Add install scripts for flex
+- *(install)* Add helper aliases for build process
+- *(install)* Add `tool_version` to environment
+- *(tools)* Add glibc to senv.local.tpl (wip)
+- *(tools)* Add GCC 4.9.4 support
+- *(install)* Call tool setenv if exists
+- *(install)* Add `--force` to create_wrappers.py
+- *(setups)* Add update_path_variables helper script
+
+### 🐛 Bug Fixes
+
+- *(install)* Correctly check for out-of-tree build
+- *(install)* Update `ld_library_path` gcc `setenv`
+- *(install)* Improve wrapper script usability
+- *(install)* Correctly quote executable path in wrapper
+- *(install)* Use absolute path for in gcc wrapper
+- *(install)* Source echos and path update scripts
+- *(install)* Gcc installation: ensure cc1 is in PATH
+- *(glibc)* Correct glibc build process
+
+### 🚜 Refactor
+
+- *(install)* Env, improve install alias
+
+### ⚙️ Miscellaneous Tasks
+
+- *(git)* Update .gitignore, ignore `t/` folder
+- *(aliases)* Add alias for build sources directory
+- *(install)* Improve install script logging
+
+### 🔨 Build
+
+- *(packages)* Add missing TeX Live packages
+
+## [v0.21.0] - 2025-03-24 -- Git cred helper and ssh wrapper
 
 Test if GCM - Git Credential Manager can be used as is (no recompilation): no.
 
@@ -12,15 +61,15 @@ I tried:
 
 - pass (using a trusted gpg2 key, with passphrase pre-registered to the
   `gpg-agent`: works with pinentry-curses, provided `GPG_TTY` is set to `$(tty)`)
-- https://github.com/languitar/pass-git-helper, a python script, which uses a 
+- https://github.com/languitar/pass-git-helper, a python script, which uses a
  `~/.config/pass-git-helper/git-pass-mapping.ini`, but only matches `host`,
  not `user@host`
 
-So implement a Git credential helper using GPG2 only (not pass), and it works 
-just fine: `src\install\env\git\bin\git-pass-helper.sh`.  
+So implement a Git credential helper using GPG2 only (not pass), and it works
+just fine: `src\install\env\git\bin\git-pass-helper.sh`.
 It will create and trust a GPG2, with passphrase, said passphrase acting as a
 local password. It will help encrypt a remote Git repository server token forced
-the SSH GIT_LOGIN identified user.  
+the SSH GIT_LOGIN identified user.
 (through an SSH forced command script, as described next)
 
 Add an SSH wrapper which will set:
@@ -28,7 +77,7 @@ Add an SSH wrapper which will set:
 `./tools/git/bin/sshwrapper.sh`)
 - `GIT_AUTHOR_NAME` and `GIT_AUTHOR_EMAIL`
   (from `./tools/git/bin/sshgitwrapper.local`)
-- `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL`  
+- `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL`
 (in `./tools/git/bin/sshwrapper.sh`, after sourcing `sshgitwrapper.local`)
 
 An sshe cplxgit will work, with a local PC `~/.ssh/config` of:
@@ -44,7 +93,7 @@ Host cplxgit
 ```
 
 The `#cplxgit_cd forced` will make the `sshe.bat` to open an SSH shell, and the
-remote SSH forced command `sshwrapper.sh` will make the appropriate `cd` + 
+remote SSH forced command `sshwrapper.sh` will make the appropriate `cd` +
 `source .env` (as well as set the GIT variables).
 
 ### 🚀 Features
