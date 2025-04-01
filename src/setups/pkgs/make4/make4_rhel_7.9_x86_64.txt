@@ -3,8 +3,8 @@ glibc-devel
 glibc
 kernel-headers
 cpp
-automake
 autoconf
 gettext
 gettext-devel
 texinfo
+perl-libintl
