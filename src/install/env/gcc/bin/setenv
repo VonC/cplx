@@ -75,9 +75,26 @@ if ! [ -d "${tool_dir}/root" ]; then
 fi
 
 export PERLLIB="${tool_dir}/root/usr/lib64/perl5/vendor_perl:${tool_dir}/root/usr/share/perl5/vendor_perl"
-update_path_variable "PATH" "${tool_dir}/current/libexec"
+
+# Find the correct directory containing cc1
+cc1_path=$(which cc1 2>/dev/null)
+if [[ ! "$cc1_path" =~ ${tool_dir}/current ]]; then
+    # cc1 is not in PATH or not from our current directory
+    cc1_path=$(find "${tool_dir}/current/" -name cc1 -type f 2>/dev/null | head -1)
+    if [ -n "$cc1_path" ]; then
+        cc1_dir=$(dirname "$cc1_path")
+        update_path_variable "PATH" "$cc1_dir"
+    else
+        fatal "No cc1 found in '${tool_dir}/current/'" 11
+    fi
+else
+    # cc1 is already in PATH from our tool directory
+    cc1_dir=$(dirname "$(which cc1)")
+    update_path_variable "PATH" "$cc1_dir"
+fi
+
 update_path_variable "PATH" "${tool_dir}/current/bin"
-export LD_LIBRARY_PATH="${tool_current}/lib64:${tool_root}/usr/lib64:${tool_root}/usr/lib:${tool_root}/lib64:${tool_root}/lib"
+export LD_LIBRARY_PATH="${tool_current}/lib64:${cc1_dir}:${tool_root}/usr/lib64:${tool_root}/usr/lib:${tool_root}/lib64:${tool_root}/lib"
 update_path_variable "MANPATH" "${tool_dir}/current/share/man"
 alias man='BASH_ENV= "${tool_dir}/bin/manw.sh"'
 
