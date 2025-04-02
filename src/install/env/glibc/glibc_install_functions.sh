@@ -9,13 +9,45 @@ function glibc_setenv() {
     fi
     # shellcheck disable=SC2154
     if [[ ! -e "${tools}/gcc/bin/gcc" ]]; then
-        fatal "No gcc present at" 118
+        fatal "No gcc present at '${tools}/gcc/bin'" 118
     fi
     # shellcheck disable=SC2154
     update_path_variable "PATH" "${tools}/gcc/bin"
     info "glibc: PATH update with gcc/bin: '${PATH}'"
     export COMPILER_PATH="${tools}/gcc/bin"
     info "glibc: COMPILER_PATH update with gcc/bin: '${COMPILER_PATH}'"
+
+    # shellcheck disable=SC2154
+    if [[ ! -e "${tools}/make4/current/bin/make" ]]; then
+        fatal "No make 4.x present at '${tools}/make4/current/bin'" 118
+    fi
+
+    # shellcheck disable=SC2154
+    update_path_variable "PATH" "${tools}/make4/current/bin"
+    info "glibc: PATH update with make4/current/bin: '${PATH}'"
+
+    # Avoid the error:'bison: /usr/share/bison/m4sugar/m4sugar.m4: cannot open: No such file or directory'
+    # shellcheck disable=SC2154
+    export BISON_PKGDATADIR="${root}/usr/share/bison"
+
+    # -g enables debug symbols, and -O2 is a standard optimization level often used with it.
+    export CFLAGS="${CFLAGS} -g -O2"
+    export CPPFLAGS="${CPPFLAGS} -g -O2"
+    export CXXFLAGS="${CXXFLAGS} -g -O2" # Add CXXFLAGS too
+
+    unset LD_LIBRARY_PATH
+
+    # Save the original LDFLAGS for logging
+    local original_ldflags="${LDFLAGS}"
+
+    # Use sed-like pattern replacement to remove -Wl,-rpath=... up to the next -Wl
+    # This handles both single-line and multi-line LDFLAGS with proper spacing
+    LDFLAGS=$(echo "${LDFLAGS}" | sed -E 's/-Wl,-rpath=[^ ]* *(-Wl)/\1/g')
+
+    # Log the change
+    info "Removed -Wl,-rpath from LDFLAGS"
+    info "Original LDFLAGS: '${original_ldflags}'"
+    info "Modified LDFLAGS: '${LDFLAGS}'"
 }
 
 function configure() {
