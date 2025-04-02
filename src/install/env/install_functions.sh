@@ -67,7 +67,7 @@ function setenv() {
     local dynamic_linker
     dynamic_linker=$(find "${root}/lib64" -name 'ld-linux-x86-64.so*' -print 2>/dev/null | head -n1)
     if [[ -z "${dynamic_linker}" ]]; then
-        fatal "Unable to find dynamic linker in '${root}/lib64'" 19
+        fatal "Unable to find dynamic linker in '${root}/lib64'" 192
     fi
 
     # --- LDFLAGS (Crucial) ---
@@ -164,7 +164,7 @@ function install() {
         file_check_src=$(readlink -f "${tool_src}/../build/${CPLX_CHECK_SRC}")
     fi
     if [[ ! -e "${file_check_src}" ]]; then
-        fatal "No '${file_check_src}'" 19
+        fatal "No '${file_check_src}'" 193
     fi
     if [[ -e "${tool_prefix}/${file_check_prefix}" ]]; then
         if [[ "${tool_prefix}/${file_check_prefix}" -nt "${file_check_src}" ]]; then
@@ -221,7 +221,7 @@ function package() {
         info "No package '${package_name}' in '${tool}': package '${tool_name}' in '${package_name}'"
     fi
     task "Must package '${tool_name}' in '${package_name}'"
-    tar czf "${tool}/${package_name}" -C "${tool_prefix}" . || fatal "Unable to package '${tool_name}' in '${package_name}'" 19
+    tar czf "${tool}/${package_name}" -C "${tool_prefix}" . || fatal "Unable to package '${tool_name}' in '${package_name}'" 191
     ok "Package is now done in '${package_name}'"
 }
 
