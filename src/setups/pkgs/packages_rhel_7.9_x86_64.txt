@@ -3261,6 +3261,7 @@ parted-3.1-32.el7.x86_64.rpm
 parted-devel-3.1-32.el7.x86_64.rpm
 passwd-0.79-6.el7.x86_64.rpm
 patch-2.7.1-12.el7_7.x86_64.rpm
+patchelf-0.9-10.el7.x86_64.rpm
 patchutils-0.3.3-4.el7.x86_64.rpm
 pavucontrol-3.0-5.el7.x86_64.rpm
 pax-3.4-19.el7.x86_64.rpm
