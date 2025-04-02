@@ -173,8 +173,8 @@ if "%CPLX_TOOL%" == "glibc" (
   rem https://
   set "CPLX_URL=https://github.com/bminor/glibc/archive/refs/tags/glibc-[version].tar.gz
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=usr/bin/pldd"
+  set "CPLX_CHECK_SRC=elf/pldd"
   set "CPLX_BIN="
   set "CPLX_CONFIG_DONE=default"
 )
@@ -206,8 +206,8 @@ if "%CPLX_TOOL%" == "make4" (
   rem https://
   set "CPLX_URL=https://github.com/mirror/make/archive/refs/tags/4.2.93.tar.gz"
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_CHECK_PREFIX=lib/aa"
-  set "CPLX_CHECK_SRC=lib/aa"
+  set "CPLX_CHECK_PREFIX=bin/make"
+  set "CPLX_CHECK_SRC=make"
   set "CPLX_BIN=true"
   set "CPLX_CONFIG_DONE=default"
 )
