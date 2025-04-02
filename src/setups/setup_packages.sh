@@ -233,34 +233,17 @@ find_package_in_arch() {
     eval "${pkg_res_var_name}=\"${found_pkg_in_arch}\""
 }
 
-download_package() {
+try_download_package() {
     local arch="$1"
     local pkg_name="$2"
+    local url="$3"
+    local should_fatal="${4:-0}"  # 0 = error (don't fatal), 1 = fatal on failure
 
     local package_file_name="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
-    local package_file_size
-    package_file_size=$(stat -c%s "${package_file_name}" 2>/dev/null || echo 0)
     local min_pkg_size=9
     local package_file_size_limit=$((min_pkg_size * 1024))  # 9KB
 
-    if [[ -e  "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" ]]; then
-        if [[ "${package_file_size}" -lt "${package_file_size_limit}" ]]; then
-            mv "${package_file_name}" "${package_file_name}._to_delete"
-            echo "File renamed to ${package_file_name}._to_delete because its size is ${package_file_size_limit} bytes."
-            fatal "Package '${pkg_name}' is only ${package_file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
-        fi
-        ok "Package '${pkg_name}' already downloaded in '${SETUP_PKGS_DIR}/pkgs/${arch}'"
-        return 0
-    fi
-
-    local pkgs_url_name="${arch/\./_}_pkgs_url"
-    get_property "${pkgs_url_name}"
-    if [[ "${!pkgs_url_name}" == "" ]]; then
-        fatal "Property '${pkgs_url_name}' not found in file '${properties_file}'" 1
-    fi
-    url=${!pkgs_url_name}/${pkg_name}
-    url="${url//\/\//\/}"
-    info "url='${url}' for arch='${arch}' and package '${pkg_name}'"
+    info "Attempting download: url='${url}' for arch='${arch}' and package '${pkg_name}'"
     # Avoid any 403 from Cloudflare (protecting, for instance, vault.centos.org) by adding headers
     curl_headers=(
         -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
@@ -278,16 +261,85 @@ download_package() {
         -H "Upgrade-Insecure-Requests: 1"
         -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
     )
-    if ! curl -kLs "${curl_headers[@]}" -o "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}" "$url"; then
-        fatal "Failed to download package '${pkg_name}' from '${url}'" 1
+    if ! curl -kLs "${curl_headers[@]}" -o "${package_file_name}" "$url"; then
+        if [[ "${should_fatal}" -eq 1 ]]; then
+            fatal "Failed to download package '${pkg_name}' from '${url}'" 1
+        else
+            error "Failed to download package '${pkg_name}' from '${url}'"
+            return 1
+        fi
     else
-        file_size=$(stat -c%s "${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}")
+        local file_size
+        file_size=$(stat -c%s "${package_file_name}")
         if [ "$file_size" -lt "${package_file_size_limit}" ]; then
-            fatal "Downloaded package '${pkg_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
+            rm -f "${package_file_name}"
+            if [[ "${should_fatal}" -eq 1 ]]; then
+                fatal "Downloaded package '${pkg_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
+            else
+                error "Downloaded package '${pkg_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong"
+                return 1
+            fi
         fi
         ok "Package '${pkg_name}' downloaded successfully to '${SETUP_PKGS_DIR}/pkgs/${arch}'"
+        return 0
+    fi
+}
+
+download_package() {
+    local arch="$1"
+    local pkg_name="$2"
+
+    local package_file_name="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
+    local package_file_size
+    package_file_size=$(stat -c%s "${package_file_name}" 2>/dev/null || echo 0)
+    local min_pkg_size=9
+    local package_file_size_limit=$((min_pkg_size * 1024))  # 9KB
+
+    # Check if package already exists and is valid
+    if [[ -e "${package_file_name}" ]]; then
+        if [[ "${package_file_size}" -lt "${package_file_size_limit}" ]]; then
+            mv "${package_file_name}" "${package_file_name}._to_delete"
+            echo "File renamed to ${package_file_name}._to_delete because its size is ${package_file_size} bytes."
+            fatal "Package '${pkg_name}' is only ${package_file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
+        fi
+        ok "Package '${pkg_name}' already downloaded in '${SETUP_PKGS_DIR}/pkgs/${arch}'"
+        return 0
     fi
 
+    # Get URLs from property
+    local pkgs_url_name="${arch/\./_}_pkgs_url"
+    get_property "${pkgs_url_name}"
+    if [[ "${!pkgs_url_name}" == "" ]]; then
+        fatal "Property '${pkgs_url_name}' not found in file '${properties_file}'" 1
+    fi
+
+    # Split comma-separated URLs and try each one
+    local urls="${!pkgs_url_name}"
+    local IFS=','
+    read -ra url_list <<< "$urls"
+    local last_url_index=$((${#url_list[@]} - 1))
+
+    for i in "${!url_list[@]}"; do
+        local url="${url_list[$i]}/${pkg_name}"
+        url="${url//\/\//\/}"  # Replace double slashes with single slash
+
+        # Check if this is the last URL to try
+        if [[ $i -eq $last_url_index ]]; then
+            # Last URL - fatal on failure
+            try_download_package "${arch}" "${pkg_name}" "${url}" 1
+            return 0  # This will only be reached if the download succeeds
+        else
+            # Not the last URL - just error on failure and try the next URL
+            if try_download_package "${arch}" "${pkg_name}" "${url}" 0; then
+                return 0  # Download succeeded, exit the loop
+            fi
+            # If we reach here, the download failed but we'll try the next URL
+            warning "Failed with URL ${i+1}/${#url_list[@]}, trying next mirror..."
+        fi
+    done
+
+    # This should never be reached as the last URL will either succeed or fatal
+    fatal "No URLs worked for downloading package '${pkg_name}'" 3
 }
 
 scp_package() {
