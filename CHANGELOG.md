@@ -4,6 +4,37 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.23.0] - 2025-04-04 - make and glibc compilations;
+
+Following the incomplete compilation of glib (2.28 instead of 2.17 on RHEL 7.x, for running nodes 18), I need a make 4.x instead of 3.x.
+
+Glibc compile, but does not install. Error or core dump on elf/sln.
+
+### 🚀 Features
+
+- *(make4)* Add GNU Make 4
+- *(setups)* Add automake116 to the supported tools
+- *(setup)* Use multiple URLs for package download
+- *(install)* Introduce glibc wrapper scripts
+
+### 🐛 Bug Fixes
+
+- *(install)* Allow cleanup/install
+- *(install)* Resolve bootstrap and automake issues
+- *(env)* Check for glibc and make4 availability
+- *(install)* Update return codes for errors
+- *(install)* Enhance glibc build environment setup
+- *(env)* CPLX_BIN means tool uses its name
+- *(install)* Dynamic linker setting now conditional
+- *(glibc)* Remove unnecessary linker flags
+- *(packages)* Fix verbose parameter handling
+- *(setups)* Update glibc packages for RHEL 7.9
+
+### ⚙️ Miscellaneous Tasks
+
+- *(setups)* Update CentOS 7.9 packages URLs
+- *(setups)* Add libgcc and patchelf dependencies
+
 ## [v0.22.0] - 2025-04-01 -- Glibc, GCC and flex compilations
 
 I need a more recent glibc than the one provided by the system (2.17 for RHEL 7.x), for running recent version of nodes.
