@@ -230,7 +230,8 @@ function is_package_installed() {
         fatal "No package name provided" 101
     fi
     if [[ -z "${verbose}" ]]; then
-        if [[ -n "${3}" || "${2}" == "true" || "${2}" == "verbose" ]]; then verbose="true"; fi
+        if [[ -n "${3}" || "${2}" == "true" ]]; then verbose="true"; fi
+        if [[ -n "${3}" || "${2}" == "verbose" ]]; then verbose="vv"; fi
     fi
     local full_package_name
     full_package_name=$(get_full_package_name "${package_name}")
