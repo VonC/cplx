@@ -1,9 +1,6 @@
-glibc-headers
-glibc-devel
-glibc
 kernel-headers
 cpp
-make
+make4
 bison
 libgcc
 patchelf
