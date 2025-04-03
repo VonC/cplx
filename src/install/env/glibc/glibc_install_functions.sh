@@ -43,6 +43,10 @@ function glibc_setenv() {
     # Use sed-like pattern replacement to remove -Wl,-rpath=... up to the next -Wl
     # This handles both single-line and multi-line LDFLAGS with proper spacing
     LDFLAGS=$(echo "${LDFLAGS}" | sed -E 's/-Wl,-rpath=[^ ]* *(-Wl)/\1/g')
+    LDFLAGS=$(echo "${LDFLAGS}" | sed -E 's/  */ /g')
+
+    # no need for -lgcc_s -ldl -lpthread -lc -lm -lc_nonshared: they would be not found
+    unset LIBS
 
     # Log the change
     info "Removed -Wl,-rpath from LDFLAGS"
