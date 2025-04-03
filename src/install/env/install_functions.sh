@@ -66,8 +66,12 @@ function setenv() {
     # --- Dynamic Linker (Important!) ---
     local dynamic_linker
     dynamic_linker=$(find "${root}/lib64" -name 'ld-linux-x86-64.so*' -print 2>/dev/null | head -n1)
-    if [[ -z "${dynamic_linker}" ]]; then
+    # shellcheck disable=SC2154
+    if [[ -z "${dynamic_linker}" && "${tool_name}" != "glibc" ]]; then
         fatal "Unable to find dynamic linker in '${root}/lib64'" 192
+    fi
+    if [[ -n "${dynamic_linker}" ]]; then
+        dynamic_linker="-Wl,--dynamic-linker=${dynamic_linker}"
     fi
 
     # --- LDFLAGS (Crucial) ---
@@ -75,7 +79,7 @@ function setenv() {
     # https://stackoverflow.com/questions/6562403/i-dont-understand-wl-rpath-wl
     export LDFLAGS="-Wl,--sysroot=${root} \
                     -Wl,-rpath=${LD_LIBRARY_PATH} \
-                    -Wl,--dynamic-linker=${dynamic_linker} \
+                    ${dynamic_linker} \
                     -Wl,--export-dynamic \
                     -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib"
                     # -lssl -lcrypto"
