@@ -68,7 +68,7 @@ function setenv() {
     dynamic_linker=$(find "${root}/lib64" -name 'ld-linux-x86-64.so*' -print 2>/dev/null | head -n1)
     # shellcheck disable=SC2154
     if [[ -z "${dynamic_linker}" && "${tool_name}" != "glibc" ]]; then
-        fatal "Unable to find dynamic linker in '${root}/lib64'" 192
+        fatal "Unable to find dynamic linker in '${root}/lib64'" 25
     fi
     if [[ -n "${dynamic_linker}" ]]; then
         dynamic_linker="-Wl,--dynamic-linker=${dynamic_linker}"
