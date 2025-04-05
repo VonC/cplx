@@ -742,8 +742,8 @@ function install_packages_for_tool() {
         local base_package_name
         base_package_name="$(base_package_name "${full_package_name}")"
 
-        # If force_install is set or package is not installed, add to install list
-        if [[ ${force_install} -eq 1 ]] || ! is_package_flagged_as "${base_package_name}" "installed"; then
+        # If force_install is set or package is not installed (or installed but not mirrored), add to install list
+        if [[ ${force_install} -eq 1 ]] || ! is_package_flagged_as "${base_package_name}" "mirrored"; then
             packages_to_install+=("${line}")
         else
             ((installed_count++))
