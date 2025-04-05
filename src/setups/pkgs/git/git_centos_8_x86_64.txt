@@ -5,4 +5,3 @@ make-devel
 zlib
 gmp
 gcc
-autoconf2.7x
