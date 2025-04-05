@@ -263,9 +263,9 @@ try_download_package() {
     )
     if ! curl -kLs "${curl_headers[@]}" -o "${package_file_name}" "$url"; then
         if [[ "${should_fatal}" -eq 1 ]]; then
-            fatal "Failed to download package '${pkg_name}' from '${url}'" 1
+            fatal "Failed to download package '${package_file_name}' from '${url}'" 1
         else
-            error "Failed to download package '${pkg_name}' from '${url}'"
+            error "Failed to download package '${package_file_name}' from '${url}'"
             return 1
         fi
     else
@@ -274,9 +274,9 @@ try_download_package() {
         if [ "$file_size" -lt "${package_file_size_limit}" ]; then
             rm -f "${package_file_name}"
             if [[ "${should_fatal}" -eq 1 ]]; then
-                fatal "Downloaded package '${pkg_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
+                fatal "Downloaded package '${package_file_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
             else
-                error "Downloaded package '${pkg_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong"
+                error "Downloaded package '${package_file_name}' is only ${file_size} bytes (<${min_pkg_size}KB), something went wrong"
                 return 1
             fi
         fi
@@ -300,7 +300,7 @@ download_package() {
         if [[ "${package_file_size}" -lt "${package_file_size_limit}" ]]; then
             mv "${package_file_name}" "${package_file_name}._to_delete"
             echo "File renamed to ${package_file_name}._to_delete because its size is ${package_file_size} bytes."
-            fatal "Package '${pkg_name}' is only ${package_file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
+            fatal "Package '${package_file_name}' is only ${package_file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
         fi
         ok "Package '${pkg_name}' already downloaded in '${SETUP_PKGS_DIR}/pkgs/${arch}'"
         return 0
