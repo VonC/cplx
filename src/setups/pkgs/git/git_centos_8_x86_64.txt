@@ -5,3 +5,4 @@ make-devel
 zlib
 gmp
 gcc
+cpp
