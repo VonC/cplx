@@ -1214,9 +1214,11 @@ check_ldd() {
     local dest_dir="$2"
 
     if [[ -z "${LD_LIBRARY_PATH}" ]]; then
+        SKIP_CC1_CHECK=1
         if ! setenv; then
-            fatal "check_ldd: ${sp}Unable to set environment variables" 123
+            fatal "check_ldd: ${sp}Unable to set environment variables (SKIP_CC1_CHECK='${SKIP_CC1_CHECK}')" 123
         fi
+        unset SKIP_CC1_CHECK
     fi
     if [[ -z "${LD_LIBRARY_PATH}" ]]; then
         fatal "check_ldd: ${sp}LD_LIBRARY_PATH is empty" 124
