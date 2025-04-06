@@ -6,3 +6,4 @@ zlib
 gmp
 gcc
 cpp
+glibc
