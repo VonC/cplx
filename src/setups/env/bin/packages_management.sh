@@ -1129,6 +1129,10 @@ _copy_element() {
     local dest_file="${2}"
     local msg="${3}"
 
+    unset LD_RUN_PATH
+    unset DT_RUNPATH
+    unset LD_LIBRARY_PATH
+
     # If source is a symlink, create a symlink at the destination
     if [[ -L "${src_file}" ]]; then
         local target
@@ -1176,8 +1180,12 @@ _copy_element() {
     if [ $rc -ne 0 ]; then
         if echo "$cp_output" | grep -qi "Permission denied"; then
             warning "${sp}[${msg}] Permission denied copying '${src_file}' to '${dest_file}', skipping marker creation"
+            rm -f "${dest_file}"
+            rm -f "${dest_file}.copied"
             return 0
         else
+            rm -f "${dest_file}"
+            rm -f "${dest_file}.copied"
             fatal "${sp}[${msg}] Unable to copy '${src_file}' to '${dest_file}': ${cp_output}" 32
         fi
     fi
