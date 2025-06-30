@@ -1464,3 +1464,66 @@ return curl_global_init ();
 https://www.openldap.org/software/download/
 https://www.openldap.org/faq/data/cache/18.html
 
+
+## isysroot and include_next
+
+https://stackoverflow.com/questions/62795463/how-can-get-g-to-use-my-own-glibc-builds-headers-correctly
+
+In your GCC version,`<cmath>` uses `#include_next`, which means that you need to make sure that the directory which contains the `cmath` file comes *before* (on the include search path) the directory with the proper `math.h` for the version of glibc you are building against.
+
+You can use `g++ -v` to view the search path. In your case, it probably looks like this:
+
+```
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ /project-foo/include
+ /project-bar/include
+ /path/to/glibc-2.23/build/install/include
+ /usr/include/c++/6
+ /usr/include/x86_64-linux-gnu/c++/6
+ /usr/lib/gcc/x86_64-linux-gnu/6/include
+ /usr/local/include
+ /usr/lib/gcc/x86_64-linux-gnu/6/include-fixed
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+```
+
+If you configure glibc with `--prefix=/usr` and install it with `DESTDIR=/path/to/glibc-2.23/build/install`, its header files will be installed into the directory `/path/to/glibc-2.23/build/install/usr/include`. This means you should be able to use the `-isysroot` option, which rewrites the default `/usr/include` directory, resulting in the right ordering of the search path:
+
+```
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ /project-foo/include
+ /project-bar/include
+ /usr/include/c++/6
+ /usr/include/x86_64-linux-gnu/c++/6
+ /usr/include/c++/6/backward
+ /usr/lib/gcc/x86_64-linux-gnu/6/include
+ /usr/lib/gcc/x86_64-linux-gnu/6/include-fixed
+ /path/to/glibc-2.23/build/install/usr/include
+
+```
+
+I just tried this and it compiled, but when running I still get the Assertion info[DT_RPATH] == NULL'` problem. Since it answers the question, I'll still accept this, but if you have any other info regarding the assertion problem in an off-comment, that would be appreciated. If it's too complex an answer, then I'll just need to post a new question. The most obvious thing of using --sysroot instead created new problems that should go in their own question. Thank you! – 
+OMGtechy
+ CommentedJul 13, 2020 at 10:57 
+
+You likely built glibc with -Wl,--rpath, that doesn't work. – 
+Florian Weimer
+ CommentedJul 13, 2020 at 18:29
+
+Indeed I did, tried removing it, still no joy. I will ask another question :) – 
+OMGtechy
+ CommentedJul 14, 2020 at 9:54
+
+
+https://stackoverflow.com/questions/35616650/how-to-upgrade-glibc-from-version-2-12-to-2-14-on-centos#comment95249587_38317265
+
+To set the timezone for the new glibc: ln -s /usr/share/zoneinfo/Europe/Rome /usr/glibc/etc/localtime as it won’t use your system timezone. Check with: /opt/glibc-2.14/lib/ld-2.14.so --library-path "/opt/glibc-2.14/lib:/lib64" /bin/date
+
+## URLs
+
+- view-source:https://mirror.chpc.utah.edu/pub/centos/7/os/x86_64/Packages/
+- https://rpm.pbone.net/
