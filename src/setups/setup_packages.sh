@@ -323,6 +323,13 @@ download_package() {
         local url="${url_list[$i]}/${pkg_name}"
         url="${url//\/\//\/}"  # Replace double slashes with single slash
 
+        # Replace [l] with the first letter of pkg_name in lowercase
+        if [[ "$url" == *"[l]"* ]]; then
+            local first_letter="${pkg_name:0:1}"
+            first_letter="${first_letter,,}"  # Convert to lowercase
+            url="${url//\[l\]/$first_letter}"
+        fi
+
         # Check if this is the last URL to try
         if [[ $i -eq $last_url_index ]]; then
             # Last URL - fatal on failure
