@@ -7,3 +7,4 @@ gmp
 gcc
 cpp
 glibc
+autoconf2.7x
