@@ -3,7 +3,9 @@
 
 SETUP_PKGS_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 # echo "SETUP_PKGS_DIR='${SETUP_PKGS_DIR}'"
+# shellcheck disable=SC1091
 source "${SETUP_PKGS_DIR}/../echos/echos"
+# shellcheck disable=SC1091
 source "${SETUP_PKGS_DIR}/../utils/properties.sh"
 source "${SETUP_PKGS_DIR}/../utils/steps.sh"
 # SRC_DIR="$( cd "$( dirname "${SETUP_PKGS_DIR}" )" && pwd )"
@@ -11,6 +13,10 @@ source "${SETUP_PKGS_DIR}/../utils/steps.sh"
 main() {
     steps_file="${SETUP_PKGS_DIR}/steps.md"
     properties_file="${SETUP_PKGS_DIR}/setup.properties"
+
+    # Add explicit logging about steps file
+    info "Using steps file: '${steps_file}'"
+
     get_property architecture
     if [[ -z "${architecture}" ]]; then
         fatal "architecture not found in file '${properties_file}'" 1
