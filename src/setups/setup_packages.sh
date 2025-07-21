@@ -250,6 +250,12 @@ try_download_package() {
     local url="$3"
     local should_fatal="${4:-0}"  # 0 = error (don't fatal), 1 = fatal on failure
 
+    if [[ ! -e "${SETUP_PKGS_DIR}/pkgs/${arch}" ]]; then
+        if ! mkdir -p "${SETUP_PKGS_DIR}/pkgs/${arch}"; then
+            fatal "Failed to create directory '${SETUP_PKGS_DIR}/pkgs/${arch}'" 202
+        fi
+    fi
+
     local package_file_name="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
     local min_pkg_size=9
     local package_file_size_limit=$((min_pkg_size * 1024))  # 9KB
