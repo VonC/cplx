@@ -214,7 +214,12 @@ find_package_in_arch() {
     local pkg_res_var_name="$3"
 
     if [[ ! -e "${packages_file}" ]]; then
-        fatal "File '${packages_file}' not found" 1
+        warning "File '${packages_file}' not found"
+        if ! touch "${packages_file}"; then
+            fatal "Unable to create file '${packages_file}'" 201
+        else
+            ok "Setup Packages file created (empty): '${packages_file}'"
+        fi
     fi
 
     # Escape any unescaped plus signs
