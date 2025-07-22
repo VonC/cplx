@@ -40,3 +40,10 @@ service_name() {
 }
 
 export service_name
+
+# Define a wrapper function that just calls service_name with all parameters
+get_service_name() {
+  service_name "$@"
+}
+
+export get_service_name
