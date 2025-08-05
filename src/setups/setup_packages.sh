@@ -1,7 +1,7 @@
 #!/bin/bash
 # shellcheck source-path=SCRIPTDIR
 
-SETUP_PKGS_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+SETUP_PKGS_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 # echo "SETUP_PKGS_DIR='${SETUP_PKGS_DIR}'"
 # shellcheck disable=SC1091
 source "${SETUP_PKGS_DIR}/../echos/echos"
@@ -37,6 +37,7 @@ download_packages_list() {
     fi
     local arch="$1"
     local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
+
     if [[ -f "${packages_file}" ]]; then
         if [[ -z "${CPLX_RELOAD_PACKAGES}" ]]; then
             ok "File '${packages_file}' already downloaded"
@@ -45,11 +46,35 @@ download_packages_list() {
         task "Must refresh/reload File '${packages_file}' (CPLX_RELOAD_PACKAGES env var set)"
     fi
 
-    # URL of the HTML page
+    # Empty the target file at the beginning
+    true >"${packages_file}"
+
+    # Get the comma-separated URLs from property
     pkgs_url_name="${arch/\./_}_pkgs_url"
     get_property "${pkgs_url_name}"
-    url=${!pkgs_url_name}
-    info "url='${url}' for arch='${arch}'"
+    url_list=${!pkgs_url_name}
+    info "URL list for arch='${arch}': ${url_list}"
+
+    # Split by comma and process each URL
+    IFS=',' read -ra urls <<<"$url_list"
+    for url in "${urls[@]}"; do
+        # Trim whitespace
+        url=$(echo "$url" | xargs)
+        info "Processing URL: '${url}' for arch='${arch}'"
+        process_packages_url "$url" "$arch" "$packages_file"
+    done
+
+    if ! step_done "download_packages_list"; then
+        fatal "Could not mark download_packages_list as done" 6
+    fi
+    ok "All URLs processed and filtered packages saved to '${packages_file}'"
+}
+
+process_packages_url() {
+    local url="$1"
+    local arch="$2"
+    local packages_file="$3"
+    local temp_file="${SETUP_PKGS_DIR}/pkgs/urls_temp.txt"
 
     # Fetch the HTML content using curl
     html_content=$(curl -kLs "$url")
@@ -59,15 +84,16 @@ download_packages_list() {
     info "HTML content line count: ${line_count} for '${url}'"
 
     if [ "$line_count" -lt 50 ]; then
-        fatal "HTML content has only ${line_count} lines (<50), something went wrong" 119
+        warning "HTML content has only ${line_count} lines (<50), skipping URL: ${url}"
+        return 0
     fi
 
     # Extract URLs from the table rows using grep
     # Define an array of grep pipelines (as strings) to extract URLs
     grep_pipelines=(
         'grep -oP '"'"'<tr class="(even|odd)">.*?<a href="\K[^"]+'"'"' | grep -v "^\.\./$" | grep "x86_64"' # https://vault.centos.org/8-stream/BaseOS/x86_64/os/Packages/
-        'grep -oP '"'"'<a href="\K[^"]*x86_64[^"]*'"'"' | grep -v "^../$"' # https://dl.rockylinux.org/vault/centos/7.9.2009/updates/x86_64/Packages/
-        'grep -oP '"'"'<a href="\K[^"]+'"'"' | grep "x86_64"' # https://mirror.chpc.utah.edu/pub/centos/7/os/x86_64/Packages/
+        'grep -oP '"'"'<a href="\K[^"]*x86_64[^"]*'"'"' | grep -v "^../$"'                                  # https://dl.rockylinux.org/vault/centos/7.9.2009/updates/x86_64/Packages/
+        'grep -oP '"'"'<a href="\K[^"]+'"'"' | grep "x86_64"'                                               # https://mirror.chpc.utah.edu/pub/centos/7/os/x86_64/Packages/
     )
     # Print the size of the grep_pipelines array
     info "grep_pipelines array size: ${#grep_pipelines[@]}"
@@ -78,15 +104,17 @@ download_packages_list() {
         # shellcheck disable=SC2181
         if [ $? -eq 0 ] && [ -n "$output" ]; then
             info "Pipeline '${pipeline}' has succeeded"
-            echo "$output" > "${SETUP_PKGS_DIR}/pkgs/urls.txt"
+            echo "$output" >"$temp_file"
             break
         fi
     done
     if [ -z "$output" ]; then
-        fatal "Failed to extract URLs from the HTML content" 118
+        warning "Failed to extract URLs from the HTML content for URL: ${url}"
+        return 0
     fi
 
     # Process the URLs to keep only the last entry for each common prefix
+    # and append to the packages file
     awk -F'-[0-9]' '{
         if ($0 !~ /^\//) {  # Ignore entries starting with /
             prefix = $1;        # Extract the common prefix (everything before -[0-9])
@@ -99,17 +127,14 @@ download_packages_list() {
         for (i = 1; i <= n; i++) {
             print map[sorted_prefixes[i]]; # Print the latest entry for each prefix
         }
-    }' "${SETUP_PKGS_DIR}/pkgs/urls.txt" > "${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
+    }' "$temp_file" >>"$packages_file"
     # shellcheck disable=SC2181
     if [[ $? -ne 0 ]]; then
-        fatal "Failed to process the URLs" 119
+        warning "Failed to process the URLs for URL: ${url}"
+        return 0
     fi
 
-    # Print the result
-    if ! step_done "download_packages_list"; then
-        fatal "Could not mark download_packages_list as done" 6
-    fi
-    ok "Filtered URLs saved to '${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt'"
+    ok "Processed URLs from '${url}' and appended to '${packages_file}'"
 }
 
 sync_packages() {
@@ -138,7 +163,7 @@ sync_packages() {
     skipped=()
 
     # Open the file on file descriptor 8
-    exec 8< "${packages_for_tools}"
+    exec 8<"${packages_for_tools}"
     while IFS= read -r line <&8 || [ -n "$line" ]; do
         # Trim leading spaces for checking
         trimmed_line="${line#"${line%%[![:space:]]*}"}"
@@ -167,7 +192,7 @@ sync_packages() {
         else
             ok "Line '${line}' processed successfully in '${packages_for_tools}'"
             # Update the 'last' file with the current processed value.
-            echo "${line}"> "${pkgs_tool_dir}/last"
+            echo "${line}" >"${pkgs_tool_dir}/last"
         fi
         process=1
 
@@ -251,7 +276,7 @@ try_download_package() {
     local arch="$1"
     local pkg_name="$2"
     local url="$3"
-    local should_fatal="${4:-0}"  # 0 = error (don't fatal), 1 = fatal on failure
+    local should_fatal="${4:-0}" # 0 = error (don't fatal), 1 = fatal on failure
 
     if [[ ! -e "${SETUP_PKGS_DIR}/pkgs/${arch}" ]]; then
         if ! mkdir -p "${SETUP_PKGS_DIR}/pkgs/${arch}"; then
@@ -261,7 +286,7 @@ try_download_package() {
 
     local package_file_name="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
     local min_pkg_size=9
-    local package_file_size_limit=$((min_pkg_size * 1024))  # 9KB
+    local package_file_size_limit=$((min_pkg_size * 1024)) # 9KB
 
     info "Attempting download: url='${url}' for arch='${arch}' and package '${pkg_name}'"
     # Avoid any 403 from Cloudflare (protecting, for instance, vault.centos.org) by adding headers
@@ -313,7 +338,7 @@ download_package() {
     local package_file_size
     package_file_size=$(stat -c%s "${package_file_name}" 2>/dev/null || echo 0)
     local min_pkg_size=9
-    local package_file_size_limit=$((min_pkg_size * 1024))  # 9KB
+    local package_file_size_limit=$((min_pkg_size * 1024)) # 9KB
 
     # Check if package already exists and is valid
     if [[ -e "${package_file_name}" ]]; then
@@ -334,19 +359,19 @@ download_package() {
     fi
 
     # Split comma-separated URLs and try each one
-    local urls="${!pkgs_url_name}"
+    local url_value="${!pkgs_url_name}"
     local IFS=','
-    read -ra url_list <<< "$urls"
+    read -ra url_list <<<"$url_value"
     local last_url_index=$((${#url_list[@]} - 1))
 
     for i in "${!url_list[@]}"; do
         local url="${url_list[$i]}/${pkg_name}"
-        url="${url//\/\//\/}"  # Replace double slashes with single slash
+        url="${url//\/\//\/}" # Replace double slashes with single slash
 
         # Replace [l] with the first letter of pkg_name in lowercase
         if [[ "$url" == *"[l]"* ]]; then
             local first_letter="${pkg_name:0:1}"
-            first_letter="${first_letter,,}"  # Convert to lowercase
+            first_letter="${first_letter,,}" # Convert to lowercase
             url="${url//\[l\]/$first_letter}"
         fi
 
@@ -354,11 +379,11 @@ download_package() {
         if [[ $i -eq $last_url_index ]]; then
             # Last URL - fatal on failure
             try_download_package "${arch}" "${pkg_name}" "${url}" 1
-            return 0  # This will only be reached if the download succeeds
+            return 0 # This will only be reached if the download succeeds
         else
             # Not the last URL - just error on failure and try the next URL
             if try_download_package "${arch}" "${pkg_name}" "${url}" 0; then
-                return 0  # Download succeeded, exit the loop
+                return 0 # Download succeeded, exit the loop
             fi
             # If we reach here, the download failed but we'll try the next URL
             warning "Failed with URL ${i+1}/${#url_list[@]}, trying next mirror..."
@@ -426,7 +451,7 @@ install_packages() {
     if [[ "${lastLine}" != "253" ]]; then
         # Copy the remote log file locally
         # shellcheck disable=SC2029
-        if ssh "${SSH_CONFIG_ENTRY}" "cat ${cplx_path}/tools/pkgs.log" >> "${SETUP_PKGS_DIR}/pkgs.log"; then
+        if ssh "${SSH_CONFIG_ENTRY}" "cat ${cplx_path}/tools/pkgs.log" >>"${SETUP_PKGS_DIR}/pkgs.log"; then
             ok "Remote ('${SSH_CONFIG_ENTRY}') log file 'pkgs.log' appended successfully to '${SETUP_PKGS_DIR}/pkgs.log'"
         else
             warning "Failed to access remote ('${SSH_CONFIG_ENTRY}') log file or to open 'pkgs.log' file at '${SETUP_PKGS_DIR}'"
@@ -441,4 +466,3 @@ install_packages() {
 }
 
 main "$@"
-
