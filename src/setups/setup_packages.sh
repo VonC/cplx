@@ -21,6 +21,9 @@ main() {
     if [[ -z "${architecture}" ]]; then
         fatal "architecture not found in file '${properties_file}'" 8
     fi
+    if [[ -z "${CPLX_TOOL}" ]]; then
+        fatal "CPLX_TOOL not defined'" 12
+    fi
     rm -f "${SETUP_PKGS_DIR}/pkgs.log"
     download_packages_list "${architecture}"
     sync_packages "${architecture}"

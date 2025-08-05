@@ -23,6 +23,7 @@ if "%~1"=="unset" (
 
 if not defined QUIET_PRJ (  %_info% "project PATH '%PATH%'" )
 if not defined QUIET_PRJ ( %_ok% "project '%project_dir_name%' senv activated%local_path_msg%: project_dir='%project_dir%', for tool '%CPLX_TOOL%'" )
+if not defined CPLX_TOOL ( %_fatal% "CPLX_TOOL must be set: use 'st my_tool' to define it" 42 )
 grep -q remove_done_markers "%project_dir%\.git\config" || git -C "%project_dir%" config --local "diff.remove_done_markers.textconv" "sed -E 's/\s+\(done: ✅\)//g'"
 goto:eof
 
