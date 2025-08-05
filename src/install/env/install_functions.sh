@@ -46,14 +46,18 @@ function setenv() {
 
     # --- Compiler Paths ---
     # COMPILER_PATH is often used for include paths, not library paths.
-    # update_xxpath is likely overkill for cc1.  Directly setting is clearer.
-    local cc1_path
-    cc1_path=$(find "${root}" -name "cc1" 2>/dev/null | head -n 1) # Find the FIRST cc1, handle not found. 2>/dev/null suppresses errors
-    if [[ -n "$cc1_path" ]]; then
-        COMPILER_PATH=$(dirname "$cc1_path")
-        export COMPILER_PATH
+    # Only look for cc1 if cpp package is installed
+    if [[ -e "${root}/usr/bin/g++" ]] || [[ -e "${root}/bin/g++" ]] || [[ -d "${root}/usr/include/c++" ]]; then
+        local cc1_path
+        cc1_path=$(find "${root}" -name "cc1" 2>/dev/null | head -n 1) # Find the FIRST cc1, handle not found. 2>/dev/null suppresses errors
+        if [[ -n "$cc1_path" ]]; then
+            COMPILER_PATH=$(dirname "$cc1_path")
+            export COMPILER_PATH
+        else
+            fatal "cc1 not found in '${root}'" 18
+        fi
     else
-        fatal "cc1 not found in '${root}'" 18
+        info "Skipping cc1 check as cpp package is not installed"
     fi
 
     # --- Flags ---
@@ -61,7 +65,7 @@ function setenv() {
     export CPPFLAGS="-I${GCC_PATH}/usr/include -I${GCC_PATH}/include" # Include paths for the preprocessor.
 
     # CFLAGS: Correctly set sysroot, PIC, and optimization.
-    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O2 -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2"  # Use -O2 for optimization
+    export CFLAGS="-DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=${root} -fPIC -O2 -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2" # Use -O2 for optimization
 
     # --- Dynamic Linker (Important!) ---
     local dynamic_linker
@@ -82,14 +86,14 @@ function setenv() {
                     ${dynamic_linker} \
                     -Wl,--export-dynamic \
                     -L${root}/usr/lib64 -L${root}/usr/lib -L${root}/lib64 -L${root}/lib"
-                    # -lssl -lcrypto"
-                    # -Wl,-verbose"
-                    # Standard lib directories.
-                    # No -nodefaultlibs needed with a proper sysroot.
-                    # -B options are generally not needed when using --sysroot.
+    # -lssl -lcrypto"
+    # -Wl,-verbose"
+    # Standard lib directories.
+    # No -nodefaultlibs needed with a proper sysroot.
+    # -B options are generally not needed when using --sysroot.
 
     # -lssl -lcrypto *MUST* be at the END of LIBS (or LDFLAGS, if that's where libs get added).
-    export LIBS="-lgcc_s -ldl -lpthread -lc -lm -lc_nonshared"  # Correct order, explicit libs.
+    export LIBS="-lgcc_s -ldl -lpthread -lc -lm -lc_nonshared" # Correct order, explicit libs.
 
     export ZLIB_PATH="${root}/usr"
     export CURLDIR="${root}"
@@ -188,7 +192,6 @@ function install() {
     ok "make install is now done in '${tool_prefix}'"
 }
 
-
 function package() {
     local package_name
     local package_name_prefix
@@ -203,7 +206,7 @@ function package() {
 
     # Store the function output in a variable
     package_name=$(find_package)
-    find_pkg_status=$?  # Capture the return code right after calling the function
+    find_pkg_status=$? # Capture the return code right after calling the function
     if [[ $find_pkg_status -ne 0 ]]; then
         package_name="${package_name_prefix}-$(date +'%Y%m%d.%H%M').${CPLX_ARCH_EXT}.tar.gz"
     fi
@@ -266,7 +269,7 @@ function deploy() {
     # Find the latest package
     local latest_package
     latest_package=$(find_package)
-    find_pkg_status=$?  # Capture the return code
+    find_pkg_status=$? # Capture the return code
 
     if [[ $find_pkg_status -ne 0 ]]; then
         fatal "No package found for deployment" 31
