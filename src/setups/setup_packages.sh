@@ -19,7 +19,7 @@ main() {
 
     get_property architecture
     if [[ -z "${architecture}" ]]; then
-        fatal "architecture not found in file '${properties_file}'" 1
+        fatal "architecture not found in file '${properties_file}'" 8
     fi
     rm -f "${SETUP_PKGS_DIR}/pkgs.log"
     download_packages_list "${architecture}"
@@ -114,7 +114,7 @@ sync_packages() {
     local pkgs_tool_dir="${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}"
     local packages_for_tools="${pkgs_tool_dir}/${CPLX_TOOL}_${arch}.txt"
     if [[ ! -e "${packages_for_tools}" ]]; then
-        fatal "File '${packages_for_tools}' not found" 1
+        fatal "File '${packages_for_tools}' not found" 9
     fi
     ok "Processing File '${packages_for_tools}'"
 
@@ -160,7 +160,7 @@ sync_packages() {
         # Process the line (actual processing logic goes here)
         task "Must process line: '${line}'"
         if ! sync_package "${arch}" "${line}"; then
-            fatal "Failed to process line: '${line}'" 1
+            fatal "Failed to process line: '${line}'" 10
         else
             ok "Line '${line}' processed successfully in '${packages_for_tools}'"
             # Update the 'last' file with the current processed value.
@@ -280,7 +280,7 @@ try_download_package() {
     )
     if ! curl -kLs "${curl_headers[@]}" -o "${package_file_name}" "$url"; then
         if [[ "${should_fatal}" -eq 1 ]]; then
-            fatal "Failed to download package '${package_file_name}' from '${url}'" 1
+            fatal "Failed to download package '${package_file_name}' from '${url}'" 11
         else
             error "Failed to download package '${package_file_name}' from '${url}'"
             return 1
@@ -317,7 +317,7 @@ download_package() {
         if [[ "${package_file_size}" -lt "${package_file_size_limit}" ]]; then
             mv "${package_file_name}" "${package_file_name}._to_delete"
             echo "File renamed to ${package_file_name}._to_delete because its size is ${package_file_size} bytes."
-            fatal "Package '${package_file_name}' is only ${package_file_size} bytes (<${min_pkg_size}KB), something went wrong" 2
+            fatal "Package '${package_file_name}' is only ${package_file_size} bytes (<${min_pkg_size}KB), something went wrong" 4
         fi
         ok "Package '${pkg_name}' already downloaded in '${SETUP_PKGS_DIR}/pkgs/${arch}'"
         return 0
@@ -327,7 +327,7 @@ download_package() {
     local pkgs_url_name="${arch/\./_}_pkgs_url"
     get_property "${pkgs_url_name}"
     if [[ "${!pkgs_url_name}" == "" ]]; then
-        fatal "Property '${pkgs_url_name}' not found in file '${properties_file}'" 1
+        fatal "Property '${pkgs_url_name}' not found in file '${properties_file}'" 7
     fi
 
     # Split comma-separated URLs and try each one
