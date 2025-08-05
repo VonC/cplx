@@ -4,6 +4,44 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.24.0] - 2025-08-05 - Git on CentOS 8
+
+Check installation of Git on CentOS8
+
+### 🚀 Features
+
+- *(setups)* Define tool_name earlier in `.env`
+- *(sh)* Support [l] in package URLs
+- *(config)* Add essential template properties
+
+### 🐛 Bug Fixes
+
+- *(setups)* Remove autoconf2.7x from CentOS 8 deps
+- *(setups)* Echos correctly display the caller name
+- *(setups)* Use "mirrored" flag for install condition
+- *(setups)* Correct file copies, glibc dependency
+- *(setup)* Handle missing package file gracefully
+- *(setup)* Ensure pkg dir exists before download
+
+### 📚 Documentation
+
+- *(md)* Explain glibc build include path issues
+- *(txt)* Add autoconf2.7x to Git CentOS 8 deps
+
+### ⚙️ Miscellaneous Tasks
+
+- *(install)* Correct error code for missing ld
+- *(setups)* Add cpp dependency for CentOS 8
+- *(src)* Add trailing newline for packages_management.sh
+- *(sh)* Add shellcheck and logging setup-packages
+- *(git)* Update batcolors submodule
+- *(git)* Ignore sensitive properties backups
+
+### Fix
+
+- *(setups)* Full path error in setup_packages.sh
+- *(setups)* Handle missing dynamic linker in check_ldd
+
 ## [v0.23.0] - 2025-04-04 - make and glibc compilations;
 
 Following the incomplete compilation of glib (2.28 instead of 2.17 on RHEL 7.x, for running nodes 18), I need a make 4.x instead of 3.x.
