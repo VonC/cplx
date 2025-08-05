@@ -37,6 +37,6 @@ If not, downloads it.
 Check if the source file exists on the remote server side.  
 If not, copy it.
 
-## Download packages List {#download_packages_list} [🔗](#download_packages_list)
+## Download packages List {#download_packages_list} [🔗](#download_packages_list) (done: ✅)
 
 Download the list of packages from a given URL, and store it in a file named after the architecture of the remote server.
