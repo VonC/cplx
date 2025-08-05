@@ -37,32 +37,65 @@ download_packages_list() {
     fi
     local arch="$1"
     local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
+    local temp_dir="${SETUP_PKGS_DIR}/pkgs/temp_${arch}"
 
     if [[ -f "${packages_file}" ]]; then
         if [[ -z "${CPLX_RELOAD_PACKAGES}" ]]; then
-            ok "File '${packages_file}' already downloaded"
+            ok "File '${packages_file}' already downloaded (CPLX_RELOAD_PACKAGES not set)"
             return 0
         fi
         task "Must refresh/reload File '${packages_file}' (CPLX_RELOAD_PACKAGES env var set)"
     fi
 
-    # Empty the target file at the beginning
-    true >"${packages_file}"
+    # Create temp directory for URL results
+    rm -rf "${temp_dir}" 2>/dev/null
+    mkdir -p "${temp_dir}"
 
     # Get the comma-separated URLs from property
     pkgs_url_name="${arch/\./_}_pkgs_url"
     get_property "${pkgs_url_name}"
-    url_list=${!pkgs_url_name}
-    info "URL list for arch='${arch}': ${url_list}"
+    local url_value="${!pkgs_url_name}"
+    info "URL list for arch='${arch}': ${url_value}"
 
     # Split by comma and process each URL
-    IFS=',' read -ra urls <<<"$url_list"
-    for url in "${urls[@]}"; do
+    IFS=',' read -ra url_list <<<"$url_value"
+    for i in "${!url_list[@]}"; do
         # Trim whitespace
-        url=$(echo "$url" | xargs)
-        info "Processing URL: '${url}' for arch='${arch}'"
-        process_packages_url "$url" "$arch" "$packages_file"
+        url=$(echo "${url_list[$i]}" | xargs)
+        info "Processing URL ${i+1}/${#url_list[@]}: '${url}' for arch='${arch}'"
+        process_packages_url "$url" "$arch" "${temp_dir}/url_${i}.txt"
     done
+
+    # Combine all URL results, remove duplicates, and sort alphabetically
+    info "Combining results from all URLs, removing duplicates, and sorting"
+    true>"${packages_file}" # Empty the target file
+
+    if [ -n "$(ls -A "${temp_dir}" 2>/dev/null)" ]; then
+        # Use awk to process all files, keeping only the latest version of each package
+        cat "${temp_dir}"/*.txt 2>/dev/null | awk -F'-[0-9]' '{
+            if ($0 !~ /^\//) {  # Ignore entries starting with /
+                prefix = $1;     # Extract the common prefix (everything before -[0-9])
+                map[prefix] = $0;  # Store the latest entry for each prefix
+            }
+        }
+        END {
+            # Sort the prefixes alphabetically
+            n = asorti(map, sorted_prefixes);
+            for (i = 1; i <= n; i++) {
+                print map[sorted_prefixes[i]];  # Print the latest entry for each prefix
+            }
+        }' >"${packages_file}"
+
+        # Count the number of packages
+        local pkg_count
+        pkg_count=$(wc -l <"${packages_file}")
+        ok "Final package list contains ${pkg_count} unique packages"
+    else
+        fatal "No packages were found from any of the URLs" 112
+    fi
+
+    # Clean up temp directory
+    rm -rf "${temp_dir}"
 
     if ! step_done "download_packages_list"; then
         fatal "Could not mark download_packages_list as done" 6
@@ -73,8 +106,8 @@ download_packages_list() {
 process_packages_url() {
     local url="$1"
     local arch="$2"
-    local packages_file="$3"
-    local temp_file="${SETUP_PKGS_DIR}/pkgs/urls_temp.txt"
+    local output_file="$3"
+    local temp_file="${SETUP_PKGS_DIR}/pkgs/url_temp.txt"
 
     # Fetch the HTML content using curl
     html_content=$(curl -kLs "$url")
@@ -84,8 +117,7 @@ process_packages_url() {
     info "HTML content line count: ${line_count} for '${url}'"
 
     if [ "$line_count" -lt 50 ]; then
-        warning "HTML content has only ${line_count} lines (<50), skipping URL: ${url}"
-        return 0
+        fatal "HTML content has only ${line_count} lines (<50), skipping URL: ${url}" 113
     fi
 
     # Extract URLs from the table rows using grep
@@ -114,7 +146,7 @@ process_packages_url() {
     fi
 
     # Process the URLs to keep only the last entry for each common prefix
-    # and append to the packages file
+    # but only for this specific URL
     awk -F'-[0-9]' '{
         if ($0 !~ /^\//) {  # Ignore entries starting with /
             prefix = $1;        # Extract the common prefix (everything before -[0-9])
@@ -127,14 +159,16 @@ process_packages_url() {
         for (i = 1; i <= n; i++) {
             print map[sorted_prefixes[i]]; # Print the latest entry for each prefix
         }
-    }' "$temp_file" >>"$packages_file"
+    }' "$temp_file" >"$output_file"
+
     # shellcheck disable=SC2181
     if [[ $? -ne 0 ]]; then
-        warning "Failed to process the URLs for URL: ${url}"
-        return 0
+        fatal "Failed to process the URLs for URL: ${url}" 111
     fi
 
-    ok "Processed URLs from '${url}' and appended to '${packages_file}'"
+    local pkg_count
+    pkg_count=$(wc -l <"$output_file")
+    ok "Processed URLs from '${url}' and found ${pkg_count} packages"
 }
 
 sync_packages() {
