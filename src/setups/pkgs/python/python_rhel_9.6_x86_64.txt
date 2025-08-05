@@ -1,5 +1,4 @@
 make
-make-devel
 zlib
 gmp
 gcc
@@ -51,10 +50,7 @@ gnutls
 libidn2
 libuuid
 libuuid-devel
-zlib
-zlib-devel
 readline
-readline-devel
 # _mpdecimal
 # _gcc-c\+\+
 # _libstdc\+\+-devel
