@@ -1,6 +1,7 @@
 make
 zlib
 gmp
+libzstd
 gcc
 cpp
 libmpc
@@ -16,7 +17,6 @@ openssl-libs
 openssl
 openssl-devel
 openssl-pkcs11
-openssl-ibmpkcs11
 openssl-perl
 bzip2-libs
 bzip2
@@ -27,8 +27,6 @@ ncurses
 ncurses-libs
 ncurses-devel
 gdbm-libs
-gdbm
-gdbm-devel
 libgpg-error
 libgpg-error-devel
 libgcrypt
