@@ -47,7 +47,7 @@ function setenv() {
     # --- Compiler Paths ---
     # COMPILER_PATH is often used for include paths, not library paths.
     # Only look for cc1 if cpp package is installed
-    if [[ -e "${root}/usr/bin/g++" ]] || [[ -e "${root}/bin/g++" ]] || [[ -d "${root}/usr/include/c++" ]]; then
+    if [[ -e "${root}/usr/bin/cpp" ]]; then
         local cc1_path
         cc1_path=$(find "${root}" -name "cc1" 2>/dev/null | head -n 1) # Find the FIRST cc1, handle not found. 2>/dev/null suppresses errors
         if [[ -n "$cc1_path" ]]; then
