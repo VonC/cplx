@@ -67,7 +67,7 @@ function make_package_list() {
     fi
     local list_file
     local base_package_name
-    base_package_name="$(base_package_name "${full_package_name}" )"
+    base_package_name="$(base_package_name "${full_package_name}")"
     if [[ -z "${base_package_name}" ]]; then
         fatal "make_package_list: No base package name found for '${full_package_name}'" 95
     fi
@@ -79,19 +79,19 @@ function make_package_list() {
         return 0
     fi
     if [[ "${full_package_name}" =~ \.rpm$ ]]; then
-        rpm2cpio "${tools_pkgs}/${full_package_name}" | cpio -itv > "${list_file}" 2>/dev/null \
-            || fatal "make_package_list: Failed to list rpm archive '${full_package_name}'" 94
+        rpm2cpio "${tools_pkgs}/${full_package_name}" | cpio -itv >"${list_file}" 2>/dev/null ||
+            fatal "make_package_list: Failed to list rpm archive '${full_package_name}'" 94
     elif [[ "${full_package_name}" =~ \.tar\.gz$ ]]; then
-        tar tzvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
-            || fatal "make_package_list: Failed to list tar.gz archive '${full_package_name}'" 95
+        tar tzvf "${tools_pkgs}/${full_package_name}" >"${list_file}" ||
+            fatal "make_package_list: Failed to list tar.gz archive '${full_package_name}'" 95
     elif [[ "${full_package_name}" =~ \.xz$ ]]; then
         if [[ "${full_package_name}" =~ \.tar\.xz$ ]] || file "${tools_pkgs}/${full_package_name}" | grep -q "XZ compressed data.*tar archive"; then
-            tar tJvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
-                || fatal "make_package_list: Failed to list tar.xz archive '${full_package_name}'" 96
+            tar tJvf "${tools_pkgs}/${full_package_name}" >"${list_file}" ||
+                fatal "make_package_list: Failed to list tar.xz archive '${full_package_name}'" 96
         else
             # For non-tar xz files (less common case), assume zip archive behind the xz compression
-            tar --xz -tzvf "${tools_pkgs}/${full_package_name}" > "${list_file}" \
-                || fatal "make_package_list: Failed to list xz archive '${full_package_name}'" 97
+            tar --xz -tzvf "${tools_pkgs}/${full_package_name}" >"${list_file}" ||
+                fatal "make_package_list: Failed to list xz archive '${full_package_name}'" 97
         fi
     fi
     if [[ -n "${verbose}" ]]; then
@@ -115,7 +115,7 @@ function lookup_file_in_package_archive() {
         fatal "lookup_file_in_package_archive: No full package name found for '${package_name}'" 54
     fi
     local base_package_name
-    base_package_name="$(base_package_name "${full_package_name}" )"
+    base_package_name="$(base_package_name "${full_package_name}")"
     if [[ -z "${base_package_name}" ]]; then
         fatal "make_package_list: No base package name found for '${full_package_name}'" 95
     fi
@@ -132,17 +132,17 @@ function lookup_file_in_package_archive() {
     # Build the list file if it does not exist
     if [[ ! -f "${full_list_file}" || $(stat -c%s "${full_list_file}") -lt 500 ]]; then
         if [[ "$package_name" =~ \.rpm$ ]]; then
-            rpm2cpio "${package_name}" | cpio -itv > "${full_list_file}" 2>/dev/null \
-                || fatal "Failed to list rpm archive '${package_name}'" 50
+            rpm2cpio "${package_name}" | cpio -itv >"${full_list_file}" 2>/dev/null ||
+                fatal "Failed to list rpm archive '${package_name}'" 50
         elif [[ "$package_name" =~ \.tar\.gz$ ]]; then
-            tar tzvf "${package_name}" > "${full_list_file}" \
-                || fatal "Failed to list tar.gz archive '${package_name}'" 51
+            tar tzvf "${package_name}" >"${full_list_file}" ||
+                fatal "Failed to list tar.gz archive '${package_name}'" 51
         elif [[ "$package_name" =~ \.tar\.xz$ ]]; then
-            tar tJvf "${package_name}" > "${full_list_file}" \
-                || fatal "Failed to list xz archive '${package_name}'" 52
+            tar tJvf "${package_name}" >"${full_list_file}" ||
+                fatal "Failed to list xz archive '${package_name}'" 52
         elif [[ "$package_name" =~ \.xz$ ]]; then
-            tar --xz -tzvf "${package_name}" > "${full_list_file}" \
-                || fatal "Failed to list xz archive '${package_name}'" 52
+            tar --xz -tzvf "${package_name}" >"${full_list_file}" ||
+                fatal "Failed to list xz archive '${package_name}'" 52
         fi
     fi
 
@@ -158,7 +158,6 @@ function lookup_file_in_package_archive() {
     echo "$result"
 }
 
-
 function current_tool() {
     local services
     get_property services
@@ -172,19 +171,19 @@ function current_tool() {
     cwd=$(pwd -P)
 
     # Split the tools string into an array using comma as the delimiter
-    IFS=',' read -ra tool_array <<< "${tools}"
+    IFS=',' read -ra tool_array <<<"${tools}"
 
     local tool
     # Loop over each tool in the array
     for tool in "${tool_array[@]}"; do
-      # Trim any leading/trailing whitespace
-      tool=$(echo "${tool}" | xargs)
+        # Trim any leading/trailing whitespace
+        tool=$(echo "${tool}" | xargs)
 
-      # Check if the current working directory matches the tool
-      if [[ "$cwd" == */${tool}/* || "$cwd" == */${tool} ]]; then
-        break
-      fi
-      tool=""
+        # Check if the current working directory matches the tool
+        if [[ "$cwd" == */${tool}/* || "$cwd" == */${tool} ]]; then
+            break
+        fi
+        tool=""
     done
     echo "${tool}"
 }
@@ -219,7 +218,7 @@ function find_file_in_packages() {
                 local extracted
                 extracted=$(echo "$line" | sed -E 's/^.*\.\///')
                 echo "  ${extracted}"
-            done <<< "${grep_output}"
+            done <<<"${grep_output}"
         fi
     done
 }
@@ -271,7 +270,7 @@ function is_package_installed() {
                 warning "full_file missing: '${full_file}'"
             fi
         fi
-    done <<< "$files"
+    done <<<"$files"
 
     if [[ ${missing} -ne 1 ]]; then
         if [[ -n "${verbose}" ]]; then
@@ -331,7 +330,7 @@ function list_files_in_package() {
         fatal "list_files_in_package: No package found for '${package_name}'" 112
     fi
     local base_package_name
-    base_package_name="$(base_package_name "${full_package_name}" )"
+    base_package_name="$(base_package_name "${full_package_name}")"
     local list_file
     list_file="${HOME}/tools/pkgs/${base_package_name}.list"
 
@@ -380,7 +379,7 @@ function get_full_package_name() {
     local candidates
     candidates=$(find "${HOME}/tools/pkgs" -maxdepth 1 -type f -name "${base}" | grep -v "\.list")
     local candidate
-    candidate="$(printf "%s" "${candidates}"|tail -1)"
+    candidate="$(printf "%s" "${candidates}" | tail -1)"
     local count
     count=$(echo "${candidates}" | grep -c '^')
     if ! is_package_built "${full_package_name}" && [ "${count}" -gt 1 ]; then
@@ -448,7 +447,7 @@ search_full_package_name_in_folder() {
         # sort numerically so that the oldest is first and the most recent is last,
         # then extract the file path.
         mapfile -t matches < <(find "${folder}" -maxdepth 1 -type f -name "${build_pattern}" -printf "%T@ %p\n" | sort -n | awk '{print $2}')
-        if (( ${#matches[@]} == 0 )); then
+        if ((${#matches[@]} == 0)); then
             fatal "No built package found matching pattern '${build_pattern}' in '${folder}'" 100
         fi
 
@@ -482,7 +481,7 @@ function remove_package() {
             local file_timestamp=0
             for file in "${f1_matches[@]}"; do
                 file_timestamp=$(stat -c %Y "$file")
-                if (( file_timestamp > timestamp )); then
+                if ((file_timestamp > timestamp)); then
                     timestamp=$file_timestamp
                     most_recent="$file"
                 fi
@@ -528,7 +527,7 @@ function remove_package() {
             local file_timestamp=0
             for file in "${f2_matches[@]}"; do
                 file_timestamp=$(stat -c %Y "$file")
-                if (( file_timestamp > timestamp )); then
+                if ((file_timestamp > timestamp)); then
                     timestamp=$file_timestamp
                     most_recent="$file"
                 fi
@@ -581,11 +580,11 @@ function remove_package() {
             fi
         else
             # Once we start processing './' lines, stop when a different line is reached
-            if (( processing_started )); then
+            if ((processing_started)); then
                 break
             fi
         fi
-    done < "${f1}"
+    done <"${f1}"
 
     # Create ${tool_pkgs}/removed folder (exit fatal on failure)
     local removed_dir="${tool_pkgs}/removed"
@@ -633,7 +632,7 @@ function set_pkgs_log() {
     # duplicates the current stderr (file descriptor 2) to file descriptor 3, saving the original stderr so it is used in the displayLog function).
     exec 3>&2
     # redirects standard output (stdout, file descriptor 1) to the file specified by PATH_LOG. After this, anything written to stdout goes into that log file.
-    exec 1> "$PATH_LOG"
+    exec 1>"$PATH_LOG"
     # makes stderr (file descriptor 2) point to where stdout (file descriptor 1) currently goes—in this case, the log file.
     exec 2>&1
 
@@ -749,7 +748,7 @@ function install_packages_for_tool() {
             ((installed_count++))
             ok "Package '${line}' is already installed (base_package_name='${base_package_name}')"
         fi
-    done < "${deps_file}"
+    done <"${deps_file}"
 
     # If all packages are already installed, we're done
     if [[ ${#packages_to_install[@]} -eq 0 ]]; then
@@ -829,9 +828,9 @@ function install_package_from_name() {
     m_log="${tool}/logs/mirror_package.log"
     rm -f "${m_log}"
     if [[ "${force}" == "true" ]] || ! is_package_flagged_as "${pkg_base}" "installed" "true"; then
-        ( install_tool_package "${pkg_base}" ) 2>&1 | tee -a "${i_log}"
+        (install_tool_package "${pkg_base}") 2>&1 | tee -a "${i_log}"
         if is_package_flagged_as "${pkg_base}" "installed" && [[ -e "${i_log}" ]]; then
-            cat "${i_log}" > "${tool_pkgs}/${pkg_base}.installed"
+            cat "${i_log}" >"${tool_pkgs}/${pkg_base}.installed"
         else
             fatal "${sp}Unable to install '${full_package_name}'" 28
         fi
@@ -839,14 +838,14 @@ function install_package_from_name() {
     _do_mirror=0
     if is_package_built "${pkg_base}"; then
         warning "${sp}Built package '${full_package_name}', skip mirroring"
-        _do_mirror=1;
+        _do_mirror=1
     fi
     if do_mirror; then
-        if  [[ "${force}" == "true" ]] || ! is_package_flagged_as "${pkg_base}" "mirrored" "true"; then
-            ( mirror_tool_package "${full_package_name}" ) 2>&1 | tee -a "${m_log}"
+        if [[ "${force}" == "true" ]] || ! is_package_flagged_as "${pkg_base}" "mirrored" "true"; then
+            (mirror_tool_package "${full_package_name}") 2>&1 | tee -a "${m_log}"
             if is_package_flagged_as "${pkg_base}" "mirrored" && [[ -e "${m_log}" ]]; then
-                echo "${sp}-------------------">> "${tool_pkgs}/${pkg_base}.installed.mirrored"
-                cat "${m_log}" >> "${tool_pkgs}/${pkg_base}.installed.mirrored"
+                echo "${sp}-------------------" >>"${tool_pkgs}/${pkg_base}.installed.mirrored"
+                cat "${m_log}" >>"${tool_pkgs}/${pkg_base}.installed.mirrored"
             else
                 fatal "${sp}Unable to mirror '${full_package_name}'" 29
             fi
@@ -922,7 +921,7 @@ function fix_package_pkgconfig_paths() {
                 warning "Package lists .pc file but it doesn't exist at '${pc_file}'"
             fi
         fi
-    done <<< "${files}"
+    done <<<"${files}"
 
     if [[ ${pc_count} -gt 0 ]]; then
         ok "Processed ${pc_count} pkg-config files from package '${package_name}'"
@@ -966,7 +965,7 @@ function install_tool_package() {
     elif [[ "${full_package_name%.tar.xz}" != "${full_package_name}" ]]; then
         if ! tar xJvf "${tools_pkgs}/${full_package_name}"; then fatal "Unable to untar tar.xz '${full_package_name}'" 5; fi
     elif [[ "${full_package_name%.xz}" != "${full_package_name}" ]]; then
-        if ! xzcat "${tools_pkgs}/${full_package_name}" > "${full_package_name%.xz,,}"; then fatal "Unable to unxz '${full_package_name}'" 4; fi
+        if ! xzcat "${tools_pkgs}/${full_package_name}" >"${full_package_name%.xz,,}"; then fatal "Unable to unxz '${full_package_name}'" 4; fi
         chmod 755 "${full_package_name%.xz,,}"
     else
         fatal "${sp}unknown extension for archive '${full_package_name}'" 11
@@ -1002,9 +1001,9 @@ function is_package_flagged_as() {
     cd "${tool_pkgs}" || fatal "Unable to access tools_pkgs '${tool_pkgs}'" 181
     shopt -s nullglob
     # shellcheck disable=SC2206
-    local flags=( ${pattern} )
+    local flags=(${pattern})
     shopt -u nullglob
-    if (( ${#flags[@]} > 0 )); then
+    if ((${#flags[@]} > 0)); then
         if [[ -n "${verbose}" ]]; then
             info "${sp}A file matching '${pattern}' already exists in '${tool_pkgs}'"
             ok "${sp}'${pkg_base}' already '${flag_suffix}' in '${tool_pkgs}'"
@@ -1099,7 +1098,7 @@ mirror_system_executable() {
         # Construct the destination path by prefixing the current folder path.
         # For example, for /usr/bin/unzipsfx, it will be copied to ./usr/bin/unzipsfx
         task "Must copy '${src_file}' to mirror folder '$(pwd)'"
-        local dest_file="./${src_file#/}"  # removes leading /
+        local dest_file="./${src_file#/}" # removes leading /
         local dest_dir
         dest_dir=$(dirname "${dest_file}")
         mkdir -p "${dest_dir}" || fatal "${sp}Unable to create directory '${dest_dir}'" 31
@@ -1108,14 +1107,14 @@ mirror_system_executable() {
         # Since it comes from the system, import also its ldd dependencies
         if ! check_ldd "./${src_file#/}" "${dest_dir}"; then
             warning "${sp}mirror_system_executable ret=1 after ldd import of './${src_file#/}' to '${dest_dir}'"
-            ret=1;
+            ret=1
         fi
     else
         # info "No action: '${src_file}' either does not exist, is not a regular file, or is a symlink."
         # Nothing to copy from system /usr,
         # so check only dependencies of the installed library file
         # if there are any absolute path, exit fatal
-        if [[  -f "./${src_file#/}" && ! -L "./${src_file#/}" ]]; then
+        if [[ -f "./${src_file#/}" && ! -L "./${src_file#/}" ]]; then
             warning "${sp}mirror_system_executable ret=1 after ldd check of './${src_file#/}'"
             if ! check_ldd "./${src_file#/}"; then ret=1; fi
         fi
@@ -1211,9 +1210,9 @@ _is_regular_file() {
 
     # Test if the file exists, is a regular file, and is not a symlink
     if [[ -f "${file}" && ! -L "${file}" ]]; then
-        return 0  # True, it is a regular file and not a symlink
+        return 0 # True, it is a regular file and not a symlink
     else
-        return 1  # False, it's either not a file or is a symlink
+        return 1 # False, it's either not a file or is a symlink
     fi
 }
 
@@ -1221,14 +1220,23 @@ check_ldd() {
     local file="$1"
     local dest_dir="$2"
 
-    if [[ -z "${LD_LIBRARY_PATH}" ]]; then
+    # --- Initial check and setenv call ---
+    # We only try to set environment variables if:
+    # 1. LD_LIBRARY_PATH is currently empty.
+    # AND
+    # 2. The package being processed is NOT a 'glibc-' package.
+    if [[ -z "${LD_LIBRARY_PATH}" && ! "${pkg_name}" == "glibc-"* ]]; then
         SKIP_CC1_CHECK=1
         if ! setenv; then
             fatal "check_ldd: ${sp}Unable to set environment variables (SKIP_CC1_CHECK='${SKIP_CC1_CHECK}')" 123
         fi
         unset SKIP_CC1_CHECK
     fi
-    if [[ -z "${LD_LIBRARY_PATH}" ]]; then
+
+    # --- Subsequent check and fatal error ---
+    # We only raise a fatal error if LD_LIBRARY_PATH is empty AND:
+    # 1. It was expected to be set (i.e., it's NOT a 'glibc-' package that we intentionally left alone).
+    if [[ -z "${LD_LIBRARY_PATH}" && ! "${pkg_name}" == "glibc-"* ]]; then
         fatal "check_ldd: ${sp}LD_LIBRARY_PATH is empty" 124
     fi
 
@@ -1241,10 +1249,10 @@ check_ldd() {
     # If the file extension is h, hpp, or similar, no need to run ldd
     local ext="${file##*.}"
     case "$ext" in
-        h|hpp|c|so|bz2|o|a|mo|gz|1.gz|LIB|pc)
-            # info "'$file' is a header file; skipping ldd check"
-            return 0
-            ;;
+    h | hpp | c | so | bz2 | o | a | mo | gz | 1.gz | LIB | pc)
+        # info "'$file' is a header file; skipping ldd check"
+        return 0
+        ;;
     esac
     local output ret
     # Run ldd and capture output and exit code.
@@ -1312,7 +1320,7 @@ check_ldd() {
             fi
             # if abs_path starts with ${tools}; then continue
             if [[ "${abs_path}" == "${tools}"* ]]; then
-                continue  # Skip if abs_path starts with ${tools}
+                continue # Skip if abs_path starts with ${tools}
             fi
             error "${sp}Absolute system path '${abs_path}' detected (tools='${tools}') in ldd output: '$line' for file '${file}'"
             if [[ -n "${dest_dir}" ]]; then
@@ -1325,9 +1333,9 @@ check_ldd() {
                 ret=1
             fi
         fi
-    done <<< "${output}"
+    done <<<"${output}"
     if [[ ! "${ret}" == "0" ]]; then
-        env|grep LD
+        env | grep LD
         echo "--------------"
         ldd "$file"
     fi
@@ -1337,10 +1345,10 @@ check_ldd() {
 #######################################################################
 # Fixes paths in pkg-config (.pc) files to reference the correct sysroot
 #
-# When installing packages into a tool-specific root directory, pkg-config 
+# When installing packages into a tool-specific root directory, pkg-config
 # files contain absolute paths pointing to system locations (/usr/lib, etc.).
 # These need to be modified to point to the tool's root directory instead,
-# so that when compiling against these libraries, the tool's isolated 
+# so that when compiling against these libraries, the tool's isolated
 # environment is used rather than the host system.
 #
 # The function:
@@ -1458,7 +1466,7 @@ function fix_pkgconfig_pc() {
     {
         print $0
     }
-    ' "${pkg_file}" > "${tmp_file}"
+    ' "${pkg_file}" >"${tmp_file}"
 
     # Check if the AWK command was successful
     # shellcheck disable=SC2181
@@ -1484,11 +1492,11 @@ function fix_pkgconfig_pc() {
 #######################################################################
 # Lists packages according to the specified tool name
 #
-# When no tool name is provided, it uses the current tool or lists 
+# When no tool name is provided, it uses the current tool or lists
 # global packages from ${HOME}/tools/pkgs if no current tool is detected.
 #
 # When a tool name is provided, it lists installed or removed packages
-# for that specific tool, depending on the packages_installed or 
+# for that specific tool, depending on the packages_installed or
 # packages_removed environment variables.
 #
 # Output format:
@@ -1535,10 +1543,10 @@ function list_packages() {
     local services
     get_property services
     # Split the services string into an array using comma as delimiter
-    IFS=',' read -ra tool_array <<< "${services}"
+    IFS=',' read -ra tool_array <<<"${services}"
     local tool_valid=0
     for t in "${tool_array[@]}"; do
-        t=$(echo "${t}" | xargs)  # Trim whitespace
+        t=$(echo "${t}" | xargs) # Trim whitespace
         if [[ "${t}" == "${tool_name}" ]]; then
             tool_valid=1
             break
@@ -1762,7 +1770,7 @@ function reinstall_all_packages() {
                 exit_code=1
             fi
         fi
-    done <<< "${packages_output}"
+    done <<<"${packages_output}"
 
     # Summary
     if [[ ${reinstall_count} -gt 0 ]]; then
@@ -1803,9 +1811,9 @@ function reinstall_all_packages() {
 _is_valid_tool_name() {
     local services
     get_property services
-    IFS=',' read -ra tool_array <<< "${services}"
+    IFS=',' read -ra tool_array <<<"${services}"
     for t in "${tool_array[@]}"; do
-        t=$(echo "${t}" | xargs)  # Trim whitespace
+        t=$(echo "${t}" | xargs) # Trim whitespace
         if [[ "${t}" == "${tool_name}" ]]; then
             return 0
         fi
