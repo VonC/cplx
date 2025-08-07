@@ -26,3 +26,5 @@ last
 *.pdf
 /t/
 *.*.properties
+tmp.lg
+tmp.txt
