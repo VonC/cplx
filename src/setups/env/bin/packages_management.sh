@@ -873,11 +873,57 @@ function post_install_tool() {
             ln -nfs "ld.bfd" "${root}/usr/bin/ld"
         fi
     fi
-
+    if [[ "$package_name" =~ ^glibc-[0-9] ]]; then
+        post_install_glibc
+    fi
     # Process all pkg-config files in the package
     fix_package_pkgconfig_paths "${package_name}"
 
     return $?
+}
+
+function post_install_glibc() {
+    local package_name
+    package_name="glibc"
+    local files
+    files=$(list_files_in_package "${package_name}")
+    if [[ -z "${files}" ]]; then
+        fatal "post_install_glibc: No files found in package '${package_name}'" 114
+    fi
+
+    # Define the target directory for the symlinks: $root/lib64
+    local target_lib64_dir="${root}/lib64"
+
+    # Ensure the target directory exists
+    if ! mkdir -p "${target_lib64_dir}"; then
+        fatal "post_install_glibc: Failed to create directory '${target_lib64_dir}'" 115
+    fi
+
+    # Process each file, looking for usr/lib64 files
+    while IFS= read -r file; do
+        local pc_file="${root}/${file}"
+        if [[ -f "${pc_file}" ]]; then
+            # Use a regex to check if the file path is directly under 'usr/lib64/'
+            # and does NOT contain any further '/' characters after 'usr/lib64/' (e.g., no subdirectories like gconv/ or audit/).
+            if [[ "$file" =~ ^usr/lib64/[^/]+$ ]]; then
+                local filename
+                filename=$(basename "$file")
+                local symlink_path
+                symlink_path="${target_lib64_dir}/${filename}"
+                # The symlink target needs to be relative to the symlink's location ($root/lib64).
+                # To reach $root/usr/lib64/filename from $root/lib64/, use ../usr/lib64/filename.
+                local symlink_target="../usr/lib64/${filename}"
+
+                task "post_install_glibc: Must create symlink'${symlink_path}' -> '${symlink_target}'"
+
+                # Create the symbolic link. Use -f to force overwrite if a previous link/file exists.
+                if ! ln -sf "${symlink_target}" "${symlink_path}"; then
+                    warn "post_install_glibc: Failed to create symlink for '${symlink_path}' to '${symlink_target}'"
+                fi
+                ok "post_install_glibc: symlink created for '${symlink_path}' to '${symlink_target}'"
+            fi
+        fi
+    done <<<"${files}"
 }
 
 # Function to process all .pc files in a package
