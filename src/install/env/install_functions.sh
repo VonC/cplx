@@ -70,6 +70,9 @@ function setenv() {
     # --- Dynamic Linker (Important!) ---
     local dynamic_linker
     dynamic_linker=$(find "${root}/lib64" -name 'ld-linux-x86-64.so*' -print 2>/dev/null | head -n1)
+    if [[ -z "${dynamic_linker}" ]]; then
+        dynamic_linker=$(find "${root}/usr" -name 'ld-linux-x86-64.so*' -print 2>/dev/null | head -n1)
+    fi
     # shellcheck disable=SC2154
     if [[ -z "${SKIP_CC1_CHECK}" && -z "${dynamic_linker}" && "${tool_name}" != "glibc" ]]; then
         fatal "Unable to find dynamic linker in '${root}/lib64' (SKIP_CC1_CHECK not set)" 25
