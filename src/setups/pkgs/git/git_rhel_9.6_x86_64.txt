@@ -1,0 +1,11 @@
+bzip2-libs
+unzip
+make
+make-devel
+zlib
+gmp
+libzstd
+gcc
+cpp
+glibc
+autoconf271

@@ -111,6 +111,7 @@ augeas-libs-1.14.1-3.el9.x86_64.rpm
 authselect-1.2.6-3.el9.x86_64.rpm
 authselect-compat-1.2.6-3.el9.x86_64.rpm
 authselect-libs-1.2.6-3.el9.x86_64.rpm
+autoconf271-2.71-8.el9.noarch.rpm
 autofs-5.1.7-65.el9.x86_64.rpm
 avahi-0.8-23.el9.x86_64.rpm
 avahi-autoipd-0.8-23.el9.x86_64.rpm
