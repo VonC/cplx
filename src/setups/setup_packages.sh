@@ -446,7 +446,9 @@ scp_package() {
     local local_pkg="${SETUP_PKGS_DIR}/pkgs/${arch}/${pkg_name}"
 
     if [[ -z "${cplx_path}" ]]; then
-        fatal "cplx_path not found in file '${properties_file}'" 801
+        if ! get_property cplx_path; then
+            fatal "cplx_path not found in file '${properties_file}'" 101
+        fi
     fi
     # Test if pkg_name exists on the remote host at ${cplx_path}/tools/pkgs/
     remote_pkg="${cplx_path}/tools/pkgs/${pkg_name}"
