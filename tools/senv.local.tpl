@@ -26,11 +26,12 @@ rem set "CPLX_RESET_STEP=copy_the_sources"
 
 set "CPLX_SRC_EXT=tar.gz"
 set "CPLX_ARCH_EXT=el8.x86_64"
+set "CPLX_ARCH_EXT=el9.x86_64"
 set "CPLX_URL="
 
 rem set "CPLX_TOOL=python"
 if "%CPLX_TOOL%" == "python" (
-  set "CPLX_VERSION=3.13.1"
+  set "CPLX_VERSION=3.13.6"
   set "CPLX_URL=https://www.python.org/ftp/python/[version]/Python-[version].tgz"
   set "CPLX_CHECK_PREFIX=lib/libpython3.so"
   set "CPLX_CHECK_SRC=libpython3.so"
@@ -60,7 +61,7 @@ if "%CPLX_TOOL%" == "openssl111" (
 )
 
 if "%CPLX_TOOL%" == "git" (
-  set "CPLX_VERSION=2.48.1"
+  set "CPLX_VERSION=2.50.1"
   rem https://github.com/git/git/archive/refs/tags/v2.48.1.zip
   set "CPLX_URL=https://github.com/git/git/archive/refs/tags/v[version].zip"
   set "CPLX_CHECK_PREFIX=libexec/git-core/git-add"
