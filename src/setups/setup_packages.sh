@@ -25,9 +25,19 @@ main() {
         fatal "CPLX_TOOL not defined'" 12
     fi
     rm -f "${SETUP_PKGS_DIR}/pkgs.log"
-    download_packages_list "${architecture}"
-    sync_packages "${architecture}"
-    install_packages
+
+    # Check if a specific package name was provided
+    if [[ "$1" == "--package" && -n "$2" ]]; then
+        # Direct package sync requested
+        info "Direct package sync requested for package: '$2'"
+        sync_package "${architecture}" "$2"
+        install_package "$2"
+    else
+        # Regular flow
+        download_packages_list "${architecture}"
+        sync_packages "${architecture}"
+        install_packages
+    fi
 }
 
 download_packages_list() {
@@ -68,7 +78,7 @@ download_packages_list() {
 
     # Combine all URL results, remove duplicates, and sort alphabetically
     info "Combining results from all URLs, removing duplicates, and sorting"
-    true>"${packages_file}" # Empty the target file
+    true >"${packages_file}" # Empty the target file
 
     if [ -n "$(ls -A "${temp_dir}" 2>/dev/null)" ]; then
         # Use awk to process all files, keeping only the latest version of each package
@@ -454,7 +464,8 @@ scp_package() {
 
 }
 
-install_packages() {
+# Add a new helper function to handle common setup and teardown operations
+setup_remote_install() {
     if ! get_property cplx_path; then
         fatal "cplx_path not found in file '${properties_file}'" 101
     fi
@@ -465,17 +476,20 @@ install_packages() {
     else
         ok "Script 'packages_management.sh' copied successfully to ${SSH_CONFIG_ENTRY}:${remote_bin}"
     fi
-    local dep_list="${CPLX_TOOL}_${architecture}.txt"
-    task "Must copy '${dep_list}' script to ${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/"
-    if ! scp "${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}/${dep_list}" "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list"; then
-        fatal "Failed to copy '${dep_list}' to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/'" 902
-    else
-        ok "List '${dep_list}' copied successfully to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list'"
+
+    # Copy dependencies list for regular install_packages (not needed for single package install)
+    if [[ "$1" != "single_package" ]]; then
+        local dep_list="${CPLX_TOOL}_${architecture}.txt"
+        task "Must copy '${dep_list}' script to ${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/"
+        if ! scp "${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}/${dep_list}" "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list"; then
+            fatal "Failed to copy '${dep_list}' to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/'" 902
+        else
+            ok "List '${dep_list}' copied successfully to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list'"
+        fi
     fi
-    set -x
-    # shellcheck disable=SC2029
-    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools/${CPLX_TOOL} && chmod 755 ${cplx_path}/bin/packages_management.sh && bash -c \"source ${cplx_path}/.env; pkg_log=1; install_packages_for_tool \"${CPLX_TOOL}\"\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}\temp.pkgs.txt"
-    set +x
+}
+
+process_install_result() {
     # Get the last line from temp.txt as exit status
     lastLine=$(tail -n 1 "${SETUP_PKGS_DIR}/temp.pkgs.txt")
     info "vvvvvvvvvvvvvvvvvvvvvvvvvvv"
@@ -491,12 +505,46 @@ install_packages() {
             warning "Failed to access remote ('${SSH_CONFIG_ENTRY}') log file or to open 'pkgs.log' file at '${SETUP_PKGS_DIR}'"
         fi
     fi
+
     if [ "${lastLine}" != "0" ]; then
         tail -n 10 "${SETUP_PKGS_DIR}/temp.pkgs.txt"
-        fatal "Installation package '${pkg_name}' failed" 5
+        fatal "Installation package failed" 5
     fi
 
-    ok "Installation package '${pkg_name}' executed"
+    ok "Installation completed successfully"
+}
+
+install_package() {
+    local package_name="$1"
+    if [[ -z "${package_name}" ]]; then
+        fatal "install_package: package_name must be provided" 901
+    fi
+
+    # Setup remote environment
+    setup_remote_install "single_package"
+
+    # Execute SSH command for single package installation
+    set -x
+    # shellcheck disable=SC2029
+    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools/${CPLX_TOOL} && chmod 755 ${cplx_path}/bin/packages_management.sh && bash -c \"source ${cplx_path}/.env; pkg_log=1; install_package_from_name \\\"${package_name}\\\"\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}/temp.pkgs.txt"
+    set +x
+
+    # Process the installation result
+    process_install_result
+}
+
+install_packages() {
+    # Setup remote environment
+    setup_remote_install "full_install"
+
+    # Execute SSH command for full package installation
+    set -x
+    # shellcheck disable=SC2029
+    ssh "${SSH_CONFIG_ENTRY}" "cd ${cplx_path}/tools/${CPLX_TOOL} && chmod 755 ${cplx_path}/bin/packages_management.sh && bash -c \"source ${cplx_path}/.env; pkg_log=1; install_packages_for_tool \\\"${CPLX_TOOL}\\\"\"; exit_status=\$?; echo \${exit_status}" | tee "${SETUP_PKGS_DIR}/temp.pkgs.txt"
+    set +x
+
+    # Process the installation result
+    process_install_result
 }
 
 main "$@"

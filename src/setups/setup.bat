@@ -22,6 +22,18 @@ if "%~1"=="packages" (
 )
 
 if not "%~1"=="" (
+    REM If the first argument starts with 'p_', it is a package name to pass to setup_packages.sh
+    echo.%~1 | findstr /b "p_" >nul
+    if not errorlevel 1 (
+        set "pkg_param=%~1"
+        REM Extract everything after the first two characters (p_)
+        set "pkg_param=!pkg_param:~2!"
+        %_info% "Package parameter detected: '!pkg_param!'"
+        shift
+    )
+)
+
+if not "%~1"=="" (
     bash.exe -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; "%project_dir_unix%/src/utils/steps.sh" repeat_or_reset_step %~1"
     if errorlevel 1 (
         %_fatal% "Unable to repeat or reset step '%~1' (r_xxx means reset, xxx means repeat)" 119
@@ -31,7 +43,13 @@ if not "%~1"=="" (
 if exist "%setup_dir%\pkgs.log" ( del /q "%setup_dir%\pkgs.log" )
 if exist "%setup_dir%\setup.log" ( del /q "%setup_dir%\setup.log" )
 
-bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% %*"
+REM Call bash with appropriate parameters based on whether a package was specified
+if defined pkg_param (
+    bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% --package \"%pkg_param%\" %*"
+) else (
+    bash -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; $(cygpath -u '%setup_dir%')/%setup_prg% %*"
+)
+
 if errorlevel 1 (
     call:display_logs
     %_fatal% "Issue when calling '%setup_dir%\%setup_prg%'" 119
