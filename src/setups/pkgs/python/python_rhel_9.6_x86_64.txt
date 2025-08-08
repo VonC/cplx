@@ -28,6 +28,7 @@ ncurses
 ncurses-libs
 ncurses-devel
 gdbm-libs
+gdbm-devel
 libgpg-error
 libgpg-error-devel
 libgcrypt
@@ -50,6 +51,7 @@ libidn2
 libuuid
 libuuid-devel
 readline
+readline-devel
 # _mpdecimal
 # _gcc-c\+\+
 # _libstdc\+\+-devel
