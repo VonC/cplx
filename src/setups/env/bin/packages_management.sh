@@ -412,7 +412,7 @@ function is_package_built() {
     return 1
 }
 
-search_full_package_name_in_folder() {
+function search_full_package_name_in_folder() {
     local package_name="${1}"
     if [[ -z "${package_name}" ]]; then
         fatal "No package name provided" 102

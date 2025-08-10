@@ -8,4 +8,5 @@ libzstd
 gcc
 cpp
 glibc
+m4
 autoconf271
