@@ -124,23 +124,34 @@ uncompress_archive() {
 
     case "$archive" in
         *.zip)
-            echo "Unzipping zip '${archive}' to '${destination}'..."
+            task "Must unzip zip '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
             if ! unzip -q "$archive" -d "$destination"; then
                 rmdir "$destination" 2>/dev/null
                 fatal "Failed to unzip '${archive}'" 4
+            else
+                ok "Unzip successfully zip '${archive}' to '${destination}'"
             fi
             ;;
         *.tar.gz)
-            echo "Extracting tar.gz '${archive}' to '${destination}'..."
+            task "Must extract tar.gz '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
             if ! tar -xzf "$archive" -C "$destination" --strip-components=1; then
                 rmdir "$destination" 2>/dev/null
-                fatal "Failed to extract '${archive}'" 41
+                error "Failed to extract '${archive}' to destination '${destination}'"
+                task "Must Try unzip tar.gz '${archive}' to '${destination}'..."
+                mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 33
+                if ! unzip -q "$archive" -d "$destination"; then
+                    rmdir "$destination" 2>/dev/null
+                    fatal "Failed to unzip tar.gz '${archive}'" 43
+                ok "Unzip successfully tar.gz '${archive}' to '${destination}'"
+                fi
+            else
+                ok "Extract successfully tar.gz '${archive}' to '${destination}'"
             fi
             ;;
         *.tar.xz)
-            echo "Extracting tar.xz '${archive}' to '${destination}'..."
+            task "Extracting tar.xz '${archive}' to '${destination}'..."
             mkdir -p "$destination" || fatal "Failed to create directory '${destination}'" 3
             if ! tar -xJf "$archive" -C "$destination" --strip-components=1; then
                 rmdir "$destination" 2>/dev/null
