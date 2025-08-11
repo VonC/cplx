@@ -42,19 +42,25 @@ main() {
 
 download_packages_list() {
     if step_is_done "download_packages_list"; then
-        ok "download_packages_list is already done"
-        return 0
+        if [[ -n "${CPLX_FORCE_RELOAD_PACKAGES}" ]]; then
+            task "Force regeneration of package list (CPLX_FORCE_RELOAD_PACKAGES set)"
+            # Mark step as not done to force regeneration
+            step_undo "download_packages_list"
+        else
+            ok "download_packages_list is already done (CPLX_FORCE_RELOAD_PACKAGES not set)"
+            return 0
+        fi
     fi
     local arch="$1"
     local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
     local temp_dir="${SETUP_PKGS_DIR}/pkgs/temp_${arch}"
 
     if [[ -f "${packages_file}" ]]; then
-        if [[ -z "${CPLX_RELOAD_PACKAGES}" ]]; then
-            ok "File '${packages_file}' already downloaded (CPLX_RELOAD_PACKAGES not set)"
+        if [[ -z "${CPLX_RELOAD_PACKAGES}" && -z "${CPLX_FORCE_RELOAD_PACKAGES}" ]]; then
+            ok "File '${packages_file}' already downloaded (neither CPLX_RELOAD_PACKAGES nor CPLX_FORCE_RELOAD_PACKAGES set)"
             return 0
         fi
-        task "Must refresh/reload File '${packages_file}' (CPLX_RELOAD_PACKAGES env var set)"
+        task "Must refresh/reload File '${packages_file}' (CPLX_RELOAD_PACKAGES or CPLX_FORCE_RELOAD_PACKAGES env var set)"
     fi
 
     # Create temp directory for URL results
@@ -82,6 +88,7 @@ download_packages_list() {
 
     if [ -n "$(ls -A "${temp_dir}" 2>/dev/null)" ]; then
         # Use awk to process all files, keeping only the latest version of each package
+        # for both the specified architecture and noarch packages
         cat "${temp_dir}"/*.txt 2>/dev/null | awk -F'-[0-9]' '{
             if ($0 !~ /^\//) {  # Ignore entries starting with /
                 prefix = $1;     # Extract the common prefix (everything before -[0-9])
@@ -131,11 +138,11 @@ process_packages_url() {
     fi
 
     # Extract URLs from the table rows using grep
-    # Define an array of grep pipelines (as strings) to extract URLs
+    # Define an array of grep pipelines (as strings) to extract URLs for both arch and noarch
     grep_pipelines=(
-        'grep -oP '"'"'<tr class="(even|odd)">.*?<a href="\K[^"]+'"'"' | grep -v "^\.\./$" | grep "x86_64"' # https://vault.centos.org/8-stream/BaseOS/x86_64/os/Packages/
-        'grep -oP '"'"'<a href="\K[^"]*x86_64[^"]*'"'"' | grep -v "^../$"'                                  # https://dl.rockylinux.org/vault/centos/7.9.2009/updates/x86_64/Packages/
-        'grep -oP '"'"'<a href="\K[^"]+'"'"' | grep "x86_64"'                                               # https://mirror.chpc.utah.edu/pub/centos/7/os/x86_64/Packages/
+        'grep -oP '"'"'<tr class="(even|odd)">.*?<a href="\K[^"]+'"'"' | grep -v "^\.\./$" | grep -E "(x86_64|noarch)"'
+        'grep -oP '"'"'<a href="\K[^"]*(x86_64|noarch)[^"]*'"'"' | grep -v "^../$"'
+        'grep -oP '"'"'<a href="\K[^"]+'"'"' | grep -E "(x86_64|noarch)"'
     )
     # Print the size of the grep_pipelines array
     info "grep_pipelines array size: ${#grep_pipelines[@]}"
