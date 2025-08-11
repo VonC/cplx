@@ -21,18 +21,37 @@ if "%~1"=="packages" (
     shift
 )
 
-if not "%~1"=="" (
-    REM If the first argument starts with 'p_', it is a package name to pass to setup_packages.sh
-    echo.%~1 | findstr /b "p_" >nul
-    if not errorlevel 1 (
-        set "pkg_param=%~1"
-        REM Extract everything after the first two characters (p_)
-        set "pkg_param=!pkg_param:~2!"
-        %_info% "Package parameter detected: '!pkg_param!'"
-        shift
-    )
-)
+if not "%setup_prg%"=="setup_packages.sh" goto:_not_setup_packages
+if "%~1"=="" goto:_not_setup_packages
 
+REM If the first argument starts with 'p_', it is a package name to pass to setup_packages.sh
+echo.%~1 | findstr /b "p_" >nul
+if not errorlevel 1 (
+    set "pkg_param=%~1"
+    REM Extract everything after the first two characters (p_)
+    set "pkg_param=!pkg_param:~2!"
+    %_info% "Package parameter detected: '!pkg_param!'"
+    shift
+)
+if "%~1"=="" goto:_not_setup_packages
+set reset_package=
+if "%~1"=="reset" (
+    %_task% "Must reset sync package"
+    if not defined CPLX_TOOL ( fatal "CPLX_TOOL is not defined: Cannot reset last package setup list without a tool defined" 42 )
+    del /f "%setup_dir%\pkgs\%CPLX_TOOL%\last" 2>NUL
+    set reset_package=true
+    shift
+)
+if "%~1"=="" goto:_not_setup_packages
+if not defined reset_package ( "fatal: unknown set package param '%~1'. Only possible after the reset command: 'setup package reset xxx'" 43 )
+%_task% "Must reset last processed setup package to '%~1' in last file '%setup_dir%\pkgs\%CPLX_TOOL%\last'"
+echo %~1>"%setup_dir%\pkgs\%CPLX_TOOL%\last"
+if errorlevel 1 (
+    fatal "Unable to reset last processed setup package to '%~1' in last file '%setup_dir%\pkgs\%CPLX_TOOL%\last'" 44
+)
+%_ok% "Last processed setup package to '%~1' reset successfully in last file '%setup_dir%\pkgs\%CPLX_TOOL%\last'"
+
+:_not_setup_packages
 if not "%~1"=="" (
     bash.exe -c "steps_file="%project_dir_unix%/src/setups/steps.md"; export steps_file; "%project_dir_unix%/src/utils/steps.sh" repeat_or_reset_step %~1"
     if errorlevel 1 (
