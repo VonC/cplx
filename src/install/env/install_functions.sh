@@ -36,7 +36,7 @@ function setenv() {
     export AUTOHEADER="${root}/usr/bin/autoheader"
     export AUTOMAKE="${root}/usr/bin/automake"
     export AUTOM4TE="${root}/usr/bin/autom4te"
-    export PERLLIB="${PERLLIB}:${root}/usr/share/autoconf:${root}/usr/lib64/perl5/vendor_perl:${root}/usr/share/perl5/vendor_perl:${root}/usr/share/automake-1.13"
+    export PERLLIB="${PERLLIB}:${root}/usr/share/autoconf:${root}/usr/lib64/perl5/vendor_perl:${root}/usr/share/perl5:${root}/usr/share/perl5/vendor_perl:${root}/usr/share/automake-1.13"
     export AUTOM4TE_CFG="${root}/usr/share/autoconf/autom4te.cfg"
     export autom4te_perllibdir="${root}/usr/share/autoconf"
     export AC_MACRODIR="${root}/usr/share/autoconf"
