@@ -1,7 +1,6 @@
 bzip2-libs
 unzip
 make
-make-devel
 zlib
 gmp
 libzstd
@@ -10,3 +9,5 @@ cpp
 glibc
 m4
 autoconf271
+perl-File-Compare
+

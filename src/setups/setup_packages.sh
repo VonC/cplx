@@ -222,6 +222,7 @@ sync_packages() {
             info "Skipping commented line: '${trimmed_line}'"
             continue
         fi
+        if [[ "${line}" == "" ]]; then continue; fi
         # If we have not yet reached the last processed value, check for it.
         if [ "$process" -eq 0 ]; then
             if [[ "$line" == "$last_value" || "$line" == "${CPLX_SP_REPEAT}" ]]; then
