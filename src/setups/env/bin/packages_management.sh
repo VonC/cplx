@@ -873,8 +873,15 @@ function post_install_tool() {
             ln -nfs "ld.bfd" "${root}/usr/bin/ld"
         fi
     fi
-    if [[ "$package_name" =~ ^glibc-[0-9] ]]; then
-        post_install_glibc
+    if declare -f "post_install_${package_name}" &>/dev/null; then
+        task "post_install_tool: Must call 'post_install_${package_name}'"
+        if "post_install_${package_name}"; then
+            ok "post_install_tool: 'post_install_${package_name}' called successfully"
+        else
+            fatal "post_install_tool: 'post_install_${package_name}' call failed" 133
+        fi
+    else
+        info "post_install_tool: No post_install_${package_name} defined"
     fi
     # Process all pkg-config files in the package
     fix_package_pkgconfig_paths "${package_name}"
@@ -924,6 +931,41 @@ function post_install_glibc() {
             fi
         fi
     done <<<"${files}"
+}
+
+function post_install_autoconf271() {
+    if [[ ! -e "${root}/opt/rh/autoconf271/bin/autoconf" ]]; then
+        fatal "post_install_autoconf271: Autoconf271 not installed: '${root}/opt/rh/autoconf271/bin/autoconf' is missing" 151
+    fi
+    if [[ ! -e "${root}/usr/bin/autoconf" ]]; then
+        task "post_install_autoconf271: Must sync (cp) opt/rh/autoconf271 content to '${root}/usr'"
+        if ! cp -a "${root}/opt/rh/autoconf271/*" "${root}/usr"; then
+            fatal "post_install_autoconf271: Unable to sync (cp) opt/rh/autoconf271 content to '${root}/usr'" 152
+        fi
+        ok "post_install_autoconf271: opt/rh/autoconf271 content successfully synced (cp'd) content to '${root}/usr'"
+    else
+        ok "post_install_autoconf271: opt/rh/autoconf271 content already synced (cp'd) content to '${root}/usr'"
+    fi
+    nb_old_path=$(find "${root}/usr" -name "auto*" -print0 | xargs -0 grep /opt/rh/autoconf271 2>/dev/null | wc -l)
+    if [[ ${nb_old_path} == 0 ]]; then
+        ok "post_install_autoconf271: All /opt/rh/autoconf271 paths already changed to '${root}/usr'"
+    else
+        files=$(find "${root}/usr" -name "auto*" -print0 | xargs -0 grep /opt/rh/autoconf271 2>/dev/null | awk -F : '{print $1;}'| sort -n | uniq)
+        update_path_ko=0
+        update_path_ok=0
+        while IFS= read -r file; do
+            if ! sed -i "s,/opt/rh/autoconf271,${root}/usr,g" "${file}"; then
+                error "post_install_autoconf271: issue when updating path /opt/rh/autoconf271 for file '${file}'"
+                update_path_ko=${update_path_ko+1}
+            fi
+            update_path_ok=${update_path_ok+1}
+        done <<<"${files}"
+        if [[ ${update_path_ko} != 0 ]]; then
+            fatal "post_install_autoconf271: issue for '${update_path_ko}' file(s) when updating path /opt/rh/autoconf271" 153
+        fi
+        ok "post_install_autoconf271: all '${update_path_ok}' file(s) successfully updated from path /opt/rh/autoconf271 to path '${root}/usr'"
+    fi
+    return 0
 }
 
 # Function to process all .pc files in a package
