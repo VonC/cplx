@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function git_setenv() {
+    # shellcheck disable=SC2154
+    export M4="${root}/usr/bin/m4"
+    info "M4 is set '${M4}' for autom4te to use it"
+}
+
 function configure() {
     task "config.log not present: reconfigure"
 
@@ -13,7 +19,7 @@ function configure() {
 
     # shellcheck disable=SC2154
     LDFLAGS="${LDFLAGS} -L${root}/usr/lib/gcc/x86_64-redhat-linux/4.8.5"
-    
+
     # Build the configure command as an array
     local configure_cmd=( 
         "${tool_src}/configure" \

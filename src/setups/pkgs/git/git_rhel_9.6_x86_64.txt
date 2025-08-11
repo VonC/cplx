@@ -10,4 +10,5 @@ glibc
 m4
 autoconf271
 perl-File-Compare
+perl-File-Copy
 
