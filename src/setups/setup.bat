@@ -6,9 +6,9 @@ for %%i in ("%~dp0") do SET "setup_dir=%%~fi"
 set "setup_dir=%setup_dir:~0,-1%"
 call <NUL "%setup_dir%\..\..\senv.bat"
 
-%_info% "----------------------------------------"
+%_pre%  "----------------------------------------"
+%_post% "----------------------------------------"
 %_info% "Setup '%project_dir_name%'"
-%_info% "----------------------------------------"
 
 %_task% "Must setup '%project_dir_name%' with params '%*'"
 
