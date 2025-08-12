@@ -6,12 +6,13 @@ gmp
 libzstd
 libmpc
 libgcc
+glibc
 glibc-devel
 glibc-headers
+kernel-headers
 binutils
 gcc
 cpp
-glibc
 m4
 autoconf271
 perl-File-Compare

@@ -1915,7 +1915,7 @@ kernel-debug-uki-virt-5.14.0-603.el9.x86_64.rpm
 kernel-devel-5.14.0-603.el9.x86_64.rpm
 kernel-devel-matched-5.14.0-603.el9.x86_64.rpm
 kernel-doc-5.14.0-603.el9.noarch.rpm
-kernel-headers-5.14.0-603.el9.x86_64.rpm
+kernel-headers-5.14.0-601.el9.x86_64.rpm
 kernel-modules-5.14.0-603.el9.x86_64.rpm
 kernel-modules-core-5.14.0-603.el9.x86_64.rpm
 kernel-modules-extra-5.14.0-603.el9.x86_64.rpm
