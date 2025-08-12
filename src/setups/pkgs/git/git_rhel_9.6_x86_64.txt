@@ -4,6 +4,11 @@ make
 zlib
 gmp
 libzstd
+libmpc
+libgcc
+glibc-devel
+glibc-headers
+binutils
 gcc
 cpp
 glibc
@@ -11,4 +16,3 @@ m4
 autoconf271
 perl-File-Compare
 perl-File-Copy
-
