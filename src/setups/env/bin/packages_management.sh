@@ -939,6 +939,18 @@ function post_install_glibc() {
     done <<<"${files}"
 }
 
+function post_install_asciidoc() {
+    if grep "CONF_DIR = '/etc" "${root}/usr/bin/asciidoc"; then
+        task "post_install_asciidoc: Must update asciidoc CONF_DIR to '${root}/etc'"
+        if ! sed -i "s,CONF_DIR = '/etc,CONF_DIR = '${root}/etc,g" "${root}/usr/bin/asciidoc"; then
+            fatal "post_install_asciidoc: Unable to update asciidoc CONF_DIR to '${root}/etc'" 155
+        fi
+        ok "post_install_asciidoc: Successfully updated asciidoc CONF_DIR to '${root}/etc'"
+    else
+        ok "post_install_asciidoc: asciidoc CONF_DIR already updated to to '${root}/etc'"
+    fi
+}
+
 function post_install_autoconf271() {
     if [[ ! -e "${root}/opt/rh/autoconf271/bin/autoconf" ]]; then
         fatal "post_install_autoconf271: Autoconf271 not installed: '${root}/opt/rh/autoconf271/bin/autoconf' is missing" 151
