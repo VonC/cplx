@@ -960,10 +960,10 @@ glib2-tests-2.68.4-16.el9.x86_64.rpm
 glibc-2.34-221.el9.x86_64.rpm
 glibc-all-langpacks-2.34-221.el9.x86_64.rpm
 glibc-common-2.34-221.el9.x86_64.rpm
-glibc-devel-2.34-221.el9.x86_64.rpm
+glibc-devel-2.34-217.el9.x86_64.rpm
 glibc-doc-2.34-221.el9.noarch.rpm
 glibc-gconv-extra-2.34-221.el9.x86_64.rpm
-glibc-headers-2.34-221.el9.x86_64.rpm
+glibc-headers-2.34-217.el9.x86_64.rpm
 glibc-langpack-aa-2.34-221.el9.x86_64.rpm
 glibc-langpack-af-2.34-221.el9.x86_64.rpm
 glibc-langpack-agr-2.34-221.el9.x86_64.rpm

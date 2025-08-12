@@ -868,11 +868,6 @@ function install_package_from_name() {
 # Update post_install_tool to use the new function
 function post_install_tool() {
     local package_name="$1"
-    if [[ "$package_name" =~ ^binutils-[0-9] ]]; then
-        if [[ ! -e "${root}/usr/bin/ld" ]]; then
-            ln -nfs "ld.bfd" "${root}/usr/bin/ld"
-        fi
-    fi
     if declare -f "post_install_${package_name}" &>/dev/null; then
         task "post_install_tool: Must call 'post_install_${package_name}'"
         if "post_install_${package_name}"; then
@@ -887,6 +882,17 @@ function post_install_tool() {
     fix_package_pkgconfig_paths "${package_name}"
 
     return $?
+}
+
+function post_install_binutils() {
+    if [[ ! -e "${root}/usr/bin/ld" ]]; then
+        task "post_install_binutils: must link ld.bfd to ld in '${root}/usr/bin'"
+        if ! ln -nfs "ld.bfd" "${root}/usr/bin/ld"; then
+            fatal "post_install_binutils: Failed to link ld.bfd to ld in '${root}/usr/bin'" 156
+        fi
+        ok "post_install_binutils: ld.bfd successfully linked to ld in '${root}/usr/bin'"
+    fi
+    ok "post_install_binutils: ld.bfd already linked to ld in '${root}/usr/bin'"
 }
 
 function post_install_glibc() {
