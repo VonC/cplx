@@ -951,6 +951,43 @@ function post_install_asciidoc() {
     fi
 }
 
+function post_install_docbook-style-xsl() {
+    # folder=$(ls -1drt "${root}/usr/share/sgml/docbook/xsl-stylesheets-"*|tail -1)
+    folder=$(find "${root}/usr/share/sgml/docbook" -maxdepth 1 -type d -name "xsl-stylesheets-*" -printf '%T@ %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)
+    if [[ -z "${folder}" ]]; then
+        fatal "post_install_docbook-style-xsl: there should be a xsl-stylesheets-* folder in '${root}/usr/share/sgml/docbook'" 156
+    fi
+    folder=$(basename "${folder}")
+    task "Must create/update a 'current' symlink in '${root}/usr/share/sgml/docbook' for folder '${folder}'"
+    if ! ln -nfs "${folder}" "${root}/usr/share/sgml/docbook/current"; then
+        fatal "post_install_docbook-style-xsl: Unable to create/update a 'current' symlink in '${root}/usr/share/sgml/docbook' for folder '${folder}'" 157
+    fi
+    ok "post_install_docbook-style-xsl: 'current' symlink successfully created/updated in '${root}/usr/share/sgml/docbook' for folder '${folder}'"
+
+    nb_imports=$(grep -nRHE "import.*http://" "${root}"/** 2>/dev/null | grep -c docbook)
+    if [[ ${nb_imports} == 0 ]]; then
+        ok "post_install_docbook-style-xsl: All Documentation imports paths already changed to '${root}/usr/share/sgml/docbook/current/'"
+    else
+        task "post_install_docbook-style-xsl: Must update '${nb_imports}' paths in '${root}'"
+        files=$(grep -nRHE "import.*http://" "${root}/"/** 2>/dev/null | grep docbook | awk -F : '{print $1;}' | sort -n | uniq)
+        update_import_ko=0
+        update_import_ok=0
+        while IFS= read -r file; do
+            if ! sed -i "s,import\(.*\)http.*current/,import\1${root}/usr/share/sgml/docbook/current/,g" "${file}"; then
+                error "post_install_docbook-style-xsl: issue when updating import path to '${root}/usr/share/sgml/docbook/current/' for file '${file}'"
+                ((update_import_ko++))
+            else
+                ((update_import_ok++))
+            fi
+        done <<<"${files}"
+        if [[ ${update_import_ko} != 0 ]]; then
+            fatal "post_install_docbook-style-xsl: issue for '${update_import_ko}' file(s) when updating import path to '${root}/usr/share/sgml/docbook/current/'" 153
+        fi
+        ok "post_install_docbook-style-xsl: all '${update_import_ok}' file(s) successfully updated import path to '${root}/usr/share/sgml/docbook/current/'"
+    fi
+
+}
+
 function post_install_autoconf271() {
     if [[ ! -e "${root}/opt/rh/autoconf271/bin/autoconf" ]]; then
         fatal "post_install_autoconf271: Autoconf271 not installed: '${root}/opt/rh/autoconf271/bin/autoconf' is missing" 151
@@ -974,15 +1011,17 @@ function post_install_autoconf271() {
         while IFS= read -r file; do
             if ! sed -i "s,/opt/rh/autoconf271,${root}/usr,g" "${file}"; then
                 error "post_install_autoconf271: issue when updating path /opt/rh/autoconf271 for file '${file}'"
-                update_path_ko=${update_path_ko+1}
+                ((update_path_ko++))
+            else
+                ((update_path_ok++))
             fi
-            update_path_ok=${update_path_ok+1}
         done <<<"${files}"
         if [[ ${update_path_ko} != 0 ]]; then
             fatal "post_install_autoconf271: issue for '${update_path_ko}' file(s) when updating path /opt/rh/autoconf271" 153
         fi
         ok "post_install_autoconf271: all '${update_path_ok}' file(s) successfully updated from path /opt/rh/autoconf271 to path '${root}/usr'"
     fi
+    sed -i "s,http://www.oasis-open.org/docbook/xml/4.\(.*\)/docbookx.dtd,${root}/usr/share/sgml/docbook/xml-dtd-4.\1/docbookx.dtd,g" "${root}/etc/asciidoc/docbook45.conf"
     return 0
 }
 
