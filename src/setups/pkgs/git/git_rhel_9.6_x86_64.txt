@@ -31,3 +31,7 @@ autoconf271
 perl-File-Compare
 perl-File-Copy
 asciidoc
+docbook-style-xsl
+docbook-dtds
+xmlto
+libxslt
