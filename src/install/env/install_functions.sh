@@ -162,11 +162,11 @@ function install() {
     local file_check_src
 
     if [[ -z "${CPLX_CHECK_PREFIX}" ]]; then
-        fatal "No CPLX_CHECK_PREFIX defined (element in installation directory), unable to install '${tool_name}'" 18
+        fatal "install: No CPLX_CHECK_PREFIX defined (element in installation directory), unable to install '${tool_name}'" 18
     fi
 
     if [[ -z "${CPLX_CHECK_SRC}" ]]; then
-        fatal "No CPLX_CHECK_SRC defined (element in source directory), unable to install '${tool_name}'" 18
+        fatal "install: No CPLX_CHECK_SRC defined (element in source directory), unable to install '${tool_name}'" 18
     fi
 
     file_check_prefix="${CPLX_CHECK_PREFIX}"
@@ -175,24 +175,25 @@ function install() {
         file_check_src=$(readlink -f "${tool_src}/../build/${CPLX_CHECK_SRC}")
     fi
     if [[ ! -e "${file_check_src}" ]]; then
-        fatal "No '${file_check_src}'" 193
+        fatal "install: No '${file_check_src}'" 193
     fi
     if [[ -e "${tool_prefix}/${file_check_prefix}" ]]; then
         if [[ "${tool_prefix}/${file_check_prefix}" -nt "${file_check_src}" ]]; then
-            ok "No need to install '${tool_name}' in '${tool_prefix}': '${file_check_prefix}' newer than '${file_check_src}'"
+            ok "install: No need to install '${tool_name}' in '${tool_prefix}': '${file_check_prefix}' newer than '${file_check_src}'"
             return 0
         else
-            info "'${file_check_prefix}' is older than '${file_check_src}': install '${tool_name}' in '${tool_prefix}'"
+            info "install: '${file_check_prefix}' is older than '${file_check_src}': install '${tool_name}' in '${tool_prefix}'"
         fi
     else
-        info "No '${file_check_prefix}' in '${tool_prefix}': install '${tool_name}' in '${tool_prefix}'"
+        info "install: No '${file_check_prefix}' in '${tool_prefix}': install '${tool_name}' in '${tool_prefix}'"
     fi
-    task "Must cleanup '${tool_prefix}' first:"
+    task "install: Must cleanup '${tool_prefix}' first:"
     # fatal "Stop before cleanup and install" 125
     rm -Rf "${tool_prefix:?}/*" || fatal "Unable to remove '${tool_prefix} content'" 18
     task "Must install '${tool_name}' in '${tool_prefix}'"
-    make install || fatal "Unable to make install in '${tool_prefix}'" 19
-    ok "make install is now done in '${tool_prefix}'"
+    cd "${tool_src}" || fatal "install: Unable to make access src '${tool_src}' for '${tool_prefix}'" 20
+    make install || fatal "install: Unable to make install in '${tool_prefix}'" 19
+    ok "install: make install is now done in '${tool_prefix}'"
 }
 
 function package() {
