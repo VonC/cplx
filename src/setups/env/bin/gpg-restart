@@ -1,6 +1,0 @@
-#!/bin/bash
-kill $(pgrep gpg-agent)
-# shellcheck disable=SC1090
-eval "$(gpg-agent --daemon --use-standard-socket --write-env-file ~/certs/.gpg-agent-info)" && source ~/certs/.gpg-agent-info
-gpg-connect-agent reloadagent /bye
-chmod 700 ~/certs

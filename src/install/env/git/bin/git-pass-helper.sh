@@ -1,306 +1,233 @@
 #!/bin/bash
-
-# pass-git-helper.sh for multi-user SSH service account
-
-VERSION="2.0"
-GPG_COMMAND="gpg2"
-PASSWORD_STORE_BASE="$HOME/.password-store"
+VERSION="2.3" # Updated version
 
 # Function to display version information
 display_version() {
   echo "git-pass-helper version $VERSION"
-  exit 0
 }
 
-# Function to exit with an error message
-fatal_error() {
-  echo "Error: $1" >&2
-  exit 1
-}
+# Find the script's own directory
+DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
-# Function to check if a GPG key with the given UID exists
-check_gpg_key() {
-  local uid="$1"
-  if "$GPG_COMMAND" --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --list-keys --with-colons | grep "^uid.*$uid" > /dev/null; then
-    return 0 # Key exists
-  else
-    return 1 # Key does not exist
-  fi
-}
+# --------------------------- Usage Function ---------------------------------
+# Displays help information for the script.
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") <command>
 
-# Function to generate a GPG key
-generate_gpg_key() {
-  local uid="$1"
-  local real_name
-  local passphrase
+A git-credential helper and GPG key manager for secure, automated credential storage.
 
-  echo "Generating2 OpenPGP key for user: $uid"
+Commands:
+  store                   Reads credentials (e.g., "host=...") from stdin, ensures a
+                          GPG key exists for the current user, and stores the
+                          credentials in an encrypted file.
 
-  # Automatically use uid as real_name
-  local real_name="$uid"
+  get                     Reads key-value pairs (e.g. "host=...") from stdin
+                          and retrieves/decrypts the matching credentials.
 
-  # Only prompt for passphrase, redirecting input from /dev/tty
-  while true; do
-    read -r -s -p "Enter a passphrase for your key (non-empty): " passphrase < /dev/tty
-    echo # To move the cursor to the next line after the hidden input
-    if [[ -n "$passphrase" ]]; then
-      break
-    else
-      echo "Passphrase cannot be empty."
-    fi
-  done
+  erase                   Reads key-value pairs (e.g. "host=...") from stdin
+                          and deletes the matching encrypted credentials.
 
-  # Write the key generation parameters to the temporary file
-  cat <<EOF > k.cmd
-%echo Generating OpenPGP key for ${uid}
-Key-Type: RSA
-Key-Length: 4096
-Expire-Date: 0
-Name-Real: $real_name
-Name-Email: ${uid}@dummy.local
-Passphrase: $passphrase
-%pubring ${HOME}/certs/$uid.pub
-%secring ${HOME}/certs/$uid.sec
-%commit
+  list                    Lists all currently stored encrypted credential files.
+
+  init-gpg                Initializes and verifies the GPG environment, sanitizes
+                          the configuration, and lists existing keys.
+
+  help, -h, --help        Displays this help message.
+
+  version, -v, --version  Display the git-pass-helper version.
+
+Environment Variables:
+  GPG_KEY_PASSPHRASE    If set, this passphrase is used to automatically generate
+                        a new GPG key if one is not found. If not set, the
+                        script will prompt interactively.
+
+  GIT_LOGIN, GPG_UID,   Used in order of precedence to determine the user ID for
+  GIT_AUTHOR_EMAIL, USER  key management and credential storage/retrieval.
+
 EOF
-# Name-Email: ${uid}@dummy.local  # Optional, but GPG might complain without it
-# Removing email entry to ensure simple UID
-  gpg_output=$("$GPG_COMMAND" --batch --gen-key k.cmd 2>&1)
-
-  if check_gpg_key "$uid"; then
-    echo "$uid OpenPGP key generation done."
-  else
-    echo "GPG key generation failed for $uid. Output from gpg:"
-    echo "$gpg_output"
-    fatal_error "Failed to generate GPG key for $uid."
-  fi
-
-  fatal_error "stop for now" 22
 }
 
-# Function to check if the pass store exists
-check_pass_store() {
-  local user_store_dir="$PASSWORD_STORE_BASE/$1"
-  if [[ -f "$user_store_dir/.gpg-id" ]]; then
-    return 0 # Pass store exists
-  else
-    return 1 # Pass store does not exist
-  fi
+# --------------------------- Fatal Error Function ---------------------------------
+# Displays a fatal_error error and exits.
+fatal_error() {
+  local exit_status=1
+  [[ "${2:-}" != "" ]] && exit_status="$2"
+  echo "FATAL ERROR: $1" >&2
+  exit "${exit_status}"
 }
 
-# Function to initialize the pass store
-init_pass_store() {
+# ------------------------ .env File Lookup --------------------------
+# Search for .env in parent directories up to 4 levels
+ENV_PATH=""
+CURRENT_DIR="${DIR}"
+MAX_LEVELS=4
+for ((i = 0; i <= MAX_LEVELS; i++)); do
+  if [[ -f "${CURRENT_DIR}/.env" ]]; then
+    ENV_PATH="${CURRENT_DIR}"
+    break
+  fi
+  [[ "${CURRENT_DIR}" == "/" ]] && break
+  CURRENT_DIR="$(dirname "${CURRENT_DIR}")"
+done
+[[ -z "${ENV_PATH}" ]] && fatal_error "No .env file found in parent directories (up to $MAX_LEVELS levels)" 2
+
+dot_env="${ENV_PATH}/.env"
+if [[ -e "${ENV_PATH}/.env_" ]]; then dot_env="${ENV_PATH}/.env_"; fi
+
+# shellcheck disable=SC1090
+source "${dot_env}" || fatal_error "Error loading .env file: '${dot_env}'" 3
+
+# ------------------------- GPG Initialization ---------------------------
+# Centralized GnuPG home (defaults to your tools/certs)
+export GNUPGHOME="${GNUPGHOME:-/home/upipdfs01/tools/certs}"
+mkdir -p "$GNUPGHOME"
+chmod 700 "$GNUPGHOME"
+
+# Pick gpg command (prefer gpg2 if present)
+GPG_COMMAND="${GPG_COMMAND:-$(command -v gpg2 || command -v gpg)}"
+
+# Sanitize gpg.conf from legacy options that cause warnings
+if [[ -f "$GNUPGHOME/gpg.conf" ]]; then
+  sed -i.bak -E '/^[[:space:]]*(secret-keyring|keyring)[[:space:]]/d' "$GNUPGHOME/gpg.conf" || true
+fi
+
+# Ensure gpg-agent allows passphrases from scripts (harmless if already the default)
+printf '%s\n' 'allow-loopback-pinentry' >>"$GNUPGHOME/gpg-agent.conf" 2>/dev/null || true
+gpgconf --reload gpg-agent >/dev/null 2>&1 || true
+
+if [[ -z "${gitshellenv}" ]]; then gitshellenv=$-; fi
+
+# ------------------------- GPG Helper Functions -----------------------------
+# Ensures a key for a given User ID exists, creating it if it doesn't.
+gpg_ensure_key() {
   local uid="$1"
-  local user_store_dir="$PASSWORD_STORE_BASE/$uid"
-
-  mkdir -p "$user_store_dir"
-  if [[ -f "$user_store_dir/.gpg-id" ]]; then
-    echo "Pass password store already initialized for user: $uid"
-    return 0
-  else
-    echo "$uid" > "$user_store_dir/.gpg-id"
-  fi
-
-  if check_pass_store "$uid"; then
-    echo "Pass password store initialized for user: $uid"
-  else
-    fatal_error "Failed to initialize password store for $uid."
-  fi
-}
-
-
-# Function to get the password from the pass store
-get_password_from_store() {
-  local uid="$1"
-  local host="$2"
-  local user_store_dir="$PASSWORD_STORE_BASE/$uid"
-  local password_path="$host"
-  local username_path="${username}@${host}"
-  local gpg_file_path
-  local output
-
-  # Check if we have a username@host format file first
-  if [[ -f "$user_store_dir/$username_path.gpg" ]]; then
-    gpg_file_path="$user_store_dir/$username_path.gpg"
-  # Otherwise use just host
-  elif [[ -f "$user_store_dir/$password_path.gpg" ]]; then
-    gpg_file_path="$user_store_dir/$password_path.gpg"
-  else
-    return 1
-  fi
-
-  # Decrypt the armored file using gpg2
-  if output=$("$GPG_COMMAND" --quiet --batch --use-agent \
-              --keyring ~/certs/"${GIT_LOGIN}.pub" \
-              --secret-keyring ~/certs/"${GIT_LOGIN}.sec" \
-              --decrypt "$gpg_file_path" 2>/dev/null); then
-    echo "$output"
-    return 0
-  else
-    return 1
-  fi
-}
-
-# Function to store the password in the pass store
-store_password_in_store() {
-  local uid="$1"
-  local host="$2"
-  local username="$3"
-  local password="$4"
-  local user_store_dir="$PASSWORD_STORE_BASE/$uid"
-  local password_path="$host"
-  if [[ -n "$username" ]]; then
-    password_path="${username}@${host}"
-  fi
-  local content="$password"
-  if [[ -n "$username" ]]; then
-    content="$username"$'\n'"$content"
-  fi
-
-  export PASSWORD_STORE_DIR="$user_store_dir"
-
-  # Encrypt password with the gpg2 key of uid: put it in an armored text at PASSWORD_STORE_DIR/username@host (or just host if no username provided)
-
-  # Full file path for the encrypted password
-  local gpg_file_path="$user_store_dir/$password_path.gpg"
-
-  # Encrypt password with the gpg2 key of uid and save as armored text
-  if echo -n "$content" | "$GPG_COMMAND" --keyring ~/certs/"${GIT_LOGIN}.pub" \
-     --secret-keyring ~/certs/"${GIT_LOGIN}.sec" \
-     --recipient "$uid" \
-     --armor \
-     --encrypt \
-     --yes \
-     --output "$gpg_file_path"; then
-    chmod 600 "$gpg_file_path"
-    return 0
-  else
-    return 1
-  fi
-}
-
-# Function to erase the password from the pass store
-erase_password_from_store() {
-  local uid="$1"
-  local host="$2"
-  local username="$3"
-  local user_store_dir="$PASSWORD_STORE_BASE/$uid"
-  local password_path="$host"
-  if [[ -n "$username" ]]; then
-    password_path="${username}@${host}"
-  fi
-
-  rm -f "$user_store_dir/$password_path.gpg" 2>/dev/null
-}
-
-check_and_set_ultimate_trust() {
-  local key_id_or_uid="$1"
-  local fingerprint
-  local owner_trust
-
-  # Get the fingerprint of the key
-  fingerprint=$(gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --fingerprint "$key_id_or_uid" | grep "^ *Key fingerprint ="| awk -F '=' '{gsub(/ /, "", $2); print $2}')
-  if [[ -z "$fingerprint" ]]; then
-    echo "Error: Could not retrieve fingerprint for '$key_id_or_uid'."
-    return 1
-  fi
-
-  # Get the owner trust level
-  owner_trust=$(gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --list-keys --with-colons "$key_id_or_uid" | awk -F: '/^pub:/ {print $9}')
-
-  if [[ "$owner_trust" != "u" ]]; then
-    echo "Key '$key_id_or_uid' (fingerprint: '${fingerprint}') does not have ultimate trust (level 6/u vs. '${owner_trust}'). Setting it..."
-    if echo "${fingerprint}:6:" | gpg2 --keyring ~/certs/"${GIT_LOGIN}.pub" --secret-keyring ~/certs/"${GIT_LOGIN}.sec" --import-ownertrust; then
-      echo "Successfully set ultimate trust for key '$key_id_or_uid'."
+  # Check if a secret key for the UID already exists
+  if ! "$GPG_COMMAND" --batch --list-secret-keys "$uid" >/dev/null 2>&1; then
+    if [[ -n "${GPG_KEY_PASSPHRASE:-}" ]]; then
+      echo "No GPG key found for '$uid'. Generating a new one using the provided passphrase..."
+      "$GPG_COMMAND" --batch --yes --pinentry-mode loopback \
+        --passphrase "$GPG_KEY_PASSPHRASE" \
+        --quick-generate-key "$uid" rsa4096 encrypt,sign,auth 1y
+    elif [[ ${gitshellenv} == *i* ]]; then
+      echo "No GPG key found for '$uid'."
+      read -rp "Choose an option: [1] Generate without a passphrase [2] Enter a passphrase now: " choice </dev/tty
+      case "$choice" in
+      1)
+        read -rp "Are you sure you want to create a key with NO passphrase? (y/N) " confirm </dev/tty
+        if [[ "${confirm,,}" != "y" ]]; then
+          fatal_error "Aborted by user."
+        fi
+        echo "Generating key without a passphrase."
+        "$GPG_COMMAND" --batch --yes --quick-generate-key "$uid" rsa4096 encrypt,sign,auth 1y
+        ;;
+      2)
+        read -rs -p "Enter new passphrase: " pass1 </dev/tty
+        echo
+        read -rs -p "Enter passphrase again: " pass2 </dev/tty
+        echo
+        if [[ -z "$pass1" || "$pass1" != "$pass2" ]]; then
+          fatal_error "Passphrases do not match or are empty. Aborting."
+        fi
+        "$GPG_COMMAND" --batch --yes --pinentry-mode loopback \
+          --passphrase "$pass1" \
+          --quick-generate-key "$uid" rsa4096 encrypt,sign,auth 1y
+        ;;
+      *)
+        fatal_error "Invalid choice. Aborting."
+        ;;
+      esac
     else
-      echo "Error setting ultimate trust for key '$key_id_or_uid'."
-      return 1
+      fatal_error "GPG key for '$uid' is missing. Run interactively to create one or set GPG_KEY_PASSPHRASE."
     fi
-  #else
-  #  echo "Key '$key_id_or_uid' already has ultimate trust (level 6)."
   fi
-  return 0
 }
 
-# Main script logic
-action="$1"
-shift
+# Encrypts content from stdin to a file for a given UID
+gpg_encrypt_to_file() {
+  local uid="$1" out="$2"
+  mkdir -p "$(dirname "$out")"
+  "$GPG_COMMAND" --batch --yes --armor --recipient "$uid" --encrypt --output "$out"
+}
 
-# Check for version flags
-if [[ "$action" == "-v" ]] || [[ "$action" == "--version" ]] || [[ "$action" == "version" ]]; then
+# Decrypts a file to standard output
+gpg_decrypt_file() {
+  local in="$1"
+  "$GPG_COMMAND" --quiet --batch --decrypt "$in"
+}
+
+# ---------------------- Main Logic: Subcommands ---------------------
+# Implement git-credential helper behavior with subcommands
+case "${1:-}" in
+"" | "-h" | "--help" | "help")
+  usage
+  exit 0
+  ;;
+
+"-v" | "--version" | "version")
   display_version
-fi
+  exit 0
+  ;;
 
-if [[ -z "${GIT_LOGIN}" ]]; then
-  fatal_error "GIT_LOGIN environment variable is not set."
-fi
-git_login="${GIT_LOGIN}"
+init-gpg)
+  echo "GPG environment successfully initialized."
+  echo "GNUPGHOME is: $GNUPGHOME"
+  "$GPG_COMMAND" --version
+  echo "--- Existing Keys ---"
+  "$GPG_COMMAND" --list-keys || true
+  exit 0
+  ;;
 
-if ! check_gpg_key "${git_login}"; then
-  generate_gpg_key "${git_login}"
-fi
+store)
+  uid="${GIT_LOGIN:-${GPG_UID:-${GIT_AUTHOR_EMAIL:-${USER}}}}"
+  gpg_ensure_key "$uid"
 
-if ! check_and_set_ultimate_trust "${git_login}"; then
-  fatal_error "Unable to trust the GPG key for ${git_login}."
-fi
+  content="$(cat)"
+  host="$(printf "%s" "$content" | awk -F= '/^host=/{print $2; exit}')"
+  [[ -z "$host" ]] && fatal_error "No 'host=' found in input."
 
-if ! check_pass_store "${git_login}"; then
-  init_pass_store "${git_login}"
-fi
+  out="$ENV_PATH/.secure/git-pass/${uid}/${host}.asc"
+  printf "%s" "$content" | gpg_encrypt_to_file "$uid" "$out"
+  echo "Stored encrypted credentials at: $out"
+  exit 0
+  ;;
 
-request_data=()
-while IFS='=' read -r key value; do
-  request_data+=("$key=$value")
-done
+get)
+  ### UPDATED: Reads from stdin like 'store' ###
+  uid="${GIT_LOGIN:-${GPG_UID:-${GIT_AUTHOR_EMAIL:-${USER}}}}"
 
-host=""
-username=""
-password=""
+  # Read host from stdin
+  host="$(awk -F= '/^host=/{print $2; exit}')"
+  [[ -z "$host" ]] && fatal_error "Could not find 'host=' in standard input."
 
-# Process each key-value pair separately
-for pair in "${request_data[@]}"; do
-  key="${pair%%=*}"
-  value="${pair#*=}"
-  case "$key" in
-    host) host="$value" ;;
-    username) username="$value" ;;
-    password) password="$value" ;;
-  esac
-done
+  in="$ENV_PATH/.secure/git-pass/${uid}/${host}.asc"
+  [[ ! -f "$in" ]] && exit 0 # Fail silently as per git-credential helper spec
+  gpg_decrypt_file "$in"
+  exit 0
+  ;;
 
-if [[ -z "${username}" ]]; then username="${git_login}"; fi
+erase)
+  ### UPDATED: Reads from stdin like 'store' ###
+  uid="${GIT_LOGIN:-${GPG_UID:-${GIT_AUTHOR_EMAIL:-${USER}}}}"
 
-case "$action" in
-  get)
-    output=$(get_password_from_store "${git_login}" "$host")
+  # Read host from stdin
+  host="$(awk -F= '/^host=/{print $2; exit}')"
+  [[ -z "$host" ]] && fatal_error "Could not find 'host=' in standard input."
 
-    # Split the output by newlines into an array
-    mapfile -t output_lines <<< "$output"
+  in="$ENV_PATH/.secure/git-pass/${uid}/${host}.asc"
+  if [[ -f "$in" ]]; then
+    rm "$in"
+    echo "Erased credentials for host '$host' for user '$uid'."
+  fi
+  exit 0
+  ;;
 
-    # If we have multiple lines, first line is username, second is password
-    if [[ ${#output_lines[@]} -gt 1 ]]; then
-      echo "username=${output_lines[0]}"
-      echo "password=${output_lines[1]}"
-    # If only one line, assume it's just the password
-    else
-      echo "password=$output"
-    fi
-    ;;
-  store)
-    if [[ -n "$password" ]]; then
-      if store_password_in_store "${git_login}" "$host" "$username" "$password"; then
-        echo "Stored password for [${username}@]$host in '${PASSWORD_STORE_BASE}/${git_login}' for user ${git_login}."
-      else
-        fatal_error "Failed to store password."
-      fi
-    fi
-    ;;
-  erase)
-    erase_password_from_store "${git_login}" "$host"
-    ;;
-  *)
-    fatal_error "Unsupported action: $action"
-    ;;
+list)
+  find "$ENV_PATH/.secure/git-pass" -type f -name '*.asc' 2>/dev/null || true
+  exit 0
+  ;;
+
+*)
+  fatal_error "Unknown command: '$1'. Use -h or --help to see available commands."
+  ;;
 esac
-
-exit 0
