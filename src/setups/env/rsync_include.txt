@@ -1,0 +1,7 @@
+cplx/tools/./git/
+cplx/tools/./python/
+cplx/./.env_user
+cplx/./.env_init
+cplx/./certs
+cplx/./echos
+cplx/./bin/alias
