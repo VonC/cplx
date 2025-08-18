@@ -34,4 +34,16 @@ asciidoc
 docbook-style-xsl
 docbook-dtds
 xmlto
-libxslt
+libxslti
+glib2
+glib2-devel
+libgpg-error
+libgpg-error-devel
+libassuan
+libgcrypt
+libgcrypt-devel
+libmount
+libmount-devel
+libsecret
+libsecret-devel
+pinentry-tty
