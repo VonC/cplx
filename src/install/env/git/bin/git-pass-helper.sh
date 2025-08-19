@@ -1,6 +1,9 @@
 #!/bin/bash
 VERSION="2.3" # Updated version
 
+# Save the inherited TTY value before it gets overwritten
+GPG_TTY_INHERITED="${GPG_TTY}"
+
 # Function to display version information
 display_version() {
   echo "git-pass-helper version $VERSION"
@@ -77,6 +80,8 @@ if [[ -e "${ENV_PATH}/.env_" ]]; then dot_env="${ENV_PATH}/.env_"; fi
 
 # shellcheck disable=SC1090
 source "${dot_env}" || fatal_error "Error loading .env file: '${dot_env}'" 3
+# Restore the correct, inherited TTY value
+export GPG_TTY="${GPG_TTY_INHERITED}"
 
 # ------------------------- GPG Initialization ---------------------------
 # Centralized GnuPG home (defaults to your tools/certs)
@@ -93,27 +98,33 @@ if [[ -f "$GNUPGHOME/gpg.conf" ]]; then
 fi
 
 # Ensure gpg-agent allows passphrases from scripts (harmless if already the default)
-printf '%s\n' 'allow-loopback-pinentry' >>"$GNUPGHOME/gpg-agent.conf" 2>/dev/null || true
-gpgconf --reload gpg-agent >/dev/null 2>&1 || true
-
-if [[ -z "${gitshellenv}" ]]; then gitshellenv=$-; fi
+if ! grep allow-loopback-pinentry "$GNUPGHOME/gpg-agent.conf" 2>/dev/null >/dev/null; then
+  printf '%s\n' 'allow-loopback-pinentry' >>"$GNUPGHOME/gpg-agent.conf" 2>/dev/null || true
+  gpgconf --reload gpg-agent >/dev/null 2>&1 || true
+fi
 
 # ------------------------- GPG Helper Functions -----------------------------
 # Ensures a key for a given User ID exists, creating it if it doesn't.
+# Features an interactive prompt if GPG_KEY_PASSPHRASE is not set.
 gpg_ensure_key() {
   local uid="$1"
+  gitshellenv="{gitshellenv:-}"
   # Check if a secret key for the UID already exists
   if ! "$GPG_COMMAND" --batch --list-secret-keys "$uid" >/dev/null 2>&1; then
     if [[ -n "${GPG_KEY_PASSPHRASE:-}" ]]; then
+      # Non-interactive: GPG_KEY_PASSPHRASE is set, so use it
       echo "No GPG key found for '$uid'. Generating a new one using the provided passphrase..."
       "$GPG_COMMAND" --batch --yes --pinentry-mode loopback \
         --passphrase "$GPG_KEY_PASSPHRASE" \
         --quick-generate-key "$uid" rsa4096 encrypt,sign,auth 1y
+    # Check if we are running in an interactive terminal 
     elif [[ ${gitshellenv} == *i* ]]; then
       echo "No GPG key found for '$uid'."
+      # ### FIXED: Read from the terminal, not from stdin ###
       read -rp "Choose an option: [1] Generate without a passphrase [2] Enter a passphrase now: " choice </dev/tty
       case "$choice" in
       1)
+        # ### FIXED: Read from the terminal, not from stdin ###
         read -rp "Are you sure you want to create a key with NO passphrase? (y/N) " confirm </dev/tty
         if [[ "${confirm,,}" != "y" ]]; then
           fatal_error "Aborted by user."
@@ -122,6 +133,7 @@ gpg_ensure_key() {
         "$GPG_COMMAND" --batch --yes --quick-generate-key "$uid" rsa4096 encrypt,sign,auth 1y
         ;;
       2)
+        # ### FIXED: Read from the terminal, not from stdin ###
         read -rs -p "Enter new passphrase: " pass1 </dev/tty
         echo
         read -rs -p "Enter passphrase again: " pass2 </dev/tty
@@ -138,6 +150,7 @@ gpg_ensure_key() {
         ;;
       esac
     else
+      # Non-interactive and no passphrase provided: fail safely 
       fatal_error "GPG key for '$uid' is missing. Run interactively to create one or set GPG_KEY_PASSPHRASE."
     fi
   fi
@@ -153,13 +166,16 @@ gpg_encrypt_to_file() {
 # Decrypts a file to standard output
 gpg_decrypt_file() {
   local in="$1"
-  "$GPG_COMMAND" --quiet --batch --decrypt "$in"
+  if ! "$GPG_COMMAND" --quiet --batch --decrypt "$in"; then
+	fatal_error "Unable to decrypt '${in}', GPG_TTY='${GPG_TTY}'"
+  fi
 }
 
 # ---------------------- Main Logic: Subcommands ---------------------
 # Implement git-credential helper behavior with subcommands
 case "${1:-}" in
-"" | "-h" | "--help" | "help")
+# NEW: Handle help flag and no-argument cases
+"-h" | "--help" | "help" | "" )
   usage
   exit 0
   ;;
@@ -231,3 +247,4 @@ list)
   fatal_error "Unknown command: '$1'. Use -h or --help to see available commands."
   ;;
 esac
+
