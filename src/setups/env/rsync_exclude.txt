@@ -2,8 +2,8 @@ sources/
 pkgs/
 logs/
 log
-git-2.50.1/
+git-2.*/
 *.tar.gz
 dependencies.list
 *install_functions.sh
-python-3.13.5/
+python-3.*/
