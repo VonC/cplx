@@ -28,3 +28,4 @@ last
 *.*.properties
 tmp.lg
 tmp.txt
+/tools/batcolors/
