@@ -107,12 +107,19 @@ for archive in "${matching_archives[@]}"; do
 done
 
 # Check that exactly one archive exists
-if [[ ${#existing_archives[@]} -ne 1 ]]; then
-    fatal "Exactly one archive for version '${version}' must exist in '${sources_dir}'. Found: ${#existing_archives[@]}" 1
+if [[ ${#existing_archives[@]} -eq 0 ]]; then
+    fatal "No archives for version '${version}' found in '${sources_dir}'." 1
+elif [[ ${#existing_archives[@]} -eq 1 ]]; then
+    ok "Only one version found: '${existing_archives[0]}'"
+else
+    # Sort files by modification time (newest first)
+    mapfile -t sorted_archives < <(ls -t "${existing_archives[@]}")
+    warning "${#existing_archives[@]} versions found, take the most recent: '${sorted_archives[0]}'"
+    existing_archives=("${sorted_archives[0]}")
 fi
 
 archive_file="${existing_archives[0]}"
-echo "Found archive: ${archive_file}"
+info "Found archive: '${archive_file}'"
 
 # Define the extraction folder (same name as version)
 archive_folder="${sources_dir}/${version}"
