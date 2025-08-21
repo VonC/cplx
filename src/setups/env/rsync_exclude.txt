@@ -7,3 +7,10 @@ git-2.*/
 dependencies.list
 *install_functions.sh
 python-3.*/
+certs/private-keys*
+certs/openpgp-*
+certs/trustdb*
+certs/random_seed*
+certs/pubring.kbx*
+certs/gpg.log*
+certs/.#*

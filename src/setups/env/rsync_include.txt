@@ -5,3 +5,5 @@ cplx/./.env_init
 cplx/./certs
 cplx/./echos
 cplx/./bin/alias
+cplx/./bin/compare_file.sh
+cplx/./bin/rsync.sh
