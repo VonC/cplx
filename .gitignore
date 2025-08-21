@@ -3,6 +3,7 @@
 logs/
 a
 aa
+a.*
 *.zip
 *.rpm
 *.tar.gz
@@ -26,6 +27,6 @@ last
 *.pdf
 /t/
 *.*.properties
-tmp.lg
-tmp.txt
+tmp*
+tmp*/
 /tools/batcolors/
