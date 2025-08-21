@@ -29,12 +29,12 @@
 for %%i in ("%~dp0") do SET "build_dir=%%~fi"
 set "build_dir=%build_dir:~0,-1%"
 
-call "%build_dir%\tools\t_build.bat" :pre-processing %*
+call "%build_dir%\tools\dev_workflow\t_build.bat" :pre-processing %*
 
 ::  ===============================================
 ::  BUILD PROJECT
 ::  ===============================================
-%_stack_call% "%project_dir%\tools\get-version.bat"
+%_stack_call% "%project_dir%\tools\dev_workflow\get-version.bat"
 %_info% "----------------------------------------"
 %_info% "Build the project '%project_dir_name%', version '%project_version%'"
 %_info% "----------------------------------------"
@@ -49,7 +49,7 @@ set "QUIET_PRJ=true"
 call <NUL %cmd% %build_params%
 set "build_status=%ERRORLEVEL%"
 set "QUIET_PRJ=true"
-call "%build_dir%\tools\t_build.bat" :post-processing %build_status%
+call "%build_dir%\tools\dev_workflow\t_build.bat" :post-processing %build_status%
 call:build_unset
 goto:eof
 
@@ -61,7 +61,7 @@ goto:eof
 :build_unset
 set "cmd="
 call "%build_dir%\senv.bat" unset
-call "%build_dir%\tools\t_build.bat" :build_unset
+call "%build_dir%\tools\dev_workflow\t_build.bat" :build_unset
 set "build_dir="
 goto:eof
 
