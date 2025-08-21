@@ -4,17 +4,92 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.25.0] - 2025-08-21 - Python and Git on RHEL 9.6, add dev_workflow
+
+This release introduces comprehensive support for **RHEL 9.6**, adding the necessary package lists and dependencies to build tools like Python and Git on this new platform.
+
+The package management system has been significantly improved; it can now gather packages from multiple web addresses, producing a clean, sorted list of the newest available software.  
+The installation process is more flexible, offering a new option to install single packages directly and running generic post-install steps for specific tools like `glibc` and `asciidoc`.  
+
+The developer environment has been restructured by integrating a **`dev_workflow` submodule** for common setup logic, and adding numerous aliases for a smoother workflow.  
+Build processes have also been corrected, with specific attention given to compiling Git and its documentation successfully on the new platform.
+
+Git itself comes with a Git credential helper based on GPG2 for better security.
+
+### 🚀 Features (v0.25.0)
+
+- *(setup)* RHEL 9.6 packages
+- *(setup)* Get_service_name for backward compatibility
+- *(packages)* Support multiple package URL sources
+- *(packages)* Sort and dedup downloaded pkg list
+- *(uninstall)* Pkg-mgt glibc post-install, pit alias
+- *(setup)* Add direct package install option
+- *(senv)* Add irc alias for reconfiguring install
+- *(rhel9.6)* Add RHEL 9.6 package gdbm and readline
+- *(setup)* Package-download refresh noarch pkgs
+- *(setup)* Implement package list reset command
+- *(install)* Support generic post-install hooks
+- *(setups)* Setup asciidoc config path for custom installs
+- *(env)* Add customizable man command
+- *(env)* Add base shell environment setup in ~/tools
+- *(git-credential-helper)* Modernize credential setup
+
+### 🐛 Bug Fixes (v0.25.0)
+
+- *(md)* Add explicit IDs to markdown headings
+- *(env)* Skip cc1 check without C++ compiler tools
+- *(env)* Correct compiler detection for cc1
+- *(env)* Include all single-digit .so versions in fnm alias
+- *(install)* Expand dynamic linker search
+- *(install)* Prevent rm error on missing file
+- *(python)* Add zlib-dev to RHEL 9.6 package list
+- *(setup)* Scp_package get cplx_path before failing
+- *(install)* Handle malformed tar.gz archives
+- *(install)* Set m4/perl tool environment paths
+- *(setups)* Adjust pkgs Git build dependencies
+- *(install)* Make sure install runs in source dir
+- *(git)* Make pass helper reliable; add aliases
+- *(changelog)* Add script for common typo and text fixes
+
+### 🚜 Refactor (v0.25.0)
+
+- *(error)* Give specific exit codes
+- *(packages)* Refine ldd check
+- *(setup)* Binutils post-install and git deps
+- *(env)* Rename shell functions for clarity
+- *(senv)* Integrate dev_workflow submodule
+
+### ⚙️ Miscellaneous Tasks (v0.25.0)
+
+- *(setup)* Update Python version in local senv tpl
+- *(pkgs)* Add .keep file for package directory
+- *(gitignore)* Ignore temporary URL file
+- *(setup)* Refresh RHEL 9.6 x86_64 package list
+- *(git)* Add tools/dev_workflow submodule
+- *(git)* Ignore tmp files or folders
+- *(tools)* Clean-up after dev_workflow integration
+- *(changelog)* Fix typo
+
+### 🔨 Build (v0.25.0)
+
+- *(env)* Validate CPLX_TOOL is defined
+- *(senv)* RHEL9 Git tool versions and support
+- *(setup)* Add m4 and ninja; shell function syntax
+- *(setups)* Add Git missing build dep for RHEL 9.6
+- *(git)* Make Git documentation compile and install
+- *(bat)* Use t_build scripts to dev_workflow dir.
+
 ## [v0.24.0] - 2025-08-05 - Git on CentOS 8
 
 Check installation of Git on CentOS8
 
-### 🚀 Features
+### 🚀 Features (v0.24.0)
 
 - *(setups)* Define tool_name earlier in `.env`
 - *(sh)* Support [l] in package URLs
 - *(config)* Add essential template properties
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.24.0)
 
 - *(setups)* Remove autoconf2.7x from CentOS 8 deps
 - *(setups)* Echos correctly display the caller name
@@ -23,12 +98,12 @@ Check installation of Git on CentOS8
 - *(setup)* Handle missing package file gracefully
 - *(setup)* Ensure pkg dir exists before download
 
-### 📚 Documentation
+### 📚 Documentation (v0.24.0)
 
 - *(md)* Explain glibc build include path issues
 - *(txt)* Add autoconf2.7x to Git CentOS 8 deps
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.24.0)
 
 - *(install)* Correct error code for missing ld
 - *(setups)* Add cpp dependency for CentOS 8
@@ -37,25 +112,25 @@ Check installation of Git on CentOS8
 - *(git)* Update batcolors submodule
 - *(git)* Ignore sensitive properties backups
 
-### Fix
+### Fix (v0.24.0)
 
 - *(setups)* Full path error in setup_packages.sh
 - *(setups)* Handle missing dynamic linker in check_ldd
 
-## [v0.23.0] - 2025-04-04 - make and glibc compilations;
+## [v0.23.0] - 2025-04-04 - make and glibc compilations
 
 Following the incomplete compilation of glib (2.28 instead of 2.17 on RHEL 7.x, for running nodes 18), I need a make 4.x instead of 3.x.
 
 Glibc compile, but does not install. Error or core dump on elf/sln.
 
-### 🚀 Features
+### 🚀 Features (v0.23.0)
 
 - *(make4)* Add GNU Make 4
 - *(setups)* Add automake116 to the supported tools
 - *(setup)* Use multiple URLs for package download
 - *(install)* Introduce glibc wrapper scripts
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.23.0)
 
 - *(install)* Allow cleanup/install
 - *(install)* Resolve bootstrap and automake issues
@@ -68,7 +143,7 @@ Glibc compile, but does not install. Error or core dump on elf/sln.
 - *(packages)* Fix verbose parameter handling
 - *(setups)* Update glibc packages for RHEL 7.9
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.23.0)
 
 - *(setups)* Update CentOS 7.9 packages URLs
 - *(setups)* Add libgcc and patchelf dependencies
@@ -84,7 +159,7 @@ But glibc is still not compilable. Next step: compiling make 4.x (instead of the
 
 .env comes with install-related aliases (configure, build, install, package, deploy), and an alias to copy a tool source code (scps), complementing the existing scpe for environment setup files.
 
-### 🚀 Features
+### 🚀 Features (v0.22.0)
 
 - *(env)* Add scps alias to copy source files
 - *(cplx)* Add glibc, gcc and flex2 to cplx services
@@ -97,7 +172,7 @@ But glibc is still not compilable. Next step: compiling make 4.x (instead of the
 - *(install)* Add `--force` to create_wrappers.py
 - *(setups)* Add update_path_variables helper script
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.22.0)
 
 - *(install)* Correctly check for out-of-tree build
 - *(install)* Update `ld_library_path` gcc `setenv`
@@ -108,17 +183,17 @@ But glibc is still not compilable. Next step: compiling make 4.x (instead of the
 - *(install)* Gcc installation: ensure cc1 is in PATH
 - *(glibc)* Correct glibc build process
 
-### 🚜 Refactor
+### 🚜 Refactor (v0.22.0)
 
 - *(install)* Env, improve install alias
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.22.0)
 
 - *(git)* Update .gitignore, ignore `t/` folder
 - *(aliases)* Add alias for build sources directory
 - *(install)* Improve install script logging
 
-### 🔨 Build
+### 🔨 Build (v0.22.0)
 
 - *(packages)* Add missing TeX Live packages
 
@@ -130,7 +205,7 @@ I tried:
 
 - pass (using a trusted gpg2 key, with passphrase pre-registered to the
   `gpg-agent`: works with pinentry-curses, provided `GPG_TTY` is set to `$(tty)`)
-- https://github.com/languitar/pass-git-helper, a python script, which uses a
+- <https://github.com/languitar/pass-git-helper>, a python script, which uses a
  `~/.config/pass-git-helper/git-pass-mapping.ini`, but only matches `host`,
  not `user@host`
 
@@ -142,6 +217,7 @@ the SSH GIT_LOGIN identified user.
 (through an SSH forced command script, as described next)
 
 Add an SSH wrapper which will set:
+
 - `GIT_LOGIN` (from the `.ssh/authorized_keys` forced command parameter of
 `./tools/git/bin/sshwrapper.sh`)
 - `GIT_AUTHOR_NAME` and `GIT_AUTHOR_EMAIL`
@@ -151,7 +227,7 @@ Add an SSH wrapper which will set:
 
 An sshe cplxgit will work, with a local PC `~/.ssh/config` of:
 
-```
+```log
 Host cplxgit
   Hostname cactislux801.prod.lux.ca-indosuez.com
   User gitea2
@@ -165,14 +241,14 @@ The `#cplxgit_cd forced` will make the `sshe.bat` to open an SSH shell, and the
 remote SSH forced command `sshwrapper.sh` will make the appropriate `cd` +
 `source .env` (as well as set the GIT variables).
 
-### 🚀 Features
+### 🚀 Features (v0.21.0)
 
 - *(install)* Add gpg-restart script
 - *(install)* Add git credential helper using `pass`
 - *(install)* Use GIT_LOGIN for pass-git-helper
 - *(setups)* Update git credential helper
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.21.0)
 
 - *(setups)* Set `GPG_TTY` and extend `PATH`
 - *(install)* Update gpg-agent to use pinentry-curses
@@ -184,7 +260,7 @@ remote SSH forced command `sshwrapper.sh` will make the appropriate `cd` +
 - *(install)* Sshwrapper sourcing `.env` and init file
 - *(install)* SSH set committer email and name
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.21.0)
 
 - *(version)* Typos
 - *(git)* Ignore PDF files
@@ -193,7 +269,7 @@ remote SSH forced command `sshwrapper.sh` will make the appropriate `cd` +
 
 Needed by pinentry
 
-### 🚀 Features
+### 🚀 Features (v0.20.0)
 
 - *(libgpg-error)* Add libgpg-error service
 
@@ -202,41 +278,41 @@ Needed by pinentry
 Needed for GPG2 operation.  
 Used by pass (the password storage utility)
 
-### 🚀 Features
+### 🚀 Features (v0.19.0)
 
 - *(pinentry)* Add pinentry tool support
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.19.0)
 
 - *(install)* Update environment variables for autotools
 
 ## [v0.18.0] - 2025-03-19 - Pass (password store) and GPG2
 
-Needed for https://github.com/languitar/pass-git-helper
+Needed for <https://github.com/languitar/pass-git-helper>
 Goal is to store HTTPS credential encrypted.
 Install everything to configure cplx own gpg2 keyring/secret-keyring
 But it still need a pinentry-tty
 
-### 🚀 Features
+### 🚀 Features (v0.18.0)
 
 - *(pass)* Add pass (password store) tool support
 - *(install)* Add support for tar.xz archives
 - *(install)* Configure GNUPGHOME
 - *(setups)* Add scripts and config for GPG key
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.18.0)
 
 - *(install)* Handle other build systems
 - *(install)* Simplify pass install
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.18.0)
 
 - *(git)* .gitignore includes `tar.xz` and `xz`
 - *(packages)* Add cpp package to RHEL 7.9 setup
 
 ## [v0.16.0] - 2025-03-17 - libsecret, pkgconfig pc file and pkgs reinstall
 
-* Where to store credentials?
+- Where to store credentials?
 
   I have added the dependencies for libsecret and glib2 to work, and
   `~/tools/tool/sources/2.48.1/git-2.48.1/contrib/credential/libsecret$ make`: works
@@ -244,11 +320,11 @@ But it still need a pinentry-tty
   But it does require a D-BUS session (which needs an X11 $DISPLAY
   and either a gnome-keyring or a KDE kwallet. So no vault backend for now.
 
-* pkgconfig pc files are correctly updated during pkg installation process.
+- pkgconfig pc files are correctly updated during pkg installation process.
 
-* you now can re-install all packages for a given tool: remove + install back.
+- you now can re-install all packages for a given tool: remove + install back.
 
-### 🚀 Features
+### 🚀 Features (v0.16.0)
 
 - *(install)* Add `short_package_name()` improve log
 - *(setups)* Add force option to install packages cmd
@@ -259,7 +335,7 @@ But it still need a pinentry-tty
 - *(packages)* Rename lp to list_files_in_package
 - *(install)* Reinstall pkg and reinstall all pkgs
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.16.0)
 
 - `pkg-config` path and `.pc` files
 - *(setups)* Vim fix backspace
@@ -272,36 +348,37 @@ But it still need a pinentry-tty
 - *(install)* Handle built-in packages in pkg-config
 - *(install)* Handle root built-in pkg-config paths
 
-### 🚜 Refactor
+### 🚜 Refactor (v0.16.0)
 
 - *(env)* Rename lfpi to lfip, add rp and rap aliases
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.16.0)
 
 - *(src)* Format comment
 
 ## [v0.15.0] - 2025-03-14 - curl dependencies compil, Git and openssl3
 
 Start with libpsl and its own dependencies (libidn2, libunistring).  
-Then install openldap, curl, libpsl and libunistring in Git: it works, and 
+Then install openldap, curl, libpsl and libunistring in Git: it works, and
 `git-remote-https` is finally compiled.
 Test also openssl3 (3.4.1) not yet included in Git.
 
 Notes:
-* Refactor the `install_functions.sh` to include the name of the tool in their
+
+- Refactor the `install_functions.sh` to include the name of the tool in their
   name: easier to distinguish them.
-* `CPLX_CONFIG_DONE` helps grep a string in a file (by default,
+- `CPLX_CONFIG_DONE` helps grep a string in a file (by default,
   'Creating Makefile' in '`config.log`') to better determine if a re-configure
   is needed.
-* PATH now includes also `root/bin`, not just `root/usr/bin`.
-* A built package is now deployed to tools/pkgs automatically, when `CPLX_BIN` 
+- PATH now includes also `root/bin`, not just `root/usr/bin`.
+- A built package is now deployed to tools/pkgs automatically, when `CPLX_BIN`
   is not 'true'. `find_package` knows to select the most recent package when it
   is a built one (as opposed to system ones, which should be unique)
-* The alias `utm` allows to update a past tag, or recreate a missing one with,
+- The alias `utm` allows to update a past tag, or recreate a missing one with,
   as message, the content of the version.txt at that past commit.  
   The script is `tools/git/update-tag-message(.bat/.sh)`.
 
-### 🚀 Features
+### 🚀 Features (v0.15.0)
 
 - *(setup)* Add libunistring
 - *(install)* Implement package search and deploy
@@ -312,7 +389,7 @@ Notes:
 - *(install)* Add openssl3 support
 - *(tools)* `utm` alias for update tag message script
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.15.0)
 
 - *(tools)* Pass tool name to add_tool.bat
 - *(tools)* Correct libunistring check prefix
@@ -333,11 +410,11 @@ Notes:
 - *(install)* Openssl111 reconfigure message
 - *(changelog)* Description message for range
 
-### 🚜 Refactor
+### 🚜 Refactor (v0.15.0)
 
 - *(install)* Rename tools install fct scripts
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.15.0)
 
 - *(vscode)* Enable spell checking for plain text files
 
@@ -347,7 +424,7 @@ Since ldap uses openssl, it needs to use the right version of openssl
 Openldap will need many dependencies to be recompiled, so we need to add many additional tools.
 The add_tool script is used to add the necessary tools to the build environment.
 
-### 🚀 Features
+### 🚀 Features (v0.14.0)
 
 - Add and compile openldap to supported services
 - *(curl)* Add curl installation scripts
@@ -363,13 +440,13 @@ The add_tool script is used to add the necessary tools to the build environment.
 - *(install)* Add configure, build, and clean functions
 - *(tools)* Refactor resource creation in add_tool.bat
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.14.0)
 
 - *(setup)* Validate downloaded source size
 - *(tool)* Set en var from tool section in add_tool.bat
 - Handle CPLX_URL version placeholder
 
-### 📚 Documentation
+### 📚 Documentation (v0.14.0)
 
 - *(tools)* Add_tool.bat comments
 
@@ -379,7 +456,7 @@ Generate Makefile for the Git compilation
 Compile Git.  
 Still fails to include curl, so no git-remote-https generated.
 
-### 🚀 Features
+### 🚀 Features (v0.13.0)
 
 - *(setup)* Add git to senv.local.tpl
 - *(setup)* Add Git installation support
@@ -391,7 +468,7 @@ Still fails to include curl, so no git-remote-https generated.
 - *(setup)* Add `mtp` alias to mirror tool packages
 - Improve linking of OpenSSL libraries
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.13.0)
 
 - *(install)* Add git dependencies for RHEL 7.9
 - *(scripts)* Correct ffip alias definition
@@ -404,16 +481,16 @@ Still fails to include curl, so no git-remote-https generated.
 - *(openssl111)* Add zlib and cpp dependencies
 - *(setup)* Update fnm alias
 
-### 📚 Documentation
+### 📚 Documentation (v0.13.0)
 
 - *(md)* Add SSL documentation
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.13.0)
 
 - *(git)* Bump version to 0.13.0-SNAPSHOT
 - *(install)* Update sshgitwrapper local template
 
-### 🔨 Build
+### 🔨 Build (v0.13.0)
 
 - Add curl dependencies for Git on RHEL 7.9
 
@@ -423,7 +500,7 @@ Add openssl111 as a tool to compile
 Upgrade python wrapper scripts to better handle venv (which copies its own set of python executables)
 Add many functions to `packages_management.sh`, including the `install_package_from_name()` function, which means the `install_package` script is now obsolete, and removed.
 
-### 🚀 Features
+### 🚀 Features (v0.12.0)
 
 - *(setup)* Update OpenSSL tool name in props
 - *(setup)* Add OpenSSL 1.1.1w support in props tpl
@@ -444,7 +521,7 @@ Add many functions to `packages_management.sh`, including the `install_package_f
 - *(bin)* Implement logging for pkg mgt script
 - *(packages)* Improve package installation check
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.12.0)
 
 - *(setup)* Improve CPLX URL handling in setup.sh
 - *(build)* Correct OpenSSL linking order and libraries
@@ -481,13 +558,13 @@ Add many functions to `packages_management.sh`, including the `install_package_f
 - *(setup)* Remove install_package script
 - *(bin)* Handle pre-installed package list
 
-### 🚜 Refactor
+### 🚜 Refactor (v0.12.0)
 
 - *(bin)* Improve package searching
 - *(bin)* Extract `base_package_name` function
 - *(bin)* Improve built package detection
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.12.0)
 
 - *(md)* Markdown lint of doc.md
 - *(tools)* Fix submodule initialization check
@@ -500,7 +577,7 @@ Add many functions to `packages_management.sh`, including the `install_package_f
 Check if mpdecimal help for the Python decimal module
 Add a package step to include all runtime dependencies and python wrapper script
 
-### 🚀 Features
+### 🚀 Features (v0.11.0)
 
 - *(install)* Rename archive to package in install scripts
 - Enhance senv.bat with tool info
@@ -524,11 +601,11 @@ Add a package step to include all runtime dependencies and python wrapper script
 - Add mpdecimal package for RHEL 7.9 x86_64
 - *(env)* Add `rgp` function to `.env` file
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.11.0)
 
 - *(setup)* Improve package extension handling
 - *(setup)* Remove debug messages for skipped pkg
-- *(setyp)* Improve package installation flags
+- *(setup)* Improve package installation flags
 - *(install)* Link libmpdec and correct LDFLAGS
 - *(nev)* Enhance fd function in .env file
 - *(setup)* Always create `cplx.properties`
@@ -541,18 +618,18 @@ Add a package step to include all runtime dependencies and python wrapper script
 - *(setup)* Use realpath for cwd in packages_management.sh
 - *(mpdecimal)* Add missing dependencies for RHEL 7.9
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.11.0)
 
 - *(docs)* Correct `-lgcc` to `-lgcc_s` in doc
 - *(doc)* Address python test failures on Linux
-- *(doc)* Python expoitation with pip upgrade
+- *(doc)* Python exploitation with pip upgrade
 
-### Fix
+### Fix (v0.11.0)
 
 - *(setup)* Add checks vars for Python and mpdecimal
 - *(setup)* Setup.sh update `cplx.properties`
 
-### Refactor
+### Refactor (v0.11.0)
 
 - `pkgs_dir` is actually `tools_pkgs`
 - *(setup)* Rename archive to package
@@ -566,7 +643,7 @@ archive: a tar.gz of the tool installed
 
 Note: opening logs with VSCode no longer steam the focus of the current Windows which initiated the setup or installation.
 
-### 🚀 Features
+### 🚀 Features (v0.10.0)
 
 - *(env)* Add senvi alias for install functions
 - *(install)* Improve Python environment setup
@@ -597,7 +674,7 @@ Note: opening logs with VSCode no longer steam the focus of the current Windows 
 - *(tools)* Add `CPLX_ARCH_EXT` to `senv.local.tpl`
 - *(install)* Add mpdecimal archive step
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.10.0)
 
 - *(python)* Adjust setenv error handling
 - *(install)* Correct OpenSSL paths in Python installation
@@ -619,11 +696,11 @@ Note: opening logs with VSCode no longer steam the focus of the current Windows 
 - *(mpdecimal)* Disable C++ support during build
 - *(mpdecimal)* Improve mpdecimal build and clean
 
-### 🚜 Refactor
+### 🚜 Refactor (v0.10.0)
 
 - *(install)* Install_functions at tools level
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.10.0)
 
 - *(md)* Start install section
 - *(install)* Typo on comment
@@ -632,19 +709,19 @@ Note: opening logs with VSCode no longer steam the focus of the current Windows 
 - *(typo)* Correct hostname message in setup script
 - *(doc)* Update version.txt
 
-### Feat
+### Feat (v0.10.0)
 
 - Setup.bat log display restore focus to window
 - *(install)* Restore window focus after VSCode launch
 
-### Fix
+### Fix (v0.10.0)
 
 - *(src)* Use ln -nfs for symlinks
 - *(setup)* .env shellchecks updates
 - *(setup)* .env corrects root path
 - *(setup)* Improve error handling in packages_management.sh
 
-### Refactor
+### Refactor (v0.10.0)
 
 - *(setup)* Move setup file and improve structure
 
@@ -652,10 +729,10 @@ Note: opening logs with VSCode no longer steam the focus of the current Windows 
 
 Now that the install script works, and configure Python,
 generating a Makefile, the goal is to compile it.  
-It does, but cannot use hashlib based on openssl, 
+It does, but cannot use hashlib based on openssl,
 because CentOS/RHEL 7 use an old 1.0.2, instead of 1.1.1+
 
-### 🚀 Features
+### 🚀 Features (v0.9.0)
 
 - *(setup)* Skip commented lines in package list
 - Prepare repeat/done steps test
@@ -670,9 +747,9 @@ because CentOS/RHEL 7 use an old 1.0.2, instead of 1.1.1+
 - *(install)* Process options --clean and --configure
 - *(env)* Add `fd` function to `.env` file
 - *(env)* Improve file search functions
-- *(env)* Symbol lookup, find and grep finctions
+- *(env)* Symbol lookup, find and grep functions
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.9.0)
 
 - *(build)* Improve build.bat and senv.bat unset
 - *(install)* Improve config.log check
@@ -697,16 +774,16 @@ because CentOS/RHEL 7 use an old 1.0.2, instead of 1.1.1+
 - *(python)* Add missing dependencies for xmlsec1
 - *(install)* Document liboneagentproc and openssl_hashlib
 
-### 🚜 Refactor
+### 🚜 Refactor (v0.9.0)
 
 - *(build)* Simplify cleanup routine
 
-### 📚 Documentation
+### 📚 Documentation (v0.9.0)
 
 - *(md)* Compilation issues on RHEL 7.9
 - Avoid cSpell on doc and CentOS packages details
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.9.0)
 
 - *(md)* Non-blocking error __umodti3
 - *(md)* Add modules to activate
@@ -727,7 +804,7 @@ Check the installation log are copied back to the PC and opened in IDE
 - `sp` alias triggers a download, scp and unarchive of a rpm package from python_centos_8_x86_64.txt
 - `i` alias triggers the scp of `install`, and `install_functions.sh`, launching the installation process
 
-### 🚀 Features
+### 🚀 Features (v0.8.0)
 
 - *(utils)* Add step reset functionality
 - *(install)* Add installation scripts
@@ -770,7 +847,7 @@ Check the installation log are copied back to the PC and opened in IDE
 - *(install)* Enhance Python environment setup
 - *(env)* Add alias to tail config log
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.8.0)
 
 - *(tools)* Remove date from changelog entries
 - *(bat)* Change cdc alias to cdp or cdcp
@@ -812,16 +889,16 @@ Check the installation log are copied back to the PC and opened in IDE
 - *(setup)* Handle `.pc` files in ldd check
 - *(install)* Avoid error in Python installation
 
-### 🚜 Refactor
+### 🚜 Refactor (v0.8.0)
 
 - *(setup)* Split copy_the_sources step
 
-### 📚 Documentation
+### 📚 Documentation (v0.8.0)
 
 - *(md)* Add installation and complete setup steps
 - *(md)* Add download packages list step
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.8.0)
 
 - *(md)* CHANGELOG updated, trimmed and formatted
 - *(bat)* Run.bat format loop
@@ -830,13 +907,13 @@ Check the installation log are copied back to the PC and opened in IDE
 - *(md)* Document build issues on CentOS 8
 - *(setup)* Add openssl-devel dependency
 
-### Fix
+### Fix (v0.8.0)
 
 - *(bat)* Add trace logging to install and setup bat
 - *(install)* Improve error handling in install script
 - Add cpp package for CentOS 8
 
-### Refactor
+### Refactor (v0.8.0)
 
 - *(bat)* Simplify senv.bat and init.bat
 
@@ -848,19 +925,20 @@ Local `env` folder includes the right tree sources for the tools (python, git)
 
 `src/setup/steps.md` steps ID have been updated to match their titles, using the alias `sfa`
 
-### 🚀 Features
+### 🚀 Features (v0.7.0)
 
 - *(setup)* Check services/tools to setup script
 - *(setup)* Setup.sh scp sources
 - *(setup)* Env keep `tools/sources` folder
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.7.0)
 
 - *(setup)* Update steps IDs to match their titles
 
 ## [v0.6.0] - 2025-01-26 -- SCP to remote host, senv updates, steps tests
 
 `scp` all files needed for an `sshe` (I.e, "SSH Extended", an `senv` utility `ssh` wrapper) session.
+
 - Include all rc files like a `.env` and `.vimrc`
 - Include `get_env.sh` and `get_service_name.sh` in `bin/` to get the environment (dev,qal, ...) and service name (cplx, git_cpl, python_cpl, depending on where you are in the tree)
 
@@ -869,7 +947,7 @@ On senv updates, tools aliases (uv, uc and crel) are available even outside lsen
 
 `steps` tests are using more expressive anchor names, enforced by the `sfa` alias, for `bash -c "./steps_format_anchors.sh $1"`
 
-### 🚀 Features
+### 🚀 Features (v0.6.0)
 
 - *(tools)* Cliff.toml skip CHANGELOG updates entries
 - *(setup)* Initial files for env to scp
@@ -887,7 +965,7 @@ On senv updates, tools aliases (uv, uc and crel) are available even outside lsen
 - *(utils)* Improve repeat step handling
 - *(tools)* Add setup shortcut and repeat step var
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.6.0)
 
 - *(tools)* Avoid adding description
 - *(bat)* Senv.bat avoid ok msg on filter.changelog
@@ -908,7 +986,7 @@ A `git tag -n v.0.4.0` will show all those informations.
 Make sure `update-changelog.[bat/sh]` is able to regenerate the CHANGELOG.md from a given tag, not just from the last tag.
 Update the CHANGELOG.md accordingly
 
-### 🚀 Features
+### 🚀 Features (v0.5.0)
 
 - *(tools)* Update-changelog.sh is able to regenerate CHANGELOG.md from a tag
 - *(tools)* Update-tag-message updated tag annotation message
@@ -916,7 +994,7 @@ Update the CHANGELOG.md accordingly
 - *(tools)* Update-version.bat release tag with date
 - *(tools/git)* Update-tag-message.sh use date
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.5.0)
 
 - *(tools)* Update-version.bat fix multi-line release description
 - *(bat)* T_build.bat echo fatal call path was incorrect
@@ -930,11 +1008,11 @@ Update the CHANGELOG.md accordingly
 - *(tools)* No need for double-quotes with date
 - *(tools)* Update-version.bat avoid creating tag twice
 
-### 📚 Documentation
+### 📚 Documentation (v0.5.0)
 
 - *(setup)* Describe SCP step
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.5.0)
 
 - *(tools)* Remote old updateChangelog.sh
 - *(git)* Update version.txt to include 0.5.0-SNAPSHOT release description
@@ -946,7 +1024,7 @@ This first steps also uses the next properties and step features: the goal is to
 
 This release also refactors the `CHANGELOG.md` generation, using `version.txt` both for the version and the release title/documentation.
 
-### 🚀 Features
+### 🚀 Features (v0.4.0)
 
 - *(bat)* Senv.bat add s alias for setup.bat
 - *(bat)* Senv.bat add cdc to go back to project root folder
@@ -960,7 +1038,7 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 - *(tools)* Update-version.bat set or restore version and title in version.txt
 - *(tools)* Update-version.bat use new version-title format with version.txt on SNAPSHOT
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.4.0)
 
 - *(tools)* Update-version.bat make sure to update changelog when doing a release
 - *(tools)* Cliff.toml also skip chore commit for setting new release tag
@@ -969,7 +1047,7 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 - *(bat)* Senv.bat unset project_version/title/release_notes
 - *(tools)* Update-changelog.sh test range array size
 
-### 📚 Documentation
+### 📚 Documentation (v0.4.0)
 
 - *(version)* Add version title and description in version.txt
 - *(tools)* Cliff.toml add header for cplx project, with commit message on tags
@@ -977,7 +1055,7 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 - *(version)* Typo in release description
 - *(md)* CHANGELOG.md updated
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.4.0)
 
 - *(shell)* Add .shellcheckrc for external file directive
 - *(git)* Ignore bak files
@@ -987,7 +1065,7 @@ This release also refactors the `CHANGELOG.md` generation, using `version.txt` b
 Put in place the skeleton of a setup script (called by `build.bat`), which will executed multiple steps.
 Since those are bash scripts, add an `echos` for colored log headers in bash.
 
-### 🚀 Features
+### 🚀 Features (v0.3.0)
 
 - *(bat)* Build.bat calls src\setups\setup.bat, fix exit status
 - *(tools)* Senv.local.tpl declare SSH_CONFIG_ENTRY
@@ -1000,7 +1078,7 @@ A `call_echos_stack` in a script enable batcolors to print the script name.
 Init.bat no longer calls/depends on senv.bat.
 No more CHANGELOG update while in SNAPSHOT build.
 
-### 🚀 Features
+### 🚀 Features (v0.2.0)
 
 - *(tools)* Use batcolors with stacks
 - *(bat)* Senv.bat stack before calling init.bat
@@ -1023,7 +1101,7 @@ No more CHANGELOG update while in SNAPSHOT build.
 - *(tools)* Update-version.bat does not stop if SNAPSHOT and FORCE_UC set
 - *(bat)* Senv.bat add brel/br aliases for making release
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.2.0)
 
 - *(bat)* Build.bat additional cleanup
 - *(bat)* Senv.bat extra space on local message
@@ -1049,7 +1127,7 @@ No more CHANGELOG update while in SNAPSHOT build.
 - *(bat)* Senv.bat unset do not rely on possibly unset vars
 - *(bat)* All.bat add missing eof after :unset function
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.2.0)
 
 - *(git)* Ignore temp/tmp files
 - *(git)* Update batcolors submodule SHA1 reference
@@ -1061,7 +1139,7 @@ No more CHANGELOG update while in SNAPSHOT build.
 Initial `senv.bat` with its aliases.
 Focus on build.bat, which calls update-version.bat.
 
-### 🚀 Features
+### 🚀 Features (v0.1.0)
 
 - *(bat)* Senv/init/all/build/run
 - *(bat)* Senv.bat prepare msg for local path preserved or set
@@ -1081,7 +1159,7 @@ Focus on build.bat, which calls update-version.bat.
 - *(tools)* Update-version.bat no longer call build.bat
 - *(bat)* Build.bat calls update-version, detect failed release and cancel it
 
-### 🐛 Bug Fixes
+### 🐛 Bug Fixes (v0.1.0)
 
 - *(bat)* Senv.bat rsenv (restore) must delete path.ini
 - *(bat)* Senv.bat removes Nexus-based aliases
@@ -1101,7 +1179,7 @@ Focus on build.bat, which calls update-version.bat.
 - *(bat)* Build.bat skip params if called from update, parse and print params otherwise
 - *(bat)* Build.bat must restore echos for params
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ Miscellaneous Tasks (v0.1.0)
 
 - *(vscode)* Workspace and settings
 - *(git)* Attributes and ignore rules
