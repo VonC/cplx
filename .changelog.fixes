@@ -1,0 +1,24 @@
+#!/bin/perl
+# .changelog.fixes
+
+# PERL_CODE
+
+# Fix common typos.
+# cSpell: disable
+push @patterns, qr/uinstall/;
+push @replacements, '"uninstall"';
+push @patterns, qr/setyp/;
+push @replacements, '"setup"';
+push @patterns, qr/expoitation/;
+push @replacements, '"exploitation"';
+push @patterns, qr/finctions/;
+push @replacements, '"functions"';
+push @patterns, qr/glibc compilations;/;
+push @replacements, '"glibc compilations"';
+# cSpell: enable
+
+# Rule 5: Add a blank line after specific markers for readability.
+push @patterns, qr/(?: session\.|^Notes:|SSH wrapper which will set:)\R(?=.*?\S)/m;
+push @replacements, '"$&\n"';
+push @patterns, qr/```\RHost cplxgit/m;
+push @replacements, '"```log\nHost cplxgit"';
