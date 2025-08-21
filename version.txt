@@ -1,11 +1,5 @@
-0.25.0 -- Python and Git on RHEL 9.6, add dev_workflow
+0.26.0-SNAPSHOT -- Git and Python upgrade on RHEL9.6
 
-This release introduces comprehensive support for **RHEL 9.6**, adding the necessary package lists and dependencies to build tools like Python and Git on this new platform.
-
-The package management system has been significantly improved; it can now gather packages from multiple web addresses, producing a clean, sorted list of the newest available software.  
-The installation process is more flexible, offering a new option to install single packages directly and running generic post-install steps for specific tools like `glibc` and `asciidoc`.  
-
-The developer environment has been restructured by integrating a **`dev_workflow` submodule** for common setup logic, and adding numerous aliases for a smoother workflow.  
-Build processes have also been corrected, with specific attention given to compiling Git and its documentation successfully on the new platform.
-
-Git itself comes with a Git credential helper based on GPG2 for better security.
+- Git 2.51.0 (from 2.51.0-rc2)
+- Python 3.13.7 (from 3.13.6)
+- Sync Python build to tool
