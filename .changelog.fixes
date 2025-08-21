@@ -15,6 +15,9 @@ push @patterns, qr/finctions/;
 push @replacements, '"functions"';
 push @patterns, qr/glibc compilations;/;
 push @replacements, '"glibc compilations"';
+push @patterns, qr/dev_worklow/;
+push @replacements, '"dev_workflow"';
+
 # cSpell: enable
 
 # Rule 5: Add a blank line after specific markers for readability.
