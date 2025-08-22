@@ -30,6 +30,8 @@ for %%i in (%tools%) do (
 )
 :break
 endlocal & set "CPLX_TOOL=%CPLX_TOOL%"
+set "NO_MORE_SENV_cplx="
+"%PRJ_DIR%\senv.bat" force
 goto:eof
 
 :call_echos_stack
