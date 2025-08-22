@@ -14,3 +14,6 @@ certs/random_seed*
 certs/pubring.kbx*
 certs/gpg.log*
 certs/.#*
+python.1
+python3_target
+python3.13_bin
