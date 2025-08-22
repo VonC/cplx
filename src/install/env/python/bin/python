@@ -28,7 +28,7 @@ else
 fi
 
 if [[ ! -e "${DIR}/pip" ]]; then
-    ln -nfs "current/bin/pip" "${DIR}/pip"
+    ln -nfs "current/bin/pip" "${DIR}/pip3"
     ln -nfs "current/bin/pip3" "${DIR}/pip3"
 fi
 
@@ -43,4 +43,7 @@ if [[ -n "${venv}" ]]; then
     ln -nfs "${DIR}/python" "$(pwd)/${venv}/bin/${python3_target}"
     cp "${DIR}/current/bin/${python3_target}" "$(pwd)/${venv}/bin/${python3_target}_bin"
     sed -i "s/${python3_target}_bin/${python3_target}/g" "$(pwd)/${venv}/bin/pip"*
+fi
+if [[ -n ${VIRTUAL_ENV} && -e "${VIRTUAL_ENV}" ]]; then
+    grep bin_bin "${VIRTUAL_ENV}"/bin/* | awk -F: '{print $1}' | xargs -I{} sed -i 's/_bin_bin/_bin/g' "{}"
 fi
