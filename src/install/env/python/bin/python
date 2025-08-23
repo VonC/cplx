@@ -1,7 +1,19 @@
 #!/bin/bash
 # filepath: /c:/Users/vonc/prog/git/cplx/src/install/env/python/bin/python
 
+# Define the debug echo function.
+# It prints its arguments to stderr only if the P_DBG environment variable is set.
+echo_dbg() {
+    if [[ -n "${P_DBG}" ]]; then
+        echo "DBG: $*" >&2
+    fi
+}
+
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
+
+echo "DIR='${DIR}'" >&2
+if [[ ! -e "${DIR}/setenv" ]]; then exit 1; fi
+
 # shellcheck source=/dev/null
 source "${DIR}/setenv"
 
@@ -18,17 +30,28 @@ done
 python3_target="$(readlink "${DIR}/current/bin/python3")"
 # If "${DIR}/current/bin/python3" is a file, move it and create a symlink pointing back to "${DIR}/python"
 if [ "${python3_target}" != "../../bin/python" ]; then
+    echo_dbg "mv '${DIR}/current/bin/${python3_target}' '${DIR}/current/bin/${python3_target}_bin'"
     mv "${DIR}/current/bin/${python3_target}" "${DIR}/current/bin/${python3_target}_bin"
+
+    echo_dbg "ln -nfs '../../bin/python' '${DIR}/current/bin/python3'"
     ln -nfs "../../bin/python" "${DIR}/current/bin/python3"
+
+    echo_dbg "ln -nfs '../../bin/python' '${DIR}/current/bin/${python3_target}'"
     ln -nfs "../../bin/python" "${DIR}/current/bin/${python3_target}"
+
+    echo_dbg "ln -nfs '${python3_target}_bin' '${DIR}/current/bin/python3_target'"
     ln -nfs "${python3_target}_bin" "${DIR}/current/bin/python3_target"
+
     python3_target="${python3_target}_bin"
 else
     python3_target="$(readlink "${DIR}/current/bin/python3_target")"
 fi
 
 if [[ ! -e "${DIR}/pip" ]]; then
-    ln -nfs "current/bin/pip" "${DIR}/pip3"
+    echo_dbg "ln -nfs 'current/bin/pip3' '${DIR}/pip'"
+    ln -nfs "current/bin/pip3" "${DIR}/pip"
+
+    echo_dbg "ln -nfs 'current/bin/pip3' '${DIR}/pip3'"
     ln -nfs "current/bin/pip3" "${DIR}/pip3"
 fi
 
@@ -38,12 +61,30 @@ if [[ -z "${VIRTUAL_ENV}" ]]; then
 else
   "${VIRTUAL_ENV}/bin/${python3_target}_bin" "$@"
 fi
+
 if [[ -n "${venv}" ]]; then
     python3_target="$(readlink "$(pwd)/${venv}/bin/python3")"
+
+    echo_dbg "ln -nfs '${DIR}/python' '$(pwd)/${venv}/bin/${python3_target}'"
     ln -nfs "${DIR}/python" "$(pwd)/${venv}/bin/${python3_target}"
+
+    echo_dbg "cp '${DIR}/current/bin/${python3_target}' '$(pwd)/${venv}/bin/${python3_target}_bin'"
     cp "${DIR}/current/bin/${python3_target}" "$(pwd)/${venv}/bin/${python3_target}_bin"
+
+    echo_dbg "sed -i 's/${python3_target}_bin/${python3_target}/g' '$(pwd)/${venv}/bin/pip'* "
     sed -i "s/${python3_target}_bin/${python3_target}/g" "$(pwd)/${venv}/bin/pip"*
 fi
+
 if [[ -n ${VIRTUAL_ENV} && -e "${VIRTUAL_ENV}" ]]; then
-    grep bin_bin "${VIRTUAL_ENV}"/bin/* | awk -F: '{print $1}' | xargs -I{} sed -i 's/_bin_bin/_bin/g' "{}"
+    # Use grep -l to find files containing the pattern, then loop through them
+    # This is safer and allows for per-file debug messages.
+    echo_dbg "Searching for files with '_bin_bin' in '${VIRTUAL_ENV}/bin/' to correct them."
+    # Use a subshell and process substitution to avoid issues with loops and pipes
+    while IFS= read -r file_to_fix; do
+        # Only perform sed on actual files, not symlinks
+        if [[ -f "$file_to_fix" && ! -L "$file_to_fix" ]]; then
+            echo_dbg "sed -i 's/_bin_bin/_bin/g' '${file_to_fix}'"
+            sed -i 's/_bin_bin/_bin/g' "${file_to_fix}"
+        fi
+    done < <(grep -l "bin_bin" "${VIRTUAL_ENV}"/bin/* 2>/dev/null)
 fi
