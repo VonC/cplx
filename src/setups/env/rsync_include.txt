@@ -7,3 +7,5 @@ cplx/./echos
 cplx/./bin/alias
 cplx/./bin/compare_file.sh
 cplx/./bin/rsync.sh
+cplx/./bin/pkg.sh
+cplx/./bin/install_pkg.sh
