@@ -66,3 +66,9 @@ Deployment target of `rsync.sh`: same `<tool>/current` + `bin/` wrapper
 shape, but this is what user sessions put on their PATH. Only the
 `current` version of each tool survives promotion
 ([Promote a build](../how-to/promote-a-build-into-the-live-tree.md)).
+
+`~/tools/bin` also carries `pkg.sh` and `install_pkg.sh`, which package
+this tree into `~/pkgs/<target>.<stamp>.tar.gz` and re-install it under
+any prefix ([Packaging and relocation tools](relocation-tools.md)); the
+static `patchelf` they need is vendored under `~/tools/patchelf/root/`
+with a `~/tools/bin/patchelf` symlink.
