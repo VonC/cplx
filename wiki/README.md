@@ -35,6 +35,7 @@ Recipes for a precise goal, for readers who already know the basics.
 - 🌐 [Update a tool version](how-to/update-a-tool-version.md)
 - 🌐 [Add or fix a package mirror](how-to/add-or-fix-a-package-mirror.md)
 - 📦 [Promote a build into the live tree](how-to/promote-a-build-into-the-live-tree.md)
+- 📦 [Relocate an install to another prefix](how-to/relocate-an-install-to-another-prefix.md)
 - 🛠️ [Make a release](how-to/make-a-release.md)
 
 ## 📖 Reference
@@ -47,6 +48,7 @@ Exact, dry descriptions of commands, formats and conventions.
 - 🔨 [Tool contract](reference/tool-contract.md)
 - 🛠️ [Directory layout](reference/directory-layout.md)
 - 🌉 [steps.md format](reference/steps-file-format.md)
+- 📦 [Packaging and relocation tools](reference/relocation-tools.md)
 - 🛠️ [Exit codes](reference/exit-codes.md)
 
 ## 💡 Explanation
@@ -54,8 +56,10 @@ Exact, dry descriptions of commands, formats and conventions.
 Background and reasoning: why cplx is built the way it is.
 
 - 🛠️ [Why recompile at all](explanation/why-recompile.md)
+- 🔨 [What kind of build is this](explanation/what-kind-of-build-is-this.md)
 - 🌉 [Two machines, one build](explanation/two-machines-one-build.md)
 - 🔨 [The sandbox root](explanation/the-sandbox-root.md)
 - 🔨 [Anatomy of a build](explanation/anatomy-of-a-build.md)
 - 🌉 [Checkpoints and resume](explanation/checkpoints-and-resume.md)
 - 📦 [The build order](explanation/the-build-order.md)
+- 📦 [Why binaries remember the build home](explanation/why-binaries-remember-the-build-home.md)
