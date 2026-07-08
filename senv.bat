@@ -7,6 +7,8 @@ for %%i in ("%PRJ_DIR%") do SET "PRJ_DIR_NAME=%%~nxi"
 if defined NO_MORE_SENV_%PRJ_DIR_NAME% ( goto:eof )
 
 call "%PRJ_DIR%\tools\init.bat" "%~1"
+set "project_dir_name=%PRJ_DIR_NAME%"
+set "project_dir_unix=%PRJ_DIR_unix%"
 
 doskey steps=bash -c "./steps.sh %1"
 doskey props=bash -c "./properties.sh %1"
@@ -55,7 +57,7 @@ set "PATH=%PRJ_DIR%;%PATH%"
 
 if not defined QUIET_PRJ (  %_info% "project PATH '%PATH%'" )
 if not defined QUIET_PRJ ( %_ok% "project '%PRJ_DIR_name%' senv activated%local_path_msg%: PRJ_DIR='%PRJ_DIR%', for tool '%CPLX_TOOL%'" )
-if not defined CPLX_TOOL ( %_fatal% "CPLX_TOOL must be set: use 'st my_tool' to define it" 42 )
+if not defined CPLX_TOOL ( %_error% "CPLX_TOOL not set: use 'st my_tool' to define it before s/sp/i" )
 grep -q remove_done_markers "%PRJ_DIR%\.git\config" || git -C "%PRJ_DIR%" config --local "diff.remove_done_markers.textconv" "sed -E 's/\s+\(done: ✅\)//g'"
 
 set "NO_MORE_SENV_%PRJ_DIR_NAME%=true"
