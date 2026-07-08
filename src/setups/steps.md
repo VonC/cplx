@@ -1,5 +1,7 @@
 # Setup steps
 
+<img src="../../wiki/assets/logo-cplx-bridge-transparent.png" alt="" height="90" align="right">
+
 This document list all the necessary steps to setup the compilation project on a remote Linux host.
 
 ## Validate the SSH connection {#validate_the_ssh_connection} [🔗](#validate_the_ssh_connection) (done: ✅)

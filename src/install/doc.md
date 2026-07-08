@@ -1,5 +1,7 @@
 # Install process
 
+<img src="../../wiki/assets/logo-cplx-forge-transparent.png" alt="" height="90" align="right">
+
 ## configure step
 
 <https://rpm.pbone.net/index.php3>

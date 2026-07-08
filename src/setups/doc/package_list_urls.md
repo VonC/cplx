@@ -1,5 +1,7 @@
 # Package list URLs
 
+<img src="../../../wiki/assets/logo-cplx-download-transparent.png" alt="" height="90" align="right">
+
 VonC: I need for download_packages_list to be able to parse the "${arch/\./_}_pkgs_url" for "," as URL separator. In other words, its value is no longer just one URL, but possibly one or more than one. Refactor the method to empty the target file '{SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt', and to apply the already implemented filtering, appending the result on '{SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt'. Define a method for one URL and keep download_packages_list to iterate over the possible URLs
 
 GitHub Copilot: # URL Parsing Refactoring for Package Download
