@@ -26,7 +26,7 @@ exists, scp when the remote copy exists, package installs when the
 state: a human reads the plan, the runner reads the checkpoints, and
 both are the same headings. The cost — checkpoint noise in version
 control — is neutralized by a git textconv that strips the
-` (done: ✅)` markers from diffs. The step tree also gives resume its
+`(space)(done: ✅)` markers from diffs. The step tree also gives resume its
 shape: finishing the last child marks the parent done; repeating a
 parent re-opens its children but not its siblings.
 
