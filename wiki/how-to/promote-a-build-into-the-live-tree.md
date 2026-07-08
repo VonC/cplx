@@ -51,4 +51,6 @@ directory is gone from `~/tools/git/`, and `git --version` from a user
 session answers with the new number.
 
 Related: [Directory layout](../reference/directory-layout.md),
-[The build order](../explanation/the-build-order.md).
+[The build order](../explanation/the-build-order.md),
+[Relocate an install to another prefix](relocate-an-install-to-another-prefix.md)
+(the live tree is what `pkg.sh` packages for other accounts).

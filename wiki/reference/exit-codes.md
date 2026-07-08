@@ -18,6 +18,10 @@ prints a red `ERROR` reminder (`use 'st my_tool' to define it`). The
 tool-dependent commands refuse on their own until `st` is run: `s`/`sp`
 and `i` both fatal 2, `s packages reset` fatals 42.
 
+The packaging pair `pkg.sh` / `install_pkg.sh` has its own codes, listed
+with the tools in
+[Packaging and relocation tools](relocation-tools.md).
+
 ## `install.bat` (Windows, `i` / `irc` / `ic`)
 
 | Code | Condition |
