@@ -18,8 +18,8 @@ Promotion is a controlled rsync from one to the other.
    ```
 
    The script syncs the paths listed in `~/cplx/rsync_include.txt`
-   (minus `rsync_exclude.txt`), and — for versioned tools like `git` and
-   `python` — reads each `current` symlink to exclude and then delete
+   (minus `rsync_exclude.txt`), and (for versioned tools like `git` and
+   `python`) reads each `current` symlink to exclude and then delete
    every *other* version directory: promoting 2.52.0 is also what removes
    2.51.0 from the live tree.
 
@@ -41,7 +41,7 @@ Promotion is a controlled rsync from one to the other.
 
 4. Users pick the tool up through its wrappers: `tools/<tool>/bin/<tool>`
    sources the neighboring `setenv` (PATH, `LD_LIBRARY_PATH`, man pages)
-   and execs `../current/bin/<tool>`. Nothing to rebuild on their side —
+   and execs `../current/bin/<tool>`. Nothing to rebuild on their side:
    the `current` symlink is the switch.
 
 ## ✅ Check

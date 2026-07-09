@@ -5,7 +5,7 @@
 _There is no single canonical name for what cplx does, but every piece
 of it has one. In one line: **native, from-source, unprivileged prefix
 builds against an RPM-derived sysroot, made relocatable at install
-time** — or informally, a hand-rolled Spack for offline RHEL servers._
+time**, or informally, a hand-rolled Spack for offline RHEL servers._
 
 ## Native compilation
 
@@ -14,7 +14,7 @@ are the same. Despite the two-machine workflow, the Windows side only
 downloads sources and packages
 ([Two machines, one build](two-machines-one-build.md)); no code
 generation happens there. This matters because native builds can run
-their own test programs — `configure` probes the real target at build
+their own test programs: `configure` probes the real target at build
 time, which a cross-build cannot do.
 
 ## Sysroot build
@@ -23,7 +23,7 @@ The distinctive part. `install_functions.sh` passes `--sysroot=${root}`
 to both the compiler and the linker, so headers and libraries resolve
 inside the synthetic root assembled from unpacked RPMs
 ([The sandbox root](the-sandbox-root.md)) instead of `/usr`. The flag
-and the technique come from the cross-compilation world — a
+and the technique come from the cross-compilation world: a
 cross-toolchain always compiles against the target's sysroot. cplx uses
 it natively, as a way to compile against exact, chosen dependency
 versions without root and without ever touching the system directories.
@@ -52,7 +52,7 @@ effect, a hand-rolled, two-machine, air-gapped member of that family.
 
 The finishing technique: the binaries bake the build account's loader
 and rpath, and `install_pkg.sh` re-anchors them (patchelf + sed) when
-the package is unpacked elsewhere — the pattern conda (prefix
+the package is unpacked elsewhere, the pattern conda (prefix
 rewriting) and Nix (patchelf) rely on. The full reasoning is in
 [Why binaries remember the build home](why-binaries-remember-the-build-home.md).
 
@@ -64,7 +64,7 @@ rewriting) and Nix (patchelf) rely on. The full reasoning is in
 - **Not static linking.** The binaries are dynamically linked;
   self-containment comes from carrying the shared libraries along and
   pointing at them via rpath and the baked dynamic linker. That is
-  precisely why the relocation issue exists — a static build would not
+  precisely why the relocation issue exists: a static build would not
   remember the build home, but a fully static Python or Git (SSL, NSS,
   locales, loadable modules) is impractical.
 - **Not hermetic in the Nix/Bazel sense.** Nix gets relocatability by
@@ -78,9 +78,9 @@ rewriting) and Nix (patchelf) rely on. The full reasoning is in
 
 ## 👉 See also
 
-- [Why recompile at all](why-recompile.md) — why the distro packages
+- [Why recompile at all](why-recompile.md): why the distro packages
   cannot be used in the first place.
-- [Anatomy of a build](anatomy-of-a-build.md) — the phases the forge
+- [Anatomy of a build](anatomy-of-a-build.md): the phases the forge
   runs for one tool.
-- [The sandbox root](the-sandbox-root.md) — how the sysroot is
+- [The sandbox root](the-sandbox-root.md): how the sysroot is
   assembled from RPMs.

@@ -3,7 +3,7 @@
 <img src="../assets/logo-cplx-bridge-transparent.png" alt="" height="90" align="right">
 
 The step runner (`src\utils\steps.sh`) keeps its state in a plain
-Markdown file — `src\setups\steps.md` for the live pipeline. This page
+Markdown file: `src\setups\steps.md` for the live pipeline. This page
 describes the format and the operations on it.
 
 ## One line per step

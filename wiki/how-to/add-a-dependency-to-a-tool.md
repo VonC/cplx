@@ -14,13 +14,13 @@ bottom into `tools/<tool>/root/` on the server.
 ## 📋 Steps
 
 1. Identify the package from the error. A missing header maps to a
-   `-devel` or `-headers` RPM — the table in
+   `-devel` or `-headers` RPM: the table in
    [Diagnose a failed configure](diagnose-a-failed-configure.md) covers
    the usual suspects (`stdio.h` → `glibc-headers`,
    `openssl/ssl.h` → `openssl-devel`, ...).
 
 2. Add its *short name* (no version, no `.rpm`) to the tool's list, in
-   the right position — order matters, dependencies first:
+   the right position (order matters, dependencies first):
 
    ```text
    zlib
@@ -41,8 +41,8 @@ bottom into `tools/<tool>/root/` on the server.
    sp p_zlib-devel
    ```
 
-   or re-run the whole list — the `pkgs\<tool>\last` checkpoint makes it
-   resume where it stopped:
+   or re-run the whole list (the `pkgs\<tool>\last` checkpoint makes it
+   resume where it stopped):
 
    ```cmd
    sp

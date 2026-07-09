@@ -2,7 +2,7 @@
 
 <img src="../assets/logo-cplx-download-transparent.png" alt="" height="90" align="right">
 
-Goal: the package index fails to build, or a download comes back broken —
+Goal: the package index fails to build, or a download comes back broken;
 point cplx at a working mirror for the target distribution.
 
 The index for an architecture is scraped from plain directory listings.
@@ -19,7 +19,7 @@ in order.
    rhel_7_9_x86_64_pkgs_url=https://vault.centos.org/7.9.2009/os/x86_64/Packages/,https://archives.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/[l]/
    ```
 
-   `[l]` is replaced by the lowercase first letter of each package — the
+   `[l]` is replaced by the lowercase first letter of each package: the
    Fedora archive shards its `Packages/` folder that way. The template
    `setup.tpl.properties` keeps commented alternatives for each distro.
 

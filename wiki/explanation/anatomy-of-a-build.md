@@ -28,7 +28,7 @@ setenv → [configure] → [clean] → build → install → package → [deploy
 - **package** tars the install prefix into
   `<tool>-<version>-<timestamp>.<arch>.tar.gz`. The prefix is archived
   *relative to itself*, so it can be unpacked anywhere.
-- **deploy** copies the package to the shared `tools/pkgs/` — but only
+- **deploy** copies the package to the shared `tools/pkgs/`, but only
   for libraries. That is the entire meaning of `CPLX_BIN`: binaries are
   consumed through wrappers, libraries are consumed by other builds
   ([The build order](the-build-order.md)).
@@ -38,7 +38,7 @@ setenv → [configure] → [clean] → build → install → package → [deploy
 The pipeline never remembers "I did this"; it looks for artifacts:
 a grep in `config.log`, a file timestamp in the prefix, an existing
 package newer than the build. This is what makes `i` safely re-runnable
-after any failure — each phase re-decides from what is actually on
+after any failure: each phase re-decides from what is actually on
 disk. It also means the markers must be truthful: a wrong
 `CPLX_CHECK_SRC` makes cplx skip a build that never happened.
 
@@ -48,12 +48,12 @@ Every remote run writes a timestamped log under `logs/`, symlinked as
 `log`, which Windows pulls back and opens after each run. Configure
 failures use a conventional exit code (199) that makes `install.bat`
 additionally fetch `config.log` and append it to the local
-`install.log` — the diagnosis material arrives without ever opening a
+`install.log`: the diagnosis material arrives without ever opening a
 shell on the server
 ([Diagnose a failed configure](../how-to/diagnose-a-failed-configure.md)).
 
 ## 👉 Where to look next
 
-- [Tool contract](../reference/tool-contract.md) — the functions and
+- [Tool contract](../reference/tool-contract.md): the functions and
   markers a tool provides.
 - The long version, with every linker war story: `src/install/doc.md`.

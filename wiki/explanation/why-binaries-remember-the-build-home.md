@@ -3,7 +3,7 @@
 <img src="../assets/logo-cplx-ship-transparent.png" alt="" height="90" align="right">
 
 _Why a tool compiled under `/home/<builder>` refuses to start for an
-account that cannot read that directory — and why it can silently keep
+account that cannot read that directory, and why it can silently keep
 working for the accounts that can._
 
 ## Two paths are burned into every ELF binary
@@ -16,7 +16,7 @@ paths taken from the build account's home
   kernel loads to start the program, set by
   `-Wl,--dynamic-linker=<home>/cplx/tools/<tool>/root/lib64/ld-linux-x86-64.so.2`,
 - the **rpath** (`DT_RPATH`): the list of library directories, set by
-  `-Wl,-rpath=${LD_LIBRARY_PATH}` — absolute directories under the build
+  `-Wl,-rpath=${LD_LIBRARY_PATH}`: absolute directories under the build
   home.
 
 Python adds a third layer of absolute paths in text form: its
@@ -45,7 +45,7 @@ An account in the same group as the builder (on the same server) can read
 the build home, so its processes silently run the loader and libraries
 from there. The install looks self-contained but is not: wiping or moving
 the build home would break that account without any change on its side.
-An account outside the group gets `Permission denied` — the honest
+An account outside the group gets `Permission denied`: the honest
 version of the same dependency.
 
 ## What the installer rewrites, and what it leaves alone
@@ -78,7 +78,7 @@ and an actual run.
 Only partially. The three layers baked into a build have three different
 answers, and only the first one can really move to compile time.
 
-### Layer 1 — the rpath: mostly side-steppable
+### Layer 1 (the rpath): mostly side-steppable
 
 Linking with `$ORIGIN`-relative entries (`$ORIGIN` expands, at load
 time, to the directory of the binary being loaded) plus
@@ -97,24 +97,24 @@ current layout, though:
   valid after deployment are wrong for the test programs `configure`
   runs during the build itself.
 
-Even done perfectly, this only shrinks the patch pass — the next two
+Even done perfectly, this only shrinks the patch pass: the next two
 layers remain.
 
-### Layer 2 — the interpreter (PT_INTERP): not side-steppable in general
+### Layer 2 (the interpreter, PT_INTERP): not side-steppable in general
 
 There is no `$ORIGIN` for the interpreter: the kernel resolves it as an
 absolute path at `execve`, before any environment or loader logic
 exists. The only compile-time escape is pointing at the system
-`/lib64/ld-linux-x86-64.so.2` — valid only when the sandbox glibc
+`/lib64/ld-linux-x86-64.so.2`, valid only when the sandbox glibc
 matches the server glibc (the common case, since the root is unpacked
 from the server's own RPMs), and invalid the day a recompiled
 glibc/gcc ships to an older server, which is one of the reasons cplx
 exists. The wrapper alternative (an `exec <ld.so> --library-path ...`
 script in front of each binary) bypasses `PT_INTERP` entirely but
-confuses everything that inspects its own executable — Python's
+confuses everything that inspects its own executable: Python's
 `sys.executable`, shebangs, subprocesses.
 
-### Layer 3 — the text paths: never side-steppable
+### Layer 3 (the text paths): never side-steppable
 
 Python's `configure --prefix` lands in `pyvenv.cfg`,
 `_sysconfigdata_*.py`, pkgconfig `*.pc` files and console-script
@@ -128,16 +128,16 @@ ELF pass smaller. And rewriting at install time is exactly what the
 established binary-distribution systems do: **conda** records a long
 placeholder prefix at build time and rewrites it (text files and
 binaries alike) in every package it installs; **Nix** sets interpreters
-and rpaths with `patchelf` — the same tool `install_pkg.sh` uses.
+and rpaths with `patchelf`, the same tool `install_pkg.sh` uses.
 cplx independently converged on the same design: ship the installer
 with the package, and make relocation a normal, repeatable step of
 deployment rather than chasing a fully relocatable link.
 
 ## 👉 See also
 
-- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md)
-  — the recipe.
-- [Packaging and relocation tools](../reference/relocation-tools.md) —
+- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md):
+  the recipe.
+- [Packaging and relocation tools](../reference/relocation-tools.md):
   the exact behavior of `pkg.sh` and `install_pkg.sh`.
-- [The sandbox root](the-sandbox-root.md) — where those absolute paths
+- [The sandbox root](the-sandbox-root.md): where those absolute paths
   come from in the first place.

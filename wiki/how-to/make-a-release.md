@@ -3,7 +3,7 @@
 <img src="../assets/logo-cplx-transparent.png" alt="" height="90" align="right">
 
 Goal: turn the current `-SNAPSHOT` work into a tagged cplx release with a
-regenerated changelog — or cleanly back out of a failed attempt.
+regenerated changelog, or cleanly back out of a failed attempt.
 
 Versioning is handled by the `dev_workflow` submodule around one file,
 `version.txt`:

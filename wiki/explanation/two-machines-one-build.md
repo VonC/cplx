@@ -16,8 +16,8 @@ division of labor and the single, narrow channel between them.
 
 The split is not a preference but a constraint: only the Windows side
 has network access, and only the Linux side produces binaries that are
-valid for the target (same kernel, same arch, and — once mirrored into
-the sandbox — the right old glibc to link against).
+valid for the target (same kernel, same arch, and (once mirrored into
+the sandbox) the right old glibc to link against).
 
 ## One alias, one folder, one comment
 
@@ -34,7 +34,7 @@ Traffic over the bridge is deliberately boring:
 - commands run as one-shot `ssh <alias> "cd ...; bash ..."` calls whose
   last output line is the remote exit status,
 - results come *back* too: the build log after every run, and
-  `config.log` when configure fails — the server is headless, all
+  `config.log` when configure fails; the server is headless, all
   reading happens in VS Code on Windows.
 
 ## Identity of the machine, not of the human
@@ -42,7 +42,7 @@ Traffic over the bridge is deliberately boring:
 The first crossing asks the server who it is (`/etc/os-release` +
 `uname -m`) and freezes the answer as the `architecture` property
 (`rhel_9.6_x86_64`). From then on, every distribution-specific artifact
-— package index, dependency lists, package suffix (`el9.x86_64`) — is
+(package index, dependency lists, package suffix (`el9.x86_64`)) is
 keyed by that string. Pointing `SSH_CONFIG_ENTRY` at a different server
 is all it takes to build for another distribution
 ([Target a new Linux server](../tutorials/03-target-a-new-linux-server.md)).
@@ -50,14 +50,14 @@ is all it takes to build for another distribution
 ## Why not just mirror a repository?
 
 Mirroring yum repositories offline would bring thousands of packages,
-GPG chains and repo metadata for the *old* versions only — the new
+GPG chains and repo metadata for the *old* versions only; the new
 versions still would not exist. cplx inverts the approach: bring the
 minimum (one source archive, a curated handful of RPMs for headers and
 build deps) and spend the effort on the compile side instead.
 
 ## 👉 Where to look next
 
-- [Checkpoints and resume](checkpoints-and-resume.md) — why crossing the
+- [Checkpoints and resume](checkpoints-and-resume.md): why crossing the
   bridge twice never redoes work.
-- [Anatomy of a build](anatomy-of-a-build.md) — what happens once the
+- [Anatomy of a build](anatomy-of-a-build.md): what happens once the
   material is on the other side.
