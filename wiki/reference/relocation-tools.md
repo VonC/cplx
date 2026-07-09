@@ -8,7 +8,7 @@ package. They live in `src/setups/env/bin/`, reach the server as
 `rsync.sh`, and travel inside every `tools` archive from then on.
 
 Both source `echos` from their own directory or `../echos/`, and fall
-back to plain `echo` when neither exists — so `install_pkg.sh` runs
+back to plain `echo` when neither exists, so `install_pkg.sh` runs
 standalone next to an archive on a foreign account.
 
 ## `pkg.sh <folder>`
@@ -68,8 +68,8 @@ Exit codes:
 
 ## 👉 See also
 
-- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md)
-  — the recipe using both tools.
-- [Why binaries remember the build home](../explanation/why-binaries-remember-the-build-home.md)
-  — why the passes exist.
-- [Directory layout](directory-layout.md) — where the trees sit.
+- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md):
+  the recipe using both tools.
+- [Why binaries remember the build home](../explanation/why-binaries-remember-the-build-home.md):
+  why the passes exist.
+- [Directory layout](directory-layout.md): where the trees sit.

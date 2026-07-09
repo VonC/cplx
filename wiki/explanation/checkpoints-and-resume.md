@@ -24,8 +24,8 @@ exists, scp when the remote copy exists, package installs when the
 
 `steps.md` is simultaneously the documentation of the pipeline and its
 state: a human reads the plan, the runner reads the checkpoints, and
-both are the same headings. The cost — checkpoint noise in version
-control — is neutralized by a git textconv that strips the
+both are the same headings. The cost (checkpoint noise in version
+control) is neutralized by a git textconv that strips the
 `(space)(done: ✅)` markers from diffs. The step tree also gives resume its
 shape: finishing the last child marks the parent done; repeating a
 parent re-opens its children but not its siblings.
@@ -34,7 +34,7 @@ parent re-opens its children but not its siblings.
 
 There is no `--resume` flag anywhere because resuming is not a mode:
 `s`, `sp` and `i` always pick up from the last evidence. The flags go
-the other direction — forcing *re*-work (`irc`, `sdpl`, the `>` list
+the other direction: forcing *re*-work (`irc`, `sdpl`, the `>` list
 prefix, `CPLX_FORCE_RELOAD_PACKAGES`) when the evidence is stale, for
 example after a mirror served a broken file.
 
@@ -52,5 +52,5 @@ also clear the dependent steps that consumed the bad output.
 
 ## 👉 Where to look next
 
-- [steps.md format](../reference/steps-file-format.md) — the exact file
+- [steps.md format](../reference/steps-file-format.md): the exact file
   grammar and API.

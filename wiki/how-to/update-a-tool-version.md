@@ -25,8 +25,8 @@ git 2.51.0 → 2.52.0.
    unset: `setup.sh` asks the GitHub API for the latest clean tag
    (alphas/betas rejected, `rc` only on request).
 
-2. Reload the session for the new value, then repeat the source steps —
-   downloads and transfers are otherwise skipped as already done:
+2. Reload the session for the new value, then repeat the source steps
+   (downloads and transfers are otherwise skipped as already done):
 
    ```cmd
    st git
@@ -45,7 +45,7 @@ git 2.51.0 → 2.52.0.
 
    On the server, the dispatcher extracts into `sources/2.52.0/`,
    repoints `sources/current`, and the phases run. The `current` symlink
-   of the install prefix moves to `git-2.52.0` — the previous version
+   of the install prefix moves to `git-2.52.0`; the previous version
    stays on disk until you prune it.
 
 ## ✅ Check

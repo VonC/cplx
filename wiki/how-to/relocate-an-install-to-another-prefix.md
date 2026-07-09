@@ -3,7 +3,7 @@
 <img src="../assets/logo-cplx-ship-transparent.png" alt="" height="90" align="right">
 
 Goal: run the packaged tools on an account or directory that has no
-access to the build account's home — another user's `$HOME`, or a shared
+access to the build account's home: another user's `$HOME`, or a shared
 prefix like `/project/<team>/refer/<app>`.
 
 Background: compiled binaries hard-code the build home in their
@@ -92,13 +92,13 @@ is an import: `<prefix>/tools/python/current/bin/python -c "import ssl,
 zlib; print('ok')"`.
 
 From an account that can still read the build home, absence of failure
-proves nothing — observe instead: `LD_DEBUG=libs <binary> 2>&1 | grep
+proves nothing; observe instead: `LD_DEBUG=libs <binary> 2>&1 | grep
 <builder>` and `strace -f -e trace=execve,openat <binary>` must show no
 `/home/<builder>` access.
 
 ## 👉 See also
 
-- [Packaging and relocation tools](../reference/relocation-tools.md) —
+- [Packaging and relocation tools](../reference/relocation-tools.md):
   flags, passes and exit codes.
-- [Promote a build into the live tree](promote-a-build-into-the-live-tree.md)
-  — what `pkg.sh` packages.
+- [Promote a build into the live tree](promote-a-build-into-the-live-tree.md):
+  what `pkg.sh` packages.

@@ -2,8 +2,8 @@
 
 <img src="../assets/logo-cplx-bridge-transparent.png" alt="" height="90" align="right">
 
-Goal: re-run part of the setup pipeline — one step, a branch of steps, or
-everything from a point on — without redoing what already succeeded.
+Goal: re-run part of the setup pipeline (one step, a branch of steps, or
+everything from a point on) without redoing what already succeeded.
 
 The pipeline state lives in `src\setups\steps.md`: each step is a heading
 carrying an anchor and, once finished, a ` (done: ✅)` marker. A marked
@@ -24,7 +24,7 @@ step is skipped on the next run. Two verbs act on the markers:
    look at the file itself to see the ✅ marks).
 
 2. Repeat or reset from the command line. The name is fuzzy-matched, so a
-   fragment is enough — this is exactly what the `scpe`/`scps` aliases do:
+   fragment is enough; this is exactly what the `scpe`/`scps` aliases do:
 
    ```cmd
    s copy_the_sources     &:: repeat this step (and its substeps)

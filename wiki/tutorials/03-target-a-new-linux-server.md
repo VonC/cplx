@@ -2,8 +2,8 @@
 
 <img src="../assets/logo-cplx-bridge-transparent.png" alt="" height="90" align="right">
 
-In this tutorial you point cplx at a Linux server it has never seen — a
-new host, or a new distribution such as RHEL 9.6 after years of RHEL 7.9 —
+In this tutorial you point cplx at a Linux server it has never seen (a
+new host, or a new distribution such as RHEL 9.6 after years of RHEL 7.9)
 and prepare everything a first build needs: the SSH crossing, the package
 index for that distribution, and the per-tool dependency lists.
 

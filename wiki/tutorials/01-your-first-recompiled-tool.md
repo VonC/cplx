@@ -39,7 +39,7 @@ senv
 ```
 
 The session activates, but ends with `ERROR: CPLX_TOOL not set: use
-'st my_tool' to define it before s/sp/i` — cplx always works on one tool
+'st my_tool' to define it before s/sp/i`: cplx always works on one tool
 at a time, and every pipeline command needs one. Pick one:
 
 ```cmd
@@ -75,7 +75,7 @@ sp
 resolves each short name against the generated package index, downloads
 the RPMs (mirrors, vault, browser-like headers when needed), `scp`s them,
 and unpacks them on the server into the tool's private sandbox
-`tools/pass/root/` — never into the system. `rpm` and `yum` are not used.
+`tools/pass/root/`, never into the system. `rpm` and `yum` are not used.
 
 ## 5. Compile, package, deploy
 

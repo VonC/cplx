@@ -27,12 +27,12 @@ Checked by the shared `setenv()`; missing → fatal 22/23/24.
 
 ## Optional hook
 
-`<tool>_setenv()` — called at the end of the shared `setenv()` to bend
+`<tool>_setenv()`: called at the end of the shared `setenv()` to bend
 the environment: `git_setenv` sets `M4`; `glibc_setenv` and `gcc_setenv`
 swap in the freshly built make/gcc and neutralize rpath flags;
 `make4_setenv` wires `automake116` in.
 
-## Inherited — do not redefine
+## Inherited: do not redefine
 
 `install()`, `package()`, `find_package()`, `deploy()` come from
 `install_functions.sh`:
@@ -41,7 +41,7 @@ swap in the freshly built make/gcc and neutralize rpath flags;
   when `CPLX_CHECK_PREFIX` is newer than `CPLX_CHECK_SRC`,
 - `package()` tars the prefix into
   `<prefix>-<YYYYMMDD.HHMM>.<CPLX_ARCH_EXT>.tar.gz`,
-- `deploy()` copies the package to the shared `tools/pkgs/` — only for
+- `deploy()` copies the package to the shared `tools/pkgs/`, only for
   libraries (`CPLX_BIN` empty).
 
 ## The build environment they run in
@@ -57,7 +57,7 @@ swap in the freshly built make/gcc and neutralize rpath flags;
 
 | Marker | Question it answers |
 | --- | --- |
-| `CPLX_CONFIG_DONE` | "did configure finish?" — `default` = `creating Makefile$` in `config.log`; else `<grep-pattern> <file>` |
+| `CPLX_CONFIG_DONE` | "did configure finish?": `default` = `creating Makefile$` in `config.log`; else `<grep-pattern> <file>` |
 | `CPLX_CHECK_SRC` | "did the build produce its artifact?" (fatal 193 at install time when absent) |
 | `CPLX_CHECK_PREFIX` | "is it installed, and newer than the build?" |
 

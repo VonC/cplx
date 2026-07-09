@@ -6,7 +6,7 @@ The two trees: the repository on Windows, and the working tree it creates
 on the Linux server under `cplx_path` (the folder named by the
 `#<alias>_cd` comment in `~/.ssh/config`, typically `~/cplx`).
 
-## Windows — the repository
+## Windows: the repository
 
 ```text
 cplx\
@@ -38,7 +38,7 @@ cplx\
 └── t\                    GCC installation manual (reference copy)
 ```
 
-## Linux — the working tree (`cplx_path`, e.g. `~/cplx`)
+## Linux: the working tree (`cplx_path`, e.g. `~/cplx`)
 
 ```text
 ~/cplx/
@@ -60,7 +60,7 @@ cplx\
         └── <tool>-<ver>-<stamp>.<arch>.tar.gz   the product
 ```
 
-## Linux — the live tree (`~/tools`)
+## Linux: the live tree (`~/tools`)
 
 Deployment target of `rsync.sh`: same `<tool>/current` + `bin/` wrapper
 shape, but this is what user sessions put on their PATH. Only the

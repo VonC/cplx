@@ -46,7 +46,7 @@ comment), `architecture` (detected, e.g. `rhel_9.6_x86_64`), and
 `<architecture>_pkgs_url` mirror lists.
 
 `src\setups\env\cplx.properties` (template `.tpl`): the subset shipped to
-the server — `services`, `CPLX_ARCH_EXT`, `CPLX_CHECK_PREFIX`,
+the server: `services`, `CPLX_ARCH_EXT`, `CPLX_CHECK_PREFIX`,
 `CPLX_CHECK_SRC`, `CPLX_BIN`, `CPLX_CONFIG_DONE`, plus host/path/arch.
 
 Read and written by `src\utils\properties.sh` (`get_property`,
