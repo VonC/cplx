@@ -7,9 +7,9 @@
 # account's /home/<user> to the prefix. Run it from any account: it only
 # needs the archive, this script, and the patchelf shipped in the tools
 # archive.
-# my-project keeps a temporary application-specific variant
-# (tools/install_pkg.sh) until it consumes this one: see my-project
-# docs/pkg-tools-migration-to-cplx.md.
+# Application-specific install steps (extra bin entries) belong to the
+# consuming project's own deployment script (my-project does them in
+# tools/deploy_pkgs.sh: see my-project docs/pkg-tools-migration-to-cplx.md).
 
 # echos sits next to this script (standalone copy next to the archives) or
 # one level up (~/cplx/bin + ~/cplx/echos, ~/tools/bin + ~/tools/echos).
@@ -103,7 +103,11 @@ install_optional_bin_entries() {
 
     install_bin_link "echos" "$INSTALL_PREFIX/tools/echos/echos" && installed=1
     install_bin_link "compare_file.sh" "$INSTALL_PREFIX/tools/bin/compare_file.sh" && installed=1
-    install_bin_wrapper "pkg" "$INSTALL_PREFIX/tools/bin/pkg.sh" && installed=1
+    # A symlink, not a wrapper: the dispatcher routes 'pkg <target>' to
+    # a pkg_<target> overlay found in its calling directory, so $0 must
+    # stay in <prefix>/bin where the overlays are linked.
+    install_bin_link "pkg" "$INSTALL_PREFIX/tools/bin/pkg" && installed=1
+    install_bin_wrapper "pkg_tools" "$INSTALL_PREFIX/tools/bin/pkg_tools.sh" && installed=1
     install_bin_wrapper "install_pkg" "$INSTALL_PREFIX/tools/bin/install_pkg.sh" && installed=1
 
     if [ "$installed" -eq 1 ]; then
@@ -445,26 +449,22 @@ if ! rsync -av --delete "$SOURCE_PATH/" "$DEST_PATH/"; then
 fi
 fix_home_symlink_targets "$DEST_PATH"
 
-# --- 6. Sync distinct config files (.env, .env_) ---
-# These files are extracted to the root of STAGING_DIR, outside the TARGET folder.
-
-# Check for '.env' (tools target)
-if [ -f "$STAGING_DIR/.env" ]; then
-    task "Deploying '.env' to $INSTALL_PREFIX..."
-    if ! rsync -av "$STAGING_DIR/.env" "$INSTALL_PREFIX/"; then
-        fatal "Error: Rsync (.env) failed." 7
+# --- 6. Deploy the archive's root-level files ---
+# pkg.sh ships extra top-level items next to the target folder in the
+# archive (.env and .env_ for a tools target, anything passed through
+# its --add option, like my-project's senv). Every regular file found
+# at the staging root is deployed to the prefix and re-anchored.
+shopt -s dotglob nullglob
+for root_file in "$STAGING_DIR"/*; do
+    [ -f "$root_file" ] || continue
+    root_file_name="$(basename "$root_file")"
+    task "Deploying '$root_file_name' to $INSTALL_PREFIX..."
+    if ! rsync -av "$root_file" "$INSTALL_PREFIX/"; then
+        fatal "Error: Rsync ($root_file_name) failed." 7
     fi
-    fix_text_paths "$INSTALL_PREFIX/.env"
-fi
-
-# Check for '.env_' (tools target)
-if [ -f "$STAGING_DIR/.env_" ]; then
-    task "Deploying '.env_' to $INSTALL_PREFIX..."
-    if ! rsync -av "$STAGING_DIR/.env_" "$INSTALL_PREFIX/"; then
-        fatal "Error: Rsync (.env_) failed." 8
-    fi
-    fix_text_paths "$INSTALL_PREFIX/.env_"
-fi
+    fix_text_paths "$INSTALL_PREFIX/$root_file_name"
+done
+shopt -u dotglob nullglob
 
 # --- 6b. Clear stale bytecode caches ---
 # Old __pycache__ entries keep the build account's paths in their metadata
