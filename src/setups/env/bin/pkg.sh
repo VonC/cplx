@@ -6,8 +6,9 @@ set -o pipefail
 # account (typically the live tree 'tools') into a deterministic tarball
 # under ~/pkgs, deduplicated by SHA1, with a '<target>.latest.tar.gz'
 # symlink. The matching relocating installer is install_pkg.sh.
-# my-project keeps a temporary application-specific variant (tools/pkg.sh)
-# until it consumes this one: see my-project docs/pkg-tools-migration-to-cplx.md.
+# Consuming projects add their target rules through --add and the --
+# tar passthrough (my-project does in its tools/pkg_pdfs.sh overlay:
+# see my-project docs/pkg-tools-migration-to-cplx.md).
 
 # echos sits next to this script (standalone copy) or one level up
 # (~/cplx/bin + ~/cplx/echos, and ~/tools/bin + ~/tools/echos after rsync.sh).
@@ -29,11 +30,46 @@ if ! command -v task >/dev/null 2>&1; then
 fi
 
 # ================= CONFIGURATION =================
-# The folder inside $HOME to package
-if [ -z "$1" ]; then
-    fatal "Usage: $0 <folder_name>" 1
+# Arguments: <folder_name> [--add <item>]... [-- <tar args...>]
+# The folder inside $HOME to package comes first. Each --add ships one
+# extra top-level item (a path relative to $HOME) next to it in the
+# archive. Everything after the -- sentinel is passed to tar verbatim,
+# in order, so a consuming project can inject its own exclusion rules
+# without forking this script (my-project does: see its
+# tools/pkg_pdfs.sh overlay).
+PKG_USAGE="Usage: $0 <folder_name> [--add <item>]... [-- <tar args...>]"
+TARGET_FOLDER=""
+EXTRA_ITEMS=()
+EXTRA_TAR_PARAMS=()
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --add)
+            if [ -z "$2" ]; then
+                fatal "--add requires an item argument. $PKG_USAGE" 1
+            fi
+            EXTRA_ITEMS+=("$2")
+            shift
+            ;;
+        --)
+            shift
+            EXTRA_TAR_PARAMS=("$@")
+            break
+            ;;
+        -*)
+            fatal "Unknown option: $1. $PKG_USAGE" 1
+            ;;
+        *)
+            if [ -n "$TARGET_FOLDER" ]; then
+                fatal "Only one folder can be packaged ('$TARGET_FOLDER' and '$1'). $PKG_USAGE" 1
+            fi
+            TARGET_FOLDER="$1"
+            ;;
+    esac
+    shift
+done
+if [ -z "$TARGET_FOLDER" ]; then
+    fatal "$PKG_USAGE" 1
 fi
-TARGET_FOLDER="$1"
 
 # Destination for packages
 PKG_DIR="$HOME/pkgs"
@@ -71,6 +107,18 @@ if [ "$TARGET_FOLDER" == "tools" ]; then
             ITEMS_TO_ARCHIVE+=("$extra_env_file")
         fi
     done
+fi
+
+# Apply the caller's extension arguments: extra items first, then the
+# verbatim tar rules (appended after the default exclusions, so the
+# caller's --no-wildcards-match-slash toggles keep their relative order).
+for extra_item in "${EXTRA_ITEMS[@]}"; do
+    task "Adding requested extra item to archive list: $extra_item"
+    ITEMS_TO_ARCHIVE+=("$extra_item")
+done
+if [ "${#EXTRA_TAR_PARAMS[@]}" -gt 0 ]; then
+    task "Applying ${#EXTRA_TAR_PARAMS[@]} caller-provided tar argument(s)"
+    EXCLUDE_PARAMS+=("${EXTRA_TAR_PARAMS[@]}")
 fi
 
 # -C "$HOME"                   : Jump to home so we archive relative path '$TARGET_FOLDER/'

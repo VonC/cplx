@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# pkg dispatcher, promoted to ~/tools/bin/pkg and linked as
+# <prefix>/bin/pkg by install_pkg.sh. 'pkg <target>' runs the project
+# overlay pkg_<target> (or pkg_<target>.sh) found in its own folder
+# when present, since it carries the target's packaging rules (like
+# pkg_pdfs for my-project), and falls back to the generic pkg.sh
+# otherwise: the sibling copy first, then ../tools/bin/pkg.sh, so the
+# same file works from <prefix>/bin (a symlink keeps $0 there) and
+# from ~/tools/bin directly.
+
+pkg_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -n "$1" ]; then
+    for pkg_overlay in "$pkg_dir/pkg_$1" "$pkg_dir/pkg_$1.sh"; do
+        if [ -e "$pkg_overlay" ]; then
+            shift
+            exec bash "$pkg_overlay" "$@"
+        fi
+    done
+fi
+
+for pkg_generic in "$pkg_dir/pkg.sh" "$pkg_dir/../tools/bin/pkg.sh"; do
+    if [ -e "$pkg_generic" ]; then
+        exec bash "$pkg_generic" "$@"
+    fi
+done
+
+echo " FATAL 1 : [pkg] generic pkg.sh not found next to this dispatcher or in ../tools/bin" >&2
+exit 1
