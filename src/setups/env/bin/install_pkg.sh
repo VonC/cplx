@@ -42,6 +42,13 @@ PREFIX_SED=""
 PREFIX_SED_PAT=""
 # =================================================
 
+# The home anchor of every rewrite pattern, composed at runtime: a
+# literal '/home/' followed by more path in this script's own lines
+# would itself be rewritten by fix_text_paths when this file sits
+# inside a deployed tree, corrupting the deployed copy (its sed rules
+# and find patterns would then only match the installation prefix).
+HOME_ANCHOR="/ho""me/"
+
 sed_escape_replacement() {
     printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'
 }
@@ -141,8 +148,8 @@ fix_home_symlink_targets() {
         # tree is <prefix>/tools. Map the build layout first, then any other
         # /home/<user> anchor to the installation prefix.
         new_target="$(printf '%s\n' "$old_target" | sed \
-            -e "s|^/home/[^/]*/cplx/tools/|${PREFIX_SED}/tools/|" \
-            -e "s|^/home/[^/]*/|${PREFIX_SED}/|")"
+            -e "s|^${HOME_ANCHOR}[^/]*/cplx/tools/|${PREFIX_SED}/tools/|" \
+            -e "s|^${HOME_ANCHOR}[^/]*/|${PREFIX_SED}/|")"
 
         if [ "$new_target" = "$old_target" ]; then
             continue
@@ -153,7 +160,7 @@ fix_home_symlink_targets() {
             fatal "Error: Failed to rewrite symlink '$link_path'." 17
         fi
         fixed=$((fixed + 1))
-    done < <(find "$root_path/." -type l -lname '/home/*' -print0 2>/dev/null)
+    done < <(find "$root_path/." -type l -lname "${HOME_ANCHOR}*" -print0 2>/dev/null)
 
     if [ "$fixed" -gt 0 ]; then
         ok "Fixed $fixed absolute home symlink target(s) under '$root_path'."
@@ -174,11 +181,11 @@ fix_text_paths() {
     # restored by the last rule only. This keeps the rules from re-matching
     # each other's output and keeps the pass idempotent even when the
     # prefix itself lives under /home.
-    if ! grep -rlIZ --exclude-dir=__pycache__ -- "/home/[^/]*/" "$root_path" 2>/dev/null \
+    if ! grep -rlIZ --exclude-dir=__pycache__ -- "${HOME_ANCHOR}[^/]*/" "$root_path" 2>/dev/null \
         | xargs -0 -r sed -i \
             -e "s|${PREFIX_SED_PAT}/|\x01|g" \
-            -e "s|/home/[^/]*/cplx/tools/|\x01tools/|g" \
-            -e "s|/home/[^/]*/|\x01|g" \
+            -e "s|${HOME_ANCHOR}[^/]*/cplx/tools/|\x01tools/|g" \
+            -e "s|${HOME_ANCHOR}[^/]*/|\x01|g" \
             -e "s|\x01|${PREFIX_SED}/|g"; then
         fatal "Error: Text path fix failed under '$root_path'" 12
     fi
