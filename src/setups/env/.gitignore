@@ -1,5 +1,6 @@
 /certs/*
 !/certs/.keep
+!/certs/pinentry-wrapper.sh
 bare/
 a
 aa
