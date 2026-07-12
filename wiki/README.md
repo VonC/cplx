@@ -36,6 +36,7 @@ Recipes for a precise goal, for readers who already know the basics.
 - 🌐 [Add or fix a package mirror](how-to/add-or-fix-a-package-mirror.md)
 - 📦 [Promote a build into the live tree](how-to/promote-a-build-into-the-live-tree.md)
 - 📦 [Relocate an install to another prefix](how-to/relocate-an-install-to-another-prefix.md)
+- 📦 [Manage git credentials with git-pass-helper](how-to/manage-git-credentials-with-git-pass-helper.md)
 - 🛠️ [Make a release](how-to/make-a-release.md)
 
 ## 📖 Reference
