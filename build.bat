@@ -34,13 +34,13 @@ call "%build_dir%\tools\dev_workflow\t_build.bat" :pre-processing %*
 ::  ===============================================
 ::  BUILD PROJECT
 ::  ===============================================
-%_stack_call% "%project_dir%\tools\dev_workflow\get-version.bat"
+%_stack_call% "%build_dir%\tools\dev_workflow\get-version.bat"
 %_info% "----------------------------------------"
 %_info% "Build the project '%project_dir_name%', version '%project_version%'"
 %_info% "----------------------------------------"
 
-mkdir "%project_dir%\target" 2>NUL
-del /F /Q "%project_dir%\target\*.*" 2>NUL
+mkdir "%build_dir%\target" 2>NUL
+del /F /Q "%build_dir%\target\*.*" 2>NUL
 
 %_task% "Start build of '%project_dir_name%' with build_params '%build_params_echos%'"
 set "cmd=%build_dir%\src\setups\setup.bat"
@@ -66,5 +66,5 @@ set "build_dir="
 goto:eof
 
 :call_echos_stack
-if not defined ECHOS_STACK ( set "CURRENT_SCRIPT=%~nx0" & goto:eof ) else ( call "%project_dir%\tools\batcolors\echos.bat" :stack %~nx0 )
+if not defined ECHOS_STACK ( set "CURRENT_SCRIPT=%~nx0" & goto:eof ) else ( call "%build_dir%\tools\batcolors\echos.bat" :stack %~nx0 )
 goto:eof
