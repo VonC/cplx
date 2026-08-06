@@ -7,6 +7,7 @@ for %%i in ("%PRJ_DIR%") do SET "PRJ_DIR_NAME=%%~nxi"
 if defined NO_MORE_SENV_%PRJ_DIR_NAME% ( goto:eof )
 
 call "%PRJ_DIR%\tools\init.bat" "%~1"
+set "project_dir=%PRJ_DIR%"
 set "project_dir_name=%PRJ_DIR_NAME%"
 set "project_dir_unix=%PRJ_DIR_unix%"
 
