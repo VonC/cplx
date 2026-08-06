@@ -22,6 +22,17 @@ The packaging pair `pkg.sh` / `install_pkg.sh` has its own codes, listed
 with the tools in
 [Packaging and relocation tools](relocation-tools.md).
 
+## `switchtool.bat` (`st`)
+
+| Code | Condition |
+| --- | --- |
+| 18 | could not create `setup.properties` from `setup.tpl.properties` |
+
+A missing `src\setups\setup.properties` (git-ignored, machine-local) is
+not fatal: `st` recreates it from the committed template with a warning,
+and the placeholders at its end still need real server values before
+`s`/`sp`/`i`.
+
 ## `install.bat` (Windows, `i` / `irc` / `ic`)
 
 | Code | Condition |
