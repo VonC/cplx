@@ -28,7 +28,7 @@ of every archive root file.
 
 The project also documents itself and refreshes its toolchain: a Diataxis
 wiki (tutorials, how-to guides, reference, explanations) with a README
-front page and the five theme logos; Git 2.51.0 and Python 3.13.7 in
+front page and the five theme logos; Git 2.52.0 and Python 3.13.9 in
 senv; a per-tool env chain (.env_user sourcing .env_git and .env_python);
 gpg prompts repaired through a self-relocating pinentry wrapper; and
 install-side comfort: several source archives tolerated (newest wins with
@@ -70,6 +70,7 @@ deployed file against its cplx source.
 - *(install_pkg)* Survive the own relocation text pass
 - *(certs)* Prompt through a pinentry wrapper
 - *(switchtool)* Auto-create setup.properties
+- *(bat)* Restore the project_dir export
 
 ### 🚜 Refactor (v0.26.0)
 
