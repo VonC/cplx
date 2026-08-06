@@ -7,7 +7,12 @@ for %%i in ("%~dp0.") do SET "script_dir=%%~fi"
 for %%i in ("%script_dir%\..") do ( set "senv_dir=%%~fi" )
 call %script_dir%\batcolors\echos_macros.bat
 
-for /f "tokens=2 delims==" %%i in ('type "src\setups\setup.properties" ^| findstr /i /c:"tools_to_recompile"') do set "tools=%%i"
+if not exist "%senv_dir%\src\setups\setup.properties" (
+  %_warning% "'src\setups\setup.properties' missing: creating it from 'setup.tpl.properties', fill its placeholders before s/sp/i"
+  copy /y "%senv_dir%\src\setups\setup.tpl.properties" "%senv_dir%\src\setups\setup.properties" >nul
+  if errorlevel 1 %_fatal% "Could not create 'src\setups\setup.properties' from the template" 18
+)
+for /f "tokens=2 delims==" %%i in ('type "%senv_dir%\src\setups\setup.properties" ^| findstr /i /c:"tools_to_recompile"') do set "tools=%%i"
 
 if "%1"=="" (
   %_info% "Current tool CPLX_TOOL='%CPLX_TOOL%', tools='%tools%'"
