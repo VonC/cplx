@@ -1,5 +1,45 @@
-0.26.0-SNAPSHOT -- Git and Python upgrade on RHEL9.6
+0.26.0-SNAPSHOT -- Amnesia for the build home
 
-- Git 2.51.0 (from 2.51.0-rc2)
-- Python 3.13.7 (from 3.13.6)
-- Sync Python build to tool
+install_pkg.sh re-anchors every path a binary memorized
+
+- Fork no more
+  -- pkg gains --add, a dispatcher, and thin project overlays
+- The forge writes its manual
+  -- a Diataxis wiki, a front page, and five theme logos
+
+This cycle makes cplx packages portable. pkg.sh archives any $HOME folder
+into ~/pkgs with a deterministic tar (sorted names, no gzip timestamp),
+SHA1 dedup and a latest symlink; install_pkg.sh unpacks the newest archive
+under any `--prefix` and re-anchors symlinks, text paths, `__pycache__` and
+ELF interpreter/rpath (patchelf) there. Every tools archive now carries
+its own installer, and both scripts survive their own relocation text
+pass. The extension point keeps consuming projects on one shared copy:
+repeatable `--add` items, a -- tar passthrough, the pkg dispatcher routing
+`pkg_<target>` overlays, the pkg_tools front end, and a generalized deploy
+of every archive root file.
+
+The project also documents itself and refreshes its toolchain: a Diataxis
+wiki (tutorials, how-to guides, reference, explanations) with a README
+front page and the five theme logos; Git 2.51.0 and Python 3.13.7 in
+senv; a per-tool env chain (.env_user sourcing .env_git and .env_python);
+gpg prompts repaired through a self-relocating pinentry wrapper; and
+install-side comfort: several source archives tolerated (newest wins with
+a warning), rsync.sh for live-tree promotion, compare_file.sh to diff a
+deployed file against its cplx source.
+
+### Key changes
+
+- **Packaging and relocation canon** pkg.sh and install_pkg.sh ship in
+  cplx itself, reach ~/cplx/bin at setup and ~/tools/bin at promotion,
+  and re-anchor a package under any prefix in four passes (symlinks,
+  text paths, `__pycache__`, ELF interpreter and rpath).
+
+- **Extension point and dispatcher**: consuming projects add archive
+  items with --add, pass tar options after --, and plug a `pkg_<target>`
+  overlay through the pkg dispatcher instead of forking pkg.sh;
+  install_pkg.sh deploys every archive root file.
+
+- **Wiki, toolchain and prompts**: the Diataxis wiki and README front
+  page document the build model end to end; senv moves to Git 2.51.0
+  and Python 3.13.7 with a per-tool env chain; the pinentry wrapper
+  makes gpg passphrase prompts work in any installation prefix.

@@ -6,6 +6,105 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.26.0-SNAPSHOT unreleased] Amnesia for the build home -
+
+install_pkg.sh re-anchors every path a binary memorized
+
+- Fork no more
+  -- pkg gains --add, a dispatcher, and thin project overlays
+- The forge writes its manual
+  -- a Diataxis wiki, a front page, and five theme logos
+
+This cycle makes cplx packages portable. pkg.sh archives any $HOME folder
+into ~/pkgs with a deterministic tar (sorted names, no gzip timestamp),
+SHA1 dedup and a latest symlink; install_pkg.sh unpacks the newest archive
+under any `--prefix` and re-anchors symlinks, text paths, `__pycache__` and
+ELF interpreter/rpath (patchelf) there. Every tools archive now carries
+its own installer, and both scripts survive their own relocation text
+pass. The extension point keeps consuming projects on one shared copy:
+repeatable `--add` items, a -- tar passthrough, the pkg dispatcher routing
+`pkg_<target>` overlays, the pkg_tools front end, and a generalized deploy
+of every archive root file.
+
+The project also documents itself and refreshes its toolchain: a Diataxis
+wiki (tutorials, how-to guides, reference, explanations) with a README
+front page and the five theme logos; Git 2.51.0 and Python 3.13.7 in
+senv; a per-tool env chain (.env_user sourcing .env_git and .env_python);
+gpg prompts repaired through a self-relocating pinentry wrapper; and
+install-side comfort: several source archives tolerated (newest wins with
+a warning), rsync.sh for live-tree promotion, compare_file.sh to diff a
+deployed file against its cplx source.
+
+### Key changes (v0.26.0)
+
+- **Packaging and relocation canon** pkg.sh and install_pkg.sh ship in
+  cplx itself, reach ~/cplx/bin at setup and ~/tools/bin at promotion,
+  and re-anchor a package under any prefix in four passes (symlinks,
+  text paths, `__pycache__`, ELF interpreter and rpath).
+
+- **Extension point and dispatcher**: consuming projects add archive
+  items with --add, pass tar options after --, and plug a `pkg_<target>`
+  overlay through the pkg dispatcher instead of forking pkg.sh;
+  install_pkg.sh deploys every archive root file.
+
+- **Wiki, toolchain and prompts**: the Diataxis wiki and README front
+  page document the build model end to end; senv moves to Git 2.51.0
+  and Python 3.13.7 with a per-tool env chain; the pinentry wrapper
+  makes gpg passphrase prompts work in any installation prefix.
+
+### 🚀 Features (v0.26.0)
+
+- *(install)* Handle multiple src archives gracefully
+- *(install)* Add script to compare files with cplx
+- *(rsync)* Add script for robust tool version sync
+- *(env)* Add Python environment setup and adjust Git
+- *(pkg)* Ship packaging and relocation tools
+- *(pkg)* Add extension point and dispatcher
+- *(install_pkg)* Deploy any archive root file
+
+### 🐛 Bug Fixes (v0.26.0)
+
+- *(switchtool)* Force environment update after change
+- *(env_python)* Standardize pip command and venv paths
+- *(senv)* Non-fatal error when CPLX_TOOL unset
+- *(install_pkg)* Survive the own relocation text pass
+- *(certs)* Prompt through a pinentry wrapper
+- *(switchtool)* Auto-create setup.properties
+
+### 🚜 Refactor (v0.26.0)
+
+- *(python-env)* Make script more robust
+
+### 📚 Documentation (v0.26.0)
+
+- *(assets)* Add cplx and four theme logos
+- *(branding)* Add logos to existing pages
+- *(wiki)* Add Diataxis documentation set
+- *(readme)* Add project front page
+- *(wiki)* Make done-marker space explicit
+- *(wiki)* Document packaging and relocation
+- *(wiki)* Name the kind of build cplx does
+- *(readme)* Surface relocation and build type
+- *(wiki)* Document pkg extension and dispatcher
+- *(wiki)* Document the git credential helper
+- *(design)* Record the v0.26.0 cycle design
+- *(wiki)* Close the v0.26.0 audit gaps
+- *(wiki)* Record the switchtool exit code
+
+### 🎨 Styling (v0.26.0)
+
+- *(wiki)* Drop em dashes for plain punctuation
+- *(readme)* Drop em dashes for plain punctuation
+
+### ⚙️ Miscellaneous Tasks (v0.26.0)
+
+- *(senv)* Update Git and Python version
+- *(lint)* Add markdownlint configuration
+- *(bin)* Record exec bit on packaging scripts
+- *(certs)* Record exec bit on the pinentry wrapper
+- *(workspace)* Add Workspace Halo logo
+- *(vscode)* Sync Peacock color customizations
+
 ## [v0.25.0] - 2025-08-21 - Python and Git on RHEL 9.6, add dev_workflow
 
 This release introduces comprehensive support for **RHEL 9.6**, adding the necessary package lists and dependencies to build tools like Python and Git on this new platform.
