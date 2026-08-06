@@ -22,9 +22,10 @@ cplx\
 │   │   ├── pkgs\         package index, per-tool lists, downloaded RPMs
 │   │   ├── doc\          package_list_urls.md (mirror notebook)
 │   │   └── env\          everything shipped to the server
-│   │       ├── .env, cplx.properties (+ .tpl)
+│   │       ├── .env, .env_init, .env_user, cplx.properties (+ .tpl)
 │   │       ├── bin\      packages_management.sh, rsync.sh, compare_file.sh
-│   │       └── tools\    remote bootstrap `setup`
+│   │       ├── certs\    gpg config + pinentry-wrapper.sh
+│   │       └── tools\    per-tool .env_<tool> (git\, python\) + bootstrap `setup`
 │   ├── install\          the compile side
 │   │   ├── install.bat, doc.md (troubleshooting knowledge base)
 │   │   └── env\          shipped to the server as tools/

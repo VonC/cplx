@@ -44,7 +44,9 @@ git 2.51.0 → 2.52.0.
    ```
 
    On the server, the dispatcher extracts into `sources/2.52.0/`,
-   repoints `sources/current`, and the phases run. The `current` symlink
+   repoints `sources/current`, and the phases run. Leftover sibling
+   archives (a `2.52.0-rc2` next to the final `2.52.0`) are fine: the
+   install warns and uses the most recently changed one. The `current` symlink
    of the install prefix moves to `git-2.52.0`; the previous version
    stays on disk until you prune it.
 
