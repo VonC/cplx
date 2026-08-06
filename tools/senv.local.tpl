@@ -14,7 +14,8 @@ rem if errorlevel 1 ( set "PATH=%PATH%;%PRGS%\senv\bin" )
 ::##################################################
 ::  SET PROJECT VARIABLES
 ::##################################################
-set SSH_CONFIG_ENTRY=centos8
+rem the Host alias from your ~/.ssh/config; the real value stays out of git
+set "SSH_CONFIG_ENTRY=your_ssh_entry"
 doskey s="%project_dir%\src\setups\setup.bat" $*
 set "CPLX_REPEAT_STEP="
 rem set "CPLX_REPEAT_STEP=transfer_env_to_the_remote_project_folder"
@@ -25,13 +26,12 @@ rem set CPLX_TOOL_RC=1
 rem set "CPLX_RESET_STEP=copy_the_sources"
 
 set "CPLX_SRC_EXT=tar.gz"
-set "CPLX_ARCH_EXT=el8.x86_64"
 set "CPLX_ARCH_EXT=el9.x86_64"
 set "CPLX_URL="
 
 rem set "CPLX_TOOL=python"
 if "%CPLX_TOOL%" == "python" (
-  set "CPLX_VERSION=3.13.7"
+  set "CPLX_VERSION=3.13.9"
   set "CPLX_URL=https://www.python.org/ftp/python/[version]/Python-[version].tgz"
   set "CPLX_CHECK_PREFIX=lib/libpython3.so"
   set "CPLX_CHECK_SRC=libpython3.so"
@@ -61,7 +61,7 @@ if "%CPLX_TOOL%" == "openssl111" (
 )
 
 if "%CPLX_TOOL%" == "git" (
-  set "CPLX_VERSION=2.51.0"
+  set "CPLX_VERSION=2.52.0"
   rem https://github.com/git/git/archive/refs/tags/v2.48.1.zip
   set "CPLX_URL=https://github.com/git/git/archive/refs/tags/v[version].zip"
   set "CPLX_CHECK_PREFIX=libexec/git-core/git-add"
@@ -85,20 +85,9 @@ if "%CPLX_TOOL%" == "curl" (
   set "CPLX_VERSION=8.12.1"
   rem https://curl.se/download/curl-8.12.1.tar.gz
   set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_URL=https://curl.se/download/curl-[version].tgz"
+  set "CPLX_URL=https://curl.se/download/curl-[version].tar.gz"
   set "CPLX_CHECK_PREFIX=lib/libcurl.la"
   set "CPLX_CHECK_SRC=lib/libcurl.la"
-  set "CPLX_BIN="
-  set "CPLX_CONFIG_DONE=default"
-)
-
-if "%CPLX_TOOL%" == "libpsl" (
-  set "CPLX_VERSION=0.21.5"
-  rem https://
-  set "CPLX_URL=https://github.com/rockdaboot/libpsl/releases/download/[version]/libpsl-[version].tar.gz
-  set "CPLX_SRC_EXT=tar.gz"
-  set "CPLX_CHECK_PREFIX=lib/libpsl.la"
-  set "CPLX_CHECK_SRC=lib/libpsl.la"
   set "CPLX_BIN="
   set "CPLX_CONFIG_DONE=default"
 )
@@ -121,6 +110,17 @@ if "%CPLX_TOOL%" == "libidn2" (
   set "CPLX_SRC_EXT=tar.gz"
   set "CPLX_CHECK_PREFIX=lib/libidn2.la"
   set "CPLX_CHECK_SRC=lib/libidn2.la"
+  set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
+)
+
+if "%CPLX_TOOL%" == "libpsl" (
+  set "CPLX_VERSION=0.21.5"
+  rem https://
+  set "CPLX_URL=https://github.com/rockdaboot/libpsl/releases/download/[version]/libpsl-[version].tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=lib/libpsl.la"
+  set "CPLX_CHECK_SRC=lib/libpsl.la"
   set "CPLX_BIN="
   set "CPLX_CONFIG_DONE=default"
 )
