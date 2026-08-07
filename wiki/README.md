@@ -13,8 +13,23 @@ deployment), or 🛠️ cplx as a whole when the page spans them all.
 Documentation for [cplx](../README.md), organized on the
 [Diátaxis](https://diataxis.fr/) model. The discipline is simple: each page
 belongs to exactly one of the four categories below, and never mixes goals:
-a tutorial teaches, a how-to guide solves, a reference describes, an
-explanation clarifies.
+an explanation clarifies, a tutorial teaches, a how-to guide solves, a
+reference describes. They are listed in that order, understanding first.
+
+## 💡 Explanation
+
+Background and reasoning: why cplx is built the way it is.
+
+- 🛠️ [Why recompile at all](explanation/why-recompile.md)
+- 🔨 [What kind of build is this](explanation/what-kind-of-build-is-this.md)
+- 🌉 [Two machines, one build](explanation/two-machines-one-build.md)
+- 🌉 [The architecture key](explanation/the-architecture-key.md)
+- 🔨 [The sandbox root](explanation/the-sandbox-root.md)
+- 🔨 [Where a sandbox file comes from](explanation/where-a-sandbox-file-comes-from.md)
+- 🔨 [Anatomy of a build](explanation/anatomy-of-a-build.md)
+- 🌉 [Checkpoints and resume](explanation/checkpoints-and-resume.md)
+- 📦 [The build order](explanation/the-build-order.md)
+- 📦 [Why binaries remember the build home](explanation/why-binaries-remember-the-build-home.md)
 
 ## 🎓 Tutorials
 
@@ -31,9 +46,11 @@ Recipes for a precise goal, for readers who already know the basics.
 
 - 🌉 [Resume or repeat a step](how-to/resume-or-repeat-a-step.md)
 - 🌐 [Add a dependency to a tool](how-to/add-a-dependency-to-a-tool.md)
+- 🔨 [Add a system library by hand](how-to/add-a-system-library-by-hand.md)
 - 🔨 [Diagnose a failed configure](how-to/diagnose-a-failed-configure.md)
 - 🌐 [Update a tool version](how-to/update-a-tool-version.md)
 - 🌐 [Add or fix a package mirror](how-to/add-or-fix-a-package-mirror.md)
+- 🌉 [Survive a server OS upgrade](how-to/survive-a-server-os-upgrade.md)
 - 📦 [Promote a build into the live tree](how-to/promote-a-build-into-the-live-tree.md)
 - 📦 [Relocate an install to another prefix](how-to/relocate-an-install-to-another-prefix.md)
 - 📦 [Manage git credentials with git-pass-helper](how-to/manage-git-credentials-with-git-pass-helper.md)
@@ -46,21 +63,9 @@ Exact, dry descriptions of commands, formats and conventions.
 - 🛠️ [Commands](reference/commands.md)
 - 🛠️ [CPLX variables](reference/cplx-variables.md)
 - 🌐 [Package list formats](reference/package-list-formats.md)
+- 🌐 [Python versions by distribution](reference/python-versions-by-distribution.md)
 - 🔨 [Tool contract](reference/tool-contract.md)
 - 🛠️ [Directory layout](reference/directory-layout.md)
 - 🌉 [steps.md format](reference/steps-file-format.md)
 - 📦 [Packaging and relocation tools](reference/relocation-tools.md)
 - 🛠️ [Exit codes](reference/exit-codes.md)
-
-## 💡 Explanation
-
-Background and reasoning: why cplx is built the way it is.
-
-- 🛠️ [Why recompile at all](explanation/why-recompile.md)
-- 🔨 [What kind of build is this](explanation/what-kind-of-build-is-this.md)
-- 🌉 [Two machines, one build](explanation/two-machines-one-build.md)
-- 🔨 [The sandbox root](explanation/the-sandbox-root.md)
-- 🔨 [Anatomy of a build](explanation/anatomy-of-a-build.md)
-- 🌉 [Checkpoints and resume](explanation/checkpoints-and-resume.md)
-- 📦 [The build order](explanation/the-build-order.md)
-- 📦 [Why binaries remember the build home](explanation/why-binaries-remember-the-build-home.md)
