@@ -7,6 +7,27 @@ placeholders they rely on. The architecture key is
 `<ID>_<VERSION_ID>_<machine>` from the server's `/etc/os-release`, e.g.
 `rhel_9.6_x86_64` (dots become underscores in property keys).
 
+## Everything the architecture key names
+
+The key is recomputed from the server on every connection step and
+stored in `setup.properties`; it carries the server's minor version, so
+each of these is per minor release
+([The architecture key](../explanation/the-architecture-key.md)).
+
+| Piece | Path or key | Who creates it | Missing means |
+| --- | --- | --- | --- |
+| architecture property | `architecture` in `src\setups\setup.properties` | `setup.sh`, from the server | fatal 6 |
+| mirror URL list | `<arch with underscores>_pkgs_url` property | you, by hand | the index cannot be built |
+| package index | `src\setups\pkgs\packages_<arch>.txt` | `sdpl`, generated | short names resolve to nothing |
+| per-tool list | `src\setups\pkgs\<tool>\<tool>_<arch>.txt` | you, by hand | fatal 902 at the copy step |
+| seed list | `src\setups\pkgs\minimal_<arch>.txt` | `add_tool.bat` copies it | a new tool starts from an empty list |
+| downloaded RPMs | `src\setups\pkgs\<arch>\` | the download step | packages are fetched again |
+
+The archive suffix (`CPLX_ARCH_EXT`, for example `el9.x86_64`) is
+related but separate: it labels the packages a build produces and lives
+in `senv.local.bat`, not in the properties
+([CPLX variables](cplx-variables.md)).
+
 ## `packages_<architecture>.txt`: the generated index
 
 Built by `sdpl` from the mirror listings; do not edit by hand. One full
@@ -72,3 +93,9 @@ Placeholders inside a URL:
 | `<pkg>.installed` | unpacked into the sandbox `root/` |
 | `<pkg>.installed.mirrored` | plus its system dependencies copied in (self-contained) |
 | `<pkg>.list` | file inventory of the archive |
+
+Not every file in a sandbox has a line in these lists: the mirroring
+pass copies system libraries in on its own, and a hand copy leaves no
+flag at all
+([Where a sandbox file comes from](../explanation/where-a-sandbox-file-comes-from.md),
+[Add a system library by hand](../how-to/add-a-system-library-by-hand.md)).
