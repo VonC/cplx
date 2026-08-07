@@ -39,10 +39,16 @@ and
 ## Documentation
 
 The [wiki](wiki/README.md) is organized on the
-[Diátaxis](https://diataxis.fr/) model. Start with
-[Your first recompiled tool](wiki/tutorials/01-your-first-recompiled-tool.md),
-or jump to [Commands](wiki/reference/commands.md) and
-[Why recompile at all](wiki/explanation/why-recompile.md).
+[Diátaxis](https://diataxis.fr/) model, in that order: explanations
+first, then tutorials, then how-to guides, then reference.
+
+- 💡 understand: [Why recompile at all](wiki/explanation/why-recompile.md),
+  [What kind of build is this](wiki/explanation/what-kind-of-build-is-this.md),
+  [Where a sandbox file comes from](wiki/explanation/where-a-sandbox-file-comes-from.md)
+- 🎓 learn: [Your first recompiled tool](wiki/tutorials/01-your-first-recompiled-tool.md)
+- 🧭 do: [Add a dependency to a tool](wiki/how-to/add-a-dependency-to-a-tool.md),
+  [Relocate an install to another prefix](wiki/how-to/relocate-an-install-to-another-prefix.md)
+- 📖 look up: [Commands](wiki/reference/commands.md)
 
 ## Quick start
 
