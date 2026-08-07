@@ -6,7 +6,7 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
-## [v0.26.0-SNAPSHOT unreleased] Amnesia for the build home -
+## [v0.26.0] - 2026-08-07 - Amnesia for the build home
 
 install_pkg.sh re-anchors every path a binary memorized
 
@@ -71,6 +71,7 @@ deployed file against its cplx source.
 - *(certs)* Prompt through a pinentry wrapper
 - *(switchtool)* Auto-create setup.properties
 - *(bat)* Restore the project_dir export
+- *(tools)* Correct senv.local.tpl defaults
 
 ### 🚜 Refactor (v0.26.0)
 
@@ -105,6 +106,7 @@ deployed file against its cplx source.
 - *(certs)* Record exec bit on the pinentry wrapper
 - *(workspace)* Add Workspace Halo logo
 - *(vscode)* Sync Peacock color customizations
+- *(release)* Notes follow senv defaults
 
 ## [v0.25.0] - 2025-08-21 - Python and Git on RHEL 9.6, add dev_workflow
 
