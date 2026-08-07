@@ -77,6 +77,14 @@ the RPMs (mirrors, vault, browser-like headers when needed), `scp`s them,
 and unpacks them on the server into the tool's private sandbox
 `tools/pass/root/`, never into the system. `rpm` and `yum` are not used.
 
+Watch the second half of each package line: after unpacking, cplx runs
+`ldd` over the new files and copies the system libraries they still
+reference into the sandbox too, until nothing points outside it. You
+are seeing the two routes that fill a sandbox, unpacking a package and
+copying from the server; the third one, building a library as a tool of
+its own, is the next tutorial
+([Where a sandbox file comes from](../explanation/where-a-sandbox-file-comes-from.md)).
+
 ## 5. Compile, package, deploy
 
 ```cmd
