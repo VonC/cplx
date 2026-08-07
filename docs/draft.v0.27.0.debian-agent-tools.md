@@ -90,6 +90,31 @@ measured baseline feeds the work items:
   OpenSSL `3.5.1`, whose libssl demands `OPENSSL_3.x` version nodes
   only its sibling libcrypto serves, and the root accumulates package
   generations (two libbfd builds side by side).
+- The listing is not the whole verdict: the same stage runs a live
+  trace (`LD_DEBUG=libs,versions` on importing the two heavy wheels)
+  and it answers `wheels load`. The 72 flags therefore describe a
+  contract to tighten, not a broken runtime, and acceptance needs both
+  readings: the listing for the static closure, the trace for what the
+  process actually binds. develop#20 then showed that the trace cannot
+  serve as acceptance in its current form: it reported no host library
+  loaded, while the same run's listing had `pymupdf` and `pikepdf`,
+  the two libraries the import exercises, resolving `libgcc_s`
+  host-side from a root that ships none. The probe was therefore
+  reading an empty or wrong trace, and it must trace the venv python
+  directly, one process rather than uv plus its child, and report how
+  many trace files it wrote and kept, before a silent trace can count
+  as a clean one.
+- The C++ ceilings were missing from this run, a sort artifact having
+  dropped the `GLIBCXX_` and `CXXABI_` families, and develop#20
+  measured them once the probe was corrected: the agent serves
+  `GLIBCXX_3.4.30` and `CXXABI_1.3.13`, while the root ships
+  `libstdc++.so.6.0.29`, the GCC 11 generation topping out at
+  `GLIBCXX_3.4.29`. The wheels resolve that root copy today, so their
+  demands sit at or below it, with a margin of exactly one node. The
+  failure mode past that margin is a hard error, not a silent
+  fallback: a wheel built against `3.4.30` fails against the shipped
+  copy, the develop#13 signature. Work item 3 therefore has a decision
+  to take, ship the GCC 12 generation or inherit that one-node margin.
 
 ## Work item 1 (Q20): harden the python wrapper against foreign coreutils
 
@@ -561,6 +586,7 @@ Validation matrix, before any publication:
 | Version-node coherence: every demand of a shipped library defined by the shipped libc | required | required |
 | `uv sync` then `import pymupdf, pikepdf`, no wheel patching | required | required |
 | ABI probe: shipped loader `--list` over toolchain ELFs and venv wheels, no `not found`, no host-resolved ABI-critical library | required | not applicable (host copies are compatible) |
+| Live trace: `LD_DEBUG=libs,versions` on importing the heavy wheels, no ABI-critical library initialized from a host path (harden the probe first: trace the venv python directly and report its trace inventory, develop#20) | required | not applicable (host copies are compatible) |
 | `pytest` with coverage and testmon active | required | optional (Windows dev flow covers it) |
 | `deploy_pkgs.sh` end to end with readiness checks | not applicable | required |
 | Operator flow (`senv`, `.env` sourcing) | not applicable | required |
@@ -640,6 +666,7 @@ the correction below.
 | D8 | When to consider Python 3.14 | (a) now, widening the application pin; (b) next cycle; (c) never, stay on 3.13 to its end of life | (b): 3.13 must serve this rebuild (the application pins it), but 3.14 gains a year of maintenance, fits the annotation-heavy code through PEP 649, and is the only line RHEL 9 could ever provide as a package |
 | D7 | sqlite provenance for the python build | (a) copy from the server's `/usr`; (b) `sqlite-devel` and `sqlite-libs` payloads extracted into the python sandbox from the per-tool list; (c) sqlite rebuilt from source as a cplx tool | (b): (a) is impossible (the server has no header and no linker symlink), (b) is one list line in the same class as zlib and libffi, (c) only for a newer sqlite or independence from the RHEL patch cycle |
 | D6 | cplx release carrying this effort | (a) fold into the current 0.26.0 cycle; (b) dedicated next cycle | (b): v0.26.0 shipped on 2026-08-06, this effort opens the v0.27.0 cycle |
+| D10 | C++ runtime generation shipped in the root | (a) keep the GCC 11 `libstdc++.so.6.0.29` the platform provides, inheriting a one-node margin (`GLIBCXX_3.4.29` against an agent at `3.4.30`); (b) ship the GCC 12 generation, sourced from a toolset payload, so the archive absorbs a wheel set that moves past that node | open, to settle inside requirement 4. (a) matches the deployment servers exactly and costs nothing now; (b) buys headroom for both CI and production, since the RHEL 9.8 servers carry the same GCC 11 build and would break on the same wheel. Measure the wheels' actual C++ demands during the rebuild before choosing |
 | D9 | Architecture key across server minors | (a) copy the file set at every minor upgrade; (b) key on the major only; (c) exact match first, then the closest minor of the same major, logged | decided: (a) now to unblock the rebuild, then (c) as requirement 5. (b) is rejected: it would lose the ability to describe a distribution whose minor really diverges |
 
 ## List of feature-requests and issues to create
@@ -746,6 +773,36 @@ libssl 3.5.1 wanting `OPENSSL_3.x` nodes only its sibling libcrypto
 serves) and to pruning superseded generations (two libbfd builds side
 by side today).
 
+The develop#19 wheel inventory turns the acceptance into a checklist
+rather than a hope. Every heavy wheel the probe flagged (numpy with its
+`.libs`, pymupdf with its mupdf pair, pydantic_core, cryptography,
+pikepdf, PIL with `pillow.libs`) shows **one and only one** remaining
+host resolution, `libgcc_s.so.1`, each printed with the same proof
+line: the host libgcc_s demands `GLIBC_2.35`, a node the shipped 9.13.4
+libc does not define. `libstdc++` never appears as a wheel-side break,
+which independently confirms the develop#15 correction that the archive
+does ship it. So the wheel side closes with exactly one library plus
+the four stubs, and the acceptance is that this inventory comes back
+empty, wheel by wheel, read from the static listing. The live trace
+cannot carry that acceptance on its own until it proves it looked at
+something: develop#20 had it answer "no host library loaded" for the
+very run whose listing showed pymupdf and pikepdf resolving libgcc_s
+host-side. The consuming project has since made the probe trace the
+venv python directly and print its trace inventory, so a silent trace
+now reads as inconclusive; acceptance requires a conclusive one.
+
+This item also carries the C++ generation decision (D10). develop#20
+measured what develop#19 had missed: the agent serves
+`GLIBCXX_3.4.30` and `CXXABI_1.3.13`, while the shipped
+`libstdc++.so.6.0.29` is the GCC 11 generation topping out at
+`GLIBCXX_3.4.29`. Today's wheels resolve the root copy, so their
+demands sit at or below it, but the margin is exactly one node and the
+failure past it is a hard error rather than a fallback, the develop#13
+signature. The same limit applies to the RHEL 9.8 deployment servers,
+whose own libstdc++ is that same GCC 11 build, so a wheel set that
+moves to `3.4.30` breaks production as well as CI, and shipping the
+newer generation in the archive is what would absorb it in both places.
+
 Fourth because it is a packaging fix that can be validated by
 repackaging the current tree, without recompiling anything, and doing
 it before the expensive rebuild means that rebuild produces a complete
@@ -830,11 +887,26 @@ matrix on both distributions: relocation without any shim, the wrapper
 answering on its first call, `import ssl, zlib, sqlite3`, the toolchain
 git, version-node coherence, `uv sync` then importing the heavy wheels
 with no per-wheel patching, and the ABI probe showing no missing node
-and no host fallback. Publication follows D1: the archive rides the
-next application release version, which means the consuming project
-keeps the current archive and its interims until that release, so the
-requirement must state that schedule coupling rather than assume an
-immediate switch.
+and no host fallback, read together with the live trace (the listing
+alone overstates, since a root-object sweep has no ancestor rpath).
+Both readings must be conclusive: a trace that reports no venv process
+proves nothing, so the validation matrix takes the trace inventory,
+not only its verdict. The C++ ceilings belong to the same reading, and
+the rebuild measures the wheels' real `GLIBCXX_` demands, which is what
+settles D10.
+Publication follows D1: the archive rides the next application release
+version, which means the consuming project keeps the current archive
+and its interims until that release, so the requirement must state that
+schedule coupling rather than assume an immediate switch.
+
+The consuming project gained the seam this item needs on 2026-08-07: a
+`tools/publish.mode` switch read at pipeline start, holding `snapshot`
+to upload and anything else to run relocate, provision, package and
+walk without publishing. The first run against the new archive should
+therefore raise `tools/tools.version` with that switch off, proving the
+whole chain and the ABI probes on a real agent before any snapshot is
+uploaded, and flip it back once the archive is accepted. The gate is
+unaffected: a failure still skips the stage.
 
 Last because every other item is one of its inputs and because the
 publication is irreversible: the releases repository forbids
