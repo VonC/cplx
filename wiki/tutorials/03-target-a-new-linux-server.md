@@ -33,6 +33,12 @@ the server who it is (`/etc/os-release` + `uname -m`). The answer becomes
 the `architecture` property, for example `rhel_9.6_x86_64`. Everything
 distribution-specific is keyed on that string from now on.
 
+Read that property once, because you are about to create three things
+named after it, and note that the key carries the server's *minor*
+version: the same server upgraded to 9.8 answers `rhel_9.8_x86_64` and
+looks for a different file set
+([The architecture key](../explanation/the-architecture-key.md)).
+
 ## 3. Give the new distribution its mirrors
 
 The package index is built from mirror directory listings. In
@@ -96,3 +102,9 @@ one tool compiles to a `*.el9.x86_64.tar.gz` package.
   [Two machines, one build](../explanation/two-machines-one-build.md).
 - File formats used here:
   [Package list formats](../reference/package-list-formats.md).
+- The same three artifacts have to be recreated the day this server is
+  upgraded to a new minor version, because the key changes with it:
+  [The architecture key](../explanation/the-architecture-key.md) for the
+  mechanism, and
+  [Survive a server OS upgrade](../how-to/survive-a-server-os-upgrade.md)
+  for the recovery.
