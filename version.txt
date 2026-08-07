@@ -1,4 +1,4 @@
-0.26.0-SNAPSHOT -- Amnesia for the build home
+0.26.0 -- Amnesia for the build home
 
 install_pkg.sh re-anchors every path a binary memorized
 
