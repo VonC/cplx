@@ -22,5 +22,22 @@
   "peacock.color": "#92d284",
   "cSpell.enabledFileTypes": {
     "plaintext": true
-  }
+  },
+  "cSpell.words": [
+    "auditwheel",
+    "debian",
+    "dlopen",
+    "dlopens",
+    "insertdict",
+    "libbfd",
+    "libjpeg",
+    "liblz",
+    "libpopt",
+    "libqpdf",
+    "lsqlite",
+    "procps",
+    "redeployments",
+    "RELR",
+    "subinterpreters"
+  ]
 }
