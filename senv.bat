@@ -3,6 +3,18 @@
 for %%i in ("%~dp0") do SET "PRJ_DIR=%%~fi"
 set "PRJ_DIR=%PRJ_DIR:~0,-1%"
 for %%i in ("%PRJ_DIR%") do SET "PRJ_DIR_NAME=%%~nxi"
+for %%i in ("%~dp0..\llm-shared") do SET "LLM_SHARED_DIR=%%~fi"
+
+rem Load the doskey aliases BEFORE the NO_MORE_SENV guard: macros are
+rem per-console and never inherited, while the guard variable is, so a
+rem console spawned from an anchored parent arrives guarded but without
+rem aliases. Reloading on every call keeps guarded re-runs useful and
+rem brings in aliases added since the console was first anchored.
+if exist "%LLM_SHARED_DIR%\senv.doskey" ( doskey /MACROFILE="%LLM_SHARED_DIR%\senv.doskey" )
+if exist "%PRJ_DIR%\senv.doskey" ( doskey /MACROFILE="%PRJ_DIR%\senv.doskey" )
+rem fsenv clears the guard and re-runs this senv.bat, the escape hatch
+rem the llm-shared senv.bat defines for its own tree.
+doskey fsenv=set "NO_MORE_SENV_%PRJ_DIR_NAME%=" ^& "%PRJ_DIR%\senv.bat" $*
 
 if defined NO_MORE_SENV_%PRJ_DIR_NAME% ( goto:eof )
 
@@ -10,6 +22,10 @@ call "%PRJ_DIR%\tools\init.bat" "%~1"
 set "project_dir=%PRJ_DIR%"
 set "project_dir_name=%PRJ_DIR_NAME%"
 set "project_dir_unix=%PRJ_DIR_unix%"
+rem grmc and any other bash-invoking shared macro need the unix form;
+rem cygpath is on PATH here, the same call tools\init.bat makes for
+rem PRJ_DIR_unix.
+for /f "tokens=* delims=" %%i in ('cygpath -u "%LLM_SHARED_DIR%"') do SET "LLM_SHARED_DIR_UNIX=%%~i"
 
 doskey steps=bash -c "./steps.sh %1"
 doskey props=bash -c "./properties.sh %1"
