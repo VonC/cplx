@@ -1,0 +1,310 @@
+================ environment ================
+distribution: Debian GNU/Linux 12 (bookworm)
+kernel:    Linux 5.14.0-687.24.1.el9_8.x86_64
+coreutils: cp (GNU coreutils) 9.1
+mv:        mv (GNU coreutils) 9.1
+           note: F3 needs mv, which the installer does not invoke today.
+           Choosing F3 widens the host-tool contract; F2 adds nothing.
+cp option: --remove-destination accepted, so F2 can be measured
+clock:     milliseconds
+scratch:   /tmp/copy-form.940
+
+================ M4 form f1: cp -a src prefix/name ================
+--- f1 / absent ---
+before:   prefix/name is absent
+exit:     0
+elapsed:  16 ms
+diagnostic: (empty)
+after:    prefix/name is regular file
+
+--- f1 / regular_file ---
+before:   prefix/name is regular file
+exit:     0
+elapsed:  12 ms
+diagnostic: (empty)
+after:    prefix/name is regular file
+
+--- f1 / empty_dir ---
+before:   prefix/name is directory
+exit:     0
+elapsed:  15 ms
+diagnostic: (empty)
+after:    prefix/name is directory
+nested:   the payload landed INSIDE the directory as prefix/name/rootfile.env
+
+--- f1 / populated_dir ---
+before:   prefix/name is directory
+exit:     0
+elapsed:  11 ms
+diagnostic: (empty)
+after:    prefix/name is directory
+nested:   the payload landed INSIDE the directory as prefix/name/rootfile.env
+
+--- f1 / symlink_regular_file ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/external_file
+exit:     0
+elapsed:  16 ms
+diagnostic: (empty)
+after:    prefix/name is symlink -> /tmp/copy-form.940/external_file
+external: content DIFFER, mtime DIFFER
+      bytes before: absent;|2358086223 22;|
+      bytes after:  absent;|2305296262 18;|
+      mtime before: ;|1577833200;|
+      mtime after:  ;|1786354471;|
+
+--- f1 / symlink_dir ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/external_dir
+exit:     0
+elapsed:  15 ms
+diagnostic: (empty)
+after:    prefix/name is symlink -> /tmp/copy-form.940/external_dir
+external: content DIFFER, mtime DIFFER
+      bytes before: .=directory;./ext.txt=944912744 9;./ext_dir=directory;|absent;|
+      bytes after:  .=directory;./ext.txt=944912744 9;./ext_dir=directory;./rootfile.env=2305296262 18;|absent;|
+      mtime before: .=1577833200;./ext.txt=1577833200;./ext_dir=1577833200;|;|
+      mtime after:  .=1786354471;./ext.txt=1577833200;./ext_dir=1577833200;./rootfile.env=1786354471;|;|
+
+--- f1 / dangling_symlink ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/nowhere
+exit:     1
+elapsed:  11 ms
+diagnostic:
+      cp: not writing through dangling symlink '/tmp/copy-form.940/prefix/rootfile.env'
+after:    prefix/name is symlink -> /tmp/copy-form.940/nowhere
+
+--- f1 / fifo ---
+before:   prefix/name is fifo
+exit:     124
+exit note: 124 is the timeout status, so the form BLOCKED and was killed
+elapsed:  20010 ms
+diagnostic: (empty)
+after:    prefix/name is fifo
+
+
+================ M4 form f2: cp -a --remove-destination src prefix/name ================
+--- f2 / absent ---
+before:   prefix/name is absent
+exit:     0
+elapsed:  17 ms
+diagnostic: (empty)
+after:    prefix/name is regular file
+
+--- f2 / regular_file ---
+before:   prefix/name is regular file
+exit:     0
+elapsed:  14 ms
+diagnostic: (empty)
+after:    prefix/name is regular file
+
+--- f2 / empty_dir ---
+before:   prefix/name is directory
+exit:     0
+elapsed:  15 ms
+diagnostic: (empty)
+after:    prefix/name is directory
+nested:   the payload landed INSIDE the directory as prefix/name/rootfile.env
+
+--- f2 / populated_dir ---
+before:   prefix/name is directory
+exit:     0
+elapsed:  14 ms
+diagnostic: (empty)
+after:    prefix/name is directory
+nested:   the payload landed INSIDE the directory as prefix/name/rootfile.env
+
+--- f2 / symlink_regular_file ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/external_file
+exit:     0
+elapsed:  15 ms
+diagnostic: (empty)
+after:    prefix/name is regular file
+external: content same, mtime same
+
+--- f2 / symlink_dir ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/external_dir
+exit:     0
+elapsed:  13 ms
+diagnostic: (empty)
+after:    prefix/name is symlink -> /tmp/copy-form.940/external_dir
+external: content DIFFER, mtime DIFFER
+      bytes before: .=directory;./ext.txt=944912744 9;./ext_dir=directory;|absent;|
+      bytes after:  .=directory;./ext.txt=944912744 9;./ext_dir=directory;./rootfile.env=2305296262 18;|absent;|
+      mtime before: .=1577833200;./ext.txt=1577833200;./ext_dir=1577833200;|;|
+      mtime after:  .=1786354492;./ext.txt=1577833200;./ext_dir=1577833200;./rootfile.env=1786354491;|;|
+
+--- f2 / dangling_symlink ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/nowhere
+exit:     0
+elapsed:  14 ms
+diagnostic: (empty)
+after:    prefix/name is regular file
+
+--- f2 / fifo ---
+before:   prefix/name is fifo
+exit:     0
+elapsed:  15 ms
+diagnostic: (empty)
+after:    prefix/name is regular file
+
+
+================ M4 form f3: cp -a src prefix/.name.tmp then mv -f prefix/.name.tmp prefix/name ================
+--- f3 / absent ---
+before:   prefix/name is absent
+exit:     0
+elapsed:  26 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is regular file
+temp:     no prefix/.name.tmp remains
+
+--- f3 / regular_file ---
+before:   prefix/name is regular file
+exit:     0
+elapsed:  26 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is regular file
+temp:     no prefix/.name.tmp remains
+
+--- f3 / empty_dir ---
+before:   prefix/name is directory
+exit:     0
+elapsed:  25 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is directory
+nested:   the payload landed INSIDE the directory as prefix/name/.rootfile.env.tmp
+temp:     the temporary name survives one level down, as prefix/name/.name.tmp
+
+--- f3 / populated_dir ---
+before:   prefix/name is directory
+exit:     0
+elapsed:  24 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is directory
+nested:   the payload landed INSIDE the directory as prefix/name/.rootfile.env.tmp
+temp:     the temporary name survives one level down, as prefix/name/.name.tmp
+
+--- f3 / symlink_regular_file ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/external_file
+exit:     0
+elapsed:  25 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is regular file
+temp:     no prefix/.name.tmp remains
+external: content same, mtime same
+
+--- f3 / symlink_dir ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/external_dir
+exit:     0
+elapsed:  27 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is symlink -> /tmp/copy-form.940/external_dir
+temp:     no prefix/.name.tmp remains
+external: content DIFFER, mtime DIFFER
+      bytes before: .=directory;./ext.txt=944912744 9;./ext_dir=directory;|absent;|
+      bytes after:  .=directory;./.rootfile.env.tmp=2305296262 18;./ext.txt=944912744 9;./ext_dir=directory;|absent;|
+      mtime before: .=1577833200;./ext.txt=1577833200;./ext_dir=1577833200;|;|
+      mtime after:  .=1786354492;./.rootfile.env.tmp=1786354492;./ext.txt=1577833200;./ext_dir=1577833200;|;|
+
+--- f3 / dangling_symlink ---
+before:   prefix/name is symlink -> /tmp/copy-form.940/nowhere
+exit:     0
+elapsed:  27 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is regular file
+temp:     no prefix/.name.tmp remains
+
+--- f3 / fifo ---
+before:   prefix/name is fifo
+exit:     0
+elapsed:  25 ms
+diagnostic:
+      cp step rc=0: 
+      mv step rc=0: 
+after:    prefix/name is regular file
+temp:     no prefix/.name.tmp remains
+
+
+================ measurement answers ================
+One matrix per form over all eight destination shapes, every shape present
+whatever its outcome. "exit" is the status of the form as a whole, which
+for F3 is the mv step unless the copy step already failed. "after" is what
+prefix/name is once the form returned. "nested" says whether the copy
+landed inside a directory destination instead of replacing it. "tmp" says
+whether F3 left its temporary behind. "bytes" and "mtime" are the external
+symlink target, read separately so a rewrite with identical content still
+shows up. "ms" is elapsed time, which is how a prompt refusal is told from
+a block. A cell reads n/a when the shape cannot raise that question,
+unavailable when the tool or option is missing here, skipped when the case
+was withheld as unsafe, and n/r when no record was produced.
+
+--- f1: cp -a src prefix/name ---
+destination shape     | exit | after        | nested | tmp    | bytes  | mtime  | ms
+----------------------+------+--------------+--------+--------+--------+--------+-------
+absent                | 0    | regular file | n/a    | n/a    | n/a    | n/a    | 16
+regular_file          | 0    | regular file | n/a    | n/a    | n/a    | n/a    | 12
+empty_dir             | 0    | directory    | yes    | n/a    | n/a    | n/a    | 15
+populated_dir         | 0    | directory    | yes    | n/a    | n/a    | n/a    | 11
+symlink_regular_file  | 0    | symlink      | n/a    | n/a    | DIFFER | DIFFER | 16
+symlink_dir           | 0    | symlink      | n/a    | n/a    | DIFFER | DIFFER | 15
+dangling_symlink      | 1    | symlink      | n/a    | n/a    | n/a    | n/a    | 11
+fifo                  | 124  | fifo         | n/a    | n/a    | n/a    | n/a    | 20010
+
+--- f2: cp -a --remove-destination src prefix/name ---
+destination shape     | exit | after        | nested | tmp    | bytes  | mtime  | ms
+----------------------+------+--------------+--------+--------+--------+--------+-------
+absent                | 0    | regular file | n/a    | n/a    | n/a    | n/a    | 17
+regular_file          | 0    | regular file | n/a    | n/a    | n/a    | n/a    | 14
+empty_dir             | 0    | directory    | yes    | n/a    | n/a    | n/a    | 15
+populated_dir         | 0    | directory    | yes    | n/a    | n/a    | n/a    | 14
+symlink_regular_file  | 0    | regular file | n/a    | n/a    | same   | same   | 15
+symlink_dir           | 0    | symlink      | n/a    | n/a    | DIFFER | DIFFER | 13
+dangling_symlink      | 0    | regular file | n/a    | n/a    | n/a    | n/a    | 14
+fifo                  | 0    | regular file | n/a    | n/a    | n/a    | n/a    | 15
+
+--- f3: cp -a src prefix/.name.tmp then mv -f prefix/.name.tmp prefix/name ---
+destination shape     | exit | after        | nested | tmp    | bytes  | mtime  | ms
+----------------------+------+--------------+--------+--------+--------+--------+-------
+absent                | 0    | regular file | n/a    | clean  | n/a    | n/a    | 26
+regular_file          | 0    | regular file | n/a    | clean  | n/a    | n/a    | 26
+empty_dir             | 0    | directory    | yes    | inside | n/a    | n/a    | 25
+populated_dir         | 0    | directory    | yes    | inside | n/a    | n/a    | 24
+symlink_regular_file  | 0    | regular file | n/a    | clean  | same   | same   | 25
+symlink_dir           | 0    | symlink      | n/a    | clean  | DIFFER | DIFFER | 27
+dangling_symlink      | 0    | regular file | n/a    | clean  | n/a    | n/a    | 27
+fifo                  | 0    | regular file | n/a    | clean  | n/a    | n/a    | 25
+
+--- the four deciding cells ---
+The review named these: does the external target survive byte-identical
+when the destination is a symlink to a regular file, and does the form
+refuse or replace promptly instead of blocking on a FIFO.
+
+form  | destination shape     | exit | after        | bytes  | mtime  | ms      | reading
+------+-----------------------+------+--------------+--------+--------+---------+--------
+f2    | symlink_regular_file  | 0    | regular file | same   | same   | 15      | external target untouched
+f2    | fifo                  | 0    | regular file | n/a    | n/a    | 15      | replaced promptly, now regular file
+f3    | symlink_regular_file  | 0    | regular file | same   | same   | 25      | external target untouched
+f3    | fifo                  | 0    | regular file | n/a    | n/a    | 25      | replaced promptly, now regular file
+
+F1 is the baseline those two are judged against:
+f1    | symlink_regular_file  | 0    | symlink      | DIFFER | DIFFER | 16      |
+f1    | fifo                  | 124  | fifo         | n/a    | n/a    | 20010   |
+
+--- host tool contract cost ---
+F3 needs mv, which the installer does not invoke today, so choosing F3
+adds mv to the audited host-tool inventory. F2 needs only the
+--remove-destination option of the cp already in that inventory.
+
+================ end of evidence ================

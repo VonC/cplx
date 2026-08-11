@@ -1,0 +1,150 @@
+================ environment ================
+distribution: Debian GNU/Linux 12 (bookworm)
+kernel:    Linux 5.14.0-687.24.1.el9_8.x86_64
+coreutils: cp (GNU coreutils) 9.1
+rsync:     absent on this host, the rsync cases report themselves unavailable
+scratch:   /tmp/dest-shape.344
+
+================ M1: mirror destination shapes ================
+engine: rsync -av --delete src/ dst/
+UNAVAILABLE: rsync is absent on this host, M1 cannot be measured here
+================ M2: root-file deployment shapes ================
+engines: rsync -av file prefix/  and  cp -a file prefix/
+--- M2 engine rsync --- UNAVAILABLE: rsync is absent on this host
+--- M2 engine cp, case: absent ---
+before:   absent
+      (absent)
+command:  cp -a file prefix/
+exit:     0
+diagnostic: (empty)
+after:    regular file
+      (not a directory)
+
+--- M2 engine cp, case: regular_file ---
+before:   regular file
+      (not a directory)
+command:  cp -a file prefix/
+exit:     0
+diagnostic: (empty)
+after:    regular file
+      (not a directory)
+
+--- M2 engine cp, case: empty_dir ---
+before:   directory
+      .
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: cannot overwrite directory '/tmp/dest-shape.344/prefix/rootfile.env' with non-directory
+after:    directory
+      .
+
+--- M2 engine cp, case: populated_dir ---
+before:   directory
+      .
+      ./inner
+      ./inner.txt
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: cannot overwrite directory '/tmp/dest-shape.344/prefix/rootfile.env' with non-directory
+after:    directory
+      .
+      ./inner
+      ./inner.txt
+
+--- M2 engine cp, case: symlink_dir ---
+before:   symlink -> /tmp/dest-shape.344/external_dir
+      (symlink, its target is listed under external target)
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: cannot overwrite directory '/tmp/dest-shape.344/prefix/rootfile.env' with non-directory
+after:    symlink -> /tmp/dest-shape.344/external_dir
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+external: target unchanged, compared by content and not by listing
+
+--- M2 engine cp, case: symlink_regular_file ---
+before:   symlink -> /tmp/dest-shape.344/external_file
+      (symlink, its target is listed under external target)
+command:  cp -a file prefix/
+exit:     0
+diagnostic: (empty)
+after:    symlink -> /tmp/dest-shape.344/external_file
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+external: TARGET CHANGED, the engine wrote or deleted through the link
+      before: external_dir=absent external_file=file[3396430059 14]
+      after:  external_dir=absent external_file=file[2305296262 18]
+
+--- M2 engine cp, case: dangling_symlink ---
+before:   symlink -> /tmp/dest-shape.344/nowhere
+      (symlink, its target is listed under external target)
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: not writing through dangling symlink '/tmp/dest-shape.344/prefix/rootfile.env'
+after:    symlink -> /tmp/dest-shape.344/nowhere
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+
+--- M2 engine cp, case: fifo ---
+before:   fifo
+      (not a directory)
+command:  cp -a file prefix/
+exit:     124
+exit note: 124 is the timeout status, so the engine BLOCKED and was
+           killed. Opening this destination for writing never returned.
+diagnostic: (empty)
+after:    fifo
+      (not a directory)
+
+================ M3: real deployment shape, read only ================
+UNAVAILABLE: no prefix was given on the command line, so no real
+deployment prefix was inspected. Re-run as
+  sh installer_destination_shape_check.sh <prefix> [<prefix> ...]
+on a host with access, or report M3 as an acknowledged evidence gap.
+prefixes checked: 0
+
+================ measurement answers ================
+Generated from the cases above, one row per measured shape. "exit" is the
+engine status, "after" the destination type once it returned, "symlink"
+(shown as "link" in the M2 matrix) whether a symlinked destination was
+followed or replaced, and "external" (as "ext") whether the content behind
+such a link changed. A cell reads n/a when the shape cannot raise that
+question, unavailable when the tool is missing on this host, skipped when
+the case was withheld as unsafe to run here, and n/r when no record was
+produced at all. Every measured shape has a row whatever its outcome.
+
+--- M1: rsync -av --delete src/ dst/ ---
+destination shape     | exit | after        | symlink  | external
+----------------------+------+--------------+----------+----------
+absent                | -    | unavailable  | -        | -
+empty_dir             | -    | unavailable  | -        | -
+populated_dir         | -    | unavailable  | -        | -
+regular_file          | -    | unavailable  | -        | -
+symlink_empty_dir     | -    | unavailable  | -        | -
+symlink_populated_dir | -    | unavailable  | -        | -
+symlink_regular_file  | -    | unavailable  | -        | -
+dangling_symlink      | -    | unavailable  | -        | -
+fifo                  | -    | unavailable  | -        | -
+
+--- M2: rsync -av file prefix/   versus   cp -a file prefix/ ---
+                      |              rsync                   |               cp
+destination shape     | exit after        link     ext       | exit after        link     ext
+----------------------+--------------------------------------+-------------------------------------
+absent                | -    unavailable  -        -         | 0    regular file n/a      n/a
+regular_file          | -    unavailable  -        -         | 0    regular file n/a      n/a
+empty_dir             | -    unavailable  -        -         | 1    directory    n/a      n/a
+populated_dir         | -    unavailable  -        -         | 1    directory    n/a      n/a
+symlink_dir           | -    unavailable  -        -         | 1    symlink      followed unchanged
+symlink_regular_file  | -    unavailable  -        -         | 0    symlink      followed CHANGED
+dangling_symlink      | -    unavailable  -        -         | 1    symlink      followed n/a
+fifo                  | -    unavailable  -        -         | 124  fifo         n/a      n/a
+
+--- M3: <prefix>/tools on real deployment prefixes ---
+no prefix inspected on this host, so M3 is unanswered here
+prefixes inspected: 0
+
+================ end of evidence ================

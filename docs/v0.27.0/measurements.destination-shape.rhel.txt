@@ -1,0 +1,441 @@
+================ environment ================
+distribution: Red Hat Enterprise Linux 9.8 (Plow)
+kernel:    Linux 5.14.0-687.24.1.el9_8.x86_64
+coreutils: cp (GNU coreutils) 8.32
+rsync:     rsync  version 3.2.5  protocol version 31
+scratch:   /tmp/dest-shape.499587
+
+================ M1: mirror destination shapes ================
+engine: rsync -av --delete src/ dst/
+--- M1 case: absent ---
+before:   absent
+      (absent)
+command:  rsync -av --delete src/ dst/
+exit:     0
+diagnostic:
+      sending incremental file list
+      created directory /tmp/dest-shape.499587/dst
+      ./
+      .src_hidden
+      sub/
+      sub/file.txt
+      
+      sent 263 bytes  received 114 bytes  754.00 bytes/sec
+      total size is 22  speedup is 0.06
+after:    directory
+      .
+      ./.src_hidden
+      ./sub
+      ./sub/file.txt
+
+--- M1 case: empty_dir ---
+before:   directory
+      .
+command:  rsync -av --delete src/ dst/
+exit:     0
+diagnostic:
+      sending incremental file list
+      ./
+      .src_hidden
+      sub/
+      sub/file.txt
+      
+      sent 267 bytes  received 69 bytes  672.00 bytes/sec
+      total size is 22  speedup is 0.07
+after:    directory
+      .
+      ./.src_hidden
+      ./sub
+      ./sub/file.txt
+
+--- M1 case: populated_dir ---
+before:   directory
+      .
+      ./.stale_hidden
+      ./stale.txt
+      ./stale_dir
+command:  rsync -av --delete src/ dst/
+exit:     0
+diagnostic:
+      sending incremental file list
+      deleting stale_dir/
+      deleting stale.txt
+      deleting .stale_hidden
+      ./
+      .src_hidden
+      sub/
+      sub/file.txt
+      
+      sent 259 bytes  received 105 bytes  728.00 bytes/sec
+      total size is 22  speedup is 0.06
+after:    directory
+      .
+      ./.src_hidden
+      ./sub
+      ./sub/file.txt
+
+--- M1 case: regular_file ---
+before:   regular file
+      (not a directory)
+command:  rsync -av --delete src/ dst/
+exit:     3
+diagnostic:
+      sending incremental file list
+      rsync: [Receiver] ERROR: cannot stat destination "/tmp/dest-shape.499587/dst/": Not a directory (20)
+      rsync error: errors selecting input/output files, dirs (code 3) at main.c(761) [Receiver=3.2.5]
+after:    regular file
+      (not a directory)
+
+--- M1 case: symlink_empty_dir ---
+before:   symlink -> /tmp/dest-shape.499587/external_dir
+      (symlink, its target is listed under external target)
+command:  rsync -av --delete src/ dst/
+exit:     0
+diagnostic:
+      sending incremental file list
+      ./
+      .src_hidden
+      sub/
+      sub/file.txt
+      
+      sent 259 bytes  received 65 bytes  648.00 bytes/sec
+      total size is 22  speedup is 0.07
+after:    symlink -> /tmp/dest-shape.499587/external_dir
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+external: TARGET CHANGED, the engine wrote or deleted through the link
+      before: external_dir=dir[.=directory;] external_file=absent
+      after:  external_dir=dir[.=directory;./.src_hidden=2089894463 14;./sub=directory;./sub/file.txt=2573135066 8;] external_file=absent
+
+--- M1 case: symlink_populated_dir ---
+before:   symlink -> /tmp/dest-shape.499587/external_dir
+      (symlink, its target is listed under external target)
+command:  rsync -av --delete src/ dst/
+exit:     0
+diagnostic:
+      sending incremental file list
+      deleting ext_dir/
+      deleting ext.txt
+      deleting .ext_hidden
+      ./
+      .src_hidden
+      sub/
+      sub/file.txt
+      
+      sent 259 bytes  received 99 bytes  716.00 bytes/sec
+      total size is 22  speedup is 0.06
+after:    symlink -> /tmp/dest-shape.499587/external_dir
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+external: TARGET CHANGED, the engine wrote or deleted through the link
+      before: external_dir=dir[.=directory;./.ext_hidden=4133876715 16;./ext.txt=944912744 9;./ext_dir=directory;] external_file=absent
+      after:  external_dir=dir[.=directory;./.src_hidden=2089894463 14;./sub=directory;./sub/file.txt=2573135066 8;] external_file=absent
+
+--- M1 case: symlink_regular_file ---
+before:   symlink -> /tmp/dest-shape.499587/external_file
+      (symlink, its target is listed under external target)
+command:  rsync -av --delete src/ dst/
+exit:     3
+diagnostic:
+      sending incremental file list
+      rsync: [Receiver] ERROR: cannot stat destination "/tmp/dest-shape.499587/dst/": Not a directory (20)
+      rsync error: errors selecting input/output files, dirs (code 3) at main.c(761) [Receiver=3.2.5]
+after:    symlink -> /tmp/dest-shape.499587/external_file
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+external: target unchanged, compared by content and not by listing
+
+--- M1 case: dangling_symlink ---
+before:   symlink -> /tmp/dest-shape.499587/nowhere
+      (symlink, its target is listed under external target)
+command:  rsync -av --delete src/ dst/
+exit:     11
+diagnostic:
+      sending incremental file list
+      rsync: [Receiver] mkdir "/tmp/dest-shape.499587/dst" failed: File exists (17)
+      rsync error: error in file IO (code 11) at main.c(780) [Receiver=3.2.5]
+after:    symlink -> /tmp/dest-shape.499587/nowhere
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+
+--- M1 case: fifo ---
+before:   fifo
+      (not a directory)
+command:  rsync -av --delete src/ dst/
+exit:     3
+diagnostic:
+      sending incremental file list
+      rsync: [Receiver] ERROR: cannot stat destination "/tmp/dest-shape.499587/dst/": Not a directory (20)
+      rsync error: errors selecting input/output files, dirs (code 3) at main.c(761) [Receiver=3.2.5]
+after:    fifo
+      (not a directory)
+
+================ M2: root-file deployment shapes ================
+engines: rsync -av file prefix/  and  cp -a file prefix/
+--- M2 engine rsync, case: absent ---
+before:   absent
+      (absent)
+command:  rsync -av file prefix/
+exit:     0
+diagnostic:
+      sending incremental file list
+      rootfile.env
+      
+      sent 137 bytes  received 35 bytes  344.00 bytes/sec
+      total size is 18  speedup is 0.10
+after:    regular file
+      (not a directory)
+
+--- M2 engine rsync, case: regular_file ---
+before:   regular file
+      (not a directory)
+command:  rsync -av file prefix/
+exit:     0
+diagnostic:
+      sending incremental file list
+      rootfile.env
+      
+      sent 137 bytes  received 35 bytes  344.00 bytes/sec
+      total size is 18  speedup is 0.10
+after:    regular file
+      (not a directory)
+
+--- M2 engine rsync, case: empty_dir ---
+before:   directory
+      .
+command:  rsync -av file prefix/
+exit:     0
+diagnostic:
+      sending incremental file list
+      rootfile.env
+      
+      sent 136 bytes  received 35 bytes  342.00 bytes/sec
+      total size is 18  speedup is 0.11
+after:    regular file
+      (not a directory)
+
+--- M2 engine rsync, case: populated_dir ---
+before:   directory
+      .
+      ./inner
+      ./inner.txt
+command:  rsync -av file prefix/
+exit:     23
+diagnostic:
+      sending incremental file list
+      could not make way for new regular file: rootfile.env
+      cannot delete non-empty directory: rootfile.env
+      
+      sent 71 bytes  received 64 bytes  270.00 bytes/sec
+      total size is 18  speedup is 0.13
+      rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1327) [sender=3.2.5]
+after:    directory
+      .
+      ./inner
+      ./inner.txt
+
+--- M2 engine rsync, case: symlink_dir ---
+before:   symlink -> /tmp/dest-shape.499587/external_dir
+      (symlink, its target is listed under external target)
+command:  rsync -av file prefix/
+exit:     0
+diagnostic:
+      sending incremental file list
+      rootfile.env
+      
+      sent 137 bytes  received 35 bytes  344.00 bytes/sec
+      total size is 18  speedup is 0.10
+after:    regular file
+      (not a directory)
+symlink:  no longer a symlink, so it was replaced
+external: target unchanged, compared by content and not by listing
+
+--- M2 engine rsync, case: symlink_regular_file ---
+before:   symlink -> /tmp/dest-shape.499587/external_file
+      (symlink, its target is listed under external target)
+command:  rsync -av file prefix/
+exit:     0
+diagnostic:
+      sending incremental file list
+      rootfile.env
+      
+      sent 137 bytes  received 35 bytes  344.00 bytes/sec
+      total size is 18  speedup is 0.10
+after:    regular file
+      (not a directory)
+symlink:  no longer a symlink, so it was replaced
+external: target unchanged, compared by content and not by listing
+
+--- M2 engine rsync, case: dangling_symlink ---
+before:   symlink -> /tmp/dest-shape.499587/nowhere
+      (symlink, its target is listed under external target)
+command:  rsync -av file prefix/
+exit:     0
+diagnostic:
+      sending incremental file list
+      rootfile.env
+      
+      sent 137 bytes  received 35 bytes  344.00 bytes/sec
+      total size is 18  speedup is 0.10
+after:    regular file
+      (not a directory)
+symlink:  no longer a symlink, so it was replaced
+
+--- M2 engine rsync, case: fifo ---
+before:   fifo
+      (not a directory)
+command:  rsync -av file prefix/
+exit:     0
+diagnostic:
+      sending incremental file list
+      rootfile.env
+      
+      sent 137 bytes  received 35 bytes  344.00 bytes/sec
+      total size is 18  speedup is 0.10
+after:    regular file
+      (not a directory)
+
+--- M2 engine cp, case: absent ---
+before:   absent
+      (absent)
+command:  cp -a file prefix/
+exit:     0
+diagnostic: (empty)
+after:    regular file
+      (not a directory)
+
+--- M2 engine cp, case: regular_file ---
+before:   regular file
+      (not a directory)
+command:  cp -a file prefix/
+exit:     0
+diagnostic: (empty)
+after:    regular file
+      (not a directory)
+
+--- M2 engine cp, case: empty_dir ---
+before:   directory
+      .
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: cannot overwrite directory '/tmp/dest-shape.499587/prefix/rootfile.env' with non-directory
+after:    directory
+      .
+
+--- M2 engine cp, case: populated_dir ---
+before:   directory
+      .
+      ./inner
+      ./inner.txt
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: cannot overwrite directory '/tmp/dest-shape.499587/prefix/rootfile.env' with non-directory
+after:    directory
+      .
+      ./inner
+      ./inner.txt
+
+--- M2 engine cp, case: symlink_dir ---
+before:   symlink -> /tmp/dest-shape.499587/external_dir
+      (symlink, its target is listed under external target)
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: cannot overwrite directory '/tmp/dest-shape.499587/prefix/rootfile.env' with non-directory
+after:    symlink -> /tmp/dest-shape.499587/external_dir
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+external: target unchanged, compared by content and not by listing
+
+--- M2 engine cp, case: symlink_regular_file ---
+before:   symlink -> /tmp/dest-shape.499587/external_file
+      (symlink, its target is listed under external target)
+command:  cp -a file prefix/
+exit:     0
+diagnostic: (empty)
+after:    symlink -> /tmp/dest-shape.499587/external_file
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+external: TARGET CHANGED, the engine wrote or deleted through the link
+      before: external_dir=absent external_file=file[3396430059 14]
+      after:  external_dir=absent external_file=file[2305296262 18]
+
+--- M2 engine cp, case: dangling_symlink ---
+before:   symlink -> /tmp/dest-shape.499587/nowhere
+      (symlink, its target is listed under external target)
+command:  cp -a file prefix/
+exit:     1
+diagnostic:
+      cp: not writing through dangling symlink '/tmp/dest-shape.499587/prefix/rootfile.env'
+after:    symlink -> /tmp/dest-shape.499587/nowhere
+      (symlink, its target is listed under external target)
+symlink:  still a symlink, so it was followed rather than replaced
+
+--- M2 engine cp, case: fifo ---
+before:   fifo
+      (not a directory)
+command:  cp -a file prefix/
+exit:     124
+exit note: 124 is the timeout status, so the engine BLOCKED and was
+           killed. Opening this destination for writing never returned.
+diagnostic: (empty)
+after:    fifo
+      (not a directory)
+
+================ M3: real deployment shape, read only ================
+--- M3 prefix: /home/deploy-account ---
+      drwxrwxr-x+ 9 deploy-account deploy-group 147 Jul  7 17:38 /home/deploy-account/tools
+      directory '/home/deploy-account/tools'
+      readlink: not a symlink, not applicable
+--- M3 prefix: /project/middleware1/refer/deploy-group ---
+      drwxr-xr-x. 8 middleware1 middleware 136 Jul  7 17:38 /project/middleware1/refer/deploy-group/tools
+      directory '/project/middleware1/refer/deploy-group/tools'
+      readlink: not a symlink, not applicable
+prefixes checked: 2
+
+================ measurement answers ================
+Generated from the cases above, one row per measured shape. "exit" is the
+engine status, "after" the destination type once it returned, "symlink"
+(shown as "link" in the M2 matrix) whether a symlinked destination was
+followed or replaced, and "external" (as "ext") whether the content behind
+such a link changed. A cell reads n/a when the shape cannot raise that
+question, unavailable when the tool is missing on this host, skipped when
+the case was withheld as unsafe to run here, and n/r when no record was
+produced at all. Every measured shape has a row whatever its outcome.
+
+--- M1: rsync -av --delete src/ dst/ ---
+destination shape     | exit | after        | symlink  | external
+----------------------+------+--------------+----------+----------
+absent                | 0    | directory    | n/a      | n/a
+empty_dir             | 0    | directory    | n/a      | n/a
+populated_dir         | 0    | directory    | n/a      | n/a
+regular_file          | 3    | regular file | n/a      | n/a
+symlink_empty_dir     | 0    | symlink      | followed | CHANGED
+symlink_populated_dir | 0    | symlink      | followed | CHANGED
+symlink_regular_file  | 3    | symlink      | followed | unchanged
+dangling_symlink      | 11   | symlink      | followed | n/a
+fifo                  | 3    | fifo         | n/a      | n/a
+
+--- M2: rsync -av file prefix/   versus   cp -a file prefix/ ---
+                      |              rsync                   |               cp
+destination shape     | exit after        link     ext       | exit after        link     ext
+----------------------+--------------------------------------+-------------------------------------
+absent                | 0    regular file n/a      n/a       | 0    regular file n/a      n/a
+regular_file          | 0    regular file n/a      n/a       | 0    regular file n/a      n/a
+empty_dir             | 0    regular file n/a      n/a       | 1    directory    n/a      n/a
+populated_dir         | 23   directory    n/a      n/a       | 1    directory    n/a      n/a
+symlink_dir           | 0    regular file replaced unchanged | 1    symlink      followed unchanged
+symlink_regular_file  | 0    regular file replaced unchanged | 0    symlink      followed CHANGED
+dangling_symlink      | 0    regular file replaced n/a       | 1    symlink      followed n/a
+fifo                  | 0    regular file n/a      n/a       | 124  fifo         n/a      n/a
+
+--- M3: <prefix>/tools on real deployment prefixes ---
+prefix                             | kind         | mode         | acl     | link target
+-----------------------------------+--------------+--------------+---------+------------
+/home/deploy-account                    | directory    | drwxrwxr-x+  | yes     | n/a
+/project/middleware1/refer/deploy-group | directory    | drwxr-xr-x.  | no      | n/a
+prefixes inspected: 2
+
+================ end of evidence ================
