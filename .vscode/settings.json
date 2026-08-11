@@ -25,11 +25,14 @@
   },
   "cSpell.words": [
     "auditwheel",
+    "behaviourally",
     "bootstrappable",
     "CXXABI",
     "debian",
     "dlopen",
     "dlopens",
+    "dotglob",
+    "findutils",
     "insertdict",
     "libbfd",
     "libjpeg",
@@ -37,9 +40,18 @@
     "libpopt",
     "libqpdf",
     "lsqlite",
+    "overclaim",
+    "overclaims",
     "procps",
     "redeployments",
     "RELR",
-    "subinterpreters"
+    "shopt",
+    "somedir",
+    "subinterpreters",
+    "underspecified",
+    "unretained",
+    "unvalidatable",
+    "xattrs",
+    "zcat"
   ]
 }
