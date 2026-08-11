@@ -1,7 +1,7 @@
 # Install without the host rsync
 
 - Type: issue
-- Umbrella: docs/draft.v0.27.0.debian-agent-tools.md
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
 
 ## Split entry this draft comes from
 
@@ -53,9 +53,19 @@ run tests, package and publish.
 
 `install_pkg.sh` is the entry point of that relocation, and it has to
 run on a bare foreign account before anything is installed. Its
-bootstrap dependency set is today bash, tar, find, sed, grep, cp, ln and
-mv, all POSIX baseline, plus `rsync`, the single outlier. The agent
-image does not carry that outlier.
+bootstrap dependency set is today bash, tar, find, sed, grep, ln and
+the rest of the host toolbox, plus `rsync`, the single outlier. The
+agent image does not carry that outlier.
+
+Correction, 2026-08-09: this paragraph first read "bash, tar, find, sed,
+grep, cp, ln and mv, all POSIX baseline". The requirement review
+disproved it on three counts: the set is neither eight commands nor
+POSIX (the script is Bash using GNU `find -printf`, `grep -rlIZ
+--exclude-dir`, `xargs -0 -r` and `sed -i`), `mv` is never invoked, and
+`cp` is not called today at all, since the fallback is what introduces
+it. The audited contract lives in
+[the requirement](issue.v0.27.0.rsync-cp-fallback.md), which is
+authoritative; this draft is kept as the record of how the topic opened.
 
 ## Observed defect (Q19)
 
@@ -122,8 +132,10 @@ matter and must be verified rather than assumed.
 
 The reasoning to preserve:
 
-- (a) leaves the installer needing only POSIX tools, which is stronger
-  than adding a binary that must itself be bootstrappable;
+- (a) leaves the installer needing only host commands both supported
+  targets already carry, which is stronger than adding a binary that
+  must itself be bootstrappable (this bullet first read "only POSIX
+  tools", corrected 2026-08-09 with the rest of the claim);
 - (b) would drag rsync's `libpopt`, `libzstd`, `liblz4` and `libcrypto`
   onto a foreign distribution, the same failure class as the mixed
   runtime resolution already met with `libgcc_s` and `libstdc++`;

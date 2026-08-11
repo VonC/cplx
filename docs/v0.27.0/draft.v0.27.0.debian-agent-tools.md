@@ -4,7 +4,7 @@
 - Draft role: umbrella
 
 Source of every finding referenced here:
-`../my-project/docs/jenkins_build.md` (the PDFS Jenkins build discovery,
+`../../my-project/docs/jenkins_build.md` (the PDFS Jenkins build discovery,
 builds develop#2 through develop#19 on 2026-08-06 and 2026-08-07) and
 the cplx sources named per item. The Qn identifiers below are the open questions of that
 document; this draft turns its "durable fix, in cplx" notes into one
@@ -59,7 +59,7 @@ archive distribution-agnostic without touching the build model
 | Q | Defect | Evidence | Interim in the pipeline |
 | --- | --- | --- | --- |
 | Q20 | The python wrapper exports `LD_LIBRARY_PATH` then calls host `readlink`/`mv`/`ln`, which bind the shipped RHEL libc and die on `GLIBC_PRIVATE` | develop#3, wrapper line 60 mangled exec target | uv drives the `python3*_bin` ELF directly via `UV_PYTHON` |
-| Q24 | The toolchain python has no `_sqlite3`: the sandbox never held `sqlite-devel`, so the extension was never compiled (and no `libsqlite3` ships either) | develop#7 `ModuleNotFoundError: _sqlite3`, develop#19 root listing | walk runs `--no-cov -p no:pytest-testmon`, coverage gate suspended, coverage-importing suites skipif-guarded |
+| Q24 | The toolchain python has no `_sqlite3`: the sandbox never held `sqlite-devel`, so the extension was never compiled, and `libsqlite3.so.0` ships nowhere in the root either | develop#7 `ModuleNotFoundError: _sqlite3`, live tree searched on the build account 2026-08-08 | walk runs `--no-cov -p no:pytest-testmon`, coverage gate suspended, coverage-importing suites skipif-guarded |
 | Q26 | The wheels' own rpath hides the toolchain root, so manylinux extensions resolve Debian's copies against the RHEL libc; what the root actually lacks is narrower than first read, the runtime resolving inside the prefix once the python rpath governs | develop#10 pymupdf, develop#12 ld.so assertion, develop#13 `GLIBC_2.36` via libstdc++, develop#15 pikepdf grafted libjpeg, develop#21 clean runtime trace | `--replace-needed` onto `libc.so.6` plus a `--force-rpath` append of the root on every venv wheel; publish gated on a green walk |
 | Q19 | `install_pkg.sh` hard-requires `rsync`, absent from the agent image | develop#2 exit 5 at the mirror phase | rsync stand-in shim written by the pipeline |
 
@@ -217,7 +217,7 @@ cannot use host paths anyway: `install_functions.sh` compiles with
 and `-Wl,--sysroot=${root}` plus explicit `-L${root}/...` in `LDFLAGS`,
 so every header and library comes from the tool's sandbox root, never
 from `/usr`. That isolation is the whole point of the build model
-([Why recompile](../wiki/explanation/why-recompile.md)): a toolchain
+([Why recompile](../../wiki/explanation/why-recompile.md)): a toolchain
 linked against the host would drag host versions into the archive.
 
 What is needed is those two payloads unpacked inside the python
@@ -280,13 +280,15 @@ it. The pipeline error is `ModuleNotFoundError: No module named
 '_sqlite3'`, which says the extension file does not exist; a built
 extension whose library was missing would instead fail at dlopen with
 `ImportError: libsqlite3.so.0: cannot open shared object file`. Only a
-rebuild produces the file. The extension is therefore proven absent;
-`libsqlite3.so.0` is merely unaccounted for, absent from the one
-directory develop#19 listed and never looked for in the seven others
-(the same narrow reading that misplaced `libgcc_s`, see develop#24).
-Step 1 below settles it on the build account, and the answer changes
-nothing here: the payload gets added either way, for the header the
-build needs.
+rebuild produces the file. Both gaps are now proven rather than
+inferred: the extension by that error, and the library by a direct
+search of the live toolchain tree on the build account on 2026-08-08,
+`find . -name libsqlite3.so.0` under `tools/*/root` returning nothing.
+The archive therefore owes two files, not one, and the runtime library
+is not optional: the RHEL servers carry their own copy in
+`/usr/lib64`, so shipping the extension alone would work there and fail
+on the agent, the asymmetry that kept the Q26 family invisible until CI
+met a foreign distribution.
 
 ### Steps
 
@@ -328,11 +330,15 @@ build needs.
    `checking for stdlib extension module _sqlite3` must answer `yes`,
    not `missing`, and `_sqlite3` must be absent from the
    necessary-bits-not-found summary at the end of the build.
-5. Make sure `libsqlite3.so.0` ships inside the archive root
-   (`tools/python/root/usr/lib64`), not only in the build sandbox: on
-   RHEL the deployed tree could still borrow the host copy from
-   `/usr/lib64` and hide the gap, while Debian's multiarch layout
-   never would. This belongs to the runtime closure of work item 3.
+5. Ship `libsqlite3.so.0` inside the archive root
+   (`tools/python/root/usr/lib64`), not only in the build sandbox. This
+   is required rather than precautionary: the library is absent from
+   the whole root today, confirmed on 2026-08-08 by searching the live
+   tree on the build account, while the RHEL servers carry their own
+   copy in `/usr/lib64`. An archive that compiled the extension without
+   shipping the library would therefore pass on RHEL and fail on the
+   agent, the exact asymmetry that hid the Q26 family. The closure
+   check of work item 3 is what keeps it shipped.
 
 Acceptance for this item: `python3 -c 'import sqlite3'` passes on the
 build account, on a Debian 12 container after relocation, and on the
@@ -364,12 +370,14 @@ Three sub-tasks:
    anything host-side once the search list matches the runtime's. There
    is no drop between RPM extraction and packaging to hunt down: the
    develop#19 reading that pointed at one came from listing
-   `root/usr/lib64` alone. `libsqlite3.so.0` is the one library still
-   open, absent from that directory and not yet looked for elsewhere,
-   and it arrives anyway with the work item 2 list entries (Q24 proves
-   the missing python module, which is the part that matters). What
-   this sub-task keeps is the packaging-time closure check, over the
-   whole rpath, so a future drop cannot ship silently.
+   `root/usr/lib64` alone. One library is genuinely absent, and it is
+   the one this closure must gain: `libsqlite3.so.0` ships nowhere in
+   the root, confirmed on 2026-08-08 by searching the live tree on the
+   build account. It arrives with the work item 2 payload, and this
+   sub-task is what makes its arrival verifiable rather than hoped for.
+   What this sub-task keeps, then, is the packaging-time closure check
+   over the whole rpath, with `libsqlite3.so.0` among the members it
+   enforces, so a future drop cannot ship silently.
 2. Keep the snapshot coherent (the develop#14 lesson): the published
    9.13.4 libc lacks the `GLIBC_2.35` version node that the current
    RHEL `libgcc_s` demands, while the live build-account root has it:
@@ -452,9 +460,9 @@ Two halves, both needed:
 
 The mechanism, the recovery and the inventory of everything the key
 names are documented in the wiki
-([The architecture key](../wiki/explanation/the-architecture-key.md),
-[Survive a server OS upgrade](../wiki/how-to/survive-a-server-os-upgrade.md),
-[Package list formats](../wiki/reference/package-list-formats.md)).
+([The architecture key](../../wiki/explanation/the-architecture-key.md),
+[Survive a server OS upgrade](../../wiki/how-to/survive-a-server-os-upgrade.md),
+[Package list formats](../../wiki/reference/package-list-formats.md)).
 
 ## Work item 4 (Q19): give install_pkg.sh a fallback without rsync
 
@@ -540,7 +548,7 @@ Debian's 3.13 starting only with Debian 13.
 Compiling therefore stays the only way to hold a chosen 3.13 patch
 level on both machines. The full matrix, with a checkable source per
 row, is in
-[Python versions by distribution](../wiki/reference/python-versions-by-distribution.md).
+[Python versions by distribution](../../wiki/reference/python-versions-by-distribution.md).
 
 ### Looking past 3.13: what 3.14 would bring (D8)
 
@@ -699,6 +707,35 @@ markers), listed here so the effort has a definition of done:
   ELF path is also acceptable, the bypass is then a convention rather
   than a workaround.
 
+## Follow-up raised by requirement 1, to schedule in this collection
+
+Added 2026-08-10, from the M1 measurement taken for the design of requirement 1
+and recorded in `measurements.index.md`.
+
+**The unchanged rsync mirror can write and delete outside the prefix.** Given a
+mirror destination that is a symlink to a directory, `rsync -av --delete src/
+dst/` follows the link and operates on the external target: where that directory
+is empty it writes the whole archive tree into it, and where it is populated it
+writes into it and deletes its stale entries. Both cases return 0, so the
+installer reports success while having modified a tree nobody pointed it at.
+Measured on RHEL 9.8 with rsync 3.2.5, which is the deployment configuration.
+
+This is a production defect in the current installer, not a regression from the
+v0.27.0 work, and requirement 1 deliberately does not fix it: the settled
+requirement holds the rsync invocation, output, semantics and exit codes
+unchanged, so hardening that path there would reopen the requirement rather than
+finish its design. Requirement 1's fallback refuses the shape; the rsync path
+keeps it.
+
+What this follow-up owes: decide whether the installer should validate its
+mirror destination for both engines, and if so, land it as its own item with its
+own production acceptance evidence, since it changes behavior on the RHEL
+targets. M3 inspected two real deployment prefixes and found `tools` to be a real
+directory on both, the safe shape, so nothing is known to be affected today; two
+prefixes are not a survey, and that is the whole reason this is written down
+rather than assumed away. Corrected 2026-08-11 from an earlier reading of one
+prefix, which came from the measurement index rather than from the raw output.
+
 ## Out of scope for this tools set
 
 - Q17, a one-line `requirements.txt` pinning uv: a my-project file,
@@ -718,7 +755,7 @@ the correction below.
 | D1 | Maven version hosting the new tools archive | (a) the next application release version, published at release time; (b) a dedicated intermediate version so CI switches without waiting for a release | decided: (a); the archive rides the next application release, so CI keeps the 9.13.4 archive and its interims until that release publishes |
 | D2 | Wrapper strategy for `LD_LIBRARY_PATH` | (a) save/unset around helpers, restore on the exec; (b) `env -u` per call site; (c) builtins where possible | (a) |
 | D3 | Stub resolution for dlopen'd wheels | (a) `patchelf --force-rpath` in the relocation pass; (b) keep `DT_RUNPATH` plus explicit `LD_LIBRARY_PATH` in CI and in the wrapper exec | resolved: (a); develop#15 proved wheels and their grafted libraries need RPATH semantics; RHEL harmlessness is checked by the validation matrix |
-| D4 | How install_pkg.sh stops needing the host rsync | (a) in-script cp fallback; (b) ship the rsync payload in the archive like patchelf; (c) both; (d) wait for the agent image | decided: (a). It leaves the installer needing only POSIX tools, while (b) would drag rsync's libpopt, libzstd, liblz4 and libcrypto onto a foreign distribution, the failure class of Q26. Compiling rsync in cplx is impossible here: a cplx-built binary carries a `/home/<builder>` interpreter and rsync must run before the pass that repairs it. Asking the CICD team for rsync stays a parallel, non-blocking track |
+| D4 | How install_pkg.sh stops needing the host rsync | (a) in-script cp fallback; (b) ship the rsync payload in the archive like patchelf; (c) both; (d) wait for the agent image | decided: (a). Both options add something, and the contrast is the argument: (a) adds one command, `cp`, which the script does not call today and which both supported targets already carry, while (b) would add a binary plus its libpopt, libzstd, liblz4 and libcrypto onto a foreign distribution, the failure class of Q26. The claim that both targets carry it is now measured rather than assumed. The consuming project's diagnose stage runs a command and behavior script on the Debian agent at every build, and the same script was run by hand on a RHEL 9.8 deployment server on 2026-08-09: both report all nineteen commands and every behavior present, `cp -a` keeping a symlink a symlink included, with rsync the only difference between them, present on the server and absent on the agent. The behaviors are satisfied by the older toolset of the two, RHEL running behind Debian on coreutils, findutils, grep and sed, which is the stronger direction for the claim. Correction, 2026-08-09: this rationale first read "needing only POSIX tools", which the requirement review disproved. The script is a Bash script using GNU behavior (`find -printf`, `grep -rlIZ --exclude-dir`, `xargs -0 -r`, `sed -i`), and the `cp -a` the fallback adds is itself a GNU and BSD extension. The decision is unaffected, only its justification; requirement 1 carries the audited contract. Compiling rsync in cplx is impossible here: a cplx-built binary carries a `/home/<builder>` interpreter and rsync must run before the pass that repairs it. Asking the CICD team for rsync stays a parallel, non-blocking track |
 | D5 | Batch a Python 3.13.x refresh with the sqlite rebuild | (a) yes, one rebuild serves both; (b) no, minimal change | decided: (a) on **3.13.14**, never 3.13.10; re-check 3.13.15 for regression reports just before the rebuild and take it if clean |
 | D8 | When to consider Python 3.14 | (a) now, widening the application pin; (b) next cycle; (c) never, stay on 3.13 to its end of life | (b): 3.13 must serve this rebuild (the application pins it), but 3.14 gains a year of maintenance, fits the annotation-heavy code through PEP 649, and is the only line RHEL 9 could ever provide as a package |
 | D7 | sqlite provenance for the python build | (a) copy from the server's `/usr`; (b) `sqlite-devel` and `sqlite-libs` payloads extracted into the python sandbox from the per-tool list; (c) sqlite rebuilt from source as a cplx tool | (b): (a) is impossible (the server has no header and no linker symlink), (b) is one list line in the same class as zlib and libffi, (c) only for a newer sqlite or independence from the RHEL patch cycle |
@@ -763,7 +800,58 @@ break the SONAME lookup, the failure class this collection exists to
 remove, arriving through the installer instead of the archive. `cp -a`
 preserves symlinks and hard links both, the latter being what `rsync -a`
 drops without `-H`, so the check is that the two engines produce the
-same tree, with that pair as the canary.
+same tree, with that pair as the canary. The 2026-08-09 measurement
+confirms the tool is available for the job: `cp -a` keeps a link a link
+on the RHEL server and on the agent alike, so this acceptance rests on
+a verified capability rather than on a manual page.
+
+A third measurement, taken on 2026-08-09 across nine mirror destination
+shapes and eight root-file shapes, settles what each engine does when
+the destination is not a plain directory, and it bears on this item's
+boundary and preflight rules rather than on the copy itself. The mirror
+engine refuses a regular file, a symlink to a regular file, a dangling
+symlink and a FIFO, but follows a symlink to a directory silently and
+successfully, deleting the external target under `--delete`. On the
+root-file path the two engines diverge on six shapes of eight: rsync
+replaces a directory, a symlink or a FIFO where the copy engine refuses,
+and the copy engine blocks forever on a FIFO where rsync replaces it
+cleanly. The copy engine answered identically on coreutils 8.32 and 9.1.
+A preflight on the fallback path is therefore not merely diagnostic, and
+refusing a symlinked destination is a deliberate divergence from what
+rsync does today rather than a restatement of it. The raw output of both
+hosts is retained with the consuming project's build evidence.
+
+Re-measured on 2026-08-09 with the probe comparing the external target
+by content rather than by listing, one row moved and it settles the
+question the reviewer raised. The copy engine, given a root-file
+destination that is a symlink to a regular file, returns exit 0 with the
+destination still a symlink and overwrites the file the link points at.
+The previous reading called that unchanged because it compared names.
+Both hosts agree, on coreutils 8.32 and 9.1.
+
+The two engines are therefore unsafe in opposite places, which is what
+the requirement should act on. On the mirror path rsync follows a
+symlink to a directory and empties it under `--delete`, silently and
+with exit 0. On the root-file path rsync replaces the link and leaves
+its target alone, while the copy engine follows the link and overwrites
+the target, also with exit 0. A fallback built as a plain copy is thus
+safer than rsync on the mirror path and more dangerous than it on the
+root-file path, and neither difference shows in an exit status.
+Refusing a symlinked destination is the one rule that is correct on
+both paths, and the divergence it creates is from a different engine in
+each case.
+
+The same day's second measurement narrows the copy form the design may
+choose, and it is worth recording at umbrella level because it removes a
+question rather than answering it. Given the same populated destination,
+`cp -a src/. dst/` leaves the destination root carrying the source mode
+and the source mtime, which is precisely what `rsync -av --delete src/
+dst/` does, while copying entry by entry leaves the destination its own
+mode and a fresh mtime. Both targets agree, on coreutils 8.32 with rsync
+and on 9.1 without it. So the engines can be made to agree on the
+transfer root by choosing the form, the compared manifest needs no
+carve-out for the root, and the same form is the one that carries hidden
+entries without a dotglob.
 
 First because it is the most independent change in the collection: one
 file, no rebuild, no packaging, verifiable against the existing
