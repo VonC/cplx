@@ -5,13 +5,15 @@ No, it is not implemented.
 This document tracks the implementation of
 [plan.v0.27.0.rsync-cp-fallback.md](plan.v0.27.0.rsync-cp-fallback.md), six
 steps that give `install_pkg.sh` a second copy engine without changing the rsync
-path. Nothing has been implemented yet: this is the initial skeleton written
-alongside the plan, before any code change and before any check.
+path. No installer code has changed: `src/setups/env/bin/install_pkg.sh` is
+untouched at 505 lines and steps 1 to 5 have not started. Step 0 builds the
+harness those steps are judged against, and it is checked below, corrected after
+code review round 1 and awaiting regenerated evidence on both targets.
 
-> Initial-skeleton note: every per-step section other than `Goal` and
+> Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
 > `_(empty — no check has taken place yet.)_.` until an implementation check
-> replaces it.
+> replaces it. Step 0's sections are filled in; steps 1 to 5 are not.
 >
 > Markdown lint note: never leave a space immediately inside an inline code span
 > (MD038) -- write a needed space as the token `[space]`, as in `` `[space]${x}` ``.
@@ -189,8 +191,109 @@ the cost is accepted rather than optimized.
 
 ### Analysis of Step 0 implementation state
 
-Not started. Step 0 is not implemented because no verification harness exists in
-this repository yet, and no case has been run against the current installer.
+Yes. Step 0 has been fully implemented.
+
+This section has also said yes three times before and been wrong each time, which
+is worth recording rather than tidying away: a harness whose own contract has
+holes reports green while proving less than it claims, and reading it does not
+reveal that. Three review rounds found twelve defects, and no run had ever failed
+on any of them.
+
+Code review round 1 refuted the first yes on four counts:
+
+- `resolve_archive` searched two of the installer's four archive roots, so a
+  newer archive in `$HOME` or `$HOME/pkgs` could be installed while the declared
+  one was approved. The wrong-archive control shared the blind spot, since it
+  planted its decoy inside the shortened search set.
+- Two of the three baseline behaviours the plan requires did not exist: the
+  root-file FIFO case and the root-file symlink-to-regular-file case, both with
+  rsync present. The RHEL capture's nine passes therefore did not cover the two
+  behaviours Step 3 changes for the fallback engine only.
+- The exit-only control never entered `run_case`, so it proved only that its own
+  private check could see an absent tree, not that a real case would refuse the
+  same substitute. `run_case` did return success for an exit-only program
+  whenever the expected exit was zero and the phase expression empty.
+- The matrix label was derived from the requesting environment alone, so Debian
+  with rsync present was still labelled D-fb, RHEL without rsync still R-rs, and
+  a forced-fallback request still R-fb against an installer with no override.
+
+All four were corrected, both copies brought into step, and both baselines
+regenerated: RHEL 9.8 at sixteen cases and the Debian CI agent at eleven, zero
+failures on either. Round 2 accepted those fixes as real and then refuted the
+second yes on five further counts, three of which the regenerated captures
+demonstrated rather than merely risked:
+
+- **The Debian capture called itself D-fb.** That cell means the fallback engine
+  was selected and ran. This installer has no fallback and dies at the mirror, so
+  no engine ran at all, and the capture then claimed the label was asserted by
+  `engine none`. Absence of rsync's banner proves only that rsync did not run,
+  which is equally true of a successful fallback, so it cannot be affirmative
+  evidence for one.
+- **`run_case` checked only that the prefix was a directory.** No fixture oracle
+  existed, so a failed `mkfifo` or `ln -s` produced a case that reported the
+  required shape without ever planting it. The symlink case in particular would
+  have passed on a host where `ln -s` yields a copy: the destination would carry
+  archive content and the unused external file would be unchanged.
+- **`--step` changed only the verdict label.** It was never validated and never
+  dispatched a suite, so `--step 5` ran the step 0 cases and could print
+  `Step 5: every assertion ... behaved as designed`, a vacuous pass at exactly
+  the level later steps are meant to rely on.
+- **Preflight was neither complete nor a gate.** It omitted commands the harness
+  invokes, including the newly load-bearing `env`, and a missing one incremented
+  the failure count and carried on into the controls and the installer cases, so
+  a dependency failure surfaced as a red verdict twenty lines later rather than
+  before anything ran.
+- **A passing case printed only the archive basename**, which cannot say which of
+  the four searched roots won, and the canonical-installer override added in
+  round 1 was open to any case rather than to controls alone.
+
+All five were corrected and both baselines regenerated, at sixteen cases on RHEL
+and eleven on the Debian agent, zero failures on either. Both captures reported
+the shared-body digest `0f2b90f8` from two different files in two repositories,
+which closed the cross-copy provenance question by evidence rather than by
+argument. Round 3 accepted that, accepted the honest Debian identity, and then
+refuted the third yes on three further counts:
+
+- **The engine assertion treated selection as proof of execution.** It recognised
+  a guessed `copy engine: fallback` marker. The plan has Step 1 emit a
+  **selection** line before archive discovery while both rsync call sites stay
+  unchanged, so on a no-rsync host that line can say fallback and the same run
+  still die at the unchanged mirror. The harness would have reported
+  `engine fallback, read from the run trace` for a run in which no copy engine
+  ran, making a guessed phrase stronger evidence than the event it describes.
+- **The fixture oracle had no retained calibration.** It was demonstrated once on
+  a developer host, which diagnoses rather than recalibrates: an error in the
+  oracle could accept a false declaration on both targets while every ordinary
+  case stayed green, and no retained run would show it.
+- **Preflight dropped a plan-mandated command.** The plan names five
+  verification-only additions required on every target before any case, and
+  `diff` was not among the declared tools. The list also claimed to hold every
+  external command the harness runs while excepting the child `bash` that
+  `run_case` looks up on PATH.
+
+The first of those also corrects reasoning recorded here. The round 3 request
+flagged the speculative branch as risky because a wording mismatch would silently
+report `none`. That is backwards: a mismatch fails loudly, and the unsafe case is
+Step 1 choosing exactly the guessed wording. Guarding the wrong direction is why
+the branch was kept rather than removed.
+
+All three are corrected, and both baselines have been regenerated against the
+corrected body. RHEL 9.8 captured R-rs by hand on 2026-08-12, seventeen cases and
+zero failures, with the identity confirmed from rsync's own operation banner and
+both root-file shapes measured. The Debian CI agent captured
+`Debian/no-rsync/no-engine` in Jenkins build 38, twelve cases and zero failures:
+exit 5 in the mirror phase, no tree deployed, staging retained. All seven
+negative controls behave as designed on both targets, including the new
+fixture-shape control, so the oracle that reads every setup is recalibrated in
+the evidence itself rather than in an anecdote about a developer host. Both
+captures report `all 28 present`, and both report the shared-body digest
+`d9027ad8` from two different files in two repositories.
+
+The superseded captures are replaced rather than kept alongside, which round 2
+confirmed as the right call: a capture that cannot identify the archive actually
+consumed, or that names the wrong matrix cell, would imply evidentiary value it
+does not have. The review transcript preserves what each said and why it was
+rejected.
 
 ### Goal for Step 0
 
@@ -209,9 +312,6 @@ a captured baseline of the current installer.
 - No installer case asserts a timeout, because the current installer has no path
   that blocks: with rsync absent it never reaches the root-file site, and with
   rsync present M2 measured rsync replacing a FIFO promptly with exit 0.
-- Each case declares the installer and archive it intends to exercise, and the
-  harness asserts the resolved identities against those declarations before
-  running.
 - The negative controls fail as designed and for the right reason: an exit-only
   substitute that changes no state, a wrong-archive substitute that fails the
   archive-identity assertion, and a wrong-installer substitute that fails the
@@ -223,29 +323,291 @@ a captured baseline of the current installer.
 
 ### What was implemented for Step 0
 
-_(empty — no check has taken place yet.)_.
+- **The harness**: `docs/v0.27.0/verify.install-pkg.sh`, 771 lines, effort-local
+  per Q01 so it cannot reach the shipped archive. It takes `--step`,
+  `--installer` and `--scratch`, works in a scratch directory it removes on
+  exit, and never writes to a deployment prefix.
+- **Case contract, per Q07, two mandatory oracles**: `run_case` applies a fixture
+  oracle before anything runs, then asserts the declared installer and archive
+  against the resolved values, then the exit code, then a phase-specific
+  diagnostic, then a post-state oracle. Both oracles are mandatory arguments and
+  an unnamed or unknown one is a failure, so neither a status-only pass nor a
+  case reporting an unplanted shape is reachable. The fixture oracle covers
+  `fresh`, `fifo:<path>`, `symlink:<path>=<target>` with the target verified by
+  `readlink`, `decoy-newer:<path>` with the decoy proved newer than the declared
+  archive, and `installer-copy:<path>` proved present, at another path, and
+  byte-identical to the installer under test. Each passing case prints the shape
+  it verified and the identity it asserted, the archive as a logical root plus
+  name rather than a bare basename, since one name can exist under more than one
+  of the four searched roots.
+- **Step dispatch**: only `--step 0` has a case suite, and any other value is
+  refused before preflight. The verdict names the suites that actually ran and
+  fails if no baseline suite ran, so it can never rest on the requested label
+  alone. Extending a later step means extending the dispatch and the suite record
+  together.
+- **Hermetic archive selection**: every case runs with `HOME` pinned to a scratch
+  directory, and `resolve_archive` searches the same four roots `install_pkg.sh`
+  line 393 searches, the prefix, its `pkgs` directory, `$HOME` and `$HOME/pkgs`.
+  The archive the harness asserts is therefore the archive the installer
+  consumes, and nothing it asserts depends on what sits in the real home.
+- **Negative controls**: seven. The watchdog blocks a copy onto a reader-less FIFO
+  and is killed at two seconds; the wrong-archive control plants a newer decoy so
+  the installer's own selection diverges from the declaration; the omitted-root
+  control plants the same decoy in `$HOME/pkgs`, the root the superseded resolver
+  ignored, so a shortened resolver fails loudly; the wrong-installer control
+  points at a present second copy of the script; the exit-only substitute is
+  declared as its own canonical installer so it clears identity and travels the
+  whole of `run_case`, and is refused by `assert_post_state`, the same oracle
+  every real case is judged by; the fixture-shape control plants a plain regular
+  file where a case declares an exact symlink and requires refusal on the shape
+  rather than on anything downstream; the encoder control confirms that `jln`
+  encodes to `6a6c6e`. Each control names the exact refusal reason it requires,
+  not a broad prefix, so a missing fixture cannot satisfy a control that exists
+  to prove an identity mismatch. The canonical-installer override is refused
+  outside a control, so ordinary cases keep no escape hatch from the identity
+  gate. The controls run on both targets, so the fixture oracle every behavioural
+  conclusion rests on is recalibrated in the evidence being approved rather than
+  demonstrated once on a developer host.
+- **Synthetic archive builder, per Q02**: carries the shapes the acceptance
+  names, a SONAME symlink onto `libgcc_s-11-20240719.so.1`, a linked rpath
+  directory `root/lib64` onto `usr/lib64`, a hidden entry, and the `.env` and
+  `.env_` archive root files.
+- **Baseline capture, all three plan behaviours**: without rsync, exit 5 in the
+  mirror phase with the `not-deployed` oracle asserting no populated `tools` tree
+  and a retained staging directory. With rsync, a fresh install under the
+  `installed` oracle, then the two root-file shapes on their own fresh prefixes:
+  a FIFO at `.env`, which rsync must replace with a regular file carrying the
+  archive content, and a symlink at `.env` onto a regular file outside the
+  prefix, which rsync must replace while that external target stays identical in
+  both content and mtime. Promptness needs no separate assertion: every case runs
+  under the twenty-second watchdog, so a blocking engine returns 124 and fails
+  the expected exit.
+- **Engine operation asserted, never inferred**: `assert_engine` reads what
+  actually operated from the run's own trace, rsync's file-list banner, which the
+  transfer prints rather than a decision to transfer. `none` additionally
+  requires a failed run, because absence of the rsync banner alone is equally
+  true of a successful fallback and so cannot be affirmative evidence for one.
+  The claim `no engine ran` therefore rests on no trace **and** a failure before
+  any copy. There is deliberately no fallback expectation and no fallback marker
+  recognition: Step 0 asserts only the two states it can witness, rsync operating
+  and nothing operating. When Step 1 defines its trace, that belongs in a
+  separately named selection assertion, and proof that the selected engine copied
+  stays with the operation and post-state cases.
+- **Preflight is a gate, not a case group**: it declares twenty-eight commands,
+  cross-checked against the script's command positions rather than listed from
+  memory; it asserts fractional `stat`; and it asserts the target identity. Any
+  failure stops the run with a distinct exit code before a single control or
+  baseline case, so a dependency problem cannot be buried under twenty later
+  lines. The inventory holds every external command the harness runs, including
+  the child `bash` that `run_case` looks up on PATH, which an earlier version
+  quietly excepted while claiming to be complete. It also holds the plan's five
+  verification-only additions, `timeout`, `stat`, `sha256sum`, `mkfifo` and
+  `diff`. Only `diff` is not invoked at step 0: it is the manifest comparison's
+  tool, and the target capture is the promised evidence that step 5's acceptance
+  gate will have it, which is the point of asserting it. Dropping `env` in favour
+  of setting `HOME` on the command itself removed one dependency rather than
+  declaring it.
+- **Target identity refused rather than qualified**: an identity is claimed only
+  when the run can witness it. Debian with rsync present, RHEL without rsync, a
+  forced-fallback request, and an installer that can select a fallback engine are
+  each refused, and a target-claiming host that cannot produce its identity fails
+  preflight instead of printing a qualified label. The last of those is the
+  strongest form of the round 3 correction: rather than inferring `D-fb` or
+  `R-fb` from the environment, the harness says it has no assertion for a
+  fallback and refuses until Step 1 defines the selection trace. Fallback support
+  is read from the installer under test rather than from the step number. On a
+  non-target host the run states it is a self-test and is not target evidence.
+- **The pre-change Debian result is not a matrix cell**: `D-fb` means the
+  fallback engine was selected and ran, and this installer has none, so the run
+  reports `Debian/no-rsync/no-engine` and says in the header that this is the
+  state expected to become D-fb once the engine exists. The cell is reserved for
+  a run whose fallback selection is evidenced, which Step 1's engine trace makes
+  possible.
+- **Installer fingerprint**: the header prints the installer's sha256, its line
+  count, and whether it supports the fallback override.
+- **Two harness fingerprints, doing different jobs**: the whole-file sha256 pins
+  a capture to one exact file, and the shared-body sha256, taken from a marker
+  line to the end, is equal in both repository copies. The two files now differ
+  only in their header comment block, so the second digest turns "the copies are
+  in step" into something a reader checks from the evidence rather than takes on
+  prose.
+- **Consuming-project stage**: the Debian capture exists because the harness was
+  copied to that repository as `tools/installer_verify_step0.sh` and wired into
+  a report-never-gate Jenkins stage placed after the relocate stage, in its own
+  shell so the pipeline's rsync shim is not on PATH. The installer resolution is
+  now one identical block in both files, so the two differ only in their header
+  comment and the shared-body digest covers all of the code.
+- **Retained baselines, both targets**: `verify.step0.rhel.txt` (R-rs, by hand,
+  2026-08-12, seventeen cases: the rsync path installing cleanly with the canary
+  symlink surviving, plus the FIFO and symlink root-file shapes with the external
+  target byte- and mtime-identical) and `verify.step0.debian.txt`
+  (`Debian/no-rsync/no-engine`, Jenkins build 38, twelve cases: exit 5 in the
+  mirror phase, no tree deployed, staging retained). Both sanitized before
+  retention. The Debian one comes from the build's archived artifact rather than
+  the console, so it carries no timestamper prefix and nothing was reformatted,
+  and it is tied to consuming-project commit `7503e53a` by a whole-file digest
+  that matches that commit's copy byte for byte.
+- **Validation evidence**: `bash -n` clean on both copies; the declared tool
+  inventory cross-checked against the script's own command positions; the step
+  guard and the preflight gate each exercised on a deliberate negative; the
+  fixture oracle exercised by a retained control on both targets; both target
+  runs exit 0; `install_pkg.sh` unchanged at 505 lines with `src/` untouched;
+  both `rsync -av` call sites intact; the sanitization gate clean.
+
+Both captures record the same installer, `3c1f6a56`, 505 lines, `fallback: no`.
+That is the published installer the deployment host and CI run today, not this
+branch's `8ffb726c`, which is correct for a pre-change baseline. Step 5 must name
+which installer it exercises on each target rather than assume the branch one.
 
 ### New helpers or cases introduced for Step 0
 
-_(empty — no check has taken place yet.)_.
+- `run_case`: the case contract, one function, used by every installer case and
+  by the exit-only control. It takes a mandatory fixture oracle and a mandatory
+  post-state oracle, plus a canonical-installer override refused outside a
+  control, which exists only so a control can be declared as its own installer
+  and still travel the whole function.
+- `assert_fixture`: what the case claims to have planted, verified before the
+  installer runs, with five shapes: `fresh`, `fifo`, `symlink` including its
+  exact target, `decoy-newer` including location and newness, and
+  `installer-copy` proved present, elsewhere, and byte-identical. This is what
+  stops a failed `mkfifo` or `ln -s` from producing a case that reports a shape
+  it never planted.
+- `assert_post_state`: the single place a deployment is judged, with two oracles,
+  `installed` and `not-deployed`. Real cases and the exit-only control go through
+  it, so proving the control also proves the cases.
+- `assert_engine`: reads what actually operated from the run's own trace. It
+  knows two answers, `rsync` and `none`, and `none` also requires a failed run,
+  so it means no engine ran rather than only that rsync did not. It recognises no
+  fallback marker, because a selection line is not an operation.
+- `resolve_archive`: reproduces the installer's archive selection across all four
+  of its search roots, under the pinned `HOME`, which is what makes the
+  archive-identity assertion real.
+- `archive_identity`: names which of the four roots a resolved archive came from,
+  since a basename alone cannot say that and the same name can sit under more
+  than one root.
+- `body_digest`: the sha256 of the shared body, from its marker line to the end,
+  printed beside the whole-file digest so a capture proves the two repository
+  copies are in step.
+- `build_archive`: the synthetic fixture of Q02.
+- `enc`: the hex encoder, delete-complement form, shared with the manifest
+  recipe and guarded by its own control.
+- `control`: runs a negative control with failures captured, then reports one
+  case that passes only if the control was refused for the exact reason it
+  names. It is the only place `EXPECT_FAIL` and `CONTROL_ACTIVE` are set, and it
+  always clears both, so no early return can leave the harness deaf to real
+  failures or leave the identity override open. Inner case counting is rolled
+  back, so a control is exactly one case either way.
+- `suite`: records which case suites actually ran, so the verdict never rests on
+  the requested `--step` label.
+- `preflight`, `new_prefix`, `short_sha`, `pass`, `fail`, `chk`: supporting
+  helpers.
 
 ### Architecture check for Step 0
 
-_(empty — no check has taken place yet.)_.
+- **Layering**: the DDD-Hexagonal question does not apply. This repository has
+  no application layers, no ports and no adapters: it is Bash and Batch, and
+  this step adds one standalone shell script. Reporting compliance would be
+  meaningless rather than reassuring.
+- **The boundary that does apply**: the harness must not reach the shipped
+  archive. It lives under `docs/v0.27.0/`, which `pkg.sh` never packages, and
+  its only reference to `src/` is the default path used to locate the installer
+  under test. It writes nothing under `src/`.
+- **Separation**: the harness reads the installer and never edits it, so Step 0
+  cannot mask a later step's defect by changing the thing it measures.
+
+- **Two copies of one script**: the Debian capture required a copy of the
+  harness in the consuming project, since that agent is the only Debian target
+  and it has no access to this repository. The copy names this repository as its
+  source of truth in its header, and differs only there and in how it resolves a
+  default installer. It can still drift.
+
+Yes, there is something that needs to be addressed: the harness now exists in
+two repositories and nothing enforces that they stay in step. It is a watch
+point rather than a defect in this step, and the natural moment to check it is
+Step 5, which runs on both targets. Two things now make drift visible rather
+than silent, and they do different jobs.
+
+Each run prints the sha256 of the whole file that produced it. That pins a
+capture to one exact body, which is how a Debian capture is tied to the commit
+that produced it. It cannot compare the copies: the digest covers the header, and
+the headers differ by design, so those two values are expected to differ and
+their difference means nothing.
+
+Each run also prints the digest of the shared body, from a marker line to the
+end, and that value is equal in both copies. The installer resolution is now one
+identical block, so the marker sits directly under the header comment and the
+shared digest covers all of the code rather than most of it. This is what proves
+the copies are in step, and unlike the round 2 arrangement it is proved by the
+evidence itself rather than by a `diff` a reader has to run and a paragraph
+asking them to trust it.
+
+Round 2's version of this paragraph claimed the whole-file digest let two
+captures be compared. It does not, and the two captures disproved it by reporting
+different values for identical bodies. The two digests are kept separate here for
+that reason.
 
 ### Cost and timing check for Step 0
 
-_(empty — no check has taken place yet.)_.
+- **No new computation in the installer**: Step 0 changes no installer code, so
+  the plan's cost bounds are untouched.
+- **Harness cost**: each case builds a small synthetic archive and runs one
+  installer invocation. Work is linear in the number of cases, with no nested
+  iteration over tree entries, so nothing here is quadratic or `n log n`.
+- **Timing**: every installer invocation runs under a twenty-second watchdog,
+  and the watchdog itself is proved by a deliberate blocker rather than assumed.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Harness case check for Step 0
 
-_(empty — no check has taken place yet.)_.
+This replaces the template's unit-test coverage section: the repository has no
+Python package and no unit tests, so there is no class to hold to 100%.
+
+- **Preflight**: 3 cases, the command inventory, the fractional-`stat`
+  assertion, and the target-identity assertion. It is a gate: any of the three
+  failing stops the run before a single control or baseline case, with a distinct
+  exit code, so nothing after it can be mistaken for evidence.
+- **Negative controls**: 7 cases, each asserting the exact reason it failed
+  rather than a broad prefix that a different failure could satisfy. They run on
+  both targets, so every one of them is recalibrated in each retained capture.
+- **Baseline, no-rsync branch**: 2 cases, the mirror failure under the
+  `not-deployed` oracle and the engine assertion. Twelve cases in total on that
+  branch.
+- **Baseline, rsync branch**: 7 cases, the fresh install and its engine
+  assertion, the root-file FIFO case with its replacement sentinel, and the
+  root-file symlink case with its replacement sentinel and its external-target
+  sentinel. Seventeen cases in total on that branch.
+- **Coverage of the harness itself**: the negative controls stand in for it.
+  They cover a vacuous pass, a wrong-operation pass, a resolver blind to one of
+  the installer's search roots, and a false fixture declaration. The exit-only
+  control runs through the same oracle a real case uses, so proving it proves the
+  cases rather than only itself; the fixture-shape control does the same for the
+  oracle that interprets every setup, and it is retained on both targets rather
+  than demonstrated once on a developer host.
+- **Guards proved on deliberate negatives during the rework**: the step guard
+  refuses `--step 1` with exit 2, and an injected missing command stops the run
+  at preflight with exit 2 and no case executed. These are host-independent, so a
+  developer-host proof is sufficient for them, which is why they have no target
+  control of their own.
+- **Still uncovered**: a case whose sentinels are themselves wrong, which the
+  plan records as an accepted residual.
+
+No, there is no unexercised case left. Both branches have run on the target each
+describes, against this harness body: seventeen cases on RHEL, twelve on the
+Debian agent, zero failures on either, with the shared-body digest in both
+captures confirming the two copies were the same code.
 
 ### Feature integrity for Step 0
 
-_(empty — no check has taken place yet.)_.
+- **Existing behaviour**: nothing under `src/` changed. `install_pkg.sh` is
+  unchanged at 505 lines and both `rsync -av` call sites are intact, so no
+  existing installer behaviour is impaired.
+- **Reporting**: the installer's own diagnostics are untouched. The harness adds
+  reporting of its own, in its output only.
+- **Compatibility**: the harness is a new effort-local file. Nothing depends on
+  it yet, and it cannot reach a deployment prefix or the shipped archive.
 
----
+No existing feature or reporting capability appears impaired.
 
 ## Step 1. Engine selection, override and trace
 
