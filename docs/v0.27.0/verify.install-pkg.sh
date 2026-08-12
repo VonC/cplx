@@ -1,0 +1,771 @@
+#!/bin/bash
+# Verification harness for the v0.27.0 rsync-cp-fallback effort.
+#
+# This is Step 0 of docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md. It writes no
+# installer code. It builds the executable oracle every later step is judged
+# against, and captures what the CURRENT installer does, so each step has a
+# measured baseline rather than a described one.
+#
+# Usage:
+#   bash verify.install-pkg.sh [--step N] [--installer PATH] [--scratch DIR]
+#
+# Everything below the marker is byte-identical to the consuming project's copy,
+# tools/installer_verify_step0.sh, and the header prints the digest of that
+# shared body so the claim is checkable rather than asserted. Only this comment
+# block differs between the two files.
+
+# ---8<--- shared body: identical in both repository copies from this line ---
+#
+# Case contract (plan Q07). Every case:
+#   * names a FIXTURE oracle, applied before anything runs, so a case cannot
+#     report a shape it never planted. A failed `mkfifo` or `ln -s` is a case
+#     failure, not a silently different case;
+#   * DECLARES the installer and archive it intends to exercise, and the harness
+#     asserts the resolved values against those declarations. Recording an
+#     identity is not asserting it: a recorded value still lets a case exercise
+#     the wrong copy and pass. The asserted pair is printed with every case, the
+#     archive as a logical root plus name, since one basename can exist under
+#     more than one searched root;
+#   * asserts a phase-specific diagnostic together with the exit code, so a right
+#     code from the wrong phase fails;
+#   * names a POST-STATE oracle, which run_case applies itself.
+# Both oracles are mandatory arguments. An unnamed or unknown one is a failure,
+# so neither a status-only pass nor an unplanted fixture is reachable.
+#
+# Hermetic archive selection. install_pkg.sh searches FOUR roots for the newest
+# tools.*.tar.gz: the prefix, its pkgs directory, $HOME and $HOME/pkgs. Every
+# case runs with HOME pinned to a scratch directory and resolves across the same
+# four roots, so the archive the harness asserts is the archive the installer
+# consumes.
+#
+# Negative controls, so a harness that blesses anything is caught:
+#   watchdog     a deliberate blocker must be reported as a timeout
+#   exit-only    a substitute returning the expected status while changing no
+#                state must be refused BY THE ORACLE A REAL CASE USES, so it
+#                travels the whole of run_case rather than a private check
+#   wrong-arch   a decoy archive must fail the ARCHIVE-identity assertion
+#   omitted-root a decoy in a root a shortened resolver would ignore must fail
+#                the same assertion, which is what exposes that omission
+#   wrong-inst   a present second installer copy must fail the INSTALLER-identity
+#                assertion, and specifically on the value rather than on absence
+#   fixture-shape a regular file planted where a case declares a symlink must be
+#                refused by the fixture oracle, on the shape and not downstream
+#   encoder      a name whose hex holds a, c and e must survive encoding
+# Each control states the exact reason it requires, so a control cannot be
+# satisfied by a different failure than the one it exists to prove.
+#
+# Baseline, captured not asserted-as-timeout. The current installer has no path
+# that blocks: with rsync absent it exits 5 in the mirror phase and never reaches
+# the root-file site; with rsync present the root-file step uses rsync, which
+# replaces both a FIFO and a symlink promptly with exit 0.
+#
+# Target identity. D-fb, R-rs and R-fb are the plan's matrix cells, and a cell is
+# claimed only when the environment AND the installer can produce it, with the
+# engine then asserted from the run's own trace. The pre-change Debian result is
+# NOT D-fb: that cell means the fallback engine was selected and ran, and this
+# installer has no fallback, so the run is reported as Debian/no-rsync/no-engine,
+# the state expected to become D-fb once the engine exists.
+
+set -u
+
+STEP=0
+INSTALLER=""
+SCRATCH_PARENT="${TMPDIR:-/tmp}"
+TIMEOUT_S=20
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --step)      STEP="$2"; shift 2 ;;
+        --installer) INSTALLER="$2"; shift 2 ;;
+        --scratch)   SCRATCH_PARENT="$2"; shift 2 ;;
+        *) echo "unknown argument: $1" >&2; exit 2 ;;
+    esac
+done
+
+# Only step 0 has a case suite. Accepting any other value would let the verdict
+# line report success for a step whose cases do not exist, which is a vacuous
+# pass at exactly the level later steps are meant to rely on. When a later step
+# adds a suite, extend this dispatch and the SUITES record below together.
+case "$STEP" in
+    0) ;;
+    *) echo "unsupported --step $STEP: only step 0 has a case suite today." >&2
+       echo "Add its suite and extend the dispatch before requesting it." >&2
+       exit 2 ;;
+esac
+SUITES=""
+suite() { SUITES="${SUITES:+$SUITES }$1"; }
+
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Default resolution, in the order a host is likely to have one: this
+# repository's own source, then the prefix a pipeline extracted, then a deployed
+# copy, then a sibling checkout. This uses the real HOME on purpose, because it
+# is finding the installer rather than running it; every case then runs with HOME
+# pinned inside scratch.
+if [ -z "$INSTALLER" ]; then
+    for cand in \
+        "$here/../../src/setups/env/bin/install_pkg.sh" \
+        "${PREFIX:-}/bootstrap/bin/install_pkg.sh" \
+        "$HOME/tools/bin/install_pkg.sh" \
+        "$here/../../cplx/src/setups/env/bin/install_pkg.sh"; do
+        [ -f "$cand" ] && { INSTALLER="$cand"; break; }
+    done
+fi
+[ -n "$INSTALLER" ] || { echo "no installer found; pass --installer PATH" >&2; exit 2; }
+[ -f "$INSTALLER" ] || { echo "installer not found: $INSTALLER" >&2; exit 2; }
+INSTALLER=$(cd "$(dirname "$INSTALLER")" && pwd)/$(basename "$INSTALLER")
+
+SCRATCH="${SCRATCH_PARENT%/}/cplx-verify.$$"
+failures=0
+cases=0
+
+cleanup() { rm -rf -- "$SCRATCH" 2>/dev/null; }
+trap cleanup EXIT
+mkdir -p -- "$SCRATCH" || { echo "cannot create scratch under $SCRATCH_PARENT" >&2; exit 2; }
+
+# The installer's two home search roots, pinned inside scratch. Nothing the
+# harness asserts then depends on what happens to sit in the real home.
+CASE_HOME="$SCRATCH/home"
+mkdir -p -- "$CASE_HOME/pkgs"
+
+# ---------------------------------------------------------------- reporting ---
+EXPECT_FAIL=0
+CONTROL_ACTIVE=0
+CTL_REASON=""
+pass() { printf '  %-34s PASS  %s\n' "$1" "${2:-}"; }
+# In a negative control the failure IS the expected result, so it is captured
+# rather than printed. A log that a reader scans for FAIL must not show one that
+# the next line contradicts. Only the control helper sets these flags, and it
+# always clears them, so no early return can leave the harness deaf to failures.
+fail() {
+    if [ "$EXPECT_FAIL" -eq 1 ]; then CTL_REASON="${2:-}"; return 0; fi
+    printf '  %-34s FAIL  %s\n' "$1" "${2:-}"
+    failures=$((failures + 1))
+}
+chk()  { cases=$((cases + 1)); if [ "$2" = "$3" ]; then pass "$1" "$3"; else fail "$1" "want [$2] got [$3]"; fi; }
+
+# control <name> <required-reason-prefix> <command...>
+# The reason prefix is the whole point: a control that only demanded "INSTALLER"
+# would be satisfied by a missing fixture rather than by the identity mismatch it
+# exists to prove. Inner case counting is rolled back so a control is exactly one
+# case either way.
+control() {
+    local name="$1" want="$2"; shift 2
+    local saved="$cases"
+    EXPECT_FAIL=1; CONTROL_ACTIVE=1; CTL_REASON=""
+    "$@" >/dev/null 2>&1
+    EXPECT_FAIL=0; CONTROL_ACTIVE=0
+    cases=$((saved + 1))
+    case "$CTL_REASON" in
+        "$want"*) pass "$name" "refused on [$want], as designed" ;;
+        "")       fail "$name" "passed, so that oracle is not asserted" ;;
+        *)        fail "$name" "refused for the wrong reason: $CTL_REASON" ;;
+    esac
+}
+
+# ------------------------------------------------------------------ encoder ---
+# Delete-complement: it can only ever keep hex digits, so it cannot repeat the
+# defect where a whitespace-looking set deleted the digits a, c and e.
+enc() { printf '%s' "$1" | od -An -v -tx1 | tr -dc '0-9a-f'; }
+
+short_sha() { sha256sum -- "$1" 2>/dev/null | cut -c1-12; }
+
+# The digest of the shared body, from the marker line to EOF. Both repository
+# copies produce the same value, which is what makes "the copies are in step" a
+# reproducible statement rather than a claim in prose. The whole-file digest
+# stays too: it pins a capture to one exact file, and cannot compare the copies
+# because their header comments differ by design.
+body_digest() {
+    local f="$1" n
+    n=$(grep -n '^# ---8<--- shared body' -- "$f" 2>/dev/null | head -n 1 | cut -d: -f1)
+    [ -n "$n" ] || { printf 'no-marker'; return; }
+    tail -n +"$n" -- "$f" | sha256sum | cut -d' ' -f1
+}
+
+# ---------------------------------------------------------------- preflight ---
+# Two things, kept in one list because both must hold before any case runs, and
+# named separately here because they are true for different reasons.
+#
+# Every external command the harness itself runs, including the ones implied by
+# an option rather than named in a command position, and including `bash`, which
+# run_case looks up on PATH to invoke the installer. An earlier version claimed
+# to list every external command while quietly excepting that child `bash`.
+#
+# Plus the plan's five verification-only additions, which must be present on
+# every target before any case: timeout, stat, sha256sum, mkfifo and diff. Only
+# `diff` is not invoked at step 0: it is the manifest comparison's tool, and the
+# target capture is the promised evidence that the acceptance gate in step 5 will
+# have it. Asserting it here is the point of asserting it at all.
+#
+# Missing any of them stops the run before the first case, rather than becoming
+# a red line in a verdict a reader reaches after twenty others.
+HARNESS_TOOLS="basename bash cp cut date diff dirname find grep gzip head ln ls \
+mkdir mkfifo od readlink rm sha256sum sort stat tail tar timeout touch tr uname wc"
+
+preflight() {
+    echo "--- preflight"
+    local missing="" p t
+    for t in $HARNESS_TOOLS; do
+        p=$(command -v "$t" 2>/dev/null)
+        [ -n "$p" ] || missing="${missing:+$missing }$t"
+    done
+    cases=$((cases + 1))
+    if [ -n "$missing" ]; then
+        fail "preflight commands" "MISSING: $missing"
+        return 1
+    fi
+    pass "preflight commands" "all $(printf '%s\n' $HARNESS_TOOLS | wc -l | tr -d ' ') present"
+
+    : > "$SCRATCH/.pf"
+    local m; m=$(stat -c '%.9Y' -- "$SCRATCH/.pf" 2>&1)
+    rm -f -- "$SCRATCH/.pf"
+    cases=$((cases + 1))
+    case "$m" in
+        *.*) pass "preflight stat fractional" "$m" ;;
+        *)   fail "preflight stat fractional" "no fractional field: $m"; return 1 ;;
+    esac
+
+    # A run that claims a target identity must be able to produce it. Refusing
+    # here is the difference between evidence and a mislabelled log.
+    cases=$((cases + 1))
+    if [ "$COMBINATION_OK" -eq 1 ]; then
+        pass "preflight combination" "$COMBINATION, engine asserted below"
+    elif [ "$COMBINATION_CLAIMS_TARGET" -eq 1 ]; then
+        fail "preflight combination" "$COMBINATION_WHY"
+        return 1
+    else
+        pass "preflight combination" "self-test, not target evidence"
+    fi
+    return 0
+}
+
+# ------------------------------------------------------- synthetic archive ---
+# Plan Q02: synthetic for steps 0 to 4, the real published archive for Step 5.
+# It carries the shapes the acceptance names: a SONAME symlink, a linked rpath
+# directory, a hidden entry, and the two archive root files.
+build_archive() {
+    local out="$1" build="$SCRATCH/build"
+    rm -rf -- "$build"; mkdir -p "$build/tools/root/usr/lib64" "$build/tools/bin"
+    printf 'payload\n'            > "$build/tools/root/usr/lib64/libgcc_s-11-20240719.so.1"
+    ln -s libgcc_s-11-20240719.so.1 "$build/tools/root/usr/lib64/libgcc_s.so.1"
+    ln -s usr/lib64                 "$build/tools/root/lib64"
+    printf 'binary\n'             > "$build/tools/bin/patchelf"
+    printf 'hidden\n'             > "$build/tools/.hidden-entry"
+    printf 'export A=1\n'         > "$build/.env"
+    printf 'export B=2\n'         > "$build/.env_"
+    ( cd "$build" && tar --sort=name -cf - tools .env .env_ 2>/dev/null | gzip -n > "$out" )
+}
+
+# The installer picks the newest tools.*.tar.gz across the prefix, its pkgs
+# directory, $HOME and $HOME/pkgs (install_pkg.sh line 393). All four roots are
+# resolved here, under the same pinned HOME the case runs with.
+resolve_archive() {
+    local prefix="$1"
+    find "$prefix" "$prefix/pkgs" "$CASE_HOME" "$CASE_HOME/pkgs" \
+        -maxdepth 1 -type f -name 'tools.*.tar.gz' \
+        -printf '%T@ %p\n' 2>/dev/null | sort -unr | head -n 1 | cut -d' ' -f2-
+}
+
+# Which of the four roots won, as a stable logical name. A basename alone cannot
+# say that, and the same name can sit under more than one searched root.
+archive_identity() {
+    local prefix="$1" path="$2" name
+    [ -n "$path" ] || { printf '(none resolved)'; return; }
+    name=$(basename -- "$path")
+    case "$path" in
+        "$prefix/pkgs/"*)    printf 'PREFIX/pkgs/%s' "$name" ;;
+        "$prefix/"*)         printf 'PREFIX/%s' "$name" ;;
+        "$CASE_HOME/pkgs/"*) printf 'HOME/pkgs/%s' "$name" ;;
+        "$CASE_HOME/"*)      printf 'HOME/%s' "$name" ;;
+        *)                   printf 'OUTSIDE:%s' "$path" ;;
+    esac
+}
+
+new_prefix() {
+    local p="$SCRATCH/$1"; rm -rf -- "$p"; mkdir -p "$p/pkgs"; printf '%s' "$p"
+}
+
+# ----------------------------------------------------------- fixture oracle ---
+# What the case claims to have planted, verified before the installer runs.
+# FIXTURE_SEEN carries the human-readable shape into the retained output.
+FIXTURE_SEEN=""
+assert_fixture() {
+    local spec="$1" name="$2" prefix="$3" declared_archive="$4"
+    FIXTURE_SEEN=""
+    if [ ! -d "$prefix" ]; then fail "$name" "FIXTURE: prefix missing"; return 1; fi
+    if [ ! -d "$prefix/pkgs" ]; then fail "$name" "FIXTURE: prefix has no pkgs directory"; return 1; fi
+    case "$spec" in
+        fresh)
+            if [ -e "$prefix/tools" ]; then fail "$name" "FIXTURE fresh: tools already exists"; return 1; fi
+            if [ -e "$prefix/.env" ] || [ -e "$prefix/.env_" ]; then
+                fail "$name" "FIXTURE fresh: an archive root file is already present"; return 1; fi
+            FIXTURE_SEEN="fresh prefix, no tools and no root files"
+            ;;
+        fifo:*)
+            local rel="${spec#fifo:}"
+            if [ ! -p "$prefix/$rel" ]; then
+                fail "$name" "FIXTURE fifo: $rel is not a FIFO (creation failed or wrong type)"; return 1; fi
+            FIXTURE_SEEN="$rel is a FIFO"
+            ;;
+        symlink:*)
+            # Declared and assigned separately: `local a=x b=${a}` expands every
+            # word before the builtin assigns any of them, so b would see an
+            # unset a. With set -u that is an abort rather than a wrong value.
+            local body rel want got
+            body="${spec#symlink:}"
+            rel="${body%%=*}"
+            want="${body#*=}"
+            if [ ! -L "$prefix/$rel" ]; then
+                fail "$name" "FIXTURE symlink: $rel is not a symlink (ln -s failed or wrong type)"; return 1; fi
+            got=$(readlink -n -- "$prefix/$rel")
+            if [ "$got" != "$want" ]; then
+                fail "$name" "FIXTURE symlink: $rel points at [$got], expected [$want]"; return 1; fi
+            if [ ! -f "$want" ]; then
+                fail "$name" "FIXTURE symlink: the external target [$want] is not a regular file"; return 1; fi
+            FIXTURE_SEEN="$rel is a symlink onto an external regular file"
+            ;;
+        decoy-newer:*)
+            local decoy="${spec#decoy-newer:}" dm am
+            if [ ! -f "$decoy" ]; then fail "$name" "FIXTURE decoy: [$decoy] is absent"; return 1; fi
+            if [ ! -f "$declared_archive" ]; then
+                fail "$name" "FIXTURE decoy: the declared archive [$declared_archive] is absent"; return 1; fi
+            dm=$(stat -c '%Y' -- "$decoy" 2>/dev/null)
+            am=$(stat -c '%Y' -- "$declared_archive" 2>/dev/null)
+            if [ -z "$dm" ] || [ -z "$am" ] || [ "$dm" -le "$am" ]; then
+                fail "$name" "FIXTURE decoy: [$decoy] is not newer than the declared archive"; return 1; fi
+            FIXTURE_SEEN="a newer decoy archive exists at $(archive_identity "$prefix" "$decoy")"
+            ;;
+        installer-copy:*)
+            local copy="${spec#installer-copy:}" canon
+            if [ ! -f "$copy" ]; then
+                fail "$name" "FIXTURE installer-copy: [$copy] is absent, so the control would prove absence rather than identity"; return 1; fi
+            canon=$(cd "$(dirname "$copy")" && pwd)/$(basename "$copy")
+            if [ "$canon" = "$INSTALLER" ]; then
+                fail "$name" "FIXTURE installer-copy: [$copy] is the installer under test, not a second copy"; return 1; fi
+            if [ "$(sha256sum -- "$copy" | cut -d' ' -f1)" != "$(sha256sum -- "$INSTALLER" | cut -d' ' -f1)" ]; then
+                fail "$name" "FIXTURE installer-copy: [$copy] is not a copy of the installer under test"; return 1; fi
+            FIXTURE_SEEN="a present second installer copy at another path"
+            ;;
+        *)
+            fail "$name" "FIXTURE: case named no known oracle [$spec]"; return 1 ;;
+    esac
+    return 0
+}
+
+# --------------------------------------------------------- post-state oracle ---
+# The one place a deployment is judged. Real cases and the exit-only control go
+# through it, so proving the control also proves the cases.
+assert_post_state() {
+    local oracle="$1" name="$2" prefix="$3"
+    case "$oracle" in
+        installed)
+            if [ ! -d "$prefix/tools" ] || [ -z "$(ls -A "$prefix/tools" 2>/dev/null)" ]; then
+                fail "$name" "POST-STATE: tools tree absent or empty"; return 1; fi
+            if [ ! -f "$prefix/tools/bin/patchelf" ]; then
+                fail "$name" "POST-STATE: payload file missing from the tree"; return 1; fi
+            if [ ! -L "$prefix/tools/root/usr/lib64/libgcc_s.so.1" ]; then
+                fail "$name" "POST-STATE: canary SONAME symlink is not a link"; return 1; fi
+            if [ ! -f "$prefix/.env" ] || [ ! -f "$prefix/.env_" ]; then
+                fail "$name" "POST-STATE: archive root files not deployed"; return 1; fi
+            ;;
+        not-deployed)
+            if [ -d "$prefix/tools" ] && [ -n "$(ls -A "$prefix/tools" 2>/dev/null)" ]; then
+                fail "$name" "POST-STATE: tools was populated despite the failure"; return 1; fi
+            if ! ls -d "$prefix/pkgs"/tools.*/ >/dev/null 2>&1; then
+                fail "$name" "POST-STATE: staging absent, the recovery claim is unproven"; return 1; fi
+            ;;
+        *)
+            fail "$name" "POST-STATE: case named no known oracle [$oracle]"; return 1 ;;
+    esac
+    return 0
+}
+
+# Which engine actually OPERATED, read from the run's own output rather than from
+# the environment that requested it. rsync -v always opens with its file list,
+# which is an operation banner: it is printed by the transfer, not by a decision
+# to transfer.
+#
+# `none` is not the absence of the rsync banner alone: that would prove only
+# that rsync did not run, which is also true of a successful fallback. It
+# additionally requires a failed run, so the claim is that NO engine ran, which
+# is what the pre-change no-rsync baseline actually shows.
+#
+# There is deliberately no `fallback` expectation here, and no recognition of a
+# fallback marker. An earlier version guessed at Step 1's wording, and the guess
+# was unsafe in the direction that matters: the plan has Step 1 emit a SELECTION
+# line before archive discovery while both rsync call sites stay unchanged, so on
+# a no-rsync host that line can say fallback and the same run still die at the
+# unchanged mirror. Recognising it would have reported "engine fallback, read
+# from the run trace" for a run in which no copy engine ran, making a guessed
+# phrase stronger evidence than the event it describes. Step 0 asserts only the
+# states it can measure today. When Step 1 defines its trace, that belongs in a
+# separately named SELECTION assertion, and proof that the selected engine copied
+# stays with the operation and post-state cases.
+assert_engine() {
+    local name="$1" log="$2" want="$3" case_exit="$4"
+    cases=$((cases + 1))
+    local seen="none"
+    grep -q 'sending incremental file list' "$log" 2>/dev/null && seen="rsync"
+    case "$want" in
+        rsync)
+            if [ "$seen" = "$want" ]; then pass "$name" "engine $seen operated, read from the run trace"
+            else fail "$name" "engine: want $want, the trace shows $seen"; fi ;;
+        none)
+            if [ "$seen" != "none" ]; then
+                fail "$name" "engine: expected none, the trace shows $seen"
+            elif [ "$case_exit" = "0" ]; then
+                fail "$name" "engine: no engine trace, yet the run succeeded, so something copied untraced"
+            else
+                pass "$name" "no engine ran: no trace and the run failed at exit $case_exit"
+            fi ;;
+        *) fail "$name" "engine: unknown expectation [$want]" ;;
+    esac
+}
+
+# ---------------------------------------------------------- the case runner ---
+# run_case <name> <prefix> <declared-installer> <declared-archive> <expect-exit>
+#          <expect-phase-regex> <fixture-oracle> <post-state-oracle>
+#          [canonical-installer]
+# Both oracles are mandatory and applied here, so no caller can produce a case
+# that checks status alone or reports an unplanted shape. Case-specific extras
+# are asserted by the caller AFTER this returns, on top of the oracles rather
+# than instead of them.
+CASE_EXIT=0
+CASE_LOG=""
+run_case() {
+    local name="$1" prefix="$2" want_inst="$3" want_arch="$4" want_exit="$5"
+    local want_phase="$6" fixture="${7:-}" oracle="${8:-}" canonical="${9:-$INSTALLER}"
+    cases=$((cases + 1))
+
+    if [ -z "$fixture" ]; then fail "$name" "FIXTURE: case named no oracle"; return 1; fi
+    if [ -z "$oracle" ];  then fail "$name" "POST-STATE: case named no oracle"; return 1; fi
+
+    # The canonical-installer override exists so a negative control can be
+    # declared as its own installer and still travel this whole function. Outside
+    # a control it would be an escape hatch from the very gate below, so it is
+    # refused there.
+    if [ "$canonical" != "$INSTALLER" ] && [ "$CONTROL_ACTIVE" -ne 1 ]; then
+        fail "$name" "INSTALLER identity: only a negative control may override the canonical installer"
+        return 1
+    fi
+
+    # 1. fixture precondition, exact rather than "the prefix exists"
+    assert_fixture "$fixture" "$name" "$prefix" "$want_arch" || return 1
+
+    # 2. identity, declared then asserted, across all four installer search roots
+    local got_arch; got_arch=$(resolve_archive "$prefix")
+    if [ "$got_arch" != "$want_arch" ]; then
+        fail "$name" "ARCHIVE identity: want [$(archive_identity "$prefix" "$want_arch")] resolved [$(archive_identity "$prefix" "$got_arch")]"
+        return 1
+    fi
+    if [ ! -f "$want_inst" ]; then
+        fail "$name" "INSTALLER identity: declared path absent [$want_inst]"
+        return 1
+    fi
+    local got_inst; got_inst=$(cd "$(dirname "$want_inst")" && pwd)/$(basename "$want_inst")
+    # Both sides are canonicalised the same way, so the comparison is between
+    # two files and not between two spellings of one path.
+    local want_canon="$canonical"
+    [ -f "$want_canon" ] && want_canon=$(cd "$(dirname "$want_canon")" && pwd)/$(basename "$want_canon")
+    if [ "$got_inst" != "$want_canon" ]; then
+        fail "$name" "INSTALLER identity: want [$want_canon] declared [$got_inst]"
+        return 1
+    fi
+    local ident="installer $(short_sha "$got_inst")  archive $(archive_identity "$prefix" "$got_arch")"
+    local fixture_seen="$FIXTURE_SEEN"
+
+    # 3. run under the watchdog, with HOME pinned, capturing status and output
+    CASE_LOG="$SCRATCH/$name.log"
+    HOME="$CASE_HOME" timeout "$TIMEOUT_S" bash "$want_inst" tools --prefix "$prefix" \
+        > "$CASE_LOG" 2>&1
+    CASE_EXIT=$?
+
+    if [ "$CASE_EXIT" != "$want_exit" ]; then
+        fail "$name" "exit: want $want_exit got $CASE_EXIT"
+        return 1
+    fi
+    # 4. phase-specific diagnostic, so a right code from the wrong phase fails
+    if [ -n "$want_phase" ] && ! grep -qE "$want_phase" "$CASE_LOG"; then
+        fail "$name" "phase: no line matching /$want_phase/ (exit $CASE_EXIT)"
+        return 1
+    fi
+    # 5. post-state, never optional
+    assert_post_state "$oracle" "$name" "$prefix" || return 1
+
+    pass "$name" "exit $CASE_EXIT"
+    printf '      fixture   %s\n' "$fixture_seen"
+    printf '      identity  %s\n' "$ident"
+    return 0
+}
+
+# ------------------------------------------------------------- matrix label ---
+have_rsync=no; command -v rsync >/dev/null 2>&1 && have_rsync=yes
+force_cp="${CPLX_INSTALL_PKG_FORCE_CP:-}"
+# Whether the installer under test can select a fallback engine at all, read
+# from the installer rather than assumed from the step number.
+installer_has_fallback=no
+grep -q 'CPLX_INSTALL_PKG_FORCE_CP' "$INSTALLER" 2>/dev/null && installer_has_fallback=yes
+os_id=$( . /etc/os-release 2>/dev/null && echo "${ID:-unknown}" )
+[ -n "$os_id" ] || os_id="unknown"
+
+COMBINATION=""
+COMBINATION_OK=0
+COMBINATION_CLAIMS_TARGET=0
+COMBINATION_WHY=""
+COMBINATION_NOTE=""
+WANT_ENGINE=""
+# Step 0 recognises exactly two states, and both are states it can measure: rsync
+# operating, and nothing operating. It infers no fallback cell, because it cannot
+# witness one. An installer that can select a fallback is refused here rather
+# than guessed at, and stays refused until Step 1 defines the selection trace and
+# the harness gains a separately named assertion for it.
+case "$os_id" in
+    debian)
+        COMBINATION_CLAIMS_TARGET=1
+        if [ "$force_cp" = "1" ]; then
+            COMBINATION_WHY="forced fallback requested; step 0 cannot witness a fallback engine, so it refuses to label the run"
+        elif [ "$have_rsync" = yes ]; then
+            COMBINATION_WHY="Debian with rsync present is neither the no-rsync baseline nor the D-fb cell"
+        elif [ "$installer_has_fallback" = yes ]; then
+            COMBINATION_WHY="this installer can select a fallback engine, which step 0 has no assertion for; extend the harness when step 1 defines the selection trace"
+        else
+            COMBINATION="Debian/no-rsync/no-engine"; COMBINATION_OK=1; WANT_ENGINE="none"
+            COMBINATION_NOTE="pre-change baseline, NOT the D-fb cell: this installer has no fallback engine, so no engine can run. This is the state expected to become D-fb once one exists."
+        fi ;;
+    rhel|centos|rocky|almalinux)
+        COMBINATION_CLAIMS_TARGET=1
+        if [ "$force_cp" = "1" ]; then
+            COMBINATION_WHY="R-fb is a fallback cell, and step 0 can witness no fallback engine; it refuses the label rather than infer it"
+        elif [ "$have_rsync" = no ]; then
+            COMBINATION_WHY="RHEL without rsync is not the R-rs cell, and no matrix cell covers it"
+        elif [ "$installer_has_fallback" = yes ]; then
+            COMBINATION_WHY="this installer can select a fallback engine, which step 0 has no assertion for; extend the harness when step 1 defines the selection trace"
+        else
+            COMBINATION="R-rs"; COMBINATION_OK=1; WANT_ENGINE="rsync"
+        fi ;;
+    *)
+        COMBINATION_WHY="$os_id is not a supported target" ;;
+esac
+
+# ------------------------------------------------------------------- report ---
+echo "=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step $STEP ==="
+echo "date      : $(date -u '+%Y-%m-%dT%H:%M:%SZ') (UTC)"
+# The harness body itself. The whole-file digest pins a capture to one exact
+# file; the shared-body digest is equal in both repository copies and is what
+# makes "the copies are in step" checkable from the evidence alone.
+echo "harness   : $(basename -- "${BASH_SOURCE[0]}")"
+echo "  sha256  : $(sha256sum -- "${BASH_SOURCE[0]}" 2>/dev/null | cut -d' ' -f1)"
+echo "  body    : $(body_digest "${BASH_SOURCE[0]}")"
+echo "uname     : $(uname -srm)"
+echo "installer : $INSTALLER"
+# Which script was measured, not just where it sat. A path proves nothing about
+# content: the first RHEL baseline ran against a deployed copy dated months
+# before this branch, and the retained output could not have shown that.
+echo "  sha256  : $(sha256sum -- "$INSTALLER" 2>/dev/null | cut -d' ' -f1)"
+echo "  lines   : $(wc -l < "$INSTALLER" 2>/dev/null | tr -d ' ')"
+echo "  fallback: $installer_has_fallback (CPLX_INSTALL_PKG_FORCE_CP support)"
+echo "rsync     : $have_rsync"
+if [ "$COMBINATION_OK" -eq 1 ]; then
+    echo "identity  : $COMBINATION, requested; the engine is asserted from the run trace below"
+    [ -n "$COMBINATION_NOTE" ] && echo "            $COMBINATION_NOTE"
+else
+    echo "identity  : none, this run is NOT target evidence"
+    echo "            $COMBINATION_WHY"
+fi
+echo "home      : $CASE_HOME (pinned, so archive selection is hermetic)"
+echo "scratch   : $SCRATCH"
+echo
+
+# Preflight is a gate, not a case group: a missing dependency or a mislabelled
+# target makes every later line meaningless, so nothing runs after it fails.
+if ! preflight; then
+    echo
+    echo "=== VERDICT ==="
+    echo "preflight failed: the harness cannot run here, so no case was executed."
+    echo "Fix the dependency or the target identity above and re-run."
+    exit 2
+fi
+suite "preflight"
+echo
+
+# ------------------------------------------------------- negative controls ---
+echo "--- negative controls"
+
+# encoder: the defect this guards deleted the hex digits a, c and e.
+chk "control encoder" "6a6c6e" "$(enc 'jln')"
+
+# watchdog: a deliberate blocker, invoked directly rather than through the
+# installer, must be reported as a timeout. This is what makes "promptly" in
+# Step 3 a falsifiable claim.
+mkfifo "$SCRATCH/blocker.fifo" 2>/dev/null
+cases=$((cases + 1))
+if [ ! -p "$SCRATCH/blocker.fifo" ]; then
+    fail "control watchdog" "FIXTURE: cannot create a FIFO fixture here"
+else
+    printf 'x\n' > "$SCRATCH/blocker.src"
+    timeout 2 cp -a "$SCRATCH/blocker.src" "$SCRATCH/blocker.fifo" >/dev/null 2>&1
+    wd=$?
+    if [ "$wd" -eq 124 ]; then pass "control watchdog" "blocked, killed at 2s"
+    else fail "control watchdog" "expected timeout 124, got $wd"; fi
+fi
+
+arch_prefix=$(new_prefix ctl)
+build_archive "$arch_prefix/pkgs/tools.2026-08-11_000000.tar.gz"
+good_archive=$(resolve_archive "$arch_prefix")
+
+# wrong archive: a decoy that is newer wins the installer's own selection, so
+# the resolved archive differs from the declared one and identity must fail.
+decoy_prefix_archive="$arch_prefix/pkgs/tools.2026-08-12_000000.tar.gz"
+build_archive "$decoy_prefix_archive"
+touch -d '2030-01-01 00:00:00' "$decoy_prefix_archive" 2>/dev/null
+control "control wrong-archive" "ARCHIVE identity: want" \
+    run_case "wrong-archive" "$arch_prefix" "$INSTALLER" "$good_archive" 0 "" \
+             "decoy-newer:$decoy_prefix_archive" installed
+rm -f -- "$decoy_prefix_archive"
+
+# omitted root: the same decoy planted in $HOME/pkgs, a root the installer
+# searches and an earlier resolver here did not. A harness blind to that root
+# approves the declared archive while the installer consumes the decoy, so this
+# control is the one that fails if the four roots are ever shortened again.
+decoy_home_archive="$CASE_HOME/pkgs/tools.2026-08-12_000000.tar.gz"
+build_archive "$decoy_home_archive"
+touch -d '2030-01-01 00:00:00' "$decoy_home_archive" 2>/dev/null
+control "control omitted-root" "ARCHIVE identity: want" \
+    run_case "omitted-root" "$arch_prefix" "$INSTALLER" "$good_archive" 0 "" \
+             "decoy-newer:$decoy_home_archive" installed
+rm -f -- "$decoy_home_archive"
+
+# wrong installer: a PRESENT second copy at another path must fail INSTALLER
+# identity on the value. Demanding the exact reason matters: a failed copy would
+# otherwise satisfy this control through "declared path absent", proving that an
+# absent file is absent rather than that identity is asserted.
+cp -a "$INSTALLER" "$SCRATCH/install_pkg.copy.sh"
+control "control wrong-installer" "INSTALLER identity: want" \
+    run_case "wrong-installer" "$arch_prefix" "$SCRATCH/install_pkg.copy.sh" "$good_archive" 0 "" \
+             "installer-copy:$SCRATCH/install_pkg.copy.sh" installed
+
+# exit-only: a substitute that returns the expected status while changing no
+# state must be refused. It is declared as its own canonical installer so it
+# clears identity and travels the WHOLE of run_case, and it must then be caught
+# by assert_post_state, the same oracle every real case is judged by.
+exitonly=$(new_prefix exitonly)
+build_archive "$exitonly/pkgs/tools.2026-08-11_000000.tar.gz"
+exitonly_archive=$(resolve_archive "$exitonly")
+printf '#!/bin/bash\nexit 0\n' > "$SCRATCH/exit-only.sh"
+control "control exit-only" "POST-STATE" \
+    run_case "exit-only" "$exitonly" "$SCRATCH/exit-only.sh" "$exitonly_archive" 0 "" \
+             fresh installed "$SCRATCH/exit-only.sh"
+
+# fixture shape: a case declares an exact symlink fixture, and a plain regular
+# file is planted instead. The oracle must refuse it, and specifically on the
+# shape rather than on anything downstream.
+#
+# This control runs on both targets on purpose. The oracle interprets the setup
+# that every behavioural conclusion rests on, so an error in it could accept a
+# false declaration on both targets while every ordinary case stayed green. A
+# developer-host incident diagnoses that once; only a retained control
+# recalibrates it on the evidence being approved.
+fixctl=$(new_prefix fixture-ctl)
+build_archive "$fixctl/pkgs/tools.2026-08-11_000000.tar.gz"
+fixctl_archive=$(resolve_archive "$fixctl")
+mkdir -p "$SCRATCH/external"
+printf 'DECOY TARGET\n' > "$SCRATCH/external/fixctl.target"
+printf 'a regular file, not a link\n' > "$fixctl/.env"
+control "control fixture-shape" "FIXTURE symlink:" \
+    run_case "fixture-shape" "$fixctl" "$INSTALLER" "$fixctl_archive" 0 "" \
+             "symlink:.env=$SCRATCH/external/fixctl.target" installed
+suite "controls"
+echo
+
+# ------------------------------------------------------- baseline capture ---
+echo "--- baseline of the CURRENT installer"
+base=$(new_prefix baseline)
+build_archive "$base/pkgs/tools.2026-08-11_000000.tar.gz"
+base_archive=$(resolve_archive "$base")
+
+if [ "$have_rsync" = yes ]; then
+    echo "  (rsync present: the mirror succeeds today, so the baseline is a"
+    echo "   working install, and the root-file shapes are rsync's behaviour)"
+    run_case "baseline fresh install" "$base" "$INSTALLER" "$base_archive" 0 \
+             'Installation successful' fresh installed
+    assert_engine "baseline engine" "$CASE_LOG" "${WANT_ENGINE:-rsync}" "$CASE_EXIT"
+
+    # Root-file FIFO, plan step 0 baseline 2. The destination .env is a FIFO;
+    # rsync replaces it and returns 0. The watchdog is the promptness proof:
+    # a blocking engine would come back as 124 and fail the expected 0, which
+    # is exactly what the calibrated control shows cp -a does to a FIFO.
+    fifo=$(new_prefix rootfile-fifo)
+    build_archive "$fifo/pkgs/tools.2026-08-11_000000.tar.gz"
+    fifo_archive=$(resolve_archive "$fifo")
+    mkfifo "$fifo/.env" 2>/dev/null
+    run_case "baseline root-file FIFO" "$fifo" "$INSTALLER" "$fifo_archive" 0 \
+             "Deploying '\.env'" "fifo:.env" installed
+    cases=$((cases + 1))
+    if [ -p "$fifo/.env" ]; then
+        fail "baseline FIFO replaced" "destination is still a FIFO"
+    elif [ -f "$fifo/.env" ] && grep -q 'export A=1' "$fifo/.env" 2>/dev/null; then
+        pass "baseline FIFO replaced" "regular file carrying the archive content"
+    else
+        fail "baseline FIFO replaced" "not a regular file with the archive content"
+    fi
+
+    # Root-file symlink to a regular file OUTSIDE the prefix, plan step 0
+    # baseline 3. rsync replaces the link itself; the external target must be
+    # byte- and mtime-identical afterwards, which is the guarantee Step 3 has
+    # to preserve when the fallback engine takes over.
+    link=$(new_prefix rootfile-symlink)
+    build_archive "$link/pkgs/tools.2026-08-11_000000.tar.gz"
+    link_archive=$(resolve_archive "$link")
+    mkdir -p "$SCRATCH/external"
+    ext="$SCRATCH/external/env.target"
+    printf 'EXTERNAL\n' > "$ext"
+    touch -d '2020-02-02 02:02:02' "$ext" 2>/dev/null
+    ext_before="$(sha256sum -- "$ext" | cut -d' ' -f1) $(stat -c '%.9Y' -- "$ext")"
+    ln -s "$ext" "$link/.env" 2>/dev/null
+    run_case "baseline root-file symlink" "$link" "$INSTALLER" "$link_archive" 0 \
+             "Deploying '\.env'" "symlink:.env=$ext" installed
+    cases=$((cases + 1))
+    if [ -L "$link/.env" ]; then
+        fail "baseline symlink replaced" "destination is still a symlink"
+    elif grep -q 'export A=1' "$link/.env" 2>/dev/null; then
+        pass "baseline symlink replaced" "regular file carrying the archive content"
+    else
+        fail "baseline symlink replaced" "not a regular file with the archive content"
+    fi
+    cases=$((cases + 1))
+    ext_after="$(sha256sum -- "$ext" | cut -d' ' -f1) $(stat -c '%.9Y' -- "$ext")"
+    if [ "$ext_before" = "$ext_after" ]; then
+        pass "baseline external target intact" "content and mtime unchanged"
+    else
+        fail "baseline external target intact" "changed: [$ext_before] -> [$ext_after]"
+    fi
+    suite "baseline-rsync"
+else
+    echo "  (no rsync: the mirror phase dies, which is the Q19 defect itself,"
+    echo "   and the root-file site is never reached, so its two shapes have"
+    echo "   no baseline on this target by construction)"
+    run_case "baseline no-rsync mirror" "$base" "$INSTALLER" "$base_archive" 5 \
+             'Rsync \(main\) failed|rsync' fresh not-deployed
+    assert_engine "baseline engine" "$CASE_LOG" "${WANT_ENGINE:-none}" "$CASE_EXIT"
+    suite "baseline-no-rsync"
+fi
+echo
+
+# ------------------------------------------------------------------ verdict ---
+echo "=== VERDICT ==="
+echo "suites    : ${SUITES:-none}"
+echo "cases: $cases, failures: $failures"
+# The verdict names the suites that actually ran. It must never rest on the
+# requested step label alone, which is a number a caller chose rather than
+# evidence of anything.
+case "$SUITES" in
+    *baseline*) ;;
+    *) echo "Step $STEP: no baseline suite ran, so this run proves nothing about the installer."
+       exit 1 ;;
+esac
+if [ "$failures" -eq 0 ]; then
+    echo "Step $STEP: every assertion and every negative control behaved as designed."
+    exit 0
+fi
+echo "Step $STEP: $failures assertion(s) failed. The harness or the installer does"
+echo "not behave as this step records. Fix before relying on later steps."
+exit 1
