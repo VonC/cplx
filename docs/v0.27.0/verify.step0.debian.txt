@@ -1,0 +1,150 @@
+Harness: tools/installer_verify_step0.sh --step 0 (the consuming project's copy
+         of docs/v0.27.0/verify.install-pkg.sh)
+Target: Debian 12 CI agent, Jenkins build 38
+Identity: Debian/no-rsync/no-engine, the pre-change state expected to become the
+         D-fb cell once a fallback engine exists. It is deliberately NOT labelled
+         D-fb.
+Captured: 2026-08-12, by the pipeline stage 'Verify installer baseline (Step 0)'
+Purpose: Step 0 baseline of the CURRENT installer on a host with no rsync, plus
+         the case contract and the seven negative controls.
+
+Supersedes: the build 35, 36 and 37 captures, each withdrawn by a review round.
+         Build 36 is the one worth remembering: it claimed the D-fb cell while
+         also reporting that no engine ran.
+
+Produced by: consuming-project commit 7503e53a, 'fix(installer): stop the harness
+         inferring a fallback engine'. The harness sha256 below is that commit's
+         copy, so the evidence is tied to a body rather than to a name.
+
+Source: fetched from the build's archived artifact
+        a.evidence/verify-step0.debian.txt rather than scraped from the console,
+        so it carries no timestamper prefix and nothing was reformatted.
+
+Note: the workspace path carried the company name and the private project name,
+and both have been substituted under the repository's sensitive-content rules.
+No other byte of the output is changed.
+
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 0 ===
+date      : 2026-08-12T14:25:34Z (UTC)
+harness   : installer_verify_step0.sh
+  sha256  : 027d69fc06a7a583bbd549f5f662dfd546391bf9f13c166acde474210a4f53ae
+  body    : d9027ad8dc9a77017b0067d4a1224d0bef39efa291e1e161f54ebaa37f59db44
+uname     : Linux 5.14.0-687.24.1.el9_8.x86_64 x86_64
+installer : /home/jenkins/workspace/company_PDF_my-project_develop/prefix/bootstrap/bin/install_pkg.sh
+  sha256  : 3c1f6a562b56daf4078ff36fa494ceb558e5415f516b8616c46f67347ccfb3f1
+  lines   : 505
+  fallback: no (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : no
+identity  : Debian/no-rsync/no-engine, requested; the engine is asserted from the run trace below
+            pre-change baseline, NOT the D-fb cell: this installer has no fallback engine, so no engine can run. This is the state expected to become D-fb once one exists.
+home      : /tmp/cplx-verify.64814/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.64814
+
+--- preflight
+  preflight commands                 PASS  all 28 present
+  preflight stat fractional          PASS  1786544734.111293512
+  preflight combination              PASS  Debian/no-rsync/no-engine, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  control watchdog                   PASS  blocked, killed at 2s
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (no rsync: the mirror phase dies, which is the Q19 defect itself,
+   and the root-file site is never reached, so its two shapes have
+   no baseline on this target by construction)
+  baseline no-rsync mirror           PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 3c1f6a562b56  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  no engine ran: no trace and the run failed at exit 5
+
+=== VERDICT ===
+suites    : preflight controls baseline-no-rsync
+cases: 12, failures: 0
+Step 0: every assertion and every negative control behaved as designed.
+
+--- reading, added when the output was retained ---
+
+This is the Debian half of the Step 0 baseline, and it is still the half that
+matters most: this agent is where Q19 actually bites, and the run records the
+failure exactly as the requirement describes it. Exit 5 in the mirror phase, no
+populated tools tree, and the staging directory left behind, which is the
+recovery contract the design states rather than assumes. The last two are
+asserted by the `not-deployed` oracle inside the case runner, so the case cannot
+pass on status alone.
+
+**What this run is not called, and why.** Build 36 labelled itself `D-fb` and
+then claimed that label was asserted by `engine none`. Code review refuted both
+halves. D-fb is the cell where the fallback engine is selected and runs; this
+installer has none and dies at the mirror, so no engine ran at all. And absence
+of rsync's banner proves only that rsync did not run, which is equally true of a
+successful fallback, so it can never be affirmative evidence for one. The
+identity here is `Debian/no-rsync/no-engine`, not a matrix cell but the
+pre-change state expected to become one, and the header says so. The engine
+assertion matches: `no engine ran` requires no trace **and** a failed run, so the
+claim is that nothing copied rather than that rsync did not.
+
+**And what the harness no longer even tries to say.** A later body recognised a
+guessed `copy engine: fallback` marker so that a future run could claim D-fb.
+That was withdrawn as unsafe in the direction that matters. The plan has Step 1
+emit a selection line before archive discovery while both rsync call sites stay
+unchanged, so on this agent that line could say fallback and the same run still
+die at the unchanged mirror having copied nothing, and the harness would have
+reported `engine fallback, read from the run trace`. A guessed phrase would have
+become stronger evidence than the event it describes, on the one target where the
+defect actually lives. Step 0 now witnesses two states only, and refuses a target
+identity outright for any installer able to select a fallback.
+
+The stage runs in its own shell so the pipeline's rsync shim is not on PATH, and
+`rsync : no` records that. If the shim ever leaked onto PATH, the harness would
+refuse any target identity and fail preflight rather than record a shimmed
+success as Debian evidence.
+
+`control fixture-shape` is new here. It plants a plain regular file where a case
+declares an exact symlink and requires refusal on the shape, which recalibrates
+on this target the oracle that interprets every fixture. Without it, a
+shared-mode error in that oracle could accept a false declaration on both targets
+while every ordinary case stayed green.
+
+The root-file FIFO and symlink shapes have no baseline on this target, and that
+is a property of the target rather than a gap. Without rsync the installer dies
+at the mirror phase and never reaches the root-file loop, so there is nothing to
+observe. Their baseline is the RHEL capture's, where rsync is present.
+
+`all 28 present` covers every external command the harness runs, including the
+child `bash` the case runner looks up on PATH, plus the plan's five
+verification-only additions. `diff` is the one not invoked at step 0: it is the
+manifest comparison's tool, and this line is the promised evidence that step 5's
+acceptance gate will have it on this agent.
+
+Three details worth recording, none of them defects.
+
+The kernel string reads `el9_8`, the RHEL host kernel, because the agent is a
+Docker container carrying a Debian 12 userland. `/etc/os-release` is what the
+harness reads for the identity, and it reported Debian, so the identity is right.
+A reader comparing kernels between the two captures would otherwise conclude the
+stage ran on the wrong machine.
+
+The installer fingerprint is `3c1f6a56...`, while this branch's
+`src/setups/env/bin/install_pkg.sh` is `8ffb726c...`, both 505 lines. That is
+correct for a baseline: the agent measured the copy extracted from the published
+archive, which is the installer CI runs today, and the RHEL capture reports the
+same digest. It also means later steps show no transition here until the pipeline
+runs a fixed installer, whether standalone or from a republished archive, which
+is the delivery split the requirement settled under Q05. Step 5 has to name which
+installer it exercises on this target rather than assume the branch one. The
+header also records `fallback: no`, so the absence of an override is measured
+rather than inferred from the step number.
+
+The two harness digests answer different questions. The whole-file value,
+`027d69fc...`, pins this output to one exact file, and it matches the copy in
+commit `7503e53a` byte for byte, which is how this evidence is tied to that
+commit. It cannot be compared with the cplx source, whose header comment differs
+by design. The shared-body value, `d9027ad8...`, is taken from a marker line to
+the end of the file, and the RHEL capture reports the same value from a different
+file. That is what shows the two copies are in step.
