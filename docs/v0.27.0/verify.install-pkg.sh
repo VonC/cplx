@@ -87,8 +87,8 @@ done
 # pass at exactly the level later steps are meant to rely on. When a later step
 # adds a suite, extend this dispatch and the SUITES record below together.
 case "$STEP" in
-    0) ;;
-    *) echo "unsupported --step $STEP: only step 0 has a case suite today." >&2
+    0|1) ;;
+    *) echo "unsupported --step $STEP: steps 0 and 1 have case suites today." >&2
        echo "Add its suite and extend the dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -400,6 +400,56 @@ assert_post_state() {
 # states it can measure today. When Step 1 defines its trace, that belongs in a
 # separately named SELECTION assertion, and proof that the selected engine copied
 # stays with the operation and post-state cases.
+# The SELECTION trace, deliberately a different function from assert_engine and
+# deliberately never used to conclude that anything copied.
+#
+# Step 1 emits one `Copy engine:` line before archive discovery, and step 1 alone
+# changes no call site, so a run can select cp and still operate rsync. That
+# divergence is real at this step and the suite records it rather than hiding it.
+# Reading a selection line as proof of a copy is exactly the conflation that was
+# removed from assert_engine, and keeping the two apart is what stops it coming
+# back once the trace exists.
+assert_selection() {
+    local name="$1" log="$2" want="$3" want_detail="$4"
+    cases=$((cases + 1))
+    local count line
+    count=$(grep -c 'Copy engine:' "$log" 2>/dev/null)
+    if [ "${count:-0}" -eq 0 ]; then
+        fail "$name" "SELECTION: no 'Copy engine:' line in the run trace"; return 1; fi
+    if [ "$count" -ne 1 ]; then
+        fail "$name" "SELECTION: expected exactly one trace line, found $count"; return 1; fi
+    line=$(grep -m1 'Copy engine:' "$log")
+    case "$line" in
+        *"Copy engine: $want"*) ;;
+        *) fail "$name" "SELECTION: want [$want], trace reads [$line]"; return 1 ;;
+    esac
+    if [ -n "$want_detail" ] && ! printf '%s' "$line" | grep -qE "$want_detail"; then
+        fail "$name" "SELECTION: engine $want but detail does not match /$want_detail/: [$line]"
+        return 1
+    fi
+    # Design Q06: announced BEFORE archive discovery, so a run that dies during
+    # discovery or extraction has still said which engine it would have used.
+    #
+    # The discovery marker is REQUIRED, not merely compared when present. An
+    # earlier version skipped the comparison if the marker was absent and still
+    # printed "announced before discovery", so a trace with nothing to order
+    # against produced the same passing message as a correctly ordered one. An
+    # ordering oracle that concludes from absence orders nothing.
+    local sel_at disc_at disc_count
+    disc_count=$(grep -c 'Searching for latest' "$log" 2>/dev/null)
+    if [ "${disc_count:-0}" -ne 1 ]; then
+        fail "$name" "SELECTION: archive discovery marker: want exactly 1, found ${disc_count:-0}, so there is nothing to order against"
+        return 1
+    fi
+    sel_at=$(grep -n 'Copy engine:' "$log" | head -n 1 | cut -d: -f1)
+    disc_at=$(grep -n 'Searching for latest' "$log" | head -n 1 | cut -d: -f1)
+    if [ "$sel_at" -ge "$disc_at" ]; then
+        fail "$name" "SELECTION: trace at line $sel_at, not before archive discovery at line $disc_at"
+        return 1
+    fi
+    pass "$name" "selected $want, announced before discovery (a selection, not a copy)"
+}
+
 assert_engine() {
     local name="$1" log="$2" want="$3" case_exit="$4"
     cases=$((cases + 1))
@@ -473,10 +523,20 @@ run_case() {
     local ident="installer $(short_sha "$got_inst")  archive $(archive_identity "$prefix" "$got_arch")"
     local fixture_seen="$FIXTURE_SEEN"
 
-    # 3. run under the watchdog, with HOME pinned, capturing status and output
+    # 3. run under the watchdog, with HOME pinned, capturing status and output.
+    # CASE_FORCE_CP distinguishes three states a case may need: unset, set and
+    # empty, and set to a value. An empty value is not the same as unset to the
+    # code under test, and the plan names both, so the harness must be able to
+    # produce both rather than collapse them.
     CASE_LOG="$SCRATCH/$name.log"
-    HOME="$CASE_HOME" timeout "$TIMEOUT_S" bash "$want_inst" tools --prefix "$prefix" \
-        > "$CASE_LOG" 2>&1
+    if [ -n "${CASE_FORCE_CP+set}" ]; then
+        HOME="$CASE_HOME" CPLX_INSTALL_PKG_FORCE_CP="$CASE_FORCE_CP" \
+            timeout "$TIMEOUT_S" bash "$want_inst" tools --prefix "$prefix" \
+            > "$CASE_LOG" 2>&1
+    else
+        HOME="$CASE_HOME" timeout "$TIMEOUT_S" bash "$want_inst" tools --prefix "$prefix" \
+            > "$CASE_LOG" 2>&1
+    fi
     CASE_EXIT=$?
 
     if [ "$CASE_EXIT" != "$want_exit" ]; then
@@ -513,38 +573,77 @@ COMBINATION_CLAIMS_TARGET=0
 COMBINATION_WHY=""
 COMBINATION_NOTE=""
 WANT_ENGINE=""
-# Step 0 recognises exactly two states, and both are states it can measure: rsync
-# operating, and nothing operating. It infers no fallback cell, because it cannot
-# witness one. An installer that can select a fallback is refused here rather
-# than guessed at, and stays refused until Step 1 defines the selection trace and
-# the harness gains a separately named assertion for it.
-case "$os_id" in
-    debian)
-        COMBINATION_CLAIMS_TARGET=1
-        if [ "$force_cp" = "1" ]; then
-            COMBINATION_WHY="forced fallback requested; step 0 cannot witness a fallback engine, so it refuses to label the run"
-        elif [ "$have_rsync" = yes ]; then
-            COMBINATION_WHY="Debian with rsync present is neither the no-rsync baseline nor the D-fb cell"
-        elif [ "$installer_has_fallback" = yes ]; then
-            COMBINATION_WHY="this installer can select a fallback engine, which step 0 has no assertion for; extend the harness when step 1 defines the selection trace"
-        else
-            COMBINATION="Debian/no-rsync/no-engine"; COMBINATION_OK=1; WANT_ENGINE="none"
-            COMBINATION_NOTE="pre-change baseline, NOT the D-fb cell: this installer has no fallback engine, so no engine can run. This is the state expected to become D-fb once one exists."
-        fi ;;
-    rhel|centos|rocky|almalinux)
-        COMBINATION_CLAIMS_TARGET=1
-        if [ "$force_cp" = "1" ]; then
-            COMBINATION_WHY="R-fb is a fallback cell, and step 0 can witness no fallback engine; it refuses the label rather than infer it"
-        elif [ "$have_rsync" = no ]; then
-            COMBINATION_WHY="RHEL without rsync is not the R-rs cell, and no matrix cell covers it"
-        elif [ "$installer_has_fallback" = yes ]; then
-            COMBINATION_WHY="this installer can select a fallback engine, which step 0 has no assertion for; extend the harness when step 1 defines the selection trace"
-        else
-            COMBINATION="R-rs"; COMBINATION_OK=1; WANT_ENGINE="rsync"
-        fi ;;
-    *)
-        COMBINATION_WHY="$os_id is not a supported target" ;;
-esac
+# The identity a run may claim advances with the suite, so a later step defines
+# its own contract instead of inheriting an earlier step's rules by accident.
+# Step 0's rules refuse a fallback-capable installer, which was right while the
+# harness could witness no fallback. Applied unchanged to step 1 they refused the
+# step 1 candidate on both supported targets, before any case ran, because the
+# candidate contains the override token. A developer host hid that, since an
+# unsupported host is a self-test either way.
+#
+# Two things stay refused at every step: a global forced override, which would
+# make the whole run measure one requested mode rather than the selection logic,
+# and a host and tool shape the target matrix does not contain.
+if [ "$STEP" -ge 1 ]; then
+    # Step 1 runs a SELECTION suite. It is deliberately not a matrix cell: one
+    # run exercises six selections and, where rsync is present, the forced
+    # divergence too, so no single engine cell describes it.
+    case "$os_id" in
+        debian)
+            COMBINATION_CLAIMS_TARGET=1
+            if [ "$force_cp" = "1" ]; then
+                COMBINATION_WHY="a global forced override would fix every case's selection; the suite sets the override per case instead"
+            elif [ "$have_rsync" = yes ]; then
+                COMBINATION_WHY="Debian with rsync present is not a shape the target matrix contains"
+            else
+                COMBINATION="step1-candidate/Debian/no-rsync"; COMBINATION_OK=1; WANT_ENGINE="none"
+                COMBINATION_NOTE="a step 1 selection suite, NOT a matrix cell: it exercises six selections, and the unchanged rsync site still fails with no engine operating."
+            fi ;;
+        rhel|centos|rocky|almalinux)
+            COMBINATION_CLAIMS_TARGET=1
+            if [ "$force_cp" = "1" ]; then
+                COMBINATION_WHY="a global forced override would fix every case's selection; the suite sets the override per case instead"
+            elif [ "$have_rsync" = no ]; then
+                COMBINATION_WHY="RHEL without rsync is not a shape the target matrix contains"
+            else
+                COMBINATION="step1-candidate/RHEL/rsync"; COMBINATION_OK=1; WANT_ENGINE="rsync"
+                COMBINATION_NOTE="a step 1 selection suite, NOT a matrix cell: it exercises six selections plus the forced divergence, where cp is selected and rsync still operates."
+            fi ;;
+        *)
+            COMBINATION_WHY="$os_id is not a supported target" ;;
+    esac
+else
+    # Step 0 recognises exactly two states, and both are states it can measure:
+    # rsync operating, and nothing operating. It infers no fallback cell, because
+    # it cannot witness one, and refuses an installer able to select one.
+    case "$os_id" in
+        debian)
+            COMBINATION_CLAIMS_TARGET=1
+            if [ "$force_cp" = "1" ]; then
+                COMBINATION_WHY="forced fallback requested; step 0 cannot witness a fallback engine, so it refuses to label the run"
+            elif [ "$have_rsync" = yes ]; then
+                COMBINATION_WHY="Debian with rsync present is neither the no-rsync baseline nor the D-fb cell"
+            elif [ "$installer_has_fallback" = yes ]; then
+                COMBINATION_WHY="this installer can select a fallback engine, which step 0 has no assertion for; run it at --step 1, whose suite does"
+            else
+                COMBINATION="Debian/no-rsync/no-engine"; COMBINATION_OK=1; WANT_ENGINE="none"
+                COMBINATION_NOTE="pre-change baseline, NOT the D-fb cell: this installer has no fallback engine, so no engine can run. This is the state expected to become D-fb once one exists."
+            fi ;;
+        rhel|centos|rocky|almalinux)
+            COMBINATION_CLAIMS_TARGET=1
+            if [ "$force_cp" = "1" ]; then
+                COMBINATION_WHY="R-fb is a fallback cell, and step 0 can witness no fallback engine; it refuses the label rather than infer it"
+            elif [ "$have_rsync" = no ]; then
+                COMBINATION_WHY="RHEL without rsync is not the R-rs cell, and no matrix cell covers it"
+            elif [ "$installer_has_fallback" = yes ]; then
+                COMBINATION_WHY="this installer can select a fallback engine, which step 0 has no assertion for; run it at --step 1, whose suite does"
+            else
+                COMBINATION="R-rs"; COMBINATION_OK=1; WANT_ENGINE="rsync"
+            fi ;;
+        *)
+            COMBINATION_WHY="$os_id is not a supported target" ;;
+    esac
+fi
 
 # ------------------------------------------------------------------- report ---
 echo "=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step $STEP ==="
@@ -749,6 +848,101 @@ else
     suite "baseline-no-rsync"
 fi
 echo
+
+# --------------------------------------------------- step 1: engine selection ---
+# Plan step 1: the engine is resolved once, before archive discovery, from
+# `command -v rsync` and the override, and announced as a selection.
+#
+# Every case here asserts the SELECTION line only. Step 1 changes no call site,
+# so on a host with rsync a forced-fallback run still mirrors with rsync, and the
+# suite asserts that divergence explicitly rather than letting the selection line
+# imply a copy. Steps 2 and 3 close it, and their cases are what will show the
+# fallback actually copying.
+if [ "$STEP" -ge 1 ]; then
+    echo "--- step 1: engine selection (a selection trace, not proof of a copy)"
+
+    # The ordering oracle's two controls, retained on both targets, and two named
+    # controls rather than one composite so each failure reason is checked
+    # independently and each counts once.
+    #
+    # They calibrate different things, and an earlier version had only the first.
+    # That one proves the oracle cannot infer ordering from an absent marker,
+    # which is marker PRESENCE. The branch that implements Q06, that a selection
+    # announced after archive discovery must be refused, had never executed: the
+    # six real cases show a correctly ordered trace passing, and no trace in
+    # existence is ordered wrongly, because no installer emits one. Leaving the
+    # only rejection branch of this step's own guarantee to code inspection is
+    # the assurance class the plan's Q07 treats as a complement to instrumented
+    # controls rather than a replacement for them.
+
+    # 1. No discovery marker at all: there is nothing to order against.
+    printf 'Info  : [install_pkg.sh] Copy engine: rsync (/usr/bin/rsync)\n' \
+        > "$SCRATCH/selection-no-discovery.log"
+    printf 'Info  : [install_pkg.sh] Installation prefix: /nowhere\n' \
+        >> "$SCRATCH/selection-no-discovery.log"
+    control "control selection-no-discovery" "SELECTION: archive discovery marker" \
+        assert_selection "selection-no-discovery" "$SCRATCH/selection-no-discovery.log" rsync ""
+
+    # 2. Exactly one discovery marker and one otherwise-valid selection line, in
+    # the wrong order. Well formed in every respect except the one Q06 requires.
+    printf 'Task=>: [install_pkg.sh] Searching for latest tools archive...\n' \
+        > "$SCRATCH/selection-out-of-order.log"
+    printf 'Info  : [install_pkg.sh] Copy engine: rsync (/usr/bin/rsync)\n' \
+        >> "$SCRATCH/selection-out-of-order.log"
+    control "control selection-out-of-order" "SELECTION: trace at line" \
+        assert_selection "selection-out-of-order" "$SCRATCH/selection-out-of-order.log" rsync ""
+
+    if [ "$have_rsync" = yes ]; then
+        sel_exit=0; sel_phase='Installation successful'; sel_post=installed
+    else
+        sel_exit=5; sel_phase='Rsync \(main\) failed|rsync'; sel_post=not-deployed
+    fi
+
+    sel_n=0
+    # The literal token `unset` is this loop's sentinel for "do not set the
+    # variable at all", which the plan distinguishes from setting it empty.
+    for sel_spec in unset 1 0 yes true ""; do
+        sel_n=$((sel_n + 1))
+        sel_prefix=$(new_prefix "sel$sel_n")
+        build_archive "$sel_prefix/pkgs/tools.2026-08-11_000000.tar.gz"
+        sel_archive=$(resolve_archive "$sel_prefix")
+
+        if [ "$sel_spec" = "unset" ]; then
+            unset CASE_FORCE_CP; sel_label="override unset"
+        elif [ -z "$sel_spec" ]; then
+            CASE_FORCE_CP=""; sel_label="override empty"
+        else
+            CASE_FORCE_CP="$sel_spec"; sel_label="override $sel_spec"
+        fi
+
+        # Only the exact value 1 forces the fallback. Everything else, including
+        # the truthy-looking yes and true, behaves as unset: the consumers are
+        # scripts, so tolerant parsing would be a liability rather than a
+        # convenience.
+        if [ "$sel_spec" = "1" ]; then
+            sel_engine="cp"; sel_detail="forced by CPLX_INSTALL_PKG_FORCE_CP=1"
+        elif [ "$have_rsync" = yes ]; then
+            sel_engine="rsync"; sel_detail="rsync \(/.*rsync\)"
+        else
+            sel_engine="cp"; sel_detail="rsync not found on PATH"
+        fi
+
+        run_case "step1 $sel_label" "$sel_prefix" "$INSTALLER" "$sel_archive" \
+                 "$sel_exit" "$sel_phase" fresh "$sel_post"
+        assert_selection "step1 $sel_label trace" "$CASE_LOG" "$sel_engine" "$sel_detail"
+
+        # The divergence, asserted where it exists rather than described. With
+        # rsync present and the fallback forced, step 1 selects cp and still
+        # operates rsync, because neither call site has changed yet. Recording
+        # it here means step 2 has something to show a transition against.
+        if [ "$sel_spec" = "1" ] && [ "$have_rsync" = yes ]; then
+            assert_engine "step1 forced still operates rsync" "$CASE_LOG" rsync "$CASE_EXIT"
+        fi
+    done
+    unset CASE_FORCE_CP
+    suite "step1-selection"
+    echo
+fi
 
 # ------------------------------------------------------------------ verdict ---
 echo "=== VERDICT ==="
