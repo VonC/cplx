@@ -4,9 +4,12 @@
 # <target>.*.tar.gz produced by pkg.sh into an installation prefix, then
 # makes the tree self-contained there — symlink targets, text files, ELF
 # interpreter (PT_INTERP) and rpath are re-anchored from the build
-# account's /home/<user> to the prefix. Run it from any account: it only
-# needs the archive, this script, and the patchelf shipped in the tools
-# archive.
+# account's /home/<user> to the prefix. Run it from any account.
+# It needs the archive, this script, the patchelf shipped in the tools
+# archive, and a short list of host programs. That list is recorded, with
+# the method that produced it, under "Host tools install_pkg.sh needs" in
+# wiki/reference/relocation-tools.md. rsync is optional there: without it
+# the script falls back to cp at both transfer sites.
 # Application-specific install steps (extra bin entries) belong to the
 # consuming project's own deployment script (my-project does them in
 # tools/deploy_pkgs.sh: see my-project docs/pkg-tools-migration-to-cplx.md).
