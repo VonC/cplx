@@ -2225,10 +2225,10 @@ commit; the same two target runs must be regenerated.
 
 ### Repairs made by the reviewer
 
-- **Substantive — `docs/v0.27.0/verify.install-pkg.sh`**: removed the unwitnessed
+- **Substantive —
   rsync branch from `assert_deploy_engine`, simplified its contract to cp plus
   expected marker count, and updated its sole caller. The repair is staged.
-- **Substantive record update —
+- **Substantive —
   `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`**: changed Step 3
   to the exact required `No. Step 3 has NOT been fully implemented.` status,
   added the concrete missing-work section, recorded why the existing captures
@@ -2629,6 +2629,847 @@ remains required. No round 4 or additional measurement is requested.
 - Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
 - Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
 - Implementation step: 3
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-3 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-08-13T19:22:28+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 rsync-cp-fallback round 1
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+Implementation step: 4
+Review round: 1
+
+### Requestor assessment for step 4 rsync-cp-fallback round 1
+
+Step 4 is not yet fully implemented: the documentation is written and the
+installer header corrected, but the target evidence that nothing moved is not in
+hand.
+
+**Test evidence.** No new cases, deliberately. This step adds no behaviour, so it
+adds no assertion, and a `--step 4` dispatch entry with no cases would be exactly
+the vacuous pass the step guard was added to refuse. The check this step owes is
+that nothing moved: a `--step 3` run against the step 4 installer must produce
+the same 56 and 47 cases with zero failures and still observe exit 5 at the
+mirror and exit 7 at the root-file deploy. The developer-host self-test gives 47
+cases with the same 17 symlink-limitation failures as the step 3 self-test on the
+same host, so no outcome moved there, but that host cannot create a symlink and
+is not target evidence.
+
+**Static checks.** `bash -n` clean. The step's own criteria all pass exactly:
+`Rsync \(` returns nothing in the installer, which steps 2 and 3 achieved and
+this step must not regress; `gzip` appears in the wiki contract; neither the code
+5 nor the code 7 row names rsync.
+
+**Coverage.** Unchanged from step 3, since no case was added or removed: 47 cases
+on a no-rsync host, 56 where rsync is present.
+
+**Architecture.** This step touches published documentation and one comment. No
+code path, exit code or message text moves, so nothing the earlier steps
+established can be weakened here. The exit-code table lives on one page and the
+neighbouring `exit-codes.md` links to it rather than duplicating it, so there is
+a single source to correct.
+
+**Performance.** No runtime change at all.
+
+**Feature integrity.** The published codes keep their numbers, so every caller
+reading 5 or 7 keeps working; only their names changed, from naming the engine to
+naming the step, which is what makes them true on both engines. The header
+correction fixes a claim that was false before this effort began and would have
+stayed false: it said the installer needs only the archive, itself and the
+shipped patchelf, so a reader validating an agent image against it would have
+concluded no host tools were required.
+
+### Implementation report for step 4 rsync-cp-fallback round 1
+
+Step 4 publishes what steps 1 to 3 built and records a contract that never
+existed. It changes no executable line: the installer edit is three comment
+lines, and the two fatal messages were already reworded by the steps that created
+their engine branches, which is what Q04-4C requires so no intermediate commit
+publishes a message naming rsync for a step that may run `cp`.
+
+**The wiki now describes a mirror rather than an rsync call.** The engine is
+chosen once, before archive discovery, announced as a `Copy engine:` line, and
+overridable for validation with the exact semantics the design settled: only the
+value `1` forces the fallback.
+
+**Codes 5 and 7 are named for their steps rather than their engine**, keeping
+their numbers. `wiki/reference/exit-codes.md` was checked and already
+cross-references this page instead of duplicating the table, so one correction
+suffices. `wiki/reference/tool-contract.md` was also checked and is a different
+contract, what a tool must provide to the build dispatcher, so the host-tool list
+does not belong there.
+
+**The asymmetry is published rather than left to be discovered.** A table gives
+each destination shape and what each engine does with it, including the two where
+the fallback refuses what rsync accepts: a mirror destination that is a symlink
+to a directory, where rsync follows it, empties the external target and returns
+0; and a root-file destination that is a symlink to a regular file, where rsync
+replaces the link. Both are measured behaviours, and an operator reading only the
+exit codes would otherwise meet the refusals as unexplained failures. This table
+is beyond the plan's enumerated list for this step and is declared as such: two
+engines cannot be usefully described without saying where they differ.
+
+**The host-tool contract is recorded in four groups**, shell, mandatory, optional
+and shipped. `gzip` sits in the mandatory group and is the entry worth naming: no
+command position names it, because `tar -xzf` starts it as a subprocess, so a
+scan for command tokens alone publishes a contract that a host without `gzip`
+will fail.
+
+**The inventory method is recorded beside the list**, in four steps: command
+position tokens, the subprocesses that command options start, exclusion of shell
+builtins so `printf` and `[` are not published as host requirements, and
+confirmation on a host carrying only the listed programs. The method is there so
+a re-audit reaches the same list rather than a shorter one, which is the failure
+mode that produced the original omission.
+
+**The script header is corrected.** It claimed the installer needs only the
+archive, itself and the shipped patchelf. It now points at the recorded contract
+and notes that rsync is optional there.
+
+### Change summary for step 4 rsync-cp-fallback round 1
+
+Staged paths in this repository:
+
+- `src/setups/env/bin/install_pkg.sh`, 622 to 625 lines, digest `591e2db0`.
+  Three comment lines; no executable change.
+- `wiki/reference/relocation-tools.md`, 85 to 137 lines.
+- `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`.
+
+Two neighbouring wiki pages were inspected and deliberately not edited:
+`exit-codes.md`, which cross-references this page rather than duplicating the
+table, and `tool-contract.md`, which is a different contract.
+
+`a.commit` is not yet written for this step. It will follow the shape the earlier
+steps settled, reduced to what this step actually produces: the installer and
+wiki edit, the validation record, then the review transcript. There are no
+capture files unless the target runs show a difference, which would itself be the
+finding.
+
+In the consuming project, the candidate verification input is refreshed in the
+working tree to carry the new installer digest, not yet committed, pending the
+target runs. Its harness copy is unchanged, since this step adds no cases.
+
+### Writer response for step 4 rsync-cp-fallback round 1
+
+Writer response: No earlier feedback is outstanding, and no disagreement is recorded.
+
+Step 3's review is closed and committed. Its two record-only corrections were
+accepted as made, and its substantive round 2 repair, narrowing the unwitnessed
+`rsync` answer out of `assert_deploy_engine`, is in the committed harness.
+
+**One thing this step does beyond the plan's list, declared rather than slipped
+in.** The plan enumerates what the wiki gains: the mirror described with two
+engines, codes 5 and 7 renamed, the host-tool contract in four groups, and the
+inventory method. I also added a destination asymmetry table. Two engines cannot
+be usefully described without saying where they differ, and the shapes where they
+differ are exactly the ones an operator meets as an unexplained exit 5 or 7. It
+is the reason the wiki delta is +52 against an advisory +30 to +45. Say if you
+would rather it went, and the budget comes back inside its range.
+
+**One judgement worth flagging.** The plan named only `relocation-tools.md`. I
+checked the two neighbouring pages before writing: `exit-codes.md` already links
+here rather than duplicating the table, so correcting one page is enough, and
+`tool-contract.md` turned out to be about what a tool must provide to the build
+dispatcher, not about host tools. Neither was edited. If the host-tool contract
+should instead live on its own page, that is a placement decision rather than a
+content one, and the material would move unchanged.
+
+**On the harness.** This step deliberately adds no cases and no `--step 4`
+dispatch entry. Adding a step with no suite is precisely the vacuous pass the
+step guard exists to refuse, so step 4's evidence is a `--step 3` run against the
+step 4 installer showing every outcome unchanged. If you would rather see a step
+4 dispatch that simply re-runs the step 3 suite under its own label, that is a
+different trade and worth saying now rather than at step 5.
+
+### Reviewer focus for step 4 rsync-cp-fallback round 1
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-08-13T20:05:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 4
+- Outcome: answer
+
+### Reviewer assessment for step 4 rsync-cp-fallback round 1
+
+Step 4 is not commit-ready. The target reruns close the request's original
+evidence gap: RHEL returned 56 cases and Debian 47, with zero failures, exits 5
+and 7 still observed, installer digest `591e2db0`, and no harness change. The
+implementation review nevertheless found two substantive errors in the
+published contract itself.
+
+#### Findings
+
+1. **Substantive — the mandatory host-tool row was incomplete.** The wiki called
+   its ten-program row the whole contract, but the settled requirement's audited
+   inventory contains 19 executables already invoked by the installer plus the
+   new `cp`, for 20 final-state mandatory programs. The omitted programs were
+   `chmod`, `cut`, `head`, `ln`, `od`, `readlink`, `sort`, `touch`, `tr` and
+   `xargs`. A target image validated against the staged row could therefore pass
+   the published check and still fail during relocation.
+2. **Substantive — the engine-equivalence sentence exceeded the measured
+   guarantee.** It said the engines were equivalent for a whole-tree mirror
+   without the settled fresh-prefix condition. The requirement and M5 evidence
+   say exact manifest parity is for two fresh prefixes; over a populated prefix,
+   rsync's quick check may retain a surviving entry while the fallback empties
+   and rewrites it. The wrong-destination table also collapsed M2's empty and
+   populated root-file directory rows even though rsync replaces the former and
+   refuses the latter.
+
+These are documentation behavior and acceptance-contract errors, not polishing.
+They do not invalidate the 56/47 confirmation runs, which correctly show that
+Step 4 changed no executable behavior, but they prevent convergence in this
+round.
+
+#### Repairs made by the reviewer
+
+- **Substantive —
+  20-program final-state mandatory inventory; scoped manifest parity to fresh
+  prefixes; stated populated-prefix behavior per engine; split empty and
+  populated root-file directories; and corrected the inventory method's final
+  step to the supported-target measurement actually performed. The path is
+  staged.
+- **Substantive —
+  `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`**: retained the
+  affirmative implementation check and target-run evidence, recorded both
+  contract repairs, used the exact canonical Step 4 status sentence, and updated
+  the wiki line count. The path is staged.
+- **Substantive —
+  matches the repaired staged wiki. Group membership, order and subjects remain
+  correct; three groups are still the right shape.
+
+No installer or harness code was edited. No additional target measurement is
+needed because the repaired statements are derived directly from the settled
+requirement and retained M2/M5 and installer-contract evidence.
+
+#### Implementation-check conclusion
+
+The executable Step 4 behavior is sound: the installer change is comment-only,
+no runtime path, exit code or diagnostic moved, no DDD/hexagonal concern applies,
+no performance work was introduced, and the cumulative shell harness is the
+repository's planned test substitute. After the repairs, the Step 4 validation
+record correctly says `Yes. Step 4 has been fully implemented.` while the whole
+effort remains incomplete because Step 5 has not started.
+
+#### Reviewer decision for step 4 rsync-cp-fallback round 1
+
+Disposition: changes-requested. Rework and review again. Round 2 should verify
+the repaired published contract and `a.commit`; it does not need to rerun the
+unchanged installer or request new measurement.
+
+<!-- review-entry-id: answer-round-1 -->
+
+## Round 2 by requestor - Step 4
+
+- Recorded: 2026-08-13T20:24:13+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 rsync-cp-fallback round 2
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+Implementation step: 4
+Review round: 2
+
+### Requestor assessment for step 4 rsync-cp-fallback round 2
+
+Step 4 is fully implemented. The documentation is written and corrected, the
+installer header points at the recorded contract, and both targets confirmed the
+change moved no behaviour.
+
+**Test evidence.** No new cases, deliberately: this step adds no behaviour to
+assert, and a `--step 4` dispatch entry with no cases would be the vacuous pass
+the step guard exists to refuse. The check it owed was that nothing moved, and
+both targets answered it. A `--step 3` run against the step 4 installer
+`591e2db0` returned 56 cases on RHEL and 47 on the Debian agent, zero failures,
+every outcome identical to the step 3 captures, with exits 5 and 7 still observed
+at the two refusal sites. The harness digests did not move at all, whole-file or
+shared body, because no case changed: only the installer digest moved, which is
+the signature a documentation-only step should leave.
+
+**Static checks.** `bash -n` clean. The step's own criteria pass exactly:
+`Rsync \(` returns nothing in the installer, `gzip` appears in the wiki contract,
+and neither the code 5 nor the code 7 row names rsync.
+
+**Coverage.** Unchanged from step 3, since no case was added or removed: 47 cases
+on a no-rsync host, 56 where rsync is present.
+
+**Architecture.** This step touches published documentation and one comment. No
+code path, exit code or message text moves. The exit-code table has one source:
+`exit-codes.md` links here rather than duplicating it, and `tool-contract.md` is
+a different contract, what a tool must provide to the build dispatcher.
+
+**Performance.** No runtime change at all.
+
+**Feature integrity.** The published codes keep their numbers, so every caller
+reading 5 or 7 keeps working; only their names changed, from naming the engine to
+naming the step, which is what makes them true on both engines. The header
+correction retires a claim that was false before this effort began: it said the
+installer needs only the archive, itself and the shipped patchelf, so anyone
+validating an agent image against it would have concluded no host tools were
+required.
+
+**The round 1 repairs are verified, not assumed.** The corrected tool list was
+re-derived independently by running the documented method against the installer:
+a command-position scan excluding shell builtins and the script's own functions
+yields nineteen programs, and step 2 of the method adds `gzip` from `tar -z`, for
+twenty. That is exactly the corrected list.
+
+### Implementation report for step 4 rsync-cp-fallback round 2
+
+Step 4 publishes what steps 1 to 3 built and records a host-tool contract that
+never existed. It changes no executable line: the installer edit is three comment
+lines, and both fatal messages were already reworded by the steps that created
+their engine branches, which is what Q04-4C requires.
+
+The wiki now describes a mirror with two engines, the selection made once before
+archive discovery and announced, and the override with its exact semantics. Codes
+5 and 7 are named for the mirror step and the root-file deploy step rather than
+for rsync, keeping their numbers. A destination table publishes the asymmetry, so
+the shapes where the fallback refuses what rsync accepts are documented rather
+than met as unexplained failures. The host-tool contract is recorded in four
+groups with the inventory method beside it, and the script header points at it.
+
+**What round 1 corrected, and why each mattered.**
+
+The host-tool contract listed ten mandatory programs and should have listed
+twenty. That is the finding worth dwelling on: this step's entire contribution is
+a contract plus the method for producing it, and the contract produced with that
+method was half missing. `chmod`, `cut`, `head`, `ln`, `od`, `readlink`, `sort`,
+`touch`, `tr` and `xargs` were all absent. The method itself is sound and I
+re-derived the corrected list with it to confirm that: nineteen from a
+command-position scan, plus `gzip` from the `tar -z` subprocess. What failed was
+its application, which is precisely the failure the method was written to prevent
+in future readers and did not prevent in its own author. The page now carries the
+complete list.
+
+Engine parity was stated without the fresh-prefix qualifier the design settles.
+Both engines produce the same manifest when each installs into a fresh prefix,
+which is what the equivalence run measures. Over a populated prefix they both
+remove what the new tree no longer carries, but they are not guaranteed to agree
+entry for entry: rsync's quick check can retain an entry whose size and
+integer-second mtime match, where the fallback empties and rewrites. The design
+records that measurement and the page now scopes the claim to match it, with the
+divergence stated rather than implied.
+
+The root-file directory row conflated two measured behaviours. rsync replaces an
+empty directory with the file and fails on a populated one; the fallback refuses
+both at exit 7. The table now has a row for each, so the rsync column is true in
+both.
+
+**Nothing executable was touched by any of this.** No installer code, no harness
+code, and no case outcome changed, so the 56 and 47 confirmation runs remain
+current evidence for the staged state.
+
+### Change summary for step 4 rsync-cp-fallback round 2
+
+Staged paths in this repository:
+
+- `src/setups/env/bin/install_pkg.sh`, 622 to 625 lines, digest `591e2db0`.
+  Three comment lines; no executable change; untouched by round 1's repairs.
+- `wiki/reference/relocation-tools.md`, 85 to 141 lines, carrying round 1's three
+  repairs.
+- `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`.
+- `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`, this transcript.
+
+Two neighbouring wiki pages were inspected and deliberately not edited:
+`exit-codes.md`, which cross-references this page rather than duplicating the
+table, and `tool-contract.md`, which is a different contract.
+
+`a.commit` holds three groups. Membership, order and subjects are unchanged from
+round 1; the reviewer amended group 1's bullets to describe the corrected
+contract and the scoped parity claim, which is subject accuracy rather than
+regrouping:
+
+1. `docs(wiki): publish the copy engines and the host-tool contract` --
+   `src/setups/env/bin/install_pkg.sh`, `wiki/reference/relocation-tools.md`
+2. `docs(v0.27.0): record step 4 documentation` --
+   `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`
+3. `docs(v0.27.0): retain the step 4 code review transcript` --
+   `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`
+
+Three groups rather than the five the earlier steps used, because this step
+produces less. The installer edit rides with the wiki: three comment lines whose
+entire content is a pointer to the page the same commit writes.
+
+No capture files are retained. The step 3 captures remain step 3's evidence,
+measuring the step 3 installer; the confirmation runs answered one question and
+are recorded in the validation with their digests and counts.
+
+In the consuming project, one commit refreshed the candidate verification input
+to carry the new installer digest. Its harness copy and its stage variable are
+unchanged, since this step adds no cases and has no suite of its own.
+
+### Writer response for step 4 rsync-cp-fallback round 2
+
+Writer response: All three round 1 repairs are accepted. No disagreement is recorded, and no
+reviewer edit was reversed.
+
+**The tool-list finding is the one worth naming plainly, and it was mine.** This
+step's whole contribution is a host-tool contract plus the method for producing
+it. I published the method and then published a contract, produced with that
+method, that was missing half its entries: ten of twenty. The method is not at
+fault, and I confirmed that rather than assuming it. Re-running it against the
+installer gives nineteen programs from a command-position scan, excluding shell
+builtins and the script's own functions, and step 2 adds `gzip` from the `tar -z`
+subprocess: twenty, exactly the corrected list. So the method reproduces the right
+answer and my application of it did not. That is a sharper failure than a missing
+list would have been, because the page's own argument is that a method prevents
+exactly this.
+
+**The parity scope repair is correct and matches the design.** The design's
+equivalence measurement runs into two fresh prefixes, and it separately records
+rsync's quick check retaining an entry whose size and integer-second mtime match
+where the fallback empties and rewrites. My wording claimed equivalence for a
+whole-tree mirror without that qualifier, which overstates it on the one shape an
+operator is most likely to meet, a redeployment. The corrected page scopes the
+claim and states the divergence.
+
+**The directory row repair is correct.** rsync replaces an empty root-file
+directory and fails on a populated one; the fallback refuses both. One row could
+not be true of the rsync column in both cases, and the table now has two.
+
+**Each repair was verified against the four-part scope evidence**: the plan step,
+the answer's repaired-path inventory, the staged diff, and the implementation
+check. No installer or harness code changed, which the unchanged digests confirm,
+so the 56 and 47 confirmation runs remain current evidence for the staged state
+and no rerun is needed.
+
+**One earlier point is now settled by events.** Round 1 was published before the
+confirmation runs returned, with the assessment stating the target evidence was
+not in hand. The runs arrived afterwards and I corrected the staged record
+immediately, but a published request cannot be replaced, so that request text
+understates what the record now says. The transcript group in `a.commit` records
+the sequence so the difference is legible rather than puzzling.
+
+**One item I raised in round 1 has not been answered and I am not pressing it.**
+The destination asymmetry table is beyond the plan's enumerated list for this
+step, and the reviewer repaired it rather than removing it, which I read as
+acceptance. If it should go, the wiki delta returns inside its advisory range.
+
+### Reviewer focus for step 4 rsync-cp-fallback round 2
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-round-2 -->
+
+## Round 2 by reviewer - Step 4
+
+- Recorded: 2026-08-13T20:42:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 4
+- Outcome: answer
+
+### Reviewer assessment for step 4 rsync-cp-fallback round 2
+
+Step 4 is not commit-ready. All three round-1 repairs are present and correct,
+the complete 20-program row matches the settled requirement exactly, and the
+56/47 confirmation runs remain valid because neither installer nor harness code
+changed. Round 2 nevertheless found two more substantive defects in the
+published contract.
+
+#### Findings
+
+1. **Substantive — the documented inventory method still did not reproduce the
+   independently reported scan.** The round-2 request says the successful scan
+   excluded shell builtins *and the installer's own functions*. The wiki method
+   instructed a future auditor to exclude builtins only. A command-position scan
+   following that method would retain `task`, `fatal`, `mirror_tree_cp` and the
+   other defined or sourced helpers as apparent host programs. That makes the
+   method incomplete even though the manually repaired list is now right.
+2. **Substantive — the destination table generalized one measured result.** M2
+   proves rsync replaces a FIFO; it does not prove the same result for every
+   other special-file type. The fallback does refuse every special file by its
+   preflight, but the rsync column has to keep unmeasured types type-specific
+   rather than claiming FIFO semantics for all of them.
+
+Neither finding changes runtime behavior or invalidates the retained target-run
+summary. Both affect Step 4's central deliverable: an accurate, reproducible
+published contract.
+
+#### Repairs made by the reviewer
+
+- **Substantive — `wiki/reference/relocation-tools.md`**: made the method exclude
+  installer-defined and sourced helper functions as well as shell builtins; kept
+  the measured FIFO result on its own row; and scoped other special-file rsync
+  behavior to the type instead of generalizing an unmeasured result. The path is
+  staged.
+- **Substantive —
+  `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`**: recorded both
+  round-2 repairs, retained the exact affirmative Step 4 sentence and current
+  target evidence, and updated the wiki line count. The path is staged.
+- **Substantive — `a.commit`**: amended Group 1's method bullet to describe the
+  now-reproducible exclusions. Its three groups, membership, order and subjects
+  remain accurate.
+
+No installer, harness or consuming-project file was edited. No target rerun or
+new measurement is needed.
+
+#### Implementation-check conclusion
+
+Step 4's executable state remains fully implemented: its installer delta is
+comment-only, the target runs demonstrate no behavior moved, no architecture or
+performance concern applies, and no unit-test layer exists for this Bash/wiki
+step. The validation plan correctly keeps Step 4 at
+`Yes. Step 4 has been fully implemented.` and the document-level status at `No`
+because Step 5 has not started.
+
+#### Reviewer decision for step 4 rsync-cp-fallback round 2
+
+Disposition: changes-requested. Rework and review again. Round 3 should verify
+the two repaired contract statements and `a.commit`; it need not rerun the
+unchanged installer or gather new measurement.
+
+<!-- review-entry-id: answer-round-2 -->
+
+## Round 3 by requestor - Step 4
+
+- Recorded: 2026-08-13T20:41:25+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 rsync-cp-fallback round 3
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+Implementation step: 4
+Review round: 3
+
+### Requestor assessment for step 4 rsync-cp-fallback round 3
+
+Step 4 is fully implemented. The documentation is written and twice corrected,
+the installer header points at the recorded contract, and both targets confirmed
+the change moved no behaviour.
+
+**Test evidence.** No new cases, deliberately: this step adds no behaviour to
+assert, and a `--step 4` dispatch entry with no cases would be the vacuous pass
+the step guard exists to refuse. The check it owed was that nothing moved, and
+both targets answered it. A `--step 3` run against the step 4 installer
+`591e2db0` returned 56 cases on RHEL and 47 on the Debian agent, zero failures,
+every outcome identical to the step 3 captures, with exits 5 and 7 still observed
+at the two refusal sites. Those runs remain current: neither review round touched
+installer or harness code, which the unchanged digests confirm.
+
+**Static checks.** `bash -n` clean. The step's own criteria pass exactly:
+`Rsync \(` returns nothing in the installer, `gzip` appears in the wiki contract,
+and neither the code 5 nor the code 7 row names rsync.
+
+**Coverage.** Unchanged from step 3, since no case was added or removed: 47 cases
+on a no-rsync host, 56 where rsync is present.
+
+**Architecture.** This step touches published documentation and one comment. No
+code path, exit code or message text moves. The exit-code table has one source:
+`exit-codes.md` links here rather than duplicating it, and `tool-contract.md` is
+a different contract, what a tool must provide to the build dispatcher.
+
+**Performance.** No runtime change at all.
+
+**Feature integrity.** The published codes keep their numbers, so every caller
+reading 5 or 7 keeps working; only their names changed, from naming the engine to
+naming the step, which is what makes them true on both engines. The header
+correction retires a claim that was false before this effort began.
+
+**Both round 2 repairs verified rather than assumed.** The method's new exclusion
+step was checked by running the previous method against the installer: twelve
+installer-defined functions survive a builtins-only filter, plus six helpers
+sourced from `echos`. That gap was consequential rather than cosmetic, since
+`info` and `error` are real programs on hosts carrying GNU texinfo and similar,
+so the published method could have named one of them a mandatory host
+requirement. The behaviour table now distinguishes the measured FIFO row from
+other special files, which M2 did not measure.
+
+### Implementation report for step 4 rsync-cp-fallback round 3
+
+Step 4 publishes what steps 1 to 3 built and records a host-tool contract that
+never existed. It changes no executable line: the installer edit is three comment
+lines, and both fatal messages were already reworded by the steps that created
+their engine branches.
+
+The wiki describes a mirror with two engines, the selection made once before
+archive discovery and announced, and the override with its exact semantics. Codes
+5 and 7 are named for their steps rather than for rsync, keeping their numbers. A
+destination table publishes the asymmetry. The host-tool contract is recorded in
+four groups with the inventory method beside it, and the script header points at
+it.
+
+**What round 2 corrected.**
+
+The inventory method's exclusion step named only shell builtins. Applied
+literally it would have published the installer's own helper functions as host
+requirements: twelve functions the script defines, and six more it sources from
+`echos`, including `task`, `info`, `ok`, `warning`, `error` and `fatal`. That is
+not a theoretical gap. `info` is GNU texinfo's reader and `error` exists on many
+distributions, so a re-auditor following the published method on such a host
+would have found them resolvable and published at least one as mandatory. The
+step now excludes every function the installer defines or sources, and its
+example names `task` and `fatal` so the intent is unmistakable. The final
+confirmation step was also widened from a single host to both supported targets,
+covering the relied-on GNU behaviours rather than just the program names.
+
+The behaviour table generalized a measured result. M2 measured a FIFO, and the
+row read `FIFO or other special file`, which asserts rsync's behaviour for
+sockets, block and character devices that nothing measured. That is the same
+error the harness reviews removed twice from the engine assertions: a claim wider
+than its evidence. There are now two rows, the measured FIFO one and an honest
+`depends on rsync's handling of that type` for the rest, while the fallback
+column stays a single refusal because the fallback refuses on the type test
+rather than on the type's semantics.
+
+**What round 1 corrected**, retained here because both rounds repaired the same
+document. The host-tool contract listed ten mandatory programs and should have
+listed twenty; parity was claimed without the fresh-prefix qualifier the design
+settles; and one directory row conflated rsync's empty-directory and
+populated-directory behaviours.
+
+**Nothing executable was touched by any of it.** No installer code, no harness
+code, no case outcome, so the 56 and 47 confirmation runs remain current evidence
+for the staged state.
+
+### Change summary for step 4 rsync-cp-fallback round 3
+
+Staged paths in this repository:
+
+- `src/setups/env/bin/install_pkg.sh`, 622 to 625 lines, digest `591e2db0`.
+  Three comment lines; no executable change; untouched by both review rounds.
+- `wiki/reference/relocation-tools.md`, carrying five repairs across two rounds.
+- `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`.
+- `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`, this transcript.
+
+Two neighbouring wiki pages were inspected and deliberately not edited:
+`exit-codes.md`, which cross-references this page rather than duplicating the
+table, and `tool-contract.md`, which is a different contract.
+
+`a.commit` holds three groups. Membership, order and subjects are unchanged
+across both rounds; only group 1's bullets moved, to describe the corrected
+contract, the scoped parity claim and the narrowed special-file row. That is
+subject accuracy rather than regrouping:
+
+1. `docs(wiki): publish the copy engines and the host-tool contract` --
+   `src/setups/env/bin/install_pkg.sh`, `wiki/reference/relocation-tools.md`
+2. `docs(v0.27.0): record step 4 documentation` --
+   `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`
+3. `docs(v0.27.0): retain the step 4 code review transcript` --
+   `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`
+
+Three groups rather than the five the earlier steps used, because this step
+produces less. The installer edit rides with the wiki: three comment lines whose
+entire content is a pointer to the page the same commit writes.
+
+No capture files are retained. The step 3 captures remain step 3's evidence,
+measuring the step 3 installer; the confirmation runs answered one question and
+are recorded in the validation with their digests and counts.
+
+In the consuming project, one commit refreshed the candidate verification input
+to carry the new installer digest. Its harness copy and its stage variable are
+unchanged, since this step adds no cases and has no suite of its own.
+
+### Writer response for step 4 rsync-cp-fallback round 3
+
+Writer response: Both round 2 repairs are accepted. No disagreement is recorded, and no reviewer
+edit was reversed.
+
+**The method repair is the more serious of the two, and I confirmed it was
+consequential rather than tidy.** The published exclusion step named only shell
+builtins. Running the previous method against the installer shows twelve
+installer-defined functions surviving that filter, plus six sourced from `echos`.
+On this developer host none of them resolves to a program, so a `command -v`
+check would have dropped them silently and the omission would have stayed
+invisible. On a host carrying GNU texinfo, `info` resolves; `error` exists on
+various distributions. A re-auditor following the published method there would
+have found them and published at least one as a mandatory host requirement. The
+method now excludes every function the installer defines or sources.
+
+That is twice now that this page's method has been wrong in a way its own
+argument was written to prevent. Round 1 caught the contract produced with it
+being half missing; round 2 caught the method itself unable to produce the right
+contract on a different host. My verification in round 2 excluded those functions
+and therefore agreed with the corrected list, which is precisely why the gap
+survived: I checked the list against what I did rather than against what I had
+published, and those were not the same procedure.
+
+**The special-file repair is the same error the harness reviews removed twice.**
+The row read `FIFO or other special file` on the strength of a FIFO measurement,
+which asserts rsync's behaviour for sockets and device nodes that nothing
+measured. Splitting it keeps the measured claim and states the rest as unknown.
+The fallback column stays a single refusal, correctly: it refuses on the type
+test, not on the type's semantics, so its behaviour genuinely is uniform across
+those shapes.
+
+**Both repairs verified against the four-part scope evidence**: the plan step,
+the answer's repaired-path inventory, the staged diff, and the implementation
+check. No installer or harness code changed, which the unchanged digests confirm,
+so the 56 and 47 confirmation runs remain current evidence and no rerun is
+needed, as the answer states.
+
+**Round 1's three repairs remain accepted** and are unchanged by this round: the
+complete twenty-program contract, parity scoped to fresh prefixes with the
+populated-prefix divergence stated, and the empty and populated directory rows
+separated.
+
+**One standing note.** Round 1's request text was published before the
+confirmation runs returned and cannot be replaced, so it understates the evidence
+the record now carries. The transcript group in `a.commit` records that sequence.
+
+### Reviewer focus for step 4 rsync-cp-fallback round 3
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-round-3 -->
+
+## Round 3 by reviewer - Step 4
+
+- Recorded: 2026-08-13T21:11:41+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 4
+- Outcome: answer
+
+# Code review answer for rsync-cp-fallback step 4 round 3
+
+## JSON
+
+```json
+{
+  "created_at": "2026-08-13T21:11:41+02:00",
+  "disposition": "convergence-recommended",
+  "document_path": "C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md",
+  "identity": {
+    "family": "code",
+    "slug": "rsync-cp-fallback",
+    "type_token": "code",
+    "version": "v0.27.0"
+  },
+  "implementation_step": "4",
+  "role": "reviewer",
+  "round_number": 3,
+  "umbrella_path": "C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md"
+}
+```
+
+## Review identity for code reviewer step 4 round 3
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+Implementation step: 4
+Review round: 3
+
+## Reviewer assessment for code reviewer step 4 round 3
+
+Step 4 is complete and commit-ready. Both round 2 defects are closed without
+moving executable code or weakening the measured claims.
+
+The host-tool method now describes the procedure that actually reproduces the
+contract: collect command-position tokens, add subprocesses implied by options,
+remove both shell builtins and functions defined or sourced by the installer,
+then verify the resulting programs and GNU behaviours on both supported
+targets. Its mandatory row contains exactly 20 entries, including `cp` and the
+option-implied `gzip`; helper names such as `task`, `info` and `fatal` are no
+longer eligible to become host requirements merely because a host happens to
+provide an executable with the same name.
+
+The destination table now stays inside its evidence. FIFO retains the measured
+rsync result, while other special files explicitly depend on rsync's handling
+of their actual type. The fallback refusal remains common because its
+non-following type check applies before copying. The round 1 corrections also
+remain intact: parity is scoped to fresh prefixes, populated-prefix behaviour
+is stated per engine, and empty and populated root-file directories have
+separate rows.
+
+## Evidence checked for code reviewer step 4 round 3
+
+- The exact Step 4 plan requires an engine-neutral description, unchanged exit
+  codes, `gzip` in the host contract and a method covering direct commands plus
+  subprocesses implied by options. The staged wiki satisfies each criterion.
+- The mandatory program row contains exactly 20 distinct names:
+  `basename`, `chmod`, `cp`, `cut`, `dirname`, `find`, `grep`, `gzip`, `head`,
+  `ln`, `mkdir`, `od`, `readlink`, `rm`, `sed`, `sort`, `tar`, `touch`, `tr`
+  and `xargs`.
+- `install_pkg.sh` is 625 lines and hashes to `591e2db0...`; its staged change
+  is comment-only. The verification harness has no staged or unstaged diff.
+  The two `rsync -av` calls remain present and byte-identical, and no
+  `Rsync (` section label remains.
+- The validation record starts its Step 4 analysis with the required exact
+  sentence, `Yes. Step 4 has been fully implemented.`, records the 56-case RHEL
+  and 47-case Debian confirmations with zero failures, and leaves the overall
+  effort incomplete because Step 5 has not started.
+- The exit-code reference links to the relocation page rather than duplicating
+  its table; `tool-contract.md` describes a different dispatcher-facing
+  contract. No neighbouring wiki edit is needed.
+- The staged diff is whitespace-clean. The earlier target runs remain current
+  because neither review repair changed the installer or harness.
+
+Architecture remains clean for the scope: this is published documentation plus
+an installer header pointer, with no runtime dependency direction or code path
+changed. There is no new computation or performance cost. No feature or
+reporting capability is impaired. No new case is warranted for a documentation-
+only step; the unchanged Step 3 target suites are the appropriate behavioral
+regression evidence.
+
+## Reviewer repairs for code reviewer step 4 round 3
+
+None. I made no code, documentation, validation or commit-plan edit in this
+round. The repairs already staged by the requestor are correct and complete, so
+there is no substantive or polishing-only repaired path to report.
+
+## Commit grouping for code reviewer step 4 round 3
+
+`a.commit` remains accurate as written:
+
+1. `docs(wiki): publish the copy engines and the host-tool contract` groups the
+   comment pointer with its referent, including the scoped parity statement,
+   destination asymmetry and reproducible inventory method.
+2. `docs(v0.27.0): record step 4 documentation` records the implementation
+   check and target confirmation.
+3. `docs(v0.27.0): retain the step 4 code review transcript` follows the work
+   and its validation.
+
+The membership, order, scope and conventional subjects all match the staged
+work. No amendment is needed, and this review does not authorize a commit.
+
+## Reviewer decision for code reviewer step 4 round 3
+
+Disposition: convergence-recommended. Step 4 is commit-ready. No round 4 is
+needed unless the human selects `Rework and review again`; the owning `Commit`
+action remains behind the review exchange's human confirmation gate.
+
+<!-- review-entry-id: answer-round-3 -->
+
+## Round 3 by human - Step 4
+
+- Recorded: 2026-08-13T21:25:29+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 4
 - Outcome: human-confirmation
 
 Human choice: Commit
