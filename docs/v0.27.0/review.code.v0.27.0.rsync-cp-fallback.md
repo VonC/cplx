@@ -848,3 +848,573 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-4 -->
+
+## Round 1 by requestor - Step 1
+
+- Recorded: 2026-08-12T19:40:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 1
+- Outcome: request
+
+### Review scope for code step 1 round 1
+
+Step 1 of the rsync-cp-fallback plan: resolve the copy engine once, before
+archive discovery, and announce it. No call site changes, so behaviour is
+unchanged on every host. Step 0 is committed and converged; step 1 is staged and
+not committed.
+
+### Requestor report for code step 1 round 1
+
+`select_copy_engine` runs once between prefix resolution and archive discovery.
+rsync is selected when `command -v` resolves it and the override is not exactly
+`1`; the fallback otherwise, and the override never selects rsync. Absence
+selects the fallback, a present rsync that fails does not. One `info` line
+reports the engine with either the resolved rsync path or the reason, and the
+path is what makes the consuming project's `--delete`-ignoring shim visible
+rather than silent. One detection site; both `rsync -av` calls byte-identical;
+505 to 535 lines.
+
+The harness gained `assert_selection`, deliberately a different function from
+`assert_engine`, honouring step 0 round 3's ruling that a selection line must
+never be read as proof of a copy. It requires exactly one trace line, checks the
+engine and detail, and asserts the line precedes archive discovery, which makes
+design Q06 executable. Six cases cover the override matrix the plan names, with
+`yes` and `true` asserted to report rsync rather than a forced fallback, and
+`run_case` now distinguishes an unset override from one set and empty. A
+divergence case asserts that a forced selection of `cp` still operates rsync at
+this step, which is true now, false after step 2, and therefore what step 2 shows
+a transition against.
+
+Cases first, and seen to fail: against the pre-change installer all six selection
+assertions failed with `SELECTION: no 'Copy engine:' line`, none passing
+vacuously. Against the implemented installer, 24 cases and zero failures on the
+developer host; with a stand-in rsync the trace reports the shim's own path.
+
+### The blocking question for code step 1 round 1
+
+The plan's step 1 completion criterion says the cases pass on both targets, and
+that cannot hold with the Q05 delivery split. RHEL can run this branch's
+installer via `--installer`. The Debian agent measures the installer from the
+published archive, which has no engine selection, so the six cases would fail
+there for a correct reason until a fixed installer is published, which is step
+5's business. Three options are laid out in the request; none was taken
+unilaterally, and the consolidated plan was not edited. No target capture is
+retained for step 1, and the validation plan says `Partly`.
+
+Five points flagged as least certain: the trace text is now a contract nothing
+outside this review records as load-bearing; the line budget is +30 against an
+advisory +15 to +25, the overage being the comment that protects the shim-visible
+path; the override is defaulted at the top so the script can no longer tell unset
+from empty internally; the divergence case has no Debian coverage and never will;
+and four of the six override cases are the same assertion.
+
+<!-- review-entry-id: request-round-1 -->
+
+## Round 1 by reviewer - Step 1
+
+- Recorded: 2026-08-12T18:00:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 1
+- Outcome: answer
+
+### Reviewer assessment for code reviewer step 1 round 1
+
+The installer change itself is sound. `select_copy_engine` has one call between
+prefix resolution and archive discovery, one `command -v rsync` detection site,
+and the exact override semantics the design settled. Both transfer invocations
+are untouched. Announcing the path returned by `command -v` is sufficient: the
+decision is about what the shell will resolve, and probing the executable or its
+version would introduce a second policy the design does not ask for.
+
+The +30 line delta is acceptable against an advisory +15 to +25. The executable
+change is small; the excess is the explanation that makes the resolved path and
+selection/action distinction maintainable. Defaulting the override to empty is
+also acceptable because unset and empty intentionally have identical selection
+semantics even though the harness proves both caller forms.
+
+The harness correctly separates `assert_selection` from `assert_engine`. No
+selection result is passed to the operation assertion, and the forced case
+positively records the temporary divergence: cp selected, rsync still operated.
+That is the right transition case. Step 2 should change its expected operation
+and post-state, not quietly delete it.
+
+Step 1 is not yet commit-ready because its target gate cannot currently run the
+candidate on either supported target, and the new ordering oracle has a vacuous
+success path.
+
+### Findings for code reviewer step 1 round 1
+
+#### 1. The Step 0 identity refusal still rejects the Step 1 candidate
+
+The request says RHEL can produce target evidence by passing this branch's
+installer to `--installer`. The current harness cannot do that. Its combination
+logic still refuses every installer containing `CPLX_INSTALL_PKG_FORCE_CP` on a
+supported target, regardless of `--step`. This candidate contains that token, so
+RHEL and Debian both stop at the target-identity preflight before any Step 1 case.
+The successful developer run does not expose this because an unsupported host is
+explicitly treated as a self-test rather than target evidence.
+
+Advance the identity gate with the suite. At `--step 0`, retain the existing
+refusal of a fallback-capable installer. At `--step 1`, permit the candidate on
+the two valid host shapes—RHEL with rsync and Debian without rsync—and label the
+run as a **Step 1 candidate selection suite**, not D-fb or R-fb. A single Step 1
+run deliberately contains several selections and, on RHEL, the forced-selection
+divergence, so it is not one engine matrix cell. Continue refusing a global
+forced override and impossible host/tool shapes.
+
+This evolution also gives later steps an explicit place to define their own
+identity contract instead of inheriting Step 0's rules accidentally.
+
+#### 2. Selection ordering passes when discovery evidence is absent
+
+`assert_selection` claims the announcement occurred before archive discovery,
+but it compares positions only when `Searching for latest` exists. If that marker
+is absent, it emits the same passing message—“announced before discovery”—without
+evidence of the event it ordered against. Both target copies would share that
+false-positive path.
+
+Require exactly one archive-discovery marker before comparing line numbers and
+fail clearly when it is missing. Add a permanent negative control using a
+synthetic trace without that marker and require the specific `SELECTION`
+refusal. Retain the control on both targets. The ordinary cases then prove the
+positive ordering against the real installer; the control proves the oracle
+cannot infer ordering from absence.
+
+### Ruling on target evidence and Q05
+
+Keep the literal completion criterion: Step 1 cases must pass on both targets.
+Choose option 2, but treat the candidate installer as a fingerprinted
+**verification input**, not as a second delivered installer.
+
+The Debian verification stage should continue to use the published installer
+for its Step 0 baseline. Add a separate Step 1 invocation whose `--installer`
+points to an ephemeral or explicitly verification-only copy of this candidate.
+The capture must print the candidate digest, and the review must reproduce that
+it equals the staged cplx installer byte for byte. The copy must not replace
+`$PREFIX/bootstrap/bin/install_pkg.sh`, enter the package/archive input, or be
+used by a deployment step. If Jenkins requires the input to be committed in the
+consuming repository, keep it in a non-packaged verification location and name
+that temporary duplication honestly in the commit.
+
+This does not pull delivery forward. Step 1 proves that the candidate's shell
+selection logic works under Debian and RHEL semantics; Step 5 still proves that
+the fixed installer is actually delivered through the published archive. An
+interim archive would conflate those two obligations, while weakening “both
+targets” would discard the compatibility evidence the criterion exists to
+obtain. No plan amendment is needed.
+
+Retain one sanitized Step 1 capture per target. Each must identify the candidate
+installer and harness body, exercise the six selection forms, and show the
+appropriate operation result: RHEL's forced cp selection still operates rsync;
+Debian's selections occur before the unchanged rsync site fails with no engine
+operating. These are selection-suite identities, not acceptance matrix cells.
+
+### Answers to the requestor's remaining questions
+
+The trace text is now intentionally load-bearing inside this effort. The exact
+`Copy engine:` contract is recorded in the validation plan and exercised by the
+harness; a wording change should fail the cases rather than be made invisible by
+a loose parser.
+
+Six cases are appropriate even though five share a branch. The requirement is
+not merely boolean truth: `yes`, `true`, `0`, empty and unset are distinct inputs
+whose fail-safe interpretation is part of the interface.
+
+The consuming-project harness copy should be committed only after its body is
+again proved equal below the marker and its Step 1 stage uses the candidate
+verification input described above. Its normal Step 0 published-installer stage
+should remain intact.
+
+### Required rework for code reviewer step 1 round 1
+
+1. Make target identity step-aware so the Step 1 candidate suite can run on
+   RHEL-with-rsync and Debian-without-rsync without claiming a fallback cell.
+2. Make the archive-discovery marker mandatory in `assert_selection` and add a
+   retained negative control for the missing-marker path.
+3. Supply the candidate installer to a separate Debian Step 1 verification run,
+   fingerprint it against the staged cplx source, and keep it outside delivery.
+4. Run and retain Step 1 evidence on both targets, update the validation result
+   from those captures, and keep both harness bodies synchronized.
+5. Amend `a.commit` for the target evidence and final transcript; identify the
+   consuming-project verification commit separately.
+
+### Commit grouping for code reviewer step 1 round 1
+
+The separation of installer, harness and validation record is correct, but three
+groups are not the final sequence. Once the required evidence exists, use five
+project groups: installer, harness, retained target captures, validation record,
+then review transcript. The consuming-project harness/candidate-stage work
+remains its own identified commit. Do not run the prepared groups while the
+validation result is `Partly`.
+
+### Reviewer decision for code reviewer step 1 round 1
+
+Disposition: changes-requested. The engine selector and its selection/operation
+separation are correct, but the supported targets currently refuse the candidate
+before the suite, the ordering assertion can pass without discovery evidence,
+and the plan-required two-target captures do not exist. Apply the five bounded
+items above and publish code review round 2.
+
+<!-- review-entry-id: answer-round-1 -->
+
+## Round 2 by requestor - Step 1
+
+- Recorded: 2026-08-12T20:15:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 1
+- Outcome: request
+
+### Review scope for code step 1 round 2
+
+Step 1 of the rsync-cp-fallback plan after round 1's changes-requested: all five
+required reworks applied, and the cases now pass on both supported targets. Still
+not committed.
+
+### Requestor report for code step 1 round 2
+
+The identity gate advances with the suite. Step 0 still refuses a fallback-capable
+installer; step 1 admits the candidate on RHEL-with-rsync and Debian-without-rsync
+and labels the run `step1-candidate/...`, never a matrix cell. A global forced
+override and impossible host shapes stay refused at every step. The finding was
+the requestor's own defect: step 0's round 4 hardening rejected any installer
+carrying the override token, which was right while nothing could witness a
+fallback, and the developer host reported self-test either way, so a green local
+run said nothing about it.
+
+`assert_selection` now requires exactly one archive discovery marker and fails
+clearly when it is absent, instead of reporting an ordering it never established.
+`control selection-ordering` feeds it a synthetic trace with a well-formed
+selection line and no marker, and both target captures retain it refusing.
+
+The Debian route is the ruled one: `tools/install_pkg.candidate.verification-only
+.sh`, digest `b78511b9` equal to the staged cplx installer byte for byte,
+exercised by a separate stage. The Step 0 stage is untouched and still measures
+the published installer; `tools/` is not packaged; nothing replaces the bootstrap
+installer and no deployment step reads the copy.
+
+Evidence: RHEL 9.8, 31 cases, 0 failures, with only `1` selecting cp and the
+divergence case recording that rsync still operated. Debian agent, build 39, 25
+cases, 0 failures, where every selection is cp because rsync is absent and the six
+cases establish the reason attached to each, so a truthy-looking value is not
+reported as forced on the target where the fallback matters most. Both report
+`body: 9507f1a2` from two different files.
+
+Two incidental confirmations: the RHEL step 1 run exercises the whole step 0
+baseline against the candidate at exit 0, testing the no-behaviour-change claim
+rather than asserting it; and build 39 regenerated the Debian step 0 capture at 12
+cases, confirming the harness changes were confined to step 1. The committed step
+0 captures were not replaced with that regeneration, since each records the body
+that produced it, and the reviewer is asked whether that is right.
+
+Four points flagged as least certain: the ordering oracle is only half calibrated,
+since nothing exercises a selection line emitted after discovery; the step-aware
+identity is a fork that will not stay readable at four steps; five of the six
+Debian selection cases take one branch and are kept for their reason strings; and
+the verification input is a real second copy of the thing under test whose
+deletion at step 5 nothing enforces.
+
+<!-- review-entry-id: request-round-2 -->
+
+## Round 2 by reviewer - Step 1
+
+- Recorded: 2026-08-12T20:20:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 1
+- Outcome: answer
+
+### Reviewer assessment for code reviewer step 1 round 2
+
+The target-identity and transport findings are closed. The identity contract now
+advances with the requested suite without weakening Step 0: `--step 0` still
+refuses a fallback-capable installer, while `--step 1` admits only the two valid
+target shapes and labels them candidate selection suites rather than engine
+matrix cells. Global forcing and impossible host/tool combinations remain
+refused.
+
+The verification-only candidate is also correctly bounded. The consuming
+project's Step 0 stage still measures the published installer; its separate Step
+1 stage points at a non-packaged candidate file, and no deployment step reads or
+installs that file. This proves target compatibility without claiming delivery,
+so Step 5's Q05 obligation remains intact.
+
+I independently reproduced the important identities:
+
+- the staged cplx installer and consuming-project candidate both hash to
+  `b78511b9...` byte for byte;
+- the two harness bodies are byte-identical from their marker through EOF and
+  hash to `9507f1a2...`;
+- the consuming project is clean at `e0aa80ff`;
+- the RHEL capture reports 31 cases and the Debian capture 25, with zero
+  failures, the stated candidate digest and the expected selection reasons;
+- the staged diff is whitespace-clean.
+
+The RHEL divergence assertion is exactly the right transition marker. Step 2
+must change its expected operation and post-state rather than remove it. The
+Debian cases are not redundant: they distinguish a forced reason from absence
+for five distinct non-forcing inputs on the host where rsync is unavailable.
+
+One small but load-bearing calibration gap remains, so Step 1 is not yet
+commit-ready.
+
+### Finding for code reviewer step 1 round 2
+
+#### The ordering control does not exercise incorrect ordering
+
+The new `control selection-ordering` proves that `assert_selection` refuses a
+trace with no discovery marker. That closes round 1's vacuous-absence path, but
+it calibrates marker presence rather than the ordering comparison itself. The
+branch that implements Q06—`sel_at >= disc_at` must fail—has never executed.
+
+The six real cases prove that a correctly ordered trace passes. They cannot show
+that an incorrectly ordered trace is rejected. Since “selection before archive
+discovery” is the guarantee this Step adds, leaving its only rejection branch to
+code inspection would be the assurance class plan Q07 explicitly treats as a
+complement, not a replacement, for instrumented controls.
+
+Extend the existing control with a second synthetic trace containing exactly one
+discovery marker followed by exactly one otherwise-valid selection line. Require
+the specific `SELECTION: trace at line ... not before archive discovery` refusal.
+This can be a second named control or two assertions under a clearly composite
+ordering control; either way, each failure reason must be checked independently
+and count honestly.
+
+Because that changes the shared harness body, synchronize the consuming copy and
+regenerate both retained Step 1 captures. With one additional control assertion,
+the expected totals are 32 on RHEL and 26 on Debian, unless the chosen composite
+reporting deliberately preserves a different honest count.
+
+### Rulings on the requestor's other questions
+
+#### Keep the committed Step 0 captures unchanged
+
+Do not replace them with build 39's regeneration. A retained capture is evidence
+from the exact harness body and installer fingerprint it records, not a rolling
+snapshot that must match the newest harness. Replacing converged Step 0 evidence
+would erase the direct artifact reviewed and committed for that step.
+
+The cumulative Step 1 captures already provide the useful regression evidence
+against the candidate. Build 39's successful published-installer Step 0 rerun is
+additional operational confirmation, but it need not displace or duplicate the
+committed record.
+
+#### The step-aware fork is acceptable at Step 1
+
+Two explicit suite contracts are clearer than a generic identity that would
+again overclaim. Before Step 2 evidence is taken, its implementation must extend
+the dispatch and identity rules together and give the new run an identity that
+matches what its operation cases witness. That is later-step work, not a reason
+to introduce an abstraction now.
+
+#### The temporary candidate-copy obligation is sufficiently recorded
+
+The verification-only filename, Jenkins-stage comments, validation record and
+consuming-project commit all state that the duplicate must disappear when Step 5
+delivers the fixed installer. No additional Step 1 mechanism can enforce a
+future deletion without coupling this implementation to delivery prematurely;
+Step 5 review should treat its removal as an explicit cleanup check.
+
+### Required rework for code reviewer step 1 round 2
+
+1. Add a synthetic out-of-order trace and require the ordering-comparison
+   refusal independently of the missing-marker refusal.
+2. Keep both harness bodies synchronized and regenerate both Step 1 target
+   captures against the resulting body.
+3. Update the validation record, measured counts, consuming-project commit
+   provenance and five-group `a.commit` from those captures.
+
+No installer change is requested. Do not regenerate or replace the committed
+Step 0 captures.
+
+### Commit grouping for code reviewer step 1 round 2
+
+The five-group structure is correct: installer, harness, Step 1 target captures,
+validation record, then transcript. Keep that structure, but do not run it until
+the ordering control and regenerated evidence are present. The synchronized
+consuming-project harness update remains a separate identified commit; the
+candidate installer itself should remain byte-identical to the staged cplx
+source.
+
+### Reviewer decision for code reviewer step 1 round 2
+
+Disposition: changes-requested. The implementation, target identities,
+verification-only transport and two-target behavioral evidence are sound, but
+the load-bearing ordering oracle is only half calibrated. Add the one bounded
+negative path above, regenerate the two captures, and publish code review round
+3.
+
+<!-- review-entry-id: answer-round-2 -->
+
+## Round 3 by requestor - Step 1
+
+- Recorded: 2026-08-12T21:30:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 1
+- Outcome: request
+
+### Review scope for code step 1 round 3
+
+Step 1 of the rsync-cp-fallback plan after round 2's single finding: the ordering
+oracle is now calibrated on both sides, and both target captures are regenerated
+at the predicted counts. Still not committed.
+
+### Requestor report for code step 1 round 3
+
+Two named ordering controls rather than one composite, so each failure reason is
+checked independently and each counts once. `control selection-no-discovery`
+feeds a well-formed selection line with no archive discovery marker and requires
+refusal on the marker, which is the control that already existed and calibrates
+marker presence. `control selection-out-of-order` feeds exactly one discovery
+marker followed by one otherwise-valid selection line and requires refusal on the
+comparison, which is the branch implementing Q06 and had never executed: the six
+real cases only exercise the passing path, and no installer emits a wrongly
+ordered trace. Both retained on both targets, both refusing for their own reason.
+
+The installer is untouched this round: 535 lines, one detection site, both
+`rsync -av` call sites byte-identical, and the consuming-project candidate still
+hashes `b78511b9`, equal to the staged source.
+
+Evidence: RHEL 9.8, `step1-candidate/RHEL/rsync`, 32 cases, 0 failures. Debian
+agent, `step1-candidate/Debian/no-rsync`, Jenkins build 40, 26 cases, 0 failures.
+Both report `body: 65451888` from two different files. Build 40's step 0 stage
+regenerated its capture at 12 cases against the published installer, confirming
+the new control landed in the step 1 suite and nowhere else; per the ruling that
+is a cross-check and the committed step 0 captures are unchanged. The
+consuming-project harness sync is committed as `7852d0c0`, the candidate file and
+Step 1 stage having come in with `e0aa80ff`.
+
+Four points flagged as least certain, all of them standing obligations rather
+than defects: the step-aware identity fork depends on step 2 extending dispatch
+and identity together, which lives in a comment rather than in enforced code; the
+divergence case must be re-pointed at step 2 rather than deleted, and nothing
+notices a deletion; five of the six Debian selection cases still take one branch
+and earn their place through the reason string; and the verification input's
+deletion at step 5 is recorded in three places but enforced by none.
+
+<!-- review-entry-id: request-round-3 -->
+
+## Round 3 by reviewer - Step 1
+
+- Recorded: 2026-08-13T07:40:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 1
+- Outcome: answer
+
+### Reviewer assessment for code reviewer step 1 round 3
+
+The final calibration finding is closed. The two ordering controls are better as
+separate named cases than as a composite: one proves that the oracle refuses an
+absent discovery marker, and the other proves that it refuses an actual reversed
+ordering. Each demands its own diagnostic prefix and increments the evidence
+count independently, so neither branch can satisfy the other by accident.
+
+The ordinary six selection cases provide the matching positive side: exactly one
+selection and discovery marker, the expected engine and reason, and selection
+strictly before discovery. Together, the positive cases and two controls cover
+presence, cardinality and both outcomes of the ordering comparison. I found no
+remaining Step 1 case that can pass without exercising the property it reports.
+
+The accumulated later-step obligations do not make Step 1 incomplete. They are
+deliberately visible transition constraints:
+
+- Step 2 must extend dispatch and target identity together because its suite
+  will witness a different operation contract.
+- Step 2 must re-point `step1 forced still operates rsync` to its new expected
+  operation/post-state rather than delete the transition marker.
+- Step 5 must remove the consuming project's verification-only candidate when
+  delivered-installer evidence supersedes it.
+
+None can be enforced inside Step 1 without implementing later steps early. Each
+is recorded in code comments, validation history and review, and each future
+change will expose the relevant files to its step review. That is sufficient
+discipline for this plan; no new framework is warranted.
+
+### Evidence checked for code reviewer step 1 round 3
+
+I independently reproduced the retained identities and structural checks:
+
+- The staged installer and consuming-project verification candidate are
+  byte-identical at `b78511b9...`; the installer remains 535 lines.
+- The cplx and consuming-project harness bodies are byte-identical from the
+  shared marker through EOF at `65451888...`.
+- The RHEL capture reports 32 cases and zero failures, including both ordering
+  controls, all six selection forms, and the forced cp selection while rsync
+  still operates.
+- The Debian capture reports 26 cases and zero failures, including both ordering
+  controls and the distinct forced-versus-absence reasons.
+- The consuming project is clean at `7852d0c0`; that commit changes only the
+  synchronized harness body.
+- The installer and both harness copies pass `bash -n`; staged and unstaged
+  diffs pass `git diff --check`.
+- There remains one `command -v rsync` detection site and the two original
+  `rsync -av` invocations remain present and unmodified.
+
+These captures support the validation plan's `Yes`. Build 40's Step 0 rerun is
+properly kept as a cross-check only. The committed Step 0 captures remain the
+immutable artifacts reviewed with the harness body and installer fingerprints
+they record.
+
+### Rulings on the requestor's questions
+
+Splitting the controls loses nothing a composite would preserve. A composite
+would either hide two refusal reasons behind one count or require internal
+accounting equivalent to the two named controls. The present form is easier to
+audit in both raw captures.
+
+The Step 1 suite now distinguishes selection from operation throughout. On RHEL,
+the forced case asserts both facts separately and demonstrates their temporary
+divergence. On Debian, successful selection assertions coexist with exit 5 and
+the unchanged no-engine baseline rather than claiming fallback execution. No
+trace string is being promoted into proof of copying.
+
+The six Debian cases remain justified despite sharing an engine result. Their
+interface claims differ in the caller input and reason string, and those are
+exactly what the target evidence verifies.
+
+### Commit grouping for code reviewer step 1 round 3
+
+The five-group `a.commit` is correctly scoped and ordered:
+
+1. installer selection and trace;
+2. synchronized Step 1 harness contract;
+3. retained RHEL and Debian Step 1 captures;
+4. validation record supported by those captures;
+5. the complete code-review transcript.
+
+The measured 535/965 line counts, 32/26 cases, target fingerprints and
+consuming-project provenance match the staged artifacts. The consuming-project
+commits `e0aa80ff` and `7852d0c0` are correctly identified separately. No commit
+message amendment is required before running the sequence.
+
+### Reviewer decision for code reviewer step 1 round 3
+
+Disposition: convergence-recommended. Step 1 is complete and correct, both
+target captures support the validation plan's `Yes`, and the five-group commit
+sequence is sound. Recommend **commit-ready**, not code review round 4.
+
+<!-- review-entry-id: answer-round-3 -->
+
+## Round 3 by human - Step 1
+
+- Recorded: 2026-08-13T08:00:55+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 1
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-3 -->
