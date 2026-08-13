@@ -216,6 +216,51 @@ clear_pycache() {
     ok "__pycache__ cleared (bytecode is regenerated on first import)."
 }
 
+# The mirror's delete semantics without rsync, for the only case this script
+# uses: a whole tree onto a whole tree. Emptying the destination content then
+# copying the source content is equivalent for that case; no partial-tree,
+# filter or exclusion behaviour is in scope, because no call site uses one.
+mirror_tree_cp() {
+    local src="$1" dst="$2"
+
+    # The boundary, applied before anything is removed, because this delete is
+    # recursive and unbounded if pointed at the wrong place. -L is tested first
+    # and no test here follows a link: a symlink of any kind is refused,
+    # including a symlink to a directory, the shape measured to make the rsync
+    # path empty an EXTERNAL target and still return 0. The new engine is the
+    # stricter one.
+    if [ -L "$dst" ]; then
+        fatal "Error: mirror step (engine cp): destination '$dst' is a symlink; refusing to empty it." 5
+    fi
+    if [ -e "$dst" ] && [ ! -d "$dst" ]; then
+        fatal "Error: mirror step (engine cp): destination '$dst' is not a directory." 5
+    fi
+
+    task "Mirror engine cp: emptying and copying into '$dst'..."
+    if [ -e "$dst" ]; then
+        # The content, not the directory itself, so the directory object and any
+        # mount-point boundary on it are retained. This says nothing about its
+        # metadata: the copy form below deliberately gives the transfer root the
+        # source's attributes, so no ACL on the destination is preserved, and
+        # ACLs are outside the parity manifest either way.
+        if ! find "$dst" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; then
+            fatal "Error: mirror step (engine cp): could not empty '$dst'." 5
+        fi
+    elif ! mkdir -p -- "$dst"; then
+        fatal "Error: mirror step (engine cp): could not create '$dst'." 5
+    fi
+
+    # `src/.` is load-bearing: it gives the transfer root the source mode and
+    # mtime, matching the other engine's treatment of its transfer root, and it
+    # carries hidden entries without depending on the caller's globbing. Both
+    # trees hold hidden entries, and skipping them would leave stale hidden
+    # files behind on a redeployment.
+    if ! cp -a "$src/." "$dst/"; then
+        fatal "Error: mirror step (engine cp): copy into '$dst' failed." 5
+    fi
+    ok "Mirror complete (engine cp)."
+}
+
 find_patchelf() {
     local candidate
     for candidate in "$INSTALL_PREFIX/tools/bin/patchelf" "$HOME/tools/bin/patchelf"; do
@@ -478,11 +523,15 @@ if [ ! -d "$SOURCE_PATH" ]; then
 fi
 
 task "Syncing to $DEST_PATH (Mirror Mode)..."
-# -a: Archive mode (perms, times, etc.)
-# -v: Verbose
-# --delete: Delete files in DEST that are not in SOURCE
-if ! rsync -av --delete "$SOURCE_PATH/" "$DEST_PATH/"; then
-    fatal "Error: Rsync (main) failed." 5
+if [ "$COPY_ENGINE" = "rsync" ]; then
+    # -a: Archive mode (perms, times, etc.)
+    # -v: Verbose
+    # --delete: Delete files in DEST that are not in SOURCE
+    if ! rsync -av --delete "$SOURCE_PATH/" "$DEST_PATH/"; then
+        fatal "Error: mirror step (engine rsync) failed." 5
+    fi
+else
+    mirror_tree_cp "$SOURCE_PATH" "$DEST_PATH"
 fi
 fix_home_symlink_targets "$DEST_PATH"
 
