@@ -1801,3 +1801,837 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 3
+
+- Recorded: 2026-08-13T13:40:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 3
+- Outcome: request
+
+### Review scope for code step 3 round 1
+
+Step 3 branches the root-file deploy on the engine verdict and gives the fallback
+a non-following preflight. It is the step at which a host without rsync installs
+end to end, so it is where the Q19 defect is fully removed. Steps 0 to 2 are
+committed and converged; step 3 is staged, not committed, target evidence not in.
+
+### Requestor report for code step 3 round 1
+
+`deploy_root_file_cp` is deliberately a separate helper from the mirror's,
+sharing only the engine verdict, because this operation has no delete semantics
+and neither site's rules should be reachable from the other. Its preflight is a
+safety rule: M2 measured two hazards belonging to this engine, following a
+symlink to a regular file to overwrite an external target while returning 0, and
+blocking on a FIFO. The observation therefore does not follow links, `-L` first,
+which is load-bearing rather than stylistic. Two shapes are accepted, absent and
+real regular file; everything else is refused at exit 7 before `cp` runs, which
+is what stops the block. The copy is `cp -a --remove-destination`, defence in
+depth with no concurrency claim. All three plan grep checks are exact, and the
+`Rsync \(` check caught a section comment step 2 had left naming rsync for a
+mirror it had already made engine-neutral.
+
+The three obligations step 2 handed over are discharged. `baseline no-rsync
+mirror` has now moved twice and reaches exit 0 here, each move re-pointing the
+same assertion rather than replacing it. The cp-marker precedence stayed
+mirror-scoped by construction, since the new site emits a distinct marker. The
+consuming project's STEP is advanced.
+
+A latent harness defect was found and fixed: `run_case` left `CASE_LOG` and
+`CASE_EXIT` holding the previous case's values when a case failed before running
+the installer, so every trace-reading assertion after such a case could assert
+against the wrong run and pass. Both are cleared on entry and both assertions now
+refuse an empty log. Reachable on any host; it surfaced here because this one
+cannot build a symlink fixture.
+
+Cases first, and seen to fail: eighteen assertions failed against the pre-change
+installer, none vacuously. On the developer host 47 cases run and every remaining
+failure traces to the verified inability to create symlinks, which blocks the
+canary and the symlink-to-regular-file refusal.
+
+Five points flagged as least certain, the first most serious: the step's central
+case, the symlink refusal preventing measured silent external data loss, has
+never run anywhere, so everything said about it comes from reading the code.
+Then: `mirrored-only` is weak by construction with per-case caller-side sentinels
+carrying the weight; the preflight and copy are separated in time and nothing
+measures that; both refusal shapes are ordinary cases rather than controls; and
+the line budget is +38 against an advisory +20 to +30.
+
+<!-- review-entry-id: request-round-1 -->
+
+## Round 1 by reviewer - Step 3
+
+- Recorded: 2026-08-13T14:20:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 3
+- Outcome: answer
+
+### Reviewer assessment for code reviewer step 3 round 1
+
+The two target runs are enough to answer this round. They close the largest
+evidence gap in the request: on both supported targets the fallback refuses the
+symlink-to-regular-file shape at exit 7, leaves the link in place, and leaves
+the external target byte- and mtime-identical. They also prove the FIFO refusal
+is prompt and non-destructive, the directory shapes are refused, the RHEL rsync
+asymmetry remains, and the Debian no-rsync installation now completes end to
+end.
+
+The installer implementation is structurally correct. `deploy_root_file_cp`
+has the right independent responsibility; its `-L`-first observation does not
+follow links in any branch; its second test accepts only an absent destination
+or a real regular file; and `--remove-destination` is described at the measured
+static strength without a concurrency claim. The two original rsync commands
+remain byte-identical. The +38 line delta is acceptable under the advisory
+budget because the additional comment records the measured reason the ordering
+is load-bearing.
+
+Clearing `CASE_LOG` and `CASE_EXIT` on entry to `run_case` is the right bounded
+fix. The trace-reading functions already take the selected log as an explicit
+argument, and they now refuse the sentinel value when the preceding case did
+not run. Moving all case state into a larger return protocol is not required
+for this step.
+
+Four evidence defects need correction before these runs can be retained and the
+step can converge.
+
+### Findings for code reviewer step 3 round 1
+
+#### 1. Assert the deploy operation from the deploy trace
+
+`step3 accepted engine` currently calls `assert_engine`, whose cp answer reads
+only `Mirror engine cp:`. It does not read `Deploy engine cp:` at all. On RHEL,
+that assertion would therefore pass for the Step 2 behaviour: cp at the mirror,
+then rsync at the root-file site. The installed post-state proves the files were
+deployed, but not that the forced fallback operated at the second site.
+
+Keep `assert_engine` mirror-scoped, as the Step 2 handoff required. Add a
+site-specific deploy-operation assertion (or an equivalently explicit check)
+that reads `Deploy engine cp:` and use it for the accepted-shapes case. The
+archive contains two root files, so the assertion can also require the marker
+count its contract expects rather than accepting an unrelated occurrence.
+
+#### 2. Give Step 3 truthful target identities
+
+The suite tag advances to `step3-candidate`, but both branches select their
+`COMBINATION_NOTE` under `STEP >= 2` and still describe a “step 2 candidate
+suite”. The Debian note is materially contradictory: it says the run dies at
+the root-file site until Step 3, immediately above a capture that completes at
+exit 0.
+
+Make the Step 3 branch explicit. The Debian run now exercises the D-fb matrix
+cell end to end and should say so. The RHEL suite exercises R-rs and R-fb in one
+cumulative run and should name both rather than describe only the Step 2 mirror
+coverage. Keep the per-case operation assertions as the authority for which
+engine actually ran.
+
+#### 3. Correct the case accounting and fixture description
+
+The RHEL output is correctly 56, not the predicted 55. The Step 3 suite has 12
+assertions without rsync and 14 with it; the two RHEL-only assertions are the
+rsync symlink run and its replacement sentinel. The validation record currently
+says 11, 13 and 55, while the Debian total of 47 is already correct. Recount
+after the deploy-operation assertion is finalized and record the actual totals.
+
+The accepted-shapes capture also calls `.env_` “a regular file where a tree is
+expected”. That text comes from reusing the mirror's `dest-file` fixture oracle
+and contradicts the Step 3 case, where a regular file is expected. Make the
+fixture description neutral or split the descriptions so retained evidence
+does not label an accepted shape as erroneous.
+
+#### 4. Retain corrected target captures and update validation
+
+The pasted runs are decisive review evidence, but no Step 3 capture is staged
+in cplx and the validation result still says `Partly`. Because findings 1 to 3
+change the harness body and its output, do not retain these superseded versions.
+Synchronize the corrected harness to the consuming project, rerun the same
+RHEL and Debian commands, retain `verify.step3.rhel.txt` and
+`verify.step3.debian.txt`, and update the validation record to `Yes` with the
+actual counts, installer digest, whole-file harness digests, shared-body digest,
+host/build provenance and consuming-project commit.
+
+No new measurement campaign is requested. The same two target runs are the
+right evidence.
+
+### Commit grouping for code reviewer step 3 round 1
+
+Follow Step 2's five-group shape after round 2 is green: installer, harness,
+retained target captures, validation record, then review transcript. The
+consuming-project synchronization remains its own commit; its current Step 3
+commit is `f21701bd`, and the harness correction should be a separate follow-up
+there so the retained Debian capture names its exact producer.
+
+### Reviewer decision for code reviewer step 3 round 1
+
+Disposition: changes-requested. The production implementation is sound and the
+supplied target runs demonstrate the central safety behaviour, but the harness
+does not yet prove that cp operated at the deploy site, its Step 3 identity text
+is false, its documented RHEL count is wrong, and the corrected captures are
+not retained. Apply the four bounded changes and publish code review round 2.
+
+<!-- review-entry-id: answer-round-1 -->
+
+## Round 2 by requestor - Step 3
+
+- Recorded: 2026-08-13T15:15:23+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 rsync-cp-fallback round 2
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+Implementation step: 3
+Review round: 2
+
+### Requestor assessment for step 3 rsync-cp-fallback round 2
+
+Step 3 is fully implemented, and its cases pass on both supported targets. This
+is the step at which the Q19 defect is gone end to end: a host with no rsync
+installs completely.
+
+**Test evidence.** Two retained target captures, both zero failures.
+`verify.step3.rhel.txt`, identity `step3-candidate/RHEL/rsync`, 56 cases, one
+cumulative run exercising R-rs without the override and R-fb under it at both
+transfer sites. `verify.step3.debian.txt`, identity
+`step3-candidate/Debian/no-rsync`, Jenkins build 45, 47 cases, exercising the
+D-fb cell end to end. Both report installer `f86dba2a` and shared-body digest
+`31f96f70`.
+
+The two cases the developer host could never run both pass on both targets: the
+symlink-to-regular-file refusal, which prevents the measured silent overwrite of
+a file outside the prefix, and the canary. That host cannot create a symlink at
+all, verified directly rather than assumed.
+
+Cases first, and seen to fail: eighteen assertions failed against the pre-change
+installer, with none passing vacuously.
+
+**Static checks.** `bash -n` clean on both harness copies. All three plan grep
+checks exact: `remove-destination` at the deploy site only, `Rsync \(` returns
+nothing, `rsync -av` still shows exactly the two original invocations,
+byte-identical inside their branches.
+
+**Coverage.** The repository has no Python package and no unit tests, so the
+validation replaces coverage with a harness case check. `--step 3` runs 47 cases
+on a no-rsync host and 56 where rsync is present; the step 3 suite contributes 12
+and 14. The two RHEL-only assertions are the rsync symlink run and its
+replacement sentinel.
+
+**Architecture.** Q01 keeps the two transfer sites independent, sharing the
+verdict and nothing else. Both are now branched and each carries only the rules
+its own operation needs: the mirror deletes and has a destructive boundary, the
+deploy does not delete and has none. The two helpers share no code.
+
+**Performance.** One type test and one `cp` per archive root file, on the
+fallback path only, which is two files for a tools archive. No tree traversal is
+added. The refusal is what makes the timing claim: the FIFO is refused before
+`cp` runs, so the engine cannot block, and the watchdog keeps promptly
+falsifiable.
+
+**Feature integrity.** Exit codes keep their numbers, so no caller changes. The
+rsync path is unchanged, including on the shapes where it replaces what the
+fallback refuses, and a case asserts that difference rather than assuming the
+engines agree. The deliberate behaviour change is that a FIFO or symlinked
+root-file destination now fails at exit 7 on the fallback where rsync returns 0;
+on the symlink shape the alternative was overwriting an external file and
+reporting success.
+
+### Implementation report for step 3 rsync-cp-fallback round 2
+
+`deploy_root_file_cp` branches the root-file loop on the engine verdict. It is
+deliberately a separate helper from the mirror's, sharing nothing but the
+verdict, because this operation has no delete semantics: the mirror's destructive
+boundary must not be reachable from here, nor these rules from there.
+
+Its preflight is a safety rule rather than a tidiness one. M2 measured two
+hazards belonging to this engine rather than to a distribution. Onto a
+destination that is a symlink to a regular file, `cp -a` follows the link,
+overwrites the external target and returns 0, so silent data loss is reported as
+success. Onto a FIFO it blocks, so an unattended install waits forever instead of
+failing.
+
+The observation therefore does not follow links, and `-L` is tested first. That
+is load-bearing rather than stylistic: a following predicate would classify a
+symlink to a regular file as an acceptable regular file and preserve the exact
+overwrite the rule removes. Two shapes are accepted, an absent destination and a
+real regular file; everything else is refused at exit 7 before `cp` runs, which
+is what stops the block. The copy is `cp -a --remove-destination`, static defence
+in depth with no concurrency claim attached.
+
+This step owns the exit-7 rewording under Q04-4C, on both engines, with the
+preflight refusals using the same code. The step's own grep check also caught a
+section comment still reading `Rsync (Mirror Mode)` for a mirror that step 2 had
+already made engine-neutral; it now reads `Mirror the tree`.
+
+Round 1 of this review found the accepted-shapes case asserting the wrong site.
+It called `assert_engine`, whose cp answer reads only the mirror's marker, so on
+a host with rsync it would have passed for step 2's behaviour: cp at the mirror,
+rsync at the root-file site. That is precisely the state step 3 exists to move
+past. `assert_deploy_engine` now reads `Deploy engine cp:` and requires the
+marker count the archive implies, two root files, so one stray occurrence cannot
+satisfy it. It was verified to reject rather than merely to pass: run against the
+step 2 installer it fails with "no Deploy engine cp: trace".
+
+Round 1 also corrected three descriptions. Both identity branches previously
+selected their note under `STEP >= 2` and described a step 2 suite, with the
+Debian one claiming the run dies at the root-file site directly above a capture
+that completes at exit 0; step 3 now has its own notes naming D-fb end to end on
+Debian and R-rs plus R-fb on RHEL. The `dest-file` fixture description is neutral,
+so retained evidence no longer labels an accepted root-file destination as an
+erroneous shape. And the case counts are corrected to 12 and 14, totalling 47 and
+56.
+
+A latent harness defect was found while writing these cases and fixed. `run_case`
+left `CASE_LOG` and `CASE_EXIT` holding the previous case's values when a case
+failed before running the installer, so every trace-reading assertion after such
+a case could assert against a different run's log and pass. Both are cleared on
+entry, and both assertions refuse an empty or missing log with a message saying
+the case never ran. This was reachable on any host; it surfaced here only because
+the developer host cannot build a symlink fixture.
+
+The three obligations the step 2 review recorded are discharged.
+`mirrored-not-deployed` is re-pointed: `baseline no-rsync mirror` has now moved
+three times, exit 5 at the mirror at step 0, exit 7 at the root-file site at step
+2, exit 0 here, the same assertion re-pointed each time rather than deleted. The
+cp-marker precedence stayed mirror-scoped without a change, because the new site
+emits a distinct marker, so the obligation is discharged by construction. And the
+consuming project's `STEP` is advanced.
+
+### Change summary for step 3 rsync-cp-fallback round 2
+
+Staged paths in this repository:
+
+- `src/setups/env/bin/install_pkg.sh`, 584 to 622 lines.
+- `docs/v0.27.0/verify.install-pkg.sh`, 1168 to 1409 lines.
+- `docs/v0.27.0/verify.step3.rhel.txt`, new, 56 cases.
+- `docs/v0.27.0/verify.step3.debian.txt`, new, Jenkins build 45, 47 cases.
+- `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`.
+- `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`, this transcript.
+
+`a.commit` groups, the five-group shape steps 1 and 2 settled:
+
+1. `feat(install_pkg): deploy root files without rsync, behind a preflight` --
+   `src/setups/env/bin/install_pkg.sh`
+2. `feat(verify): add the step 3 root-file deploy cases` --
+   `docs/v0.27.0/verify.install-pkg.sh`
+3. `docs(v0.27.0): retain the step 3 deploy captures` --
+   `docs/v0.27.0/verify.step3.rhel.txt`, `docs/v0.27.0/verify.step3.debian.txt`
+4. `docs(v0.27.0): record step 3 implementation` --
+   `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`
+5. `docs(v0.27.0): retain the step 3 code review transcript` --
+   `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`
+
+The installer is separated from the harness so a bisect can tell a defect in the
+change apart from a defect in the thing measuring it, and the captures from the
+record that reads them.
+
+In the consuming project, two commits: `f21701bd` synced the step 3 candidate and
+advanced the stage, and `0b42064b` synced the harness after this review's round
+1. The candidate installer did not change in round 1, so that second commit is
+the harness alone.
+
+### Writer response for step 3 rsync-cp-fallback round 2
+
+Writer response: All four round 1 items are applied, and none is disputed.
+
+**Finding 1, the deploy assertion**, was the serious one and it was the
+requestor's own oversight: the step 2 request had flagged the cp-marker
+precedence as a risk that would become wrong once a second site gained a trace,
+and then step 3 walked into exactly that. `assert_deploy_engine` now reads the
+deploy site's own marker and counts it, and it was checked against the step 2
+installer to confirm it rejects rather than merely passes.
+
+**Finding 2, the identity notes**, is applied. The Debian contradiction was
+material: the note claimed the run dies at the root-file site directly above a
+capture completing at exit 0. Both branches now have step 3 notes, naming D-fb
+end to end on Debian and R-rs with R-fb on RHEL, with the per-case operation
+assertions kept as the authority for which engine ran where.
+
+**Finding 3, counts and fixture wording**, is applied. The RHEL total is 56, not
+the predicted 55; the arithmetic was the requestor's, and the Debian 47 was
+already right. The step 3 suite is 12 and 14. The `dest-file` description is
+neutral now, since one oracle serves the mirror, where a regular file is the
+wrong shape, and the deploy, where it is an accepted one.
+
+**Finding 4, corrected captures**, is applied: the superseded runs were not
+retained, both targets were rerun on the corrected harness, and the validation
+record is `Yes` with the measured counts, digests and provenance.
+
+No disagreement is recorded for this round.
+
+Two things remain flagged rather than fixed, both carried forward from earlier
+rounds with the reviewer's agreement. The refusal shapes are ordinary cases
+rather than negative controls, the same gap ruled acceptable for step 2's
+boundary, and noted again only because this preflight guards a measured hazard.
+And the preflight and the copy are separated in time, which the design accepts
+and forbids claiming otherwise about; `--remove-destination` is defence in depth
+and nothing measures it.
+
+### Reviewer focus for step 3 rsync-cp-fallback round 2
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-round-2 -->
+
+## Round 2 by reviewer - Step 3
+
+- Recorded: 2026-08-13T15:37:37+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 3
+- Outcome: answer
+
+### Reviewer assessment for step 3 rsync-cp-fallback round 2
+
+Round 2 closes all four round 1 findings. The target captures reproduce the
+staged installer digest `f86dba2a`, the two harness copies reproduce the shared
+body `31f96f70`, the RHEL run records 56 cases with zero failures, and the
+Debian run records 47 with zero failures. The corrected deploy assertion reads
+the deploy site's own marker twice; the target identity notes and accepted-file
+fixture are truthful; and the validation record carries the corrected counts and
+provenance.
+
+The production implementation remains complete and correct. The non-following
+preflight, helper separation, exit contract, unchanged rsync calls, architecture,
+constant per-root-file work and feature-integrity conclusions need no repair.
+The repository has no applicable Python unit-test layer; the plan's explicit
+harness substitution supplies the Step 3 executable coverage.
+
+One substantive harness defect remained and has been repaired in this review,
+so this round cannot validly recommend commit-readiness.
+
+### Finding for step 3 rsync-cp-fallback round 2
+
+`assert_deploy_engine` added the needed cp proof, but also exposed an unused
+`rsync` answer. That answer concluded “deploy engine rsync operated” solely
+because no `Deploy engine cp:` marker appeared. Absence of the fallback marker
+proves only that this assertion did not see cp; it does not prove rsync reached
+or operated at the deploy site. This is the same absence-as-operation inference
+the earlier engine review deliberately removed.
+
+The safe repair narrows `assert_deploy_engine` to the only operation it can
+positively witness: cp, with the required marker count. Its sole caller now
+passes only that count. No production code or acceptance behaviour changed.
+Because the shared harness body changed, the current target captures still prove
+the production behaviour but no longer prove the exact harness proposed for
+commit; the same two target runs must be regenerated.
+
+### Repairs made by the reviewer
+
+- **Substantive — `docs/v0.27.0/verify.install-pkg.sh`**: removed the unwitnessed
+  rsync branch from `assert_deploy_engine`, simplified its contract to cp plus
+  expected marker count, and updated its sole caller. The repair is staged.
+- **Substantive record update —
+  `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`**: changed Step 3
+  to the exact required `No. Step 3 has NOT been fully implemented.` status,
+  added the concrete missing-work section, recorded why the existing captures
+  are superseded, and documented the narrowed assertion. The repair is staged.
+- **Polishing-only workflow update — `a.commit`**: retained the five groups and
+  their order, but marked the captures as awaiting replacement, recorded the
+  consuming-project resynchronization obligation, and corrected Group 2's
+  description of the assertion. This ignored workflow file is not staged.
+
+No other path was repaired. In particular,
+`src/setups/env/bin/install_pkg.sh`, the two current capture files, and the
+consuming-project files were inspected but not edited.
+
+### Evidence checked
+
+- `bash -n` passes for the staged installer and repaired cplx harness.
+- The plan's grep checks remain exact: `--remove-destination` occurs only at the
+  deploy site, `Rsync \(` has no match, and the two original `rsync -av`
+  invocations remain.
+- The staged installer hash matches both captures and the consuming-project
+  candidate: `f86dba2a5f65...`.
+- Before this review repair, the cplx and consuming-project harness whole-file
+  hashes match their respective capture headers and their independently
+  reproduced shared-body digest is `31f96f702cc0...`.
+- Both retained runs exercise the previously unavailable symlink fixture, the
+  external content-and-mtime sentinel, prompt FIFO refusal, directory
+  refusals, canary preservation and the deliberate RHEL rsync asymmetry.
+
+### Required round 3 work
+
+1. Synchronize the repaired harness to the consuming project in its own commit.
+2. Rerun `--step 3` on RHEL and Debian and replace both captures. The case totals
+   remain 56 and 47; the harness whole-file and shared-body digests must change
+   and agree with the repaired copies.
+3. Restore the validation sentence to exactly
+   `Yes. Step 3 has been fully implemented.`, remove `Missing work for Step 3`,
+   and update capture/consumer provenance after the replacement evidence passes.
+4. Publish round 3. No new measurement design or production-code change is
+   requested.
+
+### Commit grouping
+
+The five-group membership, order, scope and conventional subjects remain right:
+installer, harness, captures, validation, transcript. `a.commit` was amended
+only because its claim that the captures were current became false after the
+reviewer's substantive harness repair. Do not run it until round 3 replaces the
+captures and restores the validation verdict.
+
+### Reviewer decision for step 3 rsync-cp-fallback round 2
+
+Disposition: changes-requested. Step 3's production code and behaviour are
+sound, but the reviewer made a substantive staged harness repair. Regenerate the
+two captures against that exact body, update validation, and publish round 3.
+
+<!-- review-entry-id: answer-round-2 -->
+
+## Round 3 by requestor - Step 3
+
+- Recorded: 2026-08-13T17:40:36+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 rsync-cp-fallback round 3
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+Implementation step: 3
+Review round: 3
+
+### Requestor assessment for step 3 rsync-cp-fallback round 3
+
+Step 3 is fully implemented, and its cases pass on both supported targets. This
+is the step at which the Q19 defect is gone end to end: a host with no rsync
+installs completely.
+
+**Test evidence.** Two regenerated target captures, both zero failures, both
+taken against the harness body round 2 repaired. `verify.step3.rhel.txt`,
+identity `step3-candidate/RHEL/rsync`, 56 cases, one cumulative run exercising
+R-rs without the override and R-fb under it at both transfer sites.
+`verify.step3.debian.txt`, identity `step3-candidate/Debian/no-rsync`, Jenkins
+build 46, 47 cases, exercising the D-fb cell end to end. Both report installer
+`f86dba2a` and shared-body digest `5e0f4430`.
+
+The counts are identical to the superseded runs and the installer is
+byte-identical across both pairs, so the round 2 repair changed what the harness
+claims and nothing about what the installer does.
+
+The two cases the developer host cannot run pass on both targets: the
+symlink-to-regular-file refusal, which prevents the measured silent overwrite of
+a file outside the prefix, and the canary. That host cannot create a symlink at
+all, verified directly rather than assumed.
+
+Cases first, and seen to fail: eighteen assertions failed against the pre-change
+installer, with none passing vacuously.
+
+**Static checks.** `bash -n` clean on both harness copies. All three plan grep
+checks exact: `remove-destination` at the deploy site only, `Rsync \(` returns
+nothing, `rsync -av` still shows exactly the two original invocations,
+byte-identical inside their branches.
+
+**Coverage.** The repository has no Python package and no unit tests, so the
+validation replaces coverage with a harness case check. `--step 3` runs 47 cases
+on a no-rsync host and 56 where rsync is present; the step 3 suite contributes 12
+and 14. The two RHEL-only assertions are the rsync symlink run and its
+replacement sentinel.
+
+**Architecture.** Q01 keeps the two transfer sites independent, sharing the
+verdict and nothing else. Both are now branched and each carries only the rules
+its own operation needs: the mirror deletes and has a destructive boundary, the
+deploy does not delete and has none. The two helpers share no code.
+
+**Performance.** One type test and one `cp` per archive root file, on the
+fallback path only, which is two files for a tools archive. No tree traversal is
+added. The refusal is what makes the timing claim: the FIFO is refused before
+`cp` runs, so the engine cannot block, and the watchdog keeps promptly
+falsifiable.
+
+**Feature integrity.** Exit codes keep their numbers, so no caller changes. The
+rsync path is unchanged, including on the shapes where it replaces what the
+fallback refuses, and a case asserts that difference rather than assuming the
+engines agree. The deliberate behaviour change is that a FIFO or symlinked
+root-file destination now fails at exit 7 on the fallback where rsync returns 0;
+on the symlink shape the alternative was overwriting an external file and
+reporting success.
+
+### Implementation report for step 3 rsync-cp-fallback round 3
+
+`deploy_root_file_cp` branches the root-file loop on the engine verdict. It is
+deliberately a separate helper from the mirror's, sharing nothing but the
+verdict, because this operation has no delete semantics: the mirror's destructive
+boundary must not be reachable from here, nor these rules from there.
+
+Its preflight is a safety rule rather than a tidiness one. M2 measured two
+hazards belonging to this engine rather than to a distribution. Onto a
+destination that is a symlink to a regular file, `cp -a` follows the link,
+overwrites the external target and returns 0, so silent data loss is reported as
+success. Onto a FIFO it blocks, so an unattended install waits forever instead of
+failing.
+
+The observation therefore does not follow links, and `-L` is tested first. That
+is load-bearing rather than stylistic: a following predicate would classify a
+symlink to a regular file as an acceptable regular file and preserve the exact
+overwrite the rule removes. Two shapes are accepted, an absent destination and a
+real regular file; everything else is refused at exit 7 before `cp` runs, which
+is what stops the block. The copy is `cp -a --remove-destination`, static defence
+in depth with no concurrency claim attached.
+
+This step owns the exit-7 rewording under Q04-4C, on both engines, with the
+preflight refusals using the same code. The step's own grep check also caught a
+section comment still reading `Rsync (Mirror Mode)` for a mirror that step 2 had
+already made engine-neutral; it now reads `Mirror the tree`.
+
+**What round 2 changed, and why it mattered.** `assert_deploy_engine` carried an
+`rsync` answer that concluded rsync had operated at the deploy site purely
+because no `Deploy engine cp:` marker appeared. Absence of the fallback marker
+proves only that the assertion did not see the fallback; it never proved rsync
+reached the site. That is the same absence-as-operation inference an earlier
+review removed from the mirror assertion, reintroduced here in the very function
+written to fix a related conflation, and it survived a reading because nothing
+called it. An unreachable branch is not a harmless one: it is a claim waiting for
+a caller.
+
+The assertion now witnesses only what it can see, cp with its expected marker
+count, and its sole caller passes only that count. No installer code and no
+acceptance behaviour changed, which the identical case counts and the unchanged
+installer digest across both capture pairs confirm.
+
+**What round 1 changed.** The accepted-shapes case had called `assert_engine`,
+whose cp answer reads only the mirror's marker, so on a host with rsync it would
+have passed for step 2's behaviour: cp at the mirror, rsync at the root-file
+site. That is precisely the state step 3 exists to move past.
+`assert_deploy_engine` was added for it, verified to reject rather than merely to
+pass: run against the step 2 installer it fails with "no Deploy engine cp:
+trace". Round 1 also gave step 3 its own target identity notes, since both
+branches had described a step 2 suite and the Debian one claimed the run dies at
+the root-file site directly above a capture completing at exit 0; made the
+`dest-file` fixture description neutral, since one oracle serves the mirror where
+a regular file is the wrong shape and the deploy where it is an accepted one; and
+corrected the case counts to 12 and 14, totalling 47 and 56.
+
+A latent harness defect was found while writing these cases and fixed. `run_case`
+left `CASE_LOG` and `CASE_EXIT` holding the previous case's values when a case
+failed before running the installer, so every trace-reading assertion after such
+a case could assert against a different run's log and pass. Both are cleared on
+entry, and both assertions refuse an empty or missing log with a message saying
+the case never ran. This was reachable on any host; it surfaced here only because
+the developer host cannot build a symlink fixture.
+
+The three obligations the step 2 review recorded are discharged.
+`mirrored-not-deployed` is re-pointed: `baseline no-rsync mirror` has now moved
+three times, exit 5 at the mirror at step 0, exit 7 at the root-file site at step
+2, exit 0 here, the same assertion re-pointed each time rather than deleted. The
+cp-marker precedence stayed mirror-scoped without a change, because the new site
+emits a distinct marker, so the obligation is discharged by construction. And the
+consuming project's step variable is advanced.
+
+### Change summary for step 3 rsync-cp-fallback round 3
+
+Staged paths in this repository:
+
+- `src/setups/env/bin/install_pkg.sh`, 584 to 622 lines, digest `f86dba2a`,
+  untouched by both review rounds.
+- `docs/v0.27.0/verify.install-pkg.sh`, 1168 to 1397 lines, digest `23be347e`,
+  carrying the round 2 repair.
+- `docs/v0.27.0/verify.step3.rhel.txt`, new, 56 cases, regenerated after that
+  repair.
+- `docs/v0.27.0/verify.step3.debian.txt`, new, Jenkins build 46, 47 cases,
+  regenerated after that repair.
+- `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`.
+- `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`, this transcript.
+
+`a.commit` groups, the five-group shape steps 1 and 2 settled and this review
+confirmed. Membership, order and subjects are unchanged from round 2; only the
+capture numbers and provenance in group 3 moved:
+
+1. `feat(install_pkg): deploy root files without rsync, behind a preflight` --
+   `src/setups/env/bin/install_pkg.sh`
+2. `feat(verify): add the step 3 root-file deploy cases` --
+   `docs/v0.27.0/verify.install-pkg.sh`
+3. `docs(v0.27.0): retain the step 3 deploy captures` --
+   `docs/v0.27.0/verify.step3.rhel.txt`, `docs/v0.27.0/verify.step3.debian.txt`
+4. `docs(v0.27.0): record step 3 implementation` --
+   `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`
+5. `docs(v0.27.0): retain the step 3 code review transcript` --
+   `docs/v0.27.0/review.code.v0.27.0.rsync-cp-fallback.md`
+
+Group 2's bullet was amended to record that the deploy assertion exposes only cp,
+since absence of that marker cannot prove rsync operated. That is a subject
+accuracy correction, not a regrouping.
+
+In the consuming project, three commits: `f21701bd` synced the step 3 candidate
+and advanced its stage variable, `0b42064b` synced the harness after review round
+1, and `06a74dd3` synced the round 2 repair. The candidate installer has not
+changed since `f21701bd`, because neither review round touched installer code.
+
+### Writer response for step 3 rsync-cp-fallback round 3
+
+Writer response: Round 2's repair is accepted in full. No disagreement is recorded, and no
+reviewer edit was reversed.
+
+**The finding was correct and the defect was the requestor's.** The step 2
+request had itself flagged that the cp-marker precedence would become wrong once
+a second site gained a trace. Step 3 then added that second site and, in the
+function written specifically to keep the two sites separately checkable,
+introduced an `rsync` answer that inferred operation from the absence of the cp
+marker. That is the identical inference an earlier review removed from the mirror
+assertion. It survived a reading because nothing called it, which is the lesson
+worth keeping: an unreachable branch is a claim waiting for a caller, not dead
+weight.
+
+**Each repair was verified rather than trusted**, against the plan step, the
+answer's repaired-path inventory, the staged diff and the implementation check:
+
+- The narrowed assertion witnesses only cp with its marker count, and its sole
+  caller passes only the count. No `deploy engine rsync` answer remains anywhere.
+- `bash -n` is clean and the three plan grep checks are still exact.
+- `src/setups/env/bin/install_pkg.sh` is untouched by the reviewer, and its
+  digest `f86dba2a` is the same one both the superseded and the replacement
+  captures record, so production behaviour was never in question.
+- The record repair correctly set the step to not fully implemented while the
+  captures were stale.
+
+**The three missing-work items are discharged**, and recorded as such rather than
+deleted: the narrowed assertion was synchronized to the consuming project, whose
+shared body is byte-identical again at `5e0f4430`; both targets were rerun
+against that exact body; and the step returns to `Yes` only now, on captures that
+measure the harness proposed for commit.
+
+**On `a.commit`**: membership, order and subjects were already correct and are
+unchanged. The reviewer's amendment marked the captures as awaiting replacement
+and corrected group 2's description of the assertion. The first is now obsolete
+and has been updated to the measured numbers; the second is kept, since it
+describes the assertion accurately.
+
+**Accepted earlier feedback still standing.** Round 1's four items remain applied:
+the deploy-site assertion, step 3's own identity notes, the neutral fixture
+description, and the corrected counts of 12, 14, 47 and 56.
+
+Two limits stay flagged rather than fixed, both with the reviewer's agreement
+from step 2. The refusal shapes are ordinary cases rather than negative controls,
+the same gap ruled acceptable for the mirror boundary, noted again only because
+this preflight guards a measured hazard. And the preflight and the copy are
+separated in time, which the design accepts and forbids claiming otherwise
+about; `--remove-destination` is defence in depth and nothing measures it.
+
+### Reviewer focus for step 3 rsync-cp-fallback round 3
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-round-3 -->
+
+## Round 3 by reviewer - Step 3
+
+- Recorded: 2026-08-13T18:05:00+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 3
+- Outcome: answer
+
+### Reviewer assessment for step 3 rsync-cp-fallback round 3
+
+Step 3 is fully implemented and commit-ready. The round 2 substantive repair is
+present in both harness copies, both replacement captures measure that exact
+shared body, and all three missing-work items are discharged. No production,
+harness, test, acceptance or grouping repair was needed in this review.
+
+The implementation-check conclusions are affirmative:
+
+- **Implementation**: both transfer sites branch on the single engine verdict;
+  `deploy_root_file_cp` remains independent from the destructive mirror helper;
+  its non-following `-L`-first preflight accepts only absent or real regular-file
+  destinations; and `cp -a --remove-destination` carries no concurrency claim.
+- **Architecture**: the two operation-specific helpers share only the verdict,
+  with neither boundary reachable from the other site. No DDD/hexagonal concern
+  applies to this standalone Bash installer, and no structural smell remains.
+- **Performance**: constant work per archive root file, one type observation and
+  one cp on the fallback path, with no added tree traversal or super-linear
+  computation. The FIFO refusal precedes cp and remains watchdog-falsifiable.
+- **Coverage**: this repository has no applicable Python unit-test layer. Its
+  planned substitution is the cumulative Bash harness, which contributes 12
+  Step 3 assertions without rsync and 14 with it.
+- **Feature integrity**: exit codes stay 5 and 7, both original rsync invocations
+  remain byte-identical in their branches, and the deliberate engine asymmetry
+  is asserted rather than normalized away.
+
+### Evidence checked
+
+- The staged and consuming-project installers are byte-identical at
+  `f86dba2a5f65...`, 622 lines, matching both capture headers.
+- The cplx harness is `23be347e...`; the consuming-project harness is
+  `e9e6c5a4...`; both reproduce the same shared-body digest
+  `5e0f4430322c...`, matching both regenerated captures.
+- RHEL records 56 cases and zero failures, exercising R-rs and R-fb at both
+  transfer sites. Debian build 46 records 47 and zero failures, exercising D-fb
+  end to end.
+- Both targets positively witness two `Deploy engine cp:` operations. No
+  `deploy engine rsync` answer or `assert_deploy_engine` rsync caller remains.
+- Both targets pass the symlink refusal with the link intact and the external
+  content and mtime unchanged; pass the prompt FIFO refusal with the FIFO
+  intact; refuse empty and populated directories; and preserve the canary.
+- RHEL additionally proves the deliberate rsync result on the same symlink
+  shape: link replaced, external target untouched.
+- `bash -n` passes on both source and consuming-project copies. The exact grep
+  checks show `--remove-destination` only at the deploy site, no `Rsync (` text,
+  and exactly the two original `rsync -av` invocations. Both staged and
+  unstaged diff checks are clean.
+
+### Repairs made by the reviewer
+
+Only polishing record repairs were made, so convergence remains valid in this
+round:
+
+- **Polishing-only —
+  `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md`**: split the Step
+  3 status into the exact canonical sentence
+  `Yes. Step 3 has been fully implemented.` followed by its evidence summary;
+  replaced stale prose saying the captures still needed replacement with the
+  actual superseded-and-replacement history; and changed the harness section
+  from “replacement captures pending” to the retained replacement state. The
+  path is staged.
+- **Polishing-only — `docs/v0.27.0/verify.step3.rhel.txt`**: corrected its
+  reading from “committed cplx source” to “staged cplx source”; Step 3 has not
+  been committed yet. The raw run and every measured value are unchanged. The
+  path is staged.
+
+No other path was repaired. In particular, the installer, harness code, Debian
+capture and consuming-project files were inspected but not edited.
+
+### Validation and commit grouping
+
+The validation document correctly remains globally `No, it is not implemented.`
+because Steps 4 and 5 have not started, while Step 3 now uses the exact completed
+sentence and has no active `Missing work for Step 3` section. The completed
+round 2 work is retained under a historical discharge heading rather than as an
+active work list.
+
+`a.commit` remains accurate without amendment: five groups in dependency order,
+with correct file membership, conventional subjects, replacement counts and
+consumer provenance. The two polishing corrections remain within Groups 4 and
+3 respectively and do not change membership or ordering.
+
+### Reviewer decision for step 3 rsync-cp-fallback round 3
+
+Disposition: convergence-recommended. Step 3 is commit-ready. This recommendation
+is advisory and does not authorize a commit; the exchange's human `Commit` gate
+remains required. No round 4 or additional measurement is requested.
+
+<!-- review-entry-id: answer-round-3 -->
+
+## Round 3 by human - Step 3
+
+- Recorded: 2026-08-13T19:12:12+02:00
+- Exchange: code/code/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.md
+- Implementation step: 3
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-3 -->
