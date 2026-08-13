@@ -1,0 +1,198 @@
+Harness: docs/v0.27.0/verify.install-pkg.sh --step 3
+Target: RHEL 9.8 deployment server, rsync present
+Identity: step3-candidate/RHEL/rsync. One cumulative run exercising R-rs without
+         the override and R-fb under it, at both transfer sites, so it is not one
+         matrix cell.
+Captured: 2026-08-13, by hand, over ssh
+Purpose: Step 3 evidence that the root-file deploy branches on the engine verdict
+         and that the fallback's non-following preflight refuses every shape M2
+         measured as hazardous. The step 0, 1 and 2 suites run too, since the
+         dispatch is cumulative.
+
+Installer under test: this branch's candidate, copied to /tmp on the target. It
+         is not the deployed installer, and the header's sha256 ties this run to
+         the staged source.
+
+Supersedes: the 12:45Z run of the same day. Code review round 2 narrowed an
+         assertion in the harness, so that run measured a harness body that no
+         longer exists. The installer is byte-identical and every case outcome is
+         unchanged; only the harness digests moved, which is the point of
+         regenerating rather than keeping it.
+
+Note: nothing in this output required substitution under the repository's
+sensitive-content rules. The run used /tmp paths on both sides, so no deployment
+account name appears. No byte of the output is changed.
+
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 3 ===
+date      : 2026-08-13T15:12:27Z (UTC)
+harness   : verify.install-pkg.sh
+  sha256  : 23be347eaa50ce4e394cf263bad6be41bdc1bbf0331449eccce09abb237453a6
+  body    : 5e0f4430322c2e185b747f78000e203cef1e6d17ce47bf4aac7ee8cc0eaca74e
+uname     : Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+installer : /tmp/install_pkg.candidate.sh
+  sha256  : f86dba2a5f65d321a2a7ec1598bc41697edfb006977677851a063c2a7ec2cb63
+  lines   : 622
+  fallback: yes (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : yes
+identity  : step3-candidate/RHEL/rsync, requested; the engine is asserted from the run trace below
+            a step 3 candidate suite, NOT one matrix cell: one cumulative run exercises R-rs without the override and R-fb under it, at both transfer sites. The per-case operation assertions remain the authority for which engine ran where.
+home      : /tmp/cplx-verify.2057400/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.2057400
+
+--- preflight
+  preflight commands                 PASS  all 28 present
+  preflight stat fractional          PASS  1786633947.655399653
+  preflight combination              PASS  step3-candidate/RHEL/rsync, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  control watchdog                   PASS  blocked, killed at 2s
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (rsync present: the mirror succeeds today, so the baseline is a
+   working install, and the root-file shapes are rsync's behaviour)
+  baseline fresh install             PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  engine rsync operated, read from the run trace
+  baseline root-file FIFO            PASS  exit 0
+      fixture   .env is a FIFO
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline FIFO replaced             PASS  regular file carrying the archive content
+  baseline root-file symlink         PASS  exit 0
+      fixture   .env is a symlink onto an external regular file
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline symlink replaced          PASS  regular file carrying the archive content
+  baseline external target intact    PASS  content and mtime unchanged
+
+--- step 1: engine selection (a selection trace, not proof of a copy)
+  control selection-no-discovery     PASS  refused on [SELECTION: archive discovery marker], as designed
+  control selection-out-of-order     PASS  refused on [SELECTION: trace at line], as designed
+  step1 override unset               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override unset trace         PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override 1                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 1 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 forced now operates cp       PASS  engine cp operated, read from the run trace
+  step1 override 0                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 0 trace             PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override yes                 PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override yes trace           PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override true                PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override true trace          PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override empty               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override empty trace         PASS  selected rsync, announced before discovery (a selection, not a copy)
+
+--- step 2: the mirror fallback and its destination boundary
+  step2 fallback fresh               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 fresh engine                 PASS  engine cp operated, read from the run trace
+  step2 hidden entry carried         PASS  cp -a src/. carried the hidden entry
+  step2 fallback redeploy            PASS  exit 0
+      fixture   tools is a populated real directory holding the stale entry .stale-hidden
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 stale entries removed        PASS  hidden, visible and directory entries all gone
+  step2 dest regular file            PASS  exit 5
+      fixture   tools is a regular file
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 dest file untouched          PASS  refused before any delete
+  step2 dest symlink to dir          PASS  exit 5
+      fixture   tools is a symlink onto an external directory
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 external target intact       PASS  nothing outside the prefix was deleted
+  step2 rsync dest regular file      PASS  exit 5
+      fixture   tools is a regular file
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+
+--- step 3: the root-file deploy and its non-following preflight
+  step3 deploy accepted shapes       PASS  exit 0
+      fixture   .env_ is a regular file
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 accepted deploy engine       PASS  deploy engine cp operated on 2 root files, read from the run trace
+  step3 both root files deployed     PASS  absent and present destinations both carry archive content
+  step3 dest symlink to file         PASS  exit 7
+      fixture   .env is a symlink onto an external regular file
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 symlink left intact          PASS  the link itself was not replaced
+  step3 external target intact       PASS  content and mtime unchanged, so nothing copied through the link
+  step3 dest FIFO refused promptly   PASS  exit 7
+      fixture   .env is a FIFO
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 FIFO left intact             PASS  refused before any copy, so the FIFO survives
+  step3 dest empty directory         PASS  exit 7
+      fixture   .env is a directory where a regular file is expected
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 dest populated directory     PASS  exit 7
+      fixture   .env is a directory where a regular file is expected
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 directory content intact     PASS  refused without touching what was inside
+  step3 refusal distinguishable      PASS  the preflight names the shape, not a failed copy
+  step3 rsync dest symlink to file   PASS  exit 0
+      fixture   .env is a symlink onto an external regular file
+      identity  installer f86dba2a5f65  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 rsync replaced the link      PASS  link replaced, external target untouched: the documented asymmetry
+
+=== VERDICT ===
+suites    : preflight controls baseline-rsync step1-selection step2-mirror step3-rootfile
+cases: 56, failures: 0
+Step 3: every assertion and every negative control behaved as designed.
+
+--- reading, added when the output was retained ---
+
+This is the RHEL half of the step 3 evidence, and the only half that can run both
+engines at both transfer sites in one pass.
+
+**The case that had never run anywhere.** `step3 dest symlink to file` refuses at
+exit 7, `step3 symlink left intact` shows the link itself was not replaced, and
+`step3 external target intact` shows the file it pointed at is byte- and
+mtime-identical. M2 measured this engine following such a link, overwriting the
+external target and returning 0: silent data loss reported as success. Until this
+run, everything said about that refusal came from reading the code. It is now
+measured on a target.
+
+**The Step 0 gate closes here.** `step3 dest FIFO refused promptly` returns exit
+7 with the FIFO intact. At step 0 the same shape was rsync replacing it at exit
+0, and M2 measured this engine blocking on it. Promptly is falsifiable rather
+than rhetorical: the case runs under the twenty-second watchdog, so a blocking
+engine would return 124 and fail the expected 7, and the calibration control two
+sections above still reports its own timeout.
+
+**The deploy site is asserted from its own trace.** `step3 accepted deploy engine`
+reads `Deploy engine cp:` and requires two occurrences, one per archive root
+file. The earlier version of this assertion read the mirror's marker, which on
+this host would have passed for step 2's behaviour, cp at the mirror and rsync at
+the deploy site. That is the state step 3 exists to move past, so the assertion
+had to be able to reject it, and it does: run against the step 2 installer it
+fails with "no Deploy engine cp: trace".
+
+**Both engines, and where they deliberately differ.** `step3 rsync dest symlink
+to file` completes at exit 0 and `step3 rsync replaced the link` confirms rsync
+replaced the link while leaving the external target alone. The fallback refuses
+the same shape. That asymmetry is the design's choice, asserted here rather than
+assumed, and it is the same trade as the mirror boundary: the new engine is the
+stricter one.
+
+**Directories are refused whether empty or populated**, and the populated one
+keeps its content, so the refusal costs nothing that was there.
+
+**Fingerprints.** The installer is `f86dba2a`, 622 lines, unchanged from the
+round 1 run since only the harness moved. The harness whole-file digest
+`23be347e` pins this capture to the staged cplx source; the shared-body digest
+`5e0f4430` is the value the Debian capture also reports.
