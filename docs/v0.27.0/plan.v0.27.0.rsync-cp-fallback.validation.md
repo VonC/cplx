@@ -8,14 +8,15 @@ steps that give `install_pkg.sh` a second copy engine without changing the rsync
 path. Step 0 is complete, converged after four code review rounds and committed.
 Step 1 is complete, converged after three code review rounds and committed. Step
 2 is complete, converged after two code review rounds and committed. Step 3 is
-implemented and passing on both supported targets: `install_pkg.sh` is now 622
-lines, both transfer sites branch on the verdict, and both `rsync -av` invocations are
-still byte-identical inside their branches. Steps 4 and 5 have not started.
+complete, converged after three code review rounds and committed. Step 4 is
+complete on both supported targets: it changes no executable line, so
+`install_pkg.sh` is 625 lines of which three are comment. Step 5 has not
+started.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
 > `_(empty — no check has taken place yet.)_.` until an implementation check
-> replaces it. Steps 0 to 3 are filled in; steps 4 and 5 are not.
+> replaces it. Steps 0 to 4 are filled in; step 5 is not.
 >
 > Markdown lint note: never leave a space immediately inside an inline code span
 > (MD038) -- write a needed space as the token `[space]`, as in `` `[space]${x}` ``.
@@ -1290,10 +1291,76 @@ No existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 4 implementation state
 
-Not started. Step 4 is not implemented because the fatal messages and the wiki
-reference still name rsync rather than the operation, and no host-tool contract
-is recorded anywhere.
+Yes. Step 4 has been fully implemented.
 
+Both targets confirm that the documentation-only step moved no behavior. During
+code review, the published contract itself needed four substantive corrections:
+the mandatory host-tool row now carries all 20 final-state executables, and the
+engine-parity wording is scoped to fresh prefixes while populated-prefix
+behavior is stated per engine. Round 2 made the inventory method reproducible by
+excluding installer and sourced helper functions, and stopped generalizing the
+measured FIFO behavior to every special-file type.
+
+This step publishes what steps 1 to 3 built and records a contract that never
+existed. It changes no executable line: the installer edit is three comment
+lines, and the two fatal messages were already reworded by the steps that
+created their engine branches, which is what Q04-4C requires so that no
+intermediate commit publishes a message naming rsync for a step that may run
+`cp`.
+
+**The wiki now describes a mirror rather than an rsync call.** The engine is
+chosen once, announced, and overridable for validation, and the page says so.
+Codes 5 and 7 keep their numbers and are named for the mirror step and the
+root-file deploy step rather than for the engine, matching the in-script text.
+
+**The review corrected two contract overclaims.** The first staged version
+listed only 10 mandatory executables despite calling the table the whole
+contract; the settled requirement and installer audit name 19 commands already
+invoked plus `cp`, for 20 in the final state. The first staged version also said
+the engines were equivalent for a whole-tree mirror without the fresh-prefix
+qualification. The corrected page limits manifest parity to fresh prefixes and
+states the measured populated-prefix behavior separately.
+
+**Round 2 corrected the contract method and one evidence scope.** The report
+that independently reproduced the 20-program list excluded shell builtins and
+functions defined or sourced by the installer, but the published method named
+only builtins; without the function exclusion it does not reproduce an external
+program inventory. The destination table also claimed rsync replaces every
+special-file type where only FIFO behavior was measured. The method now names
+both exclusions, the FIFO row remains exact, and other special files are left to
+rsync's type-specific handling while the fallback refusal remains guaranteed.
+
+**The asymmetry is published rather than left to be discovered.** A table gives
+each destination shape and what each engine does with it. It includes the mirror
+symlink where rsync empties the external target, the root-file symlink where
+rsync replaces the link, and the measured distinction between empty and
+populated root-file directories. An operator reading only the exit codes would
+otherwise meet the fallback refusals as surprises.
+
+**The host-tool contract is recorded in four groups**, shell, mandatory,
+optional and shipped, with `gzip` in the mandatory group. `gzip` is the entry
+worth naming: no command position names it, because `tar -xzf` starts it as a
+subprocess, so a token scan alone publishes a contract that a host without
+`gzip` will fail. The inventory method is recorded beside the list precisely so
+a re-audit reaches the same list rather than a shorter one.
+
+**The confirmation runs, and what they had to show.** The installer digest moved
+to `591e2db0`, so both targets ran the step 3 suite against it. RHEL returned 56
+cases and the Debian agent 47, zero failures on either, with every case outcome
+identical to the step 3 captures and the same exits 5 and 7 observed at the two
+refusal sites. The harness digests are unchanged, whole-file and shared body
+alike, because this step added no cases; only the installer digest moved, which
+is exactly the shape a documentation-only step should produce.
+
+No step 4 capture files are retained. The step 3 captures remain step 3's
+evidence, measuring the step 3 installer, and replacing them would destroy that.
+These runs answered one question, whether anything moved, and the answer is
+recorded here with the digests and counts that support it. Had they differed, the
+difference would have been the finding and would have been retained in full.
+
+There is no step 4 suite and none is wanted: this step adds no behaviour to
+assert, and adding a dispatch entry with no cases would be the vacuous pass the
+step guard exists to refuse.
 ### Goal for Step 4
 
 Reword the two fatal messages and the wiki entries in terms of the operation
@@ -1310,27 +1377,91 @@ groups with the inventory method beside it, and correct the script header.
 
 ### What was implemented for Step 4
 
-_(empty — no check has taken place yet.)_.
+- **The mirror described as a mirror**, with two engines, the selection announced
+  once before archive discovery, and the validation override named with its exact
+  semantics: only `1` forces the fallback.
+- **Codes 5 and 7 renamed for their steps**, not their engine, keeping their
+  numbers so no caller changes. `exit-codes.md` already cross-references this
+  page rather than duplicating the table, so there is one source to correct.
+- **The destination asymmetry table**, giving each shape and what each engine
+  does with it, including the two where the fallback refuses what rsync accepts.
+- **The host-tool contract in four groups**: shell, all 20 mandatory external
+  programs in the final state, optional rsync, and shipped patchelf.
+- **The inventory method beside the list**, in four steps: command-position
+  tokens, the subprocesses that command options start, exclusion of shell
+  builtins and installer or sourced helper functions, and confirmation of every
+  entry and relied-on GNU behavior on both supported targets.
+- **The script header corrected.** It claimed the installer needs only the
+  archive, itself and the shipped patchelf, which was false. It now points at the
+  recorded contract and notes rsync is optional there.
 
 ### New helpers or cases introduced for Step 4
 
-_(empty — no check has taken place yet.)_.
+None, and deliberately so. This step adds no behaviour, so it adds no assertion.
+A `--step 4` dispatch entry with no cases would be exactly the vacuous pass the
+step guard was added to refuse, so step 4's evidence is a `--step 3` run against
+the step 4 installer showing every case outcome unchanged.
 
 ### Architecture check for Step 4
 
-_(empty — no check has taken place yet.)_.
+- **Layering**: not applicable, as for the earlier steps.
+- **The boundary that applies**: this step touches published documentation and
+  one comment. No code path, no exit code and no message text moves, so nothing
+  the earlier steps established can be weakened here.
+- **Single source**: the exit-code table lives on one page, and the neighbouring
+  `exit-codes.md` links to it. `tool-contract.md` was inspected and is a
+  different contract, what a tool must provide to the build dispatcher, so the
+  host-tool list does not belong there.
+
+No, there is nothing that needs to be addressed.
 
 ### Cost and timing check for Step 4
 
-_(empty — no check has taken place yet.)_.
+- **No runtime change at all.** Three comment lines in the installer.
+- **Line budget**: `install_pkg.sh` 622 to 625, a delta of +3 against an advisory
+  +0 to +5. `wiki/reference/relocation-tools.md` 85 to 144, a delta of +59
+  against an advisory +30 to +45. The overage is the asymmetry table, which the
+  plan did not list separately: two engines cannot be usefully described without
+  saying where they differ, and the shapes where they differ are the ones an
+  operator meets as an unexplained exit 5 or 7. Recorded rather than trimmed.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Harness case check for Step 4
 
-_(empty — no check has taken place yet.)_.
+- **No new cases**, by design, as above.
+- **The check this step owed** was that nothing moved, and both targets answered
+  it: a `--step 3` run against the step 4 installer returned 56 cases on RHEL and
+  47 on the Debian agent, zero failures, every outcome identical to the step 3
+  captures, with exits 5 and 7 still observed at the two refusal sites.
+- **The harness digests did not move**, whole-file or shared body, because this
+  step added no cases. Only the installer digest changed, which is the shape a
+  documentation-only step should produce and the reason these runs were worth
+  making rather than assuming.
+- **Developer-host self-test**: 47 cases with the same 17 symlink-limitation
+  failures as the step 3 self-test on the same host, so no outcome moved there
+  either.
+
+No, there is no unexercised check left for this step.
 
 ### Feature integrity for Step 4
 
-_(empty — no check has taken place yet.)_.
+- **Nothing executable changed.** Three comment lines in the installer, and the
+  rest is published documentation. No exit code, no message text and no code
+  path moves.
+- **The published codes keep their numbers**, so every caller reading 5 or 7
+  keeps working. Only their names changed, from naming the engine to naming the
+  step, which is what makes them true on both engines.
+- **A correction rather than an addition**: the header claimed the installer
+  needs only the archive, itself and the shipped patchelf. That was false before
+  this effort began, and would have stayed false. A reader validating an agent
+  image against it would have concluded no host tools were required.
+- **The contract can now be checked before a deployment rather than after.**
+  That is the point of publishing it with its inventory method: a list without
+  the method invites a re-audit that scans command positions, misses `gzip`, and
+  quietly shortens the contract.
+
+No existing feature or reporting capability appears impaired.
 
 ---
 
