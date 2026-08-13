@@ -1,0 +1,155 @@
+Harness: tools/installer_verify_step0.sh --step 1 (the consuming project's copy
+         of docs/v0.27.0/verify.install-pkg.sh)
+Target: Debian 12 CI agent, Jenkins build 41, rsync absent
+Identity: step1-candidate/Debian/no-rsync. A selection suite, NOT an acceptance
+         matrix cell.
+Captured: 2026-08-13, by the pipeline stage 'Verify installer candidate (Step 1)'
+Purpose: Step 1 evidence on the only Debian target, that the engine is selected
+         once, before archive discovery, and announced.
+
+Installer under test: a VERIFICATION INPUT, not a delivered installer.
+         tools/install_pkg.candidate.verification-only.sh in the consuming
+         project, a byte-identical copy of this branch's candidate. It does not
+         replace the bootstrap installer, does not enter pkg.sh's input or the
+         published archive, and no deployment step reads it. Its digest below
+         equals the staged cplx installer, reproduced in review.
+
+Produced by: consuming-project commit a0e95798, 'ci(installer): refresh the Step
+         1 candidate after sanitization', which brought the candidate copy back
+         in line with the sanitized cplx source. The harness body came in with
+         7852d0c0, and the candidate file and Step 1 stage with e0aa80ff.
+
+Supersedes: the build 40 capture, which measured installer b78511b9. That
+         installer was sanitized after the step 1 review converged: one comment
+         line carrying the deployment account name, which the public repository's
+         pre-commit hook required before the file could be committed. No
+         executable byte changed and the case counts are identical, so only the
+         installer digest moved.
+
+Source: fetched from the build's archived artifact
+        a.evidence/verify-step1.debian.txt, so it carries no timestamper prefix
+        and nothing was reformatted.
+
+Note: the workspace path carried the company name and the private project name,
+and both have been substituted under the repository's sensitive-content rules.
+No other byte of the output is changed.
+
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 1 ===
+date      : 2026-08-13T06:27:33Z (UTC)
+harness   : installer_verify_step0.sh
+  sha256  : 5c8ba2b0b5ed89e5ee65216f96f2b6e10cabdb16c3f053aaa5555b5e70f290ec
+  body    : 65451888e1a4275e7d2d57c6292aa2dd1620cec1c169f8dbea744686cce4fb38
+uname     : Linux 5.14.0-687.24.1.el9_8.x86_64 x86_64
+installer : /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.candidate.verification-only.sh
+  sha256  : 312be8aea5364b0a38a9149bcf3802e6b3b1e63cc495df80674aeb123176dd5d
+  lines   : 535
+  fallback: yes (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : no
+identity  : step1-candidate/Debian/no-rsync, requested; the engine is asserted from the run trace below
+            a step 1 selection suite, NOT a matrix cell: it exercises six selections, and the unchanged rsync site still fails with no engine operating.
+home      : /tmp/cplx-verify.65085/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.65085
+
+--- preflight
+  preflight commands                 PASS  all 28 present
+  preflight stat fractional          PASS  1786602453.471524076
+  preflight combination              PASS  step1-candidate/Debian/no-rsync, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  control watchdog                   PASS  blocked, killed at 2s
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (no rsync: the mirror phase dies, which is the Q19 defect itself,
+   and the root-file site is never reached, so its two shapes have
+   no baseline on this target by construction)
+  baseline no-rsync mirror           PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  no engine ran: no trace and the run failed at exit 5
+
+--- step 1: engine selection (a selection trace, not proof of a copy)
+  control selection-no-discovery     PASS  refused on [SELECTION: archive discovery marker], as designed
+  control selection-out-of-order     PASS  refused on [SELECTION: trace at line], as designed
+  step1 override unset               PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override unset trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override 1                   PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 1 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override 0                   PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 0 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override yes                 PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override yes trace           PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override true                PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override true trace          PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override empty               PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override empty trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+
+=== VERDICT ===
+suites    : preflight controls baseline-no-rsync step1-selection
+cases: 26, failures: 0
+Step 1: every assertion and every negative control behaved as designed.
+
+--- reading, added when the output was retained ---
+
+This is the Debian half of the step 1 evidence, and it exists because the plan
+requires step 1's cases to pass on both supported targets while this agent
+measures an installer that has no engine selection. The code review's ruling was
+to supply the candidate as a fingerprinted verification input rather than weaken
+the criterion or pull step 5's delivery forward, and this is that run.
+
+**Every selection here is cp, and that is correct rather than uninformative.**
+rsync is absent, so it cannot be selected whatever the override says. What the
+six cases prove on this target is the *reason* attached to each: `1` reports
+`forced by CPLX_INSTALL_PKG_FORCE_CP=1`, and unset, `0`, `yes`, `true` and empty
+all report `rsync not found on PATH`. A truthy-looking value is therefore not
+silently reported as a forced fallback on the one target where the fallback will
+matter most, which is what those five cases are for here.
+
+**The unchanged call site still fails.** Every selection case exits 5 at the
+mirror with no engine operating. That is the point of step 1 being a selection
+step: the announcement moved, the behaviour did not. The `baseline no-rsync
+mirror` case, run against the candidate rather than the published installer,
+makes the same statement directly.
+
+**Both ordering controls run here too.** `selection-no-discovery` refuses a trace
+with no archive discovery marker; `selection-out-of-order` refuses one whose
+selection line follows the marker. They are separate controls rather than one
+composite so each failure reason is checked independently and each counts once.
+An earlier body had only the first, which calibrates marker presence, leaving the
+branch that implements Q06 unexecuted on both targets.
+
+**What this run is not.** It is not delivery. The verification input sits in the
+consuming project's `tools/`, which is not packaged; the Step 0 stage in the same
+build still measures `$PREFIX/bootstrap/bin/install_pkg.sh`, the published
+installer, at 12 cases and zero failures, so the baseline continues to describe
+what CI actually runs. Shipping the fixed installer through the archive remains
+step 5's obligation under Q05, and this stage does not discharge it. The
+duplication is temporary and should be deleted when step 5 does.
+
+**Fingerprints.** The installer is `312be8ae`, 535 lines, `fallback: yes`, equal
+byte for byte to the staged cplx source, which is what stops a stale copy in this
+repository passing silently. The harness whole-file digest `5c8ba2b0` pins this
+capture to commit `7852d0c0`; the shared-body digest `65451888` is the value the
+RHEL capture also reports, from the cplx file, so both targets ran the same code.
+
+**Two things this target cannot show.** The rsync-selected trace form and the
+forced divergence both require rsync, which this agent will never have; that is
+the Q19 defect itself, not a coverage gap the harness can close. Their evidence
+is the RHEL capture's.
