@@ -6,15 +6,15 @@ This document tracks the implementation of
 [plan.v0.27.0.rsync-cp-fallback.md](plan.v0.27.0.rsync-cp-fallback.md), six
 steps that give `install_pkg.sh` a second copy engine without changing the rsync
 path. Step 0 is complete, converged after four code review rounds and committed.
-Step 1 is implemented and passing on both supported targets:
-`src/setups/env/bin/install_pkg.sh` is now 535 lines, and both `rsync -av` call
-sites are still unmodified, since step 1 adds a decision and no branch. Steps 2
-to 5 have not started.
+Step 1 is complete, converged after three code review rounds and committed. Step
+2 is implemented and passing on both supported targets: `install_pkg.sh` is now
+584 lines, the mirror branches on the verdict, and both `rsync -av` invocations
+are still byte-identical inside their branches. Steps 3 to 5 have not started.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
 > `_(empty — no check has taken place yet.)_.` until an implementation check
-> replaces it. Steps 0 and 1 are filled in; steps 2 to 5 are not.
+> replaces it. Steps 0 to 2 are filled in; steps 3 to 5 are not.
 >
 > Markdown lint note: never leave a space immediately inside an inline code span
 > (MD038) -- write a needed space as the token `[space]`, as in `` `[space]${x}` ``.
@@ -867,8 +867,59 @@ No existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 2 implementation state
 
-Not started. Step 2 is not implemented because mirror mode still calls
-`rsync -av --delete` unconditionally and no destination boundary exists.
+Yes. Step 2 has been fully implemented, and its cases pass on both supported
+targets.
+
+`mirror_tree_cp` reproduces the mirror's delete semantics without rsync, and the
+mirror site branches on the verdict. The rsync invocation is unchanged inside its
+branch, so this step adds a second path rather than altering the first.
+
+**The boundary is the point of this step, and it is stricter than rsync.** It
+observes the destination without following any link: a symlink of any kind is
+refused, and so is any present non-directory. Only two shapes are accepted, an
+absent destination which it creates, and a real directory whose *content* it
+empties. Emptying the content rather than removing the directory retains the
+directory object, and with it any mount-point boundary on that path. It promises
+nothing about the directory's metadata: the copy form deliberately gives the
+transfer root the source's attributes, so no ACL on the destination is preserved,
+and ACLs are outside the parity manifest in any case. The refusal happens before
+a single entry is removed.
+
+The sharpest shape is a destination that is a symlink to a directory. The design
+records M1 measuring the rsync path following that link under `--delete`,
+emptying the *external* target and returning 0. The fallback refuses it. So on
+the one shape where the two engines differ most, the new engine is the safe one
+and the unchanged one is silently destructive, which is the opposite of the
+intuition an earlier design draft had recorded.
+
+**Two existing cases changed rather than being deleted**, which is what the step
+1 review required of this step:
+
+- `step1 forced still operates rsync` became `step1 forced now operates cp`. It
+  marked the step 1 divergence where a forced selection still operated rsync;
+  step 2 closes that, so the assertion is re-pointed at the new engine.
+- `baseline no-rsync mirror` expected exit 5 at the mirror, the Q19 defect
+  itself. The fallback now completes the mirror on that target, so the case
+  expects exit 7 at the root-file site, which still calls rsync unconditionally
+  until step 3, under a new `mirrored-not-deployed` oracle.
+
+That second change is the effort's central defect being removed, recorded as a
+transition rather than as a green line. The step 1 selection cases moved with it
+for the same reason: what a run does after selecting is a property of the step,
+not of step 1, and their selection assertions are unchanged either way.
+
+**Both captures are in hand.** RHEL 9.8, `step2-candidate/RHEL/rsync`, 42 cases
+and zero failures, exercising both engines at the mirror. The Debian agent,
+`step2-candidate/Debian/no-rsync`, Jenkins build 43, 35 cases and zero failures,
+where the fallback is the only engine and the mirror completing is the defect
+being removed rather than an override being honoured.
+
+The developer host cannot create symlinks at all, so
+two case classes could not be exercised there: the canary SONAME symlink after a
+fallback mirror, and the symlink-to-directory boundary, whose fixture oracle
+correctly refused rather than passing. Both pass on both targets. The step 2 cases
+were run against the pre-change installer first, as the shared checklist
+requires, and failed on nine assertions with none passing vacuously.
 
 ### Goal for Step 2
 
@@ -888,27 +939,124 @@ real directory, then empty the destination content and copy with
 
 ### What was implemented for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **`mirror_tree_cp`**, following the existing helper convention: `local` args, a
+  `task` line, `fatal` with an exit code inline, `ok` on success. Called from the
+  mirror site so the surrounding `task` line and the `fix_home_symlink_targets`
+  call after it are untouched.
+- **The destination boundary**, applied before anything is removed. `-L` is
+  tested first and no test follows a link. Refuses a symlink of any kind and any
+  present non-directory; accepts an absent destination, which it creates, and a
+  real directory, whose content it empties.
+- **Emptying the content, not the directory**: `find "$dst" -mindepth 1 -maxdepth
+  1 -exec rm -rf -- {} +`, so the directory object survives and a mount point
+  stays a mount point. Its metadata does not survive and is not claimed to: the
+  copy form resets the transfer root from the source, so an ACL on the
+  destination is not preserved. An earlier version of this record said such a
+  destination "survives as itself", which overstated what keeping the inode
+  buys.
+- **`cp -a "$src/." "$dst/"`**, the design's load-bearing copy form. It gives the
+  transfer root the source mode and mtime, matching the other engine's treatment
+  of its transfer root, and it carries hidden entries without depending on the
+  caller's globbing. Both trees hold hidden entries.
+- **The exit-5 rewording this step owns**, per Q04-4C: `Error: Rsync (main)
+  failed.` is gone, replaced by messages naming the mirror step and the engine
+  that failed. The code stays 5 on both engines, so no caller changes.
+- **An operation trace for the fallback**, `Mirror engine cp:`, emitted by the
+  helper at the point it copies. This is beyond the plan's named rewording and is
+  flagged as such in the review: without it no assertion can witness a successful
+  fallback, since the fallback has no equivalent of rsync's file-list banner, and
+  the step 1 divergence case could not have been re-pointed.
 
 ### New helpers or cases introduced for Step 2
 
-_(empty — no check has taken place yet.)_.
+- `mirror_tree_cp` in the installer: the only new function, and the only place
+  the destructive boundary lives.
+- `assert_engine` gained a `cp` answer, recognised by the helper's operation
+  trace. The cp marker takes **precedence** over the rsync banner, because at
+  step 2 the root-file site still calls rsync unconditionally, so a forced run
+  prints that banner from the later site while the mirror ran cp. Reading the
+  banner alone would name the wrong engine for the site being asserted.
+- Three fixture oracles: `dest-file`, `dest-symlink-dir` with its target read
+  back and proved a directory, and `populated` with a named stale marker.
+- Two post-state oracles: `mirrored-not-deployed`, the honest intermediate where
+  the mirror completed and the root-file site has not; and `staging-retained`
+  for the boundary refusals, where the tree is deliberately left as it was.
+- Nine step 2 cases on a host without rsync, ten where rsync exists, the extra
+  being the same wrong-shape fixture on the rsync engine so the reworded exit-5
+  diagnostic is asserted on **both** engines rather than only the new one.
 
 ### Architecture check for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **Layering**: not applicable, as for the earlier steps.
+- **The boundary that applies**: Q01 keeps the mirror and the root-file deploy as
+  independent paths sharing the verdict and nothing else. This step branches one
+  of them and leaves the other untouched, so the destructive boundary attaches to
+  exactly the site that deletes, and cannot be applied to the site that does not.
+- **The rsync path is unchanged**, inside its branch. Both original invocations
+  are byte-identical, which the step's grep check confirms.
+
+No, there is nothing that needs to be addressed.
 
 ### Cost and timing check for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **One `find` and one `cp` per mirror**, on the fallback path only. No per-entry
+  shell iteration, so nothing here is quadratic.
+- **The rsync path adds nothing**: it gains one string comparison on an
+  already-computed verdict.
+- **Line budget**: 535 to 584, a delta of +49 against an advisory +25 to +35. The
+  overage is the boundary's five distinct diagnostics and the comments recording
+  why the copy form and the refusal rule are design constraints rather than
+  implementation choices. Recorded rather than trimmed, as at step 1.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Harness case check for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **Cumulative dispatch**: `--step 2` runs preflight, the seven controls, the
+  step 0 baseline, the step 1 suite and the step 2 suite: 35 cases on a no-rsync
+  host and 42 where rsync is present.
+- **Step 2 suite**: 9 cases without rsync, 10 with, covering a fresh fallback
+  install, a redeployment over a populated tree, the hidden entry carried, the
+  stale entries removed, both wrong-shape refusals, and the untouched-destination
+  sentinels for each.
+- **Cases first, and seen to fail**: nine assertions failed against the
+  pre-change installer, including both boundary diagnostics and the engine
+  assertion, with none passing vacuously.
+- **Retained on both targets**: `verify.step2.rhel.txt` at 42 cases and
+  `verify.step2.debian.txt` at 35, zero failures on either. The canary SONAME
+  symlink after a fallback mirror, and
+  the symlink-to-directory boundary, could not run on the developer host, which
+  cannot create a symlink
+  at all, verified directly rather than assumed. Both pass on both targets
+  now. The fixture oracle refused the second rather than passing it, which is the
+  oracle behaving correctly on a host that cannot build its fixture.
 
 ### Feature integrity for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **The rsync path is unchanged.** Both original invocations are byte-identical,
+  the mirror one now inside a branch. A host with rsync installs exactly as
+  before, and the step's grep checks confirm the call sites and the absence of
+  the old message.
+- **Exit codes keep their numbers.** The mirror still fails at 5 on either
+  engine, so no caller changes. Only the message text moved, which the plan
+  assigns to this step precisely so no intermediate commit publishes a message
+  naming rsync for a step that may now run `cp`.
+- **A behaviour genuinely changes, and it is the intended one.** On a host
+  without rsync the mirror now succeeds where it used to exit 5. That is the Q19
+  defect being removed. The run still fails, at the root-file site and exit 7,
+  until step 3 branches that site too, so this step leaves the installer working
+  further than before and not yet working end to end on that target.
+- **The new engine is stricter than the old one on one shape**, a destination
+  that is a symlink to a directory. The rsync path follows it and can empty an
+  external target while returning 0; the fallback refuses. A prefix configured
+  that way changes from a silent success to a diagnosable exit 5. That is a
+  deliberate behaviour change, scoped to the fallback, and it is the safe
+  direction.
+- **Compatibility**: no new variable, no new exit code, no new dependency. `cp`
+  and `find` were already in the harness inventory and are already used by the
+  installer.
+
+No existing feature or reporting capability appears impaired.
 
 ---
 
