@@ -5,15 +5,16 @@ No, it is not implemented.
 This document tracks the implementation of
 [plan.v0.27.0.rsync-cp-fallback.md](plan.v0.27.0.rsync-cp-fallback.md), six
 steps that give `install_pkg.sh` a second copy engine without changing the rsync
-path. No installer code has changed: `src/setups/env/bin/install_pkg.sh` is
-untouched at 505 lines and steps 1 to 5 have not started. Step 0 builds the
-harness those steps are judged against, and it is checked below, corrected after
-code review round 1 and awaiting regenerated evidence on both targets.
+path. Step 0 is complete, converged after four code review rounds and committed.
+Step 1 is implemented and passing on both supported targets:
+`src/setups/env/bin/install_pkg.sh` is now 535 lines, and both `rsync -av` call
+sites are still unmodified, since step 1 adds a decision and no branch. Steps 2
+to 5 have not started.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
 > `_(empty — no check has taken place yet.)_.` until an implementation check
-> replaces it. Step 0's sections are filled in; steps 1 to 5 are not.
+> replaces it. Steps 0 and 1 are filled in; steps 2 to 5 are not.
 >
 > Markdown lint note: never leave a space immediately inside an inline code span
 > (MD038) -- write a needed space as the token `[space]`, as in `` `[space]${x}` ``.
@@ -613,8 +614,100 @@ No existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 1 implementation state
 
-Not started. Step 1 is not implemented because both rsync call sites are still
-unconditional, nothing resolves an engine, and no trace names one.
+Yes. Step 1 has been fully implemented, and its cases pass on both supported
+targets.
+
+`select_copy_engine` resolves the engine once, before archive discovery, from
+`command -v rsync` and the override, and announces it with one `info` line
+carrying the engine, the resolved rsync path when rsync was selected, and the
+forced reason when the override applied. Both `rsync -av` call sites are
+unmodified, as this step requires: nothing branches on the verdict yet.
+
+The harness gained a step 1 suite and, with it, a `--step 1` dispatch that is
+cumulative, so a step 1 run executes the step 0 preflight, controls and baseline
+as well. Six cases cover the override matrix the plan names: unset, `1`, `0`,
+`yes`, `true` and empty. The harness distinguishes unset from set-and-empty,
+because the code under test does.
+
+**The evidence position, stated plainly.** The step 1 cases were run against the
+pre-change installer first, as the shared checklist requires, and failed on all
+six with `SELECTION: no 'Copy engine:' line in the run trace`, with no case
+passing vacuously. They pass against the implemented installer.
+
+Round 1 of the step 1 code review found the first version of this suite could not
+run on either target, and the cause was the harness rather than the installer.
+Step 0 refuses an installer able to select a fallback, which was right while
+nothing could witness one, and the step 1 candidate contains that token, so both
+targets stopped at the identity preflight before any case ran. The developer host
+hid it, an unsupported host being reported as a self-test either way. The identity
+contract now advances with the suite, so a later step defines its own rules
+instead of inheriting an earlier step's by accident.
+
+The same round found the ordering oracle able to pass without evidence: it
+compared line positions only when the archive discovery marker existed and
+otherwise still reported `announced before discovery`. The marker is now required,
+and a retained control feeds the oracle a synthetic trace without one.
+
+**How both targets are covered.** The step 1 completion criterion says the cases
+pass on both targets, and the Debian agent measures the installer extracted from
+the published archive, which has no engine selection. The code review kept the
+criterion literal and settled the route: the agent runs a **verification input**,
+a byte-identical copy of the candidate at
+`tools/install_pkg.candidate.verification-only.sh` in the consuming project,
+exercised by a separate stage. It does not replace the bootstrap installer, does
+not enter the packaged archive, and no deployment step reads it; the Step 0 stage
+still measures the published installer, so the baseline continues to describe
+what CI runs. Shipping the fixed installer through the archive stays Step 5's
+obligation under Q05, and this does not discharge it. The duplication is
+temporary and should be deleted once Step 5 does.
+
+No plan amendment was needed, and none was made.
+
+**A sanitization fix intervened between convergence and commit, and it moved the
+installer digest.** The repository's pre-commit hook refused the step 1 commit:
+three tracked files carried the deployment account name, in a public repository.
+The rule covering that term was added to the sensitive-content rules during this
+effort and nothing had scanned tracked source against it, so the leak surfaced
+only when an unrelated commit was blocked. The hook scans whole staged blobs, so those
+files were uncommittable until fixed.
+
+All three are corrected, and none changed behaviour. `install_pkg.sh` line 36 was
+a comment example. The other two, `gpg-agent.conf` and `git-pass-helper.sh`, hold
+their literals inside a `/home/<account>/` anchor that `fix_text_paths` rewrites
+to the install prefix on deploy, and its pattern `${HOME_ANCHOR}[^/]*/` matches
+any account name, so the anchor is the mechanism rather than the address.
+Parameterising off `$HOME` was considered and rejected as wrong: a relocated
+install has a prefix that is not the home, and GnuPG expands no variable in a
+conf file at all, which is what forced an absolute path there originally. The
+rewrite was proved rather than assumed, by running the installer's own sed rules
+over both files and confirming every anchor becomes the prefix and none survives.
+
+The installer is therefore `312be8ae` rather than the earlier digest, still 535
+lines, one comment line apart. Both captures were regenerated against it, at
+identical case counts, so the only thing that moved is the digest. The step 1
+review had already converged on code this does not change, and the exchange was
+past its rounds by then, so the change is recorded here and in the commit rather
+than carried by a further round.
+
+**Both captures, regenerated.** RHEL 9.8, `step1-candidate/RHEL/rsync`, 32 cases
+and zero failures: the six selections behave as the design settled, and the
+divergence case records that a forced `cp` selection still operates rsync. The
+Debian agent, `step1-candidate/Debian/no-rsync`, Jenkins build 41, 26 cases and
+zero failures: every selection is `cp` because rsync is absent, and what the six
+cases establish there is the reason attached to each, so a truthy-looking value
+is not reported as a forced fallback on the target where the fallback will matter
+most. Both report the shared-body digest `65451888`, and the Debian capture's
+installer digest equals the staged source byte for byte.
+
+Two things only the RHEL capture can show, permanently: the rsync-selected trace
+form and the forced divergence both need rsync, which the Debian agent will never
+have. That is the Q19 defect itself rather than a coverage gap.
+
+Build 41 also regenerated the Debian step 0 capture at 12 cases and zero
+failures, against the published installer, confirming the harness changes were
+confined to step 1. The committed step 0 captures are **not** replaced with it:
+step 0 is converged and committed, and each capture records the harness body that
+produced it, which is what the two digests exist for.
 
 ### Goal for Step 1
 
@@ -633,27 +726,140 @@ the resolved rsync path or the forced reason.
 
 ### What was implemented for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **The verdict, declared in the configuration block**: `COPY_ENGINE`, either
+  `rsync` or `cp`; `COPY_ENGINE_RSYNC`, the resolved binary when rsync was
+  selected; and `CPLX_INSTALL_PKG_FORCE_CP`, defaulted from the environment so
+  the override has one reading site.
+- **`select_copy_engine`, called once before archive discovery**, per Q06. rsync
+  is selected when `command -v rsync` resolves and the override is not exactly
+  `1`; the fallback otherwise. The override never selects rsync.
+- **The trace**: one `info` line, `Copy engine: rsync (<path>)`,
+  `Copy engine: cp (forced by CPLX_INSTALL_PKG_FORCE_CP=1)` or
+  `Copy engine: cp (rsync not found on PATH)`. The resolved path is not
+  decoration: `command -v rsync` finds the consuming project's stand-in shim as
+  readily as a real rsync, and that shim ignores `--delete`, so printing what was
+  resolved turns an invisible degradation into a visible one. The smoke test
+  confirms it, reporting the shim's own path.
+- **Absence selects the fallback, failure does not**: nothing here reacts to an
+  rsync that exists and exits non-zero, which stays a diagnosable error rather
+  than becoming a silent success with different semantics.
+- **Both call sites untouched**: `rsync -av --delete` and `rsync -av` are
+  byte-identical to their pre-change form, and one detection site exists, both
+  confirmed by the step's grep checks.
 
 ### New helpers or cases introduced for Step 1
 
-_(empty — no check has taken place yet.)_.
+- `select_copy_engine` in the installer: the only engine decision in the run.
+- `assert_selection` in the harness: reads the `Copy engine:` line, requires
+  exactly one of them, checks the engine and its detail, and asserts the line
+  appears before archive discovery, which is Q06 made executable. It is a
+  **different function from `assert_engine` on purpose**, and its pass message
+  says so: a selection is not proof that anything copied. Step 0's code review
+  removed a guessed fallback marker from `assert_engine` for exactly this reason,
+  and separating the two functions is what stops the conflation returning now
+  that the trace exists. The archive discovery marker is required rather than
+  compared when present: an earlier version reported `announced before discovery`
+  for a trace with nothing to order against, and an ordering oracle that
+  concludes from absence orders nothing.
+- **The step-aware identity contract**: at `--step 0` an installer able to select
+  a fallback is refused, since nothing there can witness one. At `--step 1` the
+  candidate is admitted on the two valid shapes, RHEL with rsync and Debian
+  without, and the run is labelled `step1-candidate/...` rather than a matrix
+  cell, because one run holds six selections and, on RHEL, the forced divergence,
+  which no single engine cell describes. A global forced override and any host
+  and tool shape the matrix does not contain stay refused at every step.
+- **Two ordering controls**, named separately so each failure reason is checked
+  independently and each counts once. `control selection-no-discovery` feeds a
+  well-formed selection line with no discovery marker and must be refused on the
+  marker; `control selection-out-of-order` feeds exactly one discovery marker
+  followed by one otherwise-valid selection line and must be refused on the
+  comparison. Both retained on both targets. The second exists because the first
+  calibrates marker presence rather than ordering: the branch implementing Q06
+  had never executed, since the six real cases only show a correctly ordered
+  trace passing and no installer emits a wrongly ordered one.
+- `CASE_FORCE_CP` in `run_case`: distinguishes unset, set-and-empty, and set to a
+  value, because the code under test distinguishes them and the plan names both
+  of the first two.
+- **Six selection cases**, the override matrix: unset, `1`, `0`, `yes`, `true`,
+  empty. Only `1` selects the fallback; `yes` and `true` are asserted to report
+  rsync rather than a forced fallback, since tolerant parsing would be a
+  liability where the consumers are scripts.
+- **One divergence case**, `step1 forced still operates rsync`, run only where
+  rsync is present. With the fallback forced, step 1 selects `cp` and still
+  mirrors with rsync, because no call site has changed. Asserting that here
+  records the divergence in evidence rather than describing it, and gives step 2
+  something to show a transition against.
 
 ### Architecture check for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **Layering**: not applicable, as for step 0. This repository is Bash and Batch
+  with no application layers, ports or adapters.
+- **The boundary that does apply**: one decision site, reused. The plan's Q01
+  keeps the mirror and the root-file deploy as independent paths sharing the
+  verdict and nothing else, so this step adds the verdict and no abstraction over
+  the two transfers.
+- **Placement**: the verdict is declared in the configuration block and resolved
+  in its own section between prefix resolution and archive discovery, so the
+  announcement precedes every step that can fail on a foreign target.
+
+No, there is nothing that needs to be addressed.
 
 ### Cost and timing check for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **One `command -v`** per run, replacing nothing and repeated nowhere. The
+  design's cost note allowed exactly this: one path lookup for engine detection.
+- **No per-entry work**: nothing here touches the deployed tree.
+- **Line budget**: 505 to 535, a delta of +30 against an advisory +15 to +25.
+  The overage is comment, not code: the block explaining why the resolved path is
+  printed is what stops a later step deleting the one field that makes a stand-in
+  shim visible. Recorded rather than trimmed further.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Harness case check for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **Cumulative dispatch**: `--step 1` runs preflight, the seven step 0 controls,
+  the step 0 baseline and the step 1 suite, so 26 cases on a no-rsync host and 32
+  on a host with rsync.
+- **Step 1 suite**: 14 cases on a no-rsync host, the two ordering controls plus
+  six runs each with its selection assertion; 15 where rsync is present, the
+  extra being the divergence case.
+- **Cases first, and seen to fail**: run against the pre-change installer the six
+  selection assertions fail with `SELECTION: no 'Copy engine:' line in the run
+  trace`, and no case passes vacuously. The six runs themselves still pass, which
+  is correct: this step changes selection, not behaviour.
+- **Both targets, retained**: `verify.step1.rhel.txt` at 32 cases and
+  `verify.step1.debian.txt` at 26, zero failures on either. Every case in the
+  suite has now run on at least one supported target.
+- **Still unexercised, and permanently so on one target**: the rsync-selected
+  trace form and the divergence case cannot run on the Debian agent, which has no
+  rsync and never will. The RHEL capture is their only evidence, and that is the
+  Q19 defect rather than a gap the harness can close.
+- **The ordering oracle is now calibrated on both sides**: one control proves it
+  refuses a trace with no discovery marker, the other proves it refuses a trace
+  whose selection line follows the marker. An earlier version had only the first,
+  which left the branch implementing Q06 never executed, and no installer emits a
+  wrongly ordered trace to exercise it incidentally.
 
 ### Feature integrity for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **Existing behaviour**: unchanged. Both `rsync -av` invocations are
+  byte-identical, nothing branches on the verdict, and every exit code keeps its
+  number. A host with rsync installs exactly as before; a host without still dies
+  at exit 5 in the mirror phase, now having said which engine it would have used.
+- **Reporting**: one line added, before archive discovery. It reports a selection
+  and claims nothing about a transfer.
+- **Compatibility**: `CPLX_INSTALL_PKG_FORCE_CP` is new and read once. Unset
+  behaves exactly as before this step, so no existing caller changes. Only the
+  exact value `1` does anything, which fails safe for a caller that sets a
+  truthy-looking value expecting tolerance.
+- **The one real risk, and it is deferred by design**: with the override set to
+  `1` on a host with rsync, the run now says `cp` and still mirrors with rsync.
+  That is visible in the evidence rather than hidden, and step 2 closes it. Until
+  then the override is a test surface whose effect is a trace, which is why the
+  design forbids pointing it at a live deployment prefix.
+
+No existing feature or reporting capability appears impaired.
 
 ---
 
