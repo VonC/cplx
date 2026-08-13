@@ -7,14 +7,15 @@ This document tracks the implementation of
 steps that give `install_pkg.sh` a second copy engine without changing the rsync
 path. Step 0 is complete, converged after four code review rounds and committed.
 Step 1 is complete, converged after three code review rounds and committed. Step
-2 is implemented and passing on both supported targets: `install_pkg.sh` is now
-584 lines, the mirror branches on the verdict, and both `rsync -av` invocations
-are still byte-identical inside their branches. Steps 3 to 5 have not started.
+2 is complete, converged after two code review rounds and committed. Step 3 is
+implemented and passing on both supported targets: `install_pkg.sh` is now 622
+lines, both transfer sites branch on the verdict, and both `rsync -av` invocations are
+still byte-identical inside their branches. Steps 4 and 5 have not started.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
 > `_(empty — no check has taken place yet.)_.` until an implementation check
-> replaces it. Steps 0 to 2 are filled in; steps 3 to 5 are not.
+> replaces it. Steps 0 to 3 are filled in; steps 4 and 5 are not.
 >
 > Markdown lint note: never leave a space immediately inside an inline code span
 > (MD038) -- write a needed space as the token `[space]`, as in `` `[space]${x}` ``.
@@ -1064,9 +1065,87 @@ No existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 3 implementation state
 
-Not started. Step 3 is not implemented because the root-file loop still calls
-`rsync -av` unconditionally, with no preflight and no copy-form flag.
+Yes. Step 3 has been fully implemented.
 
+Its cases pass on both supported targets. This is the step at which the Q19
+defect is gone end to end.
+
+Review round 2 narrowed an unwitnessed `rsync` answer out of the new deploy
+operation assertion, which changed the harness body, so both captures were
+regenerated against it. Every case outcome is unchanged and the installer is
+byte-identical; only the harness digests moved.
+
+`deploy_root_file_cp` branches the root-file loop on the verdict, and it is
+deliberately a separate helper from the mirror's, sharing nothing with it but the
+engine verdict. This operation has no delete semantics, so the mirror's
+destructive boundary must not be reachable from here, nor these rules from there.
+
+**The preflight is a safety rule, and M2 is why.** Measured on coreutils 8.32 and
+9.1, this engine carries two hazards the rsync path does not. Onto a destination
+that is a symlink to a regular file, `cp -a` follows the link, overwrites the
+external target and returns 0: silent data loss reported as success. Onto a FIFO
+it blocks, so an unattended install waits forever rather than failing. Both are
+engine semantics rather than a distribution accident.
+
+The observation therefore does not follow links, and `-L` is tested first. That
+is load-bearing rather than stylistic: a following predicate would classify a
+symlink to a regular file as an acceptable regular file and preserve the exact
+overwrite the rule exists to remove. Two shapes are accepted, an absent
+destination and a real regular file; every directory, every kind of symlink,
+every FIFO and every other special file is refused at exit 7 before `cp` runs,
+which is what stops the block. The copy is `cp -a --remove-destination`, static
+defence in depth with no concurrency claim attached.
+
+**The exit-7 rewording this step owns**, per Q04-4C: `Error: Rsync (...) failed.`
+is gone from both engines, replaced by messages naming the deploy step and the
+engine, with the preflight refusals using the same code. The step's own grep
+check also caught a section comment still reading `Rsync (Mirror Mode)`, which
+step 2 left behind when it made the mirror engine-neutral; it now reads
+`Mirror the tree`.
+
+**Three markers moved rather than being deleted**, which is what the step 2
+review required this step to do:
+
+- `baseline no-rsync mirror` has now moved twice. Exit 5 at the mirror at step 0,
+  the Q19 defect written down; exit 7 at the root-file site at step 2, the honest
+  intermediate; exit 0 here, with the install completing on the fallback engine
+  alone. The sequence is readable only because each move re-pointed the same
+  assertion.
+- The step 1 selection cases and the step 2 suite follow it to exit 0 on a
+  no-rsync host, for the same reason: what a run does after selecting is a
+  property of the step.
+- The cp-marker precedence stayed mirror-scoped without needing a change, because
+  the new site emits `Deploy engine cp:` rather than the mirror's marker. That
+  was the obligation the step 2 review recorded, and distinct markers discharge
+  it by construction rather than by a rule someone must remember.
+
+**A latent harness defect was found while writing these cases, and fixed.**
+`run_case` left `CASE_LOG` and `CASE_EXIT` holding the previous case's values
+when a case failed before running the installer. Every `assert_engine` and
+`assert_selection` call reads `CASE_LOG` immediately after such a `run_case`, so
+a case that failed at its fixture would have had the next assertion read the
+wrong run's log, quite possibly passing. Both are now cleared on entry and both
+assertions refuse an empty or missing log with a message saying the case never
+ran. This was reachable on any host, not only this one; it surfaced here because
+the developer host cannot build a symlink fixture.
+
+**Both target behaviours were demonstrated before and after the round 2
+reviewer repair.** The superseded runs established the production behaviour;
+the replacements establish the narrowed harness body proposed for commit. RHEL
+9.8, `step3-candidate/RHEL/rsync`, ran 56 cases with zero failures, exercising
+R-rs and R-fb at both transfer sites in one run. The Debian agent,
+`step3-candidate/Debian/no-rsync`, Jenkins build 46, ran 47 with zero failures,
+exercising the D-fb cell end to end.
+
+The two cases the developer host could not run both pass on both targets: the
+symlink-to-regular-file refusal, which is the one preventing measured silent
+external data loss, and the canary. That host cannot create a symlink at all,
+verified directly rather than assumed, so until these runs everything said about
+that refusal came from reading the code.
+
+The step 3 cases were run against the pre-change installer first, as the shared
+checklist requires, and failed on eighteen assertions with none passing
+vacuously.
 ### Goal for Step 3
 
 Branch the root-file loop on the verdict; on the fallback path, observe the
@@ -1087,27 +1166,123 @@ real regular file, and copy with `cp -a --remove-destination src prefix/name`.
 
 ### What was implemented for Step 3
 
-_(empty — no check has taken place yet.)_.
+- **`deploy_root_file_cp`**, separate from the mirror helper by design: this
+  operation has no delete semantics, so neither helper's rules are reachable from
+  the other's site.
+- **The non-following preflight**: `-L` first, two shapes accepted, everything
+  else refused at exit 7 before `cp` runs.
+- **`cp -a --remove-destination`**, static defence in depth, with no concurrency
+  claim made anywhere.
+- **The exit-7 rewording**, on both engines, and the stale `Rsync (Mirror Mode)`
+  section comment step 2 left behind.
+- **`CASE_LOG` and `CASE_EXIT` cleared on entry to `run_case`**, with both
+  trace-reading assertions refusing an empty log.
+
+### Round 2 rework for Step 3, and how it was discharged
+
+Review round 2 removed an unwitnessed `rsync` answer from `assert_deploy_engine`.
+It had concluded that rsync operated at the deploy site purely because no
+fallback marker appeared, which proves only that the assertion did not see the
+fallback. That is the same absence-as-operation inference an earlier review
+removed from the mirror assertion, reintroduced in the function written to fix a
+related conflation, and it survived a reading because nothing called it.
+
+- The narrowed assertion was synchronized to the consuming-project harness, whose
+  shared body is again byte-identical at `5e0f4430`.
+- Both targets were rerun against that exact body and the replacement captures
+  retained: RHEL 56 cases, Debian 47, zero failures, matching the counts the
+  superseded runs produced.
+- The installer is byte-identical at `f86dba2a` across both the superseded and
+  the replacement captures, so the production behaviour was never in question;
+  only the harness digests moved.
 
 ### New helpers or cases introduced for Step 3
 
-_(empty — no check has taken place yet.)_.
+- `deploy_root_file_cp` in the installer, the second and last engine branch.
+- `dest-dir` fixture oracle, for the empty and populated directory shapes.
+- `assert_deploy_engine`: the deploy site's own operation trace, a separate
+  function from `assert_engine` because that one stays mirror-scoped. Reading
+  the mirror marker for a deploy assertion would prove only that the mirror used
+  cp, which on a host with rsync is exactly step 2's behaviour and precisely
+  what this assertion must reject. It also counts the marker, since a tools
+  archive carries two root files and one stray occurrence must not satisfy a
+  contract expecting two. It exposes no rsync answer: absence of this cp marker
+  cannot prove rsync operated. The cp answer was verified by running the step 3
+  suite against the step 2 installer, where it fails with "no Deploy engine cp:
+  trace".
+- `mirrored-only` post-state oracle: the mirror completed and the run failed at
+  the root-file site. It deliberately asserts nothing about the root files,
+  because each refusal case has its own destination shape and folding them in
+  would weaken the oracle to whatever they share.
+- Twelve step 3 cases without rsync, fourteen where it exists: both accepted
+  shapes in one run with the deploy engine and its marker count asserted from
+  the deploy trace, the symlink refusal with its link-intact and
+  external-target-intact sentinels, the FIFO refusal with its FIFO-intact
+  sentinel under the watchdog, the empty and populated directory refusals with a
+  content-intact sentinel, a refusal-distinguishable-from-copy-failure check,
+  and on rsync the same symlink shape asserting the engines DIFFER.
 
 ### Architecture check for Step 3
 
-_(empty — no check has taken place yet.)_.
+- **Layering**: not applicable, as for the earlier steps.
+- **The boundary that applies**: Q01 keeps the two transfer sites independent,
+  sharing the verdict and nothing else. Both are now branched, and each carries
+  only the rules its own operation needs. The mirror deletes and has a
+  destructive boundary; the deploy does not delete and has none.
+- **Both original rsync invocations remain byte-identical** inside their
+  branches, which the step's grep check confirms.
+
+No, there is nothing that needs to be addressed.
 
 ### Cost and timing check for Step 3
 
-_(empty — no check has taken place yet.)_.
+- **One type test and one `cp` per archive root file**, on the fallback path
+  only, which is two files for a tools archive. No tree traversal is added.
+- **The refusal is what makes the timing claim**: the FIFO is refused before
+  `cp` runs, so the engine cannot block. The watchdog proves promptness is
+  falsifiable, and the calibration control still reports its timeout.
+- **Line budget**: 584 to 622, a delta of +38 against an advisory +20 to +30.
+  The overage is the comment recording M2's two measured hazards and why the
+  observation must not follow links, which is the reason the rule exists.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Harness case check for Step 3
 
-_(empty — no check has taken place yet.)_.
+- **Cumulative dispatch**: `--step 3` runs preflight, the seven controls, the
+  step 0 baseline and the step 1, 2 and 3 suites: 47 cases on a no-rsync host
+  and 56 where rsync is present. The two extra RHEL assertions are the rsync
+  symlink run and its replacement sentinel.
+- **Cases first, and seen to fail**: eighteen assertions failed against the
+  pre-change installer, including every refusal diagnostic, with none passing
+  vacuously.
+- **Retained replacement captures on both targets**:
+  `verify.step3.rhel.txt` ran 56 cases and `verify.step3.debian.txt` ran 47, zero
+  failures on either. The symlink-to-regular-file refusal and canary both pass.
+  The developer host cannot create a symlink at all, verified directly, so both
+  were unexercised until the target runs. These retained replacements use the
+  shared harness body after review round 2 narrowed the unused, absence-based
+  rsync answer out of the deploy assertion.
 
 ### Feature integrity for Step 3
 
-_(empty — no check has taken place yet.)_.
+- **Exit codes keep their numbers.** The root-file step still fails at 7 on
+  either engine, and the preflight refusals use the same code, so no caller
+  changes. Only the message text moved, which the plan assigns to this step.
+- **The rsync path is unchanged**, including on the shapes where it replaces
+  what the fallback refuses. That asymmetry is deliberate and is the same trade
+  as the mirror boundary: on a symlinked destination rsync replaces the link and
+  leaves the external target alone, and a harness case asserts that difference
+  rather than assuming the engines agree.
+- **The intended behaviour change**: on a host without rsync the install now
+  completes end to end. That is the Q19 defect fully removed, and it is the first
+  step at which the installer works on the Debian target.
+- **A deliberate behaviour change for the fallback**: a FIFO or symlinked root
+  file destination now fails at exit 7 where the rsync path returns 0. On the
+  symlink shape the alternative was overwriting an external file and reporting
+  success, so the refusal is the safe direction.
+
+No existing feature or reporting capability appears impaired.
 
 ---
 
