@@ -87,8 +87,8 @@ done
 # pass at exactly the level later steps are meant to rely on. When a later step
 # adds a suite, extend this dispatch and the SUITES record below together.
 case "$STEP" in
-    0|1|2) ;;
-    *) echo "unsupported --step $STEP: steps 0 to 2 have case suites today." >&2
+    0|1|2|3) ;;
+    *) echo "unsupported --step $STEP: steps 0 to 3 have case suites today." >&2
        echo "Add its suite and extend the dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -338,7 +338,11 @@ assert_fixture() {
             local rel="${spec#dest-file:}"
             if [ -L "$prefix/$rel" ] || [ ! -f "$prefix/$rel" ]; then
                 fail "$name" "FIXTURE dest-file: $rel is not a plain regular file"; return 1; fi
-            FIXTURE_SEEN="$rel is a regular file where a tree is expected"
+            # Neutral on purpose: this oracle serves both the mirror, where a
+            # regular file is the wrong shape, and the root-file deploy, where it
+            # is an accepted one. The case name carries which is meant, and
+            # retained evidence must not label an accepted shape as erroneous.
+            FIXTURE_SEEN="$rel is a regular file"
             ;;
         dest-symlink-dir:*)
             local body2 rel2 want2 got2
@@ -353,6 +357,12 @@ assert_fixture() {
             if [ ! -d "$want2" ]; then
                 fail "$name" "FIXTURE dest-symlink-dir: the external target [$want2] is not a directory"; return 1; fi
             FIXTURE_SEEN="$rel2 is a symlink onto an external directory"
+            ;;
+        dest-dir:*)
+            local rel4="${spec#dest-dir:}"
+            if [ -L "$prefix/$rel4" ] || [ ! -d "$prefix/$rel4" ]; then
+                fail "$name" "FIXTURE dest-dir: $rel4 is not a real directory"; return 1; fi
+            FIXTURE_SEEN="$rel4 is a directory where a regular file is expected"
             ;;
         populated:*)
             local body3 rel3 marker3
@@ -412,6 +422,17 @@ assert_post_state() {
             if [ -f "$prefix/.env" ] || [ -f "$prefix/.env_" ]; then
                 fail "$name" "POST-STATE: archive root files deployed, but the root-file site cannot work without rsync yet"; return 1; fi
             ;;
+        mirrored-only)
+            # The mirror completed and the run then failed at the root-file
+            # site. Deliberately says nothing about the root files themselves:
+            # step 3's refusal cases each assert their own destination shape,
+            # which differs per case, so folding it in here would weaken it to
+            # whatever all of them share.
+            if [ ! -d "$prefix/tools" ] || [ -z "$(ls -A "$prefix/tools" 2>/dev/null)" ]; then
+                fail "$name" "POST-STATE: tools tree absent or empty, so the mirror did not complete"; return 1; fi
+            if [ ! -L "$prefix/tools/root/usr/lib64/libgcc_s.so.1" ]; then
+                fail "$name" "POST-STATE: canary SONAME symlink is not a link after the mirror"; return 1; fi
+            ;;
         staging-retained)
             if ! ls -d "$prefix/pkgs"/tools.*/ >/dev/null 2>&1; then
                 fail "$name" "POST-STATE: staging absent, the recovery claim is unproven"; return 1; fi
@@ -461,6 +482,8 @@ assert_post_state() {
 assert_selection() {
     local name="$1" log="$2" want="$3" want_detail="$4"
     cases=$((cases + 1))
+    if [ -z "$log" ] || [ ! -f "$log" ]; then
+        fail "$name" "SELECTION: no run log, so the case it belongs to never ran"; return 1; fi
     local count line
     count=$(grep -c 'Copy engine:' "$log" 2>/dev/null)
     if [ "${count:-0}" -eq 0 ]; then
@@ -499,9 +522,38 @@ assert_selection() {
     pass "$name" "selected $want, announced before discovery (a selection, not a copy)"
 }
 
+# The DEPLOY site's own operation trace, and a separate function on purpose.
+#
+# assert_engine stays mirror-scoped, which is what the step 2 handoff required,
+# so reading it for a deploy assertion would prove only that the MIRROR used cp.
+# On a host with rsync that is exactly step 2's behaviour, cp at the mirror then
+# rsync at the root-file site, and it is precisely what a step 3 assertion has to
+# be able to reject. The marker count matters too: a tools archive carries two
+# root files, so one stray occurrence must not satisfy a contract expecting two.
+assert_deploy_engine() {
+    local name="$1" log="$2" want_count="$3"
+    cases=$((cases + 1))
+    if [ -z "$log" ] || [ ! -f "$log" ]; then
+        fail "$name" "DEPLOY ENGINE: no run log, so the case it belongs to never ran"; return 1; fi
+    local seen_count
+    seen_count=$(grep -c 'Deploy engine cp:' "$log" 2>/dev/null)
+    seen_count=${seen_count:-0}
+    if [ "$seen_count" -eq 0 ]; then
+        fail "$name" "DEPLOY ENGINE: want cp, but no 'Deploy engine cp:' trace, so the deploy site did not run the fallback"
+        return 1
+    fi
+    if [ -n "$want_count" ] && [ "$seen_count" -ne "$want_count" ]; then
+        fail "$name" "DEPLOY ENGINE: want $want_count cp deploys, the trace shows $seen_count"
+        return 1
+    fi
+    pass "$name" "deploy engine cp operated on ${want_count:-$seen_count} root files, read from the run trace"
+}
+
 assert_engine() {
     local name="$1" log="$2" want="$3" case_exit="$4"
     cases=$((cases + 1))
+    if [ -z "$log" ] || [ ! -f "$log" ]; then
+        fail "$name" "engine: no run log, so the case it belongs to never ran"; return 1; fi
     local seen="none"
     grep -q 'sending incremental file list' "$log" 2>/dev/null && seen="rsync"
     # The cp marker is emitted only by the mirror helper, so it takes precedence
@@ -540,6 +592,13 @@ run_case() {
     local name="$1" prefix="$2" want_inst="$3" want_arch="$4" want_exit="$5"
     local want_phase="$6" fixture="${7:-}" oracle="${8:-}" canonical="${9:-$INSTALLER}"
     cases=$((cases + 1))
+    # Cleared on entry, so a case that fails before running the installer leaves
+    # no log rather than the PREVIOUS case's. Every assert_engine and
+    # assert_selection call reads CASE_LOG after a run_case that may have failed
+    # early, and a stale log there would have them assert against the wrong run
+    # and quite possibly pass.
+    CASE_LOG=""
+    CASE_EXIT=-1
 
     if [ -z "$fixture" ]; then fail "$name" "FIXTURE: case named no oracle"; return 1; fi
     if [ -z "$oracle" ];  then fail "$name" "POST-STATE: case named no oracle"; return 1; fi
@@ -644,7 +703,9 @@ if [ "$STEP" -ge 1 ]; then
     # exercises six selections and, from step 2, both engines at the mirror, so
     # no single engine cell describes it. The label carries the highest suite so
     # a capture cannot be mistaken for the one below it.
-    if [ "$STEP" -ge 2 ]; then SUITE_TAG="step2-candidate"; else SUITE_TAG="step1-candidate"; fi
+    if   [ "$STEP" -ge 3 ]; then SUITE_TAG="step3-candidate"
+    elif [ "$STEP" -ge 2 ]; then SUITE_TAG="step2-candidate"
+    else                         SUITE_TAG="step1-candidate"; fi
     case "$os_id" in
         debian)
             COMBINATION_CLAIMS_TARGET=1
@@ -654,7 +715,9 @@ if [ "$STEP" -ge 1 ]; then
                 COMBINATION_WHY="Debian with rsync present is not a shape the target matrix contains"
             else
                 COMBINATION="$SUITE_TAG/Debian/no-rsync"; COMBINATION_OK=1; WANT_ENGINE="none"
-                if [ "$STEP" -ge 2 ]; then
+                if [ "$STEP" -ge 3 ]; then
+                    COMBINATION_NOTE="a step 3 candidate suite. Both sites now branch, so this run exercises the D-fb matrix cell end to end: the fallback is the only engine and the install completes. The per-case operation assertions remain the authority for which engine ran where."
+                elif [ "$STEP" -ge 2 ]; then
                     COMBINATION_NOTE="a step 2 candidate suite, NOT a matrix cell: the fallback now completes the mirror here, and the run dies at the root-file site until step 3."
                 else
                     COMBINATION_NOTE="a step 1 selection suite, NOT a matrix cell: it exercises six selections, and the unchanged rsync site still fails with no engine operating."
@@ -668,7 +731,9 @@ if [ "$STEP" -ge 1 ]; then
                 COMBINATION_WHY="RHEL without rsync is not a shape the target matrix contains"
             else
                 COMBINATION="$SUITE_TAG/RHEL/rsync"; COMBINATION_OK=1; WANT_ENGINE="rsync"
-                if [ "$STEP" -ge 2 ]; then
+                if [ "$STEP" -ge 3 ]; then
+                    COMBINATION_NOTE="a step 3 candidate suite, NOT one matrix cell: one cumulative run exercises R-rs without the override and R-fb under it, at both transfer sites. The per-case operation assertions remain the authority for which engine ran where."
+                elif [ "$STEP" -ge 2 ]; then
                     COMBINATION_NOTE="a step 2 candidate suite, NOT a matrix cell: it exercises both engines at the mirror, the fallback under the override and rsync without it."
                 else
                     COMBINATION_NOTE="a step 1 selection suite, NOT a matrix cell: it exercises six selections plus the forced divergence, where cp is selected and rsync still operates."
@@ -904,7 +969,19 @@ if [ "$have_rsync" = yes ]; then
     fi
     suite "baseline-rsync"
 else
-    if [ "$STEP" -ge 2 ]; then
+    if [ "$STEP" -ge 3 ]; then
+        # Both sites now branch, so a host with no rsync installs end to end.
+        # This case has moved twice: exit 5 at the mirror at step 0, which was
+        # the Q19 defect written down; exit 7 at the root-file site at step 2,
+        # the honest intermediate; and exit 0 here, the defect gone. Each move
+        # re-pointed the assertion rather than deleting it, which is what keeps
+        # the sequence readable.
+        echo "  (no rsync, step 3: both sites branch, so the install completes"
+        echo "   on the fallback engine alone)"
+        run_case "baseline no-rsync mirror" "$base" "$INSTALLER" "$base_archive" 0 \
+                 'Installation successful' fresh installed
+        assert_engine "baseline engine" "$CASE_LOG" cp "$CASE_EXIT"
+    elif [ "$STEP" -ge 2 ]; then
         # The Q19 defect is gone from the mirror as of step 2, so the case that
         # recorded it changes rather than disappears. The run now gets past the
         # mirror on the fallback and dies at the root-file site, which still
@@ -974,7 +1051,7 @@ if [ "$STEP" -ge 1 ]; then
     # the step, not of step 1: from step 2 the fallback completes the mirror, so
     # a no-rsync host stops at the root-file site instead of the mirror. The
     # selection assertions below are unchanged either way, which is the point.
-    if [ "$have_rsync" = yes ]; then
+    if [ "$have_rsync" = yes ] || [ "$STEP" -ge 3 ]; then
         sel_exit=0; sel_phase='Installation successful'; sel_post=installed
     elif [ "$STEP" -ge 2 ]; then
         sel_exit=7; sel_phase="Rsync \(\.env"; sel_post=mirrored-not-deployed
@@ -1049,11 +1126,14 @@ if [ "$STEP" -ge 2 ]; then
     # the only engine. Either way these cases run the cp mirror.
     if [ "$have_rsync" = yes ]; then
         CASE_FORCE_CP=1
-        # rsync present, so the root-file site works and the install completes.
-        s2_exit=0; s2_phase='Installation successful'; s2_post=installed
     else
         unset CASE_FORCE_CP
-        # No rsync, so the root-file site still fails until step 3.
+    fi
+    if [ "$have_rsync" = yes ] || [ "$STEP" -ge 3 ]; then
+        # Either rsync deploys the root files, or from step 3 the fallback does.
+        s2_exit=0; s2_phase='Installation successful'; s2_post=installed
+    else
+        # No rsync and before step 3, so the root-file site still fails.
         s2_exit=7; s2_phase="Rsync \(\.env"; s2_post=mirrored-not-deployed
     fi
 
@@ -1144,6 +1224,155 @@ if [ "$STEP" -ge 2 ]; then
 
     unset CASE_FORCE_CP
     suite "step2-mirror"
+    echo
+fi
+
+# ------------------------------------------- step 3: the root-file fallback ---
+# Plan step 3: branch the root-file loop on the verdict; on the fallback path
+# observe the destination without following symlinks, accept only an absent
+# destination or a real regular file, and copy with --remove-destination.
+#
+# M2 measured the two hazards this preflight exists for, and they belong to the
+# fallback engine rather than to a distribution: onto a symlink to a regular
+# file `cp -a` follows the link, overwrites the external target and returns 0;
+# onto a FIFO it blocks. The first is silent data loss reported as success, the
+# second is an unattended install waiting forever.
+if [ "$STEP" -ge 3 ]; then
+    echo "--- step 3: the root-file deploy and its non-following preflight"
+
+    if [ "$have_rsync" = yes ]; then CASE_FORCE_CP=1; else unset CASE_FORCE_CP; fi
+
+    # 1. Both accepted shapes, in one run: .env absent and .env_ present as a
+    # real regular file. The install completes and both carry archive content.
+    s3a=$(new_prefix step3-accept)
+    build_archive "$s3a/pkgs/tools.2026-08-11_000000.tar.gz"
+    s3a_archive=$(resolve_archive "$s3a")
+    printf 'stale root file\n' > "$s3a/.env_"
+    run_case "step3 deploy accepted shapes" "$s3a" "$INSTALLER" "$s3a_archive" 0 \
+             'Installation successful' "dest-file:.env_" installed
+    # Both root files, and read from the DEPLOY trace rather than the mirror's:
+    # the archive carries .env and .env_, so the fallback must have deployed
+    # exactly two.
+    assert_deploy_engine "step3 accepted deploy engine" "$CASE_LOG" 2
+    cases=$((cases + 1))
+    if grep -q 'export A=1' "$s3a/.env" 2>/dev/null \
+       && grep -q 'export B=2' "$s3a/.env_" 2>/dev/null; then
+        pass "step3 both root files deployed" "absent and present destinations both carry archive content"
+    else
+        fail "step3 both root files deployed" "a root file is missing or stale"
+    fi
+
+    # 2. The overwrite hazard: a destination that is a symlink to a regular file
+    # OUTSIDE the prefix. Refused at exit 7, the link left as a link, and the
+    # external target byte-identical including mtime. Without the non-following
+    # observation this run would have reported success while destroying it.
+    s3b=$(new_prefix step3-symlink)
+    build_archive "$s3b/pkgs/tools.2026-08-11_000000.tar.gz"
+    s3b_archive=$(resolve_archive "$s3b")
+    mkdir -p "$SCRATCH/external"
+    s3b_ext="$SCRATCH/external/rootfile.target"
+    printf 'PRECIOUS\n' > "$s3b_ext"
+    touch -d '2020-02-02 02:02:02' "$s3b_ext" 2>/dev/null
+    s3b_before="$(sha256sum -- "$s3b_ext" | cut -d' ' -f1) $(stat -c '%.9Y' -- "$s3b_ext")"
+    ln -s "$s3b_ext" "$s3b/.env" 2>/dev/null
+    run_case "step3 dest symlink to file" "$s3b" "$INSTALLER" "$s3b_archive" 7 \
+             "deploy step \(engine cp\): '\.env' destination is a symlink" \
+             "symlink:.env=$s3b_ext" mirrored-only
+    s3b_log="$CASE_LOG"
+    cases=$((cases + 1))
+    if [ -L "$s3b/.env" ]; then
+        pass "step3 symlink left intact" "the link itself was not replaced"
+    else
+        fail "step3 symlink left intact" "the destination symlink was replaced"
+    fi
+    cases=$((cases + 1))
+    if [ "$s3b_before" = "$(sha256sum -- "$s3b_ext" | cut -d' ' -f1) $(stat -c '%.9Y' -- "$s3b_ext")" ]; then
+        pass "step3 external target intact" "content and mtime unchanged, so nothing copied through the link"
+    else
+        fail "step3 external target intact" "the external target was overwritten through the link"
+    fi
+
+    # 3. The block hazard, and the Step 0 gate closing. A FIFO destination was
+    # measured making this engine wait forever; the preflight must refuse it
+    # before cp runs. run_case's watchdog is what makes "promptly" falsifiable:
+    # a blocking engine returns 124 and fails the expected 7.
+    s3c=$(new_prefix step3-fifo)
+    build_archive "$s3c/pkgs/tools.2026-08-11_000000.tar.gz"
+    s3c_archive=$(resolve_archive "$s3c")
+    mkfifo "$s3c/.env" 2>/dev/null
+    run_case "step3 dest FIFO refused promptly" "$s3c" "$INSTALLER" "$s3c_archive" 7 \
+             "deploy step \(engine cp\): '\.env' destination is not a regular file" \
+             "fifo:.env" mirrored-only
+    cases=$((cases + 1))
+    if [ -p "$s3c/.env" ]; then
+        pass "step3 FIFO left intact" "refused before any copy, so the FIFO survives"
+    else
+        fail "step3 FIFO left intact" "the FIFO was replaced or removed"
+    fi
+
+    # 4. Directory destinations, empty and populated, both refused at exit 7.
+    s3d=$(new_prefix step3-emptydir)
+    build_archive "$s3d/pkgs/tools.2026-08-11_000000.tar.gz"
+    s3d_archive=$(resolve_archive "$s3d")
+    mkdir -p "$s3d/.env"
+    run_case "step3 dest empty directory" "$s3d" "$INSTALLER" "$s3d_archive" 7 \
+             "deploy step \(engine cp\): '\.env' destination is not a regular file" \
+             "dest-dir:.env" mirrored-only
+
+    s3e=$(new_prefix step3-populateddir)
+    build_archive "$s3e/pkgs/tools.2026-08-11_000000.tar.gz"
+    s3e_archive=$(resolve_archive "$s3e")
+    mkdir -p "$s3e/.env"
+    printf 'inside\n' > "$s3e/.env/occupant"
+    run_case "step3 dest populated directory" "$s3e" "$INSTALLER" "$s3e_archive" 7 \
+             "deploy step \(engine cp\): '\.env' destination is not a regular file" \
+             "dest-dir:.env" mirrored-only
+    cases=$((cases + 1))
+    if [ -f "$s3e/.env/occupant" ]; then
+        pass "step3 directory content intact" "refused without touching what was inside"
+    else
+        fail "step3 directory content intact" "the directory's content was disturbed"
+    fi
+
+    # 5. A preflight refusal must be distinguishable from a copy failure. Both
+    # exit 7, so the code alone cannot tell them apart; the diagnostics must.
+    cases=$((cases + 1))
+    if [ -z "$s3b_log" ] || [ ! -f "$s3b_log" ]; then
+        fail "step3 refusal distinguishable" "the symlink case never ran, so there is no refusal to read"
+    elif grep -q "destination is a symlink" "$s3b_log" 2>/dev/null \
+         && ! grep -q "copy failed" "$s3b_log" 2>/dev/null; then
+        pass "step3 refusal distinguishable" "the preflight names the shape, not a failed copy"
+    else
+        fail "step3 refusal distinguishable" "a preflight refusal reads like a copy failure"
+    fi
+
+    # 6. The same refusal shapes on the rsync engine, where one exists. rsync
+    # replaces a symlink destination and leaves its target alone, which is the
+    # asymmetry the design keeps deliberately, so this asserts the engines
+    # DIFFER here rather than that they agree.
+    if [ "$have_rsync" = yes ]; then
+        unset CASE_FORCE_CP
+        s3f=$(new_prefix step3-symlink-rsync)
+        build_archive "$s3f/pkgs/tools.2026-08-11_000000.tar.gz"
+        s3f_archive=$(resolve_archive "$s3f")
+        s3f_ext="$SCRATCH/external/rootfile.rsync.target"
+        printf 'PRECIOUS\n' > "$s3f_ext"
+        s3f_before=$(sha256sum -- "$s3f_ext" | cut -d' ' -f1)
+        ln -s "$s3f_ext" "$s3f/.env" 2>/dev/null
+        run_case "step3 rsync dest symlink to file" "$s3f" "$INSTALLER" "$s3f_archive" 0 \
+                 'Installation successful' "symlink:.env=$s3f_ext" installed
+        cases=$((cases + 1))
+        if [ ! -L "$s3f/.env" ] \
+           && [ "$(sha256sum -- "$s3f_ext" | cut -d' ' -f1)" = "$s3f_before" ]; then
+            pass "step3 rsync replaced the link" "link replaced, external target untouched: the documented asymmetry"
+        else
+            fail "step3 rsync replaced the link" "rsync did not behave as the design records"
+        fi
+        CASE_FORCE_CP=1
+    fi
+
+    unset CASE_FORCE_CP
+    suite "step3-rootfile"
     echo
 fi
 
