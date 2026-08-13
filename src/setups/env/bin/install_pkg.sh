@@ -33,13 +33,20 @@ fi
 # ================= CONFIGURATION =================
 # Installation prefix: the directory holding 'tools', 'bin' and 'pkgs'.
 # Defaults to $HOME (historical same-account layout). Pass -p/--prefix for a
-# relocated install, e.g. --prefix /project/middleware1/refer/upipdfs
+# relocated install, e.g. --prefix /project/middleware1/refer/deploy-group
 INSTALL_PREFIX="$HOME"
 # Resolved after argument parsing: $INSTALL_PREFIX/pkgs
 PKG_DIR=""
 # sed-escaped copies of INSTALL_PREFIX, safe in replacement and pattern position
 PREFIX_SED=""
 PREFIX_SED_PAT=""
+# The copy engine, 'rsync' or 'cp', and the resolved rsync path when selected.
+# Decided once by select_copy_engine and reused by every transfer site.
+COPY_ENGINE=""
+COPY_ENGINE_RSYNC=""
+# Validation override, a test surface rather than an operating mode: only the
+# exact value 1 forces the fallback, anything else behaves as unset.
+CPLX_INSTALL_PKG_FORCE_CP="${CPLX_INSTALL_PKG_FORCE_CP:-}"
 # =================================================
 
 # The home anchor of every rewrite pattern, composed at runtime: a
@@ -384,6 +391,29 @@ if ! mkdir -p "$PKG_DIR"; then
     fatal "Error: Failed to create '$PKG_DIR'." 19
 fi
 info "Installation prefix: $INSTALL_PREFIX"
+
+# --- 1b. Select the copy engine ---
+# Here, before archive discovery, and announced as a SELECTION rather than an
+# action: a run that dies during discovery or extraction has still said which
+# engine it would have copied with. Absence of rsync selects the fallback; a
+# present rsync that FAILS does not, since that is a real error about the tree,
+# the permissions or the disk. The resolved path is printed because command -v
+# finds a stand-in shim as readily as a real rsync, and a shim that ignores
+# --delete would otherwise degrade the mirror invisibly.
+select_copy_engine() {
+    COPY_ENGINE_RSYNC="$(command -v rsync 2>/dev/null)"
+    if [ "$CPLX_INSTALL_PKG_FORCE_CP" = "1" ]; then
+        COPY_ENGINE="cp"
+        info "Copy engine: cp (forced by CPLX_INSTALL_PKG_FORCE_CP=1)"
+    elif [ -n "$COPY_ENGINE_RSYNC" ]; then
+        COPY_ENGINE="rsync"
+        info "Copy engine: rsync ($COPY_ENGINE_RSYNC)"
+    else
+        COPY_ENGINE="cp"
+        info "Copy engine: cp (rsync not found on PATH)"
+    fi
+}
+select_copy_engine
 
 # --- 2. Find the Most Recent Archive ---
 # We look in the prefix, $HOME and both pkgs directories for files like
