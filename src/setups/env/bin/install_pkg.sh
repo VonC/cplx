@@ -261,6 +261,40 @@ mirror_tree_cp() {
     ok "Mirror complete (engine cp)."
 }
 
+# Deploys one archive root file without rsync. Deliberately separate from the
+# mirror helper and sharing nothing with it but the engine verdict: this
+# operation has no delete semantics, so the mirror's destructive boundary must
+# not be reachable from here, nor this one's rules from there.
+deploy_root_file_cp() {
+    local src="$1" dst="$2" name="$3"
+
+    # A safety rule, not a tidiness one. Measured on coreutils 8.32 and 9.1, this
+    # engine has two hazards the rsync path does not: onto a symlink to a regular
+    # file, `cp -a` FOLLOWS the link, overwrites the external target and returns
+    # 0, so the install reports success while the operator's file is gone; onto a
+    # FIFO it blocks, so an unattended install waits forever instead of failing.
+    #
+    # -L is tested first and nothing here follows a link, which is the
+    # load-bearing detail: a following predicate would classify a symlink to a
+    # regular file as an acceptable regular file and keep the exact overwrite
+    # this rule removes. Two shapes are accepted, absent and real regular file;
+    # everything else is refused BEFORE cp runs, which is what stops the block.
+    if [ -L "$dst" ]; then
+        fatal "Error: deploy step (engine cp): '$name' destination is a symlink; refusing to copy through it." 7
+    fi
+    if [ -e "$dst" ] && [ ! -f "$dst" ]; then
+        fatal "Error: deploy step (engine cp): '$name' destination is not a regular file." 7
+    fi
+
+    task "Deploy engine cp: '$name' into '$INSTALL_PREFIX'..."
+    # --remove-destination is static defence in depth, not a concurrency claim:
+    # the preflight and the copy are separated in time and nothing here says
+    # otherwise.
+    if ! cp -a --remove-destination "$src" "$dst"; then
+        fatal "Error: deploy step (engine cp): '$name' copy failed." 7
+    fi
+}
+
 find_patchelf() {
     local candidate
     for candidate in "$INSTALL_PREFIX/tools/bin/patchelf" "$HOME/tools/bin/patchelf"; do
@@ -513,7 +547,7 @@ if ! tar -xzf "$LATEST_ARCHIVE" -C "$STAGING_DIR"; then
     fatal "Error: Extraction failed." 3
 fi
 
-# --- 5. Rsync (Mirror Mode) ---
+# --- 5. Mirror the tree ---
 # The source is inside the staging dir (e.g., <prefix>/pkgs/tools.xxx/tools/)
 SOURCE_PATH="$STAGING_DIR/$TARGET"
 DEST_PATH="$INSTALL_PREFIX/$TARGET"
@@ -545,8 +579,12 @@ for root_file in "$STAGING_DIR"/*; do
     [ -f "$root_file" ] || continue
     root_file_name="$(basename "$root_file")"
     task "Deploying '$root_file_name' to $INSTALL_PREFIX..."
-    if ! rsync -av "$root_file" "$INSTALL_PREFIX/"; then
-        fatal "Error: Rsync ($root_file_name) failed." 7
+    if [ "$COPY_ENGINE" = "rsync" ]; then
+        if ! rsync -av "$root_file" "$INSTALL_PREFIX/"; then
+            fatal "Error: deploy step (engine rsync) failed for '$root_file_name'." 7
+        fi
+    else
+        deploy_root_file_cp "$root_file" "$INSTALL_PREFIX/$root_file_name" "$root_file_name"
     fi
     fix_text_paths "$INSTALL_PREFIX/$root_file_name"
 done
