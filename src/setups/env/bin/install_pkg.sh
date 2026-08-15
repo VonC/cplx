@@ -4,9 +4,12 @@
 # <target>.*.tar.gz produced by pkg.sh into an installation prefix, then
 # makes the tree self-contained there — symlink targets, text files, ELF
 # interpreter (PT_INTERP) and rpath are re-anchored from the build
-# account's /home/<user> to the prefix. Run it from any account: it only
-# needs the archive, this script, and the patchelf shipped in the tools
-# archive.
+# account's /home/<user> to the prefix. Run it from any account.
+# It needs the archive, this script, the patchelf shipped in the tools
+# archive, and a short list of host programs. That list is recorded, with
+# the method that produced it, under "Host tools install_pkg.sh needs" in
+# wiki/reference/relocation-tools.md. rsync is optional there: without it
+# the script falls back to cp at both transfer sites.
 # Application-specific install steps (extra bin entries) belong to the
 # consuming project's own deployment script (my-project does them in
 # tools/deploy_pkgs.sh: see my-project docs/pkg-tools-migration-to-cplx.md).
@@ -33,13 +36,20 @@ fi
 # ================= CONFIGURATION =================
 # Installation prefix: the directory holding 'tools', 'bin' and 'pkgs'.
 # Defaults to $HOME (historical same-account layout). Pass -p/--prefix for a
-# relocated install, e.g. --prefix /project/middleware1/refer/upipdfs
+# relocated install, e.g. --prefix /project/middleware1/refer/deploy-group
 INSTALL_PREFIX="$HOME"
 # Resolved after argument parsing: $INSTALL_PREFIX/pkgs
 PKG_DIR=""
 # sed-escaped copies of INSTALL_PREFIX, safe in replacement and pattern position
 PREFIX_SED=""
 PREFIX_SED_PAT=""
+# The copy engine, 'rsync' or 'cp', and the resolved rsync path when selected.
+# Decided once by select_copy_engine and reused by every transfer site.
+COPY_ENGINE=""
+COPY_ENGINE_RSYNC=""
+# Validation override, a test surface rather than an operating mode: only the
+# exact value 1 forces the fallback, anything else behaves as unset.
+CPLX_INSTALL_PKG_FORCE_CP="${CPLX_INSTALL_PKG_FORCE_CP:-}"
 # =================================================
 
 # The home anchor of every rewrite pattern, composed at runtime: a
@@ -207,6 +217,85 @@ clear_pycache() {
         warning "Some __pycache__ directories could not be removed under '$root_path'."
     fi
     ok "__pycache__ cleared (bytecode is regenerated on first import)."
+}
+
+# The mirror's delete semantics without rsync, for the only case this script
+# uses: a whole tree onto a whole tree. Emptying the destination content then
+# copying the source content is equivalent for that case; no partial-tree,
+# filter or exclusion behaviour is in scope, because no call site uses one.
+mirror_tree_cp() {
+    local src="$1" dst="$2"
+
+    # The boundary, applied before anything is removed, because this delete is
+    # recursive and unbounded if pointed at the wrong place. -L is tested first
+    # and no test here follows a link: a symlink of any kind is refused,
+    # including a symlink to a directory, the shape measured to make the rsync
+    # path empty an EXTERNAL target and still return 0. The new engine is the
+    # stricter one.
+    if [ -L "$dst" ]; then
+        fatal "Error: mirror step (engine cp): destination '$dst' is a symlink; refusing to empty it." 5
+    fi
+    if [ -e "$dst" ] && [ ! -d "$dst" ]; then
+        fatal "Error: mirror step (engine cp): destination '$dst' is not a directory." 5
+    fi
+
+    task "Mirror engine cp: emptying and copying into '$dst'..."
+    if [ -e "$dst" ]; then
+        # The content, not the directory itself, so the directory object and any
+        # mount-point boundary on it are retained. This says nothing about its
+        # metadata: the copy form below deliberately gives the transfer root the
+        # source's attributes, so no ACL on the destination is preserved, and
+        # ACLs are outside the parity manifest either way.
+        if ! find "$dst" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; then
+            fatal "Error: mirror step (engine cp): could not empty '$dst'." 5
+        fi
+    elif ! mkdir -p -- "$dst"; then
+        fatal "Error: mirror step (engine cp): could not create '$dst'." 5
+    fi
+
+    # `src/.` is load-bearing: it gives the transfer root the source mode and
+    # mtime, matching the other engine's treatment of its transfer root, and it
+    # carries hidden entries without depending on the caller's globbing. Both
+    # trees hold hidden entries, and skipping them would leave stale hidden
+    # files behind on a redeployment.
+    if ! cp -a "$src/." "$dst/"; then
+        fatal "Error: mirror step (engine cp): copy into '$dst' failed." 5
+    fi
+    ok "Mirror complete (engine cp)."
+}
+
+# Deploys one archive root file without rsync. Deliberately separate from the
+# mirror helper and sharing nothing with it but the engine verdict: this
+# operation has no delete semantics, so the mirror's destructive boundary must
+# not be reachable from here, nor this one's rules from there.
+deploy_root_file_cp() {
+    local src="$1" dst="$2" name="$3"
+
+    # A safety rule, not a tidiness one. Measured on coreutils 8.32 and 9.1, this
+    # engine has two hazards the rsync path does not: onto a symlink to a regular
+    # file, `cp -a` FOLLOWS the link, overwrites the external target and returns
+    # 0, so the install reports success while the operator's file is gone; onto a
+    # FIFO it blocks, so an unattended install waits forever instead of failing.
+    #
+    # -L is tested first and nothing here follows a link, which is the
+    # load-bearing detail: a following predicate would classify a symlink to a
+    # regular file as an acceptable regular file and keep the exact overwrite
+    # this rule removes. Two shapes are accepted, absent and real regular file;
+    # everything else is refused BEFORE cp runs, which is what stops the block.
+    if [ -L "$dst" ]; then
+        fatal "Error: deploy step (engine cp): '$name' destination is a symlink; refusing to copy through it." 7
+    fi
+    if [ -e "$dst" ] && [ ! -f "$dst" ]; then
+        fatal "Error: deploy step (engine cp): '$name' destination is not a regular file." 7
+    fi
+
+    task "Deploy engine cp: '$name' into '$INSTALL_PREFIX'..."
+    # --remove-destination is static defence in depth, not a concurrency claim:
+    # the preflight and the copy are separated in time and nothing here says
+    # otherwise.
+    if ! cp -a --remove-destination "$src" "$dst"; then
+        fatal "Error: deploy step (engine cp): '$name' copy failed." 7
+    fi
 }
 
 find_patchelf() {
@@ -385,6 +474,29 @@ if ! mkdir -p "$PKG_DIR"; then
 fi
 info "Installation prefix: $INSTALL_PREFIX"
 
+# --- 1b. Select the copy engine ---
+# Here, before archive discovery, and announced as a SELECTION rather than an
+# action: a run that dies during discovery or extraction has still said which
+# engine it would have copied with. Absence of rsync selects the fallback; a
+# present rsync that FAILS does not, since that is a real error about the tree,
+# the permissions or the disk. The resolved path is printed because command -v
+# finds a stand-in shim as readily as a real rsync, and a shim that ignores
+# --delete would otherwise degrade the mirror invisibly.
+select_copy_engine() {
+    COPY_ENGINE_RSYNC="$(command -v rsync 2>/dev/null)"
+    if [ "$CPLX_INSTALL_PKG_FORCE_CP" = "1" ]; then
+        COPY_ENGINE="cp"
+        info "Copy engine: cp (forced by CPLX_INSTALL_PKG_FORCE_CP=1)"
+    elif [ -n "$COPY_ENGINE_RSYNC" ]; then
+        COPY_ENGINE="rsync"
+        info "Copy engine: rsync ($COPY_ENGINE_RSYNC)"
+    else
+        COPY_ENGINE="cp"
+        info "Copy engine: cp (rsync not found on PATH)"
+    fi
+}
+select_copy_engine
+
 # --- 2. Find the Most Recent Archive ---
 # We look in the prefix, $HOME and both pkgs directories for files like
 # target.*.tar.gz, and keep the newest by modification time.
@@ -438,7 +550,7 @@ if ! tar -xzf "$LATEST_ARCHIVE" -C "$STAGING_DIR"; then
     fatal "Error: Extraction failed." 3
 fi
 
-# --- 5. Rsync (Mirror Mode) ---
+# --- 5. Mirror the tree ---
 # The source is inside the staging dir (e.g., <prefix>/pkgs/tools.xxx/tools/)
 SOURCE_PATH="$STAGING_DIR/$TARGET"
 DEST_PATH="$INSTALL_PREFIX/$TARGET"
@@ -448,11 +560,15 @@ if [ ! -d "$SOURCE_PATH" ]; then
 fi
 
 task "Syncing to $DEST_PATH (Mirror Mode)..."
-# -a: Archive mode (perms, times, etc.)
-# -v: Verbose
-# --delete: Delete files in DEST that are not in SOURCE
-if ! rsync -av --delete "$SOURCE_PATH/" "$DEST_PATH/"; then
-    fatal "Error: Rsync (main) failed." 5
+if [ "$COPY_ENGINE" = "rsync" ]; then
+    # -a: Archive mode (perms, times, etc.)
+    # -v: Verbose
+    # --delete: Delete files in DEST that are not in SOURCE
+    if ! rsync -av --delete "$SOURCE_PATH/" "$DEST_PATH/"; then
+        fatal "Error: mirror step (engine rsync) failed." 5
+    fi
+else
+    mirror_tree_cp "$SOURCE_PATH" "$DEST_PATH"
 fi
 fix_home_symlink_targets "$DEST_PATH"
 
@@ -466,8 +582,12 @@ for root_file in "$STAGING_DIR"/*; do
     [ -f "$root_file" ] || continue
     root_file_name="$(basename "$root_file")"
     task "Deploying '$root_file_name' to $INSTALL_PREFIX..."
-    if ! rsync -av "$root_file" "$INSTALL_PREFIX/"; then
-        fatal "Error: Rsync ($root_file_name) failed." 7
+    if [ "$COPY_ENGINE" = "rsync" ]; then
+        if ! rsync -av "$root_file" "$INSTALL_PREFIX/"; then
+            fatal "Error: deploy step (engine rsync) failed for '$root_file_name'." 7
+        fi
+    else
+        deploy_root_file_cp "$root_file" "$INSTALL_PREFIX/$root_file_name" "$root_file_name"
     fi
     fix_text_paths "$INSTALL_PREFIX/$root_file_name"
 done

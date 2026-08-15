@@ -1,0 +1,26 @@
+===== host identity =====
+distribution: Debian GNU/Linux 12 (bookworm)
+coreutils: cp (GNU coreutils) 9.1
+rsync: absent, only the fallback half can be measured here
+===== reference: the source tree =====
+src root:  mode=750 mtime=1577930645 owner=jenkins group=jenkins   (mode set to 750)
+===== engine A: rsync -av --delete src/ dst/ =====
+skipped: rsync is absent on this host
+===== engine B1: empty the destination, then cp -a src/. dst/ =====
+before:    mode=711 mtime=1273122489 owner=jenkins group=jenkins   (mode set to 711)
+after:     mode=750 mtime=1577930645 owner=jenkins group=jenkins
+===== engine B2: empty the destination, then copy each top-level entry =====
+before:    mode=711 mtime=1273122489 owner=jenkins group=jenkins   (mode set to 711)
+after:     mode=711 mtime=1786354448 owner=jenkins group=jenkins
+===== verdict on the transfer root =====
+cp -a src/.  root mode:  takes the SOURCE mode (750), which the design does not expect
+cp -a src/.  root mtime: takes the SOURCE mtime, which the design does not expect
+per-entry cp root mode:  keeps the destination mode (711), as the design claims
+per-entry cp root mtime: fresh, set when the copy ran, as the design claims
+===== everything beneath the root =====
+contents: not compared, rsync absent so there is only one tree
+fallback tree entries:
+    .srchidden	f	644	14	1786354447.9561268990	
+    link	l	777	12	1786354447.9601268980	sub/file.txt
+    sub	d	705	22	1577930645.0000000000	
+    sub/file.txt	f	644	8	1577930645.0000000000	

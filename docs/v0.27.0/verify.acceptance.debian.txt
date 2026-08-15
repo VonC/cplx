@@ -1,0 +1,230 @@
+Harness: tools/installer_verify_step0.sh --step 5 (the consuming project's copy
+         of docs/v0.27.0/verify.install-pkg.sh)
+Target: Debian 12 CI agent, Jenkins build 55, rsync absent
+Identity: step3-candidate/Debian/no-rsync. This run exercises the D-fb matrix
+         cell end to end: the fallback is the only engine and the install
+         completes. The identity still reads "step3-candidate" because it names
+         the last step that changed installer code: steps 4 and 5 changed none.
+Captured: 2026-08-15, by the pipeline stage 'Verify installer candidate (current
+         step)'
+Purpose: Step 5 acceptance on the only Debian target. It carries the rows no
+         other target can produce, and it explicitly does NOT carry the
+         two-engine rows.
+
+Archive under test: the synthetic fixture built by the harness. The published
+         archive is not reachable from this agent, so the real-archive rows are
+         RHEL-only and are named as such in the output below.
+
+Installer under test: a VERIFICATION INPUT, not a delivered installer.
+         tools/install_pkg.candidate.verification-only.sh in the consuming
+         project, a byte-identical copy of this branch's candidate. It does not
+         replace the bootstrap installer, does not enter pkg.sh's input or the
+         published archive, and no deployment step reads it.
+
+Produced by: the consuming-project commit that made the loader comparison
+         comparable. The candidate is unchanged since step 3: no
+         review round in steps 4 or 5 touched installer code.
+
+Supersedes: the build 51 and 53 captures. Build 51 never ran the
+         interrupted-copy row, which had been placed inside the two-engine
+         section; build 53 ran a loader comparison whose two sides could pick
+         different loaders. Every other case outcome is unchanged.
+
+Source: fetched from the build's archived artifact
+        a.evidence/verify-step5.debian.txt, so it carries no timestamper prefix
+        and nothing was reformatted. The body below was rebuilt from those bytes
+        by machine, header prepended and the substitution below applied, rather
+        than transcribed. An earlier version of this file was updated in place
+        instead: the header was rewritten to this run while one body line
+        survived from the run before, producing a capture that claimed a harness
+        whose recovery assertion cannot emit that line. Code review round 3
+        found it. Rebuilding from the artifact is now the only way this file is
+        produced, and the rebuild was diffed against the corrected version to
+        confirm they agree byte for byte.
+
+Note: the workspace path carried the company name and the private project name,
+and both have been substituted under the repository's sensitive-content rules.
+No other byte of the output is changed.
+
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 5 ===
+date      : 2026-08-15T08:21:55Z (UTC)
+harness   : installer_verify_step0.sh
+  sha256  : 068551ad73b1bcfa57df5c965c57dd8ba4225b178c272e0137b3b23eff9ffb69
+  body    : ccf52d7a36c072f2ce11b410cb9ae9ed60ed38c1fda924489408967d27465747
+uname     : Linux 5.14.0-687.24.1.el9_8.x86_64 x86_64
+archive   : synthetic fixture built by the harness
+installer : /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.candidate.verification-only.sh
+  sha256  : 591e2db0684181f29d4f8ef3fb9d669250e604d2dcb6442c01758f48f764575a
+  lines   : 625
+  fallback: yes (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : no
+identity  : step3-candidate/Debian/no-rsync, requested; the engine is asserted from the run trace below
+            a step 3 candidate suite. Both sites now branch, so this run exercises the D-fb matrix cell end to end: the fallback is the only engine and the install completes. The per-case operation assertions remain the authority for which engine ran where.
+home      : /tmp/cplx-verify.65281/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.65281 (1629.5 GiB free on overlay)
+watchdog  : 20s per case
+
+--- preflight
+  preflight commands                 PASS  all 30 present
+  preflight stat fractional          PASS  1786782115.276016388
+  preflight combination              PASS  step3-candidate/Debian/no-rsync, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  control watchdog                   PASS  blocked, killed at 2s
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  control equivalence mtime cell     PASS  refused on [of 1 rewritten entries], as designed
+  control equivalence digest cell    PASS  refused on [the engines differ where they must not], as designed
+  control loader absent fallback     PASS  refused on [no loader or no ELF found under cp], as designed
+  control loader different ELF       PASS  refused on [the two trees selected different ELFs], as designed
+  control loader different loader    PASS  refused on [the two trees used different loaders], as designed
+  control loader dependency count    PASS  refused on [same ELF and loader, but], as designed
+  control loader short listing       PASS  refused on [listings too short to compare], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (no rsync, step 3: both sites branch, so the install completes
+   on the fallback engine alone)
+  baseline no-rsync mirror           PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  engine cp operated, read from the run trace
+
+--- step 1: engine selection (a selection trace, not proof of a copy)
+  control selection-no-discovery     PASS  refused on [SELECTION: archive discovery marker], as designed
+  control selection-out-of-order     PASS  refused on [SELECTION: trace at line], as designed
+  step1 override unset               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override unset trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override 1                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 1 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override 0                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 0 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override yes                 PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override yes trace           PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override true                PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override true trace          PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override empty               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override empty trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+
+--- step 2: the mirror fallback and its destination boundary
+  step2 fallback fresh               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 fresh engine                 PASS  engine cp operated, read from the run trace
+  step2 hidden entry carried         PASS  cp -a src/. carried the hidden entry
+  step2 fallback redeploy            PASS  exit 0
+      fixture   tools is a populated real directory holding the stale entry .stale-hidden
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 stale entries removed        PASS  hidden, visible and directory entries all gone
+  step2 dest regular file            PASS  exit 5
+      fixture   tools is a regular file
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 dest file untouched          PASS  refused before any delete
+  step2 dest symlink to dir          PASS  exit 5
+      fixture   tools is a symlink onto an external directory
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 external target intact       PASS  nothing outside the prefix was deleted
+
+--- step 3: the root-file deploy and its non-following preflight
+  step3 deploy accepted shapes       PASS  exit 0
+      fixture   .env_ is a regular file
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 accepted deploy engine       PASS  deploy engine cp operated on 2 root files, read from the run trace
+  step3 both root files deployed     PASS  absent and present destinations both carry archive content
+  step3 dest symlink to file         PASS  exit 7
+      fixture   .env is a symlink onto an external regular file
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 symlink left intact          PASS  the link itself was not replaced
+  step3 external target intact       PASS  content and mtime unchanged, so nothing copied through the link
+  step3 dest FIFO refused promptly   PASS  exit 7
+      fixture   .env is a FIFO
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 FIFO left intact             PASS  refused before any copy, so the FIFO survives
+  step3 dest empty directory         PASS  exit 7
+      fixture   .env is a directory where a regular file is expected
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 dest populated directory     PASS  exit 7
+      fixture   .env is a directory where a regular file is expected
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 directory content intact     PASS  refused without touching what was inside
+  step3 refusal distinguishable      PASS  the preflight names the shape, not a failed copy
+
+--- step 5: acceptance rows no earlier suite covers
+  (no rsync on this host: the equivalence pair, the canary and loader
+   comparisons and the rsync-failure row all need two engines on one
+   host. They are NOT covered by this run and are not claimed by it.)
+  accept no-rsync host installs      PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  accept no-rsync host engine        PASS  engine cp operated, read from the run trace
+  accept no-rsync host selection     PASS  selected cp, announced before discovery (a selection, not a copy)
+  accept cp interrupted mid-copy     PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  accept interrupted leaves a partial tree PASS  2 entries present, staging retained by the post-state oracle
+  accept rerun after interruption    PASS  exit 0
+      fixture   tools is a directory where a regular file is expected
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  accept rerun restores the tree     PASS  2 entries after the interruption, then every one of the archive's 9 entries present and nothing else
+  accept contract PATH completes the install PASS  the 20 published programs alone are sufficient
+  accept no gzip fails at extraction PASS  exit 3 at extraction, nothing transferred
+
+=== VERDICT ===
+suites    : preflight controls baseline-no-rsync step1-selection step2-mirror step3-rootfile step5-acceptance
+cases: 63, failures: 0
+Step 5: every assertion and every negative control behaved as designed.
+
+--- reading, added when the output was retained ---
+
+This is the Debian half of the step 5 evidence, and the target the whole effort
+exists for.
+
+**The row only this target can produce.** `accept no-rsync host selection` reads
+"selected cp ... rsync not found on PATH": the fallback was chosen because rsync
+is genuinely absent, not because the override forced it. `accept no-rsync host
+engine` then shows cp actually operated, and `accept no-rsync host installs`
+shows the install completed. On RHEL the fallback can only ever be reached under
+CPLX_INSTALL_PKG_FORCE_CP, so no RHEL run can stand in for this one.
+
+**The interrupted copy runs here now, and that is the point of it.** In build 51
+it did not: the row had been placed inside the two-engine section, so it ran only
+where rsync exists. It is a property of the fallback engine rather than a
+comparison between engines, and this agent is where the fallback is the only
+engine there is, which makes a copy cut short here a real recovery rather than a
+forced one. The override is set only where rsync is present, so this run measures
+the engine the agent would actually use. Exit 5 at the mirror, a partial tree
+with staging retained, then 2 entries to 9 after the rerun.
+
+**What this capture does NOT claim.** The equivalence pair, the canary and loader
+comparisons and the rsync-failure row need two engines on one host and cannot run
+here. The harness prints that in the output rather than omitting the rows. Before
+that branch existed, a step 5 run on this agent would have skipped all of them in
+silence, run the single gzip case, and been eligible to print "every assertion and
+every negative control behaved as designed".
+
+**Seven oracle controls run here too.** Two drive the equivalence oracle and five
+the loader verdict, all with fabricated inputs, so none of them needs rsync. All
+seven refuse. This agent therefore confirms the oracle behaviour the RHEL capture
+depends on, including the five loader refusals no real archive can produce, since
+a real archive only ever exercises the accepting branch.
+
+**Fingerprints.** The installer is `591e2db0`, 625 lines, byte-identical to the
+cplx candidate. The shared-body digest `ccf52d7a` matches the RHEL capture, which
+is what proves the two targets ran the same harness rather than asserting it. The
+whole-file digests differ by design: only the header comment block differs
+between the two copies.

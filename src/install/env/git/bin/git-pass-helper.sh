@@ -84,8 +84,11 @@ source "${dot_env}" || fatal_error "Error loading .env file: '${dot_env}'" 3
 export GPG_TTY="${GPG_TTY_INHERITED}"
 
 # ------------------------- GPG Initialization ---------------------------
-# Centralized GnuPG home (defaults to your tools/certs)
-export GNUPGHOME="${GNUPGHOME:-/home/upipdfs01/tools/certs}"
+# Centralized GnuPG home (defaults to your tools/certs). The /home/<account>/
+# anchor is a placeholder: the installer's relocation text pass rewrites it to
+# the install prefix on deploy, matching any account name. It is deliberately
+# not $HOME, since a relocated install has a prefix that is not the home.
+export GNUPGHOME="${GNUPGHOME:-/home/deploy-account/tools/certs}"
 mkdir -p "$GNUPGHOME"
 chmod 700 "$GNUPGHOME"
 

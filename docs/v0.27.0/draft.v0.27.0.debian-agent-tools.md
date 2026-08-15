@@ -4,7 +4,7 @@
 - Draft role: umbrella
 
 Source of every finding referenced here:
-`../my-project/docs/jenkins_build.md` (the PDFS Jenkins build discovery,
+`../../my-project/docs/jenkins_build.md` (the PDFS Jenkins build discovery,
 builds develop#2 through develop#19 on 2026-08-06 and 2026-08-07) and
 the cplx sources named per item. The Qn identifiers below are the open questions of that
 document; this draft turns its "durable fix, in cplx" notes into one
@@ -59,8 +59,8 @@ archive distribution-agnostic without touching the build model
 | Q | Defect | Evidence | Interim in the pipeline |
 | --- | --- | --- | --- |
 | Q20 | The python wrapper exports `LD_LIBRARY_PATH` then calls host `readlink`/`mv`/`ln`, which bind the shipped RHEL libc and die on `GLIBC_PRIVATE` | develop#3, wrapper line 60 mangled exec target | uv drives the `python3*_bin` ELF directly via `UV_PYTHON` |
-| Q24 | The toolchain python has no `_sqlite3`: the sandbox never held `sqlite-devel`, so the extension was never compiled (and no `libsqlite3` ships either) | develop#7 `ModuleNotFoundError: _sqlite3`, develop#19 root listing | walk runs `--no-cov -p no:pytest-testmon`, coverage gate suspended, coverage-importing suites skipif-guarded |
-| Q26 | The shipped root misses `libgcc_s`, and the wheels' own rpath hides the root (the four glibc stubs and libstdc++ ship but stay unreachable), so manylinux extensions resolve Debian's copies against the RHEL libc | develop#10 pymupdf, develop#12 ld.so assertion, develop#13 `GLIBC_2.36` via libstdc++, develop#15 pikepdf grafted libjpeg | `--replace-needed` onto `libc.so.6` plus a `--force-rpath` append of the root on every venv wheel; publish gated on a green walk |
+| Q24 | The toolchain python has no `_sqlite3`: the sandbox never held `sqlite-devel`, so the extension was never compiled, and `libsqlite3.so.0` ships nowhere in the root either | develop#7 `ModuleNotFoundError: _sqlite3`, live tree searched on the build account 2026-08-08 | walk runs `--no-cov -p no:pytest-testmon`, coverage gate suspended, coverage-importing suites skipif-guarded |
+| Q26 | The wheels' own rpath hides the toolchain root, so manylinux extensions resolve Debian's copies against the RHEL libc; what the root actually lacks is narrower than first read, the runtime resolving inside the prefix once the python rpath governs | develop#10 pymupdf, develop#12 ld.so assertion, develop#13 `GLIBC_2.36` via libstdc++, develop#15 pikepdf grafted libjpeg, develop#21 clean runtime trace | `--replace-needed` onto `libc.so.6` plus a `--force-rpath` append of the root on every venv wheel; publish gated on a green walk |
 | Q19 | `install_pkg.sh` hard-requires `rsync`, absent from the agent image | develop#2 exit 5 at the mirror phase | rsync stand-in shim written by the pipeline |
 
 ## Agent baseline measured by the develop#19 probes
@@ -80,13 +80,15 @@ measured baseline feeds the work items:
   libraries resolving libc host-side: partly the known root-object
   simulation artifact, but also a sign the relocation rpath pass does
   not cover every shipped library (work item 3); the same listing
-  proves the four glibc stubs and `libstdc++` ship in the root, while
-  `libgcc_s` and `libsqlite3` do not. Second, every C++ and
+  proves the four glibc stubs and `libstdc++` ship in `root/usr/lib64`
+  and shows neither `libgcc_s` nor `libsqlite3` there, a reading
+  develop#21 qualifies below: that directory is one of the eight the
+  relocation puts on the rpath. Second, every C++ and
   rust wheel (watchfiles, greenlet, numpy, pymupdf, pydantic_core)
   resolves root libc through the appended rpath (the append works) but
   takes Debian's `libgcc_s`, whose `GLIBC_2.35` reference the archive
-  libc cannot satisfy: harmless at runtime today, and exactly what the
-  closure removes. Third, one real archive fact: the root ships
+  libc cannot satisfy: harmless at runtime, and develop#21 explains
+  why, the real process never taking that copy. Third, one real archive fact: the root ships
   OpenSSL `3.5.1`, whose libssl demands `OPENSSL_3.x` version nodes
   only its sibling libcrypto serves, and the root accumulates package
   generations (two libbfd builds side by side).
@@ -115,6 +117,38 @@ measured baseline feeds the work items:
   fallback: a wheel built against `3.4.30` fails against the shipped
   copy, the develop#13 signature. Work item 3 therefore has a decision
   to take, ship the GCC 12 generation or inherit that one-node margin.
+- develop#21 then made the two probes agree, and the answer narrows
+  this work. The relocation gives the toolchain ELFs an rpath of eight
+  directories (`root/usr/lib64`, `root/usr/lib`, `root/lib64`,
+  `current/lib`, `python-3.13.9/lib`, then the three git ones), while
+  the interim appends exactly one of them to each wheel and the probe
+  inventories that same one. At run time the python ELF is the root
+  object and its whole rpath governs every dlopen of the process, so
+  the wheels resolve inside the prefix; a per-wheel listing sees the
+  single appended directory and falls back to the host. The runtime
+  reading is conclusive: `libgcc_s` carries an initializer (develop#19
+  caught its `calling init` in the uv process), the imports succeeded
+  so its `DT_NEEDED` was satisfied, and no host library was
+  initialized, so it resolved from the prefix and therefore ships in
+  the root, outside the one directory the probes list. Read the 72
+  flags accordingly, and inventory the whole rpath before concluding
+  that anything is missing.
+- develop#24 ran that widened probe and turned the inference into
+  measurement, over 388 ELFs from the eight directories plus the venv.
+  Zero wheels are flagged: every venv extension resolves inside the
+  prefix once it carries the python ELF's whole rpath, `pymupdf` and
+  `pikepdf` included, so the static reading and the live trace agree at
+  last. `libgcc_s` is located, shipping as
+  `root/lib64/libgcc_s-11-20240719.so.1` under the python root and the
+  git root alike. What stays flagged, 110 of 388, is toolchain
+  libraries probed in isolation, 55 per root and none from the venv:
+  `libstdc++.so.6.0.29` is the representative case, taking host libm,
+  libc and libgcc_s as a root object because the shipped libraries
+  carry no rpath of their own, which is the measured argument for
+  sub-task 3 below. The only missing version nodes left, eight lines,
+  are the libssl `OPENSSL_3.x` set, and they appear under both roots:
+  the archive carries two OpenSSL copies, one per tree, each needing
+  its sibling libcrypto beside it.
 
 ## Work item 1 (Q20): harden the python wrapper against foreign coreutils
 
@@ -183,7 +217,7 @@ cannot use host paths anyway: `install_functions.sh` compiles with
 and `-Wl,--sysroot=${root}` plus explicit `-L${root}/...` in `LDFLAGS`,
 so every header and library comes from the tool's sandbox root, never
 from `/usr`. That isolation is the whole point of the build model
-([Why recompile](../wiki/explanation/why-recompile.md)): a toolchain
+([Why recompile](../../wiki/explanation/why-recompile.md)): a toolchain
 linked against the host would drag host versions into the archive.
 
 What is needed is those two payloads unpacked inside the python
@@ -246,9 +280,15 @@ it. The pipeline error is `ModuleNotFoundError: No module named
 '_sqlite3'`, which says the extension file does not exist; a built
 extension whose library was missing would instead fail at dlopen with
 `ImportError: libsqlite3.so.0: cannot open shared object file`. Only a
-rebuild produces the file, and the develop#19 root listing confirms
-both gaps: neither `libsqlite3` nor any `_sqlite3` extension ships
-today.
+rebuild produces the file. Both gaps are now proven rather than
+inferred: the extension by that error, and the library by a direct
+search of the live toolchain tree on the build account on 2026-08-08,
+`find . -name libsqlite3.so.0` under `tools/*/root` returning nothing.
+The archive therefore owes two files, not one, and the runtime library
+is not optional: the RHEL servers carry their own copy in
+`/usr/lib64`, so shipping the extension alone would work there and fail
+on the agent, the asymmetry that kept the Q26 family invisible until CI
+met a foreign distribution.
 
 ### Steps
 
@@ -290,11 +330,15 @@ today.
    `checking for stdlib extension module _sqlite3` must answer `yes`,
    not `missing`, and `_sqlite3` must be absent from the
    necessary-bits-not-found summary at the end of the build.
-5. Make sure `libsqlite3.so.0` ships inside the archive root
-   (`tools/python/root/usr/lib64`), not only in the build sandbox: on
-   RHEL the deployed tree could still borrow the host copy from
-   `/usr/lib64` and hide the gap, while Debian's multiarch layout
-   never would. This belongs to the runtime closure of work item 3.
+5. Ship `libsqlite3.so.0` inside the archive root
+   (`tools/python/root/usr/lib64`), not only in the build sandbox. This
+   is required rather than precautionary: the library is absent from
+   the whole root today, confirmed on 2026-08-08 by searching the live
+   tree on the build account, while the RHEL servers carry their own
+   copy in `/usr/lib64`. An archive that compiled the extension without
+   shipping the library would therefore pass on RHEL and fail on the
+   agent, the exact asymmetry that hid the Q26 family. The closure
+   check of work item 3 is what keeps it shipped.
 
 Acceptance for this item: `python3 -c 'import sqlite3'` passes on the
 build account, on a Debian 12 container after relocation, and on the
@@ -317,16 +361,23 @@ it: their cache serves compatible copies.
 
 Three sub-tasks:
 
-1. Ship the runtime closure in `tools/python/root/usr/lib64`. The
-   develop#19 root listing settles who is already there: the four
-   stubs (`libpthread.so.0`, `libdl.so.2`, `librt.so.1`,
-   `libutil.so.1`) and `libstdc++.so.6.0.29` ship; `libgcc_s.so.1` and
-   `libsqlite3.so.0` do not. `libgcc` is already in the python sandbox
-   list, so its library is dropped somewhere between RPM extraction
-   and packaging: find that spot rather than copying the file in by
-   hand; `libsqlite3` arrives with the work item 2 list entries. Add a
-   packaging-time closure check listing the required members so a
-   future drop cannot ship silently.
+1. Ship the runtime closure, which develop#24 measured rather than
+   assumed: the closure is already complete for the wheels. Over the
+   whole rpath, the four stubs (`libpthread.so.0`, `libdl.so.2`,
+   `librt.so.1`, `libutil.so.1`) and `libstdc++.so.6.0.29` sit in
+   `root/usr/lib64`, `libgcc_s` ships as
+   `root/lib64/libgcc_s-11-20240719.so.1`, and no venv wheel resolves
+   anything host-side once the search list matches the runtime's. There
+   is no drop between RPM extraction and packaging to hunt down: the
+   develop#19 reading that pointed at one came from listing
+   `root/usr/lib64` alone. One library is genuinely absent, and it is
+   the one this closure must gain: `libsqlite3.so.0` ships nowhere in
+   the root, confirmed on 2026-08-08 by searching the live tree on the
+   build account. It arrives with the work item 2 payload, and this
+   sub-task is what makes its arrival verifiable rather than hoped for.
+   What this sub-task keeps, then, is the packaging-time closure check
+   over the whole rpath, with `libsqlite3.so.0` among the members it
+   enforces, so a future drop cannot ship silently.
 2. Keep the snapshot coherent (the develop#14 lesson): the published
    9.13.4 libc lacks the `GLIBC_2.35` version node that the current
    RHEL `libgcc_s` demands, while the live build-account root has it:
@@ -336,9 +387,12 @@ Three sub-tasks:
    demanded by a shipped library is defined by the shipped libc. The
    rule covers whole library families, not only glibc: ship consistent
    pairs (develop#19: the root's libssl `3.5.1` demands `OPENSSL_3.x`
-   nodes only its sibling libcrypto serves), and prune superseded
-   generations at packaging (the 9.13.4 root carries two libbfd
-   builds).
+   nodes only its sibling libcrypto serves, and develop#24 finds that
+   pair duplicated, one OpenSSL copy per tree, python and git), and
+   prune superseded generations at packaging (the 9.13.4 root carries
+   two libbfd builds). Those eight `OPENSSL_3.x` lines are now the only
+   missing version nodes the probe reports, so this sub-task and the
+   rpath one are what the rebuild still owes.
 3. Make the root resolvable for dlopen'd wheels: D3 is settled by
    evidence. auditwheel writes classic `DT_RPATH` into wheel extensions
    precisely because RPATH propagates down the loading chain
@@ -351,6 +405,15 @@ Three sub-tasks:
    Extend the pass to every shipped library, not only the executables:
    the develop#19 probe saw lone root libraries fall back on the host
    cache, and a library-wide rpath makes the contract probe exact.
+   develop#24 sizes that half of the work, the only half left once the
+   wheels came out clean: 110 of 388 inventoried ELFs are shipped
+   libraries with no rpath of their own, 55 under the python root and
+   55 under the git root, `libstdc++.so.6.0.29` among them taking host
+   libm, libc and libgcc_s whenever it is the root object. The same run
+   also shows why the CI append is a probe aid rather than a runtime
+   need: develop#21 was already clean at run time while the wheels
+   carried one directory and `libgcc_s` sat in another, so the python
+   ELF's rpath does propagate to what the process dlopens.
 
 Acceptance for this item: on a Debian 12 container, `uv sync` then
 `python -c 'import pymupdf, pikepdf'` in the project venv succeeds with
@@ -397,9 +460,9 @@ Two halves, both needed:
 
 The mechanism, the recovery and the inventory of everything the key
 names are documented in the wiki
-([The architecture key](../wiki/explanation/the-architecture-key.md),
-[Survive a server OS upgrade](../wiki/how-to/survive-a-server-os-upgrade.md),
-[Package list formats](../wiki/reference/package-list-formats.md)).
+([The architecture key](../../wiki/explanation/the-architecture-key.md),
+[Survive a server OS upgrade](../../wiki/how-to/survive-a-server-os-upgrade.md),
+[Package list formats](../../wiki/reference/package-list-formats.md)).
 
 ## Work item 4 (Q19): give install_pkg.sh a fallback without rsync
 
@@ -441,6 +504,10 @@ Build sequence, on the RHEL 9.8 build account (a deployment server):
    `python_repository` tag lookup now resolves to 3.14.x, which the
    consuming project forbids (`requires-python = ">=3.13, <3.14"`,
    `uv.lock` on `==3.13.*`).
+2. Refresh the live tree and package with `pkg_tools`
+   (`src/setups/env/bin/pkg_tools.sh`, front end of `pkg.sh tools`),
+   producing `~/pkgs/tools.<stamp>.tar.gz` with `.env`, `.env_` and the
+   relocation scripts included.
 
 ### Which 3.13.x to build (D5)
 
@@ -485,7 +552,7 @@ Debian's 3.13 starting only with Debian 13.
 Compiling therefore stays the only way to hold a chosen 3.13 patch
 level on both machines. The full matrix, with a checkable source per
 row, is in
-[Python versions by distribution](../wiki/reference/python-versions-by-distribution.md).
+[Python versions by distribution](../../wiki/reference/python-versions-by-distribution.md).
 
 ### Looking past 3.13: what 3.14 would bring (D8)
 
@@ -570,10 +637,6 @@ Decision D8: stay on 3.13 for this cycle, since the archive must match
 the pin the application enforces today, and revisit 3.14 at the next
 cycle, when 3.13 leaves its bugfix phase (around October 2026) and the
 free-threaded wheel situation is clearer.
-2. Refresh the live tree and package with `pkg_tools`
-   (`src/setups/env/bin/pkg_tools.sh`, front end of `pkg.sh tools`),
-   producing `~/pkgs/tools.<stamp>.tar.gz` with `.env`, `.env_` and the
-   relocation scripts included.
 
 Validation matrix, before any publication:
 
@@ -586,7 +649,7 @@ Validation matrix, before any publication:
 | Version-node coherence: every demand of a shipped library defined by the shipped libc | required | required |
 | `uv sync` then `import pymupdf, pikepdf`, no wheel patching | required | required |
 | ABI probe: shipped loader `--list` over toolchain ELFs and venv wheels, no `not found`, no host-resolved ABI-critical library | required | not applicable (host copies are compatible) |
-| Live trace: `LD_DEBUG=libs,versions` on importing the heavy wheels, no ABI-critical library initialized from a host path (harden the probe first: trace the venv python directly and report its trace inventory, develop#20) | required | not applicable (host copies are compatible) |
+| Live trace: `LD_DEBUG=libs,versions` on importing the heavy wheels, no ABI-critical library initialized from a host path, read from a conclusive trace (the probe traces the venv python directly and prints its inventory since develop#21, an empty one reading as inconclusive) | required | not applicable (host copies are compatible) |
 | `pytest` with coverage and testmon active | required | optional (Windows dev flow covers it) |
 | `deploy_pkgs.sh` end to end with readiness checks | not applicable | required |
 | Operator flow (`senv`, `.env` sourcing) | not applicable | required |
@@ -635,12 +698,43 @@ markers), listed here so the effort has a definition of done:
 - drop the rsync shim from the relocate stage (work item 4 replaces
   it);
 - flip the walk-stage ABI contract probe from informative to blocking:
-  with the closure shipped and the library-wide rpath, the expected
-  flag count is zero (develop#19 baseline: 72 informative flags);
+  with the library-wide rpath in place, the expected flag count is
+  zero, against the develop#24 baseline of 110 flagged out of 388
+  inventoried ELFs, all of them shipped libraries probed in isolation
+  (55 per root) and none of them wheels;
 - optionally retire the `python3*_bin` bypass and `UV_PYTHON` aiming at
   the raw ELF, if the hardened wrapper proves usable by uv; keeping the
   ELF path is also acceptable, the bypass is then a convention rather
   than a workaround.
+
+## Follow-up raised by requirement 1, to schedule in this collection
+
+Added 2026-08-10, from the M1 measurement taken for the design of requirement 1
+and recorded in `measurements.index.md`.
+
+**The unchanged rsync mirror can write and delete outside the prefix.** Given a
+mirror destination that is a symlink to a directory, `rsync -av --delete src/
+dst/` follows the link and operates on the external target: where that directory
+is empty it writes the whole archive tree into it, and where it is populated it
+writes into it and deletes its stale entries. Both cases return 0, so the
+installer reports success while having modified a tree nobody pointed it at.
+Measured on RHEL 9.8 with rsync 3.2.5, which is the deployment configuration.
+
+This is a production defect in the current installer, not a regression from the
+v0.27.0 work, and requirement 1 deliberately does not fix it: the settled
+requirement holds the rsync invocation, output, semantics and exit codes
+unchanged, so hardening that path there would reopen the requirement rather than
+finish its design. Requirement 1's fallback refuses the shape; the rsync path
+keeps it.
+
+What this follow-up owes: decide whether the installer should validate its
+mirror destination for both engines, and if so, land it as its own item with its
+own production acceptance evidence, since it changes behavior on the RHEL
+targets. M3 inspected two real deployment prefixes and found `tools` to be a real
+directory on both, the safe shape, so nothing is known to be affected today; two
+prefixes are not a survey, and that is the whole reason this is written down
+rather than assumed away. Corrected 2026-08-11 from an earlier reading of one
+prefix, which came from the measurement index rather than from the raw output.
 
 ## Out of scope for this tools set
 
@@ -661,7 +755,7 @@ the correction below.
 | D1 | Maven version hosting the new tools archive | (a) the next application release version, published at release time; (b) a dedicated intermediate version so CI switches without waiting for a release | decided: (a); the archive rides the next application release, so CI keeps the 9.13.4 archive and its interims until that release publishes |
 | D2 | Wrapper strategy for `LD_LIBRARY_PATH` | (a) save/unset around helpers, restore on the exec; (b) `env -u` per call site; (c) builtins where possible | (a) |
 | D3 | Stub resolution for dlopen'd wheels | (a) `patchelf --force-rpath` in the relocation pass; (b) keep `DT_RUNPATH` plus explicit `LD_LIBRARY_PATH` in CI and in the wrapper exec | resolved: (a); develop#15 proved wheels and their grafted libraries need RPATH semantics; RHEL harmlessness is checked by the validation matrix |
-| D4 | How install_pkg.sh stops needing the host rsync | (a) in-script cp fallback; (b) ship the rsync payload in the archive like patchelf; (c) both; (d) wait for the agent image | decided: (a). It leaves the installer needing only POSIX tools, while (b) would drag rsync's libpopt, libzstd, liblz4 and libcrypto onto a foreign distribution, the failure class of Q26. Compiling rsync in cplx is impossible here: a cplx-built binary carries a `/home/<builder>` interpreter and rsync must run before the pass that repairs it. Asking the CICD team for rsync stays a parallel, non-blocking track |
+| D4 | How install_pkg.sh stops needing the host rsync | (a) in-script cp fallback; (b) ship the rsync payload in the archive like patchelf; (c) both; (d) wait for the agent image | decided: (a). Both options add something, and the contrast is the argument: (a) adds one command, `cp`, which the script does not call today and which both supported targets already carry, while (b) would add a binary plus its libpopt, libzstd, liblz4 and libcrypto onto a foreign distribution, the failure class of Q26. The claim that both targets carry it is now measured rather than assumed. The consuming project's diagnose stage runs a command and behavior script on the Debian agent at every build, and the same script was run by hand on a RHEL 9.8 deployment server on 2026-08-09: both report all nineteen commands and every behavior present, `cp -a` keeping a symlink a symlink included, with rsync the only difference between them, present on the server and absent on the agent. The behaviors are satisfied by the older toolset of the two, RHEL running behind Debian on coreutils, findutils, grep and sed, which is the stronger direction for the claim. Correction, 2026-08-09: this rationale first read "needing only POSIX tools", which the requirement review disproved. The script is a Bash script using GNU behavior (`find -printf`, `grep -rlIZ --exclude-dir`, `xargs -0 -r`, `sed -i`), and the `cp -a` the fallback adds is itself a GNU and BSD extension. The decision is unaffected, only its justification; requirement 1 carries the audited contract. Compiling rsync in cplx is impossible here: a cplx-built binary carries a `/home/<builder>` interpreter and rsync must run before the pass that repairs it. Asking the CICD team for rsync stays a parallel, non-blocking track |
 | D5 | Batch a Python 3.13.x refresh with the sqlite rebuild | (a) yes, one rebuild serves both; (b) no, minimal change | decided: (a) on **3.13.14**, never 3.13.10; re-check 3.13.15 for regression reports just before the rebuild and take it if clean |
 | D8 | When to consider Python 3.14 | (a) now, widening the application pin; (b) next cycle; (c) never, stay on 3.13 to its end of life | (b): 3.13 must serve this rebuild (the application pins it), but 3.14 gains a year of maintenance, fits the annotation-heavy code through PEP 649, and is the only line RHEL 9 could ever provide as a package |
 | D7 | sqlite provenance for the python build | (a) copy from the server's `/usr`; (b) `sqlite-devel` and `sqlite-libs` payloads extracted into the python sandbox from the per-tool list; (c) sqlite rebuilt from source as a cplx tool | (b): (a) is impossible (the server has no header and no linker symlink), (b) is one list line in the same class as zlib and libffi, (c) only for a newer sqlite or independence from the RHEL patch cycle |
@@ -673,7 +767,7 @@ the correction below.
 
 | Order | Type | Key title | Slug | Status | Requirement | Validation plan |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | pending | - | - |
+| 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | completed | `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` | `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md` |
 | 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | pending | - | - |
 | 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | pending | - | - |
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | pending | - | - |
@@ -696,6 +790,68 @@ build account path stays byte-identical, and otherwise falls back to a
 `cp` mirror that preserves the `--delete` semantics for redeployments
 over an existing prefix (empty the destination content, then `cp -a`),
 with a plain `cp -a` for root files. It must log which engine ran.
+
+Symlink fidelity belongs to the acceptance, and develop#24 is what
+makes it concrete: the runtime closure resolves `libgcc_s.so.1` through
+a link onto `libgcc_s-11-20240719.so.1`, and an rpath entry can itself
+be a link, `root/lib64` onto `usr/lib64`. A fallback that dereferenced
+links would silently double the tree, and one that dropped them would
+break the SONAME lookup, the failure class this collection exists to
+remove, arriving through the installer instead of the archive. `cp -a`
+preserves symlinks and hard links both, the latter being what `rsync -a`
+drops without `-H`, so the check is that the two engines produce the
+same tree, with that pair as the canary. The 2026-08-09 measurement
+confirms the tool is available for the job: `cp -a` keeps a link a link
+on the RHEL server and on the agent alike, so this acceptance rests on
+a verified capability rather than on a manual page.
+
+A third measurement, taken on 2026-08-09 across nine mirror destination
+shapes and eight root-file shapes, settles what each engine does when
+the destination is not a plain directory, and it bears on this item's
+boundary and preflight rules rather than on the copy itself. The mirror
+engine refuses a regular file, a symlink to a regular file, a dangling
+symlink and a FIFO, but follows a symlink to a directory silently and
+successfully, deleting the external target under `--delete`. On the
+root-file path the two engines diverge on six shapes of eight: rsync
+replaces a directory, a symlink or a FIFO where the copy engine refuses,
+and the copy engine blocks forever on a FIFO where rsync replaces it
+cleanly. The copy engine answered identically on coreutils 8.32 and 9.1.
+A preflight on the fallback path is therefore not merely diagnostic, and
+refusing a symlinked destination is a deliberate divergence from what
+rsync does today rather than a restatement of it. The raw output of both
+hosts is retained with the consuming project's build evidence.
+
+Re-measured on 2026-08-09 with the probe comparing the external target
+by content rather than by listing, one row moved and it settles the
+question the reviewer raised. The copy engine, given a root-file
+destination that is a symlink to a regular file, returns exit 0 with the
+destination still a symlink and overwrites the file the link points at.
+The previous reading called that unchanged because it compared names.
+Both hosts agree, on coreutils 8.32 and 9.1.
+
+The two engines are therefore unsafe in opposite places, which is what
+the requirement should act on. On the mirror path rsync follows a
+symlink to a directory and empties it under `--delete`, silently and
+with exit 0. On the root-file path rsync replaces the link and leaves
+its target alone, while the copy engine follows the link and overwrites
+the target, also with exit 0. A fallback built as a plain copy is thus
+safer than rsync on the mirror path and more dangerous than it on the
+root-file path, and neither difference shows in an exit status.
+Refusing a symlinked destination is the one rule that is correct on
+both paths, and the divergence it creates is from a different engine in
+each case.
+
+The same day's second measurement narrows the copy form the design may
+choose, and it is worth recording at umbrella level because it removes a
+question rather than answering it. Given the same populated destination,
+`cp -a src/. dst/` leaves the destination root carrying the source mode
+and the source mtime, which is precisely what `rsync -av --delete src/
+dst/` does, while copying entry by entry leaves the destination its own
+mode and a fresh mtime. Both targets agree, on coreutils 8.32 with rsync
+and on 9.1 without it. So the engines can be made to agree on the
+transfer root by choosing the form, the compared manifest needs no
+carve-out for the root, and the same form is the one that carries hidden
+entries without a dotglob.
 
 First because it is the most independent change in the collection: one
 file, no rebuild, no packaging, verifiable against the existing
@@ -720,9 +876,21 @@ propagate down the whole loading chain, and the pass must cover every
 shipped library rather than executables alone, since the develop#19
 probe caught lone root libraries falling back on the host cache.
 
+Acceptance goes past `readelf -d`, because develop#24 measured what
+this item is worth: 110 of 388 inventoried ELFs are shipped libraries
+with no rpath of their own, 55 under each root, and re-probing after
+the pass should bring that to zero. Two specific readings tell whether
+it worked. The shipped `libstdc++.so.6.0.29` must stop taking host
+libm, libc and libgcc_s when probed alone, since `libgcc_s` does ship
+in `root/lib64`. And the eight `OPENSSL_3.x` nodes the probe reports
+missing on the root's libssl should disappear with them, that library
+finding its sibling libcrypto once it has a search path: if they
+survive the pass, the pairing is genuinely incoherent and requirement 4
+inherits a real defect rather than an artifact.
+
 Second because it is the other change confined to `install_pkg.sh`,
 needs no rebuild either, and can be proved against the current archive
-by re-running the relocation and reading `readelf -d`. Landing it
+by re-running the relocation and re-reading the probe. Landing it
 before the packaging and build items means the definitive rebuild is
 validated with the final relocation semantics already in place.
 
@@ -759,37 +927,45 @@ Depends on: nothing.
 Type: Issue. Slug: `toolchain-runtime-closure`. Regroups sub-tasks 1 and
 2 of work item 3 (Q26).
 
-The develop#19 listing settled what the shipped root contains: the four
-glibc compat stubs and `libstdc++.so.6.0.29` are there, `libgcc_s.so.1`
-is not, although `libgcc` sits in the python sandbox list, so the
-library is lost between payload extraction and packaging. The fix finds
-and repairs that spot rather than copying the file in by hand, and adds
-a packaging-time closure check listing the members the archive must
-carry, so a future drop cannot ship silently. The same item carries the
-coherence rule that develop#14 taught: the shipped root must be one
-snapshot where every version node a shipped library demands is defined
-by the shipped libc, which extends to library families (the root's
-libssl 3.5.1 wanting `OPENSSL_3.x` nodes only its sibling libcrypto
-serves) and to pruning superseded generations (two libbfd builds side
-by side today).
+This item lost most of its first half to measurement, and it is worth
+stating plainly because two earlier readings of this draft were wrong.
+develop#19 listed `root/usr/lib64` alone and concluded `libgcc_s.so.1`
+was missing; develop#24, listing all eight directories the relocation
+puts on the rpath, found it shipping as
+`root/lib64/libgcc_s-11-20240719.so.1` under the python root and the
+git root alike. There is no drop between payload extraction and
+packaging to find and repair. Confirmed present as well: the four glibc
+compat stubs and `libstdc++.so.6.0.29` in `root/usr/lib64`.
 
-The develop#19 wheel inventory turns the acceptance into a checklist
-rather than a hope. Every heavy wheel the probe flagged (numpy with its
-`.libs`, pymupdf with its mupdf pair, pydantic_core, cryptography,
-pikepdf, PIL with `pillow.libs`) shows **one and only one** remaining
-host resolution, `libgcc_s.so.1`, each printed with the same proof
-line: the host libgcc_s demands `GLIBC_2.35`, a node the shipped 9.13.4
-libc does not define. `libstdc++` never appears as a wheel-side break,
-which independently confirms the develop#15 correction that the archive
-does ship it. So the wheel side closes with exactly one library plus
-the four stubs, and the acceptance is that this inventory comes back
-empty, wheel by wheel, read from the static listing. The live trace
-cannot carry that acceptance on its own until it proves it looked at
-something: develop#20 had it answer "no host library loaded" for the
-very run whose listing showed pymupdf and pikepdf resolving libgcc_s
-host-side. The consuming project has since made the probe trace the
-venv python directly and print its trace inventory, so a silent trace
-now reads as inconclusive; acceptance requires a conclusive one.
+What the closure still owes is therefore not a missing library but a
+guarantee. Add the packaging-time closure check listing the members the
+archive must carry, over the whole rpath rather than one directory, so
+a future drop cannot ship silently, and carry the coherence rule
+develop#14 taught: the shipped root must be one snapshot where every
+version node a shipped library demands is defined by the shipped libc.
+The rule extends to library families and to pruning superseded
+generations, the archive carrying two libbfd builds side by side today,
+and two OpenSSL copies, one per tree.
+
+One caveat on the libssl evidence, to check before spending effort on
+it. The root's libssl 3.5.1 demands `OPENSSL_3.x` nodes that only its
+sibling libcrypto serves, and the probe reports them as missing, but it
+reports them while listing libssl as a root object, where no rpath
+applies and the host libcrypto answers. `import ssl` passes on every
+run, so the pair is probably coherent already and those eight lines are
+the same isolation artifact as the rest. Requirement 2 is what settles
+it: re-probe once every shipped library carries an rpath, and only then
+decide whether this rule has anything to fix here.
+
+The wheel side needs nothing from this item. develop#24 showed every
+venv wheel resolving inside the prefix, zero flagged out of 388
+inventoried ELFs, once each wheel carries the search list the runtime
+uses. That acceptance belongs to requirement 2, which produces it; what
+belongs here is that the closure check keeps it true after a rebuild.
+Both probe readings must be conclusive when it is verified: a listing
+read over the whole rpath, and a live trace that proves it looked at a
+venv process, develop#20 having answered "no host library loaded" for a
+run that had looked at nothing.
 
 This item also carries the C++ generation decision (D10). develop#20
 measured what develop#19 had missed: the agent serves
