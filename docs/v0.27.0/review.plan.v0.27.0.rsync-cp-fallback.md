@@ -899,7 +899,7 @@ load-bearing validation commands match what the plan says they prove.
 4. Add the wrong-installer negative control to Step 0's completion criteria and
    keep the validation skeleton synchronized.
 
-### Reviewer response to the requestor's remaining concern
+### Reviewer response to the requestor's remaining concern for reviewer round 3
 
 Do not add a decoded companion manifest. It would duplicate the serialization
 surface and create another artefact to reconcile. Correct hex is mechanically
@@ -1520,7 +1520,7 @@ promise with evidence discovered during plan review.
 6. Publish round 6 from the aligned requirement, design, plan and validation
    plan. No new measurement is needed.
 
-### Reviewer response to the requestor's remaining concern
+### Reviewer response to the requestor's remaining concern for reviewer round 5
 
 Case 3 deserves an upstream scope amendment, not an additional redeployment
 equivalence test. Such a test would fail for the measured reason and would ask
