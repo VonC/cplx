@@ -504,6 +504,10 @@ Build sequence, on the RHEL 9.8 build account (a deployment server):
    `python_repository` tag lookup now resolves to 3.14.x, which the
    consuming project forbids (`requires-python = ">=3.13, <3.14"`,
    `uv.lock` on `==3.13.*`).
+2. Refresh the live tree and package with `pkg_tools`
+   (`src/setups/env/bin/pkg_tools.sh`, front end of `pkg.sh tools`),
+   producing `~/pkgs/tools.<stamp>.tar.gz` with `.env`, `.env_` and the
+   relocation scripts included.
 
 ### Which 3.13.x to build (D5)
 
@@ -633,10 +637,6 @@ Decision D8: stay on 3.13 for this cycle, since the archive must match
 the pin the application enforces today, and revisit 3.14 at the next
 cycle, when 3.13 leaves its bugfix phase (around October 2026) and the
 free-threaded wheel situation is clearer.
-2. Refresh the live tree and package with `pkg_tools`
-   (`src/setups/env/bin/pkg_tools.sh`, front end of `pkg.sh tools`),
-   producing `~/pkgs/tools.<stamp>.tar.gz` with `.env`, `.env_` and the
-   relocation scripts included.
 
 Validation matrix, before any publication:
 
@@ -767,7 +767,7 @@ the correction below.
 
 | Order | Type | Key title | Slug | Status | Requirement | Validation plan |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | pending | - | - |
+| 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | completed | `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` | `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md` |
 | 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | pending | - | - |
 | 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | pending | - | - |
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | pending | - | - |
