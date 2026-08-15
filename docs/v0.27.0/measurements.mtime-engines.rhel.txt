@@ -1,0 +1,71 @@
+Probe: docs/v0.27.0/probe.mtime-engines.sh
+Target: RHEL 9.8 deployment server, rsync 3.2.5, coreutils 8.32, xfs
+Captured: 2026-08-11, by hand
+Purpose: settle whether a fractional source mtime survives each copy engine in
+         the exact forms the design specifies, and whether rsync's default
+         quick check skips an already-present destination file.
+
+Note: the filesystem line carried the deployment account name and has been
+substituted under the repository's sensitive-content rules. No other byte of the
+output is changed.
+
+=== probe.mtime-engines, v0.27.0 rsync-cp-fallback ===
+date      : 2026-08-11T13:39:05Z (UTC)
+uname     : Linux 5.14.0-687.24.1.el9_8.x86_64 x86_64
+os-release: Red Hat Enterprise Linux 9.8 (Plow)
+coreutils : stat (GNU coreutils) 8.32
+rsync     : rsync  version 3.2.5  protocol version 31
+filesystem: /dev/mapper/vg_project-project xfs    471701508 361892132 109809376      77% /home/deploy-account
+
+source mtime           : 1767319445.123456789
+
+=== case 1  fresh mirror, both engines ===
+rsync fresh mirror     : 1767319445.123456789
+cp -a src/. fresh      : 1767319445.123456789
+
+=== case 2  fresh root-file deploy, both engines ===
+rsync root-file        : 1767319445.123456789
+cp -a --remove-dest    : 1767319445.123456789
+
+=== case 3  populated destination, same size and integer second,
+===         different fraction: does the rsync quick check skip it? ===
+destination before     : 1767319445.987654321
+destination after rsync: 1767319445.987654321
+verdict                : SKIPPED, destination kept its own fraction
+                         (integer seconds equal, fractions differ)
+fallback same case     : 1767319445.123456789
+                         (the fallback empties first, so no skip is possible)
+
+=== case 4  archive evidence: fractional mtimes in an extracted staging tree ===
+(one-liner printed by the probe; run separately against a real staging tree)
+
+--- reading, added when the output was retained ---
+
+Cases 1 and 2 answer the question the round 4 plan review raised, and they
+disprove the writer's claim rather than confirming it. Through the exact fresh
+forms this design specifies, `rsync -av --delete src/ dst/`, the fallback's
+empty-then-`cp -a src/. dst/`, `rsync -av file prefix/` and
+`cp -a --remove-destination src prefix/name`, both engines reproduce the source
+mtime to the nanosecond. rsync 3.2.5 synchronizes fractional mtimes. The claim
+that `rsync -a` transfers whole seconds only is withdrawn: it was never
+measured and it is wrong.
+
+Case 3 is the behaviour that actually exists, and it is a different thing.
+Against a destination file already present with the same size and the same
+integer second but a different fraction, rsync's default quick check decides no
+transfer is needed and the destination keeps its own mtime. That is a skip
+decision on a populated destination, not truncation during transfer. The
+fallback cannot reach that state at all, because it empties the destination
+before copying.
+
+Scope, so the result is not over-read:
+
+- The equivalence comparison installs into two fresh prefixes. No destination
+  file pre-exists, so no quick check runs, and cases 1 and 2 are what govern it.
+  The manifest keeps full mtime precision.
+- On a real redeployment over a populated prefix the two engines are therefore
+  not interchangeable for entries that survive: rsync may skip what the fallback
+  always rewrites. This is standard, documented and unchanged rsync behaviour on
+  the path this effort deliberately leaves alone, not a defect introduced here.
+  It is recorded because "the two engines produce the same tree" is only true of
+  the fresh case that the equivalence run actually measures.

@@ -1,0 +1,61 @@
+Probe: docs/v0.27.0/probe.manifest-forms.sh
+Target: RHEL 9.8 deployment server, coreutils 8.32, xfs
+Captured: 2026-08-11, by hand. This supersedes the first capture of the same
+day, taken before round 4 review required every C2 and C3 assertion to feed the
+exit status. The earlier version could print FAIL and still exit 0.
+Purpose: C1 usable fractional mtime, C2 tool presence, C3 the exact recipe forms.
+
+Note: the scratch and filesystem lines carried the deployment account name and
+have been substituted under the repository's sensitive-content rules. No other
+byte of the output is changed.
+
+=== probe.manifest-forms, v0.27.0 rsync-cp-fallback ===
+date        : 2026-08-11T13:39:18Z (UTC)
+uname       : Linux 5.14.0-687.24.1.el9_8.x86_64 x86_64
+os-release  : Red Hat Enterprise Linux 9.8 (Plow)
+coreutils   : stat (GNU coreutils) 8.32
+scratch     : /home/deploy-account/.cplx-probe.1272046
+filesystem  : /dev/mapper/vg_project-project xfs    471701508 361892132 109809376      77% /home/deploy-account
+
+--- C1  stat fractional mtime, format and resolution
+a           : 1786455558.080462451
+b           : 1786455558.081462451
+C1 fractional format        : OK
+C1 resolution               : OK   (two files differ)
+combined    : 0|644|1786455558.080462451|8005|8005
+
+--- C2  verification-only commands
+C2 timeout                  : OK   (/bin/timeout)
+C2 stat                     : OK   (/bin/stat)
+C2 sha256sum                : OK   (/bin/sha256sum)
+C2 diff                     : OK   (/bin/diff)
+C2 mkfifo                   : OK   (/bin/mkfifo)
+
+--- C3  exact forms the recipe specifies
+C3 encoder jln              : OK   (6a6c6e)
+C3 digest length            : OK   (64)
+C3 digest value             : OK   (2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824)
+C3 readlink -n newline      : OK   (7467740a)
+C3 NUL enumeration          : OK   (5 entries)
+C3 awkward name encodes     : OK
+C3 sort -o                  : OK   (a b)
+C3 grep -f - status         : OK   (1)
+
+=== VERDICT ===
+All C1, C2 and C3 assertions passed on this target.
+
+--- reading, added when the output was retained ---
+
+Every assertion passes and the exit status now means something: this run is
+usable as the Step 0 preflight rather than as prose to interpret.
+
+Two results are worth calling out. `C3 readlink -n newline` returns 7467740a,
+the hex of `tgt` followed by the newline byte, so the recipe's direct
+`readlink -n | encoder` pipeline preserves a trailing newline in a symlink
+target. The earlier capture used a plain target through command substitution,
+which could not have detected stripping. And `C3 encoder jln` returns 6a6c6e on
+the real target, so the round 3 delete-complement fix holds in fact.
+
+C1 also reads better here than in the first capture: files a and b differ
+directly, without needing the sleep fallback, so this filesystem resolves two
+back-to-back creations.
