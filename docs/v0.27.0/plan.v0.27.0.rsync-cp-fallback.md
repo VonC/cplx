@@ -205,6 +205,7 @@ The harness preflights all five on each target before running any case, and
 fails with a clear message naming the missing command rather than part way
 through a run. The sanitization scan deliberately uses `sed` and `grep` only, so
 it adds nothing to this list.
+
 - Each run writes `docs/v0.27.0/verify.<step>.<target>.txt`, retained as
   evidence in the same way the `measurements.*.txt` outputs are.
 

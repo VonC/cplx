@@ -1,6 +1,6 @@
 # v0.27.0 rsync-cp-fallback implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
 This document tracks the implementation of
 [plan.v0.27.0.rsync-cp-fallback.md](plan.v0.27.0.rsync-cp-fallback.md), six
@@ -10,13 +10,16 @@ Step 1 is complete, converged after three code review rounds and committed. Step
 2 is complete, converged after two code review rounds and committed. Step 3 is
 complete, converged after three code review rounds and committed. Step 4 is
 complete on both supported targets: it changes no executable line, so
-`install_pkg.sh` is 625 lines of which three are comment. Step 5 has not
-started.
+`install_pkg.sh` is 625 lines of which three are comment. Step 5 is complete:
+its harness and specification blockers are repaired, its current RHEL and
+Debian evidence reports 82 and 63 cases with zero failures, and the rebuilt
+Debian capture authenticates the archive-complete recovery verdict against the
+fingerprinted harness.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
 > `_(empty — no check has taken place yet.)_.` until an implementation check
-> replaces it. Steps 0 to 4 are filled in; step 5 is not.
+> replaces it. Steps 0 to 5 are filled in.
 >
 > Markdown lint note: never leave a space immediately inside an inline code span
 > (MD038) -- write a needed space as the token `[space]`, as in `` `[space]${x}` ``.
@@ -616,8 +619,9 @@ No existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 1 implementation state
 
-Yes. Step 1 has been fully implemented, and its cases pass on both supported
-targets.
+Yes. Step 1 has been fully implemented.
+
+Its cases pass on both supported targets.
 
 `select_copy_engine` resolves the engine once, before archive discovery, from
 `command -v rsync` and the override, and announces it with one `info` line
@@ -869,8 +873,9 @@ No existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 2 implementation state
 
-Yes. Step 2 has been fully implemented, and its cases pass on both supported
-targets.
+Yes. Step 2 has been fully implemented.
+
+Its cases pass on both supported targets.
 
 `mirror_tree_cp` reproduces the mirror's delete semantics without rsync, and the
 mirror site branches on the verdict. The rsync invocation is unchanged inside its
@@ -1095,7 +1100,7 @@ overwrite the rule exists to remove. Two shapes are accepted, an absent
 destination and a real regular file; every directory, every kind of symlink,
 every FIFO and every other special file is refused at exit 7 before `cp` runs,
 which is what stops the block. The copy is `cp -a --remove-destination`, static
-defence in depth with no concurrency claim attached.
+defense in depth with no concurrency claim attached.
 
 **The exit-7 rewording this step owns**, per Q04-4C: `Error: Rsync (...) failed.`
 is gone from both engines, replaced by messages naming the deploy step and the
@@ -1147,6 +1152,7 @@ that refusal came from reading the code.
 The step 3 cases were run against the pre-change installer first, as the shared
 checklist requires, and failed on eighteen assertions with none passing
 vacuously.
+
 ### Goal for Step 3
 
 Branch the root-file loop on the verdict; on the fallback path, observe the
@@ -1172,7 +1178,7 @@ real regular file, and copy with `cp -a --remove-destination src prefix/name`.
   the other's site.
 - **The non-following preflight**: `-L` first, two shapes accepted, everything
   else refused at exit 7 before `cp` runs.
-- **`cp -a --remove-destination`**, static defence in depth, with no concurrency
+- **`cp -a --remove-destination`**, static defense in depth, with no concurrency
   claim made anywhere.
 - **The exit-7 rewording**, on both engines, and the stale `Rsync (Mirror Mode)`
   section comment step 2 left behind.
@@ -1361,6 +1367,7 @@ difference would have been the finding and would have been retained in full.
 There is no step 4 suite and none is wanted: this step adds no behaviour to
 assert, and adding a dispatch entry with no cases would be the vacuous pass the
 step guard exists to refuse.
+
 ### Goal for Step 4
 
 Reword the two fatal messages and the wiki entries in terms of the operation
@@ -1469,8 +1476,25 @@ No existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 5 implementation state
 
-Not started. Step 5 is not implemented because no acceptance run has taken place
-and no equivalence comparison exists.
+Yes. Step 5 has been fully implemented.
+
+The implementation and owning specification questions are closed. The current
+runs report 82 cases on RHEL and 63 on Debian with zero failures. The Debian
+capture was rebuilt mechanically from the authenticated build artifact and now
+carries the archive-completeness verdict emitted by fingerprinted shared harness
+body `ccf52d7a36c0`; the matching consuming-project source has the whole-file
+digest recorded in that capture.
+
+The retained comparison inputs independently
+reproduce 30665 identical entry sets, no non-mtime differences, and 592 mtime
+differences in the same-engine run-variant set. The requirement and design now
+own that exact-plus-behavioural rule after a separate converged specification
+review.
+
+The installer did not change in this step, and has not changed since step 3. Its
+digest `591e2db06841` is the same one the step 3, step 4 and step 5 captures all
+report. Every defect this step surfaced was in the harness or in the shape of the
+experiment, never in the installer.
 
 ### Goal for Step 5
 
@@ -1489,24 +1513,211 @@ retain the output as evidence.
 
 ### What was implemented for Step 5
 
-_(empty — no check has taken place yet.)_.
+- **The acceptance suite**, dispatched at `--step 5`, adding the rows no earlier
+  step covers: the equivalence comparison, the canary and loader checks, the
+  rsync-failure row, and the gzip pair.
+- **Three new harness options**: `--real-archive`, so step 5 alone runs against
+  the published archive rather than the synthetic fixture; `--equivalence-out`,
+  so the comparison survives the scratch tree; and `--timeout`, because the
+  20-second watchdog that suits a 12-entry fixture kills a 30665-entry install.
+- **The equivalence comparison**, rebuilt after its first result was refuted.
+  Three installs at ONE prefix path, each into a prefix just removed, the third
+  repeating rsync as a same-engine control.
+- **A no-rsync branch** for the acceptance section, which names the rows it
+  cannot cover and asserts the one row only a host without rsync can produce.
+- **The gzip pair**: a PATH built from the installer's published contract, a
+  positive control that installs across it, and the gzip-free run beneath it.
+- **The interrupted-copy row and its rerun**, on both targets, with the
+  interruption injected by a copy that stops after one entry.
+- **The equivalence oracle as a callable function**, compared exactly on seven
+  fields and constrained to the run window on the rewritten mtimes, with two
+  controls that drive it using fabricated manifests.
+- **A decoder-aware sensitive scan**, `docs/v0.27.0/scan.manifest-sensitive.sh`,
+  without which retaining the manifests would carry reversible hex-encoded paths
+  past the repository's raw-text gate.
+- **Retained evidence**: `verify.acceptance.rhel.txt`,
+  `verify.acceptance.debian.txt`, the three manifest inputs
+  `verify.acceptance.manifest-{rsync,cp,control}.rhel.txt`, and both comparison
+  outputs `verify.acceptance.equivalence-diff.rhel.txt` and
+  `verify.acceptance.equivalence-control-diff.rhel.txt`.
+
+### Round 1 missing work and its current state
+
+Kept as a record rather than deleted. Every implementation item raised in rounds
+1 and 2 is now discharged: the upstream mtime rule converged, complete-tree
+recovery compares archive and destination path sets, the loader has five refusal
+controls, and the scanner is fail-closed and calibrated. The last evidence item
+is also discharged: the Debian capture was rebuilt from the artifact bytes and
+its corrected body was diff-verified rather than patched in place.
+
+- **The `cp`-engine interruption row.** Implemented with a copy that stops after
+  one entry and fails, perturbing only the mirror form so the root-file deploy is
+  untouched: exit 5, a partial destination, staging retained, then a rerun over
+  the same archive proving every one of its 9 entries present and nothing else.
+  It is implemented to run on BOTH targets.
+  It was first written inside the two-engine section, where the Debian agent
+  never reached it, which would have shipped a recovery guarantee untested on the
+  target the effort exists for. It is a property of the fallback engine rather
+  than a comparison between engines, so it belongs wherever that engine runs, and
+  the override is set only where rsync is present.
+- **The 592 exempted mtime cells.** The round 1 oracle removed every engine
+  difference whose path also appeared in the same-engine control. That identified
+  a noise SET and then treated membership of it as permission for any value, so
+  those cells were excluded while the verdict said all eight fields were
+  compared. Seven fields are now compared exactly with no allowance of any kind.
+  mtime is compared exactly outside the rewritten set, and inside it each value
+  must fall within the wall-clock window of its own install: a rule the cells are
+  measured against rather than excused from. The verdict states what was measured
+  which way instead of claiming everything was compared.
+- **The one-sided loader row.** Target, dependency count and unresolved count are
+  now recorded for both trees, both targets must exist, both listings must be
+  meaningful, and the two trees must have selected the SAME ELF, which is why the
+  recorded target is tree-relative rather than a basename.
+- **The three manifest inputs.** Retained uncompressed beside both diffs. The
+  round 1 record argued that digests plus the diffs were sufficient and that the
+  alternative was unscannable compressed blobs. That was a false choice: the
+  recipe calls for plain text, and the harness already retains plain text on the
+  target. The encoding does create a real gap, which is closed separately by
+  `docs/v0.27.0/scan.manifest-sensitive.sh`.
+- **Regeneration.** Both targets were re-run after every harness repair, and the
+  retained captures and manifests come from those runs. Provenance was checked
+  rather than assumed: the manifests carry the scratch directory of the run that
+  produced them, and an earlier copy from the preceding run was rejected on that
+  basis rather than retained beside a newer capture.
 
 ### New helpers or cases introduced for Step 5
 
-_(empty — no check has taken place yet.)_.
+- `emit_manifest`, implementing the validation plan's recipe verbatim, plus
+  `manifest_field_diff`, `manifest_mtime_outside`, `eq_probe_tree`, `eq_install`,
+  `canary_verdict` and `assert_equivalence`.
+- Sixteen acceptance cases on RHEL, eight on the Debian agent.
+- `docs/v0.27.0/scan.manifest-sensitive.sh`, a decoder-aware sensitive scan. The
+  manifests encode the entry path and the symlink target as reversible hex, which
+  the repository's raw-text gate cannot see inside, so retaining them without
+  this check would move protected terms past the gate in a recoverable form.
+- **Three of the additions are controls rather than assertions about the change**,
+  and each exists because the thing it guards had been asserted without one:
+  - `accept contract PATH completes the install` installs across the constructed
+    PATH with gzip present, so the refusal beneath it is attributable to gzip
+    rather than to whatever else that PATH lacked.
+  - `accept equivalence rsync control install` repeats rsync, measuring the
+    run-to-run noise floor instead of assuming it.
+  - `control equivalence mtime cell` and `control equivalence digest cell` drive
+    the equivalence oracle with fabricated manifests, placing the defect on a
+    control-noisy path. They exist because that oracle had only ever been fed
+    data that passed, and the round 1 version accepted both of these.
+- `assert_equivalence` is a function rather than inline code specifically so
+  those two controls can drive it. An oracle no case can make fail is not an
+  oracle, and this is the one the central claim of the step rests on.
 
 ### Architecture check for Step 5
 
-_(empty — no check has taken place yet.)_.
+- **Layering**: not applicable, as for the earlier steps.
+- **The boundary that applies**: this step adds no installer code. It adds
+  harness code and evidence only, so nothing steps 1 to 3 established can be
+  weakened here, and the unchanged installer digest is the proof.
+- **Single source**: the harness has two repository copies with one shared body
+  below a marker. Both step 5 captures report body `ccf52d7a36c0`, which is what
+  proves they ran the same harness instead of asserting it.
+- **The published contract is now executable.** `INSTALLER_TOOLS` in the harness
+  is the list from `wiki/reference/relocation-tools.md`. A contract short of a
+  program cannot complete an install on the constructed PATH, so the page and the
+  harness now check each other.
+
+No, there is no architecture issue that needs to be addressed.
 
 ### Cost and timing check for Step 5
 
-_(empty — no check has taken place yet.)_.
+- **No runtime change at all.** No installer line moved in this step.
+- **Harness line budget**: 316 at step 0 to 2104 now. Step 5 alone added roughly
+  620 lines, against a plan advisory of +120 to +180, plus a 105-line scan script
+  the plan did not anticipate at all. The overage is the equivalence rework, the
+  four controls and the interruption fixture, none of which the plan foresaw,
+  because it assumed a byte comparison between two prefixes would answer the
+  equivalence question. It did not: that comparison measured the prefix names.
+  Roughly a third of the overage arrived after code review round 1 rather than
+  from the original implementation. Recorded rather than trimmed.
+- **Wall clock**: the RHEL acceptance run is now three complete installs of a
+  30665-entry toolchain plus three manifests, tens of minutes. This is the reason
+  `--timeout` exists.
+- **Disk**: three toolchains plus staging do not fit in the 4 GiB `/tmp` on the
+  deployment host. An early run exhausted it. The scratch tree therefore goes on
+  the project filesystem, and the run header now reports free space.
+
+No, there is no runtime performance issue that needs to be addressed.
 
 ### Harness case check for Step 5
 
-_(empty — no check has taken place yet.)_.
+- **Both targets, zero failures**: 82 cases on RHEL, 63 on the Debian agent.
+- **The equivalence result, reproduced by hand** from the retained manifests
+  rather than taken from the verdict: across 30665 entries the engines agree
+  exactly on type, size, mode, uid, gid, digest and symlink target. mtime agrees
+  exactly on 30073. The remaining 592 are the entries the post-copy passes
+  rewrite, identified by the same-engine control rather than assumed, and each
+  carries an mtime inside the wall-clock window of its own install. Reproduced
+  independently from the retained files: the entry sets are identical, no engine
+  mtime difference falls outside the control-noisy set, and the 592 rewritten
+  mtimes occupy disjoint windows per run, 1786779412 to 1786779496 under rsync
+  and 1786780111 to 1786780184 under cp. Those windows are why exact equality is
+  impossible for those cells and why the rule is containment rather than
+  equality: both runs stamped them while running, minutes apart.
+- **The oracle is calibrated, not merely used.** Two controls drive it with
+  fabricated manifests placing the defect on a control-noisy path, which is where
+  the round 1 oracle was blind. Both refuse, on both targets. They need no rsync,
+  so the Debian agent confirms the same oracle behaviour the RHEL capture relies
+  on.
+- **A retained capture is rebuilt from the run's bytes, never patched.** Code
+  review round 3 found the Debian capture carrying a recovery verdict the harness
+  it fingerprints cannot emit: the header had been updated with `sed` while a
+  body line survived from the run before. The two together described a file that
+  never executed. Diffing the whole body against an independent transcription
+  showed that single line and nothing else, but the method was the defect rather
+  than the line, and patching a capture is now treated as producing a new one.
+- **Provenance was checked, not assumed.** The manifests carry the scratch
+  directory of the run that produced them, in the diff header. A copy taken from
+  the preceding run was rejected on that basis rather than retained beside a
+  newer capture: it was dated later than the capture and looked current.
+- **The three manifest inputs are retained uncompressed**, 6.1 MB each, from run
+  `cplx-verify.3006027`, the same run as the RHEL capture:
+  - `verify.acceptance.manifest-rsync.rhel.txt` `e55e137c9eca5a1c`
+  - `verify.acceptance.manifest-cp.rhel.txt` `51d28c3cf2f6898f`
+  - `verify.acceptance.manifest-control.rhel.txt` `150d05cc189f5c84`
+  Their hex-encoded path and target fields are scanned by
+  `docs/v0.27.0/scan.manifest-sensitive.sh`. That scanner was itself wrong on
+  first use: the rules carry a `regex:` prefix and an inline `(?i)`, so every
+  term became the literal string `regex:(?i)<term>` and matched nothing, and it
+  reported clean on a manifest with a protected term planted in a hex path. It is
+  now calibrated in both directions, refuses outright when the rules file is
+  absent, and carries no term list of its own, since this repository is public.
+- **Rows not covered on Debian**, stated in the artifact itself rather than
+  omitted: the equivalence pair, the canary and loader comparisons, and the
+  rsync-failure row. Each needs two engines on one host.
+- **Developer-host self-test**: the acceptance rows behave as on the targets,
+  including the interrupted copy and both oracle controls. The remaining failures
+  on that host are its inability to create symlinks or to run a binary from a
+  constructed PATH, both reported as fixture defects naming the responsible
+  tools rather than as findings about the installer.
+
+No acceptance case work remains. The implementation asserts complete recovery,
+all loader refusal branches have controls, the equivalence rule is settled
+upstream, and both target captures now agree with their fingerprinted harnesses.
+
+One limitation is recorded rather than claimed as coverage: **the loader row is
+RHEL-only**, because it is meaningful only against the published archive and the
+Debian agent cannot reach it. That is a property of the target, not an omission,
+and the Debian capture prints it among the rows it does not claim.
 
 ### Feature integrity for Step 5
 
-_(empty — no check has taken place yet.)_.
+- **Nothing executable changed**, so nothing existing can have regressed. The
+  earlier suites run cumulatively inside both step 5 runs and every case outcome
+  matches its step 3 capture.
+- **The Q19 defect stays removed**, measured where it occurred: on the Debian
+  agent `accept no-rsync host selection` reads "rsync not found on PATH", so the
+  fallback was selected because rsync is absent and not because the override
+  forced it, and the install completes.
+- **The documented asymmetry is unchanged.** `step3 rsync replaced the link`
+  still returns exit 0 where the fallback returns exit 7, which is the row the
+  wiki page publishes as deliberate.
+
+No existing feature or reporting capability appears impaired.
