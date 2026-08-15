@@ -8,6 +8,13 @@
 #
 # Usage:
 #   bash verify.install-pkg.sh [--step N] [--installer PATH] [--scratch DIR]
+#                              [--real-archive PATH] [--equivalence-out DIR]
+#                              [--timeout SECONDS]
+#
+# --scratch names the PARENT: the run creates cplx-verify.<pid> beneath it and
+# removes that on exit. Step 5 installs two complete toolchains plus staging
+# there, so on a host whose /tmp is a memory-backed filesystem it belongs on
+# real disk instead. The header reports the free space it starts with.
 #
 # Everything below the marker is byte-identical to the consuming project's copy,
 # tools/installer_verify_step0.sh, and the header prints the digest of that
@@ -70,6 +77,8 @@ set -u
 
 STEP=0
 INSTALLER=""
+EQ_OUT=""
+REAL_ARCHIVE=""
 SCRATCH_PARENT="${TMPDIR:-/tmp}"
 TIMEOUT_S=20
 
@@ -78,6 +87,20 @@ while [ $# -gt 0 ]; do
         --step)      STEP="$2"; shift 2 ;;
         --installer) INSTALLER="$2"; shift 2 ;;
         --scratch)   SCRATCH_PARENT="$2"; shift 2 ;;
+        # Where to copy the equivalence manifests before scratch is removed. The
+        # design retains the comparison rather than a verdict, and all three
+        # files rather than the diff alone: a reader cannot audit a comparison
+        # whose inputs are gone.
+        --equivalence-out) EQ_OUT="$2"; shift 2 ;;
+        # The real published archive, for step 5 acceptance only. Q02 keeps the
+        # synthetic fixture for steps 0 to 4 and reserves the real one for
+        # acceptance, because only the real tree carries the ELF binaries and the
+        # twelve thousand symlinks the loader and canary rows are about.
+        --real-archive) REAL_ARCHIVE="$2"; shift 2 ;;
+        # The watchdog. Twenty seconds is right for a synthetic fixture and far
+        # too short for a real toolchain, so acceptance raises it explicitly
+        # rather than silently.
+        --timeout) TIMEOUT_S="$2"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -87,8 +110,10 @@ done
 # pass at exactly the level later steps are meant to rely on. When a later step
 # adds a suite, extend this dispatch and the SUITES record below together.
 case "$STEP" in
-    0|1|2|3) ;;
-    *) echo "unsupported --step $STEP: steps 0 to 3 have case suites today." >&2
+    0|1|2|3|5) ;;
+    *) echo "unsupported --step $STEP: steps 0 to 3 and 5 have case suites today." >&2
+       echo "Step 4 has none: it changes documentation only, so its evidence is" >&2
+       echo "a --step 3 run against the step 4 installer." >&2
        echo "Add its suite and extend the dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -169,6 +194,270 @@ enc() { printf '%s' "$1" | od -An -v -tx1 | tr -dc '0-9a-f'; }
 
 short_sha() { sha256sum -- "$1" 2>/dev/null | cut -c1-12; }
 
+# The equivalence manifest, exactly the recipe the validation plan fixes. It is
+# emitted here rather than shipped as a comparator: the design proves equivalence
+# once and retains the output, and a shipped tool would be a second thing to
+# maintain and to trust.
+#
+# Every textual field is locale and zone independent, filename-bearing fields are
+# hex encoded so no name can forge a record, and the type is a shell test rather
+# than a localized description. Hard-link topology is deliberately absent: `cp -a`
+# preserves hard links and `rsync -a` expands them, so emitting a link count would
+# manufacture a difference the design already accepts.
+emit_manifest() {
+    local root="$1" out="$2"
+    local rel path type size mode mtime uid gid digest target enc_path enc_target
+    export LC_ALL=C TZ=UTC
+    # Refuse before the loop when the manifest cannot be written. Unchecked, the
+    # append below fails once per entry -- tens of thousands of identical lines
+    # on a real tree -- and, far worse, leaves the comparison downstream reading
+    # a file that was never created, where "no differences" is indistinguishable
+    # from agreement. `true` and not `:` because a redirection failure on a
+    # special builtin ends the shell outright under POSIX mode.
+    if [ ! -d "$root" ]; then
+        printf 'manifest: source tree is missing, nothing to record: %s\n' "$root" >&2
+        return 1
+    fi
+    if ! mkdir -p -- "${out%/*}" 2>/dev/null || ! true > "$out" 2>/dev/null; then
+        printf 'manifest: cannot write %s -- the scratch filesystem is full or gone\n' "$out" >&2
+        return 1
+    fi
+    while IFS= read -r -d '' rel; do
+        path="$root${rel:+/$rel}"
+        # -L first, so a symlink is never resolved into the type of its target.
+        if   [ -L "$path" ]; then type=l
+        elif [ -d "$path" ]; then type=d
+        elif [ -f "$path" ]; then type=f
+        elif [ -p "$path" ]; then type=p
+        elif [ -S "$path" ]; then type=S
+        elif [ -b "$path" ]; then type=b
+        elif [ -c "$path" ]; then type=c
+        else type='?'; fi
+
+        # The transfer root's empty relative path encodes to the empty string, so
+        # it is written as a token that cannot collide with hex.
+        if [ -z "$rel" ]; then enc_path=ROOT; else enc_path=$(enc "$rel"); fi
+
+        if [ "$type" = f ]; then
+            size=$(stat -c '%s' -- "$path")
+            # -z then exactly 64 characters, so the filename escaping GNU
+            # checksum tools apply to unusual names cannot reach the field.
+            digest=$(sha256sum -z -- "$path" | head -c 64)
+        else
+            size='-'; digest='-'
+        fi
+        mode=$(stat -c '%a' -- "$path")
+        mtime=$(stat -c '%.9Y' -- "$path")
+        uid=$(stat -c '%u' -- "$path")
+        gid=$(stat -c '%g' -- "$path")
+        if [ "$type" = l ]; then
+            # -n matters: without it readlink appends a newline the target does
+            # not contain, and command substitution would instead strip every
+            # trailing newline the target does contain.
+            enc_target=$(readlink -n -- "$path" | od -An -v -tx1 | tr -dc '0-9a-f')
+        else
+            enc_target='-'
+        fi
+        printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+            "$enc_path" "$type" "$size" "$mode" "$mtime" "$uid" "$gid" \
+            "$digest" "$enc_target" >> "$out"
+    done < <(find "$root" -mindepth 0 -printf '%P\0')
+    LC_ALL=C sort -o "$out" "$out"
+}
+
+# The paths whose field N differs between two manifests. Both files are keyed on
+# field 1 and C-collated by emit_manifest, which is what join requires.
+manifest_field_diff() {
+    LC_ALL=C join -t $'\t' -j1 <(cut -f1,"$3" "$1") <(cut -f1,"$3" "$2") \
+        | awk -F'\t' '$2 != $3 { print $1 }' | LC_ALL=C sort
+}
+
+# Everything read from a live tree, captured while that tree exists. The
+# equivalence installs share ONE prefix path, so no two trees are ever on disk
+# together and an assertion reaching across them would read a directory that has
+# already been removed.
+EQ_CANARIES=0; EQ_LINKS=0; EQ_DEPS=0; EQ_NOTFOUND=0; EQ_TARGET=""
+eq_probe_tree() {
+    local tree="$1" ld target
+    EQ_CANARIES=$(find "$tree" -name 'libgcc_s.so.1' 2>/dev/null | wc -l | tr -d ' ')
+    EQ_LINKS=$(find "$tree" -name 'libgcc_s.so.1' -type l 2>/dev/null | wc -l | tr -d ' ')
+    EQ_DEPS=0; EQ_NOTFOUND=0; EQ_TARGET=""; EQ_LOADER=""
+    # Sorted, so the choice is the tree's content and not its directory order.
+    # Unsorted, `head -n 1` picked whichever loader the filesystem happened to
+    # return first, and the published tree carries one per toolchain root: two
+    # probes of two identical trees then read the same binary with different
+    # loaders and reported 5 dependencies against 4. The trees were equal; the
+    # measurement was not.
+    ld=$(find "$tree" -name 'ld-linux-x86-64.so.2' 2>/dev/null | LC_ALL=C sort | head -n 1)
+    # The target must be a real ELF, tested by its magic rather than by its name.
+    # Matching */bin/python3* by name alone selected python3.13-config, a shell
+    # script, and the loader then listed zero dependencies for it.
+    target=""
+    while IFS= read -r c; do
+        [ -n "$c" ] || continue
+        if [ "$(head -c 4 -- "$c" 2>/dev/null | od -An -tx1 | tr -d ' \n')" = "7f454c46" ]; then
+            target="$c"; break
+        fi
+    done <<EOF
+$(find "$tree" -type f -path '*/bin/python3*' 2>/dev/null | LC_ALL=C sort
+  find "$tree" -type f -name 'patchelf' 2>/dev/null | LC_ALL=C sort)
+EOF
+    [ -n "$ld" ] && [ -n "$target" ] || return 0
+    # Recorded RELATIVE to the tree, so the two trees' selections can be required
+    # to be the same ELF. A basename cannot carry that: two trees could select
+    # different files sharing a name and the comparison would not notice.
+    EQ_TARGET="${target#$tree/}"
+    EQ_LOADER="${ld#$tree/}"
+    EQ_DEPS=$("$ld" --list "$target" 2>/dev/null | grep -c '=>')
+    EQ_NOTFOUND=$("$ld" --list "$target" 2>/dev/null | grep -c 'not found')
+    return 0
+}
+
+# One equivalence install: the prefix is removed and recreated at a FIXED path,
+# the archive placed, the engine selected, the install run. Reused for every
+# install in the comparison so that no two trees differ by their own location.
+EQ_PREFIX=""
+EQ_ARCHIVE_SRC=""
+# The wall-clock window of the install. The post-copy passes rewrite files and
+# stamp them with the time of the run, so these bounds are what lets those
+# entries be CONSTRAINED rather than excluded from the comparison.
+EQ_T0=0
+EQ_T1=0
+eq_install() {
+    local label="$1" forced="$2" p arch
+    EQ_T0=$(date +%s)
+    p=$(new_prefix accept-eq)
+    cp -a "$EQ_ARCHIVE_SRC" "$p/pkgs/"
+    arch=$(resolve_archive "$p")
+    if [ "$forced" = yes ]; then CASE_FORCE_CP=1; else unset CASE_FORCE_CP; fi
+    run_case "accept equivalence $label install" "$p" "$INSTALLER" "$arch" 0 \
+             'Installation successful' fresh installed
+    unset CASE_FORCE_CP
+    EQ_T1=$(date +%s)
+    EQ_PREFIX="$p"
+}
+
+# The equivalence oracle. A function so the calibration control below can drive
+# it with fabricated manifests: an oracle no case can make fail is not an oracle.
+#
+# Every field is compared EXACTLY, including mtime. The earlier form removed any
+# engine difference whose path also appeared in the same-engine control, which
+# identified a run-to-run noise SET and then treated membership of that set as
+# permission for any value at all. It left 592 mtime cells unconstrained while
+# reporting that all eight fields had been compared. A fallback-specific mtime
+# defect on one of those paths would have been absorbed.
+#
+# mtime on the entries the post-copy passes rewrite cannot be exactly equal
+# across two runs, because those entries carry the time of the run. Those cells
+# are therefore CONSTRAINED, not excused: each must fall inside the wall-clock
+# window of its own install. That is a rule the cells are measured against, and
+# the verdict states how many were measured which way rather than claiming all
+# eight fields were compared everywhere.
+assert_equivalence() {
+    local name="$1" m_r="$2" m_c="$3" m_ctl="$4"
+    local t0r="$5" t1r="$6" t0c="$7" t1c="$8"
+    local lines only fields names k n detail rewritten exact_bad out_r out_c
+    cases=$((cases + 1))
+    lines=$(wc -l < "$m_r" | tr -d ' ')
+    only=$(LC_ALL=C comm -3 <(cut -f1 "$m_r") <(cut -f1 "$m_c") | wc -l | tr -d ' ')
+    if [ "$only" -ne 0 ]; then
+        fail "$name" "$only entries exist under one engine only"; return 1
+    fi
+    # Fields other than mtime: exact equality, no allowance of any kind.
+    fields=(2 3 4 6 7 8 9)
+    names=(type size mode uid gid digest target)
+    detail=""
+    k=0
+    while [ "$k" -lt 7 ]; do
+        n=$(manifest_field_diff "$m_r" "$m_c" "${fields[$k]}" | wc -l | tr -d ' ')
+        [ "${n:-0}" -gt 0 ] && detail="${detail:+$detail, }${names[$k]} $n"
+        k=$((k + 1))
+    done
+    if [ -n "$detail" ]; then
+        fail "$name" "the engines differ where they must not: $detail"; return 1
+    fi
+    # mtime. The rewritten set is defined by the CONTROL, two runs of one engine,
+    # so it is measured rather than assumed. Outside that set the engines must
+    # agree exactly; inside it each value must lie in its own run's window.
+    manifest_field_diff "$m_r" "$m_ctl" 5 > "$SCRATCH/eq.rewritten"
+    manifest_field_diff "$m_r" "$m_c" 5 > "$SCRATCH/eq.enginemtime"
+    rewritten=$(wc -l < "$SCRATCH/eq.rewritten" | tr -d ' ')
+    exact_bad=$(LC_ALL=C comm -23 "$SCRATCH/eq.enginemtime" "$SCRATCH/eq.rewritten" \
+                | wc -l | tr -d ' ')
+    if [ "${exact_bad:-0}" -ne 0 ]; then
+        fail "$name" "mtime differs on $exact_bad entries the same engine reproduces exactly"
+        return 1
+    fi
+    out_r=$(manifest_mtime_outside "$m_r" "$SCRATCH/eq.rewritten" "$t0r" "$t1r")
+    out_c=$(manifest_mtime_outside "$m_c" "$SCRATCH/eq.rewritten" "$t0c" "$t1c")
+    if [ "${out_r:-1}" -ne 0 ] || [ "${out_c:-1}" -ne 0 ]; then
+        fail "$name" \
+             "of $rewritten rewritten entries, $out_r under rsync and $out_c under cp carry an mtime outside their own run"
+        return 1
+    fi
+    pass "$name" \
+         "$lines entries: 7 fields exact, mtime exact on $((lines - rewritten)) and inside its own run window on the $rewritten the passes rewrite"
+    return 0
+}
+
+
+# The loader verdict, as a function so its refusal branches can be exercised by
+# controls rather than only its accepting branch by the target run. Round 2 asked
+# for exactly this: the positive observation on the real archive does not show
+# that the rejection works, and the version before it accepted a fallback side
+# that had produced nothing at all.
+assert_loader() {
+    local name="$1" tgt_r="$2" ld_r="$3" deps_r="$4" nf_r="$5"
+    local tgt_c="$6" ld_c="$7" deps_c="$8" nf_c="$9"
+    cases=$((cases + 1))
+    if [ -z "$tgt_r" ] || [ -z "$tgt_c" ]; then
+        fail "$name" \
+             "no loader or no ELF found under $([ -z "$tgt_r" ] && printf rsync || printf cp), so that side was never observed"
+        return 1
+    fi
+    if [ "$tgt_r" != "$tgt_c" ]; then
+        fail "$name" "the two trees selected different ELFs, so the counts are not comparable"
+        return 1
+    fi
+    # The loader is half the measurement and was not compared at all. The tree
+    # carries one per toolchain root, an unsorted lookup picked whichever the
+    # filesystem returned first, and two probes of two provably identical trees
+    # reported 5 dependencies against 4. The counts were incomparable and the
+    # case passed anyway, because it only ever looked at the unresolved totals.
+    if [ "$ld_r" != "$ld_c" ]; then
+        fail "$name" "the two trees used different loaders, so the counts are not comparable"
+        return 1
+    fi
+    # Order matters here. A listing of zero is meaningless whatever the other
+    # side says, so it is diagnosed as an unreadable target rather than as a
+    # disagreement between the engines.
+    if [ "${deps_r:-0}" -lt 2 ] || [ "${deps_c:-0}" -lt 2 ]; then
+        fail "$name" "listings too short to compare: rsync $deps_r, cp $deps_c dependencies for $tgt_r"
+        return 1
+    fi
+    if [ "${deps_r:-0}" -ne "${deps_c:-0}" ]; then
+        fail "$name" \
+             "same ELF and loader, but $deps_r dependencies under rsync against $deps_c under cp"
+        return 1
+    fi
+    if [ "${nf_c:-1}" -le "${nf_r:-0}" ]; then
+        pass "$name" \
+             "$tgt_r read under both engines ($deps_r and $deps_c deps), no 'not found' the rsync tree did not already have (rsync $nf_r, cp $nf_c)"
+        return 0
+    fi
+    fail "$name" "the fallback tree adds unresolved libraries (rsync $nf_r, cp $nf_c)"
+    return 1
+}
+# How many of the given paths carry an mtime outside [t0, t1] in this manifest.
+# One second of slack each way, because the manifest records nanoseconds while
+# the window is taken in whole seconds.
+manifest_mtime_outside() {
+    local manifest="$1" pathlist="$2" t0="$3" t1="$4"
+    LC_ALL=C join -t $'\t' -j1 "$pathlist" <(cut -f1,5 "$manifest") \
+        | awk -F'\t' -v a="$((t0 - 1))" -v b="$((t1 + 1))" \
+              '$2+0 < a || $2+0 > b { n++ } END { print n+0 }'
+}
+
 # The digest of the shared body, from the marker line to EOF. Both repository
 # copies produce the same value, which is what makes "the copies are in step" a
 # reproducible statement rather than a claim in prose. The whole-file digest
@@ -198,8 +487,19 @@ body_digest() {
 #
 # Missing any of them stops the run before the first case, rather than becoming
 # a red line in a verdict a reader reaches after twenty others.
-HARNESS_TOOLS="basename bash cp cut date diff dirname find grep gzip head ln ls \
-mkdir mkfifo od readlink rm sha256sum sort stat tail tar timeout touch tr uname wc"
+HARNESS_TOOLS="awk basename bash cp cut date df diff dirname find grep gzip head \
+ln ls mkdir mkfifo od readlink rm sha256sum sort stat tail tar timeout touch tr \
+uname wc"
+
+# The INSTALLER's published host-tool contract, from wiki/reference/
+# relocation-tools.md. Deliberately a separate list from the harness's own: the
+# harness calls sha256sum, mkfifo and diff, which the installer never does, and
+# the installer needs chmod, sed and xargs, which the harness never calls. The
+# constructed PATH below is built from THIS list. Built from the harness list it
+# was short exactly those three, so the installer could not start, and the case
+# reported the host at fault on every host it had ever run on.
+INSTALLER_TOOLS="basename chmod cp cut dirname find grep gzip head ln mkdir od \
+readlink rm sed sort tar touch tr xargs"
 
 preflight() {
     echo "--- preflight"
@@ -393,6 +693,22 @@ assert_fixture() {
 }
 
 # --------------------------------------------------------- post-state oracle ---
+# The canary is FOUND, never hardcoded. The synthetic fixture carries one at
+# tools/root/usr/lib64, and the published archive carries two under different
+# toolchain roots, so a literal path asserts the shape of the fixture and nothing
+# at all about a real tree. Finding none is a failure and not a pass: that is the
+# difference between "every canary survived as a link" and "no canary was looked
+# at". Echoes the same repair already made in the acceptance assertion.
+canary_verdict() {
+    local tree="$1" n l
+    n=$(find "$tree" -name 'libgcc_s.so.1' 2>/dev/null | wc -l | tr -d ' ')
+    l=$(find "$tree" -name 'libgcc_s.so.1' -type l 2>/dev/null | wc -l | tr -d ' ')
+    if [ "${n:-0}" -eq 0 ]; then printf 'none'; return 1; fi
+    if [ "$l" -ne "$n" ]; then printf 'of %s canaries only %s are links' "$n" "$l"; return 1; fi
+    printf '%s' "$n"
+    return 0
+}
+
 # The one place a deployment is judged. Real cases and the exit-only control go
 # through it, so proving the control also proves the cases.
 assert_post_state() {
@@ -403,8 +719,9 @@ assert_post_state() {
                 fail "$name" "POST-STATE: tools tree absent or empty"; return 1; fi
             if [ ! -f "$prefix/tools/bin/patchelf" ]; then
                 fail "$name" "POST-STATE: payload file missing from the tree"; return 1; fi
-            if [ ! -L "$prefix/tools/root/usr/lib64/libgcc_s.so.1" ]; then
-                fail "$name" "POST-STATE: canary SONAME symlink is not a link"; return 1; fi
+            local cv
+            if ! cv=$(canary_verdict "$prefix/tools"); then
+                fail "$name" "POST-STATE: canary SONAME symlink: $cv"; return 1; fi
             if [ ! -f "$prefix/.env" ] || [ ! -f "$prefix/.env_" ]; then
                 fail "$name" "POST-STATE: archive root files not deployed"; return 1; fi
             ;;
@@ -643,12 +960,17 @@ run_case() {
     # code under test, and the plan names both, so the harness must be able to
     # produce both rather than collapse them.
     CASE_LOG="$SCRATCH/$name.log"
+    # CASE_PATH_PREFIX lets an acceptance case put a stand-in ahead of the real
+    # program on PATH, which is how a present-but-failing rsync is produced.
+    local case_path="$PATH"
+    [ -n "${CASE_PATH_PREFIX:-}" ] && case_path="$CASE_PATH_PREFIX:$PATH"
     if [ -n "${CASE_FORCE_CP+set}" ]; then
-        HOME="$CASE_HOME" CPLX_INSTALL_PKG_FORCE_CP="$CASE_FORCE_CP" \
+        HOME="$CASE_HOME" PATH="$case_path" CPLX_INSTALL_PKG_FORCE_CP="$CASE_FORCE_CP" \
             timeout "$TIMEOUT_S" bash "$want_inst" tools --prefix "$prefix" \
             > "$CASE_LOG" 2>&1
     else
-        HOME="$CASE_HOME" timeout "$TIMEOUT_S" bash "$want_inst" tools --prefix "$prefix" \
+        HOME="$CASE_HOME" PATH="$case_path" \
+            timeout "$TIMEOUT_S" bash "$want_inst" tools --prefix "$prefix" \
             > "$CASE_LOG" 2>&1
     fi
     CASE_EXIT=$?
@@ -785,6 +1107,7 @@ echo "harness   : $(basename -- "${BASH_SOURCE[0]}")"
 echo "  sha256  : $(sha256sum -- "${BASH_SOURCE[0]}" 2>/dev/null | cut -d' ' -f1)"
 echo "  body    : $(body_digest "${BASH_SOURCE[0]}")"
 echo "uname     : $(uname -srm)"
+echo "archive   : ${REAL_ARCHIVE:-synthetic fixture built by the harness}"
 echo "installer : $INSTALLER"
 # Which script was measured, not just where it sat. A path proves nothing about
 # content: the first RHEL baseline ran against a deployed copy dated months
@@ -801,7 +1124,13 @@ else
     echo "            $COMBINATION_WHY"
 fi
 echo "home      : $CASE_HOME (pinned, so archive selection is hermetic)"
-echo "scratch   : $SCRATCH"
+# Free space is part of the run identity, not a convenience: step 5 installs two
+# complete toolchains plus staging into the scratch tree, and on a host whose
+# /tmp is a memory-backed filesystem that is a much smaller number than the disk
+# behind $HOME. A run that exhausts it fails while copying, which is the shape
+# the interrupted-copy row is about, so the figure is recorded up front.
+echo "scratch   : $SCRATCH ($(df -Pk "$SCRATCH" 2>/dev/null | awk 'NR==2 {printf "%.1f GiB free on %s", $4/1048576, $1}' || echo 'free space unknown'))"
+echo "watchdog  : ${TIMEOUT_S}s per case"
 echo
 
 # Preflight is a gate, not a case group: a missing dependency or a mislabelled
@@ -899,6 +1228,49 @@ fixctl_archive=$(resolve_archive "$fixctl")
 mkdir -p "$SCRATCH/external"
 printf 'DECOY TARGET\n' > "$SCRATCH/external/fixctl.target"
 printf 'a regular file, not a link\n' > "$fixctl/.env"
+# The equivalence oracle, driven with fabricated manifests, because the oracle
+# that matters most in step 5 is otherwise only ever exercised by data that
+# passes. Both controls put the injected defect on a path the CONTROL also moves,
+# which is exactly where the previous subset oracle was blind: it treated
+# membership of the noise set as permission for any value at all, and passed both
+# of these. They run here, before the expensive target installs.
+eqctl="$SCRATCH/eqctl"
+mkdir -p "$eqctl"
+# path<TAB>type size mode mtime uid gid digest target. `keep` is quiet in the
+# control, `noisy` is moved by it, standing for an entry the passes rewrite.
+printf 'keep\tf\t10\t644\t1000.000000000\t1\t1\taaa\t-\nnoisy\tf\t20\t644\t1000.000000000\t1\t1\tbbb\t-\n' > "$eqctl/r.txt"
+printf 'keep\tf\t10\t644\t1000.000000000\t1\t1\taaa\t-\nnoisy\tf\t20\t644\t1050.000000000\t1\t1\tbbb\t-\n' > "$eqctl/ctl.txt"
+# 1. An mtime the engine put far outside its own run, on the noisy path.
+printf 'keep\tf\t10\t644\t1000.000000000\t1\t1\taaa\t-\nnoisy\tf\t20\t644\t9999999.000000000\t1\t1\tbbb\t-\n' > "$eqctl/cp-mtime.txt"
+# 2. A content difference on the noisy path, which no window rule may excuse.
+printf 'keep\tf\t10\t644\t1000.000000000\t1\t1\taaa\t-\nnoisy\tf\t20\t644\t1020.000000000\t1\t1\tZZZ\t-\n' > "$eqctl/cp-digest.txt"
+control "control equivalence mtime cell" "of 1 rewritten entries" \
+    assert_equivalence "eqctl-mtime" "$eqctl/r.txt" "$eqctl/cp-mtime.txt" \
+        "$eqctl/ctl.txt" 990 1010 990 1010
+control "control equivalence digest cell" "the engines differ where they must not" \
+    assert_equivalence "eqctl-digest" "$eqctl/r.txt" "$eqctl/cp-digest.txt" \
+        "$eqctl/ctl.txt" 990 1010 990 1010
+
+# The loader verdict's refusal branches, driven with fabricated observations. The
+# real archive can only ever produce the accepting branch, so without these the
+# rejection is asserted by nobody. The first is the exact shape round 1 left
+# open: the fallback side observed nothing, which became zero unresolved
+# libraries, and zero is never greater than the rsync side's count.
+control "control loader absent fallback" "no loader or no ELF found under cp" \
+    assert_loader "loaderctl-absent" "bin/python3" "lib64/ld.so" 5 0 "" "" 0 0
+control "control loader different ELF" "the two trees selected different ELFs" \
+    assert_loader "loaderctl-mismatch" "bin/python3" "lib64/ld.so" 5 0 "bin/other" "lib64/ld.so" 5 0
+# The shape a real run produced: identical trees, the same ELF, but a different
+# loader picked out of two toolchain roots by an unsorted lookup, and 5
+# dependencies reported against 4. The old verdict passed it, because it read
+# only the unresolved totals and both were zero.
+control "control loader different loader" "the two trees used different loaders" \
+    assert_loader "loaderctl-ld" "bin/python3" "git/lib64/ld.so" 5 0 "bin/python3" "python/lib64/ld.so" 4 0
+control "control loader dependency count" "same ELF and loader, but" \
+    assert_loader "loaderctl-deps" "bin/python3" "lib64/ld.so" 5 0 "bin/python3" "lib64/ld.so" 4 0
+control "control loader short listing" "listings too short to compare" \
+    assert_loader "loaderctl-short" "bin/python3" "lib64/ld.so" 5 0 "bin/python3" "lib64/ld.so" 0 0
+
 control "control fixture-shape" "FIXTURE symlink:" \
     run_case "fixture-shape" "$fixctl" "$INSTALLER" "$fixctl_archive" 0 "" \
              "symlink:.env=$SCRATCH/external/fixctl.target" installed
@@ -1373,6 +1745,418 @@ if [ "$STEP" -ge 3 ]; then
 
     unset CASE_FORCE_CP
     suite "step3-rootfile"
+    echo
+fi
+
+# ------------------------------------------------ step 5: acceptance ---
+# The design's acceptance table, run end to end rather than per step. Most of its
+# rows are already asserted by the suites above, which run cumulatively, so this
+# section adds only what nothing else covers.
+if [ "$STEP" -ge 5 ]; then
+    echo "--- step 5: acceptance rows no earlier suite covers"
+
+    # 1. The two engines over one archive, each into a FRESH prefix at the SAME
+    # PATH. The path matters as much as the freshness. The installer writes the
+    # prefix into the tree deliberately: the text pass rewrites shebangs and
+    # configs, patchelf rewrites PT_INTERP and rpath. Two installs under prefixes
+    # whose names differ therefore produce trees that differ, and a byte
+    # comparison between them measures the names. Measured with names three
+    # characters apart: 205 files differed in size, every delta a positive
+    # multiple of three, and a further 163 ELF files differed in content at
+    # identical size where patchelf had rewritten a fixed-width field.
+    #
+    # Freshness stays a condition. rsync's quick check skips a destination whose
+    # size and integer second already match, which the fallback cannot do because
+    # it empties first, so every install starts from a prefix just removed.
+    #
+    # The third install, rsync again, is the control. Two runs cannot produce
+    # identical trees: the post-copy passes rewrite files and stamp them with the
+    # time of the run. So the run-to-run noise floor is MEASURED here rather than
+    # assumed, and the engine comparison is then required to add nothing to it.
+    if [ "$have_rsync" = yes ]; then
+        EQ_DIR="$SCRATCH/equivalence"
+        eq_built=yes
+        mkdir -p "$EQ_DIR" 2>/dev/null || eq_built=no
+
+        # ONE archive for all three installs. Building the synthetic fixture per
+        # install stamps each tree with the mtimes of its own build, and the
+        # control then absorbs the entire mtime dimension: measured that way, all
+        # 12 entries moved between two runs of the same engine, so mtime proved
+        # nothing. The real archive is a fixed file and already had this property.
+        if [ -n "$REAL_ARCHIVE" ]; then
+            # Resolved through its own symlink, so the capture names the dated
+            # file rather than `latest` and a rerun months later is comparable.
+            EQ_ARCHIVE_SRC=$(readlink -f -- "$REAL_ARCHIVE")
+        else
+            mkdir -p "$SCRATCH/eq-archive"
+            build_archive "$SCRATCH/eq-archive/tools.2026-08-11_000000.tar.gz"
+            EQ_ARCHIVE_SRC="$SCRATCH/eq-archive/tools.2026-08-11_000000.tar.gz"
+        fi
+
+        eq_install rsync no
+        eq_t0_r=$EQ_T0; eq_t1_r=$EQ_T1
+        assert_engine "accept equivalence rsync engine" "$CASE_LOG" rsync "$CASE_EXIT"
+        eq_probe_tree "$EQ_PREFIX/tools"
+        eq_can_r=$EQ_CANARIES; eq_lnk_r=$EQ_LINKS
+        eq_deps=$EQ_DEPS; eq_nf_r=$EQ_NOTFOUND; eq_tgt=$EQ_TARGET; eq_ld_r=$EQ_LOADER
+        emit_manifest "$EQ_PREFIX/tools" "$EQ_DIR/manifest.rsync.txt" || eq_built=no
+
+        eq_install cp yes
+        eq_t0_c=$EQ_T0; eq_t1_c=$EQ_T1
+        assert_engine "accept equivalence cp engine" "$CASE_LOG" cp "$CASE_EXIT"
+        eq_probe_tree "$EQ_PREFIX/tools"
+        # All three values, symmetrically with the rsync side. Keeping only the
+        # unresolved count here meant a fallback tree with no ELF at all reported
+        # zero unresolved libraries, and zero is never greater than the rsync
+        # side's count, so the absence passed.
+        eq_lnk_c=$EQ_LINKS; eq_nf_c=$EQ_NOTFOUND
+        eq_deps_c=$EQ_DEPS; eq_tgt_c=$EQ_TARGET; eq_ld_c=$EQ_LOADER
+        emit_manifest "$EQ_PREFIX/tools" "$EQ_DIR/manifest.cp.txt" || eq_built=no
+
+        eq_install "rsync control" no
+        assert_engine "accept equivalence control engine" "$CASE_LOG" rsync "$CASE_EXIT"
+        emit_manifest "$EQ_PREFIX/tools" "$EQ_DIR/manifest.control.txt" || eq_built=no
+
+        # Every input is retained, not just a verdict: a reader cannot audit a
+        # comparison whose inputs are gone, and the control is an input.
+        if [ "$eq_built" = yes ]; then
+            diff -u "$EQ_DIR/manifest.rsync.txt" "$EQ_DIR/manifest.cp.txt" \
+                > "$EQ_DIR/manifest.diff.txt" 2>&1
+            diff -u "$EQ_DIR/manifest.rsync.txt" "$EQ_DIR/manifest.control.txt" \
+                > "$EQ_DIR/manifest.control.diff.txt" 2>&1
+        fi
+        eqr_lines=0
+        eqc_lines=0
+        [ -s "$EQ_DIR/manifest.rsync.txt" ] &&
+            eqr_lines=$(wc -l < "$EQ_DIR/manifest.rsync.txt" | tr -d ' ')
+        [ -s "$EQ_DIR/manifest.cp.txt" ] &&
+            eqc_lines=$(wc -l < "$EQ_DIR/manifest.cp.txt" | tr -d ' ')
+        cases=$((cases + 1))
+        # The questions in order. `[ ! -s ]` is true of a file that was never
+        # created, so a run that wrote no manifest at all would otherwise report
+        # the strongest verdict in this step on evidence that does not exist.
+        if [ "$eq_built" != yes ] || [ ! -f "$EQ_DIR/manifest.diff.txt" ]; then
+            fail "accept manifest equivalence" \
+                 "no manifest set was produced, so nothing was compared"
+        elif [ "$eqr_lines" -lt 2 ] || [ "$eqc_lines" -lt 2 ]; then
+            fail "accept manifest equivalence" \
+                 "manifest too small to be a tree: rsync $eqr_lines, cp $eqc_lines entries"
+        else
+            # Field by field against the control, because a count comparison
+            # would let a digest difference hide behind an equal number of
+            # control mtime differences. Each field asks the same question: is
+            # there an entry the engines disagree on that two runs of ONE engine
+            # agree on? That entry, and only that, is the fallback's doing.
+            assert_equivalence "accept manifest equivalence" \
+                "$EQ_DIR/manifest.rsync.txt" "$EQ_DIR/manifest.cp.txt" \
+                "$EQ_DIR/manifest.control.txt" \
+                "$eq_t0_r" "$eq_t1_r" "$eq_t0_c" "$eq_t1_c"
+        fi
+        # The transfer root is in the manifest by construction, and the canary is
+        # asserted separately so it cannot be lost inside a large diff.
+        cases=$((cases + 1))
+        if grep -q '^ROOT	d	' "$EQ_DIR/manifest.rsync.txt" \
+           && grep -q '^ROOT	d	' "$EQ_DIR/manifest.cp.txt"; then
+            pass "accept transfer root in manifest" "both roots recorded with mode and mtime"
+        else
+            fail "accept transfer root in manifest" "a transfer root is missing from a manifest"
+        fi
+        # The canary is found rather than hardcoded, because the synthetic
+        # fixture carries one at tools/root/usr/lib64 and the real archive
+        # carries two, under tools/git/root/lib64 and tools/python/root/lib64. A
+        # hardcoded path would silently assert nothing on the real tree.
+        cases=$((cases + 1))
+        if [ "${eq_can_r:-0}" -eq 0 ]; then
+            fail "accept canary link both engines" "no libgcc_s.so.1 found in the tree, so nothing was asserted"
+        elif [ "$eq_lnk_r" -eq "$eq_can_r" ] && [ "$eq_lnk_c" -eq "$eq_can_r" ]; then
+            pass "accept canary link both engines" "$eq_can_r canary link(s), still links under each engine"
+        else
+            fail "accept canary link both engines" \
+                 "of $eq_can_r canaries, rsync kept $eq_lnk_r and cp kept $eq_lnk_c as links"
+        fi
+
+        # The loader row, and only meaningful against the real archive: the
+        # synthetic fixture has no ELF. It is differential on purpose. The
+        # question the design asks is whether the fallback tree carries a
+        # `not found` the rsync tree did not already have, so a library the
+        # archive never resolved is not counted against this change.
+        if [ -n "$REAL_ARCHIVE" ]; then
+            # Both the loader and the ELF were found, not spelled out, and were
+            # read from each tree while that tree still existed. The first
+            # version required -type f for the loader and the path
+            # */python/bin/python3* for the ELF, and the published tree has
+            # neither: it keeps each toolchain under its own root, so the run
+            # reported that it had asserted nothing. That report is the only
+            # reason this is being repaired rather than believed.
+            # Every question is asked of BOTH trees. The previous form required a
+            # target and a meaningful listing from the rsync tree only, so a
+            # fallback tree with no ELF contributed zero unresolved libraries and
+            # passed on that zero. An observation that was never made is not
+            # evidence that nothing was wrong.
+            assert_loader "accept loader resolves both engines" \
+                "$eq_tgt" "$eq_ld_r" "$eq_deps" "$eq_nf_r" \
+                "$eq_tgt_c" "$eq_ld_c" "$eq_deps_c" "$eq_nf_c"
+        fi
+
+        # Retained before scratch is removed, every input rather than the diff
+        # alone: a reader cannot audit a comparison whose inputs are gone, and
+        # the control manifest is an input to the verdict, not a by-product.
+        if [ -n "$EQ_OUT" ]; then
+            if mkdir -p -- "$EQ_OUT" && cp -a "$EQ_DIR/manifest.rsync.txt" \
+                 "$EQ_DIR/manifest.cp.txt" "$EQ_DIR/manifest.control.txt" \
+                 "$EQ_DIR/manifest.diff.txt" "$EQ_DIR/manifest.control.diff.txt" \
+                 "$EQ_OUT/"; then
+                echo "  equivalence manifests retained in $EQ_OUT"
+            else
+                echo "  WARNING: could not retain the equivalence manifests in $EQ_OUT"
+            fi
+        else
+            echo "  (no --equivalence-out given: the manifests stay in scratch and"
+            echo "   are removed with it, so the comparison would not be auditable)"
+        fi
+
+
+        # 2. A present rsync that FAILS must not fall back. Absence selects the
+        # fallback; failure is a real error about the tree, the permissions or
+        # the disk, and retrying it with another engine would turn a diagnosable
+        # failure into a silent success with different semantics.
+        failbin="$SCRATCH/failbin"
+        rm -rf -- "$failbin"; mkdir -p "$failbin"
+        printf '#!/bin/bash\necho "rsync: simulated failure" >&2\nexit 23\n' > "$failbin/rsync"
+        chmod +x "$failbin/rsync"
+        eqf=$(new_prefix accept-rsync-fails)
+        build_archive "$eqf/pkgs/tools.2026-08-11_000000.tar.gz"
+        eqf_archive=$(resolve_archive "$eqf")
+        CASE_PATH_PREFIX="$failbin"
+        run_case "accept rsync fails no fallback" "$eqf" "$INSTALLER" "$eqf_archive" 5 \
+                 'mirror step \(engine rsync\) failed' fresh staging-retained
+        cases=$((cases + 1))
+        if [ -n "$CASE_LOG" ] && [ -f "$CASE_LOG" ] \
+           && ! grep -q 'Mirror engine cp:' "$CASE_LOG"; then
+            pass "accept no fallback after rsync failure" "no fallback trace: the failure was not retried"
+        else
+            fail "accept no fallback after rsync failure" "a fallback ran after rsync failed, or the case never ran"
+        fi
+        unset CASE_PATH_PREFIX
+    else
+        # A host with no rsync cannot host the rows above: each takes BOTH engines
+        # over one archive on one host. Printing what was skipped is part of the
+        # measurement rather than a courtesy -- rows that simply do not appear
+        # leave this artifact reading as full acceptance, and the verdict line
+        # below would say every assertion behaved as designed on the strength of
+        # the single gzip case. The skipped rows are RHEL rows and are recorded
+        # as not covered here.
+        echo "  (no rsync on this host: the equivalence pair, the canary and loader"
+        echo "   comparisons and the rsync-failure row all need two engines on one"
+        echo "   host. They are NOT covered by this run and are not claimed by it.)"
+        # What this host alone can measure is the row the effort exists for: the
+        # fallback is selected because rsync is genuinely absent, not forced, and
+        # the install completes. This is the defect, measured where it occurred.
+        eqd=$(new_prefix accept-no-rsync)
+        build_archive "$eqd/pkgs/tools.2026-08-11_000000.tar.gz"
+        eqd_archive=$(resolve_archive "$eqd")
+        unset CASE_FORCE_CP
+        run_case "accept no-rsync host installs" "$eqd" "$INSTALLER" "$eqd_archive" 0 \
+                 'Installation successful' fresh installed
+        assert_engine "accept no-rsync host engine" "$CASE_LOG" cp "$CASE_EXIT"
+        assert_selection "accept no-rsync host selection" "$CASE_LOG" cp 'rsync not found on PATH'
+    fi
+
+    # 3. The interrupted copy, and the rerun that repairs it. The design
+    # requires a fallback interrupted mid-copy to leave a partial destination
+    # with staging retained, and a rerun over the same archive to restore a
+    # complete tree.
+    #
+    # It sits OUTSIDE the two-engine section deliberately. This is a property of
+    # the fallback engine, not a comparison between engines, so it runs wherever
+    # that engine can be reached: forced on a host with rsync, and native on the
+    # host where the fallback is the only engine there is. That second case is
+    # the operationally interesting one, and placing this row with the two-engine
+    # comparisons would have left the agent the effort exists for untested for
+    # recovery. The override is therefore set only where rsync is present, so the
+    # no-rsync host measures the engine it would really use.
+    #
+    # The interruption is injected rather than described: a cp
+    # that copies a strict subset and then fails is what the installer sees
+    # when a copy is cut short, and only the mirror form is perturbed so the
+    # root-file deploy still behaves normally.
+    cpfail="$SCRATCH/cpfail"
+    rm -rf -- "$cpfail"; mkdir -p "$cpfail"
+    eq_realcp=$(command -v cp)
+    cat > "$cpfail/cp" <<EOF
+#!/bin/bash
+real="$eq_realcp"
+prev=""; last=""
+for a in "\$@"; do prev="\$last"; last="\$a"; done
+case "\$prev" in
+*/.)
+    src="\${prev%/.}"; dst="\${last%/}"
+    n=0
+    for e in "\$src"/*; do
+        [ -e "\$e" ] || continue
+        "\$real" -a "\$e" "\$dst/" || exit 1
+        n=\$((n + 1))
+        break
+    done
+    echo "cp: simulated interruption after \$n entries" >&2
+    exit 1 ;;
+esac
+exec "\$real" "\$@"
+EOF
+    chmod +x "$cpfail/cp"
+    eqi=$(new_prefix accept-interrupted)
+    build_archive "$eqi/pkgs/tools.2026-08-11_000000.tar.gz"
+    eqi_archive=$(resolve_archive "$eqi")
+    if [ "$have_rsync" = yes ]; then CASE_FORCE_CP=1; else unset CASE_FORCE_CP; fi
+    CASE_PATH_PREFIX="$cpfail"
+    run_case "accept cp interrupted mid-copy" "$eqi" "$INSTALLER" "$eqi_archive" 5 \
+             'mirror step \(engine cp\): copy into .* failed' fresh staging-retained
+    unset CASE_PATH_PREFIX
+    cases=$((cases + 1))
+    eqi_partial=$(find "$eqi/tools" -mindepth 1 2>/dev/null | wc -l | tr -d ' ')
+    if [ "${eqi_partial:-0}" -eq 0 ]; then
+        fail "accept interrupted leaves a partial tree" \
+             "the destination is empty, so the interruption did not land mid-copy"
+    else
+        pass "accept interrupted leaves a partial tree" \
+             "$eqi_partial entries present, staging retained by the post-state oracle"
+    fi
+    # The rerun, with the real cp back on PATH and the same archive.
+    run_case "accept rerun after interruption" "$eqi" "$INSTALLER" "$eqi_archive" 0 \
+             'Installation successful' dest-dir:tools installed
+    cases=$((cases + 1))
+    # Completeness is decided against the ARCHIVE, not against the partial tree
+    # it replaced. Comparing the two counts only shows the tree grew: a rerun
+    # that reached three entries out of nine would have passed a case labelled
+    # complete recovery. The archive listing is an independent description of
+    # what the tree must contain, produced by tar rather than by the installer,
+    # so it cannot agree with a mistake in the thing it is checking.
+    eqi_full=$(find "$eqi/tools" -mindepth 1 2>/dev/null | wc -l | tr -d ' ')
+    tar -tzf "$eqi_archive" 2>/dev/null | sed -n 's|^tools/||p' | sed 's|/$||' \
+        | grep -v '^$' | LC_ALL=C sort -u > "$SCRATCH/eqi.expected"
+    find "$eqi/tools" -mindepth 1 -printf '%P\n' 2>/dev/null \
+        | LC_ALL=C sort -u > "$SCRATCH/eqi.actual"
+    eqi_want=$(wc -l < "$SCRATCH/eqi.expected" | tr -d ' ')
+    eqi_missing=$(LC_ALL=C comm -23 "$SCRATCH/eqi.expected" "$SCRATCH/eqi.actual" | wc -l | tr -d ' ')
+    eqi_extra=$(LC_ALL=C comm -13 "$SCRATCH/eqi.expected" "$SCRATCH/eqi.actual" | wc -l | tr -d ' ')
+    if [ "${eqi_want:-0}" -lt 2 ]; then
+        fail "accept rerun restores the tree" \
+             "the archive listing yielded $eqi_want entries, too few to check completeness against"
+    elif [ "${eqi_missing:-1}" -ne 0 ] || [ "${eqi_extra:-1}" -ne 0 ]; then
+        fail "accept rerun restores the tree" \
+             "recovered tree differs from the archive: $eqi_missing missing, $eqi_extra unexpected"
+    elif [ "${eqi_full:-0}" -le "${eqi_partial:-0}" ]; then
+        fail "accept rerun restores the tree" \
+             "the rerun did not add entries: $eqi_partial before, $eqi_full after"
+    else
+        pass "accept rerun restores the tree" \
+             "$eqi_partial entries after the interruption, then every one of the archive's $eqi_want entries present and nothing else"
+    fi
+    unset CASE_FORCE_CP
+
+    # 4. A host without gzip must fail at extraction, before any transfer. This
+    # is the row the inventory method exists for: no command position names gzip,
+    # tar -xzf starts it as a subprocess, and an image missing it reaches a build
+    # precisely because a token scan reported a contract without it.
+    # Both PATHs carry the published contract and bash and timeout, which the
+    # harness needs to start and bound the run. They differ in gzip and in
+    # nothing else, so the pair isolates it.
+    gzfull="$SCRATCH/gzfull"
+    nogzip="$SCRATCH/nogzip"
+    rm -rf -- "$gzfull" "$nogzip"; mkdir -p "$gzfull" "$nogzip"
+    # Two independent things can go wrong here and they used to share one verdict
+    # line that named neither: the PATH could not be populated, or the populated
+    # PATH cannot run. Reporting "no working gzip-free PATH on this host" for
+    # both states a host property that was never measured, so each is now named
+    # with the tools responsible.
+    nogzip_unplaceable=""
+    for t in $INSTALLER_TOOLS bash timeout; do
+        p=$(command -v "$t" 2>/dev/null) ||
+            { nogzip_unplaceable="${nogzip_unplaceable:+$nogzip_unplaceable }$t(absent)"; continue; }
+        ln -s "$p" "$gzfull/$t" 2>/dev/null || cp -a "$p" "$gzfull/$t" 2>/dev/null \
+            || nogzip_unplaceable="${nogzip_unplaceable:+$nogzip_unplaceable }$t"
+        [ "$t" = gzip ] && continue
+        ln -s "$p" "$nogzip/$t" 2>/dev/null || cp -a "$p" "$nogzip/$t" 2>/dev/null \
+            || nogzip_unplaceable="${nogzip_unplaceable:+$nogzip_unplaceable }$t"
+    done
+    # Each tool is RUN, not merely resolved. `command -v` reports a file that
+    # exists and carries the executable bit, which is not the same as a program
+    # that starts: where the placement fell back to a copy, the copies resolve
+    # and then fail at exec, and the case would report the installer's exit 127
+    # as if it were a finding about the installer.
+    # The sentinel proves the probe itself ran. Without it a PATH whose bash
+    # cannot start produces no output at all, which is indistinguishable from
+    # every tool working.
+    nogzip_probe=$(PATH="$nogzip" bash -c 'for c in '"$INSTALLER_TOOLS"' bash timeout; do
+        [ "$c" = gzip ] && continue
+        "$c" --version >/dev/null 2>&1 || printf "%s " "$c"
+    done; printf READY' 2>&1)
+    case "$nogzip_probe" in
+        *READY) nogzip_broken="${nogzip_probe%READY}" ;;
+        *)      nogzip_broken="the PATH could not start bash: $nogzip_probe" ;;
+    esac
+
+    # The positive control for the row below. Without it the refusal is credited
+    # to gzip on the strength of an exit code, when a PATH short of anything else
+    # fails too -- which is exactly what was happening. It also makes the
+    # published contract executable: if that list is missing a program, the
+    # install cannot complete here and this case says so.
+    cases=$((cases + 1))
+    if [ -n "$nogzip_unplaceable" ]; then
+        fail "accept contract PATH completes the install" \
+             "FIXTURE: could not place on the constructed PATH: $nogzip_unplaceable"
+    elif [ -n "$nogzip_broken" ]; then
+        # Guarded on the same two conditions as the row it controls. Guarded on
+        # placement alone, a fixture whose programs will not start reports this
+        # as the published contract being insufficient, which is a finding about
+        # the wrong thing entirely.
+        fail "accept contract PATH completes the install" \
+             "FIXTURE: placed but will not run: $nogzip_broken"
+    else
+        eqgc=$(new_prefix accept-gzip-control)
+        build_archive "$eqgc/pkgs/tools.2026-08-11_000000.tar.gz"
+        HOME="$CASE_HOME" PATH="$gzfull" timeout "$TIMEOUT_S" \
+            bash "$INSTALLER" tools --prefix "$eqgc" > "$SCRATCH/gzfull.log" 2>&1
+        gzc=$?
+        if [ "$gzc" -eq 0 ] && [ -d "$eqgc/tools" ]; then
+            pass "accept contract PATH completes the install" \
+                 "the $(printf '%s\n' $INSTALLER_TOOLS | wc -l | tr -d ' ') published programs alone are sufficient"
+        else
+            fail "accept contract PATH completes the install" \
+                 "exit $gzc with only the published contract on PATH: $(tail -n 1 "$SCRATCH/gzfull.log")"
+        fi
+    fi
+
+    eqg=$(new_prefix accept-nogzip)
+    build_archive "$eqg/pkgs/tools.2026-08-11_000000.tar.gz"
+    eqg_archive=$(resolve_archive "$eqg")
+    cases=$((cases + 1))
+    # The fixture has to be proved before the case means anything: a PATH that
+    # runs nothing at all would produce a failure this case could mistake for the
+    # one it is looking for. A host without working symlinks cannot build it,
+    # because copied binaries lose their runtime and every command becomes
+    # not-found, so it says so rather than reporting a misleading exit.
+    if [ -n "$nogzip_unplaceable" ]; then
+        fail "accept no gzip fails at extraction" \
+             "FIXTURE: could not place on the gzip-free PATH: $nogzip_unplaceable"
+    elif [ -n "$nogzip_broken" ]; then
+        fail "accept no gzip fails at extraction" \
+             "FIXTURE: placed but will not run from the gzip-free PATH: $nogzip_broken"
+    elif PATH="$nogzip" bash -c 'command -v gzip >/dev/null 2>&1' 2>/dev/null; then
+        fail "accept no gzip fails at extraction" "FIXTURE: gzip is still reachable on the constructed PATH"
+    else
+        HOME="$CASE_HOME" PATH="$nogzip" timeout "$TIMEOUT_S" \
+            bash "$INSTALLER" tools --prefix "$eqg" > "$SCRATCH/nogzip.log" 2>&1
+        ng=$?
+        if [ "$ng" -eq 3 ] && [ ! -d "$eqg/tools" ]; then
+            pass "accept no gzip fails at extraction" "exit 3 at extraction, nothing transferred"
+        else
+            fail "accept no gzip fails at extraction" \
+                 "exit $ng, tools present=$([ -d "$eqg/tools" ] && echo yes || echo no)"
+        fi
+    fi
+
+    suite "step5-acceptance"
     echo
 fi
 
