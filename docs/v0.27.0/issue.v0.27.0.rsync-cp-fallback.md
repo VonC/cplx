@@ -271,6 +271,29 @@ left to chance.
   therefore always rewrites it. That is standard, documented, unchanged
   rsync behaviour on a path this issue does not touch, so it is a
   boundary on the parity claim rather than a defect to fix here.
+- Amended 2026-08-14 on measurement, recorded in
+  `verify.acceptance.rhel.txt` and its three retained manifests. The
+  parity above is a claim about the copy **forms**, which is what
+  `measurements.mtime-engines.rhel.txt` measured, and it holds. It does
+  not transfer unchanged to a finished **install**, because the installer
+  rewrites part of the tree after the copy: the text path fix, the ELF
+  fix and the `__pycache__` clear all write files whose mtime is then the
+  time of that run rather than anything the copy produced. Measured on
+  the published archive, 30073 of 30665 entries are identical across the
+  engines on every recorded field including mtime to the nanosecond. The
+  unchanged same-engine control defines the run-variant set: 592 paths
+  whose mtimes differ between two fresh rsync installs. In the retained
+  measurement that is the same set whose mtimes differ between engines;
+  independent inspection attributes those paths to the post-copy passes.
+  Their mtimes fall in disjoint per-run windows, 84 seconds wide under
+  rsync and 73 under the fallback. For those 592 the guarantee is stated
+  behaviourally: the same entries exist under both engines, with the same
+  type, size, mode, ownership, content digest and link target, and each
+  carries an mtime written during its own install. Exact mtime equality
+  there is not achievable across two separate runs of the current
+  installer without adding timestamp normalization. That normalization
+  is rejected because it would change installed metadata solely for a
+  one-off parity proof rather than preserve copy-engine behaviour.
 - What a redeployment over a populated prefix must still guarantee is
   stated behaviourally rather than as parity, and is unchanged: the
   fallback removes what the new tree no longer carries, hidden entries
@@ -425,9 +448,11 @@ Closable in cplx, on evidence this repository can produce:
 - An interrupted fallback leaves a partial destination with the staging
   directory retained, and rerunning the same command produces a complete
   tree.
-- The two engines produce the same tree **from a fresh prefix each**,
-  under the manifest of the confirmed rule, with hard-link topology as
-  the permitted divergence. Fresh is a condition of the criterion, not a
+- The two engines produce equivalent trees **from a fresh prefix each**,
+  under the manifest of the confirmed rule. On the same-engine
+  run-variant set, all compared fields except mtime agree exactly and
+  each mtime lies within its own install window. Hard-link topology is
+  the separate manifest omission. Fresh is a condition of the criterion, not a
   convenience: over a populated prefix the engines are measured to
   diverge for surviving entries, per the amendment in the confirmed rule.
   The canary pair is checked explicitly: `libgcc_s.so.1` still a symlink
@@ -476,6 +501,6 @@ Settled across four specification review rounds (2026-08-08 and
 | Q04 | Exit codes 5 and 7 stay for both engines, including the Q09 destination refusal. Their messages and the wiki entry are reworded to name the operation rather than rsync | Confirmed rule (exit-code bullet); Gap item 5; Gap item 6 | New codes per engine, rejected because no status-only consumer in the reviewed evidence needs the distinction and every wiki consumer would have to change; a distinct code for the destination-emptying failure, deferred on the same ground, since adding a code later is not a breaking change while renumbering one is |
 | Q05 | The claim is split. cplx closes on a standalone fixed installer relocating the existing published archive; the consuming project removes its shim once its pipeline actually runs either that installer or an archive containing the fix | Acceptance (split into closable in cplx and tracked downstream) | Waiting for publication, rejected because it couples the collection's first and most independent item to its last and to a release schedule outside both repositories; asserting an immediate pipeline switch, rejected because the reviewed evidence does not establish which delivery route the pipeline uses |
 | Q06 | An audited host-tool contract is recorded in the wiki reference in four groups: the Bash language and its builtins; the mandatory external programs, including `gzip` (started by GNU tar's `-z` at line 437) and `cp` as this fix's addition; the optional rsync; and the shipped patchelf. The inventory method is recorded beside the list, covering command-position tokens and the subprocesses that command options imply | What Q19 blocks today (four groups, inventory method); Gap item 6 | The original POSIX-only claim with its eight-command list, disproved: the script is Bash using GNU `find -printf`, `grep -rlIZ --exclude-dir`, `xargs -0 -r` and `sed -i`, and `cp -a` is itself non-POSIX; a runtime preflight, rejected as a new exit code plus a list that drifts, delivering the answer long after image-selection time; dropping the contract entirely, rejected because it leaves the next target unvalidatable |
-| Q07 | The two engines are compared per entry over relative path, entry type, regular-file bytes, mode, mtime and symlink target, with ownership stated or normalized and hard-link topology the permitted divergence. ACLs, extended attributes and SELinux labels are outside parity because `rsync -a` never promised them, not because the staging tree lacks them | Confirmed rule (equivalence and metadata bullets) | Requiring xattr and SELinux parity, rejected because it would force `-A` and `-X` onto the rsync command that must stay unchanged; content and symlinks only, rejected because it drops mode and mtime, which both engines already preserve |
+| Q07 | The two engines are compared per entry over relative path, entry type, regular-file bytes, mode, mtime and symlink target, with ownership stated or normalized. Comparison is exact except that, on the same-engine run-variant set, every non-mtime field is exact and mtime is bounded to its own install window. Hard-link topology is omitted separately. ACLs, extended attributes and SELinux labels are outside parity because `rsync -a` never promised them, not because the staging tree lacks them | Confirmed rule (equivalence and metadata bullets) | Requiring xattr and SELinux parity, rejected because it would force `-A` and `-X` onto the rsync command that must stay unchanged; content and symlinks only, rejected because it drops mode and mtime, which both engines already preserve; timestamp normalization, rejected because it changes installed metadata solely for a one-off parity proof |
 | Q08 | The equivalence is proved once, by a recipe recorded in the validation plan, reproducing the manifest, normalizing the permitted differences, checking the canary links explicitly, and retaining its output as evidence | Confirmed rule (one-off proof bullet); Acceptance (retained comparison output) | Shipping a comparator, rejected because one usable on the CI agent must itself run inside the host-tool contract this issue is about; folding the check into item 4, rejected because that item answers what the archive carries, not whether two installs agree |
 | Q09 | The fallback accepts an absent destination, which it creates, or a real directory, whose content it empties. Anything else observed immediately before deletion fails the mirror step with exit 5 before any entry is removed, and the delete never traverses a destination observed as a symlink. Concurrent replacement of that path is outside this issue | Confirmed rule (destination boundary bullet); Gap item 2; Concrete examples (non-directory and symlinked destination); Acceptance (boundary refusal) | Replacing whatever is there, rejected because it deletes an entry the operator may not have meant to point at; resolving a symlinked destination and mirroring into its target, rejected because the recursive delete would then run somewhere the installer was never given, the exact outcome the boundary exists to prevent |

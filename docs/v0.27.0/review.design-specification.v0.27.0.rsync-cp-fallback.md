@@ -7,7 +7,7 @@ This append-only transcript records completed review rounds. Review agents add
 new entries through the review-exchange core and do not reread earlier entries
 as working context.
 
-## Round 1 by requestor
+## Round 1 by requestor for requestor round 1
 
 - Recorded: 2026-08-09T16:41:37+02:00
 - Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
@@ -15,13 +15,13 @@ as working context.
 - Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
 - Outcome: request
 
-### Review identity for design-specification rsync-cp-fallback round 1
+### Review identity for design-specification rsync-cp-fallback round 1 (exchange 1)
 
 Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
 Reviewed specification: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
 Review round: 1
 
-### Requestor assessment for design-specification rsync-cp-fallback round 1
+### Requestor assessment for design-specification rsync-cp-fallback round 1 (exchange 1)
 
 The design answers the settled requirement
 `issue.v0.27.0.rsync-cp-fallback.md`, whose nine clarifications are recorded in
@@ -87,7 +87,7 @@ Two points on the design body rather than on its questions:
   is wrong, the recovery half of Q01's requirement-level answer becomes new work
   and the design understates its scope.
 
-### Change summary for design-specification rsync-cp-fallback round 1
+### Change summary for design-specification rsync-cp-fallback round 1 (exchange 1)
 
 Round 1 for this design, so there is no preceding round to compare against. The
 document was written in this cycle, directly after the requirement settled.
@@ -121,7 +121,7 @@ Six open questions were added through `oqm` after the body was written, so the
 body reflects the recommended answers where they touch it, and the questions
 record the alternatives rather than leaving the body ambiguous.
 
-### Writer response for design-specification rsync-cp-fallback round 1
+### Writer response for design-specification rsync-cp-fallback round 1 (exchange 1)
 
 Writer response: No reviewer feedback exists yet: this is the first request of the design
 exchange, so nothing has been accepted, adapted or disputed.
@@ -153,13 +153,13 @@ Q02 metadata claim are the two places where a wrong fact would propagate
 silently into the plan, and they are worth checking against the code and the
 tools rather than against the argument.
 
-### Reviewer focus for design-specification rsync-cp-fallback round 1
+### Reviewer focus for design-specification rsync-cp-fallback round 1 (exchange 1)
 
 Check for missing questions, assess the existing options and answers, and suggest any clearer wording.
 
 <!-- review-entry-id: request-round-1 -->
 
-## Round 1 by human
+## Round 1 by human for human round 1
 
 - Recorded: 2026-08-09T19:42:12+02:00
 - Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
@@ -205,7 +205,7 @@ then start another automated design review round; do not consolidate yet.
 
 <!-- review-entry-id: answer-round-1 -->
 
-## Round 2 by requestor
+## Round 2 by requestor for requestor round 2
 
 - Recorded: 2026-08-09T20:20:47+02:00
 - Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
@@ -213,13 +213,13 @@ then start another automated design review round; do not consolidate yet.
 - Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
 - Outcome: request
 
-### Review identity for design-specification rsync-cp-fallback round 2
+### Review identity for design-specification rsync-cp-fallback round 2 (exchange 1)
 
 Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
 Reviewed specification: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
 Review round: 2
 
-### Requestor assessment for design-specification rsync-cp-fallback round 2
+### Requestor assessment for design-specification rsync-cp-fallback round 2 (exchange 1)
 
 Five questions are live: Q01, Q03, Q04, Q05 and Q06. Q02 is not a question and
 is not counted as one: it was withdrawn before any answer, on the two-target
@@ -279,7 +279,7 @@ that access does not materialize, Q03 keeps its recommendation and its unknown
 cost, and the design should say so rather than leaving the reader to assume the
 measurement happened.
 
-### Change summary for design-specification rsync-cp-fallback round 2
+### Change summary for design-specification rsync-cp-fallback round 2 (exchange 1)
 
 Changes since round 1, mapped to the five requested changes of the round 1
 answer.
@@ -322,7 +322,7 @@ in the requirement used the private project's real name and now uses its
 operating-system account name inside absolute paths and now carry its `vonc`
 alias. No document content changed beyond those substitutions.
 
-### Writer response for design-specification rsync-cp-fallback round 2
+### Writer response for design-specification rsync-cp-fallback round 2 (exchange 1)
 
 Writer response: All five requested changes are accepted and applied. No disagreement to record.
 
@@ -358,13 +358,13 @@ are not reopened, implementation shape stays out of the design, and the rsync
 path's invariance is treated as a constraint rather than a preference, which is
 why both new boundaries are scoped to the fallback.
 
-### Reviewer focus for design-specification rsync-cp-fallback round 2
+### Reviewer focus for design-specification rsync-cp-fallback round 2 (exchange 1)
 
 Check for missing questions, assess the existing options and answers, and suggest any clearer wording.
 
 <!-- review-entry-id: request-round-2 -->
 
-## Round 2 by reviewer
+## Round 2 by reviewer for reviewer round 2
 
 - Recorded: 2026-08-09T23:46:55+02:00
 - Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
@@ -1296,3 +1296,415 @@ Human choice: Consolidate
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-5 -->
+
+## Round 1 by requestor for requestor round 1 (3)
+
+- Recorded: 2026-08-15T00:01:56+02:00
+- Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+- Outcome: request
+
+### Review identity for design-specification rsync-cp-fallback round 1 (exchange 2)
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Reviewed specification: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+Review round: 1
+
+### Requestor assessment for design-specification rsync-cp-fallback round 1 (exchange 2)
+
+This round exists because a code review refused to let an implementation change a
+settled specification claim. That refusal was correct, and this request asks the
+specification to be changed openly instead.
+
+**No open questions are added or removed.** The amendment answers a question the
+specification had already settled once, on measurement, and settles it again on
+broader measurement. The existing options and answers elsewhere in the document
+are unaffected: nothing about engine selection, the destination boundary, the
+exit codes or the redeployment guarantee moves.
+
+**What was wrong, precisely.** The requirement and the design both state that on
+a fresh prefix the two engines produce identical trees, mtime included to the
+nanosecond. That claim was settled on 2026-08-11 against
+`measurements.mtime-engines.rhel.txt`, whose stated purpose is to settle "whether
+a fractional source mtime survives each copy engine in the exact forms the design
+specifies". It measured the copy **forms**, and for the copy forms it is true and
+remains true.
+
+The acceptance row that consumes the claim compares finished **installs**. An
+install is a larger object than a copy: after the copy the installer runs the
+text path fix, the ELF fix and the `__pycache__` clear, each of which writes
+files. Those files then carry the mtime of the run. Two installs cannot run at
+the same instant, so those entries can never share an mtime, under either engine.
+The specification therefore asked the acceptance row for something no
+implementation could ever satisfy, and the gap was invisible until the comparison
+first ran against the published archive rather than a 12-entry fixture.
+
+**The measurement this amendment rests on.** Across 30665 entries of the
+published archive, 30073 are identical between the engines on every recorded
+field including mtime to the nanosecond. The remaining 592 are exactly the
+entries the post-copy passes rewrite. That set is not asserted, it is measured,
+by installing a third time with the same engine and taking the entries that move
+between two runs of it. Those 592 carry mtimes in disjoint per-run windows, 72
+seconds wide under rsync and 53 under the fallback. Retained as
+`verify.acceptance.rhel.txt` with its three manifests and both diffs.
+
+**What the amendment does not weaken.** For the 592 the amendment still requires
+the same entries to exist under both engines with the same type, size, mode,
+ownership, content digest and link target. Only the timestamp is stated
+behaviourally, and it is still constrained: each must fall inside the wall-clock
+window of its own install. Every other field-path cell in the tree keeps exact
+comparison. The permitted divergences the design already carried, hard-link
+topology and the populated-prefix quick check, are untouched.
+
+**Reviewer wording suggestions**: none exist yet, this being round 1 of this
+exchange.
+
+**One thing this request should be challenged on.** I am the author of the
+implementation that discovered the gap, and I proposed containment-in-window
+inside a code review before bringing it here, which the code reviewer refused as
+an implementation silently replacing a settled criterion. That refusal is the
+reason this exchange exists. A reviewer should therefore weigh whether the
+behavioural rule is genuinely the strongest available statement, or merely the
+one that makes my existing implementation pass. The alternative I can see is
+narrowing the acceptance row to compare the copy rather than the install, which
+would match the original measurement exactly but would stop the row from
+exercising the installed tree at all.
+
+### Change summary for design-specification rsync-cp-fallback round 1 (exchange 2)
+
+Round 1 of this exchange, so the baseline is the specification as it stood after
+its own earlier review and after the 2026-08-11 measurement amendment.
+
+| Document | Delta | What changed |
+| --- | --- | --- |
+| `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` | +20 | one amendment bullet in the parity section |
+| `docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md` | +21 / -1 | one amendment paragraph pair, and the acceptance table row it governs |
+
+## The issue
+
+One bullet added to the parity list, dated 2026-08-14 and attributed to
+`verify.acceptance.rhel.txt` and its manifests. It separates the copy-form claim,
+which stands, from the installed-tree comparison, which cannot inherit it
+unchanged. It states the measured split, 30073 exact of 30665, names what defines
+the remaining 592, and replaces equality for those with a behavioural rule that
+still fixes type, size, mode, ownership, digest and link target and bounds the
+mtime to the run.
+
+No existing bullet is deleted or reworded. The 2026-08-11 amendment above it is
+left exactly as it was, including its populated-prefix boundary.
+
+## The design
+
+One amendment pair added after the existing 2026-08-11 amendment, making the same
+separation and stating why exact equality there is unachievable rather than
+merely unmet: it would require two installs running at the same instant.
+
+The acceptance table row `Two engines over the same archive` gains a clause for
+the rewritten entries and its reason column becomes "permitted divergences"
+rather than "one permitted divergence", since hard-link topology is no longer the
+only one. That is the single line deleted in this change.
+
+## What deliberately did not change
+
+- The transfer-root paragraph, which remains a no-carve-out claim resting on the
+  2026-08-09 measurement.
+- The populated-prefix boundary and its rsync quick-check explanation.
+- The ACL, xattr and SELinux exclusion.
+- Every engine-selection, destination-boundary and exit-code decision.
+- The plan and its validation record, which are code-family documents and follow
+  this exchange rather than lead it. The plan's step 5 text still states the
+  unamended rule and will be reconciled after this exchange converges, not
+  before.
+
+## What a reviewer should test first
+
+1. Whether the behavioural rule for the 592 is the strongest available, or the
+   one that suits the existing implementation. The alternative is narrowing the
+   acceptance row to the copy rather than the install.
+2. Whether "inside the wall-clock window of its own install" is tight enough to
+   catch a real fallback defect, given a defect that merely wrote a wrong-but-
+   recent timestamp would satisfy it.
+3. Whether defining the rewritten set by a same-engine control is sound, or
+   whether it should be defined from the installer's own passes instead, which
+   would be a stronger statement but would couple the acceptance row to the
+   installer's internals.
+
+### Writer response for design-specification rsync-cp-fallback round 1 (exchange 2)
+
+Writer response: This is round 1 of this specification exchange. No reviewer answer exists, so
+nothing is accepted, reversed or disagreed with here.
+
+The change is brought here because a code review refused it in its own family.
+Step 5 of the implementation compared the two copy engines over the published
+archive and found 592 entries of 30665 whose mtime differs. I proposed, inside
+that code review, that those cells be constrained to the wall-clock window of
+their install rather than compared for equality. The code reviewer refused: an
+implementation round cannot silently replace a settled requirement and design
+decision with a new acceptance criterion, and the retained manifests prove the
+narrower rule was measured correctly while also proving the trees are not
+exactly equal. That refusal is correct and is why this exchange was opened.
+
+The specification is what needs to change, not the measurement. The parity claim
+was settled on a probe of the copy forms and is true of them. The acceptance row
+applies it to a finished install, which the installer's own post-copy passes make
+a different object. Nothing in the implementation can close that gap, because the
+gap is between what two documents promise and what any install can do.
+
+One point of self-criticism belongs in the record rather than in a later round. I
+had the measurement showing disjoint per-run windows before I published the code
+round that proposed the new rule, and I argued there that the promise might be
+unsatisfiable as written. Having reached that conclusion, the right move was to
+come here first rather than to ask a code reviewer to accept a changed criterion
+and note the alternative in passing. The code reviewer should not have had to
+catch it.
+
+The retained evidence supporting the amendment is unchanged by this exchange and
+already on disk: `verify.acceptance.rhel.txt`, its three manifests and both
+comparison diffs, all from run `cplx-verify.4102299`.
+
+### Reviewer focus for design-specification rsync-cp-fallback round 1 (exchange 2)
+
+Check for missing questions, assess the existing options and answers, and suggest any clearer wording.
+
+<!-- review-entry-id: request-round-1 -->
+
+## Round 1 by human for human round 1 (3)
+
+- Recorded: 2026-08-15T16:59:11+02:00
+- Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+- Outcome: escalation
+
+exchange was abandoned while waiting for reviewer
+
+<!-- review-entry-id: escalation-round-1 -->
+
+## Round 2 by human for human round 2
+
+- Recorded: 2026-08-15T17:23:43+02:00
+- Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+- Outcome: human-resolution
+
+Manual recovery authorized by the user on 2026-08-15. The specification
+exchange escalated only because its request lease expired before the reviewer
+acquired it. Preserve the current amended design and evidence, clear the stopped
+state, and continue with a fresh specification review round.
+
+<!-- review-entry-id: human-resolution-round-2 -->
+
+## Round 2 by requestor for requestor round 2 (3)
+
+- Recorded: 2026-08-15T17:28:14+02:00
+- Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+- Outcome: request
+
+### Review identity for design-specification rsync-cp-fallback round 2 (exchange 2)
+
+Umbrella draft: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Reviewed specification: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+Review round: 2
+
+### Requestor assessment for design-specification rsync-cp-fallback round 2 (exchange 2)
+
+The recovered round reviews the current amendment, not the expired request's old
+capture. No open question is added: the live decision is whether finished-install
+parity may treat run-stamped mtimes behaviorally while retaining exact comparison
+everywhere else.
+
+Fresh retained evidence from run `cplx-verify.3006027` is sufficient for that
+decision. All three manifests contain 30665 entries. The engine pair has zero
+non-mtime differences and 592 mtime differences; the same-engine control has the
+same 592-path difference set, with no path left over in either direction. The
+rsync and fallback mtime windows are disjoint, 84 and 73 seconds respectively.
+Both target captures are green at 82 and 63 cases and share harness body
+`ccf52d7a36c0`.
+
+The amendment keeps the acceptance object as a completed install, rather than
+narrowing it to the copy. It requires exact path, type, size, mode, ownership,
+digest and target on the run-variant paths and bounds their mtime to their own
+run. That is the strongest useful non-invasive statement for files deliberately
+rewritten after transfer; timestamp normalization would be a new behavior rather
+than evidence about the copy engines.
+
+The current wording still needs a consistency pass. The issue acceptance bullet
+and Q07 row call hard-link topology the sole permitted divergence; the causal
+wording should distinguish what the control proves from the path inspection that
+attributes it to post-copy passes; and `unachievable` must be scoped to separate
+runs of the current installer without adding timestamp normalization.
+
+### Change summary for design-specification rsync-cp-fallback round 2 (exchange 2)
+
+This is a recovery round after the prior request lease expired without a reviewer
+answer. The amendment itself is unchanged in intent. Its supporting retained
+capture and manifests were regenerated after harness repairs.
+
+- `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` carries the dated
+  finished-install parity amendment and the current measured windows, 84 seconds
+  for rsync and 73 for the fallback.
+- `docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md` separates copy-form parity
+  from finished-install parity and updates the two-engine acceptance row.
+- The current evidence comes from `cplx-verify.3006027`: RHEL 82/0, Debian 63/0,
+  three 30665-entry manifests, two diffs and calibrated equivalence and loader
+  controls.
+
+No engine-selection, destination-boundary, exit-code, redeployment or metadata-
+exclusion decision changes.
+
+### Writer response for design-specification rsync-cp-fallback round 2 (exchange 2)
+
+Writer response: No specification reviewer answer exists yet. The former round escalated solely
+because its lease expired before reviewer acquisition. The user authorized manual
+recovery on 2026-08-15, and the exchange resumed as round 2.
+
+The code reviewer correctly refused to accept the new mtime rule inside an
+implementation review. This specification round owns that decision. The writer
+asks the reviewer to judge the behavioral rule independently, with particular
+skepticism about whether the same-engine control and wall-clock bound are strong
+enough, and to provide exact replacement wording for any consistency defects.
+
+### Reviewer focus for design-specification rsync-cp-fallback round 2 (exchange 2)
+
+Check for missing questions, assess the existing options and answers, and suggest any clearer wording.
+
+<!-- review-entry-id: request-round-2 -->
+
+## Round 2 by reviewer for reviewer round 2 (3)
+
+- Recorded: 2026-08-15T17:34:55+02:00
+- Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+- Outcome: answer
+
+### Reviewer assessment for design-specification rsync-cp-fallback round 2
+
+The amendment is directionally correct and the current evidence is sufficient.
+The original measurement proved source-mtime preservation by the two copy forms;
+it did not prove byte-for-byte metadata equality after later relocation passes
+rewrite files. Keeping the acceptance object as the finished install is the
+right choice because those passes consume the copied tree and are part of the
+behavior the fallback must preserve.
+
+I independently reproduced the retained result: all three manifests contain
+30665 identical paths; the engine pair has no difference in type, size, mode,
+uid, gid, digest or link target; its 592 mtime-difference paths exactly equal
+the same-engine control's 592 paths. The diff provenance names
+`cplx-verify.3006027`, and the retained capture reports the current 82-case RHEL
+run, including all five loader controls and a symmetric `5 and 5` observation.
+
+No substantive decision or new open question is missing. The wall-clock rule is
+not merely a way to make the implementation pass: for a file intentionally
+rewritten after transfer, its source mtime is no longer the relevant invariant.
+Exact non-mtime equality, confinement to a same-engine run-variant path set and
+an own-run time bound together distinguish engine parity from ordinary temporal
+variance.
+
+Three consistency edits remain. They are covered wording rather than another
+design choice: the requirement acceptance bullet and Q07 still call hard-link
+topology the sole divergence; the same-engine control proves run variance but
+does not by itself prove which pass caused it; and exact equality is possible in
+principle if the installer adds timestamp normalization, so `unachievable` must
+be scoped to separate runs of the current installer without that new behavior.
+
+### Question verdicts for design-specification rsync-cp-fallback round 2
+
+1. **Compare copies or finished installs?** Keep finished installs. A copy-only
+   comparison would reproduce the earlier probe but would stop before the
+   relocation passes that consume the engine output. It would prove a narrower
+   property than the acceptance row needs.
+2. **Is the own-install wall-clock bound strong enough?** Yes, in combination
+   with the other constraints. It is not meaningful alone. The eligible path
+   must be run-variant under the unchanged same-engine control, every non-mtime
+   field must agree exactly, and every engine mtime difference outside that set
+   must fail. A recent-but-wrong timestamp is not an engine-parity defect when
+   the current installer deliberately rewrote the same file during that run.
+3. **Should the eligible set be defined by the control or by installer internals?**
+   Keep the same-engine control as the normative definition. It measures the
+   observable run-to-run variance without coupling the acceptance contract to
+   today's three implementation passes. Path inspection may attribute the
+   current 592 to those passes, but that attribution is explanatory evidence,
+   not what makes a future path eligible for the mtime rule.
+4. **Is timestamp normalization a required alternative?** No. It could make
+   separate runs compare exactly, so the document must not call equality
+   impossible in the abstract. Adding normalization would nevertheless change
+   installed metadata solely to simplify a one-off comparison and is outside
+   this copy-engine requirement.
+5. **Are existing questions sufficient?** Yes. Q01 through Q07 remain settled.
+   The amendment changes the scope of Q07's manifest comparison, so the issue's
+   Q07 row and acceptance bullet must reflect the already-selected answer; no
+   new open-ended question is needed.
+
+### Convergence evidence for design-specification rsync-cp-fallback round 2
+
+Covered wording: - Use this distinction wherever the 592-path set is introduced: "The unchanged
+  same-engine control defines the run-variant set: paths whose mtimes differ
+  between two fresh rsync installs. In the retained measurement that set is the
+  same 592 paths whose mtimes differ between the engines. Independent inspection
+  attributes those paths to the post-copy relocation passes; that attribution
+  explains the result but does not define eligibility."
+- Replace the absolute feasibility claim with: "Exact mtime equality for those
+  paths is not achievable across two separate runs of the current installer
+  without adding a timestamp-normalization step. Such normalization is rejected
+  here because it would change installed metadata solely for a one-off parity
+  proof rather than preserve copy-engine behavior."
+- Amend the issue acceptance bullet and Q07 row to say: "On the same-engine
+  run-variant set, all compared fields except mtime agree exactly and each mtime
+  lies within its own install window. Hard-link topology remains the separate
+  manifest omission."
+- Describe the final proof as "fresh-install manifest equivalence: exact outside
+  the same-engine run-variant mtime set, and exact on every non-mtime field plus
+  own-install window containment inside that set."
+
+Convergence rationale: The evidence supports the selected behavioral rule, the alternatives are
+materially addressed, and no open decision remains. The required edits reconcile
+existing normative and explanatory text without changing the decision, adding a
+new option or requiring new evidence. They are therefore covered wording suitable
+for convergence. Consolidation remains subject to the durable human gate.
+
+### Writer instructions for design-specification rsync-cp-fallback round 2
+
+Apply the covered wording before consolidation:
+
+- Update the issue's fresh-prefix acceptance bullet and Q07 decision row so
+  hard-link topology is not described as the only permitted divergence. Name
+  the control-defined run-variant mtime rule alongside it.
+- In the issue and design amendments, say that the same-engine control defines
+  the observable run-variant path set. State separately that inspection of the
+  current paths and installer attributes the measured 592 to the post-copy
+  passes.
+- Scope `unachievable` to two separate runs of the current installer without a
+  new timestamp-normalization step, and record why normalization is rejected.
+- In the design's proved-once paragraph, replace unqualified `fresh-tree
+  manifest parity` with the exact-plus-behavioral comparison the amendment now
+  defines.
+- Then reconcile the plan validation recipe and Step 5 oracle wording with the
+  amended specification before resuming code review round 3.
+
+These edits do not require another specification decision or another target
+measurement. They must be present before consolidation so the settled tables,
+acceptance criterion and explanatory paragraphs say the same thing.
+
+### Final reviewer decision for design-specification rsync-cp-fallback round 2
+
+Decision: convergence-recommended. This recommendation is advisory; consolidation is not confirmed and remains at the durable human gate.
+
+<!-- review-entry-id: answer-round-2 -->
+
+## Round 2 by human for human round 2 (3)
+
+- Recorded: 2026-08-15T17:40:38+02:00
+- Exchange: specification/design-specification/v0.27.0/rsync-cp-fallback
+- Umbrella: C:/Users/vonc/git/cplx/docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: C:/Users/vonc/git/cplx/docs/v0.27.0/design.v0.27.0.rsync-cp-fallback.md
+- Outcome: human-confirmation
+
+Human choice: Consolidate
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->

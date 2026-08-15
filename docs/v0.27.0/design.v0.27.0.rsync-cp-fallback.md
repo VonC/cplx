@@ -468,6 +468,31 @@ changes no decision: the rsync path is unchanged, which is the point,
 and what a redeployment must guarantee is stated behaviourally in the
 requirement rather than as parity between engines.
 
+Amended 2026-08-14 on acceptance measurement, retained as
+`verify.acceptance.rhel.txt` with its three manifests. The parity above
+is a claim about the copy **forms**, and as such it holds. The
+acceptance row compares finished **installs**, which is a larger object:
+the text path fix, the ELF fix and the `__pycache__` clear all rewrite
+files after the copy, so those entries carry the mtime of the run rather
+than of the copy. The unchanged same-engine control defines the
+run-variant set: paths whose mtimes differ between two fresh rsync
+installs. On the published archive that set contains 592 of 30665 paths
+and is the same set whose mtimes differ between engines. Independent
+inspection attributes those paths to the post-copy passes; that
+attribution explains the result but does not define eligibility. The
+other 30073 agree exactly on every recorded field, mtime included to the
+nanosecond, across both engines.
+
+The run-variant set is therefore compared behaviourally rather than by equality:
+the same entries must exist under both engines with the same type, size,
+mode, ownership, content digest and link target, and each mtime must
+fall inside the wall-clock window of its own install. The set is not
+declared, it is measured by the same-engine control. Exact equality
+there is not achievable across two separate runs of the current
+installer without adding timestamp normalization. That normalization is
+rejected because it would change installed metadata solely for a one-off
+parity proof rather than preserve copy-engine behaviour.
+
 The transfer root, `<prefix>/<target>` itself, is part of that
 comparison and is expected to agree, with no carve-out. That is a
 consequence of the copy form above rather than an assumption: the
@@ -518,9 +543,11 @@ Proving it once on fresh prefixes is now a measured choice rather than a
 convenient one. A redeployment comparison between engines would fail for
 the reason above, and failing it would ask the implementation to satisfy
 a promise the unchanged rsync path does not make. The contract is
-therefore fresh-tree manifest parity, plus the redeployment behaviour the
-requirement defines per engine, and the two are deliberately different
-kinds of claim.
+therefore fresh-install manifest equivalence: exact outside the
+same-engine run-variant mtime set, and exact on every non-mtime field
+plus own-install window containment inside that set. It sits beside the
+redeployment behaviour the requirement defines per engine, and the two
+are deliberately different kinds of claim.
 
 ## Documented contract for v0.27.0 rsync-cp-fallback
 
@@ -733,7 +760,7 @@ wrong; those rows say so, because the reason is part of the decision.
 | `cp` engine, `<prefix>/<name>` is a FIFO | Exit 7 promptly, no copy started, FIFO intact | M2: `cp` blocks on a FIFO, so the refusal must precede the copy or an unattended install hangs |
 | Same two shapes with rsync present | rsync's measured behavior, unchanged | The asymmetry is deliberate: the new engine is the stricter one |
 | `cp` engine interrupted mid-copy | Partial destination, staging retained, rerun restores a complete tree | Non-atomicity accepted with a stated recovery |
-| Two engines over the same archive | Manifest agrees, transfer root included, both roots carrying the source mode and mtime; hard-link topology may differ; `libgcc_s.so.1` still a link | Equivalence with its one permitted divergence, the root agreeing because of the copy form |
+| Two engines over the same archive | Manifest agrees, transfer root included, both roots carrying the source mode and mtime; hard-link topology may differ; `libgcc_s.so.1` still a link. On the same-engine run-variant set, every non-mtime field agrees and each mtime falls inside its own install window, per the amendment above | Equivalence under the exact-plus-behavioural comparison, the root agreeing because of the copy form |
 | `CPLX_INSTALL_PKG_FORCE_CP=1` on a host with rsync | Fallback runs, engine line states it was forced | The test surface that makes two criteria executable |
 | `CPLX_INSTALL_PKG_FORCE_CP` set to anything else | Treated as unset, rsync selected, trace reports rsync | Fail safe, and the trace reports what was chosen rather than what was asked |
 | Target image without `gzip` | Fails at extraction, before any transfer | Why the inventory must carry option-selected subprocesses |
