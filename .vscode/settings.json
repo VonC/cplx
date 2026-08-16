@@ -24,6 +24,7 @@
     "plaintext": true
   },
   "cSpell.words": [
+    "assertable",
     "auditwheel",
     "behavioural",
     "behaviourally",
@@ -37,6 +38,7 @@
     "dotglob",
     "enginemtime",
     "excludable",
+    "filesz",
     "findutils",
     "insertdict",
     "libbfd",
@@ -50,6 +52,9 @@
     "overclaim",
     "overclaims",
     "Parameterising",
+    "phentsize",
+    "phnum",
+    "phoff",
     "preflighted",
     "procps",
     "recalibrated",
@@ -66,10 +71,15 @@
     "unclosable",
     "uncommittable",
     "underspecified",
+    "unparseable",
+    "unrepresentable",
     "unretained",
     "unscannable",
     "unvalidatable",
+    "unvalidated",
+    "unwiped",
     "xattrs",
+    "XNUM",
     "zcat"
   ]
 }
