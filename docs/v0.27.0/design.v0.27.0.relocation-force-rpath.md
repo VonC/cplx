@@ -398,7 +398,7 @@ are never confused:
 | dynamic scan or `--print-rpath` fails, header otherwise valid | `failed` | its own evidenced value |
 | `tag_state: ambiguous` | `failed` | its own evidenced value |
 | `--print-interpreter` fails while `has_interp` is yes | its own case | `failed` |
-| the computed target search path is empty or unavailable | `failed` for every walked ELF | its own evidenced value |
+| the computed target search path is empty or unavailable | `failed` for each **selected** object, cases 4, 5 and 6, whose write cannot be formed; cases 1, 2, 3 and 7 keep their case-defined dispositions | its own evidenced value |
 | `--set-rpath` fails on a selected object | `failed` | its own evidenced value |
 | `--set-interpreter` fails | its own case | `failed` |
 
@@ -409,6 +409,16 @@ row is axis-local: a write that fails on one axis never erases the other axis's
 result, and a missing target search path stops the pass from writing any rpath
 without preventing the interpreter guard from reaching its own evidenced
 disposition on every object.
+
+A third reading was added after the v0.27.0 plan review found the original
+wording of the last row contradicting two other clauses. "`failed` for every
+walked ELF" would have made a case 2 or case 7 object `failed` under a missing
+search path, which the case-identity section forbids, since for cases 1, 2, 3 and
+7 the case and the disposition always agree, and which the acceptance table
+contradicts, calling `not dynamically linked` explicitly not a failure. The
+missing input is **object-local**: it fails the objects whose write was due and
+leaves the others as their cases fix them. The acceptance still fails through the
+selected objects, so nothing is hidden by the narrower reading.
 
 The benign values keep their positive-evidence rule throughout: a successful
 `--print-interpreter` establishes a present interpreter and supplies its value,
@@ -766,7 +776,7 @@ directories.
 | An object carrying both `DT_RPATH` and `DT_RUNPATH` | `rpath failed` | `tag_state: ambiguous`, and patchelf's preference for `DT_RUNPATH` would otherwise decide the disposition instead of the object |
 | A shared library whose `--print-rpath` errors, header valid | `rpath failed` and `interpreter not applicable` | an axis-local probe failure, so the interpreter answer stands on its own evidence |
 | A program whose `--print-interpreter` errors while `has_interp` is yes | its own rpath case and `interpreter failed` | the converse axis-local failure |
-| `build_elf_rpath` returning an empty search path | `rpath failed` for every walked ELF, interpreter axis unaffected | a missing required rpath input, which does not stop the interpreter guard reaching its own evidenced disposition |
+| `build_elf_rpath` returning an empty search path | `rpath failed` for every object with a write due, cases 4, 5 and 6; cases 1, 2, 3 and 7 keep their case-defined dispositions; interpreter axis unaffected | a missing required rpath input, which does not stop the interpreter guard reaching its own evidenced disposition, and cannot make a write fail for an object that had none due |
 | The pass skipped because patchelf is absent | trailer with a walked-ELF total of zero and no records | "did not run" stays distinguishable from "ran and found nothing" |
 | The shipped patchelf, run in validation | its observed behavior recorded, not only its documented one | the tag-reading design rests on the documented interface, so the shipped binary is exercised rather than assumed |
 | Comparing every disposition trailer field with the object records carrying its token | all nine equalities hold, `walked` equals the record count, and `mig-checked` equals the case 5 record count | categorical comparison makes the trailer evidence for what the records say, where a sum only proves arithmetic and a truncated or permuted capture would pass |
