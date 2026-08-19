@@ -425,13 +425,55 @@ fix_elf_paths() {
     ok "Fixed $fixed ELF interpreter/rpath value(s) under '$root_path'."
 }
 
-# --- 1. Argument Parsing ---
-FORCE=0
-TARGET=""
+# --- 0b. Definitions the main flow calls ---
+# usage and select_copy_engine are defined here, above the main boundary,
+# rather than beside their call sites below it. Their call sites are
+# unchanged; only the definitions moved. A definition above its call site
+# changes nothing about an executed run, and it is what lets the file be
+# sourced with every production function defined: a guard placed after
+# these definitions in their old positions would have sat after the flow
+# it was meant to precede.
 
 usage() {
     fatal "Usage: $0 <target-folder> [-f|--force] [-p|--prefix <dir>]" 1
 }
+
+# --- 1b. Select the copy engine ---
+# Here, before archive discovery, and announced as a SELECTION rather than an
+# action: a run that dies during discovery or extraction has still said which
+# engine it would have copied with. Absence of rsync selects the fallback; a
+# present rsync that FAILS does not, since that is a real error about the tree,
+# the permissions or the disk. The resolved path is printed because command -v
+# finds a stand-in shim as readily as a real rsync, and a shim that ignores
+# --delete would otherwise degrade the mirror invisibly.
+select_copy_engine() {
+    COPY_ENGINE_RSYNC="$(command -v rsync 2>/dev/null)"
+    if [ "$CPLX_INSTALL_PKG_FORCE_CP" = "1" ]; then
+        COPY_ENGINE="cp"
+        info "Copy engine: cp (forced by CPLX_INSTALL_PKG_FORCE_CP=1)"
+    elif [ -n "$COPY_ENGINE_RSYNC" ]; then
+        COPY_ENGINE="rsync"
+        info "Copy engine: rsync ($COPY_ENGINE_RSYNC)"
+    else
+        COPY_ENGINE="cp"
+        info "Copy engine: cp (rsync not found on PATH)"
+    fi
+}
+
+# --- MAIN BOUNDARY ---
+# Everything above is definitions; everything below runs an install.
+#
+# Sourcing this file defines its functions and performs no install, so the
+# verification harness can call the production functions themselves rather
+# than a copy. Executing it is unchanged: BASH_SOURCE[0] equals $0 there,
+# so the guard is a no-op on the deployed path.
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+    return 0
+fi
+
+# --- 1. Argument Parsing ---
+FORCE=0
+TARGET=""
 
 # Parse args
 while [[ "$#" -gt 0 ]]; do
@@ -475,26 +517,8 @@ fi
 info "Installation prefix: $INSTALL_PREFIX"
 
 # --- 1b. Select the copy engine ---
-# Here, before archive discovery, and announced as a SELECTION rather than an
-# action: a run that dies during discovery or extraction has still said which
-# engine it would have copied with. Absence of rsync selects the fallback; a
-# present rsync that FAILS does not, since that is a real error about the tree,
-# the permissions or the disk. The resolved path is printed because command -v
-# finds a stand-in shim as readily as a real rsync, and a shim that ignores
-# --delete would otherwise degrade the mirror invisibly.
-select_copy_engine() {
-    COPY_ENGINE_RSYNC="$(command -v rsync 2>/dev/null)"
-    if [ "$CPLX_INSTALL_PKG_FORCE_CP" = "1" ]; then
-        COPY_ENGINE="cp"
-        info "Copy engine: cp (forced by CPLX_INSTALL_PKG_FORCE_CP=1)"
-    elif [ -n "$COPY_ENGINE_RSYNC" ]; then
-        COPY_ENGINE="rsync"
-        info "Copy engine: rsync ($COPY_ENGINE_RSYNC)"
-    else
-        COPY_ENGINE="cp"
-        info "Copy engine: cp (rsync not found on PATH)"
-    fi
-}
+# Defined above the main boundary; called here, where it always was, before
+# archive discovery.
 select_copy_engine
 
 # --- 2. Find the Most Recent Archive ---
