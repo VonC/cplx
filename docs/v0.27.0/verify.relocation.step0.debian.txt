@@ -1,0 +1,148 @@
+Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 0
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 65
+Purpose: Step 0 baseline of the CURRENT relocation pass, MEASURED by running it
+         over a real ELF. The authoring host is Windows with no patchelf, no
+         compiler and no binutils, so it cannot produce or rewrite an ELF at all.
+Captured: 2026-08-19, by the pipeline stage 'Verify relocation candidate (Step 0)'
+
+Baseline recorded here:
+  objects walked        2
+  mixed count emitted   Fixed 1 ELF interpreter/rpath value(s)
+  rpath value rewritten from /home/builder/prefix/lib to the computed target,
+                        asserted in BOTH directions, which is what ties the
+                        reported mutation to this object
+  tag written           DT_RUNPATH, read with readelf -d AFTER the pass ran
+  target rpath computed non-empty, so the pass did not skip its writes
+
+Capability: declare -A supported locally at bash 5.2.15, and on the exact RHEL
+         9.8 target at bash 5.1.8, read from docs/v0.27.0/capability.rhel-9.8.txt
+         and drawn through the same production functions the cases call. All
+         three of the plan's outcomes are reachable and distinct: exact evidence
+         gives supported; representative version-pinned RHEL 9 or UBI 9 evidence
+         opens the provisional branch and records the Step 6 debt; and NO
+         evidence BLOCKS the step rather than passing quietly.
+
+Provenance: the commit and commit-short lines below are the revision the agent
+         built, and the harness-sha256 is the committed harness. Both are checked
+         against the local repository rather than assumed, after a push to a
+         multi-URL remote once failed on its first URL and left an earlier build
+         running against a previous commit.
+
+Supersedes: builds 56 to 64, each withdrawn by a defect the runs exposed.
+         Build 56 reported 'tag-written PASS' after a pass that exited 127, and
+         'functions-defined PASS' from a probe that died before printing.
+         Build 57 fixed one of three identical call sites.
+         Build 58 carried a duplicated note.
+         Build 59 proved a call returned zero and a count of one, then rechecked
+         the tag the fixture was planted with, so nothing tied the mutation to
+         the donor.
+         Build 60 measured the exact-target capability and only PRINTED it.
+         Build 61 asserted it but read one value per field, so a self-
+         contradicting file read as whichever line came first.
+         Build 63 matched the identity as a SUBSTRING, accepting 9.80, and its
+         negative cases exercised a parallel parser carrying the same bug.
+         Build 64 treated absent target evidence as a note, so a run knowing
+         nothing about the target could still report OBJECTIVE MET.
+
+Source: fetched from the build's archived artifact rather than scraped from the
+        console. Workspace paths are placeholdered; nothing else is changed.
+
+===== BEGIN CPLX-RELOCATION-STEP0 =====
+captured-at: 2026-08-19T06:54:17Z
+build: 65
+commit: 0a2b25e13b8f3c8618fbe6c159269a33a16aa239
+commit-short: 0a2b25e13b8f
+uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+bash: 5.2.15(1)-release
+harness-sha256: fbafc244527383f0f92133246adfd06fdb71bac73c6887c2a20906b7c6ebef01
+candidate-sha256: 24ed8ec3e466ba3b03d9812d6ab47fc89f0ae9844cd6bd253c53275cacf890d5
+patchelf: /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf
+patchelf-version: patchelf 0.19.1
+readelf-version: GNU readelf (GNU Binutils for Debian) 2.40
+sha256sum-version: sha256sum (GNU coreutils) 9.1
+----- harness output -----
+
+== harness prerequisite preflight
+  preflight/readelf                        PASS  /usr/bin/readelf
+  preflight/sha256sum                      PASS  /usr/bin/sha256sum
+
+== capability gate: declare -A
+  assoc-array/local                        PASS  supported
+  assoc-array/local-bash                   NOTE  5.2.15(1)-release
+  target-capability/identity               PASS  identity
+  target-capability/identity               PASS  identity
+  target-capability/identity               PASS  identity
+  target-capability/capability             PASS  capability
+  target-capability/unavailable            PASS  unavailable
+  target-capability/malformed              PASS  malformed
+  target-capability/bash                   PASS  bash
+  target-capability/duplicate              PASS  duplicate
+  target-capability/ok                     PASS  ok
+  target-capability/absent                 PASS  absent
+  target-source/none-is-blocked            PASS  blocked none
+  target-source/representative             PASS  representative ok
+  target-source/representative-identity    PASS  representative identity
+  assoc-array/exact-target                 PASS  supported (retained exact capture)
+  assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
+  assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
+
+== step 0: seam
+  control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
+  identity/installer                       PASS  /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/declared-by                     NOTE  --installer argument
+  identity/installer-digest                NOTE  24ed8ec3e466
+  seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
+  seam/probe-ran                           PASS  sentinel present
+  seam/source-returns-zero                 PASS  0
+  seam/no-install-on-source                PASS  0
+  seam/functions-defined                   PASS  
+  seam/guard-present                       PASS  1
+  seam/guard-precedes-main                 PASS  guard 463, main 474
+  seam/definitions-above-boundary          PASS  usage 437, engine 449
+  seam/execute-still-refuses               PASS  1
+  seam/execute-usage-path                  PASS  usage reached from the main flow
+
+== step 0: host-tool contract
+  host-tool/no-invocations                 PASS  0
+  host-tool/rejects                        PASS  python -c pass
+  host-tool/rejects                        PASS  /usr/bin/python -c pass
+  host-tool/rejects                        PASS  ./readelf -d x
+  host-tool/rejects                        PASS  foo | awk '{print}'
+  host-tool/rejects                        PASS  value=$(sha256sum x)
+  host-tool/rejects                        PASS  if true; then wc -l x; fi
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/allows-path-argument           PASS  argument, not a command
+
+== host capability for step 0
+  host/can-run-step-0                      PASS  patchelf /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf on a Linux host
+
+== step 0: baseline capture
+  baseline/fixture-anchored                PASS  /home/builder/prefix/lib
+  baseline/fixture-tag-before              PASS  1
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.67937/baseline-prefix/tools/python/root/usr/lib64
+  baseline/production-pass-ran             PASS  0
+  baseline/mixed-count-emitted             PASS  Fixed 1 ELF interpreter/rpath value(s)
+  baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.67937/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
+  baseline/tag-written                     PASS  DT_RUNPATH
+  baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
+  baseline/objects-walked                  NOTE  2
+  baseline/donor                           NOTE  /bin/true
+  baseline/installer-lines                 NOTE  649
+
+== verdict
+  step        0
+  cases       46
+  failures    0
+  installer   /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  readelf     /usr/bin/readelf
+  sha256sum   /usr/bin/sha256sum
+  assoc local supported (bash 5.2.15(1)-release)
+  assoc rhel  supported
+
+OBJECTIVE MET for step 0
+----- end harness output -----
+harness-exit: 0
+result: OBJECTIVE_MET
+===== END CPLX-RELOCATION-STEP0 =====

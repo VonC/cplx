@@ -20,8 +20,39 @@ seven steps that give `install_pkg.sh` an ordered ELF classifier, a forced
 
 ## Analysis of Step 0 implementation state
 
-Not started. Step 0 is not implemented because no verification harness exists for
-this effort yet.
+Yes. Step 0 has been fully implemented.
+
+The harness reports `OBJECTIVE MET` on the Debian 12 CI agent, build 65, **46
+cases and 0 failures**, and every claim it makes is asserted through the code
+path that makes it. The production pass ran over a planted, asserted ELF; it
+emitted `Fixed 1 ELF interpreter/rpath value(s)`; the donor's rpath **value** is
+proved to have become the computed target and to have left the planted
+`/home/builder/prefix/lib`, which is what ties the reported mutation to this
+object rather than to any other walked ELF; and `readelf -d` confirms the tag it
+wrote.
+
+All three of the plan's capability outcomes are now reachable and distinct, and
+each has a case. Exact evidence gives `supported`: `declare -A` is supported on
+the exact RHEL 9.8 target at bash 5.1.8, measured on the target and retained in
+`docs/v0.27.0/capability.rhel-9.8.txt`. Representative version-pinned RHEL 9 or
+UBI 9 evidence opens the **provisional** branch and records the Step 6 debt
+rather than discharging it. And **no evidence at all BLOCKS the step**, which is
+the correction this round makes: silence about the target used to be a note that
+let a capable run report success while knowing nothing about the machine it
+exists to qualify.
+
+The evidence is drawn through `capability_verdict` and `capability_source`, the
+production functions every case calls, so a change to either is a change to what
+those cases observe. They refuse a wrong distribution, a `9.80` near-miss, a
+`9.7` near-miss, an `unsupported` outcome, an `unavailable` one, a malformed one,
+a missing bash version, a self-contradicting file and a named-but-missing file,
+and they cover all three source branches including the two that carry no file.
+
+The seam is in place with the executed path byte-identical to before,
+`shellcheck` is clean on both files, and both harness prerequisites resolved. The
+retained evidence is `docs/v0.27.0/verify.relocation.step0.debian.txt`, carrying
+the commit it was built from, `0a2b25e13b8f`, and the harness digest
+`fbafc244…`, both checked against the local repository.
 
 ### Goal for Step 0
 
@@ -83,27 +114,229 @@ will call is defined, and executing the script is unchanged.
 
 ### What was implemented for Step 0
 
-_(empty — no check has taken place yet.)_.
+Four artifacts accompany the rearranged installer: the harness, the retained
+Debian capture, the retained RHEL capability measurement, and this validation
+record. No production behavior is intended to change.
+
+**`docs/v0.27.0/verify.relocation-rpath.sh`** (new, 893 lines). The executable
+oracle, a separate file rather than an extension of `verify.install-pkg.sh` per
+Q01, so nothing here can break that file's mirrored shared-body digest. It takes
+`--step N`, `--installer PATH`, `--prefix DIR`, `--patchelf PATH`, exact or
+representative capability evidence, and the exact-target flag. Its `--step`
+dispatch accepts only 0 today: accepting an unknown step would let the verdict
+line report success for a suite that does not exist.
+
+- **the prerequisite preflight**, run before the installer is sourced and before
+  any case-specific mutation. It resolves with `type -P`, requires an absolute
+  path to a regular executable file, verifies the interface, and only then pins
+  the value read-only, in that order, so a failed substitution cannot be masked
+  by the declaration builtin;
+- **the capability gate**, recording one of the three `declare -A` outcomes;
+- **a negative control** whose unplanted fixture must fail, so a suite that
+  blesses anything is caught before any positive case is trusted;
+- **the seam cases**: sourcing returns zero, the prefix gains no entry, every
+  production function the harness will call is defined, the guard is present and
+  precedes the main flow, both moved definitions sit above the boundary, and an
+  executed run still refuses on the usage path;
+- **the real baseline**: it plants a dynamically linked ELF by copying a shipped
+  system object and anchoring it with `patchelf --set-rpath
+  /home/builder/prefix/lib`, asserts that plant with `patchelf --print-rpath` and
+  `readelf -d` before anything runs, invokes the **production** `fix_elf_paths`
+  through the seam, reads the emitted `Fixed <n>` line out of that run's output,
+  and inspects the rewritten object's tag with `readelf -d` independently. No
+  compiler is needed and nothing is read from the installer's source text;
+- **one host-tool contract rule** replacing the two the first round carried. It
+  matches a forbidden name in **command position**, at the start of a command or
+  after a pipe, separator, subshell opener or control keyword, so
+  `/usr/bin/python` and `./readelf` are caught while
+  `"$INSTALL_PREFIX/tools/python/root/..."` stays an argument. It carries six
+  negative cases it must reject and two benign shapes it must allow, read from
+  heredocs so the harness's own quoting is not the thing under test;
+- **a host-capability gate** that refuses a step this machine cannot run,
+  distinctly from a code failure. Step 0's baseline needs an ELF-capable Linux
+  host with `patchelf`; where that is absent the harness prints `HOST CANNOT
+  SATISFY STEP 0` and exits 4, and says in as many words that no substitute was
+  accepted. Host-independent cases run first and their result stands.
+
+**`src/setups/env/bin/install_pkg.sh`** (625 to 649 lines, a measured net of
+**+24**). The rearrangement the plan requires and nothing else:
+
+- `usage` and `select_copy_engine` move above a new `# --- MAIN BOUNDARY ---`,
+  their call sites unchanged at their original positions;
+- the sourced-versus-executed guard is placed at that boundary, returning when
+  `BASH_SOURCE[0]` differs from `$0`;
+- the `# --- 1b. Select the copy engine ---` marker is restored at the call site,
+  since the section header traveled up with the definition.
+
+Executed behaviour was compared before and after by running both copies from
+identically-named paths and diffing the output: **identical once `$0` is
+normalised**, with the same exit code 1 on the usage path.
+
+Twelve defects were found before this round by running the harness or by reading
+the environment it must run in: three before the first request, two in code
+review round 1, two by reading the CI pipeline, four in builds 56 and 57, and
+one in code review round 3. They are recorded because the shape matters more
+than the fix.
+
+- **the preflight could not fail.** `preflight_tool` returned the resolved path
+  **on stdout** and was called in a command substitution, so its diagnostics went
+  into the variable and its `PREFLIGHT_OK=0` ran in a subshell that could not
+  reach the parent. The gate could not trip. It now returns through a named
+  variable;
+- **an assertion passed against the wrong line.** `seam/guard-precedes-main`
+  matched the **first** `BASH_SOURCE[0]` in the file, a pre-existing legitimate
+  use at line 19 for `INSTALL_PKG_DIR`. It reported PASS with `guard 19`, a false
+  pass, which is worse than failing because it reports the property as held. It
+  now matches the boundary marker and asserts the guard's exact text separately;
+- **the plan's literal host-tool grep cannot reach zero** on this installer,
+  matching `python` four times inside path strings it must contain and once in a
+  comment;
+- **the baseline measured a description, not a run** (round 1). It counted a
+  planted plain-text file, inferred the written tag from the absence of
+  `--force-rpath` in the source, and grepped the source for the `Fixed` format
+  string. Step 0 exists so later steps are judged against a measurement rather
+  than a description, and that version captured the description. It could not
+  have been otherwise on this host, which has no ELF toolchain, and the harness
+  wrote something it could run instead of refusing;
+- **the narrowed host-tool rule let path-qualified commands through** (round 1).
+  Excluding any name adjacent to `/` treats `/usr/bin/python` and `./readelf` as
+  path text even in command position. Fixing the first false positive introduced
+  a false negative, which is the same error the plan's alternate-pair column made
+  twice: a correction made without checking what it now permits.
+
+- **the round 2 host gate resolved patchelf on PATH only** (found after round 2
+  was published, by reading the CI pipeline that would run it). The Debian agent
+  ships patchelf inside the extracted prefix and never on PATH, so the gate added
+  to stop the harness faking a baseline would have refused to run it on the one
+  host able to produce one. It now resolves as `find_patchelf` does, prefix then
+  home tools then command path, with a `--patchelf` override, and plants the
+  resolved binary at `tools/bin/patchelf` in the fixture prefix so the production
+  resolution runs on its ordinary surface;
+- **the round 2 baseline would have measured a skipped pass** (same reading).
+  `build_elf_rpath` derives the target search path from directories that must
+  exist, and the fixture prefix held only `tools/bin`, so the computed value
+  would be empty and `fix_elf_paths` would skip every write under its
+  `[ -n "$new_rpath" ]` guard while still printing a `Fixed` line. The fixture
+  now carries a realistic tool layout, and a new assertion fails loudly if the
+  computed target rpath is ever empty, so a pass that does nothing can no longer
+  read as a pass that worked;
+- **build 56 sourced a foreign `echos` helper.** The candidate sat beside an
+  unrelated helper, so the source probe exercised more than the standalone
+  installer. The harness now sources an isolated scratch copy;
+- **`seam/functions-defined` passed after the probe died.** Empty output became
+  an empty missing-function list, which matched the expected empty value. A
+  `PROBE` sentinel is now required before values are read;
+- **`baseline/tag-written` passed after the production call exited 127.** The
+  planted and expected tag were both `DT_RUNPATH`, so the untouched fixture
+  satisfied the assertion. The tag check is now gated on a successful call and
+  emitted count;
+- **build 57 applied isolation to one of three source sites.** The target-rpath
+  and production probes still sourced the caller's copy. All three now use the
+  isolated copy;
+- **the aggregate mutation did not identify the donor.** The baseline proved a
+  call returned zero and counted one mutation, then checked only that the donor
+  retained its planted `DT_RUNPATH` tag. It now asserts the donor's exact target
+  rpath and that the planted builder value has gone.
+
+The earlier host-distinction findings are why the harness now carries a
+**host-capability gate**. The plan formerly said "the validation host" without
+distinguishing it from the authoring host, and an unstated assumption of that
+kind is exactly what produced a baseline nobody could run.
+
+### Two plan amendments this step made
+
+Both are applied to the plan itself, which is staged in this round rather than
+carried as notes.
+
+- **The plan's execution checklist now states the tested rule.** It required a
+  bare-word grep to print nothing, which it cannot: `python` appears four times
+  inside path strings the installer must contain and once in a comment. The
+  checklist now names the harness's own `host-tool/no-invocations` case, with
+  the command-position rule stated and the reason recorded, so the checklist and
+  the tested rule cannot diverge.
+- **The plan now says which host can answer which step.** A new subsection gives
+  the per-step requirement: Steps 0, 1 and 4 need a Linux host with `patchelf`,
+  `readelf` and GNU `sha256sum`; Step 6 needs the RHEL 9.8 target; Steps 2, 3 and
+  5 are host-independent. It also states the two rules that follow, that a step
+  the host cannot run must refuse distinctly, and that the host-independent cases
+  still run when a prerequisite is unresolved. The plan's earlier silence on this
+  is what let a baseline be written that could not be measured where it was
+  written.
 
 ### New types or classes introduced for Step 0
 
-_(empty — no check has taken place yet.)_.
+None. This is a Bash effort: no classes, no modules. The new artefact is one
+shell script, `docs/v0.27.0/verify.relocation-rpath.sh`, and the new named shell
+functions in it are harness scaffolding (`pass`, `fail`, `chk`, `note`,
+`section`, `control`, `preflight_tool`, `capability_verdict`,
+`capability_source`, `cleanup`, `unplanted_case`), none of which ships to a
+deployment.
 
 ### Architecture check for Step 0
 
-_(empty — no check has taken place yet.)_.
+The DDD-Hexagonal question does not apply: this repository is a Bash toolchain
+with no layers, ports or adapters, and the effort adds none. The architectural
+property that does apply is the **deployment contract**, that `install_pkg.sh`
+must run alone from a bare account, and it is preserved: no file was added to the
+installer's dependencies, no host tool was introduced, and the harness lives
+under `docs/` where no deployment reaches it.
+
+The seam is the one structural change, and it is inert on the executed path. The
+guard returns only when `BASH_SOURCE[0]` differs from `$0`, which is never true
+for an executed script, and the two moved definitions sit above their unchanged
+call sites.
+
+One separation is intended: `readelf` and `sha256sum` are harness prerequisites
+and must be kept out of the installer mechanically. The harness's
+command-position rule covers bare and path-qualified forms and has explicit
+negative cases for both.
+
+No architecture issue remains for Step 0. Missing exact-target evidence now
+enters the blocked outcome and prevents a green verdict; representative pinned
+evidence is distinguished as provisional and records the Step 6 debt.
 
 ### Performance check for Step 0
 
-_(empty — no check has taken place yet.)_.
+No production computation was added, so the installed pass has the same cost it
+had before: the guard is one string comparison evaluated once, on a path where it
+is always false.
+
+The harness itself walks a prepared prefix once, greps the installer a fixed
+number of times, and sources it in one subshell. Every operation is linear in the
+file or the prefix, and nothing iterates a collection inside a walk of the same
+collection. No O(n^2) or O(n log n) computation is introduced.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Unit test coverage check for Step 0
 
-_(empty — no check has taken place yet.)_.
+The 100% unit-coverage rule targets `src\pdfss\tests\unit`, a Python tree this
+repository does not have. There is no pytest, no coverage gate and no unit-test
+directory here; the project's gate is `shellcheck` plus the Bash harness, which
+is what the plan's execution checklist substitutes for the groundhog walk.
+
+What stands in its place is the 46-case Bash suite retained from build 65, with
+one negative control and a successful production relocation run. It asserts the
+planted donor's exact post-pass rpath and the removal of the planted value.
+The capability table now calls the production verdict and covers the round-5
+near-miss and duplicate findings, the named-but-absent evidence path, all source
+branches, and the no-evidence blocked outcome. The request supplies a clean
+ShellCheck 0.11.0 run; the reviewer could not reproduce it because `shellcheck`
+is unavailable here.
+
+No, there is no unit-tested class below 100% that needs completing, because the
+rule's tree does not exist in this repository.
 
 ### Feature integrity for Step 0
 
-_(empty — no check has taken place yet.)_.
+No regression is visible in the rearranged source: the moved functions and their
+call sites are unchanged, the sourced guard is at the new boundary, and the
+usage path still exits with the same code. The request reports a byte-identical
+pre/post comparison after normalising `$0`, and build 65 executes the production
+relocation pass successfully while proving the donor's value changed. Missing
+target evidence now blocks the step, while representative pinned evidence opens
+the provisional path and records the Step 6 debt. The rsync-versus-cp selection
+remains at its original call site before archive discovery.
 
 ---
 
