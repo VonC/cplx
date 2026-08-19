@@ -1,0 +1,27 @@
+Exact-target capability measurement for the v0.27.0 relocation-force-rpath plan.
+
+Purpose: Step 0's capability gate has three outcomes, and `unavailable` is the
+         one the plan permits only against representative pinned evidence. An
+         earlier harness hardcoded `unavailable` on every host, which made that
+         branch a constant rather than an outcome: it would have reported the
+         target unreachable from the target itself. This is the exact-target
+         measurement, taken on the deployment target rather than inferred.
+
+Consequence: `declare -A` is supported on the exact RHEL 9.8 target, so the
+         observation tuple's associative-array carrier (Q05) is confirmed there.
+         The Step 0 provisional branch does not open, and the exact-target
+         confirmation that Step 6 would otherwise carry as a debt is discharged
+         for the capability question. Step 6's deployment and preload
+         measurement remain outstanding: this measures the interpreter, not the
+         install.
+
+Fed to the harness with --target-capability, which reads the declare-A line, so
+the recorded outcome is a measurement this file carries rather than a constant
+the harness asserts.
+
+target: Red Hat Enterprise Linux 9.8 (Plow)
+kernel: 5.14.0-687.36.1.el9_8.x86_64
+bash: 5.1.8(1)-release
+declare-A: supported
+measured-at: 2026-08-18T18:22:03Z
+probe: ( declare -A _p && _p[k]=v && [ "${_p[k]}" = v ] )
