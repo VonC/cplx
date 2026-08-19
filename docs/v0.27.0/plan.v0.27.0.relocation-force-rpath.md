@@ -174,6 +174,39 @@ negative host-tool grep over `install_pkg.sh`, so an accidental production use i
 detected rather than reasoned about. The installer's own host-tool contract is
 unaffected, since neither ever runs during an install.
 
+### Which host can answer which step
+
+The plan said "the validation host" throughout and never said that it may not be
+the machine the work is written on. That silence had a consequence: the first
+Step 0 harness could not run the relocation pass where it was written, so it
+inferred the baseline from the installer's source text instead, and the omission
+made that look reasonable rather than wrong.
+
+The steps do not all need the same host:
+
+| Step | What it needs | Why |
+| --- | --- | --- |
+| 0 | Linux with `patchelf`, `readelf`, GNU `sha256sum` | its baseline runs the real pass over a real ELF |
+| 1 | the same | ELF fixtures, the `readelf` oracle and patchelf probes |
+| 2 | any host with Bash 4.0+ | the classifier consumes controlled tuples |
+| 3 | any host with Bash 4.0+ | the formatter, reader and corpus are text |
+| 4 | Linux with `patchelf`, `readelf`, GNU `sha256sum` | integration rewrites real objects |
+| 5 | any host | documentation coverage |
+| 6 | the RHEL 9.8 target | deployment, preload and monitoring |
+
+Two rules follow, and both are properties of the harness rather than advice.
+
+**A step this host cannot run must say so distinctly.** The harness declares what
+a step needs and refuses when the host cannot supply it, with its own exit code
+so that "cannot answer" is never read as "answered" or as "the code is broken".
+Answering a cheaper question is what the refusal exists to prevent.
+
+**The host-independent cases still run.** A missing prerequisite leaves the gate
+incomplete and the run non-zero, but the cases needing neither prerequisite
+report first, so a host missing one tool still learns whether the seam and the
+host-tool contract hold. Only the cases that genuinely need a tool are skipped,
+and they are named when they are.
+
 ### Step 0 harness prerequisite preflight
 
 The harness runs as `bash docs/v0.27.0/verify.relocation-rpath.sh --step N`, so
@@ -1942,6 +1975,7 @@ rather than absorbed.
 Not started.
 
 ---
+
 ## Step 5 analysis and intent
 
 ### Step 5 issues
@@ -2214,6 +2248,7 @@ later cycle knows what it costs.
 Not started.
 
 ---
+
 ## Execution command checklist for v0.27.0 relocation-force-rpath
 
 Every step runs the same three checks, in this order, stopping at the first
@@ -2231,14 +2266,33 @@ failure. They are described once here and referenced by each step.
    Repeat fix-and-walk until it reports the step's objective. This is the
    substitute for the `ghog day` walk the template assumes, and it keeps the
    same property: one command sequence, gate first, stop at the first failure.
-3. **Run the grep check.** Confirm the step introduced no host tool outside the
-   audited contract:
-   `grep -nE '\b(readelf|sha256sum|stat|wc|awk|perl|python)\b' src/setups/env/bin/install_pkg.sh`
-   must print nothing. This is the mechanical half of the requirement's
-   host-tool rule; the reading half is the diff. `readelf` and `sha256sum` are
-   in the pattern because they are **harness prerequisites**: they belong to the
-   validation host and never to a deployment, so their appearing in the installer
-   is the drift this check exists to catch.
+3. **Run the host-tool check.** Confirm the step introduced no host tool outside
+   the audited contract. The check is the harness's own, which is where its
+   negative cases live:
+   `bash docs/v0.27.0/verify.relocation-rpath.sh --step 0` must report
+   `host-tool/no-invocations` passing, alongside the six shapes it must reject
+   and the two it must allow.
+
+   **This replaces the bare-word grep the checklist carried until now**, and the
+   replacement is a narrowing rather than a loosening. The old form was
+   `grep -nE '\b(readelf|sha256sum|stat|wc|awk|perl|python)\b'` over the
+   installer, required to print nothing. It cannot: `python` appears four times
+   inside path strings the installer must contain,
+   `tools/python/root/lib64/...` and the `tool_dir` loop, and once in a comment.
+   A check that can never pass is not a gate, and the two available repairs were
+   to weaken it or to make it match the property it is actually about.
+
+   The property is that no forbidden tool is **invoked**. An invocation is a name
+   in command position: at the start of a command, or after a separator, a pipe,
+   a subshell opener, a command substitution, or a `then`, `else`, `do` or `elif`
+   keyword. A name anywhere else is an argument or a path fragment, and a comment
+   invokes nothing. That rule rejects `/usr/bin/python -c pass` and
+   `./readelf -d x`, which an earlier slash-adjacency attempt let through, and
+   accepts the installer's own path strings.
+
+   `readelf` and `sha256sum` are in the forbidden set because they are **harness
+   prerequisites**: they belong to the validation host and never to a deployment,
+   so their appearing in the installer is the drift this check exists to catch.
 
 ## Ready-to-run command for v0.27.0 relocation-force-rpath
 
