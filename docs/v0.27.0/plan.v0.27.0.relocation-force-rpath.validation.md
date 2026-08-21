@@ -1017,7 +1017,7 @@ items, because the previous rounds had each closed one shape and revealed
 another, and a list of shapes has no end.
 
 **The oracle accepted the wrong token.** Every reject case asked whether the rule
-named *some* unlisted word, not whether it named the one the case planted. So the
+named _some_ unlisted word, not whether it named the one the case planted. So the
 extractor and the oracle could be wrong together, and they already were:
 `xargs -P 4 zzunlisted` returned `4`, which is unlisted, so the case passed while
 the rule was reading an option operand instead of the command. A green matrix
