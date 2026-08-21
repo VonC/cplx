@@ -298,6 +298,231 @@ deploy_root_file_cp() {
     fi
 }
 
+# --- ELF observation (v0.27.0 relocation-force-rpath, Design Area 1) ---
+#
+# One structural read per walked ELF, producing a normalized named tuple. The
+# tuple is ONE FIXED GLOBAL associative array, named once and shared by the
+# observer, the classifier and the controlled tests. Fixed and global rather
+# than passed: Bash cannot pass an associative array by value, so a per-call
+# container would mean passing its name and dereferencing through a nameref,
+# which is a second interpreter capability beyond the one the plan gates.
+#
+# The clearing rule is a single operation in a single place, because "the other
+# fields are not touched" is how a previous object's reading survives into the
+# next loop iteration and is read as this object's evidence.
+declare -A CPLX_ELF_OBS
+
+# Every key the tuple carries. Named once so the clear and the fill cannot
+# disagree about the field set.
+CPLX_ELF_OBS_KEYS="structural_status elf_kind has_dynamic has_interp tag_state \
+rpath_probe_status rpath_value interp_probe_status interp_value"
+
+# elf_obs_clear: empty every field in one operation. `absent` is a value rather
+# than an unset key, because an unset key expands to the empty string and would
+# be indistinguishable from a probe that answered with nothing.
+elf_obs_clear() {
+    local k
+    for k in $CPLX_ELF_OBS_KEYS; do
+        CPLX_ELF_OBS["$k"]=""
+    done
+}
+
+# elf_obs_inconclusive: the fully defined structural-failure tuple. Every other
+# field is cleared, both probe statuses are blocked, and both probe values are
+# absent. This is the ONLY fault that blocks both axes.
+elf_obs_inconclusive() {
+    elf_obs_clear
+    CPLX_ELF_OBS[structural_status]="inconclusive"
+    CPLX_ELF_OBS[rpath_probe_status]="blocked"
+    CPLX_ELF_OBS[interp_probe_status]="blocked"
+    CPLX_ELF_OBS[rpath_value]="absent"
+    CPLX_ELF_OBS[interp_value]="absent"
+    return 0
+}
+
+# elf_read_le: read WIDTH bytes at OFFSET from FILE as a little-endian unsigned
+# integer. `od` is already in the audited host-tool contract; nothing else is.
+#
+# ELF64 offsets and sizes are UNSIGNED 64-bit; Bash arithmetic is SIGNED 64-bit.
+# A field with its top bit set therefore decodes to a negative number, and a
+# caller that validated an extent by adding two of them would accept an object
+# whose segment starts past the end of the file: 0xFFFFFFFFFFFFFFF0 reads as -16,
+# and -16 + 8 is less than any size. That is not a hypothetical rounding concern,
+# it is a malformed object finishing with `structural_status: ok`.
+#
+# So this function fails on any value it cannot represent faithfully. Everything
+# this domain reads, offsets, sizes and counts, is bounded by a real file size,
+# so a field at or above 2^63 is malformed rather than merely large, and the
+# caller's existing "read failed" path is exactly the right response.
+elf_read_le() {
+    local file="$1" offset="$2" width="$3" bytes i v=0
+    bytes=$(od -An -tx1 -v -j "$offset" -N "$width" "$file" 2>/dev/null | tr -d '[:space:]')
+    [ "${#bytes}" -eq $((width * 2)) ] || { printf ''; return 1; }
+    for (( i = width - 1; i >= 0; i-- )); do
+        v=$(( (v << 8) + 0x${bytes:i*2:2} ))
+    done
+    # v is the low 64 bits read as signed, so v < 0 holds exactly when the true
+    # unsigned value is at or above 2^63. Values below that are decoded exactly.
+    [ "$v" -lt 0 ] && { printf ''; return 1; }
+    printf '%s' "$v"
+
+}
+# elf_observe FILE SIZE: fill CPLX_ELF_OBS for one object.
+#
+# The size comes from the caller rather than from a stat, because the audited
+# host-tool contract carries neither `stat` nor `wc`. It is a CALLER OBLIGATION,
+# not something the walk supplies today: the walk currently emits `-print0` and
+# no size, so whichever step wires the observer in must extend it to emit the
+# size beside the path.
+#
+# The obligation is exact: SIZE must be the size of the bytes this function will
+# READ, which is the size after symlink resolution. `find -printf '%s'` without
+# `-L` reports the LINK's own size, a dozen-odd bytes, and every symlinked
+# library is then rejected here as too short to hold a header. The walk is safe
+# from that today only because `-type f` never yields a symlink; that is
+# load-bearing, so a walk that ever gains `-L` or `-type l` must resolve the
+# size too.
+#
+# Identification and whole-header presence are validated UNCONDITIONALLY. The
+# program-header checks apply only when e_phnum is nonzero, because a file with
+# no program header table is a valid shape: there is no entry whose size must
+# equal the ELF64 program header size, and requiring it would reject a
+# well-formed relocatable object.
+elf_observe() {
+    local file="$1" size="$2"
+    local magic ei_class ei_data ei_version e_type e_machine
+    local e_phoff e_phentsize e_phnum
+    local i off p_type p_offset p_filesz
+    local dyn_off dyn_size d_tag entry seen_rpath=0 seen_runpath=0
+
+    elf_obs_clear
+
+    # --- identification, four parts ---
+    magic=$(od -An -tx1 -v -N 4 "$file" 2>/dev/null | tr -d '[:space:]')
+    [ "$magic" = "7f454c46" ] || { elf_obs_inconclusive; return 0; }
+    # The whole 64-byte ELF64 header must be present: a file long enough for the
+    # four magic bytes the walk filters on may still be shorter than the header
+    # this function reads.
+    [ "$size" -ge 64 ] || { elf_obs_inconclusive; return 0; }
+    ei_class=$(elf_read_le "$file" 4 1)   || { elf_obs_inconclusive; return 0; }
+    ei_data=$(elf_read_le "$file" 5 1)    || { elf_obs_inconclusive; return 0; }
+    ei_version=$(elf_read_le "$file" 6 1) || { elf_obs_inconclusive; return 0; }
+    [ "$ei_class" = "2" ]   || { elf_obs_inconclusive; return 0; }  # ELFCLASS64
+    [ "$ei_data" = "1" ]    || { elf_obs_inconclusive; return 0; }  # ELFDATA2LSB
+    [ "$ei_version" = "1" ] || { elf_obs_inconclusive; return 0; }  # EV_CURRENT
+
+    e_machine=$(elf_read_le "$file" 18 2) || { elf_obs_inconclusive; return 0; }
+    [ "$e_machine" = "62" ] || { elf_obs_inconclusive; return 0; }  # EM_X86_64
+
+    e_type=$(elf_read_le "$file" 16 2) || { elf_obs_inconclusive; return 0; }
+    e_phnum=$(elf_read_le "$file" 56 2) || { elf_obs_inconclusive; return 0; }
+    # PN_XNUM: the extended count lives in the section header table, which is
+    # outside this domain, so it is inconclusive rather than followed.
+    [ "$e_phnum" != "65535" ] || { elf_obs_inconclusive; return 0; }
+
+    case "$e_type" in
+        2) CPLX_ELF_OBS[elf_kind]="exec" ;;
+        3) CPLX_ELF_OBS[elf_kind]="dyn" ;;
+        *) CPLX_ELF_OBS[elf_kind]="unsupported" ;;
+    esac
+    CPLX_ELF_OBS[has_dynamic]="no"
+    CPLX_ELF_OBS[has_interp]="no"
+    CPLX_ELF_OBS[tag_state]="none"
+
+    if [ "$e_phnum" -gt 0 ]; then
+        e_phentsize=$(elf_read_le "$file" 54 2) || { elf_obs_inconclusive; return 0; }
+        e_phoff=$(elf_read_le "$file" 32 8)     || { elf_obs_inconclusive; return 0; }
+        # ELF64 fixes Elf64_Phdr at 56 bytes.
+        [ "$e_phentsize" = "56" ] || { elf_obs_inconclusive; return 0; }
+        # Every extent is checked against the REMAINING file, never by adding an
+        # offset to a size. Two values that each pass `elf_read_le` can still sum
+        # past 2^63 and come back negative, and a negative total satisfies any
+        # `-le "$size"`. Subtracting cannot overflow here, because the left side
+        # is proved to lie within the file before it is used.
+        [ "$e_phoff" -le "$size" ] || { elf_obs_inconclusive; return 0; }
+        [ $(( e_phnum * e_phentsize )) -le $(( size - e_phoff )) ] \
+            || { elf_obs_inconclusive; return 0; }
+
+        for (( i = 0; i < e_phnum; i++ )); do
+            off=$(( e_phoff + i * e_phentsize ))
+            p_type=$(elf_read_le "$file" "$off" 4)             || { elf_obs_inconclusive; return 0; }
+            p_offset=$(elf_read_le "$file" $(( off + 8 )) 8)   || { elf_obs_inconclusive; return 0; }
+            p_filesz=$(elf_read_le "$file" $(( off + 32 )) 8)  || { elf_obs_inconclusive; return 0; }
+            [ "$p_offset" -le "$size" ] || { elf_obs_inconclusive; return 0; }
+            [ "$p_filesz" -le $(( size - p_offset )) ] || { elf_obs_inconclusive; return 0; }
+            case "$p_type" in
+                2) CPLX_ELF_OBS[has_dynamic]="yes"; dyn_off="$p_offset"; dyn_size="$p_filesz" ;;
+                3) CPLX_ELF_OBS[has_interp]="yes" ;;
+            esac
+        done
+
+        if [ "${CPLX_ELF_OBS[has_dynamic]}" = "yes" ]; then
+            # Elf64_Dyn is d_tag plus d_un, two eight-byte members, so the entry
+            # size is 16 by layout rather than by a stored field. A segment whose
+            # extent is not a whole number of entries is rejected.
+            [ $(( dyn_size % 16 )) -eq 0 ] || { elf_obs_inconclusive; return 0; }
+            entry=0
+            while :; do
+                [ $(( entry * 16 )) -lt "$dyn_size" ] || { elf_obs_inconclusive; return 0; }
+                d_tag=$(elf_read_le "$file" $(( dyn_off + entry * 16 )) 8) \
+                    || { elf_obs_inconclusive; return 0; }
+                case "$d_tag" in
+                    0)  break ;;              # DT_NULL terminates the array
+                    15) seen_rpath=$(( seen_rpath + 1 )) ;;   # DT_RPATH
+                    29) seen_runpath=$(( seen_runpath + 1 )) ;;  # DT_RUNPATH
+                esac
+                entry=$(( entry + 1 ))
+            done
+            if [ $(( seen_rpath + seen_runpath )) -gt 1 ]; then
+                CPLX_ELF_OBS[tag_state]="ambiguous"
+            elif [ "$seen_rpath" -eq 1 ]; then
+                CPLX_ELF_OBS[tag_state]="rpath"
+            elif [ "$seen_runpath" -eq 1 ]; then
+                CPLX_ELF_OBS[tag_state]="runpath"
+            fi
+        fi
+    fi
+
+    CPLX_ELF_OBS[structural_status]="ok"
+    # Probe statuses are set by the probe step. Structure fixes only the two
+    # `skipped` producers, and those are its ONLY producers: skipped always means
+    # "this object has nothing to read", never "we did not look".
+    CPLX_ELF_OBS[rpath_probe_status]=""
+    CPLX_ELF_OBS[interp_probe_status]=""
+    CPLX_ELF_OBS[rpath_value]="absent"
+    CPLX_ELF_OBS[interp_value]="absent"
+    return 0
+}
+
+# elf_probe FILE PATCHELF: run the two probes over an already-observed object.
+# Separate from elf_observe because the structural read is eager and only the
+# probes short-circuit, and only on evidence.
+elf_probe() {
+    local file="$1" patchelf_bin="$2" out
+    if [ "${CPLX_ELF_OBS[structural_status]}" != "ok" ]; then
+        CPLX_ELF_OBS[rpath_probe_status]="blocked"
+        CPLX_ELF_OBS[interp_probe_status]="blocked"
+        return 0
+    fi
+    if [ "${CPLX_ELF_OBS[has_dynamic]}" = "no" ]; then
+        CPLX_ELF_OBS[rpath_probe_status]="skipped"
+    elif out=$("$patchelf_bin" --print-rpath "$file" 2>/dev/null); then
+        CPLX_ELF_OBS[rpath_probe_status]="ok"
+        CPLX_ELF_OBS[rpath_value]="$out"
+    else
+        CPLX_ELF_OBS[rpath_probe_status]="failed"
+    fi
+    if [ "${CPLX_ELF_OBS[has_interp]}" = "no" ]; then
+        CPLX_ELF_OBS[interp_probe_status]="skipped"
+    elif out=$("$patchelf_bin" --print-interpreter "$file" 2>/dev/null); then
+        CPLX_ELF_OBS[interp_probe_status]="ok"
+        CPLX_ELF_OBS[interp_value]="$out"
+    else
+        CPLX_ELF_OBS[interp_probe_status]="failed"
+    fi
+    return 0
+}
+
 find_patchelf() {
     local candidate
     for candidate in "$INSTALL_PREFIX/tools/bin/patchelf" "$HOME/tools/bin/patchelf"; do
