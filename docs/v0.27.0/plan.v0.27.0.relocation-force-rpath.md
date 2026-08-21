@@ -572,6 +572,9 @@ original bytes, replacement bytes and citation:
 | `M13` | that entry's `p_filesz`, 8 bytes at entry `+0x20` | the base's size to a length carrying the segment past the file end | `G01` |
 | `M14` | `PT_DYNAMIC`'s `p_filesz`, 8 bytes at entry `+0x20` | the base's multiple of 16 to that value plus 8 | `G01` |
 | `M15` | the terminating entry's `d_tag`, 8 bytes at its offset | `00 00 …` to `01 00 …`, `DT_NULL` to `DT_NEEDED`, `p_filesz` unchanged | `G01` |
+| `M16` | `e_phnum`, 2 bytes at `0x38` | the base's count to `00 00`, a lawful zero meaning the object carries no program header table | `G01` |
+| `M17` | a `PT_LOAD` entry's `p_offset`, 8 bytes at entry `+0x08` | the base's offset to `f0 ff ff ff ff ff ff ff`, an unsigned value at `2^64-16` | `G01` |
+| `M18` | a `PT_LOAD` entry's `p_offset` and `p_filesz`, 8 bytes each at entry `+0x08` and `+0x20` | the base's values to `00 00 00 00 00 00 00 40` each, which is `2^62`: each decodes exactly, and only their sum passes `2^63` | `G01` |
 
 Every accepted and ambiguous fixture states **both probe statuses, whether each
 probe value is present, and the literal value when the status is `ok`**. The
@@ -605,7 +608,7 @@ Every behavior the design and the classifier rely on therefore has at least one
 | a present interpreter answers with the interpreter | `F01`, and every other fixture carrying `PT_INTERP` | interp `ok`, value `/lib64/ld-linux-x86-64.so.2` |
 | structure proves the rpath probe inapplicable | `F04`, with `F08` and `F09` | rpath `skipped`, no value |
 | structure proves the interpreter probe inapplicable | `F03`, with `F08` and `F09` | interp `skipped`, no value |
-| an inconclusive structure blocks both axes | `F12` to `F23` | both `blocked`, neither value present |
+| an inconclusive structure blocks both axes | `F12` to `F25` | both `blocked`, neither value present |
 | the rpath probe fails while the interpreter axis survives | `D01` | rpath `failed`, no value; interp `ok` with its value |
 | the interpreter probe fails while the rpath axis survives | `D02` | interp `failed`, no value; rpath `ok` with its value |
 
@@ -776,6 +779,8 @@ field cleared, both probe statuses `blocked` and neither value present:
 | `F21` | segment extent past the file | segment bounds | `G01` + `M12` + `M13` | `readelf -l` prints the base segment's real offset and size | not provided; identical segment bytes at two congruent offsets would do it, same reason as `F20` |
 | `F22` | dynamic extent not a whole number of entries | dynamic entry sizing | `G01` + `M14` | `Elf64_Dyn` is `d_tag` plus `d_un`, so 16 follows from the layout rather than from a stored field (LSB dynamic section; `elf(5)`) | not applicable; the invariant is a whole number of entries, and this carrier proves a bounds rule in `F21` |
 | `F23` | dynamic list never reaching `DT_NULL` | dynamic list termination | `G01` + `M15` | `DT_NULL` is the `d_tag` value ending the array (LSB dynamic section; `elf(5)`) | not applicable; the terminator's presence is the only lawful terminal state, and this carrier proves tag identity in `F06`, `F07`, `F10` and `F11` |
+| `F24` | a segment offset whose unsigned value has its top bit set | integer representability: a field at or above `2^63` cannot be decoded faithfully by signed shell arithmetic and must be refused rather than wrapped | `G01` + `M17` | `readelf -l` reports the base segment's real offset, so the planted value is demonstrably not it; `readelf` itself rejects the mutated file, which is the semantic oracle's verdict that the object is malformed | not applicable; the guard is about a value's representability, and the lawful counterpart is every accepted fixture whose offsets decode exactly |
+| `F25` | two segment extents that each decode exactly and whose SUM does not | extent arithmetic: an offset and a size that both pass the reader can still overflow when added, and a negative total satisfies any `-le` comparison against a file size. This is the guard `F24` cannot reach, because `F24` is refused one step earlier by the reader | `G01` + `M18` | `readelf -l` reports the base's real offset and size, so `2^62` is demonstrably neither; and the fixture is measured against BOTH observers, the pre-fix one reporting `ok` and the fixed one `inconclusive`, so it is a regression witness rather than an assertion about the current code alone | not applicable; the guard is about how an extent is computed, not about a field's identity |
 
 Requiring zero unexercised guards paid for itself the first time it was applied.
 The identification guard has four parts and the previous matrix exercised two,
@@ -904,8 +909,13 @@ are `blocked`.
 - both ambiguity fixtures yield `tag_state: ambiguous`;
 - the harness reaches the observer by sourcing the installer in a subshell, so
   the production function is the one under test;
-- no new installer host tool is used: the host-tool grep is clean and a read of
-  the diff confirms only `od`, `head`, `find` and the shipped patchelf.
+- no new installer host tool is used, and this is now **two mechanical rules
+  rather than one rule and one reading**. The denylist rule stays: no
+  harness-only tool is invoked. The allowlist rule is new: every command-position
+  word in the installer must appear in `docs/v0.27.0/contract.host-tools.txt`,
+  the committed vocabulary, so a tool outside it fails the gate instead of
+  passing unnoticed. Step 1's own additions resolve to `od`, `head`, `find` and
+  the shipped patchelf, all of which the installer already used.
   **`readelf` and `sha256sum` are harness-only prerequisites**, and the execution
   checklist's negative host-tool grep over `install_pkg.sh` names both, so an
   accidental production use is detected rather than assumed away;
@@ -2293,6 +2303,193 @@ failure. They are described once here and referenced by each step.
    `readelf` and `sha256sum` are in the forbidden set because they are **harness
    prerequisites**: they belong to the validation host and never to a deployment,
    so their appearing in the installer is the drift this check exists to catch.
+
+   **Amendment, Step 1: the allowlist half is now a rule too.** Until now this
+   checklist item enforced only the denylist, and the completion criteria asked
+   for the other half as "a read of the diff confirms only `od`, `head`, `find`
+   and the shipped patchelf". A reading is not a check. The consequence arrived
+   on schedule: the first Step 1 observer read bytes with `dd`, shellcheck was
+   clean, `host-tool/no-invocations` passed, and a tool outside the contract
+   shipped. A denylist cannot enforce an allowlist, because a tool on neither
+   list is exactly what it fails to see.
+
+   So the permitted vocabulary is decided here, and the decision has three
+   parts, because the installer's command words are three different kinds of
+   thing.
+
+   **Shell keywords and builtins are permitted without being listed.** They are
+   the interpreter, not the host. The deployment contract already pins the
+   interpreter, so a builtin adds no host dependency and listing one would grow
+   the vocabulary without measuring anything. The two sets are bash's own and
+   are named in the harness rather than curated.
+
+   **Functions are permitted when the installer defines them, or when a shipped
+   file it sources defines them.** They are read from the installer rather than
+   listed, so a renamed function cannot silently fall out of the vocabulary.
+
+   **External commands are the vocabulary, and they live in
+   `docs/v0.27.0/contract.host-tools.txt`**, committed beside the harness as
+   plain data, in the same shape as Step 3's contract corpus: one entry per
+   line, four columns, name, invocation form, resolver, purpose. Every
+   command-position word the harness extracts must appear there, and every entry
+   there must appear in the installer, so the file cannot drift in either
+   direction. Adding a host dependency therefore means editing a reviewed file,
+   which is the visibility the reading was supposed to provide and did not.
+
+   **The rule's limit is stated rather than papered over.** It is lexical, so a
+   command reached through a variable is invisible to it. That is not
+   hypothetical: patchelf is always invoked as `"$patchelf_bin"`. The `form`
+   column carries `indirect` for those, and an `indirect` entry must name a
+   resolver function that the harness then confirms is defined in the installer.
+   That turns an unprovable claim into a checkable one. It does not make the
+   rule total, and the harness must not report it as though it did.
+
+   The gate is `bash docs/v0.27.0/verify.relocation-rpath.sh --step 0`, which
+   must report `host-tool/allowlist-unlisted` and `host-tool/contract-unused` at
+   zero, the contract well-formed, and BOTH matrices green.
+
+   **Every reject case requires the exact planted dependency**, compared by
+   basename so a path-qualified shape still counts. That is the single most
+   load-bearing sentence in this section. An earlier matrix accepted "some
+   unlisted word", which let the extractor and the oracle be wrong together, and
+   it had already happened: `xargs -P 4 cmd` returned `4`, which is unlisted, so
+   the case passed while the rule was reading an option operand rather than the
+   command. Under that oracle a green matrix proved less than it read as
+   proving, and adding shapes to it would not have helped.
+
+   The reject matrix names each shape a new dependency can take: plain,
+   `!`-negated, piped, path-qualified, inside a command substitution within a
+   double-quoted string, as a `case` arm's command in every pattern form,
+   literal, computed as `$pat)`, escaped as `\))` and extglob as `@(a|b))`,
+   inside a brace group, after one or more `NAME=value` assignment prefixes,
+   after a leading redirection both attached and spaced, after each keyword that
+   introduces a command including `coproc`, and as the operand of every declared
+   launcher in each of its option forms.
+
+   **Launcher semantics are declared data rather than a rule of thumb.** Which
+   options take an operand, and whether that operand is REQUIRED or OPTIONAL, are
+   facts about each launcher, so the contract carries a launcher table beside the
+   vocabulary: the token, its owner, the short option letters and the long option
+   names, with a `?` marking an optional operand.
+
+   Arity matters as much as the option list. `xargs -E eof-str cmd` consumes its
+   operand and `xargs --eof cmd` consumes nothing, so a rule with one notion of
+   operand swallows the command in the optional forms. Short options cluster, so
+   the letters are walked rather than the word measured: `xargs -rP 4 cmd` has
+   its operand-taking letter at the end of the cluster, while `-n1` carries its
+   operand attached.
+
+   `builtin` is deliberately absent from the launcher table, because
+   `builtin NAME` runs a shell builtin by definition and can never reach an
+   external. It appears in the BOUNDARY instead, because it can reach `eval`.
+   That is not an inconsistency: a rule about host tools and a rule about
+   interpreter facilities are different rules that happen to share a scanner.
+
+   The option semantics are written once and shared by the launcher extraction
+   and the boundary. Two copies of a rule drift apart while each looks right in
+   isolation, and this effort has already been caught by that once.
+
+   **The coupling runs in both directions.** A declared launcher must itself be
+   permitted, and a permitted tool KNOWN to run its argument must be declared as
+   a launcher. Without the second direction, adding `env` or `timeout` to the
+   vocabulary would leave the rule blind to whatever it runs, and the harness
+   would keep reporting zero.
+
+   The allow matrix names each shape the rule must NOT claim, **one case per
+   shape rather than one verdict over a file of them**. That is not a
+   presentation choice. Widening the openers broke the rule in the other
+   direction, and the aggregate form could not say which shape broke it: `{` in
+   the opener class made every `${value}` read as a command, and a bare `)` made
+   `$(basename x)suffix` read as a command called `suffix`. The matrix therefore
+   carries `${value}`, `${HOME}/tools`, `$(basename x)suffix`, `$(dirname y).bak`,
+   `arr=(one two three)`, `arr+=(four five)`, and the `${g:-default}` and
+   `${i#prefix}` expansion forms, each as its own case.
+
+   It also carries the NESTED closes, because a rule that removes one close per
+   line passes the single-level shape and fails the double:
+   `$(basename $(dirname x))suffix`, `$(basename $(dirname $(readlink y)))tail`,
+   and a construct closing inside a substitution in each of its four forms,
+   `esac)`, `fi)`, `done)` and `})`. Each of those was a false positive at some
+   point in this rule's history, and the single-level case would not have caught
+   any of them.
+
+   And it carries the launcher forms the installer actually uses, so widening the
+   rule to see launcher targets cannot start claiming their options:
+   `$(command -v rsync)`, `$(echo a | xargs -0 -r sed -i -e s/a/b/)`, and a
+   `case` whose pattern is an escaped paren inside a substitution.
+
+   **The lexical boundary is fail-closed, not merely stated.** A command inside
+   `eval "..."` is invisible, and so is a launcher whose target is an expansion,
+   for the same reason a command reached through a variable is: the string is
+   blanked before the openers run and no lexical rule reaches inside it. Saying
+   so in prose was not enough, because a later step could add one and the gate
+   would keep reporting zero.
+
+   So the gate REFUSES a file containing any of those forms rather than answering
+   for it, and ten boundary shapes prove the refusal fires while a literal-target
+   case proves it is not indiscriminate. `eval` is also reachable through a
+   DISPATCHER: `command eval "$p"` and `builtin eval "$p"` both run it, and
+   neither puts `eval` where the command-word extraction looks. The installer
+   uses none of these forms today, which is why the boundary is green rather than
+   why it is absent.
+
+   The contract must also not contradict itself, since a duplicated entry can
+   answer `runs-argument` both ways while every other check still passes: no
+   entry name and no launcher token may appear twice.
+
+   **Every contract rule is exercised in both directions by a control.** Five
+   controls mutate a copy of the real contract and require the rule to report;
+   five require silence on the real one. A rule that has quietly stopped
+   detecting anything passes a suite built only from clean inputs, and so does a
+   rule that was never wired up: the round that first claimed these controls had
+   not in fact written them, and every rule reported zero. Each control calls the
+   same function the gate calls, so it cannot pass against a second copy the gate
+   does not use.
+
+   The dispatcher set is `command` and `builtin`, and both facts about it were
+   measured. `builtin -- eval "$p"` runs eval, so flags and `--` are skipped
+   before the command word is taken. `exec eval "$p"` does NOT run eval: exec
+   replaces the shell with an external program of that name, there is none, and
+   it exits 127.
+
+   Over-reporting is not the safe direction. A rule that names `${HOME}` as a
+   forbidden external command does not get tightened, it gets switched off.
+
+   `)` is **not an opener at all**, and reaching that took three failed attempts
+   worth recording, because each failure was a repair for the one before it.
+
+   As a bare opener it read `$(basename x)suffix` as a command called `suffix`.
+   Requiring a blank after it fixed that and made `a)cmd` invisible, which is
+   valid Bash calling `cmd`, so the rule became fail-open. Deleting the first
+   `)` on a hoisted substitution line fixed both at one level of nesting and
+   broke at two: `$(basename $(dirname x))suffix` hoists to a line carrying two
+   closes, and removing one leaves the other to open `suffix`.
+
+   Counting closes was the wrong instinct, because the ambiguity is not about
+   depth. `)` has two meanings and only one of them is a command position: the
+   end of a `case` PATTERN. That meaning is recognised directly and rewritten to
+   `;`, which is already an opener, so `)` needs no opener role and a close of
+   any construct at any depth opens nothing by construction. Block terminators
+   are excluded first, since `esac)`, `fi)`, `done)` and `})` end a construct
+   inside a substitution rather than a pattern.
+
+   **Keywords that introduce a command are transparent**, and the reason is a
+   property of the tool rather than of the shell: `grep -o` yields
+   non-overlapping matches, so an opener followed by a keyword consumed the
+   keyword as its command word and left the real command with no opener of its
+   own. `if true; then cmd; fi` reported `if then fi` and never `cmd`. That was
+   the largest fail-open this rule has had, it existed from the rule's first
+   version, and no case caught it because every reject shape had been written
+   with the command in the first position after the opener.
+
+   `{` opens a group only when a blank follows, and that one is **exact rather
+   than narrowing**: `{` is a reserved word, a reserved word must be delimited,
+   and `{ls; }` is a Bash syntax error rather than a call to `ls`.
+
+   The obligations pull against each other, so the gate asserts them together
+   rather than one at a time: `host-tool/unspaced-case-arm-is-seen` and
+   `host-tool/substitution-close-is-not-an-opener`. A repair that satisfies one
+   by giving up the other fails here rather than being written up as a trade.
 
 ## Ready-to-run command for v0.27.0 relocation-force-rpath
 
