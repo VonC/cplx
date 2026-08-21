@@ -6789,3 +6789,16 @@ wording edits in the validation skeleton.
 Decision: convergence-recommended. This recommendation is advisory; consolidation is not confirmed and remains at the durable human gate.
 
 <!-- review-entry-id: answer-round-15 -->
+
+## Round 15 by human - human-confirmation
+
+- Recorded: 2026-08-21T15:56:08+02:00
+- Exchange: specification/plan/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Outcome: human-confirmation
+
+Human choice: Consolidate
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-15 -->
