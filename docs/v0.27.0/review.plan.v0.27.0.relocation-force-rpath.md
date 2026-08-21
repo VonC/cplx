@@ -281,7 +281,7 @@ documentation and final acceptance work.
 
 References checked:
 
-- https://packages.debian.org/bookworm/bash
+- <https://packages.debian.org/bookworm/bash>
 
 ### Question verdicts for plan relocation-force-rpath round 1
 
@@ -403,7 +403,7 @@ Two of the writer's own arguments were refuted rather than refined, and both are
 the same kind of error: a property asserted about a structure without being
 checked against it.
 
-**Q03's oracle was not an oracle.** The plan argued that a generator wrong about
+1. **Q03's oracle was not an oracle.** The plan argued that a generator wrong about
 the ELF layout would be caught because the accepted fixtures would fail first.
 They would not. A generator that writes `e_type` at the wrong offset and an
 observer that reads that same wrong offset agree with each other; the ordinary
@@ -414,7 +414,7 @@ lawful base shapes and their tags, and, for each malformed derivative, a single
 mutation from a validated base with its size and changed offset asserted. Option
 3D records the refuted argument rather than quietly dropping it.
 
-**Q04's two steps had no valid ordering.** The writer weighed behavior-then-
+2. **Q04's two steps had no valid ordering.** The writer weighed behavior-then-
 report against report-then-behavior and picked the first without noticing that
 both leave a production state nobody would ship. Behavior first releases a pass
 writing `DT_RPATH` over three populations while still printing the mixed count
@@ -425,7 +425,7 @@ record stream land atomically as Step 3, after Steps 1 and 2 have separately
 proved the observer and the classifier. The wiki work is now Step 4 and the
 acceptance Step 5, six steps in total, and the validation skeleton matches.
 
-The other three:
+   The other three:
 
 3. Q05 becomes 5C. The associative-array carrier was rejected on an unmeasured
    Bash version assumption, which is a thing to check rather than a reason to
@@ -1242,7 +1242,7 @@ Review round: 4
 Round 4. All five round 3 requested changes are applied, none disputed. Answers
 1A, 2A, 3A, 4D, 5C, 6A, 7A stand, and Q08 is added and answered 8A.
 
-**Q08 is a placement decision the plan never made.** Step 3 scheduled both ends
+1. **Q08 is a placement decision the plan never made.** Step 3 scheduled both ends
 of the wire contract, the formatter and the retained-output reader, against
 `install_pkg.sh`, and then had to argue that neither was called. One of those
 arguments should never have been needed: the reader is the retained recipe's
@@ -1254,7 +1254,7 @@ follow beyond the line count: a production reader call site becomes impossible
 rather than merely unintended, and the round-trip becomes a check between two
 independent ends rather than a file agreeing with itself.
 
-**The lifecycle defect between Q05 and Q06 is the serious one.** Q05's
+2. **The lifecycle defect between Q05 and Q06 is the serious one.** Q05's
 provisional branch let Steps 1 to 5 proceed on representative pinned evidence
 when the exact RHEL target was unreachable. Q06 allowed a terminal `blocked`
 verdict. Each was settled on its own, and nothing connected them, so nothing
@@ -1267,9 +1267,9 @@ provisional debt in a three-outcome table, and Q06's entry condition is stated
 rather than implied. Option 6D records the collapsed reading as rejected,
 because that is what the plan had by omission.
 
-The other three:
+   The other three:
 
-2. Step 3 now proves its own central claim. Re-running the Step 0 baseline shows
+3. Step 3 now proves its own central claim. Re-running the Step 0 baseline shows
    no report was emitted, which is weaker than it looks, since a stray call whose
    output was redirected or discarded leaves the baseline unchanged. A static
    assertion now requires the formatter's identifier to occur in
@@ -1277,7 +1277,7 @@ The other three:
    identifier absent entirely. Step 4 replaces it with checks for the intended
    call sites, so the property flips from "no caller" to "these callers" in the
    step that creates them. The baseline stays as a behavioral backstop.
-3. The manifest is auditable rather than asserted. Every entry carries field,
+4. The manifest is auditable rather than asserted. Every entry carries field,
    offset, width, byte order, original bytes, replacement bytes and an exact ELF
    specification citation, and two cross-checks anchor it outside itself: a
    lawful `readelf`-validated base must carry the stated original bytes at the
@@ -1635,7 +1635,7 @@ Review round: 5
 Round 5. All five round 4 requested changes are applied, none disputed. Answers
 1A, 2A, 3A, 4D, 5C, 6A, 7A, 8A stand, and Q09 is added and answered 9A.
 
-**Q09 is Q08's unfinished half.** Splitting the `CPLX-ELF/1` grammar across two
+1. **Q09 is Q08's unfinished half.** Splitting the `CPLX-ELF/1` grammar across two
 files made the two ends independent, and the plan treated that independence as
 if it were an oracle. It is not. A round-trip is satisfied by any pair of
 implementations that are wrong in the same way, and two ends written by the same
@@ -1652,7 +1652,7 @@ literals go to the reader. `/1` is frozen, so a grammar change needs reviewed
 authority, a new marker and a new corpus rather than a quiet redefinition behind
 the same token.
 
-**Q03's base-only class was mislabelled as a weakness.** The plan had recorded
+2. **Q03's base-only class was mislabelled as a weakness.** The plan had recorded
 the missing lawful alternate as a con to be tolerated, which left the actual
 evidentiary strength of each manifest row undetermined until implementation. A
 field whose domain contains one lawful value has its citation and its lawful base
@@ -1665,9 +1665,9 @@ ELF64, the dynamic entry size, fixed at 16, and `DT_NULL` termination, whose
 presence is the only lawful state. Zero unclassified entries, and the choice is
 made in the plan rather than silently per field by whoever implements it.
 
-The other three:
+   The other three:
 
-2. The call-site assertion has a lexical boundary. The formatter is named
+3. The call-site assertion has a lexical boundary. The formatter is named
    `emit_cplx_elf_v1_record`, reserved and distinctive, counted as a whole shell
    word rather than as a substring, and forbidden in installer comments and
    message literals. Step 3 expects exactly the definition; Step 4 expects the
@@ -1954,8 +1954,8 @@ not stored ELF fields. `Elf64_Dyn` consists of `d_tag` and `d_un`; its 16-byte
 size in this domain follows from that fixed layout. `DT_NULL` is a `d_tag`
 value that terminates the entry sequence. The LSB dynamic-section definition
 and Linux `elf(5)` both describe that structure and terminator:
-https://refspecs.linuxfoundation.org/LSB_5.0.0/LSB-Core-generic/LSB-Core-generic/dynamicsection.html
-and https://man7.org/linux/man-pages/man5/elf.5.html. A fixture for a bad
+<https://refspecs.linuxfoundation.org/LSB_5.0.0/LSB-Core-generic/LSB-Core-generic/dynamicsection.html>
+and <https://man7.org/linux/man-pages/man5/elf.5.html>. A fixture for a bad
 dynamic-entry extent therefore has to mutate an actual carrier such as
 `PT_DYNAMIC.p_filesz` or truncate the file; a missing terminator has to replace
 the terminator's `d_tag`, shorten the segment, or alter its extent. Those
@@ -3977,8 +3977,8 @@ the one left as an example.
 
 GNU `sha256sum` is now named, and it is gated rather than assumed. Step 0
 establishes three things instead of two, resolving `sha256sum` to an executable
-on the validation host beside `readelf` and recording the capability before Step
-1. Absence leaves the harness gate **incomplete**, and the plan refuses both
+on the validation host beside `readelf` and recording the capability before Step 1.  
+Absence leaves the harness gate **incomplete**, and the plan refuses both
 fallbacks by name: not path plus version, which is precisely the weakness the
 digest removes, and not another checksum chosen quietly.
 
@@ -6727,7 +6727,9 @@ The final answers are 1A, 2A, 3A, 4D, 5C, 6A, 7A, 8A, 9A, and 10B.
 
 ### Convergence evidence for plan relocation-force-rpath round 15
 
-Covered wording: 1. Replace `#### Answer to Q10: deferred to the reviewer` and its paragraph with
+Covered wording:
+
+1. Replace `#### Answer to Q10: deferred to the reviewer` and its paragraph with
    an answer selecting option 10B: an empty computed target search path gives
    rpath `failed` to cases 4, 5, and 6, whose writes were due; cases 1, 2, 3,
    and 7 keep their case-defined dispositions. State that case 1 may already be
