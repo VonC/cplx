@@ -1,0 +1,610 @@
+Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 1
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 89
+Purpose: Step 1's guard-complete fixture matrix over the ELF observer, and both
+         halves of the host-tool contract. Every fixture is a real ELF that must
+         be generated, mutated and probed, and the authoring host has no
+         patchelf, no compiler and no binutils, so none of this runs there.
+Captured: 2026-08-21, by the pipeline stage 'Verify relocation candidate (Step 1)'
+
+What this establishes:
+  462 cases, 0 failures
+  twenty-five fixtures, asserted as a SET rather than a count, and every
+    expected value in the matrix a literal
+  the two integer guards, each with its own fixture, because they fail at
+    different points
+  forty-four reject shapes, thirty-one allow shapes, thirteen boundary shapes
+    and TEN contract controls, one case each
+
+The controls are the change that matters here, because the previous capture
+         claimed them and they did not exist. Each consistency rule is now a
+         function; five controls mutate a copy of the real contract and require
+         the rule to REPORT, and five require it to stay silent on the real one.
+         A rule that has quietly stopped detecting anything fails the first set,
+         and a rule that reports on everything fails the second. "The check
+         reports zero" was never evidence that the check could report anything
+         else.
+
+Two dispatcher facts were wrong and both had been reasoned rather than measured.
+         `builtin -- eval "$p"` runs eval and slipped past, because the command
+         word was taken as the token straight after the dispatcher and that
+         token was `--`. Flags and `--` are skipped now, which is exact rather
+         than approximate here because neither dispatcher has an option that
+         takes an operand.
+
+         And `exec eval "$p"` does NOT run eval: exec replaces the shell with an
+         external program of that name, there is none, and it exits 127. `exec`
+         is out of the dispatcher set. That was measured after the claim had
+         already shipped as prose in a previous capture.
+
+Provenance: commit, harness-sha256, candidate-sha256 and host-tools-sha256 below
+         are checked against the local repository. Workspace paths are
+         placeholdered; nothing else is changed.
+
+===== BEGIN CPLX-RELOCATION-STEP1 =====
+captured-at: 2026-08-21T11:11:13Z
+build: 89
+commit: b49289a6f7405ebbddf40a06d13af56340235e8f
+commit-short: b49289a6f740
+uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+bash: 5.2.15(1)-release
+harness-sha256: e314fda2cba35ebd6b5e2a231e3509a5d3d513e20a188c64c9accc5e30caace5
+candidate-sha256: eba5a5e27b796ba0392af4c13f76b0c9fe3db7e6f80c9f3da5a5ea10f6a81962
+host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
+patchelf: /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf
+patchelf-version: patchelf 0.19.1
+readelf-version: GNU readelf (GNU Binutils for Debian) 2.40
+sha256sum-version: sha256sum (GNU coreutils) 9.1
+----- harness output -----
+
+== harness prerequisite preflight
+  preflight/readelf                        PASS  /usr/bin/readelf
+  preflight/sha256sum                      PASS  /usr/bin/sha256sum
+
+== capability gate: declare -A
+  assoc-array/local                        PASS  supported
+  assoc-array/local-bash                   NOTE  5.2.15(1)-release
+  target-capability/identity               PASS  identity
+  target-capability/identity               PASS  identity
+  target-capability/identity               PASS  identity
+  target-capability/capability             PASS  capability
+  target-capability/unavailable            PASS  unavailable
+  target-capability/malformed              PASS  malformed
+  target-capability/bash                   PASS  bash
+  target-capability/duplicate              PASS  duplicate
+  target-capability/ok                     PASS  ok
+  target-capability/absent                 PASS  absent
+  target-source/none-is-blocked            PASS  blocked none
+  target-source/representative             PASS  representative ok
+  target-source/representative-identity    PASS  representative identity
+  assoc-array/exact-target                 PASS  supported (retained exact capture)
+  assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
+  assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
+
+== step 0: seam
+  control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
+  identity/installer                       PASS  /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/declared-by                     NOTE  --installer argument
+  identity/installer-digest                NOTE  eba5a5e27b79
+  seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
+  seam/probe-ran                           PASS  sentinel present
+  seam/source-returns-zero                 PASS  0
+  seam/no-install-on-source                PASS  0
+  seam/functions-defined                   PASS  
+  seam/guard-present                       PASS  1
+  seam/guard-precedes-main                 PASS  guard 688, main 699
+  seam/definitions-above-boundary          PASS  usage 662, engine 674
+  seam/execute-still-refuses               PASS  1
+  seam/execute-usage-path                  PASS  usage reached from the main flow
+
+== step 0: host-tool contract
+  host-tool/no-invocations                 PASS  0
+  host-tool/rejects                        PASS  python -c pass
+  host-tool/rejects                        PASS  /usr/bin/python -c pass
+  host-tool/rejects                        PASS  ./readelf -d x
+  host-tool/rejects                        PASS  foo | awk '{print}'
+  host-tool/rejects                        PASS  value=$(sha256sum x)
+  host-tool/rejects                        PASS  if true; then wc -l x; fi
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/contract                       NOTE  /home/jenkins/workspace/company_PDF_my-project_develop/tools/relocation_host_tools.verification-only.txt
+  host-tool/contract-nonempty              PASS  yes
+  host-tool/contract-columns               PASS  0
+  host-tool/contract-form-values           PASS  0
+  host-tool/contract-runs-argument-answered PASS  0
+  host-tool/contract-entries-unique        PASS  0
+  host-tool/launcher-tokens-unique         PASS  0
+  host-tool/contract-indirect-resolver     PASS  0
+  host-tool/launcher-table-nonempty        PASS  yes
+  host-tool/launcher-is-permitted          PASS  0
+  host-tool/runs-argument-entries-declared PASS  0
+  host-tool/control-duplicate-entry        PASS  the rule reports 1 on the mutated contract
+  host-tool/control-duplicate-launcher     PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unanswered-entry       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-undeclared-runner      PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unowned-launcher       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-clean-duplicate-entry  PASS  silent on the real contract
+  host-tool/control-clean-duplicate-launcher PASS  silent on the real contract
+  host-tool/control-clean-unanswered-entry PASS  silent on the real contract
+  host-tool/control-clean-undeclared-runner PASS  silent on the real contract
+  host-tool/control-clean-unowned-launcher PASS  silent on the real contract
+  host-tool/no-unsupported-forms           PASS  0
+  host-tool/allowlist-unlisted             PASS  0
+  host-tool/contract-unused                PASS  0
+  host-tool/allowlist-rejects              PASS  zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if ! zzunlisted -x; then :; fi
+  host-tool/allowlist-rejects              PASS  foo | zzunlisted -x
+  host-tool/allowlist-rejects              PASS  /usr/bin/zzunlisted -x
+  host-tool/allowlist-rejects              PASS  value="$(zzunlisted -x)"
+  host-tool/allowlist-rejects              PASS  find . -exec zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  find . -execdir zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  if true; then zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  while :; do zzunlisted -x; done
+  host-tool/allowlist-rejects              PASS  if true; then :; else zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  if zzunlisted -q; then :; fi
+  host-tool/allowlist-rejects              PASS  until zzunlisted; do :; done
+  host-tool/allowlist-rejects              PASS  coproc zzunlisted -x
+  host-tool/allowlist-rejects              PASS  case "$x" in $pat) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a)zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  { zzunlisted -x; }
+  host-tool/allowlist-rejects              PASS  VAR=1 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  VAR=1 OTHER=2 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  >/dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  > /dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  foo &>/dev/null zzunlisted
+  host-tool/allowlist-rejects              PASS  command zzunlisted -x
+  host-tool/allowlist-rejects              PASS  command -v zzunlisted
+  host-tool/allowlist-rejects              PASS  exec zzunlisted -x
+  host-tool/allowlist-rejects              PASS  exec -a myname zzunlisted -x
+  host-tool/allowlist-rejects              PASS  echo a | xargs zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0 -r zzunlisted -i
+  host-tool/allowlist-rejects              PASS  echo a | xargs -P 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -I {} zzunlisted {}
+  host-tool/allowlist-rejects              PASS  echo a | xargs -n1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-procs 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -rP 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  exec -ca name zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0rn1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --eof zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -e zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -E eofstr zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --replace zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-args 3 zzunlisted
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in \)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in @(a|b)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in +(y)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in !(z)) zzunlisted -x ;; esac
+  host-tool/allowlist-allows               PASS  sed -e 's/a/b/' file
+  host-tool/allowlist-allows               PASS  local x="$INSTALL_PREFIX/tools/python/root/lib64/ld-linux-x86-64.so.2"
+  host-tool/allowlist-allows               PASS  myfun() { :; }; myfun arg
+  host-tool/allowlist-allows               PASS  printf '%s' "$x"
+  host-tool/allowlist-allows               PASS  case "$engine" in rsync) rsync -av a b ;; esac
+  host-tool/allowlist-allows               PASS  { printf '%s' "$x"; }
+  host-tool/allowlist-allows               PASS  LC_ALL=C sort file
+  host-tool/allowlist-allows               PASS  plain_assignment=value
+  host-tool/allowlist-allows               PASS  plain_assignment=${value}
+  host-tool/allowlist-allows               PASS  prefixed=${HOME}/tools
+  host-tool/allowlist-allows               PASS  concatenated=$(basename x)suffix
+  host-tool/allowlist-allows               PASS  dotted=$(dirname y).bak
+  host-tool/allowlist-allows               PASS  arr=(one two three)
+  host-tool/allowlist-allows               PASS  arr+=(four five)
+  host-tool/allowlist-allows               PASS  quoted="${k}literal"
+  host-tool/allowlist-allows               PASS  defaulted=${g:-defaultword}
+  host-tool/allowlist-allows               PASS  stripped=${i#prefixword}
+  host-tool/allowlist-allows               PASS  nested=$(basename $(dirname x))suffix
+  host-tool/allowlist-allows               PASS  deeper=$(basename $(dirname $(readlink y)))tail
+  host-tool/allowlist-allows               PASS  casein=$(case $x in p)head -c 4 q ;; esac)more
+  host-tool/allowlist-allows               PASS  ifin=$(if true; then od -c a; fi)tailone
+  host-tool/allowlist-allows               PASS  whilein=$(while :; do tr a b; done)tailtwo
+  host-tool/allowlist-allows               PASS  groupin=$( { sort z; } )tailthree
+  host-tool/allowlist-allows               PASS  lookup=$(command -v rsync)
+  host-tool/allowlist-allows               PASS  piped=$(echo a | xargs -0 -r sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  replaced=$(echo a | xargs -I {} sed -i -e s/a/b/ {})
+  host-tool/allowlist-allows               PASS  parallel=$(echo a | xargs -P 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  named=$(exec -a alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  clustered=$(echo a | xargs -rP 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  execclust=$(exec -ca alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  builtin cd /tmp
+  host-tool/unspaced-case-arm-is-seen      PASS  a)cmd names the unlisted command
+  host-tool/substitution-close-is-not-an-opener PASS  $(basename x)suffix is one word
+  host-tool/boundary-fires                 PASS  eval "zzunlisted -x"
+  host-tool/boundary-fires                 PASS  if eval "$payload"; then :; fi
+  host-tool/boundary-fires                 PASS  VAR=1 eval "$payload"
+  host-tool/boundary-fires                 PASS  command "$launcher_target" -x
+  host-tool/boundary-fires                 PASS  command -v "$launcher_target"
+  host-tool/boundary-fires                 PASS  xargs -0 "$launcher_target"
+  host-tool/boundary-fires                 PASS  echo a | xargs -rP 4 "$launcher_target"
+  host-tool/boundary-fires                 PASS  exec -a alias "$launcher_target"
+  host-tool/boundary-fires                 PASS  command eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -p eval "$payload"
+  host-tool/boundary-allows-literal-target PASS  a literal launcher target is readable
+  host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
+  host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
+
+== host capability for step 1
+  host/can-run-step-1                      PASS  patchelf /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf on a Linux host
+
+== step 0: baseline capture
+  baseline/fixture-anchored                PASS  /home/builder/prefix/lib
+  baseline/fixture-tag-before              PASS  1
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.71236/baseline-prefix/tools/python/root/usr/lib64
+  baseline/production-pass-ran             PASS  0
+  baseline/mixed-count-emitted             PASS  Fixed 1 ELF interpreter/rpath value(s)
+  baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.71236/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
+  baseline/tag-written                     PASS  DT_RUNPATH
+  baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
+  baseline/objects-walked                  NOTE  2
+  baseline/donor                           NOTE  /bin/true
+  baseline/installer-lines                 NOTE  874
+  step1/observer-defined                   PASS  elf_observe, elf_probe, elf_obs_clear
+
+== step 1: the manifest and its anchors
+  manifest/columns-complete                PASS  0
+  manifest/every-entry-cited               PASS  0
+  manifest/entries                         NOTE  19
+  step1/donor-program                      NOTE  /bin/true
+
+== step 1: layout confirmation
+  layout/base-parses                       PASS  readelf -h accepts the lawful base
+  layout/class-reported                    PASS  1
+  layout/data-reported                     PASS  1
+  layout/machine-reported                  PASS  1
+  layout/phentsize-bytes-vs-readelf        PASS  56
+  layout/phnum-bytes-vs-readelf            PASS  13
+  layout/alternate-pair-e_type-single-range PASS  1
+  layout/alternate-pair-readelf-differs    PASS  1
+
+== step 1: the fixture matrix
+  F01/fixture-columns                      PASS  12
+  F01/structural_status                    PASS  ok
+  F01/elf_kind                             PASS  exec
+  F01/has_dynamic                          PASS  yes
+  F01/has_interp                           PASS  yes
+  F01/tag_state                            PASS  none
+  F01/rpath_probe_status                   PASS  ok
+  F01/rpath_value                          PASS  
+  F01/interp_probe_status                  PASS  ok
+  F01/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F01/guard                                NOTE  the lawful base, no guard rejects
+  F02/fixture-columns                      PASS  12
+  F02/structural_status                    PASS  ok
+  F02/elf_kind                             PASS  dyn
+  F02/has_dynamic                          PASS  yes
+  F02/has_interp                           PASS  yes
+  F02/tag_state                            PASS  none
+  F02/rpath_probe_status                   PASS  ok
+  F02/rpath_value                          PASS  
+  F02/interp_probe_status                  PASS  ok
+  F02/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F02/guard                                NOTE  e_type reported as DYN
+  F03/fixture-columns                      PASS  12
+  F03/structural_status                    PASS  ok
+  F03/elf_kind                             PASS  dyn
+  F03/has_dynamic                          PASS  yes
+  F03/has_interp                           PASS  no
+  F03/tag_state                            PASS  none
+  F03/rpath_probe_status                   PASS  ok
+  F03/rpath_value                          PASS  
+  F03/interp_probe_status                  PASS  skipped
+  F03/interp_value                         PASS  absent
+  F03/guard                                NOTE  a library: ET_DYN with no PT_INTERP
+  F04/fixture-columns                      PASS  12
+  F04/oracle-no-dynamic                    PASS  0
+  F04/structural_status                    PASS  ok
+  F04/elf_kind                             PASS  exec
+  F04/has_dynamic                          PASS  no
+  F04/has_interp                           PASS  yes
+  F04/tag_state                            PASS  none
+  F04/rpath_probe_status                   PASS  skipped
+  F04/rpath_value                          PASS  absent
+  F04/interp_probe_status                  PASS  ok
+  F04/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F04/guard                                NOTE  no PT_DYNAMIC, so the rpath probe is structurally inapplicable
+  F05/fixture-columns                      PASS  12
+  F05/oracle-soname                        PASS  1
+  F05/oracle-no-search-tag                 PASS  0
+  F05/structural_status                    PASS  ok
+  F05/elf_kind                             PASS  exec
+  F05/has_dynamic                          PASS  yes
+  F05/has_interp                           PASS  yes
+  F05/tag_state                            PASS  none
+  F05/rpath_probe_status                   PASS  ok
+  F05/rpath_value                          PASS  
+  F05/interp_probe_status                  PASS  ok
+  F05/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F05/guard                                NOTE  a SONAME passes the dynamic scan without becoming a search-path tag
+  F06/fixture-columns                      PASS  12
+  F06/structural_status                    PASS  ok
+  F06/elf_kind                             PASS  exec
+  F06/has_dynamic                          PASS  yes
+  F06/has_interp                           PASS  yes
+  F06/tag_state                            PASS  rpath
+  F06/rpath_probe_status                   PASS  ok
+  F06/rpath_value                          PASS  /opt/cplx-probe/lib
+  F06/interp_probe_status                  PASS  ok
+  F06/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F06/guard                                NOTE  the dynamic scan, DT_RPATH
+  F07/fixture-columns                      PASS  12
+  F07/structural_status                    PASS  ok
+  F07/elf_kind                             PASS  exec
+  F07/has_dynamic                          PASS  yes
+  F07/has_interp                           PASS  yes
+  F07/tag_state                            PASS  runpath
+  F07/rpath_probe_status                   PASS  ok
+  F07/rpath_value                          PASS  /opt/cplx-probe/lib
+  F07/interp_probe_status                  PASS  ok
+  F07/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F07/guard                                NOTE  the dynamic scan, DT_RUNPATH
+  F08/fixture-columns                      PASS  12
+  F08/structural_status                    PASS  ok
+  F08/elf_kind                             PASS  exec
+  F08/has_dynamic                          PASS  no
+  F08/has_interp                           PASS  no
+  F08/tag_state                            PASS  none
+  F08/rpath_probe_status                   PASS  skipped
+  F08/rpath_value                          PASS  absent
+  F08/interp_probe_status                  PASS  skipped
+  F08/interp_value                         PASS  absent
+  F08/guard                                NOTE  e_phnum zero: the table-dependent guards do not apply
+  F09/fixture-columns                      PASS  12
+  F09/structural_status                    PASS  ok
+  F09/elf_kind                             PASS  unsupported
+  F09/has_dynamic                          PASS  no
+  F09/has_interp                           PASS  no
+  F09/tag_state                            PASS  none
+  F09/rpath_probe_status                   PASS  skipped
+  F09/rpath_value                          PASS  absent
+  F09/interp_probe_status                  PASS  skipped
+  F09/interp_value                         PASS  absent
+  F09/guard                                NOTE  ET_REL, the only shape giving elf_kind unsupported
+  F10/fixture-columns                      PASS  12
+  F10/oracle-rpath                         PASS  1
+  F10/oracle-runpath                       PASS  1
+  F10/structural_status                    PASS  ok
+  F10/elf_kind                             PASS  exec
+  F10/has_dynamic                          PASS  yes
+  F10/has_interp                           PASS  yes
+  F10/tag_state                            PASS  ambiguous
+  F10/rpath_probe_status                   PASS  ok
+  F10/rpath_value                          PASS  /opt/cplx-probe/runpath
+  F10/interp_probe_status                  PASS  ok
+  F10/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F10/guard                                NOTE  both search-path tags, with RUNPATH preferred by patchelf
+  F11/fixture-columns                      PASS  12
+  F11/oracle-two-rpaths                    PASS  2
+  F11/structural_status                    PASS  ok
+  F11/elf_kind                             PASS  exec
+  F11/has_dynamic                          PASS  yes
+  F11/has_interp                           PASS  yes
+  F11/tag_state                            PASS  ambiguous
+  F11/rpath_probe_status                   PASS  ok
+  F11/rpath_value                          PASS  /opt/cplx-probe/rpath-b
+  F11/interp_probe_status                  PASS  ok
+  F11/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
+  F11/duplicate-rpath-frozen               NOTE  /opt/cplx-probe/rpath-b under patchelf 0.19.1
+  F11/guard                                NOTE  two RPATH tags; the value is the FROZEN literal measured under patchelf 0.19.1
+  F12/fixture-columns                      PASS  12
+  F12/structural_status                    PASS  inconclusive
+  F12/cleared-elf_kind                     PASS  
+  F12/cleared-has_dyn                      PASS  
+  F12/cleared-tag_state                    PASS  
+  F12/rpath_probe_status                   PASS  blocked
+  F12/rpath_value                          PASS  absent
+  F12/interp_probe_status                  PASS  blocked
+  F12/interp_value                         PASS  absent
+  F12/guard                                NOTE  identification, magic
+  F13/fixture-columns                      PASS  12
+  F13/structural_status                    PASS  inconclusive
+  F13/cleared-elf_kind                     PASS  
+  F13/cleared-has_dyn                      PASS  
+  F13/cleared-tag_state                    PASS  
+  F13/rpath_probe_status                   PASS  blocked
+  F13/rpath_value                          PASS  absent
+  F13/interp_probe_status                  PASS  blocked
+  F13/interp_value                         PASS  absent
+  F13/guard                                NOTE  identification, version
+  F14/fixture-columns                      PASS  12
+  F14/structural_status                    PASS  inconclusive
+  F14/cleared-elf_kind                     PASS  
+  F14/cleared-has_dyn                      PASS  
+  F14/cleared-tag_state                    PASS  
+  F14/rpath_probe_status                   PASS  blocked
+  F14/rpath_value                          PASS  absent
+  F14/interp_probe_status                  PASS  blocked
+  F14/interp_value                         PASS  absent
+  F14/guard                                NOTE  identification, class
+  F15/fixture-columns                      PASS  12
+  F15/structural_status                    PASS  inconclusive
+  F15/cleared-elf_kind                     PASS  
+  F15/cleared-has_dyn                      PASS  
+  F15/cleared-tag_state                    PASS  
+  F15/rpath_probe_status                   PASS  blocked
+  F15/rpath_value                          PASS  absent
+  F15/interp_probe_status                  PASS  blocked
+  F15/interp_value                         PASS  absent
+  F15/guard                                NOTE  identification, data encoding
+  F16/fixture-columns                      PASS  12
+  F16/structural_status                    PASS  inconclusive
+  F16/cleared-elf_kind                     PASS  
+  F16/cleared-has_dyn                      PASS  
+  F16/cleared-tag_state                    PASS  
+  F16/rpath_probe_status                   PASS  blocked
+  F16/rpath_value                          PASS  absent
+  F16/interp_probe_status                  PASS  blocked
+  F16/interp_value                         PASS  absent
+  F16/guard                                NOTE  domain, e_machine
+  F17/fixture-columns                      PASS  12
+  F17/structural_status                    PASS  inconclusive
+  F17/cleared-elf_kind                     PASS  
+  F17/cleared-has_dyn                      PASS  
+  F17/cleared-tag_state                    PASS  
+  F17/rpath_probe_status                   PASS  blocked
+  F17/rpath_value                          PASS  absent
+  F17/interp_probe_status                  PASS  blocked
+  F17/interp_value                         PASS  absent
+  F17/guard                                NOTE  e_phnum in ordinary form
+  F18/fixture-columns                      PASS  12
+  F18/structural_status                    PASS  inconclusive
+  F18/cleared-elf_kind                     PASS  
+  F18/cleared-has_dyn                      PASS  
+  F18/cleared-tag_state                    PASS  
+  F18/rpath_probe_status                   PASS  blocked
+  F18/rpath_value                          PASS  absent
+  F18/interp_probe_status                  PASS  blocked
+  F18/interp_value                         PASS  absent
+  F18/guard                                NOTE  whole-header presence
+  F19/fixture-columns                      PASS  12
+  F19/structural_status                    PASS  inconclusive
+  F19/cleared-elf_kind                     PASS  
+  F19/cleared-has_dyn                      PASS  
+  F19/cleared-tag_state                    PASS  
+  F19/rpath_probe_status                   PASS  blocked
+  F19/rpath_value                          PASS  absent
+  F19/interp_probe_status                  PASS  blocked
+  F19/interp_value                         PASS  absent
+  F19/guard                                NOTE  program header entry size
+  F20/fixture-columns                      PASS  12
+  F20/structural_status                    PASS  inconclusive
+  F20/cleared-elf_kind                     PASS  
+  F20/cleared-has_dyn                      PASS  
+  F20/cleared-tag_state                    PASS  
+  F20/rpath_probe_status                   PASS  blocked
+  F20/rpath_value                          PASS  absent
+  F20/interp_probe_status                  PASS  blocked
+  F20/interp_value                         PASS  absent
+  F20/guard                                NOTE  table bounds
+  F21/fixture-columns                      PASS  12
+  F21/oracle-segment-past-file             PASS  1
+  F21/structural_status                    PASS  inconclusive
+  F21/cleared-elf_kind                     PASS  
+  F21/cleared-has_dyn                      PASS  
+  F21/cleared-tag_state                    PASS  
+  F21/rpath_probe_status                   PASS  blocked
+  F21/rpath_value                          PASS  absent
+  F21/interp_probe_status                  PASS  blocked
+  F21/interp_value                         PASS  absent
+  F21/guard                                NOTE  segment bounds
+  F22/fixture-columns                      PASS  12
+  F22/oracle-dynamic-size-remainder        PASS  8
+  F22/structural_status                    PASS  inconclusive
+  F22/cleared-elf_kind                     PASS  
+  F22/cleared-has_dyn                      PASS  
+  F22/cleared-tag_state                    PASS  
+  F22/rpath_probe_status                   PASS  blocked
+  F22/rpath_value                          PASS  absent
+  F22/interp_probe_status                  PASS  blocked
+  F22/interp_value                         PASS  absent
+  F22/guard                                NOTE  dynamic entry sizing
+  F23/fixture-columns                      PASS  12
+  F23/oracle-no-dt-null                    PASS  0
+  F23/structural_status                    PASS  inconclusive
+  F23/cleared-elf_kind                     PASS  
+  F23/cleared-has_dyn                      PASS  
+  F23/cleared-tag_state                    PASS  
+  F23/rpath_probe_status                   PASS  blocked
+  F23/rpath_value                          PASS  absent
+  F23/interp_probe_status                  PASS  blocked
+  F23/interp_value                         PASS  absent
+  F23/guard                                NOTE  dynamic list termination
+  F24/fixture-columns                      PASS  12
+  F24/oracle-entry                         NOTE  table at 64, first LOAD is entry 2, so entry at 176
+  F24/oracle-planted-p_offset              PASS  f0ffffffffffffff
+  F24/oracle-base-differs                  PASS  base p_offset is 0000000000000000
+  F24/structural_status                    PASS  inconclusive
+  F24/cleared-elf_kind                     PASS  
+  F24/cleared-has_dyn                      PASS  
+  F24/cleared-tag_state                    PASS  
+  F24/rpath_probe_status                   PASS  blocked
+  F24/rpath_value                          PASS  absent
+  F24/interp_probe_status                  PASS  blocked
+  F24/interp_value                         PASS  absent
+  F24/guard                                NOTE  integer representability: a segment offset at 2^64-16 must be refused, not wrapped
+  F25/fixture-columns                      PASS  12
+  F25/oracle-entry                         NOTE  table at 64, first LOAD is entry 2, so entry at 176
+  F25/oracle-planted-p_offset              PASS  0000000000000040
+  F25/oracle-planted-p_filesz              PASS  0000000000000040
+  F25/oracle-each-value-representable      PASS  2^62 decodes to 4611686018427387904
+  F25/oracle-sum-overflows                 PASS  2^62 + 2^62 reads as -9223372036854775808
+  F25/oracle-base-differs                  PASS  base p_offset is 0000000000000000
+  F25/structural_status                    PASS  inconclusive
+  F25/cleared-elf_kind                     PASS  
+  F25/cleared-has_dyn                      PASS  
+  F25/cleared-tag_state                    PASS  
+  F25/rpath_probe_status                   PASS  blocked
+  F25/rpath_value                          PASS  absent
+  F25/interp_probe_status                  PASS  blocked
+  F25/interp_value                         PASS  absent
+  F25/guard                                NOTE  extent arithmetic: a representable size whose extent overflows when added
+  fixtures/all-values-frozen               PASS  0
+  fixtures/table-readable                  PASS  25
+  fixtures/ids-are-F01-to-F25              PASS  no gap, no duplicate
+
+== step 1: the clearing rule
+  clearing/rejected-first                  PASS  inconclusive
+  clearing/good-after-rejected-status      PASS  ok
+  clearing/good-after-rejected-tag         PASS  rpath
+  clearing/good-after-rejected-kind        PASS  exec
+  clearing/rejected-after-good-kind        PASS  
+  clearing/rejected-after-good-tag         PASS  
+  clearing/rejected-after-good-rpath-val   PASS  absent
+
+== step 1: probe witnesses
+  F01/rpath_probe_status                   PASS  ok
+  F01/interp_probe_status                  PASS  ok
+  F01/rpath_value                          PASS  
+  F01/obligation                           NOTE  an applicable no-tag rpath probe answers with an empty value
+  F06/rpath_probe_status                   PASS  ok
+  F06/interp_probe_status                  PASS  ok
+  F06/rpath_value                          PASS  /opt/cplx-probe/lib
+  F06/obligation                           NOTE  DT_RPATH answers with its stored value
+  F07/rpath_probe_status                   PASS  ok
+  F07/interp_probe_status                  PASS  ok
+  F07/rpath_value                          PASS  /opt/cplx-probe/lib
+  F07/obligation                           NOTE  DT_RUNPATH answers with its stored value, one query serving both tags
+  F10/rpath_probe_status                   PASS  ok
+  F10/interp_probe_status                  PASS  ok
+  F10/rpath_value                          PASS  /opt/cplx-probe/runpath
+  F10/obligation                           NOTE  with both tags present patchelf prefers the DT_RUNPATH value
+  F04/rpath_probe_status                   PASS  skipped
+  F04/interp_probe_status                  PASS  ok
+  F04/obligation                           NOTE  structure proves the rpath probe inapplicable
+  F03/rpath_probe_status                   PASS  ok
+  F03/interp_probe_status                  PASS  skipped
+  F03/obligation                           NOTE  structure proves the interpreter probe inapplicable
+  F08/rpath_probe_status                   PASS  skipped
+  F08/interp_probe_status                  PASS  skipped
+  F08/obligation                           NOTE  structure proves both probes inapplicable
+  F12/rpath_probe_status                   PASS  blocked
+  F12/interp_probe_status                  PASS  blocked
+  F12/rpath_value                          PASS  absent
+  F12/obligation                           NOTE  an inconclusive structure blocks both axes
+
+== step 1: axis-local probe faults
+  D01/rpath_probe_status                   PASS  failed
+  D01/rpath_value_absent                   PASS  absent
+  D01/interp_survives                      PASS  ok
+  D01/interp_value                         NOTE  /lib64/ld-linux-x86-64.so.2
+  D02/interp_probe_status                  PASS  failed
+  D02/rpath_survives                       PASS  ok
+  doubles/shipped-identity-restored        PASS  6526398feccd54ab150e49ef643376c6ae37445fdc28b3320baf4aea59f9d536
+
+== verdict
+  step        1
+  cases       462
+  failures    0
+  installer   /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  readelf     /usr/bin/readelf
+  sha256sum   /usr/bin/sha256sum
+  assoc local supported (bash 5.2.15(1)-release)
+  assoc rhel  supported
+
+OBJECTIVE MET for step 1
+----- end harness output -----
+harness-exit: 0
+result: OBJECTIVE_MET
+===== END CPLX-RELOCATION-STEP1 =====
