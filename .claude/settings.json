@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash -n:*)",
+      "Bash(sha256sum:*)",
+      "Bash(shellcheck:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(git log:*)",
+      "Bash(git write-tree)",
+      "Bash(git hash-object:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git rev-list:*)",
+      "Bash(git fetch:*)",
+      "Bash(git branch:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git merge-base:*)",
+      "Bash(git restore:*)",
+      "Bash(git push:*)",
+      "Bash(curl -sS --netrc-file:*)",
+      "Bash(curl -sS -g --netrc-file:*)",
+      "Bash(scp:*)",
+      "Bash(perl:*)",
+      "Bash(cp:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "PowerShell(*review_exchange.bat*)",
+      "PowerShell(*code_review_request.bat*)",
+      "PowerShell(*ghog.bat*)",
+      "PowerShell(*wac.bat*)",
+      "PowerShell(*gcba.bat*)",
+      "PowerShell(*pw.bat*)"
+    ]
+  }
+}
