@@ -379,12 +379,25 @@ function get_full_package_name() {
     local candidates
     candidates=$(find "${HOME}/tools/pkgs" -maxdepth 1 -type f -name "${base}" | grep -v "\.list")
     local candidate
-    candidate="$(printf "%s" "${candidates}" | tail -1)"
+    # Sorted by VERSION, not by find order. `tail -1` over an unsorted find was
+    # picking an arbitrary archive whenever two were staged.
+    candidate="$(printf "%s\n" "${candidates}" | sort -V | tail -1)"
     local count
     count=$(echo "${candidates}" | grep -c '^')
-    if ! is_package_built "${full_package_name}" && [ "${count}" -gt 1 ]; then
-        echo "${candidates}"
-        fatal "Expected one candidate file for '${base}', found ${count}" 104
+    if [ "${count}" -gt 1 ]; then
+        # Two versions of the same package staged side by side is the NORMAL
+        # state after an upgrade or a version bump: the new archive arrives
+        # beside the one it replaces. Refusing it used to stop `sp` and `rap`
+        # dead partway through a list (fatal 104), leaving the sandbox half
+        # updated and the operator pruning by hand.
+        #
+        # The newest wins, and the ones passed over are named rather than
+        # silently dropped, so nobody has to guess which archive was used.
+        warning "${sp}${count} archives staged for '${base}', using the newest: $(basename "${candidate}")"
+        printf "%s\n" "${candidates}" | sort -V | head -n -1 | while IFS= read -r ignored; do
+            info "${sp}  superseded, not used: $(basename "${ignored}")"
+        done
+        info "${sp}  run 'remove_superseded_versions <tool>' to retire the old payloads"
     fi
     full_package_name=$(basename "${candidate}")
     echo "${full_package_name}"
@@ -473,20 +486,21 @@ function remove_package() {
     done < <(find "${tool_pkgs}" -maxdepth 1 -type f -name "${package_name}-[0-9]*.installed*")
     # Handle multiple matches for built packages - keep only the most recent
     if [[ ${#f1_matches[@]} -gt 1 ]]; then
+        # Find the most recent file using sorting by modification time.
+        # Hoisted out of the built-package branch: both branches need it now,
+        # since an RPM with two flags also has to pick a winner rather than die.
+        local most_recent=""
+        local timestamp=0
+        local file_timestamp=0
+        for file in "${f1_matches[@]}"; do
+            file_timestamp=$(stat -c %Y "$file")
+            if ((file_timestamp > timestamp)); then
+                timestamp=$file_timestamp
+                most_recent="$file"
+            fi
+        done
         # Check if these are built packages
         if is_package_built "${f1_matches[0]}"; then
-            # Find the most recent file using sorting by modification time
-            local most_recent=""
-            local timestamp=0
-            local file_timestamp=0
-            for file in "${f1_matches[@]}"; do
-                file_timestamp=$(stat -c %Y "$file")
-                if ((file_timestamp > timestamp)); then
-                    timestamp=$file_timestamp
-                    most_recent="$file"
-                fi
-            done
-
             # Delete older built packages
             for file in "${f1_matches[@]}"; do
                 if [[ "$file" != "$most_recent" ]]; then
@@ -498,8 +512,22 @@ function remove_package() {
             # Update f1_matches to contain only the most recent file
             f1_matches=("${most_recent}")
         else
-            # Not built packages, so this is an error
-            fatal "Expected one .installed file for package '${package_name}' in '${tool_pkgs}', found ${#f1_matches[@]}" 102
+            # An RPM package with two flags: the same "normal after an upgrade"
+            # situation as the staged archives above, one level down. `sp`
+            # installs the new version without removing the old, so both flags
+            # sit there and this used to be fatal 102, which stopped `rap` on
+            # its first duplicate.
+            #
+            # The newest flag wins so the caller can proceed. The older flag is
+            # deliberately LEFT IN PLACE, unlike the built-package branch above,
+            # because its payload is still unpacked in root/: deleting the flag
+            # alone would strand those files with nothing recording where they
+            # came from, which is the orphan problem this whole area suffers
+            # from. Retiring payload and flag together is
+            # `remove_superseded_versions`.
+            warning "${sp}${#f1_matches[@]} installed flags for '${package_name}', using the newest: $(basename "${most_recent}")"
+            info "${sp}  run 'remove_superseded_versions <tool>' to retire the older payload and flag"
+            f1_matches=("${most_recent}")
         fi
     elif [[ ${#f1_matches[@]} -ne 1 ]]; then
         fatal "Expected one .installed file for package '${package_name}' in '${tool_pkgs}', none" 102
@@ -1869,6 +1897,79 @@ function reinstall_package() {
 # Returns:
 #   0 on success (all packages reinstalled), non-zero if any package fails
 #######################################################################
+# remove_superseded_versions <tool>: retire every package version that a newer
+# one has replaced, payload and flag together.
+#
+# Why this is not just "delete the old flag". When `sp` installs a new version
+# it does not remove the old one, so the sandbox ends up with two flags, two
+# .list inventories, and two payloads unpacked on top of each other. Where the
+# versions share a path the new file won; where they do not, the old file is
+# still there with nothing referencing it. Those orphans are what left
+# `libopcodes-63` and `libopcodes-66` behind, each asking for a `libbfd` that no
+# longer exists anywhere.
+#
+# Two obvious implementations are both wrong:
+#   - deleting the old flag alone leaves the orphaned payload forever, which is
+#     how the tree reached this state in the first place;
+#   - running the normal removal on the old version deletes every path in its
+#     .list, and most of those paths are now owned by the NEW version, because
+#     the two RPMs ship the same file names. That would strip the new install
+#     and leave a flag claiming it is present.
+#
+# So the set difference is the whole point: delete only what the old version
+# owns and the new one does not.
+function remove_superseded_versions() {
+    local tool_name="${1:-$(current_tool)}"
+    if [[ -z "${tool_name}" ]]; then
+        fatal "No tool name provided or determined from current directory" 321
+        return 1
+    fi
+    local tool_dir="${HOME}/tools/${tool_name}"
+    local tool_pkgs="${tool_dir}/pkgs"
+    local shared_pkgs="${HOME}/tools/pkgs"
+    if [[ ! -d "${tool_pkgs}" ]]; then
+        fatal "No pkgs directory for tool '${tool_name}' at '${tool_pkgs}'" 322
+        return 1
+    fi
+    mkdir -p "${tool_pkgs}/superseded"
+
+    local retired=0 names name flags cnt newest old ov nv only_old f
+    names=$(find "${tool_pkgs}" -maxdepth 1 -type f -name "*.installed*" -printf '%f\n' 2>/dev/null |
+        sed -E 's/-[0-9][^-]*-[^-]*\.el[0-9]+.*$//' | sort -u)
+    for name in ${names}; do
+        # Newest first, by VERSION rather than by mtime: a reinstall touches the
+        # old flag and would otherwise make it look like the winner.
+        flags=$(find "${tool_pkgs}" -maxdepth 1 -type f -name "${name}-[0-9]*.installed*" -printf '%f\n' 2>/dev/null | sort -V -r)
+        cnt=$(printf '%s\n' "${flags}" | grep -c .)
+        [[ "${cnt}" -le 1 ]] && continue
+        newest=$(printf '%s\n' "${flags}" | head -1)
+        nv="${newest%%.installed*}"
+        for old in $(printf '%s\n' "${flags}" | tail -n +2); do
+            ov="${old%%.installed*}"
+            if [[ ! -f "${shared_pkgs}/${ov}.list" || ! -f "${shared_pkgs}/${nv}.list" ]]; then
+                warning "No .list pair for '${ov}' and '${nv}', leaving both flags alone"
+                continue
+            fi
+            task "Must retire '${ov}', superseded by '${nv}'"
+            only_old=$(comm -23 \
+                <(grep -v '^d' "${shared_pkgs}/${ov}.list" | awk '{print $NF}' | sort -u) \
+                <(grep -v '^d' "${shared_pkgs}/${nv}.list" | awk '{print $NF}' | sort -u))
+            while IFS= read -r f; do
+                [[ -z "${f}" ]] && continue
+                # Never remove a directory: another version may still populate it.
+                [[ -d "${tool_dir}/root/${f#./}" ]] && continue
+                rm -f "${tool_dir}/root/${f#./}" "${tool_dir}/root/${f#./}.copied"
+            done <<<"${only_old}"
+            # Keep the evidence, as with the superseded archives.
+            mv "${tool_pkgs}/${old}" "${tool_pkgs}/superseded/" 2>/dev/null
+            retired=$((retired + 1))
+            ok "Retired '${ov}': $(printf '%s\n' "${only_old}" | grep -c .) file(s) it alone owned"
+        done
+    done
+    ok "remove_superseded_versions: ${retired} superseded version(s) retired for '${tool_name}'"
+    return 0
+}
+
 function reinstall_all_packages() {
     local tool_name="${1}"
     local exit_code=0
