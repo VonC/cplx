@@ -378,4 +378,29 @@ res=$?
 if [[ ${res} != 0 ]]; then
     exit "${res}"
 fi
+
+# Advance the install selector, and only now that the build has succeeded.
+#
+# `rsync.sh` reads this symlink to decide which version to promote, and deletes
+# every OTHER version directory from the live tree while doing it. So moving it
+# early, or on a failed build, would both ship a broken tool and delete the
+# working one. Leaving it where it is on failure makes rollback automatic:
+# nothing changed.
+#
+# Derived from tool_prefix rather than from the tool name, because setenv()
+# exports `tool` as a path by then; dirname/basename keep this correct whatever
+# the variable holds.
+if [[ -n "${tool_prefix}" && -d "${tool_prefix}" ]]; then
+    prefix_parent="$(dirname "${tool_prefix}")"
+    prefix_name="$(basename "${tool_prefix}")"
+    if [[ "$(readlink "${prefix_parent}/current")" != "${prefix_name}" ]]; then
+        task "Must point '${prefix_parent}/current' at '${prefix_name}'"
+        ln -nfs "${prefix_name}" "${prefix_parent}/current" \
+            || fatal "Unable to advance 'current' to '${prefix_name}'" 24
+        ok "'current' now points at '${prefix_name}'"
+    else
+        ok "'current' already points at '${prefix_name}'"
+    fi
+fi
+
 ok "All done"
