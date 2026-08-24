@@ -1,6 +1,6 @@
 make
 zlib
-zlib-dev
+zlib-devel
 gmp
 libzstd
 gcc
