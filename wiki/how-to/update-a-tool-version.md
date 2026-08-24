@@ -46,14 +46,40 @@ git 2.51.0 → 2.52.0.
    On the server, the dispatcher extracts into `sources/2.52.0/`,
    repoints `sources/current`, and the phases run. Leftover sibling
    archives (a `2.52.0-rc2` next to the final `2.52.0`) are fine: the
-   install warns and uses the most recently changed one. The `current` symlink
-   of the install prefix moves to `git-2.52.0`; the previous version
+   install warns and uses the most recently changed one.
+
+   The install prefix is derived from the version you asked for, so the
+   build lands in a new `git-2.52.0/` directory and the previous version
+   is not touched. The `current` symlink of the install prefix moves to
+   `git-2.52.0` **only after the install succeeds**; the previous version
    stays on disk until you prune it.
+
+   That ordering is deliberate. `current` is what
+   [Promote a build into the live tree](promote-a-build-into-the-live-tree.md)
+   reads to decide which version to ship, *and* what it uses to delete
+   every other version from the live tree. A symlink moved before the
+   build, or moved by a build that then failed, would promote a
+   half-written directory and delete the working one. A failed build
+   therefore changes nothing: `current` still points at the previous
+   version, and re-running is safe.
 
 ## ✅ Check
 
 A new `git-2.52.0-<timestamp>.<arch>.tar.gz` exists in the remote
 `tools/git/`, and `tools/git/current` points at `git-2.52.0`.
+
+If `current` still points at the old version, the install did not reach
+its end: read `src\install\install.log` rather than moving the symlink by
+hand, since the new directory may be incomplete.
+
+## ⚠️ Do not move the prefix symlink yourself
+
+It is tempting, when a build fails late, to point `current` at the new
+directory and promote anyway. That skips the one check that stands
+between a partial build and the live tree. If a build really must be
+adopted despite a late failure, verify the prefix has the tool's
+`CPLX_CHECK_PREFIX` file first (`lib/libpython3.so` for Python), which is
+the same file the install itself tests.
 
 Related:
 [Promote a build into the live tree](promote-a-build-into-the-live-tree.md)
