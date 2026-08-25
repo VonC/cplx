@@ -1,29 +1,36 @@
 Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 1
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 95
-Purpose: Step 1's guard-complete fixture matrix over the ELF observer, and both
-         halves of the host-tool contract. Re-run alongside the Step 2 residual
-         boundary change, so the two retained captures come from one build and
-         one revision of the harness rather than from two.
-Captured: 2026-08-24, by the pipeline stage 'Verify relocation candidate (Step 1)'
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 97
+Purpose: Step 1's guard-complete fixture matrix over the ELF observer, both
+         halves of the host-tool contract, and the Step 0 behavioural baseline.
+         Re-run for Step 3, whose formatter is added to the installer this
+         capture measures: the baseline is the evidence that adding it changed
+         nothing an install can observe.
+Captured: 2026-08-25, by the pipeline stage 'Verify relocation candidate (Step 1)'
 
 What this establishes:
   462 cases, 0 failures, OBJECTIVE MET
-  the count is unchanged from the build 92 capture, which is the point of
-    re-running it: the Step 2 residual change touched the inventory assertions
-    and their controls, and Step 1 shares the planting helpers with them, so an
-    unchanged 462 is evidence the change stayed inside Step 2
+  the Step 0 baseline RAN against the exact staged installer: a real production
+    pass over a real ELF, reporting `Fixed 1 ELF interpreter/rpath value(s)`,
+    writing DT_RUNPATH, with the planted builder anchor gone. The installer now
+    carries the Step 3 record formatter and the observable behaviour is
+    unchanged, which is what Step 3 owed
+  the host-tool allowlist is clean over the installer, which matters this round:
+    build 96 refused it at 10 unlisted words, because the formatter matched its
+    wire tokens with UNQUOTED case patterns and the rule reads those as command
+    words. The tokens were quoted rather than added to the contract, since
+    the installer was wrong there and the check was right
 
-This supersedes the build 92 capture. Same result, newer harness.
+This supersedes the build 95 capture. Same 462 cases and 0 failures, newer tree.
 
 ----- begin harness output -----
-captured-at: 2026-08-24T18:06:56Z
-build: 95
-commit: 066c1465be8ca898dafc90b9b486a11206705652
-commit-short: 066c1465be8c
+captured-at: 2026-08-25T08:20:44Z
+build: 97
+commit: 5fe5f0244f6dcd9693a04e97c832c5be56e9a757
+commit-short: 5fe5f0244f6d
 uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: 1571686901c232659fffa279c89ac17ebdd437de3b54d6d7940d8e33aae833bb
-candidate-sha256: abf837482f41aab9f50f3e39ecce25ef45c1005a711a32e8e4460544d3181c92
+harness-sha256: e9c46735d917ab207526a76872fe7497307a647b747a37037989ecc9d0e93bf5
+candidate-sha256: 05221d33b18370242c74f8ebe2a0dd60ad8f363ffb1ae567bb21b377c9ee69d5
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
 patchelf: ./prefix/tools/bin/patchelf
 patchelf-version: patchelf 0.19.1
@@ -59,15 +66,15 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
   identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
-  identity/installer-digest                NOTE  abf837482f41
+  identity/installer-digest                NOTE  05221d33b183
   seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
   seam/probe-ran                           PASS  sentinel present
   seam/source-returns-zero                 PASS  0
   seam/no-install-on-source                PASS  0
   seam/functions-defined                   PASS  
   seam/guard-present                       PASS  1
-  seam/guard-precedes-main                 PASS  guard 829, main 840
-  seam/definitions-above-boundary          PASS  usage 803, engine 815
+  seam/guard-precedes-main                 PASS  guard 934, main 945
+  seam/definitions-above-boundary          PASS  usage 908, engine 920
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
@@ -205,17 +212,17 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
 == step 0: baseline capture
   baseline/fixture-anchored                PASS  /home/builder/prefix/lib
   baseline/fixture-tag-before              PASS  1
-  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.116689/baseline-prefix/tools/python/root/usr/lib64
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.116685/baseline-prefix/tools/python/root/usr/lib64
   baseline/production-pass-ran             PASS  0
   baseline/mixed-count-emitted             PASS  Fixed 1 ELF interpreter/rpath value(s)
   baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
-  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.116689/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.116685/baseline-prefix/tools/python/root/usr/lib64
   baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
   baseline/tag-written                     PASS  DT_RUNPATH
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
   baseline/objects-walked                  NOTE  2
   baseline/donor                           NOTE  /bin/true
-  baseline/installer-lines                 NOTE  1015
+  baseline/installer-lines                 NOTE  1120
   step1/observer-defined                   PASS  elf_observe, elf_probe, elf_obs_clear
 
 == step 1: the manifest and its anchors

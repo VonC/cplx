@@ -1,11 +1,10 @@
 Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 2 --prefix <the extracted prefix>
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 95
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 97
 Purpose: Step 2's classifier over the Step 1 tuple, in its three layers: the
          controlled rows, the producer-to-consumer bridge, and the exact
-         develop#24 inventory over the real extracted archive. The bridge plants
-         real ELF fixtures and the inventory needs a real tree, so neither can
-         run on the authoring host and this is the only capture of either.
-Captured: 2026-08-24, by the pipeline stage 'Verify relocation candidate (Step 2)'
+         develop#24 inventory over the real extracted archive. Re-run for Step 3
+         as regression evidence: Step 3 changed the file all three steps share.
+Captured: 2026-08-25, by the pipeline stage 'Verify relocation candidate (Step 2)'
 
 What this establishes:
   355 cases, 0 failures, OBJECTIVE MET
@@ -14,32 +13,27 @@ What this establishes:
     libraries all walked and all case 4, 303 walked libraries all case 4, the
     python object present and selected, 161 recorded git objects all walked and
     exact, and 135 residual programs all classified
+  the count is UNCHANGED from build 95, which is the point of re-running it:
+    Step 3 added a formatter to the installer and a suite to the harness, and an
+    unchanged 355 with 0 failures is measured evidence that neither reached
+    Step 2
 
   tools/python/root/a.out answers case 5, which is SELECTED, and it is reported
   by name as a NOTE rather than counted as a Step 2 failure. The reading-2 plan
   revision moved the residual-population assertion to Steps 4 and 6, which hold
-  it unqualified. Counting it here made a MANDATORY Step 2 command exit 1 for a
-  criterion Step 2 no longer owns, so the harness contradicted the plan it
-  validates. The finding is not suppressed: it is stated in full, and Steps 4
-  and 6 inherit it.
+  it unqualified.
 
-This supersedes the build 92 capture, which reported 346 cases and 1 failure.
-The case count moved for a second reason as well as the split above: the
-residual rules gained controls. `control/inventory-residual-unclassified`
-refuses an unclassified residual, `control/inventory-residual-not-case-7`
-requires the other case to be accepted here, and
-`control/inventory-git-tree-selected` now asserts round 4's lesson directly on
-the counters rather than inferring it from a complaint that moved downstream.
+This supersedes the build 95 capture. Same result, newer tree.
 
 ----- begin harness output -----
-captured-at: 2026-08-24T18:07:24Z
-build: 95
-commit: 066c1465be8ca898dafc90b9b486a11206705652
-commit-short: 066c1465be8c
+captured-at: 2026-08-25T08:21:11Z
+build: 97
+commit: 5fe5f0244f6dcd9693a04e97c832c5be56e9a757
+commit-short: 5fe5f0244f6d
 uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: 1571686901c232659fffa279c89ac17ebdd437de3b54d6d7940d8e33aae833bb
-candidate-sha256: abf837482f41aab9f50f3e39ecce25ef45c1005a711a32e8e4460544d3181c92
+harness-sha256: e9c46735d917ab207526a76872fe7497307a647b747a37037989ecc9d0e93bf5
+candidate-sha256: 05221d33b18370242c74f8ebe2a0dd60ad8f363ffb1ae567bb21b377c9ee69d5
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
 inventory-sha256: 8980abe860db6ad9fb41e08478d191a8d242056600697c7bc7df50d8c36ed565
 inventory-rows: 272
@@ -78,15 +72,15 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
   identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
-  identity/installer-digest                NOTE  abf837482f41
+  identity/installer-digest                NOTE  05221d33b183
   seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
   seam/probe-ran                           PASS  sentinel present
   seam/source-returns-zero                 PASS  0
   seam/no-install-on-source                PASS  30709
   seam/functions-defined                   PASS  
   seam/guard-present                       PASS  1
-  seam/guard-precedes-main                 PASS  guard 829, main 840
-  seam/definitions-above-boundary          PASS  usage 803, engine 815
+  seam/guard-precedes-main                 PASS  guard 934, main 945
+  seam/definitions-above-boundary          PASS  usage 908, engine 920
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
@@ -224,17 +218,17 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
 == step 0: baseline capture
   baseline/fixture-anchored                PASS  /home/builder/prefix/lib
   baseline/fixture-tag-before              PASS  1
-  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.129172/baseline-prefix/tools/python/root/usr/lib64
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.129168/baseline-prefix/tools/python/root/usr/lib64
   baseline/production-pass-ran             PASS  0
   baseline/mixed-count-emitted             PASS  Fixed 1 ELF interpreter/rpath value(s)
   baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
-  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.129172/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.129168/baseline-prefix/tools/python/root/usr/lib64
   baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
   baseline/tag-written                     PASS  DT_RUNPATH
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
   baseline/objects-walked                  NOTE  2
   baseline/donor                           NOTE  /bin/true
-  baseline/installer-lines                 NOTE  1015
+  baseline/installer-lines                 NOTE  1120
   step2/classifier-defined                 PASS  elf_classify
 
 == step 2: the tuple contract
