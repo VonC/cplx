@@ -664,6 +664,111 @@ elf_classify() {
     return 0
 }
 
+# The literal marker and its schema version. A recipe reading a marker it does
+# not know rejects the capture rather than guessing, so the version is part of
+# the token rather than a field beside it.
+CPLX_ELF_V1_MARKER="CPLX-ELF/1"
+
+# The CPLX-ELF/1 record formatter. Takes KIND then that kind's fields, and
+# writes one record.
+#
+# This comment does not spell the function's own name, and that is a rule rather
+# than a style: step 3 asserts the identifier appears in this file exactly once,
+# at the definition below, which is how "defined and not called" is proved
+# instead of assumed. Prose carrying the name would satisfy the count without a
+# caller existing, so the assertion is kept honest by keeping the name out of
+# every comment and message literal here.
+#
+# The structured half of the report the design fixes in Design Area 3. It goes
+# to the same captured install output as the human `echos` lines, so an operator
+# reads sentences and a retained recipe asserts on figures, and no file is
+# written into a deployment prefix to carry it.
+#
+# DEFINED AND NOT CALLED at step 3, deliberately. The behaviour change and the
+# emission belong in one step because emission is what a deployment can observe;
+# a formatter with no caller is a definition, which a deployment cannot tell
+# apart from its absence. The harness asserts this identifier occurs in this
+# file exactly once, here, so the property is checked rather than assumed.
+#
+# The READER is not here and never will be. It runs only against a retained
+# capture, so a parser in the file that must deploy standalone would add a call
+# surface no install executes, to the file whose size is this effort's live
+# constraint.
+#
+# Usage, with the function's own name written as <fmt> for the reason above:
+#   <fmt> obj CASE RPATH INTERP ABS_PATH DEST_ROOT
+#   <fmt> end STATE REASON WALKED \
+#       R_REWRITTEN R_FAILED R_ALREADY_CORRECT R_NOT_DYNAMIC R_EXCLUDED \
+#       I_REWRITTEN I_FAILED I_UNCHANGED I_NOT_APPLICABLE \
+#       MIG_CHECKED MIG_FAILED
+#
+# Returns 2 and writes nothing on input the grammar forbids. A formatter that
+# printed a malformed record would move the defect into the capture, where a
+# reader would blame the run rather than the writer.
+emit_cplx_elf_v1_record() {
+    local kind="$1" rel hex dest count
+    # The patterns are QUOTED throughout this function, and that is load bearing
+    # rather than style. The host-tool rule reads an unquoted case pattern as a
+    # command word, so a bare `obj|end)` makes the installer look like it invokes
+    # tools named obj and end. Quoting states the literal intent and keeps the
+    # allowlist honest; the two already-quoted state pairings below never had the
+    # problem, which is what pointed at the cause.
+    case "$kind" in
+        "obj")
+            [ "$#" -eq 6 ] || return 2
+            case "$2" in [1-7]) ;; *) return 2 ;; esac
+            case "$3" in
+                "rewritten"|"failed"|"already-correct"|"not-dynamic"|"excluded") ;;
+                *) return 2 ;;
+            esac
+            case "$4" in
+                "rewritten"|"failed"|"unchanged"|"not-applicable") ;;
+                *) return 2 ;;
+            esac
+            # The value is relative to the walked root, which is what
+            # fix_elf_paths is actually given. Naming the installation prefix
+            # instead would add a constant `tools/` to every record.
+            dest="${6%/}"
+            rel="${5#"$dest"/}"
+            [ -n "$rel" ] || return 2
+            case "$rel" in "/"*|"./"*) return 2 ;; esac
+            # Raw bytes, not text: a Linux pathname is a byte string that need
+            # not be valid UTF-8, and decoding it first would break the encoding
+            # for exactly the names it exists to survive. `od` wraps at a
+            # measured sixteen bytes per line, which `tr` removes along with the
+            # separators, so a name straddling that boundary still round-trips.
+            hex=$(printf '%s' "$rel" | od -An -tx1 | tr -d ' \n')
+            printf '%s obj case=%s rpath=%s interp=%s path=%s\n' \
+                "$CPLX_ELF_V1_MARKER" "$2" "$3" "$4" "$hex"
+            ;;
+        "end")
+            [ "$#" -eq 15 ] || return 2
+            # A closed pair. A skipped pass and a completed walk of an empty
+            # tree both produce zero records, so the totals alone cannot tell
+            # them apart and the pairing is what does.
+            case "$2 $3" in
+                "completed none"|"skipped patchelf-absent") ;;
+                *) return 2 ;;
+            esac
+            for count in "${@:4}"; do
+                case "$count" in ''|*[!0-9]*) return 2 ;; esac
+                # A skipped pass that reported counts would be describing work
+                # it did not do.
+                if [ "$2" = "skipped" ] && [ "$count" != "0" ]; then
+                    return 2
+                fi
+            done
+            printf '%s end state=%s reason=%s walked=%s r-rewritten=%s r-failed=%s r-already-correct=%s r-not-dynamic=%s r-excluded=%s i-rewritten=%s i-failed=%s i-unchanged=%s i-not-applicable=%s mig-checked=%s mig-failed=%s\n' \
+                "$CPLX_ELF_V1_MARKER" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" \
+                "${10}" "${11}" "${12}" "${13}" "${14}" "${15}"
+            ;;
+        *)
+            return 2
+            ;;
+    esac
+    return 0
+}
+
 find_patchelf() {
     local candidate
     for candidate in "$INSTALL_PREFIX/tools/bin/patchelf" "$HOME/tools/bin/patchelf"; do
