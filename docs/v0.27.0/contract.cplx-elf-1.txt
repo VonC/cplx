@@ -1,0 +1,137 @@
+# CPLX-ELF/1 contract corpus.
+#
+# Committed test data. Authored BY HAND from the reviewed design's grammar
+# (design.v0.27.0.relocation-force-rpath.md, Design Area 3), which is rank 1
+# semantic authority. This file is rank 2: the frozen executable witness.
+# The formatter and the reader are rank 3, and a mismatch presumes THEY are
+# wrong. See ledger.cplx-elf-1.md for the two-way derivation audit.
+#
+# Neither production end sources constants from this file, and this file was
+# not generated from either end's vocabulary tables. A corpus derived from the
+# formatter would agree with the formatter by construction and prove nothing.
+#
+# FORMAT. One vector per line, fields separated by the pipe character. No
+# record value can contain a pipe or a semicolon, so both are safe delimiters.
+#
+#   canonical-obj  | id | record
+#   canonical-end  | id | record
+#   reader-valid   | id | record            accepted, formatter need not emit
+#   rejected       | id | reason | record
+#   path           | id | raw-spec | expected-hex
+#   capture-valid  | id | record;;record;;...
+#   capture-reject | id | reason | record;;record;;...
+#
+# RAW-SPEC ESCAPES for the path matrix. Named and decimal on purpose: an escape
+# written in hex would express the input in the very encoding under test.
+#
+#   %SP%    one space, 0x20
+#   %NL%    one line feed, 0x0A
+#   %B255%  the single byte whose decimal value is 255
+#   %DEST%  the walked root DEST_PATH; the encoded value is what FOLLOWS it
+#
+# CANONICAL FIELD ORDER, from the design's sample capture:
+#   obj: case rpath interp path
+#   end: state reason walked r-rewritten r-failed r-already-correct
+#        r-not-dynamic r-excluded i-rewritten i-failed i-unchanged
+#        i-not-applicable mig-checked mig-failed
+
+# --- class 1: canonical formatter vectors ------------------------------------
+# The formatter's output is compared byte for byte against THESE AND ONLY THESE.
+# Between them the seven obj records carry all five rpath tokens, all four
+# interp tokens, and every case 1 to 7.
+
+canonical-obj|simple|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6c69622f666f6f2e736f
+canonical-obj|root-relative|CPLX-ELF/1 obj case=3 rpath=rewritten interp=rewritten path=7573722f6c69622f6c69627a2e736f2e31
+canonical-obj|delimiter-bytes|CPLX-ELF/1 obj case=4 rpath=already-correct interp=not-applicable path=6120623d630a
+canonical-obj|non-utf8|CPLX-ELF/1 obj case=2 rpath=not-dynamic interp=not-applicable path=78ff2e736f
+canonical-obj|shortest|CPLX-ELF/1 obj case=7 rpath=excluded interp=not-applicable path=61
+canonical-obj|at-wrap|CPLX-ELF/1 obj case=6 rpath=rewritten interp=failed path=6c69622f616263646566672e736f2e31
+canonical-obj|across-wrap|CPLX-ELF/1 obj case=1 rpath=rewritten interp=unchanged path=6c69622f61626364656667682e736f2e31
+
+canonical-end|completed-design-sample|CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+canonical-end|skipped|CPLX-ELF/1 end state=skipped reason=patchelf-absent walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+
+# --- class 2: other reader-valid vectors -------------------------------------
+# Lawful under the grammar, never required of the formatter. The permutations
+# are what test the design's "reader locates fields by NAME rather than by
+# POSITION". A strictly positional reader passes every canonical vector and
+# every rejected one, and fails only here.
+
+reader-valid|obj-permuted|CPLX-ELF/1 obj path=6c69622f666f6f2e736f interp=unchanged rpath=failed case=5
+reader-valid|obj-permuted-2|CPLX-ELF/1 obj rpath=excluded case=7 path=61 interp=not-applicable
+reader-valid|end-permuted|CPLX-ELF/1 end mig-failed=0 mig-checked=1 i-not-applicable=0 i-unchanged=1 i-failed=0 i-rewritten=0 r-excluded=0 r-not-dynamic=0 r-already-correct=0 r-failed=1 r-rewritten=0 walked=1 reason=none state=completed
+reader-valid|end-permuted-2|CPLX-ELF/1 end walked=0 state=skipped reason=patchelf-absent r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+
+# --- class 3: rejected vectors -----------------------------------------------
+# One literal per rejected form. The reason token makes the refusal
+# distinguishable, which the plan requires.
+
+rejected|unknown-marker|marker|CPLX-ELF/2 obj case=5 rpath=failed interp=unchanged path=61
+rejected|unknown-kind|kind|CPLX-ELF/1 blob case=5 rpath=failed interp=unchanged path=61
+rejected|obj-missing-field|missing|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged
+rejected|obj-duplicate-field|duplicate|CPLX-ELF/1 obj case=5 rpath=failed rpath=rewritten interp=unchanged path=61
+rejected|obj-unknown-field|unknown|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61 extra=1
+rejected|obj-bad-rpath-token|token|CPLX-ELF/1 obj case=5 rpath=already correct interp=unchanged path=61
+rejected|obj-bad-interp-token|token|CPLX-ELF/1 obj case=5 rpath=failed interp=not-dynamic path=61
+rejected|obj-case-zero|case|CPLX-ELF/1 obj case=0 rpath=failed interp=unchanged path=61
+rejected|obj-case-eight|case|CPLX-ELF/1 obj case=8 rpath=failed interp=unchanged path=61
+rejected|obj-path-empty|path|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=
+rejected|obj-path-odd-length|path|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=616
+rejected|obj-path-uppercase-hex|path|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6C69622F666F6F2E736F
+rejected|obj-path-non-hex|path|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6c69622g
+rejected|obj-path-leading-slash|path|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=2f6c69622f666f6f2e736f
+rejected|obj-path-leading-dot-slash|path|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=2e2f6c69622f666f6f2e736f
+rejected|end-bad-state-reason|pairing|CPLX-ELF/1 end state=completed reason=patchelf-absent walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+rejected|end-bad-state-reason-2|pairing|CPLX-ELF/1 end state=skipped reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+rejected|end-unknown-state|pairing|CPLX-ELF/1 end state=aborted reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+rejected|end-missing-count|missing|CPLX-ELF/1 end state=completed reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 mig-checked=0 mig-failed=0
+rejected|end-duplicate-count|duplicate|CPLX-ELF/1 end state=completed reason=none walked=0 walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+rejected|end-unknown-count|unknown|CPLX-ELF/1 end state=completed reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0 r-bogus=0
+rejected|end-negative-count|number|CPLX-ELF/1 end state=completed reason=none walked=-1 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+rejected|end-non-numeric-count|number|CPLX-ELF/1 end state=completed reason=none walked=one r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+
+# --- the path vector matrix --------------------------------------------------
+# Raw input and expected lowercase hex, both literal corpus data. The wrap pair
+# is authored at the MEASURED od -An -tx1 line width of 16 bytes, recorded in
+# ledger.cplx-elf-1.md, not at an assumed one.
+
+path|simple|lib/foo.so|6c69622f666f6f2e736f
+path|root-relative|%DEST%/usr/lib/libz.so.1|7573722f6c69622f6c69627a2e736f2e31
+path|delimiter-bytes|a%SP%b=c%NL%|6120623d630a
+path|non-utf8|x%B255%.so|78ff2e736f
+path|shortest|a|61
+path|at-wrap|lib/abcdefg.so.1|6c69622f616263646566672e736f2e31
+path|across-wrap|lib/abcdefgh.so.1|6c69622f61626364656667682e736f2e31
+
+# --- whole-capture vectors: reconciliation -----------------------------------
+# Grammar-valid records whose CAPTURE is accepted or rejected. The design's
+# categorical rule lives here: per-token equalities, walked, mig-checked, the
+# skipped-run rule, and exactly one trailer.
+
+capture-valid|design-sample|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6c69622f666f6f2e736f;;CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+capture-valid|empty-completed|CPLX-ELF/1 end state=completed reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+capture-valid|skipped|CPLX-ELF/1 end state=skipped reason=patchelf-absent walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+capture-valid|two-objects|CPLX-ELF/1 obj case=5 rpath=rewritten interp=unchanged path=61;;CPLX-ELF/1 obj case=3 rpath=rewritten interp=not-applicable path=62;;CPLX-ELF/1 end state=completed reason=none walked=2 r-rewritten=2 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=1 mig-checked=1 mig-failed=0
+
+# A capture is the INSTALL OUTPUT, so the human echos lines share it with the
+# stream. Ignoring a line that carries no marker and rejecting a line that
+# carries an unknown one are different obligations, and only a pair shows the
+# reader does both.
+capture-valid|mixed-with-human-lines|  OK   : [install_pkg.sh] relocating tools;;CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61;;  INFO : [install_pkg.sh] 1 object walked;;CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+
+capture-reject|unknown-marker-in-capture|marker|CPLX-ELF/2 obj case=5 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 end state=completed reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+# The trailer terminates the capture. This vector's counts DO reconcile across
+# all three records, so only the position rule rejects it: it is the shape a
+# second run leaves behind when its own trailer was lost.
+capture-reject|obj-after-trailer|trailer|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 end state=completed reason=none walked=2 r-rewritten=0 r-failed=2 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=2 i-not-applicable=0 mig-checked=2 mig-failed=0;;CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=62
+capture-reject|no-trailer|trailer|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61
+capture-reject|two-trailers|trailer|CPLX-ELF/1 end state=completed reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0;;CPLX-ELF/1 end state=completed reason=none walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+capture-reject|walked-mismatch|walked|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 end state=completed reason=none walked=2 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+capture-reject|token-miscount|per-token|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=1 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+capture-reject|aggregate-only|per-token|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=62;;CPLX-ELF/1 end state=completed reason=none walked=2 r-rewritten=2 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=2 i-not-applicable=0 mig-checked=2 mig-failed=0
+capture-reject|mig-checked-mismatch|migration|CPLX-ELF/1 obj case=3 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+capture-reject|mig-failed-exceeds|migration|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=2
+capture-reject|skipped-with-record|skipped|CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=61;;CPLX-ELF/1 end state=skipped reason=patchelf-absent walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+capture-reject|skipped-nonzero-count|skipped|CPLX-ELF/1 end state=skipped reason=patchelf-absent walked=0 r-rewritten=1 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+
+# eof
