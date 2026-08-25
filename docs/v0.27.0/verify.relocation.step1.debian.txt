@@ -1,56 +1,31 @@
 Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 1
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 89
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 95
 Purpose: Step 1's guard-complete fixture matrix over the ELF observer, and both
-         halves of the host-tool contract. Every fixture is a real ELF that must
-         be generated, mutated and probed, and the authoring host has no
-         patchelf, no compiler and no binutils, so none of this runs there.
-Captured: 2026-08-21, by the pipeline stage 'Verify relocation candidate (Step 1)'
+         halves of the host-tool contract. Re-run alongside the Step 2 residual
+         boundary change, so the two retained captures come from one build and
+         one revision of the harness rather than from two.
+Captured: 2026-08-24, by the pipeline stage 'Verify relocation candidate (Step 1)'
 
 What this establishes:
-  462 cases, 0 failures
-  twenty-five fixtures, asserted as a SET rather than a count, and every
-    expected value in the matrix a literal
-  the two integer guards, each with its own fixture, because they fail at
-    different points
-  forty-four reject shapes, thirty-one allow shapes, thirteen boundary shapes
-    and TEN contract controls, one case each
+  462 cases, 0 failures, OBJECTIVE MET
+  the count is unchanged from the build 92 capture, which is the point of
+    re-running it: the Step 2 residual change touched the inventory assertions
+    and their controls, and Step 1 shares the planting helpers with them, so an
+    unchanged 462 is evidence the change stayed inside Step 2
 
-The controls are the change that matters here, because the previous capture
-         claimed them and they did not exist. Each consistency rule is now a
-         function; five controls mutate a copy of the real contract and require
-         the rule to REPORT, and five require it to stay silent on the real one.
-         A rule that has quietly stopped detecting anything fails the first set,
-         and a rule that reports on everything fails the second. "The check
-         reports zero" was never evidence that the check could report anything
-         else.
+This supersedes the build 92 capture. Same result, newer harness.
 
-Two dispatcher facts were wrong and both had been reasoned rather than measured.
-         `builtin -- eval "$p"` runs eval and slipped past, because the command
-         word was taken as the token straight after the dispatcher and that
-         token was `--`. Flags and `--` are skipped now, which is exact rather
-         than approximate here because neither dispatcher has an option that
-         takes an operand.
-
-         And `exec eval "$p"` does NOT run eval: exec replaces the shell with an
-         external program of that name, there is none, and it exits 127. `exec`
-         is out of the dispatcher set. That was measured after the claim had
-         already shipped as prose in a previous capture.
-
-Provenance: commit, harness-sha256, candidate-sha256 and host-tools-sha256 below
-         are checked against the local repository. Workspace paths are
-         placeholdered; nothing else is changed.
-
-===== BEGIN CPLX-RELOCATION-STEP1 =====
-captured-at: 2026-08-21T11:11:13Z
-build: 89
-commit: b49289a6f7405ebbddf40a06d13af56340235e8f
-commit-short: b49289a6f740
+----- begin harness output -----
+captured-at: 2026-08-24T18:06:56Z
+build: 95
+commit: 066c1465be8ca898dafc90b9b486a11206705652
+commit-short: 066c1465be8c
 uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: e314fda2cba35ebd6b5e2a231e3509a5d3d513e20a188c64c9accc5e30caace5
-candidate-sha256: eba5a5e27b796ba0392af4c13f76b0c9fe3db7e6f80c9f3da5a5ea10f6a81962
+harness-sha256: 1571686901c232659fffa279c89ac17ebdd437de3b54d6d7940d8e33aae833bb
+candidate-sha256: abf837482f41aab9f50f3e39ecce25ef45c1005a711a32e8e4460544d3181c92
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
-patchelf: /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf
+patchelf: ./prefix/tools/bin/patchelf
 patchelf-version: patchelf 0.19.1
 readelf-version: GNU readelf (GNU Binutils for Debian) 2.40
 sha256sum-version: sha256sum (GNU coreutils) 9.1
@@ -82,17 +57,17 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
 
 == step 0: seam
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
-  identity/installer                       PASS  /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
-  identity/installer-digest                NOTE  eba5a5e27b79
+  identity/installer-digest                NOTE  abf837482f41
   seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
   seam/probe-ran                           PASS  sentinel present
   seam/source-returns-zero                 PASS  0
   seam/no-install-on-source                PASS  0
   seam/functions-defined                   PASS  
   seam/guard-present                       PASS  1
-  seam/guard-precedes-main                 PASS  guard 688, main 699
-  seam/definitions-above-boundary          PASS  usage 662, engine 674
+  seam/guard-precedes-main                 PASS  guard 829, main 840
+  seam/definitions-above-boundary          PASS  usage 803, engine 815
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
@@ -106,7 +81,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/rejects                        PASS  if true; then wc -l x; fi
   host-tool/allows-path-argument           PASS  argument, not a command
   host-tool/allows-path-argument           PASS  argument, not a command
-  host-tool/contract                       NOTE  /home/jenkins/workspace/company_PDF_my-project_develop/tools/relocation_host_tools.verification-only.txt
+  host-tool/contract                       NOTE  ./tools/relocation_host_tools.verification-only.txt
   host-tool/contract-nonempty              PASS  yes
   host-tool/contract-columns               PASS  0
   host-tool/contract-form-values           PASS  0
@@ -225,22 +200,22 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
 
 == host capability for step 1
-  host/can-run-step-1                      PASS  patchelf /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf on a Linux host
+  host/can-run-step-1                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
 
 == step 0: baseline capture
   baseline/fixture-anchored                PASS  /home/builder/prefix/lib
   baseline/fixture-tag-before              PASS  1
-  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.71236/baseline-prefix/tools/python/root/usr/lib64
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.116689/baseline-prefix/tools/python/root/usr/lib64
   baseline/production-pass-ran             PASS  0
   baseline/mixed-count-emitted             PASS  Fixed 1 ELF interpreter/rpath value(s)
   baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
-  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.71236/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.116689/baseline-prefix/tools/python/root/usr/lib64
   baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
   baseline/tag-written                     PASS  DT_RUNPATH
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
   baseline/objects-walked                  NOTE  2
   baseline/donor                           NOTE  /bin/true
-  baseline/installer-lines                 NOTE  874
+  baseline/installer-lines                 NOTE  1015
   step1/observer-defined                   PASS  elf_observe, elf_probe, elf_obs_clear
 
 == step 1: the manifest and its anchors
@@ -597,7 +572,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   step        1
   cases       462
   failures    0
-  installer   /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  installer   ./tools/install_pkg.relocation-candidate.verification-only.sh
   readelf     /usr/bin/readelf
   sha256sum   /usr/bin/sha256sum
   assoc local supported (bash 5.2.15(1)-release)
