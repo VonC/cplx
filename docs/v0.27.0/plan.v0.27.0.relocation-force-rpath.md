@@ -21,8 +21,20 @@ re-explained per step, and each keeps the property the template was protecting.
 | `pytest` unit tests under `tests/unit/**` | cases in a Bash harness, `docs/v0.27.0/verify.relocation-rpath.sh` | item 1 of this collection validated the same file this way, through `verify.install-pkg.sh`, and its evidence is retained beside it |
 | `__init__.py` upkeep | none | there are no Python packages to register |
 | `ghog day` walk | one harness walk plus `shellcheck` on every changed script | the property is "one command runs the gate and the tests and stops at the first failure", which the walk keeps |
-| `check.bat` | `shellcheck`, which the project already uses through `.shellcheckrc` and inline `# shellcheck disable=` directives | it is the lint gate this repository actually has |
+| `check.bat` | `src/utils/lint_shell.sh`, which runs `shellcheck` over every tracked script outside `docs/`, using the `.shellcheckrc` and inline `# shellcheck disable=` directives the project already has | it is the lint gate this repository actually has, and one command runs it over the whole repository |
 | the 650-line Python ceiling | the line budget of `install_pkg.sh`, tracked per step | the gate scans Python under `tools` and `tests` and does not reach this file, but its size is a real constraint for a different reason, recorded in the confirmed facts |
+
+The `check.bat` substitution is **declared, not only stated**. `.review-validation`
+at the repository root names `src/utils/lint_shell.sh` as this repository's mandatory
+validation floor, and the shared code-review resolver reads it instead of assuming
+the Python default. Prose in a plan cannot be checked by a tool; that file can, so
+the two cannot drift apart.
+
+The harness substitution is deliberately **not** declared there. That file binds
+every future review of this repository, and a walk of `verify.relocation-rpath.sh`
+is this effort's check, not the project's: it should retire when v0.27.0 does. It
+enters the resolved validation set as a plan addition instead, which is the scope
+that matches its lifetime.
 
 ## Confirmed facts this plan is built on
 
@@ -188,11 +200,28 @@ The steps do not all need the same host:
 | --- | --- | --- |
 | 0 | Linux with `patchelf`, `readelf`, GNU `sha256sum` | its baseline runs the real pass over a real ELF |
 | 1 | the same | ELF fixtures, the `readelf` oracle and patchelf probes |
-| 2 | any host with Bash 4.0+ | the classifier consumes controlled tuples |
+| 2 | **two host classes**, see below | the controlled layer consumes tuples; the bridge and the inventory need real ELF objects |
 | 3 | any host with Bash 4.0+ | the formatter, reader and corpus are text |
 | 4 | Linux with `patchelf`, `readelf`, GNU `sha256sum` | integration rewrites real objects |
 | 5 | any host | documentation coverage |
 | 6 | the RHEL 9.8 target | deployment, preload and monitoring |
+
+**Step 2 is the row that is not one host.** The earlier version of this table gave
+it "any host with Bash 4.0+", which described the controlled layer and quietly
+omitted two thirds of the step. Its three layers do not need the same machine:
+
+| Step 2 layer | What it needs | Why |
+| --- | --- | --- |
+| the controlled rows, the tuple invariants and the inventory controls | any host with Bash 4.0+ | they feed literal tuples to the classifier and drive the assertion functions directly |
+| the producer-to-consumer bridge | Linux with `patchelf`, `readelf` and a program donor | it plants real ELF fixtures through `resolve_fixture_donor` and `plant_patchelf_double`, and refuses at `bridge/donor` on a host with no program to cut one from |
+| the `develop#24` inventory | the same, plus the extracted archive and the recorded oracle | it walks real objects and classifies each one |
+
+Both of the last two are completion criteria, not optional extras, so the step as
+a whole is answered only on the Linux validation host. The distinction is not
+academic: build 92 exercised the bridge for the first time on any machine, and
+every earlier round measured the controlled layer alone while the bridge sat
+unproven behind a `bridge/donor` refusal that a single-host row gave no reason to
+expect.
 
 Two rules follow, and both are properties of the harness rather than advice.
 
@@ -206,6 +235,33 @@ incomplete and the run non-zero, but the cases needing neither prerequisite
 report first, so a host missing one tool still learns whether the seam and the
 host-tool contract hold. Only the cases that genuinely need a tool are skipped,
 and they are named when they are.
+
+**A check a host cannot afford is unanswered, not skipped.** The two rules above
+treat a missing *tool* as the reason a host cannot answer. A third reason is
+cost, and the allowlist corpus is the case that forced it.
+
+The corpus proves the host-tool rule can report and can stay silent, over
+eighty-three planted shapes. It is not slow by construction: each shape writes a
+probe and runs `hc_unlisted` through a short pipeline, and `hc_unlisted` spends a
+dozen more subprocesses reading the file, so the corpus costs on the order of
+fifteen hundred process spawns. Linux answers that in **4.5 seconds**, measured
+on the Debian agent at step 2 of build 92. A Cygwin host emulates `fork` in user
+space and does not answer at all: measured at over five minutes and killed at the
+bound, having never reached the step's own cases. That is a property of the
+platform, roughly seventy to one, not of the machine or of the rule.
+
+So the corpus is gated **by platform**, the same way `patchelf` and `readelf`
+are, and for the same reason: the harness declares what a check needs and refuses
+when the host cannot supply it. Where it is refused, the run reports it through
+the third outcome, `UNANSWERED` and exit 5, and names the exact command that
+would answer it. It is never silently skipped, because a fast local run that
+reads as a clean one is precisely the failure this plan has refused elsewhere.
+
+Coverage is unchanged where it decides anything. CI is Linux, so the corpus runs
+there on every step of every build. What changes is that `--step N` now reaches a
+verdict on the authoring host, in 43 seconds rather than never, which is what
+lets a local run exercise the shipped harness instead of an extraction driver
+standing in for it.
 
 ### Step 0 harness prerequisite preflight
 
@@ -990,6 +1046,26 @@ The git objects are enumerated rather than counted because a count is a fact
 about one inventory snapshot and would silently pass on a different one, which is
 the kind of check this plan has already rejected twice elsewhere.
 
+**Where each half is asserted.** The set is stated once, here, and every step
+that names it means this table. The steps differ only in which half they must be
+green for:
+
+| Half | Asserted by |
+| --- | --- |
+| the recorded populations: 110 libraries, python, the git objects | Steps 2, 4 and 6 |
+| the residual: every other archive program at case 7 | Steps 4 and 6, **not** Step 2 |
+
+The recorded half is answerable from the record, which is data this effort owns
+and commits. The residual half is answerable only from a real archive, so it is
+asserted by the steps that have one: Step 4 over the staging tree it rewrites,
+Step 6 over the deployed archive. Step 2 consumes tuples and cannot repackage a
+tarball, so requiring it to be green for the archive's contents would make a
+classifier step wait on an artifact the umbrella's last requirement owns.
+
+Nothing about the invariant itself is relaxed by this split. No object is
+excused and no exception is named; the harness reports every residual object it
+walks at every step. Only the step that must be green for it moves.
+
 ### Step 2 framings
 
 After the observer because it consumes the tuple; before the wiring because the
@@ -1105,8 +1181,35 @@ the builder-anchored test.
 - the classifier is invoked in the harness without running an install, which is
   what makes the inventory check of Step 6, the acceptance, possible;
 - against the `develop#24` inventory the classifier selects exactly the set
-  stated once above: the 110 flagged libraries as case 4, the python program by
-  name, the enumerated git objects, and every other archive program as case 7.
+  stated once above, **for every object the record names**: the 110 flagged
+  libraries as case 4, the python program by name, and the enumerated git
+  objects. The recorded populations are what this step can answer, because the
+  record is data the step owns.
+
+#### What Step 2 deliberately does not accept
+
+The residual half of the selected set, *every other archive program left
+rpath-excluded at case 7*, is **not** a Step 2 completion criterion. It is
+asserted where the artifact it describes is produced: the acceptance of Step 6
+and the rebuilt archive of the umbrella's `tools-archive-rebuild`.
+
+The reason is that the residual population is a property of the **archive**, not
+of the classifier. Step 2 owns a decision over a tuple, and its recorded
+inventory is the oracle for that decision. Whether some object nobody recorded
+happens to sit in a published tarball is a fact about what was packaged, and a
+step that consumes tuples cannot fix it. Making Step 2 fail on it couples a
+classifier step to an artifact a later requirement owns, and the coupling is not
+theoretical: `tools/python/root/a.out`, a compiler test binary that entered the
+tree by none of the three routes and whose interpreter path exists only on the
+build host, held this step at one failure while every population the record
+names passed.
+
+This is a relocation of the assertion, not a weakening of it. The invariant is
+unchanged and unqualified: no exception is named, no object is excused, and the
+harness still walks and reports every residual object it finds. What moves is
+*which step must be green for it*. Step 4 and Step 6 state the same sentence and
+run against the real tree, so the invariant is enforced twice downstream and is
+never enforced against a tarball the step under test cannot rebuild.
 
 ## Step 2 addendums
 
@@ -1890,6 +1993,14 @@ Records are emitted during the existing walk, never gathered for a second one.
   the selected set is the one Step 2 states once, the same statement Step 6's
   acceptance uses: the 110 flagged libraries, the python program by name, the
   enumerated git objects, every other archive program preserved;
+- **the residual half is asserted here, and Step 2 does not assert it.** Every
+  archive program the record does not name answers case 7 and is reported as
+  preserved, over the real extracted tree this step already rewrites. Step 2
+  accepts only the recorded populations, for the reason its own criteria give:
+  the residual population is a property of the archive rather than of the
+  classifier, so it is asserted where a real archive is in hand. A residual
+  object that answers anything but case 7 fails **this** step, and fails Step 6,
+  and no exception is admitted for either;
 - a second run and a `--force` reinstall rewrite nothing and account for the
   covered set as `already correct`;
 - the three `$HOME` cases behave as the design's acceptance table states;
@@ -2218,7 +2329,12 @@ A blocked record names, at minimum:
   populations, and the assertions are the ones Step 2 states once: the 110
   flagged libraries as case 4, the python program **asserted by name**, the
   enumerated git objects, and every other archive program preserved as case 7. An
-  excluded program that was quietly rewritten fails this step;
+  excluded program that was quietly rewritten fails this step. **This is the
+  final assertion of the residual half**, which Step 2 does not make and Step 4
+  makes over the staging tree: here it is made over the deployed archive, so an
+  object that reached the tarball by no route at all is caught before the
+  acceptance is called green. No exception is admitted, and a residual object
+  that is neither preserved nor removed from the archive fails the acceptance;
 - **every retained capture is accepted by the categorical reader**, the Step 3
   one, rather than being read by eye. A capture that no reader accepted is not
   acceptance evidence;

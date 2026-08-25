@@ -5,7 +5,8 @@ No, it is not implemented.
 This document tracks the implementation of
 [plan.v0.27.0.relocation-force-rpath.md](plan.v0.27.0.relocation-force-rpath.md),
 seven steps that give `install_pkg.sh` an ordered ELF classifier, a forced
-`DT_RPATH`, and a report a retained recipe can assert on. No step has started.
+`DT_RPATH`, and a report a retained recipe can assert on. Steps 0 and 1 are
+implemented, Step 2 is in progress, and Steps 3 to 6 have not started.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
@@ -312,8 +313,9 @@ No, there is no performance issue that needs to be addressed.
 
 The 100% unit-coverage rule targets `src\pdfss\tests\unit`, a Python tree this
 repository does not have. There is no pytest, no coverage gate and no unit-test
-directory here; the project's gate is `shellcheck` plus the Bash harness, which
-is what the plan's execution checklist substitutes for the groundhog walk.
+directory here; the project's gate is `src/utils/lint_shell.sh`, which runs
+`shellcheck` over every tracked script outside `docs/`, plus the Bash harness,
+which is what the plan's execution checklist substitutes for the groundhog walk.
 
 What stands in its place is the 46-case Bash suite retained from build 65, with
 one negative control and a successful production relocation run. It asserts the
@@ -1300,8 +1302,21 @@ rejection logic is broken.
 
 ## Analysis of Step 2 implementation state
 
-Not started. Step 2 is not implemented because the pass still has one condition
-where the design specifies seven ordered cases.
+Yes. Step 2 has been fully implemented.
+
+The classifier, controlled matrix, bridge, and recorded inventory satisfy the
+revised behavioral criteria, and the repository lint gate plus shared resolver
+dependency are available and green. The executable verdict now agrees with the
+criterion boundary: the harness asserts what Step 2 owns, that every residual
+program was classified, and reports a residual whose case is not 7 as a note
+naming it for Steps 4 and 6. Build 95 answers the mandatory Linux command at
+**355 cases, 0 failures, OBJECTIVE MET**, with `tools/python/root/a.out` stated
+in full and assigned downstream rather than suppressed.
+
+The other round-15 boundary work is closed. `src/utils/lint_shell.sh` checks all
+44 tracked non-documentation shell scripts and exits 0, the plan-scoped
+ShellCheck and request-scoped `bash -n` commands exit 0, and the committed shared
+resolver support passes its focused 271-test suite.
 
 ### Goal for Step 2
 
@@ -1346,10 +1361,11 @@ its corresponding controlled row. A disagreement means the controlled rows have
 drifted. No controlled tuple and no controlled double counts as evidence for both
 production and consumption.
 
-Against the `develop#24` inventory the classifier selects exactly the set stated
-once in the plan, and that statement is the same one Steps 4 and 6 use: the 110
-flagged libraries as case 4, the python program asserted by name, the enumerated
-git objects, every other archive program as case 7. The plan had contradicted
+Against the `develop#24` inventory the classifier selects the recorded half of
+the set stated once in the plan: the 110 flagged libraries as case 4, the python
+program asserted by name, and the enumerated git objects. The revised plan keeps
+the residual every-other-program case 7 invariant but binds it to Steps 4 and 6,
+which hold the staging tree and deployed archive. The plan had contradicted
 itself here, this step saying every program but python was untouched while Step 6
 said python and git; the design settles it in favor of python and git, and the
 git objects are enumerated rather than counted because a count is a fact about
@@ -1357,27 +1373,314 @@ one inventory snapshot.
 
 ### What was implemented for Step 2
 
-_(empty — no check has taken place yet.)_.
+**The ordered classifier, in `src/setups/env/bin/install_pkg.sh`.** One function,
+`elf_classify TARGET_RPATH`, and one global, `CPLX_ELF_CASE`. It sits between
+`elf_probe` and `find_patchelf`, above the main boundary, so sourcing the
+installer reaches it without performing an install. It reads the Step 1 tuple and
+writes nothing else.
+
+The seven cases are the design's, in the design's order, each with the reason for
+its position beside it:
+
+- case 1 has three producers and no fourth: a structural status that is not `ok`,
+  an rpath probe that `failed`, and `tag_state: ambiguous`. `skipped` is
+  deliberately absent, so an object with no dynamic section reaches case 2 and
+  never case 1. `blocked` is tested even though the observer cannot emit it
+  beside a successful structure, because the rule is that a probe which never
+  answered may not reach a benign later case, and `absent` holds no builder
+  anchor, so the fall-through would otherwise be case 7;
+- case 2 is `has_dynamic: no`;
+- case 3 is the tag AND the value together, which is what leaves a matching
+  string under `DT_RUNPATH` to be rewritten rather than skipped;
+- case 4 is `ET_DYN` with no `PT_INTERP`, with neither the suffix nor a SONAME in
+  the test;
+- cases 5 and 6 are **program populations** and are gated on the kind before
+  their own test, so an `unsupported` kind reaches case 7 whatever value it
+  carries. Case 5 is then the exact target under `DT_RUNPATH`, bounded to a
+  v0.26.0 prefix because `build_elf_rpath` is unchanged here, and case 6 is the
+  pass's current builder-anchor test on the same value;
+- the additive promise still holds where it was written to hold: it says no
+  **program** the current guard covers is dropped, and case 4 has already taken
+  `ET_DYN` with no `PT_INTERP`, so a `dyn` reaching case 5 carries a `PT_INTERP`
+  and an `exec` is a program by `e_type`. An earlier version read that promise as
+  covering every ELF kind and tested the value alone, which review round 2
+  refused;
+- case 7 is everything else, so the RPM-extracted programs and the vendored
+  patchelf are excluded by rule rather than by a name check.
+
+The classifier is not wired. `fix_elf_paths` is untouched, so an executed install
+behaves exactly as it did after Step 1.
+
+**Three case layers, in `docs/v0.27.0/verify.relocation-rpath.sh`.** The `--step`
+dispatch accepts `2`, and the suite is reached through the same seam Step 1 uses.
+
+The **controlled rows** are twenty-four complete tuples, `C01` to `C24`, each
+stating all nine fields, the target it is judged against and its expected case.
+`step2_load_row` clears the array by REMOVING its keys rather than by writing
+empty strings, so a row that forgot a field leaves a missing key instead of an
+indistinguishable empty one, and `step2_tuple_invariants` refuses it before the
+classifier is invoked, on a reason beginning `TUPLE` so the refusal reads as a
+defective test rather than as a classification. The invariant set is the
+design's: the closed vocabularies, the fully defined structural-failure tuple,
+`skipped` checked in both directions against its two producers, and a value that
+is `absent` unless its own probe answered.
+
+Eight negative controls mutate one valid tuple each and require that refusal: a
+missing key, an extra key, `blocked` beside a successful observation, an unearned
+skip, a missing skip, a value surviving a probe that did not answer, a structural
+field surviving an inconclusive read, and a tag with no dynamic section.
+
+The row groups the plan names are asserted over the table rather than claimed in
+prose: each of the seven cases expected somewhere, two `$HOME` overlaps, both
+successful tag forms, ambiguity, structural inconclusiveness, both `skipped`
+producers, and **both axis-local failure combinations**, which is the pair a
+four-token checklist does not require. The id set is checked for gaps and
+duplicates, since a count of twenty-three is satisfied by one row written twice
+and another missing.
+
+The **bridge** is ten rows over seven real Step 1 subjects, `F01`, `F03`, `F04`,
+`F06`, `F07`, `F10` and `F16`, plus the `D01` and `D02` doubles over `F01`. Each
+subject is planted by the Step 1 recipe of that id rather than by a second recipe
+written to the same description, which is why the recipes moved into shared
+helpers. Each observed tuple is held to the same invariant checker the rows are
+held to, and each classification must equal both its literal expected case and
+the case its named controlled row produced, so a drift on either side of the seam
+fails rather than passing quietly on both. `F06` and `F07` cross twice, once
+against a target they hold and once against one they do not, which is what
+exercises the exact-target comparison in both directions.
+
+The **inventory** walks a real archive tree as production walks it, computes the
+target with the production `build_elf_rpath` under the declared prefix, and
+classifies every ELF without running an install. It compares against a
+**recorded oracle**, `docs/v0.27.0/inventory.develop-24.txt`, rather than against
+the tree it is checking:
+
+- the reader requires exactly the 110 distinct recorded library paths, so a
+  truncated, padded or duplicated record fails there rather than on the tree;
+- every recorded library must be walked and answer case 4. Case 3 is refused: it
+  is the state of a tree this version already converted, which is not the tree
+  the criterion names;
+- every **walked** library is collected independently of the record and must
+  answer case 4, which is what stops one being skipped in silence;
+- the recorded python path must be walked and selected, asserted by name;
+- the recorded git paths must be walked and selected. Location is not population
+  identity: an object the record does not name is residual whatever tree it sits
+  in, and passes only as case 7;
+- every residual program must answer case 7 **exactly**, not merely "not
+  selected", since cases 1, 2 and 3 are outcomes the plan does not allow for that
+  population.
+
+The judgements live in `step2_inventory_assert`, which the thirteen controls
+drive as well, so a rule that has quietly stopped detecting anything fails a
+control rather than passing on a tree nobody could check. Eleven break one field
+each and require the exact `ORACLE` or `INVENTORY` refusal; two require silence,
+on a well-formed state and on an unrecorded case 7 program under the git tree.
+
+An unrecorded walked library is counted and named rather than failed, and the
+reason is measured rather than preferred: develop#24 flagged 110 of 388, "55 per
+root and none from the venv", so the record names the flagged subset and the
+archive's library population is larger by construction.
+
+Without the record the criterion is **unanswered** rather than derived. Case 1
+objects are still counted and named, because a malformed library is not
+recognised as a library and would otherwise satisfy the preservation rule by
+being excluded from nothing.
+
+**Shared fixture planting.** `resolve_fixture_donor`, `plant_fixture_base`,
+`plant_fixture` and `plant_patchelf_double` were extracted from `step1_suite`
+without changing a recipe: the twenty-five recipe bodies moved verbatim, with
+each `continue` becoming `return 1` and the caller doing the `|| continue`. Step
+1's assertions are unchanged.
+
+**A third harness outcome.** `UNANSWERED` and exit code 5 separate "every case
+passed but an obligation could not be asked" from both a pass and a code failure.
+The inventory is its first user: without the recorded oracle or the archive it
+reports what to pass rather than being silently skipped.
+
+**Platform-gated host-tool corpus.** The eighty-three-shape allowlist corpus runs
+on Linux, where the retained measurement is 4.5 seconds, and is recorded as
+unanswered on other platforms with the exact Linux command that can answer it.
+That keeps the corpus in every Linux step invocation while allowing the exact
+Step 1 and Step 2 entry points to terminate on the authoring host.
+
+### What the Debian 12 agent answered for Step 2
+
+Three builds closed most of what this section listed as owed, and the record
+states what they measured rather than that they happened.
+
+| Gate | Result |
+| --- | --- |
+| Step 1 re-run, build 95 | **462 cases, 0 failures, OBJECTIVE MET**, retained as `verify.relocation.step1.debian.txt` |
+| Step 2, build 95 | **355 cases, 0 failures, OBJECTIVE MET**, retained as `verify.relocation.step2.debian.txt` |
+| the producer-to-consumer bridge | runs, for the first time on any host |
+| the develop#24 oracle | recorded as `inventory.develop-24.txt` and read: all its assertions pass |
+| `shellcheck` on the agent | absent from that image, so the gate's only result is the local one |
+
+**The oracle.** 272 rows: the 110 flagged libraries, the python program, and 161
+git programs. The library rows are the ABI contract probe's flagged set, 388
+ELFs inventoried and 110 flagged, 55 per root and none from the venv, which is
+the develop#24 measurement reproduced. Build 24 itself is long gone, the job
+retains ten builds, so the set was re-measured rather than recovered. It was
+recorded in one build and read by a later one, never derived in the run that
+checks it.
+
+The git population is the git install and **not** the sysroot shipped beside it.
+Those 74 binutils and glibc programs are residual, and the run measured that
+rule holding: they all answer case 7 and none appears in the failure. Recording
+them would have demanded they be selected, inverting what rounds 4 and 5 settled.
+
+**The one failure, and it is not the classifier.** Build 91 failed 76 residual
+entries. 75 were relocatable objects and static archives, the C and GCC startup
+objects, the sanitizer preinit objects, `libmcheck.a` and `python.o`. None
+carries a `PT_DYNAMIC`, none can be given a search path, and the pass would
+never rewrite one, so demanding case 7 of them asked a question the pass never
+asks. The walk now judges only `exec` and `dyn` objects as residual programs,
+through `step2_inventory_is_program`, with four controls over that boundary in
+both directions: two requiring an unsupported and a cleared kind to fall out,
+two requiring `exec` and `dyn` to stay judged. What falls out is counted and
+named, because a preservation rule is satisfied most easily by a population
+nobody looked at.
+
+The arithmetic is exact: 76 = 75 excluded and named, plus one that remains.
+Builds 91 and 92 walked the same 675 objects and reported the same 26 case-1
+objects, so the fix reclassified the population rather than shrinking it.
+
+**`tools/python/root/a.out` answers case 5, which is selected.** A stray build
+artifact shipped inside the archive would be given a search path by the pass.
+Either the archive should not carry it or the program gate should not select it.
+
+It is reported and not excluded. Step 2 asserts what Step 2 owns, that the
+classifier answered for every residual program, and names a residual whose case
+is not 7 as a note carrying it to Steps 4 and 6, which hold the population
+assertion unqualified. That is a boundary, not a suppression: excluding the
+object, or quietly dropping the line, would be the count-driven change this
+effort has refused since Step 0. Two controls hold the boundary in place, one
+refusing an unclassified residual and one requiring the other case to be
+accepted here, so a drift back to failing it is caught by the suite rather than
+by a later reader.
 
 ### New types or classes introduced for Step 2
 
-_(empty — no check has taken place yet.)_.
+None. This is a Bash effort: no classes, no modules. What is introduced in the
+installer is one global, `CPLX_ELF_CASE`, and one function, `elf_classify`.
+
+In the harness, which is test code rather than production: four shared planting
+functions extracted from Step 1 (`resolve_fixture_donor`, `plant_fixture_base`,
+`plant_fixture`, `plant_patchelf_double`) and eighteen Step 2 functions
+(`step2_literal`, `step2_load_row`, `step2_tuple_invariants`, `step2_rows`,
+`step2_bridge_rows`, `step2_inventory_oracle`, `step2_in_set`,
+`step2_missing_members`, `step2_inventory_reset`, `step2_inventory_assert`,
+`step2_inventory_controls`, `step2_ctl_write_oracle`,
+`step2_inventory_record_program`, `step2_inventory_is_program`, `step2_ctl_silent`,
+`step2_controlled_suite`, `step2_bridge_suite`, `step2_inventory_suite`), plus
+nineteen single-purpose control functions. Two new data shapes: the associative
+array `STEP2_CASE_OF`, which is how the bridge requires agreement with a row
+rather than with a second copy of its expectation, and the recorded inventory
+file, `population|path` rows read into three sets.
 
 ### Architecture check for Step 2
 
-_(empty — no check has taken place yet.)_.
+DDD-Hexagonal does not apply to a Bash toolchain. The property that does is the
+deployment contract, that `install_pkg.sh` runs alone from a bare account, and it
+holds: the classifier adds no file, no sidecar and no host tool. The allowlist
+half of the host-tool rule was run against the changed installer and reports zero
+unlisted words and zero unused contract entries, which is a measurement rather
+than a reading: the classifier's only command-position words are `[`, `return`
+and `local`, all interpreter rather than host.
+
+The separation the plan cares about is kept and slightly strengthened. The
+harness never reimplements the classifier: it sources the production function
+through the seam and drives it. Extracting the fixture recipes removes the one
+place where Step 2 could have grown a second copy of Step 1's inputs, so the
+bridge compares the classifier against the producer rather than against a
+lookalike.
+
+One thing is worth naming rather than leaving implicit. The key-set rule compares
+two independent statements, production's `CPLX_ELF_OBS_KEYS` and the harness's own
+`STEP2_ROW_FIELDS`, and one case asserts they agree. Building the rows out of
+production's list would have compared that list with itself.
+
+The allowlist rule earned its keep here rather than merely passing. The kind gate
+was first written as `case ... in exec|dyn)`, and the rule reported `dyn` as an
+unlisted host tool: it rewrites a case pattern to `dyn;`, which leaves the word
+in command position. That is the rule being literal, not wrong, so the gate is
+two `[` comparisons instead and the reason is recorded beside them. A false
+positive is fixed in the file that collided, never by loosening the assertion.
+
+The inventory's judgements were factored into `step2_inventory_assert` for the
+same reason Step 1 factored its contract rules into functions: a control that
+exercised a second copy of a rule would prove nothing about the gate. The
+round-4 pair also drives `step2_inventory_record_program`, the same population
+router the walk calls, so neither case can bypass the location-independent rule
+by prefilling assertion globals. The eleven refusal controls and the two silence
+controls call the functions the walk calls.
+
+No, there is nothing that needs to be addressed.
 
 ### Performance check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The classifier is a fixed sequence of at most nine string comparisons over values
+already read. It forks no process, opens no file and iterates nothing, so it is
+O(1) per object and the walk stays linear in the number of objects. No O(n^2) or
+O(n log n) computation is introduced, and the plan's rule that no step may add a
+second full walk of the tree to the production ELF pass is untouched, since the
+classifier is not wired to the pass at all.
+
+The harness's inventory does walk a tree, which the plan permits for validation
+and forbids only in the installer. Its cost is one fork-free four-byte read per
+file, with `od` and the two probes reached only by the objects that answer the
+ELF magic, so the many non-ELF files of an archive cost a builtin rather than a
+process.
+
+Its oracle comparison is the one place a quadratic shape appears, and it is
+stated rather than hidden: each walked ELF is tested for membership of the
+recorded sets, so the work is the walked count times the recorded size. On the
+measured inventory that is 388 objects against roughly 120 recorded paths, it
+runs in the harness rather than in the installer, and the plan's rule about a
+second production walk is untouched because none of this is in the pass.
+
+No, there is no performance issue that needs addressing at this step.
 
 ### Unit test coverage check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The 100% unit-coverage rule targets a Python tree this repository does not have.
+What stands in its place, per the plan's stated substitution, is the case matrix.
+
+The matrix exercises every implemented branch, both `$HOME` overlaps, both
+successful tag forms, ambiguity, structural inconclusiveness, both `skipped`
+producers, both axis-local failure combinations, and both program-boundary
+exclusions: an `unsupported` kind carrying a builder-anchored value and one
+carrying the exact target under `DT_RUNPATH` each answer case 7. Every one of
+those groups is asserted over the table itself, so a group that lost its last row
+fails rather than leaving the suite green, and the id set is checked for gaps and
+duplicates.
+
+The controlled layer is exercised at 138 cases and 0 failures. Build 92 also
+executes the bridge and the inventory against the recorded oracle: the bridge
+passes, every oracle assertion passes, and the residual population reports one
+real failure rather than an uncovered code path. The inventory controls include
+eleven refusals, two silence cases, and four checks over the residual-program
+boundary in both directions.
+
+No, there is no unit-tested class below 100% to complete: there is no such class,
+and the matrix that stands in its place covers the population boundary the
+review found missing. The remaining Step 2 failure is an acceptance result over
+the archive, not a unit-coverage gap.
 
 ### Feature integrity for Step 2
 
-_(empty — no check has taken place yet.)_.
+No existing feature or reporting capability is impaired. `elf_classify` is
+defined and never called by the executed path: `fix_elf_paths` still reads the
+four magic bytes, still applies its single builder-anchor guard, still writes
+through `--set-rpath` without `--force-rpath`, and still reports its one mixed
+count. The observer and the probe are unchanged, the copy-engine selection of the
+previous effort is untouched, and the Step 0 baseline should re-measure
+identically.
+
+The Step 1 suite is refactored, not altered: the recipes, their failure messages
+and every assertion moved without a change of text, and the donor and base
+planting keep the same outcomes. Build 92 re-executes the suite through those
+helpers at 462 cases and 0 failures.
 
 ---
 
