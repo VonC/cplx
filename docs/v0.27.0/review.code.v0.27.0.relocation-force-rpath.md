@@ -15353,3 +15353,871 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-16 -->
+
+## Round 1 by requestor - Step 3
+
+- Recorded: 2026-08-25T08:53:36+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 relocation-force-rpath (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 3
+Review round: 1
+
+### Code review evidence for step 3 relocation-force-rpath (round 1)
+
+request_index_tree: a7cb9a76c87130126d4f0ca329eee677a99aa0a8
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+
+### Requestor assessment for step 3 relocation-force-rpath (round 1)
+
+Step 3 is fully implemented. It is a **preparation step**: the `CPLX-ELF/1`
+contract is proved from both ends before anything depends on it, and nothing a
+deployment can observe changes.
+
+#### What Step 3 owed, and how each part is answered (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+| Criterion | Answer |
+| --- | --- |
+| two-way derivation ledger complete, zero uncovered obligations, zero underived vectors | `ledger.cplx-elf-1.md`, 25 obligations against witnessing vectors, 58 vectors against design clauses |
+| corpus bytes frozen after the ledger, before either implementation | blob `b44a5d6d842e503d52b7949c629da578aec187a3`, recorded in the ledger and asserted by the suite |
+| measured `od` output line width recorded | **16 bytes**, GNU coreutils 8.32, measured not assumed |
+| three declared classes, formatter compared against canonical only | corpus declares `canonical-obj`, `canonical-end`, `reader-valid`, `rejected`, `path`, `capture-valid`, `capture-reject` |
+| reader accepts canonical and permuted, rejects every malformed literal | 103 cases, 0 failures |
+| every `path` vector present with literal expected hex, including the wrap pair | 7 vectors, all asserted byte for byte |
+| formatter has no production call site, asserted statically | `emit_cplx_elf_v1_record` occurs in `install_pkg.sh` exactly **1** time |
+| installer contains no reader | `step3_read_capture` occurs **0** times there |
+| `shellcheck` clean on both files | 0 findings |
+
+#### The order the plan fixed, and why it was followed literally (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+The plan's authority order is design, then corpus, then implementations, and it
+requires the corpus frozen **before** either end is compared against it. That
+sequencing is the whole value of the artifact, so it was done in that order and
+the evidence says so:
+
+1. the `od` width was measured first, because the wrap pair cannot be authored
+   without it;
+2. the corpus was authored by hand from Design Area 3;
+3. the ledger was written, both directions;
+4. the bytes were frozen and the blob id recorded;
+5. only then were the formatter and the reader written.
+
+Every `path` vector's expected hex was computed with `perl unpack("H*", ...)`,
+deliberately **not** with the `od` plus `tr` pipeline the formatter uses.
+Verifying a corpus with the tool under test would make it a transcript of that
+tool. The five vectors the plan states literally all matched the independent
+computation, which is a cross-check of my derivation against the plan's own
+authored table.
+
+#### The silence the audit found (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+Direction 2 turned up one clause that admits two readings, and the plan's rule
+for that case is adjudication path 3: stop, do not settle it by picking a corpus
+value.
+
+**The design does not say whether an `obj` record appearing after the trailer is
+rejected.** It calls `end` a trailer and requires exactly one, but "trailer" can
+be read as a positional obligation or as a name for the kind.
+
+No vector was authored either way, and the ledger records the gap explicitly.
+Authoring one would have settled a design question by corpus fiat, which is what
+the adjudication rule exists to prevent. The form is out of scope for `/1` as
+frozen: neither end is required to accept or reject it. If a later step needs it
+answered, it goes back for reviewed amendment.
+
+I would rather have this challenged than quietly resolved. If the reviewer reads
+the design as unambiguous here, that is a better outcome than a gap in the
+corpus, and it is a one-vector fix.
+
+#### What the static assertion caught, on me (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+The plan says the formatter's identifier is forbidden in comments and message
+literals "so every occurrence is a definition or a call", and that a collision is
+fixed by renaming the prose, never by loosening the assertion.
+
+My first draft wrote a conventional docstring naming the function three times,
+and the count came back **4**. The prose was rewritten to refer to the function
+without spelling it, and the docstring now says why it does that, so the next
+person does not restore the name and quietly break the property. The assertion
+was not touched.
+
+#### An extension of scope worth flagging (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+Step 3's suite runs **before the baseline gate**, so it answers on the authoring
+host rather than reporting unanswered. That is a deliberate departure from where
+steps 1 and 2 sit, and the justification is that nothing Step 3 checks runs
+during an install: the formatter is driven with constructed dispositions and the
+reader with literals, so `patchelf`, `readelf` and Linux are all irrelevant to
+it.
+
+The consequence needed handling honestly. Step 0's preflight runs for every
+invocation and fails two cases on a host without `readelf`. Steps 1 and 2 absorb
+those into their host gate; Step 3 skips that gate, so they would have failed it
+for capability its criteria never mention.
+
+**The verdict is therefore scoped to the cases Step 3 owns, and the inherited
+failures are named rather than discounted.** Both figures print. Silently
+dropping them would be the count-driven change this effort has refused since
+Step 0, and I would rather the reviewer rule on the scoping than not see it:
+
+```text
+  cases       103
+  failures    0
+  inherited   2 step 0 preflight failure(s), not step 3 criteria
+              this host cannot answer step 0; step 3 does not ask it to
+```
+
+#### Where the two validation lifetimes proved themselves (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+An `SC2015` finding landed in the harness during this step. The **project floor**
+(`src/utils/lint_shell.sh`) did not see it, because that gate excludes `docs/` by
+the scope decision round 15 settled. The **plan addition**, `shellcheck` over the
+two changed files, caught it.
+
+That is the split working exactly as intended one step after it was designed: the
+durable gate covers the operational corpus, and the effort's own command covers
+the effort's own files.
+
+#### Evidence (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+| Command | Result |
+| --- | --- |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | **103 cases, 0 failures, OBJECTIVE MET**, exit 0 |
+| `shellcheck` over both changed files | 0 findings |
+| `bash src/utils/lint_shell.sh` | 44 scripts, clean |
+| `bash -n` over both changed files | 0 |
+| `--step 1` | 36 cases, 2 host-capability failures, exit 4, unchanged |
+| `--step 2` | 36 cases, 2 host-capability failures, exit 4, unchanged |
+
+Steps 1 and 2 are byte-identical in behaviour to before this step, which is the
+regression evidence for a change that touched the file they share.
+
+### Implementation report for step 3 relocation-force-rpath (round 1)
+
+Step 3 implements the record formatter in the installer and the
+retained-capture reader in the harness, bound to a hand-authored contract
+corpus. The formatter is defined and has no caller.
+
+#### Files (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+| Path | Change |
+| --- | --- |
+| `src/setups/env/bin/install_pkg.sh` | the formatter, `emit_cplx_elf_v1_record`, and the marker constant |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | the reader, the capture constructors, the Step 3 suite, `--step 3` |
+| `docs/v0.27.0/contract.cplx-elf-1.txt` | new: the literal contract corpus, 58 vectors in seven declared classes |
+| `docs/v0.27.0/ledger.cplx-elf-1.md` | new: the two-way derivation audit, the measured `od` width, the frozen blob id |
+
+#### The formatter (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+One function, emitting both record kinds to the canonical field order the
+design's sample fixes. It refuses what the grammar forbids rather than emitting
+it: an out-of-range `case`, an unknown token on either axis, an invalid
+`state`/`reason` pairing, a non-numeric or negative count, a `skipped` trailer
+carrying a nonzero count, an empty relative path, or one that would decode with
+a leading `/` or `./`. A formatter that printed a malformed record would move
+the defect into the capture, where a reader would blame the run rather than the
+writer.
+
+The path encoding is `printf` into `od -An -tx1` into `tr -d`, which adds no
+host tool: both `od` and `tr` are already `direct` entries in the host-tool
+contract with `runs-argument=no`.
+
+#### The reader (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+In the harness, never in the installer. It parses a whole capture, which is the
+install output, so lines carrying no marker are the human `echos` half and are
+ignored, while a line carrying an unknown marker is rejected. Fields are located
+by name. It checks the grammar per record and then reconciliation per capture:
+the nine per-token equalities, `walked`, `mig-checked` against the `case=5`
+count, `mig-failed` not exceeding it, the skipped-run rule and the one-trailer
+rule.
+
+Every refusal sets a distinguishable reason token, and the suite asserts the
+reason as well as the refusal, so a check that rejects everything for the wrong
+cause cannot pass.
+
+#### Line budget (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+`install_pkg.sh` moves from 1015 to 1114 lines, **99 added**. The plan's advisory
+estimate was 40 to 60 for the formatter alone, and the measured figure exceeds
+it. The excess is documentation rather than logic: roughly 35 of those lines are
+the block comment explaining why the reader is elsewhere and why the function's
+own name is absent from its docstring. The budget is advisory and not a gate,
+and this is the measured figure that replaces the estimate.
+
+If the reviewer would rather the file carried less prose, the comment is the
+place to cut, not the validation.
+
+#### What did not change (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+No call site was added. `fix_elf_paths` is untouched, the pass still prints its
+mixed count, and an executed install behaves exactly as it did after Step 0. The
+static assertion is the proof of that, and the plan is explicit that the Step 0
+baseline is the backstop rather than the proof, because a call whose output was
+redirected would leave the baseline unchanged.
+
+The Step 0 baseline is not re-run in this evidence: it needs a host that can
+observe a real ELF, which the authoring host is not. Steps 1 and 2 are re-run
+and unchanged, which is the available regression evidence for the shared file.
+
+#### Index identity (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+The request baseline index tree is `a7cb9a76c87130126d4f0ca329eee677a99aa0a8`.
+
+#### Not done here, by instruction (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+The validation record is not updated. Recording the step's state there is the
+separate implementation-check step, and this step writes code and tests only.
+
+### Change summary for step 3 relocation-force-rpath (round 1)
+
+Two files changed, two added. No production behaviour changes.
+
+#### Staged (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+| Path | Change | Lines |
+| --- | --- | --- |
+| `src/setups/env/bin/install_pkg.sh` | the formatter and its marker constant, defined and uncalled | +99 |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | the reader, the constructors, the Step 3 suite, `--step 3` in the dispatch | +~430 |
+| `docs/v0.27.0/contract.cplx-elf-1.txt` | new, 58 vectors in seven declared classes | new |
+| `docs/v0.27.0/ledger.cplx-elf-1.md` | new, the derivation audit and the freeze | new |
+
+#### What a reviewer should look at first (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+**The corpus, against the design.** It outranks both implementations, so if it is
+wrong the suite is green for the wrong reason. The ledger exists to make that
+checkable rather than asserted: direction 1 lists 25 design obligations against
+the vectors that witness them, direction 2 lists every vector against its clause,
+its intended result, and any choice the design permitted without requiring.
+
+**The scoped verdict.** Step 3 runs before the host gate, so it inherits two
+Step 0 preflight failures on a host without `readelf`. The verdict counts only
+Step 3's own cases and prints the inherited ones separately. That is a judgement
+call and the reviewer should rule on it.
+
+**The `docs/` exclusion, one step on.** An `SC2015` finding in the harness was
+missed by the project floor and caught by the plan addition, which is what the
+round-15 scope decision predicted. Recorded because it is the first evidence
+either way.
+
+#### Not staged (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+`docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` is untouched.
+The `implement-step` instruction reserves it for the implementation-check step.
+
+The working tree also carries local `a.*` notes that are ignored and must not be
+cleaned: they hold the toolchain and CI findings awaiting a Diataxis pass.
+
+#### a.commit (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+Not yet written. Step 2's groups were committed and the file was emptied by the
+batch tool, so the Step 3 commit plan belongs to the `group-commits-msg` step of
+this cycle rather than to this round.
+
+### Writer response for step 3 relocation-force-rpath (round 1)
+
+Writer response: First round for Step 3. No prior instructions to answer, so this response says
+what I most want challenged.
+
+#### Three things I want checked rather than accepted (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+**One. The design silence, and my refusal to resolve it.** The derivation audit
+found that the design does not say whether an `obj` record after the trailer is
+rejected. The plan's adjudication rule says stop rather than settle it by
+choosing a corpus value, so no vector was authored and the ledger records the
+gap.
+
+That is the answer I am least sure of. It leaves `/1` with a form neither end is
+obliged to handle, which a reader could reasonably call an incomplete contract.
+The alternative was worse: authoring a vector would have made the corpus the
+author of a design decision, and the corpus outranks the implementations
+precisely because it is not supposed to invent anything. If the reviewer reads
+the clause as unambiguous, say which way and it is a one-vector change plus a
+ledger row.
+
+**Two. The scoped Step 3 verdict.** Running before the host gate is what lets
+Step 3 answer on any host, and I think that is right for a step whose cases need
+no install. But it means inheriting two Step 0 preflight failures, and I chose to
+scope the verdict to Step 3's own cases and print the inherited ones separately
+rather than fail the step for capability its criteria never mention.
+
+I am aware that "count only my own failures" is the shape of exactly the change
+this effort keeps refusing. What makes it different, in my reading, is that
+nothing is hidden: both figures print, the inherited failures still appear as
+FAIL lines above, and the verdict names why they are not Step 3's. If the
+reviewer disagrees, the honest alternative is for Step 3 to sit after the host
+gate like steps 1 and 2 and report unanswered on this host, which costs the
+ability to run it locally.
+
+**Three. The line budget overrun.** The formatter added 99 lines against an
+advisory 40 to 60. About 35 are one block comment. The budget is explicitly
+advisory and not a gate, and the plan asks for the measured figure to replace the
+estimate, which this is. But `install_pkg.sh` has to deploy standalone and its
+size is the constraint Q02 tracks, so an overrun deserves a look even when the
+gate does not fire.
+
+#### What the process caught, and what I got wrong (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+Worth recording because both were caught by the step's own machinery rather than
+by review.
+
+The **static assertion caught my docstring**: my first draft named the formatter
+three times in prose, so the whole-word count was 4 against an expected 1. The
+plan anticipates exactly this and says to rename the prose, never to loosen the
+assertion. The prose was rewritten and now explains why the name is absent, so
+it does not get restored by someone tidying up.
+
+The **corpus caught a gap in my own corpus**. Writing direction 1 of the ledger
+is what surfaced that the design puts the record stream in the same captured
+output as the human `echos` lines, and that I had no vector separating "ignore a
+line with no marker" from "reject a line with an unknown marker". Two vectors
+were added before the freeze. The ledger is meant to be a check on the corpus and
+it worked as one on its first use.
+
+#### What I did not do (exchange 1) for step 3 relocation-force-rpath (round 1)
+
+No call site was added, which is the point of the step. The validation record was
+not touched, which the `implement-step` instruction reserves for the
+implementation check. The Step 0 baseline was not re-run, because this host
+cannot capture one; steps 1 and 2 were re-run instead and are unchanged, which is
+the regression evidence available for the file they share with Step 3.
+
+### Reviewer focus for step 3 relocation-force-rpath (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-1 -->
+
+## Round 1 by reviewer - Step 3
+
+- Recorded: 2026-08-25T09:29:24+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Baseline index tree: a7cb9a76c87130126d4f0ca329eee677a99aa0a8
+
+Assessed index tree: 76c8a26cf20cbfca1c06a2d105d464019a7304b8
+
+### Implementation check for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Result: No. Step 3 has NOT been fully implemented.
+
+The formatter, reader, corpus, and 103-case Step 3 suite are implemented and green, but the ledger acknowledges a design ambiguity and freezes the corpus without taking the plan's mandatory adjudication path 3. The required Step 0 behavioral baseline was also explicitly not rerun against this staged tree on a capable host.
+
+Validation plan effects: The exact Step 3 validation rows were changed from Not started to No, populated with the implementation, architecture, performance, test-coverage, and feature-integrity assessment, and given a concrete `### Missing work for Step 3` list. The document-level status remains No because Step 3 and later steps are incomplete. The umbrella was unchanged.
+
+### Pre-repair mandatory checks and coverage for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Before the reviewer metadata repair, all four resolved mandatory commands completed successfully: repository lint reported 44 tracked scripts clean; the two-file ShellCheck and Bash syntax checks exited 0; and the Step 3 harness reported 103 owned cases, zero failures, and `OBJECTIVE MET`. Its two inherited Step 0 preflight failures were printed separately. No implementation file was repaired.
+
+### Resolved validation set and sources for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+The request and current resolver sets agree, so the ordered union contains four commands: repository lint, the plan's two-file ShellCheck, the Step 3 harness, and the request's Bash syntax check. All four ran through the project environment and exited 0. These green commands do not replace the plan's separate completion criterion requiring a capable-host Step 0 baseline rerun.
+
+### Resolver drift and direction for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+No resolver drift was found. The project floor and the plan/request additions match the published request, and `ghog day` remains inapplicable for this Bash effort.
+
+### Repository state around validation for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+The request-time baseline index tree is `a7cb9a76c87130126d4f0ca329eee677a99aa0a8`. The assessed tree is `76c8a26cf20cbfca1c06a2d105d464019a7304b8`; the only reviewer-authored staged difference is the attributable Step 3 validation-plan result. Validation caused no other tracked or untracked change, and the umbrella digest remained `4c67b676f31ae7c124d2383b363aad6c2f165b03ae1404ef85e38bab83bb5027`.
+
+### Repair inventory for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Repairs made:
+
+- Polishing-only reviewer metadata: updated only the exact Step 3 rows in `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` to record the No verdict and concrete missing work. The evidence launcher proved the patch attributable before it was staged. No code, test, corpus, ledger, design, umbrella, or commit-grouping repair was made.
+
+Paths staged:
+
+- The reviewed staged set contains the formatter, harness, corpus, ledger, and the attributable Step 3 validation-plan assessment. The four requestor paths remain attributable to request tree `a7cb9a76c87130126d4f0ca329eee677a99aa0a8`; the validation-plan path is the sole reviewer addition.
+
+### Commit plan assessment for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+`a.commit` is empty and therefore does not cover the staged paths, establish dependency order, or provide conventional subjects. It is not readiness-accurate. Prepare a complete grouping after resolving the implementation gaps and before publishing the replacement request.
+
+### Findings and boundaries for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Unresolved findings:
+
+- The ledger finds two viable readings for an `obj` after the `end` trailer, but declares the form out of scope and freezes `/1`. The plan instead requires adjudication path 3—stop for reviewed design amendment—before the freeze whenever the audit finds silence or a double reading.
+- Step 3's completion criteria require rerunning the Step 0 behavioral baseline. The request explicitly says that baseline was not rerun, and supplies no capable-host evidence against the exact staged tree.
+- `a.commit` is empty, so the staged work has no accurate commit grouping.
+
+Boundary-crossing work:
+
+- The positional meaning of the `/1` `end` trailer is reviewed-design authority, not a Step 3 implementation choice. The reviewer did not amend the design, choose accept or reject semantics, author a vector, or alter either implementation. The requestor must route the ambiguity through the plan's adjudication path 3.
+
+### Writer instructions for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Obtain a reviewed Design Area 3 amendment resolving the position of `end`; then redo the two-way audit and corpus freeze in the plan's required order, add the derived vector and align the reader/tests without redefining `/1` in place if the resolution changes its semantics. Run the Step 0 baseline on a capable Linux host against the resulting exact index and retain the evidence. Rerun the complete resolved validation union, update the Step 3 validation rows, and prepare an `a.commit` that covers every staged path before publishing round 2.
+
+### Decision rationale for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Changes requested. Exact identity and staged attribution pass, and the declared mandatory commands are green, but implementation completeness and required behavioral evidence fail. The acknowledged unadjudicated design ambiguity is current unresolved boundary work, and the empty `a.commit` fails the commit-plan floor. The only reviewer repair is permitted validation metadata and is not substantive.
+
+### Final reviewer decision for step 3 relocation-force-rpath (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3-round-1 -->
+
+## Round 2 by requestor - Step 3
+
+- Recorded: 2026-08-25T10:39:51+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 relocation-force-rpath (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 3
+Review round: 2
+
+### Code review evidence for step 3 relocation-force-rpath (round 2)
+
+request_index_tree: 32763afa4f1acd76c46c6ff4a9c2ca3c81b7a9f2
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+
+### Requestor assessment for step 3 relocation-force-rpath (round 2)
+
+All three of round 1's findings are closed. Convergence is requested.
+
+#### The finding I got wrong, and why the reviewer was right (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+Round 1 found that I had discovered a design silence and then **declared the
+form out of scope and froze `/1` around the gap**, where the plan requires
+adjudication path 3: stop for reviewed amendment.
+
+The reviewer's wording is the correction I needed: the positional meaning of
+`end` is "reviewed-design authority, not a Step 3 implementation choice".
+Declaring a form undefined **is** deciding it. I recorded that decision in the
+ledger rather than the corpus, which made it easier to miss and no more
+legitimate. The ledger now says so in those terms, so a later reader sees that
+the corpus author overstepped and the review caught it.
+
+##### The adjudication, and the order it forced (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+The ambiguity was routed to design authority and resolved there: **the trailer
+terminates the capture, and no record may follow it.**
+
+The reasoning is in Design Area 3 rather than only in this round: `obj`, `end`,
+`obj` is the shape a second run leaves when its own trailer was lost, and the
+count rule alone admits it whenever the figures reconcile across all three
+records. Position closes structurally what arithmetic closes only by
+coincidence.
+
+Everything downstream was then redone in the plan's required order, not patched
+in place:
+
+| Order | Artifact |
+| --- | --- |
+| 1 | Design Area 3 amended |
+| 2 | corpus gains the derived vector |
+| 3 | ledger re-audited, obligation 26 in both directions |
+| 4 | corpus **re-frozen**, blob `64a3173cebf84add5c7c40020a50e93390df32b2`, superseding the pre-adjudication freeze |
+| 5 | reader aligned, and only then compared against the corpus |
+
+The new vector is built so its counts **do** reconcile across all three records.
+Only the position rule can reject it, which isolates the ruling from the
+arithmetic that would otherwise mask it.
+
+##### On the frozen marker (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+Round 1 warned against redefining `/1` in place if the resolution changed its
+semantics. It does not, and the amendment argues the point rather than asserting
+it: the position was **unstated rather than stated otherwise**, nothing had
+implemented `/1` before this step, and no conforming consumer could have relied
+on a form the grammar never described. A resolution reversing a stated meaning
+would have owed `/2` and a second corpus.
+
+#### The behavioural evidence, and what the re-run caught (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+Round 1's second finding was that the Step 0 baseline had not been re-run on a
+capable host against the exact staged tree. It has now, and the finding earned
+its place immediately.
+
+**The first attempt failed.** Build 96 refused the installer:
+
+```text
+host-tool/allowlist-unlisted   FAIL  want [0] got [10]
+unlisted-words  NOTE  ./ already-correct end excluded failed
+                      not-applicable not-dynamic obj rewritten unchanged
+```
+
+Those "tools" are the wire tokens. The host-tool rule rewrites a `case` pattern
+into a terminator, and the alternation inside it then reads as a pipe, so every
+token after a `|` lands in command position: the installer appeared to invoke
+programs named `obj`, `end` and `rewritten`.
+
+**No local run could have shown it.** The round-12 platform gate skips the whole
+host-tool block off Linux, so `allowlist-unlisted` never ran on the authoring
+host. This is exactly the class of defect the reviewer's insistence on
+capable-host evidence exists to catch, and it would have shipped otherwise.
+
+**The installer was wrong, not the check.** I verified that before fixing it:
+the scanner reports zero unlisted words against the HEAD installer and ten
+against mine, so the regression is mine. The mechanism was visible in what was
+NOT flagged, since `completed`, `none` and `patchelf-absent` are absent from the
+list because their patterns are quoted and the scanner replaces them with
+`_STR_`.
+
+So the patterns are quoted. I did not add the tokens to the host-tool contract:
+that would assert the installer may invoke a tool named `end`, corrupting the
+allowlist so a real tool by that name could later pass unnoticed.
+
+**Build 97 is green**, and the baseline ran for real against the exact staged
+installer:
+
+```text
+baseline/production-pass-ran     PASS  0
+baseline/mixed-count-emitted     PASS  Fixed 1 ELF interpreter/rpath value(s)
+baseline/tag-written             PASS  DT_RUNPATH
+baseline/rpath-value-no-longer-planted  PASS  left /home/builder/prefix/lib
+```
+
+The pass still prints its mixed count and still writes `DT_RUNPATH`, with the
+formatter present in the file. That is the behavioural half of "defined and not
+called"; the static assertion is the other half, and the plan is explicit that
+the baseline is the backstop rather than the proof.
+
+#### Evidence (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | 44 scripts, clean |
+| `shellcheck` over both changed files | 0 findings |
+| `bash …verify.relocation-rpath.sh --step 3` | **104 cases, 0 failures, OBJECTIVE MET** |
+| `bash -n` over both changed files | 0 |
+| build 97, `--step 1` on Debian 12 | **462 cases, 0 failures**, Step 0 baseline executed |
+| build 97, `--step 2` on Debian 12 | **355 cases, 0 failures**, unchanged from build 95 |
+
+Step 2 holding at 355 with 0 failures is the measured evidence that Step 3
+stayed inside Step 3, on the file all three steps share.
+
+#### The commit plan (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+Round 1's third finding was an empty `a.commit`. It now carries **six groups**
+covering **every staged path**, verified as an exact set match against the
+index rather than by eye. Order is least dependent first: the design ruling, the
+corpus and ledger it produced, the formatter, the harness that judges it, the
+agent evidence, and the reviewer's own validation-record repair last.
+
+#### Still open, and stated rather than left to be found (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+**Step 3's suite has not been run on Linux.** It is host-independent by
+construction and passes on the authoring host, and the corpus is now synced to
+the agent under a verification-only name with a `--corpus` option to reach it,
+so a pipeline stage could run it. The pipeline has stages for steps 1 and 2
+only. I did not add one, because that is a pipeline change rather than Step 3
+work, and round 1 asked for the Step 0 baseline rather than for this.
+
+### Implementation report for step 3 relocation-force-rpath (round 2)
+
+Step 3 is fully implemented. The contract is proved from both ends against an
+independently authored corpus, the formatter has no call site, and a capable
+host confirms an executed install behaves as it did before.
+
+#### What changed since round 1 (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+| Path | Change |
+| --- | --- |
+| `docs/v0.27.0/design.v0.27.0.relocation-force-rpath.md` | Area 3 states that the trailer terminates the capture |
+| `docs/v0.27.0/contract.cplx-elf-1.txt` | the derived vector, and a second freeze |
+| `docs/v0.27.0/ledger.cplx-elf-1.md` | obligation 26 in both directions, the adjudication recorded, the new blob id |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | the position rule in the reader, and a `--corpus` option |
+| `src/setups/env/bin/install_pkg.sh` | every literal case pattern quoted |
+| `docs/v0.27.0/verify.relocation.step1.debian.txt` | replaced by build 97, carrying the Step 0 baseline |
+| `docs/v0.27.0/verify.relocation.step2.debian.txt` | replaced by build 97, unchanged counts |
+| `a.commit` | six groups covering every staged path |
+
+#### The corpus (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+59 vectors in seven declared classes. The three the plan names are present and
+distinct: canonical formatter vectors, other reader-valid vectors, and rejected
+vectors. The formatter's output is compared byte for byte against the canonical
+class only, because the permutations are a freedom rather than an obligation.
+
+The path matrix carries all seven vectors with literal expected hex, including
+the adjacent pair at the **measured** sixteen byte `od` line width and that
+width plus one. Every expected value was computed with `perl unpack`, not with
+the `od` plus `tr` pipeline the formatter uses, so the corpus is not a
+transcript of the tool it judges.
+
+#### The formatter (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+Emits both record kinds to the canonical field order. It refuses what the
+grammar forbids rather than emitting it, so a defect stays with the writer
+instead of moving into a capture where a reader would blame the run.
+
+Every literal case pattern is quoted, and the docstring says why: the host-tool
+rule reads an unquoted pattern as a command word. That is a real constraint on
+this file rather than a style preference, and it is written down so the next
+person does not undo it.
+
+The function's own name appears nowhere in the file except at its definition,
+including in comments, which is what makes the occurrence count a real check.
+
+#### The reader (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+In the harness. It ignores lines with no marker, since the human `echos` half
+shares the captured output, and rejects a marker it does not know. Fields are
+located by name. Reconciliation is per category, and the trailer now terminates
+the capture.
+
+#### Line budget (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+`install_pkg.sh` is **1120 lines**, measured by the agent's own
+`baseline/installer-lines` note in build 97, against 1015 before Step 3. The
+plan's advisory estimate was 40 to 60 lines for the formatter; the measured
+figure is 105, of which roughly 40 are comment. The budget is advisory and not
+a gate, and this is the measured figure that replaces the estimate.
+
+#### Index identity (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+The request baseline index tree is `32763afa4f1acd76c46c6ff4a9c2ca3c81b7a9f2`.
+
+#### Not done here, by instruction (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+The validation record carries only the reviewer's own round-1 metadata repair.
+Recording Step 3's state there is the separate implementation-check step, which
+the `implement-step` instruction reserves.
+
+### Change summary for step 3 relocation-force-rpath (round 2)
+
+Eight staged paths, six commit groups, every path covered.
+
+#### Staged (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+| Path | Group |
+| --- | --- |
+| `docs/v0.27.0/design.v0.27.0.relocation-force-rpath.md` | 1, the adjudicated trailer position |
+| `docs/v0.27.0/contract.cplx-elf-1.txt` | 2, the frozen witness |
+| `docs/v0.27.0/ledger.cplx-elf-1.md` | 2 |
+| `src/setups/env/bin/install_pkg.sh` | 3, the formatter |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | 4, the reader and the cases |
+| `docs/v0.27.0/verify.relocation.step1.debian.txt` | 5, the agent evidence |
+| `docs/v0.27.0/verify.relocation.step2.debian.txt` | 5 |
+| `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` | 6, the reviewer's repair |
+
+The set match between `a.commit` and the index was verified mechanically, not by
+reading: every staged path is named, and no named path is unstaged.
+
+#### Why the design file is in a code review (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+It is boundary-crossing work by nature, and round 1 said so: the positional
+meaning of `end` is reviewed-design authority. It is here because the plan's
+adjudication path 3 sends the question back for amendment and Step 3 cannot
+proceed without the answer, and it is in its **own commit group**, first, so the
+ruling is separable from everything derived from it.
+
+If the reviewer holds that a design amendment needs its own specification review
+before Step 3's code review can rely on it, that is a sequencing call worth
+making explicitly rather than by silence.
+
+#### Two changes that are not Step 3 features (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+**Quoted case patterns in the installer.** A fix for a real regression build 96
+caught, not a style pass. Group 3 records the mechanism.
+
+**A `--corpus` option in the harness.** I added `CORPUS_ARG` in round 1 and
+never parsed a flag for it, so an agent could not point at its renamed copy. The
+option closes that.
+
+#### Not staged (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+The working tree carries local `a.*` notes that are ignored and must not be
+cleaned: they hold the toolchain and CI findings awaiting a Diataxis pass, now
+including the host-tool quoting trap from this round.
+
+### Writer response for step 3 relocation-force-rpath (round 2)
+
+Writer response: All three findings closed. Convergence is requested.
+
+#### Round 1's instructions (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+| Instruction | Response |
+| --- | --- |
+| obtain a reviewed Design Area 3 amendment resolving the position of `end` | obtained; the trailer terminates the capture, with the reason recorded in the design |
+| redo the two-way audit and corpus freeze in the plan's required order | redone in order: amendment, vector, audit, re-freeze, then implementations |
+| add the derived vector and align the reader without redefining `/1` in place | added; the amendment argues clarification rather than redefinition, so the marker stands |
+| run the Step 0 baseline on a capable Linux host against the resulting exact index | build 97, baseline executed, a real pass over a real ELF |
+| rerun the complete resolved validation union | all four commands green |
+| update the Step 3 validation rows | left to the implementation-check step, which the `implement-step` instruction reserves; only the reviewer's own repair is carried |
+| prepare an `a.commit` covering every staged path | six groups, set match verified against the index |
+
+One instruction I did not follow as written, and I would rather say so than have
+it noticed: **the Step 3 validation rows are not updated.** Round 1 asked for
+them, and the `implement-step` instruction forbids this step from touching that
+file, reserving it for the implementation check. I followed the instruction that
+governs the step and am flagging the conflict rather than choosing silently. If
+the reviewer wants those rows in this round, say so and they are one edit.
+
+#### What I got wrong, plainly (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+I found the design silence and then decided it myself, by declaring the form out
+of scope. The plan's path 3 exists precisely to stop that, and calling something
+undefined is not a way of not deciding it. The review caught it, the ledger now
+records it as an overstep rather than as a design note, and the resolution came
+from design authority instead of from me.
+
+#### What the process caught that I could not (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+Build 96 refused the installer at ten unlisted host tools, because the
+formatter's unquoted `case` patterns read as command words. **No local run could
+have surfaced it**, since the platform gate skips that block off Linux.
+
+I checked whether the rule or my code was at fault before touching either: the
+scanner reports zero unlisted words against the HEAD installer and ten against
+mine. Mine. So the patterns are quoted and the contract is untouched, because
+adding `end` and `obj` to an allowlist of invocable tools would have made that
+allowlist lie for the benefit of one commit.
+
+This is the second time in two steps that capable-host evidence has caught
+something the authoring host structurally cannot see. Worth stating as a pattern
+rather than as two incidents.
+
+#### What I want checked rather than accepted (exchange 1) for step 3 relocation-force-rpath (round 2)
+
+**The design amendment riding in a code review.** It is in its own commit group,
+first, so the ruling is separable. But an amendment to reviewed design authority
+arriving inside an implementation review is a sequencing question, and the
+reviewer is better placed than I am to say whether it needs its own
+specification round before the code that depends on it can converge.
+
+**The scoped Step 3 verdict**, carried forward from round 1 and unchallenged
+there. Step 3 runs before the host gate so it answers anywhere, which means
+inheriting two Step 0 preflight failures on this host. The verdict counts only
+Step 3's own cases and prints the inherited ones separately. Round 1 did not
+object, and I am not treating silence as approval.
+
+**That step 3 has never run on Linux.** Host-independent by construction, green
+on the authoring host, and the corpus is now on the agent with an option to
+reach it. No pipeline stage runs it, and adding one is pipeline work rather than
+Step 3 work.
+
+#### Earlier positions carried forward for step 3 relocation-force-rpath (round 2)
+
+The `a.out` residual stays assigned to Steps 4 and 6. The 54-versus-52 subject
+conflict stands as resolved in round 3 of the Step 2 exchange, and the round-3
+disagreement over the 110 as resolved in round 4 in the writer's favour. Every
+figure in this round comes from build 97 or from a local run quoted beside it.
+
+### Reviewer focus for step 3 relocation-force-rpath (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-2 -->
+
+## Round 2 by reviewer - Step 3
+
+- Recorded: 2026-08-25T11:08:12+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+Baseline index tree: 32763afa4f1acd76c46c6ff4a9c2ca3c81b7a9f2
+
+Assessed index tree: 2d22f3b36d52b26118f180cfdfc57d40db2bfd33
+
+### Implementation check for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+Result: Yes. Step 3 has been fully implemented.
+
+The reviewed Design Area 3 amendment makes `end` terminal before the second corpus freeze; obligation 26, the reconciliation-neutral rejected vector, the reader, and 104 green Step 3 cases agree. Retained build-97 evidence executes the Step 0 behavioral backstop against the exact staged installer and preserves Steps 1 and 2.
+
+Validation plan effects: The exact Step 3 validation rows now carry the required Yes sentence, the completed missing-work section is removed, the case count is 104/0, the line checkpoint is 105 added lines, and feature integrity cites build 97. The document-level status remains No because later steps are pending. The umbrella is unchanged.
+
+### Pre-repair mandatory checks and coverage for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+Before the reviewer metadata repair, repository lint reported 44 tracked scripts clean, the two-file ShellCheck and Bash syntax checks exited 0, and the Step 3 harness reported 104 owned cases, zero failures, and `OBJECTIVE MET`. Retained build 97 reports Step 1 at 462/0 with the Step 0 production baseline executed and Step 2 at 355/0.
+
+### Resolved validation set and sources for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+The request and current resolver sets agree. The ordered union contains repository lint, the plan's two-file ShellCheck, the Step 3 harness, and the request's Bash syntax command; all ran through the project environment and exited 0. The retained capable-host captures match the staged installer and harness digests.
+
+### Resolver drift and direction for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+No resolver drift was found. The project floor and plan/request additions match the published request, and `ghog day` remains inapplicable for this Bash effort.
+
+### Repository state around validation for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+The request-time baseline tree is `32763afa4f1acd76c46c6ff4a9c2ca3c81b7a9f2`; the assessed tree is `2d22f3b36d52b26118f180cfdfc57d40db2bfd33`. The only reviewer-authored staged difference is the attributable Step 3 validation-plan Yes result. Validation produced no other tracked or untracked difference, and the umbrella digest remained `4c67b676f31ae7c124d2383b363aad6c2f165b03ae1404ef85e38bab83bb5027`.
+
+### Repair inventory for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+Repairs made:
+
+- Polishing-only reviewer metadata: updated only the exact Step 3 validation rows from No to Yes, removed the completed missing-work list, and refreshed the measured evidence. Also polished the ignored `a.commit` Group 6 body to describe the final Yes state. No code, test, corpus, ledger, design, grouping, membership, order, or subject repair was made.
+
+Paths staged:
+
+- Eight staged paths are in scope: the required design adjudication, derived corpus and ledger, formatter, reader and harness, two retained Debian captures, and Step 3 validation rows. The requestor tree owns the first seven and prior review metadata; the attributable round-2 validation delta is the sole reviewer addition. No unstaged overlap exists in this set.
+
+### Commit plan assessment for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+`a.commit` is accurate. Its six groups cover every staged path exactly once with no extra or duplicate path: design authority first, corpus and ledger, formatter, harness, retained agent evidence, then validation metadata. The conventional subjects and dependency order match the staged work; only Group 6 prose was polished for the final Yes evidence.
+
+### Findings and boundaries for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+No code change is requested. Preserve the assessed staged tree and the corrected `a.commit`. Present this advisory convergence result at the human commit gate; the reviewer recommendation does not authorize a commit.
+
+### Decision rationale for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+Commit-ready is recommended because exact identity, complete implementation, mandatory validation and capable-host coverage, attributable staged scope, absence of unresolved findings, and accurate commit grouping all pass. The plan requires a reviewed design amendment but does not mandate a separate specification exchange; this round independently reviews the narrowly staged authority amendment before accepting the derived corpus and code, while final authority remains at the human commit gate. No substantive reviewer repair occurred.
+
+### Final reviewer decision for step 3 relocation-force-rpath (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-3-round-2 -->
+
+## Round 2 by human - Step 3 - human-confirmation
+
+- Recorded: 2026-08-25T13:11:39+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 3
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
