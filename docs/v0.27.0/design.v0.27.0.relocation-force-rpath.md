@@ -627,6 +627,19 @@ the records say rather than a set of totals with the right sum:
 - **Exactly one trailer per capture.** A capture with none is truncated; a
   capture with two is two runs concatenated. Either way the recipe knows not to
   assert on it.
+- **The trailer terminates the capture.** `end` is positional as well as a
+  kind: no record may follow it. A capture carrying `obj`, `end`, `obj` is a
+  second run whose own trailer was lost, which is the truncated case above
+  wearing the shape of a valid one. The count rule alone would admit it whenever
+  the trailer figures happened to reconcile across all three records, so the
+  position is what closes it structurally rather than by arithmetic coincidence.
+
+  This CLARIFIES `/1` rather than redefining it, and the distinction matters
+  because `/1` is frozen. The position was previously unstated rather than
+  stated otherwise: no conforming consumer could have relied on a form the
+  grammar never described, and nothing that already parses `/1` changes meaning.
+  A resolution that reversed a stated meaning would owe a new marker and a new
+  corpus instead of a rule added behind the old token.
 
 ## Design Area 4 for v0.27.0 relocation-force-rpath: migration and its bounds
 
