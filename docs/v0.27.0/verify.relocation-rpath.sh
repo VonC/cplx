@@ -59,6 +59,7 @@ REPRESENTATIVE_CAPABILITY_FILE=""
 TARGET_IS_EXACT=0
 HOST_TOOL_CONTRACT_ARG=""
 INVENTORY_ARG=""
+CORPUS_ARG=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -78,6 +79,10 @@ while [ "$#" -gt 0 ]; do
         --target-is-exact) TARGET_IS_EXACT=1; shift ;;
         # The allowlist half of the host-tool rule: committed vocabulary data.
         --host-tool-contract) HOST_TOOL_CONTRACT_ARG="$2"; shift 2 ;;
+        # The CPLX-ELF/1 contract corpus, committed test data. Namable for the
+        # same reason the host-tool contract is: an agent carries it under a
+        # verification-only name beside the harness rather than at its own.
+        --corpus) CORPUS_ARG="$2"; shift 2 ;;
         # The recorded develop#24 inventory: the Step 2 selected-set oracle.
         --inventory) INVENTORY_ARG="$2"; shift 2 ;;
         -h|--help) sed -n '2,45p' "$0"; exit 0 ;;
@@ -85,13 +90,13 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# Only steps 0, 1 and 2 have case suites today. Accepting any other value would
+# Only steps 0, 1, 2 and 3 have case suites today. Accepting any other value would
 # let the verdict line report success for a step whose cases do not exist, which
 # is a vacuous pass at exactly the level later steps rely on. Extend this
 # dispatch and the suite together.
 case "$STEP" in
-    0|1|2) ;;
-    *) echo "unsupported --step $STEP: steps 0, 1 and 2 have case suites today." >&2
+    0|1|2|3) ;;
+    *) echo "unsupported --step $STEP: steps 0, 1, 2 and 3 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -1505,6 +1510,507 @@ if [ "$HOST_OK" -eq 1 ]; then
     cases=$((cases + 1))
 else
     printf '  %-40s SKIP  missing: %s\n' "host/can-run-step-$STEP" "$HOST_WHY"
+fi
+
+# ==================================================================== step 3 ===
+# The CPLX-ELF/1 report contract, proved from BOTH ENDS before anything depends
+# on it, so the step that changes behaviour carries only the wiring.
+#
+# Nothing here runs during an install and nothing here needs a capable host: the
+# formatter is driven with constructed dispositions exactly as step 2 drives the
+# classifier with constructed tuples, and the reader is driven with literals.
+# So this suite sits BEFORE the baseline gate and answers on any host with bash.
+#
+# THE READER LIVES HERE, NEVER IN THE INSTALLER. It consumes a retained capture,
+# so a parser in the file that must deploy standalone would add a call surface
+# no install executes, to the file whose size is this effort's live constraint.
+# The malformed-capture constructors live beside it for the same reason: they
+# are validation inputs, and nothing in the installer knows how to build a
+# broken capture.
+
+CORPUS="${CORPUS_ARG:-$here/contract.cplx-elf-1.txt}"
+# The frozen bytes, recorded in ledger.cplx-elf-1.md BEFORE either end was
+# compared against them. Checked here so a corpus edited to make a red suite
+# green is caught by the suite it was edited to satisfy.
+CORPUS_FROZEN_BLOB="64a3173cebf84add5c7c40020a50e93390df32b2"
+
+STEP3_REASON=""
+
+# step3_vectors CLASS: the corpus lines of one class, without the class field.
+step3_vectors() {
+    grep "^$1|" "$CORPUS" 2>/dev/null | cut -d'|' -f2-
+}
+
+# step3_unescape SPEC DEST: decode the corpus raw-spec escapes to real bytes,
+# into STEP3_SPEC. Named and decimal escapes on purpose, so a corpus input is
+# never written in the encoding under test.
+#
+# The result is returned in a GLOBAL rather than printed, because one vector's
+# raw input ends in a newline and command substitution strips trailing newlines.
+# Printing it would silently drop the byte that vector exists to prove survives.
+STEP3_SPEC=""
+step3_unescape() {
+    local spec="$1" dest="$2" out
+    out="${spec//%DEST%/$dest}"
+    out="${out//%SP%/ }"
+    out="${out//%B255%/$'\xff'}"
+    # Last, because it introduces the byte that terminates a line.
+    out="${out//%NL%/$'\n'}"
+    STEP3_SPEC="$out"
+}
+
+# step3_read_capture CAPTURE: THE RETAINED-OUTPUT READER.
+#
+# Accepts a whole capture, which is the install output, so lines carrying no
+# marker are the human `echos` half and are ignored. A line carrying an UNKNOWN
+# marker is rejected instead: ignoring it would be guessing that the run it
+# describes is irrelevant.
+#
+# Sets STEP3_REASON to a distinguishable token and returns 1 on refusal, or
+# clears it and returns 0. Fields are located BY NAME: nothing here depends on
+# the order the formatter happens to emit.
+step3_read_capture() {
+    local capture="$1"
+    local line rest kind pair name value seen
+    local objs=0 trailers=0 case5=0
+    local r_rewritten=0 r_failed=0 r_already=0 r_notdyn=0 r_excluded=0
+    local i_rewritten=0 i_failed=0 i_unchanged=0 i_notapp=0
+    local t_state="" t_reason="" t_walked=""
+    local t_r_rewritten="" t_r_failed="" t_r_already="" t_r_notdyn="" t_r_excluded=""
+    local t_i_rewritten="" t_i_failed="" t_i_unchanged="" t_i_notapp=""
+    local t_mig_checked="" t_mig_failed=""
+    local c_case="" c_rpath="" c_interp="" c_path=""
+    STEP3_REASON=""
+
+    while IFS= read -r line; do
+        case "$line" in
+            "CPLX-ELF/1 "*) rest="${line#CPLX-ELF/1 }" ;;
+            "CPLX-ELF/"*)   STEP3_REASON="marker"; return 1 ;;
+            *)              continue ;;
+        esac
+        kind="${rest%% *}"
+        rest="${rest#* }"
+        case "$kind" in
+            obj|end) ;;
+            *) STEP3_REASON="kind"; return 1 ;;
+        esac
+        # The trailer TERMINATES the capture, so nothing may follow it. Checked
+        # here rather than by counting afterwards, because the shape this closes
+        # is `obj end obj`, whose figures can reconcile across all three records
+        # while being a second run that lost its own trailer. Arithmetic would
+        # admit it; position does not.
+        if [ "$trailers" -ne 0 ]; then
+            STEP3_REASON="trailer"; return 1
+        fi
+
+        seen=""
+        c_case=""; c_rpath=""; c_interp=""; c_path=""
+        t_state=""; t_reason=""; t_walked=""
+        t_r_rewritten=""; t_r_failed=""; t_r_already=""; t_r_notdyn=""; t_r_excluded=""
+        t_i_rewritten=""; t_i_failed=""; t_i_unchanged=""; t_i_notapp=""
+        t_mig_checked=""; t_mig_failed=""
+
+        for pair in $rest; do
+            # A bare word can only come from a value that contained a space, and
+            # the grammar's tokens are space-free precisely so that cannot be
+            # mistaken for a field.
+            case "$pair" in
+                *=*) ;;
+                *) STEP3_REASON="token"; return 1 ;;
+            esac
+            name="${pair%%=*}"
+            value="${pair#*=}"
+            case " $seen " in
+                *" $name "*) STEP3_REASON="duplicate"; return 1 ;;
+            esac
+            seen="$seen $name"
+            case "$kind:$name" in
+                obj:case)   c_case="$value" ;;
+                obj:rpath)  c_rpath="$value" ;;
+                obj:interp) c_interp="$value" ;;
+                obj:path)   c_path="$value" ;;
+                end:state)  t_state="$value" ;;
+                end:reason) t_reason="$value" ;;
+                end:walked) t_walked="$value" ;;
+                end:r-rewritten)      t_r_rewritten="$value" ;;
+                end:r-failed)         t_r_failed="$value" ;;
+                end:r-already-correct) t_r_already="$value" ;;
+                end:r-not-dynamic)    t_r_notdyn="$value" ;;
+                end:r-excluded)       t_r_excluded="$value" ;;
+                end:i-rewritten)      t_i_rewritten="$value" ;;
+                end:i-failed)         t_i_failed="$value" ;;
+                end:i-unchanged)      t_i_unchanged="$value" ;;
+                end:i-not-applicable) t_i_notapp="$value" ;;
+                end:mig-checked)      t_mig_checked="$value" ;;
+                end:mig-failed)       t_mig_failed="$value" ;;
+                *) STEP3_REASON="unknown"; return 1 ;;
+            esac
+        done
+
+        if [ "$kind" = "obj" ]; then
+            case " $seen " in
+                *" case "*) ;; *) STEP3_REASON="missing"; return 1 ;;
+            esac
+            case " $seen " in
+                *" rpath "*) ;; *) STEP3_REASON="missing"; return 1 ;;
+            esac
+            case " $seen " in
+                *" interp "*) ;; *) STEP3_REASON="missing"; return 1 ;;
+            esac
+            case " $seen " in
+                *" path "*) ;; *) STEP3_REASON="missing"; return 1 ;;
+            esac
+            case "$c_case" in [1-7]) ;; *) STEP3_REASON="case"; return 1 ;; esac
+            case "$c_rpath" in
+                rewritten)      r_rewritten=$((r_rewritten + 1)) ;;
+                failed)         r_failed=$((r_failed + 1)) ;;
+                already-correct) r_already=$((r_already + 1)) ;;
+                not-dynamic)    r_notdyn=$((r_notdyn + 1)) ;;
+                excluded)       r_excluded=$((r_excluded + 1)) ;;
+                *) STEP3_REASON="token"; return 1 ;;
+            esac
+            case "$c_interp" in
+                rewritten)      i_rewritten=$((i_rewritten + 1)) ;;
+                failed)         i_failed=$((i_failed + 1)) ;;
+                unchanged)      i_unchanged=$((i_unchanged + 1)) ;;
+                not-applicable) i_notapp=$((i_notapp + 1)) ;;
+                *) STEP3_REASON="token"; return 1 ;;
+            esac
+            # Non-empty, even length, lowercase hex only.
+            case "$c_path" in
+                ""|*[!0-9a-f]*) STEP3_REASON="path"; return 1 ;;
+            esac
+            if [ $(( ${#c_path} % 2 )) -ne 0 ]; then
+                STEP3_REASON="path"; return 1
+            fi
+            # A decoded value may not begin with `/` or `./`: 2f is `/`, 2e2f is
+            # `./`. Tested on the encoded form so nothing has to be decoded to
+            # find out.
+            case "$c_path" in
+                2f*|2e2f*) STEP3_REASON="path"; return 1 ;;
+            esac
+            objs=$((objs + 1))
+            [ "$c_case" = "5" ] && case5=$((case5 + 1))
+        else
+            trailers=$((trailers + 1))
+            for name in state reason walked r-rewritten r-failed r-already-correct \
+                r-not-dynamic r-excluded i-rewritten i-failed i-unchanged \
+                i-not-applicable mig-checked mig-failed; do
+                case " $seen " in
+                    *" $name "*) ;; *) STEP3_REASON="missing"; return 1 ;;
+                esac
+            done
+            case "$t_state $t_reason" in
+                "completed none"|"skipped patchelf-absent") ;;
+                *) STEP3_REASON="pairing"; return 1 ;;
+            esac
+            for value in "$t_walked" "$t_r_rewritten" "$t_r_failed" "$t_r_already" \
+                "$t_r_notdyn" "$t_r_excluded" "$t_i_rewritten" "$t_i_failed" \
+                "$t_i_unchanged" "$t_i_notapp" "$t_mig_checked" "$t_mig_failed"; do
+                case "$value" in
+                    ""|*[!0-9]*) STEP3_REASON="number"; return 1 ;;
+                esac
+            done
+        fi
+    done <<< "$capture"
+
+    # Exactly one trailer. None is a truncated capture; two is two runs
+    # concatenated. Either way the recipe knows not to assert on it.
+    if [ "$trailers" -ne 1 ]; then
+        STEP3_REASON="trailer"; return 1
+    fi
+    # A skipped pass that reported counts would be describing work it did not do.
+    if [ "$t_state" = "skipped" ]; then
+        if [ "$objs" -ne 0 ]; then STEP3_REASON="skipped"; return 1; fi
+        for value in "$t_walked" "$t_r_rewritten" "$t_r_failed" "$t_r_already" \
+            "$t_r_notdyn" "$t_r_excluded" "$t_i_rewritten" "$t_i_failed" \
+            "$t_i_unchanged" "$t_i_notapp" "$t_mig_checked" "$t_mig_failed"; do
+            [ "$value" = "0" ] || { STEP3_REASON="skipped"; return 1; }
+        done
+    fi
+    [ "$t_walked" = "$objs" ] || { STEP3_REASON="walked"; return 1; }
+    # Per category, not by sum. A capture of 388 failed records with a trailer
+    # claiming 388 rewritten satisfies both sums and every category is wrong.
+    [ "$t_r_rewritten" = "$r_rewritten" ] || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_r_failed" = "$r_failed" ]       || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_r_already" = "$r_already" ]     || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_r_notdyn" = "$r_notdyn" ]       || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_r_excluded" = "$r_excluded" ]   || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_i_rewritten" = "$i_rewritten" ] || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_i_failed" = "$i_failed" ]       || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_i_unchanged" = "$i_unchanged" ] || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_i_notapp" = "$i_notapp" ]       || { STEP3_REASON="per-token"; return 1; }
+    [ "$t_mig_checked" = "$case5" ] || { STEP3_REASON="migration"; return 1; }
+    [ "$t_mig_failed" -le "$t_mig_checked" ] || { STEP3_REASON="migration"; return 1; }
+    return 0
+}
+
+# step3_capture_from_vector VECTOR: the constructors. A corpus capture packs its
+# records with `;;` so one vector is one line; this expands them back to the
+# newline-separated stream a real capture is.
+step3_capture_from_vector() {
+    printf '%s' "${1//;;/$'\n'}"
+}
+
+step3_suite() {
+    local id record raw expect got reason spec dest line class n
+    dest="/tmp/cplx-step3-dest"
+
+    section "step 3: the corpus is the frozen witness"
+
+    if [ ! -f "$CORPUS" ]; then
+        fail "corpus/present" "CORPUS absent: $CORPUS"
+        cases=$((cases + 1))
+        return 0
+    fi
+    note "corpus/path" "$CORPUS"
+    pass "corpus/present" "$(step3_vectors canonical-obj | grep -c .) canonical obj vectors"
+    cases=$((cases + 1))
+
+    # The corpus outranks both implementations, so a suite made green by editing
+    # it would be the one failure this design cannot otherwise see.
+    got=$(git hash-object "$CORPUS" 2>/dev/null || echo unavailable)
+    chk "corpus/frozen-bytes" "$CORPUS_FROZEN_BLOB" "$got"
+    cases=$((cases + 1))
+
+    # Three declared classes. A two-class corpus would file a lawful permutation
+    # as malformed input, which is the mistake the third class exists to stop.
+    for class in canonical-obj canonical-end reader-valid rejected path \
+        capture-valid capture-reject; do
+        n=$(step3_vectors "$class" | grep -c .)
+        if [ "$n" -gt 0 ]; then
+            pass "corpus/class-$class" "$n vectors"
+        else
+            fail "corpus/class-$class" "CORPUS class is empty"
+        fi
+        cases=$((cases + 1))
+    done
+
+    section "step 3: the formatter emits the canonical bytes"
+
+    if declare -F emit_cplx_elf_v1_record >/dev/null 2>&1; then
+        pass "step3/formatter-defined" "emit_cplx_elf_v1_record"
+    else
+        fail "step3/formatter-defined" "SEAM the formatter did not survive sourcing"
+    fi
+    cases=$((cases + 1))
+
+    # Byte for byte against the CANONICAL class only. The formatter is never
+    # required to emit the permutations, so comparing against them would be
+    # asserting a freedom rather than an obligation.
+    while IFS='|' read -r id record; do
+        [ -n "$id" ] || continue
+        raw=$(step3_vectors path | awk -F'|' -v i="$id" '$1 == i {print $2}')
+        [ -n "$raw" ] || continue
+        step3_unescape "$raw" "$dest"
+        got=$(emit_cplx_elf_v1_record obj \
+            "$(printf '%s' "$record" | sed 's/.*case=\([0-9]\).*/\1/')" \
+            "$(printf '%s' "$record" | sed 's/.*rpath=\([a-z-]*\).*/\1/')" \
+            "$(printf '%s' "$record" | sed 's/.*interp=\([a-z-]*\).*/\1/')" \
+            "$dest/${STEP3_SPEC#"$dest/"}" "$dest" 2>/dev/null)
+        chk "formatter/canonical-$id" "$record" "$got"
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors canonical-obj)"
+
+    # Every path vector's expected hex, including the adjacent pair straddling
+    # the measured od wrap boundary, where a lost byte or an injected separator
+    # would appear and nowhere else.
+    while IFS='|' read -r id raw expect; do
+        [ -n "$id" ] || continue
+        step3_unescape "$raw" "$dest"
+        got=$(emit_cplx_elf_v1_record obj 5 failed unchanged \
+            "$dest/${STEP3_SPEC#"$dest/"}" "$dest" 2>/dev/null)
+        got="${got##*path=}"
+        chk "formatter/path-$id" "$expect" "$got"
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors path)"
+
+    while IFS='|' read -r id record; do
+        [ -n "$id" ] || continue
+        case "$id" in
+            completed-design-sample)
+                got=$(emit_cplx_elf_v1_record end completed none 1 0 1 0 0 0 0 0 1 0 1 0) ;;
+            skipped)
+                got=$(emit_cplx_elf_v1_record end skipped patchelf-absent 0 0 0 0 0 0 0 0 0 0 0 0) ;;
+            *) continue ;;
+        esac
+        chk "formatter/canonical-end-$id" "$record" "$got"
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors canonical-end)"
+
+    # The formatter refuses what the grammar forbids rather than emitting it.
+    for spec in "obj 8 failed unchanged $dest/a $dest" \
+        "obj 5 bogus unchanged $dest/a $dest" \
+        "obj 5 failed bogus $dest/a $dest" \
+        "end completed patchelf-absent 0 0 0 0 0 0 0 0 0 0 0 0" \
+        "end skipped none 0 0 0 0 0 0 0 0 0 0 0 0" \
+        "end skipped patchelf-absent 0 1 0 0 0 0 0 0 0 0 0 0"; do
+        # shellcheck disable=SC2086  # deliberate word split: the row IS the argv
+        if emit_cplx_elf_v1_record $spec >/dev/null 2>&1; then
+            fail "formatter/refuses" "FORMATTER emitted a forbidden record: $spec"
+        else
+            pass "formatter/refuses" "$spec"
+        fi
+        cases=$((cases + 1))
+    done
+
+    section "step 3: the reader accepts what the grammar allows"
+
+    # Canonical records, each as a one-record capture with its matching trailer.
+    while IFS='|' read -r id record; do
+        [ -n "$id" ] || continue
+        if step3_read_capture "$record"; then
+            fail "reader/needs-trailer-$id" "READER accepted a capture with no trailer"
+        else
+            if [ "$STEP3_REASON" = "trailer" ]; then
+                pass "reader/needs-trailer-$id" "trailer"
+            else
+                fail "reader/needs-trailer-$id" "READER wrong reason: $STEP3_REASON"
+            fi
+        fi
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors canonical-obj)"
+
+    # The permutations are what test name-based field resolution. A strictly
+    # positional reader passes every canonical and every rejected vector, and
+    # fails only here.
+    while IFS='|' read -r id record; do
+        [ -n "$id" ] || continue
+        # A lone obj record is a capture with no trailer, so the permuted obj
+        # vectors are given the trailer that reconciles with them. Skipping them
+        # instead would skip the only vectors that test obj field resolution.
+        case "$id" in
+            obj-permuted)
+                record="$record"$'\n'"CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0" ;;
+            obj-permuted-2)
+                record="$record"$'\n'"CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=1 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=1 mig-checked=0 mig-failed=0" ;;
+            # The permuted COMPLETED trailer reconciles against one record, so
+            # it needs that record to be a lawful capture. Feeding it alone
+            # would test reconciliation, which is not what this class is for.
+            end-permuted)
+                record="CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6c69622f666f6f2e736f"$'\n'"$record" ;;
+        esac
+        if step3_read_capture "$record"; then
+            pass "reader/permuted-$id" "fields located by name"
+        else
+            fail "reader/permuted-$id" "READER rejected a lawful permutation: $STEP3_REASON"
+        fi
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors reader-valid)"
+
+    section "step 3: the reader refuses what it must"
+
+    while IFS='|' read -r id reason record; do
+        [ -n "$id" ] || continue
+        if step3_read_capture "$record"; then
+            fail "reader/rejects-$id" "READER accepted a malformed record"
+        elif [ "$STEP3_REASON" = "$reason" ]; then
+            pass "reader/rejects-$id" "$reason"
+        else
+            fail "reader/rejects-$id" "READER reason $STEP3_REASON, expected $reason"
+        fi
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors rejected)"
+
+    section "step 3: reconciliation is categorical"
+
+    while IFS='|' read -r id record; do
+        [ -n "$id" ] || continue
+        if step3_read_capture "$(step3_capture_from_vector "$record")"; then
+            pass "reader/capture-$id" "accepted"
+        else
+            fail "reader/capture-$id" "READER rejected a lawful capture: $STEP3_REASON"
+        fi
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors capture-valid)"
+
+    while IFS='|' read -r id reason record; do
+        [ -n "$id" ] || continue
+        if step3_read_capture "$(step3_capture_from_vector "$record")"; then
+            fail "reader/capture-rejects-$id" "READER accepted an inconsistent capture"
+        elif [ "$STEP3_REASON" = "$reason" ]; then
+            pass "reader/capture-rejects-$id" "$reason"
+        else
+            fail "reader/capture-rejects-$id" "READER reason $STEP3_REASON, expected $reason"
+        fi
+        cases=$((cases + 1))
+    done <<< "$(step3_vectors capture-reject)"
+
+    section "step 3: the two ends agree"
+
+    # The round trip is checked as well, but it is the corpus that makes their
+    # agreement mean correctness: two ends written by the same hand can drift
+    # together while still carrying the marker.
+    got=$(
+        emit_cplx_elf_v1_record obj 5 failed unchanged "$dest/lib/foo.so" "$dest"
+        emit_cplx_elf_v1_record end completed none 1 0 1 0 0 0 0 0 1 0 1 0
+    )
+    if step3_read_capture "$got"; then
+        pass "step3/round-trip" "the reader accepts what the formatter emits"
+    else
+        fail "step3/round-trip" "ROUNDTRIP the reader refused the formatter: $STEP3_REASON"
+    fi
+    cases=$((cases + 1))
+
+    section "step 3: the formatter has no production call site"
+
+    # The whole argument of this step is that nothing a deployment can see
+    # changes, and an identifier search is only as good as the identifier. The
+    # name is reserved in the plan and forbidden in comments and message
+    # literals here, so every occurrence is a definition or a call. Step 3
+    # expects exactly one: the definition.
+    n=$(grep -c '\bemit_cplx_elf_v1_record\b' "$INSTALLER" 2>/dev/null || true)
+    chk "step3/formatter-uncalled" "1" "$n"
+    cases=$((cases + 1))
+
+    # The reader is in this harness and must not have leaked into the file that
+    # has to deploy standalone.
+    n=$(grep -c '\bstep3_read_capture\b' "$INSTALLER" 2>/dev/null || true)
+    chk "step3/reader-absent-from-installer" "0" "$n"
+    cases=$((cases + 1))
+}
+
+# Step 3 needs no baseline and no capable host: nothing it checks runs during an
+# install, so the capture below would prove nothing about it while demanding
+# patchelf and a Linux kernel it never uses. Running the suite HERE, ahead of the
+# host gate, is what lets step 3 answer on the authoring host rather than report
+# unanswered for capability it does not need.
+if [ "$STEP" = "3" ]; then
+    # The formatter is PRODUCTION code, reached by sourcing the installer through
+    # the seam step 0 opened, so the cases exercise it rather than a copy.
+    # shellcheck disable=SC1090
+    source "$ISOLATED_INSTALLER" >/dev/null 2>&1
+    # Step 0's preflight runs for every invocation and resolves readelf and the
+    # target capability, which Step 3 never uses: it reads literals and drives a
+    # formatter. On a host without those, Step 0's cases fail above and steps 1
+    # and 2 absorb them into their host gate, which Step 3 skips.
+    #
+    # So the verdict is scoped to the cases Step 3 OWNS, and the inherited ones
+    # are named rather than discounted. Reporting the total would fail Step 3 for
+    # capability its criteria do not mention; hiding the inherited failures would
+    # be the count-driven change this effort has refused since Step 0. Both
+    # figures are printed, and only the owned one decides.
+    step3_inherited_failures="$failures"
+    step3_first_case=$((cases + 1))
+    step3_suite
+    step3_own_failures=$((failures - step3_inherited_failures))
+    printf '\n== verdict\n'
+    printf '  step        %s\n' "$STEP"
+    printf '  cases       %s\n' "$((cases - step3_first_case + 1))"
+    printf '  failures    %s\n' "$step3_own_failures"
+    printf '  corpus      %s\n' "$CORPUS"
+    printf '  installer   %s\n' "$INSTALLER"
+    if [ "$step3_inherited_failures" -ne 0 ]; then
+        printf '  inherited   %s step 0 preflight failure(s), not step 3 criteria\n' \
+            "$step3_inherited_failures"
+        printf '              this host cannot answer step 0; step 3 does not ask it to\n'
+    fi
+    if [ "$step3_own_failures" -ne 0 ]; then
+        printf '\nOBJECTIVE NOT MET for step %s: %s failure(s)\n' "$STEP" "$step3_own_failures"
+        exit 1
+    fi
+    printf '\nOBJECTIVE MET for step %s\n' "$STEP"
+    exit 0
 fi
 
 # -------------------------------------------------------------------- baseline ---
