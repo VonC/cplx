@@ -1686,8 +1686,13 @@ helpers at 462 cases and 0 failures.
 
 ## Analysis of Step 3 implementation state
 
-Not started. Step 3 is not implemented because the record formatter and the
-retained-capture reader do not exist.
+Yes. Step 3 has been fully implemented.
+
+The reviewed design amendment resolves the trailer-position ambiguity before
+the corpus's second freeze, the re-audited ledger covers all 26 obligations,
+and the aligned formatter and reader pass 104 Step 3 cases. Retained build-97
+evidence executes the required Step 0 behavioral backstop against the exact
+staged installer and confirms Steps 1 and 2 remain green.
 
 ### Goal for Step 3
 
@@ -1792,27 +1797,61 @@ unchanged.
 
 ### What was implemented for Step 3
 
-_(empty — no check has taken place yet.)_.
+- `src/setups/env/bin/install_pkg.sh` defines the uncalled
+  `emit_cplx_elf_v1_record` formatter and the `/1` marker.
+- `docs/v0.27.0/verify.relocation-rpath.sh` implements the sole retained-capture
+  reader, corpus constructors, categorical reconciliation, and the Step 3
+  dispatch and verdict.
+- `docs/v0.27.0/contract.cplx-elf-1.txt` supplies the three declared vector
+  classes, path-byte matrix, and whole-capture reconciliation cases.
+- `docs/v0.27.0/ledger.cplx-elf-1.md` records the two-way audit, measured
+  16-byte `od` width, and frozen corpus blob.
+- The Step 3 harness reports 104 owned cases, zero failures, and `OBJECTIVE
+  MET`; repository lint, the two-file ShellCheck command, and Bash syntax are
+  clean.
 
 ### New types or classes introduced for Step 3
 
-_(empty — no check has taken place yet.)_.
+No application type or class is introduced. The new contract artifacts declare
+canonical formatter, other reader-valid, rejected, path, capture-valid, and
+capture-reject vector classes.
 
 ### Architecture check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The formatter remains in the standalone installer while the validation-only
+reader remains in the harness, preserving the intended production/validation
+boundary. The staged Design Area 3 amendment is the authority artifact required
+by the plan's adjudication path and is independently reviewed in this round
+before the derived corpus and implementations. No DDD-Hexagonal layer applies
+to these Bash scripts, and no cross-boundary dependency smell was found.
+
+No architecture issue needs to be addressed.
 
 ### Performance check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The formatter has no production call site, so this step adds no install-time
+walk or runtime work. The measured 105-line installer increase exceeds the
+advisory estimate but is not a performance gate.
+
+No performance issue needs to be addressed.
 
 ### Unit test coverage check for Step 3
 
-_(empty — no check has taken place yet.)_.
+This repository has no `src/pdfss/tests/unit` Python unit-test layer; the plan's
+declared substitute is the Bash harness. Its Step 3 suite exercises the
+formatter, reader, literal corpus classes, path matrix, malformed forms,
+reconciliation, round trip, and static no-call-site assertions across 104 owned
+cases with zero failures.
+
+No unit-tested class below 100% needs completing.
 
 ### Feature integrity for Step 3
 
-_(empty — no check has taken place yet.)_.
+The static assertions show one formatter definition and no reader in the
+installer. Retained build-97 evidence runs the real Step 0 production baseline
+against the staged installer at 462/0 for Step 1 and keeps Step 2 at 355/0,
+confirming the pass still writes `DT_RUNPATH`, emits its mixed count, and has no
+observable Step 3 behavior change.
 
 ---
 
