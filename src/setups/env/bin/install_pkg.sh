@@ -523,6 +523,147 @@ elf_probe() {
     return 0
 }
 
+# --- ELF classification (v0.27.0 relocation-force-rpath, Design Area 2) ---
+#
+# The seven ordered cases, evaluated in order, first match wins. Cases 4, 5 and
+# 6 select an object for rewriting; cases 1, 2, 3 and 7 do not.
+#
+# The order is the contract, not tidiness. INSTALL_PREFIX defaults to $HOME, so
+# the target search path ITSELF contains `/home/` and the broad builder-anchored
+# test of case 6 matches objects that are already relocated. Two orderings carry
+# that weight:
+#   * case 3 before cases 4 to 6 makes a second run report zero rewrites under
+#     $HOME, where the deployed value would otherwise re-satisfy case 6 forever;
+#   * case 5 before case 6 makes a v0.26.0-relocated prefix classify as a
+#     migration rather than as a fresh relocation, which in turn decides whether
+#     the interpreter assertion examines the object.
+#
+# The case is POPULATION IDENTITY, not an outcome. It is assigned from the
+# observation and does not change with what the pass then manages to do: a case
+# 5 object whose write fails is still a case 5 object, so the migration
+# population still contains it. The disposition, which the wiring step adds
+# later, is the separate value recording what happened.
+#
+# It is computed ONCE per object into one fixed global, for the reason the tuple
+# is: three consumers ask about the same object, and one stored answer keeps
+# them consistent by construction rather than by three conditions kept in step.
+CPLX_ELF_CASE=""
+
+# elf_classify TARGET_RPATH: assign CPLX_ELF_CASE from CPLX_ELF_OBS.
+#
+# TARGET_RPATH is the search path build_elf_rpath computes for this install. An
+# EMPTY target is not a special case here: the classifier answers with the
+# object's own population, and an unavailable target is a fact about the write
+# rather than an observation of the object, so recording it belongs to the
+# disposition.
+#
+# The tuple is read, never validated. The observer fills every field of it, and
+# a caller handing over a tuple it did not observe is a defective caller; the
+# harness checks the invariants before it calls, which is where a malformed
+# input fails as a broken test rather than as a classification.
+elf_classify() {
+    local target="$1"
+
+    # Case 1: a required rpath observation failed or was inconclusive. Three
+    # producers and no fourth. A structural failure invalidates the whole tuple;
+    # a probe that ran and did not answer leaves nothing to compare; and
+    # `ambiguous` is a SUCCESSFUL observation of a state the requirement defines
+    # no population for, which patchelf's own tag preference would otherwise
+    # decide. `skipped` is deliberately not among them: an object with no
+    # dynamic section reaches case 2, never case 1.
+    #
+    # `blocked` cannot occur beside a structural `ok`, so its test is redundant
+    # against the observer as written. It is kept because the rule is "a
+    # required rpath observation failed or was inconclusive", and a probe that
+    # never answered must not be able to reach a benign later case: `absent`
+    # holds no `/home/`, so without this the fall-through would be case 7.
+    if [ "${CPLX_ELF_OBS[structural_status]}" != "ok" ] \
+       || [ "${CPLX_ELF_OBS[rpath_probe_status]}" = "failed" ] \
+       || [ "${CPLX_ELF_OBS[rpath_probe_status]}" = "blocked" ] \
+       || [ "${CPLX_ELF_OBS[tag_state]}" = "ambiguous" ]; then
+        CPLX_ELF_CASE=1
+        return 0
+    fi
+
+    # Case 2: no PT_DYNAMIC, so there is no search path to set. Not a failure.
+    if [ "${CPLX_ELF_OBS[has_dynamic]}" = "no" ]; then
+        CPLX_ELF_CASE=2
+        return 0
+    fi
+
+    # Case 3: already correct. The tag AND the value together, which is what
+    # leaves a matching string under DT_RUNPATH to be rewritten rather than
+    # skipped: that state is the one this version exists to replace.
+    if [ "${CPLX_ELF_OBS[tag_state]}" = "rpath" ] \
+       && [ "${CPLX_ELF_OBS[rpath_value]}" = "$target" ]; then
+        CPLX_ELF_CASE=3
+        return 0
+    fi
+
+    # Case 4: the library population, ET_DYN carrying no PT_INTERP. That is how
+    # the loader itself tells a shared object from a position-independent
+    # executable: both are ET_DYN and only the executable names an interpreter.
+    # Neither the `.so` suffix nor a SONAME is part of the test, since the
+    # archive ships versioned real files such as libstdc++.so.6.0.29.
+    if [ "${CPLX_ELF_OBS[elf_kind]}" = "dyn" ] \
+       && [ "${CPLX_ELF_OBS[has_interp]}" = "no" ]; then
+        CPLX_ELF_CASE=4
+        return 0
+    fi
+
+    # Cases 5 and 6 are PROGRAM populations, so both are gated on the kind
+    # before their own test. The requirement names them "migration-program" and
+    # "fresh-program", and case 7 takes everything else; `unsupported` is neither
+    # an ET_EXEC nor an ET_DYN and is therefore not a program whatever value it
+    # carries. An earlier version tested the value alone and argued additivity
+    # from it, which read that promise too widely: it says no PROGRAM the current
+    # guard covers is dropped, not that every ELF kind becomes one.
+    #
+    # Additivity still holds where it was written to hold. Case 4 has already
+    # claimed ET_DYN with no PT_INTERP, so a `dyn` reaching here carries a
+    # PT_INTERP and is a position-independent executable, and an `exec` is a
+    # program by e_type with or without one. Both stay covered.
+    #
+    # Written as two `[` comparisons rather than as a `case`: a bare-word case
+    # pattern such as `dyn)` reads as a command word to the host-tool allowlist,
+    # which rewrites the pattern to `dyn;` and then finds `dyn` in command
+    # position. The rule is right to be literal there, and this file is where
+    # the fix belongs.
+    if [ "${CPLX_ELF_OBS[elf_kind]}" != "exec" ] \
+       && [ "${CPLX_ELF_OBS[elf_kind]}" != "dyn" ]; then
+        CPLX_ELF_CASE=7
+        return 0
+    fi
+
+    # Case 5: the migration population, a program holding the exact target value
+    # under DT_RUNPATH. The promise is bounded to what it can recognize, a
+    # prefix relocated by v0.26.0, because build_elf_rpath is unchanged here and
+    # therefore computes the identical list. A later change to that list must
+    # define and validate recognition of its own predecessor value rather than
+    # inherit this exact-current-value test.
+    if [ "${CPLX_ELF_OBS[tag_state]}" = "runpath" ] \
+       && [ "${CPLX_ELF_OBS[rpath_value]}" = "$target" ]; then
+        CPLX_ELF_CASE=5
+        return 0
+    fi
+
+    # Case 6: the fresh population, a remaining program whose search path is
+    # still builder-anchored. This is the guard the pass has today, on the same
+    # value, so no program it selects today is dropped.
+    case "${CPLX_ELF_OBS[rpath_value]}" in
+        */home/*)
+            CPLX_ELF_CASE=6
+            return 0
+            ;;
+    esac
+
+    # Case 7: nothing above applies. The RPM-extracted programs and the vendored
+    # patchelf running the pass land here by rule rather than by a name check.
+    # shellcheck disable=SC2034  # exported classifier result, consumed by later steps
+    CPLX_ELF_CASE=7
+    return 0
+}
+
 find_patchelf() {
     local candidate
     for candidate in "$INSTALL_PREFIX/tools/bin/patchelf" "$HOME/tools/bin/patchelf"; do
