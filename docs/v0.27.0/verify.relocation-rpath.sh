@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2317  # shellcheck 0.10 name for indirect functions annotated SC2329 below
 # Verification harness for the v0.27.0 relocation-force-rpath effort.
 #
 # This is the executable oracle of
@@ -11,6 +12,16 @@
 #   bash verify.relocation-rpath.sh [--step N] [--installer PATH] [--prefix DIR]
 #                                   [--patchelf PATH]
 #
+# Exit codes: 0 the step's objective is met, 1 at least one case failed, 2 the
+# arguments are unusable, 3 reserved, 4 this host cannot answer the step at all,
+# 5 every case passed but an obligation went unanswered and the run says which.
+# 5 is not a softer 0: the step is not met, and the difference from 1 is only
+# that the gap is in what could be asked rather than in what the code did.
+#
+# Step 2 adds the ordered classifier's cases. Its controlled tuples need nothing
+# but the interpreter, its producer-to-consumer bridge needs the ELF host every
+# step from 0 on already needs, and its inventory check needs an extracted
+# archive named with --prefix.
 # It is deliberately NOT an extension of verify.install-pkg.sh (plan Q01): that
 # file carries a shared-body marker declaring everything below one line
 # byte-identical to the consuming project's copy, so adding cases here would
@@ -47,6 +58,7 @@ TARGET_CAPABILITY_FILE=""
 REPRESENTATIVE_CAPABILITY_FILE=""
 TARGET_IS_EXACT=0
 HOST_TOOL_CONTRACT_ARG=""
+INVENTORY_ARG=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -66,18 +78,20 @@ while [ "$#" -gt 0 ]; do
         --target-is-exact) TARGET_IS_EXACT=1; shift ;;
         # The allowlist half of the host-tool rule: committed vocabulary data.
         --host-tool-contract) HOST_TOOL_CONTRACT_ARG="$2"; shift 2 ;;
-        -h|--help) sed -n '2,35p' "$0"; exit 0 ;;
+        # The recorded develop#24 inventory: the Step 2 selected-set oracle.
+        --inventory) INVENTORY_ARG="$2"; shift 2 ;;
+        -h|--help) sed -n '2,45p' "$0"; exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 
-# Only step 0 has a case suite today. Accepting any other value would let the
-# verdict line report success for a step whose cases do not exist, which is a
-# vacuous pass at exactly the level later steps rely on. Extend this dispatch
-# and the suite together.
+# Only steps 0, 1 and 2 have case suites today. Accepting any other value would
+# let the verdict line report success for a step whose cases do not exist, which
+# is a vacuous pass at exactly the level later steps rely on. Extend this
+# dispatch and the suite together.
 case "$STEP" in
-    0|1) ;;
-    *) echo "unsupported --step $STEP: steps 0 and 1 have case suites today." >&2
+    0|1|2) ;;
+    *) echo "unsupported --step $STEP: steps 0, 1 and 2 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -96,10 +110,17 @@ fi
 INSTALLER=$(cd "$(dirname "$INSTALLER")" && pwd)/$(basename "$INSTALLER")
 
 HOST_TOOL_CONTRACT="${HOST_TOOL_CONTRACT_ARG:-$here/contract.host-tools.txt}"
+INVENTORY="${INVENTORY_ARG:-$here/inventory.develop-24.txt}"
 
 SCRATCH="${TMPDIR:-/tmp}/cplx-relocation-verify.$$"
 failures=0
 cases=0
+# An obligation this run could not answer, and the exact way to answer it. Kept
+# apart from the failure count because "nobody could ask" is not "the code is
+# wrong", and folding it into either is how a step gets reported done on the
+# strength of the questions it happened to be able to reach.
+UNANSWERED=""
+UNANSWERED_HOW=""
 
 # shellcheck disable=SC2329  # invoked indirectly by the EXIT trap below
 cleanup() { rm -rf -- "$SCRATCH" 2>/dev/null; }
@@ -981,7 +1002,50 @@ hc_unused() {
     done < <(hc_contract_entries "$contract")
 }
 
-if [ -f "$HOST_TOOL_CONTRACT" ]; then
+# The allowlist corpus is affordable on Linux and nowhere else, so the host is
+# checked the same way patchelf and readelf are checked: by platform, before the
+# work rather than after it.
+#
+# It is not the gate that is slow, it is fork(). Each of the eighty-three shapes
+# writes a probe and runs `hc_unlisted | sed | grep`, and hc_unlisted itself
+# spends a dozen more subprocesses on the file; call it fifteen hundred spawns
+# for the corpus. Linux answers all of it in 4.5 seconds, measured on the Debian
+# agent at step 2 of build 92. Cygwin emulates fork() in user space and answers
+# in over five minutes, which is to say it does not answer: the run was killed at
+# its bound having never reached the step's own cases. That is a 70x gap in the
+# platform, not a slow machine.
+#
+# A host that cannot afford it says so through the third outcome rather than
+# skipping quietly or timing out. UNANSWERED and exit 5 exist for exactly this,
+# and the inventory check was their only user until now: "nobody could ask this
+# here" is neither a pass nor a code failure. Reporting it as unanswered is what
+# stops a fast local run from reading as a clean one.
+#
+# Coverage is unchanged where it counts. CI is Linux, so the corpus runs there on
+# every step of every build, which is where the gate has to hold.
+HOST_TOOL_AFFORDABLE=1
+case "$(uname -s 2>/dev/null)" in
+    Linux) ;;
+    *) HOST_TOOL_AFFORDABLE=0 ;;
+esac
+
+# A missing contract and an unaffordable host are different answers and must stay
+# different: the first is a defect, the second is a question this platform cannot
+# ask. Collapsing them into one condition made an absent-file FAIL fire on a host
+# whose contract was present and readable, which is the opposite of what the
+# third outcome is for.
+if [ -f "$HOST_TOOL_CONTRACT" ] && [ "$HOST_TOOL_AFFORDABLE" -ne 1 ]; then
+    note "host-tool/contract" "$HOST_TOOL_CONTRACT"
+    printf '  %-40s SKIP  %s\n' "host-tool/corpus" \
+        "needs a Linux host (this is $(uname -s 2>/dev/null)); fork cost makes it unanswerable here"
+    UNANSWERED="${UNANSWERED:+$UNANSWERED, }the host-tool allowlist corpus"
+    UNANSWERED_HOW="$UNANSWERED_HOW
+  the allowlist corpus proves the host-tool rule can report and can stay silent,
+  over eighty-three planted shapes. It costs about 4.5 seconds on Linux and does
+  not complete on this platform, where fork is emulated. Run
+  bash docs/v0.27.0/verify.relocation-rpath.sh --step $STEP on the Linux
+  validation host to answer it."
+elif [ -f "$HOST_TOOL_CONTRACT" ]; then
     note "host-tool/contract" "$HOST_TOOL_CONTRACT"
 
     # The contract is data the rule depends on, so it is validated before it is
@@ -1783,6 +1847,160 @@ elf_make_two_search_tags() {
     elf_poke "$file" $(( second_entry + 8 )) "$(le_hex $(( first_index + ${#first} + 1 )) 8)"
 }
 
+# ------------------------------------------------------------ fixture planting ---
+# The donor, the lawful base and the twenty-five recipes, extracted from Step 1's
+# suite so Step 2's bridge plants the SAME fixture rather than a second one
+# written to the same description. A bridge whose subjects were re-cut here would
+# compare the classifier against a copy of the producer's inputs, which is the
+# drift it exists to detect.
+FIXTURE_DONOR=""
+
+# A hand-assembled ELF would be a second implementation of the format, which the
+# plan already refused for the parser. The lawful bases are shipped system
+# objects, varied with patchelf, and each is validated by `readelf` before use.
+resolve_fixture_donor() {
+    local d
+    for d in /bin/true /usr/bin/true /bin/echo; do
+        [ -f "$d" ] && { FIXTURE_DONOR="$d"; return 0; }
+    done
+    return 1
+}
+
+# G01, the lawful base: a program with PT_INTERP, PT_LOAD and PT_DYNAMIC and no
+# search-path tag.
+#
+# The donor is whatever the distribution ships, and on Debian 12 /bin/true is a
+# PIE, so its e_type is ET_DYN. The base NORMALISES e_type to ET_EXEC rather than
+# inheriting it, so the fixture set does not silently change meaning with the
+# donor: F01 is exec because it was made exec, and F02 is dyn because one
+# mutation made it so. An earlier version inherited the donor and expected exec,
+# and the run said dyn.
+plant_fixture_base() {
+    local out="$1" donor="$2"
+    cp -- "$donor" "$out" || return 1
+    chmod u+w -- "$out" || return 1
+    "$PATCHELF_BIN" --remove-rpath "$out" 2>/dev/null
+    elf_poke "$out" 16 "0200"
+    return 0
+}
+
+# plant_fixture ID RECIPE OUT BASE DONOR: cut one fixture from the base.
+#
+# A recipe that cannot be cut REPORTS and returns non-zero, so the caller skips
+# that row rather than asserting against a file it never planted.
+plant_fixture() {
+    local id="$1" recipe="$2" f="$3" G01="$4" donor_prog="$5"
+    local ph dynph dynoff dynsize off tag nulls
+    case "$recipe" in
+        prog)        cp -- "$G01" "$f" ;;
+        pie)         cp -- "$G01" "$f"; elf_poke "$f" 16 "0300" ;;
+        rel)         cp -- "$G01" "$f"; elf_poke "$f" 16 "0100"; elf_poke "$f" 56 "0000" ;;
+        lib)         cp -- "$G01" "$f"
+                     elf_poke "$f" 16 "0300"
+                     elf_remove_phdr "$f" 3 \
+                         || { fail "$id/recipe" "G02 could not remove PT_INTERP"; return 1; } ;;
+        # patchelf runs on the UNNORMALISED donor and e_type is set after: it
+        # rewrites segments, and asking it to work on a PIE layout that has
+        # been relabelled ET_EXEC makes it decline silently, which the first
+        # run showed as a tag_state of none on both tag fixtures.
+        rpath)       cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
+                     "$PATCHELF_BIN" --force-rpath --set-rpath '/opt/cplx-probe/lib' "$f" 2>/dev/null
+                     elf_poke "$f" 16 "0200" ;;
+        runpath)     cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
+                     "$PATCHELF_BIN" --force-rpath --set-rpath '/opt/cplx-probe/lib' "$f" 2>/dev/null
+                     off=$(elf_find_dyn_entry "$f" 15) \
+                         || { fail "$id/recipe" "M03 DT_RPATH not found"; return 1; }
+                     elf_poke "$f" "$off" "$(le_hex 29 8)"
+                     elf_poke "$f" 16 "0200" ;;
+        nodynamic)   cp -- "$G01" "$f"
+                     elf_remove_phdr "$f" 2 \
+                         || { fail "$id/recipe" "G03 could not remove PT_DYNAMIC"; return 1; } ;;
+        notabletag)  cp -- "$G01" "$f"
+                     elf_add_dyn_tag_reusing_value "$f" 14 1 \
+                         || { fail "$id/recipe" "G04 could not add DT_SONAME before DT_NULL"; return 1; } ;;
+        bothtags)    cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
+                     elf_make_two_search_tags "$f" 29 15 \
+                         '/opt/cplx-probe/runpath' '/opt/cplx-probe/rpath' runpath \
+                         || { fail "$id/recipe" "G07 could not create distinct RPATH and RUNPATH"; return 1; }
+                     elf_poke "$f" 16 "0200" ;;
+        duplicatetag) cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
+                     elf_make_two_search_tags "$f" 15 15 \
+                         '/opt/cplx-probe/rpath-a' '/opt/cplx-probe/rpath-b' rpath \
+                         || { fail "$id/recipe" "G08 could not create two distinct RPATH entries"; return 1; }
+                     elf_poke "$f" 16 "0200" ;;
+        notable)     cp -- "$G01" "$f"; elf_poke "$f" 56 "0000" ;;
+        badmagic)    cp -- "$G01" "$f"; elf_poke "$f" 0 "7f454c47" ;;
+        badversion)  cp -- "$G01" "$f"; elf_poke "$f" 6 "00" ;;
+        elf32)       cp -- "$G01" "$f"; elf_poke "$f" 4 "01" ;;
+        bigendian)   cp -- "$G01" "$f"; elf_poke "$f" 5 "02" ;;
+        badmachine)  cp -- "$G01" "$f"; elf_poke "$f" 18 "b700" ;;
+        pnxnum)      cp -- "$G01" "$f"; elf_poke "$f" 56 "ffff" ;;
+        shortfile)   head -c 32 "$G01" > "$f" ;;
+        badphentsize) cp -- "$G01" "$f"; elf_poke "$f" 54 "2000" ;;
+        tablepast)   cp -- "$G01" "$f"; elf_poke "$f" 32 "$(le_hex $(( $(elf_size "$G01") + 16 )) 8)" ;;
+        # M17: the unsigned value 2^64-16, written as literal bytes because
+        # no Bash integer can hold it. That is the point of the fixture.
+        offsetwrap)  cp -- "$G01" "$f"
+                     ph=$(elf_find_phdr "$f" 1) || { fail "$id/recipe" "M17 PT_LOAD not found"; return 1; }
+                     elf_poke "$f" $(( ph + 8 )) "f0ffffffffffffff" ;;
+        # M18: both extents at 2^62. Each decodes exactly, so the
+        # representability guard cannot refuse this one; only their sum
+        # overflows. Measured both ways: the pre-fix observer reports `ok`
+        # for this object and the fixed one reports `inconclusive`.
+        extentwrap)  cp -- "$G01" "$f"
+                     ph=$(elf_find_phdr "$f" 1) || { fail "$id/recipe" "M18 PT_LOAD not found"; return 1; }
+                     elf_poke "$f" $(( ph + 8 )) "$(le_hex $(( 1 << 62 )) 8)"
+                     elf_poke "$f" $(( ph + 32 )) "$(le_hex $(( 1 << 62 )) 8)" ;;
+        segmentpast) cp -- "$G01" "$f"
+                     ph=$(elf_find_phdr "$f" 1) || { fail "$id/recipe" "M12/M13 PT_LOAD not found"; return 1; }
+                     elf_poke "$f" $(( ph + 8 )) "$(le_hex $(( $(elf_size "$f") + 16 )) 8)"
+                     elf_poke "$f" $(( ph + 32 )) "$(le_hex 1 8)" ;;
+        dynodd)      cp -- "$G01" "$f"
+                     dynph=$(elf_find_phdr "$f" 2) || { fail "$id/recipe" "M14 PT_DYNAMIC not found"; return 1; }
+                     dynoff=$(elf_read_le "$f" $(( dynph + 8 )) 8)
+                     dynsize=$(elf_read_le "$f" $(( dynph + 32 )) 8)
+                     [ $(( dynoff + dynsize + 8 )) -le "$(elf_size "$f")" ] \
+                         || { fail "$id/recipe" "M14 donor has no eight-byte dynamic slack"; return 1; }
+                     elf_poke "$f" $(( dynph + 32 )) "$(le_hex $(( dynsize + 8 )) 8)" ;;
+        nonull)      cp -- "$G01" "$f"
+                     dynph=$(elf_find_phdr "$f" 2) || { fail "$id/recipe" "M15 PT_DYNAMIC not found"; return 1; }
+                     dynoff=$(elf_read_le "$f" $(( dynph + 8 )) 8)
+                     dynsize=$(elf_read_le "$f" $(( dynph + 32 )) 8)
+                     nulls=0
+                     for (( off = dynoff; off < dynoff + dynsize; off += 16 )); do
+                         tag=$(elf_read_le "$f" "$off" 8) || break
+                         if [ "$tag" = "0" ]; then elf_poke "$f" "$off" "$(le_hex 1 8)"; nulls=$((nulls + 1)); fi
+                     done
+                     [ "$nulls" -gt 0 ] || { fail "$id/recipe" "M15 donor has no DT_NULL"; return 1; } ;;
+        *) fail "$id/recipe" "unknown recipe [$recipe]"; return 1 ;;
+    esac
+    [ -f "$f" ] || { fail "$id/fixture" "FIXTURE absent: $f was not planted"; return 1; }
+    return 0
+}
+
+# plant_patchelf_double ID DIR: write a patchelf stand-in that fails one probe.
+#
+# The double DELEGATES every call it does not fail to the shipped tool, so the
+# surviving axis is answered by the real binary rather than by a stand-in that
+# would make the surviving value meaningless.
+plant_patchelf_double() {
+    local pid="$1" dir="$2" flag
+    case "$pid" in
+        D01) flag="--print-rpath" ;;
+        D02) flag="--print-interpreter" ;;
+        *) return 1 ;;
+    esac
+    mkdir -p -- "$dir" || return 1
+    cat > "$dir/patchelf" <<DOUBLE
+#!/bin/bash
+[ "\$1" = "$flag" ] && exit 1
+exec "$PATCHELF_BIN" "\$@"
+DOUBLE
+    chmod +x -- "$dir/patchelf" || return 1
+    return 0
+}
+
+
 step1_manifest() {
     cat <<'MANIFEST'
 M00|e_type|16|2|little|from the donor|02 00|elf(5) Elf64_Ehdr.e_type: the base is normalised to ET_EXEC=2
@@ -1938,33 +2156,25 @@ step1_suite() {
     note "manifest/entries" "$(grep -c '^M' "$mfile")"
 
     # ------------------------------------------------------------- the donors ---
-    # A hand-assembled ELF would be a second implementation of the format, which
-    # the plan already refused for the parser. The lawful bases are shipped system
-    # objects, varied with patchelf, and each is validated by `readelf` before use.
-    local donor_prog="" d
-    for d in /bin/true /usr/bin/true /bin/echo; do
-        [ -f "$d" ] && { donor_prog="$d"; break; }
-    done
-    if [ -z "$donor_prog" ]; then
-        fail "step1/donors" "FIXTURE absent: program donor [$donor_prog]"
+    local donor_prog=""
+    if ! resolve_fixture_donor; then
+        fail "step1/donors" "FIXTURE absent: no program donor on this host"
         return 1
     fi
+    donor_prog="$FIXTURE_DONOR"
     note "step1/donor-program" "$donor_prog"
 
     section "step 1: layout confirmation"
 
-    # G01, the lawful base: a program with PT_INTERP, PT_LOAD and PT_DYNAMIC and
-    # no search-path tag.
+    # G01, the lawful base: a program with PT_INTERP, PT_LOAD and PT_DYNAMIC, no
+    # search-path tag, and e_type normalised to ET_EXEC. The recipe and the
+    # reason it normalises rather than inherits live with the planting helpers,
+    # since Step 2's bridge cuts its subjects from the same base.
     local G01="$base/G01.elf"
-    cp -- "$donor_prog" "$G01" && chmod u+w -- "$G01"
-    "$PATCHELF_BIN" --remove-rpath "$G01" 2>/dev/null
-    # The donor is whatever the distribution ships, and on Debian 12 /bin/true is
-    # a PIE, so its e_type is ET_DYN. The base NORMALISES e_type to ET_EXEC
-    # rather than inheriting it, so the fixture set does not silently change
-    # meaning with the donor: F01 is exec because it was made exec, and F02 is
-    # dyn because one mutation made it so. An earlier version inherited the
-    # donor and expected exec, and the run said dyn.
-    elf_poke "$G01" 16 "0200"
+    if ! plant_fixture_base "$G01" "$donor_prog"; then
+        fail "step1/base" "FIXTURE absent: the lawful base could not be cut"
+        return 1
+    fi
 
     # Layout confirmation, over the whole object: the base is emitted at the
     # manifest's own offsets and `readelf` must then report the intended value for
@@ -2014,7 +2224,6 @@ step1_suite() {
     # is exactly why the production tuple stores the latter as a value.
     local fixture_row fixture_columns
     local id recipe xstat xkind xdyn xint xtag xrstat xrval xistat xival guard f sz
-    local ph dynph dynoff dynsize off tag nulls
     while IFS= read -r fixture_row; do
         [ -n "$fixture_row" ] || continue
         fixture_columns=$(awk -F'|' '{ print NF }' <<<"$fixture_row")
@@ -2022,90 +2231,7 @@ step1_suite() {
             <<<"$fixture_row"
         chk "$id/fixture-columns" "12" "$fixture_columns"
         f="$base/$id.elf"
-        case "$recipe" in
-            prog)        cp -- "$G01" "$f" ;;
-            pie)         cp -- "$G01" "$f"; elf_poke "$f" 16 "0300" ;;
-            rel)         cp -- "$G01" "$f"; elf_poke "$f" 16 "0100"; elf_poke "$f" 56 "0000" ;;
-            lib)         cp -- "$G01" "$f"
-                         elf_poke "$f" 16 "0300"
-                         elf_remove_phdr "$f" 3 \
-                             || { fail "$id/recipe" "G02 could not remove PT_INTERP"; continue; } ;;
-            # patchelf runs on the UNNORMALISED donor and e_type is set after: it
-            # rewrites segments, and asking it to work on a PIE layout that has
-            # been relabelled ET_EXEC makes it decline silently, which the first
-            # run showed as a tag_state of none on both tag fixtures.
-            rpath)       cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
-                         "$PATCHELF_BIN" --force-rpath --set-rpath '/opt/cplx-probe/lib' "$f" 2>/dev/null
-                         elf_poke "$f" 16 "0200" ;;
-            runpath)     cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
-                         "$PATCHELF_BIN" --force-rpath --set-rpath '/opt/cplx-probe/lib' "$f" 2>/dev/null
-                         off=$(elf_find_dyn_entry "$f" 15) \
-                             || { fail "$id/recipe" "M03 DT_RPATH not found"; continue; }
-                         elf_poke "$f" "$off" "$(le_hex 29 8)"
-                         elf_poke "$f" 16 "0200" ;;
-            nodynamic)   cp -- "$G01" "$f"
-                         elf_remove_phdr "$f" 2 \
-                             || { fail "$id/recipe" "G03 could not remove PT_DYNAMIC"; continue; } ;;
-            notabletag)  cp -- "$G01" "$f"
-                         elf_add_dyn_tag_reusing_value "$f" 14 1 \
-                             || { fail "$id/recipe" "G04 could not add DT_SONAME before DT_NULL"; continue; } ;;
-            bothtags)    cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
-                         elf_make_two_search_tags "$f" 29 15 \
-                             '/opt/cplx-probe/runpath' '/opt/cplx-probe/rpath' runpath \
-                             || { fail "$id/recipe" "G07 could not create distinct RPATH and RUNPATH"; continue; }
-                         elf_poke "$f" 16 "0200" ;;
-            duplicatetag) cp -- "$donor_prog" "$f"; chmod u+w -- "$f"
-                         elf_make_two_search_tags "$f" 15 15 \
-                             '/opt/cplx-probe/rpath-a' '/opt/cplx-probe/rpath-b' rpath \
-                             || { fail "$id/recipe" "G08 could not create two distinct RPATH entries"; continue; }
-                         elf_poke "$f" 16 "0200" ;;
-            notable)     cp -- "$G01" "$f"; elf_poke "$f" 56 "0000" ;;
-            badmagic)    cp -- "$G01" "$f"; elf_poke "$f" 0 "7f454c47" ;;
-            badversion)  cp -- "$G01" "$f"; elf_poke "$f" 6 "00" ;;
-            elf32)       cp -- "$G01" "$f"; elf_poke "$f" 4 "01" ;;
-            bigendian)   cp -- "$G01" "$f"; elf_poke "$f" 5 "02" ;;
-            badmachine)  cp -- "$G01" "$f"; elf_poke "$f" 18 "b700" ;;
-            pnxnum)      cp -- "$G01" "$f"; elf_poke "$f" 56 "ffff" ;;
-            shortfile)   head -c 32 "$G01" > "$f" ;;
-            badphentsize) cp -- "$G01" "$f"; elf_poke "$f" 54 "2000" ;;
-            tablepast)   cp -- "$G01" "$f"; elf_poke "$f" 32 "$(le_hex $(( $(elf_size "$G01") + 16 )) 8)" ;;
-            # M17: the unsigned value 2^64-16, written as literal bytes because
-            # no Bash integer can hold it. That is the point of the fixture.
-            offsetwrap)  cp -- "$G01" "$f"
-                         ph=$(elf_find_phdr "$f" 1) || { fail "$id/recipe" "M17 PT_LOAD not found"; continue; }
-                         elf_poke "$f" $(( ph + 8 )) "f0ffffffffffffff" ;;
-            # M18: both extents at 2^62. Each decodes exactly, so the
-            # representability guard cannot refuse this one; only their sum
-            # overflows. Measured both ways: the pre-fix observer reports `ok`
-            # for this object and the fixed one reports `inconclusive`.
-            extentwrap)  cp -- "$G01" "$f"
-                         ph=$(elf_find_phdr "$f" 1) || { fail "$id/recipe" "M18 PT_LOAD not found"; continue; }
-                         elf_poke "$f" $(( ph + 8 )) "$(le_hex $(( 1 << 62 )) 8)"
-                         elf_poke "$f" $(( ph + 32 )) "$(le_hex $(( 1 << 62 )) 8)" ;;
-            segmentpast) cp -- "$G01" "$f"
-                         ph=$(elf_find_phdr "$f" 1) || { fail "$id/recipe" "M12/M13 PT_LOAD not found"; continue; }
-                         elf_poke "$f" $(( ph + 8 )) "$(le_hex $(( $(elf_size "$f") + 16 )) 8)"
-                         elf_poke "$f" $(( ph + 32 )) "$(le_hex 1 8)" ;;
-            dynodd)      cp -- "$G01" "$f"
-                         dynph=$(elf_find_phdr "$f" 2) || { fail "$id/recipe" "M14 PT_DYNAMIC not found"; continue; }
-                         dynoff=$(elf_read_le "$f" $(( dynph + 8 )) 8)
-                         dynsize=$(elf_read_le "$f" $(( dynph + 32 )) 8)
-                         [ $(( dynoff + dynsize + 8 )) -le "$(elf_size "$f")" ] \
-                             || { fail "$id/recipe" "M14 donor has no eight-byte dynamic slack"; continue; }
-                         elf_poke "$f" $(( dynph + 32 )) "$(le_hex $(( dynsize + 8 )) 8)" ;;
-            nonull)      cp -- "$G01" "$f"
-                         dynph=$(elf_find_phdr "$f" 2) || { fail "$id/recipe" "M15 PT_DYNAMIC not found"; continue; }
-                         dynoff=$(elf_read_le "$f" $(( dynph + 8 )) 8)
-                         dynsize=$(elf_read_le "$f" $(( dynph + 32 )) 8)
-                         nulls=0
-                         for (( off = dynoff; off < dynoff + dynsize; off += 16 )); do
-                             tag=$(elf_read_le "$f" "$off" 8) || break
-                             if [ "$tag" = "0" ]; then elf_poke "$f" "$off" "$(le_hex 1 8)"; nulls=$((nulls + 1)); fi
-                         done
-                         [ "$nulls" -gt 0 ] || { fail "$id/recipe" "M15 donor has no DT_NULL"; continue; } ;;
-            *) fail "$id/recipe" "unknown recipe [$recipe]"; continue ;;
-        esac
-        [ -f "$f" ] || { fail "$id/fixture" "FIXTURE absent: $f was not planted"; continue; }
+        plant_fixture "$id" "$recipe" "$f" "$G01" "$donor_prog" || continue
 
         sz=$(elf_size "$f")
         step1_missing_fixture_oracle "$id" "$f" "$sz" "$G01"
@@ -2279,24 +2405,8 @@ PROBES
     shipped_digest=$("$SHA256SUM_BIN" -- "$PATCHELF_BIN" | cut -d' ' -f1)
     for pid in D01 D02; do
         d_dir="$SCRATCH/double.$pid"
-        mkdir -p -- "$d_dir"
-        # The double delegates every call it does not fail to the shipped tool,
-        # so the surviving axis is answered by the real binary rather than by a
-        # stand-in that would make the surviving value meaningless.
-        if [ "$pid" = "D01" ]; then
-            cat > "$d_dir/patchelf" <<DOUBLE
-#!/bin/bash
-[ "\$1" = "--print-rpath" ] && exit 1
-exec "$PATCHELF_BIN" "\$@"
-DOUBLE
-        else
-            cat > "$d_dir/patchelf" <<DOUBLE
-#!/bin/bash
-[ "\$1" = "--print-interpreter" ] && exit 1
-exec "$PATCHELF_BIN" "\$@"
-DOUBLE
-        fi
-        chmod +x -- "$d_dir/patchelf"
+        plant_patchelf_double "$pid" "$d_dir" \
+            || { fail "$pid/double" "FIXTURE absent: the $pid double could not be written"; continue; }
         (
             elf_observe "$base/F01.elf" "$(elf_size "$base/F01.elf")"
             elf_probe "$base/F01.elf" "$d_dir/patchelf"
@@ -2320,6 +2430,1243 @@ DOUBLE
     # values above evidence about the shipped binary rather than about a double.
     after_digest=$("$SHA256SUM_BIN" -- "$PATCHELF_BIN" | cut -d' ' -f1)
     chk "doubles/shipped-identity-restored" "$shipped_digest" "$after_digest"
+}
+
+# --------------------------------------------------------------- step 2 suite ---
+# Step 2 is the ordered classifier: a decision over the Step 1 tuple, callable
+# without running an install. Three layers answer three different questions and
+# none of them stands in for another:
+#
+#   controlled rows  every case, every ordering and both $HOME overlaps, driven
+#                    by tuples this file builds. Each is a COMPLETE,
+#                    contract-valid tuple, checked before it is classified.
+#   the bridge       real Step 1 observations crossing the seam, so the
+#                    controlled inputs are shown to conform to what the producer
+#                    actually emits. A controlled tuple and a controlled double
+#                    are not counted as evidence for both production and
+#                    consumption.
+#   the inventory    the classifier over a real archive tree, where the selected
+#                    set is the one the plan states once.
+
+# The two targets every controlled row is judged against, and the value the
+# Step 1 tag recipes plant. They are literals, and their SHAPES are asserted
+# rather than assumed: the overlap rows exist because a $HOME target carries the
+# same builder anchor the fresh-population test looks for, so a T_HOME that had
+# lost it would leave those rows proving nothing at all.
+STEP2_T_OUT="/opt/cplx/tools/python/root/usr/lib64:/opt/cplx/tools/git/root/usr/lib64"
+STEP2_T_HOME="/home/builder/tools/python/root/usr/lib64:/home/builder/tools/git/root/usr/lib64"
+STEP2_T_PROBE="/opt/cplx-probe/lib"
+STEP2_ELF_MAGIC=$'\x7fELF'
+
+# The tuple's field set, stated HERE rather than read from the installer's own
+# CPLX_ELF_OBS_KEYS. Two independent statements compared by one case is what
+# makes the exact-key-set rule an assertion; building the rows out of
+# production's list would compare that list with itself.
+STEP2_ROW_FIELDS="structural_status elf_kind has_dynamic has_interp tag_state \
+rpath_probe_status rpath_value interp_probe_status interp_value"
+
+# The case each controlled row produced, so the bridge can require agreement
+# with a row rather than with a second copy of its expectation.
+declare -A STEP2_CASE_OF=()
+
+STEP2_LIT=""
+# The row tokens, expanded on load. `@empty@` is the empty string and is
+# distinct from `absent`, which is a value the tuple stores; the target tokens
+# let a row say "this value IS the target" instead of repeating a long literal
+# that would then have to match by eye.
+step2_literal() {
+    case "$1" in
+        @empty@)   STEP2_LIT="" ;;
+        @t-out@)   STEP2_LIT="$STEP2_T_OUT" ;;
+        @t-home@)  STEP2_LIT="$STEP2_T_HOME" ;;
+        @t-probe@) STEP2_LIT="$STEP2_T_PROBE" ;;
+        *)         STEP2_LIT="$1" ;;
+    esac
+}
+
+# step2_load_row FIELD...: clear the tuple, then populate it from one row.
+#
+# The array is cleared by REMOVING its keys rather than by writing empty strings
+# into them. Writing empties would make "the row forgot this field" and "the row
+# meant it empty" indistinguishable, which is the whole reason the exact-key-set
+# rule exists in a shell: an unset associative-array key expands to the empty
+# string at the point of use, so the classifier would branch on a value nobody
+# wrote.
+step2_load_row() {
+    local k
+    for k in "${!CPLX_ELF_OBS[@]}"; do
+        unset "CPLX_ELF_OBS[$k]"
+    done
+    # shellcheck disable=SC2086  # the field list is deliberately word-split
+    for k in $STEP2_ROW_FIELDS; do
+        [ "$#" -gt 0 ] || return 0
+        step2_literal "$1"
+        CPLX_ELF_OBS["$k"]="$STEP2_LIT"
+        shift
+    done
+    return 0
+}
+
+# step2_tuple_invariants NAME: the tuple contract, checked BEFORE the classifier
+# is invoked, so a malformed row fails as a defective TEST rather than as a
+# classifier result.
+#
+# The reason always begins with `TUPLE`, which is what lets a negative control
+# require that exact refusal instead of being satisfied by any failure at all.
+#
+# The rules are the design's own: one structural status with a closed
+# vocabulary, a fully defined structural-failure tuple, two independent probe
+# statuses whose `skipped` has exactly two producers and no third, and a value
+# that is `absent` unless its own probe answered.
+step2_tuple_invariants() {
+    local name="$1" expected actual missing extra
+    local ss kind dyn itp tag rs rv is iv
+    # shellcheck disable=SC2086  # the field list is deliberately word-split
+    expected=$(printf '%s\n' $STEP2_ROW_FIELDS | sort)
+    actual=$(printf '%s\n' "${!CPLX_ELF_OBS[@]}" | sort)
+    if [ "$expected" != "$actual" ]; then
+        missing=$(comm -23 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") | tr '\n' ' ')
+        extra=$(comm -13 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") | tr '\n' ' ')
+        fail "$name" "TUPLE key set: missing [$missing] unexpected [$extra]"
+        return 1
+    fi
+    ss="${CPLX_ELF_OBS[structural_status]}"
+    kind="${CPLX_ELF_OBS[elf_kind]}"
+    dyn="${CPLX_ELF_OBS[has_dynamic]}"
+    itp="${CPLX_ELF_OBS[has_interp]}"
+    tag="${CPLX_ELF_OBS[tag_state]}"
+    rs="${CPLX_ELF_OBS[rpath_probe_status]}"
+    rv="${CPLX_ELF_OBS[rpath_value]}"
+    is="${CPLX_ELF_OBS[interp_probe_status]}"
+    iv="${CPLX_ELF_OBS[interp_value]}"
+
+    case "$ss" in
+        ok|inconclusive) ;;
+        *) fail "$name" "TUPLE structural_status [$ss] is outside its vocabulary"; return 1 ;;
+    esac
+
+    # The structural-failure tuple is fully defined rather than left as "the
+    # other fields are not touched": that is how a previous object's reading
+    # survives into the next loop iteration and is read as this one's evidence.
+    if [ "$ss" = "inconclusive" ]; then
+        if [ -n "$kind$dyn$itp$tag" ]; then
+            fail "$name" "TUPLE inconclusive leaves a structural field set: kind [$kind] dynamic [$dyn] interp [$itp] tag [$tag]"
+            return 1
+        fi
+        if [ "$rs" != "blocked" ] || [ "$is" != "blocked" ]; then
+            fail "$name" "TUPLE inconclusive must block both axes: rpath [$rs] interp [$is]"
+            return 1
+        fi
+        if [ "$rv" != "absent" ] || [ "$iv" != "absent" ]; then
+            fail "$name" "TUPLE inconclusive must leave both values absent: rpath [$rv] interp [$iv]"
+            return 1
+        fi
+        return 0
+    fi
+
+    case "$kind" in
+        exec|dyn|unsupported) ;;
+        *) fail "$name" "TUPLE elf_kind [$kind] is outside its vocabulary"; return 1 ;;
+    esac
+    case "$dyn" in
+        yes|no) ;;
+        *) fail "$name" "TUPLE has_dynamic [$dyn] is not yes or no"; return 1 ;;
+    esac
+    case "$itp" in
+        yes|no) ;;
+        *) fail "$name" "TUPLE has_interp [$itp] is not yes or no"; return 1 ;;
+    esac
+    case "$tag" in
+        none|rpath|runpath|ambiguous) ;;
+        *) fail "$name" "TUPLE tag_state [$tag] is outside its vocabulary"; return 1 ;;
+    esac
+    if [ "$tag" != "none" ] && [ "$dyn" != "yes" ]; then
+        fail "$name" "TUPLE a search-path tag needs a dynamic section: tag [$tag] has_dynamic [$dyn]"
+        return 1
+    fi
+    # `blocked` has ONE producer and it is the structural failure handled above,
+    # so a successful observation carrying it is a broken tuple rather than a
+    # fourth probe state.
+    case "$rs" in
+        ok|skipped|failed) ;;
+        *) fail "$name" "TUPLE rpath_probe_status [$rs] cannot follow a successful observation"; return 1 ;;
+    esac
+    case "$is" in
+        ok|skipped|failed) ;;
+        *) fail "$name" "TUPLE interp_probe_status [$is] cannot follow a successful observation"; return 1 ;;
+    esac
+    # `skipped` has exactly two producers, one per axis, and nothing else may
+    # set it: it always means "this object has nothing to read", never "we did
+    # not look". Both directions are checked, so neither a missing skip nor an
+    # unearned one passes.
+    if [ "$dyn" = "no" ] && [ "$rs" != "skipped" ]; then
+        fail "$name" "TUPLE no dynamic section must skip the rpath probe, not [$rs]"
+        return 1
+    fi
+    if [ "$dyn" = "yes" ] && [ "$rs" = "skipped" ]; then
+        fail "$name" "TUPLE the rpath probe is skipped without its producer: has_dynamic [$dyn]"
+        return 1
+    fi
+    if [ "$itp" = "no" ] && [ "$is" != "skipped" ]; then
+        fail "$name" "TUPLE no interpreter must skip the interpreter probe, not [$is]"
+        return 1
+    fi
+    if [ "$itp" = "yes" ] && [ "$is" = "skipped" ]; then
+        fail "$name" "TUPLE the interpreter probe is skipped without its producer: has_interp [$itp]"
+        return 1
+    fi
+    # A value exists exactly when its own probe answered. `absent` is a value
+    # rather than an unset key precisely so this is checkable.
+    if [ "$rs" = "ok" ] && [ "$rv" = "absent" ]; then
+        fail "$name" "TUPLE an answering rpath probe has no value"
+        return 1
+    fi
+    if [ "$rs" != "ok" ] && [ "$rv" != "absent" ]; then
+        fail "$name" "TUPLE rpath_value [$rv] survives a probe that did not answer: [$rs]"
+        return 1
+    fi
+    if [ "$is" = "ok" ] && [ "$iv" = "absent" ]; then
+        fail "$name" "TUPLE an answering interpreter probe has no value"
+        return 1
+    fi
+    if [ "$is" != "ok" ] && [ "$iv" != "absent" ]; then
+        fail "$name" "TUPLE interp_value [$iv] survives a probe that did not answer: [$is]"
+        return 1
+    fi
+    return 0
+}
+
+# The controlled rows, in a function rather than inline, so the loop that runs
+# them and the cases that audit the table read the SAME text. Step 1 scraped its
+# own source with awk because its rows were inline, and two versions of that
+# reader were silently wrong before the third worked.
+#
+# Thirteen columns: the id, the nine tuple fields in their fixed order, the
+# target the row is judged against, the expected case, and what the row fixes.
+# Every row is a complete tuple: no field is omitted on the grounds that the
+# case under test does not read it.
+step2_rows() {
+    cat <<'ROWS'
+C01|inconclusive|@empty@|@empty@|@empty@|@empty@|blocked|absent|blocked|absent|@t-out@|1|case 1: the structural-failure tuple, the one fault that blocks both axes
+C02|ok|exec|no|yes|none|skipped|absent|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|2|case 2: no PT_DYNAMIC, so there is no search path to set
+C03|ok|exec|yes|yes|rpath|ok|@t-out@|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|3|case 3: the exact target under DT_RPATH is already correct
+C04|ok|dyn|yes|no|none|ok|@empty@|skipped|absent|@t-out@|4|case 4: ET_DYN with no PT_INTERP is the library population
+C05|ok|exec|yes|yes|runpath|ok|@t-out@|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|5|case 5: the exact target under DT_RUNPATH is a migration
+C06|ok|exec|yes|yes|none|ok|/home/builder/cplx/tools/python/root/usr/lib64|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|6|case 6: a builder-anchored program on a prefix outside the home tree
+C07|ok|exec|yes|yes|rpath|ok|/usr/lib64/mysql|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|7|case 7: an RPM-extracted program with a distribution rpath
+C08|ok|exec|yes|yes|runpath|ok|@t-home@|ok|/lib64/ld-linux-x86-64.so.2|@t-home@|5|the first $HOME overlap: a v0.26.0 tuple under a home prefix is a migration, not a fresh relocation
+C09|ok|exec|yes|yes|rpath|ok|@t-home@|ok|/lib64/ld-linux-x86-64.so.2|@t-home@|3|the second $HOME overlap: a this-version tuple under a home prefix is already correct, not a rewrite
+C10|ok|exec|yes|yes|rpath|ok|/opt/vendor/lib|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|7|a successful DT_RPATH observation that is neither the target nor builder-anchored
+C11|ok|exec|yes|yes|runpath|ok|/opt/vendor/lib|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|7|a successful DT_RUNPATH observation that is neither the target nor builder-anchored
+C12|ok|exec|yes|yes|runpath|ok|/home/builder/cplx/tools/lib64|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|6|a builder-anchored DT_RUNPATH program is fresh, since case 5 tests the value and not the tag alone
+C13|ok|exec|yes|yes|ambiguous|ok|/opt/cplx-probe/runpath|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|1|ambiguity is a successful observation and still fails the rpath axis closed
+C14|ok|dyn|yes|no|ambiguous|ok|/opt/cplx-probe/runpath|skipped|absent|@t-out@|1|case 1 precedes case 4: an ambiguous library is not selected
+C15|ok|exec|no|no|none|skipped|absent|skipped|absent|@t-out@|2|both skipped producers at once, the e_phnum-zero shape
+C16|ok|exec|yes|yes|none|failed|absent|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|1|the rpath-axis-local fault, with the interpreter axis surviving with its value
+C17|ok|exec|yes|yes|none|ok|@empty@|failed|absent|@t-out@|7|the interpreter-axis-local fault, with the rpath axis surviving and answering from its own value
+C18|ok|dyn|yes|no|rpath|ok|@t-out@|skipped|absent|@t-out@|3|case 3 precedes case 4: an already-correct library is not rewritten again
+C19|ok|dyn|yes|no|runpath|ok|@t-out@|skipped|absent|@t-out@|4|case 4 precedes case 5: a target-valued DT_RUNPATH on a library is the library population
+C20|ok|dyn|yes|no|none|ok|/home/builder/cplx/tools/lib|skipped|absent|@t-out@|4|case 4 precedes case 6: a builder-anchored library is the library population
+C21|ok|unsupported|yes|no|none|ok|/opt/vendor/lib|skipped|absent|@t-out@|7|an unsupported kind is not the ET_DYN library population
+C22|ok|unsupported|yes|no|none|ok|/home/builder/cplx/tools/lib|skipped|absent|@t-out@|7|an unsupported kind is not a program, so the builder anchor of case 6 does not reach it
+C23|ok|exec|yes|yes|rpath|ok|/home/builder/cplx/tools/python/root/usr/lib64|ok|/lib64/ld-linux-x86-64.so.2|@t-out@|6|a builder-anchored DT_RPATH program is fresh, since case 3 tests the value and not the tag alone
+C24|ok|unsupported|yes|no|runpath|ok|@t-out@|skipped|absent|@t-out@|7|an unsupported kind is not a program, so the exact target under DT_RUNPATH does not make it a migration
+ROWS
+}
+
+# The negative controls. Each mutates ONE contract-valid tuple and requires the
+# invariant checker to refuse it on a `TUPLE` reason. Without these the checker
+# could have quietly stopped detecting anything and every row would still pass.
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_valid_row() {
+    step2_load_row ok exec yes yes none ok @empty@ ok /lib64/ld-linux-x86-64.so.2
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_missing_key() {
+    step2_ctl_valid_row
+    unset "CPLX_ELF_OBS[interp_probe_status]"
+    step2_tuple_invariants "ctl/missing-key"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_extra_key() {
+    step2_ctl_valid_row
+    # shellcheck disable=SC2154  # deliberately plants an extra associative-array key
+    CPLX_ELF_OBS[rpath_tag_state]="rpath"
+    step2_tuple_invariants "ctl/extra-key"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_blocked_beside_ok() {
+    step2_ctl_valid_row
+    CPLX_ELF_OBS[rpath_probe_status]="blocked"
+    CPLX_ELF_OBS[rpath_value]="absent"
+    step2_tuple_invariants "ctl/blocked-beside-ok"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_unearned_skip() {
+    step2_ctl_valid_row
+    CPLX_ELF_OBS[rpath_probe_status]="skipped"
+    CPLX_ELF_OBS[rpath_value]="absent"
+    step2_tuple_invariants "ctl/unearned-skip"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_missing_skip() {
+    step2_ctl_valid_row
+    CPLX_ELF_OBS[has_dynamic]="no"
+    step2_tuple_invariants "ctl/missing-skip"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_value_without_answer() {
+    step2_ctl_valid_row
+    CPLX_ELF_OBS[interp_probe_status]="failed"
+    step2_tuple_invariants "ctl/value-without-answer"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_surviving_field() {
+    step2_load_row inconclusive exec @empty@ @empty@ @empty@ blocked absent blocked absent
+    step2_tuple_invariants "ctl/surviving-field"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_tag_without_dynamic() {
+    step2_load_row ok exec no yes rpath skipped absent ok /lib64/ld-linux-x86-64.so.2
+    step2_tuple_invariants "ctl/tag-without-dynamic"
+}
+
+step2_controlled_suite() {
+    local row cols id ss kind dyn itp tag rs rv is iv tgt want guard
+    local prod harness expected_ids actual_ids n
+
+    section "step 2: the tuple contract"
+
+    # Production's key list and this file's, compared once. Everything else in
+    # this suite rests on the two agreeing, and neither is derived from the
+    # other.
+    # shellcheck disable=SC2086  # both lists are deliberately word-split
+    prod=$(printf '%s\n' $CPLX_ELF_OBS_KEYS | sort | tr '\n' ' ')
+    # shellcheck disable=SC2086  # both lists are deliberately word-split
+    harness=$(printf '%s\n' $STEP2_ROW_FIELDS | sort | tr '\n' ' ')
+    chk "tuple/key-set-agrees-with-production" "$prod" "$harness"
+
+    # The overlap rows are only evidence if the two targets have the shapes they
+    # are named for. A T_HOME without a builder anchor would make C08 and C09
+    # ordinary rows proving nothing about precedence, and the suite would stay
+    # green while the property went untested.
+    case "$STEP2_T_HOME" in
+        */home/*) pass "targets/home-target-is-anchored" "$STEP2_T_HOME" ;;
+        *) fail "targets/home-target-is-anchored" "the home target carries no builder anchor, so the overlap rows prove nothing" ;;
+    esac
+    cases=$((cases + 1))
+    case "$STEP2_T_OUT" in
+        */home/*) fail "targets/outside-target-is-not-anchored" "the outside target carries a builder anchor" ;;
+        *) pass "targets/outside-target-is-not-anchored" "$STEP2_T_OUT" ;;
+    esac
+    cases=$((cases + 1))
+    if [ "$STEP2_T_OUT" != "$STEP2_T_HOME" ]; then
+        pass "targets/differ" "two distinct targets"
+    else
+        fail "targets/differ" "the two targets are the same string"
+    fi
+    cases=$((cases + 1))
+
+    section "step 2: the invariant checker refuses"
+
+    control "control/tuple-missing-key"        "TUPLE" step2_ctl_missing_key
+    control "control/tuple-extra-key"          "TUPLE" step2_ctl_extra_key
+    control "control/tuple-blocked-beside-ok"  "TUPLE" step2_ctl_blocked_beside_ok
+    control "control/tuple-unearned-skip"      "TUPLE" step2_ctl_unearned_skip
+    control "control/tuple-missing-skip"       "TUPLE" step2_ctl_missing_skip
+    control "control/tuple-value-no-answer"    "TUPLE" step2_ctl_value_without_answer
+    control "control/tuple-surviving-field"    "TUPLE" step2_ctl_surviving_field
+    control "control/tuple-tag-no-dynamic"     "TUPLE" step2_ctl_tag_without_dynamic
+
+    section "step 2: the ordered classifier over controlled tuples"
+
+    while IFS= read -r row; do
+        [ -n "$row" ] || continue
+        cols=$(awk -F'|' '{ print NF }' <<<"$row")
+        IFS='|' read -r id ss kind dyn itp tag rs rv is iv tgt want guard <<<"$row"
+        chk "$id/row-columns" "13" "$cols"
+        step2_load_row "$ss" "$kind" "$dyn" "$itp" "$tag" "$rs" "$rv" "$is" "$iv"
+        if ! step2_tuple_invariants "$id/tuple"; then
+            cases=$((cases + 1))
+            continue
+        fi
+        pass "$id/tuple" "complete and contract-valid"
+        cases=$((cases + 1))
+        step2_literal "$tgt"
+        elf_classify "$STEP2_LIT"
+        chk "$id/case" "$want" "$CPLX_ELF_CASE"
+        STEP2_CASE_OF["$id"]="$CPLX_ELF_CASE"
+        note "$id/guard" "$guard"
+    done < <(step2_rows)
+
+    section "step 2: the row table audits itself"
+
+    # A count of twenty-four is satisfied by a table with one row written twice
+    # and another missing, and the duplicate would silently exercise one
+    # ordering twice while another ran not at all.
+    chk "rows/row-count" "24" "$(step2_rows | grep -c .)"
+    expected_ids=$(for n in $(seq -w 1 24); do printf 'C%s\n' "$n"; done)
+    actual_ids=$(step2_rows | cut -d'|' -f1 | sort)
+    if [ "$expected_ids" = "$actual_ids" ]; then
+        pass "rows/ids-are-C01-to-C24" "no gap, no duplicate"
+    else
+        fail "rows/ids-are-C01-to-C24" \
+            "missing [$(comm -23 <(printf '%s\n' "$expected_ids") <(printf '%s\n' "$actual_ids") | tr '\n' ' ')] unexpected [$(comm -13 <(printf '%s\n' "$expected_ids") <(printf '%s\n' "$actual_ids") | tr '\n' ' ')]"
+    fi
+    cases=$((cases + 1))
+
+    # Every case reachable, and every row GROUP the plan names present, asserted
+    # over the table rather than claimed in a comment. A group that lost its last
+    # row would otherwise leave the suite green and the property untested.
+    for n in 1 2 3 4 5 6 7; do
+        chk "rows/case-$n-expected-somewhere" "yes" \
+            "$(step2_rows | awk -F'|' -v c="$n" '$12 == c { f = 1 } END { print (f ? "yes" : "no") }')"
+    done
+    chk "rows/home-overlaps" "2" \
+        "$(step2_rows | awk -F'|' '$11 == "@t-home@"' | grep -c .)"
+    chk "rows/successful-tag-rpath" "yes" \
+        "$(step2_rows | awk -F'|' '$6 == "rpath" { f = 1 } END { print (f ? "yes" : "no") }')"
+    chk "rows/successful-tag-runpath" "yes" \
+        "$(step2_rows | awk -F'|' '$6 == "runpath" { f = 1 } END { print (f ? "yes" : "no") }')"
+    chk "rows/ambiguity" "yes" \
+        "$(step2_rows | awk -F'|' '$6 == "ambiguous" { f = 1 } END { print (f ? "yes" : "no") }')"
+    chk "rows/structural-inconclusive" "yes" \
+        "$(step2_rows | awk -F'|' '$2 == "inconclusive" { f = 1 } END { print (f ? "yes" : "no") }')"
+    chk "rows/skipped-producer-rpath" "yes" \
+        "$(step2_rows | awk -F'|' '$4 == "no" && $7 == "skipped" { f = 1 } END { print (f ? "yes" : "no") }')"
+    chk "rows/skipped-producer-interp" "yes" \
+        "$(step2_rows | awk -F'|' '$5 == "no" && $9 == "skipped" { f = 1 } END { print (f ? "yes" : "no") }')"
+    # The pair a four-token checklist does not require: each axis failing ALONE,
+    # with the other axis answering and keeping its value.
+    chk "rows/axis-local-rpath-failure" "yes" \
+        "$(step2_rows | awk -F'|' '$7 == "failed" && $9 == "ok" && $10 != "absent" { f = 1 } END { print (f ? "yes" : "no") }')"
+    chk "rows/axis-local-interp-failure" "yes" \
+        "$(step2_rows | awk -F'|' '$9 == "failed" && $7 == "ok" && $8 != "absent" { f = 1 } END { print (f ? "yes" : "no") }')"
+    # The two program-boundary exclusions, kept as their own group so neither
+    # can be deleted with the suite still green. Cases 5 and 6 are program
+    # populations, so an unsupported kind reaches case 7 whichever of their two
+    # values it carries.
+    chk "rows/unsupported-is-not-a-fresh-program" "yes" \
+        "$(step2_rows | awk -F'|' '$3 == "unsupported" && $8 ~ /\/home\// && $12 == 7 { f = 1 } END { print (f ? "yes" : "no") }')"
+    chk "rows/unsupported-is-not-a-migration" "yes" \
+        "$(step2_rows | awk -F'|' '$3 == "unsupported" && $6 == "runpath" && $8 == $11 && $12 == 7 { f = 1 } END { print (f ? "yes" : "no") }')"
+    return 0
+}
+
+# The producer-to-consumer bridge. Step 1 proves a tuple is PRODUCED and the
+# rows above prove one is CONSUMED; neither shows that the controlled inputs
+# conform to the contract the producer actually emits, and that is the gap
+# neither layer can see alone.
+#
+# So representative real Step 1 observations cross the seam. Each is named by
+# its Step 1 fixture id and planted by the SAME recipe, each carries the
+# complete surviving-axis value, and each must land on the case its named
+# controlled row produced. A disagreement means the rows have drifted from the
+# contract, which is exactly what nothing else here would notice.
+#
+# Seven columns: the bridge id, the Step 1 subject, the double to probe it with
+# or `-`, the target, the expected case, the controlled row it must agree with,
+# and what the crossing establishes.
+step2_bridge_rows() {
+    cat <<'BROWS'
+B01|F03|-|@t-out@|4|C04|a library, ET_DYN with no PT_INTERP
+B02|F04|-|@t-out@|2|C02|no PT_DYNAMIC, so the rpath probe is structurally inapplicable
+B03|F06|-|@t-probe@|3|C03|DT_RPATH holding exactly the target value
+B04|F06|-|@t-out@|7|C10|the same DT_RPATH object against a target it does not hold
+B05|F07|-|@t-probe@|5|C05|DT_RUNPATH holding exactly the target value
+B06|F07|-|@t-out@|7|C11|the same DT_RUNPATH object against a target it does not hold
+B07|F10|-|@t-out@|1|C13|both search-path tags, an ambiguity that fails the rpath axis closed
+B08|F16|-|@t-out@|1|C01|a structural rejection, outside the supported domain
+B09|F01|D01|@t-out@|1|C16|the rpath probe fault, with the interpreter axis surviving
+B10|F01|D02|@t-out@|7|C17|the interpreter probe fault, with the rpath axis surviving
+BROWS
+}
+
+step2_bridge_suite() {
+    local base="$SCRATCH/bridge" G01 fid frec planted=0 planted_ids=""
+    local row bid subject dbl tgt want twin why f sz d_dir
+    local shipped_digest after_digest twin_case
+
+    section "step 2: the producer-to-consumer bridge"
+
+    mkdir -p -- "$base"
+    if ! resolve_fixture_donor; then
+        fail "bridge/donor" "FIXTURE absent: no program donor on this host"
+        cases=$((cases + 1))
+        return 1
+    fi
+    note "bridge/donor-program" "$FIXTURE_DONOR"
+    G01="$base/G01.elf"
+    if ! plant_fixture_base "$G01" "$FIXTURE_DONOR"; then
+        fail "bridge/base" "FIXTURE absent: the lawful base could not be cut"
+        cases=$((cases + 1))
+        return 1
+    fi
+    shipped_digest=$("$SHA256SUM_BIN" -- "$PATCHELF_BIN" | cut -d' ' -f1)
+
+    # Every distinct subject the rows name, planted once by the Step 1 recipe of
+    # that id. The recipes are not restated here: they are the same function.
+    while IFS='|' read -r fid frec; do
+        [ -n "$fid" ] || continue
+        plant_fixture "$fid" "$frec" "$base/$fid.elf" "$G01" "$FIXTURE_DONOR" || continue
+        planted=$((planted + 1))
+        planted_ids="$planted_ids $fid"
+    done <<'BFIX'
+F01|prog
+F03|lib
+F04|nodynamic
+F06|rpath
+F07|runpath
+F10|bothtags
+F16|badmachine
+BFIX
+    chk "bridge/subjects-planted" "7" "$planted"
+
+    while IFS= read -r row; do
+        [ -n "$row" ] || continue
+        IFS='|' read -r bid subject dbl tgt want twin why <<<"$row"
+        f="$base/$subject.elf"
+        # A subject whose recipe FAILED leaves a half-cut file behind, so file
+        # existence is not the test: the row is skipped on the planting record
+        # instead, and says so, rather than reporting a case mismatch whose real
+        # cause was two sections earlier.
+        case " $planted_ids " in
+            *" $subject "*) ;;
+            *) fail "$bid/fixture" "FIXTURE absent: $subject was not planted"
+               cases=$((cases + 1))
+               continue ;;
+        esac
+        sz=$(elf_size "$f")
+        step2_literal "$tgt"
+        tgt="$STEP2_LIT"
+        if [ "$dbl" = "-" ]; then
+            elf_observe "$f" "$sz"
+            elf_probe "$f" "$PATCHELF_BIN"
+        else
+            # The double is passed to the production probe BY PATH, which is how
+            # elf_probe takes its tool, so no command search is involved and the
+            # fault is produced deliberately rather than hoped for. Step 1 ran
+            # the same doubles inside a subshell; here the tuple has to survive
+            # into the classifier, so the isolation is the explicit path instead.
+            d_dir="$SCRATCH/double.$bid"
+            if ! plant_patchelf_double "$dbl" "$d_dir"; then
+                fail "$bid/double" "FIXTURE absent: the $dbl double could not be written"
+                cases=$((cases + 1))
+                continue
+            fi
+            elf_observe "$f" "$sz"
+            elf_probe "$f" "$d_dir/patchelf"
+            rm -rf -- "$d_dir"
+        fi
+        # The producer's own tuple, held to the SAME contract the controlled
+        # rows are held to. This is the conformance half of the bridge: a row
+        # set that had drifted into a shape the observer cannot emit fails here
+        # rather than passing quietly on both sides of the seam.
+        if ! step2_tuple_invariants "$bid/producer-tuple"; then
+            cases=$((cases + 1))
+            continue
+        fi
+        pass "$bid/producer-tuple" "$subject observed into a contract-valid tuple"
+        cases=$((cases + 1))
+        elf_classify "$tgt"
+        chk "$bid/case" "$want" "$CPLX_ELF_CASE"
+        twin_case="${STEP2_CASE_OF[$twin]:-}"
+        if [ -z "$twin_case" ]; then
+            fail "$bid/agrees-with-$twin" "the controlled row $twin produced no case to agree with"
+            cases=$((cases + 1))
+        else
+            chk "$bid/agrees-with-$twin" "$twin_case" "$CPLX_ELF_CASE"
+        fi
+        note "$bid/crossing" "$subject: $why"
+    done < <(step2_bridge_rows)
+
+    # The shipped tool is unchanged, which is what makes the surviving-axis
+    # values above evidence about the shipped binary rather than about a double.
+    after_digest=$("$SHA256SUM_BIN" -- "$PATCHELF_BIN" | cut -d' ' -f1)
+    chk "bridge/shipped-identity-restored" "$shipped_digest" "$after_digest"
+
+    # Both producer faults crossed, and both target comparisons exercised in
+    # both directions, asserted over the table so a deleted row is a failure
+    # rather than a silently narrower bridge.
+    chk "bridge/row-count" "10" "$(step2_bridge_rows | grep -c .)"
+    chk "bridge/probe-faults" "2" "$(step2_bridge_rows | awk -F'|' '$3 != "-"' | grep -c .)"
+    chk "bridge/target-matches" "2" "$(step2_bridge_rows | awk -F'|' '$4 == "@t-probe@"' | grep -c .)"
+    return 0
+}
+
+# The inventory check: the classifier over a real archive tree, with no install.
+# That is what the step exists to make possible, and Step 6's acceptance reuses
+# it.
+#
+# The oracle is READ, never derived. Review round 2 showed what deriving costs:
+# a missing expected git object, an unrecorded one, an already-converted library
+# set and a residual program answering case 1 all pass a rule stated over the
+# tree being checked. Round 3 then showed that reading half an oracle is its own
+# defect: the record was accepted at any size, and a walked library the record
+# did not name was skipped without a word, so the comparison ran one way only.
+#
+# Both directions are collected now, and the collected state is asserted by a
+# function the controls call as well, so a rule that has quietly stopped
+# detecting anything fails a control rather than passing on a clean tree.
+#
+# What each population owes:
+#
+#   the flagged libraries    exactly the recorded set, walked and case 4.
+#                            Case 3 is refused: it is the state of a tree this
+#                            version already converted, which is not the tree
+#                            the criterion names.
+#   every walked library     case 4, whether or not the record names it. This is
+#                            the walk-to-record direction with the meaning the
+#                            measurement supports, and it is where this file
+#                            departs from round 3's instruction. See below.
+#   the python program       the recorded path, walked and selected, by name.
+#   the git programs         the recorded paths as a SET against the objects
+#                            walked under the recorded git roots, so a missing
+#                            member and an unrecorded member each fail.
+#   every other program      case 7 exactly, not merely "not selected".
+#
+# THE ONE DEPARTURE, stated where it lives rather than in a round summary.
+# Round 3 asked that an unrecorded WALKED library fail. It does not, and the
+# measurement is why: develop#24 reports "110 of 388 still flagged, all of them
+# toolchain libraries probed in isolation, 55 per root and none from the venv".
+# The 110 are the FLAGGED subset, not the archive's library population, so the
+# venv and lib-dynload libraries are unrecorded by construction and equality
+# would fail on every one of them. What the finding was actually protecting,
+# that a walked library may not be silently skipped, is kept in full: every
+# walked library must answer case 4, and the unrecorded ones are counted and
+# named in the output.
+
+# The develop#24 figure, from the probe run of 2026-08-08: 110 flagged of 388
+# inventoried ELFs. The record must hold exactly this many distinct library
+# paths, so a truncated or padded record fails the reader rather than the tree.
+STEP2_INV_LIB_COUNT=110
+
+STEP2_INV_LIBS=""
+STEP2_INV_GITS=""
+STEP2_INV_PYTHON=""
+STEP2_INV_WHY=""
+
+# step2_inventory_oracle FILE: read the recorded inventory into three sets.
+#
+# Rows are `population|path`, `#` starts a comment, and the populations are
+# closed. A row this reader cannot classify fails the oracle rather than being
+# skipped, since a typo would otherwise shrink the expected set in silence, and
+# the library count and its distinctness are checked here rather than left to
+# whoever writes the file.
+step2_inventory_oracle() {
+    local file="$1" pop path bad="" n distinct
+    STEP2_INV_LIBS=""; STEP2_INV_GITS=""; STEP2_INV_PYTHON=""; STEP2_INV_WHY=""
+    while IFS='|' read -r pop path; do
+        case "$pop" in ''|\#*) continue ;; esac
+        case "$pop" in
+            library) STEP2_INV_LIBS="$STEP2_INV_LIBS $path" ;;
+            git)     STEP2_INV_GITS="$STEP2_INV_GITS $path" ;;
+            python)  STEP2_INV_PYTHON="$path" ;;
+            *)       bad="$bad $pop" ;;
+        esac
+    done < "$file"
+    if [ -n "$bad" ]; then
+        STEP2_INV_WHY="ORACLE unknown population(s):$bad"
+        return 1
+    fi
+    if [ -z "$STEP2_INV_PYTHON" ]; then
+        STEP2_INV_WHY="ORACLE no python row"
+        return 1
+    fi
+    if [ -z "$STEP2_INV_GITS" ]; then
+        STEP2_INV_WHY="ORACLE no git row"
+        return 1
+    fi
+    n=$(printf '%s' "$STEP2_INV_LIBS" | wc -w)
+    if [ "$n" -ne "$STEP2_INV_LIB_COUNT" ]; then
+        STEP2_INV_WHY="ORACLE library count is $n, and the develop#24 record holds $STEP2_INV_LIB_COUNT"
+        return 1
+    fi
+    # shellcheck disable=SC2086  # word splitting is required to count distinct oracle members
+    distinct=$(printf '%s\n' $STEP2_INV_LIBS | sort -u | wc -l)
+    if [ "$distinct" -ne "$n" ]; then
+        STEP2_INV_WHY="ORACLE library paths are not distinct: $n rows, $distinct paths"
+        return 1
+    fi
+    return 0
+}
+
+# step2_in_set NEEDLE HAYSTACK: whole-word membership over a space-separated
+# list. Written out because a substring test would make `bin/git` match
+# `bin/git-shell` and quietly accept an object nobody recorded.
+step2_in_set() {
+    case " $2 " in
+        *" $1 "*) return 0 ;;
+    esac
+    return 1
+}
+
+# step2_missing_members RECORDED SEEN: the recorded members the walk did not
+# find, space separated and empty when there are none.
+step2_missing_members() {
+    local p out=""
+    # shellcheck disable=SC2086  # both lists are deliberately word-split
+    for p in $1; do
+        step2_in_set "$p" "$2" || out="$out $p"
+    done
+    printf '%s' "$out"
+}
+
+# The collected walk state, in globals rather than in locals, so the controls
+# below drive the SAME assertion function the walk drives. A control that
+# exercised a second copy of these rules would prove nothing about the gate.
+STEP2_INV_SEEN_LIBS=""
+STEP2_INV_WALKED_LIBS=""
+STEP2_INV_LIB_BAD=""
+STEP2_INV_WALKED_LIB_BAD=""
+STEP2_INV_SEEN_GITS=""
+STEP2_INV_GIT_BAD=""
+STEP2_INV_OTHER_BAD=""
+STEP2_INV_OTHER_UNCLASSIFIED=""
+STEP2_INV_OTHERS=0
+STEP2_INV_PYTHON_SEEN=0
+STEP2_INV_PYTHON_CASE=""
+
+step2_inventory_reset() {
+    STEP2_INV_SEEN_LIBS=""
+    STEP2_INV_WALKED_LIBS=""
+    STEP2_INV_LIB_BAD=""
+    STEP2_INV_WALKED_LIB_BAD=""
+    STEP2_INV_SEEN_GITS=""
+    STEP2_INV_GIT_BAD=""
+    STEP2_INV_OTHER_BAD=""
+    STEP2_INV_OTHER_UNCLASSIFIED=""
+    STEP2_INV_OTHERS=0
+    STEP2_INV_NONPROGRAMS=0
+    STEP2_INV_NONPROGRAM_IDS=""
+    STEP2_INV_PYTHON_SEEN=0
+    STEP2_INV_PYTHON_CASE=""
+}
+
+# step2_inventory_assert: judge the collected state against the recorded oracle.
+#
+# Every reason begins with `INVENTORY`, which is what lets a negative control
+# require this exact refusal rather than being satisfied by any failure. The
+# `chk` helper is deliberately not used for the judgements a control binds to:
+# its "want [] got [...]" reason cannot carry a token a control can name.
+step2_inventory_assert() {
+    local missing_libs missing_gits unrecorded n
+    missing_libs=$(step2_missing_members "$STEP2_INV_LIBS" "$STEP2_INV_SEEN_LIBS")
+    missing_gits=$(step2_missing_members "$STEP2_INV_GITS" "$STEP2_INV_SEEN_GITS")
+    unrecorded=$(step2_missing_members "$STEP2_INV_WALKED_LIBS" "$STEP2_INV_LIBS")
+
+    if [ -z "$missing_libs" ]; then
+        pass "inventory/recorded-libraries-present" "$(printf '%s' "$STEP2_INV_LIBS" | wc -w) recorded, all walked"
+    else
+        fail "inventory/recorded-libraries-present" "INVENTORY recorded but not walked:$missing_libs"
+    fi
+    cases=$((cases + 1))
+
+    if [ -z "$STEP2_INV_LIB_BAD" ]; then
+        pass "inventory/recorded-libraries-case-4" "every recorded library is the library population"
+    else
+        fail "inventory/recorded-libraries-case-4" "INVENTORY recorded library not case 4:$STEP2_INV_LIB_BAD"
+    fi
+    cases=$((cases + 1))
+
+    # The walk-to-record direction. Every library the walk found is judged,
+    # recorded or not, which is what stops one being skipped in silence.
+    if [ -z "$STEP2_INV_WALKED_LIB_BAD" ]; then
+        pass "inventory/walked-libraries-case-4" "$(printf '%s' "$STEP2_INV_WALKED_LIBS" | wc -w) walked, all case 4"
+    else
+        fail "inventory/walked-libraries-case-4" "INVENTORY walked library not case 4:$STEP2_INV_WALKED_LIB_BAD"
+    fi
+    cases=$((cases + 1))
+
+    # Reported rather than failed, and the reason is measured: develop#24 flagged
+    # 110 of 388, "55 per root and none from the venv", so the archive's library
+    # population is larger than the recorded set by construction.
+    n=$(printf '%s' "$unrecorded" | wc -w)
+    note "inventory/unrecorded-libraries" "$n walked libraries the record does not name${unrecorded:+ ->$unrecorded}"
+
+    if [ "$STEP2_INV_PYTHON_SEEN" -eq 1 ]; then
+        pass "inventory/python-present-by-name" "$STEP2_INV_PYTHON"
+    else
+        fail "inventory/python-present-by-name" "INVENTORY the recorded python object was not walked: $STEP2_INV_PYTHON"
+    fi
+    cases=$((cases + 1))
+    case "$STEP2_INV_PYTHON_CASE" in
+        3|5|6) pass "inventory/python-selected" "case $STEP2_INV_PYTHON_CASE" ;;
+        "")    fail "inventory/python-selected" "INVENTORY the python object was not classified" ;;
+        *)     fail "inventory/python-selected" "INVENTORY the python object is excluded, case $STEP2_INV_PYTHON_CASE" ;;
+    esac
+    cases=$((cases + 1))
+
+    if [ -z "$missing_gits" ]; then
+        pass "inventory/recorded-git-objects-present" "$(printf '%s' "$STEP2_INV_GITS" | wc -w) recorded, all walked"
+    else
+        fail "inventory/recorded-git-objects-present" "INVENTORY recorded but not walked:$missing_gits"
+    fi
+    cases=$((cases + 1))
+
+    if [ -z "$STEP2_INV_GIT_BAD" ]; then
+        pass "inventory/git-objects-exact" "no unrecorded member, none unselected"
+    else
+        fail "inventory/git-objects-exact" "INVENTORY git population:$STEP2_INV_GIT_BAD"
+    fi
+    cases=$((cases + 1))
+
+    # What Step 2 owns: the classifier answered for every residual program. An
+    # object the pass could not place is a defect in the thing under test.
+    if [ -z "$STEP2_INV_OTHER_UNCLASSIFIED" ]; then
+        pass "inventory/other-programs-classified" "$STEP2_INV_OTHERS classified"
+    else
+        fail "inventory/other-programs-classified" "INVENTORY residual program unclassified:$STEP2_INV_OTHER_UNCLASSIFIED"
+    fi
+    cases=$((cases + 1))
+
+    # What Step 2 no longer owns. Before reading 2 this was a Step 2 failure, and
+    # leaving it that way made a MANDATORY Step 2 command exit 1 for a criterion
+    # the plan had just moved elsewhere: the harness would have contradicted the
+    # plan it validates. The residual is still named in full, because Steps 4 and
+    # 6 inherit it and a finding nobody can see is a finding nobody will fix.
+    # Reported either way, and deliberately never a verdict here: a line that
+    # passes on one archive and is silent on another would move the Step 2 case
+    # count with the contents of a tarball, which is precisely the count-driven
+    # coupling this effort has refused since Step 0.
+    if [ -z "$STEP2_INV_OTHER_BAD" ]; then
+        note "inventory/other-programs-case-7" \
+            "$STEP2_INV_OTHERS residual programs, all case 7"
+    else
+        note "inventory/other-programs-case-7" \
+            "not case 7, asserted by Steps 4 and 6 rather than here:$STEP2_INV_OTHER_BAD"
+    fi
+    return 0
+}
+
+# Decide whether one walked object belongs to the residual PROGRAM population.
+# A function rather than an inline test, for the reason round 5 made the same
+# change one rule over: a decision the walk makes inline cannot be controlled,
+# and an exclusion nobody can exercise is how a population quietly empties.
+#
+# Only ET_EXEC and ET_DYN are programs. The observer maps every other e_type to
+# `unsupported`, and clears the field entirely when the header could not be
+# read, so both the relocatable objects and the structurally rejected ones fall
+# out here rather than being asked for a case they can never answer.
+step2_inventory_is_program() {
+    case "$1" in
+        exec|dyn) return 0 ;;
+        *)        return 1 ;;
+    esac
+}
+
+# Record one non-library program against the populations named by the oracle.
+# The real inventory walk and the round-4 regression controls both enter here,
+# so neither side can decide population identity from a path prefix before the
+# other observes it.
+step2_inventory_record_program() {
+    local rel="$1" case_number="$2"
+
+    if [ "$rel" = "$STEP2_INV_PYTHON" ]; then
+        STEP2_INV_PYTHON_SEEN=1
+        STEP2_INV_PYTHON_CASE="$case_number"
+        return 0
+    fi
+    if step2_in_set "$rel" "$STEP2_INV_GITS"; then
+        STEP2_INV_SEEN_GITS="$STEP2_INV_SEEN_GITS $rel"
+        note "inventory/git-object" "$rel case $case_number"
+        case "$case_number" in
+            3|5|6) ;;
+            *) STEP2_INV_GIT_BAD="$STEP2_INV_GIT_BAD $rel:not-selected-case$case_number" ;;
+        esac
+        return 0
+    fi
+
+    # Location is NOT population identity, and the same mistake one directory
+    # over cost round 4. The recorded paths define the git population; anything
+    # the record does not name is residual, whatever tree it sits in, and must
+    # receive a case.
+    STEP2_INV_OTHERS=$((STEP2_INV_OTHERS + 1))
+    # Two different questions, kept apart because Step 2 owns only one of them.
+    # An unclassified residual is a CLASSIFIER defect: the pass was asked for a
+    # case and produced none, which is what this step exists to prove cannot
+    # happen. A residual that classifies as something other than 7 is a statement
+    # about what the archive CONTAINS, and the reading-2 revision moved that to
+    # Steps 4 and 6, which assert it unqualified.
+    if [ -z "$case_number" ]; then
+        STEP2_INV_OTHER_UNCLASSIFIED="$STEP2_INV_OTHER_UNCLASSIFIED $rel"
+    elif [ "$case_number" != "7" ]; then
+        STEP2_INV_OTHER_BAD="$STEP2_INV_OTHER_BAD $rel:case$case_number"
+    fi
+    return 0
+}
+
+step2_inventory_suite() {
+    local root="${1%/}" oracle="$2" target saved_prefix
+    local size path rel magic recorded_lib is_lib
+    local walked=0 unreadable=0 unreadable_ids=""
+
+    section "step 2: the develop#24 inventory"
+
+    note "inventory/root" "$root"
+    note "inventory/oracle" "$oracle"
+    if ! step2_inventory_oracle "$oracle"; then
+        fail "inventory/oracle-readable" "$STEP2_INV_WHY"
+        cases=$((cases + 1))
+        return 1
+    fi
+    pass "inventory/oracle-readable" \
+        "$STEP2_INV_LIB_COUNT libraries, $(printf '%s' "$STEP2_INV_GITS" | wc -w) git objects, one python program"
+    cases=$((cases + 1))
+    note "inventory/oracle-python" "$STEP2_INV_PYTHON"
+
+    # The target is the production one, computed by the production builder under
+    # the declared prefix. A target invented here would make every case 3 and
+    # case 5 answer below a statement about this file rather than about the tree.
+    saved_prefix="$INSTALL_PREFIX"
+    INSTALL_PREFIX="$root"
+    target=$(build_elf_rpath)
+    INSTALL_PREFIX="$saved_prefix"
+    note "inventory/target" "${target:-<empty>}"
+    if [ -z "$target" ]; then
+        fail "inventory/target-computed" "build_elf_rpath found no library directory under $root/tools"
+        cases=$((cases + 1))
+        return 1
+    fi
+    pass "inventory/target-computed" "the production builder answered under this prefix"
+    cases=$((cases + 1))
+
+    step2_inventory_reset
+
+    # The walk production performs, with the size emitted beside the path, which
+    # is the caller obligation elf_observe states. The magic test is production's
+    # own, with a fork-free prefilter in front of it: most of an archive tree is
+    # not ELF, and one process per file to learn that would cost more than the
+    # whole check.
+    while IFS= read -r -d '' size && IFS= read -r -d '' path; do
+        magic=""
+        IFS= read -r -N 4 magic < "$path" 2>/dev/null
+        [ "$magic" = "$STEP2_ELF_MAGIC" ] || continue
+        magic=$(od -An -tx1 -v -N 4 "$path" 2>/dev/null | tr -d '[:space:]')
+        [ "$magic" = "7f454c46" ] || continue
+        walked=$((walked + 1))
+        elf_observe "$path" "$size"
+        elf_probe "$path" "$PATCHELF_BIN"
+        elf_classify "$target"
+        rel="${path#"$root/./"}"
+        if [ "$CPLX_ELF_CASE" = "1" ]; then
+            unreadable=$((unreadable + 1))
+            unreadable_ids="$unreadable_ids $rel"
+        fi
+
+        # Membership and structure are decided separately, and BOTH are recorded
+        # when both hold. A recorded library that the header walk cannot read is
+        # still a recorded library and still owes case 4; a walked library the
+        # record does not name is still judged. Deciding one from the other is
+        # how round 3's silent skip happened.
+        recorded_lib=0
+        step2_in_set "$rel" "$STEP2_INV_LIBS" && recorded_lib=1
+        is_lib=0
+        if [ "${CPLX_ELF_OBS[structural_status]}" = "ok" ] \
+           && [ "${CPLX_ELF_OBS[has_dynamic]}" = "yes" ] \
+           && [ "${CPLX_ELF_OBS[elf_kind]}" = "dyn" ] \
+           && [ "${CPLX_ELF_OBS[has_interp]}" = "no" ]; then
+            is_lib=1
+        fi
+        if [ "$recorded_lib" -eq 1 ]; then
+            STEP2_INV_SEEN_LIBS="$STEP2_INV_SEEN_LIBS $rel"
+            [ "$CPLX_ELF_CASE" = "4" ] \
+                || STEP2_INV_LIB_BAD="$STEP2_INV_LIB_BAD $rel:case$CPLX_ELF_CASE"
+        fi
+        if [ "$is_lib" -eq 1 ]; then
+            STEP2_INV_WALKED_LIBS="$STEP2_INV_WALKED_LIBS $rel"
+            [ "$CPLX_ELF_CASE" = "4" ] \
+                || STEP2_INV_WALKED_LIB_BAD="$STEP2_INV_WALKED_LIB_BAD $rel:case$CPLX_ELF_CASE"
+        fi
+        if [ "$recorded_lib" -eq 1 ] || [ "$is_lib" -eq 1 ]; then
+            continue
+        fi
+
+        # The criterion is about every other archive PROGRAM, and an ELF file is
+        # not automatically one. The archive ships relocatable objects and a
+        # static archive beside its programs: crt1.o, crti.o, GCC's crtbegin.o
+        # and crtend.o, the crtprec and crtoffload set, the sanitizer preinit
+        # objects, libmcheck.a and python.o. None carries a PT_DYNAMIC, so none
+        # can be given a search path and the pass would never rewrite one.
+        # Demanding case 7 of them asks a question the pass never asks, and
+        # build 91 answered it the only way it could: 78 of them on case 2, or
+        # case 1 for the 32-bit ones the ELF64 reader rejects.
+        #
+        # They are EXCLUDED here and never passed. Dropping them silently is the
+        # failure this whole check exists to refuse, since a preservation rule
+        # is satisfied most easily by a population nobody looked at, so the
+        # count and the names are reported below.
+        #
+        # A structurally unreadable object is excluded for the same reason and
+        # stays counted as case 1 above: it cannot be judged as a program when
+        # its header could not be read at all.
+        if ! step2_inventory_is_program "${CPLX_ELF_OBS[elf_kind]}"; then
+            STEP2_INV_NONPROGRAMS=$((STEP2_INV_NONPROGRAMS + 1))
+            STEP2_INV_NONPROGRAM_IDS="$STEP2_INV_NONPROGRAM_IDS $rel"
+            continue
+        fi
+
+        step2_inventory_record_program "$rel" "$CPLX_ELF_CASE"
+    done < <(find "$root/." \( -name '.git' -o -name '__pycache__' \) -prune -o \
+             -type f -size +4c -printf '%s\0%p\0' 2>/dev/null)
+
+    note "inventory/walked" "$walked ELF objects"
+    note "inventory/develop24-baseline" "develop#24 flagged $STEP2_INV_LIB_COUNT libraries out of 388 inventoried ELFs"
+    note "inventory/case-1-objects" "$unreadable${unreadable_ids:+ ->$unreadable_ids}"
+    note "inventory/non-programs" \
+        "$STEP2_INV_NONPROGRAMS not exec and not dyn, so outside the residual program rule${STEP2_INV_NONPROGRAM_IDS:+ ->$STEP2_INV_NONPROGRAM_IDS}"
+    if [ "$walked" -gt 0 ]; then
+        pass "inventory/walked-nonzero" "$walked"
+    else
+        fail "inventory/walked-nonzero" "no ELF object under $root, so nothing was classified"
+    fi
+    cases=$((cases + 1))
+
+    step2_inventory_assert
+    return 0
+}
+
+# The inventory controls. Each drives the SAME reader or the SAME assertion
+# function the walk drives, with one deliberate defect and everything else
+# clean, so exactly one judgement fails and a control can require its exact
+# reason. Without these the whole layer could quietly stop detecting anything
+# and the run would look identical on a tree nobody could check anyway.
+#
+# The 110 synthetic library rows below are CONTROL INPUT, not a stand-in for the
+# develop#24 record: they exist to make a well-formed oracle so one field at a
+# time can be broken. The real check still refuses to run without the real
+# record.
+STEP2_CTL_ORACLE=""
+step2_ctl_write_oracle() {
+    local n="$1" dup="$2" i
+    STEP2_CTL_ORACLE="$SCRATCH/ctl-inventory.txt"
+    : > "$STEP2_CTL_ORACLE"
+    for (( i = 0; i < n; i++ )); do
+        printf 'library|tools/python/root/usr/lib64/libctl%03d.so.1\n' "$i" >> "$STEP2_CTL_ORACLE"
+    done
+    [ "$dup" = "dup" ] && printf 'library|tools/python/root/usr/lib64/libctl000.so.1\n' >> "$STEP2_CTL_ORACLE"
+    printf 'python|tools/python/current/bin/python3.13_bin\n' >> "$STEP2_CTL_ORACLE"
+    printf 'git|tools/git/root/usr/bin/git\n' >> "$STEP2_CTL_ORACLE"
+    return 0
+}
+
+# A clean collected state over that oracle: every recorded member walked, every
+# library case 4, python selected, no unrecorded git member, no residual defect.
+step2_ctl_clean_state() {
+    step2_inventory_oracle "$STEP2_CTL_ORACLE" || return 1
+    step2_inventory_reset
+    STEP2_INV_SEEN_LIBS="$STEP2_INV_LIBS"
+    STEP2_INV_WALKED_LIBS="$STEP2_INV_LIBS"
+    STEP2_INV_SEEN_GITS="$STEP2_INV_GITS"
+    STEP2_INV_PYTHON_SEEN=1
+    STEP2_INV_PYTHON_CASE=6
+    return 0
+}
+
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_short_record() {
+    step2_ctl_write_oracle 109 ""
+    step2_inventory_oracle "$STEP2_CTL_ORACLE" && return 0
+    fail "ctl/short-record" "$STEP2_INV_WHY"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_long_record() {
+    step2_ctl_write_oracle 111 ""
+    step2_inventory_oracle "$STEP2_CTL_ORACLE" && return 0
+    fail "ctl/long-record" "$STEP2_INV_WHY"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_duplicate_record() {
+    step2_ctl_write_oracle 109 "dup"
+    step2_inventory_oracle "$STEP2_CTL_ORACLE" && return 0
+    fail "ctl/duplicate-record" "$STEP2_INV_WHY"
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_missing_library() {
+    step2_ctl_write_oracle 110 ""
+    step2_ctl_clean_state || return 1
+    STEP2_INV_SEEN_LIBS="${STEP2_INV_SEEN_LIBS# tools/python/root/usr/lib64/libctl000.so.1}"
+    step2_inventory_assert
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_walked_library_not_case_4() {
+    step2_ctl_write_oracle 110 ""
+    step2_ctl_clean_state || return 1
+    STEP2_INV_WALKED_LIBS="$STEP2_INV_WALKED_LIBS tools/python/root/usr/lib64/libextra.so.1"
+    STEP2_INV_WALKED_LIB_BAD=" tools/python/root/usr/lib64/libextra.so.1:case7"
+    step2_inventory_assert
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_recorded_library_not_case_4() {
+    step2_ctl_write_oracle 110 ""
+    step2_ctl_clean_state || return 1
+    STEP2_INV_LIB_BAD=" tools/python/root/usr/lib64/libctl000.so.1:case3"
+    step2_inventory_assert
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_missing_git() {
+    step2_ctl_write_oracle 110 ""
+    step2_ctl_clean_state || return 1
+    STEP2_INV_SEEN_GITS=""
+    step2_inventory_assert
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_recorded_git_not_selected() {
+    step2_ctl_write_oracle 110 ""
+    step2_ctl_clean_state || return 1
+    STEP2_INV_GIT_BAD=" tools/git/root/usr/bin/git:not-selected-case7"
+    step2_inventory_assert
+}
+# The pair round 4 asked for, over the SAME unrecorded path under the git tree.
+# Location decides nothing now: at case 7 it is an ordinary residual program and
+# the rules must stay silent; in a selected case it enlarges the selected set and
+# must fail. The first is a positive control, so it is written out rather than
+# run through the refusal helper.
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_python_excluded() {
+    step2_ctl_write_oracle 110 ""
+    step2_ctl_clean_state || return 1
+    STEP2_INV_PYTHON_CASE=7
+    step2_inventory_assert
+}
+# shellcheck disable=SC2329  # invoked indirectly, as the control helper's command
+step2_ctl_inv_residual_unclassified() {
+    step2_ctl_write_oracle 110 ""
+    step2_ctl_clean_state || return 1
+    STEP2_INV_OTHER_UNCLASSIFIED=" tools/patchelf/root/bin/patchelf"
+    step2_inventory_assert
+}
+
+# step2_ctl_silent NAME WHY: require the assertion function to say nothing about
+# the state the caller has just arranged. The counterpart of `control`, which
+# requires a refusal: a rule that reports on everything is no more useful than
+# one that reports on nothing, and only the pair tells a working rule from
+# either failure.
+step2_ctl_silent() {
+    local name="$1" why="$2" before="$failures"
+    step2_inventory_assert
+    if [ "$failures" -eq "$before" ]; then
+        pass "$name" "$why"
+    else
+        failures="$before"
+        fail "$name" "the rules reported on a state they should accept: $why"
+    fi
+    cases=$((cases + 1))
+    return 0
+}
+
+step2_inventory_controls() {
+    local kind ctl_git_tree_path
+    section "step 2: the inventory oracle refuses"
+
+    control "control/inventory-short-record"      "ORACLE"    step2_ctl_inv_short_record
+    control "control/inventory-long-record"       "ORACLE"    step2_ctl_inv_long_record
+    control "control/inventory-duplicate-record"  "ORACLE"    step2_ctl_inv_duplicate_record
+    control "control/inventory-missing-library"   "INVENTORY" step2_ctl_inv_missing_library
+    control "control/inventory-walked-lib-case"   "INVENTORY" step2_ctl_inv_walked_library_not_case_4
+    control "control/inventory-recorded-lib-case" "INVENTORY" step2_ctl_inv_recorded_library_not_case_4
+    control "control/inventory-missing-git"       "INVENTORY" step2_ctl_inv_missing_git
+    control "control/inventory-git-not-selected"  "INVENTORY" step2_ctl_inv_recorded_git_not_selected
+    control "control/inventory-python-excluded"   "INVENTORY" step2_ctl_inv_python_excluded
+    control "control/inventory-residual-unclassified" "INVENTORY" step2_ctl_inv_residual_unclassified
+
+    # Round 4's lesson, restated now that reading 2 moved the case-7 verdict to
+    # Steps 4 and 6. This half used to require a refusal, and that refusal was
+    # the case-7 assertion, so it left with it. Retiring the control with the
+    # verdict would have retired the lesson too, and the lesson is the expensive
+    # one: LOCATION IS NOT POPULATION IDENTITY. So the claim is asserted directly
+    # instead of inferred from a complaint. An unrecorded path under the git tree
+    # is counted as residual and never joins the git population, whatever case it
+    # carries.
+    ctl_git_tree_path="tools/git/root/usr/libexec/git-core/git-http"
+    step2_ctl_write_oracle 110 ""
+    if step2_ctl_clean_state; then
+        step2_inventory_record_program "$ctl_git_tree_path" 6
+        # The clean state seeds SEEN_GITS with the whole recorded population, so
+        # the claim is about the PLANTED path only: it must have raised the
+        # residual count and must not have joined the git population. Asserting
+        # an empty SEEN_GITS instead would be asserting the fixture, not the rule.
+        if [ "$STEP2_INV_OTHERS" = "1" ] \
+            && ! step2_in_set "$ctl_git_tree_path" "$STEP2_INV_SEEN_GITS" \
+            && [ -z "$STEP2_INV_GIT_BAD" ]; then
+            pass "control/inventory-git-tree-selected" \
+                "residual, not a git member, at a selected case"
+        else
+            fail "control/inventory-git-tree-selected" \
+                "INVENTORY location decided population: others=$STEP2_INV_OTHERS planted=$ctl_git_tree_path bad=$STEP2_INV_GIT_BAD"
+        fi
+        cases=$((cases + 1))
+    else
+        fail "control/inventory-git-tree-selected" "the control oracle did not read back"
+        cases=$((cases + 1))
+    fi
+
+    # The positive half of the round 4 pair: the same unrecorded path under the
+    # git tree, at case 7, must be an ordinary residual program and draw no
+    # complaint. Written out rather than run through the refusal helper, because
+    # what it requires is silence.
+    step2_ctl_write_oracle 110 ""
+    if step2_ctl_clean_state; then
+        step2_inventory_record_program \
+            "tools/git/root/usr/libexec/git-core/git-http" 7
+        step2_ctl_silent "control/inventory-git-tree-case-7" \
+            "an unrecorded case 7 program under the git tree is residual, not a defect"
+    else
+        fail "control/inventory-git-tree-case-7" "the control oracle did not read back"
+        cases=$((cases + 1))
+    fi
+
+    # The boundary reading 2 drew, made executable. A residual that classifies as
+    # something OTHER than 7 must now be reported and accepted here, because the
+    # blocking assertion moved to Steps 4 and 6. Without this control the harness
+    # could drift back to failing it and nothing would catch the contradiction
+    # until a mandatory command exited 1 against a plan that had moved on.
+    step2_ctl_write_oracle 110 ""
+    if step2_ctl_clean_state; then
+        step2_inventory_record_program "tools/python/root/a.out" 5
+        step2_ctl_silent "control/inventory-residual-not-case-7" \
+            "a residual that is not case 7 is reported here and asserted by Steps 4 and 6"
+    else
+        fail "control/inventory-residual-not-case-7" "the control oracle did not read back"
+        cases=$((cases + 1))
+    fi
+
+    # The other half of the same claim: on a clean state the rules stay silent.
+    step2_ctl_write_oracle 110 ""
+    if step2_ctl_clean_state; then
+        step2_ctl_silent "control/inventory-clean-state" "silent on a well-formed state"
+    else
+        fail "control/inventory-clean-state" "the control oracle did not read back"
+        cases=$((cases + 1))
+    fi
+
+    # The residual population's own boundary, controlled in both directions,
+    # because an exclusion is the one kind of rule that passes by shrinking what
+    # it looks at. The first pair says what must fall out, the second says what
+    # must NOT: if this ever excluded a program, the preservation criterion
+    # would go green over a population it stopped examining.
+    section "step 2: the residual population boundary"
+
+    for kind in unsupported ""; do
+        if step2_inventory_is_program "$kind"; then
+            fail "control/non-program-excluded" \
+                "a ${kind:-cleared} kind was taken for a program"
+        else
+            pass "control/non-program-excluded" \
+                "a ${kind:-cleared} kind is not a residual program"
+        fi
+        cases=$((cases + 1))
+    done
+    for kind in exec dyn; do
+        if step2_inventory_is_program "$kind"; then
+            pass "control/program-not-excluded" "a $kind object is still judged"
+        else
+            fail "control/program-not-excluded" \
+                "a $kind object was excluded from the residual population"
+        fi
+        cases=$((cases + 1))
+    done
+    return 0
 }
 
 # ------------------------------------------------------------------ step 1 ---
@@ -2347,6 +3694,52 @@ if [ "$STEP" = "1" ]; then
     fi
 fi
 
+# ------------------------------------------------------------------ step 2 ---
+# The classifier is a PRODUCTION function, reached through the same seam, and it
+# is exercised here WITHOUT running an install. That is not a convenience: it is
+# what makes the inventory check below, and Step 6's acceptance, possible at all.
+#
+# No host gate of its own. The baseline above already refused a host that cannot
+# observe a real ELF, so by the time this runs a Linux host, patchelf, readelf
+# and sha256sum are established facts rather than assumptions. What can still be
+# missing is the archive tree, and that has its own answer below.
+if [ "$STEP" = "2" ]; then
+    # shellcheck disable=SC1090
+    source "$ISOLATED_INSTALLER" >/dev/null 2>&1
+    if declare -F elf_classify >/dev/null 2>&1; then
+        pass "step2/classifier-defined" "elf_classify"
+        cases=$((cases + 1))
+        step2_controlled_suite
+        step2_bridge_suite
+        # The inventory controls run on ANY host that reaches step 2: they drive
+        # the reader and the assertion function directly, so the rules are proved
+        # able to report and to stay silent whether or not an archive is here.
+        step2_inventory_controls
+        # The inventory needs TWO things a run is not obliged to have: the
+        # recorded develop#24 oracle and the extracted archive it describes.
+        # Either one absent leaves the criterion UNANSWERED rather than answered
+        # from whatever the tree holds, which is the weakening this check exists
+        # to refuse. It gets its own exit code and the run says what to pass.
+        if [ -f "$INVENTORY" ] && [ -d "$PREFIX/tools" ]; then
+            step2_inventory_suite "$PREFIX" "$INVENTORY"
+        else
+            printf '  %-40s SKIP  oracle [%s] tree [%s]\n' "step2/inventory" \
+                "$([ -f "$INVENTORY" ] && echo present || echo absent)" \
+                "$([ -d "$PREFIX/tools" ] && echo present || echo absent)"
+            UNANSWERED="${UNANSWERED:+$UNANSWERED, }the develop#24 inventory check"
+            UNANSWERED_HOW="$UNANSWERED_HOW
+  the inventory check compares a recorded oracle against a real archive tree.
+  Record the develop#24 selected set as docs/v0.27.0/inventory.develop-24.txt,
+  rows of population|path with populations library, python and git, or name it
+  with --inventory; and rerun with --prefix <the extracted prefix>. It is not
+  derived from the tree: a derived set passes with a member missing."
+        fi
+    else
+        fail "step2/classifier-defined" "elf_classify is not defined after sourcing"
+        cases=$((cases + 1))
+    fi
+fi
+
 # ------------------------------------------------------------------- verdict ---
 printf '\n== verdict\n'
 printf '  step        %s\n' "$STEP"
@@ -2357,10 +3750,21 @@ printf '  readelf     %s\n' "$READELF_BIN"
 printf '  sha256sum   %s\n' "$SHA256SUM_BIN"
 printf '  assoc local %s (bash %s)\n' "$ASSOC_LOCAL" "$LOCAL_BASH"
 printf '  assoc rhel  %s\n' "$ASSOC_TARGET"
+[ -n "$UNANSWERED" ] && printf '  unanswered  %s\n' "$UNANSWERED"
 
-if [ "$failures" -eq 0 ]; then
-    printf '\nOBJECTIVE MET for step %s\n' "$STEP"
-    exit 0
+# Three outcomes, not two. A failure is a finding about the code and wins, since
+# that is the thing to act on; an obligation nobody could answer is neither a
+# pass nor a code failure, so it carries its own exit code rather than being
+# folded into either. Answering the cheaper question and reporting the step done
+# is what the third outcome exists to prevent.
+if [ "$failures" -ne 0 ]; then
+    printf '\nOBJECTIVE NOT MET for step %s: %s failure(s)\n' "$STEP" "$failures"
+    exit 1
 fi
-printf '\nOBJECTIVE NOT MET for step %s: %s failure(s)\n' "$STEP" "$failures"
-exit 1
+if [ -n "$UNANSWERED" ]; then
+    printf '\nOBJECTIVE NOT MET for step %s: unanswered: %s\n' "$STEP" "$UNANSWERED"
+    printf '%s\n' "$UNANSWERED_HOW"
+    exit 5
+fi
+printf '\nOBJECTIVE MET for step %s\n' "$STEP"
+exit 0
