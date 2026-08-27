@@ -1676,6 +1676,7 @@ record is literal. Twelve objects, each at a stated path under `$DEST_PATH`:
 | `X10` | `lib/libelf32.so.1` | ELF32, outside the domain |
 | `X11` | `lib/libshort.so.1` | longer than the four magic bytes, shorter than the 64-byte header |
 | `X12` | `lib/libprobe.so.1` | `ET_DYN`, no `PT_INTERP`, `DT_RUNPATH` builder-anchored |
+| `X13` | `tools/python/root/lib64/ld-linux-x86-64.so.2` | `ET_DYN`, no `PT_INTERP`, no search-path tag, planted by the prefix builder and shaped like the real loader so case 4 claims it unless the rule stops it |
 
 The interpreter guard read from lines 413 to 422 is
 `[[ "$old_value" == */home/* ]] && [ "$old_value" != "$new_interp" ]`, so a
@@ -1699,7 +1700,7 @@ only a builder-anchored interpreter that differs from the target yields
 | `IF02` | `{X2}`, interpreter-probe double | `--print-interpreter` fails |
 | `IW01` | `{X7}`, rpath-write double | `--set-rpath` fails on a **case 5** object |
 | `IW02` | `{X2}`, interpreter-write double | `--set-interpreter` fails |
-| `R12` | prefix at `$HOME`, `{X1..X6}`, empty target search path | a missing rpath input |
+| `R14` | prefix at `$HOME`, `{X1..X6}`, no tool library directories | a missing rpath input, and the interpreter missing for the same reason |
 | `R13` | any prefix, patchelf absent | the skipped pass |
 
 ##### The object outcomes
@@ -1732,12 +1733,14 @@ value: a case is 1 to 7, a disposition is one of its wire tokens.
 | `A20` | `IF02` / `X2` | 6 | `rewritten` | `failed` | `--set-rpath --force-rpath` performed | none |
 | `A21` | `IW01` / `X7` | 5 | `failed` | `unchanged` | `--set-rpath` attempted and failed | `mig-checked` **+1**, `mig-failed` +0 |
 | `A22` | `IW02` / `X2` | 6 | `rewritten` | `failed` | `--set-rpath` performed, `--set-interpreter` attempted and failed | none |
-| `A23` | `R12` / `X1` | 4 | `failed` | `not-applicable` | none, the write has no target | none |
-| `A24` | `R12` / `X2` | 6 | `failed` | `rewritten` | `--set-interpreter` only | none |
-| `A25` | `R12` / `X3` | 7 | `excluded` | `unchanged` | none | none |
-| `A26` | `R12` / `X4` | 7 | `excluded` | `rewritten` | `--set-interpreter` only | none |
-| `A27` | `R12` / `X5` | 2 | `not-dynamic` | `not-applicable` | none | none |
-| `A28` | `R12` / `X6` | 1 | `failed` | `not-applicable` | none | none |
+| `A23` | `R14` / `X1` | 4 | `failed` | `not-applicable` | none, the write has no target | none |
+| `A24` | `R14` / `X2` | 6 | `failed` | `unchanged` | none, neither input resolved | none |
+| `A25` | `R14` / `X3` | 7 | `excluded` | `unchanged` | none | none |
+| `A26` | `R14` / `X4` | 7 | `excluded` | `unchanged` | none, neither input resolved | none |
+| `A27` | `R14` / `X5` | 2 | `not-dynamic` | `not-applicable` | none | none |
+| `A28` | `R14` / `X6` | 1 | `failed` | `not-applicable` | none | none |
+| `A29` | `R1` / `X13` | 7 | `excluded` | `not-applicable` | none | none |
+| `A30` | `R2` / `X13` | 7 | `excluded` | `not-applicable` | none | none |
 
 Each row's emitted record is fixed by its cells: `case`, `rpath`, `interp` and
 the hex of the object's path. Its trailer contribution is `walked` +1, exactly
@@ -1771,7 +1774,7 @@ independence of the axes stops being an assertion.
 | `IF02` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | `completed` |
 | `IW01` | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | `completed` |
 | `IW02` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | `completed` |
-| `R12` | 6 | 0 | 3 | 0 | 1 | 2 | 2 | 0 | 1 | 3 | 0 | 0 | `completed` |
+| `R14` | 6 | 0 | 3 | 0 | 1 | 2 | 0 | 0 | 3 | 3 | 0 | 0 | `completed` |
 | `R13` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | `skipped` |
 
 **This table is not a second hand-maintained oracle.** It was written by hand and
@@ -1788,11 +1791,25 @@ to the reader: the five `r-` buckets sum to `walked`, and the four `i-` buckets
 sum to `walked`. `R13` emits **no records and exactly one trailer**, and the
 install still succeeds.
 
-`R12` is the empty-search-path run and is given a fixed six-object inventory
+`R14` is the empty-search-path run and is given a fixed six-object inventory
 rather than the phrase "`r-failed` equals `walked`", which said nothing about the
-interpreter or migration totals. Its interpreter axis is untouched by the missing
-rpath input, which is exactly what the design claims and what the earlier
-formulation could not check.
+interpreter or migration totals.
+
+**It replaces `R12`, which asked for a fixture nobody can build.** `R12` required
+an empty computed search path AND a resolvable interpreter, so that its
+interpreter axis would show a rewrite while its rpath axis failed. Those two
+conditions are mutually exclusive in this codebase: every candidate
+`find_dynamic_linker` accepts lives inside a directory `build_elf_rpath` collects,
+so a prefix that resolves the interpreter always yields a non-empty target. The
+contradiction was found while deriving the Step 4 matrix, reported as six
+unanswered rows rather than settled by the writer, and adjudicated here.
+
+The claim `R12` was written to make, that a missing rpath input does not disturb
+the interpreter axis, is still made and is now made by a run that exists: under
+`R14` the interpreter axis reports `unchanged` or `not-applicable` throughout and
+never `failed`, which is the same independence claim stated in the terms the code
+can produce. What is given up is the stronger `i-rewritten=2` form, which no
+prefix could ever have produced.
 
 **`R12`'s rpath column is settled by Q10, and the previous version of these rows
 was wrong on the design's own terms.** They assigned **case 1** to all six
@@ -1826,6 +1843,8 @@ rows of its acceptance table:
 | fault: computed target search path empty | `A23` to `A28` |
 | fault: `--set-rpath` fails on a selected object | `A21` |
 | fault: `--set-interpreter` fails | `A22` |
+| acceptance: the resolved loader is excluded and still executes | `A29`, `A30`, and `step4/archive-loader-runs` |
+| acceptance: an ordinary shipped library is rewritten and still works | `A02`, and `step4/archive-python-runs` |
 | acceptance: python fresh, prefix outside `/home`, both guards fire | `A01` |
 | acceptance: python fresh, prefix at `$HOME`, case 6 | `A03` |
 | acceptance: `$HOME` prefix relocated by v0.26.0, case 5, checked incremented | `A14` |
@@ -1860,8 +1879,8 @@ records them as out of scope here rather than silently omitting them.
 claiming every row cites a clause, which is an assertion and not a ledger. It was
 already false: `A11` appeared in no forward entry. A claim of zero underived rows
 has to be checkable by set equality, so the mapping is enumerated per row and the
-check is that the id set of this table equals `{A01..A28} ∪ {R0..R7, IF01, IF02,
-IW01, IW02, R12, R13}` exactly, with zero missing and zero extra. That run set is
+check is that the id set of this table equals `{A01..A30} ∪ {R0..R7, IF01, IF02,
+IW01, IW02, R14, R13}` exactly, with zero missing and zero extra. That run set is
 the actual fourteen: renaming the four fault runs left the earlier `R0..R13`
 range demanding four ids that no longer exist, which the mechanical check would
 have reported rather than tolerated:
@@ -1891,17 +1910,19 @@ have reported rather than tolerated:
 | `A21` | acceptance: case 5 object whose `--set-rpath` fails, still counted; fault: `--set-rpath` fails | case 5 held, rpath `failed`, `mig-checked` +1 |
 | `A22` | fault: `--set-interpreter` fails | interpreter `failed`; case 6 and rpath `rewritten` from the case table |
 | `A23` | fault and acceptance: empty search path, interpreter axis unaffected | rpath `failed`; **case 4 from the case table**, not from this clause |
-| `A24` | the same clause | rpath `failed`; case 6 from the case table; interpreter `rewritten` from the guard |
+| `A24` | the same clause | rpath `failed`; case 6 from the case table; interpreter `unchanged` because no interpreter target resolves under `R14` |
 | `A25` | the same clause, as settled by Q10 (10B) | case 7 from the case table; rpath `excluded`, no write being due, per Q10 (10B) |
-| `A26` | the same clause, as settled by Q10 (10B) | case 7; interpreter `rewritten`; rpath `excluded`, no write being due, per Q10 (10B) |
+| `A26` | the same clause, as settled by Q10 (10B) | case 7; interpreter `unchanged` because no interpreter target resolves under `R14`; rpath `excluded`, no write being due, per Q10 (10B) |
 | `A27` | the same clause, as settled by Q10 (10B) | case 2; rpath `not-dynamic`, no write being due, per Q10 (10B) |
-| `A28` | acceptance: both tags; fault: ambiguous. The empty search path is not what fails this object | case 1, rpath `failed` independently of `R12`'s fault |
+| `A28` | acceptance: both tags; fault: ambiguous. The empty search path is not what fails this object | case 1, rpath `failed` independently of `R14`'s fault |
+| `A29` | acceptance: the loader `find_dynamic_linker` resolves is excluded and still executes | case 7 from the loader rule, not from fall-through; rpath `excluded`, no write being due; interpreter `not-applicable`, the object having no `PT_INTERP` |
+| `A30` | the same clause, on the second pass | case 7 again and never `already correct`, which is what places the rule before case 3 |
 | `R0`, `R1`, `R2` | acceptance: fresh run with no v0.26.0 objects, checked zero failed zero | `mig-checked` 0 and `mig-failed` 0 in those runs' totals |
 | `R3`, `R4` | acceptance: v0.26.0 relocation and host-interpreter rows | their migration totals |
 | `R5`, `R6`, `R7` | the structural, domain and short-file acceptance rows | one-object totals |
 | `IF01`, `IF02` | the two probe-failure acceptance rows | one-object totals |
 | `IW01`, `IW02` | the two write-failure fault rows | one-object totals |
-| `R12` | fault and acceptance: empty search path, as settled by Q10 (10B) | run-level totals |
+| `R14` | fault and acceptance: empty search path, as settled by Q10 (10B) | run-level totals |
 | `R13` | acceptance: pass skipped because patchelf is absent | zero records, one `skipped` trailer |
 
 Two entries are worth reading closely. `A11` is the row the asserted ledger
@@ -1990,22 +2011,62 @@ Records are emitted during the existing walk, never gathered for a second one.
 ### Step 4 completion criteria
 
 - `readelf -d` shows `RPATH` on the python ELF and on `libstdc++.so.6.0.29`, and
-  the selected set is the one Step 2 states once, the same statement Step 6's
-  acceptance uses: the 110 flagged libraries, the python program by name, the
-  enumerated git objects, every other archive program preserved;
-- **the residual half is asserted here, and Step 2 does not assert it.** Every
-  archive program the record does not name answers case 7 and is reported as
-  preserved, over the real extracted tree this step already rewrites. Step 2
-  accepts only the recorded populations, for the reason its own criteria give:
-  the residual population is a property of the archive rather than of the
-  classifier, so it is asserted where a real archive is in hand. A residual
-  object that answers anything but case 7 fails **this** step, and fails Step 6,
-  and no exception is admitted for either;
+  the selected set over the staging copy is the one Step 2 states once: the 110
+  flagged libraries, the python program by name, and the enumerated git objects.
+  **"Every other archive program preserved" is NOT asserted here.** It is an
+  ACCEPTANCE claim, it lives under the requirement's `## Acceptance` heading,
+  and acceptance is Step 6, which runs over the deployed archive and admits no
+  exception. An earlier revision of this bullet asserted it at this step, which
+  is how this plan came to forbid and permit the same object in one section.
+  What Step 4 shows is the selected set it produced and the residuals it found;
+  what Step 6 proves is that the archive contains nothing else selected;
+- **the loader is excluded and the tree still runs.** The object
+  `find_dynamic_linker` resolves answers case 7 and is never written, asserted
+  at the classifier seam in both directions so the rows are not vacuous: the
+  same tuple classified without the rule answers case 4, and with it answers 7,
+  including through the symlink layout the archive actually ships. And after the
+  pass over the real archive copy, **the shipped loader and the shipped python
+  are executed**, not counted. This criterion exists because a reconciled
+  account cannot see this class of damage: patchelf exits 0 on the loader and
+  destroys it, so the record reads `rewritten`, the trailer balances, and the
+  tree segfaults at exec;
+- **the residual half runs here, and what it gates is what this step owns.**
+  The pass walks a copy of the real extracted archive, the capture reconciles,
+  and **every residual program is classified**: the pass answered for each one.
+  That is the assertion Step 4 can honestly make, and an unclassified residual
+  is a classifier defect and fails this step. It is a copy and not the tree
+  itself because the pass mutates what it walks and this harness does not own
+  that tree: on the build agent it is the prefix the next pipeline stage runs.
+  What the copy costs is exact and stated: cases 3 and 5 compare an object
+  against the search path computed for its prefix, so an object the live tree
+  calls case 5 the copy calls case 6. Both are selected populations, and this
+  step reports either the same way;
+- **whether the ARCHIVE should carry a selected residual is NOT gated here.**
+  Step 2 gave the reason and it has not changed: a residual is a property of the
+  archive rather than of the classifier. Step 4 walks a staging copy; the object
+  lives in the published archive; and the only work that removes it is a
+  rebuild, which is umbrella requirement 7. So every selected residual is
+  REPORTED here with its owner, and the gate is Step 6's, whose criteria already
+  call themselves the final assertion of the residual half, over the deployed
+  archive, admitting no exception. This step ends by naming the set it hands
+  over. An earlier revision of this plan gated it here and then had to excuse
+  the failure; moving the gate to where the deployed archive is in hand is the
+  correction, and it narrows Step 4 rather than weakening Step 6;
+- **the ownership register is literal and self-retiring, and THAT is gated
+  here.** Each known selected residual is recorded by exact path with its owning
+  requirement, so the handoff names an owner rather than a path and an
+  unadjudicated violation is visibly different from an adjudicated one. It is a
+  literal path list and never a pattern. It is asserted in both directions, and
+  the second direction is this step's own bookkeeping rather than the archive's
+  contents: an entry the archive no longer carries **fails**, so a rebuilt
+  archive cannot land while this plan still names a violation the rebuild
+  removed. Today it holds exactly one entry, `tools/python/root/a.out`, owned by
+  umbrella requirement 7 (`tools-archive-rebuild`);
 - a second run and a `--force` reinstall rewrite nothing and account for the
   covered set as `already correct`;
 - the three `$HOME` cases behave as the design's acceptance table states;
-- **every row of the production outcome matrix passes**, `A01` to `A28` over runs
-  `R0` to `R7`, `IF01`, `IF02`, `IW01`, `IW02`, `R12` and `R13`, each against its
+- **every row of the production outcome matrix passes**, `A01` to `A30` over runs
+  `R0` to `R7`, `IF01`, `IF02`, `IW01`, `IW02`, `R14` and `R13`, each against its
   literal cells. No cell is a placeholder: every
   case is 1 to 7, every disposition is one of its closed wire tokens, and every
   migration delta is a number;
@@ -2031,8 +2092,8 @@ Records are emitted during the existing walk, never gathered for a second one.
 - **the two-way derivation ledger is complete and enumerated in both
   directions**: every applicable row of the design's fault matrix and every
   production-outcome row of its acceptance table maps to one or more matrix rows,
-  with zero uncovered; and **every** `A01` to `A28` and every one of the fourteen
-  runs, `R0` to `R7`, `IF01`, `IF02`, `IW01`, `IW02`, `R12` and `R13`, has its
+  with zero uncovered; and **every** `A01` to `A30` and every one of the fourteen
+  runs, `R0` to `R7`, `IF01`, `IF02`, `IW01`, `IW02`, `R14` and `R13`, has its
   own reverse entry naming
   the clause and the fields that clause fixes. The check is **set equality** on
   the id sets, reporting zero missing and zero extra, not a sentence claiming
@@ -2044,7 +2105,7 @@ Records are emitted during the existing walk, never gathered for a second one.
   parsed trailer, and literal table against the actual parsed trailer. The
   literal table has been independently recomputed and is correct, so this guards
   later drift rather than a present error;
-- `R12`'s rows follow Q10, answered 10B: rpath `failed` only where a write was
+- `R14`'s rows follow Q10, answered 10B: rpath `failed` only where a write was
   due, cases 4, 5 and 6, with cases 1, 2, 3 and 7 keeping their case-defined
   dispositions. No row is provisional;
 - a skipped pass emits a trailer with a zero total, no records, and the skipped
@@ -2083,6 +2144,48 @@ Records are emitted during the existing walk, never gathered for a second one.
   deployment shape. Do not split the file inside this step: it would change what
   the archive ships and what the how-to instructs, neither of which this plan
   owns. The estimate is advisory throughout and is never a gate.
+
+#### Step 4 measured line budget
+
+Measured with `wc -l` on `src/setups/env/bin/install_pkg.sh` at each step's own
+commit, so every figure is reproducible from the history rather than recalled.
+
+| Point | Commit | Physical lines | Delta |
+| --- | --- | --- | --- |
+| baseline, before the effort's production work | `ddebdc7` | 625 | - |
+| Step 0, the source-safe seam | `a19da45` | 649 | +24 |
+| Step 1, the observer | `2ab83f4` | 874 | +225 |
+| Step 2, the classifier | `bed0229` | 1015 | +141 |
+| Step 3, the formatter | `31db242` | 1120 | +105 |
+| **Step 4, the wiring and the loader rule** | staged | **1281** | **+161** |
+
+Non-blank, non-comment lines: 631 at Step 3, 693 staged at Step 4, so 62 of the
+161 are code and 99 are comment or blank.
+
+**The advisory band was exceeded, and by how much is the point.** Step 4's own
+estimate was 60 to 90 further lines; the measured figure is 161, roughly double
+the top of that band. The running estimate for the effort was the 625 baseline
+plus 220 to 330, so 845 to 955; the measured total is 1281, between 326 and 436
+lines past it. Every earlier step also ran over, so this is not one step's
+surprise.
+
+**Maintainability assessment: the file is at its limit but not past it, and the
+number rather than the impression says so.** 693 lines carry logic and 588 carry
+rationale, a ratio this project chose deliberately and which is the reason the
+file reads at 1281 lines rather than becoming unreadable at 900. The logic is
+seven functions with one walk between them and no nesting deeper than the walk
+itself.
+
+**Raised, not resolved here:** the deployment shape should be revisited before
+the file grows again. Nothing in v0.27.0 may split it, for the reason this
+checkpoint already gives, so this is recorded as an input to the archive-shape
+requirement rather than acted on. The next production step that touches this
+file should carry that amendment first.
+
+The reviewer's round 3 answer cites 1010 to 1149 for the same checkpoint. Those
+are not the figures `wc -l` produces at the commits above and the method behind
+them is not stated, so the table records what is measurable and reproducible and
+flags the difference rather than adopting either figure silently.
 
 ### Step 4 workflow timing readiness
 
@@ -2330,11 +2433,20 @@ A blocked record names, at minimum:
   flagged libraries as case 4, the python program **asserted by name**, the
   enumerated git objects, and every other archive program preserved as case 7. An
   excluded program that was quietly rewritten fails this step. **This is the
-  final assertion of the residual half**, which Step 2 does not make and Step 4
-  makes over the staging tree: here it is made over the deployed archive, so an
+  ONLY gating assertion of the residual half**, which Step 2 does not make and
+  Step 4 reports without gating: here it is made over the deployed archive, so an
   object that reached the tarball by no route at all is caught before the
   acceptance is called green. No exception is admitted, and a residual object
   that is neither preserved nor removed from the archive fails the acceptance;
+- **Step 4's handoff is consumed here by name.** Step 4 ends by printing the set
+  of selected residual programs it found in the staging copy, each with its
+  owning requirement, and every member of that set must be resolved before this
+  step is green: removed from the archive by its owner, or shown to be preserved
+  after all. Today that set is `tools/python/root/a.out`, owned by umbrella
+  requirement 7 (`tools-archive-rebuild`), and the rebuild it needs is the
+  discharge. A member still selected here, with no rebuild behind it, is the
+  failure this criterion exists to produce, and no adjudication reaches it: Step
+  4 may narrow what it gates, this step may not;
 - **every retained capture is accepted by the categorical reader**, the Step 3
   one, rather than being read by eye. A capture that no reader accepted is not
   acceptance evidence;
