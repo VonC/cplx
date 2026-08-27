@@ -90,13 +90,13 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# Only steps 0 to 4 have case suites today. Accepting any other value would
+# Only steps 0 to 5 have case suites today. Accepting any other value would
 # let the verdict line report success for a step whose cases do not exist, which
 # is a vacuous pass at exactly the level later steps rely on. Extend this
 # dispatch and the suite together.
 case "$STEP" in
-    0|1|2|3|4) ;;
-    *) echo "unsupported --step $STEP: steps 0 to 4 have case suites today." >&2
+    0|1|2|3|4|5) ;;
+    *) echo "unsupported --step $STEP: steps 0 to 5 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -2045,6 +2045,149 @@ if [ "$STEP" = "3" ]; then
     fi
     if [ "$step3_own_failures" -ne 0 ]; then
         printf '\nOBJECTIVE NOT MET for step %s: %s failure(s)\n' "$STEP" "$step3_own_failures"
+        exit 1
+    fi
+    printf '\nOBJECTIVE MET for step %s\n' "$STEP"
+    exit 0
+fi
+
+# ---------------------------------------------------------------- step 5 ---
+# The documentation step, asserted POSITIVELY and page by page.
+#
+# The obvious suite here is a pair of greps for the stale wording, and it is the
+# suite the earlier revision had. A stale-wording grep is a NEGATIVE test: it
+# passes when a phrase is absent, and deleting the surrounding prose satisfies
+# it perfectly. A page whose ELF section had been removed outright would have
+# gone green, which is the opposite of what this step exists to produce.
+#
+# So the primary check is one row per stated obligation, each naming its page
+# and the thing that must be PRESENT on it. Deleting the prose fails the step.
+# The stale-wording greps stay beside them as a backstop, for the reason the
+# Step 0 baseline is a backstop in Step 3: absence of the wrong thing is not
+# presence of the right one.
+#
+# Host-independent by construction. It reads Markdown and nothing else, so it
+# answers the same on the authoring host and on the agent.
+STEP5_WIKI_REF="wiki/reference/relocation-tools.md"
+STEP5_WIKI_EXP="wiki/explanation/why-binaries-remember-the-build-home.md"
+STEP5_WIKI_HOW="wiki/how-to/relocate-an-install-to-another-prefix.md"
+
+# id~page-variable~extended-regex~obligation
+#
+# Tilde-separated, not pipe-separated, because half these patterns match
+# Markdown table rows and every one of those carries a `|`. A pipe separator
+# split the pattern instead of the row, and the rows it was meant to find
+# reported missing while the page carried them: a false failure is as
+# misleading as a false pass, and this table exists to be trusted.
+STEP5_COVERAGE="\
+C1~REF~DT_RPATH~the tag actually written
+C2~REF~library.*ET_DYN.*no .PT_INTERP~the three populations, library
+C3~REF~migration program.*already carrying the target value~the three populations, migration
+C4~REF~fresh program.*builder-anchored~the three populations, fresh
+C5~REF~already correct.*not dynamically linked.*excluded~the rpath disposition axis
+C6~REF~rewritten.*failed.*unchanged.*not applicable~the interpreter disposition axis
+C7~REF~shipped dynamic loader itself~what the pass leaves untouched
+C8~EXP~install-time rewrite settles this layer~the rewrite now produces DT_RPATH
+C9~EXP~LD_LIBRARY_PATH. no longer wins~the consequence for LD_LIBRARY_PATH
+C10~EXP~setenv. stops affecting the shipped directories~the consequence for setenv
+C11~HOW~grep RPATH .*RUNPATH here is a v0\.26 tree~a check expecting RPATH exactly
+C12~HOW~readelf -d .*LIB.*grep RPATH~the library-side check"
+
+# The stale forms, each with the page it must be absent from. Backstop only.
+STEP5_STALE="\
+S1~REF~only rewrites values still containing~the /home/ guard stated as the whole rule
+S2~HOW~grep -E .RPATH.RUNPATH.~a check accepting either tag indifferently"
+
+step5_page_path() {
+    case "$1" in
+        REF) printf '%s' "$STEP5_WIKI_REF" ;;
+        EXP) printf '%s' "$STEP5_WIKI_EXP" ;;
+        HOW) printf '%s' "$STEP5_WIKI_HOW" ;;
+        *) return 1 ;;
+    esac
+}
+
+step5_suite() {
+    local id page rx what path n missing=0
+
+    section "step 5: every obligation present on its named page"
+
+    while IFS='~' read -r id page rx what; do
+        [ -n "$id" ] || continue
+        path="$here/../../$(step5_page_path "$page")"
+        if [ ! -f "$path" ]; then
+            fail "$id/page" "PAGE absent: $(step5_page_path "$page")"
+            cases=$((cases + 1))
+            missing=$((missing + 1))
+            continue
+        fi
+        if grep -qE -- "$rx" "$path"; then
+            pass "$id/present" "$what"
+        else
+            fail "$id/present" "MISSING on $(step5_page_path "$page"): $what"
+        fi
+        cases=$((cases + 1))
+    done <<< "$STEP5_COVERAGE"
+
+    section "step 5: the stale wording is gone, as a backstop"
+
+    while IFS='~' read -r id page rx what; do
+        [ -n "$id" ] || continue
+        path="$here/../../$(step5_page_path "$page")"
+        [ -f "$path" ] || continue
+        if grep -qE -- "$rx" "$path"; then
+            fail "$id/stale" "STALE on $(step5_page_path "$page"): $what"
+        else
+            pass "$id/stale" "absent: $what"
+        fi
+        cases=$((cases + 1))
+    done <<< "$STEP5_STALE"
+
+    section "step 5: the host-tool list is unchanged"
+
+    # No installer tool was added by this effort, so the contract's tool set is
+    # the number to hold. A changed count means a tool arrived without its
+    # contract row, or a row was dropped, and either is a documentation defect
+    # this step owns.
+    if [ -f "$HOST_TOOL_CONTRACT" ]; then
+        n=$(grep -cvE '^[[:space:]]*(#|$)' "$HOST_TOOL_CONTRACT")
+        chk "step5/host-tool-rows" "26" "$n"
+    else
+        fail "step5/host-tool-rows" "CONTRACT absent: $HOST_TOOL_CONTRACT"
+    fi
+    cases=$((cases + 1))
+}
+
+# Step 5 is the documentation step and it reads Markdown and nothing else, so it
+# exits HERE, above the capability gate, for the same reason step 3 does: a step
+# that needs no patchelf, no readelf and no Linux must not report
+# HOST_CANNOT_SATISFY on a host that can answer every question it asks.
+if [ "$STEP" = "5" ]; then
+    # Scoped the same way Step 3's verdict is, and for the same reason. Step 0's
+    # preflight asks for readelf and a capability record; Step 5 asks for three
+    # Markdown pages and a contract file. On a host without the ELF tools those
+    # step 0 cases fail above, and reporting the total would fail Step 5 for
+    # capability its criteria do not mention. Hiding them would be the
+    # count-driven change this effort has refused since Step 0, so both figures
+    # are printed and only the owned one decides.
+    step5_inherited_failures="$failures"
+    step5_suite
+    step5_own_failures=$((failures - step5_inherited_failures))
+    printf '\n== verdict\n'
+    printf '  step        %s\n' "$STEP"
+    printf '  cases       %s\n' "$cases"
+    printf '  failures    %s\n' "$step5_own_failures"
+    printf '  pages       %s\n' "$STEP5_WIKI_REF"
+    printf '              %s\n' "$STEP5_WIKI_EXP"
+    printf '              %s\n' "$STEP5_WIKI_HOW"
+    printf '  contract    %s\n' "$HOST_TOOL_CONTRACT"
+    if [ "$step5_inherited_failures" -ne 0 ]; then
+        printf '  inherited   %s step 0 preflight failure(s), not step 5 criteria\n' \
+            "$step5_inherited_failures"
+        printf '              this host cannot answer step 0; step 5 does not ask it to\n'
+    fi
+    if [ "$step5_own_failures" -ne 0 ]; then
+        printf '\nOBJECTIVE NOT MET for step %s: %s failure(s)\n' "$STEP" "$step5_own_failures"
         exit 1
     fi
     printf '\nOBJECTIVE MET for step %s\n' "$STEP"
@@ -5128,6 +5271,7 @@ step4_suite() {
     fi
     cases=$((cases + 1))
 }
+
 if [ "$STEP" = "4" ]; then
     # shellcheck disable=SC1090
     source "$ISOLATED_INSTALLER" >/dev/null 2>&1
