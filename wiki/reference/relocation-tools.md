@@ -82,9 +82,47 @@ The passes, in order:
 | root file deploy | every regular file at the archive root (`.env`, `.env_`, anything shipped with `pkg.sh --add`) is copied to the prefix root, then text-fixed | only files, the target folder is skipped |
 | `__pycache__` clear | removes bytecode caches (they embed build paths) | regenerated on first import |
 | text path fix | `/home/<user>/` anchors in every text file (shebangs, `pyvenv.cfg`, `*.pc`, activate scripts) | `grep -I` skips binaries; the new prefix is shielded behind a placeholder, so re-runs and `/home`-based prefixes are safe |
-| ELF fix | `PT_INTERP` → the deployed `ld-linux-x86-64.so.2`, rpath → the deployed library directories (python's root first) | `patchelf` only rewrites values still containing `/home/`; skipped with a warning when patchelf is absent |
+| ELF fix | `PT_INTERP` → the deployed `ld-linux-x86-64.so.2`, and the search path → the deployed library directories (python's root first), written as **`DT_RPATH`** | the rpath axis selects by population, not by the value it finds; the interpreter axis still rewrites only values containing `/home/`; skipped with a warning when patchelf is absent |
 | convenience bin | `<prefix>/bin`: `echos`, `compare_file.sh` and `pkg` (the shipped dispatcher) links, `pkg_tools` and `install_pkg` wrappers | only for sources present in the tree |
 
+
+### What the ELF pass writes, and to which objects
+
+The tag written is **`DT_RPATH`**, not `DT_RUNPATH`. The difference is not
+cosmetic: `DT_RUNPATH` does not apply to a library's own dependencies, so a
+shipped library that pulls in another one would fall back to the system copy,
+and `LD_LIBRARY_PATH` would outrank it. `DT_RPATH` applies transitively and
+outranks the environment, which is what makes the prefix self-contained.
+
+The pass sorts every walked object into one of **three populations**, and only
+these are given a search path:
+
+| Population | What it is |
+| --- | --- |
+| library | `ET_DYN` with no `PT_INTERP`, the shipped `.so` files |
+| migration program | a program already carrying the target value under `DT_RUNPATH`, so a prefix relocated by an older version |
+| fresh program | a remaining program whose search path is still builder-anchored |
+
+Two axes are reported independently, because two guards can disagree about the
+same object:
+
+| Axis | Values |
+| --- | --- |
+| rpath | `rewritten`, `failed`, `already correct`, `not dynamically linked`, `excluded` |
+| interpreter | `rewritten`, `failed`, `unchanged`, `not applicable` |
+
+**What the pass leaves untouched**, and why each one:
+
+- the shipped dynamic loader itself, the file the pass installs as every
+  program's `PT_INTERP`. patchelf accepts a search path on it and reports
+  success, and the loader then segfaults, taking every program with it. It is
+  excluded by identity, not by name;
+- every other program the archive carries that is in none of the three
+  populations: the RPM-extracted tools, and the vendored `patchelf` running the
+  pass. These are reported `excluded`;
+- any object with no dynamic section, reported `not dynamically linked`;
+- the interpreter of any object whose interpreter is already correct or is a
+  system path, reported `unchanged`.
 `patchelf` lookup order: `<prefix>/tools/bin/patchelf`,
 `~/tools/bin/patchelf`, then `PATH`. The dynamic linker is taken from
 `<prefix>/tools/python/root/lib64/`, falling back to a `find` under
