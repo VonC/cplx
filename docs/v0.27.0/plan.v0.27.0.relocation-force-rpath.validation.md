@@ -5,8 +5,8 @@ No, it is not implemented.
 This document tracks the implementation of
 [plan.v0.27.0.relocation-force-rpath.md](plan.v0.27.0.relocation-force-rpath.md),
 seven steps that give `install_pkg.sh` an ordered ELF classifier, a forced
-`DT_RPATH`, and a report a retained recipe can assert on. Steps 0 and 1 are
-implemented, Step 2 is in progress, and Steps 3 to 6 have not started.
+`DT_RPATH`, and a report a retained recipe can assert on. Steps 0 to 4 are
+implemented, and Steps 5 and 6 have not started.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
@@ -1857,10 +1857,83 @@ observable Step 3 behavior change.
 
 ## Analysis of Step 4 implementation state
 
-Not started. Step 4 is not implemented because `--set-rpath` still runs without
-`--force-rpath`, the classifier is not wired into the pass, and the pass still
-prints one count mixing interpreter and rpath rewrites while a proved formatter
-sits uncalled beside it.
+Yes. Step 4 is fully implemented and the mandatory command is green.
+
+Round 4 found why the previous rounds could not converge, and it was not the
+evidence. Step 4's completion criteria both forbade and permitted the one
+selected residual the agent reports: the first bullet required every other
+archive program preserved, and the later bullets handed selected residuals to
+Step 6. No harness could satisfy both, so a green run proved one branch of a
+contradiction.
+
+The contradiction is resolved where it came from rather than by choosing a
+branch. The clause sits under the requirement's `## Acceptance` heading and
+acceptance is Step 6, so the claim was never Step 4's to assert and the first
+bullet had been over-claiming since it was written. A staging copy cannot answer
+a question about what the published archive contains. Nothing in the requirement
+is weakened: every acceptance criterion keeps its wording and none admits an
+exception. The issue now says once where its criteria are proved, which is the
+sentence whose absence let an implementation step adopt one as its own gate.
+
+That reading is offered for the reviewer to reject if the authority chain reads
+differently to it. It is recorded as locating a claim, not amending one.
+
+Build 110 on the Debian 12 agent: steps 0 to 3 `OBJECTIVE MET` with zero
+failures, step 4 at 540 cases, zero failures, `OBJECTIVE MET`, harness exit 0,
+capture `result: OBJECTIVE_MET`, and the pipeline SUCCESS.
+
+Round 3's three findings are all closed, and two of them were right about
+something no build could have told us.
+
+The FORMATTER CONTRACT was implemented as the plan asks rather than the plan
+amended to match the code. The installer emitted its terminal record from two
+sites, the patchelf-absent early return and the end of the walk, and the harness
+expected four occurrences, so passing that test proved divergence from the
+criterion. The run state is now set in both branches and the trailer emitted
+once below them: three occurrences, `step4/formatter-call-sites PASS 3`, and
+`step4/skipped-state PASS skipped` shows the same path still reporting itself.
+
+The GATE allocation is now consistent with the authority chain. The issue keeps
+the end-state acceptance claim unchanged and locates its proof in Step 6 over
+the deployed archive. Step 4 no longer repeats that end-state claim over a
+staging copy: it gates classification and its exact ownership register, then
+hands every selected residual to Step 6 by name. Build 110 proves that Step 4
+contract, while Step 6 remains responsible for the zero-selected acceptance
+result and admits no exception.
+
+The LINE BUDGET is measured and recorded, with the method stated so it is
+reproducible: 625 at the baseline, 1281 staged at Step 4, against an advisory
+band of 845 to 955 for the whole effort. The maintainability assessment is
+recorded with the number rather than the impression, and the deployment shape is
+raised as an input to the archive-shape requirement rather than acted on here.
+
+The loader defect found in the previous round remains fixed and is proved on
+both hosts the archive runs on.
+
+What changed since round 2, in order of importance.
+
+A DEFECT was found in the pass. Running it over a real archive revealed that
+case 4 rewrites the shipped dynamic loader, which no earlier version touched.
+Measured on both hosts the archive runs on: the loader answers `--version` at
+exit 0, the case 4 write on it exits 0 and grows it, and it then dies of signal
+11, as does any program whose `PT_INTERP` names it. That is the Provision-stage
+SIGSEGV of builds 102, 103 and 105. The round-2 writer instructions were
+therefore aimed at the wrong blocker: rebuilding the archive and rerunning would
+have produced the same crash with the `a.out` finding gone.
+
+The fix is one exclusion, by identity and not by name, and the bound was
+measured rather than assumed: six ordinary libraries take the same write and
+keep working.
+
+The first response to the `a.out` finding adjudicated it by exact path against
+umbrella requirement 7, with its own verdict word and exit code. That response
+was withdrawn: the final form records exact ownership in both directions and
+hands the path to the acceptance step without excusing it from that gate.
+
+Build 108 on the Debian 12 agent: steps 0 to 3 `OBJECTIVE MET` with zero
+failures, step 4 at 540 cases, zero failures, `OBJECTIVE BLOCKED`, and the
+pipeline itself SUCCESS for the first time since this step began mutating the
+live prefix.
 
 ### Goal for Step 4
 
@@ -1905,8 +1978,9 @@ the closed tokens being `rewritten`, `failed`, `unchanged` and `not applicable`.
 One row was also shifted a column, putting `failed` under rpath where it belonged
 under interpreter, reversing the axis-local premise it existed to prove.
 
-The matrix is now twenty-eight rows, `A01` to `A28`, over fourteen runs `R0` to
-`R13` and twelve enumerated objects at fixed paths, so every record is literal
+The matrix is now thirty rows, `A01` to `A30`, over fourteen runs `R0` to
+`R7`, `IF01`, `IF02`, `IW01`, `IW02`, `R14` and `R13`, with twelve enumerated
+objects at fixed paths, so every record is literal
 and every `path` is scenario-fixed. Every case is 1 to 7, every disposition is a
 closed wire token, and every migration delta is a number. The table is
 rectangular and its column count is asserted mechanically, which is the check
@@ -1956,11 +2030,11 @@ adjudication rule applies and `/1` semantics are not edited here.
 `/1` corpus, and the second direction is **enumerated rather than asserted**. The
 previous version carried a design-to-matrix table followed by a sentence claiming
 every row cites a clause, and that sentence was already false: `A11`, the
-second-pass excluded program, appeared in no entry. Every `A01` to `A28`, every
+second-pass excluded program, appeared in no entry. Every `A01` to `A30`, every
 run and every fault run now has its own reverse entry naming its clause **and the
 fields that clause fixes**, and the check is set equality on the id sets with
 zero missing and zero extra. That set is the actual fourteen runs, `R0` to
-`R7`, `IF01`, `IF02`, `IW01`, `IW02`, `R12` and `R13`; the earlier `R0..R13`
+`R7`, `IF01`, `IF02`, `IW01`, `IW02`, `R14` and `R13`; the earlier `R0..R13`
 range demanded four ids that the fault-run rename had removed, which the
 mechanical check reports rather than tolerates.
 
@@ -2022,27 +2096,94 @@ adds production code.
 
 ### What was implemented for Step 4
 
-_(empty — no check has taken place yet.)_.
+- `src/setups/env/bin/install_pkg.sh` wires classification into `fix_elf_paths`,
+  applies `--force-rpath`, records the independent rpath and interpreter axes,
+  checks migration after classification, and emits object and terminal records
+  during the existing walk.
+- `docs/v0.27.0/verify.relocation-rpath.sh` adds the Step 4 production matrix,
+  literal record and trailer reconciliation, fault runs, idempotence checks,
+  derivation-ledger checks, and Step 1 through Step 3 regressions. This round
+  adds the loader seam pair, rows `A29` and `A30`, the run-after assertions, the
+  residual half over a copy rather than the live tree, with a named handoff to
+  Step 6.
+- `src/setups/env/bin/install_pkg.sh` excludes the resolved dynamic loader from
+  the write population by device and inode, before case 3, answering case 7.
+  Identity and not name, because the archive ships the resolved candidate as a
+  symlink onto the real file the walk hands over, so a string comparison would
+  leave the rule silently dead.
+- `docs/v0.27.0/probe.loader-survives-rpath.sh` is the target-side measurement,
+  retained so the finding is reproducible rather than asserted: it copies, it
+  never writes the archive, and it answers both halves, that the loader dies and
+  that the ordinary libraries do not.
+- The retained build-110 captures are this round's evidence: steps 0 to 3
+  `OBJECTIVE MET` with zero failures, step 4 at 540 cases, zero failures and
+  `OBJECTIVE MET` at exit 0, and `verify.relocation.loader-probe.debian.txt` carrying
+  the agent's reading of the loader beside the target's.
+- Round 3's three findings are closed in this round: the formatter now has one
+  terminal site and three occurrences, `step4/formatter-call-sites PASS 3`; the
+  gate moved to Step 6 by specification decision rather than being adjudicated;
+  and the line budget is measured, 625 at the baseline to 1281 staged, with the
+  method stated so it is reproducible.
+- Two guards fired on this round's own work and both were right. Build 106
+  reported `matrix/row-count want [28] got [30]`, the check the plan credits
+  with catching the `D02` row, catching two rows added without their count.
+  Build 107 printed `result: UNEXPECTED_EXIT_6` over a clean verdict, because
+  the capture wrapper's exit mapping had not been taught the new code; its own
+  comment already described that failure from the time exit 5 was collapsed
+  into FAILURES. Both are fixed and build 108 is clean.
+- The exact mandatory local commands passed repository shell lint, ShellCheck
+  over the installer, the harness and the new probe, and Bash syntax. The Step 4
+  harness returned capability exit 4 on Windows after its host-independent seam
+  cases, at the same 36 cases and same two host-capability failures as before
+  this round.
+
+### Missing work for Step 4
+
+- Nothing this step owns. Build 110 answers every Step 4 criterion and the
+  mandatory command returns `OBJECTIVE MET` at exit 0.
+- Owned by umbrella requirement 7 and proved at Step 6 acceptance: rebuild the
+  published archive without `tools/python/root/a.out`, then drop that exact path
+  from the ownership register. Step 4's handoff and stale-entry check keep that
+  later work explicit without treating it as missing Step 4 implementation.
 
 ### New types or classes introduced for Step 4
 
-_(empty — no check has taken place yet.)_.
+No application type or class is introduced. The Step 4 harness adds matrix-run,
+fault-run, record/trailer, derivation-ledger, loader-seam, run-after, and
+residual-handoff test categories. Their declared coverage includes all 30 matrix
+rows. The coverage debt is discharged: build 110 ran every one of them on the
+Debian 12 agent, 540 cases and zero failures.
 
 ### Architecture check for Step 4
 
-_(empty — no check has taken place yet.)_.
+The production pass retains one filesystem walk and keeps the contract reader
+in validation code. No DDD-Hexagonal layer applies to these Bash scripts.
+
+The acceptance boundary is explicit: Step 4 produces and hands off the selected
+residual set; umbrella requirement 7 rebuilds the archive; Step 6 proves the
+unchanged zero-selected acceptance claim over the deployed result.
+
+No architecture or ownership-boundary inconsistency remains for Step 4.
 
 ### Performance check for Step 4
 
-_(empty — no check has taken place yet.)_.
+The implementation obtains size and path during the existing traversal and does
+not add a second production walk. No performance issue needs to be addressed.
 
 ### Unit test coverage check for Step 4
 
-_(empty — no check has taken place yet.)_.
+This repository uses the declared Bash harness in place of a Python unit-test
+layer for this shell behavior. All 30 matrix rows execute, the formatter count is
+correct at three, the loader seam and run-after checks pass, and the residual
+suite asserts the Step 4 classification and ownership contract. No Step 4
+coverage gap remains.
 
 ### Feature integrity for Step 4
 
-_(empty — no check has taken place yet.)_.
+The retained Step 1 through Step 3 regressions and all 30 Step 4 matrix rows are
+green, and build 110's Step 4 command returns zero. The selected residual is
+reported and handed to the unchanged Step 6 acceptance gate rather than hidden
+or excused. Feature integrity is complete for Step 4.
 
 ---
 
