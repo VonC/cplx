@@ -713,6 +713,15 @@ gaps, and they land on the RHEL side where nothing is broken today.
 
 ## Acceptance for `relocation-force-rpath`
 
+Every criterion below is an ACCEPTANCE criterion and is proved at the
+acceptance step, which is the plan's Step 6, over the DEPLOYED archive. None of
+them is a completion gate for an earlier implementation step, and an earlier
+step that asserted one over its own staging tree was over-claiming rather than
+adding rigour: a staging copy cannot answer a question about what the published
+archive contains. Earlier steps produce the evidence these criteria consume and
+report what they find; this is where the claims are made and no exception is
+admitted to any of them.
+
 The two columns below divide **ownership and claims**, not object sets.
 The object sets deliberately overlap: the 110 archive libraries whose
 selection cplx proves are inside the 388-object inventory the consuming
