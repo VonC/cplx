@@ -443,11 +443,65 @@ The seven cases are evaluated in order and the first match wins. Cases 4, 5 and
 | 6 | a remaining program whose search path contains `/home/` | `rewritten`, fresh |
 | 7 | anything else | `excluded` |
 
-Two orderings inside that list carry the weight. Case 3 before cases 4 to 6 is
+Three orderings inside that list carry the weight. Case 3 before cases 4 to 6 is
 what makes a second run report zero rewrites under `$HOME`, where the deployed
 value would otherwise re-satisfy case 6 forever. Case 5 before case 6 is what
 makes a v0.26.0 prefix classify as a migration rather than as a fresh
 relocation, which in turn decides whether the interpreter assertion examines it.
+And the loader rule below sits before case 3, so the one object the pass must
+never write cannot report `already correct` either.
+
+### The loader is excluded by identity, and why that is not a name check
+
+Case 4 claims every `ET_DYN` with no `PT_INTERP`, and the shipped dynamic loader
+is exactly that shape. It is also the file this pass installs as every program's
+`PT_INTERP`. Giving it a search path destroys it, and destroying it kills every
+program in the archive at exec.
+
+This was measured on the RHEL 9.8 target, patchelf 0.19.1, glibc 2.34, on copies:
+
+| Step | Result |
+| --- | --- |
+| the shipped loader, `--version` | exit 0 |
+| `patchelf --force-rpath --set-rpath TARGET` on it | **exit 0**, 897856 to 905033 bytes |
+| the same loader, `--version` | **exit 139, signal 11** |
+| a program whose `PT_INTERP` names it | **exit 139, signal 11** |
+
+The middle row is the dangerous one. patchelf reports success, so without a rule
+the pass records `rewritten`, the trailer reconciles, and the report is a
+faithful account of a tree that no longer runs. No amount of reconciliation can
+show this, which is why validation grew a run-after assertion at the same time
+as the classifier grew the rule.
+
+The blast radius is one object and the rule is one exclusion, not a retreat from
+case 4. The same write was applied to `libc.so.6`, `libm.so.6`, `libdl.so.2`,
+`libpthread.so.0`, `libz.so.1` and `libstdc++.so.6`, together and then one at a
+time, and a program ran through every set at exit 0. The acceptance table's own
+case 4 exemplar, `libstdc++.so.6.0.29`, is therefore measured safe.
+
+The rule is stated as **identity, not name**: the excluded object is the one
+`find_dynamic_linker` answers with, whatever it is called. An object cannot be
+given a search path by the mechanism it implements. A name check on
+`ld-linux-*.so.*` would be the kind of test the case order exists to avoid, and
+it would also be wrong in both directions, catching spare copies nothing execs
+through and missing a loader shipped under another name.
+
+Identity means device and inode, not string equality, and the archive is why.
+`find_dynamic_linker` answers with its first existing candidate,
+`root/lib64/ld-linux-x86-64.so.2`, which the archive ships as a **symlink** onto
+`root/usr/lib64/ld-linux-x86-64.so.2`, while the walk yields real files and so
+hands over the target. A string comparison never matches, and the rule would be
+silently dead. The comparison costs two stats and no process.
+
+The rule is **bounded to the object `PT_INTERP` will name**. Another copy of a
+loader elsewhere in the tree stays in case 4 and is still rewritten: nothing
+execs through it, and widening the rule to every file that looks like a loader
+is the name check just refused. Whether a rewritten spare is acceptable in the
+shipped archive is a question for the acceptance step, not for the classifier.
+
+The rule adds no eighth case. It answers case 7, which is exactly the loader's
+membership: selected by nothing. The vendored patchelf that runs the pass is
+already there for the same reason.
 
 ### The classification is computed once and reused
 
@@ -764,7 +818,9 @@ directories.
 | `python3.13_bin`, fresh archive, prefix at `$HOME` | `rpath rewritten` (case 6) | the value contains `/home/` but holds no target value yet, so cases 3 and 5 do not match |
 | `python3.13_bin`, `$HOME` prefix relocated by v0.26.0 | `rpath rewritten` (case 5), `interpreter unchanged`, checked incremented | case 5 precedes case 6, so the object is a migration rather than a fresh relocation |
 | The same prefix, second run | `rpath already correct` (case 3), zero rewrites | case 3 precedes case 6, so the deployed value is not rewritten through the builder-anchored branch |
-| `libstdc++.so.6.0.29` | `rpath rewritten` (case 4) and `interpreter not applicable` | `ET_DYN` with no `PT_INTERP`, established by the header walk |
+| `libstdc++.so.6.0.29` | `rpath rewritten` (case 4) and `interpreter not applicable` | `ET_DYN` with no `PT_INTERP`, established by the header walk; measured to survive the write |
+| `ld-linux-x86-64.so.2`, the object `find_dynamic_linker` resolves | `rpath excluded` (case 7) and `interpreter not applicable`, and **the loader still executes after the pass** | it has case 4's shape and is the file every program's `PT_INTERP` names; the write succeeds and destroys it, so the account cannot be the only evidence |
+| Another copy of a loader elsewhere in the tree | `rpath rewritten` (case 4) | the rule is identity, not name: nothing execs through a spare, and widening it to every loader-looking file is the name check the case order refuses |
 | An RPM-extracted program under `root/usr/bin` | `rpath excluded` (case 7) | it is a program with neither a builder-anchored value nor a target value |
 | The same program with a builder-anchored interpreter | `rpath excluded` and `interpreter rewritten` | the interpreter guard is unchanged and is not bounded by the rpath classifier |
 | An object whose program header table does not parse | `rpath failed` (case 1) **and** `interpreter failed`, both probe statuses `blocked`, every other tuple field cleared | `structural_status: inconclusive`, the one fault that blocks both axes; clearing the fields is what stops a previous object's reading surviving into this one |
