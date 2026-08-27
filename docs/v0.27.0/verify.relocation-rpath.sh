@@ -90,13 +90,13 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# Only steps 0, 1, 2 and 3 have case suites today. Accepting any other value would
+# Only steps 0 to 4 have case suites today. Accepting any other value would
 # let the verdict line report success for a step whose cases do not exist, which
 # is a vacuous pass at exactly the level later steps rely on. Extend this
 # dispatch and the suite together.
 case "$STEP" in
-    0|1|2|3) ;;
-    *) echo "unsupported --step $STEP: steps 0, 1, 2 and 3 have case suites today." >&2
+    0|1|2|3|4) ;;
+    *) echo "unsupported --step $STEP: steps 0 to 4 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -153,6 +153,19 @@ chk() {
     if [ "$2" = "$3" ]; then pass "$1" "$3"; else fail "$1" "want [$2] got [$3]"; fi
 }
 note() { printf '  %-40s NOTE  %s\n' "$1" "${2:-}"; }
+# A FOURTH outcome, and the reason it is not a fifth kind of failure or a
+# quieter pass. The criterion was asked, the answer is a real violation, and the
+# work that removes it is owned by another requirement of the umbrella. Reported
+# as a failure it would blame this step for a tree it cannot change; reported as
+# a pass it would claim a green the archive does not deserve; folded into
+# `unanswered` it would say nobody could ask, which is false, the question was
+# asked and answered. So it carries its own token, its own line, and its own
+# exit code, and it names the owner every time.
+BLOCKED=""
+blocked() {
+    printf '  %-40s BLOCK %s\n' "$1" "${2:-}"
+    BLOCKED="${BLOCKED:+$BLOCKED; }${2:-}"
+}
 section() { printf '\n== %s\n' "$1"; }
 
 # control <name> <required-reason-prefix> <command...>
@@ -1954,13 +1967,38 @@ step3_suite() {
 
     section "step 3: the formatter has no production call site"
 
-    # The whole argument of this step is that nothing a deployment can see
-    # changes, and an identifier search is only as good as the identifier. The
-    # name is reserved in the plan and forbidden in comments and message
-    # literals here, so every occurrence is a definition or a call. Step 3
-    # expects exactly one: the definition.
+    # The whole argument of step 3 is that nothing a deployment can see changes,
+    # and an identifier search is only as good as the identifier. The name is
+    # reserved in the plan and forbidden in comments and message literals in the
+    # installer, so every occurrence there is a definition or a call.
+    #
+    # The EXPECTED COUNT is step-aware, because the property itself changes:
+    # step 3 expects exactly one occurrence, the definition, and step 4 expects
+    # the definition plus the call sites the plan enumerates. THREE at step 4:
+    # the definition, the per-object record, and the ONE terminal site both
+    # branches reach. Holding the step 3 figure into step 4 would fail the pass
+    # for doing the thing step 4 exists to do; dropping the assertion would lose
+    # the only proof that no further call appeared unnoticed.
+    #
+    # It said FOUR until round 3, and that is worth keeping in view. The
+    # installer emitted its own trailer from the patchelf-absent early return,
+    # so the formatter had two terminal sites and the test was written to the
+    # code rather than to the plan. Passing it proved divergence from the
+    # criterion rather than compliance with it: the plan asks for one terminal
+    # site precisely so "a trailer on every exit path" is guaranteed by the
+    # shape instead of checked by reading. The installer now has one, and this
+    # expects three.
+    # Keyed on the INSTALLER, not on --step, for the reason the baseline is: the
+    # suite travels with the file it measures, and a step 3 run against a step 4
+    # installer would otherwise fail the pass for having grown the call sites
+    # step 4 exists to add. What stays asserted either way is the exact count, so
+    # an unexpected extra call site is still caught.
     n=$(grep -c '\bemit_cplx_elf_v1_record\b' "$INSTALLER" 2>/dev/null || true)
-    chk "step3/formatter-uncalled" "1" "$n"
+    if [ "${n:-0}" -gt 1 ]; then
+        chk "step4/formatter-call-sites" "3" "$n"
+    else
+        chk "step3/formatter-uncalled" "1" "$n"
+    fi
     cases=$((cases + 1))
 
     # The reader is in this harness and must not have leaked into the file that
@@ -2125,13 +2163,44 @@ baseline_run=$(
 baseline_rc=$?
 chk "baseline/production-pass-ran" "0" "$baseline_rc"
 
-# The emitted mixed count, read from the RUN's output.
+# What the run reports, which is the one baseline assertion Step 4 CHANGES.
+#
+# Before Step 4 the pass printed one `Fixed <n>` figure mixing both axes. Step 4
+# replaces it with the CPLX-ELF/1 record stream, and the requirement records that
+# as an intended output change. So the expectation is step-aware rather than
+# fixed: asserting the old line from Step 4 onward would fail the pass for doing
+# exactly what this effort asked of it, and asserting neither would let the
+# report disappear unnoticed.
 baseline_fixed=$(printf '%s\n' "$baseline_run" \
     | grep -oE 'Fixed [0-9]+ ELF interpreter/rpath value\(s\)' | head -1)
-if [ -n "$baseline_fixed" ]; then
-    pass "baseline/mixed-count-emitted" "$baseline_fixed"
+baseline_trailer=$(printf '%s\n' "$baseline_run" \
+    | grep -c '^CPLX-ELF/1 end ' || true)
+# WHICH INSTALLER is under test, read from the file rather than from the
+# requested step. The baseline runs whatever installer it was given, so once the
+# step 4 pass has landed every step's baseline sees the record stream, and an
+# expectation keyed on --step would fail steps 1 and 2 for the pass doing what
+# step 4 asked of it. One occurrence is the step 3 definition; more than one
+# means it is called.
+baseline_emits=$(grep -c '\bemit_cplx_elf_v1_record\b' "$INSTALLER" 2>/dev/null || true)
+if [ "${baseline_emits:-0}" -gt 1 ]; then
+    if [ -n "$baseline_fixed" ]; then
+        fail "baseline/mixed-count-replaced" \
+            "BASELINE the mixed count survived Step 4: $baseline_fixed"
+    elif [ "$baseline_trailer" = "1" ]; then
+        pass "baseline/mixed-count-replaced" "one CPLX-ELF/1 trailer, no mixed count"
+    else
+        fail "baseline/mixed-count-replaced" \
+            "BASELINE neither a mixed count nor exactly one trailer: $baseline_trailer trailer(s)"
+    fi
+    # From Step 4 the run's own account is the record stream, so the value
+    # assertions below key off the trailer rather than off the retired line.
+    baseline_fixed="$baseline_trailer"
 else
-    fail "baseline/mixed-count-emitted" "no Fixed line in the run output"
+    if [ -n "$baseline_fixed" ]; then
+        pass "baseline/mixed-count-emitted" "$baseline_fixed"
+    else
+        fail "baseline/mixed-count-emitted" "no Fixed line in the run output"
+    fi
 fi
 cases=$((cases + 1))
 note "baseline/mixed-count-meaning" "one figure over two axes; replaced at Step 4"
@@ -2182,7 +2251,14 @@ else
     observed_tag="ambiguous(rpath=$after_rpath,runpath=$after_runpath)"
 fi
 if [ "$baseline_rc" -eq 0 ] && [ -n "$baseline_fixed" ]; then
-    chk "baseline/tag-written" "DT_RUNPATH" "$observed_tag"
+    # THE headline measurement of step 4: before it the pass wrote DT_RUNPATH,
+    # and forcing DT_RPATH is the whole point of the effort. The expectation
+    # follows the installer for the same reason the count above does.
+    if [ "${baseline_emits:-0}" -gt 1 ]; then
+        chk "baseline/tag-written" "DT_RPATH" "$observed_tag"
+    else
+        chk "baseline/tag-written" "DT_RUNPATH" "$observed_tag"
+    fi
     note "baseline/tag-source" "readelf -d after the pass ran, not installer text"
 else
     fail "baseline/tag-written" \
@@ -4247,6 +4323,842 @@ if [ "$STEP" = "2" ]; then
 fi
 
 # ------------------------------------------------------------------- verdict ---
+
+# Step 4 changes what an install DOES, so unlike step 3 it needs a host that can
+# observe and mutate a real ELF. It sits here, after the baseline gate, for the
+# same reason steps 1 and 2 do.
+# ==================================================================== step 4 ===
+# The only observable production step of this effort. Steps 1, 2 and 3 proved the
+# observer, the classifier and the report contract WITHOUT changing what an
+# install does; this is where they start doing something.
+#
+# Two suites, not one, and the distinction is not pedantic. Step 3's corpus holds
+# three classes: canonical formatter vectors, reader-valid permutations the
+# formatter is NOT required to emit, and malformed vectors production must never
+# emit. A real run produces none of the second class and had better produce none
+# of the third, so "the same cases, now against real captures" would describe a
+# suite that cannot exist. They are two claims and they get two checks:
+#
+#   - the STEP 3 REGRESSION, re-run unchanged against its own literal inputs;
+#   - the STEP 4 INTEGRATION, in which every capture a real run produced is fed
+#     to the production reader and asserted in full.
+
+# The builder anchors every fixture carries before the pass runs. They must
+# contain `/home/` for the guards to fire, which is the whole premise of the
+# matrix rows that expect a rewrite.
+STEP4_ANCHOR="/home/builder/cplx/tools/lib"
+STEP4_INTERP="/home/builder/cplx/tools/python/root/lib64/ld-linux-x86-64.so.2"
+STEP4_SYS_INTERP="/lib64/ld-linux-x86-64.so.2"
+
+# The object outcome matrix, seven columns, every cell a closed value. Held as
+# literal data so the expectations are read rather than derived: a cell saying
+# "its own case" is an instruction to compute an expectation, not an expectation,
+# and a table of those cannot be executed.
+#
+# row|run|object|case|rpath|interp|migration-delta
+STEP4_MATRIX="\
+A01|R0|X2|6|rewritten|rewritten|0,0
+A02|R1|X1|4|rewritten|not-applicable|0,0
+A03|R1|X2|6|rewritten|rewritten|0,0
+A04|R1|X3|7|excluded|unchanged|0,0
+A05|R1|X4|7|excluded|rewritten|0,0
+A06|R1|X5|2|not-dynamic|not-applicable|0,0
+A07|R1|X6|1|failed|not-applicable|0,0
+A08|R2|X1|3|already-correct|not-applicable|0,0
+A09|R2|X2|3|already-correct|unchanged|0,0
+A10|R2|X3|7|excluded|unchanged|0,0
+A11|R2|X4|7|excluded|unchanged|0,0
+A12|R2|X5|2|not-dynamic|not-applicable|0,0
+A13|R2|X6|1|failed|not-applicable|0,0
+A14|R3|X7|5|rewritten|unchanged|1,0
+A15|R4|X8|5|rewritten|rewritten|1,1
+A16|R5|X9|1|failed|failed|0,0
+A17|R6|X10|1|failed|failed|0,0
+A18|R7|X11|1|failed|failed|0,0
+A19|IF01|X12|1|failed|not-applicable|0,0
+A20|IF02|X2|6|rewritten|failed|0,0
+A21|IW01|X7|5|failed|unchanged|1,0
+A22|IW02|X2|6|rewritten|failed|0,0
+A23|R14|X1|4|failed|not-applicable|0,0
+A24|R14|X2|6|failed|unchanged|0,0
+A25|R14|X3|7|excluded|unchanged|0,0
+A26|R14|X4|7|excluded|unchanged|0,0
+A27|R14|X5|2|not-dynamic|not-applicable|0,0
+A28|R14|X6|1|failed|not-applicable|0,0
+A29|R1|X13|7|excluded|not-applicable|0,0
+A30|R2|X13|7|excluded|not-applicable|0,0"
+
+# STEP4_ARCHIVE_DEFECTS: the OWNERSHIP REGISTER for selected residual programs
+# the published archive carries, one per line as `prefix-relative path|owner`.
+#
+# Not an exception list and not an amnesty. Step 4 does not gate on what the
+# archive contains, so there is nothing here to be excused FROM: the register
+# says who owns each known violation, so the handoff to Step 6 names an owner
+# instead of a path, and so a violation nobody has adjudicated is visibly
+# different from one that has been.
+#
+# The reason the gate is not here is Step 2's, unchanged: a residual is a
+# property of the ARCHIVE rather than of the classifier. Step 4 walks a copy of
+# the staging tree and can honestly assert what the classifier did with every
+# residual it found. Whether the DEPLOYED archive should contain the object at
+# all is asserted where the deployed archive is in hand, and Step 6's criteria
+# already call themselves the final assertion of the residual half, admitting no
+# exception and naming "removed from the archive" as one of two discharges.
+#
+# A LITERAL PATH LIST and never a pattern, so ownership is claimed one object at
+# a time and an unlisted violation is reported as unadjudicated rather than
+# quietly absorbed.
+#
+# The register is asserted EXACT in both directions, and THAT is Step 4's to
+# gate, because it is this harness's own bookkeeping rather than the archive's
+# contents: an entry the archive no longer carries fails, so a rebuilt archive
+# cannot land while this file still names a violation the rebuild removed.
+STEP4_ARCHIVE_DEFECTS="\
+tools/python/root/a.out|umbrella requirement 7, tools-archive-rebuild"
+
+# step4_defect_owner RELPATH: the owner if RELPATH is registered, empty if not.
+step4_defect_owner() {
+    local rel="$1" line
+    while IFS='|' read -r line owner; do
+        [ -n "$line" ] || continue
+        [ "$line" = "$rel" ] && { printf '%s' "$owner"; return 0; }
+    done <<< "$STEP4_ARCHIVE_DEFECTS"
+    return 1
+}
+
+# The path each object is planted at, fixed per object so its record's `path`
+# field is literal rather than derived at assertion time.
+step4_object_path() {
+    case "$1" in
+        X1)  printf 'lib/libarch.so.1' ;;
+        X2)  printf 'bin/pyprog' ;;
+        X3)  printf 'bin/rpmprog' ;;
+        X4)  printf 'bin/rpmprog-bh' ;;
+        X5)  printf 'lib/relobj.o' ;;
+        X6)  printf 'lib/libamb.so.1' ;;
+        X7)  printf 'bin/migprog' ;;
+        X8)  printf 'bin/migprog-hostinterp' ;;
+        X9)  printf 'lib/libtrunc.so.1' ;;
+        X10) printf 'lib/libelf32.so.1' ;;
+        X11) printf 'lib/libshort.so.1' ;;
+        X12) printf 'lib/libprobe.so.1' ;;
+        X13) printf 'tools/python/root/lib64/ld-linux-x86-64.so.2' ;;
+        *) return 1 ;;
+    esac
+}
+
+# step4_plant ID PREFIX TARGET_RPATH: plant one object under a prepared prefix.
+#
+# The migration objects need the TARGET the pass will compute, not an anchor, so
+# the target is passed in rather than guessed: a case 5 object is one whose
+# stored value already equals what `build_elf_rpath` computes now, and planting
+# it with anything else would produce a different case and a different row.
+step4_plant() {
+    local id="$1" prefix="$2" target="$3" rel f off
+    rel=$(step4_object_path "$id") || return 1
+    f="$prefix/$rel"
+    mkdir -p -- "$(dirname "$f")" || return 1
+    cp -- "$FIXTURE_DONOR" "$f" || return 1
+    chmod u+w -- "$f" || return 1
+    "$PATCHELF_BIN" --remove-rpath "$f" 2>/dev/null
+    case "$id" in
+        X1|X12)
+            "$PATCHELF_BIN" --set-rpath "$STEP4_ANCHOR" "$f" 2>/dev/null || return 1
+            elf_remove_phdr "$f" 3 || return 1
+            elf_poke "$f" 16 "0300"
+            ;;
+        X2)
+            "$PATCHELF_BIN" --set-rpath "$STEP4_ANCHOR" "$f" 2>/dev/null || return 1
+            "$PATCHELF_BIN" --set-interpreter "$STEP4_INTERP" "$f" 2>/dev/null || return 1
+            ;;
+        X3)
+            "$PATCHELF_BIN" --set-interpreter "$STEP4_SYS_INTERP" "$f" 2>/dev/null || return 1
+            ;;
+        X4)
+            "$PATCHELF_BIN" --set-interpreter "$STEP4_INTERP" "$f" 2>/dev/null || return 1
+            ;;
+        X5)
+            elf_poke "$f" 16 "0100"
+            elf_poke "$f" 56 "0000"
+            ;;
+        X6)
+            elf_make_two_search_tags "$f" 29 15 \
+                "$STEP4_ANCHOR/runpath" "$STEP4_ANCHOR/rpath" runpath || return 1
+            elf_remove_phdr "$f" 3 || return 1
+            elf_poke "$f" 16 "0300"
+            ;;
+        X7)
+            "$PATCHELF_BIN" --set-rpath "$target" "$f" 2>/dev/null || return 1
+            "$PATCHELF_BIN" --set-interpreter "$STEP4_TARGET_INTERP" "$f" 2>/dev/null || return 1
+            ;;
+        X8)
+            "$PATCHELF_BIN" --set-rpath "$target" "$f" 2>/dev/null || return 1
+            "$PATCHELF_BIN" --set-interpreter "$STEP4_INTERP" "$f" 2>/dev/null || return 1
+            ;;
+        X9)
+            elf_poke "$f" 32 "$(le_hex $(( $(elf_size "$f") + 16 )) 8)"
+            ;;
+        X10)
+            elf_poke "$f" 4 "01"
+            ;;
+        X11)
+            head -c 32 "$FIXTURE_DONOR" > "$f" || return 1
+            ;;
+        *) return 1 ;;
+    esac
+    return 0
+}
+
+# step4_prepare PREFIX: the tool layout `build_elf_rpath` derives its target
+# from. A prefix holding only bin yields an EMPTY search path and the pass then
+# skips every rpath write under its own guard, which is run R14 on purpose and a
+# silent no-op everywhere else.
+step4_prepare() {
+    local prefix="$1" with_libdir="$2" ld
+    mkdir -p -- "$prefix/tools/bin" "$prefix/bin" "$prefix/lib" || return 1
+    if [ "$with_libdir" = "yes" ]; then
+        mkdir -p -- "$prefix/tools/python/root/usr/lib64" || return 1
+        mkdir -p -- "$prefix/tools/python/root/lib64" || return 1
+        ld="$prefix/tools/python/root/lib64/ld-linux-x86-64.so.2"
+        cp -- "$FIXTURE_DONOR" "$ld" 2>/dev/null
+        # SHAPED like the real loader: ET_DYN with no PT_INTERP, carrying no
+        # search-path tag. That shape is the only one under which the exclusion
+        # rule means anything. The donor is a program, and a program with a
+        # system interpreter falls to case 7 by ordinary fall-through, so a row
+        # asserting `excluded` on the donor's own shape would pass just as well
+        # with the rule deleted. Shaped this way, case 4 claims it unless the
+        # rule stops it, which is what the archive's loader does and what three
+        # builds died of.
+        chmod u+w -- "$ld" 2>/dev/null
+        "$PATCHELF_BIN" --remove-rpath "$ld" 2>/dev/null
+        elf_remove_phdr "$ld" 3 2>/dev/null
+        elf_poke "$ld" 16 "0300"
+    fi
+    if ! cp -- "$PATCHELF_BIN" "$prefix/tools/bin/patchelf" 2>/dev/null; then
+        ln -s -- "$PATCHELF_BIN" "$prefix/tools/bin/patchelf" 2>/dev/null
+    fi
+    return 0
+}
+
+# step4_target PREFIX: the search path the pass will compute for this prefix,
+# read from the PRODUCTION function through the seam rather than reimplemented.
+step4_target() {
+    bash -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1
+        INSTALL_PREFIX="$2"
+        build_elf_rpath
+    ' _ "$ISOLATED_INSTALLER" "$1" 2>/dev/null
+}
+
+# step4_pass PREFIX [DOUBLE_DIR]: run the PRODUCTION pass over a prepared prefix
+# and return everything it wrote. A double directory is prepended to PATH so a
+# planted patchelf stands in for the real one, which is how the fault rows reach
+# a failure the real tool would not produce.
+step4_pass() {
+    local prefix="$1" double_dir="${2:-}"
+    bash -c '
+        set -u
+        [ -n "$3" ] && PATH="$3:$PATH"
+        export PATH
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1
+        INSTALL_PREFIX="$2"
+        fix_elf_paths "$2" 2>&1
+    ' _ "$ISOLATED_INSTALLER" "$prefix" "$double_dir"
+}
+
+# step4_double DIR FLAG: a patchelf stand-in that fails for exactly one flag and
+# forwards everything else to the real tool. Bounded the same way step 1's probe
+# doubles are: one flag, one failure, everything else genuine.
+step4_double() {
+    local dir="$1" flag="$2"
+    mkdir -p -- "$dir" || return 1
+    # Every `$` below belongs to the GENERATED script and must survive this one
+    # unexpanded, which is exactly what single quotes are for here.
+    # shellcheck disable=SC2016
+    {
+        printf '#!/bin/bash\n'
+        printf 'for a in "$@"; do\n'
+        printf '    if [ "$a" = "%s" ]; then exit 1; fi\n' "$flag"
+        printf 'done\n'
+        printf 'exec %q "$@"\n' "$PATCHELF_BIN"
+    } > "$dir/patchelf" || return 1
+    chmod +x -- "$dir/patchelf" || return 1
+    return 0
+}
+
+# step4_record CAPTURE RELPATH: the one obj record whose path field matches, as
+# emitted. Located by the object's fixed hex path so a run's records are matched
+# to rows by identity rather than by order.
+step4_record() {
+    local capture="$1" rel="$2" hex
+    hex=$(printf '%s' "$rel" | od -An -tx1 | tr -d ' \n')
+    printf '%s\n' "$capture" | grep "^CPLX-ELF/1 obj .* path=$hex$" | head -1
+}
+
+step4_field() {
+    printf '%s\n' "$1" | grep -oE "(^| )$2=[^ ]+" | head -1 | sed "s/.*$2=//"
+}
+
+
+# step4_interp PREFIX: the interpreter the pass will install, read from the
+# PRODUCTION resolver through the seam. The rule under test compares against
+# whatever THIS function answers, so asking anything else would test a different
+# rule than the one that ships.
+step4_interp() {
+    bash -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1
+        INSTALL_PREFIX="$2"
+        find_dynamic_linker
+    ' _ "$ISOLATED_INSTALLER" "$1" 2>/dev/null
+}
+
+# step4_loader_rule_suite: the exclusion asserted at the classifier seam, in both
+# directions, so the matrix rows above are not vacuous.
+#
+# A row saying the loader answers case 7 proves nothing on its own: case 7 is the
+# fall-through, and several shapes reach it. What proves the rule is the SAME
+# tuple classified twice, once without the loader arguments and once with them.
+# Without, case 4 claims the object and the pass would write it. With, it is
+# excluded. Delete the rule and the first half still passes while the second
+# half fails, which is what a load-bearing test looks like.
+step4_loader_rule_suite() {
+    local prefix="$SCRATCH/step4-loader" ld interp target sz real
+    section "step 4: the loader exclusion, at the seam"
+
+    rm -rf -- "$prefix" 2>/dev/null
+    if ! step4_prepare "$prefix" "yes"; then
+        fail "step4/loader-fixture" "FIXTURE could not prepare a prefix"
+        cases=$((cases + 1))
+        return 0
+    fi
+    ld="$prefix/tools/python/root/lib64/ld-linux-x86-64.so.2"
+    target=$(step4_target "$prefix")
+    interp=$(step4_interp "$prefix")
+
+    if [ ! -f "$ld" ] || [ -z "$interp" ]; then
+        fail "step4/loader-fixture" "FIXTURE loader [$ld] or resolved interpreter [$interp] missing"
+        cases=$((cases + 1))
+        return 0
+    fi
+    note "step4/loader-resolved" "$interp"
+
+    sz=$(elf_size "$ld")
+    elf_observe "$ld" "$sz"
+    elf_probe "$ld" "$PATCHELF_BIN"
+
+    # Half one: the population the object belongs to on its shape alone. It must
+    # be 4, or the fixture is not the object this rule exists for and half two
+    # would pass for the wrong reason.
+    elf_classify "$target"
+    chk "step4/loader-without-rule" "4" "$CPLX_ELF_CASE"
+    cases=$((cases + 1))
+
+    # Half two: the same tuple, with the identity the tuple cannot carry.
+    elf_classify "$target" "$interp" "$ld"
+    chk "step4/loader-with-rule" "7" "$CPLX_ELF_CASE"
+    cases=$((cases + 1))
+
+    # The identity is compared through the LINK, which is the half a string
+    # comparison fails. The archive ships root/lib64/ld-linux-x86-64.so.2 as a
+    # symlink onto root/usr/lib64/ld-linux-x86-64.so.2, so the resolver answers
+    # with one path and the walk yields the other, and `=` never matches. This
+    # rebuilds that exact layout and classifies the object the WALK would hand
+    # over, not the one the resolver named.
+    real="$prefix/tools/python/root/usr/lib64/ld-linux-x86-64.so.2"
+    mv -- "$ld" "$real" 2>/dev/null
+    ln -s -- "../usr/lib64/ld-linux-x86-64.so.2" "$ld" 2>/dev/null
+    interp=$(step4_interp "$prefix")
+    if [ "$interp" = "$ld" ] && [ -f "$real" ]; then
+        elf_observe "$real" "$(elf_size "$real")"
+        elf_probe "$real" "$PATCHELF_BIN"
+        elf_classify "$target" "$interp" "$real"
+        chk "step4/loader-through-symlink" "7" "$CPLX_ELF_CASE"
+    else
+        fail "step4/loader-through-symlink" \
+            "FIXTURE the linked layout did not resolve: interp [$interp] real [$real]"
+    fi
+    cases=$((cases + 1))
+
+    rm -rf -- "$prefix" 2>/dev/null
+}
+
+# step4_runs_after PREFIX: after the pass has walked a real archive copy, does
+# that archive still run?
+#
+# Both subjects are executed, not inspected. The loader is directly executable
+# and answers `--version`, and the shipped interpreter is the object every
+# program's PT_INTERP names, so a broken one kills the tree at exec before any
+# program code runs. That is the signal `uv sync` reported as SIGSEGV while the
+# CPLX-ELF/1 stream reported a clean walk.
+#
+# Absent subjects SKIP rather than pass. A tree with no loader to run answers a
+# different question than a tree whose loader runs.
+step4_runs_after() {
+    local prefix="$1" ld py rc
+    for ld in "$prefix/tools/python/root/lib64/ld-linux-x86-64.so.2" \
+              "$prefix/tools/python/root/usr/lib64/ld-linux-x86-64.so.2"; do
+        [ -f "$ld" ] && break
+        ld=""
+    done
+    if [ -n "$ld" ] && [ -x "$ld" ]; then
+        "$ld" --version >/dev/null 2>&1
+        rc=$?
+        if [ "$rc" -eq 0 ]; then
+            pass "step4/archive-loader-runs" "the shipped loader still executes after the pass"
+        else
+            fail "step4/archive-loader-runs" \
+                "ARCHIVE the shipped loader does not execute after the pass: exit $rc$([ "$rc" -gt 128 ] && printf ' (signal %s)' "$((rc - 128))")"
+        fi
+    else
+        printf '  %-40s SKIP  no executable loader under the copy\n' "step4/archive-loader-runs"
+    fi
+    cases=$((cases + 1))
+
+    py=$(find "$prefix/tools/python" -maxdepth 3 -type f -name 'python3*_bin' 2>/dev/null | head -n 1)
+    if [ -n "$py" ] && [ -x "$py" ]; then
+        "$py" -c pass >/dev/null 2>&1
+        rc=$?
+        if [ "$rc" -eq 0 ]; then
+            pass "step4/archive-python-runs" "the shipped interpreter still executes after the pass"
+        else
+            fail "step4/archive-python-runs" \
+                "ARCHIVE the shipped python does not execute after the pass: exit $rc$([ "$rc" -gt 128 ] && printf ' (signal %s)' "$((rc - 128))")"
+        fi
+    else
+        printf '  %-40s SKIP  no shipped python under the copy\n' "step4/archive-python-runs"
+    fi
+    cases=$((cases + 1))
+}
+
+# step4_residual_suite PREFIX ORACLE: the residual half, RUN here and GATED at
+# Step 6.
+#
+# The division follows Step 2's own reason for deferring this half: the residual
+# population is a property of the ARCHIVE rather than of the classifier. So this
+# step asserts what the classifier did, that every residual program it walked was
+# CLASSIFIED, and reports each selected one with its owner. Whether the archive
+# should carry a selected program at all is an ACCEPTANCE claim, it lives under
+# the requirement's `## Acceptance` heading, and it is proved at Step 6 over the
+# DEPLOYED archive with no exception admitted.
+#
+# An earlier revision asserted the acceptance claim here, over a staging copy,
+# and then had to excuse the one object it found. A staging copy cannot answer a
+# question about what the published archive contains, so the gate moved to where
+# the deployed archive is in hand rather than the failure being excused where it
+# was not.
+#
+# The pass MUTATES what it walks, and the harness does not own the tree it is
+# pointed at. On the build agent that tree is the extracted prefix the next
+# pipeline stage runs, so walking it in place left the shipped interpreter
+# rewritten and killed the build at `uv sync` with a SIGSEGV, three builds
+# running. A verification step that breaks the run it observes is measuring its
+# own damage, so this runs over a COPY.
+#
+# What the copy costs is stated rather than hidden. Cases 3 and 5 compare the
+# object's recorded value against the search path computed for the prefix, so a
+# copy at another path cannot answer them: an object the live tree calls case 5
+# the copy calls case 6. Both are SELECTED populations and this step reports
+# either the same way, so only the case number in a note moves. Case 7 is
+# decided by the object alone and does not move at all.
+step4_residual_suite() {
+    local prefix="$1" oracle="$2" capture rec hex rel n bad=0 residuals=0 selected=0 owner seen="" unowned=""
+    local work="$SCRATCH/residual-archive"
+    section "step 4: the residual half over the real archive"
+
+    if ! step2_inventory_oracle "$oracle"; then
+        fail "step4/residual-oracle" "ORACLE unreadable: $STEP2_INV_WHY"
+        cases=$((cases + 1))
+        return 0
+    fi
+    note "step4/residual-oracle" "$oracle"
+
+    # A copy that cannot be made leaves the criterion UNANSWERED. It does not
+    # fall back to the live tree: the fallback IS the defect this guard exists
+    # to remove, and "nobody could ask" is not "the archive is clean".
+    rm -rf -- "$work" 2>/dev/null
+    if ! mkdir -p -- "$work" 2>/dev/null || ! cp -a -- "$prefix/." "$work/" 2>/dev/null; then
+        rm -rf -- "$work" 2>/dev/null
+        printf '  %-40s SKIP  could not copy the extracted archive to %s\n' \
+            "step4/residual-copy" "$work"
+        UNANSWERED="${UNANSWERED:+$UNANSWERED, }the step 4 residual population"
+        UNANSWERED_HOW="${UNANSWERED_HOW:+$UNANSWERED_HOW; }rerun with room under \${TMPDIR:-/tmp} for a copy of the extracted archive"
+        return 0
+    fi
+    note "step4/residual-copy" "$work"
+
+    # The pass runs over the copy. The live tree is left exactly as this harness
+    # found it, which is what lets the stage stay non-gating in fact and not
+    # only on paper.
+    capture=$(step4_pass "$work")
+    if [ -z "$capture" ]; then
+        fail "step4/residual-capture" "the pass produced nothing over $work"
+        rm -rf -- "$work" 2>/dev/null
+        cases=$((cases + 1))
+        return 0
+    fi
+    if step3_read_capture "$capture"; then
+        pass "step4/residual-capture" "the archive walk reconciles"
+    else
+        fail "step4/residual-capture" "READER refused the archive capture: $STEP3_REASON"
+    fi
+    cases=$((cases + 1))
+
+    # THE ASSERTION THAT WOULD HAVE CAUGHT IT, and the reason this step needed
+    # one. Every other check here reads the account the pass wrote about itself,
+    # and an account reconciles perfectly over a tree that no longer runs:
+    # patchelf exits 0 on the loader, so the record says `rewritten`, the
+    # trailer balances, and the tree segfaults at exec. Three builds reported a
+    # clean walk and then died in the next stage. A step that rewrites core
+    # objects has to RUN the tree, not count it.
+    step4_runs_after "$work"
+
+    while IFS= read -r rec; do
+        [ -n "$rec" ] || continue
+        hex=$(step4_field "$rec" path)
+        [ -n "$hex" ] || continue
+        rel=$(step4_hex_to_path "$hex")
+        # A recorded member is not residual, whatever tree it sits in. Location
+        # is not population identity, which is the lesson round 4 paid for.
+        step2_in_set "$rel" "$STEP2_INV_LIBS" && continue
+        step2_in_set "$rel" "$STEP2_INV_GITS" && continue
+        [ "$rel" = "$STEP2_INV_PYTHON" ] && continue
+        n=$(step4_field "$rec" case)
+        # A RESIDUAL PROGRAM, not a residual object. Step 2 separates the two
+        # from the observation tuple, `dyn` with no `PT_INTERP` being the library
+        # population, and a record does not carry that tuple: it carries a case
+        # and a path. The case is the population identity, so it is what
+        # separates them here.
+        #
+        # Cases 5 and 6 are the SELECTED program populations, and selection is
+        # the harm the ACCEPTANCE claim guards against: a stray build artefact
+        # shipped inside the archive would be given a search path by the pass.
+        # That claim is Step 6's, so a selected residual is reported here with
+        # its owner rather than failed. Case 4 is the library population and the
+        # record names only 110 of the several hundred the archive carries, so
+        # an unrecorded library is not a residual program at all and is passed
+        # over, which Step 2 already accepted as expected.
+        # UNCLASSIFIED is Step 4's failure; SELECTED is Step 6's finding. The
+        # line between them is ownership, and Step 2 drew it already: a residual
+        # is a property of the ARCHIVE rather than of the classifier. What this
+        # step owns is that the pass answered for every residual program it
+        # walked. What the archive happens to contain is asserted where the
+        # DEPLOYED archive is in hand, which is Step 6, and its criteria already
+        # name themselves the final assertion of the residual half.
+        if [ -z "$n" ]; then
+            fail "step4/residual-classified" "ARCHIVE residual program unclassified: $rel"
+            bad=$((bad + 1))
+            continue
+        fi
+        case "$n" in
+            5|6)
+                residuals=$((residuals + 1))
+                selected=$((selected + 1))
+                if owner=$(step4_defect_owner "$rel"); then
+                    seen="${seen:+$seen }$rel"
+                    note "step4/residual-selected" "$rel:case$n -> owned by $owner"
+                else
+                    note "step4/residual-selected" "$rel:case$n -> UNADJUDICATED, carried to step 6"
+                    unowned="${unowned:+$unowned }$rel"
+                fi
+                ;;
+            7) residuals=$((residuals + 1)) ;;
+        esac
+    done <<< "$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 obj ')"
+
+    if [ "$bad" -eq 0 ]; then
+        pass "step4/residual-classified" \
+            "$residuals residual programs, every one classified"
+    fi
+    cases=$((cases + 1))
+    note "step4/residual-count" "$residuals residual programs walked, $selected selected"
+
+    # The register asserted EXACT in the other direction. This IS Step 4's, and
+    # the distinction is worth keeping straight: the archive's contents are not
+    # this step's to gate, but a claim in this harness's own file that no longer
+    # matches the archive is its bookkeeping and nobody else's. An entry the
+    # archive no longer carries fails here, so a rebuilt archive cannot land
+    # while this file still names a violation the rebuild removed.
+    while IFS='|' read -r rel owner; do
+        [ -n "$rel" ] || continue
+        case " $seen " in
+            *" $rel "*) ;;
+            *) fail "step4/residual-register-stale" \
+                "REGISTER $rel is no longer in the archive: drop it from STEP4_ARCHIVE_DEFECTS ($owner)" ;;
+        esac
+        cases=$((cases + 1))
+    done <<< "$STEP4_ARCHIVE_DEFECTS"
+
+    # The handoff, printed whether or not anything is owned, so Step 6 reads one
+    # line rather than reconstructing the set from the records.
+    note "step4/residual-handoff-to-step-6" \
+        "selected residuals for the step 6 deployed-archive assertion: ${seen:-none} ${unowned:+| unadjudicated: $unowned}"
+    # The copy is large and the run is long, so it goes now rather than at the
+    # EXIT trap, where a later suite would be sharing the disk with it.
+    rm -rf -- "$work" 2>/dev/null
+}
+
+# step4_hex_to_path HEX: decode a record path back to bytes. Harness side only:
+# the production formatter encodes and never decodes, so this lives with the
+# reader rather than beside it in the installer.
+step4_hex_to_path() {
+    local hex="$1" i esc=""
+    for (( i = 0; i < ${#hex}; i += 2 )); do esc="$esc\x${hex:i:2}"; done
+    printf '%b' "$esc"
+}
+
+step4_suite() {
+    local row id run obj want_case want_r want_i want_mig c
+    local prefix target capture rec got n cols
+    local mig_checked mig_failed
+    local base="$SCRATCH/step4"
+    local -A CAPTURES=()
+
+    section "step 4: the matrix is a table, not a description"
+
+    # The check that would have caught the shifted D02 row: a table whose rows do
+    # not all have the same width is malformed input, and fails as that rather
+    # than as a puzzling expectation somewhere downstream.
+    n=0
+    cols=0
+    while IFS= read -r row; do
+        [ -n "$row" ] || continue
+        n=$((n + 1))
+        c=$(printf '%s' "$row" | awk -F'|' '{print NF}')
+        [ "$cols" -eq 0 ] && cols="$c"
+        if [ "$c" != "$cols" ]; then
+            fail "matrix/rectangular" "MATRIX row $n has $c columns, not $cols"
+            cases=$((cases + 1))
+            return 0
+        fi
+    done <<< "$STEP4_MATRIX"
+    chk "matrix/rectangular" "7" "$cols"
+    cases=$((cases + 1))
+    chk "matrix/row-count" "30" "$n"
+    cases=$((cases + 1))
+
+    # Every cell is a closed value. A case outside 1 to 7, or a disposition that
+    # is not one of its axis's wire tokens, is a table defect and is caught here
+    # rather than by a run that cannot match it.
+    n=0
+    while IFS='|' read -r id run obj want_case want_r want_i want_mig; do
+        [ -n "$id" ] || continue
+        case "$want_case" in [1-7]) ;; *) n=$((n + 1)) ;; esac
+        case "$want_r" in
+            rewritten|failed|already-correct|not-dynamic|excluded) ;;
+            *) n=$((n + 1)) ;;
+        esac
+        case "$want_i" in
+            rewritten|failed|unchanged|not-applicable) ;;
+            *) n=$((n + 1)) ;;
+        esac
+        case "$want_mig" in [0-9],[0-9]) ;; *) n=$((n + 1)) ;; esac
+    done <<< "$STEP4_MATRIX"
+    chk "matrix/cells-closed" "0" "$n"
+    cases=$((cases + 1))
+
+    if ! resolve_fixture_donor; then
+        fail "step4/donor" "FIXTURE absent: no donor ELF found"
+        cases=$((cases + 1))
+        return 0
+    fi
+
+    section "step 4: the production runs"
+
+    rm -rf -- "$base" 2>/dev/null
+    mkdir -p -- "$base"
+
+    # R1 and R2 are two passes over ONE prefix, which is what makes R2 an
+    # idempotence claim rather than a second first-pass.
+    for run in R0 R1 R3 R4 R5 R6 R7 IF01 IF02 IW01 IW02 R14; do
+        prefix="$base/$run"
+        # R14 is the empty-search-path run, and the only way this code reaches an
+        # empty target is a prefix with no tool library directories. The
+        # interpreter goes missing for the same reason, which is why its rows
+        # expect `unchanged` and `not-applicable` rather than a rewrite: R12
+        # asked for both at once and no prefix can give them.
+        case "$run" in
+            R14) step4_prepare "$prefix" "no" || continue ;;
+            *)   step4_prepare "$prefix" "yes" || continue ;;
+        esac
+        target=$(step4_target "$prefix")
+        STEP4_TARGET_INTERP="$prefix/tools/python/root/lib64/ld-linux-x86-64.so.2"
+        case "$run" in
+            R0|R1)   for obj in X1 X2 X3 X4 X5 X6; do step4_plant "$obj" "$prefix" "$target"; done ;;
+            R3|IW01) step4_plant X7 "$prefix" "$target" ;;
+            R4)      step4_plant X8 "$prefix" "$target" ;;
+            R5)      step4_plant X9 "$prefix" "$target" ;;
+            R6)      step4_plant X10 "$prefix" "$target" ;;
+            R7)      step4_plant X11 "$prefix" "$target" ;;
+            IF01)    step4_plant X12 "$prefix" "$target" ;;
+            IF02|IW02) step4_plant X2 "$prefix" "$target" ;;
+            R14)     for obj in X1 X2 X3 X4 X5 X6; do step4_plant "$obj" "$prefix" "$target"; done ;;
+        esac
+        # R0 keeps only X2, the row that proves both guards firing on one object
+        # with the prefix outside /home.
+        if [ "$run" = "R0" ]; then
+            for obj in X1 X3 X4 X5 X6; do rm -f -- "$prefix/$(step4_object_path "$obj")"; done
+        fi
+        # The double is planted at the prefix surface `find_patchelf` resolves
+        # FIRST, not on PATH. Production prefers "$INSTALL_PREFIX/tools/bin/patchelf"
+        # over the command path, so a PATH double is simply not the tool the pass
+        # runs, and the fault row it was built for never fires.
+        case "$run" in
+            IF01) step4_double "$prefix/tools/bin" "--print-rpath" ;;
+            IF02) step4_double "$prefix/tools/bin" "--print-interpreter" ;;
+            IW01) step4_double "$prefix/tools/bin" "--set-rpath" ;;
+            IW02) step4_double "$prefix/tools/bin" "--set-interpreter" ;;
+        esac
+        CAPTURES["$run"]=$(step4_pass "$prefix")
+        if [ "$run" = "R1" ]; then
+            CAPTURES[R2]=$(step4_pass "$prefix")
+        fi
+    done
+
+    section "step 4: every row against its literal cells"
+
+    while IFS='|' read -r id run obj want_case want_r want_i want_mig; do
+        [ -n "$id" ] || continue
+        capture="${CAPTURES[$run]:-}"
+        if [ -z "$capture" ]; then
+            fail "$id/capture" "MATRIX run $run produced no capture"
+            cases=$((cases + 1))
+            continue
+        fi
+        rec=$(step4_record "$capture" "$(step4_object_path "$obj")")
+        if [ -z "$rec" ]; then
+            fail "$id/record" "MATRIX $run/$obj emitted no record at its path"
+            cases=$((cases + 1))
+            continue
+        fi
+        chk "$id/case" "$want_case" "$(step4_field "$rec" case)"
+        cases=$((cases + 1))
+        chk "$id/rpath" "$want_r" "$(step4_field "$rec" rpath)"
+        cases=$((cases + 1))
+        chk "$id/interp" "$want_i" "$(step4_field "$rec" interp)"
+        cases=$((cases + 1))
+    done <<< "$STEP4_MATRIX"
+
+    section "step 4: every capture parses and reconciles"
+
+    # The production reader, not a syntax check: a capture is accepted only when
+    # its trailer accounts for its records per category.
+    for run in R0 R1 R2 R3 R4 R5 R6 R7 IF01 IF02 IW01 IW02 R14; do
+        capture="${CAPTURES[$run]:-}"
+        if [ -z "$capture" ]; then
+            fail "step4/capture-$run" "no capture"
+            cases=$((cases + 1))
+            continue
+        fi
+        if step3_read_capture "$capture"; then
+            pass "step4/capture-$run" "parsed and reconciled"
+        else
+            fail "step4/capture-$run" "READER refused a production capture: $STEP3_REASON"
+        fi
+        cases=$((cases + 1))
+    done
+
+    section "step 4: the migration figures"
+
+    # mig-checked is case 5 membership and does not change with the outcome of
+    # acting on it, which is what IW01 proves: the write failed and the object is
+    # still a checked migration.
+    for run in R3 R4 IW01; do
+        capture="${CAPTURES[$run]:-}"
+        [ -n "$capture" ] || continue
+        rec=$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 end ' | head -1)
+        mig_checked=$(step4_field "$rec" mig-checked)
+        mig_failed=$(step4_field "$rec" mig-failed)
+        case "$run" in
+            R3)   chk "step4/mig-$run" "1,0" "$mig_checked,$mig_failed" ;;
+            R4)   chk "step4/mig-$run" "1,1" "$mig_checked,$mig_failed" ;;
+            IW01) chk "step4/mig-$run" "1,0" "$mig_checked,$mig_failed" ;;
+        esac
+        cases=$((cases + 1))
+    done
+
+    section "step 4: both axes account for every walked object"
+
+    for run in R0 R1 R2 R3 R4 R5 R6 R7 IF01 IF02 IW01 IW02 R14; do
+        capture="${CAPTURES[$run]:-}"
+        [ -n "$capture" ] || continue
+        rec=$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 end ' | head -1)
+        got=$(step4_field "$rec" walked)
+        n=$(( $(step4_field "$rec" r-rewritten) + $(step4_field "$rec" r-failed) \
+            + $(step4_field "$rec" r-already-correct) + $(step4_field "$rec" r-not-dynamic) \
+            + $(step4_field "$rec" r-excluded) ))
+        chk "step4/rpath-axis-sums-$run" "$got" "$n"
+        cases=$((cases + 1))
+        n=$(( $(step4_field "$rec" i-rewritten) + $(step4_field "$rec" i-failed) \
+            + $(step4_field "$rec" i-unchanged) + $(step4_field "$rec" i-not-applicable) ))
+        chk "step4/interp-axis-sums-$run" "$got" "$n"
+        cases=$((cases + 1))
+    done
+
+    section "step 4: a skipped pass still says so"
+
+    prefix="$base/skip"
+    step4_prepare "$prefix" "yes"
+    rm -f -- "$prefix/tools/bin/patchelf"
+    capture=$(
+        bash -c '
+            set -u
+            PATH="/nonexistent-cplx-step4"
+            export PATH
+            # shellcheck disable=SC1090
+            source "$1" >/dev/null 2>&1
+            INSTALL_PREFIX="$2"
+            HOME="$2"
+            fix_elf_paths "$2" 2>&1
+        ' _ "$ISOLATED_INSTALLER" "$prefix"
+    )
+    rec=$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 end ' | head -1)
+    chk "step4/skipped-state" "skipped" "$(step4_field "$rec" state)"
+    cases=$((cases + 1))
+    chk "step4/skipped-reason" "patchelf-absent" "$(step4_field "$rec" reason)"
+    cases=$((cases + 1))
+    if step3_read_capture "$capture"; then
+        pass "step4/skipped-capture" "a skipped pass emits a lawful capture"
+    else
+        fail "step4/skipped-capture" "READER refused the skipped capture: $STEP3_REASON"
+    fi
+    cases=$((cases + 1))
+}
+if [ "$STEP" = "4" ]; then
+    # shellcheck disable=SC1090
+    source "$ISOLATED_INSTALLER" >/dev/null 2>&1
+    if declare -F fix_elf_paths >/dev/null 2>&1; then
+        pass "step4/pass-defined" "fix_elf_paths"
+        cases=$((cases + 1))
+        # The step 3 regression, re-run UNCHANGED against its own literal and
+        # constructed inputs. Nothing here touches a real capture, and nothing
+        # here changes because step 4 landed.
+        step3_suite
+        step4_suite
+        # The exclusion at the seam, before the archive half, so a failing rule is
+        # named as a rule failure rather than as an archive failure.
+        step4_loader_rule_suite
+        # The residual half needs the real extracted archive and the recorded
+        # oracle. Either absent leaves the criterion UNANSWERED rather than
+        # answered from whatever the tree holds, which is the weakening the
+        # third outcome exists to refuse.
+        if [ -d "$PREFIX/tools" ] && [ -f "$INVENTORY" ]; then
+            step4_residual_suite "$PREFIX" "$INVENTORY"
+        else
+            printf '  %-40s SKIP  archive [%s] oracle [%s]\n' "step4/residual" \
+                "$([ -d "$PREFIX/tools" ] && echo present || echo absent)" \
+                "$([ -f "$INVENTORY" ] && echo present || echo absent)"
+            UNANSWERED="${UNANSWERED:+$UNANSWERED, }the step 4 residual population"
+        fi
+    else
+        fail "step4/pass-defined" "SEAM the production pass did not survive sourcing"
+        cases=$((cases + 1))
+    fi
+fi
 printf '\n== verdict\n'
 printf '  step        %s\n' "$STEP"
 printf '  cases       %s\n' "$cases"
@@ -4257,12 +5169,16 @@ printf '  sha256sum   %s\n' "$SHA256SUM_BIN"
 printf '  assoc local %s (bash %s)\n' "$ASSOC_LOCAL" "$LOCAL_BASH"
 printf '  assoc rhel  %s\n' "$ASSOC_TARGET"
 [ -n "$UNANSWERED" ] && printf '  unanswered  %s\n' "$UNANSWERED"
+[ -n "$BLOCKED" ] && printf '  blocked     %s\n' "$BLOCKED"
 
-# Three outcomes, not two. A failure is a finding about the code and wins, since
-# that is the thing to act on; an obligation nobody could answer is neither a
-# pass nor a code failure, so it carries its own exit code rather than being
-# folded into either. Answering the cheaper question and reporting the step done
-# is what the third outcome exists to prevent.
+
+# FOUR outcomes, not two and no longer three. A failure is a finding about the
+# code and wins, since that is the thing to act on; an obligation nobody could
+# answer is neither a pass nor a code failure; and a criterion that WAS answered,
+# whose violation is real and owned by another requirement, is none of the three.
+# Each carries its own exit code rather than being folded into another.
+# Answering the cheaper question and reporting the step done is what these exist
+# to prevent.
 if [ "$failures" -ne 0 ]; then
     printf '\nOBJECTIVE NOT MET for step %s: %s failure(s)\n' "$STEP" "$failures"
     exit 1
@@ -4271,6 +5187,13 @@ if [ -n "$UNANSWERED" ]; then
     printf '\nOBJECTIVE NOT MET for step %s: unanswered: %s\n' "$STEP" "$UNANSWERED"
     printf '%s\n' "$UNANSWERED_HOW"
     exit 5
+fi
+# Deliberately not "MET". Step 6 states the same distinction for its own
+# monitoring criterion in the same words: green only when satisfied with
+# evidence, `blocked` when it is not, and the verdict says which.
+if [ -n "$BLOCKED" ]; then
+    printf '\nOBJECTIVE BLOCKED for step %s: %s\n' "$STEP" "$BLOCKED"
+    exit 6
 fi
 printf '\nOBJECTIVE MET for step %s\n' "$STEP"
 exit 0
