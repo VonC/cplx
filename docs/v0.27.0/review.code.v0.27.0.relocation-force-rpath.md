@@ -18195,3 +18195,541 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-6 -->
+
+## Round 1 by requestor - Step 5
+
+- Recorded: 2026-08-27T08:48:37+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 relocation-force-rpath (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 5
+Review round: 1
+
+### Code review evidence for step 5 relocation-force-rpath (round 1)
+
+request_index_tree: ba3b486f2bc607523d87f88b1d93676d22b7d6c3
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 5 (sources: plan)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+
+commit_plan_result:
+
+state: valid
+ready: true
+group 1: docs(wiki): describe the forced rpath and its reach
+group 1 path: wiki/reference/relocation-tools.md
+group 1 path: wiki/explanation/why-binaries-remember-the-build-home.md
+group 1 path: wiki/how-to/relocate-an-install-to-another-prefix.md
+group 2: test(v0.27.0): assert the pages, do not grep for absence
+group 2 path: docs/v0.27.0/verify.relocation-rpath.sh
+group 3: docs(relocation-force-rpath): record the step 5 state
+group 3 path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+staged path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+staged path: docs/v0.27.0/verify.relocation-rpath.sh
+staged path: wiki/explanation/why-binaries-remember-the-build-home.md
+staged path: wiki/how-to/relocate-an-install-to-another-prefix.md
+staged path: wiki/reference/relocation-tools.md
+
+### Requestor assessment for step 5 relocation-force-rpath (round 1)
+
+Yes. Step 5 is fully implemented and its mandatory command is green on this
+host.
+
+`bash docs/v0.27.0/verify.relocation-rpath.sh --step 5` returns `OBJECTIVE MET`
+at exit 0: 52 cases, zero owned failures. Two step 0 preflight failures are
+reported as INHERITED and named rather than absorbed, because this host carries
+no `readelf` and no capability record, and Step 5's criteria ask for neither.
+
+Step 5 is the first step of this effort whose objective is met on the authoring
+host. It reads three Markdown pages and one contract file and nothing else, so
+no Debian agent build is owed and none was run. That is a claim the reviewer
+should test rather than accept: if any Step 5 criterion turns out to need a
+capable host, this verdict is wrong.
+
+Test evidence, all twelve positive coverage rows plus two backstops and the
+contract count:
+
+- `C1` to `C7` on `wiki/reference/relocation-tools.md`: the tag written, the
+  three populations one row each, the rpath disposition axis, the interpreter
+  disposition axis, and what the pass leaves untouched
+- `C8` to `C10` on `wiki/explanation/why-binaries-remember-the-build-home.md`:
+  the install-time rewrite now producing `DT_RPATH`, the consequence for
+  `LD_LIBRARY_PATH`, the consequence for `setenv`
+- `C11` and `C12` on `wiki/how-to/relocate-an-install-to-another-prefix.md`: a
+  check expecting `RPATH` exactly, and the library-side check
+- `S1` and `S2`: the stale wording absent, labelled a backstop in the output
+- `step5/host-tool-rows`: 26, unchanged, since no installer tool was added
+
+Static-check evidence. Repository shell lint exit 0 over 44 tracked scripts.
+ShellCheck exit 0 with zero findings over the installer and the harness. No
+production code changed in this step.
+
+Coverage evidence. One assertion per obligation the plan states, twelve of
+twelve. The plan asked for positive per-obligation assertions rather than the
+two absence greps the previous revision had, and the reason is in the plan: a
+negative test passes when prose is deleted.
+
+Architecture evidence. No layer applies. The suite exits above the capability
+gate, which is the only structural decision in it.
+
+Performance evidence. Sixteen greps over three pages.
+
+Feature-integrity evidence. No behaviour changed. The host-tool contract is
+unchanged at 26 rows.
+
+### Implementation report for step 5 relocation-force-rpath (round 1)
+
+Three wiki pages and one harness suite. No production code.
+
+THE PAGES. Each described the relocation pass accurately until Step 4 landed and
+stopped describing it the moment it did. The tag is the part every page got
+wrong, and it is not a cosmetic difference: `DT_RPATH` is consulted before
+`LD_LIBRARY_PATH` where `DT_RUNPATH` is consulted after it, and `DT_RPATH`
+applies transitively to a shipped library's own dependencies where `DT_RUNPATH`
+does not. Together those decide whether a relocated prefix resolves against
+itself or against the system, and whether an environment variable can override
+it.
+
+- The reference names `DT_RPATH` in the ELF row and says the rpath axis selects
+  by population rather than by the value it finds. A new section carries the tag
+  written and why it is not `DT_RUNPATH`, the three populations as a table, the
+  two disposition axes as a table, and four things the pass leaves untouched
+  with the reason for each. The shipped loader is the first of those four, and
+  its reason is the measurement from Step 4: patchelf accepts a search path on
+  it, reports success, and the loader then segfaults.
+- The explanation opens layer 1 with the install-time rewrite settling it at
+  deployment, then states the two consequences the plan names: `LD_LIBRARY_PATH`
+  no longer wins, and `setenv` stops affecting the shipped directories. The
+  `setenv` paragraph says what to do about an export left in place, which is
+  nothing: it is inert for the prefix and still governs everything outside it.
+  The compile-time alternative is kept, reframed as the explanation of why the
+  install-time pass exists rather than as a road not yet taken.
+- The how-to expects `RPATH` exactly instead of `RPATH|RUNPATH`, which accepted
+  either and therefore proved nothing about which was present, and adds a
+  library-side check. Both changes carry their reason: a tree still carrying
+  `DT_RUNPATH` has not been relocated by this version, and a library without
+  `DT_RPATH` would resolve its dependencies against the system while the
+  programs above it looked correct.
+
+THE SUITE. The plan asked for positive per-obligation assertions and said why,
+and the reason is worth repeating because it is the kind of test this effort has
+been caught by twice already. A stale-wording grep is a NEGATIVE test: it passes
+when a phrase is absent, so deleting the surrounding prose satisfies it
+perfectly. A page whose ELF section had been removed outright would have gone
+green. Twelve rows now name their page and what must be present on it, so
+deleting the reference page's ELF section fails five of them.
+
+Two implementation details are worth the reviewer's attention.
+
+The coverage tables are tilde-separated, not pipe-separated. Half the patterns
+match Markdown table rows and every one of those carries a `|`, so a pipe
+separator split the pattern instead of the row: the first run reported three
+rows missing from a page that carried all three. A false failure is as
+misleading as a false pass.
+
+The suite exits above the capability gate, like Step 3's. A step that needs no
+patchelf, no readelf and no Linux must not report `HOST CANNOT SATISFY` on a
+host that can answer every question it asks. Its verdict is scoped to the cases
+it owns, with the inherited Step 0 preflight failures printed and named, which
+is the same split Step 3 uses and for the same reason: reporting the total would
+fail Step 5 for capability its criteria do not mention, and hiding them would be
+the count-driven change this effort has refused since Step 0.
+
+### Change summary for step 5 relocation-force-rpath (round 1)
+
+Staged paths, 6, exactly the set `a.commit` names:
+
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+- docs/v0.27.0/verify.relocation-rpath.sh
+- wiki/explanation/why-binaries-remember-the-build-home.md
+- wiki/how-to/relocate-an-install-to-another-prefix.md
+- wiki/reference/relocation-tools.md
+
+`a.commit` groups, three, least dependent first:
+
+1. the three wiki pages, which are what the step exists to change
+2. the step 5 coverage suite in the harness, which asserts them
+3. the plan's step 5 status and the validation record
+
+No production code is in this step and none changed. `install_pkg.sh` is not
+staged.
+
+This is round 1 of a new exchange for step 5. The step 4 exchange completed and
+its ten commits are on the branch, ending at `b0d10a4`.
+
+No CI repository commit accompanies this round. Step 5 needs no agent build, so
+no verification input was synced and no build was triggered.
+
+### Writer response for step 5 relocation-force-rpath (round 1)
+
+Writer response: Round 1 of a new exchange, so there is no earlier feedback for this step to
+accept or dispute.
+
+Two things carried from step 4 are named here so they survive the step boundary
+rather than being rediscovered.
+
+The first is a claim this step makes that no build can check: Step 5 is host
+independent and its objective is met on the authoring host. Every earlier step
+of this effort owed a Debian agent run, and this one does not, because it reads
+Markdown and a contract file. If any Step 5 criterion turns out to need a
+capable host, the verdict is wrong and this round should say so. It is offered
+as the one structural judgement in the step.
+
+The second is still open and still not Step 4's or Step 5's to close:
+`find_dynamic_linker` resolves one loader and the archive ships more than one
+copy, so a spare stays in case 4 and is still rewritten. Nothing execs through a
+spare, and widening the rule to every loader-looking file is the name check the
+case order exists to avoid. Whether a rewritten spare is acceptable in the
+shipped archive belongs to Step 6's acceptance. The reference page's "what the
+pass leaves untouched" section states the bound explicitly, so a reader meets
+the limit rather than inferring a stronger promise from it.
+
+One process note, since it affects what the reviewer sees. The three pages are
+in `wiki/`, which is a Diataxis tree this repository publishes. The changes stay
+inside the sections that already existed, and no page gained or lost a heading
+level, so the tree's shape is unchanged.
+
+### Reviewer focus for step 5 relocation-force-rpath (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-1 -->
+
+## Round 1 by reviewer - Step 5
+
+- Recorded: 2026-08-27T09:18:26+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Baseline index tree: ba3b486f2bc607523d87f88b1d93676d22b7d6c3
+
+Assessed index tree: e2e10c261c2c7a3937db5a10b344a10ebdff8662
+
+### Implementation check for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Result: Result: Yes. Step 5 is fully implemented after the bounded reviewer repair. The three wiki pages describe `DT_RPATH`, the selected populations, both disposition axes, the environment-precedence consequences, and exact program- and library-side checks. The repaired Step 5 suite now positively asserts the actual library-side `readelf` command rather than only its variable declaration.
+
+Validation plan effects: The exact Step 5 validation section was normalized to the implementation-check contract: its first sentence is now `Yes. Step 5 has been fully implemented.`, followed by the required architecture, performance, and unit-coverage closure statements. This is review metadata and does not change implementation or acceptance behavior.
+
+### Pre-repair mandatory checks and coverage for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+The request-time index exactly matched `ba3b486f2bc607523d87f88b1d93676d22b7d6c3`. Source inspection found that coverage row `C12` matched only `^LIB=`, so deleting the actual library-side `readelf -d "$LIB" | grep RPATH` command would still pass. The requestor-reported commands were green, but that passing result did not establish the stated library-side obligation before repair.
+
+### Resolved validation set and sources for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+The request and current resolver both require `bash src/utils/lint_shell.sh`, `bash docs/v0.27.0/verify.relocation-rpath.sh --step 5`, and `shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh`. After repair, repository shell lint is clean over 44 tracked scripts, ShellCheck exits 0 with no findings, and the Step 5 harness reports 52 cases, zero owned failures, `OBJECTIVE MET`, exit 0. Its two Step 0 capability failures remain explicitly inherited and do not belong to Step 5.
+
+### Resolver drift and direction for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+No resolver drift; the request and current validation command sets are identical.
+
+### Repository state around validation for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Baseline index `ba3b486f2bc607523d87f88b1d93676d22b7d6c3`; assessed index `e2e10c261c2c7a3937db5a10b344a10ebdff8662`. Only two attributable reviewer paths differ: the substantive Step 5 harness repair and the Step 5 validation-record metadata repair. The umbrella digest remains `0ce85a202ed42c59af696f4996820b849c2a68643b86c7d285164d1af1c1aefe`. No unrelated working-tree content was staged or reverted.
+
+### Repair inventory for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Repairs made:
+
+- Repairs made:
+- - `docs/v0.27.0/verify.relocation-rpath.sh`: substantive test repair; changed `C12` from matching only the `LIB=` assignment to matching the actual library-side `readelf -d ... LIB ... grep RPATH` command required by the plan.
+- - `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`: polishing-only review-metadata repair; restored the exact fully-implemented status sentence and added the required architecture, performance, and unit-coverage closure statements.
+- Both patches were captured before editing, proven attributable, and staged. The substantive harness repair prevents same-round convergence.
+
+Paths staged:
+
+- Six staged paths remain, exactly the request set: the implementation plan, validation plan, Step 5 harness, and three wiki pages. No staged path falls outside `a.commit`; the reviewer repairs changed content only and introduced no path.
+
+### Commit plan assessment for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+`a.commit` parses cleanly. Its three dependency-ordered groups cover all six staged paths exactly, with accurate conventional subjects, membership, and scope. No amendment is required because the reviewer repairs do not change group membership or invalidate the descriptions: the harness still contains twelve positive rows, and the validation record remains in the documentation group.
+
+### Findings and boundaries for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Unresolved findings:
+
+- No substantive implementation, validation, coverage, documentation-accuracy, or commit-plan finding remains after repair. One workflow action remains: preserve both staged reviewer repairs and publish round 2 so convergence can be assessed without a same-round substantive repair.
+
+Boundary-crossing work:
+
+- Boundary-crossing work: Step 6 still owns deployed-archive acceptance, including the selected-residual handoff carried from Step 4. It is not missing Step 5 work, and the reviewer changed no Step 6 or umbrella content.
+
+### Writer instructions for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Preserve the staged `C12` coverage correction and validation-record normalization exactly, make no further Step 5 change unless another validation exposes one, and publish round 2 against the resulting index. Keep `a.commit` unchanged unless staged membership or meaning changes. The next round can recommend commit-ready if the index and validations remain stable.
+
+### Decision rationale for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Changes requested because this round made a substantive reviewer-authored test repair: the original `C12` could pass without the required library-side check. All six readiness floors pass after repair—exact identity, complete implementation, mandatory validation and coverage, attributable staged scope, no unresolved current or carried finding, and accurate `a.commit`—but the reviewer protocol does not permit same-round convergence after a substantive repair.
+
+### Final reviewer decision for step 5 relocation-force-rpath (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-5-round-1 -->
+
+## Round 2 by requestor - Step 5
+
+- Recorded: 2026-08-27T09:22:05+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 relocation-force-rpath (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 5
+Review round: 2
+
+### Code review evidence for step 5 relocation-force-rpath (round 2)
+
+request_index_tree: e2e10c261c2c7a3937db5a10b344a10ebdff8662
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 5 (sources: plan)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+
+commit_plan_result:
+
+state: valid
+ready: true
+group 1: docs(wiki): describe the forced rpath and its reach
+group 1 path: wiki/reference/relocation-tools.md
+group 1 path: wiki/explanation/why-binaries-remember-the-build-home.md
+group 1 path: wiki/how-to/relocate-an-install-to-another-prefix.md
+group 2: test(v0.27.0): assert the pages, do not grep for absence
+group 2 path: docs/v0.27.0/verify.relocation-rpath.sh
+group 3: docs(relocation-force-rpath): record the step 5 state
+group 3 path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+staged path: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+staged path: docs/v0.27.0/verify.relocation-rpath.sh
+staged path: wiki/explanation/why-binaries-remember-the-build-home.md
+staged path: wiki/how-to/relocate-an-install-to-another-prefix.md
+staged path: wiki/reference/relocation-tools.md
+
+### Requestor assessment for step 5 relocation-force-rpath (round 2)
+
+Yes. Step 5 has been fully implemented.
+
+This is a CONFIRMATION round. No writer change was made to any staged path.
+Round 1 recorded no remaining substantive finding and asked only that its two
+staged repairs be preserved and a fresh round published, so convergence can be
+assessed against an index carrying no same-round substantive repair.
+
+Both reviewer repairs are preserved exactly and unmodified: the `C12` coverage
+correction in `docs/v0.27.0/verify.relocation-rpath.sh`, and the
+validation-record normalization in
+`docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`.
+
+Test evidence, re-run against this index rather than carried over:
+`bash docs/v0.27.0/verify.relocation-rpath.sh --step 5` returns `OBJECTIVE MET`
+at exit 0, 52 cases, zero owned failures, with `C12/present PASS the
+library-side check` now asserting the `readelf` command rather than the variable
+declaration. The two step 0 preflight failures remain reported as inherited and
+named.
+
+Static-check evidence, also re-run: repository shell lint exit 0 over 44 tracked
+scripts, ShellCheck exit 0 with zero findings over the installer and the
+harness.
+
+Coverage evidence. Twelve positive obligations, one per row of the plan's
+coverage table, each naming its page and asserted present on it, plus two
+stale-wording backstops and the host-tool row count. `C12` is stronger than it
+was in round 1 and the step is stronger for it.
+
+Architecture, performance and feature-integrity evidence are unchanged from
+round 1 and are not restated, because nothing they describe moved. No production
+code changed in this step and none is staged.
+
+### Implementation report for step 5 relocation-force-rpath (round 2)
+
+Nothing was implemented in this round, deliberately.
+
+Round 1's instruction was explicit: preserve both staged repairs, make no
+further Step 5 change unless another validation exposes one, and publish against
+the resulting index. Both validations were re-run and neither exposed anything,
+so nothing was changed.
+
+The `C12` repair is worth recording rather than just carrying, because it caught
+the exact weakness this suite exists to prevent, in the suite itself. The row
+asserted `^LIB=`, the variable declaration, where the plan's obligation is the
+library-side CHECK. A page that declared `LIB=` and never used it would have
+passed that row, which is a test certifying less than it claims: the same shape
+as a stale-wording grep passing because the prose was deleted, and the same
+shape as the formatter cardinality that passed while diverging from its plan.
+Three times now in this effort, and this one was in the guard rather than in the
+thing guarded.
+
+The corrected row matches `readelf -d .*LIB.*grep RPATH`, so it fails unless the
+page carries the command itself.
+
+The index this round publishes contains exactly what round 1 assessed, plus
+nothing. `a.commit` is untouched: its three groups still cover the six staged
+paths exactly, and neither membership nor meaning changed, so the round 1
+instruction to leave it alone is satisfied by leaving it alone.
+
+The boundary the reviewer named is unchanged and is not Step 5 work: Step 6 owns
+deployed-archive acceptance, including the selected-residual handoff carried
+from Step 4.
+
+### Change summary for step 5 relocation-force-rpath (round 2)
+
+Staged paths, 6, unchanged from round 1 and matching `a.commit` exactly:
+
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+- docs/v0.27.0/verify.relocation-rpath.sh
+- wiki/explanation/why-binaries-remember-the-build-home.md
+- wiki/how-to/relocate-an-install-to-another-prefix.md
+- wiki/reference/relocation-tools.md
+
+`a.commit`: three groups, UNCHANGED this round. Membership, order, boundaries,
+subjects and rationales are all as round 1 assessed them, and group 2 still
+describes twelve positive rows, which the `C12` repair did not change.
+
+Changed since the round 1 request: only the two reviewer repairs, preserved
+exactly as staged.
+
+- `docs/v0.27.0/verify.relocation-rpath.sh`: the `C12` coverage correction
+- `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`: the
+  validation-record normalization
+
+No writer edit was made to any staged path. No production code is in this step.
+No CI repository commit accompanies this round, and none accompanied round 1:
+Step 5 needs no agent build.
+
+### Writer response for step 5 relocation-force-rpath (round 2)
+
+Writer response: Round 1's answer is accepted in full. Neither repair was reversed, nothing was
+edited on top of one, and no disagreement is recorded.
+
+The `C12` correction is accepted as a real strengthening rather than a
+formality. Asserting `^LIB=` proved the page declared a variable, not that it
+carried the check the plan asks for, and a page could have satisfied it while
+omitting the thing entirely. That is the failure mode this whole suite was
+written to prevent, found inside the suite. Worth stating plainly: the row I
+wrote was weaker than the obligation it claimed to cover.
+
+The structural judgement put forward in round 1 was tested and accepted: Step 5
+is host independent and its objective is met on the authoring host, so no Debian
+agent build is owed. That was the one claim in this step that no build could
+check, and it is now settled in the record.
+
+One item is carried again rather than dropped, and it needs no action here:
+`find_dynamic_linker` resolves one loader and the archive ships more than one
+copy, so a spare stays in case 4 and is still rewritten. Nothing execs through a
+spare, and widening the rule to every loader-looking file is the name check the
+case order exists to avoid. Whether a rewritten spare is acceptable in the
+shipped archive belongs to Step 6's acceptance. The reference page states the
+bound explicitly, so a reader meets the limit rather than inferring a stronger
+promise from it.
+
+### Reviewer focus for step 5 relocation-force-rpath (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-2 -->
+
+## Round 2 by reviewer - Step 5
+
+- Recorded: 2026-08-27T09:40:55+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+Baseline index tree: e2e10c261c2c7a3937db5a10b344a10ebdff8662
+
+Assessed index tree: e2e10c261c2c7a3937db5a10b344a10ebdff8662
+
+### Implementation check for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+Result: Yes. Step 5 is fully implemented. The three wiki pages and the strengthened twelve-row positive coverage suite satisfy the exact Step 5 plan, and no production code changes belong to this step.
+
+Validation plan effects: No validation-plan edit was needed in round 2. The exact Step 5 status sentence and its architecture, performance, unit-coverage, and feature-integrity assessments remain accurate.
+
+### Pre-repair mandatory checks and coverage for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+The round-2 request-time index exactly matched `e2e10c261c2c7a3937db5a10b344a10ebdff8662`, the assessed round-1 tree. Both prior reviewer repairs are preserved exactly, including `C12` matching the actual library-side `readelf` command.
+
+### Resolved validation set and sources for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+The request and current resolver both require repository shell lint, the Step 5 harness, and ShellCheck over the installer and harness. Repository shell lint is clean over 44 tracked scripts; ShellCheck exits 0; the harness reports 52 cases, zero owned failures, `OBJECTIVE MET`, exit 0. Its two Step 0 capability failures remain explicitly inherited and outside Step 5.
+
+### Resolver drift and direction for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+No resolver drift; the request and current validation command sets are identical.
+
+### Repository state around validation for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+Baseline and assessed index trees are both `e2e10c261c2c7a3937db5a10b344a10ebdff8662`. The validation-state comparison is acceptable with no tracked, untracked, or ignored-path difference, and the umbrella digest remains unchanged at `0ce85a202ed42c59af696f4996820b849c2a68643b86c7d285164d1af1c1aefe`.
+
+### Repair inventory for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+`a.commit` parses cleanly. Its three dependency-ordered groups cover all six staged paths exactly, with accurate conventional subjects, membership, scope, and descriptions. No amendment is required.
+
+### Findings and boundaries for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+No writer rework is requested. Preserve the assessed index and present the advisory `commit-ready` recommendation at the human commit gate; do not treat the recommendation itself as commit authorization.
+
+### Decision rationale for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+Recommend `commit-ready`. Exact identity, complete Step 5 implementation, mandatory validation and coverage, attributable staged scope, absence of unresolved current or carried findings, unchanged umbrella, and accurate `a.commit` all pass. This round made no repair.
+
+### Final reviewer decision for step 5 relocation-force-rpath (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-5-round-2 -->
+
+## Round 2 by human - Step 5 - human-confirmation
+
+- Recorded: 2026-08-27T09:55:30+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 5
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
