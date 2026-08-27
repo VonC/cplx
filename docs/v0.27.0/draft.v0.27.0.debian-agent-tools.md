@@ -1112,6 +1112,17 @@ Last because every other item is one of its inputs and because the
 publication is irreversible: the releases repository forbids
 redeploying a version.
 
+It also discharges a criterion requirement 2 could not. Step 4 of
+`relocation-force-rpath` asserts that every archive program its record
+does not name answers case 7, and the published archive carries one
+that does not: `tools/python/root/a.out`, a stray build artefact
+removed from the live tree and the build sandbox during that step's
+review but still inside what the agent downloads. Step 4 records it as
+`blocked` against this requirement by exact path, and the harness fails
+if the entry outlives the object, so removing `a.out` and deleting that
+entry from `STEP4_ARCHIVE_DEFECTS` is part of finishing this item
+rather than a follow-up to remember.
+
 Depends on: items 1 to 6.
 
 ### Out of the collection
