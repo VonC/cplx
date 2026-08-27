@@ -2189,8 +2189,10 @@ or excused. Feature integrity is complete for Step 4.
 
 ## Analysis of Step 5 implementation state
 
-Not started. Step 5 is not implemented because the three wiki pages still
-describe the pass as it behaved before Step 4.
+Yes. Step 5 has been fully implemented.
+
+The three wiki pages describe the pass as it behaves after Step 4, and the Step
+5 suite asserts each obligation on its named page.
 
 ### Goal for Step 5
 
@@ -2220,28 +2222,66 @@ is unchanged because no installer tool was added.
 
 ### What was implemented for Step 5
 
-_(empty — no check has taken place yet.)_.
+- `wiki/reference/relocation-tools.md`: the ELF row now names `DT_RPATH` and
+  says the rpath axis selects by population rather than by the value it finds. A
+  new section records the tag written and why it is not `DT_RUNPATH`, the three
+  populations as a table, the two disposition axes as a table, and four things
+  the pass leaves untouched with the reason for each.
+- `wiki/explanation/why-binaries-remember-the-build-home.md`: layer 1 now opens
+  with the install-time rewrite settling it at deployment, states that
+  `LD_LIBRARY_PATH` no longer wins and that `setenv` stops affecting the shipped
+  directories, and keeps the compile-time alternative as the explanation of why
+  the install-time pass exists.
+- `wiki/how-to/relocate-an-install-to-another-prefix.md`: the check block expects
+  `RPATH` exactly instead of accepting either tag, adds a library-side check, and
+  explains why each of those two changes matters.
+- `docs/v0.27.0/verify.relocation-rpath.sh`: a Step 5 suite of twelve positive
+  coverage rows, two stale-wording backstops and the host-tool row count, with
+  its own dispatch above the capability gate.
+
+Local evidence: `--step 5` returns `OBJECTIVE MET` at exit 0 on the authoring
+host, 52 cases, zero owned failures, with the two step 0 preflight failures
+named as inherited rather than absorbed. ShellCheck and repository shell lint
+both exit 0.
 
 ### New types or classes introduced for Step 5
 
-_(empty — no check has taken place yet.)_.
+No application type or class is introduced, and no production code changed. The
+harness gains one suite and two literal coverage tables.
 
 ### Architecture check for Step 5
 
-_(empty — no check has taken place yet.)_.
+No layer applies. The Step 5 suite reads Markdown and the contract file and
+nothing else, which is why it exits above the capability gate: a step that needs
+no patchelf, no readelf and no Linux must not report that a host cannot satisfy
+it.
+
+No architecture smell or violation needs to be addressed.
 
 ### Performance check for Step 5
 
-_(empty — no check has taken place yet.)_.
+Not applicable. The suite runs sixteen greps over three pages.
+
+No performance issue needs to be addressed.
 
 ### Unit test coverage check for Step 5
 
-_(empty — no check has taken place yet.)_.
+Twelve positive obligations, one per row of the plan's coverage table, each
+naming its page and asserted present on it. This is the shape the plan asked for
+and the reason it asked: the previous revision had two stale-wording greps and
+nothing else, and a negative test passes when prose is deleted. Deleting the ELF
+section from the reference page now fails five rows rather than satisfying two.
+
+The two stale-wording greps are retained beside them as a backstop and are
+labelled as such in the output, not as evidence.
+
+No unit-test coverage gap needs completing.
 
 ### Feature integrity for Step 5
 
-_(empty — no check has taken place yet.)_.
-
+No behaviour changed. The host-tool contract still carries its 26 rows, asserted
+here because no installer tool was added by this effort and a changed count
+would mean a tool arrived without its contract row.
 ---
 
 ## Analysis of Step 6 implementation state

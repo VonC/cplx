@@ -2294,7 +2294,8 @@ Not applicable.
 
 ### Step 5 time-gated status
 
-Not started.
+Implemented on 2026-08-27. The suite is host independent and returns
+OBJECTIVE MET at exit 0 on the authoring host, so no agent build is owed.
 
 ---
 
