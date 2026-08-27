@@ -530,14 +530,20 @@ elf_probe() {
 #
 # The order is the contract, not tidiness. INSTALL_PREFIX defaults to $HOME, so
 # the target search path ITSELF contains `/home/` and the broad builder-anchored
-# test of case 6 matches objects that are already relocated. Two orderings carry
+# test of case 6 matches objects that are already relocated. Three orderings carry
 # that weight:
 #   * case 3 before cases 4 to 6 makes a second run report zero rewrites under
 #     $HOME, where the deployed value would otherwise re-satisfy case 6 forever;
 #   * case 5 before case 6 makes a v0.26.0-relocated prefix classify as a
 #     migration rather than as a fresh relocation, which in turn decides whether
-#     the interpreter assertion examines the object.
+#     the interpreter assertion examines the object;
+#   * the loader rule before case 3 keeps the one object the pass must never
+#     write from reporting `already correct`, which would describe a search path
+#     it has no business carrying.
 #
+# The loader rule adds no eighth case. It answers case 7, which is exactly its
+# membership: selected by nothing. The vendored patchelf running the pass is
+# already there for the same reason.
 # The case is POPULATION IDENTITY, not an outcome. It is assigned from the
 # observation and does not change with what the pass then manages to do: a case
 # 5 object whose write fails is still a case 5 object, so the migration
@@ -549,7 +555,8 @@ elf_probe() {
 # them consistent by construction rather than by three conditions kept in step.
 CPLX_ELF_CASE=""
 
-# elf_classify TARGET_RPATH: assign CPLX_ELF_CASE from CPLX_ELF_OBS.
+# elf_classify TARGET_RPATH [TARGET_INTERP] [OBJECT_PATH]: assign CPLX_ELF_CASE
+# from CPLX_ELF_OBS.
 #
 # TARGET_RPATH is the search path build_elf_rpath computes for this install. An
 # EMPTY target is not a special case here: the classifier answers with the
@@ -557,12 +564,19 @@ CPLX_ELF_CASE=""
 # rather than an observation of the object, so recording it belongs to the
 # disposition.
 #
+# TARGET_INTERP and OBJECT_PATH carry the one membership question the tuple
+# cannot answer, because the tuple describes an object and this one is about
+# WHICH object. Both are optional and an absent one disables only the loader
+# rule, which is the correct behaviour rather than a hole: with no interpreter
+# resolved there is no loader for the pass to install, and the interpreter axis
+# already reports `unchanged` for everything.
+#
 # The tuple is read, never validated. The observer fills every field of it, and
 # a caller handing over a tuple it did not observe is a defective caller; the
 # harness checks the invariants before it calls, which is where a malformed
 # input fails as a broken test rather than as a classification.
 elf_classify() {
-    local target="$1"
+    local target="$1" target_interp="${2:-}" obj_path="${3:-}"
 
     # Case 1: a required rpath observation failed or was inconclusive. Three
     # producers and no fourth. A structural failure invalidates the whole tuple;
@@ -588,6 +602,46 @@ elf_classify() {
     # Case 2: no PT_DYNAMIC, so there is no search path to set. Not a failure.
     if [ "${CPLX_ELF_OBS[has_dynamic]}" = "no" ]; then
         CPLX_ELF_CASE=2
+        return 0
+    fi
+
+    # The LOADER, excluded by IDENTITY. This is the one membership rule the
+    # observation tuple cannot express, because it is not about what the object
+    # is but about which object it is: the file this pass installs as every
+    # program's PT_INTERP. An object cannot be given a search path by the
+    # mechanism it implements, and the archive says so plainly. Measured on the
+    # RHEL 9.8 target, patchelf 0.19.1, glibc 2.34:
+    #
+    #   ld-linux-x86-64.so.2 --version   exit 0
+    #   patchelf --force-rpath --set-rpath TARGET on it   exit 0, 897856 -> 905033
+    #   ld-linux-x86-64.so.2 --version   exit 139, signal 11
+    #
+    # patchelf REPORTS SUCCESS, so without this rule the pass counts the object
+    # `rewritten`, the trailer reconciles, and the account is perfectly correct
+    # about a tree whose interpreter has been destroyed. Every program then dies
+    # at exec. Ordinary shared libraries are unaffected and were measured so:
+    # libc, libm, libdl, libpthread, libz and libstdc++ all take the same write
+    # and keep working, so this is one exclusion and not a retreat from case 4.
+    #
+    # `-ef` and not `=`, because a string comparison never matches here.
+    # find_dynamic_linker answers with its first existing candidate,
+    # `root/lib64/ld-linux-x86-64.so.2`, which the archive ships as a SYMLINK
+    # onto `root/usr/lib64/ld-linux-x86-64.so.2`, while the walk yields real
+    # files and therefore the target. `-ef` compares device and inode through
+    # the link, and it is a builtin, so the rule costs two stats and no fork.
+    #
+    # BOUNDED to the object PT_INTERP will name. Another copy of a loader
+    # elsewhere in the tree stays in case 4 and is still rewritten: it is not
+    # the interpreter, nothing execs through it, and widening this to every file
+    # that looks like a loader would be the name check the case order exists to
+    # avoid.
+    #
+    # Placed BEFORE case 3 on purpose. An object that must never be written must
+    # not be able to report `already correct` either, since that would describe a
+    # search path it has no business carrying.
+    if [ -n "$target_interp" ] && [ -n "$obj_path" ] \
+       && [ "$obj_path" -ef "$target_interp" ]; then
+        CPLX_ELF_CASE=7
         return 0
     fi
 
@@ -837,63 +891,170 @@ fix_elf_paths() {
         return 0
     fi
 
+    # The run state and every counter live HERE, above the guard, because there
+    # is ONE terminal site and it is below both branches. An early return that
+    # emitted its own trailer put the formatter at two call sites and made "a
+    # trailer on every exit path" a property to inspect rather than one the
+    # shape guarantees. The plan asks for three occurrences and one terminal
+    # site for exactly that reason, and this is that shape: definition, object
+    # record, trailer.
+    local run_state="completed" run_reason="none"
+
+    # Two independent axes, each accounting for every walked object, plus the two
+    # migration figures beside them rather than inside them. One mixed count
+    # cannot say which axis a number belongs to, which is the illegibility this
+    # step removes. Zero on a skipped run, which is what the state and reason
+    # pair distinguishes from a completed walk of an empty tree.
+    local walked=0
+    local r_rewritten=0 r_failed=0 r_already=0 r_notdyn=0 r_excluded=0
+    local i_rewritten=0 i_failed=0 i_unchanged=0 i_notapp=0
+    local mig_checked=0 mig_failed=0
+    local file_path file_size magic rpath_d interp_d old_interp
+
     local patchelf_bin
     if ! patchelf_bin=$(find_patchelf); then
         warning "patchelf not found (expected in '$INSTALL_PREFIX/tools/bin'): ELF interpreter/rpath fix skipped."
         warning "Binaries still referencing /home/<builder> will only run where that directory is readable."
-        return 0
-    fi
-
-    local new_interp
-    new_interp=$(find_dynamic_linker)
-    if [ -z "$new_interp" ]; then
-        warning "No ld-linux-x86-64.so.2 found under '$INSTALL_PREFIX/tools': ELF interpreters left unchanged."
-    fi
-
-    local new_rpath
-    new_rpath=$(build_elf_rpath)
-    if [ -z "$new_rpath" ]; then
-        warning "No library directories found under '$INSTALL_PREFIX/tools': ELF rpaths left unchanged."
-    fi
-
-    task "Fixing ELF interpreter and rpath under '$root_path' (patchelf: $patchelf_bin)..."
-    info "New interpreter: ${new_interp:-<unchanged>}"
-    info "New rpath      : ${new_rpath:-<unchanged>}"
-
-    local fixed=0
-    local file_path
-    local magic
-    local old_value
-    while IFS= read -r -d '' file_path; do
-        magic=$(head -c 4 "$file_path" 2>/dev/null | od -An -tx1 | tr -d ' \n')
-        [ "$magic" = "7f454c46" ] || continue
-
-        # Only rewrite values still anchored in a /home/<user> directory, so
-        # the pass is idempotent and system-linked binaries are left alone.
-        if [ -n "$new_rpath" ]; then
-            old_value=$("$patchelf_bin" --print-rpath "$file_path" 2>/dev/null) || old_value=""
-            if [[ "$old_value" == */home/* ]]; then
-                if "$patchelf_bin" --set-rpath "$new_rpath" "$file_path"; then
-                    fixed=$((fixed + 1))
-                else
-                    warning "Unable to set rpath on '$file_path'"
-                fi
-            fi
+        # A skipped pass and a completed walk of an empty tree both produce zero
+        # records and walked=0, so the totals alone cannot tell them apart. The
+        # state and reason pair is what does, which is why silence is not an
+        # option here even though nothing was walked.
+        run_state="skipped"
+        run_reason="patchelf-absent"
+    else
+        local new_interp
+        new_interp=$(find_dynamic_linker)
+        if [ -z "$new_interp" ]; then
+            warning "No ld-linux-x86-64.so.2 found under '$INSTALL_PREFIX/tools': ELF interpreters left unchanged."
         fi
 
-        if [ -n "$new_interp" ]; then
-            old_value=$("$patchelf_bin" --print-interpreter "$file_path" 2>/dev/null) || old_value=""
-            if [[ "$old_value" == */home/* ]] && [ "$old_value" != "$new_interp" ]; then
-                if "$patchelf_bin" --set-interpreter "$new_interp" "$file_path"; then
-                    fixed=$((fixed + 1))
+        local new_rpath
+        new_rpath=$(build_elf_rpath)
+        if [ -z "$new_rpath" ]; then
+            warning "No library directories found under '$INSTALL_PREFIX/tools': ELF rpaths left unchanged."
+        fi
+
+        task "Fixing ELF interpreter and rpath under '$root_path' (patchelf: $patchelf_bin)..."
+        info "New interpreter: ${new_interp:-<unchanged>}"
+        info "New rpath      : ${new_rpath:-<unchanged>}"
+
+        # Size and path in ONE walk: `elf_observe` needs the size, and asking for it
+        # per file would fork once per object over a tree of several hundred.
+        while IFS= read -r -d '' file_size && IFS= read -r -d '' file_path; do
+            magic=$(head -c 4 "$file_path" 2>/dev/null | od -An -tx1 | tr -d ' \n')
+            [ "$magic" = "7f454c46" ] || continue
+
+            # `find "$root_path/."` descends through a symlinked root, and every path
+            # it returns therefore carries a `/./` segment. The record's path is
+            # canonical and may not decode with a leading `./`, so the segment is
+            # removed HERE, once, rather than left for the formatter to refuse: an
+            # unnormalised path made every record fail to emit while the counters
+            # still ran, so the trailer was right and the stream was empty.
+            case "$file_path" in
+                "$root_path/./"*) file_path="$root_path/${file_path#"$root_path/./"}" ;;
+            esac
+
+            elf_observe "$file_path" "$file_size"
+            elf_probe "$file_path" "$patchelf_bin"
+            elf_classify "$new_rpath" "$new_interp" "$file_path"
+
+            # The rpath axis. The case is the object's population identity and does
+            # not change with the outcome of acting on it, so a write that fails
+            # keeps its case and records `failed` here.
+            case "$CPLX_ELF_CASE" in
+                2) rpath_d="not-dynamic" ;;
+                3) rpath_d="already-correct" ;;
+                7) rpath_d="excluded" ;;
+                4|5|6)
+                    if [ -z "$new_rpath" ]; then
+                        # An unavailable target is a fact about the write rather
+                        # than an observation of the object, so it lands on the
+                        # disposition and leaves the population alone.
+                        rpath_d="failed"
+                    elif "$patchelf_bin" --force-rpath --set-rpath "$new_rpath" "$file_path" 2>/dev/null; then
+                        rpath_d="rewritten"
+                    else
+                        warning "Unable to set rpath on '$file_path'"
+                        rpath_d="failed"
+                    fi
+                    ;;
+                *) rpath_d="failed" ;;
+            esac
+
+            # The interpreter axis, whose guard is UNCHANGED from before this step:
+            # a system interpreter and an already-target interpreter both yield
+            # `unchanged`, and only a builder-anchored one that differs from the
+            # target is rewritten.
+            if [ "${CPLX_ELF_OBS[structural_status]}" != "ok" ]; then
+                interp_d="failed"
+            elif [ "${CPLX_ELF_OBS[has_interp]}" != "yes" ]; then
+                interp_d="not-applicable"
+            elif [ "${CPLX_ELF_OBS[interp_probe_status]}" != "ok" ]; then
+                interp_d="failed"
+            else
+                old_interp="${CPLX_ELF_OBS[interp_value]}"
+                if [ -n "$new_interp" ] && [[ "$old_interp" == */home/* ]] \
+                    && [ "$old_interp" != "$new_interp" ]; then
+                    if "$patchelf_bin" --set-interpreter "$new_interp" "$file_path" 2>/dev/null; then
+                        interp_d="rewritten"
+                    else
+                        warning "Unable to set interpreter on '$file_path'"
+                        interp_d="failed"
+                    fi
                 else
-                    warning "Unable to set interpreter on '$file_path'"
+                    interp_d="unchanged"
                 fi
             fi
-        fi
-    done < <(find "$root_path/." \( -name '.git' -o -name '__pycache__' \) -prune -o -type f -size +4c -print0 2>/dev/null)
 
-    ok "Fixed $fixed ELF interpreter/rpath value(s) under '$root_path'."
+            # The migration assertion sits AFTER classification, never before. Placed
+            # earlier it would leave a target-valued search path on the very object
+            # this change exists to convert, and report that as a benign exclusion.
+            # The object is still converted; the anomaly is reported beside it.
+            if [ "$CPLX_ELF_CASE" = "5" ]; then
+                mig_checked=$((mig_checked + 1))
+                if [ -n "$new_interp" ] && [ "${CPLX_ELF_OBS[interp_value]}" != "$new_interp" ]; then
+                    warning "Migration object '$file_path' does not carry the shipped interpreter"
+                    mig_failed=$((mig_failed + 1))
+                fi
+            fi
+
+            walked=$((walked + 1))
+            case "$rpath_d" in
+                "rewritten")       r_rewritten=$((r_rewritten + 1)) ;;
+                "failed")          r_failed=$((r_failed + 1)) ;;
+                "already-correct") r_already=$((r_already + 1)) ;;
+                "not-dynamic")     r_notdyn=$((r_notdyn + 1)) ;;
+                "excluded")        r_excluded=$((r_excluded + 1)) ;;
+            esac
+            case "$interp_d" in
+                "rewritten")      i_rewritten=$((i_rewritten + 1)) ;;
+                "failed")         i_failed=$((i_failed + 1)) ;;
+                "unchanged")      i_unchanged=$((i_unchanged + 1)) ;;
+                "not-applicable") i_notapp=$((i_notapp + 1)) ;;
+            esac
+
+            # A refusal must be audible. The formatter returns non-zero and writes
+            # nothing on input the grammar forbids, and an unnoticed refusal is the
+            # one failure a reconciled trailer cannot reveal: the counters would
+            # still be right while the record it describes never appeared.
+            if ! emit_cplx_elf_v1_record obj "$CPLX_ELF_CASE" "$rpath_d" "$interp_d" \
+                "$file_path" "$root_path"; then
+                warning "Could not record '$file_path' as a CPLX-ELF/1 object"
+            fi
+        done < <(find "$root_path/." \( -name '.git' -o -name '__pycache__' \) -prune -o -type f -size +4c -printf '%s\0%p\0' 2>/dev/null)
+    fi
+
+    # THE ONE TERMINAL SITE, reached on every path by construction rather than
+    # by inspection. Both branches set the state and the counters; only this
+    # line emits.
+    emit_cplx_elf_v1_record end "$run_state" "$run_reason" "$walked" \
+        "$r_rewritten" "$r_failed" "$r_already" "$r_notdyn" "$r_excluded" \
+        "$i_rewritten" "$i_failed" "$i_unchanged" "$i_notapp" \
+        "$mig_checked" "$mig_failed"
+
+    if [ "$run_state" = "completed" ]; then
+        ok "Walked $walked ELF object(s) under '$root_path'; the CPLX-ELF/1 records carry the account."
+    fi
 }
 
 # --- 0b. Definitions the main flow calls ---
