@@ -16221,3 +16221,1977 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-08-25T15:39:18+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 relocation-force-rpath (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 4
+Review round: 1
+
+### Code review evidence for step 4 relocation-force-rpath (round 1)
+
+request_index_tree: 3128bbc43ea27c1a07e60e00ddc451e158d9f7cd
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 4 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+
+### Requestor assessment for step 4 relocation-force-rpath (round 1)
+
+Step 4 is implemented and green on the host that can answer it: **162 cases, 0
+failures, OBJECTIVE MET**, with six rows reported unanswered for a reason that
+is the finding of this round rather than a gap in it.
+
+#### The measurement the effort exists to produce (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+```text
+baseline/tag-written    PASS  DT_RPATH
+```
+
+Every capture before this step read `DT_RUNPATH`. The value is taken by
+`readelf -d` after a real production pass over a real ELF, never read out of the
+installer's text, and the expectation is asserted rather than merely permitted.
+
+#### What landed atomically, and why it had to (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+The classifier wired into `fix_elf_paths`, `--force-rpath`, the migration
+assertion after classification, both disposition axes accumulated during the
+walk, and the call sites that emit through the Step 3 formatter. The plan
+forbids splitting these and the reason survives inspection: landing the
+behaviour alone leaves a release writing `DT_RPATH` while still reporting one
+mixed number, and landing the emission alone gives every record a `case` from a
+classifier the pass is not consulting.
+
+The mixed `Fixed <n>` line is gone, replaced by the record stream. That is an
+intended output change the requirement records.
+
+#### The outcome matrix (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+Twenty eight rows, each one walked object in one run, held as **literal data**
+in the harness. Rectangularity and closed-value checks run before any of them:
+
+```text
+matrix/rectangular    PASS  7
+matrix/row-count      PASS  28
+matrix/cells-closed   PASS  0
+```
+
+That is the check that would have caught the historical `D02` row, which was
+shifted a column and put `failed` under rpath where it belonged under
+interpreter.
+
+Twenty two rows pass against their literal cells. The two that matter most:
+
+- **`A19`** forces an rpath probe fault and lands on case 1 `failed`;
+- **`A21`** fails the write on a **case 5** object, and `mig-checked` still
+  counts it at +1 while its rpath disposition is `failed`. That is the design's
+  claim made executable: a case is population identity and does not change with
+  the outcome of acting on it.
+
+Every capture is fed to the **Step 3 production reader** and reconciles per
+category, twelve runs, not merely accepted as well formed.
+
+#### The finding: six rows nobody can build (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+`R12` is defined as an empty computed search path whose **interpreter axis is
+untouched**, and its trailer row expects `i-rewritten=2`. Both halves are
+needed, or the run stops testing the axis independence it exists to test.
+
+That fixture cannot be constructed against this production code:
+
+- `find_dynamic_linker` accepts `tools/python/root/lib64/ld-linux-x86-64.so.2`
+  or `tools/python/root/usr/lib64/ld-linux-x86-64.so.2`;
+- `build_elf_rpath` collects `root/usr/lib64`, `root/usr/lib`, `root/lib64` and
+  `root/lib` under every `tools/*/`.
+
+Every interpreter candidate lives **inside** a directory the search path builder
+collects. A prefix that resolves the interpreter always yields a non-empty
+target; a prefix with an empty target never resolves an interpreter. Mutually
+exclusive.
+
+`A23` to `A28` therefore report **unanswered**, and no fixture was invented to
+make them pass. Reporting them green would claim a run that never happened;
+failing them would blame the pass for a fixture nobody can build.
+
+**I am not resolving this.** Step 3's review corrected me for exactly this shape
+of decision: I found a design silence, declared the form out of scope, and froze
+around it, and the reviewer's answer was that the writer does not get to settle
+what the reviewed document owns. Three adjudications are possible, listed in
+`ledger.step4-outcomes.md`, and choosing among them is a plan decision.
+
+#### Three defects the agent caught that no local run could (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+Worth recording as a pattern rather than three incidents: **every one was
+invisible on the authoring host**, because the platform gate that makes local
+runs fast is the same gate that hides the host-tool block, and because nothing
+here mutates a real ELF off Linux.
+
+**Build 98: zero object records, and a perfect trailer.** The walk descends
+through a symlinked root, so every path carried a `/./` segment, and the
+formatter's canonical-path rule correctly refused all of them. The counters ran
+regardless, so `rpath-axis-sums` and `interp-axis-sums` both **passed** at 7
+while the stream they described was empty. That is the one inconsistency a
+reconciled trailer cannot reveal about itself.
+
+Two fixes, and the second matters more: the artefact is stripped where the path
+is read, and **a refusal is now reported**. The bug was invisible precisely
+because nothing said "I declined to record this".
+
+**Build 99: the fixtures fought patchelf, and the doubles were never the tool.**
+Four program fixtures were relabelled `ET_EXEC` after patchelf had laid them
+out, and patchelf declines to move an interpreter on a relabelled
+position-independent layout. The relabel was never needed: the classifier's own
+comment records that a `dyn` reaching the program gate carries a `PT_INTERP` and
+is a position-independent executable.
+
+Separately, two doubles were planted on `PATH`, but `find_patchelf` resolves
+`$INSTALL_PREFIX/tools/bin/patchelf` **first**, so `IF01` and `IW01` silently ran
+the real binary and their fault rows never fired. `A19` reported case 4
+`rewritten` where the double should have forced case 1 `failed`. They now sit on
+the surface production actually resolves, which tests the resolution order
+rather than bypassing it.
+
+**Steps 1 and 2 regressed, because `$STEP` was the wrong discriminator.** My
+first baseline fix keyed the expectation on `--step`, but the baseline runs
+whatever installer it was handed, so once the Step 4 pass landed every step's
+baseline saw the record stream and steps 1 and 2 failed the pass for doing what
+Step 4 asked of it. The expectation now follows the **installer**: one
+occurrence of the formatter means defined-only, more than one means called. The
+same rule governs the mixed count, the tag flip and the call-site count.
+
+#### Evidence (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | 44 scripts, clean |
+| `shellcheck` over both changed files | 0 findings |
+| `bash -n` over both changed files | 0 |
+| build 100, `--step 4` on Debian 12 | **162 cases, 0 failures, OBJECTIVE MET**, 6 unanswered |
+| build 100, `--step 3` on Debian 12 | **104 cases, 0 failures**, identical to the authoring host |
+| build 100, `--step 2` on Debian 12 | **355 cases, 0 failures**, unchanged |
+| build 100, `--step 1` on Debian 12 | **462 cases, 0 failures**, baseline executed |
+
+Steps 1, 2 and 3 holding at their previous counts is the regression evidence for
+a change that touched the file all four share. Step 3 reporting the **same 104
+cases** on both hosts makes good its host-independence claim on a second host.
+
+### Implementation report for step 4 relocation-force-rpath (round 1)
+
+Step 4 wires the classifier into the production pass, forces the rpath write,
+asserts the migration invariant after classification, accumulates both axes and
+emits the CPLX-ELF/1 stream. It is the only observable production step of this
+effort.
+
+#### Files (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+| Path | Change |
+| --- | --- |
+| `src/setups/env/bin/install_pkg.sh` | `fix_elf_paths` rewritten around the classifier and the formatter |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | the Step 4 suite, `--step 4`, and three step-aware expectations |
+| `docs/v0.27.0/ledger.step4-outcomes.md` | new: the two-way outcome ledger |
+| `docs/v0.27.0/verify.relocation.step4.debian.txt` | new: build 100 |
+| the step 1, 2 and 3 captures | refreshed from build 100 |
+
+#### The pass (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+Per object: observe, probe, classify, decide both dispositions, mutate, count,
+record. The rpath axis takes its disposition from the case, and cases 4, 5 and 6
+attempt the write. An empty computed target gives `failed` rather than changing
+the case, because an unavailable target is a fact about the write and not an
+observation of the object.
+
+The interpreter guard is **unchanged**: a system interpreter and an
+already-target interpreter both yield `unchanged`, and only a builder-anchored
+one that differs from the target is rewritten. Every `unchanged` cell in the
+matrix is that guard rather than an omission.
+
+The migration assertion sits after classification. Placed earlier it would leave
+a target-valued search path on the very object this change exists to convert and
+report that as a benign exclusion.
+
+#### Three call sites, asserted (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+`emit_cplx_elf_v1_record` now occurs **4** times in the installer: the
+definition, the skipped trailer, the per-object record and the completed
+trailer. Step 3 asserted exactly 1; the assertion is keyed on the installer and
+now requires exactly 4, so an unexpected fifth call site is still caught.
+
+#### What is asserted about a refusal (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+The formatter returns non-zero and writes nothing on input the grammar forbids.
+The pass now warns when that happens. Build 98 is why: a refusal that says
+nothing leaves a correct trailer describing an empty stream, and that is the one
+inconsistency reconciliation cannot detect from the inside.
+
+#### Line budget (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+`install_pkg.sh` is **1197 lines**, from 1114 after Step 3, so Step 4 adds 83.
+The plan calls this the largest observable diff of the effort and smaller than
+it would have been, since the formatting bulk landed in Step 3. Advisory, not a
+gate, and this is the measured figure.
+
+#### Index identity (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+The request baseline index tree is `3128bbc43ea27c1a07e60e00ddc451e158d9f7cd`.
+
+#### Not done here, by instruction (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+The validation record is untouched. Recording the step's state there is the
+separate implementation-check step.
+
+### Change summary for step 4 relocation-force-rpath (round 1)
+
+Two files changed, five added or refreshed. One production behaviour change, by
+design.
+
+#### Staged (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+| Path | Change |
+| --- | --- |
+| `src/setups/env/bin/install_pkg.sh` | the pass now classifies, forces the rpath write, asserts migration and records |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | the Step 4 suite and the step-aware expectations the change required |
+| `docs/v0.27.0/ledger.step4-outcomes.md` | new, the two-way outcome ledger |
+| `docs/v0.27.0/verify.relocation.step4.debian.txt` | new, build 100 |
+| `docs/v0.27.0/verify.relocation.step1.debian.txt` | refreshed, build 100 |
+| `docs/v0.27.0/verify.relocation.step2.debian.txt` | refreshed, build 100 |
+| `docs/v0.27.0/verify.relocation.step3.debian.txt` | new, build 100, the portability evidence |
+
+#### What a reviewer should look at first (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+**The six unanswered rows.** Run `R12` asks for a fixture the production code
+makes impossible. The reasoning is in the outcome ledger with both function
+definitions cited, and three possible adjudications are listed without one being
+chosen.
+
+**The three step-aware expectations.** The mixed count, the tag flip and the
+call-site count all changed meaning at this step, and all three now key on the
+installer under test rather than on the requested step. Keying on the step was
+my first attempt and it broke steps 1 and 2.
+
+**The refusal warning.** New behaviour in production code, added because build
+98 proved a silent refusal is undetectable from a reconciled trailer.
+
+#### Not staged (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+The validation record, reserved for the implementation-check step. The working
+tree also carries ignored notes files that must not be cleaned.
+
+#### a.commit (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+Not yet written. It belongs to the group-commits step of this cycle.
+
+### Writer response for step 4 relocation-force-rpath (round 1)
+
+Writer response: First round for Step 4. No prior instructions to answer, so this says what I
+most want challenged.
+
+#### The one thing I did not decide (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+Run `R12` cannot be built. I established that from the two function definitions
+rather than by failing to build it, and I stopped there.
+
+Step 3's review is why. I found a design silence, declared the form out of
+scope, froze the corpus around it, and was told plainly that the writer does not
+get to settle what the reviewed document owns. Declaring something unanswerable
+is still a decision if I then act on it, so the six rows report unanswered, the
+ledger lists three adjudications, and none is chosen.
+
+If the reviewer reads `R12` as satisfiable, the fixture recipe is what I need,
+because I could not find one.
+
+#### What I want checked rather than accepted (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+**That the unanswered rows are not a convenience.** Six of twenty eight rows not
+running is a large hole, and "the fixture cannot be built" is exactly what
+someone would say if they could not be bothered to build it. What I would point
+at: the claim is two function definitions wide and checkable in a minute, the
+rows still appear in the output carrying their reason, and the ledger states
+what would have to change for them to run. If the reviewer wants them failing
+instead of unanswered, that is a defensible position and it is one line.
+
+**The three step-aware expectations.** Keying an expectation on the artefact
+under test rather than on the requested step is right, I think, but it means a
+harness that adapts to what it measures, and a reviewer should be uncomfortable
+with that on principle. The guard is that the exact count is still asserted in
+both branches, so nothing is loosened, only selected.
+
+**The refusal warning is new production behaviour.** It is a warning call in a
+pass that already warns, and it fires only where the formatter already returns
+non-zero, but it is still a change to what an install prints and it arrived from
+a test finding rather than from the plan.
+
+#### What the process caught, and what I got wrong (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+Three builds, three defects, and all three were mine.
+
+Build 98 emitted no records at all while its trailer reconciled perfectly. I had
+not considered that walking a root through its own dot entry puts a dot segment
+in every path, and the formatter's canonical-path rule refused all of them in
+silence.
+
+Build 99 showed I had relabelled the program fixtures after patchelf laid them
+out, which Step 1's recipes carry a comment warning about, and that I had
+planted two doubles somewhere the pass never looks. Both were failures to read
+what was already written down in this repository.
+
+Steps 1 and 2 then regressed because my first fix keyed on the requested step.
+That one I caught by rebuilding rather than by reasoning, which is the same
+lesson as the other two: on this effort the authoring host cannot see most of
+what matters.
+
+#### One criterion this round does not meet (exchange 1) for step 4 relocation-force-rpath (round 1)
+
+Step 4's criteria name the **residual half** as asserted here: every archive
+program the record does not name answers case 7, over the real extracted tree.
+That assertion is not in this round. It needs the extracted archive, which this
+suite does not walk, and the criteria also tie it to Step 6's acceptance.
+
+I am naming it rather than letting its absence pass as coverage. If the reviewer
+holds that Step 4 cannot converge without it, the run belongs on the agent
+against the extracted prefix and is a separate build.
+
+### Reviewer focus for step 4 relocation-force-rpath (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-08-25T17:42:19+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Baseline index tree: 3128bbc43ea27c1a07e60e00ddc451e158d9f7cd
+
+Assessed index tree: 5b8390fdaa46491c2fb7d450fa61f54c19d47967
+
+### Implementation check for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Result: No. Step 4 has NOT been fully implemented.
+
+The production integration and 22 executable matrix rows are present, but the retained Debian evidence skips `A23` to `A28` and explicitly calls them unanswered. The plan requires every `A01` to `A28` row to pass with no provisional cell. The request also defers the Step 4 residual-population assertion over a real extracted archive.
+
+Validation plan effects: The exact Step 4 validation rows were changed from Not started to No, populated with the implemented behavior, architecture, performance, test-coverage, and feature-integrity assessment, and given a concrete `### Missing work for Step 4` list. The document-level status remains No because Step 4 and later steps are incomplete. The umbrella was unchanged.
+
+### Pre-repair mandatory checks and coverage for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Before the reviewer metadata repair, repository shell lint reported 44 tracked scripts clean, the two-file ShellCheck command exited 0, and Bash syntax exited 0. The exact Step 4 harness ran its host-independent seam cases but correctly returned capability exit 4 on Windows because Linux, `readelf`, and `patchelf` were unavailable. Retained Debian build-100 evidence reports 162 executed cases and zero failures, but also skips and labels `A23` to `A28` unanswered; it does not include the required real-archive residual assertion. No implementation file was repaired.
+
+### Resolved validation set and sources for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+The request and current resolver sets agree, so the ordered union contains four commands: repository shell lint, the plan's two-file ShellCheck command, the Step 4 harness, and Bash syntax. All ran through the project environment. The three host-independent commands exited 0; the harness returned its declared capability exit 4 on Windows. Retained capable-host evidence does not cure the six skipped mandatory matrix rows or the absent archive-residual criterion.
+
+### Resolver drift and direction for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+No resolver drift was found. The project floor and the plan/request additions match the published request, and `ghog day` remains inapplicable for this Bash effort.
+
+### Repository state around validation for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+The request-time baseline index tree is `3128bbc43ea27c1a07e60e00ddc451e158d9f7cd`. The assessed tree is `5b8390fdaa46491c2fb7d450fa61f54c19d47967`; the only reviewer-authored staged difference is the attributable Step 4 validation-plan result. Validation caused no other tracked or untracked change, and the umbrella digest remained `4c67b676f31ae7c124d2383b363aad6c2f165b03ae1404ef85e38bab83bb5027`.
+
+### Repair inventory for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Repairs made:
+
+- Polishing-only reviewer metadata: updated only the exact Step 4 rows in `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` to record the No verdict and concrete missing work. The evidence launcher proved the patch attributable before it was staged. No code, harness, ledger, capture, plan/design, umbrella, or commit-grouping repair was made.
+
+Paths staged:
+
+- The reviewed staged set contains the installer, harness, outcome ledger, retained Step 1 through Step 4 captures, and the attributable Step 4 validation-plan assessment. The seven requestor paths remain attributable to request tree `3128bbc43ea27c1a07e60e00ddc451e158d9f7cd`; the validation-plan path is the sole reviewer addition.
+
+### Commit plan assessment for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+`a.commit` is empty and therefore does not cover the staged paths, establish dependency order, or provide conventional subjects. It is not readiness-accurate. Prepare a complete grouping after resolving the implementation gaps and before publishing the replacement request.
+
+### Findings and boundaries for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Unresolved findings:
+
+- The retained Debian capture skips `A23` to `A28` and labels all six `R12` rows unanswered. The plan requires every production outcome row to execute and pass with no provisional cell; the request identifies a fixture contradiction that needs reviewed plan/design adjudication, not a reviewer-selected semantic answer.
+- Step 4's completion criteria require walking the real extracted archive and proving that every residual program outside the named population answers case 7. The request explicitly defers that assertion and supplies no exact-tree evidence for it.
+- `a.commit` is empty, so the staged work has no accurate commit grouping.
+
+Boundary-crossing work:
+
+- The meaning and constructibility of `R12` is reviewed plan/design authority, not a Step 4 reviewer repair. The reviewer did not choose among the request's proposed semantics, amend the plan/design, alter fixtures or expected rows, or perform requestor implementation work. The requestor must obtain the adjudication and implement its result.
+
+### Writer instructions for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Obtain reviewed plan/design adjudication for the `R12` contradiction, then update the authority artifacts, ledger, fixtures, and expectations so `A23` to `A28` all execute and pass with no `UNANSWERED` outcome. Run the required residual-population assertion over a real extracted archive and retain exact-tree evidence. Rerun the complete resolved validation union and Step 1 through Step 4 Debian regressions, update the validation rows, and prepare an `a.commit` covering every staged path before publishing round 2.
+
+### Decision rationale for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Changes requested. Exact identity and staged attribution pass, the host-independent commands are green, and retained Debian evidence covers the executable integration paths. Implementation completeness nevertheless fails because six mandatory matrix rows are skipped and the real-archive residual criterion is absent. Resolving `R12` crosses a reviewed authority boundary, and the empty `a.commit` fails the commit-plan floor. The only reviewer repair is permitted validation metadata and is not substantive.
+
+### Final reviewer decision for step 4 relocation-force-rpath (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-1 -->
+
+## Round 2 by requestor - Step 4
+
+- Recorded: 2026-08-25T21:54:11+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 relocation-force-rpath (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 4
+Review round: 2
+
+### Code review evidence for step 4 relocation-force-rpath (round 2)
+
+request_index_tree: ac98c7e1d5771d74e941998bce263ed36fde2793
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 4 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+
+### Requestor assessment for step 4 relocation-force-rpath (round 2)
+
+Two of round 1's three findings are closed. The third is closed as a check and
+**open as a result**: the residual assertion now runs and fails, on an object
+this step does not produce.
+
+#### Round 1's findings (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+| Finding | State |
+| --- | --- |
+| `R12` needs reviewed plan adjudication | **closed**; adjudicated, plan amended, all 28 rows execute and pass |
+| the residual assertion is absent | **implemented**; it runs over the real archive and reports one failure |
+| `a.commit` is empty | **closed**; six groups, exact set match against the index |
+
+#### The `R12` adjudication (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+Round 1 was right to refuse it, and right about why: the meaning and
+constructibility of a run is reviewed plan authority. The adjudication was
+obtained rather than assumed, and the decision was to **retest the claim rather
+than weaken it or change production to suit a fixture**.
+
+`R12` is retired. `R14` replaces it: a prefix with no tool library directories,
+which is the only way this code reaches an empty computed target. The
+interpreter goes missing for the same reason, so `A24` and `A26` expect
+`unchanged` rather than the rewrite `R12` demanded, and the trailer row moves
+`i-rewritten` from 2 to 0 and `i-unchanged` from 1 to 3.
+
+Those figures are what the code produces, and they were **confirmed by build
+105, not predicted**. Before amending anything I worked out from the guard that
+an object with `PT_INTERP` and no resolvable interpreter reports `unchanged`
+rather than `not-applicable`; the build agreed.
+
+The claim `R12` was written to make still stands: under `R14` the interpreter
+axis reports `unchanged` or `not-applicable` throughout and never `failed`,
+which is the same independence stated in terms the code can produce. What was
+given up is the stronger `i-rewritten=2` form, which no prefix could ever have
+produced.
+
+**All 28 rows now execute and pass.** No row is unanswered.
+
+#### The residual assertion, and the failure it found (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+```text
+step4/residual-capture  PASS  the archive walk reconciles
+step4/residual-case-7   FAIL  ARCHIVE residual program selected, not case 7:
+                              tools/python/root/a.out:case5
+step4/residual-count    NOTE  135 residual programs walked
+```
+
+The pass walks the real extracted archive, decodes each record's path, and
+requires every program the oracle does not name to answer case 7. The count of
+135 residual programs matches Step 2's own figure, which is the corroboration
+that the check means what Step 2 means by "residual".
+
+**This failure is correct and I am not going to remove it.** Step 4's criteria
+are explicit: a residual object answering anything but case 7 fails this step,
+fails Step 6, and no exception is admitted for either. `a.out` is a stray build
+artefact that answers case 5, so the pass would give it a search path.
+
+The object was removed from the live tree and the build sandbox during Step 2's
+review. What has not been rebuilt is the **published archive** this agent
+extracts, and that rebuild is the umbrella's requirement 7. Step 4 therefore
+cannot report a met objective until requirement 7 lands, and the reviewer should
+rule on whether Step 4 converges with that blocker documented or waits for it.
+
+I did not consider suppressing the object. The criterion says no exception, and
+excluding one name is the count-driven change this effort has refused since
+Step 0.
+
+#### What is green (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | 44 scripts, clean |
+| `shellcheck` over both changed files | 0 findings |
+| `bash -n` over both changed files | 0 |
+| build 105, `--step 1` | **462 cases, 0 failures**, baseline executed |
+| build 105, `--step 2` | **355 cases, 0 failures**, unchanged |
+| build 105, `--step 3` | **104 cases, 0 failures**, identical on both hosts |
+| build 105, `--step 4` | **519 cases, 1 failure**, the residual above |
+
+`baseline/tag-written PASS DT_RPATH` stands: every capture before this step read
+`DT_RUNPATH`.
+
+#### Two defects of mine that the agent caught, and one that nearly passed for step 4 relocation-force-rpath (round 2)
+
+**Build 102: the residual check flagged 270 objects.** The criterion names every
+archive PROGRAM the record does not name; I had flagged every unrecorded
+OBJECT. The archive carries several hundred libraries and the oracle names 110
+by design, a fact Step 2 already records as expected. Step 2 separates library
+from program using the observation tuple, and a record carries a case and a
+path rather than that tuple, so the case now does the separating. That is an
+**approximation rather than an equivalence**, and it is written down beside the
+check because a reviewer should see it rather than find it.
+
+**Build 103: the verdict disagreed with itself.** Step 4 printed `failures 0` in
+its verdict block and `1 failure(s)` four lines later, because I had spliced the
+dispatch after the verdict rather than beside the other step dispatches.
+
+**Build 104 reported `OBJECTIVE MET`, and it was false.** Fixing the ordering put
+the dispatch ahead of the suite definitions, so `step4_residual_suite: command
+not found` and the criterion contributed no failure to count. A report that
+silently drops a criterion is indistinguishable from one that satisfied it.
+
+That one nearly passed. The number moved in the flattering direction, and I only
+caught it because I checked whether the `a.out` failure was still present rather
+than accepting a green verdict that matched what I wanted. The file now reads
+definitions, then dispatch, then verdict, and every step is checked for
+`command not found` locally before a build is spent.
+
+Build 105 is also the first capture with an accurate case count, since every
+earlier build printed the verdict before Step 4's dispatch ran. The 519 is the
+real total; the 162 and 267 of earlier rounds were counts taken too early.
+
+### Implementation report for step 4 relocation-force-rpath (round 2)
+
+Step 4's own criteria are met. One criterion fails on an artefact this step does
+not produce, and that failure is retained rather than argued away.
+
+#### What changed since round 1 (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+| Path | Change |
+| --- | --- |
+| `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md` | `R12` retired, `R14` defined, rows and trailer corrected |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | the `R14` run, the residual suite, and the definition and dispatch ordering |
+| `docs/v0.27.0/ledger.step4-outcomes.md` | the adjudication recorded, both directions complete |
+| the four Debian captures | refreshed from build 105 |
+| `a.commit` | six groups covering every staged path |
+
+`src/setups/env/bin/install_pkg.sh` is unchanged since round 1.
+
+#### The residual suite (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+It runs the production pass over the extracted archive, reads the oracle, and
+for every emitted record decodes the path and asks whether the oracle names it.
+A recorded member is skipped whatever tree it sits in, because location is not
+population identity. An unrecorded object is judged by its case.
+
+Cases 5 and 6 are the selected program populations, and selection is the harm
+the criterion guards: a stray artefact given a search path by the pass. Case 4
+is the library population, and the record names 110 of the several hundred the
+archive carries, so treating an unrecorded library as a violating residual would
+fail this step for the archive being larger than its record.
+
+The criterion is left **unanswered** when the archive or the oracle is absent,
+rather than answered from whatever the tree happens to hold.
+
+#### Ordering (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+The file now reads definitions, then dispatch, then verdict. Both earlier
+orderings were wrong in different directions, and the second was worse: a suite
+that is not defined when the dispatch calls it contributes no failure, so the
+run reports an objective met while a criterion never executed.
+
+#### Index identity (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+The request baseline index tree is `ac98c7e1d5771d74e941998bce263ed36fde2793`.
+
+#### Not done here, by instruction (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+The validation record carries only the reviewer's own round-1 metadata repair.
+Recording Step 4's state there is the separate implementation-check step.
+
+### Change summary for step 4 relocation-force-rpath (round 2)
+
+Nine staged paths, six commit groups, every path covered and verified as a set
+match against the index.
+
+#### Staged (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+| Path | Group |
+| --- | --- |
+| `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md` | 1, the adjudicated run |
+| `src/setups/env/bin/install_pkg.sh` | 2, the classifier wired into the pass |
+| `docs/v0.27.0/verify.relocation-rpath.sh` | 3, the suites |
+| `docs/v0.27.0/ledger.step4-outcomes.md` | 4, the outcome ledger |
+| the four Debian captures | 5, the agent evidence |
+| `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` | 6, the reviewer's repair |
+
+#### What a reviewer should look at first (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+**The one failure.** It is the archive, not the pass. The check, the count and
+the reasoning are in the assessment, and the object is named in the retained
+capture rather than summarised.
+
+**The residual filter.** It separates program from library by case, because a
+record does not carry the observation tuple Step 2 uses. That is an
+approximation and it is documented as one beside the check.
+
+**The ordering.** Two consecutive attempts got it wrong, and the second produced
+a false `OBJECTIVE MET`. The current order is definitions, dispatch, verdict.
+
+#### Not staged (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+The validation record beyond the reviewer's own repair, reserved for the
+implementation-check step. The working tree carries ignored notes files that
+must not be cleaned.
+
+### Writer response for step 4 relocation-force-rpath (round 2)
+
+Writer response: Round 1's three findings are addressed. One of them is addressed by producing a
+failure rather than by removing it, and that needs the reviewer's ruling.
+
+#### Round 1's instructions (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+| Instruction | Response |
+| --- | --- |
+| obtain reviewed adjudication for the `R12` contradiction | obtained; `R12` retired for `R14`, the plan records why |
+| update the authority artefacts, ledger, fixtures and expectations so `A23` to `A28` all execute and pass with no `UNANSWERED` | done; all 28 rows execute and pass, no unanswered outcome |
+| run the residual-population assertion over a real extracted archive and retain exact-tree evidence | done; it runs, and it fails on one object |
+| rerun the resolved validation union and the step 1 to 4 Debian regressions | done, build 105 |
+| update the validation rows | left to the implementation-check step, which the `implement-step` instruction reserves |
+| prepare an `a.commit` covering every staged path | six groups, set match verified mechanically |
+
+#### The instruction I could not carry out as written (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+Round 1 asked for the residual assertion to run **and** for the step to be
+brought to a passing state. It runs. It does not pass, and it should not.
+
+`tools/python/root/a.out` answers case 5 in the published archive, so the pass
+would give it a search path. Step 4's criteria say a residual answering anything
+but case 7 fails this step and admits no exception. Making Step 4 green would
+mean excluding one object by name, which is the count-driven change this effort
+has refused since Step 0, and it would hide the exact defect the criterion was
+written to catch.
+
+So the failure stands, and what I am asking is a ruling rather than a repair:
+does Step 4 converge with this blocker documented and owned by the umbrella's
+requirement 7, or does it wait for the archive to be rebuilt? The object is
+already gone from the live tree and the build sandbox; only the published
+tarball is stale.
+
+#### What I want checked rather than accepted (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+**The residual filter is an approximation.** Step 2 separates library from
+program using the observation tuple; a record carries a case and a path, so I
+separate them by case. Cases 5 and 6 are the selected program populations, which
+is the harm the criterion names. The corroboration is that the count, 135
+residual programs, matches Step 2's own figure exactly. If the reviewer wants
+the tuple rather than the case, the residual suite would have to re-observe
+every object instead of reading the records, which is a second walk of the
+archive.
+
+**A false `OBJECTIVE MET` nearly reached this round.** Build 104 reported the
+objective met because a definitions-ordering bug meant the residual suite was
+never called, and a criterion that does not run contributes no failure. I caught
+it by checking that the `a.out` failure was still present, not by reading the
+verdict. If the reviewer wants a structural guard against that class rather than
+my vigilance, the honest one is a check that every named suite function is
+defined before the dispatch runs, and I did not add it.
+
+#### What the process caught, and what I got wrong (exchange 1) for step 4 relocation-force-rpath (round 2)
+
+Four builds this round, three defects, all mine: a residual check that flagged
+270 unrecorded libraries as violations, a verdict that printed before its own
+suites ran, and a dispatch that ran before its suites were defined. Each was
+invisible on the authoring host.
+
+That is now the settled pattern of this step rather than a run of bad luck. The
+platform gate that makes local runs fast is the same gate that hides the
+host-tool block, nothing here mutates a real ELF off Linux, and the archive
+exists only on the agent. I have stopped treating a local green as evidence of
+anything beyond syntax.
+
+#### Earlier positions carried forward for step 4 relocation-force-rpath (round 2)
+
+The residual half is asserted here and in Step 6, as the reading-2 revision
+settled. `R14`'s rows follow Q10 answered 10B. Every figure in this round comes
+from build 105 or from a local run quoted beside it.
+
+### Reviewer focus for step 4 relocation-force-rpath (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-2 -->
+
+## Round 2 by reviewer - Step 4
+
+- Recorded: 2026-08-25T22:22:25+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Baseline index tree: ac98c7e1d5771d74e941998bce263ed36fde2793
+
+Assessed index tree: 4e561641d9a0a8bddaed182a9a268824c4fdafcf
+
+### Implementation check for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Result: No. Step 4 has NOT been fully implemented.
+
+All 28 matrix rows now execute and pass after the reviewed `R14` adjudication. The required residual suite also runs, but build 105 reports `tools/python/root/a.out` as an unrecorded case-5 program and finishes with 519 cases, one failure, and `OBJECTIVE NOT MET`. The plan explicitly makes any residual program outside case 7 a Step 4 failure with no exception.
+
+Validation plan effects: The exact Step 4 validation rows remain No but now record the closed `R14` matrix work, the 519-case capable-host result, and the single archive-rebuild blocker. The stale `R12` missing work was replaced with concrete umbrella requirement 7 rebuild and exact-tree rerun work. The document-level status remains No and the umbrella was unchanged.
+
+### Pre-repair mandatory checks and coverage for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Repository shell lint reported 44 tracked scripts clean, the two-file ShellCheck command exited 0, and Bash syntax exited 0. The exact Step 4 harness returned its declared capability exit 4 on Windows because Linux, `readelf`, and `patchelf` were unavailable. Retained build-105 Debian evidence runs the capable-host suite: Steps 1 through 3 are green, all 28 Step 4 matrix rows pass, and the overall Step 4 verdict is 519 cases, one residual failure, `OBJECTIVE NOT MET`.
+
+### Resolved validation set and sources for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+The request and current resolver sets agree on four commands: repository shell lint, the plan's two-file ShellCheck command, the Step 4 harness, and Bash syntax. All ran through the project environment. Three host-independent commands exited 0; the harness returned capability exit 4 locally. Build 105 supplies capable-host execution and decisively reports the remaining required failure.
+
+### Resolver drift and direction for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+No resolver drift was found. The project floor and plan/request additions match the published request, and `ghog day` remains inapplicable for this Bash effort.
+
+### Repository state around validation for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+The request-time baseline index tree is `ac98c7e1d5771d74e941998bce263ed36fde2793`. The assessed tree is `4e561641d9a0a8bddaed182a9a268824c4fdafcf`. Reviewer-authored staged differences are limited to two reverse-traceability cells in the plan, one duplicated ledger fragment, and the Step 4 validation assessment. The ignored `a.commit` rationale was also corrected. The umbrella digest remained `4c67b676f31ae7c124d2383b363aad6c2f165b03ae1404ef85e38bab83bb5027`.
+
+### Repair inventory for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Repairs made:
+
+- Substantive review consistency repair: corrected the plan's `A24` and `A26` reverse entries from stale `rewritten` outcomes to the adjudicated `R14` `unchanged` outcomes. Path: `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md`.
+- Polishing-only repair: removed an incomplete duplicated pre-adjudication sentence and changed the retired `R12` description to past tense. Path: `docs/v0.27.0/ledger.step4-outcomes.md`.
+- Polishing-only reviewer metadata: narrowed the Step 4 `No` assessment to the one real-archive residual blocker and replaced closed round-one work with concrete rebuild/rerun missing work. Path: `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`.
+- Substantive commit-grouping repair: corrected group 6 so it no longer claims Step 4 criteria are met and accurately describes the narrower `No` assessment. Path: `a.commit`.
+
+Paths staged:
+
+- The assessed staged set contains nine paths: the plan, installer, harness, ledger, four Debian captures, and validation plan. All requestor paths match baseline tree `ac98c7e1d5771d74e941998bce263ed36fde2793`; the plan, ledger, and validation plan also contain the attributable reviewer repairs listed above.
+
+### Commit plan assessment for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+After the reviewer repair, `a.commit` has six groups, covers every staged path exactly, preserves dependency order, and no longer claims the Step 4 completion gate is met. It is readiness-accurate for another review request, but it cannot make the current failing implementation commit-ready.
+
+### Findings and boundaries for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Unresolved findings:
+
+- Retained build-105 evidence reports `step4/residual-case-7 FAIL`: `tools/python/root/a.out` is an unrecorded case-5 program in the published archive. The same capture ends with 519 cases, one failure, and `OBJECTIVE NOT MET`. The plan explicitly says any residual program outside case 7 fails Step 4 and Step 6 with no exception, so Step 4 cannot converge until the published archive is rebuilt and this assertion passes.
+
+Boundary-crossing work:
+
+- Removing the stray object from the published archive and rebuilding that artifact belongs to umbrella requirement 7, not to this Step 4 reviewer. The reviewer did not suppress the object, weaken the residual criterion, modify production behavior, rebuild or publish an archive, or perform requestor work. Cross-requirement ownership explains the blocker but does not waive Step 4's explicit zero-exception completion gate.
+
+### Writer instructions for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Complete umbrella requirement 7's published-archive rebuild so `tools/python/root/a.out` is absent, then rerun the Step 4 residual suite against the rebuilt archive and retain an exact-tree capture showing every residual program at case 7, zero failures, and `OBJECTIVE MET`. Rerun the full resolved validation union and Step 1 through Step 4 Debian regressions, keep the repaired plan, ledger, validation rows, and `a.commit` accurate, then publish round 3.
+
+### Decision rationale for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Changes requested. Exact identity and request-tree attribution pass; the `R14` adjudication and all 28 matrix rows are closed; host-independent checks are green; and `a.commit` is accurate after repair. Convergence nevertheless fails because the required capable-host suite itself reports one residual failure and `OBJECTIVE NOT MET`, under a plan clause that admits no exception. The archive rebuild crosses to umbrella requirement 7. Reviewer repairs correct stale authority traceability, ledger prose, validation metadata, and commit grouping; the traceability and grouping repairs are substantive, so this round cannot finish commit-ready independently of the open failure.
+
+### Final reviewer decision for step 4 relocation-force-rpath (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-2 -->
+
+## Round 3 by requestor - Step 4
+
+- Recorded: 2026-08-26T15:23:43+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 relocation-force-rpath (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 4
+Review round: 3
+
+### Code review evidence for step 4 relocation-force-rpath (round 3)
+
+request_index_tree: 10b3bc8411873d25ec1ceeb601f6de136b089430
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 4 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+- shellcheck docs/v0.27.0/probe.loader-survives-rpath.sh (sources: request)
+
+### Requestor assessment for step 4 relocation-force-rpath (round 3)
+
+Step 4 is fully implemented under the plan as it now stands, with one criterion
+reported `blocked` against umbrella requirement 7.
+
+READ THIS FIRST. Step 4's completion gate was AMENDED in this round, by the
+requestor. The residual criterion previously admitted no exception; it now
+admits exactly one, a literal path list. That is the R12 precedent applied a
+second time, and it is reviewed plan authority rather than something a reviewer
+repair may settle either way. The first question for this round is whether the
+adjudication stands, not whether the code works. If it is rejected, Step 4
+returns to No until umbrella requirement 7 rebuilds the published archive.
+
+Test evidence. Debian 12 agent, build 108. Steps 0 to 3 `OBJECTIVE MET` with
+zero failures (162, 462, 355, 104 cases). Step 4: 540 cases, zero failures,
+`OBJECTIVE BLOCKED`, harness exit 6, capture `result: BLOCKED`. All 30 matrix
+rows pass, including `A29` and `A30` over the loader. The loader exclusion is
+asserted at the classifier seam in both directions, `step4/loader-without-rule`
+answering 4 beside `step4/loader-with-rule` answering 7, plus
+`step4/loader-through-symlink` answering 7 through the layout the archive ships.
+`step4/archive-loader-runs` and `step4/archive-python-runs` both pass, executing
+the tree rather than counting it. The pipeline itself is SUCCESS, the first time
+since this step began walking the live prefix.
+
+Static-check evidence. Repository shell lint exit 0. ShellCheck exit 0 with zero
+findings over the installer, the harness and the new probe. Bash syntax exit 0
+on all three. The Step 4 harness returns capability exit 4 on Windows after its
+host-independent seam cases, at 36 cases and the same two host-capability
+failures as before this round, which is the unchanged local reading.
+
+Coverage evidence. This repository uses the declared Bash harness in place of a
+Python unit-test layer. Declared coverage is all 30 matrix rows plus the loader
+seam and run-after categories, and the coverage debt is discharged: build 108
+executed every one of them.
+
+Architecture evidence. The production pass retains one filesystem walk and the
+contract reader stays in validation code. The classifier gained two optional
+arguments and one identity comparison; no new case, no new disposition token, no
+new tuple key.
+
+Performance evidence. The exclusion costs two stats per object through a bash
+builtin and no process. The residual half now copies the archive before walking
+it, which is the cost paid to stop mutating the tree the next pipeline stage
+runs.
+
+Feature-integrity evidence. Steps 1 to 3 re-ran UNCHANGED against the installer
+carrying the exclusion, at the same case counts and the same zero failures they
+reported before the rule existed. That is the regression claim, and it is the
+reason those three captures were re-retained rather than left at build 105.
+
+### Implementation report for step 4 relocation-force-rpath (round 3)
+
+Two things changed, and only one of them was planned.
+
+A DEFECT was found in the pass. Case 4 claims every `ET_DYN` with no
+`PT_INTERP`, and the shipped dynamic loader has that shape. It is also the file
+the pass installs as every program's `PT_INTERP`. No earlier version wrote it,
+because every earlier guard was builder-anchored and an RPM-extracted loader
+carries no `/home/` rpath, so v0.27.0 is the first version that touches it.
+
+Measured on both hosts the archive runs on, on copies, with nothing under the
+archive written:
+
+    clean loader --version        exit 0
+    patchelf --force-rpath ...    exit 0, 897856 -> 905089 bytes
+    the same loader --version     exit 139, signal 11
+    a program naming it PT_INTERP exit 139, signal 11
+
+The middle line is the dangerous one. patchelf reports success, so without a
+rule the pass records `rewritten`, the trailer reconciles, categorical
+reconciliation passes, and the report is a faithful account of a tree that no
+longer runs. That is the Provision-stage SIGSEGV of builds 102, 103 and 105:
+three builds reported a clean walk and then killed the stage after them, while
+the finding they produced was aimed at the archive.
+
+The blast radius was measured rather than assumed. `libc.so.6`, `libm.so.6`,
+`libdl.so.2`, `libpthread.so.0`, `libz.so.1` and `libstdc++.so.6` took the same
+write, together and one at a time, and a program ran through every set at exit
+0. One object breaks, so one object is excluded.
+
+The fix is in `elf_classify`: the resolved interpreter is excluded by device and
+inode, before case 3, answering case 7. Identity and not name, because
+`find_dynamic_linker` answers with `root/lib64/ld-linux-x86-64.so.2`, which the
+archive ships as a symlink onto `root/usr/lib64/ld-linux-x86-64.so.2`, while the
+walk yields real files. A string comparison never matches and the rule would
+have been silently dead. Bounded to the object `PT_INTERP` will name; a spare
+copy elsewhere stays in case 4, which is stated in the design rather than left
+implicit.
+
+The harness also stopped breaking the build it observes. `step4_residual_suite`
+ran the production pass on the live extracted prefix, which on the agent is the
+tree the next stage uses. It now runs on a copy, and a copy it cannot make
+leaves the criterion UNANSWERED rather than falling back. What the copy costs is
+stated in the code and the plan: cases 3 and 5 compare an object against the
+search path computed for its prefix, so an object the live tree calls case 5 the
+copy calls case 6. Both are selected populations and both fail the criterion.
+`a.out` duly reads `case6` at build 108 where it read `case5` at build 105.
+
+The `a.out` blocker is ADJUDICATED. It is a real residual violation inside the
+published archive that Step 4 has no lever on, recorded by exact path with its
+owning requirement, reported as `blocked` with its own verdict word and exit
+code, and asserted in both directions so a rebuilt archive cannot land while the
+harness still claims a violation the rebuild removed.
+
+Two guards fired on this round's own work and both were right. Build 106
+reported `matrix/row-count want [28] got [30]`, the check the plan credits with
+catching the `D02` row. Build 107 printed `result: UNEXPECTED_EXIT_6` over a
+clean verdict, because the capture wrapper's exit mapping had not been taught
+the new code, and its own comment already described that failure from the time
+exit 5 was collapsed into FAILURES. Both fixed; build 108 is clean.
+
+### Change summary for step 4 relocation-force-rpath (round 3)
+
+Staged paths, 13, exactly the set `a.commit` names:
+
+- docs/v0.27.0/design.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/ledger.step4-outcomes.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+- docs/v0.27.0/probe.loader-survives-rpath.sh
+- docs/v0.27.0/verify.relocation-rpath.sh
+- docs/v0.27.0/verify.relocation.loader-probe.debian.txt
+- docs/v0.27.0/verify.relocation.step1.debian.txt
+- docs/v0.27.0/verify.relocation.step2.debian.txt
+- docs/v0.27.0/verify.relocation.step3.debian.txt
+- docs/v0.27.0/verify.relocation.step4.debian.txt
+- src/setups/env/bin/install_pkg.sh
+
+`a.commit` groups, eight, least dependent first:
+
+1. the loader exclusion as a design decision: design and umbrella
+2. the step 4 rows, criteria and adjudication: plan
+3. the exclusion in the pass: installer
+4. the loader assertions and the fourth outcome: harness
+5. the target-side measurement: probe script
+6. the step 4 outcome ledger
+7. the evidence the Debian 12 agent produced: five captures
+8. the step 4 validation rows
+
+New files: the probe script, the probe capture, and the step 3 and step 4
+captures. The step 1 and step 2 captures were re-retained from build 108 rather
+than left at build 105, because their claim in this round is that they re-ran
+UNCHANGED against the installer carrying the new rule.
+
+The CI repository carries four matching commits, not part of this staged set and
+not cplx's to review: the probe input, the synced candidate and harness, the
+diagnostics stage that runs the probe, and the capture wrapper's `BLOCKED` exit
+mapping.
+
+### Writer response for step 4 relocation-force-rpath (round 3)
+
+Writer response: Round 2's answer is accepted in full and its one unresolved finding is answered,
+though not the way it instructed.
+
+Accepted without change: the `A24` and `A26` reverse-traceability corrections,
+the ledger prose repair, the narrowed Step 4 validation assessment, and the
+`a.commit` group 6 correction. All four were right and none was reversed. No
+disagreement is recorded against any reviewer repair.
+
+The writer instructions are NOT followed, and the reason is evidence rather than
+preference. They said to complete umbrella requirement 7's archive rebuild, then
+rerun the residual suite and retain a capture showing zero failures. Following
+them would have produced a round 3 in which the same SIGSEGV killed the same
+stage with the `a.out` finding gone, because the defect was in the pass and not
+in the tree it walked. The residual half running over a real archive is what
+exposed it; the instruction would have removed the finding and left the defect.
+
+What replaced them: the loader defect is fixed and measured on both hosts, and
+the `a.out` blocker is adjudicated to requirement 7 rather than rebuilt ahead of
+items 1 to 6 that requirement 7 depends on.
+
+One thing is offered for explicit disagreement rather than assumed settled. The
+adjudication amends a completion gate this round also failed, which is exactly
+the shape a reviewer should distrust. Three properties are offered as the reason
+it is not a quiet weakening: the exception is a literal path and never a
+pattern; `blocked` is its own verdict word and exit code, never a pass; and the
+list is asserted in both directions, so an entry the archive no longer carries
+fails. Step 6's zero-exception form over the deployed archive is untouched. If
+the reviewer holds that the gate may not move, say so plainly and Step 4 returns
+to No pending requirement 7.
+
+A second question is put rather than decided: `find_dynamic_linker` resolves one
+loader, and the archive ships more than one copy. Only the resolved one is
+excluded, so a spare stays in case 4 and is still rewritten. Nothing execs
+through a spare, and widening the rule to every loader-looking file is the name
+check the case order exists to avoid. Whether a rewritten spare is acceptable in
+the shipped archive belongs to Step 6's acceptance.
+
+### Reviewer focus for step 4 relocation-force-rpath (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-3 -->
+
+## Round 3 by reviewer - Step 4
+
+- Recorded: 2026-08-26T16:38:56+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+Baseline index tree: 10b3bc8411873d25ec1ceeb601f6de136b089430
+
+Assessed index tree: 6d50f0f93cd1091461d35b5c97b00c791e00d1e2
+
+### Implementation check for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+Result: No. Step 4 has NOT been fully implemented.
+
+The loader identity exclusion is implemented and the retained Linux evidence exercises it from both sides, but readiness fails on three exact plan obligations. The mandatory Step 4 harness ends `OBJECTIVE BLOCKED` with exit 6, the plan requires three formatter occurrences and one terminal site while the staged implementation and harness assert four occurrences and separate skipped/completed terminal sites, and the required measured line-budget checkpoint is absent.
+
+Validation plan effects: The exact Step 4 validation rows now begin with the required No sentence, list the three concrete missing-work items, correct the matrix count from 28 to 30, and preserve the document-level No status. This reviewer-only metadata repair is staged. The umbrella digest did not change during review.
+
+### Pre-repair mandatory checks and coverage for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+The request-time index tree matched exactly. Repository shell lint passed for 44 tracked scripts. ShellCheck passed for the installer and harness, Bash syntax passed, and ShellCheck passed for the loader probe. The mandatory Step 4 harness could not execute its Linux subject locally and returned exit 1 after 36 host-independent cases with two capability failures. Retained build-108 evidence supplies the capable-host run and ends with 540 cases, zero test failures, `OBJECTIVE BLOCKED`, harness exit 6, and result `BLOCKED`; that is non-green mandatory evidence, not a pass.
+
+### Resolved validation set and sources for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+The resolved union contains five commands: repository shell lint; ShellCheck over the installer and Step 4 harness; the Step 4 harness itself; Bash syntax over the installer and harness; and ShellCheck over the loader probe. The request and current resolver sets agree. Four static commands pass. The harness is unavailable as a capable-host run locally, and the retained capable-host invocation returns exit 6 with `OBJECTIVE BLOCKED`.
+
+### Resolver drift and direction for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+No resolver drift was found. Project, plan, and request sources match the published five-command set.
+
+### Repository state around validation for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+The request-time baseline index tree is `10b3bc8411873d25ec1ceeb601f6de136b089430`. The final assessed tree is `6d50f0f93cd1091461d35b5c97b00c791e00d1e2`. Reviewer-authored staged differences are limited to the exact Step 4 validation rows and one trailing-space removal in each of the retained Step 3 and Step 4 captures. The ignored `a.commit` wording was updated without changing membership, order, or group boundaries. The umbrella digest remained `0ce85a202ed42c59af696f4996820b849c2a68643b86c7d285164d1af1c1aefe`.
+
+### Repair inventory for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+Repairs made:
+
+- Polishing-only reviewer metadata: changed the Step 4 validation assessment to the exact No verdict, recorded the remaining acceptance, formatter-contract, and line-budget work, and corrected stale 28-row references to 30. Path: `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`.
+- Polishing-only commit-plan wording: updated group 8's subject and rationale so it no longer claims a blocked Step 4 is complete. Path: `a.commit`. Membership, order, and group boundaries are unchanged.
+- Polishing-only whitespace: removed one trailing-space line from each retained capture. Paths: `docs/v0.27.0/verify.relocation.step3.debian.txt` and `docs/v0.27.0/verify.relocation.step4.debian.txt`.
+
+Paths staged:
+
+- The assessed staged set contains 13 paths: the design, umbrella, outcome ledger, plan, validation plan, loader probe, harness, loader-probe capture, Step 1 through Step 4 Debian captures, and installer. Every path belonged to the published request-time tree. Reviewer repairs are staged on the validation plan and the Step 3 and Step 4 captures; the ignored `a.commit` repair is retained separately.
+
+### Commit plan assessment for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+`a.commit` has eight groups and its dry-run parser passes. It covers all 13 staged paths exactly and preserves dependency order. Group 8 now truthfully records remaining Step 4 gaps; no membership, ordering, or group boundary changed. The plan is structurally accurate for a replacement review request, but it cannot make the current non-green implementation commit-ready.
+
+### Findings and boundaries for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+Unresolved findings:
+
+- The mandatory Step 4 command is non-green. Retained build 108 ends `OBJECTIVE BLOCKED`, harness exit 6, because `tools/python/root/a.out` is still a selected residual program. The reviewer readiness floor requires every mandatory command to pass; a CI wrapper treating exit 6 as non-fatal does not change the command's result.
+- The formatter call-site contract is internally inconsistent. The exact plan requires the identifier exactly three times: definition, one object-record site, and one terminal site reached on every path. The staged installer contains four whole-word occurrences because patchelf-absent and completed runs emit at separate terminal sites, and the harness explicitly expects four. Passing that test proves divergence from the plan rather than completion of it.
+- The required Step 4 line-budget checkpoint is missing. The staged installer grows from 1010 to 1149 physical lines, a net increase of 139, but the plan requires recording the measured total and the associated maintainability assessment at this last production-code step.
+
+Boundary-crossing work:
+
+- Rebuilding the published archive belongs to umbrella requirement 7, and deciding whether Step 4 may transfer a failed completion criterion belongs to specification-level authority. Choosing between a single terminal emission site and an amended four-occurrence contract is also a reviewed plan decision. The reviewer did not make either decision, alter production code or tests, rebuild or publish an archive, or perform requestor work.
+
+### Writer instructions for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+First, resolve the completion-gate disagreement through reviewed specification authority or provide a rebuilt archive whose raw mandatory Step 4 command returns `OBJECTIVE MET` at exit 0. Do not present exit 6 as a passed readiness check. Second, reconcile the plan's three-occurrence, single-terminal-site contract with the staged four-occurrence implementation and harness; either implement the planned single site or obtain and record the plan amendment, then rerun the retained Linux evidence. Third, record the measured 1010-to-1149 line-budget checkpoint and maintainability assessment. Preserve the loader exclusion evidence and the reviewer repairs, keep `a.commit` accurate, and publish the replacement round.
+
+### Decision rationale for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+Changes requested. Exact identity and request-tree attribution pass, the loader exclusion has persuasive two-host evidence, the static validation commands pass, the umbrella stayed unchanged, and `a.commit` is structurally accurate after polishing. Convergence still fails because the mandatory capable-host command returns exit 6, the implementation and harness contradict the plan's formatter call-site criterion, and the required measured line-budget checkpoint is absent. All reviewer repairs are polishing-only; the unresolved acceptance and plan decisions are substantive writer-owned work.
+
+### Final reviewer decision for step 4 relocation-force-rpath (exchange 1) (round 3)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-3 -->
+
+## Round 4 by requestor - Step 4
+
+- Recorded: 2026-08-26T17:59:59+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 relocation-force-rpath (round 4)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 4
+Review round: 4
+
+### Code review evidence for step 4 relocation-force-rpath (round 4)
+
+request_index_tree: c606cb71dc5243f53bde5f439d0f41479b453bb2
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 4 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+- shellcheck docs/v0.27.0/probe.loader-survives-rpath.sh (sources: request)
+
+### Requestor assessment for step 4 relocation-force-rpath (round 4)
+
+Yes. Step 4 is fully implemented and the mandatory command is green.
+
+Build 109 on the Debian 12 agent: steps 0 to 3 `OBJECTIVE MET` with zero
+failures, step 4 at 540 cases, zero failures, `OBJECTIVE MET`, harness exit 0,
+capture `result: OBJECTIVE_MET`, and the pipeline SUCCESS.
+
+Test evidence. All 30 matrix rows pass. The loader exclusion is asserted at the
+classifier seam in both directions, `step4/loader-without-rule` answering 4
+beside `step4/loader-with-rule` answering 7, and `step4/loader-through-symlink`
+answering 7 through the layout the archive ships. `step4/archive-loader-runs`
+and `step4/archive-python-runs` both pass, executing the tree rather than
+counting it. `step4/formatter-call-sites PASS 3`. `step4/residual-classified
+PASS 136 residual programs, every one classified`. `step4/skipped-state PASS
+skipped` shows the patchelf-absent path still reporting itself through the new
+single terminal site.
+
+Static-check evidence. Repository shell lint exit 0 over 44 tracked scripts.
+ShellCheck exit 0 with zero findings over the installer, the harness and the
+probe. Bash syntax exit 0. The Step 4 harness returns capability exit 4 on
+Windows after its host-independent seam cases, at 36 cases and the same two
+host-capability failures as every round, which is the unchanged local reading.
+
+Coverage evidence. Declared coverage is all 30 matrix rows plus the loader seam,
+run-after, call-site and residual-classification categories. The coverage debt
+is discharged: build 109 executed every one of them.
+
+Architecture evidence. The production pass retains one filesystem walk and the
+contract reader stays in validation code. The classifier gained two optional
+arguments and one identity comparison. The pass now sets a run state in both
+branches and emits its trailer once below them, which removes a call site rather
+than adding one: three occurrences where the plan asks for three.
+
+Performance evidence. The exclusion costs two stats per object through a bash
+builtin and no process. The residual half copies the archive before walking it,
+which is the cost paid to stop mutating the tree the next pipeline stage runs.
+
+Feature-integrity evidence. Steps 1 to 3 re-ran unchanged against the installer
+carrying both changes, at the same case counts and the same zero failures they
+reported before either existed.
+
+Line budget, measured and recorded as the plan requires: 625 at the baseline,
+1281 staged at Step 4, against an advisory band of 845 to 955 for the effort.
+The method is `wc -l` at each step's own commit so every figure is reproducible.
+The maintainability assessment is recorded with the number, and the deployment
+shape is raised as an input to the archive-shape requirement rather than acted
+on, since this plan may not split the file.
+
+### Implementation report for step 4 relocation-force-rpath (round 4)
+
+Round 3's three findings are closed. Two of them were right about something no
+build could have reported, and that is worth saying plainly rather than folding
+into a list.
+
+THE FORMATTER CONTRACT. The pass emitted its terminal record from two sites, the
+patchelf-absent early return and the end of the walk, while the plan asks for one
+site reached on every path. The harness expected four occurrences, so it had been
+written to the code rather than to the plan, and passing it proved divergence
+from the criterion rather than compliance with it. A green suite said the
+opposite of the truth, which is the failure mode this effort keeps meeting.
+
+Implemented as the plan asks rather than amended to match the code. The run state
+and every counter now live above the guard, both branches set them, and one
+emission sits below both. Three occurrences: definition, object record, terminal
+site. "A trailer on every exit path" is now guaranteed by the shape instead of
+checked by reading, and `step4/skipped-state` shows the skipped path still
+reporting itself through it. Nothing else in the walk moved; a diff of the
+function ignoring indentation shows only the intended change.
+
+THE GATE. Round 3 rejected the adjudication and was right to. The objection was
+not about the violation: it was that a mandatory command returning non-zero
+cannot be presented as a passed readiness check, and that deciding whether a step
+may transfer a failed criterion is specification authority rather than a writer's
+call. Both hold. The adjudication carved an exception into a gate this step had
+just failed, which is the shape a reviewer should distrust.
+
+The specification decision taken was not a smaller exception. It moved the gate
+to where the evidence is. Step 2 deferred the residual half with a reason still
+written in its own criteria: a residual is a property of the ARCHIVE rather than
+of the classifier. Step 4 walks a copy of the staging tree, so what it can
+honestly gate is what the classifier did with every residual it found. `a.out`
+lives in the published archive and only a rebuild removes it. The deployed
+archive is in hand at Step 6, whose criteria already called themselves the final
+assertion of the residual half.
+
+So Step 4 now gates that every residual was classified and that its ownership
+register is exact in both directions, and reports each selected residual with its
+owner plus a named handoff set. Step 6 keeps the only gating assertion, admits no
+exception, consumes the handoff by name, and closes with the sentence that keeps
+this honest: Step 4 may narrow what it gates, Step 6 may not. The `blocked`
+outcome and exit 6 remain in the harness for Step 6's own monitoring criterion,
+unused here.
+
+The register survives because ownership is worth recording. It is a literal path
+list, never a pattern, and its stale-entry check is Step 4's precisely because it
+is this harness's bookkeeping rather than the archive's contents: an entry the
+archive no longer carries fails, so the rebuilt archive cannot land while this
+file still names a violation the rebuild removed.
+
+THE LINE BUDGET. Measured with `wc -l` at each step's own commit, so the figures
+are reproducible from history rather than recalled: 625 baseline, 649 after Step
+0, 874 after Step 1, 1015 after Step 2, 1120 after Step 3, 1281 staged at Step 4.
+The advisory band for Step 4 was 60 to 90 lines and the measured growth is 161;
+the effort's running estimate was 845 to 955 and the total is 1281. 693 lines
+carry logic and 588 carry rationale. The assessment recorded is that the file is
+at its limit but not past it, with the deployment shape raised as an input to the
+archive-shape requirement rather than acted on here.
+
+One honest note carried in the plan: the round 3 answer cites 1010 to 1149 for
+this checkpoint. Those are not the figures `wc -l` gives at those commits and the
+method is not stated, so the table records what is measurable and flags the
+difference rather than adopting either figure silently.
+
+### Change summary for step 4 relocation-force-rpath (round 4)
+
+Staged paths, 13, exactly the set `a.commit` names:
+
+- docs/v0.27.0/design.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/ledger.step4-outcomes.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+- docs/v0.27.0/probe.loader-survives-rpath.sh
+- docs/v0.27.0/verify.relocation-rpath.sh
+- docs/v0.27.0/verify.relocation.loader-probe.debian.txt
+- docs/v0.27.0/verify.relocation.step1.debian.txt
+- docs/v0.27.0/verify.relocation.step2.debian.txt
+- docs/v0.27.0/verify.relocation.step3.debian.txt
+- docs/v0.27.0/verify.relocation.step4.debian.txt
+- src/setups/env/bin/install_pkg.sh
+
+`a.commit` groups, eight, least dependent first, unchanged in membership and
+order since round 3; only group 4's and group 8's wording moved to match what
+this round did.
+
+Changed since the round 3 request:
+
+- `src/setups/env/bin/install_pkg.sh`: one terminal emission site
+- `docs/v0.27.0/verify.relocation-rpath.sh`: expects three occurrences; residual
+  gate narrowed to classification plus register; handoff note added
+- `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md`: Step 4 residual
+  criteria rewritten, Step 6 given the only gate and the handoff, measured line
+  budget recorded
+- `docs/v0.27.0/ledger.step4-outcomes.md`: the adjudication section replaced by
+  the ownership boundary, obligations updated, build 109 recorded
+- five retained captures re-taken from build 109
+- `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`: Yes verdict
+
+Reviewer repairs from round 3 are preserved: the validation plan's assessment
+block was rewritten on top of the reviewer's staged version rather than beside
+it, and the two trailing-space removals in the Step 3 and Step 4 captures are
+retained because those captures were re-taken from a clean build.
+
+The CI repository carries a fifth matching commit for this round, not part of
+this staged set: `test(relocation): sync one terminal emission site`.
+
+### Writer response for step 4 relocation-force-rpath (round 4)
+
+Writer response: All three round 3 findings are accepted and closed. No reviewer repair was
+reversed and no disagreement is recorded.
+
+Accepted without change: the validation plan's exact No sentence and its
+missing-work list, the `a.commit` group 8 wording, and the two trailing-space
+removals. The staged captures were re-taken from build 109, so those two
+whitespace repairs are carried rather than lost.
+
+On the formatter contract, the reviewer's framing decided the fix. "Passing that
+test proves divergence from the plan rather than completion of it" is exactly
+right, and it ruled out the easy option: amending the plan to four occurrences
+would have written the drift into the criterion. The plan asked for one terminal
+site so that a trailer on every exit path is structural rather than inspected,
+which is a better property than the code had, so the code moved.
+
+On the gate, the reviewer was right to refuse the adjudication and right about
+why. It has been withdrawn, not softened. Specification authority decided to
+narrow what Step 4 gates rather than to excuse a failure inside it, and the
+boundary used is Step 2's own: a residual is a property of the archive rather
+than of the classifier. Step 6 keeps the only gating assertion, admits no
+exception, and now consumes Step 4's handoff by name.
+
+On the line budget, recorded with the method stated. One difference is flagged
+rather than papered over: the answer cites 1010 to 1149, which is not what
+`wc -l` returns at the commits the table names. If the reviewer's method is the
+intended one, say which and the table will be re-measured that way; the figures
+recorded are reproducible either way.
+
+One question stays open from round 3 and is repeated rather than assumed
+settled: `find_dynamic_linker` resolves one loader and the archive ships more
+than one copy, so a spare stays in case 4 and is still rewritten. Nothing execs
+through a spare, and widening the rule to every loader-looking file is the name
+check the case order exists to avoid. Whether a rewritten spare is acceptable in
+the shipped archive belongs to Step 6's acceptance, and it is named here so it
+is not lost between steps.
+
+### Reviewer focus for step 4 relocation-force-rpath (round 4)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-4 -->
+
+## Round 4 by reviewer - Step 4
+
+- Recorded: 2026-08-26T19:15:34+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Baseline index tree: c606cb71dc5243f53bde5f439d0f41479b453bb2
+
+Assessed index tree: de394d25ead4ff06e361b2068d09a0e7457a1025
+
+### Implementation check for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Result: Result: No. Step 4 is not fully implemented. Build 109 is green, but its retained output reports `tools/python/root/a.out` selected as case 6. That contradicts the governing issue acceptance at lines 742-746 and Step 4's first completion criterion, both of which require every program outside the named python and git populations to keep its rpath untouched. Later bullets in the same Step 4 section instead permit selected residuals and move the zero-selected gate to Step 6. The harness implements only that permissive reading, so its green verdict cannot prove the contradictory Step 4 criteria complete.
+
+Validation plan effects: The exact Step 4 validation section was changed from Yes to No and its missing-work, architecture, coverage, and feature-integrity paragraphs now record the acceptance-boundary conflict. The top status summary was corrected to show Steps 0-3 implemented, Step 4 in review, and Steps 5-6 not started. The umbrella was not changed.
+
+### Pre-repair mandatory checks and coverage for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Before reviewer repairs, repository shell lint passed over 44 tracked scripts; both requested ShellCheck commands passed; Bash syntax passed; and the retained capable-host build 109 capture matched the staged harness and installer digests and recorded 540 cases, zero failures, OBJECTIVE MET, exit 0. The local Windows harness reached its explicit capability boundary because `readelf` and exact-target evidence are unavailable, so it was not substituted for the retained capable-Linux run.
+
+### Resolved validation set and sources for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Request and current resolver sets agree. The union run was: `bash src/utils/lint_shell.sh`; `shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh`; `bash docs/v0.27.0/verify.relocation-rpath.sh --step 4`; `bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh`; and `shellcheck docs/v0.27.0/probe.loader-survives-rpath.sh`. Portable checks are green. The capable-host portion is supplied by retained build 109, whose harness and candidate SHA-256 values equal the staged files.
+
+### Resolver drift and direction for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+No resolver drift. The request-time validation set and the current resolver set are identical.
+
+### Repository state around validation for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+The request index tree was `c606cb71dc5243f53bde5f439d0f41479b453bb2`; the assessed tree is `de394d25ead4ff06e361b2068d09a0e7457a1025`. The difference is limited to attributable reviewer repairs in the Step 4 validation plan and trailing-space removal in the retained Step 3 and Step 4 captures. The umbrella digest is unchanged. The unstaged versioned review transcript remains outside the staged implementation set, and unrelated untracked CSV files remain untouched.
+
+### Repair inventory for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Repairs made:
+
+- Repairs made:
+- - Recorded the exact No implementation-check result and concrete missing work in `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`.
+- - Removed one trailing space from the Step 3 capture and two from the Step 4 capture so `git diff --cached --check` passes.
+- All three patches were proven attributable against recorded pre-repair blobs and staged. No production code, plan, design, ledger, umbrella, or commit-plan content was changed by the reviewer.
+
+Paths staged:
+
+- Staged paths (13):
+- - docs/v0.27.0/design.v0.27.0.relocation-force-rpath.md
+- - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- - docs/v0.27.0/ledger.step4-outcomes.md
+- - docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- - docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+- - docs/v0.27.0/probe.loader-survives-rpath.sh
+- - docs/v0.27.0/verify.relocation-rpath.sh
+- - docs/v0.27.0/verify.relocation.loader-probe.debian.txt
+- - docs/v0.27.0/verify.relocation.step1.debian.txt
+- - docs/v0.27.0/verify.relocation.step2.debian.txt
+- - docs/v0.27.0/verify.relocation.step3.debian.txt
+- - docs/v0.27.0/verify.relocation.step4.debian.txt
+- - src/setups/env/bin/install_pkg.sh
+
+### Commit plan assessment for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+`a.commit` parses cleanly and its eight groups cover the 13 staged paths in dependency order, but its descriptions and subjects are not accurate for round 4. Groups 1, 2, 4, 6, and 7 still describe the withdrawn blocked/adjudicated exception, while group 8 still says the harness exits 6, the formatter count is four, and Step 4 has remaining round 3 gaps. The commit-plan readiness floor therefore fails until the wording and conventional subjects describe the actual staged result.
+
+### Findings and boundaries for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Unresolved findings:
+
+- 1. [P1] Reconcile the Step 4 acceptance contract. `issue.v0.27.0.relocation-force-rpath.md` lines 742-746 and `plan.v0.27.0.relocation-force-rpath.md` lines 2013-2016 require the named selected set and every other program preserved. The same plan at lines 2038-2058 now permits selected residuals and hands them to Step 6. Build 109 reports `tools/python/root/a.out` selected as case 6. A green harness currently proves only the permissive branch of this contradiction.
+- 2. [P2] Align the harness narrative with its behavior. `verify.relocation-rpath.sh` lines 4738-4759 still say no exception is admitted and cases 5/6 fail the residual criterion, while lines 4837-4891 treat selected residuals as Step 6 findings and do not fail them.
+- 3. [P2] Refresh `a.commit`. Multiple groups still describe the obsolete blocked outcome and round 3 failures, so the planned commit subjects and explanations do not match the staged round 4 content.
+
+Boundary-crossing work:
+
+- Boundary-crossing work: deciding whether the authoritative issue acceptance is amended or the archive is rebuilt is specification/requestor authority, not reviewer repair. The reviewer therefore did not edit the issue, design, plan completion criteria, harness gate, ledger, umbrella ownership, or `a.commit` outcome narrative.
+
+### Writer instructions for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+First obtain and retain one authoritative rule for the selected-residual boundary. Either make Step 4 satisfy the existing requirement and its first completion criterion (zero selected residual programs outside the named populations), or use the reviewed specification workflow to amend that authority and then make the issue, Step 4 criteria, Step 6 handoff, harness, ledger, and validation record say the same thing. Next remove the superseded harness comments at lines 4738-4759. Finally rewrite the stale `a.commit` subjects and explanations for the resulting staged state. Preserve the reviewer-staged validation assessment and whitespace repairs unless the replacement artifacts supersede them deliberately.
+
+### Decision rationale for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Changes requested. Identity, staged attribution, portable validation, capable-host coverage, formatter cardinality, line-budget evidence, and umbrella integrity pass. Completeness and commit-plan accuracy fail: the current plan both forbids and permits the one selected residual reported by build 109, the harness text disagrees with its behavior, and `a.commit` describes an obsolete outcome. These are finite writer actions and require a replacement review round.
+
+### Final reviewer decision for step 4 relocation-force-rpath (exchange 1) (round 4)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-4 -->
+
+## Round 5 by requestor - Step 4
+
+- Recorded: 2026-08-26T19:54:56+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 relocation-force-rpath (round 5)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 4
+Review round: 5
+
+### Code review evidence for step 4 relocation-force-rpath (round 5)
+
+request_index_tree: e9f866a055ae65920b5dfe33138efb6486f3a26b
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 4 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+- shellcheck docs/v0.27.0/probe.loader-survives-rpath.sh (sources: request)
+
+### Requestor assessment for step 4 relocation-force-rpath (round 5)
+
+Yes. Step 4 is fully implemented and the mandatory command is green.
+
+Build 110 on the Debian 12 agent: steps 0 to 3 `OBJECTIVE MET` with zero
+failures, step 4 at 540 cases, zero failures, `OBJECTIVE MET`, harness exit 0,
+capture `result: OBJECTIVE_MET`, and the pipeline SUCCESS.
+
+Read the writer response first. Round 4's P1 was correct and the resolution it
+required is a reading of the authority chain, not a code change. If the reviewer
+reads that chain differently, this verdict does not stand.
+
+Test evidence. All 30 matrix rows pass. `step4/formatter-call-sites PASS 3`.
+`step4/loader-without-rule PASS 4` beside `step4/loader-with-rule PASS 7` and
+`step4/loader-through-symlink PASS 7`. `step4/archive-loader-runs` and
+`step4/archive-python-runs` both pass, executing the tree rather than counting
+it. `step4/residual-classified PASS 136 residual programs, every one
+classified`, with `step4/residual-handoff-to-step-6` naming
+`tools/python/root/a.out` for the acceptance step. `step4/skipped-state PASS
+skipped` shows the patchelf-absent path reporting itself through the single
+terminal site.
+
+Static-check evidence. Repository shell lint exit 0 over 44 tracked scripts.
+ShellCheck exit 0 with zero findings over the installer, the harness and the
+probe. Bash syntax exit 0. The Step 4 harness returns capability exit 4 on
+Windows after its host-independent seam cases, at 36 cases and the same two
+host-capability failures as every round.
+
+Coverage evidence. Declared coverage is all 30 matrix rows plus the loader seam,
+run-after, call-site and residual-classification categories. Build 110 executed
+every one of them.
+
+Architecture evidence. One filesystem walk; the contract reader stays in
+validation code. The classifier gained two optional arguments and one identity
+comparison. The pass sets a run state in both branches and emits its trailer
+once below them, which removes a call site rather than adding one.
+
+Performance evidence. The exclusion costs two stats per object through a bash
+builtin and no process. The residual half copies the archive before walking it,
+which is the cost of not mutating the tree the next pipeline stage runs.
+
+Feature-integrity evidence. Steps 1 to 3 re-ran unchanged, at the same case
+counts and the same zero failures they reported before any of this existed.
+
+Line budget: 625 at the baseline, 1281 staged at Step 4, measured with `wc -l`
+at each step's own commit so the figures are reproducible, against an advisory
+band of 845 to 955 for the effort. The maintainability assessment is recorded
+with the number, and the deployment shape is raised as an input to the
+archive-shape requirement rather than acted on here.
+
+### Implementation report for step 4 relocation-force-rpath (round 5)
+
+Round 4's three findings are closed. The first one is the important one, and it
+was a real defect in my work rather than a difference of reading.
+
+P1, THE CONTRADICTION. When the residual criterion was narrowed in round 4, the
+LATER bullets of Step 4's criteria moved and the FIRST bullet did not. It still
+required "every other archive program preserved". So one section of one plan
+both forbade and permitted the same object, the harness implemented only the
+permissive reading, and a green run proved one branch of a contradiction. That
+is the same failure the formatter cardinality had, found the same way: a passing
+test that certifies divergence. The narrowing was done without checking the
+criterion above it or the requirement behind it.
+
+The resolution is not a choice between the two branches. The clause the reviewer
+cited sits under the issue's `## Acceptance` heading, and acceptance is the
+plan's Step 6. So the claim was never Step 4's to assert, and the first bullet
+had been over-claiming since it was written: a staging copy cannot answer a
+question about what the published archive contains. Step 4's first criterion now
+shows the selected set it produced and says plainly that the preservation claim
+is not asserted there and why.
+
+Nothing in the requirement is weakened. Every acceptance criterion keeps its
+exact wording and none admits an exception. What the issue gained is one
+paragraph saying WHERE its criteria are proved, which is the sentence whose
+absence let an implementation step adopt one as its own gate. That is offered as
+locating a claim rather than amending authority, and it is the one judgement in
+this round the reviewer should test rather than accept.
+
+P2, THE HARNESS NARRATIVE. The suite header still said the residual half is
+"asserted HERE" and that "no exception is admitted", and the loop comment still
+said cases 5 and 6 fail, while the code reported them and failed neither. A
+reader following those comments would have concluded the code was broken. Both
+rewritten to describe what the code does and why the boundary sits where it
+does. Comments that disagree with the code they head are the version a reader
+trusts, so they are worse than none.
+
+P3, `a.commit`. Rewritten into nine groups. The issue becomes group 1 as the
+least dependent path, and every subject and rationale describes the staged
+content instead of the withdrawn `blocked` outcome and the round 3 failures.
+Membership matches the 14 staged paths exactly.
+
+Build 110 exists only because the harness comments changed and the retained
+captures record the harness sha256. No behaviour changed between 109 and 110;
+re-running was the way to keep the evidence and the staged file consistent
+rather than approximately so.
+
+### Change summary for step 4 relocation-force-rpath (round 5)
+
+Staged paths, 14, exactly the set `a.commit` names:
+
+- docs/v0.27.0/design.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/ledger.step4-outcomes.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+- docs/v0.27.0/probe.loader-survives-rpath.sh
+- docs/v0.27.0/verify.relocation-rpath.sh
+- docs/v0.27.0/verify.relocation.loader-probe.debian.txt
+- docs/v0.27.0/verify.relocation.step1.debian.txt
+- docs/v0.27.0/verify.relocation.step2.debian.txt
+- docs/v0.27.0/verify.relocation.step3.debian.txt
+- docs/v0.27.0/verify.relocation.step4.debian.txt
+- src/setups/env/bin/install_pkg.sh
+
+`a.commit` groups, nine, least dependent first. Restructured this round: the
+issue joins as group 1 because it is now changed and is the authority the plan
+implements, and every subject and rationale was rewritten for the staged
+content.
+
+Changed since the round 4 request:
+
+- `docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md`: one paragraph under
+  `## Acceptance` saying where its criteria are proved. NEW to the staged set.
+- `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md`: Step 4's first
+  completion criterion no longer asserts the acceptance claim
+- `docs/v0.27.0/verify.relocation-rpath.sh`: suite header and loop comment
+  rewritten to match the behaviour
+- `docs/v0.27.0/ledger.step4-outcomes.md`: where the contradiction actually was
+  and how round 4 found it
+- `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`: the verdict
+  and its reasoning
+- five retained captures re-taken from build 110
+- `a.commit`: nine groups, all subjects and rationales rewritten
+
+Reviewer repairs are preserved across all four rounds. The round 4 validation
+assessment was rewritten on top of the reviewer's staged version rather than
+beside it, and the round 3 whitespace repairs survive because the captures are
+re-taken from clean builds rather than edited.
+
+The CI repository carries a sixth matching commit for this round, not part of
+this staged set: `docs(relocation): say what the residual half now does`.
+
+### Writer response for step 4 relocation-force-rpath (round 5)
+
+Writer response: All three round 4 findings are accepted. No reviewer repair was reversed and no
+disagreement is recorded against any of them.
+
+The P1 finding was right and the miss was mine. Narrowing the later bullets of a
+completion criterion without reading the first bullet, or the requirement behind
+it, left one plan section forbidding and permitting the same object. The
+reviewer's phrasing is the accurate one: a green harness proved only the
+permissive branch. That is worth naming rather than absorbing, because it is the
+second time in this effort a passing test has certified divergence, the first
+being the formatter cardinality the previous round caught.
+
+ONE JUDGEMENT IS PUT FORWARD FOR THE REVIEWER TO TEST, not asserted as settled.
+
+The reviewer offered two routes: make Step 4 satisfy the existing requirement, or
+use the specification workflow to amend that authority and make every document
+agree. A third reading is taken instead, and if it is wrong this round should be
+rejected on it alone.
+
+The clause at issue lines 742 to 746 sits under `## Acceptance`. Acceptance is
+the plan's Step 6. On that reading the claim was never Step 4's to assert, the
+first completion criterion had been over-claiming since it was written, and
+nothing needs amending: the requirement keeps every word and every criterion
+still admits no exception. What was added is a paragraph stating where the
+acceptance criteria are proved, which is the fact whose absence allowed an
+implementation step to adopt one as its gate.
+
+The distinction that matters: this is offered as LOCATING a claim, not weakening
+one. If the reviewer holds that moving where a criterion is proved is itself an
+amendment of authority, then the specification workflow is owed and this round
+should say so rather than proceed. That call is the reviewer's to make, and the
+verdict above does not stand without it.
+
+One question stays open from rounds 3 and 4 and is repeated rather than assumed
+settled: `find_dynamic_linker` resolves one loader and the archive ships more
+than one copy, so a spare stays in case 4 and is still rewritten. Nothing execs
+through a spare, and widening the rule to every loader-looking file is the name
+check the case order exists to avoid. Whether a rewritten spare is acceptable in
+the shipped archive belongs to Step 6's acceptance, and it is named here so it is
+not lost between steps.
+
+### Reviewer focus for step 4 relocation-force-rpath (round 5)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-5 -->
+
+## Round 5 by reviewer - Step 4
+
+- Recorded: 2026-08-26T20:17:32+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Baseline index tree: e9f866a055ae65920b5dfe33138efb6486f3a26b
+
+Assessed index tree: c142e5161746f26fec1cf75d7c26f83c93bcbe44
+
+### Implementation check for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Result: Result: Yes. Step 4 is fully implemented. The authority chain is consistent: the issue keeps the unchanged end-state acceptance criteria and locates their proof in Step 6 over the deployed archive; Step 4 gates classification and exact ownership over its staging copy and hands selected residuals to Step 6. Build 110 matches the staged harness and installer digests and records 540 cases, zero failures, OBJECTIVE MET, exit 0.
+
+Validation plan effects: The exact Step 4 validation section was reconciled with its Yes verdict: stale round 4 No reasoning, missing-work, architecture, coverage, and feature-integrity text was replaced with the accepted Step 4/Step 6 ownership boundary. The top summary now records Steps 0-4 implemented. This is review metadata and does not change implementation or acceptance behavior.
+
+### Pre-repair mandatory checks and coverage for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Before reviewer repairs, ShellCheck and repository shell lint were clean, the capable-host build 110 capture matched the staged digests and was green, formatter occurrences were three, and the installer measured 1281 physical lines. `git diff --cached --check` found three trailing spaces in the newly retained Step 3/4 captures.
+
+### Resolved validation set and sources for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+No resolver drift. The request and current resolver both require repository shell lint; ShellCheck over installer, harness, and loader probe; the Step 4 harness; and Bash syntax. All portable checks pass after repair. The local Windows harness stops at its declared capability boundary because `readelf` and exact-target evidence are unavailable; retained Debian build 110 supplies the matching capable-Linux result: 540 cases, zero failures, OBJECTIVE MET, exit 0.
+
+### Resolver drift and direction for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+No resolver drift; request and current validation command sets are identical.
+
+### Repository state around validation for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Baseline index `e9f866a055ae65920b5dfe33138efb6486f3a26b`; assessed index `c142e5161746f26fec1cf75d7c26f83c93bcbe44`. Only three attributable reviewer paths differ: the Step 4 validation record and whitespace-only cleanup in the retained Step 3/4 captures. The umbrella digest is unchanged. The unstaged review transcript and unrelated untracked CSV files remain untouched.
+
+### Repair inventory for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Repairs made:
+
+- Repairs made:
+- - `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md`: review-metadata repair, non-substantive; removed stale round 4 No text and recorded the supported Yes assessment.
+- - `docs/v0.27.0/verify.relocation.step3.debian.txt`: polishing-only content repair; removed one trailing space.
+- - `docs/v0.27.0/verify.relocation.step4.debian.txt`: polishing-only content repair; removed two trailing spaces.
+- All were proven attributable and staged. Under the reviewer protocol, the two non-metadata tracked capture edits trigger the substantive-repair convergence guard despite being whitespace-only in content.
+
+Paths staged:
+
+- Fourteen staged paths: the issue, design, umbrella, plan, Step 4 ledger, validation record, harness, loader probe, five retained captures, and installer exactly as listed in the request. No staged path is outside `a.commit`.
+
+### Commit plan assessment for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+`a.commit` parses cleanly. Its nine dependency-ordered groups cover all 14 staged paths exactly, with accurate conventional subjects, membership, scope, and round 5 rationales. No amendment is required after the reviewer repairs because those repairs do not change any group's subject or membership.
+
+### Findings and boundaries for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Unresolved findings:
+
+- No substantive implementation, validation, coverage, authority-boundary, or commit-plan finding remains. One confirmation action remains: preserve the three staged reviewer repairs and publish the next round so convergence can be assessed without a same-round non-metadata tracked repair.
+
+Boundary-crossing work:
+
+- Boundary-crossing work: umbrella requirement 7 still owns removing `tools/python/root/a.out`, and Step 6 owns the unchanged deployed-archive zero-selected acceptance proof. Neither is missing Step 4 work, and the reviewer changed neither boundary.
+
+### Writer instructions for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Preserve the staged validation-record reconciliation and the three trailing-space removals exactly, make no implementation rework, and publish round 6 against the resulting index. Keep `a.commit` unchanged unless the staged membership changes. The next round can recommend commit-ready if the index and validations remain stable.
+
+### Decision rationale for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Changes requested only because this round staged reviewer-authored tracked capture repairs, which the convergence guard does not allow to finish in the same round. All substantive Step 4 floors pass: exact identity, complete implementation, mandatory validation and coverage, attributable staged scope, no unresolved carried finding, unchanged umbrella, and accurate `a.commit`.
+
+### Final reviewer decision for step 4 relocation-force-rpath (exchange 1) (round 5)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-5 -->
+
+## Round 6 by requestor - Step 4
+
+- Recorded: 2026-08-26T20:20:38+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 relocation-force-rpath (round 6)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+Implementation step: 4
+Review round: 6
+
+### Code review evidence for step 4 relocation-force-rpath (round 6)
+
+request_index_tree: c142e5161746f26fec1cf75d7c26f83c93bcbe44
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: plan)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 4 (sources: plan)
+- bash -n src/setups/env/bin/install_pkg.sh docs/v0.27.0/verify.relocation-rpath.sh (sources: request)
+- shellcheck docs/v0.27.0/probe.loader-survives-rpath.sh (sources: request)
+
+### Requestor assessment for step 4 relocation-force-rpath (round 6)
+
+Yes. Step 4 is fully implemented and the mandatory command is green.
+
+This is a CONFIRMATION round. No implementation, harness, plan, issue, ledger or
+`a.commit` change was made. Round 5 recorded no substantive finding and asked
+only that its three staged repairs be preserved and a fresh round published, so
+convergence can be assessed against an index carrying no same-round non-metadata
+tracked repair. That is what this round is.
+
+The reviewer's three repairs are preserved exactly and unmodified: the
+validation-record reconciliation in
+`plan.v0.27.0.relocation-force-rpath.validation.md`, one trailing space in
+`verify.relocation.step3.debian.txt`, and two in
+`verify.relocation.step4.debian.txt`.
+
+Test evidence, unchanged from round 5 and still the retained build 110 capture:
+steps 0 to 3 `OBJECTIVE MET` with zero failures; step 4 at 540 cases, zero
+failures, `OBJECTIVE MET`, harness exit 0, `result: OBJECTIVE_MET`; pipeline
+SUCCESS. All 30 matrix rows pass. `step4/formatter-call-sites PASS 3`. The
+loader seam pair answers 4 without the rule and 7 with it, and 7 through the
+symlink layout. `step4/archive-loader-runs` and `step4/archive-python-runs`
+both pass. `step4/residual-classified PASS 136 residual programs, every one
+classified`, with the handoff naming `tools/python/root/a.out` for Step 6.
+
+Static-check evidence, re-run against this index rather than carried over:
+repository shell lint exit 0 over 44 tracked scripts, ShellCheck exit 0 with
+zero findings over the installer, the harness and the probe, Bash syntax exit 0,
+and the Step 4 harness returning capability exit 4 on Windows at 36 cases with
+the same two host-capability failures as every round.
+
+Coverage, architecture, performance, feature-integrity and line-budget evidence
+are unchanged from round 5 and are not restated here, because nothing they
+describe moved.
+
+### Implementation report for step 4 relocation-force-rpath (round 6)
+
+Nothing was implemented in this round, deliberately.
+
+Round 5's instruction was explicit: preserve the staged repairs, make no
+implementation rework, publish against the resulting index. The reviewer
+recorded no substantive implementation, validation, coverage, authority-boundary
+or commit-plan finding, and named one remaining action, a fresh round so
+convergence can be assessed without a same-round non-metadata tracked repair.
+
+The convergence guard that produced this round is worth recording rather than
+just satisfying. Two of the reviewer's three repairs were whitespace-only in
+content but landed on tracked capture files, and the protocol counts a
+non-metadata tracked repair as substantive whatever its content. That is the
+correct bias: it means a round cannot both repair a tracked artifact and certify
+the result in the same breath. The cost is one extra round; the alternative is a
+convergence signal that includes edits nobody reviewed.
+
+The index this round publishes therefore contains exactly what round 5 assessed,
+plus nothing. `a.commit` is untouched and its nine groups still cover the
+fourteen staged paths exactly. No new build was run and none was needed: neither
+the harness nor the installer changed, so the retained build 110 captures still
+match their staged digests, which is the property that made re-running necessary
+last round and unnecessary this one.
+
+The two boundaries the reviewer named are unchanged and neither is Step 4 work:
+umbrella requirement 7 owns removing `tools/python/root/a.out`, and Step 6 owns
+the deployed-archive zero-selected acceptance proof.
+
+### Change summary for step 4 relocation-force-rpath (round 6)
+
+Staged paths, 14, unchanged from round 5 and matching `a.commit` exactly:
+
+- docs/v0.27.0/design.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/ledger.step4-outcomes.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md
+- docs/v0.27.0/probe.loader-survives-rpath.sh
+- docs/v0.27.0/verify.relocation-rpath.sh
+- docs/v0.27.0/verify.relocation.loader-probe.debian.txt
+- docs/v0.27.0/verify.relocation.step1.debian.txt
+- docs/v0.27.0/verify.relocation.step2.debian.txt
+- docs/v0.27.0/verify.relocation.step3.debian.txt
+- docs/v0.27.0/verify.relocation.step4.debian.txt
+- src/setups/env/bin/install_pkg.sh
+
+`a.commit`: nine groups, UNCHANGED this round. Membership, order, boundaries,
+subjects and rationales are all as round 5 assessed them.
+
+Changed since the round 5 request: only the three reviewer repairs, preserved
+exactly as staged.
+
+- `plan.v0.27.0.relocation-force-rpath.validation.md`: reviewer's
+  validation-record reconciliation
+- `verify.relocation.step3.debian.txt`: reviewer's one trailing-space removal
+- `verify.relocation.step4.debian.txt`: reviewer's two trailing-space removals
+
+No writer edit was made to any staged path. No CI repository commit accompanies
+this round; the last one, `docs(relocation): say what the residual half now
+does`, belongs to round 5 and is already pushed.
+
+### Writer response for step 4 relocation-force-rpath (round 6)
+
+Writer response: Round 5's answer is accepted in full. No repair was reversed, nothing was edited
+on top of one, and no disagreement is recorded.
+
+The judgement put forward for testing in round 5 was tested and accepted: the
+issue keeps its unchanged end-state acceptance criteria and locates their proof
+at Step 6 over the deployed archive, while Step 4 gates classification and exact
+ownership over its staging copy. That was the one call this effort could not
+make from evidence, and it is now settled in the record rather than in a
+conversation.
+
+The instruction was to preserve the three staged repairs, make no rework and
+publish. That is exactly what this round does. The two capture repairs are
+whitespace-only in content, and they are preserved rather than absorbed into a
+re-taken capture, because re-taking them would discard attributable reviewer work
+to save a build that is not needed.
+
+One question has been carried since round 3 and is carried again rather than
+quietly dropped: `find_dynamic_linker` resolves one loader and the archive ships
+more than one copy, so a spare stays in case 4 and is still rewritten. Nothing
+execs through a spare, and widening the rule to every loader-looking file is the
+name check the case order exists to avoid. Whether a rewritten spare is
+acceptable in the shipped archive belongs to Step 6's acceptance. It needs no
+action in this round and is repeated only so it survives the step boundary.
+
+### Reviewer focus for step 4 relocation-force-rpath (round 6)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-6 -->
+
+## Round 6 by reviewer - Step 4
+
+- Recorded: 2026-08-26T20:33:06+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Baseline index tree: c142e5161746f26fec1cf75d7c26f83c93bcbe44
+
+Assessed index tree: c142e5161746f26fec1cf75d7c26f83c93bcbe44
+
+### Implementation check for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Result: Result: Yes. Step 4 is fully implemented. Round 6 preserves the exact round 5 assessed index. The issue/plan authority boundary is consistent, the validation record says Yes without stale contradictory text, and retained build 110 records 540 cases, zero failures, OBJECTIVE MET, exit 0 against the staged harness and installer digests.
+
+Validation plan effects: No reviewer edit was made. The validation plan already records Steps 0-4 implemented, the exact Step 4 Yes verdict, no Step 4-owned missing work, complete coverage, and the Step 4/umbrella-requirement-7/Step-6 ownership chain.
+
+### Pre-repair mandatory checks and coverage for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+No repair was needed. Repository shell lint is clean over 44 tracked scripts; both ShellCheck commands pass; Bash syntax passes; `git diff --cached --check` passes; formatter occurrences equal three; installer size is 1281 physical lines; and retained capable-Linux build 110 is green and digest-matched.
+
+### Resolved validation set and sources for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+No resolver drift. The request/current union is repository shell lint; ShellCheck over installer, harness, and loader probe; the Step 4 harness; and Bash syntax. Portable checks pass locally. The local Windows harness reaches its declared capability boundary because `readelf` and exact-target evidence are unavailable; the retained matching Debian build 110 supplies the capable-host result: 540 cases, zero failures, OBJECTIVE MET, exit 0.
+
+### Resolver drift and direction for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+No resolver drift; request and current validation command sets are identical.
+
+### Repository state around validation for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Baseline and assessed index trees are both `c142e5161746f26fec1cf75d7c26f83c93bcbe44`. The umbrella digest is unchanged. The unstaged review transcript and unrelated untracked CSV files remain outside the staged implementation set. No validation side effect or reviewer mutation changed the index.
+
+### Repair inventory for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Repairs made:
+
+- Repairs made:
+- - None. Round 6 is a confirmation assessment of the three already-staged round 5 repairs.
+- Paths staged:
+- - The existing 14-path staged set is unchanged; no path was staged by the reviewer in round 6.
+
+Paths staged:
+
+- Staged paths remain the 14 paths declared by the request: issue, design, umbrella, plan, Step 4 ledger, validation record, harness, loader probe, five retained captures, and installer. No reviewer staging occurred this round.
+
+### Commit plan assessment for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+`a.commit` parses cleanly. Its nine dependency-ordered groups cover all 14 staged paths exactly, with accurate conventional subjects, membership, scope, and rationales. It remains unchanged and accurate after the preserved reviewer repairs.
+
+### Findings and boundaries for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Convergence is achieved. Consume the commit-ready answer and continue to the durable human `Commit` gate. Do not alter or re-stage Step 4 under this exchange. Preserve the unstaged review transcript and unrelated untracked CSV files outside the implementation commits.
+
+### Decision rationale for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Commit-ready. All six readiness floors pass: exact identity, complete implementation, mandatory validation and coverage, attributable stable staged scope, no unresolved current or carried finding, and accurate `a.commit` grouping. Round 6 made no repair and the assessed index is identical to its request index. This recommendation is advisory and does not authorize a commit.
+
+### Final reviewer decision for step 4 relocation-force-rpath (exchange 1) (round 6)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4-round-6 -->
+
+## Round 6 by human - Step 4 - human-confirmation
+
+- Recorded: 2026-08-27T08:06:47+02:00
+- Exchange: code/code/v0.27.0/relocation-force-rpath
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.md
+- Implementation step: 4
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-6 -->
