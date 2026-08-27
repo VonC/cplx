@@ -1,0 +1,579 @@
+Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 4 --prefix <the extracted prefix> --corpus <the contract corpus> --inventory <the recorded oracle>
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 110
+Purpose: Step 4 is the only observable production step of this effort. The
+         classifier is wired into the pass, the rpath write is forced, the
+         migration assertion runs after classification, and the report stream
+         replaces the mixed count. The matrix mutates real ELF objects and the
+         residual half walks a copy of the real extracted archive, so this agent
+         is the only host that can answer either.
+Captured: 2026-08-26, by the pipeline stage 'Verify relocation candidate (Step 4)'
+
+What this establishes:
+  540 cases, 0 failures, OBJECTIVE MET
+  all 30 outcome-matrix rows execute and pass against their literal cells,
+    including A29 and A30 over the loader and A23 to A28 over the adjudicated
+    R14 run
+
+  THE LOADER EXCLUSION, MEASURED FROM BOTH SIDES:
+
+    step4/loader-without-rule      PASS  4
+    step4/loader-with-rule         PASS  7
+    step4/loader-through-symlink   PASS  7
+    step4/archive-loader-runs      PASS  the shipped loader still executes
+    step4/archive-python-runs      PASS  the shipped interpreter still executes
+
+  The seam pair is what makes rows A29 and A30 mean something. Case 7 is the
+  fall-through and several shapes reach it, so a row asserting case 7 proves
+  nothing alone. The SAME tuple classified without the loader arguments answers
+  4, and with them answers 7. Delete the rule and the first half still passes
+  while the second fails.
+
+  The symlink row is the half a string comparison fails. find_dynamic_linker
+  answers with root/lib64/ld-linux-x86-64.so.2, which the archive ships as a
+  link onto root/usr/lib64/ld-linux-x86-64.so.2, while the walk yields the real
+  file. The rule compares device and inode, so it matches through the link.
+
+  The two run-after rows are the ones this step did not have and needed. Every
+  other check reads the account the pass wrote about itself, and that account
+  reconciles perfectly over a tree that segfaults: patchelf exits 0 on the
+  loader, the record reads `rewritten`, the trailer balances, and every program
+  dies at exec. Builds 102, 103 and 105 reported a clean walk and then killed
+  the stage after them. These rows RUN the tree.
+
+  ONE TERMINAL SITE, ASSERTED BY COUNT:
+
+    step4/formatter-call-sites     PASS  3
+
+  Three occurrences: the definition, the object record, and the single terminal
+  site both branches reach. It read four until round 3, because the pass emitted
+  its own trailer from the patchelf-absent early return, and the harness had
+  been written to that shape rather than to the plan's. Passing the old
+  assertion proved divergence from the criterion. The run state is now set in
+  both branches and the trailer is emitted once below them, so "a trailer on
+  every exit path" is guaranteed by the shape instead of checked by reading;
+  `step4/skipped-state PASS skipped` is that same path still reporting itself.
+
+  THE ARCHIVE RESIDUAL, REPORTED AND HANDED OVER RATHER THAN GATED:
+
+    step4/residual-classified  PASS  136 residual programs, every one classified
+    step4/residual-selected    NOTE  tools/python/root/a.out:case6
+                                     -> owned by umbrella requirement 7
+    step4/residual-count       NOTE  136 residual programs walked, 1 selected
+    step4/residual-handoff-to-step-6 NOTE  tools/python/root/a.out
+
+  What this step gates is what it owns: the assertion ran, the capture
+  reconciled, and the pass answered for every residual program it walked. An
+  unclassified residual is a classifier defect and fails here.
+
+  Whether the ARCHIVE should carry a selected residual is not gated here, for
+  the reason Step 2 gave when it deferred the residual half: a residual is a
+  property of the archive rather than of the classifier. This step walks a
+  staging copy; `a.out` lives in the published archive; and the only work that
+  removes it is umbrella requirement 7's rebuild. So it is reported with its
+  owner and handed to Step 6, whose criteria are the only gating assertion of
+  the residual half and admit no exception.
+
+  It reads case6 here where build 105 read case5, and that is the copy shift
+  the plan states in writing rather than a change in the object. Cases 3 and 5
+  compare an object against the search path computed for its prefix, so a copy
+  at another path cannot answer them. Both 5 and 6 are selected populations.
+
+  THE HARNESS NO LONGER BREAKS THE BUILD IT OBSERVES:
+
+  The residual half runs over a copy at <the harness scratch>/residual-archive.
+  Before this, it ran the production pass on the live extracted prefix, which
+  on this agent is the tree the next pipeline stage uses, and the build died at
+  `uv sync` with a segfaulting interpreter three times. Build 110 is SUCCESS.
+
+  every capture a matrix row produced is parsed by the Step 3 production reader
+    and asserted in full, field by field including the scenario-fixed path
+  the Step 3 regression re-runs unchanged inside this step, 104 cases
+  the tag flips: baseline/tag-written PASS DT_RPATH, taken by readelf after a
+    real pass rather than read out of the installer's text
+
+captured-at: 2026-08-26T17:37:01Z
+build: 110
+commit: c2dc3dc34ca28fbb2421b24c4e0f6c5e963d7d41
+commit-short: c2dc3dc34ca2
+uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+bash: 5.2.15(1)-release
+harness-sha256: 9dc373ac3ddf5968ee19eebe66d1adba419f06a67c8bb18f7056eb8558267ee6
+candidate-sha256: 5811aa59bbf98568ac1736cbb68baa0490e94d6e25790a16b5f20387aaa161fe
+host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
+patchelf: ./prefix/tools/bin/patchelf
+patchelf-version: patchelf 0.19.1
+readelf-version: GNU readelf (GNU Binutils for Debian) 2.40
+sha256sum-version: sha256sum (GNU coreutils) 9.1
+----- harness output -----
+
+== harness prerequisite preflight
+  preflight/readelf                        PASS  /usr/bin/readelf
+  preflight/sha256sum                      PASS  /usr/bin/sha256sum
+
+== capability gate: declare -A
+  assoc-array/local                        PASS  supported
+  assoc-array/local-bash                   NOTE  5.2.15(1)-release
+  target-capability/identity               PASS  identity
+  target-capability/identity               PASS  identity
+  target-capability/identity               PASS  identity
+  target-capability/capability             PASS  capability
+  target-capability/unavailable            PASS  unavailable
+  target-capability/malformed              PASS  malformed
+  target-capability/bash                   PASS  bash
+  target-capability/duplicate              PASS  duplicate
+  target-capability/ok                     PASS  ok
+  target-capability/absent                 PASS  absent
+  target-source/none-is-blocked            PASS  blocked none
+  target-source/representative             PASS  representative ok
+  target-source/representative-identity    PASS  representative identity
+  assoc-array/exact-target                 PASS  supported (retained exact capture)
+  assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
+  assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
+
+== step 0: seam
+  control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
+  identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/declared-by                     NOTE  --installer argument
+  identity/installer-digest                NOTE  5811aa59bbf9
+  seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
+  seam/probe-ran                           PASS  sentinel present
+  seam/source-returns-zero                 PASS  0
+  seam/no-install-on-source                PASS  30709
+  seam/functions-defined                   PASS
+  seam/guard-present                       PASS  1
+  seam/guard-precedes-main                 PASS  guard 1095, main 1106
+  seam/definitions-above-boundary          PASS  usage 1069, engine 1081
+  seam/execute-still-refuses               PASS  1
+  seam/execute-usage-path                  PASS  usage reached from the main flow
+
+== step 0: host-tool contract
+  host-tool/no-invocations                 PASS  0
+  host-tool/rejects                        PASS  python -c pass
+  host-tool/rejects                        PASS  /usr/bin/python -c pass
+  host-tool/rejects                        PASS  ./readelf -d x
+  host-tool/rejects                        PASS  foo | awk '{print}'
+  host-tool/rejects                        PASS  value=$(sha256sum x)
+  host-tool/rejects                        PASS  if true; then wc -l x; fi
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/contract                       NOTE  ./tools/relocation_host_tools.verification-only.txt
+  host-tool/contract-nonempty              PASS  yes
+  host-tool/contract-columns               PASS  0
+  host-tool/contract-form-values           PASS  0
+  host-tool/contract-runs-argument-answered PASS  0
+  host-tool/contract-entries-unique        PASS  0
+  host-tool/launcher-tokens-unique         PASS  0
+  host-tool/contract-indirect-resolver     PASS  0
+  host-tool/launcher-table-nonempty        PASS  yes
+  host-tool/launcher-is-permitted          PASS  0
+  host-tool/runs-argument-entries-declared PASS  0
+  host-tool/control-duplicate-entry        PASS  the rule reports 1 on the mutated contract
+  host-tool/control-duplicate-launcher     PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unanswered-entry       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-undeclared-runner      PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unowned-launcher       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-clean-duplicate-entry  PASS  silent on the real contract
+  host-tool/control-clean-duplicate-launcher PASS  silent on the real contract
+  host-tool/control-clean-unanswered-entry PASS  silent on the real contract
+  host-tool/control-clean-undeclared-runner PASS  silent on the real contract
+  host-tool/control-clean-unowned-launcher PASS  silent on the real contract
+  host-tool/no-unsupported-forms           PASS  0
+  host-tool/allowlist-unlisted             PASS  0
+  host-tool/contract-unused                PASS  0
+  host-tool/allowlist-rejects              PASS  zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if ! zzunlisted -x; then :; fi
+  host-tool/allowlist-rejects              PASS  foo | zzunlisted -x
+  host-tool/allowlist-rejects              PASS  /usr/bin/zzunlisted -x
+  host-tool/allowlist-rejects              PASS  value="$(zzunlisted -x)"
+  host-tool/allowlist-rejects              PASS  find . -exec zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  find . -execdir zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  if true; then zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  while :; do zzunlisted -x; done
+  host-tool/allowlist-rejects              PASS  if true; then :; else zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  if zzunlisted -q; then :; fi
+  host-tool/allowlist-rejects              PASS  until zzunlisted; do :; done
+  host-tool/allowlist-rejects              PASS  coproc zzunlisted -x
+  host-tool/allowlist-rejects              PASS  case "$x" in $pat) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a)zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  { zzunlisted -x; }
+  host-tool/allowlist-rejects              PASS  VAR=1 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  VAR=1 OTHER=2 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  >/dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  > /dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  foo &>/dev/null zzunlisted
+  host-tool/allowlist-rejects              PASS  command zzunlisted -x
+  host-tool/allowlist-rejects              PASS  command -v zzunlisted
+  host-tool/allowlist-rejects              PASS  exec zzunlisted -x
+  host-tool/allowlist-rejects              PASS  exec -a myname zzunlisted -x
+  host-tool/allowlist-rejects              PASS  echo a | xargs zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0 -r zzunlisted -i
+  host-tool/allowlist-rejects              PASS  echo a | xargs -P 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -I {} zzunlisted {}
+  host-tool/allowlist-rejects              PASS  echo a | xargs -n1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-procs 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -rP 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  exec -ca name zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0rn1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --eof zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -e zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -E eofstr zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --replace zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-args 3 zzunlisted
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in \)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in @(a|b)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in +(y)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in !(z)) zzunlisted -x ;; esac
+  host-tool/allowlist-allows               PASS  sed -e 's/a/b/' file
+  host-tool/allowlist-allows               PASS  local x="$INSTALL_PREFIX/tools/python/root/lib64/ld-linux-x86-64.so.2"
+  host-tool/allowlist-allows               PASS  myfun() { :; }; myfun arg
+  host-tool/allowlist-allows               PASS  printf '%s' "$x"
+  host-tool/allowlist-allows               PASS  case "$engine" in rsync) rsync -av a b ;; esac
+  host-tool/allowlist-allows               PASS  { printf '%s' "$x"; }
+  host-tool/allowlist-allows               PASS  LC_ALL=C sort file
+  host-tool/allowlist-allows               PASS  plain_assignment=value
+  host-tool/allowlist-allows               PASS  plain_assignment=${value}
+  host-tool/allowlist-allows               PASS  prefixed=${HOME}/tools
+  host-tool/allowlist-allows               PASS  concatenated=$(basename x)suffix
+  host-tool/allowlist-allows               PASS  dotted=$(dirname y).bak
+  host-tool/allowlist-allows               PASS  arr=(one two three)
+  host-tool/allowlist-allows               PASS  arr+=(four five)
+  host-tool/allowlist-allows               PASS  quoted="${k}literal"
+  host-tool/allowlist-allows               PASS  defaulted=${g:-defaultword}
+  host-tool/allowlist-allows               PASS  stripped=${i#prefixword}
+  host-tool/allowlist-allows               PASS  nested=$(basename $(dirname x))suffix
+  host-tool/allowlist-allows               PASS  deeper=$(basename $(dirname $(readlink y)))tail
+  host-tool/allowlist-allows               PASS  casein=$(case $x in p)head -c 4 q ;; esac)more
+  host-tool/allowlist-allows               PASS  ifin=$(if true; then od -c a; fi)tailone
+  host-tool/allowlist-allows               PASS  whilein=$(while :; do tr a b; done)tailtwo
+  host-tool/allowlist-allows               PASS  groupin=$( { sort z; } )tailthree
+  host-tool/allowlist-allows               PASS  lookup=$(command -v rsync)
+  host-tool/allowlist-allows               PASS  piped=$(echo a | xargs -0 -r sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  replaced=$(echo a | xargs -I {} sed -i -e s/a/b/ {})
+  host-tool/allowlist-allows               PASS  parallel=$(echo a | xargs -P 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  named=$(exec -a alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  clustered=$(echo a | xargs -rP 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  execclust=$(exec -ca alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  builtin cd /tmp
+  host-tool/unspaced-case-arm-is-seen      PASS  a)cmd names the unlisted command
+  host-tool/substitution-close-is-not-an-opener PASS  $(basename x)suffix is one word
+  host-tool/boundary-fires                 PASS  eval "zzunlisted -x"
+  host-tool/boundary-fires                 PASS  if eval "$payload"; then :; fi
+  host-tool/boundary-fires                 PASS  VAR=1 eval "$payload"
+  host-tool/boundary-fires                 PASS  command "$launcher_target" -x
+  host-tool/boundary-fires                 PASS  command -v "$launcher_target"
+  host-tool/boundary-fires                 PASS  xargs -0 "$launcher_target"
+  host-tool/boundary-fires                 PASS  echo a | xargs -rP 4 "$launcher_target"
+  host-tool/boundary-fires                 PASS  exec -a alias "$launcher_target"
+  host-tool/boundary-fires                 PASS  command eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -p eval "$payload"
+  host-tool/boundary-allows-literal-target PASS  a literal launcher target is readable
+  host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
+  host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
+
+== host capability for step 4
+  host/can-run-step-4                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
+
+== step 0: baseline capture
+  baseline/fixture-anchored                PASS  /home/builder/prefix/lib
+  baseline/fixture-tag-before              PASS  1
+  baseline/target-rpath-computed           PASS  <the harness scratch>/baseline-prefix/tools/python/root/usr/lib64
+  baseline/production-pass-ran             PASS  0
+  baseline/mixed-count-replaced            PASS  one CPLX-ELF/1 trailer, no mixed count
+  baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
+  baseline/rpath-value-rewritten           PASS  <the harness scratch>/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
+  baseline/tag-written                     PASS  DT_RPATH
+  baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
+  baseline/objects-walked                  NOTE  2
+  baseline/donor                           NOTE  /bin/true
+  baseline/installer-lines                 NOTE  1281
+  step4/pass-defined                       PASS  fix_elf_paths
+
+== step 3: the corpus is the frozen witness
+  corpus/path                              NOTE  ./tools/relocation_corpus.verification-only.txt
+  corpus/present                           PASS  7 canonical obj vectors
+  corpus/frozen-bytes                      PASS  64a3173cebf84add5c7c40020a50e93390df32b2
+  corpus/class-canonical-obj               PASS  7 vectors
+  corpus/class-canonical-end               PASS  2 vectors
+  corpus/class-reader-valid                PASS  4 vectors
+  corpus/class-rejected                    PASS  23 vectors
+  corpus/class-path                        PASS  7 vectors
+  corpus/class-capture-valid               PASS  5 vectors
+  corpus/class-capture-reject              PASS  11 vectors
+
+== step 3: the formatter emits the canonical bytes
+  step3/formatter-defined                  PASS  emit_cplx_elf_v1_record
+  formatter/canonical-simple               PASS  CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6c69622f666f6f2e736f
+  formatter/canonical-root-relative        PASS  CPLX-ELF/1 obj case=3 rpath=rewritten interp=rewritten path=7573722f6c69622f6c69627a2e736f2e31
+  formatter/canonical-delimiter-bytes      PASS  CPLX-ELF/1 obj case=4 rpath=already-correct interp=not-applicable path=6120623d630a
+  formatter/canonical-non-utf8             PASS  CPLX-ELF/1 obj case=2 rpath=not-dynamic interp=not-applicable path=78ff2e736f
+  formatter/canonical-shortest             PASS  CPLX-ELF/1 obj case=7 rpath=excluded interp=not-applicable path=61
+  formatter/canonical-at-wrap              PASS  CPLX-ELF/1 obj case=6 rpath=rewritten interp=failed path=6c69622f616263646566672e736f2e31
+  formatter/canonical-across-wrap          PASS  CPLX-ELF/1 obj case=1 rpath=rewritten interp=unchanged path=6c69622f61626364656667682e736f2e31
+  formatter/path-simple                    PASS  6c69622f666f6f2e736f
+  formatter/path-root-relative             PASS  7573722f6c69622f6c69627a2e736f2e31
+  formatter/path-delimiter-bytes           PASS  6120623d630a
+  formatter/path-non-utf8                  PASS  78ff2e736f
+  formatter/path-shortest                  PASS  61
+  formatter/path-at-wrap                   PASS  6c69622f616263646566672e736f2e31
+  formatter/path-across-wrap               PASS  6c69622f61626364656667682e736f2e31
+  formatter/canonical-end-completed-design-sample PASS  CPLX-ELF/1 end state=completed reason=none walked=1 r-rewritten=0 r-failed=1 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=1 i-not-applicable=0 mig-checked=1 mig-failed=0
+  formatter/canonical-end-skipped          PASS  CPLX-ELF/1 end state=skipped reason=patchelf-absent walked=0 r-rewritten=0 r-failed=0 r-already-correct=0 r-not-dynamic=0 r-excluded=0 i-rewritten=0 i-failed=0 i-unchanged=0 i-not-applicable=0 mig-checked=0 mig-failed=0
+  formatter/refuses                        PASS  obj 8 failed unchanged /tmp/cplx-step3-dest/a /tmp/cplx-step3-dest
+  formatter/refuses                        PASS  obj 5 bogus unchanged /tmp/cplx-step3-dest/a /tmp/cplx-step3-dest
+  formatter/refuses                        PASS  obj 5 failed bogus /tmp/cplx-step3-dest/a /tmp/cplx-step3-dest
+  formatter/refuses                        PASS  end completed patchelf-absent 0 0 0 0 0 0 0 0 0 0 0 0
+  formatter/refuses                        PASS  end skipped none 0 0 0 0 0 0 0 0 0 0 0 0
+  formatter/refuses                        PASS  end skipped patchelf-absent 0 1 0 0 0 0 0 0 0 0 0 0
+
+== step 3: the reader accepts what the grammar allows
+  reader/needs-trailer-simple              PASS  trailer
+  reader/needs-trailer-root-relative       PASS  trailer
+  reader/needs-trailer-delimiter-bytes     PASS  trailer
+  reader/needs-trailer-non-utf8            PASS  trailer
+  reader/needs-trailer-shortest            PASS  trailer
+  reader/needs-trailer-at-wrap             PASS  trailer
+  reader/needs-trailer-across-wrap         PASS  trailer
+  reader/permuted-obj-permuted             PASS  fields located by name
+  reader/permuted-obj-permuted-2           PASS  fields located by name
+  reader/permuted-end-permuted             PASS  fields located by name
+  reader/permuted-end-permuted-2           PASS  fields located by name
+
+== step 3: the reader refuses what it must
+  reader/rejects-unknown-marker            PASS  marker
+  reader/rejects-unknown-kind              PASS  kind
+  reader/rejects-obj-missing-field         PASS  missing
+  reader/rejects-obj-duplicate-field       PASS  duplicate
+  reader/rejects-obj-unknown-field         PASS  unknown
+  reader/rejects-obj-bad-rpath-token       PASS  token
+  reader/rejects-obj-bad-interp-token      PASS  token
+  reader/rejects-obj-case-zero             PASS  case
+  reader/rejects-obj-case-eight            PASS  case
+  reader/rejects-obj-path-empty            PASS  path
+  reader/rejects-obj-path-odd-length       PASS  path
+  reader/rejects-obj-path-uppercase-hex    PASS  path
+  reader/rejects-obj-path-non-hex          PASS  path
+  reader/rejects-obj-path-leading-slash    PASS  path
+  reader/rejects-obj-path-leading-dot-slash PASS  path
+  reader/rejects-end-bad-state-reason      PASS  pairing
+  reader/rejects-end-bad-state-reason-2    PASS  pairing
+  reader/rejects-end-unknown-state         PASS  pairing
+  reader/rejects-end-missing-count         PASS  missing
+  reader/rejects-end-duplicate-count       PASS  duplicate
+  reader/rejects-end-unknown-count         PASS  unknown
+  reader/rejects-end-negative-count        PASS  number
+  reader/rejects-end-non-numeric-count     PASS  number
+
+== step 3: reconciliation is categorical
+  reader/capture-design-sample             PASS  accepted
+  reader/capture-empty-completed           PASS  accepted
+  reader/capture-skipped                   PASS  accepted
+  reader/capture-two-objects               PASS  accepted
+  reader/capture-mixed-with-human-lines    PASS  accepted
+  reader/capture-rejects-unknown-marker-in-capture PASS  marker
+  reader/capture-rejects-obj-after-trailer PASS  trailer
+  reader/capture-rejects-no-trailer        PASS  trailer
+  reader/capture-rejects-two-trailers      PASS  trailer
+  reader/capture-rejects-walked-mismatch   PASS  walked
+  reader/capture-rejects-token-miscount    PASS  per-token
+  reader/capture-rejects-aggregate-only    PASS  per-token
+  reader/capture-rejects-mig-checked-mismatch PASS  migration
+  reader/capture-rejects-mig-failed-exceeds PASS  migration
+  reader/capture-rejects-skipped-with-record PASS  skipped
+  reader/capture-rejects-skipped-nonzero-count PASS  skipped
+
+== step 3: the two ends agree
+  step3/round-trip                         PASS  the reader accepts what the formatter emits
+
+== step 3: the formatter has no production call site
+  step4/formatter-call-sites               PASS  3
+  step3/reader-absent-from-installer       PASS  0
+
+== step 4: the matrix is a table, not a description
+  matrix/rectangular                       PASS  7
+  matrix/row-count                         PASS  30
+  matrix/cells-closed                      PASS  0
+
+== step 4: the production runs
+
+== step 4: every row against its literal cells
+  A01/case                                 PASS  6
+  A01/rpath                                PASS  rewritten
+  A01/interp                               PASS  rewritten
+  A02/case                                 PASS  4
+  A02/rpath                                PASS  rewritten
+  A02/interp                               PASS  not-applicable
+  A03/case                                 PASS  6
+  A03/rpath                                PASS  rewritten
+  A03/interp                               PASS  rewritten
+  A04/case                                 PASS  7
+  A04/rpath                                PASS  excluded
+  A04/interp                               PASS  unchanged
+  A05/case                                 PASS  7
+  A05/rpath                                PASS  excluded
+  A05/interp                               PASS  rewritten
+  A06/case                                 PASS  2
+  A06/rpath                                PASS  not-dynamic
+  A06/interp                               PASS  not-applicable
+  A07/case                                 PASS  1
+  A07/rpath                                PASS  failed
+  A07/interp                               PASS  not-applicable
+  A08/case                                 PASS  3
+  A08/rpath                                PASS  already-correct
+  A08/interp                               PASS  not-applicable
+  A09/case                                 PASS  3
+  A09/rpath                                PASS  already-correct
+  A09/interp                               PASS  unchanged
+  A10/case                                 PASS  7
+  A10/rpath                                PASS  excluded
+  A10/interp                               PASS  unchanged
+  A11/case                                 PASS  7
+  A11/rpath                                PASS  excluded
+  A11/interp                               PASS  unchanged
+  A12/case                                 PASS  2
+  A12/rpath                                PASS  not-dynamic
+  A12/interp                               PASS  not-applicable
+  A13/case                                 PASS  1
+  A13/rpath                                PASS  failed
+  A13/interp                               PASS  not-applicable
+  A14/case                                 PASS  5
+  A14/rpath                                PASS  rewritten
+  A14/interp                               PASS  unchanged
+  A15/case                                 PASS  5
+  A15/rpath                                PASS  rewritten
+  A15/interp                               PASS  rewritten
+  A16/case                                 PASS  1
+  A16/rpath                                PASS  failed
+  A16/interp                               PASS  failed
+  A17/case                                 PASS  1
+  A17/rpath                                PASS  failed
+  A17/interp                               PASS  failed
+  A18/case                                 PASS  1
+  A18/rpath                                PASS  failed
+  A18/interp                               PASS  failed
+  A19/case                                 PASS  1
+  A19/rpath                                PASS  failed
+  A19/interp                               PASS  not-applicable
+  A20/case                                 PASS  6
+  A20/rpath                                PASS  rewritten
+  A20/interp                               PASS  failed
+  A21/case                                 PASS  5
+  A21/rpath                                PASS  failed
+  A21/interp                               PASS  unchanged
+  A22/case                                 PASS  6
+  A22/rpath                                PASS  rewritten
+  A22/interp                               PASS  failed
+  A23/case                                 PASS  4
+  A23/rpath                                PASS  failed
+  A23/interp                               PASS  not-applicable
+  A24/case                                 PASS  6
+  A24/rpath                                PASS  failed
+  A24/interp                               PASS  unchanged
+  A25/case                                 PASS  7
+  A25/rpath                                PASS  excluded
+  A25/interp                               PASS  unchanged
+  A26/case                                 PASS  7
+  A26/rpath                                PASS  excluded
+  A26/interp                               PASS  unchanged
+  A27/case                                 PASS  2
+  A27/rpath                                PASS  not-dynamic
+  A27/interp                               PASS  not-applicable
+  A28/case                                 PASS  1
+  A28/rpath                                PASS  failed
+  A28/interp                               PASS  not-applicable
+  A29/case                                 PASS  7
+  A29/rpath                                PASS  excluded
+  A29/interp                               PASS  not-applicable
+  A30/case                                 PASS  7
+  A30/rpath                                PASS  excluded
+  A30/interp                               PASS  not-applicable
+
+== step 4: every capture parses and reconciles
+  step4/capture-R0                         PASS  parsed and reconciled
+  step4/capture-R1                         PASS  parsed and reconciled
+  step4/capture-R2                         PASS  parsed and reconciled
+  step4/capture-R3                         PASS  parsed and reconciled
+  step4/capture-R4                         PASS  parsed and reconciled
+  step4/capture-R5                         PASS  parsed and reconciled
+  step4/capture-R6                         PASS  parsed and reconciled
+  step4/capture-R7                         PASS  parsed and reconciled
+  step4/capture-IF01                       PASS  parsed and reconciled
+  step4/capture-IF02                       PASS  parsed and reconciled
+  step4/capture-IW01                       PASS  parsed and reconciled
+  step4/capture-IW02                       PASS  parsed and reconciled
+  step4/capture-R14                        PASS  parsed and reconciled
+
+== step 4: the migration figures
+  step4/mig-R3                             PASS  1,0
+  step4/mig-R4                             PASS  1,1
+  step4/mig-IW01                           PASS  1,0
+
+== step 4: both axes account for every walked object
+  step4/rpath-axis-sums-R0                 PASS  3
+  step4/interp-axis-sums-R0                PASS  3
+  step4/rpath-axis-sums-R1                 PASS  8
+  step4/interp-axis-sums-R1                PASS  8
+  step4/rpath-axis-sums-R2                 PASS  8
+  step4/interp-axis-sums-R2                PASS  8
+  step4/rpath-axis-sums-R3                 PASS  3
+  step4/interp-axis-sums-R3                PASS  3
+  step4/rpath-axis-sums-R4                 PASS  3
+  step4/interp-axis-sums-R4                PASS  3
+  step4/rpath-axis-sums-R5                 PASS  3
+  step4/interp-axis-sums-R5                PASS  3
+  step4/rpath-axis-sums-R6                 PASS  3
+  step4/interp-axis-sums-R6                PASS  3
+  step4/rpath-axis-sums-R7                 PASS  3
+  step4/interp-axis-sums-R7                PASS  3
+  step4/rpath-axis-sums-IF01               PASS  2
+  step4/interp-axis-sums-IF01              PASS  2
+  step4/rpath-axis-sums-IF02               PASS  2
+  step4/interp-axis-sums-IF02              PASS  2
+  step4/rpath-axis-sums-IW01               PASS  2
+  step4/interp-axis-sums-IW01              PASS  2
+  step4/rpath-axis-sums-IW02               PASS  2
+  step4/interp-axis-sums-IW02              PASS  2
+  step4/rpath-axis-sums-R14                PASS  7
+  step4/interp-axis-sums-R14               PASS  7
+
+== step 4: a skipped pass still says so
+  step4/skipped-state                      PASS  skipped
+  step4/skipped-reason                     PASS  patchelf-absent
+  step4/skipped-capture                    PASS  a skipped pass emits a lawful capture
+
+== step 4: the loader exclusion, at the seam
+  step4/loader-resolved                    NOTE  <the harness scratch>/step4-loader/tools/python/root/lib64/ld-linux-x86-64.so.2
+  step4/loader-without-rule                PASS  4
+  step4/loader-with-rule                   PASS  7
+  step4/loader-through-symlink             PASS  7
+
+== step 4: the residual half over the real archive
+  step4/residual-oracle                    NOTE  ./tools/inventory.develop-24.verification-only.txt
+  step4/residual-copy                      NOTE  <the harness scratch>/residual-archive
+  step4/residual-capture                   PASS  the archive walk reconciles
+  step4/archive-loader-runs                PASS  the shipped loader still executes after the pass
+  step4/archive-python-runs                PASS  the shipped interpreter still executes after the pass
+  step4/residual-selected                  NOTE  tools/python/root/a.out:case6 -> owned by umbrella requirement 7, tools-archive-rebuild
+  step4/residual-classified                PASS  136 residual programs, every one classified
+  step4/residual-count                     NOTE  136 residual programs walked, 1 selected
+  step4/residual-handoff-to-step-6         NOTE  selected residuals for the step 6 deployed-archive assertion: tools/python/root/a.out
+
+== verdict
+  step        4
+  cases       540
+  failures    0
+  installer   ./tools/install_pkg.relocation-candidate.verification-only.sh
+  readelf     /usr/bin/readelf
+  sha256sum   /usr/bin/sha256sum
+  assoc local supported (bash 5.2.15(1)-release)
+  assoc rhel  supported
+
+OBJECTIVE MET for step 4
+----- end harness output -----
+harness-exit: 0
+result: OBJECTIVE_MET
+===== END CPLX-RELOCATION-STEP4 =====

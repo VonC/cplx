@@ -1,14 +1,18 @@
 Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 1
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 97
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 110
 Purpose: Step 1's guard-complete fixture matrix over the ELF observer, both
          halves of the host-tool contract, and the Step 0 behavioural baseline.
          Re-run for Step 3, whose formatter is added to the installer this
          capture measures: the baseline is the evidence that adding it changed
          nothing an install can observe.
-Captured: 2026-08-25, by the pipeline stage 'Verify relocation candidate (Step 1)'
+Captured: 2026-08-26, by the pipeline stage 'Verify relocation candidate (Step 1)'
 
 What this establishes:
   462 cases, 0 failures, OBJECTIVE MET
+  RE-RUN unchanged against the installer that now carries the loader exclusion,
+    and unchanged is the claim: the same case count and the same zero failures
+    this step reported before that rule existed. A classifier rule that altered
+    an earlier step's reading would show here rather than in review
   the Step 0 baseline RAN against the exact staged installer: a real production
     pass over a real ELF, reporting `Fixed 1 ELF interpreter/rpath value(s)`,
     writing DT_RUNPATH, with the planted builder anchor gone. The installer now
@@ -23,14 +27,14 @@ What this establishes:
 This supersedes the build 95 capture. Same 462 cases and 0 failures, newer tree.
 
 ----- begin harness output -----
-captured-at: 2026-08-25T08:20:44Z
-build: 97
-commit: 5fe5f0244f6dcd9693a04e97c832c5be56e9a757
-commit-short: 5fe5f0244f6d
+captured-at: 2026-08-26T17:28:08Z
+build: 110
+commit: c2dc3dc34ca28fbb2421b24c4e0f6c5e963d7d41
+commit-short: c2dc3dc34ca2
 uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: e9c46735d917ab207526a76872fe7497307a647b747a37037989ecc9d0e93bf5
-candidate-sha256: 05221d33b18370242c74f8ebe2a0dd60ad8f363ffb1ae567bb21b377c9ee69d5
+harness-sha256: 9dc373ac3ddf5968ee19eebe66d1adba419f06a67c8bb18f7056eb8558267ee6
+candidate-sha256: 5811aa59bbf98568ac1736cbb68baa0490e94d6e25790a16b5f20387aaa161fe
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
 patchelf: ./prefix/tools/bin/patchelf
 patchelf-version: patchelf 0.19.1
@@ -66,15 +70,15 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
   identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
-  identity/installer-digest                NOTE  05221d33b183
+  identity/installer-digest                NOTE  5811aa59bbf9
   seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
   seam/probe-ran                           PASS  sentinel present
   seam/source-returns-zero                 PASS  0
   seam/no-install-on-source                PASS  0
   seam/functions-defined                   PASS  
   seam/guard-present                       PASS  1
-  seam/guard-precedes-main                 PASS  guard 934, main 945
-  seam/definitions-above-boundary          PASS  usage 908, engine 920
+  seam/guard-precedes-main                 PASS  guard 1095, main 1106
+  seam/definitions-above-boundary          PASS  usage 1069, engine 1081
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
@@ -212,17 +216,17 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
 == step 0: baseline capture
   baseline/fixture-anchored                PASS  /home/builder/prefix/lib
   baseline/fixture-tag-before              PASS  1
-  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.116685/baseline-prefix/tools/python/root/usr/lib64
+  baseline/target-rpath-computed           PASS  <the harness scratch>/baseline-prefix/tools/python/root/usr/lib64
   baseline/production-pass-ran             PASS  0
-  baseline/mixed-count-emitted             PASS  Fixed 1 ELF interpreter/rpath value(s)
+  baseline/mixed-count-replaced            PASS  one CPLX-ELF/1 trailer, no mixed count
   baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
-  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.116685/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-rewritten           PASS  <the harness scratch>/baseline-prefix/tools/python/root/usr/lib64
   baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
-  baseline/tag-written                     PASS  DT_RUNPATH
+  baseline/tag-written                     PASS  DT_RPATH
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
   baseline/objects-walked                  NOTE  2
   baseline/donor                           NOTE  /bin/true
-  baseline/installer-lines                 NOTE  1120
+  baseline/installer-lines                 NOTE  1281
   step1/observer-defined                   PASS  elf_observe, elf_probe, elf_obs_clear
 
 == step 1: the manifest and its anchors
