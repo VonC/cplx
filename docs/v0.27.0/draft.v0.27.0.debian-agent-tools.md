@@ -894,6 +894,27 @@ by re-running the relocation and re-reading the probe. Landing it
 before the packaging and build items means the definitive rebuild is
 validated with the final relocation semantics already in place.
 
+SCOPE CORRECTION, 2026-08-29. That sentence is the boundary of this
+item and its implementation crossed it. The step 6 acceptance added
+criteria asserting WHAT THE DEPLOYED ARCHIVE CONTAINS: that no residual
+program is selected, and that the Step 4 handoff set is empty. No
+change to `install_pkg.sh` can satisfy those, because their only
+discharge is removing an object from the archive, which is item 7's
+work. This item therefore gated itself on an artifact produced by the
+item that consumes it, item 3 could not start behind it, and nine
+review rounds ended the same way before the cause was named.
+
+The correction restores the boundary this paragraph already drew.
+What the PASS DOES stays here and is provable against the current
+archive: the classifier's membership, the tag kind and value on every
+rewritten object, the interpreter invariant, the loader resolving the
+named dependencies inside the prefix, the `OPENSSL_3.x` verdict, and
+the toolchain answering with `import ssl, zlib` on both distributions.
+What the ARCHIVE CONTAINS moves to item 7, which is where the rebuild
+happens and where those contents first become assertable. The
+assertion is not weakened and not dropped; it is made where it can be
+answered.
+
 Depends on: nothing (adjacent to item 1 only because both edit the same
 file).
 
@@ -1087,6 +1108,29 @@ unaffected: a failure still skips the stage.
 Last because every other item is one of its inputs and because the
 publication is irreversible: the releases repository forbids
 redeploying a version.
+
+INHERITED FROM ITEM 2 BY THE SCOPE CORRECTION OF 2026-08-29. The
+residual assertion over the archive belongs here, because removal is
+its only discharge and this is the item that removes. It is inherited
+whole, not softened:
+
+- no program the archive's own record does not name may be selected by
+  the relocation pass. Today one is, `tools/python/root/a.out`,
+  confirmed on both distribution paths and carried by the published
+  archive rather than by one host's copy. The rebuild removes it;
+- the Step 4 handoff set must be empty against the rebuilt archive.
+  Item 2 hands over that set with an owner named for each member, and
+  this item discharges every member by removal or by showing it
+  preserved after all;
+- the criteria item 2 could not execute without a rebuilt archive run
+  here for the first time: migration positivity and case 5 equality,
+  the three `$HOME` states, and force reinstall.
+
+Item 2's harness already carries these assertions and defers them with
+their owner named, so this item consumes a working check rather than
+writing a new one. The deferral retires itself: item 2 asserts the
+ownership register exact in both directions, so once the rebuild
+removes the object, the stale register entry fails until it is dropped.
 
 Depends on: items 1 to 6.
 
