@@ -1,11 +1,11 @@
 Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 1
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 110
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 123
 Purpose: Step 1's guard-complete fixture matrix over the ELF observer, both
          halves of the host-tool contract, and the Step 0 behavioural baseline.
          Re-run for Step 3, whose formatter is added to the installer this
          capture measures: the baseline is the evidence that adding it changed
          nothing an install can observe.
-Captured: 2026-08-26, by the pipeline stage 'Verify relocation candidate (Step 1)'
+Captured: 2026-08-28, by the pipeline stage 'Verify relocation candidate (Step 1)'
 
 What this establishes:
   462 cases, 0 failures, OBJECTIVE MET
@@ -27,14 +27,14 @@ What this establishes:
 This supersedes the build 95 capture. Same 462 cases and 0 failures, newer tree.
 
 ----- begin harness output -----
-captured-at: 2026-08-26T17:28:08Z
-build: 110
-commit: c2dc3dc34ca28fbb2421b24c4e0f6c5e963d7d41
-commit-short: c2dc3dc34ca2
+captured-at: 2026-08-28T13:02:32Z
+build: 123
+commit: aa48ff8acc8b975b67914eb88970f28dabc02570
+commit-short: aa48ff8acc8b
 uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: 9dc373ac3ddf5968ee19eebe66d1adba419f06a67c8bb18f7056eb8558267ee6
-candidate-sha256: 5811aa59bbf98568ac1736cbb68baa0490e94d6e25790a16b5f20387aaa161fe
+harness-sha256: acfd9d19133b4027ab54fc4fe84a14cce7db6053879fe06d591dc0b34c6a58ca
+candidate-sha256: 6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
 patchelf: ./prefix/tools/bin/patchelf
 patchelf-version: patchelf 0.19.1
@@ -70,15 +70,15 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
   identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
-  identity/installer-digest                NOTE  5811aa59bbf9
+  identity/installer-digest                NOTE  6d043f148d17
   seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
   seam/probe-ran                           PASS  sentinel present
   seam/source-returns-zero                 PASS  0
   seam/no-install-on-source                PASS  0
-  seam/functions-defined                   PASS  
+  seam/functions-defined                   PASS
   seam/guard-present                       PASS  1
-  seam/guard-precedes-main                 PASS  guard 1095, main 1106
-  seam/definitions-above-boundary          PASS  usage 1069, engine 1081
+  seam/guard-precedes-main                 PASS  guard 1122, main 1133
+  seam/definitions-above-boundary          PASS  usage 1096, engine 1108
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
@@ -226,7 +226,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
   baseline/objects-walked                  NOTE  2
   baseline/donor                           NOTE  /bin/true
-  baseline/installer-lines                 NOTE  1281
+  baseline/installer-lines                 NOTE  1308
   step1/observer-defined                   PASS  elf_observe, elf_probe, elf_obs_clear
 
 == step 1: the manifest and its anchors
@@ -253,7 +253,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F01/has_interp                           PASS  yes
   F01/tag_state                            PASS  none
   F01/rpath_probe_status                   PASS  ok
-  F01/rpath_value                          PASS  
+  F01/rpath_value                          PASS
   F01/interp_probe_status                  PASS  ok
   F01/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
   F01/guard                                NOTE  the lawful base, no guard rejects
@@ -264,7 +264,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F02/has_interp                           PASS  yes
   F02/tag_state                            PASS  none
   F02/rpath_probe_status                   PASS  ok
-  F02/rpath_value                          PASS  
+  F02/rpath_value                          PASS
   F02/interp_probe_status                  PASS  ok
   F02/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
   F02/guard                                NOTE  e_type reported as DYN
@@ -275,7 +275,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F03/has_interp                           PASS  no
   F03/tag_state                            PASS  none
   F03/rpath_probe_status                   PASS  ok
-  F03/rpath_value                          PASS  
+  F03/rpath_value                          PASS
   F03/interp_probe_status                  PASS  skipped
   F03/interp_value                         PASS  absent
   F03/guard                                NOTE  a library: ET_DYN with no PT_INTERP
@@ -300,7 +300,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F05/has_interp                           PASS  yes
   F05/tag_state                            PASS  none
   F05/rpath_probe_status                   PASS  ok
-  F05/rpath_value                          PASS  
+  F05/rpath_value                          PASS
   F05/interp_probe_status                  PASS  ok
   F05/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
   F05/guard                                NOTE  a SONAME passes the dynamic scan without becoming a search-path tag
@@ -376,9 +376,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F11/guard                                NOTE  two RPATH tags; the value is the FROZEN literal measured under patchelf 0.19.1
   F12/fixture-columns                      PASS  12
   F12/structural_status                    PASS  inconclusive
-  F12/cleared-elf_kind                     PASS  
-  F12/cleared-has_dyn                      PASS  
-  F12/cleared-tag_state                    PASS  
+  F12/cleared-elf_kind                     PASS
+  F12/cleared-has_dyn                      PASS
+  F12/cleared-tag_state                    PASS
   F12/rpath_probe_status                   PASS  blocked
   F12/rpath_value                          PASS  absent
   F12/interp_probe_status                  PASS  blocked
@@ -386,9 +386,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F12/guard                                NOTE  identification, magic
   F13/fixture-columns                      PASS  12
   F13/structural_status                    PASS  inconclusive
-  F13/cleared-elf_kind                     PASS  
-  F13/cleared-has_dyn                      PASS  
-  F13/cleared-tag_state                    PASS  
+  F13/cleared-elf_kind                     PASS
+  F13/cleared-has_dyn                      PASS
+  F13/cleared-tag_state                    PASS
   F13/rpath_probe_status                   PASS  blocked
   F13/rpath_value                          PASS  absent
   F13/interp_probe_status                  PASS  blocked
@@ -396,9 +396,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F13/guard                                NOTE  identification, version
   F14/fixture-columns                      PASS  12
   F14/structural_status                    PASS  inconclusive
-  F14/cleared-elf_kind                     PASS  
-  F14/cleared-has_dyn                      PASS  
-  F14/cleared-tag_state                    PASS  
+  F14/cleared-elf_kind                     PASS
+  F14/cleared-has_dyn                      PASS
+  F14/cleared-tag_state                    PASS
   F14/rpath_probe_status                   PASS  blocked
   F14/rpath_value                          PASS  absent
   F14/interp_probe_status                  PASS  blocked
@@ -406,9 +406,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F14/guard                                NOTE  identification, class
   F15/fixture-columns                      PASS  12
   F15/structural_status                    PASS  inconclusive
-  F15/cleared-elf_kind                     PASS  
-  F15/cleared-has_dyn                      PASS  
-  F15/cleared-tag_state                    PASS  
+  F15/cleared-elf_kind                     PASS
+  F15/cleared-has_dyn                      PASS
+  F15/cleared-tag_state                    PASS
   F15/rpath_probe_status                   PASS  blocked
   F15/rpath_value                          PASS  absent
   F15/interp_probe_status                  PASS  blocked
@@ -416,9 +416,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F15/guard                                NOTE  identification, data encoding
   F16/fixture-columns                      PASS  12
   F16/structural_status                    PASS  inconclusive
-  F16/cleared-elf_kind                     PASS  
-  F16/cleared-has_dyn                      PASS  
-  F16/cleared-tag_state                    PASS  
+  F16/cleared-elf_kind                     PASS
+  F16/cleared-has_dyn                      PASS
+  F16/cleared-tag_state                    PASS
   F16/rpath_probe_status                   PASS  blocked
   F16/rpath_value                          PASS  absent
   F16/interp_probe_status                  PASS  blocked
@@ -426,9 +426,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F16/guard                                NOTE  domain, e_machine
   F17/fixture-columns                      PASS  12
   F17/structural_status                    PASS  inconclusive
-  F17/cleared-elf_kind                     PASS  
-  F17/cleared-has_dyn                      PASS  
-  F17/cleared-tag_state                    PASS  
+  F17/cleared-elf_kind                     PASS
+  F17/cleared-has_dyn                      PASS
+  F17/cleared-tag_state                    PASS
   F17/rpath_probe_status                   PASS  blocked
   F17/rpath_value                          PASS  absent
   F17/interp_probe_status                  PASS  blocked
@@ -436,9 +436,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F17/guard                                NOTE  e_phnum in ordinary form
   F18/fixture-columns                      PASS  12
   F18/structural_status                    PASS  inconclusive
-  F18/cleared-elf_kind                     PASS  
-  F18/cleared-has_dyn                      PASS  
-  F18/cleared-tag_state                    PASS  
+  F18/cleared-elf_kind                     PASS
+  F18/cleared-has_dyn                      PASS
+  F18/cleared-tag_state                    PASS
   F18/rpath_probe_status                   PASS  blocked
   F18/rpath_value                          PASS  absent
   F18/interp_probe_status                  PASS  blocked
@@ -446,9 +446,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F18/guard                                NOTE  whole-header presence
   F19/fixture-columns                      PASS  12
   F19/structural_status                    PASS  inconclusive
-  F19/cleared-elf_kind                     PASS  
-  F19/cleared-has_dyn                      PASS  
-  F19/cleared-tag_state                    PASS  
+  F19/cleared-elf_kind                     PASS
+  F19/cleared-has_dyn                      PASS
+  F19/cleared-tag_state                    PASS
   F19/rpath_probe_status                   PASS  blocked
   F19/rpath_value                          PASS  absent
   F19/interp_probe_status                  PASS  blocked
@@ -456,9 +456,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F19/guard                                NOTE  program header entry size
   F20/fixture-columns                      PASS  12
   F20/structural_status                    PASS  inconclusive
-  F20/cleared-elf_kind                     PASS  
-  F20/cleared-has_dyn                      PASS  
-  F20/cleared-tag_state                    PASS  
+  F20/cleared-elf_kind                     PASS
+  F20/cleared-has_dyn                      PASS
+  F20/cleared-tag_state                    PASS
   F20/rpath_probe_status                   PASS  blocked
   F20/rpath_value                          PASS  absent
   F20/interp_probe_status                  PASS  blocked
@@ -467,9 +467,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F21/fixture-columns                      PASS  12
   F21/oracle-segment-past-file             PASS  1
   F21/structural_status                    PASS  inconclusive
-  F21/cleared-elf_kind                     PASS  
-  F21/cleared-has_dyn                      PASS  
-  F21/cleared-tag_state                    PASS  
+  F21/cleared-elf_kind                     PASS
+  F21/cleared-has_dyn                      PASS
+  F21/cleared-tag_state                    PASS
   F21/rpath_probe_status                   PASS  blocked
   F21/rpath_value                          PASS  absent
   F21/interp_probe_status                  PASS  blocked
@@ -478,9 +478,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F22/fixture-columns                      PASS  12
   F22/oracle-dynamic-size-remainder        PASS  8
   F22/structural_status                    PASS  inconclusive
-  F22/cleared-elf_kind                     PASS  
-  F22/cleared-has_dyn                      PASS  
-  F22/cleared-tag_state                    PASS  
+  F22/cleared-elf_kind                     PASS
+  F22/cleared-has_dyn                      PASS
+  F22/cleared-tag_state                    PASS
   F22/rpath_probe_status                   PASS  blocked
   F22/rpath_value                          PASS  absent
   F22/interp_probe_status                  PASS  blocked
@@ -489,9 +489,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F23/fixture-columns                      PASS  12
   F23/oracle-no-dt-null                    PASS  0
   F23/structural_status                    PASS  inconclusive
-  F23/cleared-elf_kind                     PASS  
-  F23/cleared-has_dyn                      PASS  
-  F23/cleared-tag_state                    PASS  
+  F23/cleared-elf_kind                     PASS
+  F23/cleared-has_dyn                      PASS
+  F23/cleared-tag_state                    PASS
   F23/rpath_probe_status                   PASS  blocked
   F23/rpath_value                          PASS  absent
   F23/interp_probe_status                  PASS  blocked
@@ -502,9 +502,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F24/oracle-planted-p_offset              PASS  f0ffffffffffffff
   F24/oracle-base-differs                  PASS  base p_offset is 0000000000000000
   F24/structural_status                    PASS  inconclusive
-  F24/cleared-elf_kind                     PASS  
-  F24/cleared-has_dyn                      PASS  
-  F24/cleared-tag_state                    PASS  
+  F24/cleared-elf_kind                     PASS
+  F24/cleared-has_dyn                      PASS
+  F24/cleared-tag_state                    PASS
   F24/rpath_probe_status                   PASS  blocked
   F24/rpath_value                          PASS  absent
   F24/interp_probe_status                  PASS  blocked
@@ -518,9 +518,9 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F25/oracle-sum-overflows                 PASS  2^62 + 2^62 reads as -9223372036854775808
   F25/oracle-base-differs                  PASS  base p_offset is 0000000000000000
   F25/structural_status                    PASS  inconclusive
-  F25/cleared-elf_kind                     PASS  
-  F25/cleared-has_dyn                      PASS  
-  F25/cleared-tag_state                    PASS  
+  F25/cleared-elf_kind                     PASS
+  F25/cleared-has_dyn                      PASS
+  F25/cleared-tag_state                    PASS
   F25/rpath_probe_status                   PASS  blocked
   F25/rpath_value                          PASS  absent
   F25/interp_probe_status                  PASS  blocked
@@ -535,14 +535,14 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   clearing/good-after-rejected-status      PASS  ok
   clearing/good-after-rejected-tag         PASS  rpath
   clearing/good-after-rejected-kind        PASS  exec
-  clearing/rejected-after-good-kind        PASS  
-  clearing/rejected-after-good-tag         PASS  
+  clearing/rejected-after-good-kind        PASS
+  clearing/rejected-after-good-tag         PASS
   clearing/rejected-after-good-rpath-val   PASS  absent
 
 == step 1: probe witnesses
   F01/rpath_probe_status                   PASS  ok
   F01/interp_probe_status                  PASS  ok
-  F01/rpath_value                          PASS  
+  F01/rpath_value                          PASS
   F01/obligation                           NOTE  an applicable no-tag rpath probe answers with an empty value
   F06/rpath_probe_status                   PASS  ok
   F06/interp_probe_status                  PASS  ok
