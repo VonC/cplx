@@ -758,12 +758,24 @@ output is kept as validation evidence rather than reduced to a verdict:
   lists it resolving `libm`, `libc` and `libgcc_s` inside the prefix
   when probed alone.
 - The pass reports one rpath disposition and one interpreter disposition
-  per walked ELF; each axis sums to the number of walked ELFs; and both
-  failure dispositions, `rpath failed` and `interpreter failed`, are
-  zero. A benign disposition never stands in for a failure, and
+  per walked ELF; each axis sums to the number of walked ELFs; and no
+  WRITE THAT WAS DUE failed: every object at case 4, 5 or 6 carries
+  `rewritten` or `already correct` on the axis its case selects it for.
+  A benign disposition never stands in for a failure, and
   `interpreter not applicable` and `interpreter unchanged` are recorded
   only on positive evidence, an established absence of `PT_INTERP` and an
   observed one respectively.
+- `failed` on an axis covers two events and only one of them is a defect.
+  An object at case 1 reports `failed` because its OBSERVATION was
+  inconclusive, which the supported domain excludes by rule: the archive
+  ships 26 ELF32 objects and row `A17` fixes their outcome. An object at
+  case 4, 5 or 6 reports `failed` because a write that was due did not
+  happen. Requiring the sum to be zero would fail this archive for
+  shipping what the design already excludes, so the criterion is stated
+  over writes, and every observation failure must be outside the domain
+  FOR A NAMEABLE REASON, checked against the object's own header rather
+  than accepted because the classifier said case 1. An unexplained case 1
+  is a defect wearing an exclusion's costume and fails the acceptance.
 - Idempotence holds on tag and value: a second run and a `--force`
   reinstall report zero rpath rewrites and account for the covered set as
   `rpath already correct`, and an object whose `DT_RUNPATH` already held
@@ -802,9 +814,47 @@ output is kept as validation evidence rather than reduced to a verdict:
   is the form used. A written confirmation counts only when it states
   that the agent was observed attached to, and reporting for, the exact
   relocated process in the identified validation run; a statement about
-  what the monitoring product supports in general does not. If none of
-  the three named forms can be obtained on a real target, this criterion
-  is recorded as blocked rather than satisfied by a process that started.
+  what the monitoring product supports in general does not.
+- **AMENDED 2026-08-28.** Where none of the three named forms can be
+  obtained on a real target AND the hazard is closed by construction
+  rather than by observation, this criterion may be recorded
+  `not-pursued` instead of `blocked`, by a named human decision carrying
+  its basis and an outcome for each attempted form. That is the case
+  here: the preloaded agent is statically linked, so it binds nothing
+  from the prefix and `DT_RPATH` cannot change what it resolves, leaving
+  no path by which this change reaches it. Form 1's control tool is
+  present and not executable by the deployment account; form 2's logs
+  are unreadable and its per-technology directories stay empty because
+  the preloaded object is an injection shim that promotes none of our
+  processes, measured directly; form 3 is drafted, retained and
+  deliberately not despatched. `blocked` remains the correct record
+  wherever the hazard is real and merely unobserved, and a process that
+  merely started still satisfies nothing.
+- **AMENDED 2026-08-29, a sequencing correction.** The residual and
+  handoff criteria accept the DEPLOYED archive, and the only discharge
+  for a selected residual is removal, which umbrella requirement 7
+  performs. That requirement is the integration item consuming the five
+  that precede it, this one included, so as written these criteria
+  demanded an artifact that cannot exist until after the requirement
+  they gate has closed. They are therefore TRANSFERRED to umbrella
+  requirement 7, whole and unsoftened, and are not obligations of this
+  requirement in any form.
+
+  ONE RESIDUAL CONTRACT, stated once so every document and the harness
+  can agree on it. An adjudicated residual, one the ownership register
+  names with an owner, is reported here as a HANDOVER naming that owner
+  and is NOT `UNANSWERED`: an obligation this requirement does not own
+  must not hold its verdict open. An unadjudicated residual, one no
+  owner has claimed, still FAILS here and now, which is the case this
+  criterion exists to catch. The gate is unchanged in strength and is
+  made where it can be answered, and it cannot outlive the defect
+  because the register is asserted exact in both directions, so a stale
+  entry fails at Step 4 once the rebuild removes the object.
+
+  An earlier revision of this paragraph said an adjudicated residual is
+  `UNANSWERED` here. That was the sequencing amendment, which the scope
+  correction superseded, and leaving both readings in the documents is
+  what round 10 caught.
 - With patchelf absent the pass is still skipped with a warning and the
   install still succeeds.
 - The three wiki pages describe the pass as it now behaves.
