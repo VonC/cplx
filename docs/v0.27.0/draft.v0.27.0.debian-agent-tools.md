@@ -768,7 +768,7 @@ the correction below.
 | Order | Type | Key title | Slug | Status | Requirement | Validation plan |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | completed | `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` | `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md` |
-| 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | pending | - | - |
+| 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | completed | `docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md` | `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` |
 | 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | pending | - | - |
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | pending | - | - |
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | pending | - | - |
@@ -1031,30 +1031,6 @@ to the three lookups that carry the key, the per-tool list, the package
 index and the `<arch>_pkgs_url` property. Acceptance: with only
 `rhel_9.6` files present, a server reporting `rhel_9.8_x86_64` resolves
 them and says so, while a `rhel_9.8` file, when present, still wins.
-
-The 9.8 migration also proved that the *installed* tree is not spared,
-which the recipe of the day assumed it was. The mirroring pass copies
-whatever the server carried at the time, so when system binutils moved
-from 63 to 72 the sandbox kept the copied executables while the
-`libbfd`/`libopcodes` they resolve against disappeared from
-`/usr/lib64`. The python sandbox was repaired that way; **the git
-sandbox still carries the same damage**, its `as` asking for an absent
-`libopcodes-2.35.2-63.el9.so`, and it must be repaired before git is
-rebuilt. So this item owns a sweep for that class of breakage, not only
-the key resolution.
-
-Git version, recorded here because the same sweep is what will unblock
-it: the archive ships **2.52.0** and upstream is at **2.55.0**. A bump
-is feasible today. `Cargo.toml` is already present in the 2.52.0 tree
-(crate `gitcore`, `rust-version = "1.49.0"`), but every Rust path is
-gated behind `WITH_RUST` in the Makefile, so a build that leaves it
-undefined stays pure C, which is exactly how the current archive was
-produced. Neither `cargo` nor `rustc` exists on the build host. The
-exposure is therefore scheduled rather than present: whenever upstream
-promotes a Rust subsystem from opt-in to required, this toolchain stops
-being able to build git until Rust itself becomes a cplx tool, which is
-a route-3 effort well beyond a version bump. Track it before it is
-urgent.
 
 Fifth because the sqlite item that follows cannot be validated until
 the architecture resolves on the 9.8 build account, and because the
