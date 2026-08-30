@@ -1,10 +1,31 @@
 #!/bin/bash
 
 function setenv() {
+    local tool_arg="${1}"
+    local version_arg="${2}"
 
     export tools="${HOME}/tools"
     export tool="${tools}/tool"
-    tool_prefix="$(readlink -f "${tool}/current")"
+
+    # The install prefix follows the VERSION being built, not whatever the
+    # `current` symlink happens to point at.
+    #
+    # Reading it from `current` meant a version bump configured --prefix at the
+    # OLD version and installed the new build on top of the running tree: no new
+    # directory, no rollback, and nothing said so. The version reaches this
+    # script as its second argument, so it is the honest source.
+    #
+    # `current` is NOT moved here. It is advanced once the install succeeds, at
+    # the end of this script, because rsync.sh reads that symlink to decide what
+    # to promote and deletes every other version from the live tree. Pointing it
+    # at a half-built prefix would ship a broken tool and delete the working one.
+    if [[ -n "${tool_arg}" && -n "${version_arg}" ]]; then
+        tool_prefix="${tools}/${tool_arg}/${tool_arg}-${version_arg}"
+    else
+        # No version given: keep the historical behaviour for callers that only
+        # want the environment of whatever is currently installed.
+        tool_prefix="$(readlink -f "${tool}/current")"
+    fi
     export tool_prefix
     export tool_src="${tool}/sources/current"
     export root="${tool}/root"

@@ -768,7 +768,7 @@ the correction below.
 | Order | Type | Key title | Slug | Status | Requirement | Validation plan |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | completed | `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` | `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md` |
-| 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | pending | - | - |
+| 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | completed | `docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md` | `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` |
 | 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | pending | - | - |
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | pending | - | - |
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | pending | - | - |

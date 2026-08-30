@@ -81,11 +81,23 @@ Run from the target account, with `<prefix>` substituted:
 
 ```bash
 BIN=<prefix>/tools/git/current/bin/git    # any relocated binary
+LIB=<prefix>/tools/python/root/usr/lib64/libstdc++.so.6.0.29  # any shipped library
 readelf -l "$BIN" | grep -A2 INTERP       # interpreter inside <prefix>
-readelf -d "$BIN" | grep -E 'RPATH|RUNPATH'
+readelf -d "$BIN" | grep RPATH            # RPATH exactly: RUNPATH here is a v0.26 tree
+readelf -d "$LIB" | grep RPATH            # libraries carry it too, not only programs
 ldd "$BIN"                                # every line resolves in <prefix>
 grep -RHI /home/<builder>/ <prefix>/tools # must print nothing
 ```
+
+The tag matters. Grepping for `RPATH|RUNPATH` accepts either and therefore
+proves nothing about which one is present, and a tree still carrying
+`DT_RUNPATH` has not been relocated by this version. Expect `RPATH` and no
+`RUNPATH` line at all.
+
+The library check is not redundant with the program check. `DT_RPATH` applies
+to a library's own dependencies where `DT_RUNPATH` does not, so a shipped
+library without it would resolve its dependencies against the system while the
+programs above it looked correct.
 
 For a relocated Python, the test that exercises loader and rpath at once
 is an import: `<prefix>/tools/python/current/bin/python -c "import ssl,

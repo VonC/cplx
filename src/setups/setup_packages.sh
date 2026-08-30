@@ -143,6 +143,15 @@ process_packages_url() {
         'grep -oP '"'"'<tr class="(even|odd)">.*?<a href="\K[^"]+'"'"' | grep -v "^\.\./$" | grep -E "(x86_64|noarch)"'
         'grep -oP '"'"'<a href="\K[^"]*(x86_64|noarch)[^"]*'"'"' | grep -v "^../$"'
         'grep -oP '"'"'<a href="\K[^"]+'"'"' | grep -E "(x86_64|noarch)"'
+        # Single-quoted hrefs. Every pipeline above assumes <a href="...">, so a
+        # vault that emits <a href='...'> yields nothing while the fetch itself
+        # succeeds: the run logs "Failed to extract URLs" as a soft warning and
+        # the package silently never reaches the index. That is how gdbm-devel,
+        # carried only by a copr build listing, went missing from the generated
+        # list while gdbm-libs survived through the CentOS mirrors.
+        # \x27 is the quote, written as an escape so it stays out of the shell
+        # quoting rather than needing another '"'"' dance.
+        'grep -oP '"'"'<a href=\x27\K[^\x27]+'"'"' | grep -E "(x86_64|noarch)"'
     )
     # Print the size of the grep_pipelines array
     info "grep_pipelines array size: ${#grep_pipelines[@]}"
