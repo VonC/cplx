@@ -61,9 +61,23 @@ the source and asserting what it says is not a check; it is a restatement.
 | 1 | the scope rule: helpers unset, interpreter set, measured from the run | any |
 | 2 | failing closed: a planted helper failure stops the wrapper, tree unmodified | any |
 | 3 | acceptance on RHEL: first call, second call, `-m venv`, no regression | RHEL target |
+| 4 | acceptance on Debian: the first call the defect actually breaks | Debian CI agent |
 
-Step 3 is the no-regression half the umbrella names. The Debian first call is
-owed and owned by umbrella item 7, and is not a step here.
+STEP 4 IS THE ONE THAT MATTERS, and it is a step here rather than an obligation
+handed elsewhere. The earlier draft of this plan deferred the Debian first call
+to umbrella item 7, on the correct reading that this requirement had no Debian
+environment in hand. That is no longer true: the CI agent is Debian 12, it is
+reachable again, and item 7's matrix runs after a rebuild this requirement does
+not need.
+
+So the split is now the honest one. Steps 0 to 2 prove the mechanism on any
+host. Step 3 proves nothing regressed where the defect is invisible. Step 4
+proves the fix on the distribution the defect exists on, which is the only run
+that can distinguish a working fix from a plausible one.
+
+What remains owed to item 7 is narrower and unchanged in kind: the same first
+call over the REBUILT archive, which is item 7's artifact and not this one's.
+Step 4 runs against the archive as published today.
 
 ## Numbered steps for v0.27.0 python-wrapper-foreign-distro
 
@@ -159,16 +173,44 @@ umbrella's acceptance can be checked.
 - every write lands under one throwaway prefix, `HOME` pinned to it, the live
   install's mtime unchanged before and after, and the prefix removed.
 
-### Step 3 what is OWED and not a criterion of this plan
+### Step 4 files involved
 
-The umbrella's acceptance also names a first call answering on a Debian 12
-container. That check is already in umbrella item 7's validation matrix, which
-the rebuild runs on BOTH distributions and which names "the wrapper answering
-on its first call".
+- `docs/v0.27.0/verify.wrapper-scope.sh` (existing, to be updated)
+- `docs/v0.27.0/verify.wrapper.debian.txt` (new, retained evidence)
+- the CI probe that runs it, in the pipeline repository, not here
 
-It is therefore recorded as owed, with its owner, and does NOT hold this
-requirement's verdict open. The defect is invisible on RHEL by construction, so
-no run here can substitute for it, and this plan does not pretend otherwise.
+### Step 4 goal
+
+Prove the fix on Debian 12, which is the only distribution the defect exists
+on. Everything before this step is either mechanism or no-regression; this is
+the acceptance.
+
+### Step 4 completion criteria
+
+- a first call over a freshly extracted tree on the Debian CI agent answers the
+  toolchain version through the wrapper;
+- the tree afterwards is in the expected shape: `python3` a symlink to the
+  wrapper, `python3.13_bin` the real interpreter, `python3_target` pointing at
+  it, and NO path in the tree derived from an empty string;
+- the pre-change control is recorded in the same run: with the fix reverted, the
+  same first call on the same agent MANGLES the tree, producing the
+  `current/bin/_bin` rename the issue describes. Without that control a green is
+  indistinguishable from a green on a host where the defect never fired, which
+  is precisely what a RHEL run gives and why a RHEL run cannot substitute;
+- the capture names the run identity, the agent image, its glibc version and the
+  commit, and cites that identity in its evidence rather than only in its
+  header;
+- every write lands under the build's own prefix, and the extracted archive the
+  later pipeline stages consume is left unmodified.
+
+### Step 4 what remains OWED after it
+
+The same first call over the archive umbrella item 7 REBUILDS. Step 4 runs
+against the archive as published today, which is the right target for a wrapper
+fix, and item 7's matrix re-runs it after the rebuild because a rebuilt archive
+is a different artifact. That is a narrower obligation than the one this plan
+started with, it has a named owner, and it does not hold this requirement's
+verdict open.
 
 ## Implementation decisions for v0.27.0 python-wrapper-foreign-distro
 

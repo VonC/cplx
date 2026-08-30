@@ -193,24 +193,32 @@ named. This issue names the same boundary before the work starts.
   no-regression half the umbrella names, and the RHEL target is the only place
   it can be checked.
 
-### What is owed on Debian, and who owns it
+### What this requirement proves on Debian, and what stays owed
 
-The umbrella's acceptance for this item names a first call answering on a
-Debian 12 container. **That verification is ALREADY in umbrella item 7's
-validation matrix**, which the rebuild runs on BOTH distributions and which
-lists "the wrapper answering on its first call" by name.
+An earlier revision of this section handed the Debian first call to umbrella
+item 7 outright, on the reading that this requirement had no Debian environment
+in reach. That reading was correct when it was written and is no longer: the CI
+agent IS the Debian 12 host, and it is reachable again.
 
-So it is not transferred, invented, or waived here: it is where the umbrella
-already put it, and item 7 is the item that has a Debian environment in hand.
+So the Debian first call is a criterion of THIS requirement, not an obligation
+passed on. It runs on the CI agent against the archive as published today, and
+it runs WITH A CONTROL: the same call with the fix reverted must mangle the
+tree. Without that control an A8 pass cannot be told apart from a pass on a host
+where the defect never fired, which is exactly what a RHEL run yields.
 
-This requirement is therefore COMPLETE when the first part above passes. The
-Debian first call is recorded as OWED, named with its owner, and does NOT hold
-this requirement's verdict open, for the same reason item 2's residual criteria
-do not: an obligation a requirement cannot discharge must not gate it.
+That control matters more here than it usually would. The defect is invisible on
+RHEL BY CONSTRUCTION, so every green this requirement can produce outside Debian
+is uninformative about the fix. A requirement whose only evidence is
+uninformative greens is the failure this umbrella keeps re-encountering: a check
+that passes because nothing was measured, rather than because something was
+proved.
 
-The defect is invisible on RHEL by construction, so a RHEL run cannot
-substitute. A green there would mean nothing about the fix, which is why this
-requirement does not claim one.
+WHAT STAYS OWED, narrowed to what it always should have been: the same first
+call over the archive umbrella item 7 REBUILDS. Item 7's validation matrix runs
+on both distributions and lists "the wrapper answering on its first call" by
+name, and a rebuilt archive is a different artifact from the published one, so
+that re-run is item 7's by right rather than by deferral. It does not hold this
+requirement's verdict open.
 
 ## Out of scope for this issue
 

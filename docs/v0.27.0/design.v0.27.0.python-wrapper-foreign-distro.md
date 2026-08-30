@@ -112,7 +112,7 @@ design states each rather than applying one rule everywhere.
 
 | Site | Empty answer means | Design |
 | --- | --- | --- |
-| line 30, `current/bin/python3` | either a missing symlink on a fresh tree, or a dead helper | STOP. On a fresh tree this path is the real interpreter and always resolves; an empty answer is a helper failure |
+| line 30, `current/bin/python3` | either a shape the wrapper does not support, or a dead helper | STOP. On an unconverted tree `python3` is a symlink onto `python3.13`, and the wrapper uses that answer as a FILENAME to `mv`. An empty answer is therefore never a usable state: it is a tree shaped differently than the surgery assumes, or a helper that died |
 | line 47, `current/bin/python3_target` | a converted tree missing its back-pointer | STOP. Line 32 already established the tree is converted, so this must resolve |
 | line 66, the venv `python3` | either no venv was created, or a dead helper | STOP. Reached only when `-m venv` was requested and the interpreter returned, so the venv exists |
 
@@ -173,4 +173,5 @@ which is the end-to-end call the umbrella places in item 7's validation matrix.
 | A5 | `-m venv` on RHEL | venv created and post-processed; helpers ran unset |
 | A6 | caller with no `LD_LIBRARY_PATH` | interpreter runs with an empty value, not with the variable unset |
 | A7 | `setenv` unchanged | byte-identical to its pre-change content |
-| A8 | first call on Debian 12 | OWED, and owned by umbrella item 7's validation matrix, which runs on both distributions and names this check |
+| A8 | first call on Debian 12, fix applied | the wrapper answers its version and the tree is in the expected shape. Run on the CI agent, which is the only Debian host in reach and is reachable again |
+| A9 | first call on Debian 12, fix REVERTED | the tree is mangled: `current/bin/_bin` appears. The control without which A8 cannot be told from a run on a host where the defect never fired |
