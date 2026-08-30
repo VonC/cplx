@@ -555,8 +555,8 @@ elf_probe() {
 # them consistent by construction rather than by three conditions kept in step.
 CPLX_ELF_CASE=""
 
-# elf_classify TARGET_RPATH [TARGET_INTERP] [OBJECT_PATH]: assign CPLX_ELF_CASE
-# from CPLX_ELF_OBS.
+# elf_classify TARGET_RPATH [TARGET_INTERP] [OBJECT_PATH] [SELF_TOOL]: assign
+# CPLX_ELF_CASE from CPLX_ELF_OBS.
 #
 # TARGET_RPATH is the search path build_elf_rpath computes for this install. An
 # EMPTY target is not a special case here: the classifier answers with the
@@ -576,7 +576,7 @@ CPLX_ELF_CASE=""
 # harness checks the invariants before it calls, which is where a malformed
 # input fails as a broken test rather than as a classification.
 elf_classify() {
-    local target="$1" target_interp="${2:-}" obj_path="${3:-}"
+    local target="$1" target_interp="${2:-}" obj_path="${3:-}" self_tool="${4:-}"
 
     # Case 1: a required rpath observation failed or was inconclusive. Three
     # producers and no fourth. A structural failure invalidates the whole tuple;
@@ -641,6 +641,33 @@ elf_classify() {
     # search path it has no business carrying.
     if [ -n "$target_interp" ] && [ -n "$obj_path" ] \
        && [ "$obj_path" -ef "$target_interp" ]; then
+        CPLX_ELF_CASE=7
+        return 0
+    fi
+
+    # The TOOL DOING THE WRITING, excluded by the same identity rule and for the
+    # same reason. The loader rule says an object cannot be given a search path
+    # by the mechanism it implements; this says the mechanism cannot rewrite
+    # itself while it is running.
+    #
+    # It is not a theoretical case. `find_patchelf` resolves
+    # `$INSTALL_PREFIX/tools/bin/patchelf`, the archive ships that as a symlink
+    # onto `tools/patchelf/root/bin/patchelf`, and the walk hands over the real
+    # file. Case 4 claims it on shape, a write is therefore due, and the kernel
+    # refuses to write a running executable. The acceptance measured it: one
+    # write failure over the deployed archive, `tools/patchelf/root/bin/patchelf`
+    # at case 4, silent behind a warning while the install carried on.
+    #
+    # The design already said this object belongs at case 7, three lines below
+    # the loader rule: "The vendored patchelf running the pass is already there
+    # for the same reason." It was not. Case 4 is unconditional on shape and runs
+    # first, so the sentence described an intention the code never implemented.
+    # This is the rule that makes it true.
+    #
+    # `-ef` again, and again because a string comparison would miss: the resolved
+    # path is the symlink and the walked path is its target.
+    if [ -n "$self_tool" ] && [ -n "$obj_path" ] \
+       && [ "$obj_path" -ef "$self_tool" ]; then
         CPLX_ELF_CASE=7
         return 0
     fi
@@ -956,7 +983,7 @@ fix_elf_paths() {
 
             elf_observe "$file_path" "$file_size"
             elf_probe "$file_path" "$patchelf_bin"
-            elf_classify "$new_rpath" "$new_interp" "$file_path"
+            elf_classify "$new_rpath" "$new_interp" "$file_path" "$patchelf_bin"
 
             # The rpath axis. The case is the object's population identity and does
             # not change with the outcome of acting on it, so a write that fails
