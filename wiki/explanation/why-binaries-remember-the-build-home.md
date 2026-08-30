@@ -80,13 +80,36 @@ answers, and only the first one can really move to compile time.
 
 ### Layer 1 (the rpath): mostly side-steppable
 
+**Since v0.27.0 the install-time rewrite settles this layer at deployment
+rather than at link time.** The pass writes `DT_RPATH`, not `DT_RUNPATH`, and
+the choice carries two consequences worth stating plainly:
+
+- **`LD_LIBRARY_PATH` no longer wins.** `DT_RUNPATH` is consulted after the
+  environment, so anything on `LD_LIBRARY_PATH` outranked the shipped
+  libraries; `DT_RPATH` is consulted before it. Setting `LD_LIBRARY_PATH` to
+  point at a system library will not override a shipped one any more, which is
+  the point: the prefix resolves against itself.
+- **`setenv` stops affecting the shipped directories.** The `setenv` export
+  that used to be needed to make a relocated tree find its own libraries is
+  now inert for them, because the tree carries its own answer. It still governs
+  anything outside the prefix. An export left in place is harmless and no
+  longer load-bearing, so removing it changes nothing and keeping it explains
+  nothing.
+
+`DT_RPATH` also applies transitively, to the dependencies of a shipped library
+and not only to the program that started the lookup, which `DT_RUNPATH` does
+not. That is what lets a shipped `.so` pull in another shipped `.so` instead of
+the system copy.
+
+What follows is the compile-time alternative, kept because it explains why the
+install-time pass exists rather than the other way round.
+
 Linking with `$ORIGIN`-relative entries (`$ORIGIN` expands, at load
 time, to the directory of the binary being loaded) plus
 `--enable-new-dtags` (which emits `DT_RUNPATH` instead of `DT_RPATH`,
 letting `LD_LIBRARY_PATH` take precedence again) would make library
 lookup relocatable for any prefix, forever. It is fiddly with the
 current layout, though:
-
 - binaries sit at several depths (`<tool>/current/bin`,
   `root/usr/bin`), so no single `LDFLAGS` value fits all of them;
 - some rpaths are cross-tool (python's `_ssl` module points into the

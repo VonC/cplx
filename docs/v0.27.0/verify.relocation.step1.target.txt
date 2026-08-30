@@ -1,0 +1,78 @@
+Harness: docs/v0.27.0/verify.relocation-target-observer.sh
+Target: the deployment target, RHEL 9.8 (bash 5.1.8, coreutils 8.32, binutils 2.35.2)
+Purpose: Step 1's observer must produce the right tuple on the host the install
+         actually runs on, not only on the CI agent that can build fixtures. The
+         target ships no patchelf, which is the design's premise rather than a
+         gap: elf_observe is the structural read and needs none.
+Captured: 2026-08-20, over ssh, by the reviewer-runnable script named above.
+
+Re-measured this round because the observer CHANGED: the integer guards were
+         rewritten, so the previous target capture no longer describes the code
+         that is staged. The rule is the digest, not a judgement about whether
+         the change looked relevant.
+
+What this establishes:
+  the observer is the PRODUCTION function, sourced through the Step 0 seam on
+    the target's own bash, which supports the associative array it needs
+  ten real system objects, each compared against the TARGET's own readelf: an
+    oracle that shares none of the observer's beliefs about where a field lives
+  both elf_kind values and both has_interp values occur in the corpus
+  an object the observer calls inconclusive counts as a FAILURE here, never as
+    an exclusion, because every object in the corpus has a right answer
+
+The size contract is exercised in both directions, and it is why this script
+         exists: `find -printf '%s'` without `-L` reports a symlink's own size,
+         so three of these ten libraries were first rejected as too short to
+         hold a header while readelf read them fine. Handed the link size the
+         observer must reject; handed the resolved size it must accept.
+
+Provenance: the installer sha256 below is checked against the local repository.
+         Nothing in this capture is edited.
+
+===== BEGIN CPLX-RELOCATION-STEP1-TARGET =====
+bash        5.1.8(1)-release
+od          od (GNU coreutils) 8.32
+readelf     GNU readelf version 2.35.2-72.el9
+patchelf    absent (shipped by the installer, not the host)
+installer   sha256 eba5a5e27b796ba0392af4c13f76b0c9fe3db7e6f80c9f3da5a5ea10f6a81962
+
+seam/source-rc                     0
+seam/defined-elf_obs_clear         yes
+seam/defined-elf_obs_inconclusive  yes
+seam/defined-elf_read_le           yes
+seam/defined-elf_observe           yes
+seam/defined-elf_probe             yes
+seam/assoc-array                   supported
+
+--- production observer vs the target own readelf ---
+agree         true                             dyn|yes|yes|none
+agree         bash                             dyn|yes|yes|none
+agree         od                               dyn|yes|yes|none
+agree         find                             dyn|yes|yes|none
+agree         ssh                              dyn|yes|yes|none
+agree         libz.so.1                        dyn|yes|no|none (symlink, resolved size)
+agree         libc.so.6                        dyn|yes|yes|none
+agree         libtinfo.so.6                    dyn|yes|no|none (symlink, resolved size)
+agree         ld-linux-x86-64.so.2             dyn|yes|no|none
+agree         libcrypto.so.3                   dyn|yes|no|none (symlink, resolved size)
+
+--- the size contract: a link own size is not the size of what is read ---
+size/link-vs-resolved              link=14 resolved=102552
+size/unresolved-rejected           inconclusive (correct: it was told 14 bytes)
+size/resolved-accepted             ok
+
+--- the walk that will feed it never yields a symlink ---
+walk/type-f-present                yes
+walk/no-follow                     yes
+
+--- rejection: a non-ELF and a truncated ELF must both be inconclusive ---
+reject plain      structural=inconclusive  kind=[] rpath_probe=blocked interp_probe=blocked
+reject trunc      structural=inconclusive  kind=[] rpath_probe=blocked interp_probe=blocked
+
+--- clearing rule: neither direction carries residue ---
+clear/reject-then-good             structural=ok kind=dyn tag=none
+clear/good-then-reject             structural=inconclusive kind=[] tag=[]
+
+totals: observed 10, agree 10, failures 0
+result: OBSERVER_AGREES_WITH_TARGET_READELF
+===== END CPLX-RELOCATION-STEP1-TARGET =====

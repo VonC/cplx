@@ -1,0 +1,59 @@
+Probe: docs/v0.27.0/probe.loader-survives-rpath.sh <the extracted prefix>/tools
+Target: Debian 12 CI agent (patchelf 0.19.1, glibc 2.34 in the archive), build 123
+Purpose: The Step 4 loader exclusion rests on a measurement, and a measurement
+         taken on one host is a rule with one witness. This is the same script
+         the RHEL 9.8 target ran, on the second host the archive runs on. It
+         writes only copies under a scratch directory and never touches the
+         extracted prefix.
+Captured: 2026-08-28, by the pipeline stage 'Verify relocation candidate'
+
+What this establishes:
+  the loader does NOT survive the case 4 write, and patchelf says it does:
+    exit 0 before, patchelf exit 0, 897856 to 905089 bytes, then signal 11
+  a program whose PT_INTERP names the patched loader dies the same way, which
+    is the `uv sync` SIGSEGV of builds 102, 103 and 105 reproduced on purpose
+  the blast radius is ONE object: libc, libm, libdl, libpthread, libz and
+    libstdc++ take the same write together and a program still runs through
+    them at exit 0, so the fix is one exclusion and not a retreat from case 4
+  the same four readings the RHEL 9.8 target produced, so the rule now rests on
+    both hosts the archive runs on rather than on the one where it was found
+
+The target reading, for comparison, taken 2026-08-26 on RHEL 9.8 with the same
+patchelf 0.19.1 and the same glibc 2.34:
+
+  clean-loader           exit 0
+  patchelf-set-rpath     exit 0, 897856 -> 905033
+  patched-loader         exit 139 (signal 11)
+  py-via-patched-loader  exit 139 (signal 11)
+  ordinary libraries     exit 0 before and after
+
+The byte counts differ by the length of the search path each host computes,
+which is the only thing that differs between the two runs.
+
+===== BEGIN CPLX-LOADER-PROBE =====
+archive   : ./prefix/tools
+host      : Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+patchelf  : patchelf 0.19.1
+
+== 1. the shipped loader, untouched
+  clean-loader: exit 0
+  clean-loader: ld.so (GNU libc) stable release version 2.34.
+  rpath-before: []
+
+== 2. the same loader after the case 4 write
+  patchelf-set-rpath: exit 0
+  rpath-after : [./prefix/tools/python/root/usr/lib64:./prefix/tools/python/root/usr/lib:./prefix/tools/python/root/lib64]
+  size        : 897856 -> 905089
+  patched-loader: exit 139 (signal 11)
+
+== 3. a program through each loader
+  py-interp   : ./prefix/tools/python/root/lib64/ld-linux-x86-64.so.2
+  py-via-patched-loader: exit 139 (signal 11)
+
+== 4. the ordinary libraries, which must NOT be excluded
+  before      : exit 0
+  after (all) : exit 0
+
+probe complete; nothing under ./prefix/tools was written
+probe-exit: 0
+===== END CPLX-LOADER-PROBE =====

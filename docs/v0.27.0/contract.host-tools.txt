@@ -1,0 +1,119 @@
+# CPLX installer host-tool contract, v0.27.0
+#
+# The commands `src/setups/env/bin/install_pkg.sh` may depend on the HOST to
+# supply. This file is the allowlist half of the host-tool rule: the harness
+# extracts every command-position word from the installer and every entry is
+# required to appear here, so adding a host dependency means editing this file
+# and having that edit reviewed.
+#
+# ENTRY rows, five columns, all required:
+#   name           | the command word as written
+#   form           | direct   the shell runs it, and the harness can see the word
+#                  | indirect it is reached through a variable, so no lexical rule
+#                  |          can see it; the resolver column must then name a
+#                  |          function that exists in the installer
+#   resolver       | the function that resolves an indirect command; `-` for direct
+#   runs-argument  | yes if this tool executes one of its own arguments as a
+#                  | command, no otherwise. There is no default and no curated
+#                  | list: every entry must answer, so a tool cannot be permitted
+#                  | without someone deciding whether the rule has to follow it.
+#                  | Every `yes` must own at least one LAUNCHER row below.
+#   why            | what it is for
+#
+# LAUNCHER rows, five columns, all required:
+#   the literal `launcher`
+#   token          | the word that introduces the command: a command name, or an
+#                  | option such as `-exec` when the launching is done by one
+#   owner          | the entry or shell builtin the token belongs to
+#   short-options  | the SHORT option letters that take a SEPARATE operand
+#   long-options   | the LONG option names that do, comma separated
+#
+# The option columns are why this is a table rather than a rule of thumb.
+# `xargs -P 4 cmd`, `xargs -rP 4 cmd` and `exec -ca name cmd` each put a
+# non-option word between the launcher and the command, and a rule that skipped
+# only `-`-prefixed words reported `4` and `name` as host dependencies. Short
+# options cluster, so the letters are walked rather than the word measured.
+#
+# An operand is REQUIRED unless the letter or name carries a `?`, in which case
+# it is OPTIONAL and must be attached. The difference decides whether the next
+# word belongs to the option or is the command: `xargs -E eof-str cmd` consumes
+# `eof-str`, while `xargs --eof cmd` and `xargs -e cmd` consume nothing and run
+# `cmd`. Treating an optional operand as required swallowed the command.
+#
+# `builtin` is deliberately absent: `builtin NAME` runs a shell builtin by
+# definition and can never reach an external.
+#
+# What is NOT here, deliberately:
+#
+#   Shell keywords and builtins. They are the interpreter, not the host, and the
+#   deployment contract already pins the interpreter (Bash 4.0+, and 5.1.8 on
+#   the target). A builtin adds no host dependency, so requiring it to be listed
+#   would grow the file without measuring anything.
+#
+#   `readelf` and `sha256sum`. They are HARNESS prerequisites and must never run
+#   during an install. They are named in the denylist rule instead, so their
+#   appearance in the installer is a failure rather than a missing entry.
+#
+# Two known limits, both stated, because a rule that hides its blind spots
+# reports success from them.
+#
+# 1. It is lexical, so a command the shell only assembles at run time cannot be
+#    read: a command reached through a variable, a command inside `eval`, and a
+#    launcher whose operand is computed. The first is why `form` exists and why
+#    `indirect` must name a resolver the harness confirms is defined. The other
+#    two are refused rather than guessed: the gate FAILS on a file containing
+#    them instead of reporting zero for it.
+#
+# 2. Its coverage of DIRECT positions is only as good as its openers and skips,
+#    and those have been wrong nine times, in both directions. Missed first: a
+#    `case` arm's command, a brace group's, and a command behind `NAME=value`
+#    prefixes. Over-reported next: `{` in the opener class read every `${value}`
+#    as a command, and a bare `)` read `$(basename x)suffix` as a command called
+#    `suffix`. Missed again: a blank required after `)` hid `a)cmd`;
+#    non-overlapping matches let an opener consume a keyword so
+#    `if true; then cmd; fi` never saw `cmd`; `coproc` and the non-literal
+#    patterns `$pat)` and `\))` were outside the rule; a command behind a
+#    permitted launcher was read as an argument; a leading redirection hid the
+#    command after it; and clustered short options put the operand where the
+#    command was expected.
+#
+#    Every one is now a named case, rejects for what must be seen and allows for
+#    what must not, one case per shape on each side, and each reject requires the
+#    EXACT planted dependency rather than any unlisted word. The COUNT is
+#    recorded rather than the current opener list, because the list keeps
+#    changing and the count is what says how much to trust it.
+#
+# What is NOT a limit, recorded so it is not mistaken for one: `{` opens a group
+# only when a blank follows. That is exact, not narrowing. `{` is a reserved word
+# and must be delimited, so `{ls; }` is a Bash syntax error rather than a call to
+# `ls`.
+#
+# launcher|token|owner|short-options|long-options
+launcher|command|command||
+launcher|exec|exec|a|
+launcher|xargs|xargs|adEILnPse?i?l?|arg-file,delimiter,max-args,max-procs,max-chars,eof?,replace?,max-lines?
+launcher|-exec|find||
+launcher|-execdir|find||
+#
+# name|form|resolver|runs-argument|why
+basename|direct|-|no|the leaf of a path, for names in messages and link targets
+chmod|direct|-|no|make a generated wrapper executable
+cp|direct|-|no|the cp copy engine, mirror and single-file deploy
+cut|direct|-|no|select a field from an already-split line
+dirname|direct|-|no|the parent of a path, when creating a destination
+find|direct|-|yes|the tree walks: symlink retarget, pycache prune, text and ELF passes
+grep|direct|-|no|locate the text files still carrying the builder anchor
+head|direct|-|no|bounded reads: the first archive of a sort, four magic bytes
+ln|direct|-|no|publish a bin entry as a symlink
+mkdir|direct|-|no|create destination directories
+od|direct|-|no|read raw bytes as hex, for the magic test and the ELF observer
+patchelf|indirect|find_patchelf|no|read and rewrite ELF interpreter and rpath
+readlink|direct|-|no|read a symlink target before deciding to retarget it
+rm|direct|-|no|empty a destination and prune pycache directories
+rsync|direct|-|no|the rsync copy engine, when the host provides it
+sed|direct|-|no|rewrite builder-anchored paths inside text files
+sort|direct|-|no|order archives so the newest can be taken
+tar|direct|-|no|unpack the installation archive
+touch|direct|-|no|write the completion flag
+tr|direct|-|no|squeeze whitespace out of byte dumps
+xargs|direct|-|yes|apply the text rewrite across the matched file list
