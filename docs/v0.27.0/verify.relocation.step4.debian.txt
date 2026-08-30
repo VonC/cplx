@@ -1,12 +1,12 @@
 Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 4 --prefix <the extracted prefix> --corpus <the contract corpus> --inventory <the recorded oracle>
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 110
+Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 123
 Purpose: Step 4 is the only observable production step of this effort. The
          classifier is wired into the pass, the rpath write is forced, the
          migration assertion runs after classification, and the report stream
          replaces the mixed count. The matrix mutates real ELF objects and the
          residual half walks a copy of the real extracted archive, so this agent
          is the only host that can answer either.
-Captured: 2026-08-26, by the pipeline stage 'Verify relocation candidate (Step 4)'
+Captured: 2026-08-28, by the pipeline stage 'Verify relocation candidate (Step 4)'
 
 What this establishes:
   540 cases, 0 failures, OBJECTIVE MET
@@ -91,14 +91,14 @@ What this establishes:
   the tag flips: baseline/tag-written PASS DT_RPATH, taken by readelf after a
     real pass rather than read out of the installer's text
 
-captured-at: 2026-08-26T17:37:01Z
-build: 110
-commit: c2dc3dc34ca28fbb2421b24c4e0f6c5e963d7d41
-commit-short: c2dc3dc34ca2
+captured-at: 2026-08-28T13:11:18Z
+build: 123
+commit: aa48ff8acc8b975b67914eb88970f28dabc02570
+commit-short: aa48ff8acc8b
 uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: 9dc373ac3ddf5968ee19eebe66d1adba419f06a67c8bb18f7056eb8558267ee6
-candidate-sha256: 5811aa59bbf98568ac1736cbb68baa0490e94d6e25790a16b5f20387aaa161fe
+harness-sha256: acfd9d19133b4027ab54fc4fe84a14cce7db6053879fe06d591dc0b34c6a58ca
+candidate-sha256: 6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
 patchelf: ./prefix/tools/bin/patchelf
 patchelf-version: patchelf 0.19.1
@@ -134,15 +134,15 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
   identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
-  identity/installer-digest                NOTE  5811aa59bbf9
+  identity/installer-digest                NOTE  6d043f148d17
   seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
   seam/probe-ran                           PASS  sentinel present
   seam/source-returns-zero                 PASS  0
   seam/no-install-on-source                PASS  30709
   seam/functions-defined                   PASS
   seam/guard-present                       PASS  1
-  seam/guard-precedes-main                 PASS  guard 1095, main 1106
-  seam/definitions-above-boundary          PASS  usage 1069, engine 1081
+  seam/guard-precedes-main                 PASS  guard 1122, main 1133
+  seam/definitions-above-boundary          PASS  usage 1096, engine 1108
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
@@ -290,7 +290,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
   baseline/objects-walked                  NOTE  2
   baseline/donor                           NOTE  /bin/true
-  baseline/installer-lines                 NOTE  1281
+  baseline/installer-lines                 NOTE  1308
   step4/pass-defined                       PASS  fix_elf_paths
 
 == step 3: the corpus is the frozen witness
@@ -558,8 +558,8 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   step4/archive-loader-runs                PASS  the shipped loader still executes after the pass
   step4/archive-python-runs                PASS  the shipped interpreter still executes after the pass
   step4/residual-selected                  NOTE  tools/python/root/a.out:case6 -> owned by umbrella requirement 7, tools-archive-rebuild
-  step4/residual-classified                PASS  136 residual programs, every one classified
-  step4/residual-count                     NOTE  136 residual programs walked, 1 selected
+  step4/residual-classified                PASS  137 residual programs, every one classified
+  step4/residual-count                     NOTE  137 residual programs walked, 1 selected
   step4/residual-handoff-to-step-6         NOTE  selected residuals for the step 6 deployed-archive assertion: tools/python/root/a.out
 
 == verdict
