@@ -768,7 +768,7 @@ the correction below.
 | Order | Type | Key title | Slug | Status | Requirement | Validation plan |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | completed | `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` | `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md` |
-| 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | pending | - | - |
+| 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | completed | `docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md` | `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` |
 | 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | pending | - | - |
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | pending | - | - |
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | pending | - | - |
@@ -894,6 +894,27 @@ by re-running the relocation and re-reading the probe. Landing it
 before the packaging and build items means the definitive rebuild is
 validated with the final relocation semantics already in place.
 
+SCOPE CORRECTION, 2026-08-29. That sentence is the boundary of this
+item and its implementation crossed it. The step 6 acceptance added
+criteria asserting WHAT THE DEPLOYED ARCHIVE CONTAINS: that no residual
+program is selected, and that the Step 4 handoff set is empty. No
+change to `install_pkg.sh` can satisfy those, because their only
+discharge is removing an object from the archive, which is item 7's
+work. This item therefore gated itself on an artifact produced by the
+item that consumes it, item 3 could not start behind it, and nine
+review rounds ended the same way before the cause was named.
+
+The correction restores the boundary this paragraph already drew.
+What the PASS DOES stays here and is provable against the current
+archive: the classifier's membership, the tag kind and value on every
+rewritten object, the interpreter invariant, the loader resolving the
+named dependencies inside the prefix, the `OPENSSL_3.x` verdict, and
+the toolchain answering with `import ssl, zlib` on both distributions.
+What the ARCHIVE CONTAINS moves to item 7, which is where the rebuild
+happens and where those contents first become assertable. The
+assertion is not weakened and not dropped; it is made where it can be
+answered.
+
 Depends on: nothing (adjacent to item 1 only because both edit the same
 file).
 
@@ -1011,30 +1032,6 @@ index and the `<arch>_pkgs_url` property. Acceptance: with only
 `rhel_9.6` files present, a server reporting `rhel_9.8_x86_64` resolves
 them and says so, while a `rhel_9.8` file, when present, still wins.
 
-The 9.8 migration also proved that the *installed* tree is not spared,
-which the recipe of the day assumed it was. The mirroring pass copies
-whatever the server carried at the time, so when system binutils moved
-from 63 to 72 the sandbox kept the copied executables while the
-`libbfd`/`libopcodes` they resolve against disappeared from
-`/usr/lib64`. The python sandbox was repaired that way; **the git
-sandbox still carries the same damage**, its `as` asking for an absent
-`libopcodes-2.35.2-63.el9.so`, and it must be repaired before git is
-rebuilt. So this item owns a sweep for that class of breakage, not only
-the key resolution.
-
-Git version, recorded here because the same sweep is what will unblock
-it: the archive ships **2.52.0** and upstream is at **2.55.0**. A bump
-is feasible today. `Cargo.toml` is already present in the 2.52.0 tree
-(crate `gitcore`, `rust-version = "1.49.0"`), but every Rust path is
-gated behind `WITH_RUST` in the Makefile, so a build that leaves it
-undefined stays pure C, which is exactly how the current archive was
-produced. Neither `cargo` nor `rustc` exists on the build host. The
-exposure is therefore scheduled rather than present: whenever upstream
-promotes a Rust subsystem from opt-in to required, this toolchain stops
-being able to build git until Rust itself becomes a cplx tool, which is
-a route-3 effort well beyond a version bump. Track it before it is
-urgent.
-
 Fifth because the sqlite item that follows cannot be validated until
 the architecture resolves on the 9.8 build account, and because the
 copies that unblock it today are the churn this removes. Once it lands,
@@ -1112,16 +1109,28 @@ Last because every other item is one of its inputs and because the
 publication is irreversible: the releases repository forbids
 redeploying a version.
 
-It also discharges a criterion requirement 2 could not. Step 4 of
-`relocation-force-rpath` asserts that every archive program its record
-does not name answers case 7, and the published archive carries one
-that does not: `tools/python/root/a.out`, a stray build artefact
-removed from the live tree and the build sandbox during that step's
-review but still inside what the agent downloads. Step 4 records it as
-`blocked` against this requirement by exact path, and the harness fails
-if the entry outlives the object, so removing `a.out` and deleting that
-entry from `STEP4_ARCHIVE_DEFECTS` is part of finishing this item
-rather than a follow-up to remember.
+INHERITED FROM ITEM 2 BY THE SCOPE CORRECTION OF 2026-08-29. The
+residual assertion over the archive belongs here, because removal is
+its only discharge and this is the item that removes. It is inherited
+whole, not softened:
+
+- no program the archive's own record does not name may be selected by
+  the relocation pass. Today one is, `tools/python/root/a.out`,
+  confirmed on both distribution paths and carried by the published
+  archive rather than by one host's copy. The rebuild removes it;
+- the Step 4 handoff set must be empty against the rebuilt archive.
+  Item 2 hands over that set with an owner named for each member, and
+  this item discharges every member by removal or by showing it
+  preserved after all;
+- the criteria item 2 could not execute without a rebuilt archive run
+  here for the first time: migration positivity and case 5 equality,
+  the three `$HOME` states, and force reinstall.
+
+Item 2's harness already carries these assertions and defers them with
+their owner named, so this item consumes a working check rather than
+writing a new one. The deferral retires itself: item 2 asserts the
+ownership register exact in both directions, so once the rebuild
+removes the object, the stale register entry fails until it is dropped.
 
 Depends on: items 1 to 6.
 
