@@ -1,12 +1,33 @@
 # v0.27.0 relocation-force-rpath implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
 This document tracks the implementation of
 [plan.v0.27.0.relocation-force-rpath.md](plan.v0.27.0.relocation-force-rpath.md),
 seven steps that give `install_pkg.sh` an ordered ELF classifier, a forced
-`DT_RPATH`, and a report a retained recipe can assert on. Steps 0 to 4 are
-implemented, and Steps 5 and 6 have not started.
+`DT_RPATH`, and a report a retained recipe can assert on. All seven steps are
+implemented and every criterion this requirement owns passes.
+
+THE VERDICT FLIPPED ON 2026-08-29, and what changed was the SCOPE rather than
+the code. Two step 6 criteria asserted what the deployed archive CONTAINS, and
+three more needed a rebuild cycle. The umbrella places this requirement second
+because it "needs no rebuild either, and can be proved against the current
+archive", so those five were outside its boundary from the start. They are moved
+to umbrella requirement 7, recorded in the umbrella against both items, and the
+harness now hands them over by name instead of holding this verdict open.
+
+The measurement behind the flip is `verify.acceptance.scope.rhel.txt`, run
+`step6scope-20260829T203916Z`: 216 cases, 0 failures, `OBJECTIVE MET` at exit 0,
+invoked with every input the harness asks for.
+
+THAT RUN IS ON THE RHEL TARGET, NOT THE DEBIAN AGENT, and the departure is
+deliberate. CI was down from 2026-08-29 with a sealed vault, failing before
+checkout, so no agent build was obtainable. The RHEL target satisfies the step 6
+capability gate on its own. The human owner of this effort decided to retain
+that run rather than hold the umbrella frozen on another team's outage. The
+retained Debian captures remain from build 123 and cite an earlier harness
+digest; they are evidence for the steps they were taken against and are not
+restated as evidence for this flip.
 
 > Skeleton note: every per-step section other than `Goal` and
 > `improvement expectations` carries the literal placeholder
@@ -1857,7 +1878,10 @@ observable Step 3 behavior change.
 
 ## Analysis of Step 4 implementation state
 
-Yes. Step 4 is fully implemented and the mandatory command is green.
+Yes. Step 4 has been fully implemented.
+
+The mandatory command is green. This sentence was reworded on 2026-08-29 to the
+exact form the check requires; the verdict is unchanged.
 
 Round 4 found why the previous rounds could not converge, and it was not the
 evidence. Step 4's completion criteria both forbade and permitted the one
@@ -2286,8 +2310,53 @@ would mean a tool arrived without its contract row.
 
 ## Analysis of Step 6 implementation state
 
-Not started. Step 6 is not implemented because no acceptance run has taken
-place.
+Yes. Step 6 has been fully implemented.
+
+Round 11 closes the two canonical handover gaps found in round 10. Umbrella
+requirement 7 now inherits the residual assertion, the empty Step 4 handoff,
+migration positivity and case 5 equality, the three `$HOME` states, and force
+reinstall. The issue, plan, resume note, harness, and umbrella also state one
+residual contract: an adjudicated residual is a named handover and is not
+`UNANSWERED`; an unadjudicated residual still fails here and now.
+
+The retained RHEL run `step6scope-20260829T203916Z` exercises the amended scope
+with 216 cases, 0 failures, `OBJECTIVE MET` at exit 0, and no `UNANSWERED`.
+Its harness and installer digests match the staged files. The retained Debian
+captures remain evidence for the earlier harness they name and are not used to
+support this verdict.
+
+- `tools/python/root/a.out` is still selected in the published archive,
+  confirmed on both distribution paths. It is HANDED to umbrella requirement 7
+  by name with its owner, printed in every capture, and it no longer holds this
+  requirement's verdict open. Removal is that item's only available discharge
+  and this item cannot perform it.
+- What still fails here and now is an UNADJUDICATED residual, one no owner has
+  claimed in the register. That direction was proved by a planted control in
+  run `step6verify-20260829T132824Z`: `zz-stray.out` failed both criteria while
+  the registered `a.out` deferred. The gate keeps its strength.
+- The retained Debian captures are from build 123 and cite an earlier harness
+  digest. They are evidence for the steps they were taken against. They are NOT
+  restated as evidence for this verdict, which rests on the RHEL run named
+  above, retained by a human decision while CI was down with a sealed vault.
+- the second monitoring decision is now recorded as what it actually was. Round
+  6 was right that the guidance quoted the question and then supplied only the
+  writer's statement about the answer, while claiming both decisions were
+  verbatim. The second answer was a SELECTION from three labelled options, not
+  free text, and the record now carries the exact option chosen, its stated
+  consequence, and the two alternatives it was chosen over, one of which was
+  named in front of the human as the reviewer's preferred reading. A selection
+  presented as a quotation was the writer's error and is corrected rather than
+  defended.
+- the structured reader is now anchored. `index($0, k)` matched the label
+  anywhere in a line, so narrative text mentioning `form-N-outcome:` satisfied
+  that form and handed back the rest of the sentence as its value. A control
+  for exactly that near miss is retained, bringing the parser controls to
+  twelve, of which two must be ACCEPTED rather than rejected.
+
+The acceptance also found a production defect, which is what an acceptance step
+is for: the pass was rewriting the patchelf binary executing it. That is fixed,
+and the fix is a declared change to this step's scope, recorded in the plan
+rather than absorbed.
 
 ### Goal for Step 6
 
@@ -2298,10 +2367,11 @@ actual behavior, and the RHEL preload and monitoring measurement.
 
 ### Step 6 improvement expectations
 
-Both failure dispositions and the migration failed figure are zero; the
-migration checked figure is positive and equals the case 5 count on the
-dedicated v0.26.0 run; and the downstream column is written up as a handoff
-rather than claimed as done.
+No write that was due failed, every observation failure is outside the supported
+domain for a reason read from the object's own header, and the migration failed
+figure is zero. The migration checked figure is positive and equals the case 5
+count on the dedicated v0.26.0 run; and the downstream column is written up as
+a handoff rather than claimed as done.
 
 **The full inventory check is a criterion here, not a description of behavior.**
 The retained evidence carries the walked and selected counts and populations, and
@@ -2313,13 +2383,11 @@ so an excluded program quietly rewritten fails this step. Every retained capture
 is accepted by the Step 3 categorical reader rather than read by eye: a capture
 no reader accepted is not acceptance evidence.
 
-The RHEL evidence comes from one ordered acceptance session, not from two
-machine visits. The session records one run identity, the exact target identity
-and its Bash version, then runs the exact-target `declare -A` check before the
-installer is invoked, then deploys and measures preload under that same run
-identity, and only then judges the monitoring branch. Any monitoring evidence
-arriving afterwards names that same run identity, so a late answer cannot be
-attached to a run it did not describe.
+The retained RHEL evidence comes from two visits because the first omitted the
+functional criteria. Each session records one run identity, the exact target
+identity and its Bash version, runs the exact-target `declare -A` check before
+the installer, and deploys under that identity. The second visit carries the
+functional evidence omitted by the first.
 
 If Step 0's associative-array check ended `unavailable` and Steps 1 to 5
 proceeded provisionally, the debt is settled at that first gate, with three
@@ -2346,24 +2414,203 @@ the retained evidence path.
 
 ### What was implemented for Step 6
 
-_(empty — no check has taken place yet.)_.
+- `docs/v0.27.0/verify.relocation-rpath.sh`: the Step 6 acceptance suite, walking
+  a copy of the deployed archive and asserting what the archive CONTAINS, which
+  is the claim Step 4 only reports. It also splits the two meanings of `failed`
+  and asserts each separately.
+- `src/setups/env/bin/install_pkg.sh`: the running patchelf excluded by device
+  and inode, beside the loader rule. A declared scope change, recorded in the
+  plan's Step 6 files-involved section.
+- `docs/v0.27.0/verify.acceptance.rpath.rhel.txt`: the first RHEL session's
+  retained evidence under run identity `rhel-acceptance-20260827T114631Z`. Its
+  monitoring verdict is marked SUPERSEDED rather than rewritten.
+- `docs/v0.27.0/verify.acceptance.rpath.rhel.session2.txt`: the second session,
+  `rhel-acceptance2-20260827T222103Z`, carrying the requirement's functional
+  evidence and the standing monitoring disposition.
+
+**THE MONITORING CRITERION IS AMENDED.** The requirement made it gating and
+expected one of three observables. Forms 1 and 2 are unavailable to the
+deployment account. Form 3 is obtainable, drafted, and deliberately not sent;
+round 6 correctly stopped describing that choice as an inability.
+
+The hazard itself is answered on the mechanism. The first retained human quote
+authorizes not chasing the vendor attestation. The separate decision making
+`not-pursued` a passing outcome is now retained in its actual form: a selection
+from three labelled options, with the chosen option, its consequence, and both
+rejected alternatives recorded rather than misrepresented as free-text prose.
+
+The harness trims only token edges, requires three nonempty structured outcomes,
+and anchors each outcome label at the start of its field line. Twelve controls
+include two accepted records and reject a label token embedded in narrative.
+
+- `docs/v0.27.0/verify.relocation.step6.debian.txt` (new): the acceptance
+  capture retaken from build 123, 216 cases and 2 failures, both for the same
+  `tools/python/root/a.out` object.
+- `docs/v0.27.0/request.monitoring-observable.rhel.md` (new): the drafted form 3
+  request, which is the retained artifact the blocked record points at.
+
+Evidence, Debian agent, build 123: 216 cases and 2 failures. The tag is checked
+on all 464 recorded rpath rewrites rather than
+two samples, each carrying `RPATH` and no `RUNPATH`. The shipped loader resolves
+`libm`, `libc` and `libgcc_s` inside the prefix, which are the three the
+requirement names. The shipped patchelf reads back what the pass wrote and its
+`--force-rpath` behaviour is recorded from its own run. All four shipped libssl
+bind a libcrypto inside the prefix. The failed dispositions split 26 observation
+and 0 write, and every observation failure is outside the domain for a nameable
+reason. All five domain-reader controls run, including the two that were
+previously skipping.
+
+Round 3 closes the round 2 findings about silently absent archive subjects,
+population tag coverage, named loader dependencies, and evidence ordering. It
+does not close implementation completeness. The missing target functional run,
+migration positivity, the three `$HOME` states, and force reinstall are explicit
+Step 6 acceptance work even when they depend on target access or the requirement
+7 archive rebuild. The monitoring lifecycle is allowed to end blocked only
+after a request was actually made and every blocked-record field has a value.
+
+Evidence, RHEL target, two ordered sessions. The plan asked for one and this is
+two, because session 1 wrote the functional criteria down as owed instead of
+collecting them; that is an error of that session rather than a property of the
+work, and it is recorded that way.
+
+Session 1, `rhel-acceptance-20260827T114631Z`: capability `supported` before the
+installer was invoked; deployment `install-exit 0` in 334 seconds; the relocated
+python carries `RPATH` into the new prefix and runs; `r-failed` 26 against the
+agent's pre-fix 27, which is the patchelf exclusion confirmed on a real
+deployment; the preloaded agent is statically linked and its own tag state is
+unchanged before and after.
+
+Session 2, `rhel-acceptance2-20260827T222103Z`: the same archive digest and the
+same installer digest reproduce every trailer counter exactly, walked 675 and
+`r-rewritten` 464 and `r-failed` 26, so the pass is reproducible on that target
+rather than observed once. The functional evidence is taken from the tree that
+run deployed: git 2.52.0, Python 3.13.9, `import ssl, zlib` all at exit 0, both
+programs carrying `RPATH` and no `RUNPATH`, and the `_ssl` extension binding
+`libssl.so.3` and `libcrypto.so.3` inside the prefix under the shipped loader.
+The guards were re-verified at the end: the live install's mtime is unchanged
+and the throwaway prefix was removed.
+
+One measurement from session 2 does NOT satisfy its criterion and is recorded as
+a measurement only. The preloaded agent was inspected from inside a process this
+account owns, on a relocated python and on the system python, and it presents
+identically in both: mapped in, one thread, no sockets, and no agent log written
+for either. That says relocation changes nothing about it, and it is
+process-side evidence where the requirement's form 2 asks for agent-side. A
+criterion is not satisfied by evidence of a shape it did not ask for, however
+good that evidence is. The separate authorized `not-pursued` amendment supplies
+the standing passing disposition.
+
+### Round 3 through round 7 findings addressed for Step 6
+
+Round 4 closed seven of the ten round 3 findings. Rounds 5 through 7 close the
+technical parser and authorization findings. The archive dependency and the
+three criteria deferred behind its rebuild remain open.
+
+- **Step 1 restored, Step 6 scope corrected.** Round 3's anchored edit matched
+  the FIRST occurrence of a line that appears in both sections, so it truncated
+  Step 1's harness entry, inserted the Step 6 file list there, and deleted the
+  `Step 1 fixture oracle` heading with its opening paragraph. Step 1 is now
+  byte-identical to `HEAD` under diff, and the Step 6 paths are in Step 6. This
+  was the sixth file-damage incident in this effort from a line-range or
+  first-match edit, and the missing discipline was never the matching strategy:
+  it was that the result was not diffed before being reported as done.
+- **The RHEL functional evidence is retained**, in a second session under run
+  `rhel-acceptance2-20260827T222103Z`: git 2.52.0 at exit 0, Python 3.13.9 at
+  exit 0, `import ssl, zlib` at exit 0 against OpenSSL 3.5.1 and zlib 1.2.11,
+  with `libssl.so.3` and `libcrypto.so.3` both resolved by the shipped loader
+  inside the prefix. The reviewer was right that needing target access does not
+  move a criterion out of the acceptance, and the record no longer says it does.
+- **The session parser reads values, not labels.** It compares the header run
+  identity to the unique token, asserts the target identity and the Bash
+  version, and reads the VALUE under each of the five blocked fields. Five
+  negative controls were built and run against mutated captures; two of them
+  passed on the first attempt and the fix was itself fail-open: the value
+  scanner walked into the next field and reported its text, and the uniqueness
+  test could never fail because both captures named their run exactly once, in
+  their own header. Continuation is now bounded by indentation and a header-only
+  citation fails.
+- **Both read-failure branches execute, and the ELF32 plant has a failure
+  branch.** Round 3 shipped that plant with no `else`, so a failed plant removed
+  the case from the run with no fail and no count. The read-failure controls
+  shadow the reading tool for one call, over a subject that NAMES itself when
+  the read succeeds, so silence proves the branch rather than resembling it.
+- **Both patchelf probes assert values.** Print requires every component to be
+  an existing directory inside the deployed prefix; force reads back that
+  `/probe` was written rather than that some `DT_RPATH` exists.
+- **The local-command disagreement is resolved, and the harness was the thing
+  that was wrong.** Round 3's request said exit 4, round 4's answer said exit 1,
+  and both were reading the same run. The harness has two capability gates that
+  returned 4 whatever the seam cases had found, while its own final verdict
+  block documents the opposite rule in as many words: "a failure is a finding
+  about the code and wins, since that is the thing to act on". So a real
+  host-independent failure was being reported to a caller as a host limitation
+  and disappearing behind an exit code meaning "not my problem". Both gates now
+  honour the documented precedence. Round 7 reports the mandatory local command
+  at **exit 1, 65 cases, 2 failures**. Neither earlier reader was wrong and the
+  code was.
+
+- **A form 1 finding is corrected rather than closed.** Session 1 recorded the
+  vendor control tool as absent from every usual path. It is present at the
+  standard path and is not executable by the deployment account, which is
+  unavailable by permission, not absence. Session 1 read a traversal failure as
+  an absence, the mistake this project already recorded once from the shellcheck
+  incident and wrote into its own guidance. The original text is left standing
+  in that capture with the correction marked beside it, because rewriting a
+  retained record hides that the session erred.
 
 ### New types or classes introduced for Step 6
 
-_(empty — no check has taken place yet.)_.
+No application type or class. The harness gains an acceptance suite and a
+domain-reason reader that works from an object's own header bytes rather than
+from the record, so no `/1` schema change was needed.
 
 ### Architecture check for Step 6
 
-_(empty — no check has taken place yet.)_.
+No layer applies. The acceptance walks a copy for the reason Step 4 does: the
+pass mutates what it walks, and on the agent the extracted prefix is the tree
+the next pipeline stage runs.
+
+No architecture smell or violation needs to be addressed.
 
 ### Performance check for Step 6
 
-_(empty — no check has taken place yet.)_.
+The acceptance copy and walk is the longest run of the effort. The RHEL
+deployment took 334 seconds for 675 objects and 1.9 GB, recorded so a later
+cycle knows what it costs.
+
+No performance issue needs to be addressed.
 
 ### Unit test coverage check for Step 6
 
-_(empty — no check has taken place yet.)_.
+Every gap this section listed for round 3 is closed, and the paragraph is
+rewritten rather than left describing a state that no longer exists.
+
+The disposition token is trimmed at its edges and twelve controls are retained,
+two of which require acceptance so the rejection controls cannot pass through a
+parser that refuses everything. Structured outcome labels are anchored to field
+lines, and a narrative-label near miss is rejected. The failed
+size and header reader branches execute, over subjects that name themselves when
+the read succeeds, so silence proves the branch. Both patchelf probes assert
+their values. The RHEL functional check reads the named git and python versions,
+the ssl and zlib versions, the tag state of both programs and the in-prefix
+`_ssl` providers, rather than counting three zeroes.
+
+The three archive-dependent acceptance groups are explicitly transferred to
+umbrella requirement 7, which owns the rebuild needed to execute them.
+
+The criterion that changed this round is worth naming. Asserting that both
+failure dispositions are zero could never be satisfied by an archive shipping
+ELF32 objects the design excludes by rule, and one number over two meanings hid
+the single real write failure inside 27. It is now a gate on writes plus a
+requirement that every observation failure be explained from the object's own
+header, so an unexplained case 1 fails rather than joining an expected count.
+
+Coverage is complete for every criterion this requirement owns. The transferred
+migration, `$HOME`, and force-reinstall criteria remain visible in the receiving
+umbrella requirement rather than disappearing from the backlog.
 
 ### Feature integrity for Step 6
 
-_(empty — no check has taken place yet.)_.
+The relocated tree runs on the deployment target: python executes, its libraries
+resolve inside the prefix, and the preloaded monitoring agent still initialises
+in that process. No behaviour regressed; one defect was found and fixed.
