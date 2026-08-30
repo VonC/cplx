@@ -1,0 +1,172 @@
+Harness: the Step 6 RHEL acceptance session, second visit, run by hand
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+Run identity: rhel-acceptance2-20260827T222103Z
+Captured: 2026-08-27, one ordered session, every artifact below citing that identity
+
+Purpose: session 1 left two debts that only the deployment target can settle.
+         The first is the requirement's FUNCTIONAL evidence: the toolchain git
+         and python answer as before and "import ssl, zlib" passes, over a tree
+         the candidate installer relocated. The second is the monitoring
+         observable, which session 1 recorded blocked on the strength of a
+         search this session repeats with a correction (see 4 below).
+
+         This is a SECOND VISIT and the plan asked for one ordered session. The
+         reason it is two is that session 1 recorded the functional criteria as
+         owed rather than collecting them, which was an error of that session
+         rather than a property of the work.
+
+Safety, unchanged from session 1 and verified again at the end:
+  every write landed under one throwaway prefix on /tmp, a dedicated 4 GiB
+    logical volume that is neither tmpfs nor shared with /
+  HOME was pinned to that same prefix for the install, so a mishandled --prefix
+    would have fallen back to the throwaway directory rather than the live
+    account
+  the live install was never written: its mtime is 2026-08-24 10:00:46 before
+    and after this session, and the prefix was removed at the end
+
+What this establishes:
+
+  1. CAPABILITY, checked before the installer was invoked at all
+
+     declare-A: supported
+     bash: 5.1.8(1)-release
+
+  2. THE DEPLOYMENT, of the same published archive by the same candidate
+
+     run: rhel-acceptance2-20260827T222103Z
+     prefix: /tmp/rhel-acceptance2-20260827T222103Z
+     archive: tools.2026-07-12_234035.tar.gz
+     archive-sha256: f3bba4d75a9fe8be42068e5ed78cc5cb2dd1028b17daef67bd2b742cb996a20d
+     installer-sha256: 6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
+     install-exit: 0
+     install-seconds: 334
+     prefix-size: 1.9G
+
+     CPLX-ELF/1 end state=completed reason=none walked=675
+       r-rewritten=464 r-failed=26 r-already-correct=0 r-not-dynamic=49 r-excluded=136
+       i-rewritten=163 i-failed=26 i-unchanged=134 i-not-applicable=352
+       mig-checked=0 mig-failed=0
+
+     IDENTICAL TO SESSION 1 IN EVERY COUNTER, from the same archive digest and
+     the same installer digest. The pass is reproducible on this target.
+
+  3. THE FUNCTIONAL EVIDENCE THE REQUIREMENT NAMES
+
+     run: rhel-acceptance2-20260827T222103Z, every reading below taken from the
+     tree that run deployed and from no other
+
+     toolchain-git: git version 2.52.0
+     git-version-exit: 0
+     git-init-exit: 0
+
+     toolchain-python: Python 3.13.9
+     python-version-exit: 0
+     python-sys-prefix: inside the relocated prefix, tools/python/python-3.13.9
+
+     import-ssl-zlib: ssl OpenSSL 3.5.1 1 Jul 2025, zlib 1.2.11
+     import-exit: 0
+
+     THE TAGS ON BOTH PROGRAMS, read from the deployed tree:
+       python3.13_bin: RPATH, 8 components, every one inside the prefix
+       git (git-2.52.0/bin/git): RPATH, the same 8 components
+       neither carries RUNPATH
+
+     Note that tools/git/bin/git is a Bourne-Again shell wrapper rather than an
+     ELF, so the tag evidence is taken from the program it wraps. A check that
+     read the wrapper would have found no tag and been right to.
+
+     WHERE THE LIBRARIES ACTUALLY COME FROM, resolved by the shipped loader:
+       libpython3.13.so.1.0 -> inside the prefix
+       libc.so.6, libm.so.6 -> inside the prefix
+       libz.so.1 (for git)  -> inside the prefix
+       _ssl extension module -> libssl.so.3 AND libcrypto.so.3 inside the prefix
+
+     This is the end-to-end claim the requirement asks for: not that a tag says
+     the right thing, but that the loader honours it and the OpenSSL provider
+     the interpreter actually binds is the shipped one.
+
+  4. THE MONITORING CRITERION: NOT PURSUED, by a named decision
+
+     monitoring-disposition: not-pursued
+     monitoring-decision-by: the human owner of this effort, 2026-08-28, in two
+       recorded answers. The first declined to chase the vendor attestation. The
+       second, put after round 5 of review objected that declining to ask is not
+       the same as being unable to obtain, chose PASSING OUTCOME over RECORDED
+       NEVER PASSING with the consequence stated in front of them: that Step 6
+       reaches OBJECTIVE MET once a.out is resolved, with the observable never
+       having been obtained. Both are retained verbatim with the questions that
+       produced them in the guidance file, because an earlier revision recorded
+       only a generic phrase and the reviewer was right to refuse an
+       authorization nobody could audit
+     monitoring-decision-basis: forms 1 and 2 are UNOBTAINABLE by this account
+       and form 3 is OBTAINABLE AND DECLINED, which are different claims and
+       were wrongly merged in an earlier revision. The hazard itself is closed
+       by construction, which is what makes declining form 3 defensible rather
+       than convenient
+
+     THE MECHANISM ANSWER, which is what the criterion was really asking.
+     monitoring-mechanism: the preloaded agent is static-pie linked, so it binds
+       nothing from the prefix and DT_RPATH cannot change what it resolves.
+       There is no path by which this change reaches it. A criterion asking
+       whether a change degraded something it cannot reach has been answered,
+       and answered in the only way that generalises: by mechanism rather than
+       by one observation of one run.
+
+     THE THREE NAMED FORMS, each attempted on a real target, each carrying a
+     structured outcome, because a decision not to pursue is only honest if it
+     says what was pursued first and how each attempt ended.
+
+     form-1-outcome: UNOBTAINABLE BY THIS ACCOUNT. A health or status query. The
+       vendor control tool is present at its standard path and invoking it
+       returns Permission denied. Session 1 recorded this as "no control tool
+       exists at any of the vendor's usual paths", which was a traversal failure
+       read as an absence, and is corrected here.
+
+     form-2-outcome: UNOBTAINABLE BY THIS ACCOUNT. An agent-side log or event. 8
+       files under the agent log tree, 0 readable. The per-technology
+       directories are world-writable and empty, and that is not an accident of
+       permissions: the preloaded object is an INJECTION SHIM that loads the
+       full agent only for a process it classifies as a monitored service, and
+       it promotes none of ours. Measured 2026-08-28, a later date than this
+       session and recorded as such: a system python HTTP service bound to
+       127.0.0.1, serving itself for 45 seconds and left 50 more to flush,
+       produced the shim mapped in, two threads both of them ours, one socket fd
+       ours, no dynatrace mapping beyond the shim, and zero files under the
+       entire agent tree owned by this account. Closed by measurement.
+
+     form-3-outcome: OBTAINABLE AND DECLINED. A written confirmation from the
+       owning team. The message is drafted, complete and retained at
+       docs/v0.27.0/request.monitoring-observable.rhel.md, and sending it would
+       very likely produce the observable. It was NOT sent, by the human
+       decision recorded above. An earlier revision of this record called form 3
+       unobtainable, which was false and made the amendment look forced by
+       circumstance rather than chosen; the reviewer was right to reject it.
+       Nothing prevents anyone despatching it later.
+
+     WHAT WAS MEASURED THAT SATISFIES NOTHING. The agent presents identically on
+     a relocated python and on the system python: mapped in, one thread, no
+     sockets, no log written for either. That is real evidence and it is
+     process-side, where form 2 asks for agent-side. It is recorded as a
+     measurement and it is NOT offered as satisfying the criterion, because
+     evidence of a shape the requirement did not ask for does not become
+     sufficient by being good.
+
+     WHY THIS IS AN AMENDMENT AND IS NAMED AS ONE. The requirement made this
+     criterion gating and expected one of three observables. None is obtainable
+     here. The decision is to accept the mechanism answer and stop, rather than
+     to keep an acceptance red on an attestation whose underlying risk is
+     already closed. That decision belongs to the human who owns the effort and
+     it is recorded with their name against it, dated, with its basis. It is not
+     a criterion quietly dropped, and the harness fails closed on every part of
+     this record being absent.
+
+  5. WHAT THIS SESSION DID NOT SETTLE
+
+     tools/python/root/a.out is selected on this target again, case 6, rewritten
+     on both axes. Umbrella requirement 7 owns removing it from the published
+     archive. Nothing in this session reaches it.
+
+Session order, for the record: opened and identity recorded; capability checked
+before the installer was invoked; deployed under that identity; functional
+evidence taken from the deployed tree; monitoring judged only after the
+deployment succeeded; guards re-verified and the prefix removed.
