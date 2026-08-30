@@ -1,11 +1,11 @@
 Probe: docs/v0.27.0/probe.loader-survives-rpath.sh <the extracted prefix>/tools
-Target: Debian 12 CI agent (patchelf 0.19.1, glibc 2.34 in the archive), build 110
+Target: Debian 12 CI agent (patchelf 0.19.1, glibc 2.34 in the archive), build 123
 Purpose: The Step 4 loader exclusion rests on a measurement, and a measurement
          taken on one host is a rule with one witness. This is the same script
          the RHEL 9.8 target ran, on the second host the archive runs on. It
          writes only copies under a scratch directory and never touches the
          extracted prefix.
-Captured: 2026-08-26, by the pipeline stage 'Verify relocation candidate'
+Captured: 2026-08-28, by the pipeline stage 'Verify relocation candidate'
 
 What this establishes:
   the loader does NOT survive the case 4 write, and patchelf says it does:
