@@ -2321,7 +2321,9 @@ Last, because it consumes every earlier step.
 
 ### Step 6 complexity impact
 
-None in code.
+One exclusion in the classifier, added because the acceptance measured the
+defect it prevents. The step was planned as none in code and is no longer,
+which is recorded above rather than absorbed.
 
 ### Step 6 feature preservation
 
@@ -2332,9 +2334,33 @@ This is where preservation is proved rather than asserted.
 ### Step 6 files involved
 
 - `docs/v0.27.0/verify.relocation-rpath.sh` (existing, to be updated)
-- `docs/v0.27.0/verify.acceptance.rpath.*.txt` (new, to be created): retained
-  evidence per target
-
+- `docs/v0.27.0/verify.acceptance.rpath.rhel.txt` (new): the first RHEL
+  session's retained evidence
+- `docs/v0.27.0/verify.acceptance.rpath.rhel.session2.txt` (new): the second
+  RHEL session. The plan asked for ONE ordered session and this is two, which
+  is recorded rather than smoothed over: session 1 wrote the requirement's
+  functional criteria down as owed instead of collecting them, and session 2
+  went back for them. It also corrects a form 1 finding session 1 got wrong
+- `docs/v0.27.0/request.monitoring-observable.rhel.md` (new): the drafted
+  monitoring request. It is a separate file because a blocked record whose
+  retained evidence is the record itself is circular, which round 1 caught
+- `docs/v0.27.0/verify.relocation.step6.debian.txt` (new): the acceptance
+  capture over the deployed archive
+- `docs/v0.27.0/verify.relocation.step1.debian.txt`,
+  `verify.relocation.step2.debian.txt`, `verify.relocation.step3.debian.txt`,
+  `verify.relocation.step4.debian.txt` and
+  `verify.relocation.loader-probe.debian.txt` (existing, re-taken): the agent
+  evidence, retaken from the build carrying this step's harness, because a
+  capture recording a different harness digest is evidence about a different
+  file
+- `src/setups/env/bin/install_pkg.sh` (existing, updated): **and this is a
+  declared change to this step's scope.** The step was written as "None in
+  code", and the acceptance then found a production defect: the pass was
+  rewriting the patchelf binary executing it, which the kernel refuses, so a
+  write that was due failed silently behind a warning. Finding exactly that is
+  what an acceptance step is for, and leaving a measured defect unfixed to
+  protect a scope line would be the wrong trade. The fix is one exclusion beside
+  the loader rule.
 ### Step 6 test first
 
 Acceptance cases larger than the per-step ones: a full relocation of the
@@ -2425,39 +2451,96 @@ A blocked record names, at minimum:
 
 ### Step 6 completion criteria
 
-- both failure dispositions and the migration failed figure are zero;
+- **no write that was due failed**, and every observation failure is outside the
+  supported domain for a nameable reason. `failed` on an axis covers two events
+  and only one is a defect: an object at case 1 reports it because its
+  OBSERVATION was inconclusive, which the domain excludes by rule and row `A17`
+  fixes; an object at case 4, 5 or 6 reports it because a write that was due did
+  not happen. Requiring the sum to be zero would fail this archive for shipping
+  the 26 ELF32 objects the design already excludes, so the gate is stated over
+  writes. The exclusions are checked against each object's own header rather
+  than accepted because the classifier said case 1, so an unexplained case 1
+  fails rather than joining an expected count. The raw trailer figures are
+  reported beside both, since they are the complete numbers and neither is a
+  verdict;
+- the migration failed figure is zero;
 - the migration checked figure is positive and equals the case 5 count on the
-  dedicated v0.26.0 run;
+  dedicated v0.26.0 run. MOVED to umbrella requirement 7 by the scope correction
+  below: it needs a v0.26.0 install followed by a candidate pass, which is a
+  rebuild cycle this requirement does not perform;
 - **the full inventory check is a criterion here, not a description in
   `behavior`.** The retained evidence carries the walked and selected counts and
   populations, and the assertions are the ones Step 2 states once: the 110
   flagged libraries as case 4, the python program **asserted by name**, the
   enumerated git objects, and every other archive program preserved as case 7. An
-  excluded program that was quietly rewritten fails this step. **This is the
-  ONLY gating assertion of the residual half**, which Step 2 does not make and
-  Step 4 reports without gating: here it is made over the deployed archive, so an
-  object that reached the tarball by no route at all is caught before the
-  acceptance is called green. No exception is admitted, and a residual object
-  that is neither preserved nor removed from the archive fails the acceptance;
-- **Step 4's handoff is consumed here by name.** Step 4 ends by printing the set
-  of selected residual programs it found in the staging copy, each with its
-  owning requirement, and every member of that set must be resolved before this
-  step is green: removed from the archive by its owner, or shown to be preserved
-  after all. Today that set is `tools/python/root/a.out`, owned by umbrella
-  requirement 7 (`tools-archive-rebuild`), and the rebuild it needs is the
-  discharge. A member still selected here, with no rebuild behind it, is the
-  failure this criterion exists to produce, and no adjudication reaches it: Step
-  4 may narrow what it gates, this step may not;
+  excluded program that was quietly rewritten fails this step, because that is a
+  statement about what the PASS did and this requirement owns the pass;
+- **what the ARCHIVE CONTAINS is NOT a criterion of this requirement.** SCOPE
+  CORRECTION of 2026-08-29, recorded in the umbrella against item 2.
+
+  The umbrella places this requirement second because it "needs no rebuild
+  either, and can be proved against the current archive". Two criteria written
+  into this step crossed that boundary: that no residual program the archive's
+  record does not name is selected, and that Step 4's handoff set is empty.
+  Neither is answerable by any change to `install_pkg.sh`, because the only
+  discharge is removing an object from the archive, and removal is umbrella
+  requirement 7's work. This requirement therefore gated itself on an artifact
+  produced by the requirement that consumes it, requirement 3 could not start
+  behind it, and nine review rounds ended the same way before the cause was
+  named.
+
+  Both assertions MOVE TO UMBRELLA REQUIREMENT 7 whole and unsoftened, where the
+  rebuild happens and the archive's contents first become assertable. So do the
+  three criteria this step could never execute without a rebuilt archive:
+  migration positivity and case 5 equality, the three `$HOME` states, and force
+  reinstall.
+
+  What this step still gates, and answers today against the current archive: an
+  UNADJUDICATED residual, one no owner has claimed in the register, FAILS here
+  and now. That is a statement about the pass selecting something nobody has
+  accounted for, which this requirement owns. An adjudicated one is reported
+  with its owner and handed to requirement 7. The handoff is the deliverable;
+  the discharge is not;
 - **every retained capture is accepted by the categorical reader**, the Step 3
   one, rather than being read by eye. A capture that no reader accepted is not
   acceptance evidence;
-- the shipped patchelf's actual print and force behavior is recorded;
+- the shipped patchelf's actual print and force behavior is recorded, and both
+  are asserted on the VALUE rather than on the shape of the answer: print must
+  return components that are existing directories inside the deployed prefix,
+  and force must be shown to have written the value it was asked for. A tool
+  that prints a stale target-valued rpath, or emits `DT_RPATH` while ignoring
+  `--set-rpath`, satisfies a non-emptiness test and fails the requirement;
+- **the functional evidence the requirement names is a criterion of this step,
+  taken on the target over a relocated tree**: the toolchain git answers, the
+  toolchain python answers, and `import ssl, zlib` passes, each at exit 0, with
+  the provider the interpreter actually binds resolved by the shipped loader
+  and shown to be inside the prefix. Needing a human to open the session does
+  not move this criterion outside the acceptance; it means the acceptance is
+  not finished until the session happens;
 - the `OPENSSL_3.x` verdict names a provider per libssl;
-- the monitoring criterion is either satisfied with retained evidence, or
-  recorded as blocked with every field above, and the overall verdict says
-  which: green only in the first case, `blocked` in the second;
+- the monitoring criterion carries exactly one machine-readable disposition,
+  `satisfied`, `not-pursued` or `blocked`, on exactly one retained capture, and
+  the harness parses that token rather than inferring a verdict from a heading.
+  Two captures naming two dispositions is two answers to one question and fails.
+  - `satisfied` requires a retained evidence value;
+  - `blocked` requires all five fields to carry values AND the request to have
+    been despatched;
+  - **`not-pursued` is an AMENDMENT and must read as one.** It requires the
+    mechanism answer, the decider, the basis, and an outcome recorded for each
+    of the three named forms. It is available only where the hazard is closed
+    by construction rather than by observation, and it is a human decision that
+    the harness records rather than makes. Today it is taken once: the
+    preloaded agent is statically linked, so `DT_RPATH` cannot reach it, no
+    observable form is obtainable by the deployment account, and the human
+    owner decided on 2026-08-28 not to pursue a vendor attestation for a risk
+    already closed. A `not-pursued` with any part of that record missing fails,
+    and the harness retains eight controls proving it;
 - the RHEL acceptance session ran in its stated order, with one recorded run
-  identity, the target identity and its Bash version. If Step 0's check ended
+  identity **that the evidence below it actually cites**, the target identity
+  and its Bash version. A capture naming its run once, in its own header, has
+  not cited it: the uniqueness test passes on such a file no matter what, which
+  is how both captures came to claim that every artifact cited the run while
+  neither did. If Step 0's check ended
   `unavailable`, the debt is settled inside that session, with three outcomes
   and no fourth:
 
@@ -2475,7 +2558,23 @@ A blocked record names, at minimum:
 
 ### Step 6 line budget checkpoint
 
-No production file changes.
+The step was planned as no production file change and became one, so the figure
+is recorded here rather than left saying none.
+
+`src/setups/env/bin/install_pkg.sh`, measured with `wc -l` before the first edit
+of this step and after the last:
+
+| Point | Lines |
+| --- | --- |
+| entering Step 6, the Step 5 result | 1281 |
+| after the running-patchelf exclusion | 1308 |
+| delta | +27 |
+
+Twenty-seven lines for one identity comparison and the rationale that records the
+measurement forcing it, of which 5 are code and 22 are comment. The Step 4
+checkpoint judged the file at its limit and raised the deployment shape as an
+input to the archive-shape requirement; +27 does not change that judgement and
+does not reopen it.
 
 ### Step 6 workflow timing readiness
 
@@ -2484,7 +2583,36 @@ later cycle knows what it costs.
 
 ### Step 6 time-gated status
 
-Not started.
+Run on 2026-08-28. The Debian agent half is answered by the build carrying this
+step's harness, and the RHEL half by two sessions:
+`rhel-acceptance-20260827T114631Z` and `rhel-acceptance2-20260827T222103Z`. The
+plan asked for one and there are two, because the first recorded the
+requirement's functional criteria as owed instead of collecting them.
+
+THE ACCEPTANCE IS GREEN for every criterion this requirement owns, measured by
+run `step6scope-20260829T203916Z`: 216 cases, 0 failures, `OBJECTIVE MET` at
+exit 0, with no `UNANSWERED`.
+
+- `tools/python/root/a.out` is still selected in the published archive, on both
+  distribution paths. It is TRANSFERRED to umbrella requirement 7 with its owner
+  named, reported here as a handover and NOT as `UNANSWERED`, under the one
+  residual contract the issue states and the harness implements. Migration
+  positivity and case 5 equality, the three `$HOME` states and force reinstall
+  are transferred to the same requirement for the same reason: each needs a
+  rebuild cycle this requirement does not perform.
+- an UNADJUDICATED residual, one no owner has claimed in the register, still
+  FAILS here and now. Proved by a planted control in run
+  `step6verify-20260829T132824Z`.
+
+The monitoring criterion is no longer one of them. It is recorded `not-pursued`
+by a human decision dated 2026-08-28, answered on the mechanism rather than by
+observation, and that is an **amendment to the acceptance** rather than a pass.
+An earlier revision of this section called it terminally blocked while the
+retained record said the request was never made, which round 4 was right to call
+contradictory: an undespatched request has no terminal verdict. The
+contradiction is resolved by deciding, not by relabelling.
+
+Everything else Step 6 owns passes on both hosts.
 
 ---
 
