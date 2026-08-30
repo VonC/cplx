@@ -85,18 +85,19 @@ while [ "$#" -gt 0 ]; do
         --corpus) CORPUS_ARG="$2"; shift 2 ;;
         # The recorded develop#24 inventory: the Step 2 selected-set oracle.
         --inventory) INVENTORY_ARG="$2"; shift 2 ;;
+        --rhel-session) SESSION_ARG="$2"; shift 2 ;;
         -h|--help) sed -n '2,45p' "$0"; exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 
-# Only steps 0 to 5 have case suites today. Accepting any other value would
+# Only steps 0 to 6 have case suites today. Accepting any other value would
 # let the verdict line report success for a step whose cases do not exist, which
 # is a vacuous pass at exactly the level later steps rely on. Extend this
 # dispatch and the suite together.
 case "$STEP" in
-    0|1|2|3|4|5) ;;
-    *) echo "unsupported --step $STEP: steps 0 to 5 have case suites today." >&2
+    0|1|2|3|4|5|6) ;;
+    *) echo "unsupported --step $STEP: steps 0 to 6 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -116,6 +117,7 @@ INSTALLER=$(cd "$(dirname "$INSTALLER")" && pwd)/$(basename "$INSTALLER")
 
 HOST_TOOL_CONTRACT="${HOST_TOOL_CONTRACT_ARG:-$here/contract.host-tools.txt}"
 INVENTORY="${INVENTORY_ARG:-$here/inventory.develop-24.txt}"
+SESSION_CAPTURE="${SESSION_ARG:-$here/verify.acceptance.rpath.rhel.txt $here/verify.acceptance.rpath.rhel.session2.txt}"
 
 SCRATCH="${TMPDIR:-/tmp}/cplx-relocation-verify.$$"
 failures=0
@@ -138,21 +140,26 @@ mkdir -p -- "$PREFIX"
 # ----------------------------------------------------------------- reporting ---
 EXPECT_FAIL=0
 CTL_REASON=""
-pass() { printf '  %-40s PASS  %s\n' "$1" "${2:-}"; }
+# The detail is appended only when there IS one. Written as `PASS  %s` these
+# emitted two trailing spaces on every empty-detail line, which reached the
+# retained captures and made `git diff --cached --check` report the evidence as
+# dirty. Fixing it in the reporter keeps every future capture clean instead of
+# scrubbing each one after the fact.
+pass() { printf '  %-40s PASS%s\n' "$1" "${2:+  $2}"; }
 # In a negative control the failure IS the expected result, so it is captured
 # rather than printed: a log a reader scans for FAIL must not show one the next
 # line contradicts. Only the control helper sets this flag, and it always clears
 # it, so no early return leaves the harness deaf to real failures.
 fail() {
     if [ "$EXPECT_FAIL" -eq 1 ]; then CTL_REASON="${2:-}"; return 0; fi
-    printf '  %-40s FAIL  %s\n' "$1" "${2:-}"
+    printf '  %-40s FAIL%s\n' "$1" "${2:+  $2}"
     failures=$((failures + 1))
 }
 chk() {
     cases=$((cases + 1))
     if [ "$2" = "$3" ]; then pass "$1" "$3"; else fail "$1" "want [$2] got [$3]"; fi
 }
-note() { printf '  %-40s NOTE  %s\n' "$1" "${2:-}"; }
+note() { printf '  %-40s NOTE%s\n' "$1" "${2:+  $2}"; }
 # A FOURTH outcome, and the reason it is not a fifth kind of failure or a
 # quieter pass. The criterion was asked, the answer is a real violation, and the
 # work that removes it is owned by another requirement of the umbrella. Reported
@@ -163,7 +170,7 @@ note() { printf '  %-40s NOTE  %s\n' "$1" "${2:-}"; }
 # exit code, and it names the owner every time.
 BLOCKED=""
 blocked() {
-    printf '  %-40s BLOCK %s\n' "$1" "${2:-}"
+    printf '  %-40s BLOCK%s\n' "$1" "${2:+ $2}"
     BLOCKED="${BLOCKED:+$BLOCKED; }${2:-}"
 }
 section() { printf '\n== %s\n' "$1"; }
@@ -2158,6 +2165,1214 @@ step5_suite() {
     cases=$((cases + 1))
 }
 
+
+# ---------------------------------------------------------------- step 6 ---
+# The acceptance, run as a whole rather than as a sum of the steps that fed it.
+#
+# What separates this from Step 4 is not the code it exercises but the claim it
+# makes. Step 4 walks a copy of the STAGING tree and reports what the classifier
+# did. Step 6 walks the DEPLOYED archive and asserts what it contains, which is
+# the only place that question can honestly be asked. Its residual criterion
+# therefore GATES where Step 4's reports, and no adjudication reaches it: Step 4
+# may narrow what it gates, this step may not.
+#
+# The copy discipline is Step 4's and for the same reason: the pass mutates what
+# it walks, and on the agent the extracted prefix is the tree the next pipeline
+# stage runs.
+
+# step6_run PREFIX WORK: one acceptance pass over a copy of the deployed
+# archive. Returns the capture. The copy is the caller's to remove.
+step6_run() {
+    local prefix="$1" work="$2"
+    rm -rf -- "$work" 2>/dev/null
+    mkdir -p -- "$work" 2>/dev/null || return 1
+    cp -a -- "$prefix/." "$work/" 2>/dev/null || return 1
+    step4_pass "$work"
+}
+
+# step6_case_of CAPTURE RELPATH: the case a record assigns to one path, empty
+# when the walk produced no record for it.
+step6_case_of() {
+    local rec
+    rec=$(step4_record "$1" "$2")
+    [ -n "$rec" ] || return 1
+    step4_field "$rec" case
+}
+
+
+# step6_domain_reason FILE: why this object is outside the supported domain, or
+# empty when nothing explains it.
+#
+# Option C's whole point. Asserting that an observation failure is case 1 proves
+# only that the classifier said so; it does not say the object deserved it. An
+# object that landed in case 1 for no nameable reason is a defect wearing the
+# costume of an exclusion, and a count of case 1 objects cannot tell the two
+# apart.
+#
+# FAILS CLOSED, and the first version did not. It returned `unreadable` for a
+# missing file and let a failed size read fall through to "shorter than the ELF
+# header", so an object nobody could read counted as explained. That is the very
+# hole this function exists to close, reproduced inside it: unreadable evidence
+# is not an exclusion, it is an absence of evidence, and the round 1 review was
+# right to call it. Every read is now checked, and anything unreadable returns
+# empty so the caller fails.
+#
+# Read from the file's own header bytes rather than from the record, because the
+# `/1` stream carries a case and a path and no reason, and adding one is a
+# schema change this step has no business making. The four tests are the domain
+# the design states: ELF32, wrong byte order, wrong machine, and a file too
+# short to carry a header.
+step6_domain_reason() {
+    local f="$1" sz cls dat mach
+    # Unreadable is not a reason. Empty return, caller fails.
+    [ -f "$f" ] || return 0
+    [ -r "$f" ] || return 0
+    # Size read INLINE rather than through elf_size, because this reader runs
+    # above the gate and elf_size is defined below it. A fail-closed reader that
+    # depends on where it sits in the file is not fail-closed.
+    sz=$(find "$f" -maxdepth 0 -printf '%s\n' 2>/dev/null)
+    case "$sz" in
+        ''|*[!0-9]*) return 0 ;;
+    esac
+    if [ "$sz" -lt 64 ]; then printf 'shorter than the ELF header'; return 0; fi
+    cls=$(od -An -tx1 -j 4 -N 1 "$f" 2>/dev/null | tr -d ' \n')
+    dat=$(od -An -tx1 -j 5 -N 1 "$f" 2>/dev/null | tr -d ' \n')
+    mach=$(od -An -tx1 -j 18 -N 2 "$f" 2>/dev/null | tr -d ' \n')
+    # A header byte that did not read is not a reason either.
+    [ ${#cls} -eq 2 ] || return 0
+    [ ${#dat} -eq 2 ] || return 0
+    [ ${#mach} -eq 4 ] || return 0
+    [ "$cls" = "01" ] && { printf 'ELF32'; return 0; }
+    [ "$cls" != "02" ] && { printf 'unknown ELF class %s' "$cls"; return 0; }
+    [ "$dat" != "01" ] && { printf 'not little-endian'; return 0; }
+    [ "$mach" != "3e00" ] && { printf 'not x86-64 (e_machine %s)' "$mach"; return 0; }
+    return 0
+}
+
+# step6_plant_lawful_elf64 PATH: a minimal, lawful ELF64 x86-64 header.
+#
+# The control needs a subject the reader must REFUSE to explain, and it plants
+# one rather than borrowing it. The previous version reached for FIXTURE_DONOR,
+# which is initialised further down the file than this runs, so the guard I
+# added to survive `set -u` turned the control into a silent skip: build 116 ran
+# it zero times. A control that does not run is worse than no control, because
+# the suite reports its section green either way.
+#
+# Sixty-four bytes: magic, class 2, little endian, version 1, padding, e_type
+# ET_DYN, e_machine x86-64, then zeros. Nothing here is outside the domain, so
+# the reader must answer empty.
+step6_plant_lawful_elf64() {
+    printf '\177ELF\002\001\001\000\000\000\000\000\000\000\000\000' > "$1" || return 1
+    printf '\003\000\076\000\001\000\000\000' >> "$1" || return 1
+    dd if=/dev/zero bs=1 count=40 >> "$1" 2>/dev/null || return 1
+    return 0
+}
+
+# step6_domain_reason_controls: the negative cases, because a fail-closed claim
+# is worth exactly as much as the test that proves it fails.
+#
+# Each plants its own subject and asserts the answer. Every control here either
+# runs or reports SKIP with the reason; none of them may vanish quietly.
+step6_domain_reason_controls() {
+    local d="$SCRATCH/step6-reason-ctl" r sz cls
+    section "step 6: the domain reader fails closed"
+    rm -rf -- "$d" 2>/dev/null
+    if ! mkdir -p -- "$d"; then
+        fail "step6/reason-ctl" "FIXTURE could not prepare $d"
+        cases=$((cases + 1))
+        return 0
+    fi
+
+    r=$(step6_domain_reason "$d/does-not-exist")
+    if [ -z "$r" ]; then
+        pass "step6/reason-refuses-absent" "an absent file explains nothing"
+    else
+        fail "step6/reason-refuses-absent" "READER explained an absent file as [$r]"
+    fi
+    cases=$((cases + 1))
+
+    printf 'too short' > "$d/short"
+    r=$(step6_domain_reason "$d/short")
+    if [ "$r" = "shorter than the ELF header" ]; then
+        pass "step6/reason-names-short" "$r"
+    else
+        fail "step6/reason-names-short" "READER answered [$r] for a 9-byte file"
+    fi
+    cases=$((cases + 1))
+
+    # THE DIRECTION THAT MATTERS, and the one a fail-open reader gets wrong: a
+    # lawful in-domain object must be explained by NOTHING, so that an object
+    # landing in case 1 without a reason cannot be waved through.
+    if step6_plant_lawful_elf64 "$d/lawful"; then
+        sz=$(find "$d/lawful" -maxdepth 0 -printf '%s\n' 2>/dev/null)
+        if [ "${sz:-0}" -ge 64 ]; then
+            r=$(step6_domain_reason "$d/lawful")
+            if [ -z "$r" ]; then
+                pass "step6/reason-refuses-lawful" "an in-domain object explains nothing"
+            else
+                fail "step6/reason-refuses-lawful" "READER excluded a lawful ELF64 x86-64 object as [$r]"
+            fi
+        else
+            fail "step6/reason-refuses-lawful" "FIXTURE the planted header is $sz bytes, not 64"
+        fi
+    else
+        fail "step6/reason-refuses-lawful" "FIXTURE could not plant a lawful ELF64 header"
+    fi
+    cases=$((cases + 1))
+
+    # An ELF32 header, which the reader MUST name. The positive direction of the
+    # same rule: the archive's 26 excluded objects are this shape, and a reader
+    # that could not name it would be excusing them for the wrong reason.
+    #
+    # THE PLANT IS ASSERTED IN BOTH DIRECTIONS, because round 3 shipped this
+    # check with no else branch: a failed plant removed the case from the run
+    # entirely, no fail and no count, which is the fail-open shape this whole
+    # section exists to catch. The class byte is read back too, since a dd that
+    # writes nothing leaves a lawful ELF64 header that the reader is RIGHT to
+    # refuse, and the refusal would have been reported as the reader's fault.
+    if step6_plant_lawful_elf64 "$d/elf32"; then
+        printf '\001' | dd of="$d/elf32" bs=1 seek=4 conv=notrunc 2>/dev/null
+        cls=$(dd if="$d/elf32" bs=1 skip=4 count=1 2>/dev/null | od -An -tx1 | tr -d ' \n')
+        if [ "$cls" != "01" ]; then
+            fail "step6/reason-names-elf32" \
+                "FIXTURE the class byte is [$cls], not 01: the plant did not become an ELF32 header"
+        else
+            r=$(step6_domain_reason "$d/elf32")
+            if [ "$r" = "ELF32" ]; then
+                pass "step6/reason-names-elf32" "$r"
+            else
+                fail "step6/reason-names-elf32" "READER answered [$r] for an ELF32 header"
+            fi
+        fi
+    else
+        fail "step6/reason-names-elf32" "FIXTURE could not plant a header to flip to ELF32"
+    fi
+    cases=$((cases + 1))
+
+    # An unreadable file. Portable only where permissions bite, so it SKIPS with
+    # its reason rather than passing silently on a host that cannot express it.
+    if step6_plant_lawful_elf64 "$d/noread" && chmod 000 "$d/noread" 2>/dev/null \
+       && [ ! -r "$d/noread" ]; then
+        r=$(step6_domain_reason "$d/noread")
+        if [ -z "$r" ]; then
+            pass "step6/reason-refuses-unreadable" "an unreadable file explains nothing"
+        else
+            fail "step6/reason-refuses-unreadable" "READER explained an unreadable file as [$r]"
+        fi
+        cases=$((cases + 1))
+        chmod 644 "$d/noread" 2>/dev/null
+    else
+        printf '  %-40s SKIP  this host does not enforce an unreadable regular file\n' \
+            "step6/reason-refuses-unreadable"
+    fi
+
+    # THE TWO READ-FAILURE BRANCHES, which round 2 required and round 3 recorded
+    # as required without executing. They are reachable only when a read of a
+    # file that EXISTS and IS READABLE fails, and no planted file can arrange
+    # that: the interesting state is the tool failing, not the subject being
+    # malformed. So the tool is shadowed for exactly one call, which exercises
+    # the branch itself rather than a situation that resembles it.
+    #
+    # Both must answer EMPTY. A reader that names a reason from bytes it never
+    # read is inventing the reason, and this suite would then be excusing
+    # objects on the strength of an invention.
+    # EACH SUBJECT MUST SPEAK WHEN READ, or the control proves nothing. A lawful
+    # ELF64 answers empty whether or not the shim took effect, so an empty
+    # answer over one would be indistinguishable from the shim doing nothing.
+    # The subject is therefore a file the reader NAMES when the read succeeds,
+    # and both directions are asserted: it speaks, then it goes silent.
+    printf 'tooshort' > "$d/shortsub" 2>/dev/null
+    r=$(step6_domain_reason "$d/shortsub")
+    if [ "$r" != "shorter than the ELF header" ]; then
+        fail "step6/reason-refuses-failed-size" \
+            "FIXTURE the subject answers [$r] when read, so a silent answer would prove nothing"
+    else
+        find() { return 1; }
+        r=$(step6_domain_reason "$d/shortsub")
+        unset -f find
+        if [ -z "$r" ]; then
+            pass "step6/reason-refuses-failed-size" \
+                "names the short file when the size reads, and explains nothing when it does not"
+        else
+            fail "step6/reason-refuses-failed-size" "READER answered [$r] having read no size"
+        fi
+    fi
+    cases=$((cases + 1))
+
+    if step6_plant_lawful_elf64 "$d/hdrsub"; then
+        printf '\001' | dd of="$d/hdrsub" bs=1 seek=4 conv=notrunc 2>/dev/null
+        r=$(step6_domain_reason "$d/hdrsub")
+        if [ "$r" != "ELF32" ]; then
+            fail "step6/reason-refuses-failed-header" \
+                "FIXTURE the subject answers [$r] when read, so a silent answer would prove nothing"
+        else
+            od() { return 1; }
+            r=$(step6_domain_reason "$d/hdrsub")
+            unset -f od
+            if [ -z "$r" ]; then
+                pass "step6/reason-refuses-failed-header" \
+                    "names ELF32 when the header reads, and explains nothing when it does not"
+            else
+                fail "step6/reason-refuses-failed-header" "READER answered [$r] having read no header bytes"
+            fi
+        fi
+    else
+        fail "step6/reason-refuses-failed-header" \
+            "FIXTURE could not plant a subject for the header read-failure branch"
+    fi
+    cases=$((cases + 1))
+
+    rm -rf -- "$d" 2>/dev/null
+}
+
+# step6_name_failures CAPTURE AXIS: name the objects whose AXIS reports failed,
+# and SPLIT them by what the disposition actually means.
+#
+# `failed` on an axis covers two different events, and the acceptance criterion
+# reads as though it covered one. A case 1 object reports `failed` because its
+# OBSERVATION was inconclusive, which for this archive means an ELF32 object the
+# supported domain excludes by design: the plan's own row A17 fixes that
+# outcome. A case 4, 5 or 6 object reports `failed` because a write that WAS DUE
+# did not happen, which is a defect.
+#
+# Reporting one number over both says "27 failures" about an archive whose
+# design predicts most of them. The split is what makes the criterion
+# answerable, so it is measured here rather than argued in the record.
+step6_name_failures() {
+    local work="$3"
+    local capture="$1" axis="$2" rec hex rel d n why unexplained=""
+    local total=0 observation=0 write=0 shown=0 names="" wnames=""
+    while IFS= read -r rec; do
+        [ -n "$rec" ] || continue
+        d=$(step4_field "$rec" "$axis")
+        [ "$d" = "failed" ] || continue
+        total=$((total + 1))
+        n=$(step4_field "$rec" case)
+        hex=$(step4_field "$rec" path)
+        rel=$(step4_hex_to_path "$hex")
+        case "$n" in
+            1)
+                observation=$((observation + 1))
+                why=$(step6_domain_reason "$work/$rel")
+                if [ -z "$why" ]; then
+                    unexplained="${unexplained:+$unexplained }$rel"
+                fi
+                if [ "$shown" -lt 6 ]; then
+                    names="${names:+$names }$rel"
+                    shown=$((shown + 1))
+                fi
+                ;;
+            *)
+                write=$((write + 1))
+                wnames="${wnames:+$wnames }$rel:case$n"
+                ;;
+        esac
+    done <<< "$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 obj ')"
+
+    [ "$total" -eq 0 ] && return 0
+
+    note "step6/${axis}-failed-split" \
+        "$total failed = $observation observation (case 1, outside the domain) + $write write"
+    [ "$observation" -gt 0 ] && note "step6/${axis}-outside-domain" "first $shown: $names"
+
+    # OPTION C's assertion. A count of case 1 objects says the classifier
+    # excluded them; this says the domain did. An object in case 1 that no
+    # domain rule explains is a defect wearing an exclusion's costume, and it
+    # fails here rather than being absorbed into an expected number.
+    if [ "$observation" -gt 0 ]; then
+        if [ -z "$unexplained" ]; then
+            pass "step6/${axis}-domain-explained" \
+                "$observation observation failures, every one outside the stated domain"
+        else
+            fail "step6/${axis}-domain-explained" \
+                "ACCEPTANCE case 1 with no domain reason: $unexplained"
+        fi
+        cases=$((cases + 1))
+    fi
+
+    # THE ASSERTION THAT MATTERS. A write that was due and did not happen is a
+    # defect whatever the archive ships; an object the domain excludes is not.
+    if [ "$write" -eq 0 ]; then
+        pass "step6/${axis}-write-failures" "no write that was due failed"
+    else
+        fail "step6/${axis}-write-failures" "ACCEPTANCE writes that were due failed: $wnames"
+    fi
+    cases=$((cases + 1))
+    return 0
+}
+# step6_line_of FILE PATTERN: the line number of the first match, or empty.
+# Order is a criterion in this session, so it is read as positions rather than
+# as the presence of strings anywhere in the file.
+step6_line_of() {
+    grep -n -m1 -- "$2" "$1" 2>/dev/null | cut -d: -f1
+}
+
+# step6_session_value LABEL FILE: the VALUE recorded under a label, not the
+# label. Round 3 asserted the five blocked fields were PRESENT and stopped
+# there, so a record carrying five labels and no values passed a test whose
+# whole purpose is to make `blocked` mean somebody asked. The value may sit on
+# the label line or on the line below it, since the captures wrap, and an empty
+# answer must come back empty rather than as the next paragraph.
+# step6_session_value_inline LABEL FILE: the value ON THE LABEL LINE only.
+#
+# The continuation rule that step6_session_value needs for wrapped prose is
+# wrong for a structured field: emptying `form-3-outcome:` leaves its own
+# following prose indented deeper, so the scan picks that up and the empty field
+# reads as filled. A control written for exactly that case caught it.
+#
+# A machine-readable outcome states itself on its own line. Prose may follow and
+# is ignored here.
+# THE LABEL IS ANCHORED TO THE START OF ITS LINE. `index($0, k)` matched the
+# label anywhere, so a narrative sentence such as "the form-1-outcome: was never
+# recorded" satisfied the structured field and handed back its own complaint as
+# the value. Round 6 found it, in the fix for the previous round's fail-open.
+#
+# A structured field begins its line. Prose that mentions the label is prose.
+step6_session_value_inline() {
+    awk -v k="$1" '
+        {
+            line = $0
+            sub(/^[ \t]+/, "", line)
+            if (index(line, k) != 1) next
+            s = substr(line, length(k) + 1)
+            gsub(/^[ \t]+|[ \t]+$/, "", s)
+            print s
+            exit
+        }
+    ' "$2" 2>/dev/null
+}
+
+step6_session_value() {
+    awk -v k="$1" '
+        # A continuation must be INDENTED DEEPER than its label. Without that
+        # rule the scan walks into the NEXT field and reports its text as this
+        # one value, so an empty field passes wearing its neighbours answer. A
+        # negative control caught exactly that, in the fix for the round 3
+        # finding that these fields were asserted present but never read.
+        found {
+            if ($0 !~ /[^ \t]/) next
+            match($0, /^[ \t]*/)
+            if (RLENGTH <= indent) exit
+            gsub(/^[ \t]+|[ \t]+$/, ""); print; exit
+        }
+        index($0, k) {
+            match($0, /^[ \t]*/)
+            indent = RLENGTH
+            p = index($0, k) + length(k)
+            s = substr($0, p)
+            gsub(/^[ \t]+|[ \t]+$/, "", s)
+            if (s != "") { print s; exit } else { found = 1 }
+        }
+    ' "$2" 2>/dev/null
+}
+
+# step6_session_one FILE: the checks that are a property of ONE capture.
+#
+# Round 3 asserted a single run identity by COUNTING distinct tokens and never
+# compared that token to the one in the header. A capture whose header names X
+# while its body consistently cites Y counts one token and passes, which is the
+# ambiguity the check exists to refuse. The header and the body must agree.
+#
+# The target and the shell are asserted too. Every claim in these captures is
+# about a specific distribution and a specific bash, and Step 0's whole branch
+# turns on the shell version; a capture that does not say which it ran on is
+# evidence about an unnamed host.
+step6_session_one() {
+    local f="$1" id ids uniq cites n_cap n_dep n_mon tgt bashv
+    note "step6/rhel-session-capture" "$f"
+
+    id=$(grep -m1 '^Run identity: ' "$f" | sed 's/^Run identity: //')
+    uniq=$(grep -oE 'rhel-acceptance[0-9]*-[0-9A-Za-z]+' "$f" | sort -u)
+    ids=$(printf '%s\n' "$uniq" | grep -c .)
+    cites=$(grep -oE 'rhel-acceptance[0-9]*-[0-9A-Za-z]+' "$f" | grep -c .)
+    if [ -z "$id" ]; then
+        fail "step6/session-identity" "SESSION the capture records no run identity"
+    elif [ "${ids:-0}" -ne 1 ]; then
+        fail "step6/session-identity" "SESSION the capture names $ids run identities; one session, one identity"
+    elif [ "$uniq" != "$id" ]; then
+        fail "step6/session-identity" \
+            "SESSION the header names [$id] and the body cites [$uniq]; a capture must be about one run"
+    elif [ "${cites:-0}" -lt 2 ]; then
+        # THE HEADER ALONE IS NOT A CITATION. Both captures claimed that every
+        # artifact below cited the run identity, and both named it exactly once,
+        # in the header, so the uniqueness test could never have failed on
+        # anything. A capture whose evidence never names its run is evidence
+        # about an unnamed run, and the claim in its own preamble was untrue.
+        fail "step6/session-identity" \
+            "SESSION [$id] appears only in the header; the evidence below it cites no run"
+    else
+        pass "step6/session-identity" "$id, in the header and cited $cites times in the body"
+    fi
+    cases=$((cases + 1))
+
+    # THE TARGET AND THE SHELL, because a measurement with no named host is a
+    # measurement about nothing in particular.
+    tgt=$(grep -m1 '^Target: ' "$f" | sed 's/^Target: //')
+    bashv=$(printf '%s\n' "$tgt" | grep -oE 'bash [0-9]+\.[0-9]+[^ ,]*')
+    if [ -z "$tgt" ]; then
+        fail "step6/session-target" "SESSION the capture names no target"
+    elif ! printf '%s\n' "$tgt" | grep -q 'RHEL 9'; then
+        fail "step6/session-target" "SESSION the target is not the RHEL 9 deployment target: [$tgt]"
+    elif ! printf '%s\n' "$tgt" | grep -q 'kernel '; then
+        fail "step6/session-target" "SESSION the target line records no kernel: [$tgt]"
+    elif [ -z "$bashv" ]; then
+        fail "step6/session-target" "SESSION the target line records no bash version: [$tgt]"
+    else
+        pass "step6/session-target" "$tgt"
+    fi
+    cases=$((cases + 1))
+
+    # THE ORDER, read as positions rather than as presence.
+    n_cap=$(step6_line_of "$f" 'declare-A: supported')
+    n_dep=$(step6_line_of "$f" 'install-exit: 0')
+    n_mon=$(step6_line_of "$f" 'MONITORING CRITERION')
+    if [ -z "$n_cap" ] || [ -z "$n_dep" ]; then
+        fail "step6/session-order" "SESSION the capture lacks a capability answer or a successful deployment"
+    elif [ "$n_cap" -ge "$n_dep" ]; then
+        fail "step6/session-order" "SESSION the capability answer is not recorded before the deployment"
+    elif [ -n "$n_mon" ] && [ "$n_mon" -le "$n_dep" ]; then
+        fail "step6/session-order" "SESSION the monitoring verdict is recorded before the deployment it depends on"
+    else
+        pass "step6/session-order" "capability before deployment before monitoring"
+    fi
+    cases=$((cases + 1))
+
+    if [ -n "$n_dep" ]; then
+        pass "step6/session-deployment" "the deployment succeeded on the target"
+    else
+        fail "step6/session-deployment" "SESSION the capture does not record a successful deployment"
+    fi
+    cases=$((cases + 1))
+}
+
+# step6_session_suite: validate the RETAINED RHEL sessions STRUCTURALLY.
+#
+# The first version grepped for strings and called it validation. Three things
+# were wrong with that and round 2 named all three: it could not tell whether
+# the events happened in the plan's order, it never checked that one run
+# identity covers the whole capture, and its blocked-fields test passed any
+# capture that merely lacked one phrase, including a capture with no fields at
+# all. A check that passes when its subject is absent is not a check.
+#
+# The plan's order is the criterion, not a preference: capability BEFORE the
+# installer is invoked, deployment under the same identity, monitoring judged
+# only after the deployment succeeded. Blocked is reachable only from that last
+# state, which is exactly why the order has to be read.
+#
+# THERE ARE NOW TWO SESSIONS, and the reason is recorded rather than smoothed
+# over: session 1 recorded the requirement's functional criteria as owed instead
+# of collecting them, and session 2 went back for them. Each capture is checked
+# for the properties one session must have; the criteria that only need to hold
+# SOMEWHERE are checked across the set, because requiring the preload
+# measurement in a capture that never claimed to take it would fail an honest
+# record for being honest.
+step6_session_suite() {
+    local f files="" found=0 has_preload=0 has_func=0
+    section "step 6: the RHEL acceptance sessions, from their retained captures"
+
+    for f in $SESSION_CAPTURE; do
+        [ -f "$f" ] || continue
+        files="${files:+$files }$f"
+        found=$((found + 1))
+    done
+
+    if [ "$found" -eq 0 ]; then
+        printf '  %-40s SKIP  no retained session at %s\n' "step6/rhel-session" "$SESSION_CAPTURE"
+        UNANSWERED="${UNANSWERED:+$UNANSWERED, }the step 6 RHEL acceptance session"
+        UNANSWERED_HOW="${UNANSWERED_HOW:+$UNANSWERED_HOW; }pass --rhel-session <the retained capture>, or run the ordered session on the target"
+        return 0
+    fi
+
+    for f in $files; do
+        step6_session_one "$f"
+    done
+
+    # THE PRELOAD MEASUREMENT, all four readings, in whichever capture took it.
+    for f in $files; do
+        if grep -q 'agent-tag-before:' "$f" && grep -q 'agent-tag-after:' "$f" \
+           && grep -q 'agent-providers-before:' "$f" && grep -q 'agent-providers-after:' "$f"; then
+            has_preload=1
+        fi
+    done
+    if [ "$has_preload" -eq 1 ]; then
+        pass "step6/session-preload" "the preloaded object, its tag state and its providers, before and after"
+    else
+        fail "step6/session-preload" "SESSION no retained capture carries the four preload readings"
+    fi
+    cases=$((cases + 1))
+
+    # THE FUNCTIONAL EVIDENCE the requirement names by hand. Round 3 recorded
+    # these as owed and the reviewer was right that owing them does not move
+    # them outside the acceptance, so they are asserted here and fail when
+    # absent rather than being narrated in prose.
+    # ROUND 4 FOUND THIS CHECKING ONLY THAT THREE `*: 0` LABELS EXISTED. Three
+    # zeroes prove three commands returned zero and say nothing about WHICH
+    # commands or what they answered, so a capture recording a successful run
+    # of the wrong interpreter passed it. The plan states the criterion over
+    # values: the toolchain git and python ANSWER, `import ssl, zlib` passes,
+    # both programs carry RPATH and no RUNPATH, and the provider the
+    # interpreter actually binds is resolved by the shipped loader INSIDE the
+    # prefix. Each of those is now read.
+    for f in $files; do
+        grep -qE '^ *toolchain-git: git version [0-9]+\.[0-9]+' "$f" || continue
+        grep -q 'git-version-exit: 0' "$f" || continue
+        grep -qE '^ *toolchain-python: Python [0-9]+\.[0-9]+' "$f" || continue
+        grep -q 'python-version-exit: 0' "$f" || continue
+        grep -qE '^ *import-ssl-zlib: ssl OpenSSL [0-9]' "$f" || continue
+        grep -qE '^ *import-ssl-zlib: .*zlib [0-9]' "$f" || continue
+        grep -q 'import-exit: 0' "$f" || continue
+        # The tag state of both programs, and the absence of RUNPATH stated
+        # rather than assumed from the presence of RPATH.
+        grep -qE '^ *python3[^:]*: RPATH' "$f" || continue
+        grep -qE '^ *git [^:]*: RPATH' "$f" || continue
+        grep -q 'neither carries RUNPATH' "$f" || continue
+        # The provider question, which is the one a tag cannot answer.
+        grep -q '_ssl extension module -> libssl.so.3 AND libcrypto.so.3 inside the prefix' "$f" || continue
+        has_func=1
+    done
+    if [ "$has_func" -eq 1 ]; then
+        pass "step6/session-functional" \
+            "git and python answer by version, import ssl, zlib names both library versions, both programs RPATH and no RUNPATH, and _ssl binds libssl and libcrypto inside the prefix"
+    else
+        fail "step6/session-functional" \
+            "ACCEPTANCE no retained capture carries the full functional record: named git and python versions at exit 0, ssl and zlib versions at exit 0, the RPATH state of both programs, and the in-prefix _ssl providers"
+    fi
+    cases=$((cases + 1))
+
+    # THE MONITORING DISPOSITION, parsed as an EXACT token from a
+    # machine-readable line rather than inferred from a heading.
+    #
+    # Round 4 found the previous version treating any file containing the words
+    # MONITORING CRITERION as blocked, so a capture headed SATISFIED, or one
+    # with a malformed heading, entered the blocked branch and was reported
+    # blocked. A verdict a reader can change by editing prose is not a verdict.
+    step6_monitoring_disposition "$files"
+}
+
+# step6_monitoring_disposition FILES: the standing disposition and its evidence.
+#
+# Separated from the session suite so the controls below can call it against
+# mutated copies. Exactly one capture may carry the line: two captures naming
+# two dispositions is two answers to one question, and superseded text is left
+# standing as history rather than as a competing verdict.
+step6_monitoring_disposition() {
+    local files="$1" f d n=0 carrier="" id missing="" k v
+    d=""
+    for f in $files; do
+        if grep -q '^ *monitoring-disposition: ' "$f" 2>/dev/null; then
+            n=$((n + 1))
+            carrier="$f"
+            # TRIM THE EDGES ONLY. `tr -d ' '` deletes INTERIOR spaces too, so
+            # `s a t i s f i e d` normalised to an accepted token and the check
+            # that called itself exact was not. Round 5 found it.
+            d=$(grep -m1 '^ *monitoring-disposition: ' "$f" \
+                | sed -e 's/.*monitoring-disposition: *//' -e 's/\r$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        fi
+    done
+
+    if [ "$n" -eq 0 ]; then
+        fail "step6/session-monitoring" \
+            "SESSION no retained capture records a monitoring-disposition line"
+        cases=$((cases + 1))
+        return 0
+    fi
+    if [ "$n" -gt 1 ]; then
+        fail "step6/session-monitoring" \
+            "SESSION $n captures record a monitoring-disposition; one question has one standing answer"
+        cases=$((cases + 1))
+        return 0
+    fi
+
+    id=$(grep -m1 '^Run identity: ' "$carrier" | sed 's/^Run identity: //')
+
+    case "$d" in
+        satisfied)
+            v=$(step6_session_value 'monitoring-evidence:' "$carrier")
+            if [ -n "$v" ]; then
+                pass "step6/session-monitoring" "satisfied with retained evidence in run ${id:-unknown}"
+            else
+                fail "step6/session-monitoring" \
+                    "SESSION disposition is satisfied with no monitoring-evidence value"
+            fi
+            ;;
+        not-pursued)
+            # A DECISION, not an absence. Every part of the record is required,
+            # because "we decided not to" is the exact shape a quietly dropped
+            # criterion takes when nobody has to write down what was attempted,
+            # who decided, or on what grounds.
+            for k in 'monitoring-decision-by:' 'monitoring-decision-basis:' 'monitoring-mechanism:'; do
+                v=$(step6_session_value "$k" "$carrier")
+                [ -n "$v" ] || missing="${missing:+$missing }[$k]"
+            done
+            # A STRUCTURED, NONEMPTY OUTCOME PER FORM, not a mention. Round 5
+            # found these grepping for `form 1,` anywhere, so a narrative
+            # sentence naming all three satisfied the check while recording no
+            # outcome for any of them. The outcome is what the decision rests
+            # on, so the outcome is what is read.
+            for k in 'form-1-outcome:' 'form-2-outcome:' 'form-3-outcome:'; do
+                v=$(step6_session_value_inline "$k" "$carrier")
+                [ -n "$v" ] || missing="${missing:+$missing }[$k]"
+            done
+            if [ -n "$missing" ]; then
+                fail "step6/session-monitoring" \
+                    "SESSION not-pursued is missing the record that makes it a decision: $missing"
+            else
+                # NOT `blocked`. That token means a criterion was answered and
+                # its violation is real and owned by another requirement, which
+                # this is not: there is no violation and no other owner. Nor is
+                # it a plain pass, so the text says what it is every time it is
+                # printed. The amendment is auditable from the capture, and the
+                # harness has already refused seven ways of writing it badly.
+                pass "step6/session-monitoring" \
+                    "AMENDED to not-pursued by named decision in run ${id:-unknown}; answered on mechanism, not by observation"
+                note "step6/session-monitoring-basis" \
+                    "$(step6_session_value 'monitoring-decision-by:' "$carrier")"
+            fi
+            ;;
+        blocked)
+            for k in 'owning team or channel:' 'request timestamp or identifier:' \
+                     'which observable was requested:' 'response, or none received by date:' \
+                     'retained evidence for the request itself:'; do
+                v=$(step6_session_value "$k" "$carrier")
+                [ -n "$v" ] || missing="${missing:+$missing }[$k]"
+            done
+            if [ -n "$missing" ]; then
+                fail "step6/session-monitoring" \
+                    "SESSION the blocked record has no VALUE under these fields: $missing"
+            elif grep -q 'NOT YET DESPATCHED' "$carrier"; then
+                fail "step6/session-monitoring" \
+                    "SESSION blocked with the request not despatched, so no verdict is established"
+            else
+                blocked "step6/session-monitoring" \
+                    "the monitoring criterion is blocked in run ${id:-unknown}; the acceptance is not green"
+            fi
+            ;;
+        *)
+            fail "step6/session-monitoring" \
+                "SESSION [$d] is not an allowed monitoring disposition; expected satisfied, not-pursued or blocked"
+            ;;
+    esac
+    cases=$((cases + 1))
+}
+
+# step6_ctl_disposition LABEL FILES WANT_REJECT: run the REAL parser over FILES
+# and assert whether it rejected them. Follows the established control shape:
+# `fail` is captured rather than printed, the case count is held to one, and
+# the BLOCKED accumulator is restored so a control cannot alter the run verdict.
+step6_ctl_disposition() {
+    local label="$1" files="$2" want="$3" saved="$cases" saved_blocked="$BLOCKED"
+    EXPECT_FAIL=1; CTL_REASON=""
+    step6_monitoring_disposition "$files" >/dev/null 2>&1
+    EXPECT_FAIL=0
+    cases=$((saved + 1))
+    BLOCKED="$saved_blocked"
+    if [ "$want" -eq 1 ]; then
+        if [ -n "$CTL_REASON" ]; then
+            pass "$label" "rejected, as designed"
+        else
+            fail "$label" "PARSER accepted a mutation it must reject"
+        fi
+    else
+        if [ -z "$CTL_REASON" ]; then
+            pass "$label" "the real capture is accepted"
+        else
+            fail "$label" "PARSER rejected the real capture: $CTL_REASON"
+        fi
+    fi
+}
+
+# step6_disposition_controls: the parser's own negative controls, RETAINED in
+# the harness and RUN on every host.
+#
+# Round 4 was right that the five controls claimed for that round existed only
+# as scratch mutations on the author's machine. They proved nothing to anyone
+# reading the repository, and a control nobody else can run is an assertion
+# about the author rather than about the code. These run above the capability
+# gate, every time.
+step6_disposition_controls() {
+    local d="$SCRATCH/step6-disp-ctl" src="" f base
+    section "step 6: the monitoring disposition parser, proved against mutations"
+
+    for f in $SESSION_CAPTURE; do
+        [ -f "$f" ] || continue
+        grep -q '^ *monitoring-disposition: ' "$f" 2>/dev/null && src="$f"
+    done
+    if [ -z "$src" ]; then
+        fail "step6/disposition-controls" \
+            "FIXTURE no retained capture carries a disposition, so the parser cannot be proved"
+        cases=$((cases + 1))
+        return 0
+    fi
+
+    mkdir -p "$d" 2>/dev/null
+    base="$d/base.txt"
+    if ! cp -- "$src" "$base" 2>/dev/null; then
+        fail "step6/disposition-controls" "FIXTURE could not copy the standing capture"
+        cases=$((cases + 1))
+        return 0
+    fi
+
+    # The unmutated copy must be ACCEPTED first. A parser that refuses
+    # everything would pass every rejection below while being useless.
+    step6_ctl_disposition "control/disposition-accepts-real" "$base" 0
+
+    grep -v '^ *monitoring-disposition: ' "$base" > "$d/nodisp.txt"
+    step6_ctl_disposition "control/disposition-absent" "$d/nodisp.txt" 1
+
+    sed 's/^\( *\)monitoring-disposition: .*/\1monitoring-disposition: sortof/' "$base" > "$d/badtoken.txt"
+    step6_ctl_disposition "control/disposition-unknown-token" "$d/badtoken.txt" 1
+
+    grep -v '^ *monitoring-mechanism: ' "$base" > "$d/nomech.txt"
+    step6_ctl_disposition "control/disposition-no-mechanism" "$d/nomech.txt" 1
+
+    grep -v '^ *monitoring-decision-by: ' "$base" > "$d/nowho.txt"
+    step6_ctl_disposition "control/disposition-no-decider" "$d/nowho.txt" 1
+
+    grep -v '^ *monitoring-decision-basis: ' "$base" > "$d/nobasis.txt"
+    step6_ctl_disposition "control/disposition-no-basis" "$d/nobasis.txt" 1
+
+    grep -v '^ *form-2-outcome: ' "$base" > "$d/noform2.txt"
+    step6_ctl_disposition "control/disposition-form-unaccounted" "$d/noform2.txt" 1
+
+    # AN EMPTY OUTCOME, not a deleted line. Round 5 found the control above
+    # removing a whole line, which tests absence and never tests a label
+    # present with nothing under it: the shape a record takes when someone
+    # fills the form in and leaves a box blank.
+    sed 's/^\( *\)form-3-outcome: .*/\1form-3-outcome:/' "$base" > "$d/emptyform3.txt"
+    step6_ctl_disposition "control/disposition-form-empty-outcome" "$d/emptyform3.txt" 1
+
+    # THE NEAR MISS: the structured label mentioned INSIDE narrative prose
+    # rather than beginning its own line. The unanchored reader accepted it and
+    # handed back the rest of the sentence as the outcome, so a record
+    # complaining that an outcome was never captured satisfied the check that
+    # requires the outcome. None of the controls caught it until round 6 named
+    # it, which is why this one exists.
+    sed 's/^\( *\)form-1-outcome: .*/\1the form-1-outcome: was never actually recorded/' \
+        "$base" > "$d/narrativeform.txt"
+    step6_ctl_disposition "control/disposition-form-in-prose" "$d/narrativeform.txt" 1
+
+    # INTERIOR WHITESPACE IN THE TOKEN, which the previous trim deleted along
+    # with the padding, so a malformed spelling was accepted as exact.
+    sed 's/^\( *\)monitoring-disposition: .*/\1monitoring-disposition: not - pursued/' "$base" > "$d/spacedtoken.txt"
+    step6_ctl_disposition "control/disposition-interior-space" "$d/spacedtoken.txt" 1
+
+    sed 's/^\( *\)monitoring-disposition: .*/\1monitoring-disposition:    not-pursued   /' "$base" > "$d/paddedtoken.txt"
+    step6_ctl_disposition "control/disposition-edge-padding-ok" "$d/paddedtoken.txt" 0
+
+    cp -- "$base" "$d/dup.txt" 2>/dev/null
+    step6_ctl_disposition "control/disposition-two-carriers" "$base $d/dup.txt" 1
+
+    rm -rf -- "$d" 2>/dev/null
+}
+
+
+
+# step6_archive_facts WORK CAPTURE: the acceptance criteria that read the
+# deployed tree itself rather than the installer's account of it.
+#
+# FAILS CLOSED throughout, and the previous version did not. A missing
+# libstdc++, loader, patchelf or libssl was a note, and a libssl checked with no
+# executable loader reached a provider success having resolved nothing. Round 2
+# named all four. An absent subject is not a satisfied criterion: the archive is
+# supposed to contain these, so their absence is a finding, not a reason to skip.
+step6_archive_facts() {
+    local work="$1" capture="$2"
+    local py lib ld out rec hex rel d n=0 libssl providers=""
+    local checked=0 bad="" dep missing_dep=""
+    local comps=0 outside="" old_ifs="" got=""
+
+    section "step 6: what the deployed tree says about itself"
+
+    # 1. THE TAG, on EVERY REWRITTEN OBJECT rather than on two samples. The
+    # requirement says every rewritten ELF carries RPATH and not RUNPATH, and
+    # two objects are an illustration of that claim rather than the claim.
+    while IFS= read -r rec; do
+        [ -n "$rec" ] || continue
+        d=$(step4_field "$rec" rpath)
+        [ "$d" = "rewritten" ] || continue
+        hex=$(step4_field "$rec" path)
+        rel=$(step4_hex_to_path "$hex")
+        [ -f "$work/$rel" ] || { bad="${bad:+$bad }$rel:absent"; continue; }
+        checked=$((checked + 1))
+        out=$("$READELF_BIN" -d "$work/$rel" 2>/dev/null | grep -cE '\(RPATH\)')
+        [ "${out:-0}" -eq 1 ] || bad="${bad:+$bad }$rel:no-RPATH"
+        out=$("$READELF_BIN" -d "$work/$rel" 2>/dev/null | grep -cE '\(RUNPATH\)')
+        [ "${out:-0}" -eq 0 ] || bad="${bad:+$bad }$rel:has-RUNPATH"
+    done <<< "$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 obj ')"
+
+    if [ "$checked" -eq 0 ]; then
+        fail "step6/readelf-every-rewritten" "ACCEPTANCE the capture reports no rewritten object to check"
+    elif [ -z "$bad" ]; then
+        pass "step6/readelf-every-rewritten" "$checked rewritten objects, every one RPATH and no RUNPATH"
+    else
+        fail "step6/readelf-every-rewritten" "ACCEPTANCE rewritten objects with the wrong tag state: $bad"
+    fi
+    cases=$((cases + 1))
+
+    # The two the requirement names by hand, asserted by name as well, because a
+    # population check and a named check answer different questions.
+    py=$(find "$work/tools/python" -maxdepth 3 -type f -name 'python3*_bin' 2>/dev/null | head -1)
+    if [ -z "$py" ]; then
+        fail "step6/readelf-python-rpath" "ARCHIVE no python program under the deployed tree"
+    else
+        out=$("$READELF_BIN" -d "$py" 2>/dev/null | grep -cE '\(RPATH\)')
+        chk "step6/readelf-python-rpath" "1" "${out:-0}"
+    fi
+    cases=$((cases + 1))
+
+    lib="$work/tools/python/root/usr/lib64/libstdc++.so.6.0.29"
+    if [ ! -f "$lib" ]; then
+        fail "step6/readelf-libstdcxx-rpath" \
+            "ARCHIVE the named library is absent: tools/python/root/usr/lib64/libstdc++.so.6.0.29"
+        cases=$((cases + 1))
+    else
+        out=$("$READELF_BIN" -d "$lib" 2>/dev/null | grep -cE '\(RPATH\)')
+        chk "step6/readelf-libstdcxx-rpath" "1" "${out:-0}"
+        cases=$((cases + 1))
+        out=$("$READELF_BIN" -d "$lib" 2>/dev/null | grep -cE '\(RUNPATH\)')
+        chk "step6/readelf-libstdcxx-no-runpath" "0" "${out:-0}"
+        cases=$((cases + 1))
+    fi
+
+    # 2. THE SHIPPED LOADER RESOLVING THE NAMED DEPENDENCIES. The requirement
+    # names three, so three are asserted: any-one-of-them was a weaker claim
+    # wearing the same label.
+    ld="$work/tools/python/root/lib64/ld-linux-x86-64.so.2"
+    [ -f "$ld" ] || ld="$work/tools/python/root/usr/lib64/ld-linux-x86-64.so.2"
+    if [ ! -x "$ld" ]; then
+        fail "step6/loader-resolves-in-prefix" "ARCHIVE no executable shipped loader under the deployed tree"
+        cases=$((cases + 1))
+    elif [ ! -f "$lib" ]; then
+        fail "step6/loader-resolves-in-prefix" "ARCHIVE the named library is absent, so the loader claim cannot be made"
+        cases=$((cases + 1))
+    else
+        out=$("$ld" --list "$lib" 2>/dev/null)
+        for dep in libm.so libc.so libgcc_s.so; do
+            printf '%s\n' "$out" | grep -q "$dep.*$work/" || missing_dep="${missing_dep:+$missing_dep }$dep"
+        done
+        if [ -z "$missing_dep" ]; then
+            pass "step6/loader-resolves-in-prefix" "libm, libc and libgcc_s all resolve inside the prefix"
+        else
+            fail "step6/loader-resolves-in-prefix" \
+                "ACCEPTANCE the shipped loader does not resolve these inside the prefix: $missing_dep"
+        fi
+        cases=$((cases + 1))
+    fi
+
+    # 3. THE SHIPPED PATCHELF, print AND force, each recorded from its own run.
+    # Force was previously asserted only by implication, through the tag the
+    # pass happened to leave; here the tool is made to do it on a scratch copy
+    # and the result is read back.
+    if [ ! -x "$work/tools/bin/patchelf" ]; then
+        fail "step6/patchelf-print" "ARCHIVE no shipped patchelf under the deployed tree"
+        cases=$((cases + 1))
+    else
+        note "step6/patchelf-version" "$("$work/tools/bin/patchelf" --version 2>&1 | head -1)"
+        if [ -f "$lib" ]; then
+            # PRINT, asserted on the VALUE rather than on non-emptiness. Round 3
+            # accepted any non-empty string here, which a tool printing a stale
+            # target-valued rpath satisfies exactly as well as one printing what
+            # the pass wrote. The requirement is carried by the value, so the
+            # value is what is read: every component must be an existing
+            # directory under this prefix's tools tree, which is what
+            # build_elf_rpath composes and nothing else does.
+            out=$("$work/tools/bin/patchelf" --print-rpath "$lib" 2>/dev/null)
+            comps=0
+            outside=""
+            old_ifs="$IFS"
+            IFS=':'
+            for d in $out; do
+                [ -n "$d" ] || continue
+                comps=$((comps + 1))
+                case "$d" in
+                    "$work"/tools/*)
+                        [ -d "$d" ] || outside="${outside:+$outside }$d=not-a-directory" ;;
+                    *)
+                        outside="${outside:+$outside }$d=outside-prefix" ;;
+                esac
+            done
+            IFS="$old_ifs"
+            if [ "$comps" -eq 0 ]; then
+                fail "step6/patchelf-print" \
+                    "ACCEPTANCE the shipped patchelf prints no rpath for a rewritten library"
+            elif [ -n "$outside" ]; then
+                fail "step6/patchelf-print" \
+                    "ACCEPTANCE the printed rpath carries components that are not directories in this prefix: $outside"
+            else
+                pass "step6/patchelf-print" \
+                    "$comps components, every one an existing directory under the deployed tools tree"
+            fi
+            cases=$((cases + 1))
+
+            cp -- "$lib" "$work/.patchelf-force-probe" 2>/dev/null
+            if [ -f "$work/.patchelf-force-probe" ] \
+               && "$work/tools/bin/patchelf" --force-rpath --set-rpath /probe "$work/.patchelf-force-probe" 2>/dev/null; then
+                n=$("$READELF_BIN" -d "$work/.patchelf-force-probe" 2>/dev/null | grep -cE '\(RPATH\)')
+                out=$("$READELF_BIN" -d "$work/.patchelf-force-probe" 2>/dev/null | grep -cE '\(RUNPATH\)')
+                # THE WRITTEN VALUE, not only the tag kind. A tool that emits
+                # DT_RPATH while ignoring --set-rpath passes a tag-kind test and
+                # fails the requirement, so what was asked for is read back.
+                got=$("$work/tools/bin/patchelf" --print-rpath "$work/.patchelf-force-probe" 2>/dev/null)
+                if [ "${n:-0}" -eq 1 ] && [ "${out:-0}" -eq 0 ] && [ "$got" = "/probe" ]; then
+                    pass "step6/patchelf-force" \
+                        "--force-rpath wrote DT_RPATH with the requested value and no DT_RUNPATH"
+                else
+                    fail "step6/patchelf-force" \
+                        "ACCEPTANCE the shipped patchelf --force-rpath left RPATH=$n RUNPATH=$out value=[$got] want [/probe]"
+                fi
+            else
+                fail "step6/patchelf-force" "ACCEPTANCE the shipped patchelf could not perform a forced write"
+            fi
+            cases=$((cases + 1))
+            rm -f -- "$work/.patchelf-force-probe" 2>/dev/null
+        fi
+    fi
+
+    # 4. THE OPENSSL VERDICT, a provider named per libssl, and an absent libssl
+    # or an unusable loader is a failure rather than a silent pass.
+    n=0
+    while IFS= read -r libssl; do
+        [ -n "$libssl" ] || continue
+        # ELF magic, not the name: the tree carries zero-byte `.copied` markers
+        # beside real libraries and a name glob counted four of them as libssl.
+        [ "$(head -c 4 "$libssl" 2>/dev/null | od -An -tx1 | tr -d ' \n')" = "7f454c46" ] || continue
+        n=$((n + 1))
+        if [ ! -x "$ld" ]; then
+            providers="${providers:+$providers }${libssl#"$work"/}=>NO-LOADER"
+            continue
+        fi
+        out=$("$ld" --list "$libssl" 2>/dev/null | grep -oE '/[^ ]*libcrypto[^ ]*' | head -1)
+        case "$out" in
+            "$work"/*) providers="${providers:+$providers }${libssl#"$work"/}=>in-prefix" ;;
+            "")        providers="${providers:+$providers }${libssl#"$work"/}=>unresolved" ;;
+            *)         providers="${providers:+$providers }${libssl#"$work"/}=>OUTSIDE:$out" ;;
+        esac
+    done <<< "$(find "$work/tools" -type f -name 'libssl.so*' 2>/dev/null)"
+
+    if [ "$n" -eq 0 ]; then
+        fail "step6/openssl-provider-in-prefix" "ARCHIVE ships no libssl, so the OPENSSL verdict has no subject"
+    else
+        note "step6/openssl-provider" "$n libssl: $providers"
+        case "$providers" in
+            *OUTSIDE:*|*unresolved*|*NO-LOADER*)
+                fail "step6/openssl-provider-in-prefix" \
+                    "ACCEPTANCE a shipped libssl does not bind a libcrypto inside the prefix: $providers" ;;
+            *)  pass "step6/openssl-provider-in-prefix" "$n libssl, every one binding a libcrypto inside the prefix" ;;
+        esac
+    fi
+    cases=$((cases + 1))
+}
+
+step6_suite() {
+    local prefix="$PREFIX" work="$SCRATCH/acceptance-archive"
+    local capture rec rel n hex owner
+    local libs_bad="" libs_seen=0 gits_bad="" gits_seen=0
+    local others_bad="" others=0 selected=""
+    local unadjudicated="" deferred_residual="" handoff_unowned="" handoff_deferred=""
+
+    section "step 6: the acceptance over the deployed archive"
+
+    if [ ! -d "$prefix/tools" ]; then
+        printf '  %-40s SKIP  no extracted archive at %s\n' "step6/archive" "$prefix"
+        UNANSWERED="${UNANSWERED:+$UNANSWERED, }the step 6 acceptance over the deployed archive"
+        UNANSWERED_HOW="${UNANSWERED_HOW:+$UNANSWERED_HOW; }rerun with --prefix pointing at the extracted archive"
+        return 0
+    fi
+    if ! step2_inventory_oracle "$INVENTORY"; then
+        fail "step6/oracle" "ORACLE unreadable: $STEP2_INV_WHY"
+        cases=$((cases + 1))
+        return 0
+    fi
+    note "step6/oracle" "$INVENTORY"
+
+    capture=$(step6_run "$prefix" "$work")
+    if [ -z "$capture" ]; then
+        fail "step6/acceptance-run" "the pass produced nothing over a copy of the archive"
+        rm -rf -- "$work" 2>/dev/null
+        cases=$((cases + 1))
+        return 0
+    fi
+    note "step6/acceptance-copy" "$work"
+
+    # The retained capture is evidence only if a reader accepted it. Read by eye
+    # it is prose.
+    if step3_read_capture "$capture"; then
+        pass "step6/capture-reconciles" "the production reader accepts the acceptance capture"
+    else
+        fail "step6/capture-reconciles" "READER refused the acceptance capture: $STEP3_REASON"
+    fi
+    cases=$((cases + 1))
+    rec=$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 end ' | head -1)
+    # The trailer's raw figures, reported rather than asserted. `failed` on an
+    # axis covers an observation the domain excludes and a write that was due
+    # and did not happen, and only the second is a defect. Asserting the sum is
+    # zero would fail this archive for shipping the ELF32 objects the design
+    # already excludes by rule, so the assertions live below, one per meaning.
+    note "step6/rpath-failed-raw" "$(step4_field "$rec" r-failed)"
+    note "step6/interp-failed-raw" "$(step4_field "$rec" i-failed)"
+    chk "step6/migration-failed-zero" "0" "$(step4_field "$rec" mig-failed)"
+    cases=$((cases + 1))
+    note "step6/walked" "$(step4_field "$rec" walked) objects walked"
+
+    # A COUNT IS NOT ACTIONABLE. The trailer says how many writes failed and
+    # nothing about which, and "27 failures" sends a reader back to a 675-object
+    # archive with no starting point. The acceptance names them, capped so one
+    # broken tree cannot bury the verdict under six hundred lines.
+    step6_name_failures "$capture" rpath "$work"
+    step6_name_failures "$capture" interp "$work"
+
+    section "step 6: the inventory Step 2 states once, over the deployed archive"
+
+    # The 110 flagged libraries, each case 4. Named one by one rather than
+    # counted, because a count is satisfied by the wrong hundred and ten.
+    for rel in $STEP2_INV_LIBS; do
+        libs_seen=$((libs_seen + 1))
+        n=$(step6_case_of "$capture" "$rel") || n=""
+        case "$n" in
+            4) ;;
+            "") libs_bad="${libs_bad:+$libs_bad }$rel:absent" ;;
+            *)  libs_bad="${libs_bad:+$libs_bad }$rel:case$n" ;;
+        esac
+    done
+    if [ -z "$libs_bad" ]; then
+        pass "step6/flagged-libraries" "$libs_seen recorded libraries, every one case 4"
+    else
+        fail "step6/flagged-libraries" "ARCHIVE recorded libraries not case 4: $libs_bad"
+    fi
+    cases=$((cases + 1))
+
+    # The python program ASSERTED BY NAME, which is the assertion a population
+    # count cannot make and the one D3 turns on.
+    if [ -n "$STEP2_INV_PYTHON" ]; then
+        n=$(step6_case_of "$capture" "$STEP2_INV_PYTHON") || n=""
+        case "$n" in
+            5|6) pass "step6/python-by-name" "$STEP2_INV_PYTHON at case $n" ;;
+            "")  fail "step6/python-by-name" "ARCHIVE the recorded python is absent from the walk" ;;
+            *)   fail "step6/python-by-name" "ARCHIVE the recorded python is not selected: case $n" ;;
+        esac
+    else
+        fail "step6/python-by-name" "ORACLE names no python program"
+    fi
+    cases=$((cases + 1))
+
+    for rel in $STEP2_INV_GITS; do
+        gits_seen=$((gits_seen + 1))
+        n=$(step6_case_of "$capture" "$rel") || n=""
+        case "$n" in
+            4|5|6) ;;
+            "") gits_bad="${gits_bad:+$gits_bad }$rel:absent" ;;
+            *)  gits_bad="${gits_bad:+$gits_bad }$rel:case$n" ;;
+        esac
+    done
+    if [ -z "$gits_bad" ]; then
+        pass "step6/git-objects" "$gits_seen enumerated git objects, every one selected"
+    else
+        fail "step6/git-objects" "ARCHIVE enumerated git objects not selected: $gits_bad"
+    fi
+    cases=$((cases + 1))
+
+    section "step 6: every other archive program preserved, no exception"
+
+    # THE GATING ASSERTION OF THE RESIDUAL HALF, and the reason this step exists
+    # separately from Step 4. An object that reached the tarball by no route at
+    # all is caught here, before the acceptance is called green. Step 4 reports
+    # this set and hands it over; this step fails on it.
+    while IFS= read -r rec; do
+        [ -n "$rec" ] || continue
+        hex=$(step4_field "$rec" path)
+        [ -n "$hex" ] || continue
+        rel=$(step4_hex_to_path "$hex")
+        step2_in_set "$rel" "$STEP2_INV_LIBS" && continue
+        step2_in_set "$rel" "$STEP2_INV_GITS" && continue
+        [ "$rel" = "$STEP2_INV_PYTHON" ] && continue
+        n=$(step4_field "$rec" case)
+        case "$n" in
+            5|6)
+                others=$((others + 1))
+                others_bad="${others_bad:+$others_bad }$rel:case$n"
+                selected="${selected:+$selected }$rel"
+                ;;
+            7) others=$((others + 1)) ;;
+        esac
+    done <<< "$(printf '%s\n' "$capture" | grep '^CPLX-ELF/1 obj ')"
+
+    # SPLIT BY WHETHER THE OBJECT IS ADJUDICATED, because the criterion was
+    # unsatisfiable in the umbrella's own ordering and that is a planning defect
+    # rather than an archive defect.
+    #
+    # Step 6 accepts the DEPLOYED archive. The only discharge for a selected
+    # residual is removal, which umbrella requirement 7 performs, and that
+    # requirement is the integration item consuming the five that precede it,
+    # this one included. So this criterion demanded an artifact that cannot
+    # exist until after the requirement it gates has closed.
+    #
+    # The gate is not weakened, it is SEQUENCED. An object the register names
+    # with an owner is deferred to the post-rebuild acceptance, where the
+    # rebuilt archive is in hand and the same assertion is made against it. An
+    # object nobody has adjudicated still fails here and now, which is the case
+    # this criterion exists to catch: a stray program reaching the tarball with
+    # no owner and no record.
+    #
+    # The deferral cannot outlive the defect. Step 4 asserts the register EXACT
+    # in both directions, so an entry the rebuilt archive no longer carries
+    # fails there until it is dropped.
+    unadjudicated=""
+    deferred_residual=""
+    for rel in $others_bad; do
+        if owner=$(step4_defect_owner "${rel%%:*}"); then
+            deferred_residual="${deferred_residual:+$deferred_residual }${rel%%:*} ($owner)"
+        else
+            unadjudicated="${unadjudicated:+$unadjudicated }$rel"
+        fi
+    done
+
+    if [ -n "$unadjudicated" ]; then
+        fail "step6/others-preserved" \
+            "ACCEPTANCE the deployed archive selects a program nobody has adjudicated: $unadjudicated"
+    elif [ -n "$deferred_residual" ]; then
+        note "step6/others-preserved" \
+            "$others residual programs; handed to umbrella requirement 7: $deferred_residual"
+    else
+        pass "step6/others-preserved" "$others residual programs, every one preserved at case 7"
+    fi
+    cases=$((cases + 1))
+
+    step6_archive_facts "$work" "$capture"
+
+    section "step 6: Step 4 handoff, consumed by name"
+
+    # Step 4 prints the set it found and names an owner for each. Every member
+    # must be RESOLVED here: removed from the archive by its owner, or shown to
+    # be preserved after all. A member still selected, with no rebuild behind it,
+    # is the failure this criterion exists to produce.
+    # Same sequencing as the residual criterion above, and for the same reason.
+    # A member with a named owner is deferred to the post-rebuild acceptance; a
+    # member nobody has adjudicated fails here.
+    if [ -z "$selected" ]; then
+        pass "step6/handoff-resolved" "no selected residual remains in the deployed archive"
+    else
+        handoff_unowned=""
+        handoff_deferred=""
+        for rel in $selected; do
+            if owner=$(step4_defect_owner "$rel"); then
+                handoff_deferred="${handoff_deferred:+$handoff_deferred }$rel ($owner)"
+            else
+                handoff_unowned="${handoff_unowned:+$handoff_unowned }$rel"
+            fi
+        done
+        if [ -n "$handoff_unowned" ]; then
+            fail "step6/handoff-resolved" \
+                "ACCEPTANCE still selected and nobody has adjudicated it: $handoff_unowned"
+        else
+            note "step6/handoff-resolved" \
+                "handed to umbrella requirement 7 with its owner named: $handoff_deferred"
+        fi
+    fi
+    cases=$((cases + 1))
+
+    rm -rf -- "$work" 2>/dev/null
+}
+
 # Step 5 is the documentation step and it reads Markdown and nothing else, so it
 # exits HERE, above the capability gate, for the same reason step 3 does: a step
 # that needs no patchelf, no readelf and no Linux must not report
@@ -2194,6 +3409,24 @@ if [ "$STEP" = "5" ]; then
     exit 0
 fi
 
+
+# Step 6's HOST-INDEPENDENT half, run above the capability gate.
+#
+# Two of this step's criteria need no patchelf, no readelf and no Linux: the
+# domain reader's own negative controls, and the validation of the retained RHEL
+# session, which is a text file. Running them below the gate meant they answered
+# nowhere except the agent, and round 1 reported that mandatory Step 6
+# validation could not run on the reviewer's host at all. Splitting the step at
+# its real capability boundary is the fix: what can be answered anywhere now is.
+#
+# The acceptance itself stays below the gate, because walking a real archive
+# with real patchelf is exactly what it is for.
+if [ "$STEP" = "6" ]; then
+    step6_domain_reason_controls
+    step6_disposition_controls
+    step6_session_suite
+fi
+
 # -------------------------------------------------------------------- baseline ---
 # The current pass writes DT_RUNPATH and reports one mixed count. Both are
 # MEASURED from a real run, never read out of the installer's source.
@@ -2212,6 +3445,20 @@ if [ "$HOST_OK" -ne 1 ]; then
     printf '  cases       %s\n' "$cases"
     printf '  failures    %s\n' "$failures"
     printf '  baseline    NOT RUN (host cannot satisfy)\n'
+    # A FAILURE STILL WINS HERE, exactly as the final verdict block below says
+    # it does. This gate used to return 4 whatever the seam cases had found, so
+    # a real host-independent failure was reported to a caller as a host
+    # limitation and disappeared behind an exit code meaning "not my problem".
+    #
+    # Round 4 surfaced this as a disagreement about a number: the request said
+    # exit 4, the review said exit 1, and both were reading the same run. The
+    # harness was answering 4 while documenting 1, so neither reader was wrong
+    # and the code was.
+    if [ "$failures" -ne 0 ]; then
+        printf '\nOBJECTIVE NOT MET for step %s: %s failure(s), and the baseline could not run here\n' \
+            "$STEP" "$failures"
+        exit 1
+    fi
     printf '\nOBJECTIVE NOT MET for step %s: baseline not captured on this host\n' "$STEP"
     exit 4
 fi
@@ -4403,6 +5650,14 @@ if [ "$STEP" = "1" ]; then
         printf 'Missing: %s\n' "$HOST_WHY"
         printf '\nStep 1 observes real ELF objects and probes them with patchelf.\n'
         printf 'No substitute was accepted. Run this on the Linux validation host.\n'
+        # The same precedence as the step 0 gate and the final verdict: a
+        # failure already recorded is the thing to act on, and must not be
+        # reported to a caller as a host limitation.
+        if [ "$failures" -ne 0 ]; then
+            printf '\nOBJECTIVE NOT MET for step %s: %s failure(s), and the fixtures are not observable here\n' \
+                "$STEP" "$failures"
+            exit 1
+        fi
         printf '\nOBJECTIVE NOT MET for step %s: fixtures not observable here\n' "$STEP"
         exit 4
     fi
@@ -5302,6 +6557,50 @@ if [ "$STEP" = "4" ]; then
         fail "step4/pass-defined" "SEAM the production pass did not survive sourcing"
         cases=$((cases + 1))
     fi
+fi
+
+if [ "$STEP" = "6" ]; then
+    # The acceptance needs the production pass, so it sources the same isolated
+    # installer Step 4 does and runs after the capability gate: it walks a real
+    # archive with real patchelf and answers nothing without them.
+    # shellcheck disable=SC1090
+    source "$ISOLATED_INSTALLER" >/dev/null 2>&1
+    if declare -F fix_elf_paths >/dev/null 2>&1; then
+        pass "step6/pass-defined" "fix_elf_paths"
+        cases=$((cases + 1))
+        step6_suite
+    else
+        fail "step6/pass-defined" "SEAM the production pass did not survive sourcing"
+        cases=$((cases + 1))
+    fi
+
+
+    section "step 6: the criteria deferred to after the rebuild"
+
+    # Three criteria each need a COMPLETE install cycle: a v0.26.0 install then a
+    # candidate pass for migration positivity, three separate installs for the
+    # HOME states, and a second install for the force reinstall. They are
+    # deferred rather than skipped, and the reason is not cost.
+    #
+    # Measuring them against an archive we already know is defective proves less
+    # than measuring them against the rebuilt one. The HOME states and the force
+    # reinstall are claims about what a deployment does to the shipped tree, and
+    # umbrella requirement 7 is about to change that tree. Running them now
+    # would produce evidence about an artifact that is being replaced.
+    # HANDED OVER, not owed here. The scope correction of 2026-08-29 moved these
+    # three to umbrella requirement 7, along with the residual and handoff
+    # assertions, because each needs a rebuild cycle this requirement does not
+    # perform and the umbrella placed this requirement second precisely because
+    # it needs no rebuild.
+    #
+    # They are printed rather than dropped, so the handoff is visible in every
+    # capture and requirement 7 inherits a named list rather than a memory. They
+    # are NOT added to UNANSWERED: an obligation this requirement does not own
+    # must not hold its verdict open, which is what kept nine review rounds
+    # ending the same way.
+    note "step6/handover-migration-positivity" "to umbrella requirement 7: needs a v0.26.0 install then a candidate pass"
+    note "step6/handover-home-states" "to umbrella requirement 7: needs three installs"
+    note "step6/handover-force-reinstall" "to umbrella requirement 7: needs a second install"
 fi
 printf '\n== verdict\n'
 printf '  step        %s\n' "$STEP"
