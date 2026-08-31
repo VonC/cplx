@@ -1,0 +1,134 @@
+Harness: docs/v0.27.0/verify.wrapper-scope.sh --step 0, with --wrapper, --setenv
+         and --retained naming the copies carried to the host
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+Captured: 2026-08-31, by hand, over ssh
+Purpose: Step 0 baseline of the PRE-CHANGE wrapper, taken twice, before step 1
+         rewrites it. RUN A is the clean first call; RUN B injects a failing
+         readlink at the line-30 site only. Both run over a planted fixture
+         rather than a deployment, because the surgery is destructive.
+
+WHY THIS CAPTURE IS AUTHORITATIVE AND NOT MERELY PRESENT. The verdict below
+         carries FOUR digests, and all four are asserted by a host reading this
+         file through `--capture`. `harness` is the SHA-256 of the exact harness
+         bytes that produced it, and answers which instrument measured.
+         `wrapper-sha`, `setenv-sha` and `retained-sha` are the SHA-256 of the
+         three files it measured, and answer what it measured. A reading host
+         compares each against the exact `--wrapper`, `--setenv` and `--retained`
+         inputs it was given.
+
+         The second half was added after code review round 2 demonstrated its
+         absence: a wrapper with the SAME COMMAND VOCABULARY and a deliberately
+         broken relink target passed the substitution with `OBJECTIVE MET`,
+         because a capture bound only to its instrument says nothing about the
+         inputs present. Each binding now carries a control that must fail, and
+         the broken-wrapper control keeps the vocabulary identical on purpose.
+         A stale green cannot outlive the code it described, and now it cannot
+         travel to code it never described either.
+
+Host note: step 0 is host-agnostic ACROSS POSIX HOSTS by plan decision P1, and
+         this run is on RHEL only because RHEL is the nearest POSIX host. The
+         authoring and reviewing host is Windows, which cannot create the
+         fixture's symlinks. The harness measures that with a probe before it
+         plants anything, and either reads this capture or exits 4 saying it
+         could not answer. An earlier revision ran anyway and produced seven
+         fixture failures that read as findings about the wrapper and were
+         findings about the host.
+
+THREE FINDINGS THIS RUN CORRECTED, all of them assertions the harness had wrong
+and the measurement settled:
+
+  1. `readlink -f` runs TWICE as setup, not once. The plan names line 12 of the
+     wrapper; `setenv` line 7 calls it again, during the source and therefore
+     still before `setenv` exports the search path at its own line 15. Both are
+     delegated and neither carries an environment claim.
+
+  2. RUN B ENDS WITH EXIT STATUS ZERO. The exec at line 60 targets a path
+     derived from an empty string and that file does not exist, so a non-zero
+     status was expected. The two `if` statements after the exec both take their
+     false branch, and a false `if` with no else is a successful statement, so
+     the wrapper's last command succeeds. The pre-change defect is therefore
+     SILENT: the tree is mangled, the interpreter never runs, and the caller is
+     told the call worked. That is the fact step 2 has to flip.
+
+  3. `current/bin/_bin` IS A DANGLING REFERENT, NOT A FILE. RUN B leaves
+     `current/bin` holding `python python3 python3.13 python3_target`, with
+     `python3_target` a symlink to `_bin` and the interpreter never moved aside.
+     The plan's phrase "the resulting `current/bin/_bin` shape" is satisfied by
+     the symlink target and the derived exec path.
+
+Baseline in one line: all seven post-source helper calls of a clean first call
+         observe the shipped search path, and so does the interpreter. Step 1
+         takes the first count to zero and leaves the second as it is.
+
+
+
+
+== harness prerequisite preflight
+  preflight/readlink                           PASS  /bin/readlink
+  preflight/mv                                 PASS  /bin/mv
+  preflight/ln                                 PASS  /bin/ln
+  preflight/cp                                 PASS  /bin/cp
+  preflight/sed                                PASS  /bin/sed
+  preflight/grep                               PASS  /bin/grep
+  preflight/sha256sum                          PASS  /bin/sha256sum
+
+== step 0 shim coverage: the helper list against the wrapper
+  step0/coverage/no-unshimmed-command          PASS
+  step0/coverage/no-dead-shim-entry            PASS
+
+== step 0 host gate: can this host reproduce the symlink surgery
+  step0/host/symlink-capable                   PASS  yes
+
+== step 0 controls: the fixture and the injection must be real
+  step0/control/unplanted-fixture-fails        PASS  refused on [FIXTURE], as designed
+
+== step 0 RUN A: the clean first call over a planted fixture
+  step0/runA/fixture                           PASS  planted and asserted
+  step0/runA/exit-status                       PASS  0
+  step0/runA/setup-readlink-delegated          PASS  2
+  step0/runA/post-source-calls-present         PASS  yes
+  step0/runA/readlink-calls                    PASS  3
+  step0/runA/mv-calls                          PASS  1
+  step0/runA/ln-calls                          PASS  5
+  step0/runA/interpreter-calls                 PASS  1
+  step0/runA/helpers-seeing-search-path        PASS  7
+  step0/runA/interpreter-sees-search-path      PASS  yes
+  step0/runA/setup-observed                    NOTE  unset (carries no claim, decision P9)
+  step0/runA/python3-relinked-to-wrapper       PASS  ../../bin/python
+  step0/runA/interpreter-moved-aside           PASS  yes
+  step0/runA/python3_target-points-at-real     PASS  python3.13_bin
+  step0/runA/no-empty-derived-path             PASS  no
+
+== step 0 RUN B: the same fixture with a failing line-30 readlink
+  step0/runB/fixture                           PASS  planted and asserted
+  step0/control-injection                      PASS  observed once
+  step0/control/clean-run-carries-no-injection PASS  refused on [INJECTION], as designed
+  step0/runB/injected-call                     NOTE  readlink /tmp/cplx-wrapper-scope.554252/runB/bin/current/bin/python3
+  step0/runB/python3_target-derived-from-empty PASS  _bin
+  step0/runB/interpreter-not-moved-aside       PASS  no
+  step0/runB/interpreter-never-reached         PASS  0
+  step0/runB/exit-status-is-a-silent-zero      PASS  0
+  step0/runB/mutations-after-injection         NOTE  6 mv/ln/cp/sed calls followed the failed readlink
+  step0/runB/tree-shape                        NOTE  python python3 python3.13 python3_target
+
+== step 0 identities: what later steps assert rather than assume
+  step0/retained-copy-exists                   PASS  yes
+  step0/retained-copy-matches-wrapper          PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step0/wrapper-sha256                         NOTE  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step0/setenv-sha256                          NOTE  355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  step0/wrapper-lines                          NOTE  90
+
+== verdict
+  step        0
+  cases       34
+  failures    0
+  wrapper     /home/deploy-account/wrapper-scope-step0/python
+  setenv      /home/deploy-account/wrapper-scope-step0/setenv
+  retained    ./wrapper.pre-change.verification-only
+  harness     ab07e5987b91d9f78c6f4d0228c2bd3ee3a10d07b2b31a87352efb871c05eb3f
+  wrapper-sha  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  bash        5.1.8(1)-release
+
+OBJECTIVE MET for step 0
