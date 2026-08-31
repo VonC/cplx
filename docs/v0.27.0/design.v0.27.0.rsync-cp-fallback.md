@@ -1,6 +1,7 @@
 # Design v0.27.0 -- Install without the host rsync
 
 Reference issue: [issue.v0.27.0.rsync-cp-fallback.md](issue.v0.27.0.rsync-cp-fallback.md)
+Reference environments: [reference.environments.md](reference.environments.md)
 
 Umbrella: [draft.v0.27.0.debian-agent-tools.md](draft.v0.27.0.debian-agent-tools.md)
 

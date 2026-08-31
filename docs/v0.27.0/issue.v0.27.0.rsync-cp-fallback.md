@@ -5,6 +5,7 @@
 - Slug: `rsync-cp-fallback`
 - Umbrella: [docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md](draft.v0.27.0.debian-agent-tools.md)
 - Draft: [docs/v0.27.0/draft.v0.27.0.rsync-cp-fallback.md](draft.v0.27.0.rsync-cp-fallback.md)
+- Environments: [reference.environments.md](reference.environments.md)
 
 ## What Q19 blocks today
 

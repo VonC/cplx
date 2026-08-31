@@ -5,6 +5,7 @@
 - Slug: `python-wrapper-foreign-distro`
 - Umbrella: [docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md](draft.v0.27.0.debian-agent-tools.md)
 - Draft: [docs/v0.27.0/draft.v0.27.0.python-wrapper-foreign-distro.md](draft.v0.27.0.python-wrapper-foreign-distro.md)
+- Environments: [reference.environments.md](reference.environments.md)
 
 Umbrella item 3. Regroups work item 1 (Q20) and decision D2. Depends on
 nothing, and nothing in this issue depends on the installer, the relocation

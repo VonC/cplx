@@ -11,6 +11,8 @@ wrapper fail closed on an unusable helper result. No step has started.
 > placeholder `_(empty -- no check has taken place yet.)_.` until an
 > implementation check fills it.
 
+Reference environments: [reference.environments.md](reference.environments.md)
+
 ## What this validation owes, and what it does not
 
 The umbrella's acceptance for this item names a first call answering on a

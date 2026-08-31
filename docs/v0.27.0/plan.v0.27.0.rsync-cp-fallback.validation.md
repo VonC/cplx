@@ -27,6 +27,8 @@ fingerprinted harness.
 
 ---
 
+Reference environments: [reference.environments.md](reference.environments.md)
+
 ## How this validation departs from the standard template
 
 The repository is Bash and Batch, with no Python package, no `pytest`, no

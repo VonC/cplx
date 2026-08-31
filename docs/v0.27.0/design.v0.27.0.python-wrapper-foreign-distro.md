@@ -1,6 +1,7 @@
 # Design v0.27.0 -- Keep the python wrapper working on a foreign distribution
 
 Reference issue: [issue.v0.27.0.python-wrapper-foreign-distro.md](issue.v0.27.0.python-wrapper-foreign-distro.md)
+Reference environments: [reference.environments.md](reference.environments.md)
 
 ---
 

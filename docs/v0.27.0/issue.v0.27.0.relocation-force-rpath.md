@@ -5,6 +5,7 @@
 - Slug: `relocation-force-rpath`
 - Umbrella: [docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md](draft.v0.27.0.debian-agent-tools.md)
 - Draft: [docs/v0.27.0/draft.v0.27.0.relocation-force-rpath.md](draft.v0.27.0.relocation-force-rpath.md)
+- Environments: [reference.environments.md](reference.environments.md)
 
 ## What Q26 blocks today
 

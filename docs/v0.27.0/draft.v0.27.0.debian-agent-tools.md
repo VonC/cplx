@@ -27,6 +27,10 @@ built on and for RHEL. The next archive lives in a three-machine chain:
   (bookworm) userland, glibc 2.36, where the discovery pipeline
   relocates the archive to run tests, package and publish.
 
+The full identity of both hosts, what each one can and cannot prove, and the
+index of which capture came from which, are in
+[reference.environments.md](reference.environments.md).
+
 One asymmetry worth recording, visible in any `ldd` on the RHEL
 servers: they inject `/lib64/liboneagentproc.so` (the monitoring
 agent) into every process through the system preload, the CI container
@@ -769,7 +773,7 @@ the correction below.
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Issue | Install without the host rsync | `rsync-cp-fallback` | completed | `docs/v0.27.0/issue.v0.27.0.rsync-cp-fallback.md` | `docs/v0.27.0/plan.v0.27.0.rsync-cp-fallback.validation.md` |
 | 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | completed | `docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md` | `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` |
-| 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | pending | - | - |
+| 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | pending | `docs/v0.27.0/issue.v0.27.0.python-wrapper-foreign-distro.md` | `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md` |
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | pending | - | - |
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | pending | - | - |
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | pending | - | - |

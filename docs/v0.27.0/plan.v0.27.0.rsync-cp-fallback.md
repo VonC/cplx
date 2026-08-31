@@ -4,6 +4,8 @@
 relocation succeeds on a host without `rsync` while the rsync path stays exactly
 as it is.
 
+Reference environments: [reference.environments.md](reference.environments.md)
+
 - **One decision, two independent paths**: the engine verdict is computed and
   announced before archive discovery, and the mirror and the root-file deploy
   consume it separately, each keeping its own boundary and its own fatal code.
