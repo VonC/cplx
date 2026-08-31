@@ -65,9 +65,9 @@ assumed, because round 1's own question got the first one wrong:
 
 | Step | What it proves | Host |
 | --- | --- | --- |
-| 0 | baseline: the current behavior, clean AND failing, before any change | any |
-| 1 | the scope rule: helpers unset, interpreter set, measured from the run | any |
-| 2 | failing closed: a planted helper failure stops the wrapper, tree unmodified | any |
+| 0 | baseline: the current behavior, clean AND failing, before any change | any POSIX |
+| 1 | the scope rule: helpers unset, interpreter set, measured from the run | any POSIX |
+| 2 | failing closed: a planted helper failure stops the wrapper, tree unmodified | any POSIX |
 | 3 | acceptance on RHEL: first call, second call, `-m venv`, no regression | RHEL target |
 | 4 | preparation: freeze the harness, publish its identity, land the handoff, obtain a build | any, plus the pipeline repository |
 | 5 | acceptance on Debian: the first call the defect actually breaks | Debian CI agent |
@@ -234,12 +234,56 @@ relocation harness established: numbered steps, one case per assertion, controls
 that must FAIL for the suite to mean anything, and a verdict line carrying the
 case and failure counts.
 
-It must run on any host, because the defect's cause needs a foreign
+It must run on any POSIX host, because the defect's cause needs a foreign
 distribution but its OBSERVABLE does not. The harness plants a failing helper
 rather than requiring one.
 
-Every check the harness makes is measured from the wrapper's own run. Reading
-the source and asserting what it says is not a check; it is a restatement.
+POSIX IS THE REAL BOUNDARY, and the original wording of "any host" was wrong
+rather than merely loose. What steps 0 to 2 measure is symlink surgery, so a
+host that cannot create a symlink cannot reproduce it at all. The harness
+measures that with a probe before it plants anything, and a host that fails the
+probe either reads a retained measurement or exits 4. The exact command, which
+is the plan addition to the resolved validation set and is green on both a POSIX
+host and a Windows one, is
+
+```text
+bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 \
+     --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+```
+
+THE RETAINED MEASUREMENT IS NOT A WAY OF PASSING WITHOUT RUNNING, and its
+authority takes FOUR digests rather than one. A capture answers two separate
+questions, and an early revision of this section answered only the first:
+
+- WHICH INSTRUMENT MEASURED. The capture records the SHA-256 of the harness bytes
+  that produced it, and the reading host asserts that against the harness it was
+  asked to run. Edit the harness and the two diverge and the capture must be
+  retaken.
+- WHAT IT MEASURED. The capture also records the SHA-256 of the wrapper, of
+  `setenv`, and of the retained pre-change wrapper, and the reading host asserts
+  each against the exact `--wrapper`, `--setenv` and `--retained` inputs it was
+  given.
+
+THE SECOND HALF WAS MISSING AND THE GAP WAS DEMONSTRATED, not theorised. Code
+review round 2 pointed the substitution at a wrapper with the SAME COMMAND
+VOCABULARY as the real one and a deliberately broken relink target. The shim
+coverage case saw nothing wrong, the harness digest still matched, and the run
+reported `OBJECTIVE MET` with zero failures. A capture bound only to its
+instrument certifies a run over inputs nobody compared to the ones present.
+
+Each of the four bindings carries a control that must FAIL: one mutating the
+harness digest line, and three substituting a broken wrapper, a mismatched
+`setenv` and a mismatched retained wrapper. The broken-wrapper control keeps the
+command vocabulary identical on purpose, so it is exactly the file that passed
+before this binding existed. This is the idiom the relocation harness already
+uses for `--target-capability`, carried to the inputs as well as the tool.
+
+Every check the harness makes about the wrapper's BEHAVIOUR is measured from the
+wrapper's own run. Reading the source and asserting what it says is not a check;
+it is a restatement. The one deliberate exception is the shim coverage case,
+which asks which command names the FILE CONTAINS rather than what one run
+reached, and a run-derived answer there would report the helpers that one path
+exercised and call the rest absent.
 
 ## Numbered steps for v0.27.0 python-wrapper-foreign-distro
 
@@ -247,6 +291,15 @@ the source and asserting what it says is not a check; it is a restatement.
 
 - `docs/v0.27.0/verify.wrapper-scope.sh` (new)
 - `docs/v0.27.0/wrapper.pre-change.verification-only` (new)
+- `docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt` (new, the retained capture)
+
+THE THIRD FILE WAS MISSING FROM THIS LIST, and step 2 could not have executed
+without it. Step 2's completion criteria require the comparison to be "against
+STEP 0 RUN B, the recorded pre-change mangling" and say "the suite fails if that
+baseline artifact is absent". Four of step 0's own criteria below say "the
+capture records" something. No step produced such an artifact, so the plan asked
+step 2 to compare against a file nothing created. Added after code review round 1
+of step 0 raised it, together with the writer's own reading of the same gap.
 
 ### Step 0 goal
 
@@ -481,7 +534,7 @@ answer without having been asked separately.
 
 | # | Decision | Chosen |
 | --- | --- | --- |
-| P1 | Harness host | any, since the observable is reproducible without a foreign glibc |
+| P1 | Harness host | any POSIX host, since the observable is reproducible without a foreign glibc but NOT without symlinks. CORRECTED after code review round 1 of step 0: the original wording said "any", the authoring and reviewing host is Windows, and the harness produced seven fixture failures there that read as findings about the wrapper and were findings about the host. A host that cannot create a symlink now fails a measured gate BEFORE anything is planted, and then either reads a retained measurement through `--capture` whose recorded digest must name the exact harness bytes it was asked to run, or exits 4 saying it could not answer. It never reports 0 on its own account |
 | P2 | Baseline before change | required, and TWO runs: clean and planted, both over the pre-change wrapper |
 | P3 | Fixture rather than a real tree | required for steps 0 to 2, since the surgery is destructive |
 | P4 | Evidence for the scope rule | instrument the run through recording shims, never read the source |
