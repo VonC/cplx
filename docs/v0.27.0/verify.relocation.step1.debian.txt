@@ -1,39 +1,11 @@
-Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 1
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 123
-Purpose: Step 1's guard-complete fixture matrix over the ELF observer, both
-         halves of the host-tool contract, and the Step 0 behavioural baseline.
-         Re-run for Step 3, whose formatter is added to the installer this
-         capture measures: the baseline is the evidence that adding it changed
-         nothing an install can observe.
-Captured: 2026-08-28, by the pipeline stage 'Verify relocation candidate (Step 1)'
-
-What this establishes:
-  462 cases, 0 failures, OBJECTIVE MET
-  RE-RUN unchanged against the installer that now carries the loader exclusion,
-    and unchanged is the claim: the same case count and the same zero failures
-    this step reported before that rule existed. A classifier rule that altered
-    an earlier step's reading would show here rather than in review
-  the Step 0 baseline RAN against the exact staged installer: a real production
-    pass over a real ELF, reporting `Fixed 1 ELF interpreter/rpath value(s)`,
-    writing DT_RUNPATH, with the planted builder anchor gone. The installer now
-    carries the Step 3 record formatter and the observable behaviour is
-    unchanged, which is what Step 3 owed
-  the host-tool allowlist is clean over the installer, which matters this round:
-    build 96 refused it at 10 unlisted words, because the formatter matched its
-    wire tokens with UNQUOTED case patterns and the rule reads those as command
-    words. The tokens were quoted rather than added to the contract, since
-    the installer was wrong there and the check was right
-
-This supersedes the build 95 capture. Same 462 cases and 0 failures, newer tree.
-
------ begin harness output -----
-captured-at: 2026-08-28T13:02:32Z
-build: 123
-commit: aa48ff8acc8b975b67914eb88970f28dabc02570
-commit-short: aa48ff8acc8b
-uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+===== BEGIN CPLX-RELOCATION-STEP1 =====
+captured-at: 2026-08-30T21:11:49Z
+build: 130
+commit: 96c5799cf38fe49f79e999ea15201fbd9ff1726d
+commit-short: 96c5799cf38f
+uname: Linux 5.14.0-687.41.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: acfd9d19133b4027ab54fc4fe84a14cce7db6053879fe06d591dc0b34c6a58ca
+harness-sha256: 287504ad62ba4f37522b8c58989e8018dc69c0398112b11b79699a87773a4475
 candidate-sha256: 6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
 patchelf: ./prefix/tools/bin/patchelf
@@ -42,11 +14,11 @@ readelf-version: GNU readelf (GNU Binutils for Debian) 2.40
 sha256sum-version: sha256sum (GNU coreutils) 9.1
 ----- harness output -----
 
-== harness prerequisite preflight
+== harness prerequisite preflight   [t+0s]
   preflight/readelf                        PASS  /usr/bin/readelf
   preflight/sha256sum                      PASS  /usr/bin/sha256sum
 
-== capability gate: declare -A
+== capability gate: declare -A   [t+0s]
   assoc-array/local                        PASS  supported
   assoc-array/local-bash                   NOTE  5.2.15(1)-release
   target-capability/identity               PASS  identity
@@ -57,6 +29,16 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   target-capability/malformed              PASS  malformed
   target-capability/bash                   PASS  bash
   target-capability/duplicate              PASS  duplicate
+  step2 dest regular file            PASS  exit 5
+      fixture   tools is a regular file
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 dest file untouched          PASS  refused before any delete
+  step2 dest symlink to dir          PASS  exit 5
+      fixture   tools is a symlink onto an external directory
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 external target intact       PASS  nothing outside the prefix was deleted
+
+--- step 3: the root-file deploy and its non-following preflight
   target-capability/ok                     PASS  ok
   target-capability/absent                 PASS  absent
   target-source/none-is-blocked            PASS  blocked none
@@ -66,7 +48,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
   assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
 
-== step 0: seam
+== step 0: seam   [t+1s]
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
   identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
@@ -82,7 +64,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
-== step 0: host-tool contract
+== step 0: host-tool contract   [t+1s]
   host-tool/no-invocations                 PASS  0
   host-tool/rejects                        PASS  python -c pass
   host-tool/rejects                        PASS  /usr/bin/python -c pass
@@ -97,6 +79,29 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/contract-columns               PASS  0
   host-tool/contract-form-values           PASS  0
   host-tool/contract-runs-argument-answered PASS  0
+  baseline/production-pass-ran             PASS  0
+  baseline/mixed-count-replaced            PASS  one CPLX-ELF/1 trailer, no mixed count
+  baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.110492/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
+  baseline/tag-written                     PASS  DT_RPATH
+  baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
+  baseline/objects-walked                  NOTE  2
+  baseline/donor                           NOTE  /bin/true
+  baseline/installer-lines                 NOTE  1308
+  step6/pass-defined                       PASS  fix_elf_paths
+
+== step 6: the acceptance over the deployed archive   [t+6s]
+  step6/oracle                             NOTE  ./tools/inventory.develop-24.verification-only.txt
+  step3 deploy accepted shapes       PASS  exit 0
+      fixture   .env_ is a regular file
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 accepted deploy engine       PASS  deploy engine cp operated on 2 root files, read from the run trace
+  step3 both root files deployed     PASS  absent and present destinations both carry archive content
+  step3 dest symlink to file         PASS  exit 7
+      fixture   .env is a symlink onto an external regular file
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 symlink left intact          PASS  the link itself was not replaced
   host-tool/contract-entries-unique        PASS  0
   host-tool/launcher-tokens-unique         PASS  0
   host-tool/contract-indirect-resolver     PASS  0
@@ -113,8 +118,26 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/control-clean-unanswered-entry PASS  silent on the real contract
   host-tool/control-clean-undeclared-runner PASS  silent on the real contract
   host-tool/control-clean-unowned-launcher PASS  silent on the real contract
+  step3 external target intact       PASS  content and mtime unchanged, so nothing copied through the link
+  step3 dest FIFO refused promptly   PASS  exit 7
+      fixture   .env is a FIFO
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 FIFO left intact             PASS  refused before any copy, so the FIFO survives
   host-tool/no-unsupported-forms           PASS  0
   host-tool/allowlist-unlisted             PASS  0
+  step3 dest empty directory         PASS  exit 7
+      fixture   .env is a directory where a regular file is expected
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 dest populated directory     PASS  exit 7
+      fixture   .env is a directory where a regular file is expected
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step3 directory content intact     PASS  refused without touching what was inside
+  step3 refusal distinguishable      PASS  the preflight names the shape, not a failed copy
+
+--- step 5: acceptance rows no earlier suite covers
+  (no rsync on this host: the equivalence pair, the canary and loader
+   comparisons and the rsync-failure row all need two engines on one
+   host. They are NOT covered by this run and are not claimed by it.)
   host-tool/contract-unused                PASS  0
   host-tool/allowlist-rejects              PASS  zzunlisted -x
   host-tool/allowlist-rejects              PASS  if ! zzunlisted -x; then :; fi
@@ -127,6 +150,11 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/allowlist-rejects              PASS  while :; do zzunlisted -x; done
   host-tool/allowlist-rejects              PASS  if true; then :; else zzunlisted -x; fi
   host-tool/allowlist-rejects              PASS  if zzunlisted -q; then :; fi
+  accept no-rsync host installs      PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  accept no-rsync host engine        PASS  engine cp operated, read from the run trace
+  accept no-rsync host selection     PASS  selected cp, announced before discovery (a selection, not a copy)
   host-tool/allowlist-rejects              PASS  until zzunlisted; do :; done
   host-tool/allowlist-rejects              PASS  coproc zzunlisted -x
   host-tool/allowlist-rejects              PASS  case "$x" in $pat) zzunlisted -x ;; esac
@@ -138,6 +166,15 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/allowlist-rejects              PASS  >/dev/null zzunlisted -x
   host-tool/allowlist-rejects              PASS  > /dev/null zzunlisted -x
   host-tool/allowlist-rejects              PASS  foo &>/dev/null zzunlisted
+  bridge/subjects-planted                  PASS  7
+  accept cp interrupted mid-copy     PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  accept interrupted leaves a partial tree PASS  2 entries present, staging retained by the post-state oracle
+  accept rerun after interruption    PASS  exit 0
+      fixture   tools is a directory where a regular file is expected
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  accept rerun restores the tree     PASS  2 entries after the interruption, then every one of the archive's 9 entries present and nothing else
   host-tool/allowlist-rejects              PASS  command zzunlisted -x
   host-tool/allowlist-rejects              PASS  command -v zzunlisted
   host-tool/allowlist-rejects              PASS  exec zzunlisted -x
@@ -148,6 +185,10 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/allowlist-rejects              PASS  echo a | xargs -I {} zzunlisted {}
   host-tool/allowlist-rejects              PASS  echo a | xargs -n1 zzunlisted
   host-tool/allowlist-rejects              PASS  echo a | xargs --max-procs 4 zzunlisted
+  B01/producer-tuple                       PASS  F03 observed into a contract-valid tuple
+  B01/case                                 PASS  4
+  B01/agrees-with-C04                      PASS  4
+  B01/crossing                             NOTE  F03: a library, ET_DYN with no PT_INTERP
   host-tool/allowlist-rejects              PASS  echo a | xargs -rP 4 zzunlisted
   host-tool/allowlist-rejects              PASS  exec -ca name zzunlisted
   host-tool/allowlist-rejects              PASS  echo a | xargs -0rn1 zzunlisted
@@ -159,6 +200,17 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/allowlist-rejects-extglob      PASS  case "$x" in \)) zzunlisted -x ;; esac
   host-tool/allowlist-rejects-extglob      PASS  case "$x" in @(a|b)) zzunlisted -x ;; esac
   host-tool/allowlist-rejects-extglob      PASS  case "$x" in +(y)) zzunlisted -x ;; esac
+  B02/producer-tuple                       PASS  F04 observed into a contract-valid tuple
+  B02/case                                 PASS  2
+  B02/agrees-with-C02                      PASS  2
+  B02/crossing                             NOTE  F04: no PT_DYNAMIC, so the rpath probe is structurally inapplicable
+  accept contract PATH completes the install PASS  the 20 published programs alone are sufficient
+  accept no gzip fails at extraction PASS  exit 3 at extraction, nothing transferred
+
+=== VERDICT ===
+suites    : preflight controls baseline-no-rsync step1-selection step2-mirror step3-rootfile step5-acceptance
+cases: 63, failures: 0
+Step 5: every assertion and every negative control behaved as designed.
   host-tool/allowlist-rejects-extglob      PASS  case "$x" in !(z)) zzunlisted -x ;; esac
   host-tool/allowlist-allows               PASS  sed -e 's/a/b/' file
   host-tool/allowlist-allows               PASS  local x="$INSTALL_PREFIX/tools/python/root/lib64/ld-linux-x86-64.so.2"
@@ -171,6 +223,11 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/allowlist-allows               PASS  plain_assignment=${value}
   host-tool/allowlist-allows               PASS  prefixed=${HOME}/tools
   host-tool/allowlist-allows               PASS  concatenated=$(basename x)suffix
+[Pipeline] }
+  B03/producer-tuple                       PASS  F06 observed into a contract-valid tuple
+  B03/case                                 PASS  3
+  B03/agrees-with-C03                      PASS  3
+  B03/crossing                             NOTE  F06: DT_RPATH holding exactly the target value
   host-tool/allowlist-allows               PASS  dotted=$(dirname y).bak
   host-tool/allowlist-allows               PASS  arr=(one two three)
   host-tool/allowlist-allows               PASS  arr+=(four five)
@@ -192,6 +249,10 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/allowlist-allows               PASS  execclust=$(exec -ca alias sed -e s/a/b/ f)
   host-tool/allowlist-allows               PASS  builtin cd /tmp
   host-tool/unspaced-case-arm-is-seen      PASS  a)cmd names the unlisted command
+  B04/producer-tuple                       PASS  F06 observed into a contract-valid tuple
+  B04/case                                 PASS  7
+  B04/agrees-with-C10                      PASS  7
+  B04/crossing                             NOTE  F06: the same DT_RPATH object against a target it does not hold
   host-tool/substitution-close-is-not-an-opener PASS  $(basename x)suffix is one word
   host-tool/boundary-fires                 PASS  eval "zzunlisted -x"
   host-tool/boundary-fires                 PASS  if eval "$payload"; then :; fi
@@ -207,20 +268,36 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/boundary-fires                 PASS  command -- eval "$payload"
   host-tool/boundary-fires                 PASS  command -p eval "$payload"
   host-tool/boundary-allows-literal-target PASS  a literal launcher target is readable
+  B05/producer-tuple                       PASS  F07 observed into a contract-valid tuple
+  B05/case                                 PASS  5
+  B05/agrees-with-C05                      PASS  5
+  B05/crossing                             NOTE  F07: DT_RUNPATH holding exactly the target value
   host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
   host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
 
-== host capability for step 1
+== host capability for step 1   [t+4s]
   host/can-run-step-1                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
 
-== step 0: baseline capture
+== step 0: baseline capture   [t+4s]
   baseline/fixture-anchored                PASS  /home/builder/prefix/lib
   baseline/fixture-tag-before              PASS  1
-  baseline/target-rpath-computed           PASS  <the harness scratch>/baseline-prefix/tools/python/root/usr/lib64
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.128501/baseline-prefix/tools/python/root/usr/lib64
+  B06/producer-tuple                       PASS  F07 observed into a contract-valid tuple
+  B06/case                                 PASS  7
+  B06/agrees-with-C11                      PASS  7
+  B06/crossing                             NOTE  F07: the same DT_RUNPATH object against a target it does not hold
+  B07/producer-tuple                       PASS  F10 observed into a contract-valid tuple
+  B07/case                                 PASS  1
+  B07/agrees-with-C13                      PASS  1
+  B07/crossing                             NOTE  F10: both search-path tags, an ambiguity that fails the rpath axis closed
+  B08/producer-tuple                       PASS  F16 observed into a contract-valid tuple
+  B08/case                                 PASS  1
+  B08/agrees-with-C01                      PASS  1
+  B08/crossing                             NOTE  F16: a structural rejection, outside the supported domain
   baseline/production-pass-ran             PASS  0
   baseline/mixed-count-replaced            PASS  one CPLX-ELF/1 trailer, no mixed count
   baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
-  baseline/rpath-value-rewritten           PASS  <the harness scratch>/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.128501/baseline-prefix/tools/python/root/usr/lib64
   baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
   baseline/tag-written                     PASS  DT_RPATH
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
@@ -229,13 +306,13 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   baseline/installer-lines                 NOTE  1308
   step1/observer-defined                   PASS  elf_observe, elf_probe, elf_obs_clear
 
-== step 1: the manifest and its anchors
+== step 1: the manifest and its anchors   [t+4s]
   manifest/columns-complete                PASS  0
   manifest/every-entry-cited               PASS  0
   manifest/entries                         NOTE  19
   step1/donor-program                      NOTE  /bin/true
 
-== step 1: layout confirmation
+== step 1: layout confirmation   [t+4s]
   layout/base-parses                       PASS  readelf -h accepts the lawful base
   layout/class-reported                    PASS  1
   layout/data-reported                     PASS  1
@@ -245,7 +322,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   layout/alternate-pair-e_type-single-range PASS  1
   layout/alternate-pair-readelf-differs    PASS  1
 
-== step 1: the fixture matrix
+== step 1: the fixture matrix   [t+4s]
   F01/fixture-columns                      PASS  12
   F01/structural_status                    PASS  ok
   F01/elf_kind                             PASS  exec
@@ -258,6 +335,24 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F01/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
   F01/guard                                NOTE  the lawful base, no guard rejects
   F02/fixture-columns                      PASS  12
+  B09/producer-tuple                       PASS  F01 observed into a contract-valid tuple
+  B09/case                                 PASS  1
+  B09/agrees-with-C16                      PASS  1
+  B09/crossing                             NOTE  F01: the rpath probe fault, with the interpreter axis surviving
+  B10/producer-tuple                       PASS  F01 observed into a contract-valid tuple
+  B10/case                                 PASS  7
+  B10/agrees-with-C17                      PASS  7
+  B10/crossing                             NOTE  F01: the interpreter probe fault, with the rpath axis surviving
+  bridge/shipped-identity-restored         PASS  6526398feccd54ab150e49ef643376c6ae37445fdc28b3320baf4aea59f9d536
+  bridge/row-count                         PASS  10
+  bridge/probe-faults                      PASS  2
+  bridge/target-matches                    PASS  2
+
+== step 2: the inventory oracle refuses   [t+10s]
+  control/inventory-short-record           PASS  refused on [ORACLE], as designed
+  control/inventory-long-record            PASS  refused on [ORACLE], as designed
+  control/inventory-duplicate-record       PASS  refused on [ORACLE], as designed
+  control/inventory-missing-library        PASS  refused on [INVENTORY], as designed
   F02/structural_status                    PASS  ok
   F02/elf_kind                             PASS  dyn
   F02/has_dynamic                          PASS  yes
@@ -269,6 +364,10 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F02/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
   F02/guard                                NOTE  e_type reported as DYN
   F03/fixture-columns                      PASS  12
+  control/inventory-walked-lib-case        PASS  refused on [INVENTORY], as designed
+  control/inventory-recorded-lib-case      PASS  refused on [INVENTORY], as designed
+  control/inventory-missing-git            PASS  refused on [INVENTORY], as designed
+  control/inventory-git-not-selected       PASS  refused on [INVENTORY], as designed
   F03/structural_status                    PASS  ok
   F03/elf_kind                             PASS  dyn
   F03/has_dynamic                          PASS  yes
@@ -280,6 +379,20 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F03/interp_value                         PASS  absent
   F03/guard                                NOTE  a library: ET_DYN with no PT_INTERP
   F04/fixture-columns                      PASS  12
+  control/inventory-python-excluded        PASS  refused on [INVENTORY], as designed
+  control/inventory-residual-unclassified  PASS  refused on [INVENTORY], as designed
+  control/inventory-git-tree-selected      PASS  residual, not a git member, at a selected case
+  inventory/recorded-libraries-present     PASS  110 recorded, all walked
+  inventory/recorded-libraries-case-4      PASS  every recorded library is the library population
+  inventory/walked-libraries-case-4        PASS  110 walked, all case 4
+  inventory/unrecorded-libraries           NOTE  0 walked libraries the record does not name
+  inventory/python-present-by-name         PASS  tools/python/current/bin/python3.13_bin
+  inventory/python-selected                PASS  case 6
+  inventory/recorded-git-objects-present   PASS  1 recorded, all walked
+  inventory/git-objects-exact              PASS  no unrecorded member, none unselected
+  inventory/other-programs-classified      PASS  1 classified
+  inventory/other-programs-case-7          NOTE  1 residual programs, all case 7
+  control/inventory-git-tree-case-7        PASS  an unrecorded case 7 program under the git tree is residual, not a defect
   F04/oracle-no-dynamic                    PASS  0
   F04/structural_status                    PASS  ok
   F04/elf_kind                             PASS  exec
@@ -292,6 +405,42 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F04/interp_value                         PASS  /lib64/ld-linux-x86-64.so.2
   F04/guard                                NOTE  no PT_DYNAMIC, so the rpath probe is structurally inapplicable
   F05/fixture-columns                      PASS  12
+  inventory/recorded-libraries-present     PASS  110 recorded, all walked
+  inventory/recorded-libraries-case-4      PASS  every recorded library is the library population
+  inventory/walked-libraries-case-4        PASS  110 walked, all case 4
+  inventory/unrecorded-libraries           NOTE  0 walked libraries the record does not name
+  inventory/python-present-by-name         PASS  tools/python/current/bin/python3.13_bin
+  inventory/python-selected                PASS  case 6
+  inventory/recorded-git-objects-present   PASS  1 recorded, all walked
+  inventory/git-objects-exact              PASS  no unrecorded member, none unselected
+  inventory/other-programs-classified      PASS  1 classified
+  inventory/other-programs-case-7          NOTE  not case 7, asserted by Steps 4 and 6 rather than here: tools/python/root/a.out:case5
+  control/inventory-residual-not-case-7    PASS  a residual that is not case 7 is reported here and asserted by Steps 4 and 6
+  inventory/recorded-libraries-present     PASS  110 recorded, all walked
+  inventory/recorded-libraries-case-4      PASS  every recorded library is the library population
+  inventory/walked-libraries-case-4        PASS  110 walked, all case 4
+  inventory/unrecorded-libraries           NOTE  0 walked libraries the record does not name
+  inventory/python-present-by-name         PASS  tools/python/current/bin/python3.13_bin
+  inventory/python-selected                PASS  case 6
+  inventory/recorded-git-objects-present   PASS  1 recorded, all walked
+  inventory/git-objects-exact              PASS  no unrecorded member, none unselected
+  inventory/other-programs-classified      PASS  0 classified
+  inventory/other-programs-case-7          NOTE  0 residual programs, all case 7
+  control/inventory-clean-state            PASS  silent on a well-formed state
+
+== step 2: the residual population boundary   [t+11s]
+  control/non-program-excluded             PASS  a unsupported kind is not a residual program
+  control/non-program-excluded             PASS  a cleared kind is not a residual program
+  control/program-not-excluded             PASS  a exec object is still judged
+  control/program-not-excluded             PASS  a dyn object is still judged
+
+== step 2: the develop#24 inventory   [t+11s]
+  inventory/root                           NOTE  ./prefix
+  inventory/oracle                         NOTE  ./tools/inventory.develop-24.verification-only.txt
+  inventory/oracle-readable                PASS  110 libraries, 161 git objects, one python program
+  inventory/oracle-python                  NOTE  tools/python/python-3.13.9/bin/python3.13_bin
+  inventory/target                         NOTE  ./prefix/tools/python/root/usr/lib64:./prefix/tools/python/root/usr/lib:./prefix/tools/python/root/lib64:./prefix/tools/python/current/lib:./prefix/tools/python/python-3.13.9/lib:./prefix/tools/git/root/usr/lib64:./prefix/tools/git/root/usr/lib:./prefix/tools/git/root/lib64
+  inventory/target-computed                PASS  the production builder answered under this prefix
   F05/oracle-soname                        PASS  1
   F05/oracle-no-search-tag                 PASS  0
   F05/structural_status                    PASS  ok
@@ -530,7 +679,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   fixtures/table-readable                  PASS  25
   fixtures/ids-are-F01-to-F25              PASS  no gap, no duplicate
 
-== step 1: the clearing rule
+== step 1: the clearing rule   [t+12s]
   clearing/rejected-first                  PASS  inconclusive
   clearing/good-after-rejected-status      PASS  ok
   clearing/good-after-rejected-tag         PASS  rpath
@@ -539,7 +688,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   clearing/rejected-after-good-tag         PASS
   clearing/rejected-after-good-rpath-val   PASS  absent
 
-== step 1: probe witnesses
+== step 1: probe witnesses   [t+12s]
   F01/rpath_probe_status                   PASS  ok
   F01/interp_probe_status                  PASS  ok
   F01/rpath_value                          PASS
@@ -570,7 +719,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   F12/rpath_value                          PASS  absent
   F12/obligation                           NOTE  an inconclusive structure blocks both axes
 
-== step 1: axis-local probe faults
+== step 1: axis-local probe faults   [t+14s]
   D01/rpath_probe_status                   PASS  failed
   D01/rpath_value_absent                   PASS  absent
   D01/interp_survives                      PASS  ok
@@ -591,6 +740,8 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
 
 OBJECTIVE MET for step 1
 ----- end harness output -----
+harness-seconds: 15
+preamble-seconds: 0
 harness-exit: 0
 result: OBJECTIVE_MET
 ===== END CPLX-RELOCATION-STEP1 =====
