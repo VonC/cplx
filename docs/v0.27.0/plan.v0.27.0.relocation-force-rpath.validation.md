@@ -40,6 +40,8 @@ restated as evidence for this flip.
 
 ---
 
+Reference environments: [reference.environments.md](reference.environments.md)
+
 ## Analysis of Step 0 implementation state
 
 Yes. Step 0 has been fully implemented.

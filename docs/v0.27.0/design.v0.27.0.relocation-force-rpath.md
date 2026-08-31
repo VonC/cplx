@@ -1,6 +1,7 @@
 # Design v0.27.0 -- Relocate with RPATH so wheels resolve inside the prefix
 
 Reference issue: [issue.v0.27.0.relocation-force-rpath.md](issue.v0.27.0.relocation-force-rpath.md)
+Reference environments: [reference.environments.md](reference.environments.md)
 
 ---
 

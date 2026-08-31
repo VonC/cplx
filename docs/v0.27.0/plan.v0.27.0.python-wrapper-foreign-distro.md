@@ -2,6 +2,7 @@
 
 Reference design: [design.v0.27.0.python-wrapper-foreign-distro.md](design.v0.27.0.python-wrapper-foreign-distro.md)
 Reference issue: [issue.v0.27.0.python-wrapper-foreign-distro.md](issue.v0.27.0.python-wrapper-foreign-distro.md)
+Reference environments: [reference.environments.md](reference.environments.md)
 
 ---
 
