@@ -1,78 +1,76 @@
-Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 0
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 65
-Purpose: Step 0 baseline of the CURRENT relocation pass, MEASURED by running it
-         over a real ELF. The authoring host is Windows with no patchelf, no
-         compiler and no binutils, so it cannot produce or rewrite an ELF at all.
-Captured: 2026-08-19, by the pipeline stage 'Verify relocation candidate (Step 0)'
-
-Baseline recorded here:
-  objects walked        2
-  mixed count emitted   Fixed 1 ELF interpreter/rpath value(s)
-  rpath value rewritten from /home/builder/prefix/lib to the computed target,
-                        asserted in BOTH directions, which is what ties the
-                        reported mutation to this object
-  tag written           DT_RUNPATH, read with readelf -d AFTER the pass ran
-  target rpath computed non-empty, so the pass did not skip its writes
-
-Capability: declare -A supported locally at bash 5.2.15, and on the exact RHEL
-         9.8 target at bash 5.1.8, read from docs/v0.27.0/capability.rhel-9.8.txt
-         and drawn through the same production functions the cases call. All
-         three of the plan's outcomes are reachable and distinct: exact evidence
-         gives supported; representative version-pinned RHEL 9 or UBI 9 evidence
-         opens the provisional branch and records the Step 6 debt; and NO
-         evidence BLOCKS the step rather than passing quietly.
-
-Provenance: the commit and commit-short lines below are the revision the agent
-         built, and the harness-sha256 is the committed harness. Both are checked
-         against the local repository rather than assumed, after a push to a
-         multi-URL remote once failed on its first URL and left an earlier build
-         running against a previous commit.
-
-Supersedes: builds 56 to 64, each withdrawn by a defect the runs exposed.
-         Build 56 reported 'tag-written PASS' after a pass that exited 127, and
-         'functions-defined PASS' from a probe that died before printing.
-         Build 57 fixed one of three identical call sites.
-         Build 58 carried a duplicated note.
-         Build 59 proved a call returned zero and a count of one, then rechecked
-         the tag the fixture was planted with, so nothing tied the mutation to
-         the donor.
-         Build 60 measured the exact-target capability and only PRINTED it.
-         Build 61 asserted it but read one value per field, so a self-
-         contradicting file read as whichever line came first.
-         Build 63 matched the identity as a SUBSTRING, accepting 9.80, and its
-         negative cases exercised a parallel parser carrying the same bug.
-         Build 64 treated absent target evidence as a note, so a run knowing
-         nothing about the target could still report OBJECTIVE MET.
-
-Source: fetched from the build's archived artifact rather than scraped from the
-        console. Workspace paths are placeholdered; nothing else is changed.
-
 ===== BEGIN CPLX-RELOCATION-STEP0 =====
-captured-at: 2026-08-19T06:54:17Z
-build: 65
-commit: 0a2b25e13b8f3c8618fbe6c159269a33a16aa239
-commit-short: 0a2b25e13b8f
-uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+captured-at: 2026-08-30T21:11:44Z
+build: 130
+commit: 96c5799cf38fe49f79e999ea15201fbd9ff1726d
+commit-short: 96c5799cf38f
+uname: Linux 5.14.0-687.41.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: fbafc244527383f0f92133246adfd06fdb71bac73c6887c2a20906b7c6ebef01
-candidate-sha256: 24ed8ec3e466ba3b03d9812d6ab47fc89f0ae9844cd6bd253c53275cacf890d5
-patchelf: /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf
+harness-sha256: 287504ad62ba4f37522b8c58989e8018dc69c0398112b11b79699a87773a4475
+candidate-sha256: 6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
+host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
+patchelf: ./prefix/tools/bin/patchelf
 patchelf-version: patchelf 0.19.1
 readelf-version: GNU readelf (GNU Binutils for Debian) 2.40
 sha256sum-version: sha256sum (GNU coreutils) 9.1
 ----- harness output -----
 
-== harness prerequisite preflight
+== harness prerequisite preflight   [t+0s]
   preflight/readelf                        PASS  /usr/bin/readelf
   preflight/sha256sum                      PASS  /usr/bin/sha256sum
 
-== capability gate: declare -A
+== capability gate: declare -A   [t+0s]
   assoc-array/local                        PASS  supported
   assoc-array/local-bash                   NOTE  5.2.15(1)-release
   target-capability/identity               PASS  identity
   target-capability/identity               PASS  identity
   target-capability/identity               PASS  identity
   target-capability/capability             PASS  capability
+  target-capability/unavailable            PASS  unavailable
+  target-capability/malformed              PASS  malformed
+===== BEGIN CPLX-LOADER-PROBE =====
+archive   : ./prefix/tools
+host      : Linux 5.14.0-687.41.1.el9_8.x86_64 x86_64
+patchelf  : patchelf 0.19.1
+
+== 1. the shipped loader, untouched
+  clean-loader: exit 0
+  clean-loader: ld.so (GNU libc) stable release version 2.34.
+  rpath-before: []
+
+== 2. the same loader after the case 4 write
+  patchelf-set-rpath: exit 0
+  rpath-after : [./prefix/tools/python/root/usr/lib64:./prefix/tools/python/root/usr/lib:./prefix/tools/python/root/lib64]
+  size        : 897856 -> 905089
+  patched-loader: exit 139 (signal 11)
+
+== 3. a program through each loader
+  py-interp   : ./prefix/tools/python/root/lib64/ld-linux-x86-64.so.2
+rsync absent, as expected on this image: capturing the no-engine pre-change baseline
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 0 ===
+date      : 2026-08-30T21:11:44Z (UTC)
+harness   : installer_verify_step0.sh
+  sha256  : 068551ad73b1bcfa57df5c965c57dd8ba4225b178c272e0137b3b23eff9ffb69
+  body    : ccf52d7a36c072f2ce11b410cb9ae9ed60ed38c1fda924489408967d27465747
+uname     : Linux 5.14.0-687.41.1.el9_8.x86_64 x86_64
+archive   : synthetic fixture built by the harness
+installer : ./prefix/bootstrap/bin/install_pkg.sh
+  sha256  : 3c1f6a562b56daf4078ff36fa494ceb558e5415f516b8616c46f67347ccfb3f1
+  lines   : 505
+  fallback: no (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : no
+identity  : Debian/no-rsync/no-engine, requested; the engine is asserted from the run trace below
+            pre-change baseline, NOT the D-fb cell: this installer has no fallback engine, so no engine can run. This is the state expected to become D-fb once one exists.
+home      : /tmp/cplx-verify.110790/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.110790 (1517.2 GiB free on overlay)
+watchdog  : 20s per case
+
+--- preflight
+  preflight commands                 PASS  all 30 present
+  preflight stat fractional          PASS  1788124305.014902644
+  preflight combination              PASS  Debian/no-rsync/no-engine, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
   target-capability/unavailable            PASS  unavailable
   target-capability/malformed              PASS  malformed
   target-capability/bash                   PASS  bash
@@ -86,23 +84,130 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
   assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
 
-== step 0: seam
+== step 0: seam   [t+1s]
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
-  identity/installer                       PASS  /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
-  identity/installer-digest                NOTE  24ed8ec3e466
+  identity/installer-digest                NOTE  6d043f148d17
+  seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
+verification input (NOT delivered): ./tools/install_pkg.candidate.verification-only.sh
+candidate suite: step 5
+591e2db0684181f29d4f8ef3fb9d669250e604d2dcb6442c01758f48f764575a  ./tools/install_pkg.candidate.verification-only.sh
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 5 ===
+date      : 2026-08-30T21:11:45Z (UTC)
+harness   : installer_verify_step0.sh
+  sha256  : 068551ad73b1bcfa57df5c965c57dd8ba4225b178c272e0137b3b23eff9ffb69
+  body    : ccf52d7a36c072f2ce11b410cb9ae9ed60ed38c1fda924489408967d27465747
+uname     : Linux 5.14.0-687.41.1.el9_8.x86_64 x86_64
+archive   : synthetic fixture built by the harness
+installer : ./tools/install_pkg.candidate.verification-only.sh
+  sha256  : 591e2db0684181f29d4f8ef3fb9d669250e604d2dcb6442c01758f48f764575a
+  lines   : 625
+  fallback: yes (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : no
+identity  : step3-candidate/Debian/no-rsync, requested; the engine is asserted from the run trace below
+            a step 3 candidate suite. Both sites now branch, so this run exercises the D-fb matrix cell end to end: the fallback is the only engine and the install completes. The per-case operation assertions remain the authority for which engine ran where.
+home      : /tmp/cplx-verify.110953/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.110953 (1517.2 GiB free on overlay)
+watchdog  : 20s per case
+
+--- preflight
+  preflight commands                 PASS  all 30 present
+  preflight stat fractional          PASS  1788124305.063902643
+  preflight combination              PASS  step3-candidate/Debian/no-rsync, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  target-capability/bash                   PASS  bash
+  target-capability/duplicate              PASS  duplicate
+  target-capability/ok                     PASS  ok
+  target-capability/absent                 PASS  absent
+  target-source/none-is-blocked            PASS  blocked none
+  target-source/representative             PASS  representative ok
+  target-source/representative-identity    PASS  representative identity
+  assoc-array/exact-target                 PASS  supported (retained exact capture)
+  assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
+  assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
+
+== step 0: seam   [t+1s]
+  control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
+  identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/declared-by                     NOTE  --installer argument
+  identity/installer-digest                NOTE  6d043f148d17
+  seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
+  target-capability/bash                   PASS  bash
+  target-capability/duplicate              PASS  duplicate
+  target-capability/ok                     PASS  ok
+  target-capability/absent                 PASS  absent
+  target-source/none-is-blocked            PASS  blocked none
+  target-source/representative             PASS  representative ok
+  target-source/representative-identity    PASS  representative identity
+  assoc-array/exact-target                 PASS  supported (retained exact capture)
+  assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
+  assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
+
+== step 0: seam   [t+1s]
+  control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
+  identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/declared-by                     NOTE  --installer argument
+  identity/installer-digest                NOTE  6d043f148d17
+  seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
+  target-capability/bash                   PASS  bash
+  target-capability/duplicate              PASS  duplicate
+  target-capability/ok                     PASS  ok
+  target-capability/absent                 PASS  absent
+  target-source/none-is-blocked            PASS  blocked none
+  target-source/representative             PASS  representative ok
+  target-source/representative-identity    PASS  representative identity
+  assoc-array/exact-target                 PASS  supported (retained exact capture)
+  assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
+  assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
+
+== step 0: seam   [t+1s]
+  control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
+  identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
+  identity/declared-by                     NOTE  --installer argument
+  identity/installer-digest                NOTE  6d043f148d17
   seam/echos-resolved                      NOTE  none; the installer's built-in fallbacks are used
   seam/probe-ran                           PASS  sentinel present
   seam/source-returns-zero                 PASS  0
   seam/no-install-on-source                PASS  0
-  seam/functions-defined                   PASS  
+  seam/functions-defined                   PASS
   seam/guard-present                       PASS  1
-  seam/guard-precedes-main                 PASS  guard 463, main 474
-  seam/definitions-above-boundary          PASS  usage 437, engine 449
+  seam/guard-precedes-main                 PASS  guard 1122, main 1133
+  seam/definitions-above-boundary          PASS  usage 1096, engine 1108
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
-== step 0: host-tool contract
+== step 0: host-tool contract   [t+1s]
+  host-tool/no-invocations                 PASS  0
+  host-tool/rejects                        PASS  python -c pass
+  host-tool/rejects                        PASS  /usr/bin/python -c pass
+  host-tool/rejects                        PASS  ./readelf -d x
+  host-tool/rejects                        PASS  foo | awk '{print}'
+  host-tool/rejects                        PASS  value=$(sha256sum x)
+  host-tool/rejects                        PASS  if true; then wc -l x; fi
+  py-via-patched-loader: exit 139 (signal 11)
+
+== 4. the ordinary libraries, which must NOT be excluded
+  before      : exit 0
+  after (all) : exit 0
+
+probe complete; nothing under ./prefix/tools was written
+probe-exit: 0
+===== END CPLX-LOADER-PROBE =====
+[Pipeline] sh
+  seam/probe-ran                           PASS  sentinel present
+  seam/source-returns-zero                 PASS  0
+  seam/no-install-on-source                PASS  30709
+  seam/functions-defined                   PASS
+  seam/guard-present                       PASS  1
+  seam/guard-precedes-main                 PASS  guard 1122, main 1133
+  seam/definitions-above-boundary          PASS  usage 1096, engine 1108
+  seam/execute-still-refuses               PASS  1
+  seam/execute-usage-path                  PASS  usage reached from the main flow
+
+== step 0: host-tool contract   [t+1s]
   host-tool/no-invocations                 PASS  0
   host-tool/rejects                        PASS  python -c pass
   host-tool/rejects                        PASS  /usr/bin/python -c pass
@@ -112,30 +217,730 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/rejects                        PASS  if true; then wc -l x; fi
   host-tool/allows-path-argument           PASS  argument, not a command
   host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/contract                       NOTE  ./tools/relocation_host_tools.verification-only.txt
+  host-tool/contract-nonempty              PASS  yes
+  host-tool/contract-columns               PASS  0
+  host-tool/contract-form-values           PASS  0
+  host-tool/contract-runs-argument-answered PASS  0
+  host-tool/contract-entries-unique        PASS  0
+  host-tool/launcher-tokens-unique         PASS  0
+  host-tool/contract-indirect-resolver     PASS  0
+  host-tool/launcher-table-nonempty        PASS  yes
+  seam/probe-ran                           PASS  sentinel present
+  seam/source-returns-zero                 PASS  0
+  seam/no-install-on-source                PASS  30709
+  seam/functions-defined                   PASS
+  seam/guard-present                       PASS  1
+  seam/guard-precedes-main                 PASS  guard 1122, main 1133
+  seam/definitions-above-boundary          PASS  usage 1096, engine 1108
+  seam/execute-still-refuses               PASS  1
+  seam/execute-usage-path                  PASS  usage reached from the main flow
 
-== host capability for step 0
-  host/can-run-step-0                      PASS  patchelf /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/bin/patchelf on a Linux host
+== step 0: host-tool contract   [t+1s]
+  host-tool/no-invocations                 PASS  0
+  host-tool/rejects                        PASS  python -c pass
+  host-tool/rejects                        PASS  /usr/bin/python -c pass
+  host-tool/rejects                        PASS  ./readelf -d x
+  host-tool/rejects                        PASS  foo | awk '{print}'
+  host-tool/rejects                        PASS  value=$(sha256sum x)
+  host-tool/rejects                        PASS  if true; then wc -l x; fi
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/contract                       NOTE  ./tools/relocation_host_tools.verification-only.txt
+  host-tool/contract-nonempty              PASS  yes
+  host-tool/contract-columns               PASS  0
+  host-tool/contract-form-values           PASS  0
+  host-tool/contract-runs-argument-answered PASS  0
+  host-tool/contract-entries-unique        PASS  0
+  host-tool/launcher-tokens-unique         PASS  0
+  host-tool/contract-indirect-resolver     PASS  0
+  host-tool/launcher-table-nonempty        PASS  yes
+  host-tool/launcher-is-permitted          PASS  0
+  host-tool/runs-argument-entries-declared PASS  0
+  seam/probe-ran                           PASS  sentinel present
+  seam/source-returns-zero                 PASS  0
+  seam/no-install-on-source                PASS  30709
+  seam/functions-defined                   PASS
+  seam/guard-present                       PASS  1
+  seam/guard-precedes-main                 PASS  guard 1122, main 1133
+  seam/definitions-above-boundary          PASS  usage 1096, engine 1108
+  seam/execute-still-refuses               PASS  1
+  seam/execute-usage-path                  PASS  usage reached from the main flow
 
-== step 0: baseline capture
+== step 0: host-tool contract   [t+1s]
+  host-tool/no-invocations                 PASS  0
+  host-tool/rejects                        PASS  python -c pass
+  host-tool/rejects                        PASS  /usr/bin/python -c pass
+  host-tool/rejects                        PASS  ./readelf -d x
+  host-tool/rejects                        PASS  foo | awk '{print}'
+  host-tool/rejects                        PASS  value=$(sha256sum x)
+  host-tool/rejects                        PASS  if true; then wc -l x; fi
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/contract                       NOTE  ./tools/relocation_host_tools.verification-only.txt
+  host-tool/contract-nonempty              PASS  yes
+  host-tool/contract-columns               PASS  0
+  host-tool/contract-form-values           PASS  0
+  host-tool/contract-runs-argument-answered PASS  0
+  host-tool/contract-entries-unique        PASS  0
+  host-tool/launcher-tokens-unique         PASS  0
+  host-tool/contract-indirect-resolver     PASS  0
+  host-tool/launcher-table-nonempty        PASS  yes
+  host-tool/launcher-is-permitted          PASS  0
+  host-tool/runs-argument-entries-declared PASS  0
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/allows-path-argument           PASS  argument, not a command
+  host-tool/contract                       NOTE  ./tools/relocation_host_tools.verification-only.txt
+  host-tool/contract-nonempty              PASS  yes
+  host-tool/contract-columns               PASS  0
+  host-tool/contract-form-values           PASS  0
+  host-tool/contract-runs-argument-answered PASS  0
+  host-tool/contract-entries-unique        PASS  0
+  host-tool/launcher-tokens-unique         PASS  0
+  host-tool/contract-indirect-resolver     PASS  0
+  host-tool/launcher-table-nonempty        PASS  yes
+  host-tool/launcher-is-permitted          PASS  0
+  host-tool/runs-argument-entries-declared PASS  0
+  host-tool/control-duplicate-entry        PASS  the rule reports 1 on the mutated contract
+  host-tool/control-duplicate-launcher     PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unanswered-entry       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-undeclared-runner      PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unowned-launcher       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-clean-duplicate-entry  PASS  silent on the real contract
+===== BEGIN CPLX-SHELLCHECK =====
+shellcheck: ABSENT on this image, the gate has no result here either
+===== END CPLX-SHELLCHECK =====
+[Pipeline] }
+  host-tool/launcher-is-permitted          PASS  0
+  host-tool/runs-argument-entries-declared PASS  0
+  host-tool/control-duplicate-entry        PASS  the rule reports 1 on the mutated contract
+  host-tool/control-duplicate-launcher     PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unanswered-entry       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-undeclared-runner      PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unowned-launcher       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-clean-duplicate-entry  PASS  silent on the real contract
+  host-tool/control-clean-duplicate-launcher PASS  silent on the real contract
+  host-tool/control-clean-unanswered-entry PASS  silent on the real contract
+  host-tool/control-clean-undeclared-runner PASS  silent on the real contract
+  host-tool/control-clean-unowned-launcher PASS  silent on the real contract
+  host-tool/no-unsupported-forms           PASS  0
+  host-tool/control-duplicate-entry        PASS  the rule reports 1 on the mutated contract
+  host-tool/control-duplicate-launcher     PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unanswered-entry       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-undeclared-runner      PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unowned-launcher       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-clean-duplicate-entry  PASS  silent on the real contract
+  host-tool/control-clean-duplicate-launcher PASS  silent on the real contract
+  host-tool/control-clean-unanswered-entry PASS  silent on the real contract
+  host-tool/control-clean-undeclared-runner PASS  silent on the real contract
+  host-tool/control-clean-unowned-launcher PASS  silent on the real contract
+  host-tool/no-unsupported-forms           PASS  0
+  host-tool/control-duplicate-entry        PASS  the rule reports 1 on the mutated contract
+  host-tool/control-duplicate-launcher     PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unanswered-entry       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-undeclared-runner      PASS  the rule reports 1 on the mutated contract
+  host-tool/control-unowned-launcher       PASS  the rule reports 1 on the mutated contract
+  host-tool/control-clean-duplicate-entry  PASS  silent on the real contract
+  host-tool/control-clean-duplicate-launcher PASS  silent on the real contract
+  host-tool/control-clean-unanswered-entry PASS  silent on the real contract
+  host-tool/control-clean-undeclared-runner PASS  silent on the real contract
+  host-tool/control-clean-unowned-launcher PASS  silent on the real contract
+  host-tool/no-unsupported-forms           PASS  0
+  host-tool/control-clean-duplicate-launcher PASS  silent on the real contract
+  host-tool/control-clean-unanswered-entry PASS  silent on the real contract
+  host-tool/control-clean-undeclared-runner PASS  silent on the real contract
+  host-tool/control-clean-unowned-launcher PASS  silent on the real contract
+  host-tool/no-unsupported-forms           PASS  0
+  host-tool/allowlist-unlisted             PASS  0
+  host-tool/contract-unused                PASS  0
+  host-tool/allowlist-unlisted             PASS  0
+  host-tool/contract-unused                PASS  0
+  host-tool/allowlist-rejects              PASS  zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if ! zzunlisted -x; then :; fi
+  host-tool/allowlist-unlisted             PASS  0
+  host-tool/contract-unused                PASS  0
+  host-tool/allowlist-rejects              PASS  zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if ! zzunlisted -x; then :; fi
+  host-tool/allowlist-unlisted             PASS  0
+  host-tool/contract-unused                PASS  0
+  host-tool/allowlist-rejects              PASS  zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if ! zzunlisted -x; then :; fi
+  host-tool/allowlist-rejects              PASS  foo | zzunlisted -x
+  host-tool/allowlist-rejects              PASS  /usr/bin/zzunlisted -x
+  host-tool/allowlist-rejects              PASS  zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if ! zzunlisted -x; then :; fi
+  host-tool/allowlist-rejects              PASS  foo | zzunlisted -x
+  host-tool/allowlist-rejects              PASS  /usr/bin/zzunlisted -x
+  host-tool/allowlist-rejects              PASS  value="$(zzunlisted -x)"
+  host-tool/allowlist-rejects              PASS  find . -exec zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  find . -execdir zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  if true; then zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  while :; do zzunlisted -x; done
+  host-tool/allowlist-rejects              PASS  foo | zzunlisted -x
+  host-tool/allowlist-rejects              PASS  /usr/bin/zzunlisted -x
+  host-tool/allowlist-rejects              PASS  value="$(zzunlisted -x)"
+  host-tool/allowlist-rejects              PASS  find . -exec zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  find . -execdir zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  if true; then zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  while :; do zzunlisted -x; done
+  host-tool/allowlist-rejects              PASS  if true; then :; else zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  foo | zzunlisted -x
+  host-tool/allowlist-rejects              PASS  /usr/bin/zzunlisted -x
+  host-tool/allowlist-rejects              PASS  value="$(zzunlisted -x)"
+  host-tool/allowlist-rejects              PASS  find . -exec zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  find . -execdir zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  if true; then zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  while :; do zzunlisted -x; done
+  host-tool/allowlist-rejects              PASS  if true; then :; else zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  if zzunlisted -q; then :; fi
+  host-tool/allowlist-rejects              PASS  value="$(zzunlisted -x)"
+  host-tool/allowlist-rejects              PASS  find . -exec zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  find . -execdir zzunlisted {} +
+  host-tool/allowlist-rejects              PASS  if true; then zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  while :; do zzunlisted -x; done
+  host-tool/allowlist-rejects              PASS  if true; then :; else zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  if zzunlisted -q; then :; fi
+  host-tool/allowlist-rejects              PASS  until zzunlisted; do :; done
+  host-tool/allowlist-rejects              PASS  coproc zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if true; then :; else zzunlisted -x; fi
+  host-tool/allowlist-rejects              PASS  if zzunlisted -q; then :; fi
+  host-tool/allowlist-rejects              PASS  until zzunlisted; do :; done
+  host-tool/allowlist-rejects              PASS  coproc zzunlisted -x
+  host-tool/allowlist-rejects              PASS  case "$x" in $pat) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a)zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  { zzunlisted -x; }
+  host-tool/allowlist-rejects              PASS  VAR=1 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  if zzunlisted -q; then :; fi
+  host-tool/allowlist-rejects              PASS  until zzunlisted; do :; done
+  host-tool/allowlist-rejects              PASS  coproc zzunlisted -x
+  host-tool/allowlist-rejects              PASS  case "$x" in $pat) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a)zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  { zzunlisted -x; }
+  host-tool/allowlist-rejects              PASS  VAR=1 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  VAR=1 OTHER=2 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  until zzunlisted; do :; done
+  host-tool/allowlist-rejects              PASS  coproc zzunlisted -x
+  host-tool/allowlist-rejects              PASS  case "$x" in $pat) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a)zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  { zzunlisted -x; }
+  host-tool/allowlist-rejects              PASS  VAR=1 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  VAR=1 OTHER=2 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  >/dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  > /dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  case "$x" in $pat) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  case "$x" in a)zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  { zzunlisted -x; }
+  host-tool/allowlist-rejects              PASS  VAR=1 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  VAR=1 OTHER=2 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  >/dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  > /dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  foo &>/dev/null zzunlisted
+  host-tool/allowlist-rejects              PASS  VAR=1 OTHER=2 zzunlisted -x
+  host-tool/allowlist-rejects              PASS  >/dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  > /dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  foo &>/dev/null zzunlisted
+  host-tool/allowlist-rejects              PASS  command zzunlisted -x
+  host-tool/allowlist-rejects              PASS  command -v zzunlisted
+  host-tool/allowlist-rejects              PASS  exec zzunlisted -x
+  host-tool/allowlist-rejects              PASS  exec -a myname zzunlisted -x
+  host-tool/allowlist-rejects              PASS  echo a | xargs zzunlisted
+  host-tool/allowlist-rejects              PASS  >/dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  > /dev/null zzunlisted -x
+  host-tool/allowlist-rejects              PASS  foo &>/dev/null zzunlisted
+  host-tool/allowlist-rejects              PASS  command zzunlisted -x
+  host-tool/allowlist-rejects              PASS  command -v zzunlisted
+  host-tool/allowlist-rejects              PASS  exec zzunlisted -x
+  host-tool/allowlist-rejects              PASS  exec -a myname zzunlisted -x
+  host-tool/allowlist-rejects              PASS  echo a | xargs zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0 -r zzunlisted -i
+  host-tool/allowlist-rejects              PASS  foo &>/dev/null zzunlisted
+  host-tool/allowlist-rejects              PASS  command zzunlisted -x
+  host-tool/allowlist-rejects              PASS  command -v zzunlisted
+  host-tool/allowlist-rejects              PASS  exec zzunlisted -x
+  host-tool/allowlist-rejects              PASS  exec -a myname zzunlisted -x
+  host-tool/allowlist-rejects              PASS  echo a | xargs zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0 -r zzunlisted -i
+  host-tool/allowlist-rejects              PASS  echo a | xargs -P 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -I {} zzunlisted {}
+  host-tool/allowlist-rejects              PASS  command zzunlisted -x
+  host-tool/allowlist-rejects              PASS  command -v zzunlisted
+  host-tool/allowlist-rejects              PASS  exec zzunlisted -x
+  host-tool/allowlist-rejects              PASS  exec -a myname zzunlisted -x
+  host-tool/allowlist-rejects              PASS  echo a | xargs zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0 -r zzunlisted -i
+  host-tool/allowlist-rejects              PASS  echo a | xargs -P 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -I {} zzunlisted {}
+  host-tool/allowlist-rejects              PASS  echo a | xargs -n1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0 -r zzunlisted -i
+  host-tool/allowlist-rejects              PASS  echo a | xargs -P 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -I {} zzunlisted {}
+  host-tool/allowlist-rejects              PASS  echo a | xargs -n1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-procs 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -rP 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  exec -ca name zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0rn1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --eof zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -P 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -I {} zzunlisted {}
+  host-tool/allowlist-rejects              PASS  echo a | xargs -n1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-procs 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -rP 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  exec -ca name zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0rn1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --eof zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -e zzunlisted
+  control watchdog                   PASS  blocked, killed at 2s
+  host-tool/allowlist-rejects              PASS  echo a | xargs -n1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-procs 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -rP 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  exec -ca name zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0rn1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --eof zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -e zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -E eofstr zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --replace zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-procs 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -rP 4 zzunlisted
+  host-tool/allowlist-rejects              PASS  exec -ca name zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -0rn1 zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --eof zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -e zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -E eofstr zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --replace zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-args 3 zzunlisted
+  control watchdog                   PASS  blocked, killed at 2s
+  host-tool/allowlist-rejects              PASS  echo a | xargs -e zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs -E eofstr zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --replace zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-args 3 zzunlisted
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in \)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in @(a|b)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in +(y)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects              PASS  echo a | xargs -E eofstr zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --replace zzunlisted
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-args 3 zzunlisted
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in \)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in @(a|b)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in +(y)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in !(z)) zzunlisted -x ;; esac
+  host-tool/allowlist-allows               PASS  sed -e 's/a/b/' file
+  host-tool/allowlist-rejects              PASS  echo a | xargs --max-args 3 zzunlisted
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in \)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in @(a|b)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in +(y)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in !(z)) zzunlisted -x ;; esac
+  host-tool/allowlist-allows               PASS  sed -e 's/a/b/' file
+  host-tool/allowlist-allows               PASS  local x="$INSTALL_PREFIX/tools/python/root/lib64/ld-linux-x86-64.so.2"
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in \)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in @(a|b)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in +(y)) zzunlisted -x ;; esac
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in !(z)) zzunlisted -x ;; esac
+  host-tool/allowlist-allows               PASS  sed -e 's/a/b/' file
+  host-tool/allowlist-allows               PASS  local x="$INSTALL_PREFIX/tools/python/root/lib64/ld-linux-x86-64.so.2"
+  host-tool/allowlist-allows               PASS  myfun() { :; }; myfun arg
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  host-tool/allowlist-rejects-extglob      PASS  case "$x" in !(z)) zzunlisted -x ;; esac
+  host-tool/allowlist-allows               PASS  sed -e 's/a/b/' file
+  host-tool/allowlist-allows               PASS  local x="$INSTALL_PREFIX/tools/python/root/lib64/ld-linux-x86-64.so.2"
+  host-tool/allowlist-allows               PASS  myfun() { :; }; myfun arg
+  host-tool/allowlist-allows               PASS  printf '%s' "$x"
+  host-tool/allowlist-allows               PASS  case "$engine" in rsync) rsync -av a b ;; esac
+  host-tool/allowlist-allows               PASS  { printf '%s' "$x"; }
+  host-tool/allowlist-allows               PASS  LC_ALL=C sort file
+  host-tool/allowlist-allows               PASS  local x="$INSTALL_PREFIX/tools/python/root/lib64/ld-linux-x86-64.so.2"
+  host-tool/allowlist-allows               PASS  myfun() { :; }; myfun arg
+  host-tool/allowlist-allows               PASS  printf '%s' "$x"
+  host-tool/allowlist-allows               PASS  case "$engine" in rsync) rsync -av a b ;; esac
+  host-tool/allowlist-allows               PASS  { printf '%s' "$x"; }
+  host-tool/allowlist-allows               PASS  LC_ALL=C sort file
+  host-tool/allowlist-allows               PASS  plain_assignment=value
+  host-tool/allowlist-allows               PASS  plain_assignment=${value}
+  host-tool/allowlist-allows               PASS  myfun() { :; }; myfun arg
+  host-tool/allowlist-allows               PASS  printf '%s' "$x"
+  host-tool/allowlist-allows               PASS  case "$engine" in rsync) rsync -av a b ;; esac
+  host-tool/allowlist-allows               PASS  { printf '%s' "$x"; }
+  host-tool/allowlist-allows               PASS  LC_ALL=C sort file
+  host-tool/allowlist-allows               PASS  plain_assignment=value
+  host-tool/allowlist-allows               PASS  plain_assignment=${value}
+  host-tool/allowlist-allows               PASS  prefixed=${HOME}/tools
+  host-tool/allowlist-allows               PASS  concatenated=$(basename x)suffix
+  control equivalence mtime cell     PASS  refused on [of 1 rewritten entries], as designed
+  control equivalence digest cell    PASS  refused on [the engines differ where they must not], as designed
+  control loader absent fallback     PASS  refused on [no loader or no ELF found under cp], as designed
+  control loader different ELF       PASS  refused on [the two trees selected different ELFs], as designed
+  control loader different loader    PASS  refused on [the two trees used different loaders], as designed
+  control loader dependency count    PASS  refused on [same ELF and loader, but], as designed
+  control loader short listing       PASS  refused on [listings too short to compare], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (no rsync: the mirror phase dies, which is the Q19 defect itself,
+   and the root-file site is never reached, so its two shapes have
+   no baseline on this target by construction)
+  host-tool/allowlist-allows               PASS  printf '%s' "$x"
+  host-tool/allowlist-allows               PASS  case "$engine" in rsync) rsync -av a b ;; esac
+  host-tool/allowlist-allows               PASS  { printf '%s' "$x"; }
+  host-tool/allowlist-allows               PASS  LC_ALL=C sort file
+  host-tool/allowlist-allows               PASS  plain_assignment=value
+  host-tool/allowlist-allows               PASS  plain_assignment=${value}
+  host-tool/allowlist-allows               PASS  prefixed=${HOME}/tools
+  control equivalence mtime cell     PASS  refused on [of 1 rewritten entries], as designed
+  control equivalence digest cell    PASS  refused on [the engines differ where they must not], as designed
+  control loader absent fallback     PASS  refused on [no loader or no ELF found under cp], as designed
+  control loader different ELF       PASS  refused on [the two trees selected different ELFs], as designed
+  control loader different loader    PASS  refused on [the two trees used different loaders], as designed
+  control loader dependency count    PASS  refused on [same ELF and loader, but], as designed
+  control loader short listing       PASS  refused on [listings too short to compare], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (no rsync, step 3: both sites branch, so the install completes
+   on the fallback engine alone)
+  host-tool/allowlist-allows               PASS  plain_assignment=value
+  host-tool/allowlist-allows               PASS  plain_assignment=${value}
+  host-tool/allowlist-allows               PASS  prefixed=${HOME}/tools
+  host-tool/allowlist-allows               PASS  concatenated=$(basename x)suffix
+  host-tool/allowlist-allows               PASS  dotted=$(dirname y).bak
+  host-tool/allowlist-allows               PASS  arr=(one two three)
+  host-tool/allowlist-allows               PASS  arr+=(four five)
+  host-tool/allowlist-allows               PASS  quoted="${k}literal"
+  host-tool/allowlist-allows               PASS  defaulted=${g:-defaultword}
+  host-tool/allowlist-allows               PASS  prefixed=${HOME}/tools
+  host-tool/allowlist-allows               PASS  concatenated=$(basename x)suffix
+  host-tool/allowlist-allows               PASS  dotted=$(dirname y).bak
+  host-tool/allowlist-allows               PASS  arr=(one two three)
+  host-tool/allowlist-allows               PASS  arr+=(four five)
+  host-tool/allowlist-allows               PASS  quoted="${k}literal"
+  host-tool/allowlist-allows               PASS  defaulted=${g:-defaultword}
+  host-tool/allowlist-allows               PASS  stripped=${i#prefixword}
+  baseline no-rsync mirror           PASS  exit 5
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 3c1f6a562b56  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  no engine ran: no trace and the run failed at exit 5
+
+=== VERDICT ===
+suites    : preflight controls baseline-no-rsync
+cases: 19, failures: 0
+Step 0: every assertion and every negative control behaved as designed.
+  host-tool/allowlist-allows               PASS  dotted=$(dirname y).bak
+  host-tool/allowlist-allows               PASS  arr=(one two three)
+  host-tool/allowlist-allows               PASS  arr+=(four five)
+  host-tool/allowlist-allows               PASS  quoted="${k}literal"
+  host-tool/allowlist-allows               PASS  defaulted=${g:-defaultword}
+  host-tool/allowlist-allows               PASS  stripped=${i#prefixword}
+  host-tool/allowlist-allows               PASS  nested=$(basename $(dirname x))suffix
+  host-tool/allowlist-allows               PASS  deeper=$(basename $(dirname $(readlink y)))tail
+  host-tool/allowlist-allows               PASS  concatenated=$(basename x)suffix
+  host-tool/allowlist-allows               PASS  dotted=$(dirname y).bak
+  host-tool/allowlist-allows               PASS  arr=(one two three)
+  host-tool/allowlist-allows               PASS  arr+=(four five)
+  host-tool/allowlist-allows               PASS  quoted="${k}literal"
+  host-tool/allowlist-allows               PASS  defaulted=${g:-defaultword}
+  host-tool/allowlist-allows               PASS  stripped=${i#prefixword}
+  host-tool/allowlist-allows               PASS  nested=$(basename $(dirname x))suffix
+  host-tool/allowlist-allows               PASS  deeper=$(basename $(dirname $(readlink y)))tail
+[Pipeline] }
+  baseline no-rsync mirror           PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  engine cp operated, read from the run trace
+
+--- step 1: engine selection (a selection trace, not proof of a copy)
+  control selection-no-discovery     PASS  refused on [SELECTION: archive discovery marker], as designed
+  control selection-out-of-order     PASS  refused on [SELECTION: trace at line], as designed
+  host-tool/allowlist-allows               PASS  stripped=${i#prefixword}
+  host-tool/allowlist-allows               PASS  nested=$(basename $(dirname x))suffix
+  host-tool/allowlist-allows               PASS  deeper=$(basename $(dirname $(readlink y)))tail
+  host-tool/allowlist-allows               PASS  casein=$(case $x in p)head -c 4 q ;; esac)more
+  host-tool/allowlist-allows               PASS  ifin=$(if true; then od -c a; fi)tailone
+  host-tool/allowlist-allows               PASS  whilein=$(while :; do tr a b; done)tailtwo
+  host-tool/allowlist-allows               PASS  groupin=$( { sort z; } )tailthree
+  host-tool/allowlist-allows               PASS  lookup=$(command -v rsync)
+  host-tool/allowlist-allows               PASS  piped=$(echo a | xargs -0 -r sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  nested=$(basename $(dirname x))suffix
+  host-tool/allowlist-allows               PASS  deeper=$(basename $(dirname $(readlink y)))tail
+  host-tool/allowlist-allows               PASS  casein=$(case $x in p)head -c 4 q ;; esac)more
+  host-tool/allowlist-allows               PASS  ifin=$(if true; then od -c a; fi)tailone
+  host-tool/allowlist-allows               PASS  whilein=$(while :; do tr a b; done)tailtwo
+  host-tool/allowlist-allows               PASS  groupin=$( { sort z; } )tailthree
+  host-tool/allowlist-allows               PASS  lookup=$(command -v rsync)
+  host-tool/allowlist-allows               PASS  piped=$(echo a | xargs -0 -r sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  replaced=$(echo a | xargs -I {} sed -i -e s/a/b/ {})
+  host-tool/allowlist-allows               PASS  casein=$(case $x in p)head -c 4 q ;; esac)more
+  host-tool/allowlist-allows               PASS  ifin=$(if true; then od -c a; fi)tailone
+  host-tool/allowlist-allows               PASS  whilein=$(while :; do tr a b; done)tailtwo
+  host-tool/allowlist-allows               PASS  groupin=$( { sort z; } )tailthree
+  host-tool/allowlist-allows               PASS  lookup=$(command -v rsync)
+  host-tool/allowlist-allows               PASS  piped=$(echo a | xargs -0 -r sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  replaced=$(echo a | xargs -I {} sed -i -e s/a/b/ {})
+  host-tool/allowlist-allows               PASS  parallel=$(echo a | xargs -P 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  named=$(exec -a alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  casein=$(case $x in p)head -c 4 q ;; esac)more
+  host-tool/allowlist-allows               PASS  ifin=$(if true; then od -c a; fi)tailone
+  host-tool/allowlist-allows               PASS  whilein=$(while :; do tr a b; done)tailtwo
+  host-tool/allowlist-allows               PASS  groupin=$( { sort z; } )tailthree
+  host-tool/allowlist-allows               PASS  lookup=$(command -v rsync)
+  host-tool/allowlist-allows               PASS  piped=$(echo a | xargs -0 -r sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  replaced=$(echo a | xargs -I {} sed -i -e s/a/b/ {})
+  host-tool/allowlist-allows               PASS  parallel=$(echo a | xargs -P 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  named=$(exec -a alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  clustered=$(echo a | xargs -rP 4 sed -i -e s/a/b/)
+  step1 override unset               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  host-tool/allowlist-allows               PASS  replaced=$(echo a | xargs -I {} sed -i -e s/a/b/ {})
+  host-tool/allowlist-allows               PASS  parallel=$(echo a | xargs -P 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  named=$(exec -a alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  clustered=$(echo a | xargs -rP 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  execclust=$(exec -ca alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  builtin cd /tmp
+  host-tool/unspaced-case-arm-is-seen      PASS  a)cmd names the unlisted command
+  host-tool/substitution-close-is-not-an-opener PASS  $(basename x)suffix is one word
+  host-tool/boundary-fires                 PASS  eval "zzunlisted -x"
+  host-tool/allowlist-allows               PASS  parallel=$(echo a | xargs -P 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  named=$(exec -a alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  clustered=$(echo a | xargs -rP 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  execclust=$(exec -ca alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  builtin cd /tmp
+  host-tool/unspaced-case-arm-is-seen      PASS  a)cmd names the unlisted command
+  host-tool/substitution-close-is-not-an-opener PASS  $(basename x)suffix is one word
+  host-tool/boundary-fires                 PASS  eval "zzunlisted -x"
+  host-tool/boundary-fires                 PASS  if eval "$payload"; then :; fi
+  host-tool/boundary-fires                 PASS  VAR=1 eval "$payload"
+  host-tool/boundary-fires                 PASS  command "$launcher_target" -x
+  host-tool/allowlist-allows               PASS  clustered=$(echo a | xargs -rP 4 sed -i -e s/a/b/)
+  host-tool/allowlist-allows               PASS  execclust=$(exec -ca alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  builtin cd /tmp
+  host-tool/unspaced-case-arm-is-seen      PASS  a)cmd names the unlisted command
+  host-tool/substitution-close-is-not-an-opener PASS  $(basename x)suffix is one word
+  host-tool/boundary-fires                 PASS  eval "zzunlisted -x"
+  host-tool/boundary-fires                 PASS  if eval "$payload"; then :; fi
+  host-tool/boundary-fires                 PASS  VAR=1 eval "$payload"
+  host-tool/boundary-fires                 PASS  command "$launcher_target" -x
+  host-tool/boundary-fires                 PASS  command -v "$launcher_target"
+  host-tool/boundary-fires                 PASS  xargs -0 "$launcher_target"
+  host-tool/boundary-fires                 PASS  echo a | xargs -rP 4 "$launcher_target"
+  host-tool/allowlist-allows               PASS  execclust=$(exec -ca alias sed -e s/a/b/ f)
+  host-tool/allowlist-allows               PASS  builtin cd /tmp
+  host-tool/unspaced-case-arm-is-seen      PASS  a)cmd names the unlisted command
+  host-tool/substitution-close-is-not-an-opener PASS  $(basename x)suffix is one word
+  host-tool/boundary-fires                 PASS  eval "zzunlisted -x"
+  host-tool/boundary-fires                 PASS  if eval "$payload"; then :; fi
+  host-tool/boundary-fires                 PASS  VAR=1 eval "$payload"
+  host-tool/boundary-fires                 PASS  command "$launcher_target" -x
+  host-tool/boundary-fires                 PASS  command -v "$launcher_target"
+  host-tool/boundary-fires                 PASS  xargs -0 "$launcher_target"
+  step1 override unset trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+  host-tool/boundary-fires                 PASS  if eval "$payload"; then :; fi
+  host-tool/boundary-fires                 PASS  VAR=1 eval "$payload"
+  host-tool/boundary-fires                 PASS  command "$launcher_target" -x
+  host-tool/boundary-fires                 PASS  command -v "$launcher_target"
+  host-tool/boundary-fires                 PASS  xargs -0 "$launcher_target"
+  host-tool/boundary-fires                 PASS  echo a | xargs -rP 4 "$launcher_target"
+  host-tool/boundary-fires                 PASS  exec -a alias "$launcher_target"
+  host-tool/boundary-fires                 PASS  command eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -p eval "$payload"
+  host-tool/boundary-fires                 PASS  command -v "$launcher_target"
+  host-tool/boundary-fires                 PASS  xargs -0 "$launcher_target"
+  host-tool/boundary-fires                 PASS  echo a | xargs -rP 4 "$launcher_target"
+  host-tool/boundary-fires                 PASS  exec -a alias "$launcher_target"
+  host-tool/boundary-fires                 PASS  command eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -p eval "$payload"
+  host-tool/boundary-allows-literal-target PASS  a literal launcher target is readable
+  host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
+  host-tool/boundary-fires                 PASS  exec -a alias "$launcher_target"
+  host-tool/boundary-fires                 PASS  command eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -p eval "$payload"
+  host-tool/boundary-allows-literal-target PASS  a literal launcher target is readable
+  host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
+  host-tool/boundary-fires                 PASS  echo a | xargs -rP 4 "$launcher_target"
+  host-tool/boundary-fires                 PASS  exec -a alias "$launcher_target"
+  host-tool/boundary-fires                 PASS  command eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin eval "$payload"
+  host-tool/boundary-fires                 PASS  builtin -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -- eval "$payload"
+  host-tool/boundary-fires                 PASS  command -p eval "$payload"
+  host-tool/boundary-allows-literal-target PASS  a literal launcher target is readable
+  host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
+  step1 override 1                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 1 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  host-tool/boundary-allows-literal-target PASS  a literal launcher target is readable
+  host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
+  host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
+
+== host capability for step 2   [t+4s]
+  host/can-run-step-2                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
+
+== step 0: baseline capture   [t+4s]
   baseline/fixture-anchored                PASS  /home/builder/prefix/lib
   baseline/fixture-tag-before              PASS  1
-  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.67937/baseline-prefix/tools/python/root/usr/lib64
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.110381/baseline-prefix/tools/python/root/usr/lib64
+  host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
+
+== host capability for step 4   [t+4s]
+  host/can-run-step-4                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
+
+== step 0: baseline capture   [t+4s]
+  baseline/fixture-anchored                PASS  /home/builder/prefix/lib
+  baseline/fixture-tag-before              PASS  1
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.110431/baseline-prefix/tools/python/root/usr/lib64
+  host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
+
+== host capability for step 6   [t+4s]
+  host/can-run-step-6                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
+
+== step 6: the domain reader fails closed   [t+4s]
+  step6/reason-refuses-absent              PASS  an absent file explains nothing
+  step6/reason-names-short                 PASS  shorter than the ELF header
+  step6/reason-refuses-lawful              PASS  an in-domain object explains nothing
+  step6/reason-names-elf32                 PASS  ELF32
+  step6/reason-refuses-unreadable          PASS  an unreadable file explains nothing
+  step6/reason-refuses-failed-size         PASS  names the short file when the size reads, and explains nothing when it does not
+  step6/reason-refuses-failed-header       PASS  names ELF32 when the header reads, and explains nothing when it does not
+
+== step 6: the monitoring disposition parser, proved against mutations   [t+4s]
+  control/disposition-accepts-real         PASS  the real capture is accepted
+  control/disposition-absent               PASS  rejected, as designed
+  control/disposition-unknown-token        PASS  rejected, as designed
+  host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
+
+== host capability for step 0   [t+4s]
+  host/can-run-step-0                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
+
+== step 0: baseline capture   [t+4s]
+  baseline/fixture-anchored                PASS  /home/builder/prefix/lib
+  baseline/fixture-tag-before              PASS  1
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.110540/baseline-prefix/tools/python/root/usr/lib64
+  step1 override 0                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 0 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override yes                 PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  control/disposition-no-mechanism         PASS  rejected, as designed
+  control/disposition-no-decider           PASS  rejected, as designed
+  control/disposition-no-basis             PASS  rejected, as designed
+  control/disposition-form-unaccounted     PASS  rejected, as designed
+  control/disposition-form-empty-outcome   PASS  rejected, as designed
+  control/disposition-form-in-prose        PASS  rejected, as designed
+  control/disposition-interior-space       PASS  rejected, as designed
+  control/disposition-edge-padding-ok      PASS  the real capture is accepted
+  control/disposition-two-carriers         PASS  rejected, as designed
+
+== step 6: the RHEL acceptance sessions, from their retained captures   [t+5s]
+  step6/rhel-session-capture               NOTE  ./tools/relocation_rhel_session.verification-only.txt
+  step6/session-identity                   PASS  rhel-acceptance-20260827T114631Z, in the header and cited 4 times in the body
+  step1 override yes trace           PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override true                PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override true trace          PASS  selected cp, announced before discovery (a selection, not a copy)
+  step6/session-target                     PASS  RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+  step6/session-order                      PASS  capability before deployment before monitoring
+  step6/session-deployment                 PASS  the deployment succeeded on the target
+  step6/rhel-session-capture               NOTE  ./tools/relocation_rhel_session2.verification-only.txt
+  step6/session-identity                   PASS  rhel-acceptance2-20260827T222103Z, in the header and cited 4 times in the body
+  step6/session-target                     PASS  RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+  step6/session-order                      PASS  capability before deployment before monitoring
+  step6/session-deployment                 PASS  the deployment succeeded on the target
+  step6/session-preload                    PASS  the preloaded object, its tag state and its providers, before and after
+  step6/session-functional                 PASS  git and python answer by version, import ssl, zlib names both library versions, both programs RPATH and no RUNPATH, and _ssl binds libssl and libcrypto inside the prefix
+  step6/session-monitoring                 PASS  AMENDED to not-pursued by named decision in run rhel-acceptance2-20260827T222103Z; answered on mechanism, not by observation
+  step6/session-monitoring-basis           NOTE  the human owner of this effort, 2026-08-28, in two
+
+== step 0: baseline capture   [t+5s]
+  baseline/fixture-anchored                PASS  /home/builder/prefix/lib
+  baseline/fixture-tag-before              PASS  1
+  baseline/target-rpath-computed           PASS  /tmp/cplx-relocation-verify.110492/baseline-prefix/tools/python/root/usr/lib64
   baseline/production-pass-ran             PASS  0
-  baseline/mixed-count-emitted             PASS  Fixed 1 ELF interpreter/rpath value(s)
+  baseline/mixed-count-replaced            PASS  one CPLX-ELF/1 trailer, no mixed count
   baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
-  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.67937/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.110431/baseline-prefix/tools/python/root/usr/lib64
   baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
-  baseline/tag-written                     PASS  DT_RUNPATH
+  step1 override empty               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override empty trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+
+--- step 2: the mirror fallback and its destination boundary
+  baseline/production-pass-ran             PASS  0
+  baseline/mixed-count-replaced            PASS  one CPLX-ELF/1 trailer, no mixed count
+  baseline/mixed-count-meaning             NOTE  one figure over two axes; replaced at Step 4
+  baseline/rpath-value-rewritten           PASS  /tmp/cplx-relocation-verify.110540/baseline-prefix/tools/python/root/usr/lib64
+  baseline/rpath-value-no-longer-planted   PASS  left /home/builder/prefix/lib
+  baseline/tag-written                     PASS  DT_RPATH
   baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
   baseline/objects-walked                  NOTE  2
   baseline/donor                           NOTE  /bin/true
-  baseline/installer-lines                 NOTE  649
+  baseline/installer-lines                 NOTE  1308
+  step4/pass-defined                       PASS  fix_elf_paths
+
+== step 3: the corpus is the frozen witness   [t+5s]
+  corpus/path                              NOTE  ./tools/relocation_corpus.verification-only.txt
+  corpus/present                           PASS  7 canonical obj vectors
+  corpus/frozen-bytes                      PASS  64a3173cebf84add5c7c40020a50e93390df32b2
+  corpus/class-canonical-obj               PASS  7 vectors
+  corpus/class-canonical-end               PASS  2 vectors
+  corpus/class-reader-valid                PASS  4 vectors
+  corpus/class-rejected                    PASS  23 vectors
+  corpus/class-path                        PASS  7 vectors
+  corpus/class-capture-valid               PASS  5 vectors
+  corpus/class-capture-reject              PASS  11 vectors
+
+== step 3: the formatter emits the canonical bytes   [t+5s]
+  step3/formatter-defined                  PASS  emit_cplx_elf_v1_record
+  formatter/canonical-simple               PASS  CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6c69622f666f6f2e736f
+  formatter/canonical-root-relative        PASS  CPLX-ELF/1 obj case=3 rpath=rewritten interp=rewritten path=7573722f6c69622f6c69627a2e736f2e31
+  formatter/canonical-delimiter-bytes      PASS  CPLX-ELF/1 obj case=4 rpath=already-correct interp=not-applicable path=6120623d630a
+  formatter/canonical-non-utf8             PASS  CPLX-ELF/1 obj case=2 rpath=not-dynamic interp=not-applicable path=78ff2e736f
+  formatter/canonical-shortest             PASS  CPLX-ELF/1 obj case=7 rpath=excluded interp=not-applicable path=61
+  formatter/canonical-at-wrap              PASS  CPLX-ELF/1 obj case=6 rpath=rewritten interp=failed path=6c69622f616263646566672e736f2e31
+  formatter/canonical-across-wrap          PASS  CPLX-ELF/1 obj case=1 rpath=rewritten interp=unchanged path=6c69622f61626364656667682e736f2e31
+  formatter/path-simple                    PASS  6c69622f666f6f2e736f
+  formatter/path-root-relative             PASS  7573722f6c69622f6c69627a2e736f2e31
+  formatter/path-delimiter-bytes           PASS  6120623d630a
+  formatter/path-non-utf8                  PASS  78ff2e736f
+  formatter/path-shortest                  PASS  61
+  formatter/path-at-wrap                   PASS  6c69622f616263646566672e736f2e31
+  step2 fallback fresh               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 591e2db06841  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 fresh engine                 PASS  engine cp operated, read from the run trace
+  step2 hidden entry carried         PASS  cp -a src/. carried the hidden entry
+  baseline/tag-written                     PASS  DT_RPATH
+  baseline/tag-source                      NOTE  readelf -d after the pass ran, not installer text
+  baseline/objects-walked                  NOTE  2
+  baseline/donor                           NOTE  /bin/true
+  baseline/installer-lines                 NOTE  1308
 
 == verdict
   step        0
-  cases       46
+  cases       162
   failures    0
-  installer   /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.relocation-candidate.verification-only.sh
+  installer   ./tools/install_pkg.relocation-candidate.verification-only.sh
   readelf     /usr/bin/readelf
   sha256sum   /usr/bin/sha256sum
   assoc local supported (bash 5.2.15(1)-release)
@@ -143,6 +948,8 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
 
 OBJECTIVE MET for step 0
 ----- end harness output -----
+harness-seconds: 5
+preamble-seconds: 0
 harness-exit: 0
 result: OBJECTIVE_MET
 ===== END CPLX-RELOCATION-STEP0 =====

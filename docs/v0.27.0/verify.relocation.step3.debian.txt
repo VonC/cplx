@@ -1,31 +1,11 @@
-Harness: docs/v0.27.0/verify.relocation-rpath.sh --step 3 --corpus <the contract corpus>
-Target: Debian 12 CI agent (bash 5.2.15, binutils 2.40, patchelf 0.19.1), build 123
-Purpose: Step 3's CPLX-ELF/1 report contract, proved from both ends against the
-         frozen corpus. The suite is host independent by construction and needs
-         no install, so it runs here to prove that claim on a second host rather
-         than because it must.
-Captured: 2026-08-28, by the pipeline stage 'Verify relocation candidate (Step 3)'
-
-What this establishes:
-  104 cases, 0 failures, OBJECTIVE MET
-  RE-RUN unchanged against the installer that now carries the loader exclusion,
-    and unchanged is the claim: the same case count and the same zero failures
-    this step reported before that rule existed. A classifier rule that altered
-    an earlier step's reading would show here rather than in review
-  the same 104 cases the authoring host reports, which is the portability claim
-    made good: a suite asserted to depend on nothing but bash and the corpus
-    behaves identically on a host that shares neither the platform nor the shell
-  the corpus is still the frozen bytes, checked against the blob id recorded in
-    ledger.cplx-elf-1.md before either implementation was compared against it
-
------ begin harness output -----
-captured-at: 2026-08-28T13:11:12Z
-build: 123
-commit: aa48ff8acc8b975b67914eb88970f28dabc02570
-commit-short: aa48ff8acc8b
-uname: Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+===== BEGIN CPLX-RELOCATION-STEP3 =====
+captured-at: 2026-08-30T21:12:04Z
+build: 130
+commit: 96c5799cf38fe49f79e999ea15201fbd9ff1726d
+commit-short: 96c5799cf38f
+uname: Linux 5.14.0-687.41.1.el9_8.x86_64 x86_64
 bash: 5.2.15(1)-release
-harness-sha256: acfd9d19133b4027ab54fc4fe84a14cce7db6053879fe06d591dc0b34c6a58ca
+harness-sha256: 287504ad62ba4f37522b8c58989e8018dc69c0398112b11b79699a87773a4475
 candidate-sha256: 6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
 host-tools-sha256: 306d2b75f74a7c0a062081f96250e01eee893fb7ea8d8659f07f91cb668d4f6c
 patchelf: ./prefix/tools/bin/patchelf
@@ -34,11 +14,11 @@ readelf-version: GNU readelf (GNU Binutils for Debian) 2.40
 sha256sum-version: sha256sum (GNU coreutils) 9.1
 ----- harness output -----
 
-== harness prerequisite preflight
+== harness prerequisite preflight   [t+0s]
   preflight/readelf                        PASS  /usr/bin/readelf
   preflight/sha256sum                      PASS  /usr/bin/sha256sum
 
-== capability gate: declare -A
+== capability gate: declare -A   [t+0s]
   assoc-array/local                        PASS  supported
   assoc-array/local-bash                   NOTE  5.2.15(1)-release
   target-capability/identity               PASS  identity
@@ -58,7 +38,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   assoc-array/exact-target-id              NOTE  Red Hat Enterprise Linux 9.8 (Plow)
   assoc-array/exact-target-bash            NOTE  5.1.8(1)-release
 
-== step 0: seam
+== step 0: seam   [t+0s]
   control/unplanted-fixture                PASS  refused on [FIXTURE], as designed
   identity/installer                       PASS  ./tools/install_pkg.relocation-candidate.verification-only.sh
   identity/declared-by                     NOTE  --installer argument
@@ -74,7 +54,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   seam/execute-still-refuses               PASS  1
   seam/execute-usage-path                  PASS  usage reached from the main flow
 
-== step 0: host-tool contract
+== step 0: host-tool contract   [t+0s]
   host-tool/no-invocations                 PASS  0
   host-tool/rejects                        PASS  python -c pass
   host-tool/rejects                        PASS  /usr/bin/python -c pass
@@ -202,10 +182,10 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   host-tool/both-halves-fire               PASS  readelf caught by name and by vocabulary
   host-tool/dd-regression                  PASS  denylist blind, allowlist names dd
 
-== host capability for step 3
+== host capability for step 3   [t+3s]
   host/can-run-step-3                      PASS  patchelf ./prefix/tools/bin/patchelf on a Linux host
 
-== step 3: the corpus is the frozen witness
+== step 3: the corpus is the frozen witness   [t+3s]
   corpus/path                              NOTE  ./tools/relocation_corpus.verification-only.txt
   corpus/present                           PASS  7 canonical obj vectors
   corpus/frozen-bytes                      PASS  64a3173cebf84add5c7c40020a50e93390df32b2
@@ -217,7 +197,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   corpus/class-capture-valid               PASS  5 vectors
   corpus/class-capture-reject              PASS  11 vectors
 
-== step 3: the formatter emits the canonical bytes
+== step 3: the formatter emits the canonical bytes   [t+3s]
   step3/formatter-defined                  PASS  emit_cplx_elf_v1_record
   formatter/canonical-simple               PASS  CPLX-ELF/1 obj case=5 rpath=failed interp=unchanged path=6c69622f666f6f2e736f
   formatter/canonical-root-relative        PASS  CPLX-ELF/1 obj case=3 rpath=rewritten interp=rewritten path=7573722f6c69622f6c69627a2e736f2e31
@@ -242,7 +222,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   formatter/refuses                        PASS  end skipped none 0 0 0 0 0 0 0 0 0 0 0 0
   formatter/refuses                        PASS  end skipped patchelf-absent 0 1 0 0 0 0 0 0 0 0 0 0
 
-== step 3: the reader accepts what the grammar allows
+== step 3: the reader accepts what the grammar allows   [t+3s]
   reader/needs-trailer-simple              PASS  trailer
   reader/needs-trailer-root-relative       PASS  trailer
   reader/needs-trailer-delimiter-bytes     PASS  trailer
@@ -255,7 +235,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   reader/permuted-end-permuted             PASS  fields located by name
   reader/permuted-end-permuted-2           PASS  fields located by name
 
-== step 3: the reader refuses what it must
+== step 3: the reader refuses what it must   [t+3s]
   reader/rejects-unknown-marker            PASS  marker
   reader/rejects-unknown-kind              PASS  kind
   reader/rejects-obj-missing-field         PASS  missing
@@ -280,7 +260,7 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   reader/rejects-end-negative-count        PASS  number
   reader/rejects-end-non-numeric-count     PASS  number
 
-== step 3: reconciliation is categorical
+== step 3: reconciliation is categorical   [t+3s]
   reader/capture-design-sample             PASS  accepted
   reader/capture-empty-completed           PASS  accepted
   reader/capture-skipped                   PASS  accepted
@@ -298,10 +278,10 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
   reader/capture-rejects-skipped-with-record PASS  skipped
   reader/capture-rejects-skipped-nonzero-count PASS  skipped
 
-== step 3: the two ends agree
+== step 3: the two ends agree   [t+3s]
   step3/round-trip                         PASS  the reader accepts what the formatter emits
 
-== step 3: the formatter has no production call site
+== step 3: the formatter has no production call site   [t+3s]
   step4/formatter-call-sites               PASS  3
   step3/reader-absent-from-installer       PASS  0
 
@@ -314,6 +294,8 @@ sha256sum-version: sha256sum (GNU coreutils) 9.1
 
 OBJECTIVE MET for step 3
 ----- end harness output -----
+harness-seconds: 3
+preamble-seconds: 0
 harness-exit: 0
 result: OBJECTIVE_MET
 ===== END CPLX-RELOCATION-STEP3 =====
