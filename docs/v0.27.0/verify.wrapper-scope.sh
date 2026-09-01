@@ -89,13 +89,13 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# Only step 0 has a case suite today. Accepting any other value would let the
-# verdict line report success for a step whose cases do not exist, which is a
+# Only steps 0 and 1 have case suites today. Accepting any other value would let
+# the verdict line report success for a step whose cases do not exist, which is a
 # vacuous pass at exactly the level later steps rely on. Extend this dispatch
 # and the suite together.
 case "$STEP" in
-    0) ;;
-    *) echo "unsupported --step $STEP: only step 0 has a case suite today." >&2
+    0|1) ;;
+    *) echo "unsupported --step $STEP: steps 0 and 1 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -385,6 +385,55 @@ assert_fixture() {
     return 0
 }
 
+# The venv tree the wrapper post-processes. It is planted BESIDE the fixture
+# rather than inside it, because the wrapper resolves it through `$(pwd)` and
+# not through ${DIR}. Its shape is dictated by what the wrapper does with it:
+# `bin/python3` is the symlink line 89 resolves, `bin/pip` is what the line 98
+# sed rewrites, `bin/activate` carries the `_bin_bin` text the line 112 grep
+# looks for, and `bin/<stub>_bin_bin` must exist BEFORE the run because the
+# VIRTUAL_ENV arm calls it at line 85, ahead of the post-processing that would
+# otherwise create it.
+#
+# `bin/python3` is planted over a REAL file rather than as a dangling link. The
+# wrapper only reads that link, so a dangling one would run, but it could not be
+# ASSERTED: `[ -e ]` follows the link and reports a shape the plant did create as
+# missing. A fixture whose plant cannot be asserted is the one thing this suite's
+# case contract does not allow.
+plant_venv_target() {
+    local env_dir="$1" v="$1/work/venv"
+    mkdir -p -- "$v/bin"
+    cp -- "$env_dir/current/bin/$STUB_NAME" "$v/bin/${STUB_NAME}_bin"
+    chmod +x "$v/bin/${STUB_NAME}_bin"
+    ln -nfs "${STUB_NAME}_bin" "$v/bin/python3"
+    cp -- "$env_dir/current/bin/$STUB_NAME" "$v/bin/${STUB_NAME}_bin_bin"
+    chmod +x "$v/bin/${STUB_NAME}_bin_bin"
+    printf '#!/bin/sh\n# planted pip: the line 98 sed rewrites this name.\nexec %s_bin_bin "$@"\n' \
+        "$STUB_NAME" > "$v/bin/pip"
+    printf '# planted activate: the line 112 grep finds this text.\nPYTHON=%s_bin_bin\n' \
+        "$STUB_NAME" > "$v/bin/activate"
+}
+
+# As with the fixture, and for the same reason: a case PLANTS its venv tree and
+# ASSERTS the plant, so no case can report a shape it never created. The reason
+# prefix is FIXTURE, so the unplanted-fixture control covers this shape too.
+assert_venv_target() {
+    local name="$1" env_dir="$2" v="$2/work/venv" p
+    for p in "$v/bin/python3" "$v/bin/${STUB_NAME}_bin" \
+             "$v/bin/${STUB_NAME}_bin_bin" "$v/bin/pip" "$v/bin/activate"; do
+        if [ ! -e "$p" ]; then
+            fail "$name" "FIXTURE missing: ${p#"$env_dir"/}"
+            return 1
+        fi
+    done
+    if [ "$(readlink "$v/bin/python3")" != "${STUB_NAME}_bin" ]; then
+        fail "$name" "FIXTURE venv python3 is not the expected symlink"
+        return 1
+    fi
+    cases=$((cases + 1))
+    pass "$name" "planted and asserted"
+    return 0
+}
+
 # --------------------------------------------------------------- the run ---
 # The wrapper runs with the shims FIRST on PATH and with a controlled
 # environment, so a value the harness did not put there cannot reach it.
@@ -404,6 +453,29 @@ run_wrapper() {
     return 0
 }
 
+# The venv run differs from the first-call run in the three ways the wrapper
+# actually reads, and all three are needed: it is invoked with `-m venv <dir>`,
+# so the parse at line 41 sets `venv`; it runs FROM the directory holding that
+# dir, since line 89 resolves it through `$(pwd)`; and VIRTUAL_ENV names it,
+# since the `_bin_bin` fixup at line 101 is guarded by it. Drop any one and the
+# last post-source sites never execute.
+run_wrapper_venv() {
+    local env_dir="$1" log="$2"
+    : > "$log"
+    RUN_STATUS=0
+    (
+        cd "$env_dir/work" || exit 2
+        env -i \
+            PATH="$SHIM_DIR:/usr/bin:/bin" \
+            HOME="$env_dir" \
+            VIRTUAL_ENV="$env_dir/work/venv" \
+            WRAPPER_SCOPE_LOG="$log" \
+            WRAPPER_SCOPE_FAIL_SUFFIX="" \
+            bash "$env_dir/bin/python" -m venv venv
+    ) >>"$log.out" 2>&1 || RUN_STATUS=$?
+    return 0
+}
+
 # count_calls LOG HELPER -> how many lines that helper wrote
 count_calls() { grep -c "^$2	" "$1" 2>/dev/null || true; }
 
@@ -419,6 +491,20 @@ count_calls() { grep -c "^$2	" "$1" 2>/dev/null || true; }
 count_post_source() {
     grep -v "	delegated-bootstrap$" "$1" 2>/dev/null | grep -cv "^interpreter	" || true
 }
+
+# The other half of the same oracle: of those post-source helper calls, how many
+# OBSERVED a search path. Step 0 asserts this equals the call count, step 1
+# asserts it is zero, and both read it from here so the two verdicts cannot
+# drift apart through a retyped grep chain.
+count_helpers_with_search_path() {
+    grep -v "	delegated-bootstrap$" "$1" 2>/dev/null | grep -v "^interpreter	" \
+      | grep -cv "	unset	" || true
+}
+
+# What the interpreter stub recorded: a value, `empty` or `unset`. The three are
+# distinguished at the stub, because the difference between the last two is the
+# whole subject of decision W3.
+interpreter_saw() { grep "^interpreter	" "$1" | cut -f3; }
 
 # ------------------------------------------------------------------- step 0 ---
 # Capture what the wrapper does today, before it changes, so every later claim
@@ -475,8 +561,7 @@ step0_runnable_suite() {
     # change. On the pre-change wrapper this is the shipped search path, and
     # step 1 asserts the same count is zero.
     RUNA_POST=$(count_post_source "$LOG_A")
-    RUNA_WITH_LLP=$(grep -v "	delegated-bootstrap$" "$LOG_A" | grep -v "^interpreter	" \
-                    | grep -cv "	unset	" || true)
+    RUNA_WITH_LLP=$(count_helpers_with_search_path "$LOG_A")
     chk "step0/runA/helpers-seeing-search-path" "$RUNA_POST" "$RUNA_WITH_LLP"
     # THE OTHER HALF, asserted rather than left implied. Step 1 makes the count
     # above fall to zero, and a change that also stopped the interpreter seeing
@@ -585,6 +670,183 @@ step0_runnable_suite() {
 # harness bytes. A capture produced by a different harness, or by this one before
 # an edit, no longer matches and the substitution fails, which is what stops a
 # stale green from outliving the code it described.
+# ------------------------------------------------------------------ step 1 ---
+# The scope rule: the shipped search path serves the interpreter and nothing else
+# the wrapper runs. Step 0 measured seven post-source helper calls all seeing it;
+# this step takes that count to ZERO and leaves the interpreter's sight of it
+# untouched. Both halves are asserted, because a change that starved the
+# interpreter would satisfy a helpers-only count while breaking the wrapper.
+step1_runnable_suite() {
+    section "step 1 structure: what the wrapper file must contain"
+
+    # A source-level question, like the shim coverage case and for the same
+    # reason: "exactly one save site" and "two restore sites" are claims about
+    # the FILE, and no single run can distinguish one save site from two that
+    # happen to agree.
+    chk "step1/source/save-sites" "1" \
+        "$(grep -c '^CPLX_TOOLCHAIN_LD_LIBRARY_PATH=' "$WRAPPER" || true)"
+    chk "step1/source/unset-sites" "1" \
+        "$(grep -c '^unset LD_LIBRARY_PATH$' "$WRAPPER" || true)"
+    # shellcheck disable=SC2016  # the single quotes are the point: this greps for
+    # the LITERAL restore-prefix text in the wrapper, so `${CPLX_...}` must reach
+    # grep unexpanded rather than being substituted here.
+    chk "step1/source/restore-sites" "2" \
+        "$(grep -c 'LD_LIBRARY_PATH="\${CPLX_TOOLCHAIN_LD_LIBRARY_PATH}" ' "$WRAPPER" || true)"
+    # W2: the per-command assignment form, never an export. That assignment is
+    # inherited by the interpreter and by everything it spawns, exactly as an
+    # export would be; what it does NOT do is change the wrapper shell's own
+    # environment, which is why every helper after the call sites stays unset.
+    chk "step1/source/no-export" "0" \
+        "$(grep -c 'export LD_LIBRARY_PATH' "$WRAPPER" || true)"
+
+    section "step 1 the scope rule, measured from the wrapper's own run"
+
+    # WITHOUT THIS the shim directory is empty, PATH resolves every helper to the
+    # real tool, nothing is logged, and the unset claim below passes because no
+    # helper was observed at all. That is precisely the vacuous pass this suite
+    # exists to refuse, and it happened: the first run of this step reported
+    # `helpers-seeing-search-path 0` while measuring nothing. The presence
+    # assertions caught it, which is what they are for.
+    plant_shims
+
+    local env_dir="$SCRATCH/run1" log="$SCRATCH/run1.log"
+    plant_fixture "$env_dir"
+    assert_fixture "step1/fixture" "$env_dir" || return 1
+    run_wrapper "$env_dir" "$log"
+
+    # ASSERTED PRESENT FIRST, always. A log with no helper lines would otherwise
+    # make the unset claim below true by vacuity, which is the exact failure this
+    # umbrella exists to refuse.
+    chk "step1/exit-status" "0" "$RUN_STATUS"
+    chk "step1/setup-readlink-delegated" "2" \
+        "$(grep -c "	delegated-bootstrap$" "$log" 2>/dev/null || true)"
+    chk "step1/readlink-calls" "3" "$(count_calls "$log" readlink)"
+    chk "step1/mv-calls" "1" "$(count_calls "$log" mv)"
+    chk "step1/ln-calls" "5" "$(count_calls "$log" ln)"
+    chk "step1/interpreter-calls" "1" "$(count_calls "$log" interpreter)"
+    chk "step1/post-source-helper-calls" "7" "$(count_post_source "$log")"
+
+    # THE CLAIM ITSELF, both halves.
+    chk "step1/helpers-seeing-search-path" "0" \
+        "$(count_helpers_with_search_path "$log")"
+    local seen
+    seen=$(interpreter_saw "$log")
+    chk "step1/interpreter-still-sees-it" "yes" \
+        "$( [ "$seen" = unset ] && echo no || echo yes )"
+    # Not merely "some value": the value must be the SHIPPED search path, which
+    # is recognisable because setenv builds it from the fixture's own root.
+    chk "step1/interpreter-value-is-the-shipped-path" "yes" \
+        "$(case "$seen" in *"$env_dir/root/usr/lib64"*) echo yes ;; *) echo no ;; esac)"
+
+    # Decisions P6 and P9: the two setup calls are asserted PRESENT and DELEGATED
+    # and carry NO environment claim, since they run before setenv exports
+    # anything and a caller may legitimately have exported one of its own.
+    note "step1/setup-observed" \
+        "$(grep "	delegated-bootstrap$" "$log" | cut -f3 | sort -u | tr '\n' ' ' | sed 's/ $//')"
+
+    section "step 1 the empty saved value, preserved as empty (W3)"
+
+    # A VARIANT FIXTURE, and it is labelled as one. The shipped setenv always
+    # exports a non-empty value, so the only way to exercise W3 is to plant a
+    # setenv that exports an empty one. The shipped file's own bytes are asserted
+    # separately below and are untouched by this.
+    local empty_dir="$SCRATCH/run1-empty" empty_log="$SCRATCH/run1-empty.log"
+    plant_fixture "$empty_dir"
+    {
+        printf '#!/bin/bash\n'
+        printf '# VARIANT setenv, planted by verify.wrapper-scope.sh for the W3 case.\n'
+        printf 'export LD_LIBRARY_PATH=""\n'
+    } > "$empty_dir/bin/setenv"
+    assert_fixture "step1/empty/fixture" "$empty_dir" || return 1
+    run_wrapper "$empty_dir" "$empty_log"
+    chk "step1/empty/interpreter-called" "1" "$(count_calls "$empty_log" interpreter)"
+    # EMPTY, not unset. The stub distinguishes the two, so this case can fail.
+    chk "step1/empty/reaches-interpreter-as-empty" "empty" \
+        "$(interpreter_saw "$empty_log")"
+    chk "step1/empty/helpers-still-unset" "0" \
+        "$(count_helpers_with_search_path "$empty_log")"
+
+    section "step 1 the venv path, where the other seven post-source sites run"
+
+    # THE FIRST-CALL RUN ABOVE REACHES SEVEN OF THE WRAPPER'S FOURTEEN
+    # POST-SOURCE SITES, and the criterion is about EVERY post-source helper
+    # invocation, not about the seven a `--version` call happens to reach. The
+    # rest are behind the `-m venv` post-processing and the `_bin_bin` fixup,
+    # where `cp`, `grep` and both `sed` sites live and NOWHERE ELSE. A suite that
+    # stopped at the first call would report the scope rule satisfied while three
+    # of the six shimmed helpers had never run at all: the same vacuous shape as
+    # the empty log the presence assertions caught, one level up.
+    local venv_dir="$SCRATCH/run1-venv" venv_log="$SCRATCH/run1-venv.log"
+    plant_fixture "$venv_dir"
+    plant_venv_target "$venv_dir"
+    assert_fixture "step1/venv/fixture" "$venv_dir" || return 1
+    assert_venv_target "step1/venv/target" "$venv_dir" || return 1
+    run_wrapper_venv "$venv_dir" "$venv_log"
+
+    # PRESENT FIRST, one case per helper name, so no absence can read as a pass.
+    chk "step1/venv/exit-status" "0" "$RUN_STATUS"
+    chk "step1/venv/readlink-calls" "4" "$(count_calls "$venv_log" readlink)"
+    chk "step1/venv/mv-calls" "1" "$(count_calls "$venv_log" mv)"
+    chk "step1/venv/ln-calls" "6" "$(count_calls "$venv_log" ln)"
+    chk "step1/venv/cp-calls" "1" "$(count_calls "$venv_log" cp)"
+    chk "step1/venv/sed-calls" "2" "$(count_calls "$venv_log" sed)"
+    chk "step1/venv/grep-calls" "1" "$(count_calls "$venv_log" grep)"
+    chk "step1/venv/interpreter-calls" "1" "$(count_calls "$venv_log" interpreter)"
+    chk "step1/venv/post-source-helper-calls" "13" "$(count_post_source "$venv_log")"
+
+    # THE CLAIM, over the path that runs cp, sed and grep.
+    chk "step1/venv/helpers-seeing-search-path" "0" \
+        "$(count_helpers_with_search_path "$venv_log")"
+
+    # THE SECOND RESTORE SITE, which the first-call run never reaches: with
+    # VIRTUAL_ENV set the wrapper takes the other arm of the interpreter `if`,
+    # and that arm has to hand the search path over exactly as the first does. A
+    # step 1 measured on one arm would leave the other unmeasured, which is how
+    # a two-site change gets half-verified.
+    local venv_seen
+    venv_seen=$(interpreter_saw "$venv_log")
+    chk "step1/venv/second-arm-still-sees-it" "yes" \
+        "$( [ "$venv_seen" = unset ] && echo no || echo yes )"
+    chk "step1/venv/second-arm-value-is-the-shipped-path" "yes" \
+        "$(case "$venv_seen" in *"$venv_dir/root/usr/lib64"*) echo yes ;; *) echo no ;; esac)"
+
+    section "step 1 the second call, the one site a first call cannot reach"
+
+    # The `else` arm of the relink `if` runs ONLY on a tree that has already been
+    # surgered, so re-running the same fixture is the only way to observe its
+    # `readlink`. It is the fourteenth and last post-source site, and with it
+    # every site the wrapper has is measured rather than fourteen minus the ones
+    # this fixture happened to reach.
+    local venv2_log="$SCRATCH/run1-venv2.log"
+    run_wrapper_venv "$venv_dir" "$venv2_log"
+    chk "step1/second-call/exit-status" "0" "$RUN_STATUS"
+    # The surgery is NOT repeated: no mv, and the relink `if` took its else arm.
+    chk "step1/second-call/no-second-surgery" "0" "$(count_calls "$venv2_log" mv)"
+    chk "step1/second-call/readlink-calls" "5" "$(count_calls "$venv2_log" readlink)"
+    # NINE post-source calls, not the seven the first call makes, and the two
+    # extra ones are the FIXTURE rather than the wrapper: `${DIR}/pip` is a link
+    # to `current/bin/pip3`, which this fixture never plants, so the `-e` test at
+    # line 68 is false on every call and both pip links are made again. A real
+    # deployment has pip3 and takes that branch once. The count named here is the
+    # one this fixture produces, not the one a tidier fixture would.
+    chk "step1/second-call/ln-calls" "3" "$(count_calls "$venv2_log" ln)"
+    chk "step1/second-call/post-source-helper-calls" "9" \
+        "$(count_post_source "$venv2_log")"
+    chk "step1/second-call/helpers-seeing-search-path" "0" \
+        "$(count_helpers_with_search_path "$venv2_log")"
+
+    section "step 1 identities: what this step asserts rather than assumes"
+
+    # setenv is read and asserted, never written. The expected value is the one
+    # step 0 recorded, so a setenv edited between the two steps fails here rather
+    # than quietly changing what the scope rule was measured against.
+    chk "step1/setenv-unchanged-since-step0" \
+        "355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d" \
+        "$SETENV_SHA256"
+    note "step1/wrapper-sha256" "$WRAPPER_SHA256"
+    note "step1/wrapper-lines" "$(wc -l < "$WRAPPER" | tr -d ' ')"
+}
+
 # THE IDENTITY CHECK, and the only reason the substitution is worth having. The
 # reason prefix is CAPTUREID so the control below can demand that exact refusal
 # rather than any failure at all.
@@ -691,8 +953,8 @@ ctl_subject_retained() {
     return "$rc"
 }
 
-step0_capture_substitution() {
-    section "step 0 retained measurement: this host cannot answer, so it reads one"
+step_capture_substitution() {
+    section "step $STEP retained measurement: this host cannot answer, so it reads one"
 
     # NOT a failure, and the distinction is the point. Nobody asked the question
     # here, so there is no answer to be wrong. Counting it as a finding would
@@ -721,7 +983,7 @@ step0_capture_substitution() {
     control "step0/control/mismatched-setenv-refused" "SUBJECTID" ctl_subject_setenv
     control "step0/control/mismatched-retained-refused" "SUBJECTID" ctl_subject_retained
 
-    chk "step0/capture/verdict-line" "OBJECTIVE MET for step 0" \
+    chk "step0/capture/verdict-line" "OBJECTIVE MET for step $STEP" \
         "$(grep -m1 '^OBJECTIVE ' "$CAPTURE_ARG")"
     chk "step0/capture/failures" "0" \
         "$(grep -m1 '^  failures    ' "$CAPTURE_ARG" | awk '{print $2}')"
@@ -733,7 +995,7 @@ step0_capture_substitution() {
     return 0
 }
 
-if [ "$STEP" -eq 0 ]; then
+if [ "$STEP" -eq 0 ] || [ "$STEP" -eq 1 ]; then
     # THE SHIM COVERAGE CASE, made executable. It reads the wrapper's source,
     # which every other case refuses to do, and that is correct here: the
     # question is which command names the file CONTAINS, not what one run
@@ -767,7 +1029,10 @@ if [ "$STEP" -eq 0 ]; then
     pass "step0/host/symlink-capable" "$( [ "$HOST_CAN_SYMLINK" -eq 1 ] && echo yes || echo no )"
 
     if [ "$HOST_CAN_SYMLINK" -eq 1 ]; then
-        step0_runnable_suite
+        case "$STEP" in
+            0) step0_runnable_suite ;;
+            1) step1_runnable_suite ;;
+        esac
         # A capture supplied on a capable host is still checked, so the two can
         # never drift apart unnoticed.
         if [ -n "$CAPTURE_ARG" ]; then
@@ -781,7 +1046,7 @@ if [ "$STEP" -eq 0 ]; then
         fi
     else
         note "step0/host/why" "no symlink support, so the surgery this step measures is not reproducible here"
-        step0_capture_substitution || HOSTGATE_UNANSWERED=1
+        step_capture_substitution || HOSTGATE_UNANSWERED=1
     fi
 fi
 
