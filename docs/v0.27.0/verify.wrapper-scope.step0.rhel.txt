@@ -72,6 +72,8 @@ AFTER STEP 1, THIS CAPTURE MUST BE TAKEN AND READ AGAINST THE RETAINED WRAPPER.
 
 
 
+
+
 == harness prerequisite preflight
   preflight/readlink                           PASS  /bin/readlink
   preflight/mv                                 PASS  /bin/mv
@@ -112,7 +114,7 @@ AFTER STEP 1, THIS CAPTURE MUST BE TAKEN AND READ AGAINST THE RETAINED WRAPPER.
   step0/runB/fixture                           PASS  planted and asserted
   step0/control-injection                      PASS  observed once
   step0/control/clean-run-carries-no-injection PASS  refused on [INJECTION], as designed
-  step0/runB/injected-call                     NOTE  readlink /tmp/cplx-wrapper-scope.1407635/runB/bin/current/bin/python3
+  step0/runB/injected-call                     NOTE  readlink /tmp/cplx-wrapper-scope.1853512/runB/bin/current/bin/python3
   step0/runB/python3_target-derived-from-empty PASS  _bin
   step0/runB/interpreter-not-moved-aside       PASS  no
   step0/runB/interpreter-never-reached         PASS  0
@@ -134,7 +136,7 @@ AFTER STEP 1, THIS CAPTURE MUST BE TAKEN AND READ AGAINST THE RETAINED WRAPPER.
   wrapper     /home/deploy-account/wrapper-scope-step1/wrapper.pre-change.verification-only
   setenv      /home/deploy-account/wrapper-scope-step1/setenv
   retained    ./wrapper.pre-change.verification-only
-  harness     d4e347cce020a89fe21f54b2337de3642295505e4019f6a8899802888e0aad93
+  harness     b0d0264740f85e86d54d8d6dd97b5270e5b68c7ecb8d475171e9f096433deb23
   wrapper-sha  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
   setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
   retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
