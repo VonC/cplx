@@ -5,10 +5,10 @@ No, it is not implemented.
 This document tracks the implementation of
 [plan.v0.27.0.python-wrapper-foreign-distro.md](plan.v0.27.0.python-wrapper-foreign-distro.md),
 six steps that scope the shipped search path to the interpreter and make the
-wrapper fail closed on an unusable helper result. Step 0 is complete, its
-retained measurement is bound to its instrument and to all three subject files,
-and its three mandatory commands are green on both a POSIX host and the
-reviewing Windows one; steps 1 to 5 have not started.
+wrapper fail closed on an unusable helper result. Steps 0 and 1 are complete, the
+retained measurements are bound to their instrument and subject files, and every
+mandatory command is green on both a POSIX host and the reviewing Windows one;
+steps 2 to 5 have not started.
 
 > Skeleton note: every per-step section other than `Goal` carries the literal
 > placeholder `_(empty -- no check has taken place yet.)_.` until an
@@ -297,7 +297,20 @@ Two facts worth carrying forward rather than rediscovering:
 
 ### Analysis of Step 1 implementation state
 
-_(empty -- no check has taken place yet.)_.
+Yes. Step 1 has been fully implemented.
+
+Every completion criterion is answered by an executed run rather than by reading
+the wrapper, and the runs now reach ALL FOURTEEN of the wrapper's post-source
+helper sites rather than the seven an ordinary first call makes.
+`verify.wrapper-scope.sh --step 1` reports 50 cases and 0 failures on RHEL 9.8,
+and the whole resolved validation set is green on the reviewing Windows host
+too. The scope rule flipped exactly as step 0's baseline predicted: seven of
+seven post-source helper calls saw the shipped search path before, zero see it
+now, on the first call and on the venv path alike, and the interpreter still
+does on both of its arms.
+
+The wrapper is 113 lines against a budget of 115, with one save site, one unset,
+two restore sites and no `export`.
 
 ### Goal for Step 1
 
@@ -306,7 +319,149 @@ interpreter invocation, measured from the run rather than read from the source.
 
 ### What was implemented for Step 1
 
-_(empty -- no check has taken place yet.)_.
+Three files: the shipped wrapper, the harness, and the retained capture the plan
+gained in this step's file list.
+
+`src/install/env/python/bin/python`, the FIRST shipped file this requirement
+modifies. Two edits, both of them decision D2/W1:
+
+- ONE save site, immediately after the `source` at line 18, holding the value in
+  `CPLX_TOOLCHAIN_LD_LIBRARY_PATH` rather than re-deriving it, followed by
+  `unset LD_LIBRARY_PATH`. The assignment is `${LD_LIBRARY_PATH-}`, which yields
+  empty when unset, so one line covers W3's empty case without a branch;
+- TWO restore sites, one per arm of the interpreter `if`, using the per-command
+  environment assignment. That assignment is inherited by the interpreter and by
+  everything it spawns, exactly as an `export` would be; what W2 buys is that it
+  does not change the wrapper shell's own environment, so every helper after the
+  call sites still sees no `LD_LIBRARY_PATH`.
+
+`docs/v0.27.0/verify.wrapper-scope.sh` gained the step 1 suite, the `0|1`
+dispatch, and a step-aware capture substitution. The suite has four source-level
+cases and thirty-five measured from runs, over three fixtures: the ordinary
+first call, the empty-value variant, and the `-m venv` tree the post-interpreter
+branch rewrites.
+
+`docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt`, the retained capture, 155
+lines, 50 cases, 0 failures.
+
+Criterion by criterion, with the case that answers it:
+
+- exactly one save site, value held in a variable: `step1/source/save-sites` and
+  `step1/source/unset-sites`, both 1;
+- exactly two restore sites in the prefix form: `step1/source/restore-sites` 2,
+  and `step1/source/no-export` 0. These four read the FILE rather than a run, for
+  the same reason the shim coverage case does: no single run can distinguish one
+  save site from two that happen to agree;
+- measured from the run, helpers unset on every path the wrapper has:
+  `step1/helpers-seeing-search-path` 0 on the ordinary first call, asserted only
+  after `step1/post-source-helper-calls` 7 and the individual `readlink` 3,
+  `mv` 1, `ln` 5 counts establish those calls happened;
+  `step1/venv/helpers-seeing-search-path` 0 over the `-m venv` run, after its
+  thirteen calls are established name by name, `cp`, `grep` and both `sed` sites
+  included, which exist on that path and nowhere else; and
+  `step1/second-call/helpers-seeing-search-path` 0 over a repeat call, the only
+  way to execute the `else` arm of the relink `if`, which is the fourteenth and
+  last post-source site;
+- both restore sites entered by a run rather than counted in the file:
+  `step1/venv/second-arm-still-sees-it` and
+  `step1/venv/second-arm-value-is-the-shipped-path`, since the VIRTUAL_ENV arm
+  is the one a first call never takes and a two-site change measured on one arm
+  is half verified;
+- the interpreter still set: `step1/interpreter-still-sees-it` yes, and
+  `step1/interpreter-value-is-the-shipped-path` yes, which checks the value is
+  the search path `setenv` built from the fixture root rather than merely some
+  value;
+- the bootstrap asserted separately with no environment claim:
+  `step1/setup-readlink-delegated` 2, reported as a NOTE carrying no assertion
+  about what it observed, per decisions P6 and P9;
+- an empty saved value reaching the interpreter as empty:
+  `step1/empty/reaches-interpreter-as-empty` records `empty`, not `unset`, over a
+  VARIANT fixture whose planted `setenv` exports an empty value. The shipped
+  `setenv` always exports a non-empty one, so a variant is the only way to
+  exercise W3; its own bytes are asserted unchanged separately;
+- `setenv` byte-identical to step 0's digest:
+  `step1/setenv-unchanged-since-step0`, `355bbec5...`.
+
+THE BUG THIS SUITE CAUGHT IN ITSELF, recorded because it is the exact failure the
+requirement exists to remove and it happened inside the instrument again. The
+first run of step 1 reported `helpers-seeing-search-path 0` and would have read
+as a clean pass. It was measuring NOTHING: `step1_runnable_suite` had not called
+`plant_shims`, so `PATH` resolved every helper to the real tool and no call
+reached the log. The presence assertions failed on all five counts and stopped
+it. Had the suite asserted only the absence it cares about, step 1 would have
+been reported done on an empty log.
+
+TWO CONSEQUENCES OF STEP 1 THAT REACH BACK INTO STEP 0, both handled in the plan
+rather than worked around:
+
+- step 0's command must now name the retained wrapper. Step 0 describes the
+  pre-change file; step 1 replaced the live one; the subject binding refuses the
+  mismatch. That refusal was run and observed before the plan text was written;
+- every harness edit invalidates every retained capture. Adding the step 1 suite
+  changed the harness digest, so both captures were retaken. That is the price of
+  binding a capture to its instrument, and it is the right price.
+
+### Architecture check for Step 1
+
+The layering rule this project has is what may reach a SHIPPED file, and step 1
+is the first time this requirement crosses it. The change is confined to the one
+file the plan's scope anchors name, adds no new file to the shipped tree, and
+introduces one variable whose name is prefixed `CPLX_` so it cannot collide with
+a caller's. `setenv` is read and digested, never written.
+
+The harness and both captures remain under `docs/v0.27.0/`, never packaged. The
+DDD-Hexagonal criterion does not apply to a Bash and Batch project.
+
+No, there is nothing that needs to be addressed.
+
+### Performance check for Step 1
+
+The wrapper gains one variable assignment and one `unset` per invocation, and
+two environment assignments that replace nothing. The suite runs the wrapper
+four times, over three fixtures, and greps logs of at most a few dozen lines.
+The four source-level cases each scan a 113-line file once. No new computation
+grows with the size of a deployment.
+
+No, there is no performance issue that needs to be addressed.
+
+### Unit test coverage check for Step 1
+
+The 100 percent unit rule targets `src\pdfss\tests\unit`, which belongs to the
+consuming project; cplx has no pytest suite and no unit-tested class file, so
+there is no percentage to report. The project default `ghog day` says the same
+thing from the other side: `ghog check` is green, then `ghog affected --no-cov`
+stops at exit 5 on `pytest not found on PATH`. That is the absent suite, not a
+finding about this change, and it was equally true before it. The substituted
+gate is `bash src/utils/lint_shell.sh`, green over 44 tracked scripts, plus
+`shellcheck` on both the harness and the modified wrapper, each with no finding.
+
+The behavioural substitute is the suite itself, held to the case contract rather
+than to a percentage: 50 cases, 0 failures, every behavioural claim measured from
+the wrapper's run, over all fourteen of its post-source helper sites rather than
+the seven a `--version` call reaches, and the presence assertions that caught the
+empty-log pass.
+
+No, there is no unit-tested class below 100 percent that needs completing.
+
+### Feature integrity for Step 1
+
+No existing feature is impaired, and the runs say so rather than the reasoning.
+The clean first call still ends 0, still performs the whole surgery, and still
+leaves `python3` relinked to the wrapper with `python3_target` naming the real
+interpreter: the same tree shape step 0 recorded before the change. The only
+difference in that log is which processes saw `LD_LIBRARY_PATH`.
+
+The venv path is exercised rather than argued about. The `-m venv` run ends 0,
+makes its thirteen post-source helper calls, and rewrites the venv tree as
+before; the repeat call ends 0 and does not perform the surgery again. Both
+interpreter arms are entered by a run, and each hands the shipped search path
+over, asserted by value rather than by presence:
+`step1/interpreter-value-is-the-shipped-path` for the first arm and
+`step1/venv/second-arm-value-is-the-shipped-path` for the second. The change
+cannot have quietly broken the one caller that needs the search path, on either
+arm.
+
+No, no feature-integrity evidence is still owed for Step 1.
 
 ## Step 2. Fail closed on an unusable helper result
 
