@@ -871,7 +871,7 @@ step1_runnable_suite() {
     section "step 1 the second call, the one site a first call cannot reach"
 
     # The `else` arm of the relink `if` runs ONLY on a tree that has already been
-    # surgered, so re-running the same fixture is the only way to observe its
+    # converted, so re-running the same fixture is the only way to observe its
     # `readlink`. It is the fourteenth and last post-source site, and with it
     # every site the wrapper has is measured rather than fourteen minus the ones
     # this fixture happened to reach.
@@ -1014,12 +1014,12 @@ step2_runnable_suite() {
     step2_guarded_site site1 relink-read "current/bin/python3" \
         "$s1_dir" "$s1_log" plain
 
-    section "step 2 site 2: the target read, on an already-surgered tree"
+    section "step 2 site 2: the target read, on an already-converted tree"
 
     local s2_dir="$SCRATCH/run2-site2" s2_log="$SCRATCH/run2-site2.log"
     plant_fixture "$s2_dir"
     assert_fixture "step2/site2/fixture" "$s2_dir" || return 1
-    # The else arm is reachable only once the tree HAS been surgered, so this
+    # The else arm is reachable only once the tree HAS been converted, so this
     # first call is a legitimate one and is asserted as such. It is also the
     # nearest control to hand: a guard that refused a good read would fail here
     # rather than pass every failure case below.
@@ -1037,7 +1037,7 @@ step2_runnable_suite() {
     plant_venv_target "$s3_dir"
     assert_fixture "step2/site3/fixture" "$s3_dir" || return 1
     assert_venv_target "step2/site3/target" "$s3_dir" || return 1
-    # As for site 2: the venv read is reached only after a run has surgered the
+    # As for site 2: the venv read is reached only after a run has converted the
     # tree, so the first call is legitimate and asserted.
     run_wrapper_venv "$s3_dir" "$SCRATCH/run2-site3-clean.log"
     chk "step2/site3/first-call-accepted" "0" "$RUN_STATUS"
