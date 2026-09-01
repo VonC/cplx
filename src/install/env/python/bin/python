@@ -9,6 +9,21 @@ echo_dbg() {
     fi
 }
 
+# The checked read (decision W4). `readlink` is the only helper whose RESULT the
+# wrapper turns into a path, so an empty or failed read is what produces
+# `current/bin/_bin`. This returns non-zero when the read FAILED or returned
+# NOTHING, and every caller propagates that with `|| exit`: each call site is a
+# command substitution, which runs in a subshell, so an `exit` HERE would end
+# only that subshell and let the wrapper carry on with the empty value.
+guarded_readlink() {
+    local site="$1" path="$2" value
+    if ! value="$(readlink "${path}")" || [[ -z "${value}" ]]; then
+        echo "python: readlink failed at ${site}: '${path}'" >&2
+        return 1
+    fi
+    printf '%s\n' "${value}"
+}
+
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 
 echo "DIR='${DIR}'" >&2
@@ -45,7 +60,8 @@ for (( i=0; i < ${#args[@]} - 2; i++ )); do
     fi
 done
 
-python3_target="$(readlink "${DIR}/current/bin/python3")"
+python3_target="$(guarded_readlink relink-read \
+    "${DIR}/current/bin/python3")" || exit
 # If "${DIR}/current/bin/python3" is a file, move it and create a symlink pointing back to "${DIR}/python"
 if [ "${python3_target}" != "../../bin/python" ]; then
     echo_dbg "mv '${DIR}/current/bin/${python3_target}' '${DIR}/current/bin/${python3_target}_bin'"
@@ -62,7 +78,8 @@ if [ "${python3_target}" != "../../bin/python" ]; then
 
     python3_target="${python3_target}_bin"
 else
-    python3_target="$(readlink "${DIR}/current/bin/python3_target")"
+    python3_target="$(guarded_readlink target-read \
+        "${DIR}/current/bin/python3_target")" || exit
 fi
 
 if [[ ! -e "${DIR}/pip" ]]; then
@@ -86,7 +103,8 @@ else
 fi
 
 if [[ -n "${venv}" ]]; then
-    python3_target="$(readlink "$(pwd)/${venv}/bin/python3")"
+    python3_target="$(guarded_readlink venv-read \
+        "$(pwd)/${venv}/bin/python3")" || exit
 
     echo_dbg "ln -nfs '${DIR}/python' '$(pwd)/${venv}/bin/${python3_target}'"
     ln -nfs "${DIR}/python" "$(pwd)/${venv}/bin/${python3_target}"
