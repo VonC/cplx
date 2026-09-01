@@ -58,6 +58,7 @@ A LEGITIMATE RUN IS ASSERTED TOO, without which a wrapper that refused
 
 
 
+
 == harness prerequisite preflight
   preflight/readlink                           PASS  /bin/readlink
   preflight/mv                                 PASS  /bin/mv
@@ -99,7 +100,7 @@ A LEGITIMATE RUN IS ASSERTED TOO, without which a wrapper that refused
   step2/site1/no-mutation-after-injection      PASS  0
   step2/site1/tree-unmodified                  PASS  yes
 
-== step 2 site 2: the target read, on an already-surgered tree
+== step 2 site 2: the target read, on an already-converted tree
   step2/site2/fixture                          PASS  planted and asserted
   step2/site2/first-call-accepted              PASS  0
   step2/site2/first-call-relinked              PASS  ../../bin/python
@@ -141,7 +142,7 @@ A LEGITIMATE RUN IS ASSERTED TOO, without which a wrapper that refused
   wrapper     /home/deploy-account/wrapper-scope-step1/python
   setenv      /home/deploy-account/wrapper-scope-step1/setenv
   retained    ./wrapper.pre-change.verification-only
-  harness     b0d0264740f85e86d54d8d6dd97b5270e5b68c7ecb8d475171e9f096433deb23
+  harness     fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
   wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
   setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
   retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
