@@ -256,6 +256,9 @@ bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 \
 
 bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 \
      --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
+
+bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 \
+     --capture docs/v0.27.0/verify.wrapper.rhel.txt
 ```
 
 STEP 0'S COMMAND NAMES THE RETAINED WRAPPER, and from step 1 onward it must.
@@ -267,9 +270,9 @@ route around, and it was observed before this paragraph was written.
 
 EVERY HARNESS EDIT INVALIDATES EVERY RETAINED CAPTURE, which is the price of
 binding a capture to its instrument. Adding the step 1 suite changed the harness
-digest, so both captures were retaken; adding the step 2 suite changed it again,
-so all three were. The cost is deliberate: the alternative is a capture that
-outlives the code it described.
+digest, so both captures were retaken; the step 2 suite changed it again, and
+the step 3 suite once more, so all four were. The cost is deliberate: the
+alternative is a capture that outlives the code it described.
 
 THE RETAINED MEASUREMENT IS NOT A WAY OF PASSING WITHOUT RUNNING, and its
 authority takes FOUR digests rather than one. A capture answers two separate
