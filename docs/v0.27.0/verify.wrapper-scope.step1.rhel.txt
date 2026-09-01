@@ -52,7 +52,7 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
          `cp`, `grep` and both `sed` sites live and nowhere else, and it runs the
          VIRTUAL_ENV arm of the interpreter `if`, so the SECOND restore site is
          measured from a run rather than counted in the source. A third run over
-         the already-surgered tree reaches the `else` arm of the relink `if`,
+         the already-converted tree reaches the `else` arm of the relink `if`,
          the fourteenth site, which no first call can execute.
 
          The venv run makes THIRTEEN post-source helper calls and none sees the
@@ -65,6 +65,7 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
          `${DIR}/pip` links to `current/bin/pip3`, which the fixture never
          plants, so the `-e` test is false on every call and both pip links are
          made again. A deployment has pip3 and takes that branch once.
+
 
 
 
@@ -150,7 +151,7 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
   wrapper     /home/deploy-account/wrapper-scope-step1/python
   setenv      /home/deploy-account/wrapper-scope-step1/setenv
   retained    ./wrapper.pre-change.verification-only
-  harness     b0d0264740f85e86d54d8d6dd97b5270e5b68c7ecb8d475171e9f096433deb23
+  harness     fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
   wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
   setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
   retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
