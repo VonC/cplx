@@ -2383,3 +2383,791 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 2
+
+- Recorded: 2026-09-01T09:59:27+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 python-wrapper-foreign-distro (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 2
+Review round: 1
+
+### Code review evidence for step 2 python-wrapper-foreign-distro (round 1)
+
+request_index_tree: 68cd2c21acd4cd50b8750fcfdd5f1c62df40142a
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(wrapper): fail closed on an unusable read
+group 1 path: src/install/env/python/bin/python
+group 2: test(wrapper): add the step 2 failure suite
+group 2 path: docs/v0.27.0/verify.wrapper-scope.sh
+group 3: test(wrapper): retake the step 0 capture for step 2
+group 3 path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+group 4: test(wrapper): retake the step 1 capture for step 2
+group 4 path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+group 5: docs(python-wrapper-foreign-distro): record step 2 validation
+group 5 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/verify.wrapper-scope.sh
+staged path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+staged path: src/install/env/python/bin/python
+```
+
+### Requestor assessment for step 2 python-wrapper-foreign-distro (round 1)
+
+#### Assessment for step 2 python-wrapper-foreign-distro (round 1)
+
+Step 2 is fully implemented against its completion criteria. All three read sites
+are checked calls through ONE shared guard, and the stop is measured from
+injected runs rather than read from the source.
+
+Two things are raised for this review rather than settled by me, and both are
+recorded in the validation record: the wrapper is 131 lines against the plan's
+115-line review trigger, and the plan names no retained capture for step 2. They
+are described under the architecture evidence below.
+
+#### Test evidence for step 2 python-wrapper-foreign-distro (round 1)
+
+`bash docs/v0.27.0/verify.wrapper-scope.sh --step 2` on RHEL 9.8 (kernel
+5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release): 53 cases, 0 failures,
+`OBJECTIVE MET for step 2`, harness `7abe95fb`, wrapper `7213dfe0`, setenv
+`355bbec5`, retained `88c4e0d2`.
+
+What that run measures, criterion by criterion:
+
+- the stop: `step2/site1|site2|site3/exit-status-non-zero` yes, and
+  `.../message-names-helper-site-and-path` yes, which asserts the site label AND
+  the path are in the text rather than that any output appeared;
+- the tree unmodified, twice and in two ways: `.../tree-unmodified` yes compares
+  a shape snapshot before the run with one after, and
+  `.../no-mutation-after-injection` 0 counts `mv`, `ln`, `cp` and `sed` lines
+  after the injected `readlink` in the call log;
+- the comparison against step 0 run B: `step2/baseline/*` plants the RETAINED
+  pre-change wrapper and injects the same site, reproducing the recorded
+  mangling, `_bin` derived from empty, interpreter never reached, silent zero
+  exit, and 6 mutations after the failure. The baseline artifact is asserted
+  present and asserted to be the step 0 subject by digest, and the suite returns
+  rather than skipping when it is absent;
+- each site injected separately and identified:
+  `.../injected-call-is-this-site` yes reads the exact argv the shim recorded;
+- a legitimate run still accepted: `step2/legitimate/*` ends 0, performs the
+  surgery, calls the interpreter once, produces no `current/bin/_bin`, and
+  `step2/site2/first-call-accepted` and `step2/site3/first-call-accepted` assert
+  the clean call each of those sites needs before it can be reached.
+
+Steps 0 and 1 were re-run on the same host against the changed harness and the
+guarded wrapper: 34 cases and 50 cases, both 0 failures, both `OBJECTIVE MET`.
+Both retained captures were retaken for those runs, and both plan commands are
+green again on the reviewing Windows host through the capture substitution, 22
+cases each, 0 failures.
+
+#### Static check evidence for step 2 python-wrapper-foreign-distro (round 1)
+
+`shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`:
+no finding. `bash src/utils/lint_shell.sh`: clean over 44 tracked scripts. This
+project has no `check.bat`; these are the substituted static gates and both ran
+on the current bytes.
+
+#### Coverage evidence for step 2 python-wrapper-foreign-distro (round 1)
+
+The project default `ghog day` runs `ghog check` green, then `ghog affected
+--no-cov` stops at exit 5 on `pytest not found on PATH`. cplx has no
+`pyproject.toml`, no tests directory and no pytest suite, so there is no
+percentage to report; that is the project's standing state and not a finding
+about this change. The behavioural substitute is the step 2 suite itself: 53
+cases, 0 failures, with each failure case asserting its injection was OBSERVED
+before anything is concluded from what followed it.
+
+#### Architecture evidence, including the two decisions this round raises for step 2 python-wrapper-foreign-distro (round 1)
+
+The change stays inside the plan's boundary: the same one shipped file the scope
+anchors name, no new file in the shipped tree, one new shell function whose name
+is local to the wrapper and is declared in the harness vocabulary so the shim
+coverage case still reads the file correctly. `setenv` is read and digested,
+never written, and asserted byte-identical to the step 0 digest. The
+DDD-Hexagonal criterion does not apply to a Bash and Batch project.
+
+THE WRAPPER IS 131 LINES against the plan's 115-line budget. The plan calls that
+budget a review trigger rather than a gate, and names the failure it is meant to
+detect: guards written per site instead of shared. That cause is measured
+absent, `step2/source/guard-definitions` 1 against `step2/source/checked-calls`
+3, so the overshoot is comment density in the wrapper's own explanation of W2 and
+of the subshell trap, not duplicated guards. The action the trigger asks for is a
+review before it lands, which is this round. I did not trim the step 1 comments
+to reach the number, because they are landed reviewed text and shrinking them to
+hit a soft budget would be the wrong repair.
+
+THE PLAN NAMES NO RETAINED CAPTURE FOR STEP 2, unlike steps 0, 1 and 3. Its file
+list is the two files this step changed, so I created none. The consequence is
+that `--step 2` can be answered only on a POSIX host: the reviewing Windows host
+exits 4 saying it could not answer. This step's evidence therefore exists as a
+run rather than as a retained file, which is the shape the rest of this effort
+deliberately refuses. Adding the capture would also mean adding its command to
+the plan's resolved validation set, and both files are outside step 2's list, so
+this is a plan decision rather than a repair I should make silently.
+
+#### Performance evidence for step 2 python-wrapper-foreign-distro (round 1)
+
+One function call per read site, three per invocation at most, each running the
+same single `readlink` the site already ran. No read is performed twice and the
+guard adds one emptiness test per site. The suite adds four wrapper runs and one
+shape snapshot per guarded site, and a snapshot walks a fixture of about a dozen
+entries once. Nothing introduced here is O(n^2) or O(n log n), and no new
+computation grows with the size of a deployment.
+
+#### Feature integrity evidence for step 2 python-wrapper-foreign-distro (round 1)
+
+The legitimate first call still ends 0, still performs the whole surgery, still
+leaves `python3` relinked to the wrapper, still calls the interpreter once and
+still produces no `current/bin/_bin`. The already-surgered second call and the
+`-m venv` call are both accepted before their own sites are injected, so a guard
+that refused a good read would fail those cases rather than pass the failure
+ones. Step 1's evidence is unchanged against the guarded wrapper: 50 cases, 0
+failures, the same fourteen post-source sites and the same zero.
+
+### Implementation report for step 2 python-wrapper-foreign-distro (round 1)
+
+#### What changed for step 2 for step 2 python-wrapper-foreign-distro (round 1)
+
+Two files, which is exactly the plan's step 2 file list, plus the two retained
+captures the identity bindings force.
+
+**The shipped wrapper, `src/install/env/python/bin/python`.** It gains one shared
+`guarded_readlink SITE PATH` and three checked calls.
+
+- The helper runs `readlink` and returns non-zero when EITHER the exit status is
+  non-zero OR the output is empty, printing
+  `python: readlink failed at <site>: '<path>'` on stderr. On success it prints
+  the value, so the call sites keep the shape they already had.
+- The three callers propagate with `|| exit`: `relink-read` at
+  `current/bin/python3`, `target-read` at `current/bin/python3_target`, and
+  `venv-read` at `<venv>/bin/python3`. The propagation is the contract's whole
+  content. Each call site is a command substitution and therefore a SUBSHELL, so
+  an `exit` inside the helper would end only that subshell and leave the wrapper
+  running with the empty value it exists to refuse. That is why the suite proves
+  the stop from the run rather than from the presence of the word `exit`.
+- The bootstrap `readlink -f` at line 12 stays unchecked, by decision P6. It runs
+  before `setenv` is sourced, and failing it would stop the wrapper before any
+  guarded site is reached, so the run would prove nothing.
+
+**The harness, `docs/v0.27.0/verify.wrapper-scope.sh`.** It gains the step 2
+suite and the machinery three of its cases need.
+
+- `step2_guarded_site` measures one site the same way three times: snapshot the
+  tree, inject at that site, then assert the injection was observed, that the
+  injected argv IS that site, a non-zero exit, a message naming helper, site and
+  path, zero mutations after the injection, and an unchanged tree shape.
+- `step2/baseline/*` re-measures step 0 run B from the RETAINED pre-change
+  wrapper rather than quoting its capture, so the comparison is a measurement.
+  The baseline artifact is asserted present and asserted by digest to be the step
+  0 subject, and the suite returns rather than skipping when it is absent. Its
+  six mutations are asserted present, because a baseline of zero would let every
+  guarded case pass by measuring a difference that was never there.
+- Three source-level cases answer the shared-guard question no run can:
+  `guard-definitions` 1, `checked-calls` 3, `unguarded-readlink-calls` 2. The
+  last counts the substitution form rather than the word, because the guard's own
+  message names `readlink` in text and text is not a call.
+- `tree_snapshot` records every path, every symlink target and every file size,
+  and deliberately ignores mtime: the wrapper legitimately recreates an identical
+  `pip` symlink on a repeat call, and a shape that changed by nothing is not a
+  modification.
+- Supporting changes: `injected_argv` and `mutations_after_injection`,
+  `guarded_readlink` added to the wrapper vocabulary the shim coverage case
+  reads, an optional wrapper argument on `plant_fixture` so the retained copy can
+  be planted, an optional fail suffix on `run_wrapper_venv`, and the step
+  dispatch extended to `0|1|2`.
+
+**Both retained captures were retaken**, for the reason step 1 already recorded
+and one more. Every harness edit invalidates every retained capture, and this
+step also changed the shipped wrapper, which invalidates the step 1 capture's
+SUBJECT binding as well as its instrument binding. Both were retaken on the same
+RHEL host, both report the same case counts as before, 34 and 50, with 0
+failures.
+
+The step 2 suite caught one defect in itself before it landed, worth naming
+because it is the same class this umbrella exists to close. The
+`unguarded-readlink-calls` case first counted any line containing `readlink`
+followed by a space, and reported 3 rather than 2: the third was the guard's own
+error MESSAGE. Counting a word in a string as a call would have made the case
+fire on correct code and, worse, would have let a real unguarded call hide behind
+a reworded message. The case now anchors on the substitution form the wrapper
+uses to capture every read.
+
+### Change summary for step 2 python-wrapper-foreign-distro (round 1)
+
+#### Staged paths for step 2 python-wrapper-foreign-distro (round 1)
+
+Index tree `68cd2c21acd4cd50b8750fcfdd5f1c62df40142a`, five staged paths:
+
+- `src/install/env/python/bin/python`
+- `docs/v0.27.0/verify.wrapper-scope.sh`
+- `docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt`
+- `docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt`
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+
+The first two are the plan's step 2 file list. The two captures are there because
+every retained capture is bound to the harness that produced it, and the step 1
+one is bound to the wrapper as well; both bindings broke on this step and both
+captures were retaken rather than left stale. The validation record is the
+trailing documentation group.
+
+The review transcript
+`docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md` is not
+staged: it grows with every round of this exchange, so it belongs to the residual
+pass of the authorized commit rather than to a group fixed now.
+
+#### Commit plan for step 2 python-wrapper-foreign-distro (round 1)
+
+`commit-plan-check --format json` reports `state: valid`, `ready: true`, no
+diagnostics, every staged path covered exactly once by five groups in dependency
+order:
+
+1. `fix(wrapper): fail closed on an unusable read` over the shipped wrapper
+2. `test(wrapper): add the step 2 failure suite` over the harness
+3. `test(wrapper): retake the step 0 capture for step 2` over the step 0 capture
+4. `test(wrapper): retake the step 1 capture for step 2` over the step 1 capture
+5. `docs(python-wrapper-foreign-distro): record step 2 validation` over the
+   validation record
+
+The subject of the last group is the one the workflow prompt required verbatim.
+Groups 3 and 4 are named `for step 2` rather than repeating the step 1 subjects,
+so the history distinguishes the two retakes of the same file.
+
+### Writer response for step 2 python-wrapper-foreign-distro (round 1)
+
+Writer response: #### Response for the first round on step 2 for step 2 python-wrapper-foreign-distro (round 1)
+
+This is round 1 for step 2, so there is no earlier answer on this step to accept
+or dispute. Two things carried over from the step 1 exchange are worth stating,
+because they were the two findings that cost that step a round.
+
+The request is published against the LIVE index. Step 1 round 1 was refused
+because an implementation check ran after publication and moved the index out
+from under the request. Here the check ran first, the validation record was
+written and staged before this request was rendered, and
+`request_index_tree` is `68cd2c21`, the tree `git write-tree` reports now.
+
+The evidence floor is stated as it is rather than as uniformly green. The project
+default `ghog day` exits 5 on `pytest not found on PATH`, because cplx has no
+Python test suite at all; that is the project's standing state, it was equally
+true before this step, and the substituted gates that do apply are green.
+
+Two decisions are handed to this review rather than taken alone:
+
+- the wrapper is 131 lines against the plan's 115-line budget. The plan calls it
+  a review trigger rather than a gate and names the failure it detects, per-site
+  guards, which is measured absent. Trimming landed step 1 comments to reach the
+  number looked like the wrong repair, so the trigger is brought here instead;
+- the plan names no retained capture for step 2, so its evidence exists as a run
+  on a POSIX host rather than as a file a Windows host can read. Creating one
+  would add a file the step's list does not name, and adding its command would
+  edit the plan, so it is raised rather than done.
+
+If the review reads either as required work, I will do it in the replacement
+round rather than defend the current shape.
+
+### Reviewer focus for step 2 python-wrapper-foreign-distro (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-1 -->
+
+## Round 1 by reviewer - Step 2
+
+- Recorded: 2026-09-01T10:24:37+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Baseline index tree: 68cd2c21acd4cd50b8750fcfdd5f1c62df40142a
+
+Assessed index tree: 8aaf4a31f90188351716a0f0934141a91289b8ee
+
+### Implementation check for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Result: No. Step 2 has NOT been fully implemented.
+
+The implementation itself centralizes the three `readlink` sites behind one fail-closed `guarded_readlink` helper, and the 131-line wrapper size is an accepted review trigger rather than a gate: the named per-site duplication risk is absent. However, the plan-owned validation evidence is incomplete. No retained Step 2 capture is staged or resolved, and `bash docs/v0.27.0/verify.wrapper-scope.sh --step 2` exits 4 on this reviewer host because the objective is not answerable here. Architecture and performance are otherwise consistent with the step; no unit-tested class is in scope. Feature integrity cannot be certified without the required POSIX evidence.
+
+Validation plan effects: Only the Step 2 validation result and its directly associated summary were corrected. The exact verdict is now `No. Step 2 has NOT been fully implemented.` A `Missing work for Step 2` section records the absent retained/resolved Step 2 evidence and the need to refresh captures after the harness-byte change. No umbrella status was changed.
+
+### Pre-repair mandatory checks and coverage for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh`: passed; 44 shell scripts checked.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt`: passed.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt`: passed.
+- `shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`: failed with SC2016 at harness line 948 for the intentionally literal `$(readlink ` pattern.
+- Additional `bash docs/v0.27.0/verify.wrapper-scope.sh --step 2`: exited 4, reporting that Step 2 is not answerable on this host because no capture was provided.
+
+### Resolved validation set and sources for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The request-time and current resolvers both returned the same four mandatory commands. After the bounded reviewer annotation:
+
+- `bash src/utils/lint_shell.sh`: passed.
+- `shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`: passed.
+- Step 0 capture verification: failed because the retained capture binds the previous harness digest `7abe95fb9307c6eabc26f5104b7826475171f72fae80c3bd385a888ea3e3de4b`, while the final harness digest is `d4e347cce020a89fe21f54b2337de3642295505e4019f6a8899802888e0aad93`.
+- Step 1 capture verification: failed for the same stale harness binding.
+
+The additional Step 2 command still exits 4 because there is no retained capture. Sources are the project/request validation set for lint and shellcheck and the plan resolver for Steps 0 and 1.
+
+### Resolver drift and direction for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+There is no request-to-current resolver drift: both resolve the same four commands. Both sets omit a Step 2 capture command, which is an unresolved plan-evidence gap rather than resolver drift.
+
+### Repository state around validation for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The request-time/baseline index tree was `68cd2c21acd4cd50b8750fcfdd5f1c62df40142a`. The assessed index tree is `8aaf4a31f90188351716a0f0934141a91289b8ee`, changed only by the attributable reviewer patches to the harness and Step 2 validation metadata. The umbrella digest remains `9e85a83e58c8e23983f9965f1c8310087e0a71f655595e42350739a73c77f404`. The Step 0 and Step 1 captures are now stale against the final harness bytes.
+
+### Repair inventory for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Repairs made:
+
+- - Polishing-only: `docs/v0.27.0/verify.wrapper-scope.sh` — add a targeted SC2016 suppression for the intentional literal pattern.
+- - Validation metadata: `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md` — correct the Step 2 verdict to No and list the missing evidence.
+
+Paths staged:
+
+- - `docs/v0.27.0/verify.wrapper-scope.sh`
+- - `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+
+### Commit plan assessment for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The independent checker returned status 0, `valid: true`, and `ready: true` with five ordered groups and no diagnostics. The ignored `a.commit` was amended so its group bodies accurately state that the Step 0 and Step 1 captures must be retaken and that Step 2 remains incomplete. Mechanical grouping is valid, but actual commit readiness is blocked by stale captures and missing Step 2 plan-owned evidence.
+
+### Findings and boundaries for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Unresolved findings:
+
+- - Step 2 has no command in the resolved mandatory validation set and no plan-owned retained capture.
+- - The reviewer-host Step 2 run exits 4 because the objective is not answerable without that capture.
+- - The reviewer annotation changed the harness digest, so the staged Step 0 and Step 1 captures must be regenerated from the final harness bytes.
+
+Boundary-crossing work:
+
+- - Adding the Step 2 capture path and exact command to the implementation plan is requestor/plan authority, so the reviewer did not make that change.
+- - Producing the retained Step 2 capture requires the supported POSIX/RHEL environment and remains requestor work.
+
+### Writer instructions for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Keep the two reviewer repairs staged. Amend the plan's Step 2 file list and resolved validation commands to own a retained Step 2 capture. From the final staged wrapper and harness bytes, run the POSIX Step 2 matrix and retain its 53-case, zero-failure capture with the correct digests. Because the harness changed, regenerate the Step 0 and Step 1 captures too, then run the exact three capture-verification commands on the reviewer host. Regenerate and check `a.commit`, rerun the Step 2 implementation check, and publish the replacement review round.
+
+### Decision rationale for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Changes are requested because implementation completeness, mandatory validation, and absence of unresolved findings do not pass the readiness floor. Exact identity, the shared fail-closed guard implementation, umbrella integrity, reviewer-patch attribution, and mechanical commit grouping pass. The reviewer repair is polishing-only, but it intentionally makes the old captures stale until the writer regenerates them from the final harness bytes.
+
+### Final reviewer decision for step 2 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-2-round-1 -->
+
+## Round 2 by requestor - Step 2
+
+- Recorded: 2026-09-01T10:34:46+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 python-wrapper-foreign-distro (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 2
+Review round: 2
+
+### Code review evidence for step 2 python-wrapper-foreign-distro (round 2)
+
+request_index_tree: 3f324a66b11cbed5c53e540e4f8b04495a2de0e6
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(plan): name the step 2 capture and command
+group 1 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+group 2: fix(wrapper): fail closed on an unusable read
+group 2 path: src/install/env/python/bin/python
+group 3: test(wrapper): add the step 2 failure suite
+group 3 path: docs/v0.27.0/verify.wrapper-scope.sh
+group 4: test(wrapper): retake the step 0 capture for step 2
+group 4 path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+group 5: test(wrapper): retake the step 1 capture for step 2
+group 5 path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+group 6: test(wrapper): capture the step 2 fail-closed rule
+group 6 path: docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
+group 7: docs(python-wrapper-foreign-distro): record step 2 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/verify.wrapper-scope.sh
+staged path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
+staged path: src/install/env/python/bin/python
+```
+
+### Requestor assessment for step 2 python-wrapper-foreign-distro (round 2)
+
+#### Assessment for step 2 python-wrapper-foreign-distro (round 2)
+
+Step 2 is fully implemented. Both round 1 findings are closed, the reviewer's two
+repairs are kept staged, and the evidence gap that blocked the round is now
+plan-owned rather than argued about.
+
+#### Test evidence for step 2 python-wrapper-foreign-distro (round 2)
+
+All three captures come from the SAME final harness bytes, `d4e347cc`, the
+reviewer's SC2016 annotation included, so no edit stands between them and the
+file a reader will run.
+
+- `--step 2` on RHEL 9.8: 53 cases, 0 failures, `OBJECTIVE MET`, retained as
+  `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt`, bound to harness
+  `d4e347cc`, wrapper `7213dfe0`, setenv `355bbec5`, retained `88c4e0d2`;
+- `--step 1` on the same host: 50 cases, 0 failures, retaken;
+- `--step 0` on the same host: 34 cases, 0 failures, retaken.
+
+The three capture-verification commands were then run on the authoring and
+reviewing Windows host, and all three report `OBJECTIVE MET`, step 2 included.
+That is the change round 1 asked for: step 2 is answered on this host through its
+capture instead of exiting 4.
+
+What the step 2 run measures, criterion by criterion:
+
+- the stop: `step2/site1|site2|site3/exit-status-non-zero` yes, and
+  `.../message-names-helper-site-and-path` yes, which asserts the site label AND
+  the path are in the text rather than that any output appeared;
+- the tree unmodified, twice and in two ways: `.../tree-unmodified` yes compares
+  a shape snapshot before the run with one after, and
+  `.../no-mutation-after-injection` 0 counts `mv`, `ln`, `cp` and `sed` lines
+  after the injected `readlink`;
+- the comparison against step 0 run B: `step2/baseline/*` plants the RETAINED
+  pre-change wrapper and injects the same site, reproducing the recorded
+  mangling, `_bin` derived from empty, interpreter never reached, silent zero
+  exit, and 6 mutations after the failure, whose presence is asserted;
+- each site injected separately and identified:
+  `.../injected-call-is-this-site` yes reads the exact argv the shim recorded;
+- a legitimate run still accepted: `step2/legitimate/*` and the clean first call
+  each of sites 2 and 3 needs before its own site is reachable.
+
+#### Static check evidence for step 2 python-wrapper-foreign-distro (round 2)
+
+`shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`:
+no finding, with the reviewer's targeted SC2016 suppression in place.
+`bash src/utils/lint_shell.sh`: clean over 44 tracked scripts. Both ran on the
+final bytes, after the captures were taken from them.
+
+#### Coverage evidence for step 2 python-wrapper-foreign-distro (round 2)
+
+The project default `ghog day` runs `ghog check` green, then `ghog affected
+--no-cov` stops at exit 5 on `pytest not found on PATH`. cplx has no
+`pyproject.toml`, no tests directory and no pytest suite, so there is no
+percentage to report; that is the project's standing state and not a finding
+about this change. The behavioural substitute is the step 2 suite: 53 cases, 0
+failures, each failure case asserting its injection was OBSERVED before anything
+is concluded from what followed it.
+
+#### Architecture evidence for step 2 python-wrapper-foreign-distro (round 2)
+
+The change stays inside the plan's boundary: the same one shipped file the scope
+anchors name, no new file in the shipped tree, one new shell function whose name
+is local to the wrapper and is declared in the harness vocabulary so the shim
+coverage case still reads the file correctly. `setenv` is read and digested,
+never written, and asserted byte-identical to the step 0 digest. The
+DDD-Hexagonal criterion does not apply to a Bash and Batch project.
+
+The wrapper is 131 lines against the plan's 115-line budget. Round 1 accepted
+that overshoot under the plan's own trigger rule, because the failure the budget
+exists to detect, guards written per site instead of shared, is measured absent:
+`step2/source/guard-definitions` 1 against `step2/source/checked-calls` 3. The
+validation record now states the trigger, its measured cause and that acceptance,
+so the next reader meets a decision rather than an unexplained number.
+
+#### Performance evidence for step 2 python-wrapper-foreign-distro (round 2)
+
+One function call per read site, three per invocation at most, each running the
+same single `readlink` the site already ran. No read is performed twice and the
+guard adds one emptiness test per site. The suite adds four wrapper runs and one
+shape snapshot per guarded site, and a snapshot walks a fixture of about a dozen
+entries once. Nothing here is O(n^2) or O(n log n), and no new computation grows
+with the size of a deployment.
+
+#### Feature integrity evidence for step 2 python-wrapper-foreign-distro (round 2)
+
+The legitimate first call still ends 0, still performs the whole surgery, still
+leaves `python3` relinked to the wrapper, still calls the interpreter once and
+still produces no `current/bin/_bin`. The already-surgered second call and the
+`-m venv` call are both accepted before their own sites are injected, so a guard
+that refused a good read would fail those cases rather than pass the failure
+ones. Step 1's evidence is unchanged against the guarded wrapper: 50 cases, 0
+failures, the same fourteen post-source sites and the same zero.
+
+### Implementation report for step 2 python-wrapper-foreign-distro (round 2)
+
+#### What changed since round 1 for step 2 python-wrapper-foreign-distro (round 2)
+
+Round 1 found the implementation sound and the plan-owned evidence incomplete.
+Nothing about the guard changed in this round; what changed is the evidence and
+the plan that owns it.
+
+**The plan now owns step 2's evidence.**
+`docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` gains the capture in
+the step 2 file list, with the reason steps 0 and 1 name theirs, and the matching
+`--step 2 --capture` command in the block of plan additions to the resolved
+validation set. The prose that already recorded "every harness edit invalidates
+every retained capture" now records that the step 2 suite changed the digest
+again, so all three captures were retaken rather than two.
+
+**The step 2 capture exists.**
+`docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` is new: 53 cases, 0 failures,
+`OBJECTIVE MET`, with the four digests that make it admissible. Its header says
+what the run measures, that the baseline is re-measured rather than quoted, that
+the three sites are injected separately, and that the file exists because this
+review asked for it, so a later reader can tell a review outcome from an
+afterthought.
+
+**All three captures were retaken from the FINAL harness bytes.** The reviewer's
+SC2016 annotation changed the harness digest after the round 1 request was
+rendered, which is exactly the staleness the identity binding is for. The order
+this round used was: take the reviewer's repairs, amend the plan, then run the
+three suites, then take the captures, then run the static gates. No harness edit
+followed the captures, so `d4e347cc` is the digest all three name and the digest
+the file has.
+
+**The two reviewer repairs are kept staged, unchanged.**
+
+- `docs/v0.27.0/verify.wrapper-scope.sh`: the targeted `shellcheck
+  disable=SC2016` on the `unguarded-readlink-calls` case, whose single-quoted
+  `$(readlink ` is deliberately literal. The authoring host's shellcheck build
+  does not raise it and the reviewer's does, so the suppression records the
+  intent rather than hiding a finding;
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`: the
+  `No` verdict and its `Missing work for Step 2` list. That work is now done, so
+  this round rewrites the verdict to `Yes` and removes the section, which is what
+  the implementation-check contract asks for when the listed work lands. The
+  reviewer's wording on the girth trigger is kept and extended rather than
+  replaced.
+
+**The validation record was rewritten for the closed state.** The step 2 verdict
+is `Yes. Step 2 has been fully implemented.`; the `Missing work for Step 2`
+section is gone; the capture-gap paragraph now reads as closed and names what the
+plan owns; the architecture check records the girth trigger, its measured cause
+and the review's acceptance, and closes with nothing outstanding; and the
+consequence paragraph records that all three captures come from the same final
+harness bytes.
+
+### Change summary for step 2 python-wrapper-foreign-distro (round 2)
+
+#### Staged paths for step 2 python-wrapper-foreign-distro (round 2)
+
+Index tree `3f324a66b11cbed5c53e540e4f8b04495a2de0e6`, seven staged paths, two
+more than round 1:
+
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` (new to this round)
+- `src/install/env/python/bin/python`
+- `docs/v0.27.0/verify.wrapper-scope.sh`
+- `docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt`
+- `docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt`
+- `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` (new to this round, added)
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+
+The plan and the step 2 capture are the two the round 1 answer asked for. The
+first two files after the plan are step 2's own list; the step 0 and step 1
+captures are there because every retained capture is bound to the harness that
+produced it, and the step 1 one to the wrapper as well.
+
+The review transcript is not staged: it grows with every round of this exchange,
+so it belongs to the residual pass of the authorized commit rather than to a
+group fixed now.
+
+#### Commit plan for step 2 python-wrapper-foreign-distro (round 2)
+
+`commit-plan-check --format json` reports `state: valid`, `ready: true`, no
+diagnostics, every staged path covered exactly once by seven groups in dependency
+order:
+
+1. `docs(plan): name the step 2 capture and command`
+2. `fix(wrapper): fail closed on an unusable read`
+3. `test(wrapper): add the step 2 failure suite`
+4. `test(wrapper): retake the step 0 capture for step 2`
+5. `test(wrapper): retake the step 1 capture for step 2`
+6. `test(wrapper): capture the step 2 fail-closed rule`
+7. `docs(python-wrapper-foreign-distro): record step 2 validation`
+
+Two groups are new since round 1, for the two new paths, and the plan group leads
+because the capture and its command are what the rest of the set now answers to.
+The reviewer's amendments to the round 1 bodies are carried rather than dropped:
+group 3 still names the SC2016 suppression, and groups 4 and 5 still say the
+captures were retaken, now stating they come from the final harness bytes rather
+than that another retake is owed. Group 7 keeps the subject the workflow prompt
+required verbatim.
+
+### Writer response for step 2 python-wrapper-foreign-distro (round 2)
+
+Writer response: #### Response to the round 1 answer for step 2 python-wrapper-foreign-distro (round 2)
+
+The round 1 answer is accepted in full. There is no disagreement to record, and
+both reviewer repairs are kept staged unchanged.
+
+The finding was right and the round 1 request said so itself: step 2's evidence
+existed as a run rather than as a file, and the request raised that as a decision
+instead of taking it. The answer took it, ruled it a plan-owned gap, and named
+the plan amendment as requestor authority. That is the resolution this round
+implements.
+
+Each written instruction, and what was done:
+
+- **keep the two reviewer repairs staged.** Both are staged and unmodified. The
+  SC2016 suppression is carried into the group 3 commit body, and the reviewer's
+  wording on the girth trigger is kept in the validation record and extended
+  rather than replaced;
+- **amend the plan's step 2 file list and resolved validation commands.** Done:
+  the file list names
+  `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` with the reason steps 0 and
+  1 name theirs, and the command block gains the matching `--step 2 --capture`
+  command;
+- **run the POSIX step 2 matrix from the final staged bytes and retain its
+  53-case, zero-failure capture with the correct digests.** Done, on RHEL 9.8,
+  bound to harness `d4e347cc`, wrapper `7213dfe0`, setenv `355bbec5` and retained
+  wrapper `88c4e0d2`;
+- **regenerate the step 0 and step 1 captures too.** Done, in the same session
+  and from the same final harness bytes, 34 and 50 cases, 0 failures;
+- **run the exact three capture-verification commands on the reviewer host.**
+  Done: all three report `OBJECTIVE MET` on the authoring and reviewing Windows
+  host, step 2 included, so the exit 4 that blocked round 1 is gone;
+- **regenerate and check `a.commit`.** Done: seven groups over seven staged
+  paths, `state: valid`, `ready: true`, no diagnostics;
+- **rerun the step 2 implementation check.** Done: the verdict is
+  `Yes. Step 2 has been fully implemented.`, and the `Missing work for Step 2`
+  section is removed because its three items are the work this round did.
+
+One ordering detail worth stating, since it is what made the round 1 captures
+stale. The reviewer's annotation changed the harness digest AFTER that request
+was rendered. This round therefore took every repair first, amended the plan
+second, and only then ran the suites and took the three captures, with the static
+gates run last on the same bytes. No harness edit follows the captures.
+
+### Reviewer focus for step 2 python-wrapper-foreign-distro (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-2 -->
+
+## Round 2 by reviewer - Step 2
+
+- Recorded: 2026-09-01T10:55:04+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Baseline index tree: 3f324a66b11cbed5c53e540e4f8b04495a2de0e6
+
+Assessed index tree: 29ea17203ccfb00739090ae4f40ed7e868bf5f65
+
+### Implementation check for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Result: Yes. Step 2 has been fully implemented.
+
+The wrapper uses one shared fail-closed guard at all three planned read sites, preserves the delegated bootstrap read, and explicitly propagates command-substitution failures. The retained RHEL capture proves the Step 0 baseline, separate injection and identification at each site, a non-zero stop with diagnostic, no later mutations, unchanged trees, and a successful legitimate run. The 131-line size remains an accepted review trigger because its named duplication risk is absent. Architecture, performance, applicable coverage, and feature-integrity checks are complete.
+
+Validation plan effects: The Step 2 verdict remains Yes. Step 2 has been fully implemented. The stale introductory sentence was corrected to say that Steps 0 through 2 are complete and Step 2 evidence is retained and resolved. No other step and no umbrella row changed.
+
+### Pre-repair mandatory checks and coverage for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+All five mandatory commands passed before the metadata-only repair: shell lint was clean over 44 tracked scripts; Step 0, Step 1, and Step 2 capture verification each reported OBJECTIVE MET; and shellcheck reported no finding. Initial sandboxed Git Bash attempts failed to create a Windows signal pipe, so the exact Bash commands were rerun outside that sandbox and passed. The metadata repair does not affect executable inputs.
+
+### Resolved validation set and sources for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The final five-command set passed on the final bytes: bash src/utils/lint_shell.sh; the Step 0 capture command; the Step 1 capture command; the new Step 2 capture command; and shellcheck on the harness and wrapper. The three retained commands validated harness digest d4e347cc; Steps 1 and 2 validated wrapper digest 7213dfe0; all reported OBJECTIVE MET.
+
+### Resolver drift and direction for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+There is no request-to-current resolver drift. Both resolve the same five commands, including the plan-owned Step 2 capture command added in this round.
+
+### Repository state around validation for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The request-time and baseline index tree was 3f324a66b11cbed5c53e540e4f8b04495a2de0e6. The assessed index tree is 29ea17203ccfb00739090ae4f40ed7e868bf5f65, changed only by the attributable validation-summary repair. The umbrella digest remained 9e85a83e58c8e23983f9965f1c8310087e0a71f655595e42350739a73c77f404; validation produced no other tracked or untracked side effect.
+
+### Repair inventory for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Repairs made:
+
+- Validation metadata, polishing-only: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md — replace the stale Round 1 introductory statement with the closed Step 2 state.
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+
+### Commit plan assessment for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The independent checker returned status 0, valid true, and ready true with seven ordered groups, seven exactly covered staged paths, and no diagnostics. Group 7 already says the theme sentence is refreshed, so the metadata-only reviewer repair leaves membership, order, scope, subject, and body accurate.
+
+### Findings and boundaries for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+No further writer repair is required. Preserve the staged reviewer metadata correction and present the advisory commit-ready result for the human commit choice.
+
+### Decision rationale for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Commit-ready is recommended because exact identity, complete implementation, mandatory validation and coverage, attributable staged scope, absence of unresolved findings, and accurate commit grouping all pass. The only Round 2 reviewer change is validation metadata and is polishing-only, not substantive. This recommendation is advisory and does not authorize a commit.
+
+### Final reviewer decision for step 2 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-2-round-2 -->
+
+## Round 2 by human - Step 2 - human-confirmation
+
+- Recorded: 2026-09-01T11:09:33+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 2
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
