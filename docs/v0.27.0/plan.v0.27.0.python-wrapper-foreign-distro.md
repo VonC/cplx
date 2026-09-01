@@ -253,6 +253,9 @@ bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 \
 
 bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 \
      --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+
+bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 \
+     --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
 ```
 
 STEP 0'S COMMAND NAMES THE RETAINED WRAPPER, and from step 1 onward it must.
@@ -264,8 +267,9 @@ route around, and it was observed before this paragraph was written.
 
 EVERY HARNESS EDIT INVALIDATES EVERY RETAINED CAPTURE, which is the price of
 binding a capture to its instrument. Adding the step 1 suite changed the harness
-digest, so both captures were retaken. The cost is deliberate: the alternative is
-a capture that outlives the code it described.
+digest, so both captures were retaken; adding the step 2 suite changed it again,
+so all three were. The cost is deliberate: the alternative is a capture that
+outlives the code it described.
 
 THE RETAINED MEASUREMENT IS NOT A WAY OF PASSING WITHOUT RUNNING, and its
 authority takes FOUR digests rather than one. A capture answers two separate
@@ -389,6 +393,12 @@ invocation.
 
 - `src/install/env/python/bin/python` (existing, to be updated)
 - `docs/v0.27.0/verify.wrapper-scope.sh` (existing, to be updated)
+- `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` (new, the retained capture)
+
+The capture is named here for the reason step 0's and step 1's are, and it was
+added after the step 2 code review found the omission: a host that cannot create
+a symlink reads it rather than running the suite, and without it `--step 2`
+exits 4 on the reviewing host and the step's evidence lives only in a terminal.
 
 ### Step 2 goal
 
