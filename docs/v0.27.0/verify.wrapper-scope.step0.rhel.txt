@@ -1,7 +1,7 @@
 Harness: docs/v0.27.0/verify.wrapper-scope.sh --step 0, with --wrapper, --setenv
          and --retained naming the copies carried to the host
 Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
-Captured: 2026-08-31, by hand, over ssh
+Captured: 2026-09-01, by hand, over ssh
 Purpose: Step 0 baseline of the PRE-CHANGE wrapper, taken twice, before step 1
          rewrites it. RUN A is the clean first call; RUN B injects a failing
          readlink at the line-30 site only. Both run over a planted fixture
@@ -60,7 +60,14 @@ Baseline in one line: all seven post-source helper calls of a clean first call
          observe the shipped search path, and so does the interpreter. Step 1
          takes the first count to zero and leaves the second as it is.
 
-
+AFTER STEP 1, THIS CAPTURE MUST BE TAKEN AND READ AGAINST THE RETAINED WRAPPER.
+         Step 0 describes the PRE-CHANGE wrapper, and step 1 rewrote the live
+         one, so `--wrapper` names
+         `docs/v0.27.0/wrapper.pre-change.verification-only` rather than
+         `src/install/env/python/bin/python`. This is not a workaround: the
+         subject binding refuses the live wrapper here on purpose, because a
+         capture describing 88c4e0d2 says nothing about the file that replaced
+         it. The refusal was observed before this note was written.
 
 
 == harness prerequisite preflight
@@ -103,7 +110,7 @@ Baseline in one line: all seven post-source helper calls of a clean first call
   step0/runB/fixture                           PASS  planted and asserted
   step0/control-injection                      PASS  observed once
   step0/control/clean-run-carries-no-injection PASS  refused on [INJECTION], as designed
-  step0/runB/injected-call                     NOTE  readlink /tmp/cplx-wrapper-scope.554252/runB/bin/current/bin/python3
+  step0/runB/injected-call                     NOTE  readlink /tmp/cplx-wrapper-scope.1318125/runB/bin/current/bin/python3
   step0/runB/python3_target-derived-from-empty PASS  _bin
   step0/runB/interpreter-not-moved-aside       PASS  no
   step0/runB/interpreter-never-reached         PASS  0
@@ -122,10 +129,10 @@ Baseline in one line: all seven post-source helper calls of a clean first call
   step        0
   cases       34
   failures    0
-  wrapper     /home/deploy-account/wrapper-scope-step0/python
-  setenv      /home/deploy-account/wrapper-scope-step0/setenv
+  wrapper     /home/deploy-account/wrapper-scope-step1/wrapper.pre-change.verification-only
+  setenv      /home/deploy-account/wrapper-scope-step1/setenv
   retained    ./wrapper.pre-change.verification-only
-  harness     ab07e5987b91d9f78c6f4d0228c2bd3ee3a10d07b2b31a87352efb871c05eb3f
+  harness     ee98b157669a2d854bef9a0b27c3800cd8c4fea9278899c07592d53e96d0c8b8
   wrapper-sha  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
   setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
   retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
