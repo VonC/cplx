@@ -11,6 +11,13 @@
 # Usage:
 #   bash verify.wrapper-scope.sh [--step N] [--wrapper PATH] [--setenv PATH]
 #                                [--retained PATH] [--capture PATH]
+#                                [--deployment PATH] [--prefix PATH]
+#                                [--live-install PATH] [--run-identity ID]
+#
+# The last four are step 3 only: it runs the REAL archive interpreter over a
+# tree the session deployed, so it is told where that tree is, which throwaway
+# prefix holds it, which live install must stay untouched, and which run
+# identity the evidence cites.
 #
 # Exit codes: 0 the step's objective is met, 1 at least one case failed, 2 the
 # arguments are unusable, 4 this host cannot answer the step at all and no
@@ -65,6 +72,10 @@ WRAPPER_ARG=""
 SETENV_ARG=""
 RETAINED_ARG=""
 CAPTURE_ARG=""
+DEPLOYMENT_ARG=""
+PREFIX_ARG=""
+LIVE_INSTALL_ARG=""
+RUN_IDENTITY_ARG=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -78,24 +89,34 @@ while [ "$#" -gt 0 ]; do
         # The retained pre-change wrapper the step 5 control runs. Step 0
         # produces it; later steps assert its digest against a named commit.
         --retained) RETAINED_ARG="$2"; shift 2 ;;
-        # The retained capture from a host that COULD answer this step. The
-        # symlink behaviour this step measures is not reproducible on a host that
-        # cannot create a symlink, so such a host reads a measurement from one
-        # that could, exactly as the relocation harness reads
-        # `--target-capability` rather than asserting a constant.
+        # The retained capture from a host that COULD answer this step. What a
+        # host cannot reproduce differs by step, the symlink surgery for steps 0
+        # to 2 and a deployed archive for step 3, but the idiom is the same:
+        # such a host reads a measurement from one that could, exactly as the
+        # relocation harness reads `--target-capability` rather than asserting a
+        # constant.
         --capture) CAPTURE_ARG="$2"; shift 2 ;;
-        -h|--help) sed -n '2,57p' "$0"; exit 0 ;;
+        # Step 3 only. The deployed python env root, the throwaway prefix that
+        # holds it, the live install that must stay untouched, and the run
+        # identity the capture cites in its evidence rather than only in its
+        # header. The session deploys the tree; a harness that deployed its own
+        # subject would be measuring an installer rather than a wrapper.
+        --deployment) DEPLOYMENT_ARG="$2"; shift 2 ;;
+        --prefix) PREFIX_ARG="$2"; shift 2 ;;
+        --live-install) LIVE_INSTALL_ARG="$2"; shift 2 ;;
+        --run-identity) RUN_IDENTITY_ARG="$2"; shift 2 ;;
+        -h|--help) sed -n '2,65p' "$0"; exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 
-# Only steps 0, 1 and 2 have case suites today. Accepting any other value would
-# let the verdict line report success for a step whose cases do not exist, which
-# is a vacuous pass at exactly the level later steps rely on. Extend this
-# dispatch and the suite together.
+# Only steps 0 to 3 have case suites today. Accepting any other value would let
+# the verdict line report success for a step whose cases do not exist, which is
+# a vacuous pass at exactly the level later steps rely on. Extend this dispatch
+# and the suite together.
 case "$STEP" in
-    0|1|2) ;;
-    *) echo "unsupported --step $STEP: steps 0, 1 and 2 have case suites today." >&2
+    0|1|2|3) ;;
+    *) echo "unsupported --step $STEP: steps 0 to 3 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -1051,6 +1072,208 @@ step2_runnable_suite() {
     note "step2/wrapper-lines" "$(wc -l < "$WRAPPER" | tr -d ' ')"
 }
 
+# ------------------------------------------------------------------ step 3 ---
+# No regression on RHEL, which is the host where this defect CANNOT fire: the
+# shipped libc is the host libc family there, so a pass says the fix did not
+# break the working case and never that it works. That is why this is the
+# no-regression step and step 5 is the acceptance.
+#
+# Everything before this step measures a PLANTED fixture through a recording
+# stub. This one runs the REAL archive interpreter over a freshly deployed tree,
+# which is the only way the third guarded read site executes for real: a stub
+# never creates a virtualenv, so `-m venv` has nothing to post-process
+# (decision Q05).
+#
+# The tree is deployed by the session, not by this harness. A harness that
+# deployed its own subject would be measuring an installer run rather than a
+# wrapper, and the deployment recipe belongs to the operations note rather than
+# to an oracle.
+#
+# WHAT A REAL DEPLOYMENT DOES AND DOES NOT EXERCISE, measured before this suite
+# was written rather than assumed. The archive is packaged from a tree the
+# wrapper has ALREADY converted: it ships `current/bin/python3` pointing at the
+# wrapper and `python3_target` at the real binary. So a deployed tree never
+# takes the relink arm, and every call takes the other one. Steps 0 to 2 measure
+# the relink arm over a planted pre-conversion fixture; this step measures the
+# arm a deployment actually runs, plus the venv post-processing that only a real
+# interpreter can reach. Asserting a conversion here would have passed on work
+# the archive did, which is the shape this umbrella exists to refuse.
+
+# One call through the deployed wrapper, with HOME pinned to the throwaway
+# prefix because the installer and the wrapper both read it, and from a stated
+# working directory because the venv site resolves its argument through `pwd`.
+STEP3_STATUS=0
+step3_call() {
+    local cwd="$1" out="$2"
+    shift 2
+    STEP3_STATUS=0
+    ( cd "$cwd" && env HOME="$PREFIX_ARG" "$DEPLOYMENT_ARG/bin/python" "$@" ) \
+        > "$out" 2>&1 || STEP3_STATUS=$?
+    return 0
+}
+
+step3_runnable_suite() {
+    section "step 3 identity: which run, which target, which shell"
+
+    # CITED IN THE EVIDENCE rather than only in the header. The prefix is
+    # asserted to carry the run identity, so a capture cannot report a run it
+    # did not measure, and the target is read from /etc/os-release rather than
+    # from `uname`, which names the host kernel even inside a container.
+    note "step3/identity/run" "$RUN_IDENTITY_ARG"
+    chk "step3/identity/prefix-carries-run-id" "yes" \
+        "$(case "$PREFIX_ARG" in *"$RUN_IDENTITY_ARG"*) echo yes ;; *) echo no ;; esac)"
+    # shellcheck disable=SC1091  # /etc/os-release exists on the host that can
+    # answer this step and nowhere else; the guarded expansions carry the case
+    # where it is missing.
+    chk "step3/identity/target" "rhel 9.8" \
+        "$( . /etc/os-release 2>/dev/null; echo "${ID:-unknown} ${VERSION_ID:-unknown}" )"
+    note "step3/identity/kernel" "$(uname -r)"
+    note "step3/identity/bash" "$BASH_VERSION"
+
+    section "step 3 the throwaway prefix, and the live install beside it"
+
+    # EVERY WRITE LANDS UNDER ONE THROWAWAY PREFIX. Asserted rather than
+    # promised: the deployment is under the prefix, and the live install is not.
+    chk "step3/prefix/deployment-under-prefix" "yes" \
+        "$(case "$DEPLOYMENT_ARG/" in "$PREFIX_ARG"/*) echo yes ;; *) echo no ;; esac)"
+    chk "step3/prefix/live-install-outside-prefix" "yes" \
+        "$(case "$LIVE_INSTALL_ARG/" in "$PREFIX_ARG"/*) echo no ;; *) echo yes ;; esac)"
+    chk "step3/live/present" "yes" \
+        "$( [ -d "$LIVE_INSTALL_ARG" ] && echo yes || echo no )"
+    # The live install's own wrapper is NOT the subject of this run. A tree that
+    # shared the file would make the mtime case below true by identity rather
+    # than by leaving the install alone.
+    chk "step3/live/wrapper-is-not-the-subject" "yes" \
+        "$( [ "$(digest_of "$LIVE_INSTALL_ARG/python/bin/python" 2>/dev/null)" \
+             != "$WRAPPER_SHA256" ] && echo yes || echo no )"
+    local live_before
+    live_before=$(stat -c %Y "$LIVE_INSTALL_ARG" 2>/dev/null)
+    note "step3/live/mtime-before" "$live_before"
+
+    section "step 3 the deployed tree, as the archive ships it"
+
+    chk "step3/deploy/wrapper-present" "yes" \
+        "$( [ -f "$DEPLOYMENT_ARG/bin/python" ] && echo yes || echo no )"
+    # THE WRAPPER UNDER TEST IS THE ONE DEPLOYED, asserted by digest. Without
+    # this the step could measure the wrapper the archive carries and report the
+    # change working while the change was never in the tree.
+    chk "step3/deploy/wrapper-is-the-subject" "$WRAPPER_SHA256" \
+        "$(digest_of "$DEPLOYMENT_ARG/bin/python" 2>/dev/null)"
+    # The deployed `setenv` is NOT byte-identical to the repository's, and that
+    # is the installer working: it re-anchors absolute paths when it relocates
+    # the tree. What matters here is the property the scope rule depends on,
+    # that the search path is still built from `senvDIR` rather than frozen to a
+    # build account's home. The repository copy's own bytes are asserted against
+    # the step 0 digest at the end of this suite.
+    note "step3/deploy/setenv-sha256" "$(digest_of "$DEPLOYMENT_ARG/bin/setenv" 2>/dev/null)"
+    # shellcheck disable=SC2016  # the single quotes are the point: this greps
+    # for the LITERAL `${senvDIR}` text in the deployed file, so it must reach
+    # grep unexpanded rather than being substituted here.
+    chk "step3/deploy/setenv-builds-the-path-from-senvdir" "1" \
+        "$(grep -c '^export LD_LIBRARY_PATH="${senvDIR}/' "$DEPLOYMENT_ARG/bin/setenv" || true)"
+
+    # THE SHIPPED SHAPE, RECORDED RATHER THAN ASSUMED. The archive is packaged
+    # from a tree the wrapper has ALREADY converted, so `python3` names the
+    # wrapper and `python3_target` names the real binary before any call here.
+    # This step therefore does NOT measure the relink arm: steps 0 to 2 measure
+    # that over a planted pre-conversion fixture. What a real deployment
+    # exercises is the OTHER arm, the one a converted tree takes on every call,
+    # and that is what the calls below assert.
+    chk "step3/deploy/ships-converted" "../../bin/python" \
+        "$(readlink "$DEPLOYMENT_ARG/current/bin/python3")"
+    STEP3_TARGET="$(readlink "$DEPLOYMENT_ARG/current/bin/python3_target" 2>/dev/null)"
+    note "step3/deploy/target-name" "$STEP3_TARGET"
+    chk "step3/deploy/real-interpreter-present" "yes" \
+        "$( [ -f "$DEPLOYMENT_ARG/current/bin/$STEP3_TARGET" ] && echo yes || echo no )"
+    # THE REAL INTERPRETER, not the recording stub steps 0 to 2 plant. The stub
+    # is a shell script; this asserts an ELF, which is the whole difference
+    # decision Q05 turns on and the reason this step exists on this host.
+    chk "step3/deploy/interpreter-is-an-elf" "yes" \
+        "$(head -c 4 "$DEPLOYMENT_ARG/current/bin/$STEP3_TARGET" 2>/dev/null \
+           | od -An -tx1 | tr -d ' \n' | grep -q '^7f454c46' && echo yes || echo no)"
+
+    section "step 3 the first call over the deployed tree"
+
+    local out1="$SCRATCH/step3-call1.out" before after1
+    before=$(tree_snapshot "$DEPLOYMENT_ARG/current/bin")
+    step3_call "$PREFIX_ARG" "$out1" --version
+    after1=$(tree_snapshot "$DEPLOYMENT_ARG/current/bin")
+    chk "step3/call1/exit-status" "0" "$STEP3_STATUS"
+    # The version comes from the ARCHIVE interpreter, so it is asserted as a
+    # shape and reported as a value: pinning 3.13.9 here would fail on the next
+    # archive for a reason that is not this wrapper's.
+    chk "step3/call1/answers-a-version" "yes" \
+        "$(grep -qE '^Python 3\.[0-9]+\.[0-9]+' "$out1" && echo yes || echo no)"
+    note "step3/call1/version" "$(grep -m1 -E '^Python ' "$out1" || true)"
+    # NO CONVERSION IS REPEATED. On a converted tree the wrapper reads
+    # `python3_target` and execs it, and must write nothing at all.
+    chk "step3/call1/tree-unchanged" "yes" \
+        "$( [ "$before" = "$after1" ] && echo yes || echo no )"
+    chk "step3/call1/python3_target-still-points-at-real" "$STEP3_TARGET" \
+        "$(readlink "$DEPLOYMENT_ARG/current/bin/python3_target")"
+    # The mangling step 0 run B recorded, absent here on a real tree.
+    chk "step3/call1/no-empty-derived-path" "no" \
+        "$( [ -e "$DEPLOYMENT_ARG/current/bin/_bin" ] && echo yes || echo no )"
+    chk "step3/call1/no-double-bin" "no" \
+        "$( [ -e "$DEPLOYMENT_ARG/current/bin/${STEP3_TARGET}_bin" ] && echo yes || echo no )"
+
+    section "step 3 the second call, through the same symlinks"
+
+    local out2="$SCRATCH/step3-call2.out" after2
+    step3_call "$PREFIX_ARG" "$out2" --version
+    after2=$(tree_snapshot "$DEPLOYMENT_ARG/current/bin")
+    chk "step3/call2/exit-status" "0" "$STEP3_STATUS"
+    chk "step3/call2/answers-a-version" "yes" \
+        "$(grep -qE '^Python 3\.[0-9]+\.[0-9]+' "$out2" && echo yes || echo no)"
+    chk "step3/call2/same-version-as-the-first" "yes" \
+        "$( [ "$(grep -m1 -E '^Python ' "$out1")" = "$(grep -m1 -E '^Python ' "$out2")" ] \
+            && echo yes || echo no )"
+    chk "step3/call2/tree-unchanged" "yes" \
+        "$( [ "$after1" = "$after2" ] && echo yes || echo no )"
+
+    section "step 3 the venv path, where the third guarded read site runs for real"
+
+    local out3="$SCRATCH/step3-venv.out" venv_name="venv-step3"
+    local venv_dir="$PREFIX_ARG/$venv_name"
+    rm -rf -- "$venv_dir"
+    step3_call "$PREFIX_ARG" "$out3" -m venv "$venv_name"
+    chk "step3/venv/exit-status" "0" "$STEP3_STATUS"
+    chk "step3/venv/created" "yes" \
+        "$( { [ -x "$venv_dir/bin/python3" ] || [ -L "$venv_dir/bin/python3" ]; } \
+            && echo yes || echo no )"
+    # THE POST-PROCESSING, which is the third guarded read site executing for
+    # real. Its target name is read from the venv the interpreter just built,
+    # exactly as the wrapper reads it, rather than assumed.
+    local venv_target
+    venv_target="$(readlink "$venv_dir/bin/python3" 2>/dev/null)"
+    note "step3/venv/target-name" "$venv_target"
+    chk "step3/venv/target-relinked-to-wrapper" "$DEPLOYMENT_ARG/bin/python" \
+        "$(readlink "$venv_dir/bin/$venv_target" 2>/dev/null)"
+    chk "step3/venv/real-binary-copied-beside-it" "yes" \
+        "$( [ -f "$venv_dir/bin/${venv_target}_bin" ] && echo yes || echo no )"
+    # The venv tree is under the throwaway prefix like every other write.
+    chk "step3/venv/under-the-prefix" "yes" \
+        "$(case "$venv_dir/" in "$PREFIX_ARG"/*) echo yes ;; *) echo no ;; esac)"
+
+    section "step 3 the live install, still untouched"
+
+    # The three calls above wrote only under the prefix, and this is the case
+    # that says so rather than the sentence.
+    chk "step3/live/mtime-unchanged" "$live_before" \
+        "$(stat -c %Y "$LIVE_INSTALL_ARG" 2>/dev/null)"
+    chk "step3/live/wrapper-untouched" "yes" \
+        "$( [ "$(digest_of "$LIVE_INSTALL_ARG/python/bin/python" 2>/dev/null)" \
+             != "$WRAPPER_SHA256" ] && echo yes || echo no )"
+
+    section "step 3 identities: what this step asserts rather than assumes"
+
+    chk "step3/setenv-unchanged-since-step0" \
+        "355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d" \
+        "$SETENV_SHA256"
+    note "step3/wrapper-sha256" "$WRAPPER_SHA256"
+    note "step3/wrapper-lines" "$(wc -l < "$WRAPPER" | tr -d ' ')"
+}
+
 # THE IDENTITY CHECK, and the only reason the substitution is worth having. The
 # reason prefix is CAPTUREID so the control below can demand that exact refusal
 # rather than any failure at all.
@@ -1199,26 +1422,67 @@ step_capture_substitution() {
     return 0
 }
 
-if [ "$STEP" -eq 0 ] || [ "$STEP" -eq 1 ] || [ "$STEP" -eq 2 ]; then
-    # THE SHIM COVERAGE CASE, made executable. It reads the wrapper's source,
-    # which every other case refuses to do, and that is correct here: the
-    # question is which command names the file CONTAINS, not what one run
-    # happened to reach. A run-derived answer would report only the helpers that
-    # particular path exercised and call the rest absent.
-    section "step 0 shim coverage: the helper list against the wrapper"
+# A capture supplied on a host that COULD answer is still checked, so the two
+# can never drift apart unnoticed. Both gates below end here, which is why it is
+# a function rather than the same eight lines twice.
+cross_check_capture() {
+    [ -n "$CAPTURE_ARG" ] || return 0
+    section "step $STEP retained capture, cross-checked on a capable host"
+    assert_capture_identity "step0/capture/names-this-harness" "$CAPTURE_ARG"
+    control "step0/control/stale-capture-refused" "CAPTUREID" ctl_stale_capture
+    assert_all_subjects "$CAPTURE_ARG" "step0/capture/subject"
+    control "step0/control/broken-wrapper-refused" "SUBJECTID" ctl_subject_wrapper
+    control "step0/control/mismatched-setenv-refused" "SUBJECTID" ctl_subject_setenv
+    control "step0/control/mismatched-retained-refused" "SUBJECTID" ctl_subject_retained
+}
 
-    _known=$( { printf '%s\n' "${HELPERS[@]}"
-                printf '%s\n' "$WRAPPER_VOCABULARY" | tr ' ' '\n'
-                wrapper_assignment_targets "$WRAPPER"; } | sort -u | grep -v '^$' )
-    _found=$(wrapper_command_words "$WRAPPER")
-    chk "step0/coverage/no-unshimmed-command" "" \
-        "$(comm -23 <(printf '%s\n' "$_found") <(printf '%s\n' "$_known") | tr '\n' ' ' | sed 's/ $//')"
-    chk "step0/coverage/no-dead-shim-entry" "" \
-        "$(comm -13 <(printf '%s\n' "$_found") <(printf '%s\n' "${HELPERS[@]}" | sort -u) | tr '\n' ' ' | sed 's/ $//')"
+# THE SHIM COVERAGE CASE, made executable. It reads the wrapper's source, which
+# every other case refuses to do, and that is correct here: the question is which
+# command names the file CONTAINS, not what one run happened to reach. A
+# run-derived answer would report only the helpers that particular path
+# exercised and call the rest absent. It applies to every step, because every
+# step has the same wrapper as its subject.
+section "step 0 shim coverage: the helper list against the wrapper"
 
-    # The host gate. Measured, never assumed: the probe creates a symlink and
-    # reads it back, so a host whose `ln -s` silently copies is caught as surely
-    # as one that refuses outright.
+_known=$( { printf '%s\n' "${HELPERS[@]}"
+            printf '%s\n' "$WRAPPER_VOCABULARY" | tr ' ' '\n'
+            wrapper_assignment_targets "$WRAPPER"; } | sort -u | grep -v '^$' )
+_found=$(wrapper_command_words "$WRAPPER")
+chk "step0/coverage/no-unshimmed-command" "" \
+    "$(comm -23 <(printf '%s\n' "$_found") <(printf '%s\n' "$_known") | tr '\n' ' ' | sed 's/ $//')"
+chk "step0/coverage/no-dead-shim-entry" "" \
+    "$(comm -13 <(printf '%s\n' "$_found") <(printf '%s\n' "${HELPERS[@]}" | sort -u) | tr '\n' ' ' | sed 's/ $//')"
+
+if [ "$STEP" -eq 3 ]; then
+    # THE STEP 3 HOST GATE, and it asks a different question from the one steps
+    # 0 to 2 ask. What this step cannot reproduce is not a symlink, it is a
+    # DEPLOYED ARCHIVE: the real interpreter, its relocated tree, and a
+    # throwaway prefix to hold the writes. A host without one answers nothing
+    # about the wrapper here, exactly as a host without symlinks does there.
+    section "step 3 host gate: is a deployed tree named for this run"
+
+    HAVE_DEPLOYMENT=0
+    if [ -n "$DEPLOYMENT_ARG" ] && [ -d "$DEPLOYMENT_ARG" ] \
+       && [ -n "$PREFIX_ARG" ] && [ -d "$PREFIX_ARG" ] \
+       && [ -n "$LIVE_INSTALL_ARG" ] && [ -n "$RUN_IDENTITY_ARG" ]; then
+        HAVE_DEPLOYMENT=1
+    fi
+    cases=$((cases + 1))
+    pass "step3/host/deployment-supplied" \
+        "$( [ "$HAVE_DEPLOYMENT" -eq 1 ] && echo yes || echo no )"
+
+    if [ "$HAVE_DEPLOYMENT" -eq 1 ]; then
+        step3_runnable_suite
+        cross_check_capture
+    else
+        note "step3/host/why" \
+             "no deployed tree supplied, so this host answers nothing about a real archive"
+        step_capture_substitution || HOSTGATE_UNANSWERED=1
+    fi
+else
+    # The host gate for steps 0 to 2. Measured, never assumed: the probe creates
+    # a symlink and reads it back, so a host whose `ln -s` silently copies is
+    # caught as surely as one that refuses outright.
     section "step 0 host gate: can this host reproduce the symlink surgery"
 
     HOST_CAN_SYMLINK=0
@@ -1238,17 +1502,7 @@ if [ "$STEP" -eq 0 ] || [ "$STEP" -eq 1 ] || [ "$STEP" -eq 2 ]; then
             1) step1_runnable_suite ;;
             2) step2_runnable_suite ;;
         esac
-        # A capture supplied on a capable host is still checked, so the two can
-        # never drift apart unnoticed.
-        if [ -n "$CAPTURE_ARG" ]; then
-            section "step 0 retained capture, cross-checked on a capable host"
-            assert_capture_identity "step0/capture/names-this-harness" "$CAPTURE_ARG"
-            control "step0/control/stale-capture-refused" "CAPTUREID" ctl_stale_capture
-            assert_all_subjects "$CAPTURE_ARG" "step0/capture/subject"
-            control "step0/control/broken-wrapper-refused" "SUBJECTID" ctl_subject_wrapper
-            control "step0/control/mismatched-setenv-refused" "SUBJECTID" ctl_subject_setenv
-            control "step0/control/mismatched-retained-refused" "SUBJECTID" ctl_subject_retained
-        fi
+        cross_check_capture
     else
         note "step0/host/why" "no symlink support, so the surgery this step measures is not reproducible here"
         step_capture_substitution || HOSTGATE_UNANSWERED=1
@@ -1262,6 +1516,8 @@ printf '  failures    %s\n' "$failures"
 printf '  wrapper     %s\n' "$WRAPPER"
 printf '  setenv      %s\n' "$SETENV"
 printf '  retained    %s\n' "$RETAINED"
+[ -n "$DEPLOYMENT_ARG" ] && printf '  deployment  %s\n' "$DEPLOYMENT_ARG"
+[ -n "$RUN_IDENTITY_ARG" ] && printf '  run-identity %s\n' "$RUN_IDENTITY_ARG"
 printf '  harness     %s\n' "$HARNESS_SHA256"
 printf '  wrapper-sha  %s\n' "$WRAPPER_SHA256"
 printf '  setenv-sha   %s\n' "$SETENV_SHA256"
@@ -1279,9 +1535,16 @@ if [ "$failures" -ne 0 ]; then
 fi
 if [ "$HOSTGATE_UNANSWERED" -ne 0 ]; then
     printf '\nOBJECTIVE NOT ANSWERABLE HERE for step %s\n' "$STEP"
-    printf 'This host cannot create a symlink, so the surgery this step measures\n'
-    printf 'is not reproducible on it. Re-run on a POSIX host, or pass the\n'
-    printf 'retained measurement with --capture <path>.\n'
+    if [ "$STEP" -eq 3 ]; then
+        printf 'No deployed archive tree was supplied, so the real-interpreter\n'
+        printf 'calls this step measures are not reproducible here. Re-run on the\n'
+        printf 'RHEL target with the step 3 deployment arguments, or pass the\n'
+        printf 'retained measurement with --capture <path>.\n'
+    else
+        printf 'This host cannot create a symlink, so the surgery this step measures\n'
+        printf 'is not reproducible on it. Re-run on a POSIX host, or pass the\n'
+        printf 'retained measurement with --capture <path>.\n'
+    fi
     exit 4
 fi
 if [ -n "$UNANSWERED" ]; then
