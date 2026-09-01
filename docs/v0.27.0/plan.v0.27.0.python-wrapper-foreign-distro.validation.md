@@ -7,7 +7,8 @@ This document tracks the implementation of
 six steps that scope the shipped search path to the interpreter and make the
 wrapper fail closed on an unusable helper result. Steps 0 through 3 are
 complete, each with retained evidence that the resolved validation set reads on
-both hosts; steps 4 and 5 have not started.
+both hosts. Step 4 is now split: the freeze is complete, and step 4B, the
+manifest and the handoff, and step 5 have not started.
 
 > Skeleton note: every per-step section other than `Goal` carries the literal
 > placeholder `_(empty -- no check has taken place yet.)_.` until an
@@ -648,7 +649,7 @@ No, there is no unit-tested class below 100 percent that needs completing.
 No existing feature is impaired, and the runs say so rather than the reasoning.
 The legitimate first call still ends 0, still performs the whole surgery, still
 leaves `python3` relinked to the wrapper, still calls the interpreter once, and
-still produces no `current/bin/_bin`. The already-surgered second call and the
+still produces no `current/bin/_bin`. The already-converted second call and the
 `-m venv` call are both accepted before their own sites are injected, so a guard
 that refused a good read would fail those cases rather than pass the failure
 ones.
@@ -837,36 +838,151 @@ belongs to step 5 on Debian, with its reverted-fix control in the same build.
 
 No, no feature-integrity evidence is still owed for Step 3.
 
-## Step 4. Freeze, publish identity, land the handoff
+## Step 4. Freeze the harness
 
 ### Analysis of Step 4 implementation state
 
-_(empty -- no check has taken place yet.)_.
+Yes. Step 4 has been fully implemented.
+
+`docs/v0.27.0/verify.wrapper-scope.sh` is final at `fab864ee`, steps 0 to 3 all
+report `OBJECTIVE MET` against those exact bytes on RHEL 9.8, and all four
+retained captures were retaken from them and name that digest. The four
+plan-owned capture commands are green on the reviewing Windows host, with
+`lint_shell.sh` clean over 44 tracked scripts and `shellcheck` reporting no
+finding.
+
+This sub-step exists because its own code review refused step 4 as one unit. The
+manifest names the commit that froze the harness, and a commit id cannot be
+written into a file that commit contains, so the freeze must be committed before
+the manifest can be generated. The plan now carries that as two ordered
+sub-steps and this is the first.
 
 ### Goal for Step 4
 
-Freeze the harness, publish its identity, carry both across the repository
-boundary, and obtain one build capture, so that step 5 consumes only artifacts
-that already exist.
-
-The completion conditions are named here rather than left to be recovered from
-the plan prose:
-
-- the harness is FINAL and committed, and steps 0 to 3 passed against those
-  bytes. No later step edits it;
-- the manifest is generated from the frozen bytes in a commit AFTER the freeze,
-  naming `freeze_commit`, `harness_path` and `file_sha256` over the file bytes
-  at that path. It never
-  names its own commit, which is impossible;
-- the pipeline harness copy, manifest copy and `wrapperScope()` probe land at
-  the exact paths the plan names;
-- one build has produced the capture, and a deliberately mismatched copy is
-  shown to FAIL the probe, so the unpaired-edit gate is demonstrated rather than
-  asserted.
+Make the harness bytes final, prove steps 0 to 3 pass against exactly those
+bytes, and land them in one commit that step 4B's manifest can name.
 
 ### What was implemented for Step 4
 
-_(empty -- no check has taken place yet.)_.
+The freeze, and the wording repair folded into it because a freeze is the last
+moment the harness can be edited at all.
+
+Two things changed in the harness since step 3, and nothing else:
+
+- the coined word `surgered` became `converted`, in four places, three comments
+  and one section title. It was never an English word: the plan's metaphor for
+  the wrapper's first-call work is SURGERY, a real noun the harness still uses
+  nine times, and an earlier session turned it into a verb that does not exist.
+  The consequence was not cosmetic. A spell-corrector kept rewriting
+  `already-surgered` to `already-surged`, the nearest real word, twice during
+  the step 3 exchange and once after a reviewer had already assessed the
+  corrected text. Left alone it would have been committed, because every commit
+  group stages with `git add -A`. `converted` is the design document's own term
+  for the same state, at its lines 116 and 171;
+- the same rename in the step 1 capture header and in this document's step 2
+  section, so no retained text carries the invented word either.
+
+ALL FOUR CAPTURES WERE RETAKEN from the frozen bytes in one session on RHEL 9.8:
+34, 50, 53 and 40 cases, 0 failures each. The step 3 retake cost a second
+deployment of the published archive, 1.9 GB under a throwaway prefix, because
+the previous run's prefix had already been removed and a capture cannot be
+stitched from two runs; its `post-run cleanup` transcript was retaken with it
+under run identity `rhel-wrapper-20260901T145429Z`.
+
+Criterion by criterion:
+
+- the harness is final and steps 0 to 3 passed against these bytes: all four
+  suites report `OBJECTIVE MET` on RHEL against `fab864ee`, and the commit half
+  is what the review gate authorizes;
+- every retained capture names the frozen digest: all four verdict blocks carry
+  `harness fab864ee`, and the four capture commands re-assert it from the
+  reviewing host, which is the identity binding doing its job;
+- the freeze commit is the one step 4B's manifest names: recorded in the commit
+  plan, whose group 2 is the freeze and whose id becomes `freeze_commit`.
+
+THE HARNESS IS NOW FROZEN. No later step may edit it: step 5 reads it, and a
+step 5 that changed it would invalidate the identity step 4B publishes.
+
+### Architecture check for Step 4
+
+This sub-step changes no shipped file and adds no file to this repository. The
+harness keeps the shape step 3 gave it, two host gates and one capture
+cross-check; this change renames a word in it and nothing else. The captures
+stay under `docs/v0.27.0/` and are never packaged. The DDD-Hexagonal criterion
+does not apply to a Bash and Batch project.
+
+No, there is nothing that needs to be addressed.
+
+### Performance check for Step 4
+
+Nothing was added. The rename touches four comment and title sites; the captures
+are the same runs over the same fixtures and the same deployment recipe, and
+their case counts are unchanged at 34, 50, 53 and 40.
+
+No, there is no performance issue that needs to be addressed.
+
+### Unit test coverage check for Step 4
+
+The 100 percent unit rule targets `src\pdfss\tests\unit`, which belongs to the
+consuming project; cplx has no pytest suite and no unit-tested class file, so
+there is no percentage to report and no legacy unit test is impacted. The
+project default `ghog day` reports that same absence: `ghog check` green, then
+`ghog affected --no-cov` at exit 5 on `pytest not found on PATH`. The substituted
+gate is `bash src/utils/lint_shell.sh`, green over 44 tracked scripts, plus
+`shellcheck` with no finding.
+
+No, there is no unit-tested class below 100 percent that needs completing.
+
+### Feature integrity for Step 4
+
+No behaviour changed, and the runs say so rather than the reasoning: all four
+suites report the same case counts and the same zero failures as the runs step 3
+published. That is the evidence a rename of comment text changed nothing
+measurable.
+
+No, no feature-integrity evidence is still owed for Step 4.
+
+## Step 4B. Publish the identity and land the handoff
+
+### Analysis of Step 4B implementation state
+
+No. Step 4B has NOT been fully implemented.
+
+Nothing in it has started, and none of it can start before the step 4 freeze
+commit exists: the manifest names that commit, the pipeline copies carry the
+manifest, and the build reads both. It is recorded here so the effort's status
+is readable rather than implied by an absent section.
+
+### Goal for Step 4B
+
+Publish the frozen harness's identity, carry both across the repository
+boundary, and obtain one build capture, so that step 5 consumes only artifacts
+that already exist.
+
+### What was implemented for Step 4B
+
+_(empty -- no work has taken place yet.)_.
+
+### Missing work for Step 4B
+
+- Generate `docs/v0.27.0/verify.wrapper-scope.manifest.txt` from the frozen
+  bytes, in a commit AFTER the step 4 freeze commit, carrying `freeze_commit`
+  (that commit), `harness_path` (`docs/v0.27.0/verify.wrapper-scope.sh`) and
+  `file_sha256` (SHA-256 over the file bytes at that path, not a Git object id).
+  It is generated by command rather than hand-written, so the digest cannot
+  disagree with the file it describes.
+- Land the pipeline copies at the exact paths the plan names,
+  `tools/wrapper_scope_verify.verification-only.sh` and
+  `tools/wrapper_scope.manifest.verification-only.txt`, plus the
+  `wrapperScope()` probe in `ci/Jenkinsfile.diagnostics` called from
+  `verifyCplx()`. That is a commit and push in the pipeline repository, not a
+  change in this one.
+- Run one build and retain `a.evidence/verify-wrapper-scope.debian.txt`. The
+  Jenkins job is reachable again: build 130 reports SUCCESS, so the sealed-Vault
+  outage of 2026-08-29 no longer blocks this.
+- Demonstrate the unpaired-edit gate with a control: a deliberately mismatched
+  harness copy must FAIL the probe. Without it the gate is asserted rather than
+  shown.
 
 ## Step 5. Acceptance on the Debian agent
 
