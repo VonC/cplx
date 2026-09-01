@@ -89,13 +89,13 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-# Only steps 0 and 1 have case suites today. Accepting any other value would let
-# the verdict line report success for a step whose cases do not exist, which is a
-# vacuous pass at exactly the level later steps rely on. Extend this dispatch
-# and the suite together.
+# Only steps 0, 1 and 2 have case suites today. Accepting any other value would
+# let the verdict line report success for a step whose cases do not exist, which
+# is a vacuous pass at exactly the level later steps rely on. Extend this
+# dispatch and the suite together.
 case "$STEP" in
-    0|1) ;;
-    *) echo "unsupported --step $STEP: steps 0 and 1 have case suites today." >&2
+    0|1|2) ;;
+    *) echo "unsupported --step $STEP: steps 0, 1 and 2 have case suites today." >&2
        echo "Add its suite and extend this dispatch before requesting it." >&2
        exit 2 ;;
 esac
@@ -232,7 +232,7 @@ HELPERS=(readlink mv ln cp sed grep)
 WRAPPER_VOCABULARY="if then else elif fi for do done while case esac in
 function return exit break continue local export unset shift eval set
 echo printf source cd pwd read test true false declare typeset let
-dirname echo_dbg"
+dirname echo_dbg guarded_readlink"
 
 # Command-position words of the wrapper: the first token of a line, and any token
 # introduced by a pipe, a list operator, a command substitution or a `then`,
@@ -345,9 +345,12 @@ STUB_NAME="python3.13"
 # shellcheck disable=SC2016  # as in plant_shims: this writes the stub's source,
 # so its `$LD_LIBRARY_PATH`, `$*` and `$PWD` must survive unexpanded.
 plant_fixture() {
-    local env_dir="$1"
+    # The wrapper under the fixture is nameable, because step 2 plants the
+    # RETAINED pre-change copy to re-measure the mangling it produces before
+    # comparing the guarded wrapper against it.
+    local env_dir="$1" wrapper="${2:-$WRAPPER}"
     mkdir -p -- "$env_dir/bin" "$env_dir/current/bin"
-    cp -- "$WRAPPER" "$env_dir/bin/python"
+    cp -- "$wrapper" "$env_dir/bin/python"
     cp -- "$SETENV" "$env_dir/bin/setenv"
     chmod +x "$env_dir/bin/python"
     ln -nfs "../current" "$env_dir/bin/current"
@@ -460,7 +463,7 @@ run_wrapper() {
 # since the `_bin_bin` fixup at line 101 is guarded by it. Drop any one and the
 # last post-source sites never execute.
 run_wrapper_venv() {
-    local env_dir="$1" log="$2"
+    local env_dir="$1" log="$2" fail_suffix="${3:-}"
     : > "$log"
     RUN_STATUS=0
     (
@@ -470,7 +473,7 @@ run_wrapper_venv() {
             HOME="$env_dir" \
             VIRTUAL_ENV="$env_dir/work/venv" \
             WRAPPER_SCOPE_LOG="$log" \
-            WRAPPER_SCOPE_FAIL_SUFFIX="" \
+            WRAPPER_SCOPE_FAIL_SUFFIX="$fail_suffix" \
             bash "$env_dir/bin/python" -m venv venv
     ) >>"$log.out" 2>&1 || RUN_STATUS=$?
     return 0
@@ -505,6 +508,40 @@ count_helpers_with_search_path() {
 # distinguished at the stub, because the difference between the last two is the
 # whole subject of decision W3.
 interpreter_saw() { grep "^interpreter	" "$1" | cut -f3; }
+
+# The exact argv of the injected failure, so a case can prove WHICH site was
+# failed rather than trusting that one was. Step 2 injects three sites in turn
+# and each run asserts its own.
+injected_argv() { grep "	injected-failure$" "$1" | cut -f2; }
+
+# The propagation oracle for step 2: mv, ln, cp and sed calls that appear AFTER
+# the injected failure in the log. Calls BEFORE it are legitimate work the run
+# had already done, so the count starts at the injection rather than at the top
+# of the log. A zero here is what proves the guard reached the wrapper, rather
+# than the word `exit` appearing in the source.
+mutations_after_injection() {
+    awk -F'\t' '
+        seen && ($1 == "mv" || $1 == "ln" || $1 == "cp" || $1 == "sed") { n++ }
+        $5 == "injected-failure" { seen = 1 }
+        END { print n + 0 }
+    ' "$1" 2>/dev/null
+}
+
+# The tree as a SHAPE: every path, every symlink target, every file size. It
+# deliberately ignores mtime, because the wrapper legitimately recreates an
+# identical `pip` symlink on a repeat call and a shape that changed by nothing
+# is not a modification. What step 2 must catch is a path that appeared,
+# vanished or started pointing somewhere else, which is exactly the mangling
+# step 0 run B recorded.
+tree_snapshot() {
+    ( cd "$1" 2>/dev/null || return 0
+      find . | sort | while IFS= read -r p; do
+          if [ -L "$p" ]; then printf '%s -> %s\n' "$p" "$(readlink "$p")"
+          elif [ -d "$p" ]; then printf '%s/\n' "$p"
+          else printf '%s %s\n' "$p" "$(wc -c < "$p" | tr -d ' ')"
+          fi
+      done )
+}
 
 # ------------------------------------------------------------------- step 0 ---
 # Capture what the wrapper does today, before it changes, so every later claim
@@ -847,6 +884,173 @@ step1_runnable_suite() {
     note "step1/wrapper-lines" "$(wc -l < "$WRAPPER" | tr -d ' ')"
 }
 
+# ------------------------------------------------------------------ step 2 ---
+# Fail closed on an unusable helper result. Step 0 run B recorded what the
+# pre-change wrapper does when a read returns nothing: the tree is mangled, the
+# interpreter never runs, and the exit status says SUCCESS. Step 2 turns each of
+# the three read sites into a checked call, and what it has to prove is that the
+# stop REACHES THE WRAPPER. That is a different claim from a guard existing in
+# the source, because each site is a command substitution and an `exit` inside
+# one ends only its own subshell.
+
+# One guarded site, measured the same way three times: inject at that site, then
+# assert the stop, the message, the absence of any later mutation, and an
+# unchanged tree. The snapshot is taken BEFORE the run and compared after, which
+# is what answers "the tree is unmodified"; the log count answers the different
+# question of whether anything ran after the failure.
+step2_guarded_site() {
+    local label="$1" site="$2" suffix="$3" env_dir="$4" log="$5" kind="$6"
+    local before after
+    before=$(tree_snapshot "$env_dir")
+    if [ "$kind" = venv ]; then
+        run_wrapper_venv "$env_dir" "$log" "$suffix"
+    else
+        run_wrapper "$env_dir" "$log" "$suffix"
+    fi
+    after=$(tree_snapshot "$env_dir")
+
+    # PRESENT FIRST, here too: a run whose injection never fired would satisfy
+    # every assertion below by having stopped nothing.
+    chk "step2/$label/injection-observed" "1" \
+        "$(grep -c "	injected-failure$" "$log" 2>/dev/null || true)"
+    chk "step2/$label/injected-call-is-this-site" "yes" \
+        "$(case "$(injected_argv "$log")" in *"$suffix") echo yes ;; *) echo no ;; esac)"
+    chk "step2/$label/exit-status-non-zero" "yes" \
+        "$( [ "$RUN_STATUS" -ne 0 ] && echo yes || echo no )"
+    # The message is asserted with the SITE LABEL and the PATH in it, not merely
+    # as non-empty output: a guard naming the wrong site would be no help to the
+    # person reading the failure.
+    chk "step2/$label/message-names-helper-site-and-path" "yes" \
+        "$(grep -q "readlink failed at $site: '.*$suffix'" "$log.out" && echo yes || echo no)"
+    chk "step2/$label/no-mutation-after-injection" "0" \
+        "$(mutations_after_injection "$log")"
+    chk "step2/$label/tree-unmodified" "yes" \
+        "$( [ "$before" = "$after" ] && echo yes || echo no )"
+}
+
+step2_runnable_suite() {
+    section "step 2 structure: one shared guard, three checked calls"
+
+    # Source-level for the reason step 1's four are: no run can tell one shared
+    # guard from three inline ones that happen to agree, and the plan budgets a
+    # SHARED helper precisely because per-site guards drift apart.
+    chk "step2/source/guard-definitions" "1" \
+        "$(grep -c '^guarded_readlink() {$' "$WRAPPER" || true)"
+    chk "step2/source/checked-calls" "3" \
+        "$(sed -e 's/#.*$//' "$WRAPPER" | grep -c 'guarded_readlink ' || true)"
+    # TWO unguarded CALLS remain by design: the bootstrap `readlink -f` at line
+    # 12, which decision P6 keeps delegated, and the one inside the guard
+    # itself. A third would be a site left unchecked. The pattern anchors on the
+    # substitution form because every read in this wrapper is captured, and
+    # because the guard's own message names the helper in TEXT, which is not a
+    # call and must not be counted as one.
+    # shellcheck disable=SC2016  # `$(readlink ` is the literal call form counted here.
+    chk "step2/source/unguarded-readlink-calls" "2" \
+        "$(sed -e 's/#.*$//' "$WRAPPER" | grep -cF '$(readlink ' || true)"
+
+    section "step 2 the baseline: the same failure against the pre-change wrapper"
+
+    # THE COMPARISON IS AGAINST STEP 0 RUN B, re-measured here rather than
+    # quoted, and its artifact is the retained pre-change wrapper. When that
+    # artifact is absent the suite FAILS: a step 2 that quietly skipped the
+    # comparison would report the guard working with nothing to have changed
+    # from, which is the shape this whole umbrella exists to refuse.
+    chk "step2/baseline/retained-present" "yes" \
+        "$( [ -f "$RETAINED" ] && echo yes || echo no )"
+    chk "step2/baseline/retained-is-the-step0-subject" \
+        "88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706" \
+        "$RETAINED_SHA256"
+    [ -f "$RETAINED" ] || return 1
+
+    plant_shims
+
+    local base_dir="$SCRATCH/run2-baseline" base_log="$SCRATCH/run2-baseline.log"
+    plant_fixture "$base_dir" "$RETAINED"
+    assert_fixture "step2/baseline/fixture" "$base_dir" || return 1
+    run_wrapper "$base_dir" "$base_log" "current/bin/python3"
+
+    chk "step2/baseline/injection-observed" "1" \
+        "$(grep -c "	injected-failure$" "$base_log" 2>/dev/null || true)"
+    chk "step2/baseline/exit-status-is-a-silent-zero" "0" "$RUN_STATUS"
+    chk "step2/baseline/python3_target-derived-from-empty" "_bin" \
+        "$(readlink "$base_dir/current/bin/python3_target" 2>/dev/null || echo MISSING)"
+    chk "step2/baseline/interpreter-never-reached" "0" \
+        "$(count_calls "$base_log" interpreter)"
+    # A baseline of zero mutations would make every guarded case below pass by
+    # measuring a difference that was never there, so the presence is asserted.
+    local baseline_mutations
+    baseline_mutations=$(mutations_after_injection "$base_log")
+    chk "step2/baseline/mutations-after-injection-present" "yes" \
+        "$( [ "$baseline_mutations" -gt 0 ] && echo yes || echo no )"
+    note "step2/baseline/mutations" \
+        "$baseline_mutations mv/ln/cp/sed calls followed the failed readlink"
+
+    section "step 2 site 1: the relink read, on a fresh tree"
+
+    local s1_dir="$SCRATCH/run2-site1" s1_log="$SCRATCH/run2-site1.log"
+    plant_fixture "$s1_dir"
+    assert_fixture "step2/site1/fixture" "$s1_dir" || return 1
+    step2_guarded_site site1 relink-read "current/bin/python3" \
+        "$s1_dir" "$s1_log" plain
+
+    section "step 2 site 2: the target read, on an already-surgered tree"
+
+    local s2_dir="$SCRATCH/run2-site2" s2_log="$SCRATCH/run2-site2.log"
+    plant_fixture "$s2_dir"
+    assert_fixture "step2/site2/fixture" "$s2_dir" || return 1
+    # The else arm is reachable only once the tree HAS been surgered, so this
+    # first call is a legitimate one and is asserted as such. It is also the
+    # nearest control to hand: a guard that refused a good read would fail here
+    # rather than pass every failure case below.
+    run_wrapper "$s2_dir" "$SCRATCH/run2-site2-clean.log"
+    chk "step2/site2/first-call-accepted" "0" "$RUN_STATUS"
+    chk "step2/site2/first-call-relinked" "../../bin/python" \
+        "$(readlink "$s2_dir/current/bin/python3")"
+    step2_guarded_site site2 target-read "current/bin/python3_target" \
+        "$s2_dir" "$s2_log" plain
+
+    section "step 2 site 3: the venv read, after the interpreter has run"
+
+    local s3_dir="$SCRATCH/run2-site3" s3_log="$SCRATCH/run2-site3.log"
+    plant_fixture "$s3_dir"
+    plant_venv_target "$s3_dir"
+    assert_fixture "step2/site3/fixture" "$s3_dir" || return 1
+    assert_venv_target "step2/site3/target" "$s3_dir" || return 1
+    # As for site 2: the venv read is reached only after a run has surgered the
+    # tree, so the first call is legitimate and asserted.
+    run_wrapper_venv "$s3_dir" "$SCRATCH/run2-site3-clean.log"
+    chk "step2/site3/first-call-accepted" "0" "$RUN_STATUS"
+    step2_guarded_site site3 venv-read "venv/bin/python3" \
+        "$s3_dir" "$s3_log" venv
+
+    section "step 2 the legitimate run, which must still be accepted"
+
+    # Without this a wrapper that refused EVERYTHING would satisfy all three
+    # failure cases above. The guard has to stop an unusable result and nothing
+    # else, so the unplanted run is asserted to still do the whole surgery.
+    local ok_dir="$SCRATCH/run2-ok" ok_log="$SCRATCH/run2-ok.log"
+    plant_fixture "$ok_dir"
+    assert_fixture "step2/legitimate/fixture" "$ok_dir" || return 1
+    run_wrapper "$ok_dir" "$ok_log"
+    chk "step2/legitimate/exit-status" "0" "$RUN_STATUS"
+    chk "step2/legitimate/no-injection" "0" \
+        "$(grep -c "	injected-failure$" "$ok_log" 2>/dev/null || true)"
+    chk "step2/legitimate/surgery-performed" "../../bin/python" \
+        "$(readlink "$ok_dir/current/bin/python3")"
+    chk "step2/legitimate/interpreter-called" "1" \
+        "$(count_calls "$ok_log" interpreter)"
+    chk "step2/legitimate/no-empty-derived-path" "no" \
+        "$( [ -e "$ok_dir/current/bin/_bin" ] && echo yes || echo no )"
+
+    section "step 2 identities: what this step asserts rather than assumes"
+
+    chk "step2/setenv-unchanged-since-step0" \
+        "355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d" \
+        "$SETENV_SHA256"
+    note "step2/wrapper-sha256" "$WRAPPER_SHA256"
+    note "step2/wrapper-lines" "$(wc -l < "$WRAPPER" | tr -d ' ')"
+}
+
 # THE IDENTITY CHECK, and the only reason the substitution is worth having. The
 # reason prefix is CAPTUREID so the control below can demand that exact refusal
 # rather than any failure at all.
@@ -995,7 +1199,7 @@ step_capture_substitution() {
     return 0
 }
 
-if [ "$STEP" -eq 0 ] || [ "$STEP" -eq 1 ]; then
+if [ "$STEP" -eq 0 ] || [ "$STEP" -eq 1 ] || [ "$STEP" -eq 2 ]; then
     # THE SHIM COVERAGE CASE, made executable. It reads the wrapper's source,
     # which every other case refuses to do, and that is correct here: the
     # question is which command names the file CONTAINS, not what one run
@@ -1032,6 +1236,7 @@ if [ "$STEP" -eq 0 ] || [ "$STEP" -eq 1 ]; then
         case "$STEP" in
             0) step0_runnable_suite ;;
             1) step1_runnable_suite ;;
+            2) step2_runnable_suite ;;
         esac
         # A capture supplied on a capable host is still checked, so the two can
         # never drift apart unnoticed.
