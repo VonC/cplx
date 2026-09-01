@@ -23,7 +23,7 @@ new module, no new tool, and no change to any shipped file outside the wrapper.
 - `docs/v0.27.0/verify.wrapper-scope.sh`: new, the verification harness.
 - `docs/v0.27.0/wrapper.pre-change.verification-only`: new, the retained
   pre-change wrapper the step 5 control runs. Never shipped, never packaged.
-- `docs/v0.27.0/verify.wrapper-scope.manifest.txt`: new, step 4B's output,
+- `docs/v0.27.0/verify.wrapper-scope.manifest.txt`: new, step 4b's output,
   generated from the FROZEN harness bytes and written in a commit AFTER the
   freeze, naming `freeze_commit`, `harness_path` and `file_sha256` over the
   file bytes at that path.
@@ -163,7 +163,7 @@ therefore:
 
 ## The cross-repository handoff
 
-Step 4B runs on the Debian CI agent, which builds the pipeline repository and has
+Step 4b runs on the Debian CI agent, which builds the pipeline repository and has
 no credentials for this one. The harness therefore has to travel, and this plan
 names the exact artifacts rather than leaving them implied.
 
@@ -350,7 +350,7 @@ measures is worthless.
   log so a later step can prove which site was failed;
 - the pre-change wrapper is retained as
   `docs/v0.27.0/wrapper.pre-change.verification-only` with its SHA-256 recorded
-  in the capture, since step 4B needs those bytes on a host with no cplx history;
+  in the capture, since step 4b needs those bytes on a host with no cplx history;
 - a control proves the fixture is real: an unplanted fixture FAILS the suite, so
   a later green cannot come from a tree that was never built;
 - a control proves RUN B is real: if the injected failure did not appear in the
@@ -462,7 +462,7 @@ criteria require the manifest, the pipeline copies, the build and the control in
 addition to the freeze, and a `No` verdict cannot serve as a partial-landing
 authorization. So the step is split into two separately reviewable ordered
 units. The split changes no criterion: every condition step 4 carried is still
-carried, by the freeze or by step 4B.
+carried, by the freeze or by step 4b.
 
 THE FREEZE KEEPS THE BARE `Step 4` NUMBER, and a reader expecting a `4A` should
 know why rather than wonder. The split was decided while a code review of step 4
@@ -470,7 +470,14 @@ was already open, and a review exchange pins its implementation step for the
 life of the exchange: renaming the unit under review to `4A` makes every later
 operation report `inconsistent` against the record it opened with. So the unit
 already under review keeps its identity and its ordered continuation is
-`Step 4B`. Nothing about the ordering or the criteria depends on the label.
+`Step 4b`. Nothing about the ordering or the criteria depends on the label.
+
+AND THE CONTINUATION IS LOWERCASE, `4b` rather than `4B`, for a reason that is
+also the protocol's rather than a preference. A review transcript entry is
+identified as `request-step-<step>-round-<n>` and validated against a lowercase
+pattern, so an uppercase sub-step cannot be published at all: the round opens
+and every publication into it is refused. This effort found that by hitting it.
+The label a step carries here is the label its review can carry.
 
 ### Step 4 files involved
 
@@ -486,19 +493,19 @@ bytes would freeze a harness no retained measurement describes.
 ### Step 4 goal
 
 Make the harness bytes final, prove steps 0 to 3 pass against exactly those
-bytes, and land them in ONE commit that step 4B's manifest can name.
+bytes, and land them in ONE commit that step 4b's manifest can name.
 
 ### Step 4 completion criteria
 
 - THE FREEZE: `verify.wrapper-scope.sh` is final and committed. Steps 0 to 3
   have passed against these bytes, and no later step edits them. A step 5 that
-  had to change the harness would invalidate the identity step 4B publishes;
+  had to change the harness would invalidate the identity step 4b publishes;
 - every retained capture names the frozen digest, so the instrument the
   captures describe is the instrument a reader runs;
 - the freeze commit contains the harness at `docs/v0.27.0/verify.wrapper-scope.sh`
-  and is the commit step 4B's manifest names as `freeze_commit`.
+  and is the commit step 4b's manifest names as `freeze_commit`.
 
-### Step 4B files involved
+### Step 4b files involved
 
 - `docs/v0.27.0/verify.wrapper-scope.manifest.txt` (new, this sub-step's OUTPUT,
   written in a LATER commit than the step 4 freeze)
@@ -508,14 +515,14 @@ Landed by this sub-step in the pipeline repository, by the cplx maintainer:
 `tools/wrapper_scope.manifest.verification-only.txt`, and the `wrapperScope()`
 probe in `ci/Jenkinsfile.diagnostics`.
 
-### Step 4B goal
+### Step 4b goal
 
 Publish the frozen harness's identity, carry both across the repository
 boundary, and obtain one build capture. This sub-step exists because step 5
 cannot both produce and consume the manifest, and because a manifest cannot name
 the commit that contains it. Everything step 5 needs is an OUTPUT of it.
 
-### Step 4B completion criteria
+### Step 4b completion criteria
 
 - THE MANIFEST, written in a commit AFTER the step 4 freeze commit, naming that
   commit as `freeze_commit`, plus `harness_path` and `file_sha256` over the file
@@ -533,7 +540,7 @@ the commit that contains it. Everything step 5 needs is an OUTPUT of it.
 ### Step 5 files involved
 
 - `docs/v0.27.0/verify.wrapper-scope.sh` (existing, READ ONLY at this point)
-- `docs/v0.27.0/verify.wrapper-scope.manifest.txt` (existing, step 4B's output)
+- `docs/v0.27.0/verify.wrapper-scope.manifest.txt` (existing, step 4b's output)
 - `docs/v0.27.0/wrapper.pre-change.verification-only` (existing, the control)
 - `docs/v0.27.0/verify.wrapper.debian.txt` (new, retained evidence)
 
@@ -567,7 +574,7 @@ the acceptance. It consumes step 4's outputs and produces none of them.
   accepted as evidence. This is the half a paired pipeline edit cannot restate,
   and it is why the manifest is worth having;
 - THIS STEP DOES NOT MODIFY THE HARNESS. A change here would break the identity
-  step 4B published, and the suite treats a harness whose digest no longer
+  step 4b published, and the suite treats a harness whose digest no longer
   matches the manifest as a failure rather than as a new baseline;
 - the capture names the run identity, the agent image, its glibc version and the
   commit, and cites that identity in its evidence rather than only in its
@@ -577,7 +584,7 @@ the acceptance. It consumes step 4's outputs and produces none of them.
 
 ### Step 5 what remains OWED after it
 
-ONE thing. The pipeline landing is NOT here: it is step 4B's work, and an
+ONE thing. The pipeline landing is NOT here: it is step 4b's work, and an
 obligation met before a step can run is not one that survives it.
 
 1. The same first call over the archive umbrella item 7 REBUILDS. Step 5 runs
@@ -598,7 +605,7 @@ this table replaced them.
 | --- | --- | --- | --- |
 | Q01 | Step 0 runs the unmodified wrapper TWICE, clean and with a path-selective failing `readlink`, and step 2 compares against RUN B by name | "Step 0 goal", "Step 0 completion criteria", "Step 2 completion criteria" | A2, planting the failure at step 2 against a retained copy whose provenance is unchecked at that point; A3, dropping the comparison, which removes the only evidence the change did anything |
 | Q02 | The step 5 control is a retained pre-change wrapper bound to a named cplx commit and path with a verified `file_sha256`, run in its own extracted tree | "Step 5 completion criteria", decision P7 | B1, reconstructing the pre-change wrapper, whose failure is indistinguishable from the defect it should show; B3, checking out the parent commit on the agent, which holds no cplx history |
-| Q03 | The harness travels to the Debian agent as a verification-only copy plus a `wrapperScope()` probe, at named paths, landed by the cplx maintainer | "The cross-repository handoff", "Step 4B files involved" | C2, fetching from cplx at build time, which needs credentials this requirement is not granting; C3, folding the checks into the relocation script, which couples two requirements and edits another's merged artifact |
+| Q03 | The harness travels to the Debian agent as a verification-only copy plus a `wrapperScope()` probe, at named paths, landed by the cplx maintainer | "The cross-repository handoff", "Step 4b files involved" | C2, fetching from cplx at build time, which needs credentials this requirement is not granting; C3, folding the checks into the relocation script, which couples two requirements and edits another's merged artifact |
 | Q04 | Recording `PATH` shims log every helper call with its inherited environment, expected calls asserted PRESENT before absence is concluded, scoped to the fourteen POST-SOURCE helpers | "The recording shim contract", "Step 1 completion criteria", decisions P4, P5, P6, P9 | D2, probe lines in a wrapper copy, which measures a modified source; D3, `strace`, unavailable on an image already missing rsync and procps |
 | Q05 | A recording shell stub for steps 0 to 2, the real archive interpreter for steps 3 and 5 | "The fixture contract", decisions P1, P3 | E2, the real interpreter everywhere, which costs portability; E3, a stub everywhere, which never creates a venv so the third guarded site never executes |
 | Q06 | One shared `guarded_readlink SITE PATH`, non-zero on failed OR empty output, with explicit propagation at every caller and a harness assertion that no mutation follows an injected failure | "The checked-call contract for the guards", "Step 2 completion criteria", decision P8 | F2, an inline guard per site, whose drift the budget notices late and indirectly; F3, splitting the file, a structural change this requirement did not set out to make |
