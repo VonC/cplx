@@ -4921,3 +4921,760 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 4b
+
+- Recorded: 2026-09-01T21:15:33+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4b
+- Outcome: request
+
+### Review identity for step 4b python-wrapper-foreign-distro (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 4b
+Review round: 1
+
+### Code review evidence for step 4b python-wrapper-foreign-distro (round 1)
+
+request_index_tree: 651d6211bfdbb312cf597e2eb8e385aca190e945
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(wrapper): publish the frozen harness identity
+group 1 path: docs/v0.27.0/verify.wrapper-scope.manifest.txt
+group 2: docs(python-wrapper-foreign-distro): record step 4B validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/verify.wrapper-scope.manifest.txt
+```
+
+### Requestor assessment for step 4b python-wrapper-foreign-distro (round 1)
+
+#### Assessment for step 4b python-wrapper-foreign-distro (round 1)
+
+Step 4B is fully implemented. The manifest is generated from the frozen bytes
+and names the freeze commit; the two copies and the `wrapperScope()` probe are
+landed at the exact paths the plan gives; build 131 ran them and retained the
+capture; and that capture shows the unpaired-edit gate refusing a deliberately
+mutated copy, which is the criterion that turns an asserted gate into a
+demonstrated one.
+
+Most of this step's evidence is in another repository by the plan's own handoff
+table, so the request quotes it rather than pointing at a build number.
+
+#### The manifest for step 4b python-wrapper-foreign-distro (round 1)
+
+`docs/v0.27.0/verify.wrapper-scope.manifest.txt`, three fields and nothing else:
+
+- `freeze_commit` `233b549d1bfa96b0e0e2cf7e9d31c996cf132389`;
+- `harness_path` `docs/v0.27.0/verify.wrapper-scope.sh`;
+- `file_sha256` `fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608`.
+
+GENERATED, not written: `git rev-parse` for the commit, and
+`git show <freeze-commit>:<harness-path> | sha256sum` for the digest, so it
+cannot disagree with the file it describes. Its header records that
+`file_sha256` is over the FILE BYTES rather than a Git blob object id, and why it
+names an earlier commit than its own.
+
+#### The pipeline landing for step 4b python-wrapper-foreign-distro (round 1)
+
+Two commits on `develop`, `1f2c934e` and `ba942700`, pushed as a clean
+fast-forward from `96c5799c`:
+
+- `tools/wrapper_scope_verify.verification-only.sh`, byte-identical to the
+  frozen harness, compared with `sha256sum` rather than by date;
+- `tools/wrapper_scope.manifest.verification-only.txt`, byte-identical to the
+  manifest;
+- `wrapperScope()` in `ci/Jenkinsfile.diagnostics`, called from the
+  `verifyCplx()` parallel and listed in the probe index at the top of the file.
+
+Both commits went through the pipeline repository's own approved entry point,
+`a.commit` then `wac.bat` then `gcba.bat --root-a-commit`, rather than by hand,
+which is that repository's stated rule.
+
+#### The build and its capture for step 4b python-wrapper-foreign-distro (round 1)
+
+Build 131, SUCCESS, 17 minutes. The push did not start it: that job's
+multibranch webhook has been unreliable, so the build was started with a direct
+POST after checking `lastBuild` once, which is the recorded procedure.
+
+```text
+distribution    debian 12
+glibc           ldd (Debian GLIBC 2.36-9+deb12u10) 2.36
+bash            5.2.15(1)-release
+  freeze_commit 233b549d1bfa96b0e0e2cf7e9d31c996cf132389
+  file_sha256   fab864ee...
+  local copy    fab864ee...
+  gate/local-copy-matches-manifest        PASS
+  control/mutated-copy-refused            PASS mutated copy is [8d51d40d8f3a...]
+  harness/runs-here                       PASS
+TRANSPORT VERIFIED
+```
+
+The control is the line that matters most: the gate was run against a copy with
+one line appended and refused it, on the agent, in the same build. A gate nobody
+has seen fail is a gate nobody has seen.
+
+#### Static check evidence for step 4b python-wrapper-foreign-distro (round 1)
+
+`bash src/utils/lint_shell.sh`: clean over 44 tracked scripts.
+`shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`:
+no finding. The probe's own script was extracted from its Groovy string and
+checked with `bash -n` and `shellcheck` BEFORE the push, which is the only lint
+a script embedded in a Jenkinsfile gets: the pipeline's shellcheck branch reads
+the `tools/*.sh` copies, not the pipeline file.
+
+`bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture ...` re-run on this
+host: `OBJECTIVE MET`, which is the check that the frozen harness and its
+captures still agree after this step touched neither.
+
+#### Coverage evidence for step 4b python-wrapper-foreign-distro (round 1)
+
+The project default `ghog day` runs `ghog check` green, then `ghog affected
+--no-cov` stops at exit 5 on `pytest not found on PATH`. cplx has no
+`pyproject.toml`, no tests directory and no pytest suite, so there is no
+percentage to report; that is the project's standing state and not a finding
+about this change.
+
+#### Architecture evidence for step 4b python-wrapper-foreign-distro (round 1)
+
+No shipped file changes and the harness is untouched, which is what the freeze
+was for: a step 4B that edited it would invalidate the identity it publishes.
+The pipeline change adds a probe to a file whose own header declares it owned by
+the cplx maintainer, plus two `verification-only` files that are never delivered
+and never packaged. No reviewed pipeline stage changed.
+
+The authority for the identity is deliberately not this manifest: the pipeline
+catches the unpaired edit, and the paired-edit case is answered here, by an
+independent comparison in a repository the pipeline cannot reach. That check
+belongs to step 5.
+
+#### Performance evidence for step 4b python-wrapper-foreign-distro (round 1)
+
+The probe hashes two files, writes and hashes one scratch copy, and runs the
+harness's `--help`. It runs inside the existing parallel rather than adding a
+stage, and nothing in it grows with the size of the archive or the tree.
+
+#### Feature integrity evidence for step 4b python-wrapper-foreign-distro (round 1)
+
+Build 131 returned SUCCESS with every other cplx probe reporting as before,
+which is the evidence that a new branch in the `verifyCplx()` parallel disturbed
+nothing. On this side the harness is byte-identical to the frozen copy and its
+step 3 command still reports `OBJECTIVE MET` against its capture.
+
+### Implementation report for step 4b python-wrapper-foreign-distro (round 1)
+
+#### What was implemented for step 4B for step 4b python-wrapper-foreign-distro (round 1)
+
+One file here, three in the pipeline repository, and one build.
+
+**The manifest.** `docs/v0.27.0/verify.wrapper-scope.manifest.txt`, carrying
+`freeze_commit`, `harness_path` and `file_sha256` and nothing else. It is
+generated by command rather than hand-written, from the bytes at
+`233b549d:docs/v0.27.0/verify.wrapper-scope.sh`, so the digest and the file it
+describes cannot disagree. Its header carries the two things a later reader
+would otherwise get wrong: that `file_sha256` is over the FILE BYTES rather than
+a Git blob object id, which is a different hash over different bytes, and that
+it names an earlier commit than its own because a commit identity is computed
+over its tree and the tree contains this file.
+
+**The pipeline copies**, byte-identical to their sources and compared with
+`sha256sum` rather than by date, which is that repository's own rule after a
+build once failed on a stale copy nobody had compared.
+
+**The probe.** `wrapperScope()` in `ci/Jenkinsfile.diagnostics`:
+
+- it hashes the local harness copy against the manifest copy and fails the
+  capture when they differ, which catches the unpaired edit;
+- it runs the SAME comparison against a copy with one line appended, and
+  requires the refusal. The mutated digest is printed beside the result, so the
+  refusal names what it refused rather than asserting one happened;
+- it checks the harness executes on the agent;
+- it reports and never gates, exit 0, like the probes beside it.
+
+The capture states what it is not, in the capture rather than in a commit
+message: the archive extracted on that agent carries the PRE-CHANGE wrapper, so
+this run makes no claim about the fix. The acceptance that tells a working fix
+from a plausible one is step 5, with its reverted-fix control in the same build.
+
+#### What was checked rather than assumed for step 4b python-wrapper-foreign-distro (round 1)
+
+- **The copies match their sources.** Both compared with `sha256sum` before the
+  commit, not by timestamp.
+- **The probe's script parses and lints.** It was extracted from its Groovy
+  string and run through `bash -n` and `shellcheck` before the push. A script
+  embedded in a Jenkinsfile gets no other lint: the pipeline's own shellcheck
+  branch reads the `tools/*.sh` copies, not the pipeline file. Both were clean
+  apart from the same SC1091 `/etc/os-release` info the cplx harness carries.
+- **The push targets the branch the job builds.** `origin` and `origin3` in that
+  repository point at different lineages, and only the second is what Jenkins
+  clones. `git rev-list --left-right --count origin3/develop...HEAD` reported
+  `0 2` before the push and `0 0` after, so it was a clean fast-forward of
+  exactly the two commits.
+- **The build had to be started by hand.** The push did not trigger it; that
+  job's multibranch webhook has been unreliable, and the recorded procedure is
+  to check `lastBuild` once and issue a direct POST with a crumb from the same
+  cookie jar. HTTP 201, and build 131 came up building.
+
+#### What this step did NOT do for step 4b python-wrapper-foreign-distro (round 1)
+
+It did not touch the harness. That is the point of the freeze: the manifest
+names those bytes, and an edit here would leave the manifest describing a file
+that no longer exists at that digest. The four retained captures still name
+`fab864ee`, and the step 3 command still reports `OBJECTIVE MET` against its
+capture on this host.
+
+It did not bring the Debian capture into this repository. The plan's handoff
+table puts `a.evidence/verify-wrapper-scope.debian.txt` in the pipeline
+repository per build, so the validation record quotes it instead. Step 5's
+capture, `verify.wrapper.debian.txt`, is the one that lands here.
+
+### Change summary for step 4b python-wrapper-foreign-distro (round 1)
+
+#### Staged paths for step 4b python-wrapper-foreign-distro (round 1)
+
+Index tree `651d6211bfdbb312cf597e2eb8e385aca190e945`, two staged paths:
+
+- `docs/v0.27.0/verify.wrapper-scope.manifest.txt` (new)
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+
+That is step 4B's whole footprint in this repository. Nothing under `src/`, and
+the harness is deliberately untouched: it is frozen, and the manifest names its
+bytes.
+
+The review transcript is not staged: it grows with every round of this exchange,
+so it belongs to the residual pass of an authorized commit rather than to a
+group fixed now.
+
+#### Changes in the other repository, already landed for step 4b python-wrapper-foreign-distro (round 1)
+
+Not staged here and not part of this commit plan, but part of what the review is
+asked to assess, since three of step 4B's four criteria live there:
+
+- `1f2c934e` `test(wrapper-scope): land the harness and manifest`
+- `ba942700` `test(wrapper-scope): probe transport and the edit gate`
+
+Pushed to `develop` as a clean fast-forward from `96c5799c`, through that
+repository's own approved entry point rather than by hand. Build 131 ran them
+and returned SUCCESS.
+
+#### Commit plan for step 4b python-wrapper-foreign-distro (round 1)
+
+`commit-plan-check --format json` reports `state: valid`, `ready: true`, no
+diagnostics, both staged paths covered exactly once by two groups in dependency
+order:
+
+1. `test(wrapper): publish the frozen harness identity`
+2. `docs(python-wrapper-foreign-distro): record step 4B validation`
+
+The manifest leads because the record describes it, and the validation record
+trails as the documentation group. Group 2 keeps the subject the workflow prompt
+required verbatim.
+
+### Writer response for step 4b python-wrapper-foreign-distro (round 1)
+
+Writer response: #### Response for the first round on step 4B for step 4b python-wrapper-foreign-distro (round 1)
+
+This is round 1 for step 4B, so there is no earlier answer on this sub-step to
+accept or dispute. Three things carried from the earlier exchanges are applied
+rather than rediscovered, and one thing about this step is genuinely different.
+
+**The step is complete before it is published.** Step 4 round 1 asked this
+review to treat a partial landing as committable and was refused, correctly. This
+request is published only now that all four of step 4B's criteria are answered,
+including the two that needed another repository and a build.
+
+**The request is published against the LIVE index**, `651d6211`, with the check
+run and its record staged first.
+
+**The evidence floor is stated as it is.** `ghog day` exits 5 on `pytest not
+found on PATH`, because cplx has no Python test suite at all. That is the
+project's standing state and it was equally true before this step.
+
+What is different: MOST OF THIS STEP'S EVIDENCE IS NOT IN THIS REPOSITORY. The
+plan's handoff table puts the harness copy, the manifest copy, the probe and the
+retained capture in the pipeline repository, so the assessment quotes the
+capture and names the two commits rather than staging them here. If the review
+would rather see the capture committed in cplx as well, that is a plan question
+rather than a repair: the table currently says it lives there per build, and
+step 5's capture is the one whose file list puts it here.
+
+One boundary worth naming, since it was crossed in this step and not in any
+earlier one. Landing the probe meant a commit and push to a shared repository
+and a CI build. I did not fold that into an authorized cplx commit and did not
+do it on my own judgment: it was put to the human as its own decision and done
+only after they authorized it.
+
+#### One protocol detail this round carries for step 4b python-wrapper-foreign-distro (round 1)
+
+The exchange identity for this sub-step is `4b`, lowercase, while the plan and
+the validation record call it `Step 4B`. The difference is not a slip.
+
+A transcript entry identifier is built as `request-step-<step>-round-<n>` and
+validated against `^[a-z0-9][a-z0-9._-]*$`, so an uppercase label makes
+`publish-request` fail with `invalid transcript entry identifier`. I learned that
+by starting a round under `4B` and being unable to publish into it, and the
+record had to be cleared by the human before this round could open, because no
+operation retires a live round: `cancel` requires a convergence gate,
+`complete --force` requires an abandoned shape, and `escalate` then `archive`
+produce a fresh active round under the same step.
+
+Nothing was published under that record, so nothing is lost: no request, answer
+or tombstone existed, and the transcript's previous entry is still step 4 round
+2. If the review would rather the label matched the id exactly, renaming the
+plan and validation headings to `Step 4b` is a two-file edit I will make on
+request rather than churn the plan a third time on my own judgment.
+
+### Reviewer focus for step 4b python-wrapper-foreign-distro (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4b-round-1 -->
+
+## Round 1 by reviewer - Step 4b
+
+- Recorded: 2026-09-01T21:17:43+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4b
+- Outcome: answer
+
+### Exact disagreement for step 4b python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The live exchange, JSON envelope, and human-readable request all identify implementation step `4b`, while the exact implementation plan and validation plan define the sub-step as `Step 4B`. Step identifiers are exact context, and no exact `4b` step currently exists in the reviewed plan. The live index tree does match the request snapshot (`651d6211bfdbb312cf597e2eb8e385aca190e945`), so this rejection is limited to the case-sensitive step-identity disagreement.
+
+### Writer instructions for step 4b python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Make the plan-owned identifier match the protocol identity that can actually be published: rename the exact plan and validation-plan sub-step from `4B` to `4b`, including its heading, analysis-status sentence, subsection headings, and identifier references needed for one unambiguous exact step. Preserve the substantive criteria and staged implementation. Re-run the implementation check and commit grouping, then publish the replacement request under the same lowercase `4b` exchange identity.
+
+### Final reviewer decision for step 4b python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4b-round-1 -->
+
+## Round 2 by requestor - Step 4b
+
+- Recorded: 2026-09-01T21:21:18+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4b
+- Outcome: request
+
+### Review identity for step 4b python-wrapper-foreign-distro (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 4b
+Review round: 2
+
+### Code review evidence for step 4b python-wrapper-foreign-distro (round 2)
+
+request_index_tree: ff912364e7683f0585ccc15701abf885f68d4373
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(plan): lowercase the step 4b identifier
+group 1 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+group 2: test(wrapper): publish the frozen harness identity
+group 2 path: docs/v0.27.0/verify.wrapper-scope.manifest.txt
+group 3: docs(python-wrapper-foreign-distro): record step 4b validation
+group 3 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/verify.wrapper-scope.manifest.txt
+```
+
+### Requestor assessment for step 4b python-wrapper-foreign-distro (round 2)
+
+#### Assessment for step 4b python-wrapper-foreign-distro (round 2)
+
+Step 4b is fully implemented. The manifest is generated from the frozen bytes
+and names the freeze commit; the two copies and the `wrapperScope()` probe are
+landed at the exact paths the plan gives; build 131 ran them and retained the
+capture; and that capture shows the unpaired-edit gate refusing a deliberately
+mutated copy, which is the criterion that turns an asserted gate into a
+demonstrated one.
+
+Most of this step's evidence is in another repository by the plan's own handoff
+table, so the request quotes it rather than pointing at a build number.
+
+#### The manifest for step 4b python-wrapper-foreign-distro (round 2)
+
+`docs/v0.27.0/verify.wrapper-scope.manifest.txt`, three fields and nothing else:
+
+- `freeze_commit` `233b549d1bfa96b0e0e2cf7e9d31c996cf132389`;
+- `harness_path` `docs/v0.27.0/verify.wrapper-scope.sh`;
+- `file_sha256` `fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608`.
+
+GENERATED, not written: `git rev-parse` for the commit, and
+`git show <freeze-commit>:<harness-path> | sha256sum` for the digest, so it
+cannot disagree with the file it describes. Its header records that
+`file_sha256` is over the FILE BYTES rather than a Git blob object id, and why it
+names an earlier commit than its own.
+
+#### The pipeline landing for step 4b python-wrapper-foreign-distro (round 2)
+
+Two commits on `develop`, `1f2c934e` and `ba942700`, pushed as a clean
+fast-forward from `96c5799c`:
+
+- `tools/wrapper_scope_verify.verification-only.sh`, byte-identical to the
+  frozen harness, compared with `sha256sum` rather than by date;
+- `tools/wrapper_scope.manifest.verification-only.txt`, byte-identical to the
+  manifest;
+- `wrapperScope()` in `ci/Jenkinsfile.diagnostics`, called from the
+  `verifyCplx()` parallel and listed in the probe index at the top of the file.
+
+Both commits went through the pipeline repository's own approved entry point,
+`a.commit` then `wac.bat` then `gcba.bat --root-a-commit`, rather than by hand,
+which is that repository's stated rule.
+
+#### The build and its capture for step 4b python-wrapper-foreign-distro (round 2)
+
+Build 131, SUCCESS, 17 minutes. The push did not start it: that job's
+multibranch webhook has been unreliable, so the build was started with a direct
+POST after checking `lastBuild` once, which is the recorded procedure.
+
+```text
+distribution    debian 12
+glibc           ldd (Debian GLIBC 2.36-9+deb12u10) 2.36
+bash            5.2.15(1)-release
+  freeze_commit 233b549d1bfa96b0e0e2cf7e9d31c996cf132389
+  file_sha256   fab864ee...
+  local copy    fab864ee...
+  gate/local-copy-matches-manifest        PASS
+  control/mutated-copy-refused            PASS mutated copy is [8d51d40d8f3a...]
+  harness/runs-here                       PASS
+TRANSPORT VERIFIED
+```
+
+The control is the line that matters most: the gate was run against a copy with
+one line appended and refused it, on the agent, in the same build. A gate nobody
+has seen fail is a gate nobody has seen.
+
+#### Static check evidence for step 4b python-wrapper-foreign-distro (round 2)
+
+`bash src/utils/lint_shell.sh`: clean over 44 tracked scripts.
+`shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`:
+no finding. The probe's own script was extracted from its Groovy string and
+checked with `bash -n` and `shellcheck` BEFORE the push, which is the only lint
+a script embedded in a Jenkinsfile gets: the pipeline's shellcheck branch reads
+the `tools/*.sh` copies, not the pipeline file.
+
+`bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture ...` re-run on this
+host: `OBJECTIVE MET`, which is the check that the frozen harness and its
+captures still agree after this step touched neither.
+
+#### Coverage evidence for step 4b python-wrapper-foreign-distro (round 2)
+
+The project default `ghog day` runs `ghog check` green, then `ghog affected
+--no-cov` stops at exit 5 on `pytest not found on PATH`. cplx has no
+`pyproject.toml`, no tests directory and no pytest suite, so there is no
+percentage to report; that is the project's standing state and not a finding
+about this change.
+
+#### Architecture evidence for step 4b python-wrapper-foreign-distro (round 2)
+
+No shipped file changes and the harness is untouched, which is what the freeze
+was for: a step 4b that edited it would invalidate the identity it publishes.
+The pipeline change adds a probe to a file whose own header declares it owned by
+the cplx maintainer, plus two `verification-only` files that are never delivered
+and never packaged. No reviewed pipeline stage changed.
+
+The authority for the identity is deliberately not this manifest: the pipeline
+catches the unpaired edit, and the paired-edit case is answered here, by an
+independent comparison in a repository the pipeline cannot reach. That check
+belongs to step 5.
+
+#### Performance evidence for step 4b python-wrapper-foreign-distro (round 2)
+
+The probe hashes two files, writes and hashes one scratch copy, and runs the
+harness's `--help`. It runs inside the existing parallel rather than adding a
+stage, and nothing in it grows with the size of the archive or the tree.
+
+#### Feature integrity evidence for step 4b python-wrapper-foreign-distro (round 2)
+
+Build 131 returned SUCCESS with every other cplx probe reporting as before,
+which is the evidence that a new branch in the `verifyCplx()` parallel disturbed
+nothing. On this side the harness is byte-identical to the frozen copy and its
+step 3 command still reports `OBJECTIVE MET` against its capture.
+
+### Implementation report for step 4b python-wrapper-foreign-distro (round 2)
+
+#### What was implemented for step 4b for step 4b python-wrapper-foreign-distro (round 2)
+
+One file here, three in the pipeline repository, and one build.
+
+**The manifest.** `docs/v0.27.0/verify.wrapper-scope.manifest.txt`, carrying
+`freeze_commit`, `harness_path` and `file_sha256` and nothing else. It is
+generated by command rather than hand-written, from the bytes at
+`233b549d:docs/v0.27.0/verify.wrapper-scope.sh`, so the digest and the file it
+describes cannot disagree. Its header carries the two things a later reader
+would otherwise get wrong: that `file_sha256` is over the FILE BYTES rather than
+a Git blob object id, which is a different hash over different bytes, and that
+it names an earlier commit than its own because a commit identity is computed
+over its tree and the tree contains this file.
+
+**The pipeline copies**, byte-identical to their sources and compared with
+`sha256sum` rather than by date, which is that repository's own rule after a
+build once failed on a stale copy nobody had compared.
+
+**The probe.** `wrapperScope()` in `ci/Jenkinsfile.diagnostics`:
+
+- it hashes the local harness copy against the manifest copy and fails the
+  capture when they differ, which catches the unpaired edit;
+- it runs the SAME comparison against a copy with one line appended, and
+  requires the refusal. The mutated digest is printed beside the result, so the
+  refusal names what it refused rather than asserting one happened;
+- it checks the harness executes on the agent;
+- it reports and never gates, exit 0, like the probes beside it.
+
+The capture states what it is not, in the capture rather than in a commit
+message: the archive extracted on that agent carries the PRE-CHANGE wrapper, so
+this run makes no claim about the fix. The acceptance that tells a working fix
+from a plausible one is step 5, with its reverted-fix control in the same build.
+
+#### What was checked rather than assumed for step 4b python-wrapper-foreign-distro (round 2)
+
+- **The copies match their sources.** Both compared with `sha256sum` before the
+  commit, not by timestamp.
+- **The probe's script parses and lints.** It was extracted from its Groovy
+  string and run through `bash -n` and `shellcheck` before the push. A script
+  embedded in a Jenkinsfile gets no other lint: the pipeline's own shellcheck
+  branch reads the `tools/*.sh` copies, not the pipeline file. Both were clean
+  apart from the same SC1091 `/etc/os-release` info the cplx harness carries.
+- **The push targets the branch the job builds.** `origin` and `origin3` in that
+  repository point at different lineages, and only the second is what Jenkins
+  clones. `git rev-list --left-right --count origin3/develop...HEAD` reported
+  `0 2` before the push and `0 0` after, so it was a clean fast-forward of
+  exactly the two commits.
+- **The build had to be started by hand.** The push did not trigger it; that
+  job's multibranch webhook has been unreliable, and the recorded procedure is
+  to check `lastBuild` once and issue a direct POST with a crumb from the same
+  cookie jar. HTTP 201, and build 131 came up building.
+
+#### What this step did NOT do for step 4b python-wrapper-foreign-distro (round 2)
+
+It did not touch the harness. That is the point of the freeze: the manifest
+names those bytes, and an edit here would leave the manifest describing a file
+that no longer exists at that digest. The four retained captures still name
+`fab864ee`, and the step 3 command still reports `OBJECTIVE MET` against its
+capture on this host.
+
+It did not bring the Debian capture into this repository. The plan's handoff
+table puts `a.evidence/verify-wrapper-scope.debian.txt` in the pipeline
+repository per build, so the validation record quotes it instead. Step 5's
+capture, `verify.wrapper.debian.txt`, is the one that lands here.
+
+### Change summary for step 4b python-wrapper-foreign-distro (round 2)
+
+#### Staged paths for step 4b python-wrapper-foreign-distro (round 2)
+
+Index tree `ff912364e7683f0585ccc15701abf885f68d4373`, three staged paths:
+
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` (the rename)
+- `docs/v0.27.0/verify.wrapper-scope.manifest.txt` (new)
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+
+That is step 4b's whole footprint in this repository. Nothing under `src/`, and
+the harness is deliberately untouched: it is frozen, and the manifest names its
+bytes.
+
+The review transcript is not staged: it grows with every round of this exchange,
+so it belongs to the residual pass of an authorized commit rather than to a
+group fixed now.
+
+#### Changes in the other repository, already landed for step 4b python-wrapper-foreign-distro (round 2)
+
+Not staged here and not part of this commit plan, but part of what the review is
+asked to assess, since three of step 4b's four criteria live there:
+
+- `1f2c934e` `test(wrapper-scope): land the harness and manifest`
+- `ba942700` `test(wrapper-scope): probe transport and the edit gate`
+
+Pushed to `develop` as a clean fast-forward from `96c5799c`, through that
+repository's own approved entry point rather than by hand. Build 131 ran them
+and returned SUCCESS.
+
+#### Commit plan for step 4b python-wrapper-foreign-distro (round 2)
+
+`commit-plan-check --format json` reports `state: valid`, `ready: true`, no
+diagnostics, all three staged paths covered exactly once by three groups in
+dependency order:
+
+1. `docs(plan): lowercase the step 4b identifier`
+2. `test(wrapper): publish the frozen harness identity`
+3. `docs(python-wrapper-foreign-distro): record step 4b validation`
+
+The plan leads because the label it settles is what the other two answer to, the
+manifest follows, and the validation record trails as the documentation group.
+Group 3 keeps the subject the workflow prompt required verbatim, now lowercase
+because the handoff was re-run under `4b`.
+
+### Writer response for step 4b python-wrapper-foreign-distro (round 2)
+
+Writer response: #### Response to the round 1 answer for step 4b python-wrapper-foreign-distro (round 2)
+
+The round 1 answer is accepted in full. There is no disagreement to record, and
+no reviewer repair was made in it to preserve.
+
+The finding was right and it was mine. I published a request whose identity was
+`4b` against a plan that defined `Step 4B`, so no exact step existed for the
+request to name, and I had told myself in the round 1 response that the case
+difference was harmless. It is not: a step identifier is exact context, and a
+review cannot check a step the plan does not define.
+
+What was done:
+
+- **the plan and the validation record now say `Step 4b`**, headings, the
+  analysis-status sentence, the subsection headings and every reference. The
+  substantive criteria are untouched, and so is the staged implementation;
+- **the plan records WHY the label is lowercase**, beside the note that already
+  explained why the freeze kept the bare `Step 4` number. Both are the same
+  class of constraint: a review exchange pins its implementation step, and a
+  transcript entry is identified as `request-step-<step>-round-<n>` against a
+  lowercase pattern, so an uppercase sub-step cannot be published at all;
+- **the implementation check and the commit grouping were re-run** under `4b`.
+  The workflow's required final subject is now
+  `docs(python-wrapper-foreign-distro): record step 4b validation`, and
+  `commit-plan-check` reports `valid` and `ready` over three groups;
+- **the request is published under the same lowercase `4b` identity**, against
+  the live index `ff912364`.
+
+The staged set gained one path since round 1: the plan, which carries the
+rename. Nothing else about the step changed, and no evidence was retaken,
+because the rename touches no measured artifact: the harness is still frozen at
+`fab864ee`, the four captures still name it, and build 131's capture is
+unaffected by what this repository calls the sub-step.
+
+### Reviewer focus for step 4b python-wrapper-foreign-distro (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4b-round-2 -->
+
+## Round 2 by reviewer - Step 4b
+
+- Recorded: 2026-09-01T21:42:58+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4b
+- Outcome: answer
+
+### Assessed index identity for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Baseline index tree: ff912364e7683f0585ccc15701abf885f68d4373
+
+Assessed index tree: ff912364e7683f0585ccc15701abf885f68d4373
+
+### Implementation check for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Result: Yes. Step 4b has been fully implemented.
+
+The staged manifest names freeze commit `233b549d1bfa96b0e0e2cf7e9d31c996cf132389`, the exact harness path, and file-byte SHA-256 `fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608`. Independent Git and SHA-256 checks confirm that the commit exists, precedes the current branch, and contains harness bytes with that digest. In the pipeline repository, commits `1f2c934e` and `ba942700` are on `develop`; their harness and manifest copies match the cplx sources byte-for-byte; `wrapperScope()` is wired into `verifyCplx()`; and its implementation both rejects a deliberately mutated copy and writes the per-build evidence artifact archived by the root Jenkinsfile. The retained Build 131 excerpt records Debian 12, the matching digest, the mutated-copy refusal, a runnable harness, `TRANSPORT VERIFIED`, and a successful build.
+
+Architecture: the pipeline change stays inside the existing diagnostics boundary and adds verification-only copies rather than shipping artifacts. Performance: the probe performs fixed-size hashing, one scratch mutation, and `--help` execution inside the existing parallel diagnostics. Unit coverage: this Bash repository has no pytest suite; the applicable lint, ShellCheck, retained harness controls, and on-agent negative control cover the step. Feature integrity: the frozen harness is unchanged, all four local suites still report `OBJECTIVE MET`, and Build 131 retained the transport verification without disturbing the other probes.
+
+Validation plan effects: No reviewer edit was made. The staged validation plan already records the exact `Yes. Step 4b has been fully implemented.` result and the evidence required by every Step 4b criterion. Validation produced no tracked, untracked, or ignored change in the ordered evidence path set.
+
+### Pre-repair mandatory checks and coverage for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+All six mandatory commands passed against index tree `ff912364e7683f0585ccc15701abf885f68d4373`: the project lint gate reported 44 tracked scripts and clean; each Step 0 through Step 3 harness command exited 0 with `OBJECTIVE MET`; and ShellCheck exited 0 with no finding. No reviewer repair was made. The manifest-to-freeze identity and both pipeline copies were also independently checked by Git and SHA-256 inspection before the command run.
+
+### Resolved validation set and sources for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The request and current resolver agree on the same ordered six-command set: `bash src/utils/lint_shell.sh`; the plan-owned Step 0, Step 1, Step 2, and Step 3 harness commands with their exact wrapper and capture arguments; and `shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`. Every command was run successfully.
+
+### Resolver drift and direction for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+No resolver drift was found. The project declaration, exact Step 4b plan additions, and request addition resolve to the same commands and source labels carried by Round 2.
+
+### Repository state around validation for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The request-time, baseline, assessed, and post-validation cplx index tree are all `ff912364e7683f0585ccc15701abf885f68d4373`. Validation-state comparison reports no tracked, untracked, or ignored path change, and the umbrella digest remained `9e85a83e58c8e23983f9965f1c8310087e0a71f655595e42350739a73c77f404`. The pipeline checkout is clean; commits `1f2c934e` and `ba942700` are ancestors of its `develop` and `origin3/develop`; its harness SHA-256 is `fab864ee…`; and its manifest SHA-256 `77ca765d…` matches the staged cplx manifest. The per-build capture is correctly an archived build artifact rather than a source-checkout file; the durable request evidence quotes its Build 131 result.
+
+### Repair inventory for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The independent `commit-plan-check.bat --format json` run exited 0 with `state: valid`, `ready: true`, three ordered groups, every staged path covered exactly once, and no diagnostic. The lowercase plan identity leads, the generated frozen-harness manifest follows, and the validation record trails. `a.commit` remains accurate and was not amended.
+
+### Findings and boundaries for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+No change is requested for Step 4b. Preserve the manifest and frozen harness identity when committing the three approved groups. The advisory recommendation does not itself authorize a commit or the Step 5 continuation.
+
+### Decision rationale for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Commit-ready is recommended because the exact lowercase Step 4b identity now exists, every implementation criterion is evidenced, all six mandatory validations pass, the external pipeline landing and negative control were independently inspected, the staged scope is attributable, no unresolved finding remains, and `a.commit` is mechanically accurate. No substantive reviewer repair was made. This is advisory only and grants no commit authority.
+
+### Final reviewer decision for step 4b python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4b-round-2 -->
+
+## Round 2 by human - Step 4b - escalation
+
+- Recorded: 2026-09-01T22:25:25+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4b
+- Outcome: escalation
+
+exchange was abandoned while waiting for unknown actor
+
+<!-- review-entry-id: escalation-round-2 -->
+
+## Round 2 by human - Step 4b - human-confirmation
+
+- Recorded: 2026-09-01T22:25:58+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4b
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
