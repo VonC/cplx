@@ -1,6 +1,6 @@
 Harness: docs/v0.27.0/verify.wrapper-scope.sh --step 3, with --wrapper, --setenv,
          --retained, --deployment, --prefix, --live-install and --run-identity
-Run identity: rhel-wrapper-20260901T121352Z
+Run identity: rhel-wrapper-20260901T145429Z
 Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
 Captured: 2026-09-01, by hand, over ssh
 Purpose: Step 3 proves NO REGRESSION on the deployment target, over a tree
@@ -92,7 +92,7 @@ EVERY WRITE LANDED UNDER ONE THROWAWAY PREFIX, `HOME` pinned to it because the
   step3/host/deployment-supplied               PASS  yes
 
 == step 3 identity: which run, which target, which shell
-  step3/identity/run                           NOTE  rhel-wrapper-20260901T121352Z
+  step3/identity/run                           NOTE  rhel-wrapper-20260901T145429Z
   step3/identity/prefix-carries-run-id         PASS  yes
   step3/identity/target                        PASS  rhel 9.8
   step3/identity/kernel                        NOTE  5.14.0-687.41.1.el9_8.x86_64
@@ -108,7 +108,7 @@ EVERY WRITE LANDED UNDER ONE THROWAWAY PREFIX, `HOME` pinned to it because the
 == step 3 the deployed tree, as the archive ships it
   step3/deploy/wrapper-present                 PASS  yes
   step3/deploy/wrapper-is-the-subject          PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
-  step3/deploy/setenv-sha256                   NOTE  e6686039af8d25d03efb65e328de43b2d9ed1abcae8afa78ebdd52b0aaca19c6
+  step3/deploy/setenv-sha256                   NOTE  4fa45057162440a13798f2b0d211da4aec0e704bbcbfea9e16d08adf70cfc802
   step3/deploy/setenv-builds-the-path-from-senvdir PASS  1
   step3/deploy/ships-converted                 PASS  ../../bin/python
   step3/deploy/target-name                     NOTE  python3.13_bin
@@ -134,7 +134,7 @@ EVERY WRITE LANDED UNDER ONE THROWAWAY PREFIX, `HOME` pinned to it because the
   step3/venv/exit-status                       PASS  0
   step3/venv/created                           PASS  yes
   step3/venv/target-name                       NOTE  python3.13_bin
-  step3/venv/target-relinked-to-wrapper        PASS  /tmp/rhel-wrapper-20260901T121352Z/tools/python/bin/python
+  step3/venv/target-relinked-to-wrapper        PASS  /tmp/rhel-wrapper-20260901T145429Z/tools/python/bin/python
   step3/venv/real-binary-copied-beside-it      PASS  yes
   step3/venv/under-the-prefix                  PASS  yes
 
@@ -154,9 +154,9 @@ EVERY WRITE LANDED UNDER ONE THROWAWAY PREFIX, `HOME` pinned to it because the
   wrapper     /home/deploy-account/wrapper-scope-step1/python
   setenv      /home/deploy-account/wrapper-scope-step1/setenv
   retained    ./wrapper.pre-change.verification-only
-  deployment  /tmp/rhel-wrapper-20260901T121352Z/tools/python
-  run-identity rhel-wrapper-20260901T121352Z
-  harness     b0d0264740f85e86d54d8d6dd97b5270e5b68c7ecb8d475171e9f096433deb23
+  deployment  /tmp/rhel-wrapper-20260901T145429Z/tools/python
+  run-identity rhel-wrapper-20260901T145429Z
+  harness     fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
   wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
   setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
   retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
@@ -166,8 +166,8 @@ OBJECTIVE MET for step 3
 
 == post-run cleanup, run by the session after the suite above
 
-run-identity: rhel-wrapper-20260901T121352Z
-prefix:       /tmp/rhel-wrapper-20260901T121352Z
+run-identity: rhel-wrapper-20260901T145429Z
+prefix:       /tmp/rhel-wrapper-20260901T145429Z
 live install: /home/deploy-account/tools
 
 $ stat -c "%n %Y" /home/deploy-account/tools /home/deploy-account/tools/python/bin/python
@@ -176,15 +176,15 @@ $ stat -c "%n %Y" /home/deploy-account/tools /home/deploy-account/tools/python/b
 $ sha256sum /home/deploy-account/tools/python/bin/python
 15d203dc1cc3bc83c0fde662089e0aa41e2c729dda844c813ca881fa79177c0c  /home/deploy-account/tools/python/bin/python
 
-$ ls -d /tmp/rhel-wrapper-20260901T121352Z
-/tmp/rhel-wrapper-20260901T121352Z
+$ ls -d /tmp/rhel-wrapper-20260901T145429Z
+/tmp/rhel-wrapper-20260901T145429Z
 exit=0
 
-$ rm -rf /tmp/rhel-wrapper-20260901T121352Z
+$ rm -rf /tmp/rhel-wrapper-20260901T145429Z
 exit=0
 
-$ ls -d /tmp/rhel-wrapper-20260901T121352Z
-ls: cannot access '/tmp/rhel-wrapper-20260901T121352Z': No such file or directory
+$ ls -d /tmp/rhel-wrapper-20260901T145429Z
+ls: cannot access '/tmp/rhel-wrapper-20260901T145429Z': No such file or directory
 exit=2
 
 $ stat -c "%n %Y" /home/deploy-account/tools /home/deploy-account/tools/python/bin/python
