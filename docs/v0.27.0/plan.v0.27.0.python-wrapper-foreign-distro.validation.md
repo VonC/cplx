@@ -5,9 +5,9 @@ No, it is not implemented.
 This document tracks the implementation of
 [plan.v0.27.0.python-wrapper-foreign-distro.md](plan.v0.27.0.python-wrapper-foreign-distro.md),
 six steps that scope the shipped search path to the interpreter and make the
-wrapper fail closed on an unusable helper result. Steps 0 through 2 are
-complete, and Step 2's evidence is retained and part of the resolved validation
-set; steps 3 to 5 have not started.
+wrapper fail closed on an unusable helper result. Steps 0 through 3 are
+complete, each with retained evidence that the resolved validation set reads on
+both hosts; steps 4 and 5 have not started.
 
 > Skeleton note: every per-step section other than `Goal` carries the literal
 > placeholder `_(empty -- no check has taken place yet.)_.` until an
@@ -524,9 +524,10 @@ pre-change copy can be planted as a fixture, an optional fail suffix on
 
 The step 2 code review made one polishing repair in that file, kept staged: a
 targeted `shellcheck disable=SC2016` on the `unguarded-readlink-calls` case,
-whose single-quoted `$(readlink ` is deliberately literal. The authoring host's
-shellcheck did not raise it and the reviewer's did, so the suppression records
-the intent rather than silencing a real finding.
+whose single-quoted `$(readlink` pattern, trailing space included, is
+deliberately literal. The authoring host's shellcheck did not raise it and the
+reviewer's did, so the suppression records the intent rather than silencing a
+real finding.
 
 `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` is the retained capture the
 review added to the plan: 53 cases, 0 failures, bound to harness `d4e347cc`,
@@ -662,7 +663,27 @@ No, no feature-integrity evidence is still owed for Step 2.
 
 ### Analysis of Step 3 implementation state
 
-_(empty -- no check has taken place yet.)_.
+Yes. Step 3 has been fully implemented.
+
+The three calls the step owes were made over a tree deployed from the published
+archive on RHEL 9.8, through the wrapper under test, against the REAL archive
+interpreter rather than the recording stub steps 0 to 2 plant.
+`verify.wrapper-scope.sh --step 3` reports 40 cases and 0 failures under run
+identity `rhel-wrapper-20260901T121352Z`, and the retained capture ends with the
+session's own cleanup transcript: the prefix listed present, removed, then
+listed absent, with the live install's mtime and its wrapper's digest read
+before and after and identical. The plan names both the capture and its command,
+and the reviewing Windows host answers step 3 through the capture substitution.
+
+A discovery changed what this step asserts, and it is recorded rather than
+worked around. THE ARCHIVE IS PACKAGED FROM A TREE THE WRAPPER HAS ALREADY
+CONVERTED: it ships `current/bin/python3` pointing at the wrapper and
+`python3_target` at `python3.13_bin`. A deployed tree therefore never takes the
+relink arm, and every call takes the other one. The first draft of this suite
+asserted a conversion the first call would perform; those cases would have
+passed on work the archive did. The suite now records the shipped state as a
+case and asserts that the calls leave it unchanged, which is the claim a
+no-regression step can actually make here.
 
 ### Goal for Step 3
 
@@ -672,7 +693,149 @@ is step 5.
 
 ### What was implemented for Step 3
 
-_(empty -- no check has taken place yet.)_.
+Two files, which is the plan's step 3 file list: the harness and the retained
+capture. The plan itself gained the step 3 command, and the three earlier
+captures were retaken, both as consequences covered below.
+
+`docs/v0.27.0/verify.wrapper-scope.sh` gained the step 3 suite and the machinery
+it needs:
+
+- four new arguments, all step 3 only: `--deployment` names the deployed python
+  env root, `--prefix` the throwaway prefix that holds it, `--live-install` the
+  install that must stay untouched, and `--run-identity` the identity the
+  capture cites. THE SESSION DEPLOYS THE TREE, not the harness: a harness that
+  deployed its own subject would be measuring an installer run rather than a
+  wrapper, and the deployment recipe belongs to the operations note;
+- a second host gate. Steps 0 to 2 ask whether the host can create a symlink;
+  step 3 asks whether a deployed archive is named for this run, because that is
+  what it cannot reproduce. A host without one reads the retained capture or
+  exits 4, exactly as a host without symlinks does;
+- `step3_call`, one call through the deployed wrapper with `HOME` pinned to the
+  prefix, since the installer and the wrapper both read it, and from a stated
+  working directory, since the venv site resolves its argument through `pwd`;
+- the shim coverage case moved out of the steps 0 to 2 branch, because every
+  step has the same wrapper as its subject, and the capture cross-check became
+  `cross_check_capture` rather than the same eight lines in two gates;
+- the verdict block gained `deployment` and `run-identity` lines, so a capture
+  carries the tree it measured and the run it belongs to.
+
+`docs/v0.27.0/verify.wrapper.rhel.txt` is the retained capture: 40 cases, 0
+failures, bound to harness `b0d02647`, wrapper `7213dfe0`, setenv `355bbec5` and
+retained wrapper `88c4e0d2`, taken under run identity
+`rhel-wrapper-20260901T121352Z`.
+
+Criterion by criterion, with the case that answers it:
+
+- a first call over a deployed tree answering the toolchain version through the
+  wrapper, on the REAL archive interpreter: `step3/call1/exit-status` 0,
+  `step3/call1/answers-a-version` yes with `Python 3.13.9` recorded as a NOTE,
+  and `step3/deploy/interpreter-is-an-elf` yes, which is the case that separates
+  a real interpreter from the recording shell stub;
+- a second call through the existing symlinks without repeating the surgery:
+  `step3/call2/exit-status` 0, `step3/call2/same-version-as-the-first` yes, and
+  `step3/call2/tree-unchanged` yes, a shape snapshot of `current/bin` before
+  against after. `step3/call1/tree-unchanged` asserts the same of the first
+  call, which is what a converted tree requires;
+- `-m venv` creating and post-processing a virtualenv so the third guarded read
+  site executes for real: `step3/venv/exit-status` 0, `step3/venv/created` yes,
+  and the two writes that site produces,
+  `step3/venv/target-relinked-to-wrapper` naming the deployed wrapper and
+  `step3/venv/real-binary-copied-beside-it` yes. The target name is read from
+  the venv the interpreter just built, exactly as the wrapper reads it;
+- the capture naming the run identity, the target and the bash version, and
+  citing that identity in its evidence: `step3/identity/run`,
+  `step3/identity/target` `rhel 9.8` read from `/etc/os-release` rather than
+  from `uname`, `step3/identity/bash`, and
+  `step3/identity/prefix-carries-run-id` yes, which is the assertion that makes
+  the identity evidence rather than decoration;
+- every write under one throwaway prefix with `HOME` pinned, the live install
+  unchanged, the prefix removed: `step3/prefix/deployment-under-prefix` yes,
+  `step3/prefix/live-install-outside-prefix` yes,
+  `step3/venv/under-the-prefix` yes, `step3/live/mtime-unchanged` across the
+  three calls, and `step3/live/wrapper-is-not-the-subject` yes, which stops the
+  mtime case passing by the two trees sharing a file. The removal itself is the
+  last section of the capture rather than a sentence in its header: `post-run
+  cleanup` is the session's own transcript, the exact commands and their exact
+  output, listing the prefix present, removing it, listing it absent, and
+  reading the live install's mtime and its wrapper's digest before and after.
+  An earlier revision asserted those facts in the header and nowhere else, and
+  the step 3 code review refused it, correctly.
+
+THREE CONSEQUENCES, the first two the same ones the earlier steps recorded:
+
+- the plan gained the step 3 command. A capture nothing reads answers nothing on
+  the authoring host, which is what the step 2 code review ruled a plan-owned
+  evidence gap. The command was added with the capture rather than after a
+  second review found it missing;
+- all four captures come from the same harness bytes, `b0d02647`. Adding the
+  step 3 suite changed the digest, and the review's own repair changed it again,
+  so all four were taken after the last edit and report their unchanged case
+  counts, 34, 50, 53 and 40, with 0 failures;
+- the cleanup runs in the SESSION, not in the harness. Removing the tree under
+  measurement is not an oracle's job, and a harness that deleted its own subject
+  would be one edit away from deleting something else. The transcript is what
+  makes the session's action evidence.
+
+### Architecture check for Step 3
+
+This step changes no shipped file. The wrapper is untouched by it: its 131 lines
+against the plan's 115-line budget were reviewed and accepted at step 2, on the
+measured ground that the duplication the budget exists to detect is absent, and
+nothing here alters that. The harness and all four captures remain under
+`docs/v0.27.0/` and are never packaged, and the deployment the step measures is
+built and destroyed inside a throwaway prefix.
+
+The harness now carries two host gates rather than one, and that is the shape
+the step needs rather than a smell: what a host cannot reproduce genuinely
+differs by step, a symlink for steps 0 to 2 and a deployed archive for step 3.
+The duplication that would have come with it was removed instead: the capture
+cross-check is one function called from both gates, and the shim coverage case
+is stated once for every step.
+
+The DDD-Hexagonal criterion does not apply to a Bash and Batch project.
+
+No, there is nothing that needs to be addressed.
+
+### Performance check for Step 3
+
+The step adds three wrapper calls and two shape snapshots of one directory to a
+run that already deploys 1.9 GB, so its own cost is not measurable beside the
+deployment the session performs once. Nothing in the suite grows with the size
+of the deployed tree: the snapshots walk `current/bin`, about thirty entries,
+and every other case reads one file or one link. Nothing introduced here is
+O(n^2) or O(n log n).
+
+No, there is no performance issue that needs to be addressed.
+
+### Unit test coverage check for Step 3
+
+The 100 percent unit rule targets `src\pdfss\tests\unit`, which belongs to the
+consuming project; cplx has no pytest suite and no unit-tested class file, so
+there is no percentage to report and no legacy unit test is impacted by this
+step. The project default `ghog day` reports that same absence: `ghog check`
+green, then `ghog affected --no-cov` at exit 5 on `pytest not found on PATH`.
+The substituted gate is `bash src/utils/lint_shell.sh`, green over 44 tracked
+scripts, plus `shellcheck` on the harness, with no finding.
+
+The behavioural substitute is the step 3 suite: 40 cases, 0 failures, every
+claim measured from a call the wrapper actually made over a real deployment.
+
+No, there is no unit-tested class below 100 percent that needs completing.
+
+### Feature integrity for Step 3
+
+This is the step whose whole subject is feature integrity, and it reports no
+impairment. The deployed wrapper answers the toolchain version on the first
+call and the same version on the second, leaves `current/bin` byte-identical in
+shape across both, produces no `current/bin/_bin` and no doubled `_bin_bin`
+name, and still creates and post-processes a virtualenv with the real
+interpreter. The live install beside it is untouched, before and after.
+
+What this step CANNOT say is that the fix works: the defect cannot fire on RHEL
+at all, because the shipped libc is the host libc family there. That claim
+belongs to step 5 on Debian, with its reverted-fix control in the same build.
+
+No, no feature-integrity evidence is still owed for Step 3.
 
 ## Step 4. Freeze, publish identity, land the handoff
 
