@@ -1,0 +1,155 @@
+Harness: docs/v0.27.0/verify.wrapper-scope.sh --step 1, with --wrapper, --setenv
+         and --retained naming the copies carried to the host
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+Captured: 2026-09-01, by hand, over ssh
+Purpose: Step 1 proves the scope rule: after the change, the shipped search path
+         serves the INTERPRETER and nothing else the wrapper runs. Measured from
+         the wrapper's own run through recording shims, never from its source.
+
+WHY THIS CAPTURE IS AUTHORITATIVE AND NOT MERELY PRESENT. The verdict below
+         carries FOUR digests, and all four are asserted by a host reading this
+         file through `--capture`: `harness` names the instrument, and
+         `wrapper-sha`, `setenv-sha` and `retained-sha` name the three files it
+         measured. A capture bound only to its instrument would certify a run
+         over inputs nobody compared to the ones present, which code review
+         round 2 of step 0 demonstrated with an unchanged-vocabulary broken
+         wrapper.
+
+Host note: step 1 is host-agnostic ACROSS POSIX HOSTS by plan decision P1, and
+         this run is on RHEL only because RHEL is the nearest POSIX host. The
+         authoring and reviewing host is Windows, which cannot create the
+         fixture's symlinks; the harness measures that with a probe and reads
+         this capture instead.
+
+THE FLIP THIS STEP EXISTS TO PRODUCE, against the step 0 baseline:
+
+  step 0:  helpers-seeing-search-path  7 of 7,  interpreter sees it
+  step 1:  helpers-seeing-search-path  0 of 7,  interpreter still sees it
+  step 1 venv path:      helpers-seeing-search-path  0 of 13, second arm too
+  step 1 second call:    helpers-seeing-search-path  0 of 9
+
+         Both halves are asserted. A change that took the helper count to zero
+         by also starving the interpreter would satisfy a helpers-only count and
+         break the wrapper, so `interpreter-still-sees-it` and
+         `interpreter-value-is-the-shipped-path` are separate cases.
+
+         THE SEVEN CALLS ARE ASSERTED PRESENT BEFORE THE COUNT IS READ. The
+         first run of this suite reported `helpers-seeing-search-path 0` while
+         measuring NOTHING: the suite had not planted its shims, so PATH
+         resolved every helper to the real tool and no call was logged. The
+         presence assertions failed and caught it. Without them this step would
+         have reported the scope rule satisfied on an empty log, which is the
+         exact failure mode this requirement exists to remove.
+
+W3, the empty saved value: exercised with a VARIANT fixture whose planted setenv
+         exports an empty value, since the shipped setenv always exports a
+         non-empty one. The interpreter records `empty` rather than `unset`, and
+         the shipped setenv's own bytes are asserted unchanged at the digest
+         step 0 recorded.
+
+ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
+         reaches. The `-m venv` variant runs the post-interpreter branch, where
+         `cp`, `grep` and both `sed` sites live and nowhere else, and it runs the
+         VIRTUAL_ENV arm of the interpreter `if`, so the SECOND restore site is
+         measured from a run rather than counted in the source. A third run over
+         the already-surgered tree reaches the `else` arm of the relink `if`,
+         the fourteenth site, which no first call can execute.
+
+         The venv run makes THIRTEEN post-source helper calls and none sees the
+         search path; the second call makes NINE and none sees it either. Every
+         helper name is asserted PRESENT case by case before any zero is read,
+         so a branch that stopped executing fails rather than passes.
+
+         The second call's nine are two more than the seven a repeat would
+         suggest, and the reason is this fixture rather than the wrapper:
+         `${DIR}/pip` links to `current/bin/pip3`, which the fixture never
+         plants, so the `-e` test is false on every call and both pip links are
+         made again. A deployment has pip3 and takes that branch once.
+
+
+
+== harness prerequisite preflight
+  preflight/readlink                           PASS  /bin/readlink
+  preflight/mv                                 PASS  /bin/mv
+  preflight/ln                                 PASS  /bin/ln
+  preflight/cp                                 PASS  /bin/cp
+  preflight/sed                                PASS  /bin/sed
+  preflight/grep                               PASS  /bin/grep
+  preflight/sha256sum                          PASS  /bin/sha256sum
+
+== step 0 shim coverage: the helper list against the wrapper
+  step0/coverage/no-unshimmed-command          PASS
+  step0/coverage/no-dead-shim-entry            PASS
+
+== step 0 host gate: can this host reproduce the symlink surgery
+  step0/host/symlink-capable                   PASS  yes
+
+== step 1 structure: what the wrapper file must contain
+  step1/source/save-sites                      PASS  1
+  step1/source/unset-sites                     PASS  1
+  step1/source/restore-sites                   PASS  2
+  step1/source/no-export                       PASS  0
+
+== step 1 the scope rule, measured from the wrapper's own run
+  step1/fixture                                PASS  planted and asserted
+  step1/exit-status                            PASS  0
+  step1/setup-readlink-delegated               PASS  2
+  step1/readlink-calls                         PASS  3
+  step1/mv-calls                               PASS  1
+  step1/ln-calls                               PASS  5
+  step1/interpreter-calls                      PASS  1
+  step1/post-source-helper-calls               PASS  7
+  step1/helpers-seeing-search-path             PASS  0
+  step1/interpreter-still-sees-it              PASS  yes
+  step1/interpreter-value-is-the-shipped-path  PASS  yes
+  step1/setup-observed                         NOTE  unset
+
+== step 1 the empty saved value, preserved as empty (W3)
+  step1/empty/fixture                          PASS  planted and asserted
+  step1/empty/interpreter-called               PASS  1
+  step1/empty/reaches-interpreter-as-empty     PASS  empty
+  step1/empty/helpers-still-unset              PASS  0
+
+== step 1 the venv path, where the other seven post-source sites run
+  step1/venv/fixture                           PASS  planted and asserted
+  step1/venv/target                            PASS  planted and asserted
+  step1/venv/exit-status                       PASS  0
+  step1/venv/readlink-calls                    PASS  4
+  step1/venv/mv-calls                          PASS  1
+  step1/venv/ln-calls                          PASS  6
+  step1/venv/cp-calls                          PASS  1
+  step1/venv/sed-calls                         PASS  2
+  step1/venv/grep-calls                        PASS  1
+  step1/venv/interpreter-calls                 PASS  1
+  step1/venv/post-source-helper-calls          PASS  13
+  step1/venv/helpers-seeing-search-path        PASS  0
+  step1/venv/second-arm-still-sees-it          PASS  yes
+  step1/venv/second-arm-value-is-the-shipped-path PASS  yes
+
+== step 1 the second call, the one site a first call cannot reach
+  step1/second-call/exit-status                PASS  0
+  step1/second-call/no-second-surgery          PASS  0
+  step1/second-call/readlink-calls             PASS  5
+  step1/second-call/ln-calls                   PASS  3
+  step1/second-call/post-source-helper-calls   PASS  9
+  step1/second-call/helpers-seeing-search-path PASS  0
+
+== step 1 identities: what this step asserts rather than assumes
+  step1/setenv-unchanged-since-step0           PASS  355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  step1/wrapper-sha256                         NOTE  4a046859695ef0e652d1de547478908b9045ffa349d67f8b861da1d647ee693f
+  step1/wrapper-lines                          NOTE  113
+
+== verdict
+  step        1
+  cases       50
+  failures    0
+  wrapper     /home/deploy-account/wrapper-scope-step1/python
+  setenv      /home/deploy-account/wrapper-scope-step1/setenv
+  retained    ./wrapper.pre-change.verification-only
+  harness     ee98b157669a2d854bef9a0b27c3800cd8c4fea9278899c07592d53e96d0c8b8
+  wrapper-sha  4a046859695ef0e652d1de547478908b9045ffa349d67f8b861da1d647ee693f
+  setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  bash        5.1.8(1)-release
+
+OBJECTIVE MET for step 1
