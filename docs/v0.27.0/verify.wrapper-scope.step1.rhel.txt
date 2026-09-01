@@ -70,6 +70,8 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
 
 
 
+
+
 == harness prerequisite preflight
   preflight/readlink                           PASS  /bin/readlink
   preflight/mv                                 PASS  /bin/mv
@@ -148,7 +150,7 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
   wrapper     /home/deploy-account/wrapper-scope-step1/python
   setenv      /home/deploy-account/wrapper-scope-step1/setenv
   retained    ./wrapper.pre-change.verification-only
-  harness     d4e347cce020a89fe21f54b2337de3642295505e4019f6a8899802888e0aad93
+  harness     b0d0264740f85e86d54d8d6dd97b5270e5b68c7ecb8d475171e9f096433deb23
   wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
   setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
   retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
