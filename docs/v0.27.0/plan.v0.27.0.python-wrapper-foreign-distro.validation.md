@@ -5,10 +5,9 @@ No, it is not implemented.
 This document tracks the implementation of
 [plan.v0.27.0.python-wrapper-foreign-distro.md](plan.v0.27.0.python-wrapper-foreign-distro.md),
 six steps that scope the shipped search path to the interpreter and make the
-wrapper fail closed on an unusable helper result. Steps 0 and 1 are complete, the
-retained measurements are bound to their instrument and subject files, and every
-mandatory command is green on both a POSIX host and the reviewing Windows one;
-steps 2 to 5 have not started.
+wrapper fail closed on an unusable helper result. Steps 0 through 2 are
+complete, and Step 2's evidence is retained and part of the resolved validation
+set; steps 3 to 5 have not started.
 
 > Skeleton note: every per-step section other than `Goal` carries the literal
 > placeholder `_(empty -- no check has taken place yet.)_.` until an
@@ -467,7 +466,26 @@ No, no feature-integrity evidence is still owed for Step 1.
 
 ### Analysis of Step 2 implementation state
 
-_(empty -- no check has taken place yet.)_.
+Yes. Step 2 has been fully implemented.
+
+All three read sites are checked calls through one shared guard, and the stop is
+measured from injected runs rather than read from the source.
+`verify.wrapper-scope.sh --step 2` reports 53 cases and 0 failures on RHEL 9.8,
+that run is retained as `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt`, the
+plan names both the capture and its exact command, and the reviewing Windows host
+now answers step 2 through the capture substitution instead of exiting 4.
+
+The change is measured against step 0 run B rather than assumed. The suite
+re-runs the retained pre-change wrapper under the same injection and reproduces
+the recorded mangling: `python3_target` derived from an empty value, the
+interpreter never reached, six `mv`/`ln`/`cp`/`sed` calls after the failed read,
+and a silent zero exit. The guarded wrapper turns those six into zero and that
+zero exit into a non-zero one.
+
+The wrapper is 131 lines against a plan budget of 115. The code review examined
+that overshoot under the plan's explicit trigger rule and accepted it, because
+the named failure, per-site guard duplication, is absent: one shared guard serves
+all three calls.
 
 ### Goal for Step 2
 
@@ -476,7 +494,169 @@ value, with the tree provably unmodified after the stop.
 
 ### What was implemented for Step 2
 
-_(empty -- no check has taken place yet.)_.
+Three files, which is the plan's step 2 file list as the code review amended it:
+the shipped wrapper, the harness, and the retained capture. The plan itself and
+the step 0 and step 1 captures changed as consequences, and are covered below.
+
+`src/install/env/python/bin/python` gained ONE shared `guarded_readlink` helper
+and three checked calls:
+
+- `guarded_readlink SITE PATH` runs `readlink` and returns non-zero when EITHER
+  the exit status is non-zero OR the output is empty, printing
+  `python: readlink failed at <site>: '<path>'` on stderr. On success it prints
+  the value, so the call sites keep the shape they already had;
+- every caller propagates with `|| exit`, at `relink-read`
+  (`current/bin/python3`), `target-read` (`current/bin/python3_target`) and
+  `venv-read` (`<venv>/bin/python3`). That propagation is the whole content of
+  the contract: each call site is a command substitution and therefore a
+  SUBSHELL, so an `exit` inside the helper would end only that subshell and leave
+  the wrapper running with the empty value it exists to refuse;
+- the bootstrap `readlink -f` at line 12 stays unchecked, by decision P6. It runs
+  before `setenv` is sourced, and failing it would stop the wrapper before any
+  guarded site is reached, so the run would prove nothing.
+
+`docs/v0.27.0/verify.wrapper-scope.sh` gained the step 2 suite, the `0|1|2`
+dispatch, `guarded_readlink` in the wrapper vocabulary the shim coverage case
+reads, an optional wrapper argument on `plant_fixture` so the retained
+pre-change copy can be planted as a fixture, an optional fail suffix on
+`run_wrapper_venv`, and three oracles: `injected_argv`,
+`mutations_after_injection` and `tree_snapshot`.
+
+The step 2 code review made one polishing repair in that file, kept staged: a
+targeted `shellcheck disable=SC2016` on the `unguarded-readlink-calls` case,
+whose single-quoted `$(readlink ` is deliberately literal. The authoring host's
+shellcheck did not raise it and the reviewer's did, so the suppression records
+the intent rather than silencing a real finding.
+
+`docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` is the retained capture the
+review added to the plan: 53 cases, 0 failures, bound to harness `d4e347cc`,
+wrapper `7213dfe0`, setenv `355bbec5` and retained wrapper `88c4e0d2`.
+
+Criterion by criterion, with the case that answers it:
+
+- a non-zero exit and a message naming the helper, the site and the path:
+  `step2/site1|site2|site3/exit-status-non-zero` yes, and
+  `.../message-names-helper-site-and-path` yes, which asserts the SITE LABEL and
+  the PATH are both in the text rather than that any output appeared at all;
+- the tree unmodified, asserted twice and in two different ways.
+  `.../tree-unmodified` yes compares a shape snapshot taken before the run with
+  one taken after; `.../no-mutation-after-injection` 0 counts the `mv`, `ln`,
+  `cp` and `sed` lines appearing after the injected `readlink` in the call log.
+  The snapshot records every path, every symlink target and every file size and
+  deliberately ignores mtime, because the wrapper legitimately recreates an
+  identical `pip` symlink on a repeat call and a shape that changed by nothing is
+  not a modification;
+- the comparison against STEP 0 RUN B: `step2/baseline/*` plants the RETAINED
+  pre-change wrapper and injects the same site, reproducing
+  `python3_target-derived-from-empty` `_bin`, `interpreter-never-reached` 0,
+  `exit-status-is-a-silent-zero` 0, and six mutations after the failure. The
+  baseline artifact is asserted present AND asserted to be the step 0 subject by
+  digest, and the suite returns rather than skipping when it is absent;
+- each of the three sites injected separately and identified:
+  `.../injected-call-is-this-site` yes reads the exact argv the shim recorded for
+  the injected failure, so a run that failed a different read than the one it
+  names cannot pass;
+- a legitimate run still accepted: `step2/legitimate/*` ends 0, performs the
+  surgery, calls the interpreter once and produces no `current/bin/_bin`, and
+  `step2/site2/first-call-accepted` and `step2/site3/first-call-accepted` assert
+  the same for the clean call each of those two sites needs before it can be
+  reached at all;
+- one shared guard rather than three inline ones: `step2/source/guard-definitions`
+  1, `step2/source/checked-calls` 3, and `step2/source/unguarded-readlink-calls`
+  2, the two being the bootstrap and the one inside the guard. These read the
+  FILE, for the same reason step 1's four source-level cases do.
+
+A CONSEQUENCE THAT REACHES BACK INTO STEPS 0 AND 1, the same one step 1 recorded
+and for the same reason. Every harness edit invalidates every retained capture,
+and this step also changed the shipped wrapper, which invalidates the step 1
+capture's SUBJECT binding as well as its instrument binding. All three captures
+were taken from the same final harness bytes on the same host, and they report
+34, 50 and 53 cases with 0 failures. All three plan commands are green on the
+reviewing Windows host through the capture substitution.
+
+THE PLAN NOW NAMES A RETAINED CAPTURE FOR STEP 2, and did not when this step was
+first published for review. Its file list held only the wrapper and the harness,
+so `--step 2` could be answered on a POSIX host and nowhere else and the reviewing
+Windows host exited 4. The step 2 code review ruled that a plan-owned evidence
+gap rather than an acceptable omission, and named the plan amendment as requestor
+authority. The plan's step 2 file list now names
+`docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt`, its command block names the
+matching `--step 2 --capture` command, and the capture is retained with the four
+digests that make it admissible.
+
+### Architecture check for Step 2
+
+The change stays inside the plan's boundary: the same one shipped file the scope
+anchors name, no new file in the shipped tree, and one new shell function whose
+name is local to the wrapper and is declared in the harness vocabulary so the
+shim coverage case still reads the file correctly. The harness and the captures
+remain under `docs/v0.27.0/` and are never packaged. `setenv` is read and
+digested, never written, and asserted byte-identical to the digest step 0
+recorded. The DDD-Hexagonal criterion does not apply to a Bash and Batch project.
+
+Two things were raised for the code review rather than settled alone, and both
+are now closed:
+
+- the wrapper is 131 lines against the plan's 115-line budget. The plan calls
+  that budget a review trigger rather than a gate and names the failure it is
+  meant to detect, guards written per site instead of shared. That cause is
+  measured absent, `step2/source/guard-definitions` 1 against
+  `step2/source/checked-calls` 3, so the overshoot is comment density in the
+  wrapper's own explanation of W2 and of the subshell trap rather than duplicated
+  guards. The action the trigger asks for is a review before it lands; the review
+  examined it and accepted it on that measured ground;
+- the plan named no retained capture and no resolved command for step 2, so the
+  step's evidence could not be read on a host that cannot create a symlink. The
+  review ruled that a plan-owned gap, the plan now names both, and the capture is
+  retained and asserted from the reviewing host.
+
+No, there is nothing that needs to be addressed. The girth trigger fired, was
+reviewed and was accepted with its named cause measured absent, and the evidence
+gap it was raised beside is closed rather than deferred.
+
+### Performance check for Step 2
+
+The wrapper gains one function call per read site, three per invocation at most,
+each running the same single `readlink` the site already ran. No read is
+performed twice, and the guard adds one emptiness test per site. The suite adds
+four wrapper runs and one shape snapshot per guarded site, and a snapshot walks a
+fixture of about a dozen entries once. No new computation grows with the size of
+a deployment, and nothing introduced here is O(n^2) or O(n log n).
+
+No, there is no performance issue that needs to be addressed.
+
+### Unit test coverage check for Step 2
+
+The 100 percent unit rule targets `src\pdfss\tests\unit`, which belongs to the
+consuming project; cplx has no pytest suite and no unit-tested class file, so
+there is no percentage to report and no legacy unit test is impacted by this
+step. The project default `ghog day` reports that same absence: `ghog check`
+green, then `ghog affected --no-cov` at exit 5 on `pytest not found on PATH`. The
+substituted gate is `bash src/utils/lint_shell.sh`, green over 44 tracked
+scripts, plus `shellcheck` on both the harness and the modified wrapper, each
+with no finding.
+
+The behavioural substitute is the step 2 suite: 53 cases, 0 failures, every claim
+about the stop measured from an injected run, and each failure case asserting its
+injection was OBSERVED before concluding anything from what followed it.
+
+No, there is no unit-tested class below 100 percent that needs completing.
+
+### Feature integrity for Step 2
+
+No existing feature is impaired, and the runs say so rather than the reasoning.
+The legitimate first call still ends 0, still performs the whole surgery, still
+leaves `python3` relinked to the wrapper, still calls the interpreter once, and
+still produces no `current/bin/_bin`. The already-surgered second call and the
+`-m venv` call are both accepted before their own sites are injected, so a guard
+that refused a good read would fail those cases rather than pass the failure
+ones.
+
+Step 1's evidence is unchanged by this step: `--step 1` still reports 50 cases
+and 0 failures against the guarded wrapper, so scoping the search path and
+failing closed do not interfere with each other.
+
+No, no feature-integrity evidence is still owed for Step 2.
 
 ## Step 3. No regression on the RHEL target
 
