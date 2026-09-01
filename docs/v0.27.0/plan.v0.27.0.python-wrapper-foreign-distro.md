@@ -242,14 +242,30 @@ POSIX IS THE REAL BOUNDARY, and the original wording of "any host" was wrong
 rather than merely loose. What steps 0 to 2 measure is symlink surgery, so a
 host that cannot create a symlink cannot reproduce it at all. The harness
 measures that with a probe before it plants anything, and a host that fails the
-probe either reads a retained measurement or exits 4. The exact command, which
-is the plan addition to the resolved validation set and is green on both a POSIX
-host and a Windows one, is
+probe either reads a retained measurement or exits 4. The exact commands, which
+are the plan additions to the resolved validation set and are green on both a
+POSIX host and a Windows one, are
 
 ```text
 bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 \
+     --wrapper docs/v0.27.0/wrapper.pre-change.verification-only \
      --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+
+bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 \
+     --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
 ```
+
+STEP 0'S COMMAND NAMES THE RETAINED WRAPPER, and from step 1 onward it must.
+Step 0 describes the PRE-CHANGE wrapper, step 1 rewrites the live one, and the
+subject binding then refuses step 0 against `src/install/env/python/bin/python`
+on purpose, because a capture describing `88c4e0d2` says nothing about the file
+that replaced it. That refusal is the binding working rather than a defect to
+route around, and it was observed before this paragraph was written.
+
+EVERY HARNESS EDIT INVALIDATES EVERY RETAINED CAPTURE, which is the price of
+binding a capture to its instrument. Adding the step 1 suite changed the harness
+digest, so both captures were retaken. The cost is deliberate: the alternative is
+a capture that outlives the code it described.
 
 THE RETAINED MEASUREMENT IS NOT A WAY OF PASSING WITHOUT RUNNING, and its
 authority takes FOUR digests rather than one. A capture answers two separate
@@ -340,6 +356,11 @@ measures is worthless.
 
 - `src/install/env/python/bin/python` (existing, to be updated)
 - `docs/v0.27.0/verify.wrapper-scope.sh` (existing, to be updated)
+- `docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt` (new, the retained capture)
+
+The capture is named here for the reason step 0's is: a host that cannot create
+a symlink reads it rather than running the suite, and a step whose evidence
+exists only in a terminal has no evidence.
 
 ### Step 1 goal
 
@@ -561,6 +582,7 @@ Each is a check that reports success without the thing it names having
 happened, which is the defect class this umbrella exists to close. The plan
 carries controls against all six rather than trusting that the last fix was the
 final one.
+
 ## Line budget
 
 `src/install/env/python/bin/python` is 91 lines. The change adds a save, an
