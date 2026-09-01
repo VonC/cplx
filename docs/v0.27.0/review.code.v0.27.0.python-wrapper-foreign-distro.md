@@ -4046,3 +4046,878 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-09-01T17:07:09+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 python-wrapper-foreign-distro (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 4
+Review round: 1
+
+### Code review evidence for step 4 python-wrapper-foreign-distro (round 1)
+
+request_index_tree: 3226f2b87aba34263072e2672ddc449967e7aef5
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(vscode): add surgered
+group 1 path: .vscode/settings.json
+group 2: test(wrapper): freeze the harness and drop a coined word
+group 2 path: docs/v0.27.0/verify.wrapper-scope.sh
+group 3: test(wrapper): retake the step 0 capture for the freeze
+group 3 path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+group 4: test(wrapper): retake the step 1 capture for the freeze
+group 4 path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+group 5: test(wrapper): retake the step 2 capture for the freeze
+group 5 path: docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
+group 6: test(wrapper): retake the RHEL no-regression capture for the freeze
+group 6 path: docs/v0.27.0/verify.wrapper.rhel.txt
+group 7: docs(python-wrapper-foreign-distro): record the step 4 freeze
+group 7 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/verify.wrapper-scope.sh
+staged path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper.rhel.txt
+```
+
+### Requestor assessment for step 4 python-wrapper-foreign-distro (round 1)
+
+#### Assessment for step 4 python-wrapper-foreign-distro (round 1)
+
+Step 4 is NOT fully implemented, and this round asks the review to rule on that
+deliberately rather than to discover it. The freeze is done; the manifest, the
+pipeline landing, the build and its gate control cannot be done until the freeze
+COMMIT exists.
+
+The ordering is forced by the plan's own decision Q08/H2, quoted from
+`### Why the manifest names an EARLIER commit`: "A commit identity is computed
+over its tree, the tree contains the manifest, so writing the id into the
+manifest changes the tree and therefore the id. This is impossible rather than
+merely awkward." So step 4 is two landings, and this is landing one.
+
+What I am asking for is a ruling on that reading, and, if it holds,
+authorization to commit the freeze so landing two becomes possible. If the
+review reads step 4 as one landing, then the criterion cannot be met at all and
+the plan needs a decision rather than the work needing a change.
+
+#### Test evidence for step 4 python-wrapper-foreign-distro (round 1)
+
+`docs/v0.27.0/verify.wrapper-scope.sh` is final at `fab864ee`, and every suite
+was run against those exact bytes on RHEL 9.8, in one session:
+
+- `--step 0`: 34 cases, 0 failures;
+- `--step 1`: 50 cases, 0 failures;
+- `--step 2`: 53 cases, 0 failures;
+- `--step 3`: 40 cases, 0 failures, run identity
+  `rhel-wrapper-20260901T145429Z`, with its `post-run cleanup` transcript
+  retaken in the same session.
+
+All four retained captures name `fab864ee`. The four plan-owned capture commands
+then ran on the reviewing Windows host and all four report `OBJECTIVE MET`.
+
+That is the freeze criterion answered as the plan states it: "the harness is
+FINAL and committed, and steps 0 to 3 passed against those bytes". The commit
+half is what this round asks for.
+
+#### Static check evidence for step 4 python-wrapper-foreign-distro (round 1)
+
+`shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`:
+no finding. `bash src/utils/lint_shell.sh`: clean over 44 tracked scripts. Both
+ran on the frozen bytes, after the captures were taken from them.
+
+#### Coverage evidence for step 4 python-wrapper-foreign-distro (round 1)
+
+The project default `ghog day` runs `ghog check` green, then `ghog affected
+--no-cov` stops at exit 5 on `pytest not found on PATH`. cplx has no
+`pyproject.toml`, no tests directory and no pytest suite, so there is no
+percentage to report; that is the project's standing state and not a finding
+about this change.
+
+#### What the freeze carries, and why the rename is in it for step 4 python-wrapper-foreign-distro (round 1)
+
+A freeze is the last moment the harness can be edited at all, so a wording
+repair that is still owed has to land in it or never.
+
+`surgered` was never an English word. The plan's metaphor for the wrapper's
+first-call work is SURGERY, a real noun the harness still uses nine times, and
+an earlier session turned it into a verb that does not exist. The consequence
+was not cosmetic: a spell-corrector kept rewriting `already-surgered` to
+`already-surged`, the nearest real word. It did so twice during the step 3
+exchange, once AFTER the reviewer had assessed the corrected text, and left
+alone it would have been committed, because every commit group stages with
+`git add -A`. `converted` is the design document's own term for the same state,
+at its lines 116 and 171.
+
+The rename touched four sites in the harness, the step 1 capture header, and the
+step 2 section of the validation record. It changed the harness digest, which is
+why all four captures were retaken.
+
+#### What remains, and what it depends on for step 4 python-wrapper-foreign-distro (round 1)
+
+Recorded as `Missing work for Step 4` in the validation record:
+
+- the manifest, generated from the frozen bytes in a commit after the freeze,
+  carrying `freeze_commit`, `harness_path` and `file_sha256`. Blocked on the
+  freeze commit;
+- the pipeline copies at `tools/wrapper_scope_verify.verification-only.sh` and
+  `tools/wrapper_scope.manifest.verification-only.txt`, plus the
+  `wrapperScope()` probe in `ci/Jenkinsfile.diagnostics`. Blocked on the
+  manifest, and a change in another repository rather than in this one;
+- one build producing `a.evidence/verify-wrapper-scope.debian.txt`. The Jenkins
+  job is reachable again, build 130 reports SUCCESS, so the sealed-Vault outage
+  of 2026-08-29 no longer blocks it;
+- a control proving the unpaired-edit gate is live: a deliberately mismatched
+  copy must FAIL the probe.
+
+#### Architecture evidence for step 4 python-wrapper-foreign-distro (round 1)
+
+This step changes no shipped file and adds no file to this repository. The
+harness keeps the shape step 3 gave it, two host gates and one capture
+cross-check, and this commit only renames a word in it. The DDD-Hexagonal
+criterion does not apply to a Bash and Batch project.
+
+#### Performance evidence for step 4 python-wrapper-foreign-distro (round 1)
+
+Nothing was added. The rename is four comment and title sites; the captures are
+the same runs as before, over the same fixtures and the same deployment recipe.
+
+#### Feature integrity evidence for step 4 python-wrapper-foreign-distro (round 1)
+
+No behaviour changed. All four suites report the same case counts and the same
+zero failures as the runs step 3 published, 34, 50, 53 and 40, which is the
+evidence that a rename of comment text changed nothing measurable.
+
+### Implementation report for step 4 python-wrapper-foreign-distro (round 1)
+
+#### What changed for step 4, landing one for step 4 python-wrapper-foreign-distro (round 1)
+
+Six files, and no new file in this repository.
+
+**The freeze.** `docs/v0.27.0/verify.wrapper-scope.sh` is final at `fab864ee`.
+The only change since step 3 is the rename of the coined word `surgered` to
+`converted` at four sites, three comments and one section title. Steps 0 to 3
+were then run against those exact bytes on RHEL 9.8 and all four report
+`OBJECTIVE MET`.
+
+**The four captures, retaken.** 34, 50, 53 and 40 cases, 0 failures each, all
+naming `fab864ee`. The step 1 capture header carries the same rename, so no
+retained text keeps the invented word. The step 2 capture changes by more than
+its digest line because the suite prints a section title that carried the word.
+The step 3 capture cost a second deployment of the published archive, 1.9 GB
+under a throwaway prefix, because the previous run's prefix had already been
+removed and a capture cannot be stitched from two runs; its `post-run cleanup`
+transcript was retaken in the same session under run identity
+`rhel-wrapper-20260901T145429Z`.
+
+**The validation record** carries the `No` verdict, the forced ordering that
+explains it, and the `Missing work for Step 4` list.
+
+**`.vscode/settings.json`** is of outside origin, staged by the commit handoff's
+repository-wide `git add -A`. It adds `surgered` to the cSpell word list. It is
+kept rather than reverted, and the group says why: the review transcript still
+quotes the word six times, in rounds already committed that must not be
+rewritten, so cSpell still meets it when it reads this tree.
+
+#### Why the rename is in the freeze rather than in its own commit for step 4 python-wrapper-foreign-distro (round 1)
+
+Because after the freeze there is no legitimate way to make it. The plan's step
+4 criterion is explicit: "no later step edits them. A step 5 that had to change
+the harness would invalidate the identity this step published." A wording repair
+deferred past the freeze is a wording repair that never happens, or one that
+costs the manifest its meaning.
+
+The repair is also not cosmetic, which is the part worth checking rather than
+taking on trust. `already-surgered` was rewritten to `already-surged` by
+something in the authoring environment twice during the step 3 exchange. The
+second time was after the step 3 reviewer had assessed the corrected text, and
+the corruption was sitting unstaged in the working tree at the convergence gate,
+where the next `git add -A` would have committed it. A word no dictionary
+contains invites exactly that.
+
+#### What was checked rather than assumed for step 4 python-wrapper-foreign-distro (round 1)
+
+- **The Jenkins job is reachable again.** The operations note records CI down on
+  2026-08-29 with a sealed Vault. Build 130 now reports SUCCESS, so the build
+  criterion of landing two is reachable rather than blocked.
+- **The pipeline repository is ready for the probe.** Its `develop` branch
+  already carries ten `tools/*.verification-only.*` files and a `verifyCplx()`
+  parallel over the relocation probes, so `wrapperScope()` lands beside them
+  through the flow the plan names rather than needing a new one.
+- **The design document already uses `converted`** for this exact state, at its
+  lines 116 and 171, so the rename adopts the effort's own vocabulary rather
+  than inventing a second one.
+
+### Change summary for step 4 python-wrapper-foreign-distro (round 1)
+
+#### Staged paths for step 4 python-wrapper-foreign-distro (round 1)
+
+Index tree `3226f2b87aba34263072e2672ddc449967e7aef5`, seven staged paths:
+
+- `.vscode/settings.json` (of outside origin)
+- `docs/v0.27.0/verify.wrapper-scope.sh` (the freeze)
+- `docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt`
+- `docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt`
+- `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt`
+- `docs/v0.27.0/verify.wrapper.rhel.txt`
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+
+No new file, and nothing under `src/`. The manifest step 4 owes is deliberately
+absent: it cannot exist before the freeze commit it must name.
+
+The review transcript is not staged: it grows with every round of this exchange,
+so it belongs to the residual pass of an authorized commit rather than to a
+group fixed now.
+
+#### Commit plan for step 4 python-wrapper-foreign-distro (round 1)
+
+`commit-plan-check --format json` reports `state: valid`, `ready: true`, no
+diagnostics, every staged path covered exactly once by seven groups in
+dependency order:
+
+1. `chore(vscode): add surgered`
+2. `test(wrapper): freeze the harness and drop a coined word`
+3. `test(wrapper): retake the step 0 capture for the freeze`
+4. `test(wrapper): retake the step 1 capture for the freeze`
+5. `test(wrapper): retake the step 2 capture for the freeze`
+6. `test(wrapper): retake the RHEL no-regression capture for the freeze`
+7. `docs(python-wrapper-foreign-distro): record the step 4 freeze`
+
+Group 2 is THE FREEZE COMMIT. If this round converges, that commit's id is what
+the manifest of landing two will carry as `freeze_commit`, with `harness_path`
+`docs/v0.27.0/verify.wrapper-scope.sh` and `file_sha256` `fab864ee...` over its
+file bytes. The manifest is generated from those bytes by command rather than
+hand-written, which is the plan's requirement, and it lands in its own later
+commit.
+
+The outside-origin entry leads because nothing depends on it, the freeze follows
+because the captures answer to it, and the validation record trails as the
+documentation group.
+
+### Writer response for step 4 python-wrapper-foreign-distro (round 1)
+
+Writer response: #### Response for the first round on step 4 for step 4 python-wrapper-foreign-distro (round 1)
+
+This is round 1 for step 4, so there is no earlier answer on this step to accept
+or dispute. One thing is different from every earlier round of this effort and
+it is the whole reason this request exists in this shape.
+
+**This step cannot converge on its own criteria, and I am not pretending it
+can.** The validation record says `No. Step 4 has NOT been fully implemented.`
+and carries a `Missing work for Step 4` list. That is not an omission I am
+asking to be excused: it is the plan's own decision Q08/H2 working. The manifest
+names the commit that froze the harness, and a commit id cannot be written into
+a file that commit contains, so the freeze must land before the manifest can be
+generated at all.
+
+What I am asking the review to rule on:
+
+- **is landing one a legitimate unit to commit?** Its own criterion, "the
+  harness is FINAL and committed, and steps 0 to 3 passed against those bytes",
+  is answered except for the commit, which is what the gate authorizes;
+- **if it is not**, then step 4 cannot be met as written and the plan needs a
+  decision rather than the work needing a change. That is the same shape as the
+  step 2 capture question, which this review ruled a plan-owned gap and returned
+  to me as requestor authority.
+
+Three lessons from the earlier rounds are applied here rather than rediscovered.
+
+**The request is published against the LIVE index**, `3226f2b8`, with the check
+run and its record staged first.
+
+**Every capture comes from the final bytes.** The rename was made first, the
+static gates run, then all four suites and all four captures taken, then the
+four commands verified from this host. No harness edit follows the captures, and
+all four name `fab864ee`.
+
+**The evidence floor is stated as it is.** `ghog day` exits 5 on `pytest not
+found on PATH`, because cplx has no Python test suite at all. That is the
+project's standing state and it was equally true before this step.
+
+One boundary I did not cross. Landing two includes a commit and push to the
+pipeline repository and a Jenkins build. That is outward-facing work in another
+repository, and the plan itself calls it "a change in another repository rather
+than a change this plan's steps make", so it is not folded into an authorized
+cplx commit and I will bring it to the human before doing it.
+
+### Reviewer focus for step 4 python-wrapper-foreign-distro (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-09-01T18:01:57+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Baseline index tree: 3226f2b87aba34263072e2672ddc449967e7aef5
+
+Assessed index tree: 3226f2b87aba34263072e2672ddc449967e7aef5
+
+### Implementation check for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Result: No. Step 4 has NOT been fully implemented.
+
+The frozen harness and its four retained captures are internally consistent and all six mandatory validation commands pass. However, the exact plan's Step 4 also requires the later manifest, the pipeline copies and probe, one build capture, and a deliberately mismatched-copy failure control. None is present in this review subject, so the staged validation plan's `Missing work for Step 4` section is accurate.
+
+Architecture: the staged Bash wording-only change introduces no layer or dependency violation. Performance: it introduces no new computation. Unit coverage: no class file or unit-test target is changed. Feature integrity: the four retained suites remain bound to harness digest `fab864ee` and report zero failures; no regression is observed in the freeze landing itself.
+
+Validation plan effects: No reviewer edit was made. The staged Step 4 validation rows already use the required exact `No. Step 4 has NOT been fully implemented.` sentence and provide a concrete `Missing work for Step 4` list. Validation caused no tracked, untracked, or ignored side effect in the ordered validation path set.
+
+### Pre-repair mandatory checks and coverage for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+All six commands passed against the request-time index tree `3226f2b87aba34263072e2672ddc449967e7aef5` before any reviewer repair; no repair was made:
+
+- `bash src/utils/lint_shell.sh`: exit 0, 44 tracked scripts, clean.
+- Step 0 capture command: exit 0, `OBJECTIVE MET for step 0`.
+- Step 1 capture command: exit 0, `OBJECTIVE MET for step 1`.
+- Step 2 capture command: exit 0, `OBJECTIVE MET for step 2`.
+- Step 3 capture command: exit 0, `OBJECTIVE MET for step 3`.
+- `shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`: exit 0, no finding.
+
+The repository has no class-based unit-test target in this step, so coverage was assessed from the staged Bash and retained acceptance evidence without running Groundhog.
+
+### Resolved validation set and sources for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The request and current resolver agree on the same ordered six-command set: the project `bash src/utils/lint_shell.sh` gate; the four plan-owned Step 0 through Step 3 harness commands; and the request-owned `shellcheck` command. Every command was run.
+
+### Resolver drift and direction for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+No resolver drift was found. `.review-validation` still declares `bash src/utils/lint_shell.sh`, the exact plan still declares the four capture commands, and the request addition remains the `shellcheck` command.
+
+### Repository state around validation for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The request-time, baseline, and post-validation index tree are all `3226f2b87aba34263072e2672ddc449967e7aef5`. Validation-state comparison reports no tracked, untracked, or ignored path change. The umbrella digest remained `9e85a83e58c8e23983f9965f1c8310087e0a71f655595e42350739a73c77f404`.
+
+### Repair inventory for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Repairs made:
+
+- No reviewer repair was made. There are no repaired paths and no substantive or polishing-only reviewer change.
+
+Paths staged:
+
+- The reviewed index contains seven paths:
+- - `.vscode/settings.json`
+- - `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+- - `docs/v0.27.0/verify.wrapper-scope.sh`
+- - `docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt`
+- - `docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt`
+- - `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt`
+- - `docs/v0.27.0/verify.wrapper.rhel.txt`
+- The harness and capture paths are attributable to the freeze evidence. `.vscode/settings.json` is explicitly described by the requestor as outside-origin and is not named by Step 4, so exact staged-scope readiness fails.
+
+### Commit plan assessment for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The independent `commit-plan-check.bat --format json` run exited 0 with `state: valid`, `ready: true`, seven ordered groups, all seven staged paths covered exactly once, and no diagnostic. `a.commit` remains mechanically accurate for the current index and was not amended. Mechanical grouping does not cure the incomplete implementation or the outside-step `.vscode/settings.json` scope finding.
+
+### Findings and boundaries for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Unresolved findings:
+
+Two readiness-blocking findings remain:
+
+1. The exact reviewed identity is Step 4, not a separately declared freeze sub-step. The plan's Step 4 completion criteria require the manifest, pipeline copies and probe, one build capture, and the mismatched-copy failure control in addition to the freeze. The request and staged validation plan both confirm those four elements are missing. Complete-implementation readiness therefore fails even though the freeze evidence passes.
+2. `.vscode/settings.json` is staged but is explicitly outside-origin and not named by Step 4. Adding the obsolete coined word to a workspace dictionary because an immutable review transcript quotes it is not part of this implementation step. Exact staged-scope readiness therefore fails.
+
+Boundary-crossing work:
+
+- Producing the manifest requires an earlier committed freeze identity, and landing the probe and obtaining the build require work in the pipeline repository. Those are genuine ordering and repository-boundary constraints; the reviewer did not perform them. They do not allow a Step 4 review to be called complete under the current unsplit plan identity.
+
+### Writer instructions for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Resolve the plan/workflow boundary before republishing this exact review:
+
+1. Use requestor or human plan authority to split the existing Step 4 into separately reviewable ordered units, such as a freeze sub-step followed by a manifest/handoff/build sub-step, if the freeze must receive its own commit gate. Otherwise publish Step 4 only after every current Step 4 completion criterion exists. Do not ask the reviewer to treat the staged `No` verdict as complete.
+2. Remove `.vscode/settings.json` from the exact Step 4 review subject, or route that independent dictionary change through its own valid scope. Do not carry an outside-origin workspace preference merely because the transcript contains historical wording.
+3. Preserve the passing frozen harness and captures; no defect was found in their current bytes or mandatory validation evidence.
+
+### Decision rationale for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Changes are requested because two of the six readiness-floor results fail: implementation completeness and attributable staged scope. Exact identity, mandatory validation and coverage, repository boundaries, absence of reviewer repairs, and mechanical `a.commit` validation otherwise pass. A commit-ready recommendation would contradict both the plan's unsplit Step 4 criteria and the staged implementation-check verdict, and it cannot be used as a partial-landing authorization.
+
+### Final reviewer decision for step 4 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-1 -->
+
+## Round 1 by human - Step 4 - escalation
+
+- Recorded: 2026-09-01T18:18:47+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4
+- Outcome: escalation
+
+## Closing the step 4 exchange after the plan split (exchange 1)
+
+The round 1 answer for step 4 requested changes with two findings, and this
+exchange is closed rather than continued because the first of them changes the
+reviewed identity itself.
+
+The answer's writer instruction 1 offered two ways out and the human chose the
+first: split step 4 into separately reviewable ordered units. The plan now
+carries `Step 4A`, the freeze, and `Step 4B`, the manifest, the pipeline
+handoff, the build and its gate control, with a `### Why step 4 is two
+sub-steps` section recording that decision Q08/H2 forces the ordering and that
+this review refused the unsplit step.
+
+A replacement round under this exchange would carry the same `step 4` identity
+the answer refused, so the work is republished as a new exchange for step 4A
+instead. Nothing measured here is discarded: the frozen harness and its four
+captures are unchanged, and the answer recorded no defect in them.
+
+Writer instruction 2 is applied too: `.vscode/settings.json` is out of the
+staged set. The dictionary entry is of outside origin and not named by this
+step, so it is left as a working-tree change to travel under its own scope.
+
+<!-- review-entry-id: escalation-round-1 -->
+
+## Round 2 by human - Step 4 - human-resolution
+
+- Recorded: 2026-09-01T18:19:05+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4
+- Outcome: human-resolution
+
+## Human decision on the escalated step 4 exchange (exchange 1)
+
+The human chose writer instruction 1 of the round 1 answer: split step 4 into
+separately reviewable ordered units. That decision is authoritative and it
+supersedes this exchange's identity rather than any evidence inside it.
+
+The exchange is ARCHIVED rather than resolved, because its evidence is worth
+keeping: the round 1 request records the freeze and its four captures, and the
+answer records why an unsplit step 4 cannot converge. Both are the reasoning
+behind the plan's new `### Why step 4 is two sub-steps` section, and a later
+reader of that section should be able to reach them.
+
+The work itself is unchanged and is republished as a new exchange for step 4A.
+The answer recorded no defect in the frozen harness or its captures.
+
+<!-- review-entry-id: human-resolution-round-2 -->
+
+## Round 2 by requestor - Step 4
+
+- Recorded: 2026-09-01T18:24:07+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 python-wrapper-foreign-distro (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 4
+Review round: 2
+
+### Code review evidence for step 4 python-wrapper-foreign-distro (round 2)
+
+request_index_tree: a95418acf53f9f524f15dc52bfc536a388bfa0ac
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(plan): split step 4 into the freeze and the handoff
+group 1 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+group 2: test(wrapper): freeze the harness and drop a coined word
+group 2 path: docs/v0.27.0/verify.wrapper-scope.sh
+group 3: test(wrapper): retake the step 0 capture for the freeze
+group 3 path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+group 4: test(wrapper): retake the step 1 capture for the freeze
+group 4 path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+group 5: test(wrapper): retake the step 2 capture for the freeze
+group 5 path: docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
+group 6: test(wrapper): retake the RHEL no-regression capture for the freeze
+group 6 path: docs/v0.27.0/verify.wrapper.rhel.txt
+group 7: docs(python-wrapper-foreign-distro): record the step 4 freeze
+group 7 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/verify.wrapper-scope.sh
+staged path: docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt
+staged path: docs/v0.27.0/verify.wrapper.rhel.txt
+```
+
+### Requestor assessment for step 4 python-wrapper-foreign-distro (round 2)
+
+#### Assessment for step 4 python-wrapper-foreign-distro (round 2)
+
+Step 4 is fully implemented, against the criteria the plan now carries for it.
+Round 1 refused the unsplit step and named the fix as plan authority; the human
+chose the split, and step 4 is now the freeze alone.
+
+The harness is final at `fab864ee`, steps 0 to 3 report `OBJECTIVE MET` against
+exactly those bytes on RHEL 9.8, all four retained captures were retaken from
+them and name that digest, and the four plan-owned capture commands are green on
+the reviewing Windows host. What step 4 still owed in round 1, the manifest, the
+pipeline copies and probe, the build and its control, is now `Step 4B` with its
+own criteria and its own missing-work list.
+
+#### Test evidence for step 4 python-wrapper-foreign-distro (round 2)
+
+Every suite was run against the frozen bytes, in one session on RHEL 9.8:
+
+- `--step 0`: 34 cases, 0 failures;
+- `--step 1`: 50 cases, 0 failures;
+- `--step 2`: 53 cases, 0 failures;
+- `--step 3`: 40 cases, 0 failures, run identity
+  `rhel-wrapper-20260901T145429Z`, with its `post-run cleanup` transcript
+  retaken in the same session.
+
+All four retained captures name `fab864ee`. The four plan commands then ran on
+the reviewing Windows host and all four report `OBJECTIVE MET`.
+
+Criterion by criterion:
+
+- the harness is final and steps 0 to 3 passed against these bytes: the four
+  runs above, and the commit half is what this gate authorizes;
+- every retained capture names the frozen digest: all four verdict blocks carry
+  `harness fab864ee`, and the four capture commands re-assert it from this host,
+  which is the identity binding doing its job rather than a claim;
+- the freeze commit is the one step 4B's manifest will name: it is group 2 of
+  the commit plan, and its id becomes `freeze_commit`.
+
+#### Static check evidence for step 4 python-wrapper-foreign-distro (round 2)
+
+`shellcheck docs/v0.27.0/verify.wrapper-scope.sh src/install/env/python/bin/python`:
+no finding. `bash src/utils/lint_shell.sh`: clean over 44 tracked scripts. Both
+ran on the frozen bytes, after the captures were taken from them.
+
+#### Coverage evidence for step 4 python-wrapper-foreign-distro (round 2)
+
+The project default `ghog day` runs `ghog check` green, then `ghog affected
+--no-cov` stops at exit 5 on `pytest not found on PATH`. cplx has no
+`pyproject.toml`, no tests directory and no pytest suite, so there is no
+percentage to report; that is the project's standing state and not a finding
+about this change.
+
+#### What the freeze carries, and why the rename is in it for step 4 python-wrapper-foreign-distro (round 2)
+
+A freeze is the last moment the harness can be edited at all, so a wording
+repair still owed has to land in it or never.
+
+`surgered` was never an English word. The plan's metaphor for the wrapper's
+first-call work is SURGERY, a real noun the harness still uses nine times, and
+an earlier session turned it into a verb that does not exist. The consequence
+was not cosmetic: a spell-corrector kept rewriting `already-surgered` to
+`already-surged`, the nearest real word. It did so twice during the step 3
+exchange, once AFTER the reviewer had assessed the corrected text, and left
+alone it would have been committed, because every commit group stages with
+`git add -A`. `converted` is the design document's own term for the same state,
+at its lines 116 and 171.
+
+The rename touched four sites in the harness, the step 1 capture header, and the
+step 2 section of the validation record. It changed the harness digest, which is
+why all four captures were retaken.
+
+#### Architecture evidence for step 4 python-wrapper-foreign-distro (round 2)
+
+This step changes no shipped file and adds no file to this repository. The
+harness keeps the shape step 3 gave it, two host gates and one capture
+cross-check, and this change renames a word in it. The plan gains a split whose
+own rationale section records the cause, the review that found it and the
+decision. The DDD-Hexagonal criterion does not apply to a Bash and Batch
+project.
+
+#### Performance evidence for step 4 python-wrapper-foreign-distro (round 2)
+
+Nothing was added. The rename is four comment and title sites; the captures are
+the same runs as before, over the same fixtures and the same deployment recipe,
+and their case counts are unchanged at 34, 50, 53 and 40.
+
+#### Feature integrity evidence for step 4 python-wrapper-foreign-distro (round 2)
+
+No behaviour changed, and the runs say so rather than the reasoning: all four
+suites report the same case counts and the same zero failures as the runs step 3
+published. That is the evidence a rename of comment text changed nothing
+measurable.
+
+### Implementation report for step 4 python-wrapper-foreign-distro (round 2)
+
+#### What changed since round 1 for step 4 python-wrapper-foreign-distro (round 2)
+
+Round 1 found no defect in the freeze evidence and refused the step on its
+identity: step 4's criteria required the manifest, the pipeline copies, the
+build and the control in addition to the freeze, so a `No` verdict could not
+serve as a partial-landing authorization. Two things changed in response, and
+the measured work changed not at all.
+
+**The plan splits step 4.**
+`docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` gains
+`### Why step 4 is split, and why the freeze keeps its number`, restates
+`Step 4` as the freeze with the four retaken captures in its file list, and adds
+`Step 4B` for the manifest, the pipeline copies and probe, the build and its
+mismatched-copy control. No criterion changed: every condition step 4 carried is
+still carried by one of the two, and the surviving references now name the
+sub-step that owns them.
+
+The validation record follows the same split: `## Step 4` with a `Yes` verdict
+and its four sub-sections, and `## Step 4B` with its goal and a
+`Missing work for Step 4B` list.
+
+**`.vscode/settings.json` left the staged set**, which is round 1's writer
+instruction 2. It is of outside origin and not named by this step. I unstaged it
+rather than reverting it, so someone else's edit is not discarded; it travels
+under its own scope whenever its owner wants it.
+
+**Nothing else moved.** The harness is the same `fab864ee`, the four captures
+are the same runs with the same case counts, and the six mandatory commands were
+re-run and are green.
+
+#### Why the freeze keeps the bare number for step 4 python-wrapper-foreign-distro (round 2)
+
+Round 1's wording suggested a freeze sub-step, and `4A` was the obvious label. I
+tried it and the protocol refused, which is worth recording because the
+transcript shows the attempt.
+
+A review exchange pins its implementation step for its lifetime. There is no
+operation that retires a live `round-in-progress` exchange: `cancel` requires a
+convergence gate, `complete --force` requires an abandoned mid-round shape, and
+`escalate` followed by `archive` clears the stopped state but starts a fresh
+round under the SAME step. A `status` under `4A` reports `coordination context
+differs from core context: implementation step (artifact 4, core 4A)`.
+
+So the unit already under review keeps its identity, its ordered continuation is
+`Step 4B`, and the plan says so where a reader expecting a `4A` will look. The
+escalate and archive entries in the transcript are that attempt rather than a
+stopped handoff, and round 2 is the fresh round the archive started.
+
+#### What step 4B owes, unchanged from round 1 for step 4 python-wrapper-foreign-distro (round 2)
+
+The manifest generated from the frozen bytes in a commit after the freeze
+commit; the pipeline copies and the `wrapperScope()` probe; one build producing
+`a.evidence/verify-wrapper-scope.debian.txt`; and a control proving a
+deliberately mismatched copy FAILS the probe. The Jenkins job is reachable
+again, build 130 reports SUCCESS, so none of it is blocked by the sealed-Vault
+outage of 2026-08-29.
+
+### Change summary for step 4 python-wrapper-foreign-distro (round 2)
+
+#### Staged paths for step 4 python-wrapper-foreign-distro (round 2)
+
+Index tree `a95418acf53f9f524f15dc52bfc536a388bfa0ac`, seven staged paths:
+
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` (the split)
+- `docs/v0.27.0/verify.wrapper-scope.sh` (the freeze)
+- `docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt`
+- `docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt`
+- `docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt`
+- `docs/v0.27.0/verify.wrapper.rhel.txt`
+- `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md`
+
+`.vscode/settings.json` is NOT among them any more, which is round 1's writer
+instruction 2. It is of outside origin and not named by this step, so it stays a
+working-tree change to travel under its own scope.
+
+No new file, and nothing under `src/`. The manifest is deliberately absent: it is
+step 4B's output and cannot exist before the freeze commit it must name.
+
+The review transcript is not staged: it grows with every round of this exchange,
+so it belongs to the residual pass of an authorized commit rather than to a
+group fixed now.
+
+#### Commit plan for step 4 python-wrapper-foreign-distro (round 2)
+
+`commit-plan-check --format json` reports `state: valid`, `ready: true`, no
+diagnostics, every staged path covered exactly once by seven groups in
+dependency order:
+
+1. `docs(plan): split step 4 into the freeze and the handoff`
+2. `test(wrapper): freeze the harness and drop a coined word`
+3. `test(wrapper): retake the step 0 capture for the freeze`
+4. `test(wrapper): retake the step 1 capture for the freeze`
+5. `test(wrapper): retake the step 2 capture for the freeze`
+6. `test(wrapper): retake the RHEL no-regression capture for the freeze`
+7. `docs(python-wrapper-foreign-distro): record the step 4 freeze`
+
+GROUP 2 IS THE FREEZE COMMIT. If this round converges, that commit's id is what
+step 4B's manifest carries as `freeze_commit`, with `harness_path`
+`docs/v0.27.0/verify.wrapper-scope.sh` and `file_sha256` `fab864ee...` over its
+file bytes, generated by command rather than hand-written.
+
+The plan leads because the split is what makes the rest reviewable, the freeze
+follows because the captures answer to it, and the validation record trails as
+the documentation group.
+
+### Writer response for step 4 python-wrapper-foreign-distro (round 2)
+
+Writer response: #### Response to the round 1 answer for step 4 python-wrapper-foreign-distro (round 2)
+
+The round 1 answer is accepted in full. There is no disagreement to record, and
+no reviewer repair was made in it to preserve.
+
+Its two findings were right, and the first one was the important one: a step
+whose criteria span two commits cannot be reviewed or gated as one unit, and a
+`No` verdict cannot serve as a partial-landing authorization. I asked the review
+to treat the staged `No` as a landing, and it correctly declined.
+
+- **writer instruction 1, the plan/workflow boundary.** The human chose the
+  first option: split step 4 into separately reviewable ordered units. The plan
+  now carries `### Why step 4 is split, and why the freeze keeps its number`,
+  a `Step 4` that is the freeze alone, and a `Step 4B` for the manifest, the
+  pipeline copies and probe, the build and its mismatched-copy control. No
+  criterion changed: every condition step 4 carried is still carried by one of
+  the two. The validation record follows the same split, `Step 4` Yes and
+  `Step 4B` not started with its own missing-work list;
+- **writer instruction 2, `.vscode/settings.json`.** Out of the staged set. It
+  is of outside origin and not named by this step, so it stays a working-tree
+  change to travel under its own scope rather than riding this one.
+
+One thing about this exchange that the transcript will show and that I would
+rather explain than leave to be inferred.
+
+I tried to retire this exchange and republish the freeze under a `4A` identity,
+which is what the answer's wording suggested. The protocol does not allow it:
+`cancel` requires a convergence gate, `complete --force` requires an abandoned
+mid-round shape, and `escalate` then `archive` clears the stopped state but
+starts a fresh round under the SAME implementation step. A `status` under `4A`
+reports `coordination context differs from core context: implementation step
+(artifact 4, core 4A)`. So the escalate and archive entries in the transcript
+are that attempt, not a stopped handoff, and the round 2 you are reading is the
+fresh round archive started.
+
+The consequence is recorded in the plan rather than hidden: the freeze keeps the
+bare `Step 4` number because a review exchange pins its implementation step for
+its lifetime, and renaming the unit already under review would make every later
+operation report `inconsistent`. If the review would rather see a `4A` label,
+that costs a new exchange after this one completes, and I would rather be told
+than guess.
+
+### Reviewer focus for step 4 python-wrapper-foreign-distro (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-2 -->
+
+## Round 2 by reviewer - Step 4
+
+- Recorded: 2026-09-01T19:23:58+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Baseline index tree: a95418acf53f9f524f15dc52bfc536a388bfa0ac
+
+Assessed index tree: a95418acf53f9f524f15dc52bfc536a388bfa0ac
+
+### Implementation check for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Result: Yes. Step 4 has been fully implemented.
+
+The amended plan makes the existing Step 4 identity the freeze-only unit and moves every manifest and handoff obligation intact to Step 4B. The harness is final at `fab864ee`; all four retained captures name those bytes; the Step 0 through Step 3 suites report 34, 50, 53, and 40 cases with zero failures; and the local mandatory checks independently accept the captures.
+
+Architecture: no shipped component or dependency boundary changes. Performance: no computation changes. Unit coverage: no class or pytest target exists in this Bash repository; the applicable lint, shellcheck, and retained harness evidence all pass. Feature integrity: case counts and zero-failure results remain unchanged.
+
+Validation plan effects: No reviewer edit was made. The staged validation plan already records the exact `Yes. Step 4 has been fully implemented.` result with complete architecture, performance, unit-coverage, and feature-integrity sections. Step 4B remains independently `No` with its own concrete missing-work list. Validation produced no tracked, untracked, or ignored side effect in the ordered path set.
+
+### Pre-repair mandatory checks and coverage for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+All six mandatory commands passed against index tree `a95418acf53f9f524f15dc52bfc536a388bfa0ac`: the project lint gate reported 44 tracked scripts and clean; each Step 0 through Step 3 harness command exited 0 with `OBJECTIVE MET`; and shellcheck exited 0 with no finding. No reviewer repair was made. Coverage was assessed from the Bash source and retained acceptance evidence without Groundhog, as required by reviewer mode.
+
+### Resolved validation set and sources for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The request and current resolver agree on the same ordered six-command set: the project `bash src/utils/lint_shell.sh` gate, the four plan-owned Step 0 through Step 3 harness commands, and the request-owned shellcheck command. Every command was run successfully.
+
+### Resolver drift and direction for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+No resolver drift was found. The project declaration, exact plan additions, and request addition resolve to the same commands and source labels carried by Round 2.
+
+### Repository state around validation for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The request-time, baseline, assessed, and post-validation index tree are all `a95418acf53f9f524f15dc52bfc536a388bfa0ac`. Validation-state comparison reports no tracked, untracked, or ignored path change. The umbrella digest remained `9e85a83e58c8e23983f9965f1c8310087e0a71f655595e42350739a73c77f404`. The unrelated `.vscode/settings.json` and protocol transcript changes remain unstaged and do not overlap the reviewed paths.
+
+### Repair inventory for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The independent `commit-plan-check.bat --format json` run exited 0 with `state: valid`, `ready: true`, seven ordered groups, every staged path covered exactly once, and no diagnostic. The plan split leads, the harness-only freeze commit follows, the four captures follow their frozen instrument, and the validation record trails. `a.commit` remains accurate and was not amended.
+
+### Findings and boundaries for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+No change is requested for Step 4. Preserve harness digest `fab864ee` after the authorized freeze commit, and use that commit identity as Step 4B's `freeze_commit`. The advisory recommendation does not itself authorize committing or beginning the cross-repository Step 4B work.
+
+### Decision rationale for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Commit-ready is recommended because all six readiness-floor results pass: exact Step 4 identity, complete freeze implementation under the split plan, mandatory validation and applicable coverage, attributable staged scope, no unresolved finding, and mechanically accurate `a.commit`. No substantive reviewer repair was made. This is advisory only and grants no commit authority.
+
+### Final reviewer decision for step 4 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4-round-2 -->
+
+## Round 2 by human - Step 4 - human-confirmation
+
+- Recorded: 2026-09-01T19:55:36+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 4
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
