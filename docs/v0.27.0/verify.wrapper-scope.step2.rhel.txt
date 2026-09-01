@@ -1,0 +1,148 @@
+Harness: docs/v0.27.0/verify.wrapper-scope.sh --step 2, with --wrapper, --setenv
+         and --retained naming the copies carried to the host
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+Captured: 2026-09-01, by hand, over ssh
+Purpose: Step 2 proves the wrapper FAILS CLOSED on an unusable read, at all three
+         read sites, and that the stop REACHES THE WRAPPER rather than ending in
+         the subshell each site's command substitution creates.
+
+WHY THIS CAPTURE IS AUTHORITATIVE AND NOT MERELY PRESENT. The verdict below
+         carries FOUR digests, and all four are asserted by a host reading this
+         file through `--capture`: `harness` names the instrument, and
+         `wrapper-sha`, `setenv-sha` and `retained-sha` name the three files it
+         measured. A capture bound only to its instrument would certify a run
+         over inputs nobody compared to the ones present, which code review
+         round 2 of step 0 demonstrated with an unchanged-vocabulary broken
+         wrapper.
+
+THIS FILE EXISTS BECAUSE THE STEP 2 CODE REVIEW ASKED FOR IT. The plan's first
+         step 2 file list named only the wrapper and the harness, so the step
+         could be answered on a POSIX host and nowhere else: the reviewing
+         Windows host exited 4 saying it could not answer, and the step's
+         evidence lived in a terminal. The plan now names this capture and its
+         exact command, so step 2 is read the way steps 0 and 1 are.
+
+Host note: step 2 is host-agnostic ACROSS POSIX HOSTS by plan decision P1, and
+         this run is on RHEL only because RHEL is the nearest POSIX host. The
+         authoring and reviewing host is Windows, which cannot create the
+         fixture's symlinks; the harness measures that with a probe and reads
+         this capture instead.
+
+WHAT THE STOP LOOKS LIKE, against the step 0 run B baseline, which this same run
+         re-measures from the retained pre-change wrapper:
+
+  pre-change, one failed read:   6 mv/ln/cp/sed calls follow it, exit 0
+  guarded, each of three sites:  0 calls follow it, exit non-zero, tree unchanged
+
+         The baseline is re-measured rather than quoted, and its six mutations
+         are asserted PRESENT. A baseline of zero would let every guarded case
+         pass by measuring a difference that was never there, which is the same
+         vacuous shape the presence assertions of step 1 exist to refuse.
+
+THE THREE SITES ARE INJECTED SEPARATELY, and each run asserts that the argv the
+         shim recorded IS the site it names, so a run that failed a different
+         read than the one it reports cannot pass. The tree is asserted twice
+         and in two ways: a shape snapshot taken before the run compared with
+         one taken after, and zero mv/ln/cp/sed lines after the injected
+         readlink in the call log. The snapshot ignores mtime on purpose, since
+         an identical `pip` symlink recreated on a repeat call is not a
+         modification.
+
+A LEGITIMATE RUN IS ASSERTED TOO, without which a wrapper that refused
+         EVERYTHING would satisfy all three failure cases above it. The clean
+         run still ends 0, still performs the whole surgery, still calls the
+         interpreter once and still produces no `current/bin/_bin`, and the
+         first call each of sites 2 and 3 needs before its site is reachable at
+         all is asserted the same way.
+
+
+== harness prerequisite preflight
+  preflight/readlink                           PASS  /bin/readlink
+  preflight/mv                                 PASS  /bin/mv
+  preflight/ln                                 PASS  /bin/ln
+  preflight/cp                                 PASS  /bin/cp
+  preflight/sed                                PASS  /bin/sed
+  preflight/grep                               PASS  /bin/grep
+  preflight/sha256sum                          PASS  /bin/sha256sum
+
+== step 0 shim coverage: the helper list against the wrapper
+  step0/coverage/no-unshimmed-command          PASS
+  step0/coverage/no-dead-shim-entry            PASS
+
+== step 0 host gate: can this host reproduce the symlink surgery
+  step0/host/symlink-capable                   PASS  yes
+
+== step 2 structure: one shared guard, three checked calls
+  step2/source/guard-definitions               PASS  1
+  step2/source/checked-calls                   PASS  3
+  step2/source/unguarded-readlink-calls        PASS  2
+
+== step 2 the baseline: the same failure against the pre-change wrapper
+  step2/baseline/retained-present              PASS  yes
+  step2/baseline/retained-is-the-step0-subject PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step2/baseline/fixture                       PASS  planted and asserted
+  step2/baseline/injection-observed            PASS  1
+  step2/baseline/exit-status-is-a-silent-zero  PASS  0
+  step2/baseline/python3_target-derived-from-empty PASS  _bin
+  step2/baseline/interpreter-never-reached     PASS  0
+  step2/baseline/mutations-after-injection-present PASS  yes
+  step2/baseline/mutations                     NOTE  6 mv/ln/cp/sed calls followed the failed readlink
+
+== step 2 site 1: the relink read, on a fresh tree
+  step2/site1/fixture                          PASS  planted and asserted
+  step2/site1/injection-observed               PASS  1
+  step2/site1/injected-call-is-this-site       PASS  yes
+  step2/site1/exit-status-non-zero             PASS  yes
+  step2/site1/message-names-helper-site-and-path PASS  yes
+  step2/site1/no-mutation-after-injection      PASS  0
+  step2/site1/tree-unmodified                  PASS  yes
+
+== step 2 site 2: the target read, on an already-surgered tree
+  step2/site2/fixture                          PASS  planted and asserted
+  step2/site2/first-call-accepted              PASS  0
+  step2/site2/first-call-relinked              PASS  ../../bin/python
+  step2/site2/injection-observed               PASS  1
+  step2/site2/injected-call-is-this-site       PASS  yes
+  step2/site2/exit-status-non-zero             PASS  yes
+  step2/site2/message-names-helper-site-and-path PASS  yes
+  step2/site2/no-mutation-after-injection      PASS  0
+  step2/site2/tree-unmodified                  PASS  yes
+
+== step 2 site 3: the venv read, after the interpreter has run
+  step2/site3/fixture                          PASS  planted and asserted
+  step2/site3/target                           PASS  planted and asserted
+  step2/site3/first-call-accepted              PASS  0
+  step2/site3/injection-observed               PASS  1
+  step2/site3/injected-call-is-this-site       PASS  yes
+  step2/site3/exit-status-non-zero             PASS  yes
+  step2/site3/message-names-helper-site-and-path PASS  yes
+  step2/site3/no-mutation-after-injection      PASS  0
+  step2/site3/tree-unmodified                  PASS  yes
+
+== step 2 the legitimate run, which must still be accepted
+  step2/legitimate/fixture                     PASS  planted and asserted
+  step2/legitimate/exit-status                 PASS  0
+  step2/legitimate/no-injection                PASS  0
+  step2/legitimate/surgery-performed           PASS  ../../bin/python
+  step2/legitimate/interpreter-called          PASS  1
+  step2/legitimate/no-empty-derived-path       PASS  no
+
+== step 2 identities: what this step asserts rather than assumes
+  step2/setenv-unchanged-since-step0           PASS  355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  step2/wrapper-sha256                         NOTE  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step2/wrapper-lines                          NOTE  131
+
+== verdict
+  step        2
+  cases       53
+  failures    0
+  wrapper     /home/deploy-account/wrapper-scope-step1/python
+  setenv      /home/deploy-account/wrapper-scope-step1/setenv
+  retained    ./wrapper.pre-change.verification-only
+  harness     d4e347cce020a89fe21f54b2337de3642295505e4019f6a8899802888e0aad93
+  wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  bash        5.1.8(1)-release
+
+OBJECTIVE MET for step 2
