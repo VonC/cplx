@@ -17,6 +17,24 @@ if [[ ! -e "${DIR}/setenv" ]]; then exit 1; fi
 # shellcheck source=/dev/null
 source "${DIR}/setenv"
 
+# SCOPE THE SHIPPED SEARCH PATH TO THE INTERPRETER (decision D2/W1).
+#
+# `setenv` exports LD_LIBRARY_PATH pointing at the shipped RHEL libraries. Every
+# helper below (readlink, mv, ln, cp, sed, grep) is resolved through PATH and
+# would inherit it, so on a foreign distribution the HOST helper binds the
+# shipped libc and dies on GLIBC_PRIVATE. The interpreter needs that search
+# path; nothing else this script runs does.
+#
+# Saved ONCE here, immediately after the source, and restored per interpreter
+# invocation through a per-command assignment rather than an export, so THIS
+# shell's environment stays unset and every helper below inherits that (W2).
+#
+# An empty value is preserved AS EMPTY rather than as unset (W3): a caller who
+# had an empty one gets an empty one back. `${VAR-}` yields empty when unset, so
+# one assignment covers both.
+CPLX_TOOLCHAIN_LD_LIBRARY_PATH="${LD_LIBRARY_PATH-}"
+unset LD_LIBRARY_PATH
+
 # Check if any of the parameters are, in that order, '-m venv'
 args=("$@")
 venv=""
@@ -55,11 +73,16 @@ if [[ ! -e "${DIR}/pip" ]]; then
     ln -nfs "current/bin/pip3" "${DIR}/pip3"
 fi
 
-# Finally, call the new binary
+# Finally, call the new binary.
+#
+# The two restore sites, one per arm. A per-command assignment is inherited by
+# the interpreter and by everything it spawns, exactly as an export would be;
+# what it does NOT do is change this shell's environment, so the helpers below
+# and every later line still see no LD_LIBRARY_PATH.
 if [[ -z "${VIRTUAL_ENV}" ]]; then
-  "${DIR}/current/bin/${python3_target}" "$@"
+  LD_LIBRARY_PATH="${CPLX_TOOLCHAIN_LD_LIBRARY_PATH}" "${DIR}/current/bin/${python3_target}" "$@"
 else
-  "${VIRTUAL_ENV}/bin/${python3_target}_bin" "$@"
+  LD_LIBRARY_PATH="${CPLX_TOOLCHAIN_LD_LIBRARY_PATH}" "${VIRTUAL_ENV}/bin/${python3_target}_bin" "$@"
 fi
 
 if [[ -n "${venv}" ]]; then
