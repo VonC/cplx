@@ -68,6 +68,8 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
 
 
 
+
+
 == harness prerequisite preflight
   preflight/readlink                           PASS  /bin/readlink
   preflight/mv                                 PASS  /bin/mv
@@ -136,8 +138,8 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
 
 == step 1 identities: what this step asserts rather than assumes
   step1/setenv-unchanged-since-step0           PASS  355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
-  step1/wrapper-sha256                         NOTE  4a046859695ef0e652d1de547478908b9045ffa349d67f8b861da1d647ee693f
-  step1/wrapper-lines                          NOTE  113
+  step1/wrapper-sha256                         NOTE  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step1/wrapper-lines                          NOTE  131
 
 == verdict
   step        1
@@ -146,8 +148,8 @@ ALL FOURTEEN POST-SOURCE SITES ARE MEASURED, not the seven a `--version` call
   wrapper     /home/deploy-account/wrapper-scope-step1/python
   setenv      /home/deploy-account/wrapper-scope-step1/setenv
   retained    ./wrapper.pre-change.verification-only
-  harness     ee98b157669a2d854bef9a0b27c3800cd8c4fea9278899c07592d53e96d0c8b8
-  wrapper-sha  4a046859695ef0e652d1de547478908b9045ffa349d67f8b861da1d647ee693f
+  harness     d4e347cce020a89fe21f54b2337de3642295505e4019f6a8899802888e0aad93
+  wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
   setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
   retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
   bash        5.1.8(1)-release
