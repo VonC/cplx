@@ -1,0 +1,197 @@
+Harness: docs/v0.27.0/verify.wrapper-scope.sh --step 3, with --wrapper, --setenv,
+         --retained, --deployment, --prefix, --live-install and --run-identity
+Run identity: rhel-wrapper-20260901T121352Z
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+Captured: 2026-09-01, by hand, over ssh
+Purpose: Step 3 proves NO REGRESSION on the deployment target, over a tree
+         deployed from the published archive and running the REAL archive
+         interpreter. It is not the acceptance: the defect this requirement
+         fixes cannot fire on RHEL at all, because the shipped libc is the host
+         libc family there. A pass here says the fix did not break the working
+         case; only step 5, on Debian, can say it works.
+
+WHY THIS CAPTURE IS AUTHORITATIVE AND NOT MERELY PRESENT. The verdict below
+         carries FOUR digests, and all four are asserted by a host reading this
+         file through `--capture`: `harness` names the instrument, and
+         `wrapper-sha`, `setenv-sha` and `retained-sha` name the files it
+         measured. It also carries `deployment` and `run-identity`, and the run
+         identity is asserted as a CASE rather than printed here only: the
+         prefix has to carry it, so a capture cannot report a run it did not
+         measure.
+
+WHAT A REAL DEPLOYMENT EXERCISES, and what it does not. Measured before the
+         suite was written rather than assumed: the archive is packaged from a
+         tree the wrapper has ALREADY converted. It ships
+         `current/bin/python3` pointing at the wrapper and `python3_target` at
+         `python3.13_bin`, so a deployed tree NEVER takes the relink arm and
+         every call takes the other one.
+
+         Steps 0 to 2 measure the relink arm over a planted pre-conversion
+         fixture with a recording stub. This step measures the arm a deployment
+         actually runs, plus the venv post-processing that only a real
+         interpreter can reach. Asserting a conversion here would have passed on
+         work the archive did, which is the shape this umbrella exists to
+         refuse, so the shipped state is RECORDED as a case and the calls are
+         asserted to leave it unchanged.
+
+THE THREE CALLS, and what each answers:
+
+  first call    Python 3.13.9 answered through the wrapper, tree unchanged
+  second call   the same version through the same symlinks, tree unchanged
+  -m venv       a virtualenv created and post-processed, so the third guarded
+                read site executes against a real venv rather than a fixture
+
+         The venv case is the one steps 0 to 2 cannot reach: their interpreter
+         is a recording shell stub, and a stub never creates a virtualenv, so
+         `-m venv` would have nothing to post-process (decision Q05). Here the
+         wrapper reads the venv's own `bin/python3`, relinks that name to the
+         wrapper and copies the real binary beside it, and both are asserted.
+
+THE DEPLOYED `setenv` IS NOT BYTE-IDENTICAL to the repository's, and that is the
+         installer working rather than a finding. It re-anchors absolute paths
+         when it relocates the tree, so its digest differs and is recorded as a
+         NOTE. What the scope rule depends on is asserted instead: the search
+         path is still built from `senvDIR` rather than frozen to a build
+         account's home. The repository copy's own bytes are asserted against
+         the step 0 digest in the same run.
+
+EVERY WRITE LANDED UNDER ONE THROWAWAY PREFIX, `HOME` pinned to it because the
+         installer and the wrapper both read it. The live install is asserted to
+         sit outside that prefix, to carry a DIFFERENT wrapper than the subject,
+         and to have the same mtime after the three calls as before them.
+
+         THE REMOVAL IS EVIDENCE RATHER THAN PROSE, and it is the last section
+         of this file. `post-run cleanup` is the session's own transcript, the
+         exact commands and their exact output: the prefix listed present,
+         removed, then listed absent, with the live install's mtime and its
+         wrapper's digest read before and after. An earlier revision of this
+         capture asserted those facts in this header and nowhere else, and the
+         step 3 code review refused it, correctly. A claim in a header is not a
+         measurement.
+
+         The cleanup is run by the SESSION rather than by the harness, for the
+         same reason the deployment is: removing the tree under measurement is
+         not an oracle's job, and a harness that deleted its own subject would
+         be one edit away from deleting something else.
+
+
+== harness prerequisite preflight
+  preflight/readlink                           PASS  /bin/readlink
+  preflight/mv                                 PASS  /bin/mv
+  preflight/ln                                 PASS  /bin/ln
+  preflight/cp                                 PASS  /bin/cp
+  preflight/sed                                PASS  /bin/sed
+  preflight/grep                               PASS  /bin/grep
+  preflight/sha256sum                          PASS  /bin/sha256sum
+
+== step 0 shim coverage: the helper list against the wrapper
+  step0/coverage/no-unshimmed-command          PASS
+  step0/coverage/no-dead-shim-entry            PASS
+
+== step 3 host gate: is a deployed tree named for this run
+  step3/host/deployment-supplied               PASS  yes
+
+== step 3 identity: which run, which target, which shell
+  step3/identity/run                           NOTE  rhel-wrapper-20260901T121352Z
+  step3/identity/prefix-carries-run-id         PASS  yes
+  step3/identity/target                        PASS  rhel 9.8
+  step3/identity/kernel                        NOTE  5.14.0-687.41.1.el9_8.x86_64
+  step3/identity/bash                          NOTE  5.1.8(1)-release
+
+== step 3 the throwaway prefix, and the live install beside it
+  step3/prefix/deployment-under-prefix         PASS  yes
+  step3/prefix/live-install-outside-prefix     PASS  yes
+  step3/live/present                           PASS  yes
+  step3/live/wrapper-is-not-the-subject        PASS  yes
+  step3/live/mtime-before                      NOTE  1783438729
+
+== step 3 the deployed tree, as the archive ships it
+  step3/deploy/wrapper-present                 PASS  yes
+  step3/deploy/wrapper-is-the-subject          PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step3/deploy/setenv-sha256                   NOTE  e6686039af8d25d03efb65e328de43b2d9ed1abcae8afa78ebdd52b0aaca19c6
+  step3/deploy/setenv-builds-the-path-from-senvdir PASS  1
+  step3/deploy/ships-converted                 PASS  ../../bin/python
+  step3/deploy/target-name                     NOTE  python3.13_bin
+  step3/deploy/real-interpreter-present        PASS  yes
+  step3/deploy/interpreter-is-an-elf           PASS  yes
+
+== step 3 the first call over the deployed tree
+  step3/call1/exit-status                      PASS  0
+  step3/call1/answers-a-version                PASS  yes
+  step3/call1/version                          NOTE  Python 3.13.9
+  step3/call1/tree-unchanged                   PASS  yes
+  step3/call1/python3_target-still-points-at-real PASS  python3.13_bin
+  step3/call1/no-empty-derived-path            PASS  no
+  step3/call1/no-double-bin                    PASS  no
+
+== step 3 the second call, through the same symlinks
+  step3/call2/exit-status                      PASS  0
+  step3/call2/answers-a-version                PASS  yes
+  step3/call2/same-version-as-the-first        PASS  yes
+  step3/call2/tree-unchanged                   PASS  yes
+
+== step 3 the venv path, where the third guarded read site runs for real
+  step3/venv/exit-status                       PASS  0
+  step3/venv/created                           PASS  yes
+  step3/venv/target-name                       NOTE  python3.13_bin
+  step3/venv/target-relinked-to-wrapper        PASS  /tmp/rhel-wrapper-20260901T121352Z/tools/python/bin/python
+  step3/venv/real-binary-copied-beside-it      PASS  yes
+  step3/venv/under-the-prefix                  PASS  yes
+
+== step 3 the live install, still untouched
+  step3/live/mtime-unchanged                   PASS  1783438729
+  step3/live/wrapper-untouched                 PASS  yes
+
+== step 3 identities: what this step asserts rather than assumes
+  step3/setenv-unchanged-since-step0           PASS  355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  step3/wrapper-sha256                         NOTE  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step3/wrapper-lines                          NOTE  131
+
+== verdict
+  step        3
+  cases       40
+  failures    0
+  wrapper     /home/deploy-account/wrapper-scope-step1/python
+  setenv      /home/deploy-account/wrapper-scope-step1/setenv
+  retained    ./wrapper.pre-change.verification-only
+  deployment  /tmp/rhel-wrapper-20260901T121352Z/tools/python
+  run-identity rhel-wrapper-20260901T121352Z
+  harness     b0d0264740f85e86d54d8d6dd97b5270e5b68c7ecb8d475171e9f096433deb23
+  wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  bash        5.1.8(1)-release
+
+OBJECTIVE MET for step 3
+
+== post-run cleanup, run by the session after the suite above
+
+run-identity: rhel-wrapper-20260901T121352Z
+prefix:       /tmp/rhel-wrapper-20260901T121352Z
+live install: /home/deploy-account/tools
+
+$ stat -c "%n %Y" /home/deploy-account/tools /home/deploy-account/tools/python/bin/python
+/home/deploy-account/tools 1783438729
+/home/deploy-account/tools/python/bin/python 1766004409
+$ sha256sum /home/deploy-account/tools/python/bin/python
+15d203dc1cc3bc83c0fde662089e0aa41e2c729dda844c813ca881fa79177c0c  /home/deploy-account/tools/python/bin/python
+
+$ ls -d /tmp/rhel-wrapper-20260901T121352Z
+/tmp/rhel-wrapper-20260901T121352Z
+exit=0
+
+$ rm -rf /tmp/rhel-wrapper-20260901T121352Z
+exit=0
+
+$ ls -d /tmp/rhel-wrapper-20260901T121352Z
+ls: cannot access '/tmp/rhel-wrapper-20260901T121352Z': No such file or directory
+exit=2
+
+$ stat -c "%n %Y" /home/deploy-account/tools /home/deploy-account/tools/python/bin/python
+/home/deploy-account/tools 1783438729
+/home/deploy-account/tools/python/bin/python 1766004409
+$ sha256sum /home/deploy-account/tools/python/bin/python
+15d203dc1cc3bc83c0fde662089e0aa41e2c729dda844c813ca881fa79177c0c  /home/deploy-account/tools/python/bin/python
+
+$ df -h /tmp
+/dev/mapper/vg_root-tmp  4.0G   62M  3.9G   2% /tmp
