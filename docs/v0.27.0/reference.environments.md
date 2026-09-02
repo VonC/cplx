@@ -87,7 +87,7 @@ that passes on RHEL says the fix did not regress, never that it works.
 
 ## Debian 12 (bookworm), the Jenkins CI agent
 
-### Identity
+### Identity on the Jenkins CI agent
 
 | Property | Value | Source |
 | --- | --- | --- |
@@ -115,13 +115,13 @@ TWO PROPERTIES THAT SURPRISE A READER OF THESE CAPTURES:
   "unavailable" rather than failing, so a capture showing only the fallback half
   is the instrument working.
 
-### Role
+### Role on the Jenkins CI agent
 
 Where the discovery pipeline relocates the archive to run tests, package and
 publish. It is the ONLY Debian host in hand, so every claim that needs a foreign
 distribution is proved here and nowhere else.
 
-### Access
+### Access on the Jenkins CI agent
 
 NOT interactive. The agent is reached only by committing to the pipeline
 repository and running a build.
@@ -240,7 +240,7 @@ A probe that needs a committed oracle needs two builds, as above.
 
 Which capture came from which host. Every file listed sits in this directory.
 
-### RHEL 9.8
+### RHEL 9.8 in the evidence index
 
 | File | What it records |
 | --- | --- |
@@ -257,7 +257,7 @@ Which capture came from which host. Every file listed sits in this directory.
 | [verify.acceptance.scope.rhel.txt](verify.acceptance.scope.rhel.txt) | requirement 2 step 6 scope run |
 | [request.monitoring-observable.rhel.md](request.monitoring-observable.rhel.md) | what the unprivileged account can and cannot see of the monitoring agent |
 
-### Debian 12
+### Debian 12 in the evidence index
 
 | File | What it records |
 | --- | --- |
