@@ -1,0 +1,442 @@
+Instrument: docs/v0.27.0/verify.wrapper-accept.sh --mode accept, run on the
+         Debian 12 CI agent through the wrapperAccept() probe of the pipeline
+         repository's ci/Jenkinsfile.diagnostics
+Run identity: debian-wrapper-accept-b139-20260902T102546Z
+Target: Debian GNU/Linux 12 (bookworm), glibc 2.36, bash 5.2.15(1)-release, on
+         a container that shares the RHEL 9.8 host kernel
+Captured: 2026-09-02, build 139 of the pipeline develop branch
+Purpose: STEP 5 IS THE ACCEPTANCE. Steps 0 to 2 prove the mechanism over a
+         planted fixture on any POSIX host, step 3 proves nothing regressed on
+         RHEL where the defect cannot fire, and step 4 and 4b freeze the harness
+         and carry its identity across the repository boundary. This is the only
+         run that can tell a working fix from a plausible one, because Debian 12
+         is the distribution the defect exists on.
+
+WHAT THIS FILE CONTAINS, and why it is three runs rather than one. A capture of
+         a passing suite says nothing on its own: it could be passing because
+         the subject works, or because the suite passes anywhere. So the
+         evidence is the acceptance PLUS the control that qualifies it PLUS the
+         identity check that admits it.
+
+           1. the Debian acceptance, 42 cases and 0 failures;
+           2. THE SAME SUITE ON RHEL 9.8, which FAILS, because the defect cannot
+              fire on the distribution whose libc family the archive ships;
+           3. the independent cplx-side identity check, run against blocks 1 and
+              2 before either was accepted as evidence.
+
+         All three name the same instrument: `accept-script-sha256` is one value
+         across the whole file, and the identity check asserts that by reading
+         every occurrence rather than the first.
+
+TWO FRESHLY DEPLOYED TREES, AND HOW THIS FILE PROVES THEY WERE NOT COPIES. The
+         first version of this step copied one already-deployed tree twice, and
+         its own code review round 1 refused it: the criterion says two freshly
+         extracted trees and a copy is not an extraction. Restating the wording
+         would have fixed nothing, so the difference is now MEASURED.
+
+         The installer rewrites every ELF to live under the prefix it deploys
+         into. A freshly deployed tree therefore carries its OWN root in its
+         interpreter's run path, and a copy carries the root it was copied from.
+         Two cases assert that for the two trees, and a control feeds one tree to
+         the same predicate while claiming the other's root and requires the
+         refusal:
+
+           step5/fixed/deployed-for-its-own-root          run path names its own root
+           step5/control/deployed-for-its-own-root        run path names its own root
+           step5/control/tree-deployed-elsewhere-refused  refused on [DEPLOYED]
+
+         The deployments are made by the probe and not by the instrument, which
+         is the rule step 3 of the plan already states: an oracle that deployed
+         its own subject would be measuring an installer run rather than a
+         wrapper.
+
+THE DISCRIMINATOR, which is the whole step in one line. The fixed tree must
+         answer a version and the control tree must not. Either half alone
+         proves nothing: a fixed tree that answers could be answering on a host
+         where the defect never fires, which is exactly what block 2 below
+         demonstrates, and a mangling control could be mangling for a reason the
+         fix does not address.
+
+           Debian   step5/acceptance/fixed-answers-and-control-does-not  yes:no
+           RHEL     the same case                                        yes:yes
+
+WHAT THE CONTROL ACTUALLY FAILED ON, measured rather than described. The
+         pre-change wrapper exports the shipped RHEL search path before it calls
+         `readlink`, and on this distribution the host helper then binds the
+         shipped libc:
+
+           readlink: symbol lookup error: .../control/root/usr/lib64/libc.so.6:
+           undefined symbol: _dl_readonly_area, version GLIBC_PRIVATE
+
+         `readlink` returns nothing, the wrapper derives `current/bin/_bin` from
+         that empty string, `mv` and `ln` die the same way so nothing is created,
+         and the exec of the derived path fails. THE WRAPPER THEN EXITS ZERO, the
+         silent failure step 0 run B recorded on RHEL with a planted failure and
+         this run confirms on Debian with a real one. The caller is told the call
+         worked.
+
+WHY THE INSTRUMENT IS A SECOND FILE and not a fifth suite in the harness. Step 4
+         froze `verify.wrapper-scope.sh` and step 4b published the digest the
+         pipeline copy is checked against, so step 5 may not edit it; and it
+         could not answer this step anyway, since its dispatch accepts steps 0 to
+         3 and its step 3 suite asserts `rhel 9.8` as its target. The acceptance
+         therefore reads the frozen harness and never writes it, which block 3
+         asserts by digest.
+
+WHERE THE WRITES LAND, and the one criterion wording this step changed. Both
+         deployments and the instrument's scratch sit under one run-keyed
+         throwaway root that the probe creates and removes. That root is the
+         build's workspace and NOT the build's prefix, which the criterion
+         originally named, because the relocation acceptance runs in the same
+         parallel branch set and its step 4 and step 6 suites each begin with
+         `cp -a "$prefix/." "$work/"`: two fresh deployments inside the prefix
+         would be copied wholesale by them while this step was still writing
+         them. The plan now states the requirement as step 3 already stated its
+         own, one throwaway prefix created and removed, and records that
+         measurement as the reason.
+
+SANITISED, as every retained capture of this effort is, and in both blocks. This
+         repository is public. The pipeline workspace segment names the
+         organisation, the project and the branch, and reads
+         `company_PDF_my-project_develop`; the RHEL account reads
+         `deploy-account`. Both placeholders are the ones the earlier retained
+         captures of this effort already use, so a reader comparing this file
+         against `verify.wrapper.rhel.txt` sees the same names for the same
+         things. No digest, no case name and no verdict line is touched by
+         either substitution.
+
+===== BEGIN CPLX-WRAPPER-ACCEPT =====
+captured-at: 2026-09-02T10:25:46Z
+build: 139
+commit: c96d5a7374b7dd39d3c50de1e32719c51bb94fa5
+run-identity: debian-wrapper-accept-b139-20260902T102546Z
+archive: /home/jenkins/workspace/company_PDF_my-project_develop/prefix/pkgs/tools.9.13.4.tar.gz
+archive-tree: /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/python
+throwaway: /home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z
+accept-copy-sha256: ccea6ea4fb7fcbc773a1ad1af7b2c0c2967866bad88b51581af95af5c4c7cb33
+----- two fresh deployments of the published archive -----
+deploy-seconds: 253
+deploy-size: 3.3G
+----- acceptance output -----
+
+== acceptance prerequisite preflight
+  preflight/sha256sum                            PASS  /usr/bin/sha256sum
+  preflight/cp                                   PASS  /usr/bin/cp
+  preflight/rm                                   PASS  /usr/bin/rm
+  preflight/readlink                             PASS  /usr/bin/readlink
+  preflight/od                                   PASS  /usr/bin/od
+  preflight/head                                 PASS  /usr/bin/head
+  preflight/readelf                              PASS  /usr/bin/readelf
+
+== step 5 host gate: are two deployed trees named for this run
+  step5/host/deployments-supplied                PASS  yes
+
+== step 5 identity: which run, which agent, which shell
+  step5/identity/run                             NOTE  debian-wrapper-accept-b139-20260902T102546Z
+  step5/identity/throwaway-carries-run-id        PASS  yes
+  step5/identity/target                          PASS  debian 12
+  step5/identity/kernel                          NOTE  5.14.0-687.41.1.el9_8.x86_64   # the RHEL host kernel, shared by the container
+  step5/identity/glibc                           NOTE  ldd (Debian GLIBC 2.36-9+deb12u10) 2.36
+  step5/identity/bash                            NOTE  5.2.15(1)-release
+
+== step 5 provenance: both wrappers, before either of them runs
+  step5/control-wrapper/named-commit             NOTE  a665f4fc201095a31e9e88b8ad51e2a0075d74fa
+  step5/control-wrapper/named-path               NOTE  src/install/env/python/bin/python
+  step5/control-wrapper/bytes                    PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step5/fixed-wrapper/named-commit               NOTE  c5764088b4c2d682794cbafc2dfb471f107e8bcd
+  step5/fixed-wrapper/bytes                      PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step5/control/wrong-control-bytes-refused      PASS  refused on [PROVENANCE], as designed
+
+== step 5 two freshly deployed trees, both created for this run
+  step5/fixed/tree-deployed                      PASS  deployed and asserted
+  step5/control/tree-deployed                    PASS  deployed and asserted
+  step5/control/unplanted-tree-refused           PASS  refused on [FIXTURE], as designed
+  step5/fixed/interpreter-run-path               NOTE  /home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/python/root/usr/lib64:/home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/python/root/usr/lib:/home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/python/root/lib64:/home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/python/current/lib:/home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/python/python-3.13.9/lib:/home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/git/root/usr/lib64:/home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/git/root/usr/lib:/home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/git/root/lib64
+  step5/fixed/deployed-for-its-own-root          PASS  run path names its own root
+  step5/control/deployed-for-its-own-root        PASS  run path names its own root
+  step5/control/tree-deployed-elsewhere-refused  PASS  refused on [DEPLOYED], as designed
+  step5/trees/are-independent                    PASS  3
+  step5/trees/fixed-under-the-throwaway-root     PASS  yes
+  step5/trees/control-under-the-throwaway-root   PASS  yes
+  step5/trees/archive-outside-the-throwaway-root PASS  yes
+  step5/scratch/under-the-throwaway-root         PASS  yes
+
+== step 5 the build's extracted archive, recorded before anything runs
+  step5/archive/path                             NOTE  /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/python
+  step5/archive/wrapper-sha256                   NOTE  15d203dc1cc3bc83c0fde662089e0aa41e2c729dda844c813ca881fa79177c0c
+  step5/archive/wrapper-is-the-pre-change-body   NOTE  no
+
+== step 5 the wrapper under test, installed into each tree
+  step5/fixed/tree-carries-the-fixed-wrapper     PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step5/control/tree-carries-the-retained-wrapper PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step5/fixed/setenv-present                     PASS  yes
+  step5/control/setenv-present                   PASS  yes
+
+== step 5 THE ACCEPTANCE: the first call over the fixed tree
+  step5/fixed/exit-status                        PASS  0
+  step5/fixed/answers-a-version                  PASS  yes
+  step5/fixed/version                            NOTE  Python 3.13.9
+  step5/fixed/python3-is-the-wrapper             PASS  ../../bin/python
+  step5/fixed/python3_target-name                NOTE  python3.13_bin
+  step5/fixed/python3_target-not-derived-from-empty PASS  no
+  step5/fixed/real-interpreter-beside-it         PASS  yes
+  step5/fixed/real-interpreter-is-an-elf         PASS  yes
+  step5/fixed/no-empty-derived-path              PASS  no
+  step5/fixed/no-empty-derived-path-in-the-run   PASS  no
+
+== step 5 THE CONTROL: the same call over the pre-change wrapper
+  step5/control/answers-a-version                PASS  no
+  step5/control/derives-the-empty-path           PASS  yes
+  step5/control/interpreter-never-reached        PASS  no
+  step5/control/exit-status                      NOTE  0
+  step5/control/matches-step0-silent-zero        NOTE  yes
+  step5/control/first-helper-failure             NOTE  readlink: symbol lookup error: /home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/control/tools/python/root/usr/lib64/libc.so.6: undefined symbol: _dl_readonly_area, version GLIBC_PRIVATE
+  step5/control/derived-exec-path                NOTE  /home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/control/tools/python/bin/current/bin/_bin
+  step5/control/tree-shape                       NOTE  idle3 idle3.13 pip3 pip3.13 pydoc3 pydoc3.13 python3 python3-config python3.13 python3.13-config python3.13_bin python3_target
+  step5/fixed/tree-shape                         NOTE  idle3 idle3.13 pip3 pip3.13 pydoc3 pydoc3.13 python3 python3-config python3.13 python3.13-config python3.13_bin python3_target
+
+== step 5 the discriminator, which is the whole point of the step
+  step5/acceptance/fixed-answers-and-control-does-not PASS  yes:no
+
+== step 5 the extracted archive, left as the later stages consume it
+  step5/archive/signature-unchanged              PASS  yes
+  step5/archive/wrapper-unchanged                PASS  15d203dc1cc3bc83c0fde662089e0aa41e2c729dda844c813ca881fa79177c0c
+  step5/throwaway/root                           NOTE  /home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z
+  step5/throwaway/size                           NOTE  3.3G
+
+== verdict
+  mode        accept
+  cases       42
+  failures    0
+  accept-script-sha256 ccea6ea4fb7fcbc773a1ad1af7b2c0c2967866bad88b51581af95af5c4c7cb33
+  fixed-wrapper-sha256 7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  control-wrapper-sha256 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  fixed-tree   /home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/fixed/tools/python
+  control-tree /home/jenkins/workspace/company_PDF_my-project_develop/a.wrapper-accept.debian-wrapper-accept-b139-20260902T102546Z/control/tools/python
+  archive-tree /home/jenkins/workspace/company_PDF_my-project_develop/prefix/tools/python
+  run-identity debian-wrapper-accept-b139-20260902T102546Z
+  bash        5.2.15(1)-release
+
+OBJECTIVE MET for step 5 (accept)
+----- end acceptance output -----
+accept-exit: 0
+result: OBJECTIVE_MET
+===== END CPLX-WRAPPER-ACCEPT =====
+
+
+================================================================================
+== THE CONTROL FOR THE RUN ABOVE: the same suite on RHEL 9.8, which must FAIL
+================================================================================
+
+Run by hand over ssh on the deployment target, with TWO FRESH DEPLOYMENTS of the
+published archive made the same way the probe makes them, and with the SAME
+instrument: `accept-script-sha256` below is the value the Debian block above
+carries, and a control run by a different build of the instrument would prove
+something about that build rather than about the host.
+
+WHY A PASSING SUITE THAT FAILS HERE IS THE POINT. Every mechanic passes on this
+host: the provenance gate, both deployments and the case that proves they were
+deployed rather than copied, all three negative controls, the fixed tree
+answering `Python 3.13.9`, the archive left untouched. What does NOT pass is the
+control half, because the defect CANNOT FIRE on RHEL: the shipped libc is the
+host libc family there, so the pre-change wrapper's `readlink` resolves
+normally, the tree is never mangled, and both trees answer.
+
+So the discriminator reports `yes:yes` and the suite refuses. That refusal is the
+evidence that the Debian `yes:no` above is a measurement rather than a formality.
+A step 5 with no such run could not tell an acceptance from a suite that passes
+anywhere.
+
+The five failures below are all and only the ones a host where the defect cannot
+fire must produce: the target assertion, the three control-half cases, and the
+discriminator they feed.
+
+run-identity: rhel-wrapper-accept-control-20260902T101944Z
+archive: /home/deploy-account/pkgs/tools.2026-07-12_234035.tar.gz
+archive-tree: /home/deploy-account/tools/python
+throwaway: /home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z
+rsync: /bin/rsync
+deploy-seconds: 255
+deploy-size: 3.3G
+
+== acceptance prerequisite preflight
+  preflight/sha256sum                            PASS  /bin/sha256sum
+  preflight/cp                                   PASS  /bin/cp
+  preflight/rm                                   PASS  /bin/rm
+  preflight/readlink                             PASS  /bin/readlink
+  preflight/od                                   PASS  /bin/od
+  preflight/head                                 PASS  /bin/head
+  preflight/readelf                              PASS  /bin/readelf
+
+== step 5 host gate: are two deployed trees named for this run
+  step5/host/deployments-supplied                PASS  yes
+
+== step 5 identity: which run, which agent, which shell
+  step5/identity/run                             NOTE  rhel-wrapper-accept-control-20260902T101944Z
+  step5/identity/throwaway-carries-run-id        PASS  yes
+  step5/identity/target                          FAIL  want [debian 12] got [rhel 9.8]
+  step5/identity/kernel                          NOTE  5.14.0-687.41.1.el9_8.x86_64   # the RHEL host kernel, shared by the container
+  step5/identity/glibc                           NOTE  ldd (GNU libc) 2.34
+  step5/identity/bash                            NOTE  5.1.8(1)-release
+
+== step 5 provenance: both wrappers, before either of them runs
+  step5/control-wrapper/named-commit             NOTE  a665f4fc201095a31e9e88b8ad51e2a0075d74fa
+  step5/control-wrapper/named-path               NOTE  src/install/env/python/bin/python
+  step5/control-wrapper/bytes                    PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step5/fixed-wrapper/named-commit               NOTE  c5764088b4c2d682794cbafc2dfb471f107e8bcd
+  step5/fixed-wrapper/bytes                      PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step5/control/wrong-control-bytes-refused      PASS  refused on [PROVENANCE], as designed
+
+== step 5 two freshly deployed trees, both created for this run
+  step5/fixed/tree-deployed                      PASS  deployed and asserted
+  step5/control/tree-deployed                    PASS  deployed and asserted
+  step5/control/unplanted-tree-refused           PASS  refused on [FIXTURE], as designed
+  step5/fixed/interpreter-run-path               NOTE  /home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/python/root/usr/lib64:/home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/python/root/usr/lib:/home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/python/root/lib64:/home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/python/current/lib:/home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/python/python-3.13.9/lib:/home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/git/root/usr/lib64:/home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/git/root/usr/lib:/home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/git/root/lib64
+  step5/fixed/deployed-for-its-own-root          PASS  run path names its own root
+  step5/control/deployed-for-its-own-root        PASS  run path names its own root
+  step5/control/tree-deployed-elsewhere-refused  PASS  refused on [DEPLOYED], as designed
+  step5/trees/are-independent                    PASS  3
+  step5/trees/fixed-under-the-throwaway-root     PASS  yes
+  step5/trees/control-under-the-throwaway-root   PASS  yes
+  step5/trees/archive-outside-the-throwaway-root PASS  yes
+  step5/scratch/under-the-throwaway-root         PASS  yes
+
+== step 5 the build's extracted archive, recorded before anything runs
+  step5/archive/path                             NOTE  /home/deploy-account/tools/python
+  step5/archive/wrapper-sha256                   NOTE  15d203dc1cc3bc83c0fde662089e0aa41e2c729dda844c813ca881fa79177c0c
+  step5/archive/wrapper-is-the-pre-change-body   NOTE  no
+
+== step 5 the wrapper under test, installed into each tree
+  step5/fixed/tree-carries-the-fixed-wrapper     PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step5/control/tree-carries-the-retained-wrapper PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step5/fixed/setenv-present                     PASS  yes
+  step5/control/setenv-present                   PASS  yes
+
+== step 5 THE ACCEPTANCE: the first call over the fixed tree
+  step5/fixed/exit-status                        PASS  0
+  step5/fixed/answers-a-version                  PASS  yes
+  step5/fixed/version                            NOTE  Python 3.13.9
+  step5/fixed/python3-is-the-wrapper             PASS  ../../bin/python
+  step5/fixed/python3_target-name                NOTE  python3.13_bin
+  step5/fixed/python3_target-not-derived-from-empty PASS  no
+  step5/fixed/real-interpreter-beside-it         PASS  yes
+  step5/fixed/real-interpreter-is-an-elf         PASS  yes
+  step5/fixed/no-empty-derived-path              PASS  no
+  step5/fixed/no-empty-derived-path-in-the-run   PASS  no
+
+== step 5 THE CONTROL: the same call over the pre-change wrapper
+  step5/control/answers-a-version                FAIL  want [no] got [yes]
+  step5/control/derives-the-empty-path           FAIL  want [yes] got [no]
+  step5/control/interpreter-never-reached        FAIL  want [no] got [yes]
+  step5/control/exit-status                      NOTE  0
+  step5/control/matches-step0-silent-zero        NOTE  yes
+  step5/control/first-helper-failure             NOTE  none-recorded
+  step5/control/derived-exec-path                NOTE  none-recorded
+  step5/control/tree-shape                       NOTE  idle3 idle3.13 pip3 pip3.13 pydoc3 pydoc3.13 python3 python3-config python3.13 python3.13-config python3.13_bin python3_target
+  step5/fixed/tree-shape                         NOTE  idle3 idle3.13 pip3 pip3.13 pydoc3 pydoc3.13 python3 python3-config python3.13 python3.13-config python3.13_bin python3_target
+
+== step 5 the discriminator, which is the whole point of the step
+  step5/acceptance/fixed-answers-and-control-does-not FAIL  want [yes:no] got [yes:yes]
+
+== step 5 the extracted archive, left as the later stages consume it
+  step5/archive/signature-unchanged              PASS  yes
+  step5/archive/wrapper-unchanged                PASS  15d203dc1cc3bc83c0fde662089e0aa41e2c729dda844c813ca881fa79177c0c
+  step5/throwaway/root                           NOTE  /home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z
+  step5/throwaway/size                           NOTE  3.3G
+
+== verdict
+  mode        accept
+  cases       42
+  failures    5
+  accept-script-sha256 ccea6ea4fb7fcbc773a1ad1af7b2c0c2967866bad88b51581af95af5c4c7cb33
+  fixed-wrapper-sha256 7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  control-wrapper-sha256 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  fixed-tree   /home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/fixed/tools/python
+  control-tree /home/deploy-account/a.wrapper-accept.rhel-wrapper-accept-control-20260902T101944Z/control/tools/python
+  archive-tree /home/deploy-account/tools/python
+  run-identity rhel-wrapper-accept-control-20260902T101944Z
+  bash        5.1.8(1)-release
+
+OBJECTIVE NOT MET for step 5 (accept): 5 failure(s)
+accept-exit: 1
+throwaway-removed: yes
+
+
+================================================================================
+== THE INDEPENDENT IDENTITY CHECK, performed HERE and not on the agent
+================================================================================
+
+This is the half a PAIRED pipeline edit cannot restate, and the reason the step
+4b manifest is worth having at all. The agent holds no cplx history, so a
+harness copy and its manifest copy edited in one pipeline commit agree with each
+other and with nothing else. The pipeline probe catches the UNPAIRED edit; this
+catches the paired one, by comparing against git in a repository that edit
+cannot reach.
+
+It runs over the two blocks above before they are accepted as evidence:
+
+- the manifest's `freeze_commit`, `harness_path` and `file_sha256` against the
+  canonical harness at that commit, AND against the harness file as it stands
+  today, which is how this step says it did not modify the frozen bytes;
+- both wrapper bodies against the commits they came from;
+- the digests the capture above records against the files this repository holds,
+  every occurrence collapsed so the two blocks must agree;
+- the two fresh-deployment cases and the control that refuses a tree deployed
+  elsewhere, counted in the capture. Code review round 1 of this step admitted a
+  capture that proved copies, so their presence is now a case here rather than
+  something a reader is trusted to notice.
+
+Each of those gates carries a negative control that must FAIL, and all of them
+are observed refusing below. One was written decorative and found so: its
+mutation was anchored at the start of a line while a verdict block is indented,
+so it mutated nothing and the gate accepted a byte-identical copy. It was the
+control that reported the gap, by saying its oracle was not asserted.
+
+
+== acceptance prerequisite preflight
+  preflight/sha256sum                            PASS  /usr/bin/sha256sum
+  preflight/cp                                   PASS  /usr/bin/cp
+  preflight/rm                                   PASS  /usr/bin/rm
+  preflight/readlink                             PASS  /usr/bin/readlink
+  preflight/od                                   PASS  /usr/bin/od
+  preflight/head                                 PASS  /usr/bin/head
+  preflight/git                                  PASS  /mingw64/bin/git
+
+== step 5 identity: the manifest against the canonical harness
+  identity/manifest/path                         NOTE  docs/v0.27.0/verify.wrapper-scope.manifest.txt
+  identity/manifest/freeze-commit                NOTE  233b549d1bfa96b0e0e2cf7e9d31c996cf132389
+  identity/manifest/harness-path                 NOTE  docs/v0.27.0/verify.wrapper-scope.sh
+  identity/manifest/harness-at-freeze-commit     PASS  fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
+  identity/control/mutated-manifest-refused      PASS  refused on [MANIFEST], as designed
+  identity/harness/canonical-file-is-still-frozen PASS  fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
+
+== step 5 identity: both wrappers against the commits they came from
+  identity/control-wrapper/at-named-commit       PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  identity/control-wrapper/retained-copy         PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  identity/fixed-wrapper/at-named-commit         PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  identity/fixed-wrapper/live-file               PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  identity/control/wrong-control-bytes-refused   PASS  refused on [PROVENANCE], as designed
+
+== step 5 identity: the retained capture, before it is accepted
+  identity/capture/path                          NOTE  docs/v0.27.0/verify.wrapper.debian.txt
+  identity/capture/accept-script                 PASS  ccea6ea4fb7fcbc773a1ad1af7b2c0c2967866bad88b51581af95af5c4c7cb33
+  identity/capture/fixed-wrapper                 PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  identity/capture/control-wrapper               PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  identity/control/mutated-capture-refused       PASS  refused on [CAPTUREID], as designed
+  identity/capture/reports-the-objective-met     PASS  1
+  identity/capture/reports-the-discriminator     PASS  1
+  identity/capture/reports-the-fixed-tree-deployed PASS  yes
+  identity/capture/reports-the-control-tree-deployed PASS  yes
+  identity/capture/reports-a-copy-refused        PASS  yes
+
+== verdict
+  mode        identity
+  cases       24
+  failures    0
+  accept-script-sha256 ccea6ea4fb7fcbc773a1ad1af7b2c0c2967866bad88b51581af95af5c4c7cb33
+  fixed-wrapper-sha256 7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  control-wrapper-sha256 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  harness-sha256 fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
+  bash        5.3.9(1)-release
+
+OBJECTIVE MET for step 5 (identity)
