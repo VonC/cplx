@@ -9,21 +9,6 @@ echo_dbg() {
     fi
 }
 
-# The checked read (decision W4). `readlink` is the only helper whose RESULT the
-# wrapper turns into a path, so an empty or failed read is what produces
-# `current/bin/_bin`. This returns non-zero when the read FAILED or returned
-# NOTHING, and every caller propagates that with `|| exit`: each call site is a
-# command substitution, which runs in a subshell, so an `exit` HERE would end
-# only that subshell and let the wrapper carry on with the empty value.
-guarded_readlink() {
-    local site="$1" path="$2" value
-    if ! value="$(readlink "${path}")" || [[ -z "${value}" ]]; then
-        echo "python: readlink failed at ${site}: '${path}'" >&2
-        return 1
-    fi
-    printf '%s\n' "${value}"
-}
-
 DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 
 echo "DIR='${DIR}'" >&2
@@ -31,24 +16,6 @@ if [[ ! -e "${DIR}/setenv" ]]; then exit 1; fi
 
 # shellcheck source=/dev/null
 source "${DIR}/setenv"
-
-# SCOPE THE SHIPPED SEARCH PATH TO THE INTERPRETER (decision D2/W1).
-#
-# `setenv` exports LD_LIBRARY_PATH pointing at the shipped RHEL libraries. Every
-# helper below (readlink, mv, ln, cp, sed, grep) is resolved through PATH and
-# would inherit it, so on a foreign distribution the HOST helper binds the
-# shipped libc and dies on GLIBC_PRIVATE. The interpreter needs that search
-# path; nothing else this script runs does.
-#
-# Saved ONCE here, immediately after the source, and restored per interpreter
-# invocation through a per-command assignment rather than an export, so THIS
-# shell's environment stays unset and every helper below inherits that (W2).
-#
-# An empty value is preserved AS EMPTY rather than as unset (W3): a caller who
-# had an empty one gets an empty one back. `${VAR-}` yields empty when unset, so
-# one assignment covers both.
-CPLX_TOOLCHAIN_LD_LIBRARY_PATH="${LD_LIBRARY_PATH-}"
-unset LD_LIBRARY_PATH
 
 # Check if any of the parameters are, in that order, '-m venv'
 args=("$@")
@@ -60,8 +27,7 @@ for (( i=0; i < ${#args[@]} - 2; i++ )); do
     fi
 done
 
-python3_target="$(guarded_readlink relink-read \
-    "${DIR}/current/bin/python3")" || exit
+python3_target="$(readlink "${DIR}/current/bin/python3")"
 # If "${DIR}/current/bin/python3" is a file, move it and create a symlink pointing back to "${DIR}/python"
 if [ "${python3_target}" != "../../bin/python" ]; then
     echo_dbg "mv '${DIR}/current/bin/${python3_target}' '${DIR}/current/bin/${python3_target}_bin'"
@@ -78,8 +44,7 @@ if [ "${python3_target}" != "../../bin/python" ]; then
 
     python3_target="${python3_target}_bin"
 else
-    python3_target="$(guarded_readlink target-read \
-        "${DIR}/current/bin/python3_target")" || exit
+    python3_target="$(readlink "${DIR}/current/bin/python3_target")"
 fi
 
 if [[ ! -e "${DIR}/pip" ]]; then
@@ -90,21 +55,15 @@ if [[ ! -e "${DIR}/pip" ]]; then
     ln -nfs "current/bin/pip3" "${DIR}/pip3"
 fi
 
-# Finally, call the new binary.
-#
-# The two restore sites, one per arm. A per-command assignment is inherited by
-# the interpreter and by everything it spawns, exactly as an export would be;
-# what it does NOT do is change this shell's environment, so the helpers below
-# and every later line still see no LD_LIBRARY_PATH.
+# Finally, call the new binary
 if [[ -z "${VIRTUAL_ENV}" ]]; then
-  LD_LIBRARY_PATH="${CPLX_TOOLCHAIN_LD_LIBRARY_PATH}" "${DIR}/current/bin/${python3_target}" "$@"
+  "${DIR}/current/bin/${python3_target}" "$@"
 else
-  LD_LIBRARY_PATH="${CPLX_TOOLCHAIN_LD_LIBRARY_PATH}" "${VIRTUAL_ENV}/bin/${python3_target}_bin" "$@"
+  "${VIRTUAL_ENV}/bin/${python3_target}_bin" "$@"
 fi
 
 if [[ -n "${venv}" ]]; then
-    python3_target="$(guarded_readlink venv-read \
-        "$(pwd)/${venv}/bin/python3")" || exit
+    python3_target="$(readlink "$(pwd)/${venv}/bin/python3")"
 
     echo_dbg "ln -nfs '${DIR}/python' '$(pwd)/${venv}/bin/${python3_target}'"
     ln -nfs "${DIR}/python" "$(pwd)/${venv}/bin/${python3_target}"

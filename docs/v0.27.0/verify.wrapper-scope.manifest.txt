@@ -1,0 +1,23 @@
+# Identity manifest for the v0.27.0 python-wrapper-foreign-distro harness.
+#
+# GENERATED, never hand-written, by:
+#   git rev-parse <freeze-commit>
+#   git show <freeze-commit>:<harness-path> | sha256sum
+# so the digest cannot disagree with the file it describes.
+#
+# It names an EARLIER commit than its own, and must: a commit identity is
+# computed over its tree, the tree contains this file, so writing that id here
+# would change the tree and therefore the id. That is decision Q08/H2 and it is
+# why the freeze is its own step.
+#
+# file_sha256 is SHA-256 over the FILE BYTES at freeze_commit:harness_path. It
+# is NOT a Git blob object id, which is a different hash over different bytes.
+#
+# The pipeline probe verifies its local harness copy against its copy of this
+# file and fails the capture when they differ, which catches an unpaired edit.
+# The authority is not this file: it is the independent comparison performed on
+# the cplx side, in a repository the pipeline edit cannot reach.
+
+freeze_commit 233b549d1bfa96b0e0e2cf7e9d31c996cf132389
+harness_path docs/v0.27.0/verify.wrapper-scope.sh
+file_sha256 fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
