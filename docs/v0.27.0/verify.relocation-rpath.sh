@@ -173,7 +173,27 @@ blocked() {
     printf '  %-40s BLOCK%s\n' "$1" "${2:+ $2}"
     BLOCKED="${BLOCKED:+$BLOCKED; }${2:-}"
 }
-section() { printf '\n== %s\n' "$1"; }
+# section NAME: the suite heading.
+#
+# With CPLX_VERIFY_TIMING set it also carries the elapsed seconds since the
+# first section, so a slow suite is LOCATED from the capture rather than
+# inferred from reading the source. Build 123 cost twenty minutes of wall clock
+# and nothing in its captures said which suite spent it; that is the same
+# absent-versus-unmeasured confusion this harness exists to refuse, pointed at
+# itself.
+#
+# Unset, the output is byte-identical to what the review rounds validated, which
+# is why the timing is opt-in rather than always on.
+section() {
+    if [ -n "${CPLX_VERIFY_TIMING:-}" ]; then
+        local now
+        now=$(date +%s)
+        : "${_TIMING_T0:=$now}"
+        printf '\n== %s   [t+%ss]\n' "$1" "$((now - _TIMING_T0))"
+        return
+    fi
+    printf '\n== %s\n' "$1"
+}
 
 # control <name> <required-reason-prefix> <command...>
 # The reason prefix is the whole point: a control demanding only "FIXTURE" would
@@ -2186,7 +2206,7 @@ step6_run() {
     local prefix="$1" work="$2"
     rm -rf -- "$work" 2>/dev/null
     mkdir -p -- "$work" 2>/dev/null || return 1
-    cp -a -- "$prefix/." "$work/" 2>/dev/null || return 1
+    cp -a --reflink=auto -- "$prefix/." "$work/" 2>/dev/null || return 1
     step4_pass "$work"
 }
 
@@ -6179,7 +6199,7 @@ step4_residual_suite() {
     # fall back to the live tree: the fallback IS the defect this guard exists
     # to remove, and "nobody could ask" is not "the archive is clean".
     rm -rf -- "$work" 2>/dev/null
-    if ! mkdir -p -- "$work" 2>/dev/null || ! cp -a -- "$prefix/." "$work/" 2>/dev/null; then
+    if ! mkdir -p -- "$work" 2>/dev/null || ! cp -a --reflink=auto -- "$prefix/." "$work/" 2>/dev/null; then
         rm -rf -- "$work" 2>/dev/null
         printf '  %-40s SKIP  could not copy the extracted archive to %s\n' \
             "step4/residual-copy" "$work"

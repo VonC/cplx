@@ -55,8 +55,17 @@ Measured afterwards by run `step6scope-20260829T203916Z` on the RHEL target,
 retained as `verify.acceptance.scope.rhel.txt`: 216 cases, 0 failures,
 `OBJECTIVE MET`. The run is on RHEL rather than the Debian agent because CI was
 down with a sealed vault, and the human owner decided to retain it rather than
-hold the umbrella frozen. Retaking the Debian captures is owed once CI returns
-and is not a condition of the verdict.
+hold the umbrella frozen. Retaking the Debian captures was owed once CI came
+back, and was never a condition of the verdict.
+
+**DISCHARGED on 2026-08-30 by CI build 130**, at commit `96c5799c`, the first
+build carrying the scope correction. All six steps ran on the Debian agent and
+all six answered `OBJECTIVE_MET`: 162, 462, 355, 104, 540 and 216 cases, zero
+failures anywhere. Step 6 reports `tools/python/root/a.out` as
+`step6/handoff-resolved NOTE handed to umbrella requirement 7 with its owner
+named`, where build 123 had ended `OBJECTIVE NOT MET for step 6: 2 failure(s)`
+on that same line. The captures are retained beside this note as
+`verify.relocation.step{0,1,2,3,4,6}.debian.txt`.
 
 ## What WAS not done, and why it blocked everything
 
@@ -123,8 +132,9 @@ agent, because CI is down.
 Nothing is owed by this requirement until umbrella requirement 7 rebuilds the
 published archive without `tools/python/root/a.out`. When that artifact exists:
 
-1. get one green Debian build first, to confirm the sequencing change on the
-   agent. It is committed at CI `9a37a822` and verified only on RHEL;
+1. DONE on 2026-08-30, build 130: the green Debian build confirming the
+   sequencing change on the agent. It was committed at CI `9a37a822` and
+   verified only on RHEL until then;
 2. consume the rebuilt archive at step 6 and verify `a.out` is gone. The stale
    register entry will then FAIL at step 4 until it is dropped from
    `STEP4_ARCHIVE_DEFECTS`, which is the mechanism that retires the deferral;

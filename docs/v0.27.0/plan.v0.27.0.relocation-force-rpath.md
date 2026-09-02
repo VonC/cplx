@@ -2,6 +2,7 @@
 
 Reference issue: [issue.v0.27.0.relocation-force-rpath.md](issue.v0.27.0.relocation-force-rpath.md)
 Reference design: [design.v0.27.0.relocation-force-rpath.md](design.v0.27.0.relocation-force-rpath.md)
+Reference environments: [reference.environments.md](reference.environments.md)
 
 This plan introduces no design choice. Every rule it schedules is settled in the
 requirement's twelve clarifications or the design's seven decisions, and where a
