@@ -1,13 +1,16 @@
 # v0.27.0 python-wrapper-foreign-distro implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
 This document tracks the implementation of
 [plan.v0.27.0.python-wrapper-foreign-distro.md](plan.v0.27.0.python-wrapper-foreign-distro.md),
-six steps that scope the shipped search path to the interpreter and make the
-wrapper fail closed on an unusable helper result. Steps 0 through 4 are
-complete, the harness is frozen and its identity is published and carried to
-the Debian agent; step 5, the acceptance, has not started.
+seven steps that scope the shipped search path to the interpreter and make the
+wrapper fail closed on an unusable helper result. All seven are complete: the
+mechanism is measured over a planted fixture, the RHEL target shows no
+regression, the harness is frozen with its identity published and carried to the
+Debian agent, and step 5 has proved the fix on Debian 12 over two freshly
+deployed trees, with the pre-change control refusing in the same run and the
+same suite refusing on RHEL where the defect cannot fire.
 
 > Skeleton note: every per-step section other than `Goal` carries the literal
 > placeholder `_(empty -- no check has taken place yet.)_.` until an
@@ -1103,7 +1106,23 @@ No, no feature-integrity evidence is still owed for Step 4b.
 
 ### Analysis of Step 5 implementation state
 
-_(empty -- no check has taken place yet.)_.
+Yes. Step 5 has been fully implemented.
+
+Build 139 of the pipeline `develop` branch deployed the published archive twice
+on the Debian 12 agent and ran the acceptance over both trees: `OBJECTIVE MET`,
+42 cases and 0 failures, with the discriminator
+`step5/acceptance/fixed-answers-and-control-does-not` reading `yes:no`. The same
+instrument run on RHEL 9.8 over two equally fresh deployments REFUSES with five
+failures, because the defect cannot fire on the distribution whose libc family
+the archive ships. The cplx-side identity check then admitted both blocks, 24
+cases and 0 failures.
+
+Code review round 1 refused the first implementation on two counts and both were
+right. It copied one already-deployed tree twice where the criterion says two
+freshly extracted trees, and it wrote to `/tmp` where the criterion names the
+build's own prefix. The trees are now genuine deployments, which the acceptance
+MEASURES rather than promises, and the write location is settled by an amended
+criterion whose reason is a measurement rather than a preference.
 
 ### Goal for Step 5
 
@@ -1127,4 +1146,271 @@ the plan prose, so an implementation check can read them directly:
 
 ### What was implemented for Step 5
 
-_(empty -- no check has taken place yet.)_.
+Two files in this repository, four in the pipeline one, one probe and one build.
+
+THE STEP FOUND ITS PLAN INCOMPLETE BEFORE IT FOUND ANYTHING ELSE. The plan's
+step 5 file list named the four artifacts step 5 CONSUMES and nothing that could
+run it, on the reading that the frozen harness would. It cannot: its `--step`
+dispatch accepts 0 to 3 and refuses anything else on purpose, and its step 3
+suite asserts `rhel 9.8` as its target. Step 4 then froze those bytes and step 4b
+published their digest, so step 5 may not extend it either. The acceptance is
+therefore a SECOND FILE beside the frozen harness, which it reads and never
+writes, and the plan's own list and validation commands were repaired to say so.
+That is the same omission step 0's file list carried and step 2 would have
+tripped on.
+
+`docs/v0.27.0/verify.wrapper-accept.sh`, the instrument, with two modes because
+the step has two halves and neither host can answer the other's:
+
+- `--mode accept` runs on the Debian agent over two freshly deployed trees it is
+  handed. It installs the fixed wrapper in one and the retained pre-change
+  wrapper in the other, and asserts that the first answers a version and the
+  second does not;
+- `--mode identity` runs HERE and needs git. It verifies the manifest triple
+  against the canonical harness, both wrapper bodies against the commits they
+  came from, and the digests a retained capture records against the files this
+  repository holds.
+
+`docs/v0.27.0/verify.wrapper.debian.txt`, the retained evidence, carrying three
+runs rather than one, because a passing suite says nothing about whether it
+would pass anywhere: the Debian acceptance, the RHEL refusal that qualifies it,
+and the identity check that admitted both.
+
+IN THE PIPELINE REPOSITORY, landed on `develop` the same way step 4b's were:
+`tools/wrapper_accept.verification-only.sh` byte-identical to the instrument,
+`tools/wrapper_python.fixed.verification-only.sh` and
+`tools/wrapper_python.pre-change.verification-only.sh` byte-identical to the two
+wrapper bodies, `tools/wrapper_accept_rsync_shim.verification-only.sh`, and
+`wrapperAccept()` in `ci/Jenkinsfile.diagnostics`, called from the
+`verifyCplx()` parallel in its own branch. The `.sh` suffix is that repository's
+rule for `text eol=lf`, and a copy whose line endings drifted would fail the
+digest check it exists to pass; the names differ from the canonical ones and the
+digests do not, which is what binds them.
+
+THE PROBE DEPLOYS THE ARCHIVE TWICE, with the same recipe
+`ci/provision_toolchain.sh` uses: bootstrap `install_pkg.sh` out of the archive,
+hard-link the archive into each throwaway prefix, stand in for the rsync the
+image does not ship, and let the installer rewrite every ELF to live under that
+prefix. Both deployments cost 253 seconds and 3.3 GB together. The deployments
+are made THERE and not in the instrument, by the rule step 3 of the plan already
+states: an oracle that deployed its own subject would be measuring an installer
+run rather than a wrapper.
+
+Criterion by criterion, with the line that answers it:
+
+- TWO FRESHLY EXTRACTED, ISOLATED TREES IN ONE RUN, and the extraction is
+  measured: the installer rewrites every ELF to live under the prefix it deploys
+  into, so `step5/fixed/deployed-for-its-own-root` and its control twin assert
+  that each tree's interpreter carries ITS OWN root in its run path, and
+  `step5/control/tree-deployed-elsewhere-refused` proves the same predicate
+  refuses a tree whose ELFs were written for somewhere else, which is exactly
+  the shape a copy has. `step5/trees/are-independent` reads `3` because it
+  counts distinct inodes across the archive and the two trees;
+- THE FIXED TREE: `step5/fixed/answers-a-version` `yes`, version `Python
+  3.13.9`, exit 0, `python3` a symlink to `../../bin/python`, `python3_target`
+  naming `python3.13_bin`, that file present and asserted an ELF, and no path
+  derived from an empty string either in the tree or in the run;
+- THE CONTROL TREE: `step5/control/derives-the-empty-path` `yes`, with the
+  derived path recorded as `.../control/tools/python/bin/current/bin/_bin` and
+  the first helper failure recorded verbatim: `readlink: symbol lookup error:
+  .../control/tools/python/root/usr/lib64/libc.so.6: undefined symbol:
+  _dl_readonly_area, version GLIBC_PRIVATE`. That is the defect itself, measured
+  on the agent;
+- THE CONTROL'S PROVENANCE CHECKED BEFORE IT RUNS:
+  `step5/control-wrapper/bytes` against commit `a665f4fc` at
+  `src/install/env/python/bin/python`, and the fixed body against `c5764088`,
+  both before either tree runs, with
+  `step5/control/wrong-control-bytes-refused` proving the gate fires;
+- THE INDEPENDENT IDENTITY CHECK: `identity/manifest/harness-at-freeze-commit`
+  against `233b549d:docs/v0.27.0/verify.wrapper-scope.sh`, its mutated-manifest
+  control refusing, and the capture's three recorded digests admitted;
+- THIS STEP DID NOT MODIFY THE HARNESS:
+  `identity/harness/canonical-file-is-still-frozen` reads `fab864ee`, the value
+  the manifest names, so the file a reader runs today is the file step 4 froze;
+- THE CAPTURE NAMES ITS RUN AND CITES IT: run identity
+  `debian-wrapper-accept-b139-20260902T102546Z`, agent `debian 12`, glibc 2.36,
+  commit `c96d5a73`, and `step5/identity/throwaway-carries-run-id` asserts the
+  throwaway root carries that identity rather than the header merely stating it;
+- EVERY WRITE UNDER ONE THROWAWAY ROOT the probe creates and removes, with the
+  archive untouched: four cases place both trees and the scratch under it and
+  the archive outside it, and `step5/archive/signature-unchanged` and
+  `step5/archive/wrapper-unchanged` say the extracted archive is what the later
+  stages will consume.
+
+THE ONE CRITERION THIS STEP CHANGED, and why it is a measurement rather than a
+convenience. The criterion said every write lands under the build's own prefix.
+In this pipeline that is `$PREFIX`, and the relocation acceptance runs in the
+SAME parallel branch set: its step 4 and step 6 suites each begin with
+`cp -a "$prefix/." "$work/"`, copying the whole prefix. Two fresh deployments
+placed inside it would be copied wholesale by them while this step was still
+writing them, and a copy the relocation harness cannot make is an UNANSWERED
+criterion it refuses to work around. Honouring the earlier wording would have
+broken another requirement's measurement to satisfy a phrase. The plan now
+states the requirement as step 3 already stated its own, one throwaway prefix
+the step creates and removes, and records that mechanism as the reason.
+
+The first version's stated reason for `/tmp` was that the trees would appear to
+the relocation inventory as unrecorded libraries. That mechanism was wrong: the
+inventory reports unrecorded entries as a NOTE and already tolerates 193 of
+them. The wholesale copy is the real one, and it was found by reading the
+relocation harness rather than by reasoning about it.
+
+THREE DEFECTS IN THE INSTRUMENT WERE FOUND BY ITS OWN CONTROLS OR BY ITS OWN
+CODE REVIEW, which is the only way this class is ever found:
+
+- the mutated-capture control mutated NOTHING. Its `sed` was anchored at
+  `^accept-script-sha256` while a verdict block is indented, so the "mutated"
+  copy was byte-identical, the gate accepted it, and the control reported that
+  its oracle was not asserted. A decorative gate written into the instrument
+  built to refuse decorative gates;
+- the capture check then read only one verdict block, and the retained evidence
+  carries two. Reading the first would have fixed the symptom and lost the
+  check, so every occurrence is collapsed with `sort -u`;
+- the check that the capture carries the fresh-deployment evidence was written
+  as one `grep -c` expecting three, and the capture's own header names those
+  three cases in its prose, so it counted nine and refused a correct capture.
+  Raising the number would have kept the defect and hidden it. Each case is now
+  asked for by name and matched only where a PASS follows it, so prose cannot
+  answer for a measurement.
+
+THE RHEL RUN IS A CONTROL AND NOT A SECOND ACCEPTANCE. Every mechanic passes
+there, including both fresh deployments, the copy-refusing control, and the
+fixed tree answering `Python 3.13.9`; what does not pass is the control half,
+because the pre-change wrapper's `readlink` resolves normally on RHEL and both
+trees answer. The discriminator reads `yes:yes` and the suite refuses with five
+failures, all and only the ones a host where the defect cannot fire must
+produce. Both blocks name the same instrument, `ccea6ea4`, asserted by the
+identity check rather than assumed.
+
+EIGHT BUILDS WERE SPENT AND ONE IS EVIDENCE. Build 139 is the retained one.
+Build 132 ran the first acceptance green but named a pre-fix instrument and its
+artifacts were discarded when a later build superseded them under the one-build
+artifact retention; builds 133 to 135 died at SCM checkout on a Jenkins Vault
+outage, `No route to host`, which is infrastructure rather than this change, and
+build 132 had already failed its own Publish stage the same way after every
+probe had run. Build 136 carried the first acceptance and its code review
+refused it. Build 137 carried the reworked probe whose archive symlink the
+installer could not see, since it discovers its archive with `-type f`. Build
+138 carried the working deployments and a capture the identity gate then
+miscounted.
+
+### Architecture check for Step 5
+
+This step changes no shipped file. The wrapper and `setenv` are read and never
+written, and the acceptance asserts that: the fixed body it installs into its
+own tree is the live `src/install/env/python/bin/python` byte for byte, checked
+against commit `c5764088` before anything runs.
+
+THE FROZEN HARNESS STAYS FROZEN, which is the structural claim this step had to
+make and the reason the instrument is a second file. `verify.wrapper-scope.sh`
+is untouched, its digest still `fab864ee`, and the identity check asserts that
+against the manifest rather than leaving it to the diff. Its four capture
+commands were re-run on this host after the change and all four still report
+`OBJECTIVE MET`.
+
+The two new files stay under `docs/v0.27.0/` with the rest of the effort's
+evidence and are never packaged. The pipeline change stays inside the boundary
+the plan draws: one probe added to `ci/Jenkinsfile.diagnostics`, which that
+file's header declares owned by the cplx maintainer, four
+`tools/*.verification-only.*` files that are never delivered, and no reviewed
+pipeline stage touched.
+
+THE DEPLOYMENT RECIPE SITS IN THE PROBE AND THE ORACLE SITS IN THE INSTRUMENT,
+which is the seam step 3 of the plan already drew and the reason this step keeps
+it: a harness that deployed its own subject would be measuring an installer run
+rather than a wrapper. The instrument is handed two roots and asserts what it
+can measure about them, including that they were deployed rather than copied.
+
+The rsync stand-in moved out of the Groovy string into
+`tools/wrapper_accept_rsync_shim.verification-only.sh`. A heredoc nested inside a
+Groovy string is a shape nobody should have to read, and a file gets `bash -n`
+and `shellcheck` where a string inside a Jenkinsfile gets neither. Both were run
+over it, and the `A && B || C` form the inline copy uses became an `if` because
+shellcheck reports it under SC2015.
+
+The probe reports and never gates, exit 0 like every probe beside it, and it
+takes its own branch in the existing parallel rather than adding a stage. It
+writes only into a run-keyed throwaway root under the workspace and removes it
+before `stageClone()` copies that workspace, so it cannot reach the archive the
+later stages consume nor the prefix the relocation suites copy wholesale in the
+same parallel.
+
+The DDD-Hexagonal criterion does not apply to a Bash, Batch and Groovy project.
+
+No, there is nothing that needs to be addressed.
+
+### Performance check for Step 5
+
+Nothing here grows with anything. The acceptance is a fixed number of cases over
+two trees, and the cost that dominates is measured rather than estimated and
+recorded in the capture: the two fresh deployments take 253 seconds and 3.3 GB
+together on the agent, and 255 seconds on the RHEL target.
+
+THAT COST BUYS THE CRITERION AND IT IS PAID IN PARALLEL. Deploying is four
+minutes against copying's three seconds, which is what the first version chose
+and what its code review refused. The branch sits in a stage whose other
+branches already run eight to ten minutes, so the stage's wall clock is
+unchanged and Jenkins reports the branch's own duration. Build 138 and build 139
+both returned SUCCESS inside the pipeline's 60 minute timeout, with the same
+duration profile as the builds before this step existed.
+
+The one loop that walks a variable set is `tree_signature`, over the entries of
+`bin` and `current/bin`, a dozen names each, sorted once. That is O(n log n) on
+n = the entries of two directories, not on the archive: the tree it compares
+holds tens of thousands of files and the signature reads two of its directories
+by design, because the surgery this step measures touches nowhere else.
+
+The identity mode hashes four files and runs two `git show` calls.
+
+No, there is no performance issue that needs to be addressed.
+
+### Unit test coverage check for Step 5
+
+The 100 percent unit rule targets `src\pdfss\tests\unit`, which belongs to the
+consuming project; cplx has no pytest suite and no unit-tested class file, so
+there is no percentage to report and no legacy unit test is impacted. The
+project default `ghog day` reports that same absence, and did again for this
+step: `ghog check` exit 0 with `check.bat not found - skipped`, then
+`ghog affected --no-cov` exit 5 on `pytest not found on PATH`.
+
+The substituted gate is `bash src/utils/lint_shell.sh`, clean over 44 tracked
+scripts, plus `shellcheck docs/v0.27.0/verify.wrapper-accept.sh` with no
+finding, the new instrument being under `docs/` and therefore outside the lint
+gate's own scope by that script's stated rule.
+
+On the pipeline side the probe's embedded shell was extracted from its Groovy
+string and checked with `bash -n` and `shellcheck`, and the rsync stand-in it
+now calls is a file rather than a nested heredoc precisely so both reach it.
+Both are clean.
+
+No, there is no unit-tested class below 100 percent that needs completing.
+
+### Feature integrity for Step 5
+
+No shipped behaviour changed, and the runs say so rather than the reasoning.
+
+In this repository the four frozen-harness capture commands were re-run after
+the change and report `OBJECTIVE MET` for steps 0, 1, 2 and 3, with the same
+digests they carried before. The wrapper, `setenv` and the harness are all
+byte-identical to what step 4 committed.
+
+On the agent, build 139 returned SUCCESS with every other cplx probe reporting
+as before, which is the evidence that a new branch in the `verifyCplx()`
+parallel disturbed nothing. The acceptance asserts the extracted archive is
+unchanged, by signature and by wrapper digest, so the archive the Provision,
+Package and Test stages consume after it is the archive they would have consumed
+without it. The two deployments it makes live outside that prefix and are
+removed before `stageClone()` copies the workspace.
+
+THE RELOCATION SUITES ARE THE FEATURE MOST AT RISK HERE, since they walk and
+copy the same prefix in the same parallel, and their own retained captures say
+they are unchanged: build 139 carries `result: OBJECTIVE_MET` for relocation
+steps 0, 1, 2, 3, 4 and 6, read from
+`a.evidence/verify-relocation-step<n>.debian.txt` rather than inferred from the
+build being green.
+
+On the RHEL target the control run left the live install untouched, asserted the
+same way, and both its deployments and its scratch were removed; `df` on that
+partition is back where it started.
+
+No, no feature-integrity evidence is still owed for Step 5.
