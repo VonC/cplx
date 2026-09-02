@@ -27,9 +27,14 @@ new module, no new tool, and no change to any shipped file outside the wrapper.
   generated from the FROZEN harness bytes and written in a commit AFTER the
   freeze, naming `freeze_commit`, `harness_path` and `file_sha256` over the
   file bytes at that path.
+- `docs/v0.27.0/verify.wrapper-accept.sh`: new, the step 5 acceptance
+  instrument. A SECOND file rather than a fifth suite in the harness, because
+  step 4 froze the harness and step 5 may not edit it. Never shipped, never
+  packaged.
 - the pipeline-side copy, manifest and probe named at exact paths in "The
   cross-repository handoff" below. NAMED HERE, LANDED THERE by the cplx
-  maintainer, and landed BY STEP 4 rather than owed after step 5.
+  maintainer, and landed BY STEP 4 rather than owed after step 5. Step 5 lands
+  three more of its own, named in "Step 5 files involved".
 
 Nothing in this plan touches the installer, the relocation pass or the archive.
 
@@ -260,6 +265,41 @@ bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 \
 bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 \
      --capture docs/v0.27.0/verify.wrapper.rhel.txt
 ```
+
+### The step 5 instrument, which is a SECOND file rather than a fifth suite
+
+THE FROZEN HARNESS CANNOT ANSWER STEP 5, and this section said nothing about it
+until step 5 was implemented and found out. Its `--step` dispatch accepts 0 to 3
+and refuses anything else on purpose, so that a verdict line can never report
+success for a step whose cases do not exist, and its step 3 suite asserts
+`rhel 9.8` as its target. Step 4 then froze those bytes and step 4b published
+their digest. So step 5 cannot extend it: the edit would invalidate the identity
+the pipeline copy is checked against, which is the one thing step 5's own
+criteria forbid.
+
+The acceptance therefore lives in `docs/v0.27.0/verify.wrapper-accept.sh`, a new
+file that READS the frozen harness and never writes it. It carries two modes,
+because the step has two halves and neither host can answer the other's:
+
+```text
+shellcheck docs/v0.27.0/verify.wrapper-accept.sh
+
+bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity \
+     --capture docs/v0.27.0/verify.wrapper.debian.txt
+```
+
+`--mode identity` runs HERE and needs git: it verifies the manifest's
+`freeze_commit`, `harness_path` and `file_sha256` against the canonical harness,
+verifies both wrapper bodies against the commits they came from, and refuses a
+retained capture whose recorded digests do not name the files this repository
+holds. Each of those gates carries a control that must FAIL.
+
+`--mode accept` runs on the Debian CI agent through the `wrapperAccept()` probe,
+and answers nowhere else: a host that is handed no deployed python env exits 4
+rather than reporting 0 on its own account. Run on RHEL it FAILS by design, and
+that refusal was measured rather than argued: every mechanic passes there and the
+four control cases do not, because the defect cannot fire on the distribution
+whose libc family the archive ships.
 
 STEP 0'S COMMAND NAMES THE RETAINED WRAPPER, and from step 1 onward it must.
 Step 0 describes the PRE-CHANGE wrapper, step 1 rewrites the live one, and the
@@ -542,7 +582,28 @@ the commit that contains it. Everything step 5 needs is an OUTPUT of it.
 - `docs/v0.27.0/verify.wrapper-scope.sh` (existing, READ ONLY at this point)
 - `docs/v0.27.0/verify.wrapper-scope.manifest.txt` (existing, step 4b's output)
 - `docs/v0.27.0/wrapper.pre-change.verification-only` (existing, the control)
+- `docs/v0.27.0/verify.wrapper-accept.sh` (new, the acceptance instrument)
 - `docs/v0.27.0/verify.wrapper.debian.txt` (new, retained evidence)
+
+Landed by this step in the pipeline repository, by the cplx maintainer, the same
+flow step 4b used: `tools/wrapper_accept.verification-only.sh`,
+`tools/wrapper_python.fixed.verification-only.sh`,
+`tools/wrapper_python.pre-change.verification-only.sh`, and the
+`wrapperAccept()` probe in `ci/Jenkinsfile.diagnostics`.
+
+THE INSTRUMENT AND THE LANDINGS WERE MISSING FROM THIS LIST, which is the same
+omission step 0's list carried and step 2 would have tripped on. The four
+entries above them are what step 5 CONSUMES, and an earlier revision listed only
+those, on the reading that the frozen harness would run the acceptance. It
+cannot: see "The step 5 instrument" above. A step whose criteria require two
+trees on a Debian agent and whose file list names nothing that can build them is
+asking for a run no file performs. Added while implementing step 5, from the
+same reading that produced the section above.
+
+The step 4b handoff table above stays as it is and gains nothing: the harness,
+its manifest and the `wrapperScope()` probe are step 4b's, they are landed, and
+an obligation met before a step can run is not one that survives it. These are
+step 5's own, and they are named here rather than there for that reason.
 
 ### Step 5 goal
 
@@ -554,7 +615,14 @@ the acceptance. It consumes step 4's outputs and produces none of them.
 
 - TWO FRESHLY EXTRACTED, ISOLATED TREES in the same run, one for the fixed
   wrapper and one for the control, so the mangled run cannot contaminate the
-  passing one;
+  passing one. EXTRACTED IS NOT COPIED, and the difference is measurable rather
+  than a matter of wording: the installer rewrites every ELF to live under the
+  prefix it deploys into, so a freshly deployed tree carries its OWN root in its
+  interpreter's run path and a copy carries the root it was copied from. The
+  acceptance asserts that for both trees and carries a control that must FAIL on
+  a tree deployed elsewhere. This sentence was added after code review round 1 of
+  step 5 found the first implementation materializing two `cp -a` copies of one
+  already-deployed tree, which no case then present could catch;
 - the fixed tree: a first call answers the toolchain version, and the tree
   afterwards has `python3` a symlink to the wrapper, `python3.13_bin` the real
   interpreter, `python3_target` pointing at it, and NO path derived from an
@@ -579,8 +647,26 @@ the acceptance. It consumes step 4's outputs and produces none of them.
 - the capture names the run identity, the agent image, its glibc version and the
   commit, and cites that identity in its evidence rather than only in its
   header;
-- every write lands under the build's own prefix, and the extracted archive the
-  later pipeline stages consume is left unmodified.
+- every write lands under ONE THROWAWAY ROOT the step creates and removes, that
+  root is the build's own and sits OUTSIDE the extracted archive, and the
+  extracted archive the later pipeline stages consume is left unmodified,
+  asserted by signature and by wrapper digest before and after.
+
+  THE WORDING WAS "under the build's own prefix" AND THAT IS WHERE IT CANNOT GO,
+  which was found by measurement rather than argued. In this pipeline the
+  build's own prefix is `$PREFIX`, and the relocation acceptance runs in the SAME
+  parallel branch set as this step: its step 4 and step 6 suites each begin with
+  `cp -a "$prefix/." "$work/"`, copying the whole prefix. Two fresh deployments
+  placed inside it would be copied wholesale by them, while this step was still
+  writing them, and a copy the relocation harness cannot make is an UNANSWERED
+  criterion it refuses to work around. Honouring the earlier wording would
+  therefore have broken another requirement's measurement to satisfy a phrase.
+
+  The throwaway root is the build's workspace instead, run-keyed and removed
+  before `stageClone()` copies that workspace. This is the same shape step 3
+  states for the RHEL target, "every write lands under one throwaway prefix,
+  `HOME` pinned to it ... and the prefix removed", and the wording is now that
+  one rather than a phrase this pipeline cannot honour.
 
 ### Step 5 what remains OWED after it
 
