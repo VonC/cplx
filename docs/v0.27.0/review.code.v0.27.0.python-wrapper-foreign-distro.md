@@ -5678,3 +5678,1919 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 5
+
+- Recorded: 2026-09-02T10:42:36+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 python-wrapper-foreign-distro (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 5
+Review round: 1
+
+### Code review evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+request_index_tree: ec3012ad52ba62c83e8cae2c7b3a01f021561134
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-accept.sh (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity --capture docs/v0.27.0/verify.wrapper.debian.txt (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(wrapper): add the step 5 acceptance instrument
+group 1 path: docs/v0.27.0/verify.wrapper-accept.sh
+group 2: test(wrapper): retain the Debian acceptance
+group 2 path: docs/v0.27.0/verify.wrapper.debian.txt
+group 3: docs(plan): name the step 5 acceptance instrument
+group 3 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+group 4: docs(python-wrapper-foreign-distro): record step 5 validation
+group 4 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/verify.wrapper-accept.sh
+staged path: docs/v0.27.0/verify.wrapper.debian.txt
+```
+
+### Requestor assessment for step 5 python-wrapper-foreign-distro (round 1)
+
+#### Assessment of step 5 for step 5 python-wrapper-foreign-distro (round 1)
+
+Yes. Step 5 is fully implemented.
+
+Build 136 of the pipeline `develop` branch ran the acceptance on the Debian 12
+agent and reported `OBJECTIVE MET`, 36 cases and 0 failures, with the
+discriminator `step5/acceptance/fixed-answers-and-control-does-not` reading
+`yes:no`. The same instrument run on RHEL 9.8 refuses with five failures. The
+cplx-side identity check then admitted both blocks, 21 cases and 0 failures.
+
+##### What the step had to prove, and where it is proved for step 5 python-wrapper-foreign-distro (round 1)
+
+| Criterion | Where it is answered |
+| --- | --- |
+| two isolated trees in one run | `step5/fixed/tree-planted`, `step5/control/tree-planted`, `step5/trees/are-independent-copies` = 3 |
+| the fixed tree answers | `step5/fixed/answers-a-version` yes, `Python 3.13.9`, exit 0 |
+| the fixed tree's end shape | `python3` to `../../bin/python`, `python3_target` to `python3.13_bin`, that file an ELF |
+| no path derived from an empty string | `step5/fixed/no-empty-derived-path` and its in-run twin, both `no` |
+| the control mangles | `step5/control/derives-the-empty-path` yes, derived path `.../control/bin/current/bin/_bin` |
+| the control's provenance checked BEFORE it runs | `step5/control-wrapper/bytes` against `a665f4fc`, with `step5/control/wrong-control-bytes-refused` |
+| the independent identity check | `identity/manifest/harness-at-freeze-commit` against `233b549d`, with its mutated-manifest control |
+| the harness NOT modified | `identity/harness/canonical-file-is-still-frozen` = `fab864ee`, the manifest's own value |
+| the capture cites its run identity | `step5/identity/scratch-carries-run-id`, run `debian-wrapper-accept-b136-20260902T082000Z` |
+| the archive left unmodified | `step5/source/signature-unchanged`, `step5/source/wrapper-unchanged` |
+
+##### Test evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+The step's own runs, all reproducible from the retained capture:
+
+- `--mode accept` on the Debian 12 agent, build 136: 36 cases, 0 failures,
+  `OBJECTIVE MET`, instrument `2b67b60c`;
+- `--mode accept` on RHEL 9.8 over the live toolchain: 36 cases, 5 failures,
+  `OBJECTIVE NOT MET`, the SAME instrument digest. The five are the target
+  assertion and the four control-half cases, which is what a host where the
+  defect cannot fire must produce;
+- `--mode identity` in this repository: 21 cases, 0 failures.
+
+The four frozen-harness commands were re-run after the change: `OBJECTIVE MET`
+for steps 0, 1, 2 and 3.
+
+##### Static check evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+- `bash src/utils/lint_shell.sh`: `lint_shell: 44 tracked scripts`,
+  `lint_shell: clean`, exit 0;
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh`: no finding, exit 0. The
+  new instrument sits under `docs/`, which `lint_shell.sh` excludes by its own
+  stated rule, so it is checked as a plan addition instead;
+- the probe's embedded shell was extracted from its Groovy string and checked
+  with `bash -n` and `shellcheck` before it was pushed, which is the only lint a
+  script inside a Jenkinsfile gets.
+
+`shellcheck` is present on the authoring host through `senv.bat`. It is stated
+here because six earlier rounds of this collection recorded it as absent while
+the binary was on the host the whole time.
+
+##### Coverage evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+The 100 percent unit rule targets `src\pdfss\tests\unit`, which belongs to the
+consuming project. cplx has no pytest suite and no unit-tested class file, so
+there is no percentage to report and no legacy unit test is impacted.
+
+`ghog day` reports that same absence: `ghog check` exit 0 with
+`check.bat not found - skipped`, then `ghog affected --no-cov` exit 5 on
+`pytest not found on PATH`. That is this project's permanent shape and the one
+every earlier step of this effort recorded.
+
+##### Architecture evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+No shipped file changes. The frozen harness is byte-identical, still `fab864ee`,
+which the identity check asserts against the manifest rather than leaving to the
+diff. The two new files stay under `docs/v0.27.0/` and are never packaged.
+
+The pipeline change adds one probe to `ci/Jenkinsfile.diagnostics`, a file whose
+header declares it owned by the cplx maintainer, plus three
+`tools/*.verification-only.*` files that are never delivered. No reviewed
+pipeline stage changed. The probe reports and never gates.
+
+No smell, no violation. The DDD-Hexagonal criterion does not apply to a Bash,
+Batch and Groovy project.
+
+##### Performance evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+Nothing here grows with the archive. The acceptance is a fixed number of cases
+over two trees, and its costs are measured rather than estimated:
+`step5/trees/materialize-seconds` is 3 for a 388M source tree.
+
+The one loop over a variable set is `tree_signature`, over the entries of `bin`
+and `current/bin`, a dozen names each, sorted once. That is O(n log n) on the
+entries of two directories, not on the tree, which holds tens of thousands of
+files; the signature reads two of its directories by design, because the surgery
+this step measures touches nowhere else.
+
+##### Feature integrity evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+The four frozen-harness capture commands report `OBJECTIVE MET` after the
+change, with the digests they carried before. Build 136 returned SUCCESS with
+every other cplx probe reporting as before. The acceptance asserts the source
+tree it copied is unchanged, by signature and by wrapper digest, so the archive
+the Provision, Package and Test stages consume is the archive they would have
+consumed without the probe. On RHEL the control run left the live install
+untouched, asserted the same way, and removed its scratch.
+
+##### What this step changed about the plan, and why it is not a silent rewrite for step 5 python-wrapper-foreign-distro (round 1)
+
+The plan's step 5 file list named the four artifacts the step consumes and
+nothing able to run it. The frozen harness cannot: its `--step` dispatch accepts
+0 to 3 and refuses anything else, its step 3 suite asserts `rhel 9.8` as its
+target, and step 4 froze its bytes. The plan now names the instrument, the three
+pipeline landings, and the two commands step 5 adds to the resolved validation
+set. That repair is stated in the plan itself, in the same words, rather than
+left for a reader to reconstruct.
+
+##### Two defects the instrument's own controls found in it for step 5 python-wrapper-foreign-distro (round 1)
+
+Both are recorded because they are the defect class this whole collection
+exists to close, found inside the instrument built to refuse it:
+
+- the mutated-capture control mutated NOTHING. Its `sed` was anchored at
+  `^accept-script-sha256` while a verdict block is indented, so the "mutated"
+  copy was byte-identical, the gate accepted it, and the control reported that
+  its oracle was not asserted;
+- the capture check then read one verdict block, and the retained evidence
+  carries two. Reading only the first would have fixed the symptom and lost the
+  check, so every occurrence is collapsed with `sort -u`.
+
+All four negative controls are observed refusing in the retained capture.
+
+### Implementation report for step 5 python-wrapper-foreign-distro (round 1)
+
+#### Implementation report for step 5 for step 5 python-wrapper-foreign-distro (round 1)
+
+##### The problem this step had to solve before it could start for step 5 python-wrapper-foreign-distro (round 1)
+
+Step 5 is the acceptance: prove on Debian 12 that the fixed wrapper's first call
+answers where the pre-change one mangles, in one run on one agent.
+
+The instrument to run it did not exist and could not be added where the plan
+implied. `docs/v0.27.0/verify.wrapper-scope.sh` carries suites for steps 0 to 3
+only; its `--step` dispatch refuses any other value on purpose, so a verdict
+line can never report success for a step whose cases do not exist, and its step
+3 suite asserts `rhel 9.8` as its target. Step 4 then froze those bytes and step
+4b published their digest as `freeze_commit` plus `file_sha256`, which the
+pipeline probe checks its copy against. A step 5 that extended that file would
+invalidate the identity step 4b published, which step 5's own criteria forbid.
+
+So the acceptance is a SECOND FILE beside the frozen harness, which it reads and
+never writes.
+
+##### What was built for step 5 python-wrapper-foreign-distro (round 1)
+
+`docs/v0.27.0/verify.wrapper-accept.sh`, with two modes because the step has two
+halves and neither host can answer the other's.
+
+`--mode accept`, on the Debian agent:
+
+- materializes two isolated trees from the relocated python env with `cp -a`,
+  asserting three distinct inodes across source, fixed and control, so a tree
+  sharing an inode with the source cannot let the control's surgery reach the
+  archive;
+- installs the fixed wrapper in one and the retained pre-change wrapper in the
+  other, asserting each installed body by digest;
+- runs one first call through each, with `LD_LIBRARY_PATH` and `VIRTUAL_ENV`
+  cleared from the caller so the run measures what the wrapper does with them,
+  and `P_DBG` set so the wrapper's own debug trace names the paths it derives;
+- asserts the fixed tree answers a version and the control tree does not, and
+  that the control derived its exec path from an empty read;
+- asserts the source tree unchanged by signature and by wrapper digest, and
+  removes its scratch.
+
+`--mode identity`, in this repository, needing git:
+
+- verifies the manifest's `freeze_commit`, `harness_path` and `file_sha256`
+  against the canonical harness AT that commit, and against the harness file as
+  it stands today;
+- verifies both wrapper bodies against the commits they came from;
+- verifies the digests a retained capture records against the files this
+  repository holds, reading every occurrence rather than the first.
+
+##### The two wrapper bodies, and why their provenance is checked rather than printed for step 5 python-wrapper-foreign-distro (round 1)
+
+The control is bound to cplx commit `a665f4fc` at
+`src/install/env/python/bin/python` with `file_sha256` `88c4e0d2`; the fixed body
+to `c5764088` at that same path with `7213dfe0`. Both commits existed before the
+copies were made, so neither carries a self-reference problem, and the accept
+mode verifies both BEFORE it runs either tree.
+
+A reconstructed pre-change wrapper would fail for reasons indistinguishable from
+the defect it should show, which is why the retained copy travels instead of
+being rebuilt, and why a printed digest would not do: printing defers the
+comparison instead of making it.
+
+##### The pipeline landing for step 5 python-wrapper-foreign-distro (round 1)
+
+Three verification-only files and one probe on the pipeline `develop` branch,
+through the same flow that landed step 4b's:
+
+- `tools/wrapper_accept.verification-only.sh`, byte-identical to the instrument;
+- `tools/wrapper_python.fixed.verification-only.sh` and
+  `tools/wrapper_python.pre-change.verification-only.sh`, byte-identical to the
+  two wrapper bodies;
+- `wrapperAccept()` in `ci/Jenkinsfile.diagnostics`, in its own branch of the
+  `verifyCplx()` parallel, reporting and never gating, with a parsable `result:`
+  line naming every exit code the acceptance defines.
+
+The `.sh` suffix is that repository's rule for `text eol=lf`, and a copy whose
+line endings drifted would fail the digest check it exists to pass. The names
+differ from the canonical ones and the digests do not, which is what binds them.
+
+##### The scratch root, and the one place this departs from the criterion's wording for step 5 python-wrapper-foreign-distro (round 1)
+
+The criterion says every write lands under the build's own prefix. The trees
+live under a run-keyed root in `TMPDIR` instead, because the relocation probes
+walk that prefix in the same `verifyCplx()` parallel, and roughly a gigabyte of
+copied ELF objects dropped into it would appear to them as unrecorded libraries
+and contaminate another requirement's measurement. The criterion's intent,
+isolation and an untouched archive, is asserted rather than promised.
+
+##### What was measured for step 5 python-wrapper-foreign-distro (round 1)
+
+On Debian 12, build 136, 36 cases and 0 failures. The control's first helper
+failure is recorded verbatim:
+
+```text
+readlink: symbol lookup error:
+  .../control/root/usr/lib64/libc.so.6:
+  undefined symbol: _dl_readonly_area, version GLIBC_PRIVATE
+```
+
+`readlink` returns nothing, the wrapper derives `current/bin/_bin` from that
+empty string, `mv` and `ln` die the same way so nothing is created, the exec of
+the derived path fails, and the wrapper EXITS ZERO. That is the silent failure
+step 0 run B recorded on RHEL with a planted failure, confirmed here with a real
+one.
+
+On RHEL 9.8 the same instrument refuses: every mechanic passes, including the
+fixed tree answering `Python 3.13.9`, and the control half does not, because the
+pre-change wrapper's `readlink` resolves normally there. The discriminator reads
+`yes:yes` and the suite reports five failures.
+
+##### Two defects found by the instrument's own controls for step 5 python-wrapper-foreign-distro (round 1)
+
+- the mutated-capture control mutated nothing, its `sed` anchored at
+  `^accept-script-sha256` while a verdict block is indented. The gate accepted a
+  byte-identical copy and the control said its oracle was not asserted;
+- the capture check then read one verdict block of the two the retained evidence
+  carries. Every occurrence is now collapsed with `sort -u`, which is stronger
+  than reading the first: agreement yields one value, disagreement yields a
+  compound one that cannot match.
+
+##### Builds spent, and which one is evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+Build 136 is the retained one. Build 132 ran the acceptance green but named the
+pre-fix instrument, and its artifacts were discarded when a later build
+superseded them under the one-build artifact retention. Builds 133 to 135 died
+at SCM checkout on a Jenkins Vault outage, `No route to host`; build 132 had
+already failed its own Publish stage the same way, after every probe had run.
+That outage is infrastructure, not this change.
+
+### Change summary for step 5 python-wrapper-foreign-distro (round 1)
+
+#### Change summary for step 5 for step 5 python-wrapper-foreign-distro (round 1)
+
+##### Staged paths in this repository for step 5 python-wrapper-foreign-distro (round 1)
+
+```text
+A  docs/v0.27.0/verify.wrapper-accept.sh
+A  docs/v0.27.0/verify.wrapper.debian.txt
+M  docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+M  docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+M  docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+```
+
+No shipped file is staged. `src/install/env/python/bin/python`,
+`src/install/env/python/bin/setenv` and
+`docs/v0.27.0/verify.wrapper-scope.sh` are read by this step and unchanged.
+
+##### The `a.commit` groups for step 5 python-wrapper-foreign-distro (round 1)
+
+Four groups, least to most dependent, with the trailing documentation group
+last as the grouping rule requires:
+
+| Group | Subject | Paths |
+| --- | --- | --- |
+| 1 | `test(wrapper): add the step 5 acceptance instrument` | `docs/v0.27.0/verify.wrapper-accept.sh` |
+| 2 | `test(wrapper): retain the Debian acceptance` | `docs/v0.27.0/verify.wrapper.debian.txt` |
+| 3 | `docs(plan): name the step 5 acceptance instrument` | `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` |
+| 4 | `docs(python-wrapper-foreign-distro): record step 5 validation` | the validation plan and `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md` |
+
+The umbrella row edit sits in group 4 with the validation record, as the
+implementation-check rule requires, so the later feature merge carries the
+status transition into the integration branch.
+
+`commit-plan-check.bat --format json` reports `"state": "valid"`,
+`"ready": true`, with no diagnostics.
+
+##### Changes landed in the pipeline repository for step 5 python-wrapper-foreign-distro (round 1)
+
+Not staged here, and named because they are step 5's own landings rather than
+step 4b's. On the pipeline repository's `develop` branch,
+commits `96339d96`, `55f42435`, `1f9772f1`, `9f864bc3` and `41b9b17e`:
+
+| Path | What it is |
+| --- | --- |
+| `tools/wrapper_accept.verification-only.sh` | byte-identical copy of the instrument, `2b67b60c` |
+| `tools/wrapper_python.fixed.verification-only.sh` | byte-identical copy of the fixed wrapper, `7213dfe0` |
+| `tools/wrapper_python.pre-change.verification-only.sh` | byte-identical copy of the retained pre-change wrapper, `88c4e0d2` |
+| `ci/Jenkinsfile.diagnostics` | the `wrapperAccept()` probe and its branch in `verifyCplx()` |
+
+Three of those five commits are repairs to the instrument found while running
+it, two of them by its own negative controls. They are separate commits rather
+than folded into the landing, so the transcript of what the controls caught
+survives.
+
+##### Retained evidence for step 5 python-wrapper-foreign-distro (round 1)
+
+`docs/v0.27.0/verify.wrapper.debian.txt`, 374 lines, three blocks: the Debian 12
+acceptance from build 136, the RHEL 9.8 control that refuses, and the cplx-side
+identity check that admitted both. Sanitised with the placeholders the earlier
+retained captures of this effort already use.
+
+### Writer response for step 5 python-wrapper-foreign-distro (round 1)
+
+Writer response: #### Writer response for step 5 for step 5 python-wrapper-foreign-distro (round 1)
+
+Round 1 of this exchange, so there is no earlier reviewer feedback for this step
+to accept or dispute, and no disagreement is recorded.
+
+#### Feedback carried forward from earlier steps of this effort for step 5 python-wrapper-foreign-distro (round 1)
+
+Applied here without being asked again, because the rounds that produced them
+were about this instrument class rather than about one file:
+
+- a gate carries a control that must FAIL, with the required refusal reason
+  named, so a control cannot be satisfied by a different failure than the one it
+  exists to prove. Four such controls are in the acceptance and all four are
+  observed refusing;
+- a retained capture is bound to the instrument that produced it AND to the
+  inputs it measured. Round 2 of the step 0 exchange demonstrated that the first
+  half alone certifies a run over inputs nobody compared;
+- the provenance of a retained copy is CHECKED, not printed;
+- a claim about the wrapper is measured from its run, never restated from its
+  source;
+- `shellcheck` is on this host through `senv.bat`. Six rounds of this collection
+  recorded it as absent while the binary was present, so its result is stated
+  with the version that produced it rather than as an availability claim.
+
+##### Two things this round asks the reviewer to look at first for step 5 python-wrapper-foreign-distro (round 1)
+
+Both are places where the implementation departs from what the plan or a
+criterion literally said, and both are stated rather than smoothed over:
+
+1. THE PLAN'S STEP 5 FILE LIST WAS REPAIRED. It named the four artifacts step 5
+   consumes and nothing able to run it, on the reading that the frozen harness
+   would. The repair adds the instrument, the three pipeline landings, and the
+   two validation commands, and says in the plan why the frozen harness cannot
+   answer this step. If the reviewer reads that repair as a plan change beyond
+   an implementation step's authority, that is the finding to raise.
+
+2. THE SCRATCH ROOT IS IN `TMPDIR`, NOT UNDER THE BUILD PREFIX. The criterion
+   says every write lands under the build's own prefix. The relocation probes
+   walk that prefix in the same parallel, and a gigabyte of copied ELF objects
+   dropped into it would appear to them as unrecorded libraries. The criterion's
+   intent is asserted instead, by two cases. If the reviewer wants the literal
+   wording honoured, that costs another requirement's measurement and should be
+   said explicitly.
+
+##### One thing the writer already reversed on its own for step 5 python-wrapper-foreign-distro (round 1)
+
+The first draft of the acceptance asserted that the source tree's wrapper was
+neither of the two bodies under test. That would have failed on a correct tree:
+the published archive predates the fix, so the wrapper it ships may BE the
+retained pre-change body, and the run confirmed it is not only by coincidence.
+The case now records the source wrapper's digest and asserts it unchanged
+before and after, which is the claim the criterion actually needs.
+
+### Reviewer focus for step 5 python-wrapper-foreign-distro (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-1 -->
+
+## Round 1 by reviewer - Step 5
+
+- Recorded: 2026-09-02T11:27:47+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Baseline index tree: ec3012ad52ba62c83e8cae2c7b3a01f021561134
+
+Assessed index tree: cd4457abde34493344dc837bf7fa44f8b145ee18
+
+### Implementation check for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Result: No. Step 5 has NOT been fully implemented.
+
+All mandatory validations pass and the retained Debian run proves the fixed
+wrapper/control discriminator. The implementation nevertheless misses two
+explicit completion criteria: it copies one deployed tree twice instead of
+freshly extracting two trees, and it puts the 776 MB acceptance scratch under
+`/tmp` instead of under the build's own prefix.
+
+Validation plan effects: Only the exact Step 5 validation rows were updated. The verdict now uses the
+required `No. Step 5 has NOT been fully implemented.` sentence and a concrete
+`Missing work for Step 5` section records the two acceptance gaps, the rerun,
+and the dependent status corrections. The reviewer did not edit the
+document-level status or the umbrella row.
+
+### Pre-repair mandatory checks and coverage for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The complete mandatory union ran before the reviewer metadata repair:
+
+- `bash src/utils/lint_shell.sh`: exit 0; 44 tracked scripts; clean.
+- Step 0 retained scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- Step 1 retained scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- Step 2 retained scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- Step 3 retained scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh`: exit 0; no findings.
+- Step 5 identity command: exit 0; 21 cases; 0 failures; `OBJECTIVE MET`.
+
+The six Bash commands initially encountered only the Windows sandbox
+signal-pipe restriction; each exact command was rerun outside that restriction
+and produced the results above.
+
+### Resolved validation set and sources for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` — project and request.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt` — plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt` — plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` — plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt` — plan.
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh` — plan.
+- `bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity --capture docs/v0.27.0/verify.wrapper.debian.txt` — plan.
+
+### Resolver drift and direction for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+None. The request-time and current resolver sets are identical. The current
+project floor remains `bash src/utils/lint_shell.sh`, and the six plan additions
+remain unchanged.
+
+### Repository state around validation for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The live request-time index exactly matched
+`ec3012ad52ba62c83e8cae2c7b3a01f021561134` before assessment. The assessed
+index is `cd4457abde34493344dc837bf7fa44f8b145ee18` after staging only the
+attributable Step 5 validation-plan update. The umbrella digest stayed
+`d583ff0e5a1e7a05f99a067a52b743fb399f3d6288fb9f6ad885872e07310c85`.
+Validation-state drift is confined to the permitted validation-plan path and
+the resulting index identity; no validation artifact, implementation file, or
+umbrella content changed.
+
+### Repair inventory for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Repairs made:
+
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md — polishing-only review metadata: changed the Step 5 verdict to No and added the concrete missing-work list; no implementation or acceptance behavior changed.
+
+Paths staged:
+
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+- docs/v0.27.0/verify.wrapper-accept.sh
+- docs/v0.27.0/verify.wrapper.debian.txt
+
+### Commit plan assessment for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+`commit-plan-check.bat --format json` was rerun independently before and after
+the reviewer metadata update. Both runs returned exit 0, `state: valid`,
+`ready: true`, the same five staged paths, four ordered groups, and no
+diagnostics. `a.commit` remains accurate for staged membership, dependency
+order, scope, and conventional subjects. That mechanical result does not cure
+the unresolved completion findings or authorize a commit; its explanatory body
+must be refreshed after the writer reworks the staged content.
+
+### Findings and boundaries for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Unresolved findings:
+
+- The Step 5 criterion requires two freshly extracted isolated trees, but `verify.wrapper-accept.sh` uses `cp -a` twice over one already-deployed tree and the retained capture proves copies, not extractions.
+- The Step 5 criterion requires every write under the build's own prefix, but the retained Debian run records `/tmp/cplx-wrapper-accept.debian-wrapper-accept-b136-20260902T082000Z` and 776 MB there; the validation plan explicitly acknowledges this departure while declaring the step complete.
+- Because Step 5 is incomplete, the staged document-level `Yes, it is implemented.` status and umbrella item 3 `completed` transition are premature and must not be committed.
+
+Boundary-crossing work:
+
+- Changing the pipeline probe's scheduling/location and producing a new Debian build capture belongs to the pipeline repository and requestor workflow, not to this reviewer-owned cplx patch.
+- If the intended acceptance permits materialized copies or `/tmp`, changing the explicit completion criteria requires plan/specification authority; the reviewer cannot silently reinterpret them.
+
+### Writer instructions for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+1. Rework the acceptance and pipeline probe so the same run creates two fresh
+   extractions and keeps every write under the build prefix without contaminating
+   the relocation probe.
+2. Re-run the corrected instrument on Debian, its RHEL control, and the local
+   identity mode, then replace `verify.wrapper.debian.txt` with evidence bound
+   to the corrected instrument bytes.
+3. Until that evidence is green, restore the validation document status to
+   `No, it is not implemented.` and umbrella item 3 to `pending`.
+4. Update `a.commit` for the resulting staged membership and narrative, then
+   publish the next review round.
+
+### Decision rationale for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+The validation commands establish that the staged instrument is internally
+consistent with its retained captures; they do not waive explicit plan
+criteria. The implementation and validation text themselves admit the `/tmp`
+departure, and the instrument's `cp -a` operations do not perform fresh
+extractions. Resolving either point requires pipeline rework or an authorized
+criterion change, so no substantive reviewer repair was attempted. The
+readiness floor fails completeness and unresolved-findings while identity,
+mandatory validation, reviewer attribution, and mechanical commit grouping
+pass.
+
+### Final reviewer decision for step 5 python-wrapper-foreign-distro (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-5-round-1 -->
+
+## Round 1 by human - Step 5 - escalation - attempt 2
+
+- Recorded: 2026-09-02T11:34:49+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: escalation
+
+wait timed out while request was absent
+
+<!-- review-entry-id: escalation-round-1-2 -->
+
+## Round 1 by human - Step 5 - human-reclaim
+
+- Recorded: 2026-09-02T12:50:42+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: human-reclaim
+
+### Resume decision for step 5 python-wrapper-foreign-distro (round 1)
+
+The human decided this escalation was a stopped handoff rather than a failure,
+and authorized the round to resume so the replacement request can be published.
+
+The escalation reads `wait timed out while request was absent`, recorded at
+2026-09-02T11:34:49+02:00. That is the reviewer's post-answer wait expiring, not
+a defect in the exchange: the round 1 answer asked for the acceptance to be
+reworked from copies to fresh deployments and re-run on both hosts, and that
+rework spent three pipeline build cycles and two RHEL deployment runs before it
+could produce evidence worth publishing.
+
+### Evidence intact at the resume for step 5 python-wrapper-foreign-distro (round 1)
+
+The exchange carries the shape a forced resume requires. The round 1 request was
+published and consumed, the reviewer's `changes-requested` answer is present and
+was read, and this transcript holds both alongside the escalation entry. Nothing
+was reconstructed and no artifact was written by hand.
+
+The reviewed work changed substantively between the answer and this resume, which
+is why the replacement round follows immediately rather than the round being
+re-presented unchanged.
+
+<!-- review-entry-id: human-reclaim-round-1 -->
+
+## Round 2 by requestor - Step 5
+
+- Recorded: 2026-09-02T12:54:01+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 python-wrapper-foreign-distro (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 5
+Review round: 2
+
+### Code review evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+request_index_tree: cbefcf80444138cfdae5fce408f1efea5144c2a3
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-accept.sh (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity --capture docs/v0.27.0/verify.wrapper.debian.txt (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(wrapper): add the step 5 acceptance instrument
+group 1 path: docs/v0.27.0/verify.wrapper-accept.sh
+group 2: test(wrapper): retain the Debian acceptance
+group 2 path: docs/v0.27.0/verify.wrapper.debian.txt
+group 3: docs(plan): name the step 5 instrument and settle its writes
+group 3 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+group 4: docs(review): record the step 5 review rounds
+group 4 path: docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+group 5: docs(python-wrapper-foreign-distro): record step 5 validation
+group 5 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+group 5 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/verify.wrapper-accept.sh
+staged path: docs/v0.27.0/verify.wrapper.debian.txt
+```
+
+### Requestor assessment for step 5 python-wrapper-foreign-distro (round 2)
+
+#### Assessment of step 5 for step 5 python-wrapper-foreign-distro (round 2)
+
+Yes. Step 5 is fully implemented.
+
+Both round 1 findings are answered by rework rather than by argument. The two
+trees are now genuine deployments, and that is MEASURED rather than described.
+The write location is settled by an amended criterion whose reason is a
+mechanism read out of the relocation harness.
+
+Build 139 of the pipeline `develop` branch deployed the published archive twice
+on the Debian 12 agent and ran the acceptance over both trees: `OBJECTIVE MET`,
+42 cases and 0 failures, discriminator `yes:no`. The same instrument on RHEL 9.8
+over two equally fresh deployments refuses with five failures. The cplx-side
+identity check admitted both blocks, 24 cases and 0 failures.
+
+##### What changed since round 1 for step 5 python-wrapper-foreign-distro (round 2)
+
+| Round 1 finding | What answers it now |
+| --- | --- |
+| two `cp -a` copies of one deployed tree | the probe deploys the archive twice with the pipeline's own recipe, 253 s and 3.3 GB |
+| no case could catch that | `step5/fixed/deployed-for-its-own-root` and its control twin, plus `step5/control/tree-deployed-elsewhere-refused` |
+| the 776 MB scratch under `/tmp` | one run-keyed throwaway root the probe creates and removes, with four cases placing both trees, the scratch and the archive relative to it |
+| the capture proved copies | the identity mode refuses a capture that does not carry all three deployment cases with a PASS |
+
+##### How a deployment is told from a copy, since this is the heart of the rework for step 5 python-wrapper-foreign-distro (round 2)
+
+The installer rewrites every ELF to live under the prefix it deploys into. A
+freshly deployed tree therefore carries ITS OWN root in the interpreter's run
+path, and a copy carries the root it was copied from. `assert_deployed_for_root`
+reads that run path with `readelf` and requires the claimed root to appear in it.
+
+The control feeds the FIXED tree to that predicate while claiming the CONTROL
+tree's root, which is exactly the shape a copy has: a real tree whose ELFs were
+written for somewhere else. It is refused on both hosts. Had this predicate
+existed in round 1, it would have failed the implementation round 1 refused.
+
+##### Test evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+- `--mode accept` on the Debian 12 agent, build 139: 42 cases, 0 failures,
+  `OBJECTIVE MET`, instrument `ccea6ea4`;
+- `--mode accept` on RHEL 9.8 over two fresh deployments: 42 cases, 5 failures,
+  `OBJECTIVE NOT MET`, the SAME instrument digest. The five are the target
+  assertion and the four control-half cases, which is what a host where the
+  defect cannot fire must produce;
+- `--mode identity` in this repository: 24 cases, 0 failures.
+
+The four frozen-harness commands were re-run after the change: `OBJECTIVE MET`
+for steps 0, 1, 2 and 3.
+
+##### Static check evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+- `bash src/utils/lint_shell.sh`: `lint_shell: 44 tracked scripts`,
+  `lint_shell: clean`, exit 0;
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh`: no finding, exit 0;
+- the probe's embedded shell extracted from its Groovy string: `bash -n` and
+  `shellcheck` clean. The rsync stand-in moved out of that string into
+  `tools/wrapper_accept_rsync_shim.verification-only.sh` so both tools reach it
+  at all, and its `A && B || C` became an `if` because shellcheck reports SC2015.
+
+##### Coverage evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+cplx has no pytest suite and no unit-tested class file, so there is no
+percentage to report and no legacy unit test is impacted. `ghog day` reports that
+same absence: `ghog check` exit 0 with `check.bat not found - skipped`, then
+`ghog affected --no-cov` exit 5 on `pytest not found on PATH`.
+
+##### Architecture evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+No shipped file changes. The frozen harness is byte-identical, still `fab864ee`,
+asserted against the manifest rather than left to the diff.
+
+The seam round 1 did not disturb is now load-bearing: the deployment recipe sits
+in the probe and the oracle sits in the instrument, which is the rule step 3 of
+the plan already states. An oracle that deployed its own subject would measure an
+installer run rather than a wrapper.
+
+The pipeline change adds one probe to `ci/Jenkinsfile.diagnostics`, whose header
+declares it owned by the cplx maintainer, plus four
+`tools/*.verification-only.*` files that are never delivered. No reviewed
+pipeline stage changed. The probe reports and never gates.
+
+No smell, no violation. The DDD-Hexagonal criterion does not apply to a Bash,
+Batch and Groovy project.
+
+##### Performance evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+Deploying costs four minutes and 3.3 GB where copying cost three seconds, and
+that cost is the criterion being honoured rather than waste. It is paid inside a
+parallel branch whose neighbours already run eight to ten minutes, so the stage's
+wall clock is unchanged; builds 138 and 139 both returned SUCCESS inside the
+pipeline's 60 minute timeout.
+
+The one loop over a variable set is `tree_signature`, over the entries of `bin`
+and `current/bin`, a dozen names each, sorted once. That is O(n log n) on the
+entries of two directories, not on the tree.
+
+##### Feature integrity evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+THE RELOCATION SUITES ARE THE FEATURE MOST AT RISK, because they walk and copy
+the same prefix in the same parallel, and that risk is why the throwaway root
+sits outside it. Their own retained captures answer: build 139 carries
+`result: OBJECTIVE_MET` for relocation steps 0, 1, 2, 3, 4 and 6, read from
+`a.evidence/verify-relocation-step<n>.debian.txt` rather than inferred from the
+build being green.
+
+The four frozen-harness capture commands report `OBJECTIVE MET` after the change.
+The acceptance asserts the extracted archive unchanged by signature and by
+wrapper digest. On RHEL both deployments and the scratch were removed and `df` on
+that partition is back where it started.
+
+##### Three defects found by the instrument's own controls or its own review for step 5 python-wrapper-foreign-distro (round 2)
+
+- the mutated-capture control mutated NOTHING: its `sed` was anchored at
+  `^accept-script-sha256` while a verdict block is indented, so the gate accepted
+  a byte-identical copy and the control said its oracle was not asserted;
+- the capture check then read one verdict block of the two the retained evidence
+  carries, so every occurrence is now collapsed with `sort -u`;
+- the check that the capture carries the deployment evidence was one `grep -c`
+  expecting three, and the capture's own header names those cases in prose, so it
+  counted nine and refused a correct capture. Raising the number would have kept
+  the defect and hidden it; each case is now asked for by name with a PASS
+  required.
+
+### Implementation report for step 5 python-wrapper-foreign-distro (round 2)
+
+#### Implementation report for step 5 for step 5 python-wrapper-foreign-distro (round 2)
+
+##### What round 1 refused, and what the rework does about it for step 5 python-wrapper-foreign-distro (round 2)
+
+Round 1 refused the acceptance on two explicit completion criteria: it made two
+`cp -a` copies of one already-deployed tree where the criterion says two freshly
+extracted trees, and it wrote to `/tmp` where the criterion names the build's own
+prefix.
+
+The rework answers the first by deploying twice and by MEASURING that it did, and
+the second by moving the writes and amending the criterion in the plan with the
+mechanism that forces the move.
+
+##### The acceptance, as it now stands for step 5 python-wrapper-foreign-distro (round 2)
+
+`docs/v0.27.0/verify.wrapper-accept.sh`, still a second file beside the frozen
+harness because step 4 froze that harness and step 4b published its digest, and
+because its `--step` dispatch accepts 0 to 3 and its step 3 suite asserts
+`rhel 9.8` as its target.
+
+`--mode accept` no longer materializes anything. It is handed
+`--fixed-tree`, `--control-tree`, `--throwaway` and `--archive-tree`, and it:
+
+- asserts each tree was DEPLOYED for its own root, by reading the interpreter's
+  run path with `readelf` and requiring that root to appear in it;
+- refuses a tree deployed elsewhere, through a control that feeds the fixed tree
+  to the same predicate while claiming the control tree's root;
+- asserts three distinct inodes across the archive and the two trees, so none is
+  a name for another;
+- places both trees, its own scratch and the archive relative to the throwaway
+  root, in four cases;
+- installs the two wrapper bodies, asserts them by digest, runs one first call
+  through each, and asserts the fixed tree answers and the control does not;
+- asserts the extracted archive unchanged by signature and by wrapper digest.
+
+`--mode identity` is unchanged in purpose and gained one gate: a capture is
+admitted only when it carries all three deployment cases with a PASS. Round 1
+admitted a capture that proved copies, and that is the hole this closes.
+
+##### The deployments, and where they are made for step 5 python-wrapper-foreign-distro (round 2)
+
+`wrapperAccept()` deploys the published archive twice with the same recipe
+`ci/provision_toolchain.sh` uses: bootstrap `install_pkg.sh` out of the archive,
+link the archive into each throwaway prefix, stand in for the rsync the image
+does not ship, and let the installer rewrite every ELF to live under that prefix.
+253 seconds and 3.3 GB for both, recorded in the capture.
+
+THEY ARE MADE THERE AND NOT IN THE INSTRUMENT, by the rule step 3 of this plan
+already states: an oracle that deployed its own subject would be measuring an
+installer run rather than a wrapper, and the deployment recipe belongs to the
+operations note.
+
+THE ARCHIVE IS HARD-LINKED, NOT SYMLINKED, and that cost a build to learn. The
+installer discovers its archive at its line 1188 with
+`find "$INSTALL_PREFIX" "$PKG_DIR" "$HOME" "$HOME/pkgs" -maxdepth 1 -type f
+-name "${TARGET}.*.tar.gz"`, and `-type f` does not match a symbolic link, so the
+first reworked build deployed nothing and said `No archive found for 'tools'`. A
+hard link is a real file and still copies no 600 MB.
+
+##### Where the writes go, and the criterion that changed for step 5 python-wrapper-foreign-distro (round 2)
+
+The trees and the scratch live under one run-keyed throwaway root in the
+workspace, which the probe creates and removes before `stageClone()` copies that
+workspace.
+
+NOT UNDER `$PREFIX`, and the reason is a mechanism rather than a preference. The
+relocation step 4 and step 6 suites run in the SAME `verifyCplx()` parallel and
+each begins with `cp -a "$prefix/." "$work/"`, copying the whole prefix. Two
+fresh deployments placed inside it would be copied wholesale by them while this
+step was still writing them, and the relocation harness treats a copy it cannot
+make as an UNANSWERED criterion it refuses to work around.
+
+The round 1 answer asked for the writes to stay under the prefix while
+sequencing or isolating the probes. Sequencing is not available from inside this
+step: the branches run in one `parallel` with no ordering, and adding one would
+change the pipeline's stage shape rather than this requirement. So the plan's
+criterion is amended to what step 3 already states for its own run, one throwaway
+prefix created and removed, with the copy recorded as the reason. That amendment
+is declared as a disagreement rather than folded into the changed-work signal.
+
+##### What was measured for step 5 python-wrapper-foreign-distro (round 2)
+
+On Debian 12, build 139, 42 cases and 0 failures. Both deployment cases and the
+copy-refusing control pass. The control's first helper failure is recorded
+verbatim:
+
+```text
+readlink: symbol lookup error:
+  .../control/tools/python/root/usr/lib64/libc.so.6:
+  undefined symbol: _dl_readonly_area, version GLIBC_PRIVATE
+```
+
+`readlink` returns nothing, the wrapper derives `current/bin/_bin` from that
+empty string, `mv` and `ln` die the same way so nothing is created, the exec of
+the derived path fails, and the wrapper EXITS ZERO. That is the silent failure
+step 0 run B recorded on RHEL with a planted failure.
+
+On RHEL 9.8, over two equally fresh deployments, the same instrument refuses:
+every mechanic passes, including both deployment cases and the fixed tree
+answering `Python 3.13.9`, and the control half does not. The discriminator reads
+`yes:yes` and the suite reports five failures.
+
+##### Three defects the instrument's own controls and review found in it for step 5 python-wrapper-foreign-distro (round 2)
+
+- the mutated-capture control mutated nothing, its `sed` anchored at
+  `^accept-script-sha256` while a verdict block is indented;
+- the capture check read one verdict block of the two the retained evidence
+  carries; every occurrence is now collapsed with `sort -u`;
+- the check added to close round 1's finding was a count over the whole file, and
+  the capture's own header names those cases in prose, so it counted nine and
+  refused a correct capture. Each case is now asked for by name with a PASS
+  required.
+
+##### Builds spent, and which one is evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+Build 139 is the retained one. Build 132 ran the first acceptance green but named
+a pre-fix instrument and its artifacts were discarded under the one-build
+retention; builds 133 to 135 died at SCM checkout on a Jenkins Vault outage,
+`No route to host`, which is infrastructure rather than this change. Build 136
+carried the first acceptance, which round 1 refused. Build 137 carried the
+reworked probe whose archive symlink the installer could not see. Build 138
+carried working deployments and a capture the identity gate then miscounted.
+
+### Change summary for step 5 python-wrapper-foreign-distro (round 2)
+
+#### Change summary for step 5 for step 5 python-wrapper-foreign-distro (round 2)
+
+##### Staged paths in this repository for step 5 python-wrapper-foreign-distro (round 2)
+
+```text
+A  docs/v0.27.0/verify.wrapper-accept.sh
+A  docs/v0.27.0/verify.wrapper.debian.txt
+M  docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+M  docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+M  docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+M  docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+```
+
+No shipped file is staged. `src/install/env/python/bin/python`,
+`src/install/env/python/bin/setenv` and
+`docs/v0.27.0/verify.wrapper-scope.sh` are read by this step and unchanged.
+
+The transcript joined the staged set since round 1: the exchange appends each
+round to it, and it is tracked project documentation rather than a runtime
+artifact.
+
+##### What each staged path carries since round 1 for step 5 python-wrapper-foreign-distro (round 2)
+
+| Path | Change since round 1 |
+| --- | --- |
+| `verify.wrapper-accept.sh` | takes two deployed trees rather than a source to copy; asserts each was deployed for its own root, with a control refusing a tree deployed elsewhere; three identity fixes |
+| `verify.wrapper.debian.txt` | replaced wholesale with build 139, a re-run RHEL control and a re-run identity check, all naming instrument `ccea6ea4` |
+| `plan...md` | the EXTRACTED IS NOT COPIED sentence, and the write-location criterion restated as one throwaway prefix with the relocation copy as its reason |
+| `plan...validation.md` | step 5 verdict back to Yes over the corrected evidence, the reviewer's missing-work list removed as done, the check sections rewritten for the new shape |
+| `draft...debian-agent-tools.md` | umbrella item 3 back to `completed`, after being restored to `pending` for the rework |
+| `review.code...md` | rounds 1 and 2 and the escalation the human resolved |
+
+##### The `a.commit` groups for step 5 python-wrapper-foreign-distro (round 2)
+
+Five groups, least to most dependent, with the trailing documentation group
+last as the grouping rule requires:
+
+| Group | Subject | Paths |
+| --- | --- | --- |
+| 1 | `test(wrapper): add the step 5 acceptance instrument` | `docs/v0.27.0/verify.wrapper-accept.sh` |
+| 2 | `test(wrapper): retain the Debian acceptance` | `docs/v0.27.0/verify.wrapper.debian.txt` |
+| 3 | `docs(plan): name the step 5 instrument and settle its writes` | `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` |
+| 4 | `docs(review): record the step 5 review rounds` | `docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md` |
+| 5 | `docs(python-wrapper-foreign-distro): record step 5 validation` | the validation plan and `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md` |
+
+The umbrella row edit sits in group 5 with the validation record, as the
+implementation-check rule requires. The transcript takes group 4 rather than the
+last position, so the mandated validation subject stays final.
+
+`commit-plan-check.bat --format json` reports `"state": "valid"`,
+`"ready": true`, with no diagnostics.
+
+##### Changes landed in the pipeline repository for step 5 python-wrapper-foreign-distro (round 2)
+
+Not staged here, and named because they are step 5's own landings. On
+the pipeline repository's `develop` branch, through commit
+`c96d5a73`:
+
+| Path | What it is |
+| --- | --- |
+| `tools/wrapper_accept.verification-only.sh` | byte-identical copy of the instrument, `ccea6ea4` |
+| `tools/wrapper_python.fixed.verification-only.sh` | byte-identical copy of the fixed wrapper, `7213dfe0` |
+| `tools/wrapper_python.pre-change.verification-only.sh` | byte-identical copy of the retained pre-change wrapper, `88c4e0d2` |
+| `tools/wrapper_accept_rsync_shim.verification-only.sh` | the rsync stand-in, moved out of the Groovy string so `bash -n` and `shellcheck` reach it |
+| `ci/Jenkinsfile.diagnostics` | `wrapperAccept()`, which now deploys the archive twice, and its branch in `verifyCplx()` |
+
+Four of the eight commits there are repairs found while running the work: the two
+its own controls caught, the archive symlink the installer cannot see because it
+discovers with `-type f`, and the count that read the capture's prose.
+
+##### Retained evidence for step 5 python-wrapper-foreign-distro (round 2)
+
+`docs/v0.27.0/verify.wrapper.debian.txt`, 442 lines, three blocks: the Debian 12
+acceptance from build 139 (42 cases, 0 failures), the RHEL 9.8 control that
+refuses (42 cases, 5 failures), and the cplx-side identity check that admitted
+both (24 cases, 0 failures). Sanitised with the placeholders the earlier retained
+captures of this effort already use.
+
+### Human guidance and writer response for step 5 python-wrapper-foreign-distro (round 2)
+
+Human guidance:
+
+#### Resume decision for step 5 python-wrapper-foreign-distro (round 2)
+
+The human decided this escalation was a stopped handoff rather than a failure,
+and authorized the round to resume so the replacement request can be published.
+
+The escalation reads `wait timed out while request was absent`, recorded at
+2026-09-02T11:34:49+02:00. That is the reviewer's post-answer wait expiring, not
+a defect in the exchange: the round 1 answer asked for the acceptance to be
+reworked from copies to fresh deployments and re-run on both hosts, and that
+rework spent three pipeline build cycles and two RHEL deployment runs before it
+could produce evidence worth publishing.
+
+#### Evidence intact at the resume for step 5 python-wrapper-foreign-distro (round 2)
+
+The exchange carries the shape a forced resume requires. The round 1 request was
+published and consumed, the reviewer's `changes-requested` answer is present and
+was read, and this transcript holds both alongside the escalation entry. Nothing
+was reconstructed and no artifact was written by hand.
+
+The reviewed work changed substantively between the answer and this resume, which
+is why the replacement round follows immediately rather than the round being
+re-presented unchanged.
+
+Writer response: #### Writer response for step 5 for step 5 python-wrapper-foreign-distro (round 2)
+
+Round 1 returned `changes-requested` with two findings. Both are accepted and
+both are answered by rework. One carries an explicit disagreement, declared
+below rather than folded into the changed-work signal.
+
+##### Accepted without reservation: the trees were copies for step 5 python-wrapper-foreign-distro (round 2)
+
+The criterion says two freshly extracted trees and the implementation made two
+`cp -a` copies of the tree the Relocate stage had already deployed. The reviewer
+is right, and the sharper point is that NO CASE IN THE ACCEPTANCE COULD HAVE
+CAUGHT IT: the suite described what it did rather than measuring it.
+
+So the rework does not just deploy twice. It makes the difference observable:
+the installer rewrites every ELF to live under the prefix it deploys into, so a
+fresh tree carries its own root in the interpreter's run path and a copy carries
+the root it came from. Two cases assert that, and a control feeds one tree while
+claiming the other's root and must be refused. That control would have failed
+the round 1 implementation.
+
+##### Accepted, with an explicit disagreement about where the writes go for step 5 python-wrapper-foreign-distro (round 2)
+
+The `/tmp` placement was wrong and it is gone. Two things follow that the
+reviewer should weigh, because the second is a criterion change.
+
+FIRST, THE REASON GIVEN IN ROUND 1 WAS ALSO WRONG, and checking it is what
+produced the right one. Round 1 said the trees would appear to the relocation
+inventory as unrecorded libraries. They would, and that costs nothing: the
+inventory reports them as a NOTE and already tolerates 193. The real mechanism is
+that the relocation step 4 and step 6 suites each begin with
+`cp -a "$prefix/." "$work/"`, copying the WHOLE prefix, in this same parallel
+branch set. Two fresh deployments inside `$PREFIX` would be copied wholesale by
+them while this step was still writing them, and a copy that harness cannot make
+is an UNANSWERED criterion it refuses to work around.
+
+SECOND, THE DISAGREEMENT. The reviewer's instruction was to keep every write
+under the build prefix while sequencing or isolating the probes so the trees
+cannot contaminate the relocation measurement. That is not available from inside
+this step: the probes run in one `parallel` with no ordering between branches,
+and giving this step an ordering would be a change to the pipeline's stage shape
+rather than to this requirement. The alternative left is to place the writes
+where the criterion's own intent survives.
+
+So the criterion is amended, in the plan, in the open, to what step 3 already
+states for its own run: one throwaway prefix the step creates and removes,
+outside the extracted archive, with the extracted archive asserted unchanged.
+The plan records the `cp -a "$prefix/."` mechanism as the reason.
+
+IF THE REVIEWER REFUSES THAT AMENDMENT, the honest consequence is not a smaller
+change here. It is that step 5 cannot run in this pipeline without damaging the
+relocation acceptance, and the ordering question belongs to whoever owns the
+stage shape. That is the decision this round is asking for, rather than a wording
+preference.
+
+##### Not disputed, and acted on for step 5 python-wrapper-foreign-distro (round 2)
+
+- the staged document-level `Yes, it is implemented.` and the umbrella `completed`
+  row were premature in round 1. Both were restored to `No` and `pending` while
+  the rework ran, and both are set again now that every criterion passes over the
+  corrected instrument;
+- the retained capture was replaced wholesale with evidence from the corrected
+  bytes: build 139 on Debian, a re-run RHEL control, and a re-run identity check,
+  all naming instrument `ccea6ea4`;
+- `a.commit` was regrouped for the new membership, which now includes the review
+  transcript this exchange appends to.
+
+##### What the writer reversed on itself between the rounds for step 5 python-wrapper-foreign-distro (round 2)
+
+Three defects in the instrument, all found by running it rather than reading it,
+all recorded in the validation plan:
+
+- a negative control whose mutation was anchored at the start of a line while a
+  verdict block is indented, so it mutated nothing and its gate accepted a
+  byte-identical copy;
+- a capture check that read one verdict block where the retained evidence carries
+  two;
+- the check added to close round 1's own finding, written as a count over the
+  file and answered by the capture's prose rather than by its measurements. It
+  refused a correct capture, and raising the expected number would have kept the
+  defect and hidden it.
+
+The last one is worth the reviewer's attention: a check written to close a
+finding about a vacuous pass was itself vacuous in the opposite direction. It is
+now three presence questions, each requiring the case name followed by a PASS.
+
+##### One thing this round should be read against for step 5 python-wrapper-foreign-distro (round 2)
+
+The exchange escalated between the rounds, `wait timed out while request was
+absent`, because the rework spent three pipeline build cycles and two RHEL
+deployment runs. The human resolved it as a stopped handoff and authorized the
+resume. No artifact was reconstructed and no answer was re-read as context; this
+request is built from the working tree and the retained captures.
+
+### Reviewer focus for step 5 python-wrapper-foreign-distro (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-2 -->
+
+## Round 2 by reviewer - Step 5
+
+- Recorded: 2026-09-02T13:27:58+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Baseline index tree: cbefcf80444138cfdae5fce408f1efea5144c2a3
+
+Assessed index tree: 864e01a837ab25c851c3bbfccc971dce83c52ef5
+
+### Implementation check for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Result: Yes. Step 5 has been fully implemented.
+
+The revised instrument closes the round 1 extraction gap with two deployments
+whose interpreter run paths must name their own roots, plus a negative control
+that refuses a tree deployed elsewhere. The retained Debian run establishes the
+`yes:no` discriminator over those deployments, the RHEL run qualifies it by
+refusing with `yes:yes`, and the local identity mode binds both to the canonical
+instrument and wrapper bytes. The amended workspace throwaway-root criterion is
+consistent with the requirement and avoids racing the relocation probes that
+copy the build prefix in parallel.
+
+Validation plan effects: No validation-plan edit was needed. Its Step 5 section already starts with the
+exact `Yes. Step 5 has been fully implemented.` sentence, contains no stale
+missing-work section, and records architecture, performance, unit-coverage and
+feature-integrity closure. All earlier step verdicts are also exact Yes results,
+so the document-level Yes and umbrella completion row are internally consistent.
+
+### Pre-repair mandatory checks and coverage for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The complete mandatory union ran before the reviewer wording repair:
+
+- `bash src/utils/lint_shell.sh`: exit 0; 44 tracked scripts; clean.
+- Step 0 retained-scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- Step 1 retained-scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- Step 2 retained-scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- Step 3 retained-scope command: exit 0; 22 cases; 0 failures; `OBJECTIVE MET`.
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh`: exit 0; no findings.
+- Step 5 identity command: exit 0; 24 cases; 0 failures; `OBJECTIVE MET`.
+
+Independent inspection also confirmed that the Debian block reports 42 cases
+and zero failures, while the RHEL control reports the expected five failures.
+
+### Resolved validation set and sources for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+- `bash src/utils/lint_shell.sh` - project and request.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt` - plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt` - plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` - plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt` - plan.
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh` - plan.
+- `bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity --capture docs/v0.27.0/verify.wrapper.debian.txt` - plan.
+
+### Resolver drift and direction for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+None. The request-time and current resolver sets are identical. The project
+floor remains `bash src/utils/lint_shell.sh`, and all six plan commands remain
+present with the same sources.
+
+### Repository state around validation for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The request-time index exactly matched
+`cbefcf80444138cfdae5fce408f1efea5144c2a3`. After staging only the attributable
+one-line capture correction, the assessed index is
+`864e01a837ab25c851c3bbfccc971dce83c52ef5`. The umbrella digest remained
+`d583ff0e5a1e7a05f99a067a52b743fb399f3d6288fb9f6ad885872e07310c85`.
+Validation-state drift is confined to `verify.wrapper.debian.txt` and the
+resulting index identity; the evidence launcher proved that patch attributable.
+
+### Repair inventory for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Repairs made:
+
+- docs/v0.27.0/verify.wrapper.debian.txt - corrected the RHEL prose from four to three negative controls, matching the three accept-mode `control` calls; documentation-only in effect, but a tracked non-validation-plan reviewer repair and therefore substantive for the same-round readiness gate.
+- a.commit - corrected four to five negative-control mechanisms and clarified that the shared wrong-body mechanism runs in both modes, producing six control cases overall; polishing-only review metadata.
+
+Paths staged:
+
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+- docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+- docs/v0.27.0/verify.wrapper-accept.sh
+- docs/v0.27.0/verify.wrapper.debian.txt
+
+### Commit plan assessment for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+`commit-plan-check.bat --format json` was run independently before assessment
+and again after the reviewer repairs. Both runs returned exit 0, `state: valid`,
+`ready: true`, the same six staged paths, five ordered groups and no diagnostics.
+The group membership, dependency order, scope and conventional subjects remain
+accurate. The ignored `a.commit` narrative was corrected to distinguish five
+negative-control mechanisms from their six executions across the two modes.
+
+### Findings and boundaries for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Unresolved findings:
+
+- None after the bounded corrections; implementation, validation evidence, staged attribution and commit grouping are otherwise ready for confirmation.
+
+Boundary-crossing work:
+
+- None. The reviewer accepted the explicit throwaway-root amendment because the issue and design require the Debian discriminator, not `$PREFIX` placement, and the parallel-copy mechanism makes the workspace root the bounded location that preserves both this acceptance and relocation evidence.
+
+### Human guidance response for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Human guidance: The human decided this escalation was a stopped handoff rather than a failure,
+and authorized the round to resume so the replacement request can be published.
+The escalation was the reviewer's post-answer wait timing out while the
+request was absent. The round 1 request and answer and the transcript evidence
+were intact; nothing was reconstructed or written by hand. The reviewed work
+changed substantively before this replacement request.
+
+Guidance response: The human guidance is acknowledged. It authorizes resumption after the timeout
+and establishes that the escalation was a stopped handoff, not an exchange
+failure. It does not waive identity, validation or readiness requirements. The
+resumed round was therefore assessed normally against its new request-time
+tree, and the writer's explicit criterion disagreement was decided from the
+issue, design, current plan and retained evidence rather than from the resume
+authorization.
+
+### Writer instructions for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+1. Preserve the attributable one-line correction in
+   `docs/v0.27.0/verify.wrapper.debian.txt` and the corrected `a.commit` count.
+2. Publish a confirmation round over the assessed staged tree without further
+   substantive changes.
+3. Keep the exact validation set and five commit groups current in that round.
+
+### Decision rationale for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+The fresh-deployment oracle, its copy-refusing control, the retained Debian and
+RHEL outcomes, and the independent identity gate close the substantive round 1
+findings. The plan's changed write-location criterion is acceptable: neither
+the issue nor design requires `$PREFIX`, while the demonstrated parallel
+`cp -a "$prefix/."` consumers make that placement unsafe for both efforts.
+One run-keyed workspace throwaway root preserves isolation, cleanup and archive
+integrity. The readiness floor is held incomplete only because this reviewer
+changed a tracked non-validation-plan file in the current round; convergence
+requires the requestor to preserve it and publish a clean confirmation round.
+
+### Final reviewer decision for step 5 python-wrapper-foreign-distro (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-5-round-2 -->
+
+## Round 3 by requestor - Step 5
+
+- Recorded: 2026-09-02T13:31:27+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 python-wrapper-foreign-distro (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+Implementation step: 5
+Review round: 3
+
+### Code review evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+request_index_tree: 864e01a837ab25c851c3bbfccc971dce83c52ef5
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, request)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt (sources: plan)
+- shellcheck docs/v0.27.0/verify.wrapper-accept.sh (sources: plan)
+- bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity --capture docs/v0.27.0/verify.wrapper.debian.txt (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(wrapper): add the step 5 acceptance instrument
+group 1 path: docs/v0.27.0/verify.wrapper-accept.sh
+group 2: test(wrapper): retain the Debian acceptance
+group 2 path: docs/v0.27.0/verify.wrapper.debian.txt
+group 3: docs(plan): name the step 5 instrument and settle its writes
+group 3 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+group 4: docs(review): record the step 5 review rounds
+group 4 path: docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+group 5: docs(python-wrapper-foreign-distro): record step 5 validation
+group 5 path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+group 5 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+staged path: docs/v0.27.0/verify.wrapper-accept.sh
+staged path: docs/v0.27.0/verify.wrapper.debian.txt
+```
+
+### Requestor assessment for step 5 python-wrapper-foreign-distro (round 3)
+
+#### Assessment of step 5 for step 5 python-wrapper-foreign-distro (round 3)
+
+Yes. Step 5 is fully implemented.
+
+Both round 1 findings are answered by rework rather than by argument. The two
+trees are now genuine deployments, and that is MEASURED rather than described.
+The write location is settled by an amended criterion whose reason is a
+mechanism read out of the relocation harness.
+
+Build 139 of the pipeline `develop` branch deployed the published archive twice
+on the Debian 12 agent and ran the acceptance over both trees: `OBJECTIVE MET`,
+42 cases and 0 failures, discriminator `yes:no`. The same instrument on RHEL 9.8
+over two equally fresh deployments refuses with five failures. The cplx-side
+identity check admitted both blocks, 24 cases and 0 failures.
+
+##### What changed since round 1 for step 5 python-wrapper-foreign-distro (round 3)
+
+| Round 1 finding | What answers it now |
+| --- | --- |
+| two `cp -a` copies of one deployed tree | the probe deploys the archive twice with the pipeline's own recipe, 253 s and 3.3 GB |
+| no case could catch that | `step5/fixed/deployed-for-its-own-root` and its control twin, plus `step5/control/tree-deployed-elsewhere-refused` |
+| the 776 MB scratch under `/tmp` | one run-keyed throwaway root the probe creates and removes, with four cases placing both trees, the scratch and the archive relative to it |
+| the capture proved copies | the identity mode refuses a capture that does not carry all three deployment cases with a PASS |
+
+##### How a deployment is told from a copy, since this is the heart of the rework for step 5 python-wrapper-foreign-distro (round 3)
+
+The installer rewrites every ELF to live under the prefix it deploys into. A
+freshly deployed tree therefore carries ITS OWN root in the interpreter's run
+path, and a copy carries the root it was copied from. `assert_deployed_for_root`
+reads that run path with `readelf` and requires the claimed root to appear in it.
+
+The control feeds the FIXED tree to that predicate while claiming the CONTROL
+tree's root, which is exactly the shape a copy has: a real tree whose ELFs were
+written for somewhere else. It is refused on both hosts. Had this predicate
+existed in round 1, it would have failed the implementation round 1 refused.
+
+##### Test evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+- `--mode accept` on the Debian 12 agent, build 139: 42 cases, 0 failures,
+  `OBJECTIVE MET`, instrument `ccea6ea4`;
+- `--mode accept` on RHEL 9.8 over two fresh deployments: 42 cases, 5 failures,
+  `OBJECTIVE NOT MET`, the SAME instrument digest. The five are the target
+  assertion, the three control-half cases and the discriminator they feed, which
+  is what a host where the defect cannot fire must produce. Counted here rather
+  than rounded, because the reviewer corrected exactly this slip elsewhere in
+  round 2 and the retained capture already states it correctly;
+- `--mode identity` in this repository: 24 cases, 0 failures.
+
+The four frozen-harness commands were re-run after the change: `OBJECTIVE MET`
+for steps 0, 1, 2 and 3.
+
+##### Static check evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+- `bash src/utils/lint_shell.sh`: `lint_shell: 44 tracked scripts`,
+  `lint_shell: clean`, exit 0;
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh`: no finding, exit 0;
+- the probe's embedded shell extracted from its Groovy string: `bash -n` and
+  `shellcheck` clean. The rsync stand-in moved out of that string into
+  `tools/wrapper_accept_rsync_shim.verification-only.sh` so both tools reach it
+  at all, and its `A && B || C` became an `if` because shellcheck reports SC2015.
+
+##### Coverage evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+cplx has no pytest suite and no unit-tested class file, so there is no
+percentage to report and no legacy unit test is impacted. `ghog day` reports that
+same absence: `ghog check` exit 0 with `check.bat not found - skipped`, then
+`ghog affected --no-cov` exit 5 on `pytest not found on PATH`.
+
+##### Architecture evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+No shipped file changes. The frozen harness is byte-identical, still `fab864ee`,
+asserted against the manifest rather than left to the diff.
+
+The seam round 1 did not disturb is now load-bearing: the deployment recipe sits
+in the probe and the oracle sits in the instrument, which is the rule step 3 of
+the plan already states. An oracle that deployed its own subject would measure an
+installer run rather than a wrapper.
+
+The pipeline change adds one probe to `ci/Jenkinsfile.diagnostics`, whose header
+declares it owned by the cplx maintainer, plus four
+`tools/*.verification-only.*` files that are never delivered. No reviewed
+pipeline stage changed. The probe reports and never gates.
+
+No smell, no violation. The DDD-Hexagonal criterion does not apply to a Bash,
+Batch and Groovy project.
+
+##### Performance evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+Deploying costs four minutes and 3.3 GB where copying cost three seconds, and
+that cost is the criterion being honoured rather than waste. It is paid inside a
+parallel branch whose neighbours already run eight to ten minutes, so the stage's
+wall clock is unchanged; builds 138 and 139 both returned SUCCESS inside the
+pipeline's 60 minute timeout.
+
+The one loop over a variable set is `tree_signature`, over the entries of `bin`
+and `current/bin`, a dozen names each, sorted once. That is O(n log n) on the
+entries of two directories, not on the tree.
+
+##### Feature integrity evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+THE RELOCATION SUITES ARE THE FEATURE MOST AT RISK, because they walk and copy
+the same prefix in the same parallel, and that risk is why the throwaway root
+sits outside it. Their own retained captures answer: build 139 carries
+`result: OBJECTIVE_MET` for relocation steps 0, 1, 2, 3, 4 and 6, read from
+`a.evidence/verify-relocation-step<n>.debian.txt` rather than inferred from the
+build being green.
+
+The four frozen-harness capture commands report `OBJECTIVE MET` after the change.
+The acceptance asserts the extracted archive unchanged by signature and by
+wrapper digest. On RHEL both deployments and the scratch were removed and `df` on
+that partition is back where it started.
+
+##### Three defects found by the instrument's own controls or its own review for step 5 python-wrapper-foreign-distro (round 3)
+
+- the mutated-capture control mutated NOTHING: its `sed` was anchored at
+  `^accept-script-sha256` while a verdict block is indented, so the gate accepted
+  a byte-identical copy and the control said its oracle was not asserted;
+- the capture check then read one verdict block of the two the retained evidence
+  carries, so every occurrence is now collapsed with `sort -u`;
+- the check that the capture carries the deployment evidence was one `grep -c`
+  expecting three, and the capture's own header names those cases in prose, so it
+  counted nine and refused a correct capture. Raising the number would have kept
+  the defect and hidden it; each case is now asked for by name with a PASS
+  required.
+
+##### What changed for round 3 for step 5 python-wrapper-foreign-distro (round 3)
+
+Nothing substantive. Round 2 already returned
+`Yes. Step 5 has been fully implemented.` with no unresolved findings; its
+`changes-requested` disposition came from the reviewer having edited a tracked
+non-validation-plan file in that same round, which the readiness floor does not
+allow to converge in the round that made it.
+
+Two reviewer repairs are preserved and were verified against the source rather
+than accepted on trust: the retained capture's RHEL section now says three
+negative controls, matching the three `control` calls in the accept mode, and
+`a.commit` group 1 now says five mechanisms and six cases across both modes.
+
+The staged tree is byte for byte the one round 2 assessed,
+`864e01a837ab25c851c3bbfccc971dce83c52ef5`. The identity command was re-run over
+the edited capture, 24 cases and 0 failures, because that capture is an input to
+a plan validation command and a prose edit is still an edit.
+
+### Implementation report for step 5 python-wrapper-foreign-distro (round 3)
+
+#### Implementation report for step 5 for step 5 python-wrapper-foreign-distro (round 3)
+
+##### What round 1 refused, and what the rework does about it for step 5 python-wrapper-foreign-distro (round 3)
+
+Round 1 refused the acceptance on two explicit completion criteria: it made two
+`cp -a` copies of one already-deployed tree where the criterion says two freshly
+extracted trees, and it wrote to `/tmp` where the criterion names the build's own
+prefix.
+
+The rework answers the first by deploying twice and by MEASURING that it did, and
+the second by moving the writes and amending the criterion in the plan with the
+mechanism that forces the move.
+
+##### The acceptance, as it now stands for step 5 python-wrapper-foreign-distro (round 3)
+
+`docs/v0.27.0/verify.wrapper-accept.sh`, still a second file beside the frozen
+harness because step 4 froze that harness and step 4b published its digest, and
+because its `--step` dispatch accepts 0 to 3 and its step 3 suite asserts
+`rhel 9.8` as its target.
+
+`--mode accept` no longer materializes anything. It is handed
+`--fixed-tree`, `--control-tree`, `--throwaway` and `--archive-tree`, and it:
+
+- asserts each tree was DEPLOYED for its own root, by reading the interpreter's
+  run path with `readelf` and requiring that root to appear in it;
+- refuses a tree deployed elsewhere, through a control that feeds the fixed tree
+  to the same predicate while claiming the control tree's root;
+- asserts three distinct inodes across the archive and the two trees, so none is
+  a name for another;
+- places both trees, its own scratch and the archive relative to the throwaway
+  root, in four cases;
+- installs the two wrapper bodies, asserts them by digest, runs one first call
+  through each, and asserts the fixed tree answers and the control does not;
+- asserts the extracted archive unchanged by signature and by wrapper digest.
+
+`--mode identity` is unchanged in purpose and gained one gate: a capture is
+admitted only when it carries all three deployment cases with a PASS. Round 1
+admitted a capture that proved copies, and that is the hole this closes.
+
+##### The deployments, and where they are made for step 5 python-wrapper-foreign-distro (round 3)
+
+`wrapperAccept()` deploys the published archive twice with the same recipe
+`ci/provision_toolchain.sh` uses: bootstrap `install_pkg.sh` out of the archive,
+link the archive into each throwaway prefix, stand in for the rsync the image
+does not ship, and let the installer rewrite every ELF to live under that prefix.
+253 seconds and 3.3 GB for both, recorded in the capture.
+
+THEY ARE MADE THERE AND NOT IN THE INSTRUMENT, by the rule step 3 of this plan
+already states: an oracle that deployed its own subject would be measuring an
+installer run rather than a wrapper, and the deployment recipe belongs to the
+operations note.
+
+THE ARCHIVE IS HARD-LINKED, NOT SYMLINKED, and that cost a build to learn. The
+installer discovers its archive at its line 1188 with
+`find "$INSTALL_PREFIX" "$PKG_DIR" "$HOME" "$HOME/pkgs" -maxdepth 1 -type f
+-name "${TARGET}.*.tar.gz"`, and `-type f` does not match a symbolic link, so the
+first reworked build deployed nothing and said `No archive found for 'tools'`. A
+hard link is a real file and still copies no 600 MB.
+
+##### Where the writes go, and the criterion that changed for step 5 python-wrapper-foreign-distro (round 3)
+
+The trees and the scratch live under one run-keyed throwaway root in the
+workspace, which the probe creates and removes before `stageClone()` copies that
+workspace.
+
+NOT UNDER `$PREFIX`, and the reason is a mechanism rather than a preference. The
+relocation step 4 and step 6 suites run in the SAME `verifyCplx()` parallel and
+each begins with `cp -a "$prefix/." "$work/"`, copying the whole prefix. Two
+fresh deployments placed inside it would be copied wholesale by them while this
+step was still writing them, and the relocation harness treats a copy it cannot
+make as an UNANSWERED criterion it refuses to work around.
+
+The round 1 answer asked for the writes to stay under the prefix while
+sequencing or isolating the probes. Sequencing is not available from inside this
+step: the branches run in one `parallel` with no ordering, and adding one would
+change the pipeline's stage shape rather than this requirement. So the plan's
+criterion is amended to what step 3 already states for its own run, one throwaway
+prefix created and removed, with the copy recorded as the reason. That amendment
+is declared as a disagreement rather than folded into the changed-work signal.
+
+##### What was measured for step 5 python-wrapper-foreign-distro (round 3)
+
+On Debian 12, build 139, 42 cases and 0 failures. Both deployment cases and the
+copy-refusing control pass. The control's first helper failure is recorded
+verbatim:
+
+```text
+readlink: symbol lookup error:
+  .../control/tools/python/root/usr/lib64/libc.so.6:
+  undefined symbol: _dl_readonly_area, version GLIBC_PRIVATE
+```
+
+`readlink` returns nothing, the wrapper derives `current/bin/_bin` from that
+empty string, `mv` and `ln` die the same way so nothing is created, the exec of
+the derived path fails, and the wrapper EXITS ZERO. That is the silent failure
+step 0 run B recorded on RHEL with a planted failure.
+
+On RHEL 9.8, over two equally fresh deployments, the same instrument refuses:
+every mechanic passes, including both deployment cases and the fixed tree
+answering `Python 3.13.9`, and the control half does not. The discriminator reads
+`yes:yes` and the suite reports five failures.
+
+##### Three defects the instrument's own controls and review found in it for step 5 python-wrapper-foreign-distro (round 3)
+
+- the mutated-capture control mutated nothing, its `sed` anchored at
+  `^accept-script-sha256` while a verdict block is indented;
+- the capture check read one verdict block of the two the retained evidence
+  carries; every occurrence is now collapsed with `sort -u`;
+- the check added to close round 1's finding was a count over the whole file, and
+  the capture's own header names those cases in prose, so it counted nine and
+  refused a correct capture. Each case is now asked for by name with a PASS
+  required.
+
+##### Builds spent, and which one is evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+Build 139 is the retained one. Build 132 ran the first acceptance green but named
+a pre-fix instrument and its artifacts were discarded under the one-build
+retention; builds 133 to 135 died at SCM checkout on a Jenkins Vault outage,
+`No route to host`, which is infrastructure rather than this change. Build 136
+carried the first acceptance, which round 1 refused. Build 137 carried the
+reworked probe whose archive symlink the installer could not see. Build 138
+carried working deployments and a capture the identity gate then miscounted.
+
+##### Round 3 for step 5 python-wrapper-foreign-distro (round 3)
+
+No implementation change. Round 2 assessed this same tree and returned
+`Yes. Step 5 has been fully implemented.`; this round exists because the
+readiness floor does not let a round converge when the reviewer edited a tracked
+file inside it.
+
+The two repairs it made are preserved and were checked against the source: the
+accept mode has three `control` calls and the identity mode three more, with the
+wrong-body mechanism shared, so five mechanisms and six cases across the
+instrument. The retained capture and `a.commit` now say so.
+
+### Change summary for step 5 python-wrapper-foreign-distro (round 3)
+
+#### Change summary for step 5 for step 5 python-wrapper-foreign-distro (round 3)
+
+##### Staged paths in this repository for step 5 python-wrapper-foreign-distro (round 3)
+
+```text
+A  docs/v0.27.0/verify.wrapper-accept.sh
+A  docs/v0.27.0/verify.wrapper.debian.txt
+M  docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+M  docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+M  docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+M  docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+```
+
+No shipped file is staged. `src/install/env/python/bin/python`,
+`src/install/env/python/bin/setenv` and
+`docs/v0.27.0/verify.wrapper-scope.sh` are read by this step and unchanged.
+
+The transcript joined the staged set since round 1: the exchange appends each
+round to it, and it is tracked project documentation rather than a runtime
+artifact.
+
+##### What each staged path carries since round 1 for step 5 python-wrapper-foreign-distro (round 3)
+
+| Path | Change since round 1 |
+| --- | --- |
+| `verify.wrapper-accept.sh` | takes two deployed trees rather than a source to copy; asserts each was deployed for its own root, with a control refusing a tree deployed elsewhere; three identity fixes |
+| `verify.wrapper.debian.txt` | replaced wholesale with build 139, a re-run RHEL control and a re-run identity check, all naming instrument `ccea6ea4` |
+| `plan...md` | the EXTRACTED IS NOT COPIED sentence, and the write-location criterion restated as one throwaway prefix with the relocation copy as its reason |
+| `plan...validation.md` | step 5 verdict back to Yes over the corrected evidence, the reviewer's missing-work list removed as done, the check sections rewritten for the new shape |
+| `draft...debian-agent-tools.md` | umbrella item 3 back to `completed`, after being restored to `pending` for the rework |
+| `review.code...md` | rounds 1 and 2 and the escalation the human resolved |
+
+##### The `a.commit` groups for step 5 python-wrapper-foreign-distro (round 3)
+
+Five groups, least to most dependent, with the trailing documentation group
+last as the grouping rule requires:
+
+| Group | Subject | Paths |
+| --- | --- | --- |
+| 1 | `test(wrapper): add the step 5 acceptance instrument` | `docs/v0.27.0/verify.wrapper-accept.sh` |
+| 2 | `test(wrapper): retain the Debian acceptance` | `docs/v0.27.0/verify.wrapper.debian.txt` |
+| 3 | `docs(plan): name the step 5 instrument and settle its writes` | `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md` |
+| 4 | `docs(review): record the step 5 review rounds` | `docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md` |
+| 5 | `docs(python-wrapper-foreign-distro): record step 5 validation` | the validation plan and `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md` |
+
+The umbrella row edit sits in group 5 with the validation record, as the
+implementation-check rule requires. The transcript takes group 4 rather than the
+last position, so the mandated validation subject stays final.
+
+`commit-plan-check.bat --format json` reports `"state": "valid"`,
+`"ready": true`, with no diagnostics.
+
+##### Changes landed in the pipeline repository for step 5 python-wrapper-foreign-distro (round 3)
+
+Not staged here, and named because they are step 5's own landings. On
+the pipeline repository's `develop` branch, through commit
+`c96d5a73`:
+
+| Path | What it is |
+| --- | --- |
+| `tools/wrapper_accept.verification-only.sh` | byte-identical copy of the instrument, `ccea6ea4` |
+| `tools/wrapper_python.fixed.verification-only.sh` | byte-identical copy of the fixed wrapper, `7213dfe0` |
+| `tools/wrapper_python.pre-change.verification-only.sh` | byte-identical copy of the retained pre-change wrapper, `88c4e0d2` |
+| `tools/wrapper_accept_rsync_shim.verification-only.sh` | the rsync stand-in, moved out of the Groovy string so `bash -n` and `shellcheck` reach it |
+| `ci/Jenkinsfile.diagnostics` | `wrapperAccept()`, which now deploys the archive twice, and its branch in `verifyCplx()` |
+
+Four of the eight commits there are repairs found while running the work: the two
+its own controls caught, the archive symlink the installer cannot see because it
+discovers with `-type f`, and the count that read the capture's prose.
+
+##### Retained evidence for step 5 python-wrapper-foreign-distro (round 3)
+
+`docs/v0.27.0/verify.wrapper.debian.txt`, 442 lines, three blocks: the Debian 12
+acceptance from build 139 (42 cases, 0 failures), the RHEL 9.8 control that
+refuses (42 cases, 5 failures), and the cplx-side identity check that admitted
+both (24 cases, 0 failures). Sanitised with the placeholders the earlier retained
+captures of this effort already use.
+
+##### Round 3 delta for step 5 python-wrapper-foreign-distro (round 3)
+
+None to the staged tree. `git write-tree` reads
+`864e01a837ab25c851c3bbfccc971dce83c52ef5`, the exact tree round 2 assessed, and
+this request carries it as `request_index_tree`.
+
+Two reviewer repairs from round 2 are preserved:
+
+| Path | Repair preserved |
+| --- | --- |
+| `docs/v0.27.0/verify.wrapper.debian.txt` | the RHEL section says three negative controls, matching the three `control` calls in the accept mode |
+| `a.commit` | group 1 says five negative-control mechanisms and six cases, the wrong-body one shared between the two modes |
+
+`a.commit` keeps the same five groups and the same six staged paths;
+`commit-plan-check.bat --format json` reports `state: valid`, `ready: true`, no
+diagnostics, after the reviewer's edit to it.
+
+### Writer response for step 5 python-wrapper-foreign-distro (round 3)
+
+Writer response: #### Writer response for step 5 for step 5 python-wrapper-foreign-distro (round 3)
+
+Round 2 returned `Yes. Step 5 has been fully implemented.` with no unresolved
+findings and no boundary-crossing work. Its `changes-requested` disposition was
+not about the implementation: the reviewer changed a tracked non-validation-plan
+file in that same round, and the readiness floor requires a round nobody edited.
+
+This is that round. NOTHING SUBSTANTIVE CHANGED. The staged tree is byte for
+byte the one round 2 assessed, `864e01a837ab25c851c3bbfccc971dce83c52ef5`, which
+is also this request's `request_index_tree`.
+
+#### The two reviewer repairs, preserved and checked for step 5 python-wrapper-foreign-distro (round 3)
+
+Both are corrections rather than preferences, and both were verified against the
+instrument rather than taken on trust:
+
+- `docs/v0.27.0/verify.wrapper.debian.txt`: the RHEL control section said "all
+  four negative controls" where the accept mode has THREE `control` calls. The
+  reviewer corrected it to three and is right;
+- `a.commit`: group 1 said "four negative controls" over a list that named five
+  items. The reviewer corrected it to five mechanisms and noted that the
+  wrong-body mechanism runs in both modes, so the complete instrument carries six
+  control cases.
+
+Counted from the source: `step5/control/wrong-control-bytes-refused`,
+`step5/control/unplanted-tree-refused` and
+`step5/control/tree-deployed-elsewhere-refused` in the accept mode;
+`identity/control/mutated-manifest-refused`,
+`identity/control/wrong-control-bytes-refused` and
+`identity/control/mutated-capture-refused` in the identity mode. Five distinct
+mechanisms, six cases, the wrong-body one shared.
+
+Neither repair was reversed, and neither is disputed, so no disagreement is
+recorded in this round.
+
+#### What was re-run after those repairs, rather than assumed for step 5 python-wrapper-foreign-distro (round 3)
+
+The reviewer edited the retained capture, and that capture is an input to one of
+the plan's own validation commands, so it was re-run rather than presumed
+unaffected:
+
+- `bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity --capture
+  docs/v0.27.0/verify.wrapper.debian.txt`: 24 cases, 0 failures,
+  `OBJECTIVE MET`. The edited line is prose in the RHEL control section and
+  touches no digest line, no verdict line and none of the three deployment cases
+  the gate reads;
+- `commit-plan-check.bat --format json`: `state: valid`, `ready: true`, the same
+  six staged paths and five ordered groups, no diagnostics.
+
+#### The disagreement round 2 carried, and its resolution for step 5 python-wrapper-foreign-distro (round 3)
+
+Round 2 declared one explicit disagreement: the write-location criterion was
+amended in the plan rather than honoured as written, because the relocation
+step 4 and step 6 suites each begin with `cp -a "$prefix/." "$work/"` over the
+whole prefix in the same parallel branch set, and sequencing that parallel is a
+change to the pipeline's stage shape rather than to this requirement.
+
+The reviewer accepted the amendment and gave its own reason: neither the issue
+nor the design requires `$PREFIX`, and one run-keyed workspace throwaway root
+preserves isolation, cleanup and archive integrity for both efforts. That
+question is settled and this round does not reopen it.
+
+#### Nothing else is asked of this round for step 5 python-wrapper-foreign-distro (round 3)
+
+The three writer instructions were to preserve both repairs, publish a
+confirmation round over the assessed staged tree without further substantive
+changes, and keep the validation set and the five commit groups current. All
+three are done, and the request's `resolved_validation_set` and
+`commit_plan_result` are rendered from the current tree rather than restated
+from round 2.
+
+#### Reviewer focus for step 5 python-wrapper-foreign-distro (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-3 -->
+
+## Round 3 by reviewer - Step 5
+
+- Recorded: 2026-09-02T13:50:24+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+Baseline index tree: 864e01a837ab25c851c3bbfccc971dce83c52ef5
+
+Assessed index tree: 864e01a837ab25c851c3bbfccc971dce83c52ef5
+
+### Implementation check for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+Result: Yes. Step 5 has been fully implemented.
+
+Round 3 preserves the exact tree assessed after round 2. The two fresh
+deployments are measured by their own-root run paths and a copy-refusing
+control; Debian records the required `yes:no` discriminator, RHEL qualifies it
+with the expected `yes:yes` refusal, and local identity validation binds the
+capture to the canonical instrument, wrappers and frozen harness.
+
+Validation plan effects: No validation-plan edit was needed. The exact Step 5 Yes sentence and all
+architecture, performance, unit-coverage and feature-integrity closure remain
+accurate; every earlier step is also Yes, supporting the document-level Yes and
+completed umbrella row.
+
+### Pre-repair mandatory checks and coverage for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+No reviewer repair was made in round 3. The complete mandatory union was green:
+project shell lint exited 0 over 44 tracked scripts; the Step 0, 1, 2 and 3
+commands each exited 0 with 22 cases and no failures; shellcheck exited 0 with
+no findings; and Step 5 identity exited 0 with 24 cases, no failures and
+`OBJECTIVE MET`.
+
+### Resolved validation set and sources for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+- `bash src/utils/lint_shell.sh` - project and request.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 0 --wrapper docs/v0.27.0/wrapper.pre-change.verification-only --capture docs/v0.27.0/verify.wrapper-scope.step0.rhel.txt` - plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 1 --capture docs/v0.27.0/verify.wrapper-scope.step1.rhel.txt` - plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 --capture docs/v0.27.0/verify.wrapper-scope.step2.rhel.txt` - plan.
+- `bash docs/v0.27.0/verify.wrapper-scope.sh --step 3 --capture docs/v0.27.0/verify.wrapper.rhel.txt` - plan.
+- `shellcheck docs/v0.27.0/verify.wrapper-accept.sh` - plan.
+- `bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity --capture docs/v0.27.0/verify.wrapper.debian.txt` - plan.
+
+### Resolver drift and direction for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+None. The request-time and current resolver sets are identical.
+
+### Repository state around validation for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+The request-time, baseline and assessed index trees are all
+`864e01a837ab25c851c3bbfccc971dce83c52ef5`. The umbrella digest stayed
+`d583ff0e5a1e7a05f99a067a52b743fb399f3d6288fb9f6ad885872e07310c85`, and
+the ordered validation-state comparison reports no tracked, untracked or
+ignored drift.
+
+### Repair inventory for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+Repairs made:
+
+- None. Round 3 preserved both round-2 corrections and made no reviewer change.
+
+Paths staged:
+
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md
+- docs/v0.27.0/review.code.v0.27.0.python-wrapper-foreign-distro.md
+- docs/v0.27.0/verify.wrapper-accept.sh
+- docs/v0.27.0/verify.wrapper.debian.txt
+
+### Commit plan assessment for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+The independent `commit-plan-check.bat --format json` run returned exit 0,
+`state: valid`, `ready: true`, six staged paths, five ordered groups and no
+diagnostics. Membership, dependency order, scope, conventional subjects and
+the corrected five-mechanism/six-case narrative are accurate.
+
+### Findings and boundaries for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+None. The advisory result is commit-ready and the human owns the convergence choice.
+
+### Decision rationale for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+All six readiness-floor results pass on an unchanged confirmation tree: exact
+identity, complete implementation, mandatory validation and coverage,
+attributable staged scope, no unresolved findings, and accurate commit groups.
+Round 3 made no substantive or polishing repair. The previously accepted
+throwaway-root amendment and both round-2 count corrections are preserved, so
+the reviewer recommends `commit-ready` without authorizing a commit.
+
+### Final reviewer decision for step 5 python-wrapper-foreign-distro (exchange 1) (round 3)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-5-round-3 -->
+
+## Round 3 by human - Step 5 - human-confirmation
+
+- Recorded: 2026-09-02T17:18:07+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Implementation step: 5
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-3 -->
