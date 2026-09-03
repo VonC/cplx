@@ -188,6 +188,7 @@ design rejects shipping a comparator.
 - `docs/v0.27.0/verify.install-pkg.sh` (new, to be created): builds a scratch
   prefix, plants each destination shape, runs the installer, and reports one
   line per case. It is written once in Step 0 and extended per step.
+
 **Its tool set, declared in full.** Round 2 review caught the earlier claim that
 the harness needs only the installer's contract plus `timeout`, which the
 acceptance step contradicts. Most of what the harness uses is already inside the

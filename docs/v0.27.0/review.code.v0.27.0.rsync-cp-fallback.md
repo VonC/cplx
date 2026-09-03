@@ -2135,7 +2135,7 @@ In the consuming project, two commits: `f21701bd` synced the step 3 candidate an
 advanced the stage, and `0b42064b` synced the harness after this review's round
 
 1. The candidate installer did not change in round 1, so that second commit is
-the harness alone.
+   the harness alone.
 
 ### Writer response for step 3 rsync-cp-fallback round 2
 

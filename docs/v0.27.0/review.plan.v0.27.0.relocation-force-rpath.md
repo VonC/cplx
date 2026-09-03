@@ -404,26 +404,26 @@ the same kind of error: a property asserted about a structure without being
 checked against it.
 
 1. **Q03's oracle was not an oracle.** The plan argued that a generator wrong about
-the ELF layout would be caught because the accepted fixtures would fail first.
-They would not. A generator that writes `e_type` at the wrong offset and an
-observer that reads that same wrong offset agree with each other; the ordinary
-`ET_EXEC` and shared-library cases both go green, and the rejection rules the
-fixtures exist for are never really exercised. The fixtures now pass an oracle
-that cannot share the observer's assumptions: validation-only `readelf` for the
-lawful base shapes and their tags, and, for each malformed derivative, a single
-mutation from a validated base with its size and changed offset asserted. Option
-3D records the refuted argument rather than quietly dropping it.
+   the ELF layout would be caught because the accepted fixtures would fail first.
+   They would not. A generator that writes `e_type` at the wrong offset and an
+   observer that reads that same wrong offset agree with each other; the ordinary
+   `ET_EXEC` and shared-library cases both go green, and the rejection rules the
+   fixtures exist for are never really exercised. The fixtures now pass an oracle
+   that cannot share the observer's assumptions: validation-only `readelf` for the
+   lawful base shapes and their tags, and, for each malformed derivative, a single
+   mutation from a validated base with its size and changed offset asserted. Option
+   3D records the refuted argument rather than quietly dropping it.
 
 2. **Q04's two steps had no valid ordering.** The writer weighed behavior-then-
-report against report-then-behavior and picked the first without noticing that
-both leave a production state nobody would ship. Behavior first releases a pass
-writing `DT_RPATH` over three populations while still printing the mixed count
-the requirement exists to remove; report first would carry a `case` field for a
-classifier the pass is not consulting. Option 4D is added and chosen: the
-classifier wiring, `--force-rpath`, the migration assertion, both axes and the
-record stream land atomically as Step 3, after Steps 1 and 2 have separately
-proved the observer and the classifier. The wiki work is now Step 4 and the
-acceptance Step 5, six steps in total, and the validation skeleton matches.
+   report against report-then-behavior and picked the first without noticing that
+   both leave a production state nobody would ship. Behavior first releases a pass
+   writing `DT_RPATH` over three populations while still printing the mixed count
+   the requirement exists to remove; report first would carry a `case` field for a
+   classifier the pass is not consulting. Option 4D is added and chosen: the
+   classifier wiring, `--force-rpath`, the migration assertion, both axes and the
+   record stream land atomically as Step 3, after Steps 1 and 2 have separately
+   proved the observer and the classifier. The wiki work is now Step 4 and the
+   acceptance Step 5, six steps in total, and the validation skeleton matches.
 
    The other three:
 
@@ -1175,7 +1175,9 @@ to Q05/Q06.
 
 ### Requested changes for plan relocation-force-rpath round 3
 
-Requested changes: 1. Add and answer the missing reader-placement question, keeping the
+Requested changes:
+
+1. Add and answer the missing reader-placement question, keeping the
    retained-output reader in the validation harness rather than the deployed
    installer.
 2. Mechanically prove the Step 3 formatter has no production call site, then
@@ -1243,29 +1245,29 @@ Round 4. All five round 3 requested changes are applied, none disputed. Answers
 1A, 2A, 3A, 4D, 5C, 6A, 7A stand, and Q08 is added and answered 8A.
 
 1. **Q08 is a placement decision the plan never made.** Step 3 scheduled both ends
-of the wire contract, the formatter and the retained-output reader, against
-`install_pkg.sh`, and then had to argue that neither was called. One of those
-arguments should never have been needed: the reader is the retained recipe's
-consumer and never executes during an install. Shipping it would put a parser no
-deployment runs into the one file whose size this effort is watching, and leave
-a call surface to be argued away every round. The formatter now ships alone; the
-reader and the malformed-capture constructors live in the harness. Two things
-follow beyond the line count: a production reader call site becomes impossible
-rather than merely unintended, and the round-trip becomes a check between two
-independent ends rather than a file agreeing with itself.
+   of the wire contract, the formatter and the retained-output reader, against
+   `install_pkg.sh`, and then had to argue that neither was called. One of those
+   arguments should never have been needed: the reader is the retained recipe's
+   consumer and never executes during an install. Shipping it would put a parser no
+   deployment runs into the one file whose size this effort is watching, and leave
+   a call surface to be argued away every round. The formatter now ships alone; the
+   reader and the malformed-capture constructors live in the harness. Two things
+   follow beyond the line count: a production reader call site becomes impossible
+   rather than merely unintended, and the round-trip becomes a check between two
+   independent ends rather than a file agreeing with itself.
 
 2. **The lifecycle defect between Q05 and Q06 is the serious one.** Q05's
-provisional branch let Steps 1 to 5 proceed on representative pinned evidence
-when the exact RHEL target was unreachable. Q06 allowed a terminal `blocked`
-verdict. Each was settled on its own, and nothing connected them, so nothing
-stopped an unreachable target being reported as Q06's terminal blocked, which
-would let the effort skip the real-target run entirely and still close. They do
-not compound: an unreachable target leaves Step 6 **incomplete**, and terminal
-blocked is reachable only after the real deployment and the preload measurement
-ran and only the monitoring observable was missing. Step 6 now settles the
-provisional debt in a three-outcome table, and Q06's entry condition is stated
-rather than implied. Option 6D records the collapsed reading as rejected,
-because that is what the plan had by omission.
+   provisional branch let Steps 1 to 5 proceed on representative pinned evidence
+   when the exact RHEL target was unreachable. Q06 allowed a terminal `blocked`
+   verdict. Each was settled on its own, and nothing connected them, so nothing
+   stopped an unreachable target being reported as Q06's terminal blocked, which
+   would let the effort skip the real-target run entirely and still close. They do
+   not compound: an unreachable target leaves Step 6 **incomplete**, and terminal
+   blocked is reachable only after the real deployment and the preload measurement
+   ran and only the monitoring observable was missing. Step 6 now settles the
+   provisional debt in a three-outcome table, and Q06's entry condition is stated
+   rather than implied. Option 6D records the collapsed reading as rejected,
+   because that is what the plan had by omission.
 
    The other three:
 
@@ -1568,7 +1570,9 @@ validation sections.
 
 ### Requested changes for plan relocation-force-rpath round 4
 
-Requested changes: 1. Add Q09 and bind the independent formatter and reader to a literal frozen
+Requested changes:
+
+1. Add Q09 and bind the independent formatter and reader to a literal frozen
    `/1` contract corpus rather than to round-trip agreement alone.
 2. Make the formatter call-site assertion whole-word and deterministic by
    reserving a distinctive identifier and enumerating its expected occurrences.
@@ -1636,34 +1640,34 @@ Round 5. All five round 4 requested changes are applied, none disputed. Answers
 1A, 2A, 3A, 4D, 5C, 6A, 7A, 8A stand, and Q09 is added and answered 9A.
 
 1. **Q09 is Q08's unfinished half.** Splitting the `CPLX-ELF/1` grammar across two
-files made the two ends independent, and the plan treated that independence as
-if it were an oracle. It is not. A round-trip is satisfied by any pair of
-implementations that are wrong in the same way, and two ends written by the same
-hand from the same reading of the same design are exactly such a pair; the `/1`
-marker travels with them unchanged. This plan has already produced that failure
-once, between the fixture generator and the observer agreeing about a wrong
-offset. Both ends are now bound to a literal contract corpus,
-`docs/v0.27.0/contract.cplx-elf-1.txt`: canonical records and trailers written
-out byte for byte across every wire token and the closed pairs, plus one
-malformed example per rejected form, authored by hand from the design's grammar,
-generated from neither end's tables and sourced as constants by neither. The
-formatter is compared byte for byte against the canonical vectors; the same
-literals go to the reader. `/1` is frozen, so a grammar change needs reviewed
-authority, a new marker and a new corpus rather than a quiet redefinition behind
-the same token.
+   files made the two ends independent, and the plan treated that independence as
+   if it were an oracle. It is not. A round-trip is satisfied by any pair of
+   implementations that are wrong in the same way, and two ends written by the same
+   hand from the same reading of the same design are exactly such a pair; the `/1`
+   marker travels with them unchanged. This plan has already produced that failure
+   once, between the fixture generator and the observer agreeing about a wrong
+   offset. Both ends are now bound to a literal contract corpus,
+   `docs/v0.27.0/contract.cplx-elf-1.txt`: canonical records and trailers written
+   out byte for byte across every wire token and the closed pairs, plus one
+   malformed example per rejected form, authored by hand from the design's grammar,
+   generated from neither end's tables and sourced as constants by neither. The
+   formatter is compared byte for byte against the canonical vectors; the same
+   literals go to the reader. `/1` is frozen, so a grammar change needs reviewed
+   authority, a new marker and a new corpus rather than a quiet redefinition behind
+   the same token.
 
 2. **Q03's base-only class was mislabelled as a weakness.** The plan had recorded
-the missing lawful alternate as a con to be tolerated, which left the actual
-evidentiary strength of each manifest row undetermined until implementation. A
-field whose domain contains one lawful value has its citation and its lawful base
-as a complete root oracle. What was defective was not naming its members. Every
-mutated field now carries exactly one of three classes: `readelf` direct for
-`e_ident[EI_CLASS]`, `e_ident[EI_DATA]`, `e_machine`, `e_type`, `e_phnum` and the
-tag; manifest with a lawful-alternate pair for `e_phoff`, `p_offset` and
-`p_filesz`; manifest with a lawful base only for `e_phentsize`, fixed at 56 by
-ELF64, the dynamic entry size, fixed at 16, and `DT_NULL` termination, whose
-presence is the only lawful state. Zero unclassified entries, and the choice is
-made in the plan rather than silently per field by whoever implements it.
+   the missing lawful alternate as a con to be tolerated, which left the actual
+   evidentiary strength of each manifest row undetermined until implementation. A
+   field whose domain contains one lawful value has its citation and its lawful base
+   as a complete root oracle. What was defective was not naming its members. Every
+   mutated field now carries exactly one of three classes: `readelf` direct for
+   `e_ident[EI_CLASS]`, `e_ident[EI_DATA]`, `e_machine`, `e_type`, `e_phnum` and the
+   tag; manifest with a lawful-alternate pair for `e_phoff`, `p_offset` and
+   `p_filesz`; manifest with a lawful base only for `e_phentsize`, fixed at 56 by
+   ELF64, the dynamic entry size, fixed at 16, and `DT_NULL` termination, whose
+   presence is the only lawful state. Zero unclassified entries, and the choice is
+   made in the plan rather than silently per field by whoever implements it.
 
    The other three:
 
@@ -2017,7 +2021,9 @@ round.
 
 ### Requested changes for plan relocation-force-rpath round 5
 
-Requested changes: 1. Replace Q03's nominal-field exhaustiveness with fixture/guard exhaustiveness
+Requested changes:
+
+1. Replace Q03's nominal-field exhaustiveness with fixture/guard exhaustiveness
    that names every actual carrier mutation or truncation, especially for
    dynamic-entry sizing and `DT_NULL` termination.
 2. Give Q09 a design/corpus/implementation authority order and a mismatch
@@ -2507,7 +2513,9 @@ polish, so convergence is not yet warranted.
 
 ### Requested changes for plan relocation-force-rpath round 6
 
-Requested changes: 1. Link every Q03 fixture to exact manifest mutation ids or an exact generation
+Requested changes:
+
+1. Link every Q03 fixture to exact manifest mutation ids or an exact generation
    operation, and substantiate the claimed lawful-alternate differences.
 2. Assert the complete observer tuple, including both probe statuses and values,
    for every structurally successful fixture.
@@ -3026,7 +3034,9 @@ condition and add direct fault-path tests, so convergence is not yet warranted.
 
 ### Requested changes for plan relocation-force-rpath round 7
 
-Requested changes: 1. Make probe coverage categorical: every relied-on successful behavior needs a
+Requested changes:
+
+1. Make probe coverage categorical: every relied-on successful behavior needs a
    named `ok` fixture, and an expected-`ok` refusal blocks Step 1 rather than
    being deferred to Step 4.
 2. Exercise both axis-local `failed` statuses through the production probe code
@@ -3490,7 +3500,9 @@ warranted.
 
 ### Requested changes for plan relocation-force-rpath round 8
 
-Requested changes: 1. Isolate D01 and D02 separately across every `find_patchelf` resolution surface, assert exact double resolution inside each case, and remove all injected state on subshell exit.
+Requested changes:
+
+1. Isolate D01 and D02 separately across every `find_patchelf` resolution surface, assert exact double resolution inside each case, and remove all injected state on subshell exit.
 2. Record the shipped patchelf's exact path, version, and content identity; re-establish them and rerun a successful two-axis witness after each fault case so double leakage is tested rather than assumed absent.
 3. Make any surviving resolver override, cache, file, or search-path mutation a Step 1 failure; ordering the fault cases last is not a substitute.
 4. Correct the remaining alternate-pair wording to four scoped statuses and an `alternate-pair status` field in both plan documents.
@@ -3900,7 +3912,9 @@ than wording-only polish, so convergence is not yet warranted.
 
 ### Requested changes for plan relocation-force-rpath round 9
 
-Requested changes: 1. Select and gate validation-only GNU `sha256sum` as the exact shipped-patchelf
+Requested changes:
+
+1. Select and gate validation-only GNU `sha256sum` as the exact shipped-patchelf
    content-identity mechanism.
 2. Specify its fail-closed 64-lowercase-hex capture before D01/D02 and exact
    recomputation after each case, before the `F06` sentinel.
@@ -4290,7 +4304,9 @@ more than wording-only polish and convergence is not yet warranted.
 
 ### Requested changes for plan relocation-force-rpath round 10
 
-Requested changes: 1. Replace the implied Step-0-to-Step-1 shell state with a reusable prerequisite
+Requested changes:
+
+1. Replace the implied Step-0-to-Step-1 shell state with a reusable prerequisite
    preflight run by every dependent harness invocation.
 2. Resolve GNU `sha256sum` before case-specific mutation to an absolute regular
    executable path, validate it fail-closed, and store it only after success in
@@ -4741,7 +4757,9 @@ confirmed constraints. No answer changes in this round.
 
 ### Requested changes for plan relocation-force-rpath round 11
 
-Requested changes: 1. Specify Step 2's classifier tests as complete, contract-valid two-axis
+Requested changes:
+
+1. Specify Step 2's classifier tests as complete, contract-valid two-axis
    tuples rather than a flat occurrence of four status tokens.
 2. Add representative production-observer-to-classifier bridge cases, including
    both axis-local failures, without conflating producer and consumer evidence.
@@ -5247,7 +5265,9 @@ from the confirmed constraints. Answers remain 1A, 2A, 3A, 4D, 5C, 6A, 7A,
 
 ### Requested changes for plan relocation-force-rpath round 12
 
-Requested changes: 1. Separate the unchanged Step 3 literal/constructed contract regression from
+Requested changes:
+
+1. Separate the unchanged Step 3 literal/constructed contract regression from
    Step 4 validation of real production captures.
 2. Add a Step 4 production outcome matrix covering every wiring branch and the
    complete two-axis record and trailer effects.
@@ -5752,7 +5772,9 @@ from the confirmed constraints. Answers remain 1A, 2A, 3A, 4D, 5C, 6A, 7A,
 
 ### Requested changes for plan relocation-force-rpath round 13
 
-Requested changes: 1. Make the Step 4 outcome matrix rectangular and literal; correct the shifted,
+Requested changes:
+
+1. Make the Step 4 outcome matrix rectangular and literal; correct the shifted,
    incomplete D02 row.
 2. Replace every case, disposition, and counter placeholder with exact closed
    values, splitting scenarios where necessary.
@@ -6269,7 +6291,9 @@ The options remain materially distinct. Answers remain 1A, 2A, 3A, 4D, 5C,
 
 ### Requested changes for plan relocation-force-rpath round 14
 
-Requested changes: 1. Disambiguate D01/D02 across Steps 1, 2, and 4, including their subjects,
+Requested changes:
+
+1. Disambiguate D01/D02 across Steps 1, 2, and 4, including their subjects,
    surviving-axis values, bridge references, and validation mirror.
 2. Replace the asserted reverse ledger with an explicit exhaustive mapping for
    `A01`-`A28` and `R0`-`R13`; add the currently missing `A11` derivation.

@@ -5235,8 +5235,8 @@ operation retires a live round: `cancel` requires a convergence gate,
 produce a fresh active round under the same step.
 
 Nothing was published under that record, so nothing is lost: no request, answer
-or tombstone existed, and the transcript's previous entry is still step 4 round
-2. If the review would rather the label matched the id exactly, renaming the
+or tombstone existed, and the transcript's previous entry is still step 4 round 2.
+If the review would rather the label matched the id exactly, renaming the
 plan and validation headings to `Step 4b` is a two-file edit I will make on
 request rather than churn the plan a third time on my own judgment.
 
