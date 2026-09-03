@@ -764,7 +764,7 @@ the correction below.
 | D8 | When to consider Python 3.14 | (a) now, widening the application pin; (b) next cycle; (c) never, stay on 3.13 to its end of life | (b): 3.13 must serve this rebuild (the application pins it), but 3.14 gains a year of maintenance, fits the annotation-heavy code through PEP 649, and is the only line RHEL 9 could ever provide as a package |
 | D7 | sqlite provenance for the python build | (a) copy from the server's `/usr`; (b) `sqlite-devel` and `sqlite-libs` payloads extracted into the python sandbox from the per-tool list; (c) sqlite rebuilt from source as a cplx tool | (b): (a) is impossible (the server has no header and no linker symlink), (b) is one list line in the same class as zlib and libffi, (c) only for a newer sqlite or independence from the RHEL patch cycle |
 | D6 | cplx release carrying this effort | (a) fold into the current 0.26.0 cycle; (b) dedicated next cycle | (b): v0.26.0 shipped on 2026-08-06, this effort opens the v0.27.0 cycle |
-| D10 | C++ runtime generation shipped in the root | (a) keep the GCC 11 `libstdc++.so.6.0.29` the platform provides, inheriting a one-node margin (`GLIBCXX_3.4.29` against an agent at `3.4.30`); (b) ship the GCC 12 generation, sourced from a toolset payload, so the archive absorbs a wheel set that moves past that node | open, to settle inside requirement 4. (a) matches the deployment servers exactly and costs nothing now; (b) buys headroom for both CI and production, since the RHEL 9.8 servers carry the same GCC 11 build and would break on the same wheel. Measure the wheels' actual C++ demands during the rebuild before choosing |
+| D10 | C++ runtime generation shipped in the root | (a) keep the GCC 11 `libstdc++.so.6.0.29` the platform provides, inheriting a one-node margin (`GLIBCXX_3.4.29` against an agent at `3.4.30`); (b) ship the GCC 12 generation, sourced from a toolset payload, so the archive absorbs a wheel set that moves past that node | DECIDED inside requirement 4 as a CONDITIONAL POLICY, by the round 1 specification review of `issue.v0.27.0.toolchain-runtime-closure.md`. The consumer set is every shipped ELF recording a `DT_NEEDED` on `libstdc++.so.6`, measured once the final wheel and dependency set is fixed. The comparison covers `GLIBCXX_` and `CXXABI_` against what the shipped `libstdc++` defines, since libstdc++ provides both namespaces, while `libgcc_s` is checked separately against its own `GCC_` needs. Ship (a) if and only if every one of those is satisfied; otherwise ship (b) and re-run every closure check of requirement 4 against the new root; if NEITHER generation satisfies them, packaging FAILS rather than taking the closer one. ZERO SPARE NODES IS ALLOWED: the threshold is satisfaction, not headroom, so "the margin is gone" is explicitly NOT the switch condition, being ambiguous between zero headroom and an unsupported node. Requirement 7 supplies the measurement; requirement 4 owns the rule |
 | D9 | Architecture key across server minors | (a) copy the file set at every minor upgrade; (b) key on the major only; (c) exact match first, then the closest minor of the same major, logged | decided: (a) now to unblock the rebuild, then (c) as requirement 5. (b) is rejected: it would lose the ability to describe a distribution whose minor really diverges |
 
 ## List of feature-requests and issues to create
@@ -1071,6 +1071,18 @@ recompile, because the closure check defined in item 4 gains
 `libsqlite3.so.0` as a required member here, and because its package
 step needs the architecture key of item 5 to resolve.
 
+CROSS-REQUIREMENT CONTRACT WITH ITEM 4, settled by the round 1
+specification review of `issue.v0.27.0.toolchain-runtime-closure.md`.
+Item 4 declares `libsqlite3.so.0` on the `tools/python` floor from the
+day it lands, carrying one named WAIVER whose owner is this item. THIS
+ITEM REMOVES THAT WAIVER, and the condition is the floor entry's own
+location test, stated identically in both documents: a file named
+`libsqlite3.so.0` present under `tools/python` in the resolution scope.
+Item 4's packaging check fails on a waiver whose REMOVAL CONDITION is
+already satisfied, rather than on the state of this item, so the
+completion signal is mechanical rather than a memory and needs no
+document to be read at packaging time.
+
 Depends on: items 4 and 5.
 
 #### 7. Rebuild, validate and publish the tools archive
@@ -1099,6 +1111,20 @@ Publication follows D1: the archive rides the next application release
 version, which means the consuming project keeps the current archive
 and its interims until that release, so the requirement must state that
 schedule coupling rather than assume an immediate switch.
+
+CROSS-REQUIREMENT CONTRACT WITH ITEM 4, settled by the round 1
+specification review of `issue.v0.27.0.toolchain-runtime-closure.md`.
+An archive packaged while ANY item 4 waiver is active is a VALIDATION
+ARTIFACT and THIS ITEM REFUSES TO PUBLISH IT. That refusal is what makes
+item 4's gate mean "unpublishable while incomplete" rather than
+"reported as incomplete", so it is a condition of publication here and
+not only a note there.
+
+THIS ITEM ALSO SUPPLIES THE D10 EVIDENCE rather than the D10 decision.
+Item 4 settles D10 as a conditional policy; what the rebuild owes is the
+measurement that policy consumes: every shipped ELF recording a
+`DT_NEEDED` on `libstdc++.so.6`, and its `GLIBCXX_` and `CXXABI_` needs
+against what the shipped providers define.
 
 The consuming project gained the seam this item needs on 2026-08-07: a
 `tools/publish.mode` switch read at pipeline start, holding `snapshot`
