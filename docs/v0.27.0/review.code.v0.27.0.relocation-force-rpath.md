@@ -130,8 +130,8 @@ need. It writes no production behaviour: the installer changes structurally only
 The guard had **no valid location** in the file as it stood, and creating one was
 part of the step. Checked against the source rather than assumed: the main flow
 begins at `# --- 1. Argument Parsing ---` (line 428), and two functions were
-defined after it, `usage` at 432 and `select_copy_engine` at 485 with its call at
-498. A guard after every definition would have sat after the flow it was meant to
+defined after it, `usage` at 432 and `select_copy_engine` at 485 with its call at 498.
+A guard after every definition would have sat after the flow it was meant to
 precede; a guard before the flow would have left those two undefined on a source.
 
 So three changes, in order:
@@ -8902,8 +8902,8 @@ none of it can be produced on this host.
 Round 2 was right on both counts and I accept both without qualification.
 
 **The program boundary.** Cases 5 and 6 tested the value alone, and row `C22`
-asserted that an `elf_kind: unsupported` tuple carrying a builder anchor is case
-6. I had argued additivity for that, and the argument was wrong on the
+asserted that an `elf_kind: unsupported` tuple carrying a builder anchor is case six.
+I had argued additivity for that, and the argument was wrong on the
 requirement's own words: it promises that no **program** the current guard covers
 is dropped, not that every ELF kind is a program. Both cases are gated on the
 kind now, `C22` expects case 7, and `C24` is new for the other branch, an
@@ -12125,7 +12125,7 @@ becomes it.
 
 The alternative was to make the walk or the classifier tolerate this object, and
 that would have been the count-driven change this effort has refused since Step
-0. `a.out` answers case 5 because it is a program carrying the exact target
+zero. `a.out` answers case 5 because it is a program carrying the exact target
 `DT_RUNPATH`, which is what the ordered rules say case 5 is. Nothing in the
 classifier is wrong. What was wrong is that the file was in the archive.
 
@@ -17119,10 +17119,12 @@ carries no `/home/` rpath, so v0.27.0 is the first version that touches it.
 Measured on both hosts the archive runs on, on copies, with nothing under the
 archive written:
 
-    clean loader --version        exit 0
-    patchelf --force-rpath ...    exit 0, 897856 -> 905089 bytes
-    the same loader --version     exit 139, signal 11
-    a program naming it PT_INTERP exit 139, signal 11
+```text
+clean loader --version        exit 0
+patchelf --force-rpath ...    exit 0, 897856 -> 905089 bytes
+the same loader --version     exit 139, signal 11
+a program naming it PT_INTERP exit 139, signal 11
+```
 
 The middle line is the dangerous one. patchelf reports success, so without a
 rule the pass records `rewritten`, the trailer reconciles, categorical
@@ -17134,7 +17136,7 @@ the finding they produced was aimed at the archive.
 The blast radius was measured rather than assumed. `libc.so.6`, `libm.so.6`,
 `libdl.so.2`, `libpthread.so.0`, `libz.so.1` and `libstdc++.so.6` took the same
 write, together and one at a time, and a program ran through every set at exit
-0. One object breaks, so one object is excluded.
+zero. One object breaks, so one object is excluded.
 
 The fix is in `elf_classify`: the resolved interpreter is excluded by device and
 inode, before case 3, answering case 7. Identity and not name, because
@@ -17631,9 +17633,9 @@ Paths staged:
 
 Unresolved findings:
 
-- 1. [P1] Reconcile the Step 4 acceptance contract. `issue.v0.27.0.relocation-force-rpath.md` lines 742-746 and `plan.v0.27.0.relocation-force-rpath.md` lines 2013-2016 require the named selected set and every other program preserved. The same plan at lines 2038-2058 now permits selected residuals and hands them to Step 6. Build 109 reports `tools/python/root/a.out` selected as case 6. A green harness currently proves only the permissive branch of this contradiction.
-- 2. [P2] Align the harness narrative with its behavior. `verify.relocation-rpath.sh` lines 4738-4759 still say no exception is admitted and cases 5/6 fail the residual criterion, while lines 4837-4891 treat selected residuals as Step 6 findings and do not fail them.
-- 3. [P2] Refresh `a.commit`. Multiple groups still describe the obsolete blocked outcome and round 3 failures, so the planned commit subjects and explanations do not match the staged round 4 content.
+1. [P1] Reconcile the Step 4 acceptance contract. `issue.v0.27.0.relocation-force-rpath.md` lines 742-746 and `plan.v0.27.0.relocation-force-rpath.md` lines 2013-2016 require the named selected set and every other program preserved. The same plan at lines 2038-2058 now permits selected residuals and hands them to Step 6. Build 109 reports `tools/python/root/a.out` selected as case 6. A green harness currently proves only the permissive branch of this contradiction.
+2. [P2] Align the harness narrative with its behavior. `verify.relocation-rpath.sh` lines 4738-4759 still say no exception is admitted and cases 5/6 fail the residual criterion, while lines 4837-4891 treat selected residuals as Step 6 findings and do not fail them.
+3. [P2] Refresh `a.commit`. Multiple groups still describe the obsolete blocked outcome and round 3 failures, so the planned commit subjects and explanations do not match the staged round 4 content.
 
 Boundary-crossing work:
 
@@ -23449,7 +23451,7 @@ wait timed out while request was absent
 - Implementation step: 6
 - Outcome: human-reclaim
 
-# Human-directed resume of Step 6 review wait
+## Human-directed resume of Step 6 review wait - attempt 3
 
 The human explicitly directed that the overnight or elapsed wait timeout is a stopped handoff, not a review failure and not a condition requiring further human resolution.
 
@@ -23459,7 +23461,7 @@ No review-exchange escalation is authorized. The reviewer must continue waiting 
 
 <!-- review-entry-id: human-reclaim-round-8-3 -->
 
-## Round 9 by requestor - Step 6
+## Round 9 by requestor - Step 6 (exchange 3)
 
 - Recorded: 2026-08-28T23:33:42+02:00
 - Exchange: code/code/v0.27.0/relocation-force-rpath
@@ -23969,7 +23971,7 @@ two consecutive change-request rounds made no meaningful progress
 - Implementation step: 6
 - Outcome: human-reclaim
 
-# Human-directed resume of Step 6 review wait
+## Human-directed resume of Step 6 review wait (exchange 2)
 
 The human explicitly directed that the overnight or elapsed wait timeout is a stopped handoff, not a review failure and not a condition requiring further human resolution.
 
@@ -24001,7 +24003,7 @@ two consecutive change-request rounds made no meaningful progress
 - Implementation step: 6
 - Outcome: human-resolution
 
-# Resolution of the Step 6 review escalation
+## Resolution of the Step 6 review escalation
 
 The exchange escalated automatically after round 9 with the diagnostic "two
 consecutive change-request rounds made no meaningful progress". That diagnostic
@@ -24090,7 +24092,7 @@ wait timed out while request was absent
 - Implementation step: 6
 - Outcome: human-reclaim
 
-# Human-directed resume of Step 6 review wait
+## Human-directed resume of Step 6 review wait - attempt 3a
 
 The human explicitly directed that the overnight or elapsed wait timeout is a stopped handoff, not a review failure and not a condition requiring further human resolution.
 
@@ -24122,7 +24124,7 @@ exchange was abandoned while waiting for reviewer
 - Implementation step: 6
 - Outcome: human-reclaim
 
-# Human-directed resume of Step 6 review wait
+## Human-directed resume of Step 6 review wait
 
 The human explicitly directed that the overnight or elapsed wait timeout is a stopped handoff, not a review failure and not a condition requiring further human resolution.
 
@@ -24154,7 +24156,7 @@ exchange was abandoned while waiting for reviewer
 - Implementation step: 6
 - Outcome: human-reclaim
 
-# Human-directed resume of Step 6 review wait
+## Human-directed resume of Step 6 review wait (exchange 3) - attempt 3
 
 The human explicitly directed that the overnight or elapsed wait timeout is a stopped handoff, not a review failure and not a condition requiring further human resolution.
 

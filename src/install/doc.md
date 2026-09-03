@@ -87,7 +87,7 @@ openssl-devel
 
 <https://github.com/python/cpython/issues/118034>
 
-CPython now requires #include <stdatomic.h> (an optional C11 feature) or MSVC. (Mimalloc can use C++ atomics, C11 atomics, or MSVC atomics. And pyatomic.h requires C11 atomics, MSVC atomics, or GCC atomics. The intersection is C11 or MSVC.)
+CPython now requires `#include <stdatomic.h>` (an optional C11 feature) or MSVC. (Mimalloc can use C++ atomics, C11 atomics, or MSVC atomics. And pyatomic.h requires C11 atomics, MSVC atomics, or GCC atomics. The intersection is C11 or MSVC.)
 
 This means CPython can't compile with GCC 4.8, as [C11 atomics were added in GCC 4.9](https://gcc.gnu.org/wiki/C11Status)
 
@@ -433,7 +433,7 @@ openssl-3.2.2.tar.gz
 But: <https://stackoverflow.com/questions/67972269/openssl-upgrade-centos-7/69187544#69187544>
 <https://bugzilla.redhat.com/show_bug.cgi?id=1416715>
 <https://bugzilla.redhat.com/show_bug.cgi?id=1792741> <https://src.fedoraproject.org/rpms/openssl11>
-ftp://ftp.icm.edu.pl/packages/linux-pbone/archive.fedoraproject.org/epel/7.2020-10-05/x86_64/Packages/o/openssl11-libs-1.1.1c-2.el7.x86_64.rpm (<https://rpm.pbone.net/info_idpl_71941238_distro_redhatel7_com_openssl11-libs-1.1.1c-2.el7.x86_64.rpm.html>)
+<ftp://ftp.icm.edu.pl/packages/linux-pbone/archive.fedoraproject.org/epel/7.2020-10-05/x86_64/Packages/o/openssl11-libs-1.1.1c-2.el7.x86_64.rpm> (<https://rpm.pbone.net/info_idpl_71941238_distro_redhatel7_com_openssl11-libs-1.1.1c-2.el7.x86_64.rpm.html>)
 
 <https://download.fedora.devel.redhat.com/pub/archive/epel/7.8/x86_64/Packages/o/openssl11-devel-1.1.1c-2.el7.x86_64.rpm>
 <https://download.fedora.devel.redhat.com/pub/archive/epel/7.8/x86_64/Packages/o/openssl11-libs-1.1.1c-2.el7.x86_64.rpm>
@@ -652,7 +652,7 @@ Either method ensures that the folder is considered during inclusion.
 
 I tried to fix this issue, but wasted 5 hours. Finally, I manually replaced #include_next with #include in three files.
 
-Replaced #include_next <stdlib.h> with #include <stdlib.h> in cstdlib and std_abs.h
+Replaced `#include_next <stdlib.h>` with `#include <stdlib.h>` in cstdlib and std_abs.h
 
 Same in <https://stackoverflow.com/questions/51350998/7515-fatal-error-stdlib-h-no-such-file-or-directory-include-next-stdlib-h>
 
@@ -743,7 +743,7 @@ So your comment:
 
 >I am pretty sure that all the .bashrc exports are already a dirty workaround
 
-is on the money<sup>1</sup>. But what's worse, the `.bashrc` setting:
+is on the money¹. But what's worse, the `.bashrc` setting:
 
 ```bash
 export CPLUS_INCLUDE_PATH="/usr/include"
@@ -774,7 +774,7 @@ ignoring duplicate directory "/usr/include"
 /usr/include/x86_64-linux-gnu
 End of search list.
 ...
-```bash
+```
 
 As you see, `/usr/include` is detected now as a *duplicated* directory in the `<...>` search
 order; the second occurrence - which was *last*, previously - is deleted and the first occurrence is
@@ -782,9 +782,11 @@ retained, coming *first* in the search order.
 
 Now recall the diagnostic:
 
-    /usr/include/c++/9/cstdlib:75:15: fatal error: stdlib.h: No such file or directory
-       75 | #include_next <stdlib.h>
-          |               ^~~~~~~~~~
+```bash
+/usr/include/c++/9/cstdlib:75:15: fatal error: stdlib.h: No such file or directory
+    75 | #include_next <stdlib.h>
+        |               ^~~~~~~~~~
+```
 
 The preprocessor directive `#include_next` is not a standard directive, it is
 a GCC extension, documented in [the GCC manual: 2.7 Wrapper Headers](https://gcc.gnu.org/onlinedocs/cpp/Wrapper-Headers.html#Wrapper-Headers)
@@ -810,17 +812,17 @@ just don't mess with the `<...>` search order.
 The problem just discussed was the subject of [a regression bug-report raised against GCC 6.0](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129).
 As you can see there, the resolution was `WONTFIX`.
 
-<hr>
+---
+
 [1] All of your `.bashrc` exports as posted are, as you suspect, poor practice.
 
 - It isn't necessary to tell the preprocessor about any search directories in
-its default search order. You can only make things wrong.
-
+  its default search order. You can only make things wrong.
 - Directories that will *not* be found by default *should* be specified by
-`-I dir` options specified on the commandline (typically injected via parameters
-of the build configuration), so that these non-default options are visible in build logs
-for trouble shooting. "Invisible hands" are to be avoided in build systems to the
-utmost practical extent.
+  `-I dir` options specified on the commandline (typically injected via parameters
+  of the build configuration), so that these non-default options are visible in build logs
+  for trouble shooting. "Invisible hands" are to be avoided in build systems to the
+  utmost practical extent.
 
 Try wheel:
 
@@ -1419,9 +1421,9 @@ Needed for the make configure.
 
 ### SSL
 
-https://gemini.google.com/app/2930f8c8cfb6e588
+<https://gemini.google.com/app/2930f8c8cfb6e588>
 
-```
+```text
 gcc -o conftest -DOPENSSL_NO_KRB5 -DUSE_CURL_MULTI --sysroot=/home/gitea2/cplx/tools/tool/root -fPIC -O2 -U_FORTIFY_SOURCE -m64 -march=x86-64 -msse4.2 -I/home/gitea2/cplx/tools/tool/root/usr/include -I/home/gitea2/cplx/tools/tool/root/usr/include -L/home/gitea2/cplx/tools/tool/root/usr/lib -Wl,--sysroot=/home/gitea2/cplx/tools/tool/root -Wl,-rpath=/home/gitea2/cplx/tools/tool/root/usr/lib64:/home/gitea2/cplx/tools/tool/root/usr/lib:/home/gitea2/cplx/tools/tool/root/lib64:/home/gitea2/cplx/tools/tool/root/lib:/home/gitea2/cplx/tools/git/git-2.48.1/usr/lib64:/home/gitea2/cplx/tools/git/git-2.48.1/lib64:/home/gitea2/cplx/tools/git/git-2.48.1/usr/lib:/home/gitea2/cplx/tools/git/git-2.48.1/lib -Wl,--dynamic-linker=/home/gitea2/cplx/tools/tool/root/lib64/ld-linux-x86-64.so.2 -Wl,--export-dynamic -L/home/gitea2/cplx/tools/tool/root/usr/lib64 -L/home/gitea2/cplx/tools/tool/root/usr/lib -L/home/gitea2/cplx/tools/tool/root/lib64 -L/home/gitea2/cplx/tools/tool/root/lib -lssl -lcrypto -Wl,-verbose conftest.c -lcurl  -lgcc_s -ldl -lpthread -lc -lm -lc_nonshared
 ```
 
@@ -1463,19 +1465,18 @@ return curl_global_init ();
 }
 ```
 
-https://www.openldap.org/software/download/
-https://www.openldap.org/faq/data/cache/18.html
-
+<https://www.openldap.org/software/download/>
+<https://www.openldap.org/faq/data/cache/18.html>
 
 ## isysroot and include_next
 
-https://stackoverflow.com/questions/62795463/how-can-get-g-to-use-my-own-glibc-builds-headers-correctly
+<https://stackoverflow.com/questions/62795463/how-can-get-g-to-use-my-own-glibc-builds-headers-correctly>
 
 In your GCC version,`<cmath>` uses `#include_next`, which means that you need to make sure that the directory which contains the `cmath` file comes *before* (on the include search path) the directory with the proper `math.h` for the version of glibc you are building against.
 
 You can use `g++ -v` to view the search path. In your case, it probably looks like this:
 
-```
+```text
 #include "..." search starts here:
 #include <...> search starts here:
  .
@@ -1493,7 +1494,7 @@ You can use `g++ -v` to view the search path. In your case, it probably looks li
 
 If you configure glibc with `--prefix=/usr` and install it with `DESTDIR=/path/to/glibc-2.23/build/install`, its header files will be installed into the directory `/path/to/glibc-2.23/build/install/usr/include`. This means you should be able to use the `-isysroot` option, which rewrites the default `/usr/include` directory, resulting in the right ordering of the search path:
 
-```
+```text
 #include "..." search starts here:
 #include <...> search starts here:
  .
@@ -1508,24 +1509,23 @@ If you configure glibc with `--prefix=/usr` and install it with `DESTDIR=/path/t
 
 ```
 
-I just tried this and it compiled, but when running I still get the Assertion info[DT_RPATH] == NULL'` problem. Since it answers the question, I'll still accept this, but if you have any other info regarding the assertion problem in an off-comment, that would be appreciated. If it's too complex an answer, then I'll just need to post a new question. The most obvious thing of using --sysroot instead created new problems that should go in their own question. Thank you! – 
+I just tried this and it compiled, but when running I still get the Assertion info[DT_RPATH] == NULL'` problem. Since it answers the question, I'll still accept this, but if you have any other info regarding the assertion problem in an off-comment, that would be appreciated. If it's too complex an answer, then I'll just need to post a new question. The most obvious thing of using --sysroot instead created new problems that should go in their own question. Thank you! –
 OMGtechy
- CommentedJul 13, 2020 at 10:57 
+ CommentedJul 13, 2020 at 10:57
 
-You likely built glibc with -Wl,--rpath, that doesn't work. – 
+You likely built glibc with -Wl,--rpath, that doesn't work. –
 Florian Weimer
  CommentedJul 13, 2020 at 18:29
 
-Indeed I did, tried removing it, still no joy. I will ask another question :) – 
+Indeed I did, tried removing it, still no joy. I will ask another question :) –
 OMGtechy
  CommentedJul 14, 2020 at 9:54
 
-
-https://stackoverflow.com/questions/35616650/how-to-upgrade-glibc-from-version-2-12-to-2-14-on-centos#comment95249587_38317265
+<https://stackoverflow.com/questions/35616650/how-to-upgrade-glibc-from-version-2-12-to-2-14-on-centos#comment95249587_38317265>
 
 To set the timezone for the new glibc: ln -s /usr/share/zoneinfo/Europe/Rome /usr/glibc/etc/localtime as it won’t use your system timezone. Check with: /opt/glibc-2.14/lib/ld-2.14.so --library-path "/opt/glibc-2.14/lib:/lib64" /bin/date
 
 ## URLs
 
-- view-source:https://mirror.chpc.utah.edu/pub/centos/7/os/x86_64/Packages/
-- https://rpm.pbone.net/
+- <view-source:https://mirror.chpc.utah.edu/pub/centos/7/os/x86_64/Packages/>
+- <https://rpm.pbone.net/>

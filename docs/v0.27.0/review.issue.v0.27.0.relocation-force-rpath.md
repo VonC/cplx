@@ -335,7 +335,9 @@ for the monitoring agent.
 
 ### Requested changes for issue relocation-force-rpath round 1
 
-Requested changes: 1. Make Q01 implementable: define the library/program classification, prove it
+Requested changes:
+
+1. Make Q01 implementable: define the library/program classification, prove it
    selects the 110 measured libraries, and reconcile the focused draft's
    system-linked-binary wording with the intended treatment of RPM libraries.
 2. Preserve the literal develop#24 zero target under Q09, and rewrite Q04 so
@@ -763,7 +765,9 @@ boundary before implementation can proceed.
 
 ### Requested changes for issue relocation-force-rpath round 2
 
-Requested changes: 1. Rewrite Q01 and the body as an additive selector that preserves fresh
+Requested changes:
+
+1. Rewrite Q01 and the body as an additive selector that preserves fresh
    builder-anchored programs, converts already-relocated target-valued
    `DT_RUNPATH` programs, and adds every dynamically linked library. Restore
    the Python executable's D3 path in examples and acceptance.
@@ -852,10 +856,10 @@ document changed with it rather than only the wording of Q01:
   target value from an earlier relocation.
 
 1. Only an object already carrying the exact target value under `DT_RPATH` is
-skipped. Every other program, RPM-extracted ones included, stays untouched. The
-validation obligation moved with it: the selector must be shown to select all
-110 flagged libraries **and the python ELF**, which is the check that would have
-caught the round 2 regression before publication.
+   skipped. Every other program, RPM-extracted ones included, stays untouched. The
+   validation obligation moved with it: the selector must be shown to select all
+   110 flagged libraries **and the python ELF**, which is the check that would have
+   caught the round 2 regression before publication.
 
    Where the other seven landed:
 
@@ -1170,12 +1174,12 @@ Q07 now reports two independent dispositions:
 - plus the migration-interpreter invariant, counted separately.
 
 1. Each axis sums to the number of walked ELFs, so the report reconciles to the
-walk twice over. The three pairs a single partition could not express are named
-in the body and in the examples: rewritten on both, `rpath excluded` with
-`interpreter rewritten`, and `rpath failed` with `interpreter rewritten`. A
-classification or inspection error takes the `failed` disposition on the axis it
-blocked, never a benign one. Acceptance requires both failure dispositions and
-the invariant count to be zero.
+   walk twice over. The three pairs a single partition could not express are named
+   in the body and in the examples: rewritten on both, `rpath excluded` with
+   `interpreter rewritten`, and `rpath failed` with `interpreter rewritten`. A
+   classification or inspection error takes the `failed` disposition on the axis it
+   blocked, never a benign one. Acceptance requires both failure dispositions and
+   the invariant count to be zero.
 
    The other four:
 
@@ -1485,12 +1489,12 @@ populations disjoint. It does separate libraries from programs; it does nothing
 about programs overlapping each other, which is where the `$HOME` layout bites.
 
 1. Q01 is now an ordered classifier, first matching case wins: (1) classification
-or inspection failure; (2) not dynamically linked; (3) exact target value under
-`DT_RPATH`; (4) library; (5) program with the exact target value under
-`DT_RUNPATH`; (6) remaining builder-anchored program; (7) excluded. The
-exact-target tests precede the broad `/home/` test, which is what makes the
-`$HOME` outcomes deterministic. The selected rpath set is unchanged from round
-3; what the order adds is one defined outcome per object.
+   or inspection failure; (2) not dynamically linked; (3) exact target value under
+   `DT_RPATH`; (4) library; (5) program with the exact target value under
+   `DT_RUNPATH`; (6) remaining builder-anchored program; (7) excluded. The
+   exact-target tests precede the broad `/home/` test, which is what makes the
+   `$HOME` outcomes deterministic. The selected rpath set is unchanged from round
+   3; what the order adds is one defined outcome per object.
 
    The other three:
 

@@ -742,13 +742,13 @@ prefix, which came from the measurement index rather than from the raw output.
 
 ## Out of scope for this tools set
 
-- Q17, a one-line `requirements.txt` pinning uv: a my-project file,
-  not a cplx one.
+- Q17, a one-line `requirements.txt` pinning uv: a my-project file, not a cplx one.
 - The ubi9 (RHEL-flavored) agent image: rejected in the discovery
   record; this draft is the counter-bet, making the archive
   distribution-agnostic instead.
 - Agent image additions (rsync, procps, corporate CA in the image JVM):
   CICD-team track, useful but not blocking once items 1 to 4 land.
+
 Nothing about the architecture key: that turned out to be in scope, see
 the correction below.
 

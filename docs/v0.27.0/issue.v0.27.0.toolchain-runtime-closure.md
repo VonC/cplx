@@ -519,4 +519,3 @@ Each is a reading that looked like evidence and was not, which is the same
 defect class the requirement itself exists to close in the archive. The three
 retained measurements are kept beside this document so a later reader checks
 the numbers rather than inheriting them.
-
