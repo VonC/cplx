@@ -1,0 +1,156 @@
+Probe: the post-RPATH OpenSSL version-node re-probe asked for by round 1 of the
+       specification review of issue.v0.27.0.toolchain-runtime-closure.md (F2)
+Target: RHEL 9.8, the live deployment install of the published archive
+Captured: 2026-09-03, by hand over ssh
+
+WHAT IT SPLITS, and why only one half needed a deployment. The question "is the
+       shipped libssl coherent with the shipped libcrypto" has two halves. Does
+       the shipped provider DEFINE what the shipped consumer NEEDS is a property
+       of the two files: an rpath changes which file is selected, never what a
+       file defines, so no relocation and no run is required to read it. Does
+       the consumer SELECT the shipped provider is the rpath question, and
+       relocation-force-rpath settled that by giving every shipped library an
+       rpath of its own.
+
+       This capture answers the first half conclusively and says so; it does not
+       claim the second.
+
+THE COMPARATOR CARRIES ITS OWN CONTROL, and it earned it. The first run of this
+       probe reported all six needed nodes missing while the inventory printed
+       directly above it showed every one of them defined. The membership test
+       compared a space-delimited pattern against newline-delimited data, so it
+       could only ever answer "missing". The verdict below is believed only
+       because the two control lines show the comparator answering both ways.
+
+TWO THINGS THIS MEASURED THAT THE REQUIREMENT NEEDED. First, the eight
+       OPENSSL_3.x lines the earlier probe reported as missing nodes are an
+       isolation artifact: every node is defined. Second, libssl.so.3 ships
+       TWICE per tool root, in root/usr/bin and root/usr/lib64, and the two are
+       NOT identical copies: their version-need sets differ. Same SONAME, same
+       ABI major, different builds.
+
+===== BEGIN CPLX-LIBSSL-REPROBE =====
+date            2026-09-03T06:00:07Z
+host            rhel 9.8
+readelf         GNU readelf version 2.35.2-72.el9
+root            /home/deploy-account/tools
+
+== the shipped OpenSSL objects, every one of them
+  /home/deploy-account/tools/git/root/usr/bin/libssl.so.3
+  /home/deploy-account/tools/git/root/usr/lib64/libcrypto.so.3
+  /home/deploy-account/tools/git/root/usr/lib64/libssl.so.3
+  /home/deploy-account/tools/python/root/usr/bin/libssl.so.3
+  /home/deploy-account/tools/python/root/usr/lib64/libcrypto.so.3
+  /home/deploy-account/tools/python/root/usr/lib64/libssl.so.3
+  count         6
+
+== version DEFINITIONS each shipped libcrypto provides
+  /home/deploy-account/tools/git/root/usr/lib64/libcrypto.so.3
+    defines OPENSSL_3.0.0
+    defines OPENSSL_3.0.1
+    defines OPENSSL_3.0.3
+    defines OPENSSL_3.0.8
+    defines OPENSSL_3.0.9
+    defines OPENSSL_3.1.0
+    defines OPENSSL_3.2.0
+    defines OPENSSL_3.3.0
+    defines OPENSSL_3.4.0
+    defines OPENSSL_3.5.0
+    defines libcrypto.so.3
+  /home/deploy-account/tools/python/root/usr/lib64/libcrypto.so.3
+    defines OPENSSL_3.0.0
+    defines OPENSSL_3.0.1
+    defines OPENSSL_3.0.3
+    defines OPENSSL_3.0.8
+    defines OPENSSL_3.0.9
+    defines OPENSSL_3.1.0
+    defines OPENSSL_3.2.0
+    defines OPENSSL_3.3.0
+    defines OPENSSL_3.4.0
+    defines OPENSSL_3.5.0
+    defines libcrypto.so.3
+
+== version NEEDS each shipped libssl records, and on which provider
+  /home/deploy-account/tools/git/root/usr/bin/libssl.so.3
+000000: Version: 1  File: libc.so.6
+0x0010:   Name: GLIBC_2.17
+0x0020:   Name: GLIBC_2.4
+0x0030:   Name: GLIBC_2.33
+0x0040:   Name: GLIBC_2.34
+0x0050:   Name: GLIBC_2.14
+0x0060:   Name: GLIBC_2.3.4
+0x0070:   Name: GLIBC_2.2.5
+0x0080:   Name: GLIBC_2.3.2
+0x0090: Version: 1  File: libcrypto.so.3
+0x00a0:   Name: OPENSSL_3.0.3
+0x00b0:   Name: OPENSSL_3.0.1
+0x00c0:   Name: OPENSSL_3.2.0
+0x00d0:   Name: OPENSSL_3.0.0
+  /home/deploy-account/tools/git/root/usr/lib64/libssl.so.3
+000000: Version: 1  File: libc.so.6
+0x0010:   Name: GLIBC_2.17
+0x0020:   Name: GLIBC_2.3.4
+0x0030:   Name: GLIBC_2.4
+0x0040:   Name: GLIBC_2.3
+0x0050:   Name: GLIBC_2.33
+0x0060:   Name: GLIBC_2.34
+0x0070:   Name: GLIBC_2.14
+0x0080:   Name: GLIBC_2.2.5
+0x0090:   Name: GLIBC_2.3.2
+0x00a0: Version: 1  File: libcrypto.so.3
+0x00b0:   Name: OPENSSL_3.3.0
+0x00c0:   Name: OPENSSL_3.0.3
+0x00d0:   Name: OPENSSL_3.4.0
+0x00e0:   Name: OPENSSL_3.0.1
+0x00f0:   Name: OPENSSL_3.2.0
+0x0100:   Name: OPENSSL_3.0.0
+  /home/deploy-account/tools/python/root/usr/bin/libssl.so.3
+000000: Version: 1  File: libc.so.6
+0x0010:   Name: GLIBC_2.17
+0x0020:   Name: GLIBC_2.4
+0x0030:   Name: GLIBC_2.33
+0x0040:   Name: GLIBC_2.34
+0x0050:   Name: GLIBC_2.14
+0x0060:   Name: GLIBC_2.3.4
+0x0070:   Name: GLIBC_2.2.5
+0x0080:   Name: GLIBC_2.3.2
+0x0090: Version: 1  File: libcrypto.so.3
+0x00a0:   Name: OPENSSL_3.0.3
+0x00b0:   Name: OPENSSL_3.0.1
+0x00c0:   Name: OPENSSL_3.2.0
+0x00d0:   Name: OPENSSL_3.0.0
+  /home/deploy-account/tools/python/root/usr/lib64/libssl.so.3
+000000: Version: 1  File: libc.so.6
+0x0010:   Name: GLIBC_2.17
+0x0020:   Name: GLIBC_2.3.4
+0x0030:   Name: GLIBC_2.4
+0x0040:   Name: GLIBC_2.3
+0x0050:   Name: GLIBC_2.33
+0x0060:   Name: GLIBC_2.34
+0x0070:   Name: GLIBC_2.14
+0x0080:   Name: GLIBC_2.2.5
+0x0090:   Name: GLIBC_2.3.2
+0x00a0: Version: 1  File: libcrypto.so.3
+0x00b0:   Name: OPENSSL_3.3.0
+0x00c0:   Name: OPENSSL_3.0.3
+0x00d0:   Name: OPENSSL_3.4.0
+0x00e0:   Name: OPENSSL_3.0.1
+0x00f0:   Name: OPENSSL_3.2.0
+0x0100:   Name: OPENSSL_3.0.0
+
+== THE ANSWER: is every OPENSSL_ node libssl needs defined by a shipped libcrypto
+  nodes needed by shipped libssl   : OPENSSL_3.0.0 OPENSSL_3.0.1 OPENSSL_3.0.3 OPENSSL_3.2.0 OPENSSL_3.3.0 OPENSSL_3.4.0 
+  nodes defined by shipped libcrypto: OPENSSL_3.0.0 OPENSSL_3.0.1 OPENSSL_3.0.3 OPENSSL_3.0.8 OPENSSL_3.0.9 OPENSSL_3.1.0 OPENSSL_3.2.0 OPENSSL_3.3.0 OPENSSL_3.4.0 OPENSSL_3.5.0 
+
+  == the comparator's own control, before its verdict is believed
+  control/a-defined-node-reads-present  want no  got no   [OPENSSL_3.0.0]
+  control/an-absent-node-reads-missing  want yes got yes   [OPENSSL_9.9.9]
+
+  VERDICT: every OPENSSL_ node libssl needs IS defined by a shipped libcrypto
+
+WHAT THIS PROBE DOES NOT ANSWER. It reads definitions and needs, which is
+a property of the bytes. It does not observe a running process, so it does
+not by itself prove the loader SELECTS the shipped libcrypto; that is the
+rpath question relocation-force-rpath settled. It also reads this install,
+which is the published archive, not a rebuilt one.
+===== END CPLX-LIBSSL-REPROBE =====

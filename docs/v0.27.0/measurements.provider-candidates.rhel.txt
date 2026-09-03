@@ -1,0 +1,75 @@
+Probe: duplicate providers counted with LOADER LOOKUP SEMANTICS, asked for by
+       round 3 of the specification review of
+       issue.v0.27.0.toolchain-runtime-closure.md
+Target: RHEL 9.8, the live deployment install of the published archive
+Captured: 2026-09-03, by hand over ssh
+
+WHAT IT CORRECTS. The previous scope probe grouped objects by their internal
+       DT_SONAME, and reported 95 SONAMEs offered more than once. That is not
+       the loader's model. For a DT_NEEDED entry the loader searches each rpath
+       directory IN ORDER for a file with that EXACT NAME; a differently named
+       object carrying the same internal SONAME is never a candidate unless a
+       path or a symlink exposes it under the needed name. The 95 therefore
+       counted development aliases such as libBrokenLocale.so beside
+       libBrokenLocale.so.1, which are not competing candidates for any lookup.
+
+       Read the loader's way, the number is 20, and the conclusion is unchanged
+       but now rests on the right model.
+
+THE COUNTS RULE 1 IS WRITTEN AGAINST:
+
+       54 distinct DT_NEEDED names are required by the shipped objects.
+       20 of those names have more than one candidate path in the scope.
+       All 20 resolve, through their links, to ONE file.
+        0 resolve to different content.
+
+       So the unmodified archive PASSES rule 1. That is the positive control the
+       acceptance requires: a rule 1 that over-refused would fail here, on 20
+       names, and this run is what shows it does not.
+
+WHY RULE 2 CANNOT BE FOLDED INTO RULE 1. The libbfd pair carries two different
+       FILENAMES, so no DT_NEEDED name ever has both as candidates and rule 1 is
+       silent on them by construction. Only a declared family list makes them
+       refusable, which is why the two rules are separate rather than one rule
+       with an exception.
+
+===== BEGIN CPLX-CANDIDATE-PROBE =====
+date            2026-09-03T06:31:35Z
+host            rhel 9.8
+tools root      /home/deploy-account/tools
+
+== the ordered scope, 10 directories
+  /home/deploy-account/tools/python/root/usr/lib64
+  /home/deploy-account/tools/python/root/usr/lib
+  /home/deploy-account/tools/python/root/lib64
+  /home/deploy-account/tools/python/current/lib
+  /home/deploy-account/tools/python/python-3.13.9/lib
+  /home/deploy-account/tools/git/root/usr/lib64
+  /home/deploy-account/tools/git/root/usr/lib
+  /home/deploy-account/tools/git/root/lib64
+  /home/deploy-account/tools/old/py3.13/lib
+  /home/deploy-account/tools/old/py3.13/lib64
+
+== collecting every DT_NEEDED name the shipped objects require
+  distinct DT_NEEDED names: 54
+
+== for each needed name: candidates by EXACT FILENAME, resolved, compared
+
+== the counts that matter for rule 1
+  needed names with MORE THAN ONE candidate path : 20
+  of those, all candidates resolve to ONE file    : 20
+  of those, candidates resolve to DIFFERENT files : 0
+
+  VERDICT: rule 1 finds no duplicate provider in this archive.
+  The archive PASSES rule 1, which is the positive control the
+  acceptance requires: a rule 1 that over-refused would fail here.
+
+== the cross-SONAME case rule 1 cannot see, and rule 2 must declare
+  /home/deploy-account/tools/python/root/usr/lib64/libbfd-2.35.2-63.el9.so
+  /home/deploy-account/tools/python/root/usr/lib64/libbfd-2.35.2-66.el9.so
+  /home/deploy-account/tools/git/root/usr/lib64/libbfd-2.35.2-63.el9.so
+  /home/deploy-account/tools/git/root/usr/lib64/libbfd-2.35.2-66.el9.so
+  These are DIFFERENT FILENAMES, so no DT_NEEDED name has both as
+  candidates. Rule 1 is silent on them by construction; only a declared
+  family list makes them refusable.
+===== END CPLX-CANDIDATE-PROBE =====
