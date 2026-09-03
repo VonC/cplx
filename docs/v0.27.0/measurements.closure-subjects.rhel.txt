@@ -1,0 +1,71 @@
+Probe: what a DT_NEEDED walk from the entry points reaches, and what it misses.
+       Asked for by round 1 of the design review of
+       design.v0.27.0.toolchain-runtime-closure.md
+Target: RHEL 9.8, the live deployment install of the published archive
+Captured: 2026-09-03, by hand over ssh
+
+WHY IT WAS TAKEN. The design proposed a subject set built from the transitive
+       DT_NEEDED closure of the interpreter and the shipped executables. The
+       review refused it: CPython loads extension modules with dlopen, and a
+       DT_NEEDED walk cannot reach an object nothing declares. If that is true,
+       the guarantee would be blind to the wheel and extension objects that
+       motivated the whole cross-distribution effort.
+
+       It is true, and the size of the gap is the point.
+
+THE WALK IS DELIBERATELY GENEROUS. It matches each DT_NEEDED name against any
+       file of that basename anywhere under the tools tree, not only within the
+       resolution scope. A stricter, scope-only walk can only reach FEWER
+       objects, so every miss recorded here is a miss under any stricter rule
+       as well.
+
+WHAT IT MEASURED:
+
+       628 shipped ELF objects under the tools tree.
+       185 entry points, executables under a bin or sbin directory.
+       176 distinct names reached by the transitive walk.
+       395 shipped ELFs NOT reached, of which
+        76 are CPython extension modules under lib-dynload and
+        28 are under site-packages.
+         0 shipped objects declare a cpython extension module as DT_NEEDED.
+
+       A subject set built from that walk alone would never examine any of the
+       395, including every extension module the interpreter dlopens. The
+       requirement's own evidence, the pymupdf and manylinux wheel failures,
+       lives entirely inside that blind spot.
+
+===== BEGIN CPLX-SUBJECTS-PROBE =====
+date            2026-09-03T08:44:07Z
+host            rhel 9.8
+tools root      /home/deploy-account/tools
+
+== shipped ELF objects under the tools tree: 628
+
+== entry points, executables under a bin or sbin directory: 185
+
+== distinct names reached by the transitive DT_NEEDED walk: 176
+
+== shipped ELFs the walk does NOT reach
+  total not reached          : 395
+  of which under lib-dynload : 76
+  of which under site-packages: 28
+
+== a sample of the unreached CPython extension modules
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/_sha1.cpython-313-x86_64-linux-gnu.so
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/_asyncio.cpython-313-x86_64-linux-gnu.so
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/_sha2.cpython-313-x86_64-linux-gnu.so
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/_bisect.cpython-313-x86_64-linux-gnu.so
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/_sha3.cpython-313-x86_64-linux-gnu.so
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/_blake2.cpython-313-x86_64-linux-gnu.so
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/fcntl.cpython-313-x86_64-linux-gnu.so
+  /home/deploy-account/tools/python/python-3.13.9/lib/python3.13/lib-dynload/_bz2.cpython-313-x86_64-linux-gnu.so
+
+== does anything shipped DECLARE a lib-dynload module as DT_NEEDED
+  count: 0
+
+== VERDICT
+  CONFIRMED. 76 CPython extension modules ship in the tree,
+  no shipped object names any of them in a DT_NEEDED, and the transitive
+  walk from the entry points reaches none of them. A subject set built
+  from that walk alone would never examine them.
+===== END CPLX-SUBJECTS-PROBE =====
