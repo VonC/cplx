@@ -1,0 +1,197 @@
+Harness: docs/v0.27.0/verify.closure-check.sh --step 0, then the same file with
+         no --step, both run by ci/Jenkinsfile.diagnostics closureCheck() over
+         the verification-only copies the pipeline carries
+Target: Debian GNU/Linux 12 (bookworm), the Jenkins CI agent, build 140
+        bash 5.2.15(1)-release
+        readelf: GNU readelf (GNU Binutils for Debian) 2.40
+        sha256sum: sha256sum (GNU coreutils) 9.1
+Captured: 2026-09-04T14:29Z, from the archived a.evidence artifact of build 140
+Purpose: the SECOND host of Step 0 of the toolchain-runtime-closure plan. The
+         step is a capability gate, and a gate that reports what one host
+         happened to carry is the failure mode it exists to remove, so the three
+         capabilities are measured here rather than inherited from the RHEL 9.8
+         build host. Its companion is verify.closure.step0.rhel.txt.
+
+WHY THIS CAPTURE COMES FROM THE ARTIFACT AND NOT FROM THE CONSOLE. The probe
+         runs inside a `parallel` with nine other branches and Jenkins
+         interleaves their console lines, so a console slice between the BEGIN
+         and END markers of this probe carries other branches' cases inside it.
+         The probe tees its own output to a.evidence/verify-closure-check.debian.txt,
+         the post block archives it, and that file is what is retained here. A
+         console-scraped version of this same run held 370 lines belonging to
+         the relocation harness running beside it.
+
+WHAT THE THREE DIGESTS PROVE, AND WHERE. The agent holds no cplx credentials, so
+         the harness, the contract and the corpus travel to it as
+         verification-only copies. The run prints the SHA-256 of all three, and
+         the comparison against the canonical cplx files is made on the cplx
+         side, which is the only side that has them. All three matched at this
+         build:
+
+           36efebff23555e55108d2f1432c03e1f103dc2b6826f0ad738710c9d75f8e848
+             docs/v0.27.0/verify.closure-check.sh
+           78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+             docs/v0.27.0/contract.closure-tools.txt
+           558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+             docs/v0.27.0/fixtures.closure-corpus.txt
+
+Host note: the distribution reads `debian 12` from /etc/os-release while the
+         kernel string is el9, because this agent is a container sharing the
+         RHEL host kernel. Every earlier Debian capture in this directory
+         carries the same pair, and it is the reason the harness host gate reads
+         /etc/os-release and never `uname`.
+
+What differs from the RHEL run, and what does not: readelf is 2.40 here against
+         2.35.2 there, coreutils 9.1 against 8.32, bash 5.2.15 against 5.1.8.
+         All three capabilities are `supported` on both, both runs report 66
+         cases and 0 failures, and both full runs refuse steps 1 to 7. The
+         instrument answers the same on the two hosts the archive runs on, which
+         is the whole claim step 0 makes.
+
+Sensitive-content note: the agent workspace path is replaced by `$WORKSPACE`.
+         Nothing else in the run below is edited.
+
+===== the archived probe output, build 140 =====
+===== BEGIN CPLX-CLOSURE-STEP0 =====
+date            2026-09-04T14:29:07Z
+build           140
+distribution    debian 12
+kernel          5.14.0-687.41.1.el9_8.x86_64   # the RHEL host kernel: the container shares it
+bash            5.2.15(1)-release
+readelf         GNU readelf (GNU Binutils for Debian) 2.40
+sha256sum       sha256sum (GNU coreutils) 9.1
+
+== the three copies that travelled, by digest
+   the run below prints the same three values from inside the
+   harness; the cplx side compares them against the canonical
+   files, which is the only place that comparison has authority
+  36efebff23555e55108d2f1432c03e1f103dc2b6826f0ad738710c9d75f8e848  closure_check_verify.verification-only.sh
+  78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe  closure_tools_contract.verification-only.txt
+  558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae  closure_corpus.verification-only.txt
+
+== step 0, the one step with a suite today
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 0 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /usr/bin/sed
+  preflight/grep                                 PASS  /usr/bin/grep
+  preflight/sort                                 PASS  /usr/bin/sort
+  preflight/uniq                                 PASS  /usr/bin/uniq
+  preflight/mkdir                                PASS  /usr/bin/mkdir
+  preflight/rm                                   PASS  /usr/bin/rm
+  preflight/chmod                                PASS  /usr/bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  debian 12
+  host/any-linux                                 PASS  debian 12
+
+== step 0 gate controls: unavailable is not unsupported
+  step0/gate/shim-planted                        PASS
+  step0/gate/readelf-unavailable                 PASS  unavailable
+  step0/gate/readelf-unsupported                 PASS  unsupported
+  step0/gate/sha256sum-unavailable               PASS  unavailable
+  step0/gate/sha256sum-unsupported               PASS  unsupported
+  step0/gate/assoc-unavailable-without-bash      PASS  unavailable
+
+== step 0 capability gate: readelf, sha256sum, declare -A
+  step0/capability/readelf/in-domain             PASS  yes
+  step0/capability/readelf                       NOTE  supported: /usr/bin/readelf answered -d -V over /usr/bin/bash
+  step0/capability/sha256sum/in-domain           PASS  yes
+  step0/capability/sha256sum                     NOTE  supported: /usr/bin/sha256sum digested the empty input correctly
+  step0/capability/assoc/in-domain               PASS  yes
+  step0/capability/assoc                         NOTE  supported: bash 5.2.15(1)-release, an associative assignment read back its own value
+
+== step 0 refusal path: a step whose declared tool is missing
+  step0/refusal/missing-tool-exit-code           PASS  5
+  step0/refusal/names-the-missing-command        PASS  yes
+  step0/refusal/suite-absent-exit-code           PASS  5
+  step0/refusal/two-refusals-are-distinct        PASS  no
+  step0/refusal/suite-absent-names-the-step      PASS  yes
+
+== step 0 red baseline: every later step declares and refuses
+  step0/declared/step1/tools-not-empty           PASS  yes
+  step0/declared/step1/host-not-empty            PASS  yes
+  step0/declared/step1/refuses                   PASS  5
+  step0/declared/step1/says-why                  PASS  yes
+  step0/declared/step2/tools-not-empty           PASS  yes
+  step0/declared/step2/host-not-empty            PASS  yes
+  step0/declared/step2/refuses                   PASS  5
+  step0/declared/step2/says-why                  PASS  yes
+  step0/declared/step3/tools-not-empty           PASS  yes
+  step0/declared/step3/host-not-empty            PASS  yes
+  step0/declared/step3/refuses                   PASS  5
+  step0/declared/step3/says-why                  PASS  yes
+  step0/declared/step4/tools-not-empty           PASS  yes
+  step0/declared/step4/host-not-empty            PASS  yes
+  step0/declared/step4/refuses                   PASS  5
+  step0/declared/step4/says-why                  PASS  yes
+  step0/declared/step5/tools-not-empty           PASS  yes
+  step0/declared/step5/host-not-empty            PASS  yes
+  step0/declared/step5/refuses                   PASS  5
+  step0/declared/step5/says-why                  PASS  yes
+  step0/declared/step6/tools-not-empty           PASS  yes
+  step0/declared/step6/host-not-empty            PASS  yes
+  step0/declared/step6/refuses                   PASS  5
+  step0/declared/step6/says-why                  PASS  yes
+  step0/declared/step7/tools-not-empty           PASS  yes
+  step0/declared/step7/host-not-empty            PASS  yes
+  step0/declared/step7/refuses                   PASS  5
+  step0/declared/step7/says-why                  PASS  yes
+
+== step 0 contract: the checker's own allowlist
+  step0/contract/entry-row-shape                 PASS
+  step0/contract/launcher-row-shape              PASS
+  step0/contract/yes-owns-a-launcher             PASS
+  step0/contract/enumerated-set                  PASS  cat chmod cp find git ln mkfifo mktemp readelf rm sha256sum tar tee
+  step0/contract/control/short-row-refused       PASS  awk|direct|-|no
+  step0/contract/control/yes-without-launcher-refused PASS  awk
+
+== step 0 mechanical assertion: proved before it has a subject
+  step0/mechanical/clean-script-has-no-finding   PASS
+  step0/mechanical/undeclared-command-is-named   PASS  awk
+  step0/mechanical/topology-is-nine              PASS  9
+  step0/mechanical/shipped-present               NOTE  0 of 9
+  step0/mechanical/shipped-absent                NOTE  closure_check.sh closure_config.sh closure_elf.sh closure_rules.sh closure_verify.sh closure_observe_live.sh closure_publish.sh closure_d10.sh deliver-closure-tools.sh
+
+== step 0 corpus: a truncated file is a failure, not a smaller run
+  step0/corpus/declares-a-count                  PASS  yes
+  step0/corpus/count-matches-rows                PASS  19
+  step0/corpus/spec-row-shape                    PASS
+  step0/corpus/ids-are-unique                    PASS
+  step0/corpus/donors-are-declared               PASS
+  step0/corpus/control/truncated-refused         PASS  19/18
+  step0/corpus/control/short-row-refused         PASS  spec|short-row|object|shared|tools/x|needed-add:libx.so.1
+
+== verdict
+  step        0
+  cases       66
+  failures    0
+  host        debian 12
+  bash        5.2.15(1)-release
+  contract    $WORKSPACE/tools/closure_tools_contract.verification-only.txt
+  corpus      $WORKSPACE/tools/closure_corpus.verification-only.txt
+  shipped-dir /tmp/cplx-closure-shipped.111961
+  harness      36efebff23555e55108d2f1432c03e1f103dc2b6826f0ad738710c9d75f8e848
+  contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+  corpus-sha   558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+  capability   readelf=supported
+  capability   sha256sum=supported
+  capability   assoc=supported
+
+OBJECTIVE MET for step 0
+result: step0-exit=0
+
+== every step, each in a fresh process: the red baseline
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===
+  step 0  exit 0  OBJECTIVE MET for step 0
+  step 1  exit 5    no suite exists for step 1 yet; it is written by step 1, the declared candidate shape and the observed loader scope
+  step 2  exit 5    no suite exists for step 2 yet; it is written by step 2, the configuration bundle and its authority
+  step 3  exit 5    no suite exists for step 3 yet; it is written by step 3, the static subject set and the derived membership half
+  step 4  exit 5    no suite exists for step 4 yet; it is written by step 4, the floor, coherence, rule 1, rule 2 and aggregation
+  step 5  exit 5    no suite exists for step 5 yet; it is written by step 5, waivers, the packaging gate and the publication boundary
+  step 6  exit 5    no suite exists for step 6 yet; it is written by step 6, the foreign-host half of the verification
+  step 7  exit 5    no suite exists for step 7 yet; it is written by step 7, the acceptance on both hosts
+
+=== aggregate: exit 5
+result: all-exit=5
+===== END CPLX-CLOSURE-STEP0 =====
