@@ -1,0 +1,99 @@
+# CPLX closure host-tool contract, v0.27.0
+#
+# The commands the NINE production scripts of the toolchain-runtime-closure
+# effort may depend on the HOST to supply: the checker and its three modules,
+# the verification driver, the live observer, the publication gate, the D10
+# reader and the pipeline delivery script. This file is the allowlist half of
+# the host-tool rule for those scripts, exactly as
+# `contract.host-tools.txt` is for `install_pkg.sh`.
+#
+# THIS IS NOT THE INSTALLER'S CONTRACT AND MUST NEVER BECOME IT. The checker
+# never runs during an install, so its tools are its own; `readelf`,
+# `sha256sum` and `tar -t` are denied inside `install_pkg.sh` by a grep the
+# execution checklist runs at every step. Two contracts, two subject sets, one
+# reading rule.
+#
+# The rows below are ENUMERATED, not sampled. The plan names the thirteen
+# commands the packaging, verification and publication paths execute, and every
+# one carries an entry here, so a reader can tell the contract from a summary of
+# it. A command a later step needs is added here, and reviewed, before that step
+# can pass: `verify.closure-check.sh` extracts every command-position word from
+# every shipped script and fails on any word absent from this file.
+#
+# ENTRY rows, five columns, all required:
+#   name           | the command word as written
+#   form           | direct   the shell runs it, and the harness can see the word
+#                  | indirect it is reached through a variable, so no lexical rule
+#                  |          can see it; the resolver column must then name a
+#                  |          function that exists in the shipped scripts
+#   resolver       | the function that resolves an indirect command; `-` for direct
+#   runs-argument  | yes if this tool executes one of its own arguments as a
+#                  | command, no otherwise. There is no default: every entry must
+#                  | answer, so a tool cannot be permitted without someone
+#                  | deciding whether the rule has to follow it. Every `yes` must
+#                  | own at least one LAUNCHER row below.
+#   why            | what it is for
+#
+# LAUNCHER rows, five columns, all required:
+#   the literal `launcher`
+#   token          | the word that introduces the command: a command name, or an
+#                  | option such as `-exec` when the launching is done by one
+#   owner          | the entry or shell builtin the token belongs to
+#   short-options  | the SHORT option letters that take a SEPARATE operand
+#   long-options   | the LONG option names that do, comma separated
+#
+# The option columns exist for the same reason they exist in the installer's
+# contract: a launcher can put a non-option word between itself and the command,
+# and a rule that skipped only `-`-prefixed words reported that word as a host
+# dependency. The columns are empty here because none of the launchers this
+# effort uses takes a separate operand before the command.
+#
+# What is NOT here, deliberately:
+#
+#   Shell keywords and builtins. They are the interpreter, not the host, and the
+#   deployment contract pins the interpreter at Bash 4.0+. Associative arrays are
+#   a capability of that interpreter and are measured by the harness capability
+#   gate rather than declared as a command.
+#
+#   The harness's own tools. `verify.closure-check.sh` lives under `docs/` and is
+#   this effort's evidence rather than its payload: it is not shipped, it never
+#   runs on a deployment target, and its prerequisites are resolved by its own
+#   preflight. A harness tool that leaked into this file would widen the shipped
+#   contract to pay for an instrument nobody deploys.
+#
+#   `patchelf`. The checker reads objects and never rewrites one. Its absence
+#   here is the statement that no script of this effort relocates anything.
+#
+# PREFLIGHT COVERS EVERY COMMAND WHOSE ABSENCE COULD STRAND STATE, which is the
+# publication set: `cat`, `tee`, `mkfifo`, `sha256sum`, `mktemp`, `chmod` and
+# `rm`. They are resolved before `upload_begin`, so a missing tool refuses before
+# anything local or remote exists. The other six may be resolved where they are
+# used, because nothing is half-written when they fail.
+#
+# One known limit, stated because a rule that hides its blind spots reports
+# success from them: the assertion is LEXICAL. A command the shell only assembles
+# at run time cannot be read. That is why `form` exists and why `indirect` must
+# name a resolver the harness confirms is defined; a command inside `eval` and a
+# launcher whose operand is computed are refused rather than guessed, and the
+# gate FAILS on a shipped file containing them instead of reporting zero for it.
+#
+# launcher|token|owner|short-options|long-options
+launcher|command|command||
+launcher|exec|exec||
+launcher|-exec|find||
+launcher|-execdir|find||
+#
+# name|form|resolver|runs-argument|why
+cat|direct|-|no|read one bundle part whole, so the digest domain is the bytes on disk
+chmod|direct|-|no|make a staged copy readable, and a promoted entry executable
+cp|direct|-|no|stage the configuration bundle and the payload checker modules
+find|direct|-|yes|the single tree walk that collects every per-object fact
+git|direct|-|no|resolve the authoritative configuration from a cplx commit and path
+ln|direct|-|no|promote a completed staging copy without overwriting an existing one
+mkfifo|direct|-|no|the descriptor handed to the constrained uploader under the begin, write, abort, commit ABI
+mktemp|direct|-|no|the exclusive staging directory publication writes into before it promotes
+readelf|direct|-|no|read dynamic entries and version needs, one invocation per shipped ELF
+rm|direct|-|no|remove a staged copy when the run refuses, so a refusal leaves nothing behind
+sha256sum|direct|-|no|content digests: duplicate candidates, the configuration document, the closed archive
+tar|direct|-|no|read the candidate archive before it is installed, for the pre-install observation
+tee|direct|-|no|write the evidence document and its retained copy in one pass

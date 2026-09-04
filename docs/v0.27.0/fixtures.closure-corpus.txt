@@ -1,0 +1,85 @@
+# CPLX closure fixture corpus, v0.27.0
+#
+# The committed TEXT from which `verify.closure-check.sh` generates the ELF
+# objects and the tree shapes its cases need, into its own scratch directory.
+# Nothing binary enters this repository, and nothing here is executed: a row is
+# a specification, and the harness is what turns it into a file.
+#
+# WHY THE OBJECTS ARE MUTATED DONORS (plan decision Q07). An ELF with a real
+# dynamic section cannot be conjured from text, and the three alternatives were
+# each refused with a reason: hand-built hex nobody will review, a compiler as a
+# harness prerequisite on both hosts, and committed binary fixtures, which the
+# two earlier items of this collection already refused. So the harness FINDS a
+# donor on the host it runs on, VALIDATES its ELF class and section shape against
+# the `donor` rows below, copies it, applies the row's mutation, and ASSERTS the
+# mutated semantic result before any case is allowed to use it. A donor that
+# fails validation, or a mutation whose asserted result is not observed, is a
+# harness failure and never a smaller run.
+#
+# THE COUNT ROW IS THE POINT OF THE FILE BEING PARSED AT ALL. A corpus that lost
+# its tail would otherwise produce a shorter, greener run: fewer fixtures, fewer
+# cases, and a verdict that reads exactly like a complete one. The harness reads
+# `count`, counts the `spec` rows, and refuses on the difference, so a truncated
+# corpus is a failure rather than a smaller run.
+#
+# Row types, each with its own fixed arity, all columns required:
+#
+#   count|<n>
+#     the number of `spec` rows this file declares.
+#
+#   donor|<selector>|<elf-type>|<required-parts>|<why>
+#     what the harness must find on the host before it may build the objects of
+#     that selector. `required-parts` is a comma separated list of the program
+#     header or dynamic entries the donor has to carry.
+#
+#   spec|<id>|<kind>|<donor>|<placement>|<mutation>|<assert>
+#     id           the name a case cites, unique across the file
+#     kind         object, an ELF derived from a donor; tree, a directory or a
+#                  plain file shape with no ELF content
+#     donor        the donor selector, or `-` for a tree
+#     placement    the path, relative to the prepared prefix, the fixture is
+#                  generated at
+#     mutation     the transformation applied to the donor, or the shape planted
+#                  for a tree, as `<verb>` or `<verb>:<operand>`
+#     assert       the semantic result the harness must OBSERVE on the generated
+#                  fixture before any case may use it. This column is why a
+#                  mutation that silently did nothing cannot be mistaken for one
+#                  that worked.
+#
+# The names inside the fixtures are deliberately `cplx`-prefixed inventions
+# rather than real library names, except where a case is about a real one:
+# `libssl.so.3` appears because the design's subject rule turns on a second copy
+# of it under `root/usr/bin`, and the `libcplxbfd` pair stands in for the
+# measured `libbfd-2.35.2-63` and `-66` generations without pinning a version
+# this corpus would then have to track.
+#
+# Steps 3 and 4 extend this file as their cases need. A row is added here and
+# reviewed before the case that consumes it exists, which is the same order the
+# host-tool contract follows.
+#
+count|19
+#
+# donor|selector|elf-type|required-parts|why
+donor|shared|ET_DYN|PT_DYNAMIC,DT_SONAME,DT_NEEDED|a shared object with a dynamic section, a soname and at least one need, so a mutation has something to change
+donor|program|ET_DYN,ET_EXEC|PT_INTERP,PT_DYNAMIC|a program carrying an interpreter, so the entry-point half of the subject rule has a real subject
+#
+# spec|id|kind|donor|placement|mutation|assert
+spec|subject-lib-dynload-unresolved|object|shared|tools/python/current/lib/python3.13/lib-dynload/_cplxprobe.cpython-313-x86_64-linux-gnu.so|needed-add:libcplxabsent.so.1|dt-needed-lists:libcplxabsent.so.1
+spec|subject-site-packages-need|object|shared|tools/python/current/lib/python3.13/site-packages/_cplxwheel.so|needed-add:libcplxprovider.so.1|dt-needed-lists:libcplxprovider.so.1
+spec|subject-unreferenced-sound|object|shared|tools/git/current/lib/libcplxorphan.so.1|soname-set:libcplxorphan.so.1|dt-soname-is:libcplxorphan.so.1
+spec|subject-second-libssl|object|shared|tools/python/root/usr/bin/libssl.so.3|soname-set:libssl.so.3|dt-soname-is:libssl.so.3
+spec|subject-program-entry-point|object|program|tools/python/current/bin/cplxprobe3.13_bin|interp-keep|pt-interp-present
+spec|reader-unreadable-object|object|shared|tools/git/current/lib/libcplxunreadable.so.1|mode-set:000|read-refused
+spec|reader-not-an-elf|tree|-|tools/git/current/lib/libcplxnotanelf.so.1|plant-text|magic-is-not-elf
+spec|provider-duplicate-different|object|shared|tools/python/current/lib/libcplxdup.so.1|content-differ:tools/git/current/lib/libcplxdup.so.1|two-paths-differ
+spec|provider-duplicate-identical|object|shared|tools/python/current/lib/libcplxsame.so.1|content-copy:tools/python/root/usr/lib64/libcplxsame.so.1|two-paths-identical
+spec|coherence-need-undefined|object|shared|tools/python/current/lib/libcplxconsumer.so.1|verneed-add:libcplxprovider.so.1:CPLX_9.9|dt-verneed-demands:CPLX_9.9
+spec|coherence-provider-defines|object|shared|tools/python/current/lib/libcplxprovider.so.1|verdef-add:CPLX_1.0|dt-verdef-defines:CPLX_1.0
+spec|coherence-resolution-leaves-archive|object|shared|tools/python/current/lib/libcplxescape.so.1|needed-add:libcplxhostonly.so.1|dt-needed-lists:libcplxhostonly.so.1
+spec|family-two-generations|object|shared|tools/git/current/lib/libcplxbfd-1.1.so|soname-set:libcplxbfd-1.1.so|dt-soname-is:libcplxbfd-1.1.so
+spec|family-two-generations-peer|object|shared|tools/git/root/usr/lib64/libcplxbfd-1.2.so|soname-set:libcplxbfd-1.2.so|dt-soname-is:libcplxbfd-1.2.so
+spec|floor-member-absent|tree|-|tools/python/current/lib|omit:libcplxfloor.so.1|named-file-absent
+spec|scope-declared-absent|tree|-|tools/git/root/lib64|omit-directory|directory-absent
+spec|scope-unexpected-subdir|tree|-|tools/python/current/cplxunexpected|plant-directory|directory-present
+spec|scope-unexpected-root|tree|-|tools/old/py3.13/lib|plant-directory|directory-present
+spec|scope-alias-one-file|tree|-|tools/python/current|symlink-to:tools/python/python-3.13.9|symlink-resolves
