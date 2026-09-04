@@ -7594,3 +7594,60 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-3 -->
+
+## Round 3 by human - Step 4b - human-resolution
+
+- Recorded: 2026-09-04T23:46:45+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Requestor LLM nature: unrecorded
+- Reviewer LLM nature: unrecorded
+- Implementation step: 4b
+- Outcome: human-resolution
+
+### Why the step 4b exchange is archived rather than resumed (round 3)
+
+This exchange is retired. Its coordination record was the last live protocol
+artifact of item 3, it named `implementation_step 4b` at round 2 with
+`status: escalated` and the reason `exchange was abandoned while waiting for
+unknown actor`, and it carried no request, no answer and no tombstone. That
+artifact-free escalated shape identifies no continuing role, so the
+repository-wide review status reported the whole repository untrustworthy and
+the reviewer of the live `toolchain-runtime-closure` step 0 exchange could not
+proceed.
+
+### The authoritative evidence this decision rests on (round 3)
+
+Item 3 is finished, and this transcript is where it is written:
+
+- step 4b escalated at 2026-09-01T22:25:25+02:00 and was human-confirmed
+  33 seconds later, at 2026-09-01T22:25:58+02:00, with `Human choice: Commit`
+  and `Outcome: continue-owning-workflow`;
+- the step 5 exchange then ran rounds 1 to 3 on the same identity and was
+  human-confirmed at 2026-09-02T17:18:07+02:00, again with `Commit`;
+- both owning actions completed in Git: `c5e25b9 docs(python-wrapper-foreign-distro):
+  record step 4b validation` and `4a9fd2a docs(review): record the step 4b
+  review rounds`, followed by `e08614f docs(python-wrapper-foreign-distro):
+  record step 5 validation` and `1b4f193 docs(review): record the step 5 review
+  rounds`.
+
+So the escalated record described work that had already converged, been
+confirmed and been committed. It represented no live round and no pending
+decision. The artifact-home migration that this repository ran later reported
+two migrated artifacts, which is the most likely reason a record retired on
+2026-09-01 was observable again afterwards.
+
+### Why archive and not resolve (round 3)
+
+The evidence is preserved rather than cleared, for the same reason the step 4
+exchange of this identity was archived on 2026-09-01T18:19:05: a later reader
+who finds a retired escalation should be able to reach the record that carried
+it, including its escalation reason and its round number. Nothing in the record
+is contradicted by this decision; it is simply no longer live.
+
+No round is resumed and no work is reopened. Item 3 stays committed exactly as
+it was, and this entry exists only so that retiring its last protocol artifact
+is durable evidence rather than a silent deletion.
+
+<!-- review-entry-id: human-resolution-round-3 -->
