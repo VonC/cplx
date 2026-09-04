@@ -438,11 +438,33 @@ that their cases still answer. Round 4 was right to refuse the claim, so the
 step RUNS them and names them:
 
 ```text
-bash docs/v0.27.0/verify.install-pkg.sh
-bash docs/v0.27.0/verify.relocation-rpath.sh
-bash docs/v0.27.0/verify.wrapper-scope.sh
-bash docs/v0.27.0/verify.wrapper-accept.sh
+bash docs/v0.27.0/verify.install-pkg.sh --step 3
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 0 \
+     --target-capability docs/v0.27.0/capability.rhel-9.8.txt
+bash docs/v0.27.0/verify.wrapper-scope.sh --step 2
+bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity
 ```
+
+EACH COMMAND CARRIES THE ARGUMENT ITS HARNESS NEEDS, AND THE ARGUMENT-FREE FORM
+IS NOT THE CONTRACT. An earlier version of this section fixed the four bare
+forms instead, and step 0's first code-review round measured what they actually
+return on RHEL 9.8: 2, 1, 1 and 2. None of the four is a preservation failure,
+and none can be made zero without changing a frozen harness of items 1, 2 and
+3, so the bare list was an UNSATISFIABLE contract rather than a stricter one:
+
+| Bare form | Measured | Why it cannot answer |
+| --- | --- | --- |
+| `verify.install-pkg.sh` | 2 | its step 0 preflight refuses BY DESIGN on an installer that can select a fallback engine, and names step 1 |
+| `verify.relocation-rpath.sh` | 1 | its step 0 is BLOCKED without `--target-capability`, which is the retained exact-target evidence |
+| `verify.wrapper-scope.sh` | 1 | its step 0 is the PRE-CHANGE wrapper baseline, and item 3's own fix made the retained copy unmatchable by construction |
+| `verify.wrapper-accept.sh` | 2 | `--mode` has no default, so the bare form is a usage error by construction |
+
+Each harness is therefore invoked at the step it can answer TODAY, that
+invocation is what the aggregate reads, and the bare status stays recorded in
+the capture beside it, so a reader sees the measurement rather than a silent
+substitution. THE FOURTH RUNS ON THE AUTHORING HOST AND NOWHERE ELSE: its
+identity mode reads cplx history through `git`, by its own header, and neither
+validation host carries a cplx checkout with history.
 
 FOUR HARNESSES, NOT THREE: the validation snapshot enumerates
 `verify.wrapper-accept.sh` beside `verify.wrapper-scope.sh` for item 3, and an
@@ -504,14 +526,23 @@ than a case:
 
 - `bash src/utils/lint_shell.sh` green.
 - `bash docs/v0.27.0/verify.closure-check.sh --step 0` green on both hosts, with
-  both captures retained.
+  both captures retained. BOTH HOSTS ARE THE TWO LINUX HOSTS this step declares,
+  the RHEL 9.8 build host and the Debian 12 agent, per
+  [reference.environments.md](reference.environments.md). The Windows authoring
+  host is not one of them and cannot answer this command: it carries no
+  `readelf`, no `/etc/os-release` identity and no distinct-refusal control, so a
+  run there returns UNANSWERED by design rather than a result.
 - `rg -n 'declare -A' docs/v0.27.0/verify.closure-check.sh` finds the gate.
 - The FOUR existing harnesses are RUN INDEPENDENTLY, not inferred and not
-  chained: `verify.install-pkg.sh`, `verify.relocation-rpath.sh`,
-  `verify.wrapper-scope.sh` and `verify.wrapper-accept.sh`, each invoked on its
-  own whatever the previous returned, each capture retained. The aggregate is
-  three-way: any status other than 0 or 5 FAILS, any 5 with no failure returns
-  UNANSWERED naming the harness, and only four zeros PASS.
+  chained, each at the exact invocation the feature-preservation section above
+  fixes: `verify.install-pkg.sh --step 3`, `verify.relocation-rpath.sh --step 0`
+  with `--target-capability`, `verify.wrapper-scope.sh --step 2` and
+  `verify.wrapper-accept.sh --mode identity`, each invoked on its own whatever
+  the previous returned, each capture retained. The aggregate is three-way: any
+  status other than 0 or 5 FAILS, any 5 with no failure returns UNANSWERED
+  naming the harness, and only four zeros PASS. The argument-free form of any of
+  the four is NOT the criterion, for the reason that section measures and
+  tabulates.
 - `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0.
 
 ## Step 0 addendums
