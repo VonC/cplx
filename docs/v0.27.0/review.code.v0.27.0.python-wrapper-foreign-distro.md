@@ -7651,3 +7651,64 @@ it was, and this entry exists only so that retiring its last protocol artifact
 is durable evidence rather than a silent deletion.
 
 <!-- review-entry-id: human-resolution-round-3 -->
+
+## Round 3 by human - Step 4b - human-completion
+
+- Recorded: 2026-09-06T16:43:13+02:00
+- Exchange: code/code/v0.27.0/python-wrapper-foreign-distro
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.md
+- Requestor LLM nature: unrecorded
+- Reviewer LLM nature: unrecorded
+- Implementation step: 4b
+- Outcome: human-completion
+
+### Why the step 4b round 3 is closed rather than resumed (round 3)
+
+The human explicitly decided to close this exchange instead of reclaiming it.
+That decision is what this entry records, because forced completion is not an
+action an automated role may choose for itself.
+
+Nothing is reopened and nothing is reviewed. Item 3 converged, was
+human-confirmed and was committed, which the archive entry above this one
+establishes from the Git history. There is no pending question, no request, no
+answer and no work waiting on a reviewer.
+
+### What the archive left behind, and why it needed closing (round 3)
+
+The archive recorded above retired the escalated evidence correctly, and it did
+one more thing its own summary does not mention: archiving starts a fresh round.
+Round 3 therefore came into existence with no request, no answer and no
+tombstone, and nobody was working it. Its lease was renewed at
+2026-09-04T23:46:46+02:00 and expired five hours later.
+
+Read on 2026-09-06 the shape was `state: abandoned-mid-round`, `Round: 3`,
+`Lease: expired`, with the diagnostic `active round has no counterpart
+artifact`. The repository-wide review status returned exit 3, outcome
+`untrustworthy`, because of this one record alone.
+
+That is the difference between this entry and the archive above it. The archive
+answered "is the escalated evidence still authoritative", and the answer was no.
+This entry answers "is the round the archive opened a live round", and the
+answer is also no. Retiring the first left the second, which is why the record
+was observable again after the commit that retired it.
+
+### What forced completion does and does not do here (round 3)
+
+It appends this decision to the transcript and removes only the coordination
+record. It manufactures no convergence, authorizes no owning action, and
+replaces no normal completion. The request, answer and tombstone paths of this
+identity hold nothing to remove, which is the artifact-free abandoned shape the
+operation requires.
+
+`reclaim` was the alternative and was refused deliberately. Reclaim renews a
+lease so the expected actor can continue, and here there is no expected actor
+and nothing to continue: the round exists because an archive opened it, not
+because anyone was reviewing.
+
+The live `toolchain-runtime-closure` step 1 exchange is a separate identity and
+is untouched by this decision. It was published at round 1 while this record was
+still present, so closing it here removes the one candidate that made the
+repository-wide status untrustworthy.
+
+<!-- review-entry-id: human-completion-round-3 -->
