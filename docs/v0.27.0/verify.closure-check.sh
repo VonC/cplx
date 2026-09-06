@@ -10,6 +10,15 @@
 # are judged with, declares what each of those steps needs from the host it runs
 # on, and refuses rather than answering a cheaper question.
 #
+# SUITES THAT EXIST TODAY: step 0, the instrument itself, and step 1, the
+# declared candidate shape and the observed loader scope. Step 1 asserts three
+# things a later reader should not have to reconstruct: that the four checker
+# modules were created together and no fifth exists, that the observed scope is
+# `build_elf_rpath`'s own output byte for byte rather than a copy of its logic,
+# and that a loader scope which could not be observed becomes a typed
+# UNDETERMINED instead of an empty one. Steps 2 to 7 are still the red baseline,
+# and each refusal names the step that will fill it.
+#
 # Usage:
 #   bash verify.closure-check.sh [--step N] [--contract PATH] [--corpus PATH]
 #                                [--shipped-dir PATH]
@@ -176,6 +185,26 @@ fail() {
 chk() {
     cases=$((cases + 1))
     if [ "$2" = "$3" ]; then pass "$1" "$3"; else fail "$1" "want [$2] got [$3]"; fi
+}
+# The same comparison for values that are LISTS. The pass line prints a size
+# rather than the value: a retained capture is read by a person, and fourteen
+# absolute paths on one PASS line buries the fifty results around it. The
+# assertion is unchanged, and a FAILURE still prints both values in full, folded
+# onto one line, because that is the case where the detail is what you need.
+chk_list() {
+    cases=$((cases + 1))
+    if [ "$2" = "$3" ]; then
+        pass "$1" "identical: $(list_size "$3") line(s), ${#3} bytes"
+    else
+        fail "$1" "want [$(oneline "$2")] got [$(oneline "$3")]"
+    fi
+}
+list_size() {
+    local n=0 line
+    while IFS= read -r line; do
+        [ -z "$line" ] || n=$((n + 1))
+    done <<< "${1-}"
+    printf '%s' "$n"
 }
 note() { printf '  %-46s NOTE%s\n' "$1" "${2:+  $2}"; }
 section() { printf '\n== %s\n' "$1"; }
@@ -394,8 +423,8 @@ step_host() {
 }
 
 # The step that FILLS each suite, so a refusal names the work rather than only
-# the gap. Step 0 is the only one with a suite today, which is the red baseline
-# this step exists to record.
+# the gap. Steps 0 and 1 have a suite today; the five that follow are still the
+# red baseline step 0 recorded, and each names the work that will fill it.
 step_filled_by() {
     case "$1" in
         0) printf 'step 0, this one' ;;
@@ -411,7 +440,7 @@ step_filled_by() {
 
 step_suite_exists() {
     case "$1" in
-        0) return 0 ;;
+        0|1) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -475,6 +504,24 @@ shipped_function_names() {
       | sort -u
 }
 
+# The fourth thing a lexical reader must not mistake for a host dependency: a
+# function a shipped script obtains by SOURCING another production script.
+# `closure_check.sh` calls `build_elf_rpath` rather than reimplementing it, and
+# that name sits in command position while being supplied by `install_pkg.sh`
+# and not by the host, so it belongs in neither contract.
+#
+# THE SET IS DERIVED FROM THE SOURCED FILE, NEVER LISTED. A hand-kept exemption
+# would accept a call to a function nobody defines, which is the same hole the
+# mechanical assertion exists to close. It is also SCOPED: a file that does not
+# name the installer gets none of its function names, so the exemption cannot
+# quietly widen to a script that never sources it.
+shipped_sourced_functions() {
+    local file="$1" installer="$SHIPPED_DIR/install_pkg.sh"
+    [ -f "$installer" ] || return 0
+    grep -q 'install_pkg.sh' "$file" || return 0
+    shipped_function_names "$installer"
+}
+
 # The finding: every command-position word of <file> absent from the contract and
 # from the file's own vocabulary, one per line. Empty output is the pass.
 shipped_undeclared_words() {
@@ -482,7 +529,8 @@ shipped_undeclared_words() {
     known=$( { contract_entry_names
                printf '%s\n' "${SHIPPED_VOCABULARY[@]}"
                shipped_assignment_targets "$file"
-               shipped_function_names "$file"; } | grep -v '^$' | sort -u )
+               shipped_function_names "$file"
+               shipped_sourced_functions "$file"; } | grep -v '^$' | sort -u )
     shipped_command_words "$file" | grep -Fxv -f <(printf '%s\n' "$known") || true
 }
 
@@ -672,12 +720,26 @@ step0_suite() {
     fi
 
     # --- steps 1 to 7 have a declared host and a declared refusal path --------
-    section "step 0 red baseline: every later step declares and refuses"
+    #
+    # THE REFUSAL IS ASSERTED FOR THE STEPS THAT ARE STILL RED, AND FOR NO
+    # OTHERS. Every later step must declare its tools and its host from the day
+    # step 0 lands, and a step whose suite does not exist yet must refuse rather
+    # than answer. Once a step is filled that refusal is gone by design, so
+    # asserting it for every step would make step 0 fail on the first step that
+    # succeeded. Step 0 does not judge a filled suite either: `--step N` is the
+    # command that judges step N, and running it from here would only report the
+    # same result under a name that hides which step produced it.
+    section "step 0 red baseline: every later step declares, and the unfilled refuse"
     for n in 1 2 3 4 5 6 7; do
         chk "step0/declared/step$n/tools-not-empty" "yes" \
             "$( [ -n "$(step_tools "$n")" ] && echo yes || echo no )"
         chk "step0/declared/step$n/host-not-empty" "yes" \
             "$( [ -n "$(step_host "$n")" ] && echo yes || echo no )"
+        if step_suite_exists "$n"; then
+            note "step0/declared/step$n/has-a-suite" \
+                 "filled by $(step_filled_by "$n"); judged by --step $n"
+            continue
+        fi
         out=$("${BASH:-bash}" "$0" --step "$n" --contract "$CONTRACT" --corpus "$CORPUS" 2>&1)
         rc=$?
         chk "step0/declared/step$n/refuses" "5" "$rc"
@@ -775,9 +837,365 @@ step0_suite() {
         "$(oneline "$(corpus_bad_spec_rows "$fix/corpus-short.txt")")"
 }
 
+# ---------------------------------------------------------- the checker modules ---
+# The four modules the delivered script topology fixes, in the order the topology
+# table lists them. Step 1 creates all four; the file name that must NOT exist in
+# any shape is named beside them, because "no fifth module" is a property of the
+# tree rather than of a table nobody re-reads.
+CLOSURE_MODULES=(closure_check.sh closure_config.sh closure_elf.sh closure_rules.sh)
+CLOSURE_FORBIDDEN_MODULE=closure_scope.sh
+
+# The BODY of a module: its lines that are neither blank nor a comment. A module
+# created with its contract comment and nothing else has a body of zero, and that
+# is what the assertion reads. "Created empty" has to be a measured number, or a
+# module quietly filled a step early is indistinguishable from one that was not.
+module_body_lines() {
+    grep -vE '^[[:space:]]*(#|$)' "$1" | grep -c . || true
+}
+
+# ------------------------------------------------------------- checker probing ---
+# One checker run, as a CHILD PROCESS. The harness never sources the checker to
+# judge a run: an exit code the checker did not produce must not be mistakable
+# for one it did, and the exit code is half of what every case below asserts.
+CHECKER_OUT=""
+CHECKER_RC=0
+run_checker() {
+    CHECKER_OUT=$("${BASH:-bash}" "$@" 2>&1)
+    CHECKER_RC=$?
+}
+
+# The typed lines of the last run, by their type column.
+typed_lines() { printf '%s\n' "$CHECKER_OUT" | grep -E "^$1\|" || true; }
+typed_count() { typed_lines "$1" | grep -c . || true; }
+
+# The two derivations, each reached through the checker's own MAIN BOUNDARY seam
+# in a child, so a syntax error in production code fails the case instead of
+# killing the harness. 91 and 92 are the harness's own codes for "the seam did
+# not hold", and they are distinct from anything the checker returns.
+declared_shape() {
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        declare -F closure_scope_declared >/dev/null 2>&1 || exit 92
+        shift
+        closure_scope_declared "$@"
+    ' _ "$SHIPPED_DIR/closure_check.sh" "$@" 2>/dev/null
+}
+
+observed_scope() {
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        declare -F closure_scope_observed >/dev/null 2>&1 || exit 92
+        closure_scope_observed "$2" "$3" || exit 93
+        printf "%s" "$CLOSURE_OBSERVED_RPATH"
+    ' _ "$SHIPPED_DIR/closure_check.sh" "$1" "$2" 2>/dev/null
+}
+
+# `build_elf_rpath` itself, sourced from the installer with nothing between it
+# and the harness. This is the OTHER side of the property case: the checker's
+# observed scope is compared against THIS value, so a reimplementation that
+# agreed today and drifted tomorrow fails the moment it drifts.
+build_elf_rpath_value() {
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$2" >/dev/null 2>&1 || exit 91
+        declare -F build_elf_rpath >/dev/null 2>&1 || exit 92
+        INSTALL_PREFIX="$1"
+        build_elf_rpath
+    ' _ "$1" "$2" 2>/dev/null
+}
+
+# =============================================================== the step 1 suite ===
+step1_suite() {
+    local checker="$SHIPPED_DIR/closure_check.sh"
+    local installer="$SHIPPED_DIR/install_pkg.sh"
+    local tree="$SCRATCH/prefix" absent="$SCRATCH/prefix-absent" stubs="$SCRATCH/stubs"
+    local module found a b ln_bin d
+    local py="python=current,python-3.13.9" gitroot="git=current"
+
+    # --- the module set, fixed and unconditional -------------------------------
+    mkdir -p -- "$stubs" || { fail "step1/scratch" "cannot create the stub directory"; return; }
+    section "step 1 topology: four modules, created together, no fifth"
+    for module in "${CLOSURE_MODULES[@]}"; do
+        chk "step1/topology/$module/exists" "yes" \
+            "$( [ -f "$SHIPPED_DIR/$module" ] && echo yes || echo no )"
+    done
+    chk "step1/topology/no-$CLOSURE_FORBIDDEN_MODULE" "no" \
+        "$( [ -f "$SHIPPED_DIR/$CLOSURE_FORBIDDEN_MODULE" ] && echo yes || echo no )"
+    # Three carry a contract comment and nothing else until the step that fills
+    # them; the fourth is filled here. Both halves are measured, because "created
+    # empty" and "filled" are the two claims this step makes about the four.
+    for module in closure_config.sh closure_elf.sh closure_rules.sh; do
+        if [ -f "$SHIPPED_DIR/$module" ]; then
+            chk "step1/topology/$module/body-is-empty" "0" \
+                "$(module_body_lines "$SHIPPED_DIR/$module")"
+        else
+            fail "step1/topology/$module/body-is-empty" "the module does not exist"
+        fi
+    done
+    if [ ! -f "$checker" ]; then
+        fail "step1/topology/closure_check.sh/is-filled" "the checker does not exist"
+        unanswered "every step 1 case" \
+          "  create src/setups/env/bin/closure_check.sh, then repeat this call"
+        return
+    fi
+    chk "step1/topology/closure_check.sh/is-filled" "yes" \
+        "$( [ "$(module_body_lines "$checker")" -gt 0 ] && echo yes || echo no )"
+    # The same mechanical assertion step 0 proved on planted subjects, run here
+    # over the real modules, so a command this step introduced without declaring
+    # it is named by the step that introduced it.
+    for module in "${CLOSURE_MODULES[@]}"; do
+        [ -f "$SHIPPED_DIR/$module" ] || continue
+        chk "step1/topology/$module/declared-commands" "" \
+            "$(oneline "$(shipped_undeclared_words "$SHIPPED_DIR/$module")")"
+    done
+    # THE CONTROL FOR THE SOURCED-FUNCTION EXEMPTION. `build_elf_rpath` passes
+    # the assertion above because `install_pkg.sh` defines it and the checker
+    # sources it. That exemption must accept nothing else: a planted script that
+    # sources the installer and calls a function NOBODY defines is still a
+    # finding, and a script that never names the installer gets no exemption at
+    # all. Without these two, the rule that lets step 1 call a production
+    # function would also let a typo through.
+    { printf '#!/bin/bash\n'
+      printf 'source "%s"\n' "$installer"
+      printf 'build_elf_rpath\n'
+      printf 'cplx_never_defined\n'; } > "$stubs/sourced.sh"
+    chk "step1/topology/control/exemption-is-scoped-to-the-defined" "cplx_never_defined" \
+        "$(oneline "$(shipped_undeclared_words "$stubs/sourced.sh")")"
+    printf '#!/bin/bash\nbuild_elf_rpath\n' > "$stubs/unsourced.sh"
+    chk "step1/topology/control/no-exemption-without-the-source" "build_elf_rpath" \
+        "$(oneline "$(shipped_undeclared_words "$stubs/unsourced.sh")")"
+
+    # --- one derivation, and no copy of the installer's walk -------------------
+    section "step 1 scope: derived once, observed through build_elf_rpath"
+    chk "step1/observed/calls-build-elf-rpath" "yes" \
+        "$(grep -qE 'build_elf_rpath' "$checker" && echo yes || echo no)"
+    # The drift grep the plan fixes: the observed scope comes from the installer's
+    # own function, so neither the tool-root glob nor the installer's first
+    # suffix may appear in the checker at all.
+    chk "step1/observed/no-reimplementation" "" \
+        "$(oneline "$(grep -nE 'tools/\*/|root/usr/lib64' "$checker" || true)")"
+    # UNEXPECTED is unwaivable BY CONSTRUCTION, which means no waiver code path
+    # reaches it. Comments are stripped first on purpose: the property belongs in
+    # the header in words, and the assertion is about code.
+    chk "step1/unwaivable/no-waiver-code-path" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$checker" | grep -nE 'waiv' || true)")"
+
+    # --- the canonical tree ----------------------------------------------------
+    #
+    # Every declared candidate present and nothing undeclared, with `current` a
+    # SYMLINK to the versioned directory beside it, which is the measured shape:
+    # an alias and a version, two paths, one file.
+    for d in tools/python/root/usr/lib64 tools/python/root/usr/lib \
+             tools/python/root/lib64 tools/python/root/lib \
+             tools/python/python-3.13.9/lib tools/python/python-3.13.9/lib64 \
+             tools/git/root/usr/lib64 tools/git/root/usr/lib \
+             tools/git/root/lib64 tools/git/root/lib \
+             tools/git/current/lib tools/git/current/lib64; do
+        mkdir -p -- "$tree/$d" || { fail "step1/scratch" "cannot plant $d"; return; }
+    done
+    ln_bin=$(type -P ln 2>/dev/null) || ln_bin=""
+    if [ -n "$ln_bin" ]; then
+        "$ln_bin" -s -- python-3.13.9 "$tree/tools/python/current"
+        chk "step1/tree/alias-planted" "yes" \
+            "$( [ -L "$tree/tools/python/current" ] && echo yes || echo no )"
+    else
+        mkdir -p -- "$tree/tools/python/current/lib" "$tree/tools/python/current/lib64"
+        note "step1/tree/alias-planted" "ln did not resolve: current is a plain directory here"
+        unanswered "the alias half of the declared subdirectory case" \
+          "  re-run on a host that supplies ln, so tools/python/current is the symlink the measured tree carries"
+    fi
+
+    # THE DECLARED SHAPE TOUCHES NO FILESYSTEM, driven rather than described. The
+    # same declaration is derived against a prefix that exists and carries the
+    # whole tree, and against one that does not exist at all; with the prefix
+    # folded out the two must be identical.
+    a=$(declared_shape "$tree" "$py" "$gitroot")
+    b=$(declared_shape "$absent" "$py" "$gitroot")
+    chk_list "step1/declared/no-filesystem" "${a//$tree/PREFIX}" "${b//$absent/PREFIX}"
+    # The control that stops the case above being vacuous: the OBSERVED side does
+    # depend on the filesystem, so the two prefixes are not interchangeable and
+    # the declared side's independence is a real property rather than an accident
+    # of two paths that happen to answer alike.
+    chk "step1/declared/control/observed-does-depend" "yes" \
+        "$( [ -n "$(build_elf_rpath_value "$tree" "$installer")" ] && echo yes || echo no )"
+    chk "step1/declared/control/observed-empty-without-tree" "" \
+        "$(build_elf_rpath_value "$absent" "$installer")"
+
+    # `root` is a declared immediate subdirectory of every root BY CONSTRUCTION,
+    # so declaring it changes nothing, and declaring a name twice changes nothing
+    # either: the dedupe preserves the first occurrence.
+    chk_list "step1/declared/root-by-construction" "$a" \
+        "$(declared_shape "$tree" "python=root,current,python-3.13.9" "git=root,current")"
+    chk_list "step1/declared/dedupe-preserves-first" "$a" \
+        "$(declared_shape "$tree" "python=current,python-3.13.9,current" "git=current,current")"
+    chk "step1/declared/count" "14" "$(printf '%s\n' "$a" | grep -c .)"
+
+    # THE PROPERTY CASE. The checker's observed scope must equal what
+    # `build_elf_rpath` prints, byte for byte, because it IS that function.
+    chk_list "step1/observed/equals-build-elf-rpath" \
+        "$(build_elf_rpath_value "$tree" "$installer")" \
+        "$(observed_scope "$tree" "$installer")"
+    # On the canonical tree the two scopes agree in content AND in order, which
+    # is the statement that the declared derivation follows the loader's order
+    # rather than merely producing the same set.
+    chk_list "step1/observed/canonical-order-matches-declared" "$a" \
+        "$(observed_scope "$tree" "$installer" | sed -e 's/:/\n/g')"
+
+    section "step 1 classification: PRESENT, ABSENT and UNEXPECTED"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$py" --root "$gitroot"
+    chk "step1/canonical/exit-code" "0" "$CHECKER_RC"
+    chk "step1/canonical/present" "14" "$(typed_count PRESENT)"
+    chk "step1/canonical/absent" "0" "$(typed_count ABSENT)"
+    chk "step1/canonical/unexpected" "0" "$(typed_count UNEXPECTED)"
+    chk "step1/canonical/undetermined" "0" "$(typed_count UNDETERMINED)"
+    # The alias and the version are BOTH declared subdirectories and BOTH
+    # accepted. A version-shaped declaration would have refused the first.
+    chk "step1/canonical/alias-present" "PRESENT|declared|$tree/tools/python/current/lib" \
+        "$(typed_lines PRESENT | grep -F "/tools/python/current/lib" | grep -v 'lib64' || true)"
+    chk "step1/canonical/version-present" \
+        "PRESENT|declared|$tree/tools/python/python-3.13.9/lib" \
+        "$(typed_lines PRESENT | grep -F "/tools/python/python-3.13.9/lib" | grep -v 'lib64' || true)"
+
+    # A declared candidate absent under both roots is ACCEPTED and reported.
+    rm -rf -- "$tree/tools/git/root/lib64"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$py" --root "$gitroot"
+    chk "step1/absent/exit-code" "0" "$CHECKER_RC"
+    chk "step1/absent/named" "ABSENT|declared|$tree/tools/git/root/lib64" \
+        "$(oneline "$(typed_lines ABSENT)")"
+    mkdir -p -- "$tree/tools/git/root/lib64"
+
+    # An immediate subdirectory under a declared root that the declaration does
+    # not list: refused as UNEXPECTED, naming it.
+    mkdir -p -- "$tree/tools/python/cplxunexpected/lib"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$py" --root "$gitroot"
+    chk "step1/unexpected-subdir/exit-code" "1" "$CHECKER_RC"
+    chk "step1/unexpected-subdir/named" \
+        "UNEXPECTED|observed|$tree/tools/python/cplxunexpected/lib|subdirectory|cplxunexpected" \
+        "$(oneline "$(typed_lines UNEXPECTED)")"
+    # Its control: the SAME tree with that subdirectory declared is accepted, so
+    # the refusal is about the DECLARATION and not about the path.
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "python=current,python-3.13.9,cplxunexpected" --root "$gitroot"
+    chk "step1/unexpected-subdir/control/declared-accepted" "0" "$CHECKER_RC"
+    chk "step1/unexpected-subdir/control/no-refusal" "0" "$(typed_count UNEXPECTED)"
+    rm -rf -- "$tree/tools/python/cplxunexpected"
+
+    # The measured undeclared root, with a floor member living only under it.
+    mkdir -p -- "$tree/tools/old/py3.13/lib"
+    printf 'not an ELF, a placeholder for the floor member\n' \
+        > "$tree/tools/old/py3.13/lib/libcplxfloor.so.1"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$py" --root "$gitroot"
+    chk "step1/unexpected-root/exit-code" "1" "$CHECKER_RC"
+    chk "step1/unexpected-root/named" \
+        "UNEXPECTED|observed|$tree/tools/old/py3.13/lib|root|old" \
+        "$(oneline "$(typed_lines UNEXPECTED)")"
+    # THE TWO RESULTS ARE VISIBLY INDEPENDENT. The root is refused, and the
+    # directory holding the floor member is STILL in the observed loader scope,
+    # so the loader would resolve there. The refusal is the only thing stopping
+    # that resolution from counting, and this case is where a reader sees both
+    # facts side by side rather than inferring one from the other.
+    if printf '%s' "$(observed_scope "$tree" "$installer")" \
+         | grep -qF "$tree/tools/old/py3.13/lib"; then found=yes; else found=no; fi
+    chk "step1/unexpected-root/member-still-in-scope" "yes" "$found"
+    chk "step1/unexpected-root/member-file-is-there" "yes" \
+        "$( [ -f "$tree/tools/old/py3.13/lib/libcplxfloor.so.1" ] && echo yes || echo no )"
+    # Its control, the same shape as the subdirectory one: declaring the root
+    # accepts the tree, so the refusal names a declaration gap and nothing else.
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$py" --root "$gitroot" --root "old=py3.13"
+    chk "step1/unexpected-root/control/declared-accepted" "0" "$CHECKER_RC"
+    rm -rf -- "$tree/tools/old"
+
+    # --- UNDETERMINED, which is an input that could not be obtained ------------
+    section "step 1 UNDETERMINED: a scope that could not be observed"
+    # An installer that refuses AT SOURCE TIME through `fatal`, which calls
+    # `exit`. Sourced in the checker's own shell that would end the run; the
+    # case exists to show it does not.
+    step1_write_fatal_stub "$stubs/fatal.sh"
+    run_checker "$checker" --prefix "$tree" --installer "$stubs/fatal.sh" \
+        --root "$py" --root "$gitroot"
+    chk "step1/undetermined/fatal/exit-is-the-checkers-own" "5" "$CHECKER_RC"
+    chk "step1/undetermined/fatal/reports-the-status" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'status 3' && echo yes || echo no)"
+    # NEVER AN EMPTY SCOPE. A checker that treated an unobtainable scope as an
+    # empty one would report all fourteen declared candidates ABSENT and exit 0,
+    # which reads exactly like a tree that is merely bare.
+    chk "step1/undetermined/fatal/no-absent-line" "0" "$(typed_count ABSENT)"
+    chk "step1/undetermined/fatal/no-present-line" "0" "$(typed_count PRESENT)"
+    chk "step1/undetermined/fatal/every-candidate-undetermined" "15" \
+        "$(typed_count UNDETERMINED)"
+    # THE REPORT CONTINUES TO COMPLETION. The verdict line is the proof: a run
+    # that inherited the sourced `exit` would have stopped before printing it.
+    chk "step1/undetermined/fatal/report-completes" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE SCOPE UNDETERMINED' && echo yes || echo no)"
+
+    # An installer that sources cleanly and defines no build_elf_rpath.
+    printf '#!/bin/bash\nCPLX_STUB_SOURCED=1\n' > "$stubs/nofunction.sh"
+    run_checker "$checker" --prefix "$tree" --installer "$stubs/nofunction.sh" \
+        --root "$py" --root "$gitroot"
+    chk "step1/undetermined/no-function/exit-code" "5" "$CHECKER_RC"
+    chk "step1/undetermined/no-function/names-it" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'defines no build_elf_rpath' && echo yes || echo no)"
+
+    # An installer whose build_elf_rpath returns non-zero.
+    printf '#!/bin/bash\nbuild_elf_rpath() { return 7; }\n' > "$stubs/failing.sh"
+    run_checker "$checker" --prefix "$tree" --installer "$stubs/failing.sh" \
+        --root "$py" --root "$gitroot"
+    chk "step1/undetermined/failing/exit-code" "5" "$CHECKER_RC"
+    chk "step1/undetermined/failing/names-the-call" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'build_elf_rpath returned non-zero' && echo yes || echo no)"
+
+    # An installer that is not there at all.
+    run_checker "$checker" --prefix "$tree" --installer "$stubs/does-not-exist.sh" \
+        --root "$py" --root "$gitroot"
+    chk "step1/undetermined/absent-installer/exit-code" "5" "$CHECKER_RC"
+    chk "step1/undetermined/absent-installer/names-the-path" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -qF "$stubs/does-not-exist.sh" && echo yes || echo no)"
+
+    # THE CONTROL FOR ALL FOUR: the real installer over the same tree produces no
+    # UNDETERMINED at all. Without it, a checker that reported UNDETERMINED
+    # unconditionally would satisfy every case above.
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$py" --root "$gitroot"
+    chk "step1/undetermined/control/real-installer" "0" "$(typed_count UNDETERMINED)"
+
+    # --- the arguments ---------------------------------------------------------
+    section "step 1 arguments: a usage error is not a verdict"
+    run_checker "$checker" --prefix "$tree" --installer "$installer"
+    chk "step1/args/no-root-declared" "2" "$CHECKER_RC"
+    run_checker "$checker" --prefix "$tree" --root "$py" --installer
+    chk "step1/args/missing-operand" "2" "$CHECKER_RC"
+    run_checker "$checker" --unknown
+    chk "step1/args/unknown-argument" "2" "$CHECKER_RC"
+}
+
+# The stub installer that refuses at source time, shaped like the installer's own
+# `fatal`: it prints and then calls `exit`. Written through a single-quoted
+# variable rather than a heredoc so the dollar-brace operands reach the file
+# unexpanded, and with no `cat`, which is not one of the harness's declared
+# prerequisites. `build_elf_rpath` IS defined here, and is never reached: the
+# case is about a refusal during sourcing, not about a missing function, and the
+# next case covers that one separately.
+step1_write_fatal_stub() {
+    local body='fatal() { echo " FATAL ${2} : [stub] ${1}" >&2; exit "${2}"; }'
+    { printf '#!/bin/bash\n'
+      printf '%s\n' "$body"
+      printf 'build_elf_rpath() { return 0; }\n'
+      printf 'fatal "the sourced installer refuses" 3\n'; } > "$1"
+}
+
 # ============================================================== the run, one step ===
 run_one_step() {
-    local step="$1" tool state host sha k
+    local step="$1" tool state host sha sha_state k
 
     printf '=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step %s ===\n' "$step"
 
@@ -833,7 +1251,13 @@ run_one_step() {
     fi
 
     if step_suite_exists "$step"; then
-        step0_suite
+        # One suite per step, dispatched by number. The list and
+        # `step_suite_exists` are extended together: a suite reachable from one
+        # and not from the other would either never run or refuse while existing.
+        case "$step" in
+            0) step0_suite ;;
+            1) step1_suite ;;
+        esac
     else
         section "step $step suite"
         note "step$step/suite" "not implemented yet"
@@ -852,16 +1276,24 @@ run_one_step() {
     printf '  shipped-dir %s\n' "$SHIPPED_DIR"
     # The identities, printed so a retained capture carries the bytes that
     # produced it and the bytes it measured. They are computed only where the
-    # sha256sum capability was measured supported: a digest taken with a tool the
-    # gate just called unsupported would be a number with no meaning.
-    if [ "$(capability_state sha256sum)" = "supported" ]; then
+    # sha256sum capability answers its probe: a digest taken with a tool the gate
+    # would call unsupported is a number with no meaning.
+    #
+    # THE PROBE RUNS FOR EVERY STEP AND IS NOT ONE OF ANY STEP'S DECLARED TOOLS.
+    # The digests identify the bytes that ran, which is a property of the capture
+    # rather than of the step, so a step that never digests anything must not
+    # refuse over the tool, and a capture from such a step must still be able to
+    # name itself. Reading the recorded state instead would have printed nothing
+    # for every step but step 0, which declares sha256sum for its own reasons.
+    sha_state="$(capability_probe sha256sum)"
+    if [ "${sha_state%%|*}" = "supported" ]; then
         sha=$(type -P sha256sum)
         printf '  harness      %s\n' "$("$sha" "${BASH_SOURCE[0]}" | sed -e 's/ .*$//')"
         printf '  contract-sha %s\n' "$("$sha" "$CONTRACT" | sed -e 's/ .*$//')"
         printf '  corpus-sha   %s\n' "$("$sha" "$CORPUS" | sed -e 's/ .*$//')"
     else
-        printf '  harness      unavailable: the sha256sum capability is %s here\n' \
-            "$(capability_state sha256sum)"
+        printf '  harness      unavailable: the sha256sum probe answered %s here\n' \
+            "${sha_state%%|*}"
     fi
     for k in "${!CAP_KEYS[@]}"; do
         printf '  capability   %s=%s\n' "${CAP_KEYS[$k]}" "${CAP_STATES[$k]}"
