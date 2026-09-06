@@ -4,11 +4,11 @@ No, it is not implemented.
 
 This document tracks the implementation of
 [plan.v0.27.0.toolchain-runtime-closure.md](plan.v0.27.0.toolchain-runtime-closure.md)
-step by step. Step 0 is implemented and checked: the harness, its host-tool
-contract, its fixture corpus, the two target-host captures and the four
-preservation captures exist, and the Step 0 verdict below is Yes against the
-plan's corrected feature-preservation contract. There is still no checker, no
-configuration bundle and no packaging gate, so steps 1 to 7 are at their initial
+step by step. Steps 0 and 1 are implemented and checked: the harness, its
+host-tool contract, its fixture corpus and the retained captures exist, and the
+four checker modules of the fixed topology now exist with `closure_check.sh`
+answering the scope question. There is still no configuration bundle, no object
+reader, no invariant and no packaging gate, so steps 2 to 7 are at their initial
 state and their check sections hold their placeholder. The document verdict
 above stays No until every step is checked.
 
@@ -359,10 +359,23 @@ now fixes.
 
 ### Analysis of Step 1 implementation state
 
-Not started. Step 1 is not implemented because
-`src/setups/env/bin/closure_check.sh` does not exist, so nothing derives the
-declared candidate shape and nothing classifies an observed directory as
-PRESENT, ABSENT or UNEXPECTED.
+Yes. Step 1 has been fully implemented.
+
+`src/setups/env/bin/closure_check.sh` exists and is filled, and the other three
+modules of the fixed topology exist with their contract comment and a body of
+zero lines. The declared candidate shape is derived from the declared roots and
+their declared immediate subdirectory lists without touching the filesystem, in
+the loader's order and deduped preserving first occurrence; the observed loader
+scope comes from `build_elf_rpath` itself through the installer's MAIN BOUNDARY
+seam, and a property case compares the two byte for byte so a future copy of
+that logic fails immediately. The three locally observable typed results are
+emitted, an undeclared root and an undeclared subdirectory are each refused by
+name, and a scope that could not be observed becomes a typed UNDETERMINED rather
+than an empty one or an inherited exit code. Every Step 1 completion criterion is
+green on the RHEL 9.8 build host: 70 cases and 0 failures for `--step 1`, 48
+tracked scripts clean for the lint gate, an empty diff on `install_pkg.sh`, both
+drift greps silent, and 104 cases with 0 failures for
+`verify.relocation-rpath.sh --step 3`.
 
 ### Goal for Step 1
 
@@ -413,27 +426,317 @@ UNEXPECTED.
 
 ### What was implemented for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **The checker**: `src/setups/env/bin/closure_check.sh`, 429 lines of which 240
+  are body, carrying the entry point, the run order, the scope derivation, the
+  classification and the report. It is the first production file of this effort.
+- **The declared candidate shape, derived without touching the filesystem**:
+  `closure_scope_declared` takes the parsed roots and their subdirectory lists
+  and prints the ordered deduped candidate list. Nothing in it tests, globs or
+  reads a path. The order is the loader's: each root's four `root/` candidates
+  first, then that root's declared subdirectories, then the next declared root,
+  with the dedupe preserving the first occurrence.
+- **`root` as a declared subdirectory by construction**: it leads every root's
+  subdirectory list whether or not the declaration names it, and its two
+  contributions dedupe against the four `root/` candidates exactly as the
+  installer's own loop does. A declaration that omits it and one that names it
+  derive the identical shape, which is a case rather than a claim.
+- **The observed loader scope, taken from `build_elf_rpath` and nowhere else**:
+  `closure_scope_observed` sources `install_pkg.sh` through its MAIN BOUNDARY
+  seam and calls the installer's own function. No suffix list and no tool-root
+  glob of the installer is reproduced in the checker.
+- **How the no-reimplementation criterion is met, stated because it is not
+  obvious**: the plan requires that
+  `rg -n 'tools/\*/|root/usr/lib64' src/setups/env/bin/closure_check.sh` print
+  nothing, while Design Area 1 requires the DECLARED derivation to use those
+  same four suffixes. Both hold: the two `usr/` candidates are composed from a
+  `rootdir` path variable rather than spelled as one literal, and the file's
+  header says so in words rather than leaving a reader to discover it. The grep
+  passes and the property case below is what actually detects drift.
+- **The subshell, which is why a refusal is typed rather than fatal**: the
+  source and the call run inside a command substitution. `install_pkg.sh` can
+  refuse while being sourced through a `fatal` that calls `exit`; in the
+  checker's own shell that would end the run and return the installer's exit
+  code as if it were a verdict. In the subshell it ends the probe, and the
+  result is a typed `UNDETERMINED` carrying the reason.
+- **The probe reports through a sentinel, not through a status**: a refusal
+  during sourcing exits with the installer's own code, which can be any value,
+  so an `RPATH|` prefix is the only signal read as success. Four distinct
+  reasons are produced: an absent installer, a non-zero source, a missing
+  `build_elf_rpath`, and a failing call.
+- **The classification**: `closure_scope_classify` joins the two scopes through
+  associative arrays and emits one typed line per entry with the side it was
+  observed on: `PRESENT|declared|<path>`, `ABSENT|declared|<path>`,
+  `UNEXPECTED|observed|<path>|root|<name>` and
+  `UNEXPECTED|observed|<path>|subdirectory|<name>`. Two further shapes,
+  `path` and `shape`, classify an observed entry `build_elf_rpath` cannot
+  produce today, so no observed directory can fall out of every branch and go
+  unmentioned.
+- **`UNEXPECTED` is unwaivable by construction**: no waiver code path exists in
+  the file, and the harness strips the comments before grepping for one, so the
+  property is stated in the header in words and measured in code.
+- **The exit codes**: 0 nothing undeclared, 1 at least one `UNEXPECTED`, 2 the
+  arguments are unusable, 5 the scope could not be observed. A refusal outranks
+  an unobtainable input, and neither is reachable from the other.
+- **The verdict says it is partial on every run, green ones included**: this
+  checker answers the scope question and makes no claim about the four archive
+  invariants, so a green scope check cannot read as a green archive.
+- **The three remaining modules**: `closure_config.sh`, `closure_elf.sh` and
+  `closure_rules.sh` are created here with their contract comment and a body of
+  ZERO lines. Each names the functions it will own, the step that fills it, and
+  the reason the responsibility is its own. `closure_rules.sh` records that it
+  owns all four invariants including the derived membership half, and that
+  `UNEXPECTED` is unwaivable so no waiver path there may reach one.
+- **The harness suite**: `docs/v0.27.0/verify.closure-check.sh` gains
+  `step1_suite`, 70 cases, and grows from 919 to 1351 lines.
+- **The step 0 red baseline had to change, and the change is part of this
+  step**: its loop asserted that every later step refuses with exit 5, which
+  becomes false the moment any step is filled. It now asserts the refusal for
+  the steps that are still unfilled and records a filled step as filled, without
+  re-running it: `--step N` is the command that judges step N, and running it
+  from inside step 0 would report the same result under a name that hides which
+  step produced it.
+- **A derived rule for functions obtained by sourcing**: `build_elf_rpath` sits
+  in command position in the checker while being supplied by `install_pkg.sh`
+  rather than by the host, so it belongs in neither host-tool contract. The
+  harness's mechanical assertion gained `shipped_sourced_functions`, DERIVED
+  from the installer's own text rather than listed, and SCOPED to files that
+  name the installer. Two controls hold it shut: a planted script that sources
+  the installer and calls an undefined function is still a finding, and one that
+  never names the installer gets no exemption at all.
+- **`contract.closure-tools.txt` is deliberately unchanged**: the checker
+  introduces no host command, which the mechanical assertion confirms over all
+  four modules, so the enumerated thirteen still cover the shipped set. Leaving
+  it untouched also keeps the contract and corpus digests the Step 0 capture
+  records valid, and the Step 1 capture reproduces both to show it.
+- **Report readability, because a capture is evidence a person reads**: `chk_list`
+  reports a list comparison as a size on a pass and in full on a failure, and
+  the verdict now probes `sha256sum` for every step rather than reading a
+  recorded state, so a capture from a step that declares no digest tool can
+  still name its own bytes. The probe is not part of any step's declared tool
+  set, so no step can refuse over it.
+- **The capture**: `docs/v0.27.0/verify.closure.step1.rhel.txt`, 424 lines,
+  carrying the step 1 run, the step 0 re-run, the aggregate, the preserved
+  surface, the authoring-host half and the line budget.
+- **Validation evidence**: `bash docs/v0.27.0/verify.closure-check.sh --step 1`
+  reports 70 cases and 0 failures on the RHEL 9.8 build host;
+  `--step 0` still reports 0 failures; the argument-free form aggregates to 5
+  with steps 2 to 7 refusing as designed; `bash src/utils/lint_shell.sh` reports
+  48 tracked scripts clean; `verify.relocation-rpath.sh --step 3` reports 104
+  cases and 0 failures; `git diff --exit-code HEAD -- install_pkg.sh` exits 0;
+  the installer-purity grep prints nothing. The sha256 of all five measured
+  files matches the working tree byte for byte on both machines.
 
 ### New types or classes introduced for Step 1
 
-_(empty — no check has taken place yet.)_.
+The production side introduces one script and six functions, plus the seam and
+the two globals that carry a result a shell function cannot return.
+
+- `closure_scope_declared`: the ONE derivation of the declared candidate shape.
+  Its inputs are the prefix and one `NAME=SUB,SUB` argument per root; its output
+  is one absolute path per line. It is the definition Design Area 1's "one
+  derivation, two callers" requires, and Step 6's verification half will call
+  this same function twice rather than write a second one.
+- `closure_scope_observed`: the sourcing probe. Sets `CLOSURE_OBSERVED_RPATH` on
+  success and `CLOSURE_OBSERVED_REASON` on failure, returning non-zero for the
+  second, which is what lets the caller produce a typed result instead of an
+  inherited exit.
+- `closure_scope_observed_lines`: splits the colon-joined loader value in the
+  shell, because `tr` is not on this effort's host-tool contract.
+- `closure_scope_classify`: the join, and the only producer of the three typed
+  results. Both directions are hash lookups.
+- `closure_scope_undetermined`: the typed result for a scope that could not be
+  observed. Every declared candidate becomes one `UNDETERMINED` line, because
+  its presence is exactly what could not be determined.
+- `closure_scope_line_count`, `closure_check_usage`, `closure_check_main`: the
+  counting helper, the usage text and the entry point.
+- **The MAIN BOUNDARY seam**, taken from `install_pkg.sh` for the same reason it
+  exists there: sourcing the checker defines its functions and runs nothing, so
+  the harness calls `closure_scope_declared` itself rather than a copy, which is
+  what makes the no-filesystem property provable rather than assertable.
+
+The harness side introduces the instrument the later steps reuse.
+
+- `run_checker`, `typed_lines`, `typed_count`: the checker is run as a CHILD
+  PROCESS and its typed lines are read by their type column, so an exit code the
+  checker did not produce cannot be mistaken for one it did.
+- `declared_shape`, `observed_scope`, `build_elf_rpath_value`: the three
+  sourcing probes, each in a child with its own codes for "the seam did not
+  hold", so a syntax error in production code fails a case instead of killing
+  the harness.
+- `module_body_lines`: measures "created empty" as a number.
+- `shipped_sourced_functions`: the derived, scoped exemption described above.
+- `chk_list`, `list_size`: a list comparison whose pass line prints a size.
+- `step1_write_fatal_stub`: writes the installer stub that refuses at source
+  time, through a single-quoted variable rather than a heredoc so the
+  dollar-brace operands reach the file unexpanded and no `cat` is needed.
 
 ### Architecture check for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **The module topology is respected and is now a fact of the tree**: four
+  modules exist, `closure_scope.sh` exists in no shape, and the harness asserts
+  both. Scope derivation and classification live in `closure_check.sh`, which
+  the topology table assigns them to and which is where the run order that
+  consumes them lives.
+- **No responsibility landed early**: the three modules the later steps fill
+  have a body of zero lines, measured rather than assumed, so a parser, an
+  object reader or an invariant written here would be visible immediately.
+- **The dependency direction is one-way and narrow**: the checker reads
+  `install_pkg.sh` and never writes it, depends on it for exactly one function,
+  and reaches it only through the seam the installer already published for the
+  relocation harness. `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh`
+  exits 0.
+- **The two host-tool contracts stay apart**: the installer-purity grep for
+  `readelf|sha256sum|tar -t` over `install_pkg.sh` prints nothing, and the
+  checker introduces no host command of its own, so neither contract moved.
+- **The instrument does not become the subject**: the harness sources production
+  code only in children, and every behavioural case runs the checker as a
+  separate process. The checker never sources the harness in any direction.
+- **The one new coupling is declared rather than incidental**: the harness's
+  mechanical assertion now knows that a shipped script may obtain a function by
+  sourcing another production script. It is derived from the sourced file and
+  scoped to files that name it, with two controls, so it cannot widen into a
+  general exemption.
+- **Payload against authoritative is not yet exercised**: nothing is staged into
+  an archive in this step, and no checker copy is executed to produce evidence.
+  Step 5 is where that boundary first has two sides.
+
+No DDD-Hexagonal violation or adapter smell needs to be addressed for Step 1.
 
 ### Cost and structure check for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **No `O(n^2)` and no `O(n log n)` path**: the declared derivation is
+  `O(roots x subdirectories)`, 14 entries on the declared shape this step
+  measures. The dedupe and the join are associative-array lookups, so neither
+  scans one list inside a loop over the other, and the checker sorts nothing.
+- **The observed scope costs exactly what `build_elf_rpath` already costs**,
+  because it is that function. The checker adds one subshell and one process
+  substitution of its own, both constant.
+- **No second walk reaches the production install path**: this step adds no line
+  to `install_pkg.sh`, and the checker never runs during an install.
+- **The rule Step 3 must keep is still ahead**: one tree walk, one `readelf` per
+  ELF, a provider index built before the object loop. Nothing here walks a tree
+  or reads an object.
+- **Line budget, with every variance recorded**:
+
+| File | Before | After | Plan advisory | Band |
+| --- | --- | --- | --- | --- |
+| `closure_check.sh` | 0 | 429 | 180 to 240 | below 550, safe; ceiling 650 |
+| `closure_config.sh` | 0 | 35 | under 20 | below 550, safe |
+| `closure_elf.sh` | 0 | 26 | under 20 | below 550, safe |
+| `closure_rules.sh` | 0 | 37 | under 20 | below 550, safe |
+| `verify.closure-check.sh` | 919 | 1351 | plus 200 to 300 | harness, not deployed |
+| `install_pkg.sh` | 1308 | 1308 | no growth | unchanged |
+
+  Every advisory estimate is exceeded and no BAND is: the deployment ceiling is
+  650 and the largest shipped file is 429. One number explains it.
+  `closure_check.sh` is 240 lines of body and 189 of comment, so its CODE lands
+  exactly at the advisory upper bound and the total carries this repository's
+  comment density on top. The same explains the three contract-comment modules,
+  whose bodies are zero and whose comments enumerate what each will own. The
+  plan's own rule for a variance above an advisory estimate is to record it and
+  continue, which is what this table does.
+
+No, there is no performance issue that needs to be addressed for Step 1.
 
 ### Harness case check for Step 1
 
-_(empty — no check has taken place yet.)_.
+The plan's five test-first cases and its one property case are all present and
+all answered, in 70 cases with 0 failures.
+
+- **The topology**: 4 existence cases, 1 asserting `closure_scope.sh` is absent,
+  3 body-is-zero cases, 1 is-filled case, 4 mechanical-assertion cases over the
+  real modules, and 2 controls for the sourced-function exemption.
+- **A declared candidate absent under both roots**: `step1/absent/exit-code` and
+  `step1/absent/named`, accepted and reported, exit 0.
+- **An undeclared immediate subdirectory of a declared root**:
+  `step1/unexpected-subdir/named` asserts the whole typed line including the
+  offending name, with exit 1, and its CONTROL declares that same subdirectory
+  and requires acceptance, so the refusal is shown to be about the declaration
+  and not about the path.
+- **The measured `tools/old/py3.13` root**: `step1/unexpected-root/named` with
+  its own control of the same shape.
+- **A floor member present only under an undeclared root**: the root is refused
+  AND `step1/unexpected-root/member-still-in-scope` shows the directory holding
+  it is still in the observed loader scope, so the two results sit side by side
+  and the refusal is visibly the only thing stopping that resolution counting.
+- **The alias and the version both declared and both present**:
+  `step1/canonical/alias-present` and `step1/canonical/version-present`, with
+  `current` planted as a real SYMLINK to `python-3.13.9`. This is the case a
+  version-shaped declaration would have failed.
+- **The property case**: `step1/observed/equals-build-elf-rpath` compares the
+  checker's observed scope against `build_elf_rpath`'s own output byte for byte,
+  and `step1/observed/canonical-order-matches-declared` shows the two scopes
+  agree in ORDER as well as in content on a correct tree, which is the statement
+  that the derivation follows the loader's order rather than merely producing
+  the same set. Beside them the two drift greps run as cases.
+- **The no-filesystem property, with its control**: derived against a prefix
+  carrying the tree and against one that does not exist, identical with the
+  prefix folded out, while the control shows the observed side DOES depend on
+  the filesystem so the two prefixes are not interchangeable.
+- **`UNDETERMINED`**: 4 driving cases, one per reason, each asserting the exit
+  code is the checker's own 5 rather than the installer's 3; 2 cases asserting
+  ZERO `ABSENT` and ZERO `PRESENT` lines, which is what a checker reading an
+  unobtainable scope as an empty one would have produced; 1 asserting all
+  fifteen candidates are `UNDETERMINED`; 1 asserting the report reaches its
+  verdict line; and 1 CONTROL showing the real installer produces none.
+- **The arguments**: 3 cases, so a usage error returns 2 and never a verdict.
+
+**One finding carried forward, recorded so it is not lost.** The Step 0 fixture
+corpus row `scope-unexpected-subdir` places its fixture at
+`tools/python/current/cplxunexpected`, which is one level too deep to appear in
+the observed scope: `build_elf_rpath` iterates the immediate subdirectories of a
+tool ROOT, so an unexpected subdirectory has to sit at `tools/python/<name>`
+with a `lib` or `lib64` beneath it. Step 1 plants that shape in the harness
+directly, which is what the plan's own "Step 1 test first" section asks for, and
+the corpus is left untouched: its header assigns extension to steps 3 and 4, and
+editing it now would invalidate the corpus digest the Step 0 capture records as
+evidence. The row should be corrected by the step that first consumes it.
+
+No, there is no Step 1 case below its declared coverage that needs completing.
+The plan's departure table replaces the pytest coverage number with a case
+count, and 70 cases answered with 0 failures is the whole of what this step
+declares.
 
 ### Feature integrity for Step 1
 
-_(empty — no check has taken place yet.)_.
+- **`install_pkg.sh` is read and never written**:
+  `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0, and
+  it is HEAD-relative and exit-status driven so a staged edit could not read as
+  proof that nothing changed.
+- **The suite that would notice an installer edit first is green**:
+  `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` reports 104 cases and
+  0 failures on the RHEL 9.8 build host. It is the suite that asserts the
+  installer's own host-tool allowlist over the installer text.
+- **Two earlier runs of that command failed and neither was a regression**, and
+  both are recorded in the capture rather than quietly retried. The first
+  lacked `contract.cplx-elf-1.txt` in the `/tmp` subset, a missing input. The
+  second reported `git hash-object` unavailable because `git` is absent from
+  that host's login PATH while present in its own tools tree, which is the exact
+  shape this repository already recorded once when a tool was called missing
+  across six review rounds while the binary was there. It was verified rather
+  than believed, and the third run, with `git` on PATH and
+  `--target-capability` supplied, is green.
+- **Step 0 still answers**: `--step 0` reports 0 failures after the harness
+  change, and its red baseline now refuses for steps 2 to 7 and records step 1
+  as filled. The contract and corpus digests it prints are unchanged from the
+  Step 0 capture, so a reader can see step 1 added no command and no fixture row.
+- **The lint floor covers the new files**: `bash src/utils/lint_shell.sh` reports
+  48 tracked scripts clean. The four modules were STAGED before that run, and
+  that is not a formality: the gate reads `git ls-files`, so its first run
+  reported 44 scripts and `clean` while covering none of them. Staged, it
+  reported 48 and one real finding, SC2034 over the `INSTALL_PREFIX` assignment
+  inside the probe subshell, which shellcheck cannot see through the `source` on
+  the line above. It now carries a scoped disable naming the reader.
+- **Reporting**: nothing existing is changed. The new reporting is the checker's
+  typed lines and its partial verdict. On the harness side two reporting
+  improvements land: a list comparison prints a size on a pass rather than
+  fourteen absolute paths, and the verdict digests are probed for every step so
+  a capture can always name its own bytes.
+- **Nothing is deployed yet**: no staging into an archive, no change to `pkg.sh`
+  at 184 lines, and no packaging gate. The checker exists and is called by the
+  harness only, so a half-built gate cannot refuse a real packaging run.
+
+No, no existing feature or reporting capability is impaired by Step 1.
 
 ---
 
