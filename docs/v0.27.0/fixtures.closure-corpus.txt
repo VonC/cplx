@@ -46,6 +46,28 @@
 #                  mutation that silently did nothing cannot be mistaken for one
 #                  that worked.
 #
+# HOW A MUTATION REACHES A REAL DYNAMIC SECTION, added by Step 3 when the engine
+# behind these rows was written. Nothing here rebuilds an ELF: the donor's own
+# `.dynstr` carries the names and its own `.dynamic` carries the entries, and a
+# mutation only moves what is already there.
+#
+#   the name slots      the LAST 256 BYTES of the donor's `.dynstr`, taken as four
+#                       64-byte slots. A mutation writes its name into a slot and
+#                       repoints a dynamic entry at that offset, so no fixture
+#                       name is limited by the length of the string it replaces.
+#                       The bytes it overwrites are symbol names, which nothing in
+#                       this effort reads: the checker reads dynamic entries and
+#                       version records, and both keep their own strings.
+#   the spare slot      the linker pads `.dynamic` past its terminating DT_NULL.
+#                       `needed-add` turns the FIRST DT_NULL into a real DT_NEEDED
+#                       entry and leaves the next spare slot as the terminator, so
+#                       the need is ADDED rather than substituted for another.
+#
+# Both shapes are donor requirements rather than assumptions, which is why the
+# `shared` row names them: a donor that cannot supply either is refused before a
+# fixture is generated from it, and the harness reports UNANSWERED rather than
+# building an object whose mutation could not take.
+#
 # The names inside the fixtures are deliberately `cplx`-prefixed inventions
 # rather than real library names, except where a case is about a real one:
 # `libssl.so.3` appears because the design's subject rule turns on a second copy
@@ -55,14 +77,95 @@
 #
 # Steps 3 and 4 extend this file as their cases need. A row is added here and
 # reviewed before the case that consumes it exists, which is the same order the
-# host-tool contract follows.
+# host-tool contract follows. STEP 3 ADDED THREE AT SUBMISSION, and each exists
+# because a case would otherwise have proved something narrower than it claims:
 #
-count|19
+#   provider-donor-need     one text provider per DT_NEEDED name the validated
+#                           donors carry, planted into a provider directory. A
+#                           donor keeps its own needs, so without this row every
+#                           generated subject would refuse on the donor's `libc`
+#                           and the planted defect would be one refusal among
+#                           several rather than the only one.
+#   provider-first-libssl   the FIRST `libssl.so.3`, in a provider directory. The
+#                           subject rule is about a SECOND copy, and with no first
+#                           copy the index would hold no such name at all, which
+#                           satisfies "absent from the index" for the wrong reason.
+#   subject-need-provider   a real object at the name `subject-site-packages-need`
+#                           depends on. It is the ONE subject in the step 3 tree a
+#                           DT_NEEDED edge reaches, so the unreferenced finding has
+#                           a negative control instead of naming every subject.
+#
+#
+# ROUND 1 OF THE STEP 3 CODE REVIEW ADDED TWO MORE, and both exist because a
+# reproduced false-green path had no fixture:
+#
+#   reader-needed-value-unreadable   a DT_NEEDED entry whose string offset falls
+#                                    outside the string table. A supported reader
+#                                    exits 0 and prints the raw value with NO
+#                                    brackets, so a parser matching only the
+#                                    bracketed shape drops the entry and the
+#                                    object resolves nothing and refuses nothing.
+#                                    `needed-offset-corrupt` is the verb, and it
+#                                    repoints the first DT_NEEDED value rather
+#                                    than touching the string table.
+#   subject-libssl-consumer          an object that NAMES `libssl.so.3`, without
+#                                    which the second copy under `root/usr/bin`
+#                                    is unreferenced for want of any consumer at
+#                                    all, and a reachability map keyed by name
+#                                    rather than by resolved path passes.
+#
+# ROUND 2 ADDED THREE, for the ordinary shape the round 1 repair still got wrong:
+# a soname symlink and its differently named target, `libz.so.1 -> libz.so.1.2.11`
+# in the wild. `provider-alias-target` is the real file, `provider-alias-link` is
+# the soname beside it, and `subject-alias-consumer` names the soname. Without
+# the three, a reachability rule that resolves an alias by NAME rather than by
+# file identity reports a normally loaded library as unreferenced, and no case
+# says so.
+#
+# ROUND 4 ADDED FOUR, for the shape a whole-path lookup cannot resolve: a
+# SYMLINKED DIRECTORY. `tools/python/current -> version` is the alias layout this
+# effort already reads, and the observed scope then holds `current/lib` while the
+# walk, which does not follow a symlinked directory, records the object under
+# `version/lib`. `dir-alias-target` is the real file, `dir-alias-soname` the
+# soname beside it, `dir-alias-directory` the directory link, and
+# `dir-alias-consumer` the object that names the soname. All four are needed
+# together: the directory link has to be applied before the name inside it means
+# anything, and without the consumer no edge selects the path at all.
+#
+# ROUND 5 ADDED THREE, all of them link chains a resolver must follow the way the
+# kernel does. Each row builds its whole shape, and each asserts with `-ef` that
+# the HOST reaches the same file, so the fixture states the right answer rather
+# than the harness assuming it:
+#
+#   chain-relative-parent   a link whose target climbs out of its own directory
+#                           and comes back down through an alias directory,
+#                           `../../version/lib/x` under `current -> version`. The
+#                           components INSIDE a target have to be resolved too.
+#   chain-through-updir     a target that goes up through a link directory,
+#                           `../linkdir/../lib/x`. `..` applies to the directory
+#                           the resolution actually reached, so reducing it
+#                           before the link is expanded lands somewhere else.
+#   chain-nine-links        nine valid links ending at one real library, which a
+#                           supported host resolves. A bound tighter than the
+#                           kernel's would refuse a tree that works.
+#
+# ROUND 3 ADDED ONE, and it is a COST fixture rather than a semantic one.
+# `alias-scaling-population` replicates the alias shape above at a size the
+# harness chooses, so the cost of resolving aliases can be MEASURED at two
+# populations instead of argued about. A rule that compares file identities pair
+# by pair grows with the product of the links and the subjects; one that reads
+# where each link points grows with the population. Only a run at two sizes tells
+# them apart, and nothing in this schema caps the number of aliased libraries.
+#
+# A row whose placement repeats another row's is not a conflict: each step's suite
+# prepares its OWN tree from the rows its cases cite, so two steps may generate
+# different objects at one path without ever meeting.
+#
+count|35
 #
 # donor|selector|elf-type|required-parts|why
-donor|shared|ET_DYN|PT_DYNAMIC,DT_SONAME,DT_NEEDED|a shared object with a dynamic section, a soname and at least one need, so a mutation has something to change
+donor|shared|ET_DYN|PT_DYNAMIC,DT_SONAME,DT_NEEDED,dynstr-tail-256,dynamic-spare-slot|a shared object with a dynamic section, a soname and at least one need, so a mutation has something to change; the last 256 bytes of its .dynstr are the four name slots a mutation writes into, and one spare DT_NULL slot is where an added need goes
 donor|program|ET_DYN,ET_EXEC|PT_INTERP,PT_DYNAMIC|a program carrying an interpreter, so the entry-point half of the subject rule has a real subject
-#
 # spec|id|kind|donor|placement|mutation|assert
 spec|subject-lib-dynload-unresolved|object|shared|tools/python/current/lib/python3.13/lib-dynload/_cplxprobe.cpython-313-x86_64-linux-gnu.so|needed-add:libcplxabsent.so.1|dt-needed-lists:libcplxabsent.so.1
 spec|subject-site-packages-need|object|shared|tools/python/current/lib/python3.13/site-packages/_cplxwheel.so|needed-add:libcplxprovider.so.1|dt-needed-lists:libcplxprovider.so.1
@@ -71,6 +174,22 @@ spec|subject-second-libssl|object|shared|tools/python/root/usr/bin/libssl.so.3|s
 spec|subject-program-entry-point|object|program|tools/python/current/bin/cplxprobe3.13_bin|interp-keep|pt-interp-present
 spec|reader-unreadable-object|object|shared|tools/git/current/lib/libcplxunreadable.so.1|mode-set:000|read-refused
 spec|reader-not-an-elf|tree|-|tools/git/current/lib/libcplxnotanelf.so.1|plant-text|magic-is-not-elf
+spec|provider-donor-need|tree|-|tools/python/root/usr/lib64|plant-donor-need|donor-need-resolvable
+spec|provider-first-libssl|object|shared|tools/python/root/usr/lib64/libssl.so.3|soname-set:libssl.so.3|dt-soname-is:libssl.so.3
+spec|subject-need-provider|object|shared|tools/python/root/usr/lib64/libcplxprovider.so.1|soname-set:libcplxprovider.so.1|dt-soname-is:libcplxprovider.so.1
+spec|reader-needed-value-unreadable|object|shared|tools/git/current/lib/libcplxbadneed.so.1|needed-offset-corrupt|dt-needed-value-unreadable
+spec|subject-libssl-consumer|object|shared|tools/python/current/lib/libcplxsslconsumer.so.1|needed-add:libssl.so.3|dt-needed-lists:libssl.so.3
+spec|provider-alias-target|object|shared|tools/python/root/usr/lib64/libcplxalias.so.1.2.3|soname-set:libcplxalias.so.1|dt-soname-is:libcplxalias.so.1
+spec|provider-alias-link|tree|-|tools/python/root/usr/lib64/libcplxalias.so.1|symlink-to:tools/python/root/usr/lib64/libcplxalias.so.1.2.3|symlink-resolves
+spec|subject-alias-consumer|object|shared|tools/python/current/lib/libcplxaliasconsumer.so.1|needed-add:libcplxalias.so.1|dt-needed-lists:libcplxalias.so.1
+spec|alias-scaling-population|object|shared|tools/git/current/lib|plant-alias-pairs|alias-pairs-present
+spec|dir-alias-target|object|shared|tools/python/version/lib/libcplxdir.so.1.2.3|soname-set:libcplxdir.so.1|dt-soname-is:libcplxdir.so.1
+spec|dir-alias-consumer|object|shared|tools/python/version/lib/libcplxdiruser.so.1|needed-add:libcplxdir.so.1|dt-needed-lists:libcplxdir.so.1
+spec|dir-alias-soname|tree|-|tools/python/version/lib/libcplxdir.so.1|symlink-to:tools/python/version/lib/libcplxdir.so.1.2.3|symlink-resolves
+spec|dir-alias-directory|tree|-|tools/python/current|symlink-to:tools/python/version|symlink-resolves
+spec|chain-relative-parent|object|shared|tools/python/root/usr/lib64|plant-chain-relative|chain-resolves
+spec|chain-through-updir|object|shared|tools/python/current/lib|plant-chain-updir|chain-resolves
+spec|chain-nine-links|object|shared|tools/python/current/lib|plant-chain-deep|chain-resolves
 spec|provider-duplicate-different|object|shared|tools/python/current/lib/libcplxdup.so.1|content-differ:tools/git/current/lib/libcplxdup.so.1|two-paths-differ
 spec|provider-duplicate-identical|object|shared|tools/python/current/lib/libcplxsame.so.1|content-copy:tools/python/root/usr/lib64/libcplxsame.so.1|two-paths-identical
 spec|coherence-need-undefined|object|shared|tools/python/current/lib/libcplxconsumer.so.1|verneed-add:libcplxprovider.so.1:CPLX_9.9|dt-verneed-demands:CPLX_9.9
