@@ -4,15 +4,19 @@ No, it is not implemented.
 
 This document tracks the implementation of
 [plan.v0.27.0.toolchain-runtime-closure.md](plan.v0.27.0.toolchain-runtime-closure.md)
-step by step. Steps 0, 1 and 2 are implemented and checked: the harness, its
+step by step. Steps 0 to 3 are implemented and checked: the harness, its
 host-tool contract, its fixture corpus and the retained captures exist, the four
 checker modules of the fixed topology exist with `closure_check.sh` answering the
-scope question, and the configuration bundle is committed with the one parser,
-the digest, the agent's consistency check and the cplx-side resolution that make
-it authoritative rather than merely self-describing. There is still no object
-reader, no invariant and no packaging gate, so steps 3 to 7 are at their initial
-state and their check sections hold their placeholder. The document verdict above
-stays No until every step is checked.
+scope question, the configuration bundle is committed with the one parser, the
+digest, the agent's consistency check and the cplx-side resolution that make it
+authoritative rather than merely self-describing, and the object reader now walks
+the tree once, treats every shipped ELF as a subject and refuses every
+`DT_NEEDED` name that resolves nowhere in the observed loader scope, reporting
+separately the subjects no edge resolves to. There is still no floor check, no
+coherence rule, no duplicate-provider or family rule, no declared entry-point
+set and no packaging gate, so steps 4 to 7 are at their initial state and their
+check sections hold their placeholder. The document verdict above stays No until every
+step is checked.
 
 > Initial-skeleton note: the skeleton was written by the `write-plans` skill
 > before any implementation check, and it still governs every step no check has
@@ -1275,19 +1279,42 @@ No, no existing feature or reporting capability is impaired by Step 2.
 
 ### Analysis of Step 3 implementation state
 
-Not started. Step 3 is not implemented because nothing walks the tree for
-subjects, nothing reads `DT_NEEDED` outside the installer, and no provider index
-exists.
+Yes. Step 3 has been fully implemented.
+
+Six code review rounds reproduced five implementation defects, R1, R2, R3a, R4
+and R5, and all five are repaired with a regression apiece that fails against the
+module it repairs. Round 6 confirmed it: "All implementation findings
+R1/R2/R3a/R4/R5 are resolved; this answer requests no further implementation
+repair within the unchanged scope." The sixth finding, R3b, was the plan
+disagreeing with itself about what this step owes, and the specification owner
+resolved it on 2026-09-07 by amendment: design Q13 splits the unreferenced
+finding into its two halves, plan Q13 gives the edge half to this step and the
+entry-point half and its declaration to Step 4. Against the amended plan this
+step's obligations are met, and the suite is green on the RHEL 9.8 build host at
+124 cases and zero failures.
+
+Independent round 7 review confirms this verdict against the specification-owner
+amendment recorded in the request and in design Q13 and plan Q13. R3b is closed:
+Step 3 owns UNREFERENCED-BY-EDGE, and Step 4 explicitly owns the declared
+entry-point set and combined finding. R1, R2, R3a, R4 and R5 remain resolved.
+No production code, harness or corpus changed from round 6, and no substantive
+reviewer repair was needed.
 
 ### Goal for Step 3
 
-Walk the tree once, identify every ELF by its magic bytes, record its
-`DT_SONAME`, `DT_NEEDED` list and version needs from a single `readelf -d -V`
-per object, build the provider index once before the loop, and implement the
-derived membership half over every shipped ELF rather than over a closure from
-the entry points.
+Walk every shipped ELF once, collect its dynamic entries and version needs,
+build the provider index before the walk, and check derived membership without
+excluding objects that no entry point reaches.
 
 ### Step 3 improvement expectations
+
+The single walk must either account for the complete subject set or report the
+missing input. A successful reader process must also yield complete parseable
+records. An unreferenced finding describes actual reachability of a subject.
+
+The plan states the same obligations in more detail, and they are repeated here
+because a later reader checks the implementation against them rather than
+against a summary:
 
 - The subject count equals the planted ELF count, with no object excluded for
   being unreachable.
@@ -1304,33 +1331,298 @@ the entry points.
   proves the parse does not silently return empty needs.
 - An absent, non-zero or unparsable `readelf` is typed UNDETERMINED naming the
   object and the missing input, not a semantic REFUSAL, and the aggregate run is
-  non-passing because an UNDETERMINED never counts toward a green. A case
-  asserts both halves: the typed result, and that publication is impossible from
-  that run. UNANSWERED stays a harness outcome and never a production verdict.
+  non-passing because an UNDETERMINED never counts toward a green. UNANSWERED
+  stays a harness outcome and never a production verdict.
 
 ### What was implemented for Step 3
 
-_(empty — no check has taken place yet.)_.
+- `closure_elf.sh` builds a provider name-to-paths index by globbing the observed
+  loader directories in scope order, identifies ELF magic with the shell itself,
+  reads each object with one `LC_ALL=C readelf -d -V`, and collects the SONAME,
+  the NEEDED list and the version needs into associative arrays keyed by path.
+- The walk is ONE `find` whose listing goes through a temporary file, so its exit
+  status is collected. An incomplete traversal, a finder that fails and a finder
+  that does not resolve are typed `UNDETERMINED|traversal|` naming the root and
+  what could not be done, and each leaves the run non-passing on its own.
+- The parser refuses the whole object when a recognized dynamic record carries no
+  readable value, naming the field, and commits its counters only on success, so
+  a refused output leaves no partial edge count behind.
+- `closure_rules.sh` checks every collected dependency against the provider index
+  and refuses a miss naming both the subject and the name. It separately reports
+  the subjects that no edge RESOLVES TO, computed from the selected provider path
+  of each name, with each selected provider that IS a symlink resolved to its
+  target by FILE IDENTITY rather than by name, because the ordinary library
+  layout does not share a name across the two paths.
+- `closure_check.sh` sources both modules, runs index, walk and rules in that
+  order, prints eight summary rows and three verdict lines, and returns 1 on a
+  membership refusal and 5 on a walk or a reading that could not be taken.
+- The corpus and harness generate real dynamic-section fixtures from host donors,
+  test membership, reachability, reader failures and traversal failures, and
+  instrument walk, index and reader counts. Step 0 derives its next absent suite
+  from the dispatcher.
 
 ### New types or classes introduced for Step 3
 
-_(empty — no check has taken place yet.)_.
+No classes are introduced. The shell model adds ordered subject and provider
+lists, associative maps for SONAME, NEEDED, version needs and provider paths, the
+walk's own state, and counters consumed by the rules and the report. Round 1
+added `closure_elf_bracketed`, the one place a string-valued dynamic entry is
+read, and `closure_walk_failed`, the one place an incomplete traversal becomes a
+typed result. The fixture helpers discover and validate donors, write dynamic
+strings and entries, plant a corpus row and assert its own asserted result.
 
 ### Architecture check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The reader, the rules module and the orchestration keep the planned dependency
+direction: the reader has no verdict, every invariant is in the rules module, and
+the entry point calls them and decides nothing. The harness asserts that
+mechanically over comment-stripped text rather than by inspection.
+
+The review repairs stayed inside those boundaries. The traversal outcome is a
+reader concern and lands in `closure_elf.sh`; the reachability rule is an
+invariant's and lands in `closure_rules.sh`; the entry point gained one summary
+row, one verdict line and a renamed call.
+
+THE REACHABILITY RULE RESOLVES BY FILE IDENTITY NOW, which is what closes R3a. It
+distinguishes the selected provider from a second same-name object outside scope,
+and it no longer loses identity when the selected soname link and its real target
+carry different basenames, which is the ordinary `libz.so.1 -> libz.so.1.2.11`
+layout and therefore the common case rather than an edge one. Each selected
+provider that IS a symlink is matched against the subjects with `-ef` until its
+target is found, stopping at the first match; a selected provider that is a real
+file is already reached under its own path and is not swept. The cost is bounded
+by the number of symlinked selected providers, which is the distinct needed names
+resolving to a link, and it is not an inventory sweep per edge.
+
+THE DECLARED ENTRY-POINT INPUT WAS A PLAN-LEVEL GAP AND IS NOW SCHEDULED.
+Before the amendment, the design's full unreferenced finding needed declared
+runtime entry points, but no step scheduled that declaration and Q10 carried no
+record for it. Step 3 implemented the edge half under its own result name. That
+name alone did not authorize a scope change; the specification-owner amendment
+below now does.
+
+THE PLAN DISAGREED WITH ITSELF HERE, which is why an implementation step could
+not settle it: its Step 3 behavior line specified the finding "computed from the
+edges already collected", and its Step 3 expected outcome quoted the design's
+conjunction. The specification owner resolved it on 2026-09-07 by amendment
+rather than by either role choosing. Design Q13 splits the finding into an EDGE
+half and an ENTRY-POINT half with separate inputs; plan Q13 gives the edge half
+to this step, under its own result name, and gives Step 4 the entry-point half,
+the `CPLX-CLOSURE/1` record that declares the entry-point set, and the combined
+result. The declaration is DECLARED and never derived, for the reason Design
+Area 2 already gives for the subject rule.
+
+So the result this step ships is what the amended plan asks of it, and the name
+it carries is what stops a reader taking it for the whole finding. Step 4's
+expected outcome now carries the pair that shows the declaration is being read: a
+declared entry point is NOT reported, and the same object with the declaration
+removed IS.
+
+The report still sits in the 636-line entry point, below the 650 deployment
+ceiling and inside the at-risk band. Move that responsibility to
+`closure_rules.sh` before Step 5 grows the file.
+
+Yes, there is something to address, and it is no longer the entry-point input:
+the recorded report-size checkpoint before Step 5, with 14 lines of headroom
+left under the ceiling.
+
+THE SELECTED PATH IS RESOLVED BY THE FILESYSTEM'S OWN RULES, which is what
+closes R5 across all three shapes round 5 reproduced. Components are taken one at
+a time from a queue; a link's target is SPLICED BACK into that queue rather than
+taken whole, so a component inside the target is resolved too; an absolute target
+restarts the resolution from the root; and `..` pops the directory the resolution
+actually reached, which is why the reader records the raw target and reduces
+nothing when it builds the map. A chase that exceeds the cycle guard is typed
+UNDETERMINED and NOTHING is cached, because a partially chased path is not the
+physical one. The result is cached by input path, so the resolution is still a
+lookup and the cost case that would catch a sweep returning still passes.
+
+THE CYCLE GUARD IS NOT A POLICY. It is the kernel's own SYMLOOP_MAX, because
+nothing in this plan says how deep a valid chain may be and a nine-link chain
+resolves on the supported host; a tighter bound would refuse a tree that works.
+
+Independent round 5 review found the directory-component fix incomplete when
+a symlink target itself introduces another directory alias or a parent component.
+Round 6 resolves all three through the component queue and explicit unresolved
+result described above. The retained R5 probes and cycle control pass; R5 is
+closed and R3b is the sole remaining obligation.
 
 ### Cost and structure check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The instrumentation passes: one walk, one index construction before the first
+read, and one reader call per planted ELF object. Dependency resolution is an
+associative lookup rather than a directory scan per object, and the reachability
+map is keyed by path.
+
+The alias resolution is a LOOKUP, which is what closes R4. The round 2 repair
+made it correct and quadratic: it scanned the subject list for each distinct
+selected symlink, which is O(L*N) and not O(L), because the inner scan still
+visits subjects skipped as already reached and an early break can come
+arbitrarily late. Neither the grammar nor the code fixes L to a constant, and one
+distinct soname symlink per library is the ordinary layout, so L grows with N.
+Independent instrumentation counted 96, 331 and 1200 identity comparisons at 16,
+32 and 64 aliases, and the plan's complexity clarification forbids that shape.
+
+THE ONE WALK NOW RECORDS WHERE EVERY LINK POINTS. `find` is asked for the link
+targets in the same invocation that lists the subjects, so resolving an alias is
+a map lookup and costs constant work per edge, with the chase bounded at eight
+hops so a cycle cannot hang it. No identity comparison is performed at all.
+
+The bound is MEASURED rather than asserted, at two alias populations, because a
+sweep and a lookup answer the same and differ only in growth. The case counts the
+commands the rule executes under a DEBUG trap with `functrace`, and states its
+threshold as work per alias pair rather than as a total ratio, because the totals
+carry a base that is itself linear in the population: the round 2 sweep's total
+grew 5.9 times for a fourfold population, which a loose ratio would have let
+through. Per pair, the lookup holds at 47 then 46 and the sweep went 55 then 81.
+
+Round 1's observation about the parser is repaired rather than accepted. The
+output was consumed by slicing the remaining text, which copies what is left on
+every iteration and is quadratic in the SIZE of one reader's output; the version
+symbols section of a large object runs to hundreds of lines. The parser now reads
+the output once with the shell's own line reader, so the per-object parse is
+linear in its output and the plan's object and provider traversal bound is not
+the only linear claim the evidence supports.
+
+The walk holds its listing in a temporary file rather than a process
+substitution. That is one extra file per run and no extra traversal: it is still
+ONE `find`, which the instrumented case measures.
+
+No performance issue needs addressing for Step 3: the one path that had a
+product bound is a lookup now, and the measurement that would catch its return
+runs in the suite.
 
 ### Harness case check for Step 3
 
-_(empty — no check has taken place yet.)_.
+This effort carries no `pytest` and no `src/pdfss/tests/unit` tree, so the
+coverage target the template states is met by the substitution the plan's
+departure table fixes: the harness suite, `--step 3`, is the unit of validation
+and every production function is exercised by a case with a named control. The
+suite is 99 cases with zero failures on the RHEL 9.8 build host.
+
+- **The subject set**: the walked count equals the planted file count and the
+  subject count equals the planted ELF count, both computed by the harness from
+  what it planted rather than read back from the run.
+- **The parser**: the edge count is asserted against a figure derived from the
+  donors' own `DT_NEEDED` counts, so a parse that silently returned fewer needs
+  fails on the number rather than on a shape.
+- **The reading failures**: eight cases, one per way an input goes missing, each
+  asserting the typed line, exit code 5, and that `refused` stayed at zero. Round
+  1 added the real malformed-ELF case, whose fixture asserts the reader exited 0,
+  and the three traversal cases, two of which assert the absence of the
+  `CLOSURE MEMBERSHIP OK` line the submitted code printed.
+- **The provider index**: the directory count, and the paths behind one lookup
+  name asked of the module itself.
+- **Membership**: the refusal is asserted whole, naming both the subject and the
+  name, with a control that plants the provider and asserts the same tree is then
+  accepted with zero refusals.
+- **Reachability**: the orphan is named, the count is asserted, the one subject an
+  edge reaches is asserted absent, and round 1 added the duplicate-name control:
+  a consumer names `libssl.so.3`, the copy in a provider directory is asserted
+  ABSENT from the list and the copy under `root/usr/bin` is asserted PRESENT.
+- **The locale pin**: a stub reader that answers honestly under `LC_ALL=C` and
+  translates otherwise, with both halves controlled.
+- **The fixture engine**: each planted row asserts the corpus's own `assert`
+  column on the generated object, and the control asserts the donor carries none
+  of the invented names.
+
+- **The SONAME alias**, added after round 2: a symlink at the soname beside its
+  versioned target and a consumer that names the soname. The target is asserted
+  ABSENT from the list, the consumer is asserted PRESENT so the case is about the
+  alias resolving rather than about an edge nobody recorded, and the link itself
+  is asserted not walked. On a host where `ln -s` copies, the fixture reports the
+  obligation UNANSWERED rather than passing over a shape it never built.
+
+EVERY REGRESSION WAS RUN AGAINST THE CODE IT REPAIRS, which is the only thing
+that shows it bites.
+
+- Against the SUBMITTED modules, the repaired harness reports 19 failures, among
+  them `step3/walk/failing-finder-not-green` returning that code's own
+  `CLOSURE MEMBERSHIP OK: 0 edges over 0 subjects all resolve`.
+- Against the ROUND 2 modules, it reports 2 failures:
+  `step3/unreferenced/alias-target-absent` returning
+  `UNREFERENCED-BY-EDGE|subject|...libcplxalias.so.1.2.3`, a normally loaded
+  library reported as reachable by nothing, and the count that follows from it.
+
+The current suite is 99 cases with zero failures on the RHEL 9.8 build host, with
+Steps 0, 1 and 2 and the relocation Step 3 harness green in the same session.
+
+No unit-tested class is below its target: there is no unit-test tree in this
+repository, and every function this step added is exercised by a harness case
+with a named control.
+
+All nine mandatory commands pass. Closure Steps 0, 1 and 2 and the relocation
+Step 3 harness are green on the same host in the same session, local lint is
+clean over 48 scripts, harness ShellCheck exits 0, the installer-purity grep
+finds nothing and the HEAD-relative installer diff is empty. The alias behavior
+and its cost are both covered by the suite now: the growing-population probe that
+exposed R4 is a case in it, and it fails against the module R4 was filed against.
+
+The nine-command union passes unchanged: closure Steps 0, 1 and 2 and the
+relocation Step 3 harness are green on the same host in the same session, local
+lint is clean over 48 scripts, harness ShellCheck exits 0, the purity grep finds
+nothing and the installer HEAD-relative diff is empty. The `current -> version` probe and the three link-chain
+probes that reproduced R5 are cases in the suite now, and each fails against the
+module it was filed against.
+
+Independent round 5 validation passed all nine mandatory commands: closure
+Steps 0/1/2/3 passed 64/70/91/113 cases; relocation Step 3 passed 104 cases;
+local lint passed over 48 scripts; harness ShellCheck passed; installer purity
+and HEAD-relative preservation checks passed. The current resolver matches the
+request. The RHEL code/harness/corpus digests match locally and mandatory
+validation changed no tracked paths. Additional real-file probes reproduced all
+three remaining R5 cases; in each, the host's `-ef` test confirms the selected
+provider is the subject that the rule falsely reports unreferenced.
+
+Independent round 6 validation passed the unchanged nine-command union:
+closure Steps 0/1/2/3 passed 64/70/91/124 cases, relocation Step 3 passed 104,
+all with zero failures and exit 0. The alias operation-count regression passed.
+Local lint passed over 48 scripts, harness ShellCheck passed, installer purity
+had no matches and its HEAD-relative diff was empty. The current resolver
+matches the request. Production modules, harness and corpus match RHEL SHA-256
+digests, and mandatory validation changed no tracked paths. The retained R5
+probes and cycle probe passed independently of the harness. No applicable
+class-based unit coverage target exists in this Bash repository; the plan's
+harness substitute and the relevant regression controls pass.
+
+Independent round 7 validation passed the unchanged nine-command union:
+closure Steps 0/1/2/3 passed 64/70/91/124 cases, and relocation Step 3 passed
+104 cases, all with zero failures and exit 0. Local lint passed over 48 scripts,
+harness ShellCheck passed, installer purity had no matches (expected exit 1),
+and the installer's HEAD-relative diff was empty. The tested production files,
+harness and corpus match local SHA-256 digests. The current validation resolver
+matches the request exactly; mandatory validation changed no review paths and
+the umbrella digest is unchanged. The plan's Bash harness coverage substitute
+passes, including its measured traversal, index and alias-cost checks.
 
 ### Feature integrity for Step 3
 
-_(empty — no check has taken place yet.)_.
+- **The installer is untouched**: `git diff --exit-code HEAD` over
+  `install_pkg.sh` exits 0, and item 2's harness, which sources it through the
+  MAIN BOUNDARY seam and asserts its host-tool allowlist over its text, reports
+  `OBJECTIVE MET` on the same host in the same session.
+- **Steps 0, 1 and 2 still pass unchanged**. Step 1's UNDETERMINED case still
+  counts exactly fifteen typed lines rather than sixteen, because the subject
+  phase emits no typed line when the loader scope could not be observed. Step 2's
+  gate case still sees zero typed scope lines after a refused bundle.
+- **The aggregate is the expected red baseline**: steps 0 to 3 exit 0 and steps 4
+  to 7 exit 5, each naming the step that will fill it.
+- **The fail-closed requirement now holds on every input this step reads.** The
+  subject phase can no longer report membership OK after losing filesystem
+  subjects or dynamic dependencies: a traversal that did not complete and an
+  object whose record could not be read each refuse the green.
+- **The false alias findings are gone**: a selected provider now reaches the file
+  the filesystem reaches, through a soname link, through a symlinked directory in
+  a prefix of the path, through a target whose own components are links, and
+  through a chain. A normally loaded library is no longer reported as reachable
+  by nothing, which is the class of defect that would have made this finding
+  actively misleading on a real archive rather than merely partial.
+- **The reporting limit is now a scheduled half rather than a gap**: the PARTIAL
+  verdict is explicit and the result is named for the half it answers. A shipped
+  executable is an entry point by definition and appears in this list until the
+  declared entry-point set exists, which is exactly why the result carries its
+  own name; Step 4 adds that declaration and the combined finding under plan
+  Q13.
 
 ---
 
@@ -1348,7 +1640,10 @@ Implement the declared floor half with its required-location column as the
 observable test, provider-aware version coherence resolved through the provider
 the object names, rule 1 over candidates of one exact lookup name compared by
 content digest, rule 2 over the declared family list, and the aggregation rule
-that reserves UNDETERMINED for an input that could not be obtained.
+that reserves UNDETERMINED for an input that could not be obtained. Plan Q13 adds
+the ENTRY-POINT half of the unreferenced finding here, with the `CPLX-CLOSURE/1`
+record that declares the entry-point set and the result that combines the two
+halves.
 
 ### Step 4 improvement expectations
 
@@ -1357,6 +1652,10 @@ that reserves UNDETERMINED for an input that could not be obtained.
   scope order, which is the correction the design's round 2 required.
 - The 20 multi-candidate names of the measured archive pass rule 1, which is the
   positive control against over-refusal.
+- A shipped ELF the declared entry-point set names is NOT reported by the combined
+  unreferenced finding, and the same object with that declaration removed IS. The
+  pair is what shows the declaration is read rather than the finding narrowed to
+  what the edges already answered.
 - The measured `libbfd` pair fails rule 2, and the same pair with the family
   undeclared is not examined.
 - An UNDETERMINED result is reported with the input it lacked and never counts
