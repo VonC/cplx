@@ -2775,3 +2775,1350 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-3 -->
+
+## Round 1 by requestor - Step 2
+
+- Recorded: 2026-09-07T10:02:47+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 toolchain-runtime-closure (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 2
+Review round: 1
+
+### Code review evidence for step 2 toolchain-runtime-closure (round 1)
+
+request_index_tree: 5341871357e54b28529ea3170dcfe55a7c79f461
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_check.sh (sources: plan)
+- rg -n 'consistency' src/setups/env/bin/closure_check.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -e SC2016 docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): declare the archive closure policy
+group 1 path: src/setups/env/closure/closure-config.txt
+group 1 path: src/setups/env/closure/README.md
+group 2: feat(closure): parse and bind the config bundle
+group 2 path: src/setups/env/bin/closure_config.sh
+group 3: feat(closure): gate the checker on the bundle
+group 3 path: src/setups/env/bin/closure_check.sh
+group 4: test(closure): add the step 2 authority suite
+group 4 path: docs/v0.27.0/verify.closure-check.sh
+group 5: test(closure): retain the step 2 host capture
+group 5 path: docs/v0.27.0/verify.closure.step2.rhel.txt
+group 6: docs(toolchain-runtime-closure): record step 2 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step2.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/closure/README.md
+staged path: src/setups/env/closure/closure-config.txt
+```
+
+### Requestor assessment for step 2 toolchain-runtime-closure (round 1)
+
+#### Requestor verdict for step 2 toolchain-runtime-closure (round 1)
+
+Yes. Step 2 has been fully implemented.
+
+The four declarations are committed as one document at
+`src/setups/env/closure/closure-config.txt`, the digest is the SHA-256 of that
+document's exact committed bytes and covers the envelope nowhere, the identity
+envelope names that digest and a commit SHA, and the three parties' asymmetric
+checks exist in `closure_config.sh` as the plan's Step 2 behavior lists them:
+`closure_config_parse`, `closure_config_digest`, `closure_envelope_check` and
+`closure_config_resolve_commit`.
+
+#### Evidence named rather than summarised for step 2 toolchain-runtime-closure (round 1)
+
+Every command below was run for this round. The host-gated ones ran on the RHEL
+9.8 build host over ssh, from a copy of the repository subset under `/tmp`; the
+lint gate and the harness lint ran on the authoring host, where the new files
+were staged first so the gate actually covered them.
+
+| Obligation | Evidence |
+| --- | --- |
+| step 2 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 2`: exit 0, 85 cases, 0 failures, `host rhel 9.8`, `sha256sum=supported git=supported assoc=supported`, `OBJECTIVE MET for step 2` |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, `lint_shell: clean` |
+| the digest is in the checker | `rg -n 'sha256sum' src/setups/env/bin/closure_check.sh`: one hit, line 360, the digest report line |
+| the agent's limit is stated | `rg -n 'consistency' src/setups/env/bin/closure_check.sh`: two hits, lines 338 and 362, the second printed on every bundle run |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| no scope drift | `rg -n 'tools/\*/\|root/usr/lib64' src/setups/env/bin/closure_check.sh` prints nothing |
+| step 1 still answers | `bash docs/v0.27.0/verify.closure-check.sh --step 1`: exit 0, 70 cases, 0 failures |
+| step 0 still answers | `bash docs/v0.27.0/verify.closure-check.sh --step 0`: exit 0, 66 cases, 0 failures |
+| the aggregate | the argument-free form: exit 5, steps 0, 1 and 2 exit 0, steps 3 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3`: exit 0, 104 cases, 0 failures, and the same with `--target-capability docs/v0.27.0/capability.rhel-9.8.txt` |
+| harness lint | `shellcheck -e SC2016 docs/v0.27.0/verify.closure-check.sh`: exit 0 |
+| the reviewed bytes are the measured bytes | `closure_check.sh` `d71921a0...b288`, `closure_config.sh` `09c8217f...15fd`, `closure_elf.sh` `5fe397e3...55b1`, `closure_rules.sh` `afb2fe67...cbb24`, harness `fc806fac...7ba2`, `closure-config.txt` `76c84a4f...0b49`, each digested on both machines and identical |
+
+The contract and corpus digests the runs print, `78559532...1abe` and
+`558c66e5...76ae`, are unchanged from the step 0 and step 1 captures, which is
+the mechanical statement that this step added no host command and no fixture row.
+`closure_elf.sh` and `closure_rules.sh` still digest to the values the step 1
+capture recorded, which is the mechanical statement that this step filled one
+module and left the two later ones at their contract comments.
+
+#### The three claims this step makes, each driven rather than asserted for step 2 toolchain-runtime-closure (round 1)
+
+**The three parties are asymmetric, and the paired edit is where that shows.** A
+floor entry is deleted and the document re-hashed to match its own envelope,
+which is the shape umbrella item 3 met and the shape shipping a declaration
+inside the artifact hides rather than removes. `step2/authority/paired-edit/agent-ACCEPTS`
+exits 0 and `step2/authority/paired-edit/packaging-REFUSES` exits 1, with
+`step2/authority/paired-edit/refusal-names-both` asserting the refusal carries
+the embedded digest and the one cplx holds. The authentic-but-wrong swap, a
+different valid bundle put in its place, is asserted the same way from both
+sides. Publication's half is Step 5's and is recorded as a NOTE naming that step
+rather than left unmentioned.
+
+**The grammar is a contract of its own, separate from the digest.** Sixteen
+refusals are driven, each naming its own record and its own reason, each mutating
+ONE record of a base document that parses clean. The base parsing clean is the
+control for all sixteen.
+
+**Decoding precedes domain validation, and the refusal reason is the proof.** The
+pair is what shows it, never either half: `%2F` is refused as an undefined escape
+and never reaches its domain, while the defined `%7C` is decoded first and then
+refused BY THE DOMAIN, naming the decoded `libc|so.6`. An implementation that
+validated first would satisfy the first case and fail the second.
+
+#### The digest domain, which is the part a second implementation gets wrong for step 2 toolchain-runtime-closure (round 1)
+
+Two cases drive it rather than describing it. The same declaration written with
+CRLF endings produces a DIFFERENT digest, because no normalisation pass exists
+and a line ending is content. Byte-identical bytes read through a different path
+produce the SAME one, because the domain is the content and never the location,
+which is what lets the archive and cplx reach the same value from two trees. The
+CRLF case carries its own control, that the CRLF document still digests, so the
+difference is about bytes and not about one of the two files being empty.
+
+#### Architecture for step 2 toolchain-runtime-closure (round 1)
+
+The module boundary is exactly the topology's: the parser, the digest, the
+envelope check and the cplx-side resolution live in `closure_config.sh` and
+nowhere else, which is what lets `closure_publish.sh` reuse them in Step 5
+without pulling in the invariants. `closure_check.sh` gains one call, one gate
+function and its report. `closure_elf.sh` and `closure_rules.sh` still have a
+body of zero lines, measured rather than assumed, so an object reader or an
+invariant written here would be visible. No `closure_scope.sh` exists in any
+shape. The module is sourced at FILE SCOPE and not inside a function, because
+`declare -A` inside a function makes its arrays local to that function and a lazy
+source would have left every later caller reading an empty model.
+
+No DDD-Hexagonal violation or adapter smell needs to be addressed.
+
+#### Cost and structure for step 2 toolchain-runtime-closure (round 1)
+
+No `O(n^2)` and no `O(n log n)` path. The parser is one pass over a 25-line
+document; every duplicate test and cross-reference is an associative-array lookup
+or one pattern match on a comma-fenced string; nothing sorts. Cross-references
+are collected during that pass and resolved in one pass over the collected list,
+so no record is re-read. One file read and one digest per run, and one `git`
+resolution at packaging time and none on the agent. The one temporary file is
+removed on success and on both refusal branches.
+
+No performance issue needs to be addressed.
+
+#### The line budget, and the one variance worth a reviewer's attention for step 2 toolchain-runtime-closure (round 1)
+
+`closure_config.sh` is 623 lines, inside the plan's 550-to-650 AT RISK band and
+under the 650 deployment ceiling, against an advisory estimate of 140 to 190. Of
+those, 195 are comment and blank. The estimate was written when Q10 was still a
+property rather than a specification; what landed is one lexer, two record
+tables, ten exact lexical domains, an escape decoder, a five-array parsed model
+with its reset, the digest, the envelope check, the cplx-side resolution and the
+authority check that composes them. The band's rule is to avoid growth where
+practical, and two reductions were made for that reason and not for the count:
+the two near-identical parse loops became one shared record-stream reader, which
+is also the "one lexer, three record tables" shape the design asks for, and the
+subdirectory duplicate map was removed in favour of the comma-fenced list that
+was already the one record of what a root declares.
+
+`closure_check.sh` is 523 lines against an advisory of plus under 10. Sourcing
+the module is the one line that estimate covered; the other 93 are the `--bundle`
+entrance, the gate, and the report block. Two completion criteria require that
+block by name, and neither is satisfiable by a file that only sources a module.
+
+**A forward risk this requestor raises rather than leaves for Step 6.** Q10 fixes
+a third grammar, `CPLX-CLOSURE-EVIDENCE/1`. It is a record TABLE and not a
+parser, so it costs less than this step's two did, but adding it to
+`closure_config.sh` would take that file over 650 and the topology forbids a
+fifth module. The table belongs with the two scripts that read evidence,
+`closure_verify.sh` and `closure_publish.sh`, which are separate rows in the
+delivered script topology rather than checker modules. This is recorded in the
+validation plan and in the retained capture. Disagreement on it is welcome now
+rather than at Step 6.
+
+#### Feature integrity for step 2 toolchain-runtime-closure (round 1)
+
+`install_pkg.sh` is unchanged and `pkg.sh` is untouched at 184 lines, so the
+packaging wiring stays Step 5's and a half-built gate cannot refuse a real
+packaging run. Steps 0 and 1 both still report 0 failures. A checker run with no
+`--bundle` prints neither the bundle section nor the declared-roots source line
+and behaves exactly as Step 1 left it.
+
+No existing feature or reporting capability is impaired.
+
+#### Two harness changes a reviewer should look at closely for step 2 toolchain-runtime-closure (round 1)
+
+Both are narrowing rather than widening, and both are stated here because a
+reviewer should not have to infer intent from a diff.
+
+**The sourced-function exemption.** It previously derived its exempt names from
+`install_pkg.sh` alone. A checker module may now be sourced by another shipped
+script, so the exemption now covers any shipped script the file NAMES IN CODE,
+with comments stripped first. Stripping comments is the narrowing half: every
+module header names its callers in prose, so a comment-blind grep would have
+granted `closure_config.sh` the checker's function names for describing who
+sources it. The two step 0 controls still hold, one asserting a call to a
+function nobody defines is still a finding and one asserting a script that names
+no other script gets no exemption at all.
+
+**The alias fixture.** `step1/tree/alias-planted` reported a code FAILURE on a
+host where `ln` resolves and `ln -s` copies instead of linking, which is the
+"resolved is not the same as able" distinction the capability gate makes for
+every other tool. It is measured now: the symlink is asserted where one was
+actually made, and where the tool resolved and could not make one the obligation
+is UNANSWERED, which is not a pass either. The RHEL result is unchanged, which
+the 70 cases and 0 failures for `--step 1` show.
+
+#### One finding recorded rather than repaired for step 2 toolchain-runtime-closure (round 1)
+
+Five bullets of the validation plan's `Step 2 improvement expectations` describe
+`CPLX-CLOSURE-EVIDENCE/1`: the evidence negatives, the derived verdict truth
+table, the evidence semantic negatives, the canonical evidence bytes, and the
+all-three-grammars statement. Q10 routes the evidence document to "Step 6 emit
+and `closure_evidence_parse`", the plan's Step 2 behavior lists only the four
+configuration and envelope functions, and the validation plan's own Step 6
+section already carries the evidence records. The bullets were written into this
+step from the whole Q10 answer rather than from the half Step 2 schedules. They
+are left in place rather than moved, for the same reason the step 1 corpus
+finding was: the step that first consumes them should correct them, and that step
+is Step 6. The validation plan's Step 2 analysis states this explicitly so the
+Yes verdict is not read as claiming those five.
+
+### Implementation report for step 2 toolchain-runtime-closure (round 1)
+
+#### What step 2 had to solve for step 2 toolchain-runtime-closure (round 1)
+
+Three issues, from the plan's own analysis. The four declarations did not exist,
+so Step 1's declared shape was fed by harness fixtures alone and the checker had
+no source of truth outside its own tests. Nothing defined the digest domain, so
+two parties could hash the same declaration to different values and both be
+right. And nothing distinguished self-describing from authoritative: an archive
+that carries its own configuration answers what it claims to owe and cannot
+answer whether cplx reviewed that claim, because a payload and its embedded
+contract can be weakened in the same edit and still agree with each other.
+
+#### The committed declaration for step 2 toolchain-runtime-closure (round 1)
+
+`src/setups/env/closure/closure-config.txt` carries all four declarations in one
+file, because a check that read three of the four would evaluate a contract
+nobody wrote. Two `root` records in the loader's order with `python` first, four
+`subdir` records covering `root`, `current` and `python-3.13.9` under python and
+`root` under git, the issue's ten `floor` entries with `libsqlite3.so.0`
+constrained to `tools/python`, the two declared families at one generation each,
+and the one initial waiver.
+
+The roots and subdirectories are the measured tree's, from
+`measurements.resolution-scope.rhel.txt`: `tools/old` is deliberately NOT
+declared, because Q09 makes its removal an operator prerequisite rather than a
+declaration that widens the contract to fit the defect.
+
+`src/setups/env/closure/README.md` states the digest domain beside the data that
+domain governs, so a second implementation reading only the code does not have to
+infer it. It also states why the envelope cannot be committed there: it names the
+commit SHA that holds the document, a value that does not exist until that commit
+does.
+
+#### The one lexer, and a record table per document for step 2 toolchain-runtime-closure (round 1)
+
+`closure_stream_read` reads the shared lexical shape once: a version line first,
+one record per line, fields separated by a vertical bar, no empty field, blank
+and comment lines ignored. `closure_cfg_record` and `closure_env_record` are the
+two tables over it. The table is selected by a VALUE and dispatched through a
+quoted `case`, not by naming a function to call: an assembled command name is
+exactly the shape `contract.closure-tools.txt` calls its own known lexical limit,
+so the dispatch stays visible to a reader of the text and to the harness's
+command-word extractor.
+
+The third grammar, `CPLX-CLOSURE-EVIDENCE/1`, is Step 6's and adds a table rather
+than a parser. The module header says so, so its absence here is a statement
+rather than an omission.
+
+#### The escape decoder, and why it reports through a global for step 2 toolchain-runtime-closure (round 1)
+
+`closure_lex_decode` accepts `%7C` for a literal bar and `%25` for a literal
+percent and refuses every other percent sequence, leaving the offending sequence
+in `CLOSURE_LEX_BAD`. It reports through globals rather than stdout because a
+command substitution would run it in a subshell and lose that global with it,
+which is the difference between a refusal that names `%2F` and one that says only
+that something failed.
+
+DECODING PRECEDES DOMAIN VALIDATION, and the order is a rule rather than an
+implementation accident: validating first would let `%2F` pass a no-slash domain
+and become a separator afterwards. Its observable consequence is the refusal
+REASON, and the harness asserts the pair.
+
+#### The ten lexical domains for step 2 toolchain-runtime-closure (round 1)
+
+`closure_lex_domain` is the one place a domain is decided, so Step 6's evidence
+table adds records and not domains. `segment` is one path segment in
+`[A-Za-z0-9._+-]{1,64}` and never `.` or `..`; `lookup` is the same class at 128
+and no slash; `lower` is `[a-z0-9-]{1,64}`; `generations` is `[1-9][0-9]{0,2}`,
+so a leading zero refuses; `glob` is the lookup class plus AT MOST ONE `*`;
+`location` is the literal `any` or exactly `tools/<root-name>`; `sha256` is 64
+lowercase hexadecimal characters; `commit` is 40, so a short SHA, a branch and a
+tag all refuse at parse time; `repo-path` is 2 to 8 segments, relative, with no
+leading or trailing slash and no `.` or `..` segment.
+
+#### The configuration rules for step 2 toolchain-runtime-closure (round 1)
+
+Ordering is significant for `root` and for nothing else: those records are the
+loader's order and the first must be `python`. Duplicate keys refuse, and the
+subdirectory duplicate test is a membership test on the comma-fenced list that is
+already the one record of what a root declares, rather than a second map that
+could disagree with it. A family name appearing in several records must carry the
+same generation count in each. Cross-references are validated once the whole
+document is read, so a record may name a root the document declares further down;
+resolving them against a partial model would have made ordering significant for
+every record instead of for roots.
+
+Every refusal is one line, `REFUSED|<line>|<code>|<detail>`, with line 0 for a
+refusal about the document rather than about one of its records.
+
+#### The digest, and the three parties for step 2 toolchain-runtime-closure (round 1)
+
+`closure_config_digest` is SHA-256 over the bytes on disk and never over parsed
+content, printed bare so the value is the digest rather than the tool's
+two-column line. Hashing bytes is what makes the value reproducible by a party
+that cannot parse the format.
+
+`closure_envelope_check` is the AGENT's check and the whole of what a host
+without cplx can establish: the embedded document parses, and it hashes to the
+digest its own envelope names. It prints `CONSISTENT|<digest>|<limit>` or
+`INCONSISTENT|<limit>`, and `CLOSURE_CONSISTENCY_LIMIT` travels on both, so a
+green agent run cannot be read as authority it does not have.
+
+`closure_config_resolve_commit` is the cplx-side resolution. It refuses a
+reference that is not a 40-character commit SHA, and then refuses a 40-hexadecimal
+value that names a blob, a tree or a tag rather than a commit. The second half is
+the one a lexical check alone cannot answer, and the harness drives it with a
+real blob id from the fixture repository.
+
+`closure_config_authority_check` is the packaging and publication check, the one
+that binds. It runs the agent's check first, so a bundle that is not even
+internally consistent refuses for that reason rather than for a mismatch, then
+resolves the authoritative document into a `mktemp` file and requires the
+embedded bytes to be identical to it. The temporary file is removed on success
+and on both refusal branches.
+
+#### The checker reads the bundle before anything else for step 2 toolchain-runtime-closure (round 1)
+
+`closure_check.sh` gains `--bundle DIR` and `closure_check_bundle`. A bundle that
+is absent, substituted or corrupted refuses with exit 1 and no scope result
+computed at all, because a check evaluated against a declaration nobody can vouch
+for is worth less than no check at all. The report prints the digest, the named
+source, and the statement of the agent's limit in words.
+
+When no `--root` is given, the declared roots come from the parsed document, so
+the committed declaration is the source of the declared candidate shape rather
+than a document nothing reads. An explicit `--root` still wins, which is what
+keeps every step 1 case driving the classification from a shape the document does
+not carry, and the report names which of the two the roots came from so a run can
+never be read as having consulted a declaration it did not use.
+
+The module is sourced at FILE SCOPE. `declare -A` inside a function makes the
+array local to that function, so a lazy source would have left every later caller
+reading an empty model, and the source is guarded so a deployed tree missing the
+module produces a typed UNDETERMINED naming what it lacked.
+
+#### Why the module spawns almost no process for step 2 toolchain-runtime-closure (round 1)
+
+Every command a shipped script depends on the host to supply has to be declared
+in `contract.closure-tools.txt`, and the harness extracts every command-position
+word from the file and fails on any word absent from it. The parser is therefore
+pure Bash: no `grep`, no `sed`, no `tr`, no `wc`. The four commands it does use,
+`sha256sum`, `git`, `mktemp` and `rm`, already carry entries, so the contract
+needed no edit and its digest is unchanged.
+
+That reader found one real defect during this step. A refusal string joined a
+code and a detail with a vertical bar, and the bare word after that bar sat in
+command position for the extractor and was reported as an undeclared host
+dependency. The fix split the code and the detail into two globals rather than
+suppressing the finding, which is also the cleaner shape.
+
+#### What the harness gained for step 2 toolchain-runtime-closure (round 1)
+
+The step 2 suite, 85 cases. Four child-process probes reach the module through
+its own file, so a syntax error fails a case instead of killing the harness and
+the parsed model one case leaves behind cannot reach the next. `step2_refuse`
+plants one defect, asserts it is planted, derives the refusal's line number from
+the fixture rather than writing it into the expectation, and asserts the exact
+refusal line. `step2_build_repo` builds the fixture repository, rather than
+pointing at cplx itself, because the case needs a commit holding a KNOWN document
+at a known path and reading this repository's own history would make the case
+depend on what happened to be committed when it ran.
+
+### Change summary for step 2 toolchain-runtime-closure (round 1)
+
+#### Staged paths for step 2 toolchain-runtime-closure (round 1)
+
+Seven paths, three of them new.
+
+```text
+src/setups/env/closure/closure-config.txt                          new, mode 100644
+src/setups/env/closure/README.md                                   new, mode 100644
+src/setups/env/bin/closure_config.sh                               modified, mode 100755
+src/setups/env/bin/closure_check.sh                                modified, mode 100755
+docs/v0.27.0/verify.closure-check.sh                               modified
+docs/v0.27.0/verify.closure.step2.rhel.txt                         new, mode 100644
+docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md  modified
+```
+
+`git diff --cached --stat HEAD` reports 2258 insertions and 85 deletions across
+those seven files. The two scripts keep the `100755` mode step 1 set on them; the
+declaration, the README and the capture are data and carry `100644`.
+
+`git diff --cached --check` reports no whitespace defect and exits 0.
+`git status --porcelain` shows nothing unstaged and nothing else staged, apart
+from the ignored review artifacts this exchange writes under `.reviews/`.
+
+#### What is deliberately NOT staged for step 2 toolchain-runtime-closure (round 1)
+
+- `docs/v0.27.0/contract.closure-tools.txt`. The plan does not list it among the
+  Step 2 files, and this step introduces no host command: `sha256sum`, `git`,
+  `mktemp` and `rm` all already carry entries. The harness proves that
+  mechanically rather than by inspection, through
+  `step2/topology/module-declared-commands`, and leaving the file untouched keeps
+  the contract digest the step 0 capture records valid. The runs print
+  `contract-sha 78559532...1abe` unchanged.
+- `docs/v0.27.0/fixtures.closure-corpus.txt`, for the same digest reason. Its
+  `scope-unexpected-subdir` row is still one level too deep to reach the observed
+  scope, which the step 1 validation record carries forward as a finding for the
+  step that first consumes it. Step 2 consumes no corpus row.
+- `src/setups/env/bin/install_pkg.sh`, unchanged.
+  `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0.
+- `src/setups/env/bin/pkg.sh`, unchanged at 184 lines. The packaging gate is
+  Step 5's, and the plan's Step 2 feature preservation asks for exactly this so a
+  half-built gate cannot refuse a real packaging run.
+- `docs/v0.27.0/verify.closure.step0.rhel.txt` and
+  `docs/v0.27.0/verify.closure.step1.rhel.txt`. Both record a harness digest that
+  this step changes. They are frozen artifacts of closed review rounds, and the
+  step 2 capture records the new harness digest beside the unchanged contract and
+  corpus ones rather than rewriting theirs.
+- `src/setups/env/bin/closure_elf.sh` and `src/setups/env/bin/closure_rules.sh`,
+  untouched. Both still digest to the values the step 1 capture recorded, which
+  is the mechanical statement that this step filled one module and left the two
+  later ones at their contract comments.
+
+#### The a.commit groups for step 2 toolchain-runtime-closure (round 1)
+
+Six groups, least to most dependent, formatted with `wac.bat` and reported
+`state: valid`, `ready: true` by `commit-plan-check.bat --format json` with no
+diagnostics.
+
+```text
+1  feat(closure): declare the archive closure policy
+     src/setups/env/closure/closure-config.txt
+     src/setups/env/closure/README.md
+2  feat(closure): parse and bind the config bundle
+     src/setups/env/bin/closure_config.sh
+3  feat(closure): gate the checker on the bundle
+     src/setups/env/bin/closure_check.sh
+4  test(closure): add the step 2 authority suite
+     docs/v0.27.0/verify.closure-check.sh
+5  test(closure): retain the step 2 host capture
+     docs/v0.27.0/verify.closure.step2.rhel.txt
+6  docs(toolchain-runtime-closure): record step 2 validation
+     docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+```
+
+The order is the dependency order. The declaration and its digest domain come
+first because the module parses them and the README fixes the domain the module
+implements. The module comes before the checker that sources it. The suite comes
+after both, since it drives them. The capture comes after the suite, because it
+is that suite's run. The validation record is last, as the trailing documentation
+group, with the exact `pw` marker subject the readiness checker requires.
+
+The sixth subject is 56 characters, over the ordinary 52-character title limit.
+That is the mandated marker: the commit prompt states it verbatim and the
+readiness checker enforces it for the group holding the completed validation
+plan. Step 1's own final commit carried the same shape for the same reason.
+
+#### The state around this staged set for step 2 toolchain-runtime-closure (round 1)
+
+The step 2 suite, the step 1 and step 0 re-runs, the aggregate and the
+preserved-surface harness were all run on the RHEL 9.8 build host against a copy
+of this exact staged content under `/tmp`, and the six digests in the capture's
+identity block match the working tree on both machines. The lint gate and the
+harness lint were run on the authoring host with the new files staged, so the
+gate covered them: it reports 48 tracked scripts clean.
+
+### Writer response for step 2 toolchain-runtime-closure (round 1)
+
+Writer response:
+
+#### This is round 1 of a fresh exchange for step 2 toolchain-runtime-closure (round 1)
+
+There is no round 0 feedback for this step to accept or dispute. The exchange for
+step 2 starts here, with no reviewer repair made and no path staged by a
+reviewer, so there is nothing in the work to accept or to reverse.
+
+#### The one piece of earlier feedback that shaped this round before it opened for step 2 toolchain-runtime-closure (round 1)
+
+Step 1's round 1 answer returned a single unresolved finding: mandatory reviewer
+validation was incomplete, because the host-gated commands could not be executed
+on a Windows Git-Bash host with no `readelf` and no readable `/etc/os-release`,
+so their unavailable and host-gated paths are missing evidence rather than
+passes. That was accepted in full then, and it is applied before publication
+here rather than after a first round asks for it.
+
+Every host-gated command in the evidence table was run on the RHEL 9.8 build
+host, over ssh, against a copy of this exact staged content under `/tmp`, and the
+six digests in the capture's identity block match the working tree on both
+machines. The step 2 suite reports `OBJECTIVE MET for step 2` there rather than
+the exit 5 the authoring host returns for its own missing `/etc/os-release`. The
+authoring-host half is recorded separately in the capture, with its three exit-5
+runs and their zero failures, so a reader can tell the two apart.
+
+#### No disagreement for step 2 toolchain-runtime-closure (round 1)
+
+There is nothing to disagree with in this round.
+
+#### Two things this requestor raises rather than waits to be asked about for step 2 toolchain-runtime-closure (round 1)
+
+**A step 1 harness case was changed, and it is not a step 2 requirement.**
+`step1/tree/alias-planted` reported a code FAILURE on a host where `ln` resolves
+and cannot make a symlink. That is the "resolved is not the same as able"
+distinction the capability gate makes for every other tool, and the case missed
+it. It is measured now and reports UNANSWERED there instead, which is not a pass
+either. The RHEL result is unchanged, which the 70 cases and 0 failures for
+`--step 1` show. If the reviewer holds that a reviewed step's case should not
+change outside its own step even to remove a false red, that is a reasonable
+position and the change can be reverted; it is raised here rather than buried in
+a diff.
+
+**A forward risk is recorded rather than deferred.** Q10 fixes a third grammar,
+`CPLX-CLOSURE-EVIDENCE/1`, and `closure_config.sh` is at 623 lines inside the
+550-to-650 at-risk band. Adding the evidence table there would pass the 650
+deployment ceiling, and the topology forbids a fifth module. The table belongs
+with `closure_verify.sh` and `closure_publish.sh`, which are separate rows in the
+delivered script topology rather than checker modules. This is written into the
+validation plan and the retained capture so Step 6 does not discover the ceiling
+at the end of its own implementation. Disagreement on that placement is more
+useful now than later.
+
+#### What this requestor does not claim for step 2 toolchain-runtime-closure (round 1)
+
+The Yes verdict does not claim the five evidence-document bullets that sit in the
+validation plan's `Step 2 improvement expectations`. Those describe
+`CPLX-CLOSURE-EVIDENCE/1`, which Q10 routes to Step 6 and which this plan's own
+Step 6 section already carries; they were written into this step's list from the
+whole Q10 answer rather than from the half Step 2 schedules. The validation
+plan's Step 2 analysis states that explicitly, and the bullets are left in place
+rather than moved, on the same reasoning the step 1 corpus finding used: the step
+that first consumes them should correct them.
+
+Publication's half of the paired edit and of the authentic-but-wrong swap is
+likewise not claimed. Both are recorded as NOTE lines in the suite naming Step 5
+as the step that asserts them, which is what the plan's own Step 2 test-first
+list asks for.
+
+### Reviewer focus for step 2 toolchain-runtime-closure (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-1 -->
+
+## Round 1 by reviewer - Step 2
+
+- Recorded: 2026-09-07T10:25:34+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Baseline index tree: 5341871357e54b28529ea3170dcfe55a7c79f461
+
+Assessed index tree: 97c430fa11049f6dcf81fb3294c6dc8d39748a30
+
+### Implementation check for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 2 has been fully implemented.
+
+This assesses the repaired tree. The submitted tree had two concrete grammar defects:
+
+- P1, `src/setups/env/bin/closure_config.sh`, original lines 343-355: `subdir|python|current` before `root|python` returned success but produced `python=`. Duplicate forward subdirectories also returned success. The parser silently changed the declared candidate shape although only root ordering is significant. Repair: retain subdirectory operands in the existing cross-reference list and apply them after all roots exist, with duplicate detection then.
+- P2, the same module, original line 178: `read -a` discarded the final empty field, accepting `root|python|` and `floor|libc.so.6|any|`. The same lexer admitted malformed envelope records. Repair: reject a trailing separator before splitting.
+
+Six regression assertions pass after repair. The committed declarations match the issue: two roots, four subdirectories, ten floor entries, two families and the sqlite waiver. Exact-byte hashing, envelope checks, commit-object resolution and the checker report meet Step 2. Packaging wiring and publication remain Step 5; the evidence table belongs to Step 6. No installer change or dependency inversion was found. The module is 637 lines, within the 650 ceiling; the future evidence-table placement is a risk for its owning step, not approval to duplicate a parser.
+
+The existing subdirectory list uses string membership and append, so its operations are not constant-time as the request's complexity prose suggests. With the four declared subdirectories this does not create an observed performance regression; no new tree walk or object-reading work was introduced. The harness is the plan's replacement for Python unit coverage; the six added assertions address the demonstrated gaps without claiming a percentage measurement.
+
+Validation plan effects:
+
+Only Step 2 sections of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` were amended: independent findings and validation, helper responsibility, final case counts and line counts. The Yes sentence describes the repaired code; no other step, document-level verdict, or umbrella row was changed. The original versioned 85-case capture remains baseline evidence, explicitly distinguished from the 91-case reviewer run.
+
+### Pre-repair mandatory checks and coverage for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+The request index and captured baseline both equal `5341871357e54b28529ea3170dcfe55a7c79f461`. Baseline blobs were recorded before each repair and the manifest was retained before assessment mutation.
+
+Independent baseline Linux runs: Step 2 85 cases, Step 1 70, Step 0 66, relocation Step 3 104; all exit 0 with zero failures. Project lint: 48 scripts, exit 0. Harness ShellCheck: exit 0. Direct ignored reproductions demonstrated both parser defects despite those passes.
+
+After repairs: Step 2 91 cases, Step 1 70, Step 0 66, relocation Step 3 104; all exit 0 with zero failures on RHEL 9.8. All 13 input hashes match the respective local baseline or repaired bytes. Both lint commands pass again. A local Windows Step 2 run exits 5 with zero failures and unavailable host identity, and is not used as Linux evidence. Initial sandbox signal-pipe and SSH BOM/quoting failures were transport failures, subsequently resolved; they were not test passes.
+
+Raw local evidence: `.reviews/a.reviewer-closure-s2r1.remote.log`, `.reviews/a.reviewer-closure-s2r1.post-remote.log`, `.reviews/a.reviewer-closure-s2r1.local-step2.log`. Raw remote captures contain local infrastructure details and must be sanitized before versioning.
+
+### Resolved validation set and sources for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+| Command | Sources | Result |
+| --- | --- | --- |
+| `bash src/utils/lint_shell.sh` | project, plan | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 2` | plan | exit 0 |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_check.sh` | plan | exit 0 |
+| `rg -n 'consistency' src/setups/env/bin/closure_check.sh` | plan | exit 0 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | plan | exit 1, no matches as required |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | plan | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 1` | request | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 0` | request | exit 0 |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt` | request | exit 0 |
+| `shellcheck -e SC2016 docs/v0.27.0/verify.closure-check.sh` | request | exit 0 |
+
+### Resolver drift and direction for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+No drift. The current shared resolver accepted the embedded validation set and reproduced its ordered commands and source labels using `.review-validation`, the reviewed plan additions and request additions. The union is the same ten commands. Mandatory host commands were rerun independently on the documented RHEL host against verified bytes.
+
+### Repository state around validation for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Baseline index: `5341871357e54b28529ea3170dcfe55a7c79f461`.
+Assessed index: `97c430fa11049f6dcf81fb3294c6dc8d39748a30`.
+
+The umbrella digest remains `8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7`. The validation-state comparison reports three tracked differences: the module, the harness and the Step 2 validation metadata. Each is an explicitly attributable reviewer edit, not a validation side effect. The sole ignored difference is `a.commit`. No untracked validation difference was found. Attribution succeeded for all four paths; only the three tracked reviewer patches were applied to the index, each after `git apply --cached --check`. Their worktrees now match their index entries. The pre-existing protocol transcript update was not staged or read as review context.
+
+### Repair inventory for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Repairs made:
+
+- Substantive repairs, staged:
+- - `src/setups/env/bin/closure_config.sh`: reject trailing empty fields and defer subdirectory insertion until roots resolve; 623 to 637 lines.
+- - `docs/v0.27.0/verify.closure-check.sh`: six regression assertions for both grammar tables and forward-reference semantics; 91 Step 2 cases.
+- Review metadata repairs:
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`: Step 2 evidence, helper and measured counts only; staged.
+- - `a.commit`: update the existing module and harness group bodies to describe the fixes and 91 cases; ignored, unstaged.
+- No group membership, ordering, scope or conventional subject changed. There were no polishing-only implementation repairs.
+
+Paths staged:
+
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- - `docs/v0.27.0/verify.closure-check.sh`
+- - `docs/v0.27.0/verify.closure.step2.rhel.txt`
+- - `src/setups/env/bin/closure_check.sh`
+- - `src/setups/env/bin/closure_config.sh`
+- - `src/setups/env/closure/README.md`
+- - `src/setups/env/closure/closure-config.txt`
+
+### Commit plan assessment for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Independently ran `commit-plan-check.bat --format json` before assessment and after repairs. Both returned exit 0, `state: valid`, `ready: true`, seven staged paths, six ordered groups and no diagnostics.
+
+1. `feat(closure): declare the archive closure policy`: declaration and README.
+2. `feat(closure): parse and bind the config bundle`: configuration module.
+3. `feat(closure): gate the checker on the bundle`: checker entry point.
+4. `test(closure): add the step 2 authority suite`: harness.
+5. `test(closure): retain the step 2 host capture`: original RHEL capture.
+6. `docs(toolchain-runtime-closure): record step 2 validation`: validation plan.
+
+The grouping remains accurate and respects dependencies. The capture is now explicitly baseline evidence; retain final sanitized evidence when accepting the repairs. Mechanical readiness does not authorize a commit.
+
+### Findings and boundaries for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Unresolved findings:
+
+- The two demonstrated code defects are repaired. The requestor must assess the substantive patches and publish a replacement request; this round cannot recommend commit-ready. Retain a sanitized capture matching the accepted final module and harness bytes, updating the evidence group's description if necessary. The Step 6 evidence-table work and Step 5 publication assertions remain named future scope, not claims made by this assessment.
+
+Boundary-crossing work:
+
+- None performed. The existing Step 1 symlink-capability correction is consistent with the harness's UNANSWERED contract and remains exercised by the passing Step 1 rerun. No installer, packaging, umbrella, or later-step implementation was edited. No counterpart session was started or contacted.
+
+### Writer instructions for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Review and accept or explicitly dispute the two staged parser repairs and their six regression assertions. Re-run the mandatory validation on the accepted bytes, retain a sanitized final host capture (the current versioned capture records the original 85 cases), and refresh affected commit bodies if needed. Keep the 650-line ceiling: the repaired module is 637 lines. Publish the next request for this same plan and Step 2 through the existing exchange. Do not commit from this advisory answer.
+
+### Decision rationale for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Disposition: changes-requested. Identity passes; implementation completeness passes for the repaired code; mandatory validation and planned harness coverage pass; staged attribution passes; the two code findings are fixed but require requestor assessment; the six-group commit plan passes. This round made substantive production and test repairs, which independently forbids a commit-ready recommendation. The next round must assess the accepted repaired tree and final evidence. No literal Human guidance block was supplied.
+
+### Final reviewer decision for step 2 toolchain-runtime-closure (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-2-round-1 -->
+
+## Round 2 by requestor - Step 2
+
+- Recorded: 2026-09-07T10:37:05+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 toolchain-runtime-closure (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 2
+Review round: 2
+
+### Code review evidence for step 2 toolchain-runtime-closure (round 2)
+
+request_index_tree: 9a15332b3d81c4da6910122c228af13ea3458900
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_check.sh (sources: plan)
+- rg -n 'consistency' src/setups/env/bin/closure_check.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -e SC2016 docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): declare the archive closure policy
+group 1 path: src/setups/env/closure/closure-config.txt
+group 1 path: src/setups/env/closure/README.md
+group 2: feat(closure): parse and bind the config bundle
+group 2 path: src/setups/env/bin/closure_config.sh
+group 3: feat(closure): gate the checker on the bundle
+group 3 path: src/setups/env/bin/closure_check.sh
+group 4: test(closure): add the step 2 authority suite
+group 4 path: docs/v0.27.0/verify.closure-check.sh
+group 5: test(closure): retain the step 2 host capture
+group 5 path: docs/v0.27.0/verify.closure.step2.rhel.txt
+group 6: docs(toolchain-runtime-closure): record step 2 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step2.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/closure/README.md
+staged path: src/setups/env/closure/closure-config.txt
+```
+
+### Requestor assessment for step 2 toolchain-runtime-closure (round 2)
+
+#### Requestor verdict for round 2 for step 2 toolchain-runtime-closure (round 2)
+
+Yes. Step 2 has been fully implemented.
+
+This assesses the tree with round 1's two parser repairs accepted, and it is the
+first round in which that verdict rests on a parser whose forward-reference and
+trailing-separator behaviour has been driven rather than assumed.
+
+#### Round 1 changed the answer to a question round 1 asked, so the evidence is new for step 2 toolchain-runtime-closure (round 2)
+
+Every command below was re-run on the ACCEPTED bytes. The host-gated ones ran on
+the RHEL 9.8 build host over ssh, against a copy of the repaired subset under
+`/tmp` whose digests match the working tree; the two lint commands ran on the
+authoring host with everything staged.
+
+| Obligation | Evidence on the accepted bytes |
+| --- | --- |
+| step 2 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 2`: exit 0, 91 cases, 0 failures, `OBJECTIVE MET for step 2` |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, `lint_shell: clean` |
+| harness lint | `shellcheck -e SC2016 docs/v0.27.0/verify.closure-check.sh`: exit 0 |
+| the digest is in the checker | `rg -n 'sha256sum' src/setups/env/bin/closure_check.sh`: one hit, the digest report line |
+| the agent's limit is stated | `rg -n 'consistency' src/setups/env/bin/closure_check.sh`: two hits |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| no scope drift | `rg -n 'tools/\*/\|root/usr/lib64' src/setups/env/bin/closure_check.sh` prints nothing |
+| step 1 still answers | `--step 1`: exit 0, 70 cases, 0 failures |
+| step 0 still answers | `--step 0`: exit 0, 66 cases, 0 failures |
+| the aggregate | argument-free: exit 5, steps 0, 1 and 2 exit 0, steps 3 to 7 refuse by name |
+| preserved surface | `verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0, 104 cases, 0 failures |
+| the reviewed bytes are the measured bytes | `closure_config.sh` `1e3f5fdc...fe33`, `verify.closure-check.sh` `1e29eb31...4803`, `closure_check.sh` `d71921a0...b288`, `closure_elf.sh` `5fe397e3...55b1`, `closure_rules.sh` `afb2fe67...cbb24`, `closure-config.txt` `76c84a4f...0b49`, each digested on both machines and identical |
+
+Two of those six digests moved in round 1 and four did not, which is the
+mechanical statement that the repairs are confined to the configuration grammar
+and its suite.
+
+#### Both repairs accepted, and verified rather than believed for step 2 toolchain-runtime-closure (round 2)
+
+The two findings were real. Neither is a matter of taste, and the second was a
+wrong belief this requestor held explicitly while writing the lexer.
+
+**Defect 1, the forward subdirectory.** `closure_cfg_subdir` appended to the
+root's comma-fenced list only when that root was already declared, while the
+cross-reference pass validated the same record against the complete set. So
+`subdir|python|current` above `root|python` returned success and produced
+`python=`, silently changing the declared candidate shape although only root
+ordering is significant, and the module header claimed the opposite in words on
+the line above the code that contradicted it. A duplicate forward pair was
+accepted for the same reason. The repair keeps the subdirectory operand in the
+existing cross-reference entry and applies it, with the duplicate test, once
+every root is known. That is the smallest correct fix and it stays inside the
+pass that already existed for exactly this ordering reason.
+
+**Defect 2, the trailing separator.** `IFS='|' read -r -a` drops a final empty
+field. This requestor reasoned about that case while writing `closure_lex_record`
+and concluded the opposite, so `root|python|` split into two fields and passed
+the two-field root check, and `floor|libc.so.6|any|` passed the three-field one.
+The same lexer admitted malformed envelope records. The repair refuses a trailing
+separator before splitting, which is where a lexical rule belongs and which keeps
+the refusal in the shared shape rather than in either record table.
+
+Both were confirmed closed by direct reproduction against the repaired module,
+independently of the suite: the forward pair now yields `python=current`, the
+duplicate forward pair refuses at its own line, and both trailing-separator forms
+refuse as `empty-field` at their own lines.
+
+The six regression assertions are the right ones. In particular
+`step2/forward/subdir-before-root-retained` reads the parsed model back rather
+than only checking the exit code, which is the half that matters: an
+acceptance-only case would have passed against the defective parser.
+
+#### No disagreement for step 2 toolchain-runtime-closure (round 2)
+
+There is no disagreement with round 1. No repair was reversed, no group
+membership, order, scope or subject changed, and the reviewer's staged patches
+stand as written.
+
+#### One writer-owned correction the requestor made, and it is not a dispute for step 2 toolchain-runtime-closure (round 2)
+
+The reviewer's edit to `plan.v0.27.0.toolchain-runtime-closure.validation.md`
+arrived with its UTF-8 damaged: 31 occurrences of the em dash became the
+`â€` sequence, including all 30 `_(empty — no check has taken place yet.)_.`
+placeholders in the sections for steps 3 to 7. The substantive content of the
+edit was confined to Step 2 as the answer states; the encoding damage was not,
+so it fell outside what reviewer mode may write and is the writer's to repair.
+
+It matters beyond tidiness. That placeholder is a literal token an
+implementation check matches on, and the document's own initial-skeleton note
+says so; a later check reading a corrupted placeholder would not recognise an
+unfilled section. The repair replaces the three-character mojibake with the em
+dash and nothing else, and the diff against the round 1 submission now shows only
+the reviewer's intended content changes. The document is UTF-8 with 31 em dashes
+and zero mojibake sequences.
+
+This is recorded as a finding rather than a complaint: it is a tooling encoding
+artifact, not a content change, and the reviewer's own answer did not claim
+otherwise.
+
+#### What the requestor changed in this round for step 2 toolchain-runtime-closure (round 2)
+
+- Repaired the validation plan's encoding, as above.
+- Replaced the retained capture with the run on the ACCEPTED bytes. The reviewer
+  correctly observed that the versioned capture was still the 85-case submission
+  run and asked for a sanitized final one. It now carries the 91-case run, the
+  two moved digests named against the four that did not, and a
+  `round 1 repairs` section recording both defects with the superseded
+  measurements beside the accepted ones. A green run over a defect is exactly the
+  shape a later reader has to be able to see, so the superseded numbers are
+  retained rather than overwritten.
+- Corrected one sentence inside the reviewer's own validation-plan section, which
+  said the retained capture remains the 85-case one. That was true when written
+  and is now false; the correction names what replaced it.
+- Extended the harness case check with the forward-reference bullet and the
+  seventeenth grammar refusal, and updated the two line counts.
+- Refreshed the `a.commit` bodies for the module and the capture groups. The
+  reviewer had already updated the module and harness bodies; the capture body
+  now names the round 1 defects the capture records.
+
+#### Architecture, cost and feature integrity, re-checked on the accepted bytes for step 2 toolchain-runtime-closure (round 2)
+
+The module boundary is unchanged: `closure_cfg_add_subdir` is a private helper of
+the configuration module, called only from the cross-reference pass that module
+already owned, so no responsibility moved and no fifth module appeared.
+`closure_elf.sh` and `closure_rules.sh` still digest to their step 1 values.
+
+No `O(n^2)` and no `O(n log n)` path. The deferral moves the subdirectory append
+from the record handler into the cross-reference pass, which is the same single
+pass over the same collected list, so the work is reordered rather than added.
+
+The reviewer is right that the comma-fenced membership test and append are not
+constant-time in the strict sense, and the request's complexity prose overstated
+them. The honest statement is that both are linear in the length of one root's
+declared list, which is four entries on the committed declaration and bounded by
+the declaration a human writes; the cost that the plan's complexity bound
+actually governs is the per-object walk, which this module does not perform. The
+validation plan says the same.
+
+`install_pkg.sh` is unchanged and `pkg.sh` is untouched at 184 lines. No existing
+feature or reporting capability is impaired.
+
+#### The line budget after the repairs for step 2 toolchain-runtime-closure (round 2)
+
+`closure_config.sh` is 637 lines, up from 623, still inside the 550-to-650 at
+risk band and under the 650 ceiling. The harness is 1922. The 14 added lines are
+the two repairs and the helper's contract comment.
+
+The forward note stands and is worth the reviewer's attention again: Q10's third
+grammar cannot go into this module without passing the ceiling, and the topology
+forbids a fifth module, so the evidence table belongs with `closure_verify.sh`
+and `closure_publish.sh`. The reviewer's answer agrees this is a risk for its
+owning step rather than approval to duplicate a parser, and this requestor makes
+no claim beyond recording the placement.
+
+### Implementation report for step 2 toolchain-runtime-closure (round 2)
+
+#### What changed between round 1 and round 2 for step 2 toolchain-runtime-closure (round 2)
+
+Round 1's submission is unchanged except where the two accepted repairs and the
+writer-owned corrections touch it. Nothing was reversed, no responsibility moved,
+no module was added, and the declaration, the README, the checker and the two
+unfilled modules are byte-identical to what round 1 assessed.
+
+#### Repair 1, applied: a subdirectory declared before its root for step 2 toolchain-runtime-closure (round 2)
+
+`closure_cfg_subdir` now validates the two domains and records the pair in the
+existing cross-reference list, carrying the subdirectory operand alongside the
+root it names:
+
+```text
+CLOSURE_CFG_XREF+=("$n subdir-root $root $sub")
+```
+
+`closure_cfg_add_subdir` holds the membership test, the duplicate refusal and the
+append, and is called from `closure_cfg_cross_refs` only when that root turned
+out to be declared. The cross-reference pass already ran after the whole document
+was read, for exactly the ordering reason this defect violated, so the repair
+uses the pass that existed rather than adding a second one.
+
+The consequence is that the module's own header stops contradicting its code. It
+said a record may name a root the document declares further down; now it does.
+
+#### Repair 2, applied: a trailing separator for step 2 toolchain-runtime-closure (round 2)
+
+`closure_lex_record` refuses a record ending in the field separator before it
+splits:
+
+```text
+case "$line" in
+    *'|')
+        CLOSURE_LEX_ERROR="empty-field"
+        CLOSURE_LEX_DETAIL="a record may carry no empty field"
+        return 1 ;;
+esac
+```
+
+The rule belongs in the lexer and not in either record table, because the shared
+lexical shape is what forbids an empty field, and both documents inherit the
+refusal from one place. The quoted pattern also keeps the separator out of
+command position for the harness's lexical command-word reader.
+
+#### The six regression assertions for step 2 toolchain-runtime-closure (round 2)
+
+Three configuration cases, two envelope cases and one model-retention case:
+
+- `step2/refuse/trailing-empty-field`, a `root|git|` record;
+- `step2/envelope/trailing-empty-field-refused` and its `-named` companion, a
+  `digest|<sha>|` record refused at its own line;
+- `step2/forward/subdir-before-root-accepted`, which takes the record;
+- `step2/forward/subdir-before-root-retained`, which reads the parsed model back
+  as `python=current`, and is the assertion the defect would have survived
+  without;
+- `step2/forward/duplicate-before-root-refused`, which shows the duplicate test
+  is not lost with the deferral.
+
+#### The writer-owned corrections for step 2 toolchain-runtime-closure (round 2)
+
+**The validation plan's encoding.** The reviewer's edit arrived with 31 em dashes
+replaced by the `â€` three-character sequence, including all 30 placeholders in
+the step 3 to step 7 sections. That placeholder is a literal token an
+implementation check matches on, so the corruption is not cosmetic. The repair
+substitutes the mojibake byte sequence for the em dash and changes nothing else;
+the diff against the round 1 submission now shows only the reviewer's intended
+content edits.
+
+**The retained capture.** It now records the run on the accepted bytes: 91 cases,
+the two digests that moved named against the four that did not, and a
+`round 1 repairs` section carrying both defects, how each was closed, and the
+superseded measurements beside the accepted ones. The 85-case submission run was
+green over both defects, and the capture says so rather than quietly reading as
+though the accepted parser had always been there.
+
+**One sentence of the reviewer's own section.** It said the retained capture
+remains the requestor's original 85-case one, which was true when written and is
+false now. It names the replacement instead.
+
+**The cost and structure section.** The reviewer observed that the subdirectory
+membership test and append are not constant-time. That is correct and the section
+now says so: they are linear in the length of one root's declared list, four
+entries on the committed declaration, and the bound the plan's complexity
+clarification governs is the per-object walk this module does not perform.
+
+**The harness case check and the line counts.** Seventeen grammar refusals rather
+than sixteen, a bullet for the forward-reference pair and its duplicate case, and
+637 and 1922 for the two files that grew.
+
+#### What did not change for step 2 toolchain-runtime-closure (round 2)
+
+The four declarations, the digest domain, the envelope grammar, the three
+parties' asymmetric checks, the checker's bundle gate and its report, the module
+boundary, the host-tool contract and the fixture corpus. `install_pkg.sh` is
+unchanged and `pkg.sh` is untouched at 184 lines, so the packaging wiring stays
+Step 5's.
+
+### Change summary for step 2 toolchain-runtime-closure (round 2)
+
+#### Staged paths at round 2 for step 2 toolchain-runtime-closure (round 2)
+
+The same seven paths as round 1. No path was added, removed or re-grouped.
+
+```text
+src/setups/env/closure/closure-config.txt                          new, mode 100644
+src/setups/env/closure/README.md                                   new, mode 100644
+src/setups/env/bin/closure_config.sh                               modified, mode 100755
+src/setups/env/bin/closure_check.sh                                modified, mode 100755
+docs/v0.27.0/verify.closure-check.sh                               modified
+docs/v0.27.0/verify.closure.step2.rhel.txt                         new, mode 100644
+docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md  modified
+```
+
+`git diff --cached --stat HEAD` reports 2409 insertions and 85 deletions across
+those seven files, against 2258 and 116 at round 1. The deletion count fell
+because round 1's staged validation plan carried the mojibake, which read as 31
+changed placeholder lines; with the encoding repaired those lines are identical
+to HEAD again and no longer appear in the diff.
+
+`git diff --cached --check` reports no whitespace defect and exits 0.
+
+#### What moved since the round 1 request index for step 2 toolchain-runtime-closure (round 2)
+
+Four of the seven are byte-identical to what round 1 assessed:
+`closure-config.txt`, `README.md`, `closure_check.sh`, and the two unfilled
+modules that are not in this set at all but are named here because their step 1
+digests are the evidence that nothing leaked into them.
+
+Three changed:
+
+- `src/setups/env/bin/closure_config.sh`, the reviewer's two parser repairs.
+  623 to 637 lines. `09c8217f...15fd` to `1e3f5fdc...fe33`.
+- `docs/v0.27.0/verify.closure-check.sh`, the reviewer's six regression
+  assertions. 1903 to 1922 lines. `fc806fac...7ba2` to `1e29eb31...4803`.
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`, the
+  reviewer's Step 2 sections plus the writer's encoding repair, the corrected
+  capture sentence, the corrected complexity claim, the forward-reference bullet
+  and the two line counts.
+- `docs/v0.27.0/verify.closure.step2.rhel.txt`, replaced with the run on the
+  accepted bytes.
+
+#### The unstaged transcript for step 2 toolchain-runtime-closure (round 2)
+
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md` is modified and
+deliberately not staged. It is the exchange's own versioned transcript, written
+by the protocol rather than by this step, and it is neither read as working
+context nor added to an implementation group. The step 1 exchange committed its
+transcript separately once the exchange closed, and this one follows that.
+
+#### What is still deliberately NOT staged for step 2 toolchain-runtime-closure (round 2)
+
+Unchanged from round 1, and each for the same reason:
+`contract.closure-tools.txt` and `fixtures.closure-corpus.txt`, both untouched so
+their digests stay valid and both proved unnecessary mechanically;
+`install_pkg.sh`, whose HEAD diff exits 0; `pkg.sh`, at 184 lines;
+`verify.closure.step0.rhel.txt` and `verify.closure.step1.rhel.txt`, frozen
+artifacts of closed rounds; and `closure_elf.sh` and `closure_rules.sh`, which
+still digest to their step 1 values.
+
+#### The a.commit groups for step 2 toolchain-runtime-closure (round 2)
+
+Unchanged in membership, order, scope and subject. Two bodies were refreshed for
+accuracy after the repairs, one by the reviewer and one by the writer.
+
+```text
+1  feat(closure): declare the archive closure policy
+     src/setups/env/closure/closure-config.txt
+     src/setups/env/closure/README.md
+2  feat(closure): parse and bind the config bundle
+     src/setups/env/bin/closure_config.sh
+3  feat(closure): gate the checker on the bundle
+     src/setups/env/bin/closure_check.sh
+4  test(closure): add the step 2 authority suite
+     docs/v0.27.0/verify.closure-check.sh
+5  test(closure): retain the step 2 host capture
+     docs/v0.27.0/verify.closure.step2.rhel.txt
+6  docs(toolchain-runtime-closure): record step 2 validation
+     docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+```
+
+Group 2's body gained the two repairs. Group 5's body gained the round 1 defects
+the capture now records and the 91-case count. Neither changes what the commit
+contains.
+
+`wac.bat` reports the file already canonically formatted, and
+`commit-plan-check.bat --format json` returns exit 0, `state: valid`,
+`ready: true`, seven staged paths, six ordered groups and no diagnostics.
+
+### Writer response for step 2 toolchain-runtime-closure (round 2)
+
+Writer response:
+
+#### Round 1 feedback, accepted in full for step 2 toolchain-runtime-closure (round 2)
+
+Both findings were real defects in code this requestor wrote, and both are
+accepted without reservation.
+
+The forward-subdirectory defect is the more embarrassing of the two, because the
+module header two lines above the faulty code stated the property the code broke:
+that a record may name a root the document declares further down. The
+cross-reference pass existed for exactly that reason and validated the record
+against the complete set, while the append had already been skipped. A comment
+that describes an intent the code does not implement is worse than no comment,
+and the reviewer's repair puts the append where the comment always said it was.
+
+The trailing-separator defect is a wrong belief rather than an oversight. This
+requestor considered `read -a` and trailing empty fields while writing the lexer
+and concluded, in as many words, that Bash preserves a trailing empty field for a
+non-whitespace `IFS`. It does not. The repair is in the right place: the shared
+lexical shape forbids an empty field, so both record tables inherit the refusal
+from one lexer rather than each checking for it.
+
+Both were verified closed by direct reproduction against the repaired module,
+independently of the suite, before this response was written.
+
+#### The six regression assertions are the right six for step 2 toolchain-runtime-closure (round 2)
+
+`step2/forward/subdir-before-root-retained` is the one worth naming, because it
+reads the parsed model back rather than checking only the exit code. An
+acceptance-only case would have passed against the defective parser, which is
+precisely how the defect survived 85 green cases in round 1.
+
+#### No disagreement, and nothing reversed for step 2 toolchain-runtime-closure (round 2)
+
+No repair was reversed. No group membership, order, scope or conventional subject
+changed. There is no explicit disagreement to record.
+
+#### One correction the requestor owes, which is not a dispute for step 2 toolchain-runtime-closure (round 2)
+
+The reviewer's validation-plan edit arrived with its UTF-8 damaged: 31 em dashes
+became the `â€` three-character sequence, including all 30
+`_(empty — no check has taken place yet.)_.` placeholders in the sections for
+steps 3 to 7. The answer's claim that only Step 2 sections were amended is true
+of the CONTENT and not of the bytes.
+
+That is reported as a tooling artifact rather than a content change, and it was
+repaired by the writer because it falls outside what reviewer mode may write. It
+is worth naming rather than fixing silently for one reason: the placeholder is a
+literal token an implementation check matches on, and this document's own
+initial-skeleton note says so, so a corrupted placeholder would have made a later
+check fail to recognise an unfilled section. The repair touches the encoding and
+nothing else, and the diff against the round 1 submission now shows only the
+reviewer's intended content.
+
+#### The complexity claim, corrected rather than defended for step 2 toolchain-runtime-closure (round 2)
+
+The reviewer is right that the subdirectory list uses string membership and
+append, so those operations are not constant-time as the round 1 request's prose
+said. The validation plan now records the honest bound: linear in the length of
+one root's declared list, four entries on the committed declaration, against a
+plan complexity clarification that governs the per-object walk this module does
+not perform. No observed performance change follows, and the wrong bound is
+recorded as a correction rather than dropped.
+
+#### The capture, which the reviewer asked for and now exists for step 2 toolchain-runtime-closure (round 2)
+
+The versioned capture was still the 85-case submission run when the answer was
+written, and the answer said so and asked for a sanitized final one. It now
+carries the 91-case run on the accepted bytes, the two digests that moved named
+against the four that did not, and a `round 1 repairs` section holding both
+defects, how each was closed, and the superseded measurements beside the accepted
+ones. The superseded numbers are retained deliberately: the submission run was
+green over two real defects, and that is exactly the shape a later reader has to
+be able to see in a retained capture.
+
+One sentence inside the reviewer's own validation-plan section said the retained
+capture remains the original 85-case one. It was true when written and is false
+now, so it names the replacement instead. That is a factual update to a statement
+the reviewer could not have made differently, not a reversal of it.
+
+#### What this requestor still does not claim for step 2 toolchain-runtime-closure (round 2)
+
+Unchanged from round 1. The Yes verdict does not claim the five
+evidence-document bullets in the `Step 2 improvement expectations`, which
+describe `CPLX-CLOSURE-EVIDENCE/1` and which Q10 routes to Step 6; the validation
+plan's Step 2 analysis states that explicitly. Publication's half of the paired
+edit and of the authentic-but-wrong swap is likewise not claimed, and both remain
+NOTE lines naming Step 5.
+
+The reviewer's phrasing on the forward note is accepted as written: the
+evidence-table placement is a risk for its owning step rather than approval to
+duplicate a parser. This requestor records the placement and makes no claim
+beyond it.
+
+### Reviewer focus for step 2 toolchain-runtime-closure (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-2 -->
+
+## Round 2 by reviewer - Step 2
+
+- Recorded: 2026-09-07T10:43:11+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Baseline index tree: 9a15332b3d81c4da6910122c228af13ea3458900
+
+Assessed index tree: 706102fe118b5a766ebca08091ea05c6a8bdd527
+
+### Implementation check for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Result:
+
+Yes. Step 2 has been fully implemented.
+
+Both round 1 defects are closed: forward subdirectory records populate the model and duplicate pairs refuse; trailing empty fields refuse in both grammar tables. The requestor accepted the exact production and harness patches. The six regression assertions remain unchanged. The final versioned capture records the accepted 91-case run and all six recorded file hashes match the working tree.
+
+The remaining Step 2 declarations, exact-byte digest domain, commit-object resolution, asymmetric authority checks and checker gate satisfy the plan. The module stays at 637 lines under the 650 ceiling, and the fixed module boundary and installer preservation hold. Publication assertions remain Step 5, and evidence emission/parsing remains Step 6; those are not completion claims here. The harness provides the plan's stated Bash coverage rather than a Python unit-coverage percentage. No new current-scope implementation finding remains.
+
+Validation plan effects:
+
+Added only the Step 2 independent round 2 validation note. The existing exact Yes status remains. This is review metadata, not a substantive repair. Explicit UTF-8 decoding/encoding and exact prefix/suffix comparisons prove all bytes outside Step 2 remain unchanged. The requestor's repair of the reviewer's earlier encoding error is verified: content before Step 2 and from Step 3 onward matches the original round 1 submission, including all 31 original em dashes. No umbrella row or document-level verdict changed.
+
+### Pre-repair mandatory checks and coverage for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Fresh baseline index matches the round 2 request: `9a15332b3d81c4da6910122c228af13ea3458900`. Captured validation state, umbrella digest and pre-repair validation-plan blob, then retained the stable manifest before assessment mutation.
+
+Independent round 2 RHEL 9.8 results: Step 2 91 cases, Step 1 70, Step 0 66 and relocation Step 3 104; all exit 0 with zero failures. All 13 measured remote input digests match current local files. Both project lint (48 scripts) and harness ShellCheck exit 0. The digest and consistency greps match, the installer-purity grep returns the required no-match result (exit 1), and the HEAD-relative installer diff exits 0. The versioned final capture's six hashes match the reviewed files. No validation command remained unavailable.
+
+Full independent Linux log: `.reviews/a.reviewer-closure-s2r2.remote.log`. It is ignored local evidence and may contain infrastructure details; do not copy it verbatim into tracked documentation.
+
+### Resolved validation set and sources for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+| Command | Sources | Result |
+| --- | --- | --- |
+| `bash src/utils/lint_shell.sh` | project, plan | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 2` | plan | exit 0 |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_check.sh` | plan | exit 0 |
+| `rg -n 'consistency' src/setups/env/bin/closure_check.sh` | plan | exit 0 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | plan | exit 1, required no matches |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | plan | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 1` | request | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 0` | request | exit 0 |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt` | request | exit 0 |
+| `shellcheck -e SC2016 docs/v0.27.0/verify.closure-check.sh` | request | exit 0 |
+
+### Resolver drift and direction for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+No drift. The current shared resolver accepted the embedded set and reproduced the same ten ordered commands and project/plan/request labels. Their union was executed independently in this round.
+
+### Repository state around validation for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Received baseline index: `9a15332b3d81c4da6910122c228af13ea3458900`.
+Assessed index: `706102fe118b5a766ebca08091ea05c6a8bdd527`.
+
+The only tracked change during this round is the Step 2 validation note, explicitly attributable to the reviewer. The raw comparison flags that metadata path; the permitted-row check verifies it is confined to Step 2. No tracked validation side effect, ignored-input change or untracked validation difference was found. The umbrella digest remains `8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7`. The metadata patch was staged only after attribution and a clean cached-apply check. No other work was staged, reverted or repaired.
+
+### Repair inventory for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Repairs made:
+
+- No substantive or polishing-only implementation repair in round 2. One review metadata update was staged: `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`, confined to the Step 2 independent validation note. No change to `a.commit` was needed. The production and test repairs were made in round 1 and are now accepted writer-owned input.
+
+Paths staged:
+
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- - `docs/v0.27.0/verify.closure-check.sh`
+- - `docs/v0.27.0/verify.closure.step2.rhel.txt`
+- - `src/setups/env/bin/closure_check.sh`
+- - `src/setups/env/bin/closure_config.sh`
+- - `src/setups/env/closure/README.md`
+- - `src/setups/env/closure/closure-config.txt`
+
+### Commit plan assessment for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+The independent checker ran before assessment and after the metadata update. Both results: exit 0, `state: valid`, `ready: true`, seven staged paths, six ordered groups, no diagnostics. The exact structured results are retained in `.reviews/a.reviewer-closure-s2r2.commit-plan.json` and `.reviews/a.reviewer-closure-s2r2.commit-plan-after.json`.
+
+1. `feat(closure): declare the archive closure policy`: declaration and README.
+2. `feat(closure): parse and bind the config bundle`: configuration module.
+3. `feat(closure): gate the checker on the bundle`: entry point.
+4. `test(closure): add the step 2 authority suite`: harness.
+5. `test(closure): retain the step 2 host capture`: final accepted-byte capture.
+6. `docs(toolchain-runtime-closure): record step 2 validation`: validation plan.
+
+Membership, dependency order, scopes, conventional subjects and refreshed bodies accurately describe the staged work. This is mechanical readiness evidence, not authorization to commit.
+
+### Findings and boundaries for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Present the advisory commit-ready recommendation and the existing human gate. Only the human's Commit choice can authorize the owning action. Keep the final capture with its exact accepted-byte identities and preserve the named future Step 5 and Step 6 obligations. No rework is requested for this step.
+
+### Decision rationale for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Advisory disposition: commit-ready. All six readiness-floor results pass: exact identity, complete implementation, mandatory validation and declared harness coverage, attributable staged scope, no unresolved current or carried findings, and accurate a.commit grouping. No substantive repair occurred in round 2. The recommendation does not authorize a commit or let the reviewer select the human gate. No literal Human guidance block was supplied.
+
+### Final reviewer decision for step 2 toolchain-runtime-closure (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-2-round-2 -->
+
+## Round 2 by human - Step 2 - human-confirmation
+
+- Recorded: 2026-09-07T11:06:02+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 2
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
