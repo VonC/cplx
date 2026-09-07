@@ -6,10 +6,19 @@
 # loader will search under an installation prefix, which of them the
 # configuration declares, and which of them nobody declared. Step 1 fills the
 # entry point, the run order, the scope derivation and the classification; Step 2
-# adds the configuration bundle it reads its declaration from; the four archive
-# invariants arrive with `closure_rules.sh` in later steps, so THIS RUN'S VERDICT
-# IS EXPLICITLY PARTIAL and says so on every run. A green scope check is not a
-# green archive.
+# adds the configuration bundle it reads its declaration from; STEP 3 ADDS THE
+# SUBJECT PHASE, which is one walk of the tree, one reader invocation per shipped
+# ELF and the DERIVED half of the membership invariant over what the walk
+# recorded. The three remaining invariants arrive with `closure_rules.sh` in later
+# steps, so THIS RUN'S VERDICT IS EXPLICITLY PARTIAL and says so on every run. A
+# green scope and membership check is not a green archive.
+#
+# THE RUN ORDER IS THE COST RULE. The provider index is built FIRST, from the
+# observed loader scope, and the tree is walked ONCE afterwards, so resolving a
+# DT_NEEDED name is a hash lookup rather than a directory scan per name. Building
+# the index inside the object loop is the O(n^2) shape this effort's complexity
+# bound forbids, and the harness measures the order from a run rather than
+# reading it out of this text.
 #
 # Usage:
 #   closure_check.sh [--prefix DIR] [--installer PATH] [--bundle DIR]
@@ -112,6 +121,21 @@ fi
 # shellcheck source=/dev/null
 if [ -f "$CLOSURE_CHECK_DIR/closure_config.sh" ]; then
     source "$CLOSURE_CHECK_DIR/closure_config.sh"
+fi
+
+# The object reader and the invariants, sourced at FILE SCOPE for the same reason
+# and in this order: the reader declares the model, the rules module reads it, and
+# `declare -A` executed inside a function would make either local to it. The
+# guards are the same too, so a deployed tree missing a module produces a typed
+# UNDETERMINED naming what it lacked rather than a run that quietly examined no
+# object at all.
+# shellcheck source=/dev/null
+if [ -f "$CLOSURE_CHECK_DIR/closure_elf.sh" ]; then
+    source "$CLOSURE_CHECK_DIR/closure_elf.sh"
+fi
+# shellcheck source=/dev/null
+if [ -f "$CLOSURE_CHECK_DIR/closure_rules.sh" ]; then
+    source "$CLOSURE_CHECK_DIR/closure_rules.sh"
 fi
 
 # Set by `closure_scope_observed`, read by its caller. A shell function cannot
@@ -380,6 +404,9 @@ closure_check_main() {
     local declared="" observed="" results="" line kind
     local rootsource="the --root arguments"
     local present=0 absent=0 unexpected=0 undetermined=0 rc=0
+    local scope_ok=0 subjects_ran=0 walk="not run"
+    local providers=0 walked=0 subjects=0 unread=0 edges=0 refused=0 unreferenced=0
+    local unresolved=0
 
     while [ "$#" -gt 0 ]; do
         case "$1" in
@@ -445,6 +472,7 @@ closure_check_main() {
 
     declared=$(closure_scope_declared "$prefix" "${specs[@]}")
     if closure_scope_observed "$prefix" "$installer"; then
+        scope_ok=1
         observed=$(closure_scope_observed_lines "$CLOSURE_OBSERVED_RPATH")
         results=$(closure_scope_classify "$prefix" "$declared" "$observed" "${specs[@]}")
     else
@@ -470,6 +498,45 @@ closure_check_main() {
     printf '  source      %s\n' "$rootsource"
     printf '\n== typed results\n'
     printf '%s\n' "$results"
+
+    # THE SUBJECT PHASE, IN THE ORDER THE COST RULE FIXES: the provider index
+    # first, then ONE walk of the tree, then the invariants over what the walk
+    # recorded. This function gains the calls and no invariant: the reading is
+    # `closure_elf.sh`'s and every verdict is `closure_rules.sh`'s.
+    printf '\n== subjects and derived membership\n'
+    if [ "$scope_ok" -ne 1 ]; then
+        # NOT AN EMPTY INDEX. The provider directories ARE the observed loader
+        # scope, so a scope that could not be obtained leaves nothing to resolve
+        # against; inventing an empty index here would refuse every name the
+        # archive records and report a missing input as hundreds of findings.
+        printf '  not computed: the provider directories come from the observed loader\n'
+        printf '  scope, and this run could not obtain it. The UNDETERMINED above is the\n'
+        printf '  finding, and this run is not a pass.\n'
+    elif ! declare -F closure_provider_index >/dev/null 2>&1 ||
+         ! declare -F closure_membership_derived >/dev/null 2>&1; then
+        printf '%s|%s|%s|%s\n' UNDETERMINED object 'every shipped object' \
+            "no closure_elf.sh or closure_rules.sh beside $CLOSURE_CHECK_DIR, so nothing was read"
+        undetermined=$((undetermined + 1))
+    else
+        closure_provider_index "$observed"
+        closure_subjects_walk "$prefix/tools"
+        closure_membership_derived
+        closure_report_unreferenced_by_edge
+        subjects_ran=1
+        providers="${#CLOSURE_PROVIDER_DIRS[@]}"
+        walked="$CLOSURE_ELF_WALKED"
+        subjects="$CLOSURE_ELF_SUBJECTS"
+        unread="$CLOSURE_ELF_UNREAD"
+        edges="$CLOSURE_ELF_EDGES"
+        refused="$CLOSURE_RULES_REFUSED"
+        unreferenced="$CLOSURE_RULES_UNREFERENCED"
+        unresolved="$CLOSURE_RULES_UNRESOLVED"
+        walk="$CLOSURE_ELF_WALK_STATE"
+        if [ "$refused" -eq 0 ] && [ "$unread" -eq 0 ] && [ "$walk" = "complete" ] && [ "$unresolved" -eq 0 ]; then
+            printf '  every DT_NEEDED name recorded by every shipped object resolves\n'
+        fi
+    fi
+
     printf '\n== summary\n'
     printf '  declared     %s\n' "$(closure_scope_line_count "$declared")"
     printf '  observed     %s\n' "$(closure_scope_line_count "$observed")"
@@ -477,22 +544,63 @@ closure_check_main() {
     printf '  absent       %s\n' "$absent"
     printf '  unexpected   %s\n' "$unexpected"
     printf '  undetermined %s\n' "$undetermined"
+    printf '  providers    %s directories, %s names\n' "$providers" \
+        "${CLOSURE_PROVIDER_NAMES:-0}"
+    printf '  walk         %s\n' "$walk"
+    printf '  walked       %s files\n' "$walked"
+    printf '  subjects     %s ELF objects\n' "$subjects"
+    printf '  unread       %s objects, reported UNDETERMINED\n' "$unread"
+    printf '  edges        %s DT_NEEDED edges\n' "$edges"
+    printf '  refused      %s unresolvable DT_NEEDED\n' "$refused"
+    printf '  unreferenced %s subjects no edge resolves to\n' "$unreferenced"
+    printf '  unresolved   %s link chains, reported UNDETERMINED\n' "$unresolved"
     # Said on every run, green ones included. This checker answers the scope
-    # question and makes no claim about the four archive invariants, and none at
-    # all about runtime host fallback, which only a running process can show.
-    printf '  verdict is PARTIAL: this run answers the scope question only\n'
+    # question and the DERIVED half of membership, and makes no claim about the
+    # declared floor, coherence, duplicate providers or declared families, and
+    # none at all about runtime host fallback, which only a running process can
+    # show.
+    printf '  verdict is PARTIAL: this run answers the scope question and the\n'
+    printf '  derived membership half, and no other invariant\n'
 
     if [ "$unexpected" -ne 0 ]; then
         printf '\nCLOSURE SCOPE REFUSED: undeclared directories in the observed loader scope: %s\n' \
             "$unexpected"
         return 1
     fi
+    if [ "$refused" -ne 0 ]; then
+        printf '\nCLOSURE MEMBERSHIP REFUSED: DT_NEEDED names resolving nowhere in the observed loader scope: %s\n' \
+            "$refused"
+        return 1
+    fi
     if [ "$undetermined" -ne 0 ]; then
         printf '\nCLOSURE SCOPE UNDETERMINED: %s\n' "$CLOSURE_OBSERVED_REASON"
         return 5
     fi
+    # AN UNDETERMINED NEVER COUNTS TOWARD A GREEN. Nothing here refused, and the
+    # run is still not a pass, because a reading that could not be taken leaves
+    # the question open rather than answered. The traversal is checked BEFORE the
+    # objects, because a walk that stopped early explains an empty inventory and
+    # an inventory that is merely empty explains nothing.
+    if [ "$subjects_ran" -eq 1 ] && [ "$walk" != "complete" ]; then
+        printf '\nCLOSURE WALK UNDETERMINED: %s\n' "$walk"
+        return 5
+    fi
+    if [ "$unresolved" -ne 0 ]; then
+        printf '\nCLOSURE LINKS UNDETERMINED: link chains that did not resolve: %s\n' \
+            "$unresolved"
+        return 5
+    fi
+    if [ "$unread" -ne 0 ]; then
+        printf '\nCLOSURE OBJECTS UNDETERMINED: objects whose reading could not be taken: %s\n' \
+            "$unread"
+        return 5
+    fi
     printf '\nCLOSURE SCOPE OK: %s declared, %s present, %s absent, nothing undeclared\n' \
         "$(closure_scope_line_count "$declared")" "$present" "$absent"
+    if [ "$subjects_ran" -eq 1 ]; then
+        printf 'CLOSURE MEMBERSHIP OK: %s edges over %s subjects all resolve, %s reached by no edge\n' \
+            "$edges" "$subjects" "$unreferenced"
+    fi
     return 0
 }
 
@@ -513,7 +621,12 @@ closure_scope_line_count() {
 # Sourcing this file defines its functions and runs nothing, so the verification
 # harness can call `closure_scope_declared` and `closure_scope_observed`
 # themselves rather than a copy, which is what lets it prove that the declared
-# derivation touches no filesystem. Executing it is unchanged: BASH_SOURCE[0]
+# derivation touches no filesystem. Step 3 uses the same seam for two more
+# things: it asks the provider index directly for the paths behind one lookup
+# name, and it wraps that index in a counting shim before calling
+# `closure_check_main`, which is how "one construction, before the first object
+# read" is measured from a run instead of grepped out of this text. Executing the
+# file is unchanged: BASH_SOURCE[0]
 # equals $0 there, so the guard is a no-op on the deployed path. This is the
 # same seam `install_pkg.sh` carries, and for the same reason.
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
