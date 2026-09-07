@@ -10,14 +10,18 @@
 # are judged with, declares what each of those steps needs from the host it runs
 # on, and refuses rather than answering a cheaper question.
 #
-# SUITES THAT EXIST TODAY: step 0, the instrument itself, and step 1, the
-# declared candidate shape and the observed loader scope. Step 1 asserts three
-# things a later reader should not have to reconstruct: that the four checker
-# modules were created together and no fifth exists, that the observed scope is
-# `build_elf_rpath`'s own output byte for byte rather than a copy of its logic,
-# and that a loader scope which could not be observed becomes a typed
-# UNDETERMINED instead of an empty one. Steps 2 to 7 are still the red baseline,
-# and each refusal names the step that will fill it.
+# SUITES THAT EXIST TODAY: step 0, the instrument itself, step 1, the declared
+# candidate shape and the observed loader scope, and step 2, the configuration
+# bundle and its authority. Step 1 asserts three things a later reader should not
+# have to reconstruct: that the four checker modules were created together and no
+# fifth exists, that the observed scope is `build_elf_rpath`'s own output byte for
+# byte rather than a copy of its logic, and that a loader scope which could not be
+# observed becomes a typed UNDETERMINED instead of an empty one. Step 2 asserts
+# the asymmetry that makes the declaration mean anything: the agent checks
+# INTERNAL CONSISTENCY and says so, packaging resolves the authoritative document
+# from cplx, and the paired edit is accepted by the first and refused by the
+# second. Steps 3 to 7 are still the red baseline, and each refusal names the step
+# that will fill it.
 #
 # Usage:
 #   bash verify.closure-check.sh [--step N] [--contract PATH] [--corpus PATH]
@@ -440,7 +444,7 @@ step_filled_by() {
 
 step_suite_exists() {
     case "$1" in
-        0|1) return 0 ;;
+        0|1|2) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -507,19 +511,36 @@ shipped_function_names() {
 # The fourth thing a lexical reader must not mistake for a host dependency: a
 # function a shipped script obtains by SOURCING another production script.
 # `closure_check.sh` calls `build_elf_rpath` rather than reimplementing it, and
-# that name sits in command position while being supplied by `install_pkg.sh`
-# and not by the host, so it belongs in neither contract.
+# from step 2 it calls the configuration module's parser and digest the same way.
+# Those names sit in command position while being supplied by another script in
+# this tree and not by the host, so they belong in neither contract.
 #
 # THE SET IS DERIVED FROM THE SOURCED FILE, NEVER LISTED. A hand-kept exemption
 # would accept a call to a function nobody defines, which is the same hole the
-# mechanical assertion exists to close. It is also SCOPED: a file that does not
-# name the installer gets none of its function names, so the exemption cannot
-# quietly widen to a script that never sources it.
+# mechanical assertion exists to close. It is also SCOPED: a file gets another
+# script's function names only when it NAMES that script, so the exemption cannot
+# quietly widen to a script that never sources it, and a file never exempts
+# itself twice.
+#
+# The candidate set is the installer plus the four checker modules, which is the
+# whole of what a shipped script here may source. Widening it later means adding
+# a source relationship the topology does not have.
 shipped_sourced_functions() {
-    local file="$1" installer="$SHIPPED_DIR/install_pkg.sh"
-    [ -f "$installer" ] || return 0
-    grep -q 'install_pkg.sh' "$file" || return 0
-    shipped_function_names "$installer"
+    local file="$1" other module
+    for other in "$SHIPPED_DIR/install_pkg.sh" "${CLOSURE_MODULES[@]}"; do
+        case "$other" in
+            /*) module="$other" ;;
+            *) module="$SHIPPED_DIR/$other" ;;
+        esac
+        [ -f "$module" ] || continue
+        [ "$module" != "$file" ] || continue
+        # The name has to appear in CODE, not in a comment. Every module's header
+        # names its callers in prose, so a comment-blind grep would have granted
+        # `closure_config.sh` the checker's function names for describing who
+        # sources it, and an exemption earned by a sentence is not an exemption.
+        sed -e 's/#.*$//' "$file" | grep -q "${module##*/}" || continue
+        shipped_function_names "$module"
+    done
 }
 
 # The finding: every command-position word of <file> absent from the contract and
@@ -845,6 +866,15 @@ step0_suite() {
 CLOSURE_MODULES=(closure_check.sh closure_config.sh closure_elf.sh closure_rules.sh)
 CLOSURE_FORBIDDEN_MODULE=closure_scope.sh
 
+# The step that FILLS each module, parallel to the array above and taken from the
+# topology table's own `Filled by` column. It is here rather than re-listed at
+# each step because "created empty" and "filled" are the same claim read at two
+# different times: a module whose filling step has a suite must have a body, and
+# every other module must still have none. Hand-listing the empty ones made step
+# 1 the place a later step had to remember to edit, and a forgotten edit there
+# reads as a step 1 regression rather than as the step that filled the file.
+CLOSURE_MODULE_FILLED_BY=(1 2 3 3)
+
 # The BODY of a module: its lines that are neither blank nor a comment. A module
 # created with its contract comment and nothing else has a body of zero, and that
 # is what the assertion reads. "Created empty" has to be a measured number, or a
@@ -914,7 +944,7 @@ step1_suite() {
     local checker="$SHIPPED_DIR/closure_check.sh"
     local installer="$SHIPPED_DIR/install_pkg.sh"
     local tree="$SCRATCH/prefix" absent="$SCRATCH/prefix-absent" stubs="$SCRATCH/stubs"
-    local module found a b ln_bin d
+    local module found a b ln_bin d i
     local py="python=current,python-3.13.9" gitroot="git=current"
 
     # --- the module set, fixed and unconditional -------------------------------
@@ -926,25 +956,30 @@ step1_suite() {
     done
     chk "step1/topology/no-$CLOSURE_FORBIDDEN_MODULE" "no" \
         "$( [ -f "$SHIPPED_DIR/$CLOSURE_FORBIDDEN_MODULE" ] && echo yes || echo no )"
-    # Three carry a contract comment and nothing else until the step that fills
-    # them; the fourth is filled here. Both halves are measured, because "created
-    # empty" and "filled" are the two claims this step makes about the four.
-    for module in closure_config.sh closure_elf.sh closure_rules.sh; do
-        if [ -f "$SHIPPED_DIR/$module" ]; then
+    # A module carries a contract comment and nothing else until the step that
+    # fills it, and a body afterwards. Both halves are measured, because "created
+    # empty" and "filled" are the two claims the topology makes about the four,
+    # and the side each module is on is read from the topology's own `Filled by`
+    # column rather than from a list kept in step by hand.
+    for i in "${!CLOSURE_MODULES[@]}"; do
+        module="${CLOSURE_MODULES[$i]}"
+        if [ ! -f "$SHIPPED_DIR/$module" ]; then
+            fail "step1/topology/$module/body" "the module does not exist"
+            continue
+        fi
+        if step_suite_exists "${CLOSURE_MODULE_FILLED_BY[$i]}"; then
+            chk "step1/topology/$module/is-filled" "yes" \
+                "$( [ "$(module_body_lines "$SHIPPED_DIR/$module")" -gt 0 ] && echo yes || echo no )"
+        else
             chk "step1/topology/$module/body-is-empty" "0" \
                 "$(module_body_lines "$SHIPPED_DIR/$module")"
-        else
-            fail "step1/topology/$module/body-is-empty" "the module does not exist"
         fi
     done
     if [ ! -f "$checker" ]; then
-        fail "step1/topology/closure_check.sh/is-filled" "the checker does not exist"
         unanswered "every step 1 case" \
           "  create src/setups/env/bin/closure_check.sh, then repeat this call"
         return
     fi
-    chk "step1/topology/closure_check.sh/is-filled" "yes" \
-        "$( [ "$(module_body_lines "$checker")" -gt 0 ] && echo yes || echo no )"
     # The same mechanical assertion step 0 proved on planted subjects, run here
     # over the real modules, so a command this step introduced without declaring
     # it is named by the step that introduced it.
@@ -998,16 +1033,31 @@ step1_suite() {
              tools/git/current/lib tools/git/current/lib64; do
         mkdir -p -- "$tree/$d" || { fail "step1/scratch" "cannot plant $d"; return; }
     done
+    # RESOLVED IS NOT THE SAME AS ABLE, which is the distinction the capability
+    # gate makes for every other tool and which this case used to miss. On the
+    # Windows authoring host `ln` resolves and `ln -s` copies instead of linking,
+    # so the plant silently produced a plain directory and the case reported a
+    # code FAILURE for an environment that cannot answer it. It is measured now:
+    # the symlink is asserted where one was actually made, and where the tool
+    # resolved and could not make one the obligation is UNANSWERED, which is not
+    # a pass either and names the host that would answer it.
     ln_bin=$(type -P ln 2>/dev/null) || ln_bin=""
     if [ -n "$ln_bin" ]; then
-        "$ln_bin" -s -- python-3.13.9 "$tree/tools/python/current"
-        chk "step1/tree/alias-planted" "yes" \
-            "$( [ -L "$tree/tools/python/current" ] && echo yes || echo no )"
+        "$ln_bin" -s -- python-3.13.9 "$tree/tools/python/current" 2>/dev/null
+    fi
+    if [ -L "$tree/tools/python/current" ]; then
+        chk "step1/tree/alias-planted" "yes" "yes"
     else
+        rm -rf -- "$tree/tools/python/current"
         mkdir -p -- "$tree/tools/python/current/lib" "$tree/tools/python/current/lib64"
-        note "step1/tree/alias-planted" "ln did not resolve: current is a plain directory here"
+        if [ -n "$ln_bin" ]; then
+            found="$ln_bin resolved and could not make one"
+        else
+            found="ln did not resolve at all"
+        fi
+        note "step1/tree/alias-planted" "no symlink here: $found; current is a plain directory"
         unanswered "the alias half of the declared subdirectory case" \
-          "  re-run on a host that supplies ln, so tools/python/current is the symlink the measured tree carries"
+          "  re-run on a host where ln -s makes a symlink, so tools/python/current is the alias the measured tree carries"
     fi
 
     # THE DECLARED SHAPE TOUCHES NO FILESYSTEM, driven rather than described. The
@@ -1178,6 +1228,526 @@ step1_suite() {
     chk "step1/args/unknown-argument" "2" "$CHECKER_RC"
 }
 
+# ---------------------------------------------- the configuration module probes ---
+# Every call reaches the module through its own file, in a CHILD PROCESS. Two
+# reasons, and both are load bearing here: a syntax error in production code
+# fails the case instead of killing the harness, and the parsed model one case
+# leaves behind cannot reach the next, so a case that passes because a previous
+# one populated a global is impossible by construction.
+#
+# 91 and 92 are the harness's own codes for "the seam did not hold", distinct
+# from anything the module returns, which is 0 or 1.
+CONFIG_OUT=""
+CONFIG_RC=0
+config_call() {
+    CONFIG_OUT=$("${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        fn="$2"
+        shift 2
+        declare -F "$fn" >/dev/null 2>&1 || exit 92
+        "$fn" "$@"
+    ' _ "$SHIPPED_DIR/closure_config.sh" "$@" 2>&1)
+    CONFIG_RC=$?
+}
+
+# The parsed model, printed from the module's own globals rather than through a
+# dump function the production code would carry for the tests alone. What a case
+# asserts is what a later step will read.
+config_model() {
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        closure_config_parse "$2" >/dev/null || exit 93
+        k=""
+        for k in ${CLOSURE_CFG_ROOTS[@]+"${CLOSURE_CFG_ROOTS[@]}"}; do
+            printf "root %s\n" "$k"
+        done
+        for k in ${CLOSURE_CFG_FLOOR[@]+"${!CLOSURE_CFG_FLOOR[@]}"}; do
+            printf "floor %s %s\n" "$k" "${CLOSURE_CFG_FLOOR[$k]}"
+        done
+        for k in ${CLOSURE_CFG_FAMILY[@]+"${!CLOSURE_CFG_FAMILY[@]}"}; do
+            printf "family %s %s\n" "$k" "${CLOSURE_CFG_FAMILY[$k]}"
+        done
+        for k in ${CLOSURE_CFG_WAIVER[@]+"${!CLOSURE_CFG_WAIVER[@]}"}; do
+            printf "waiver %s %s\n" "$k" "${CLOSURE_CFG_WAIVER[$k]}"
+        done
+    ' _ "$SHIPPED_DIR/closure_config.sh" "$1" 2>/dev/null | sort
+}
+
+config_root_specs() {
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        closure_config_parse "$2" >/dev/null || exit 93
+        closure_config_root_specs
+    ' _ "$SHIPPED_DIR/closure_config.sh" "$1" 2>/dev/null
+}
+
+config_digest() {
+    config_call closure_config_digest "$1"
+    printf '%s' "$CONFIG_OUT"
+}
+
+# The valid configuration example, exactly as the plan's grammar fixes it. Every
+# negative case below mutates ONE record of a copy of this file, so a refusal is
+# shown to be about that record rather than about the document, and its control
+# is this same file unmutated.
+step2_write_valid_config() {
+    { printf 'CPLX-CLOSURE/1\n'
+      printf 'root|python\n'
+      printf 'root|git\n'
+      printf 'subdir|python|root\n'
+      printf 'subdir|python|current\n'
+      printf 'floor|libc.so.6|any\n'
+      printf 'floor|libsqlite3.so.0|tools/python\n'
+      printf 'family|binutils-bfd|libbfd-*.so|1\n'
+      printf 'waiver|libsqlite3.so.0|python-sqlite-support\n'; } > "$1"
+}
+
+# The same document with ONE record replaced. The mutation is planted and then
+# asserted to be present, so a case cannot report a refusal for a document it
+# never wrote.
+step2_mutate() {
+    local base="$1" out="$2" drop="$3" add="$4"
+    grep -v "^$drop\$" "$base" > "$out"
+    if [ -n "$add" ]; then printf '%s\n' "$add" >> "$out"; fi
+}
+
+step2_write_envelope() {
+    { printf 'CPLX-CLOSURE-ENVELOPE/1\n'
+      printf 'digest|%s\n' "$2"
+      printf 'source|%s|%s\n' "$3" "$4"; } > "$1"
+}
+
+# =============================================================== the step 2 suite ===
+step2_suite() {
+    local dir="$SCRATCH/step2" repo="$SCRATCH/step2/repo" bundle="$SCRATCH/step2/bundle"
+    local committed="$SHIPPED_DIR/../closure/closure-config.txt"
+    local checker="$SHIPPED_DIR/closure_check.sh"
+    local installer="$SHIPPED_DIR/install_pkg.sh"
+    local module="$SHIPPED_DIR/closure_config.sh"
+    local git_bin="" d1 d2 commit found tree
+
+    mkdir -p -- "$dir" "$bundle" || { fail "step2/scratch" "cannot create the scratch directory"; return; }
+
+    # --- the module is filled, and declares every command it runs -------------
+    section "step 2 topology: the configuration module has a body now"
+    if [ ! -f "$module" ]; then
+        fail "step2/topology/module-exists" "no closure_config.sh at $module"
+        unanswered "every step 2 case" \
+          "  fill src/setups/env/bin/closure_config.sh, then repeat this call"
+        return
+    fi
+    chk "step2/topology/module-is-filled" "yes" \
+        "$( [ "$(module_body_lines "$module")" -gt 0 ] && echo yes || echo no )"
+    chk "step2/topology/module-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$module")")"
+    # The checker gains the call and nothing else, so the module has to be
+    # reachable from it: an unsourced module would leave the bundle unread while
+    # every scope case still passed.
+    chk "step2/topology/checker-sources-the-module" "yes" \
+        "$(sed -e 's/#.*$//' "$checker" | grep -q 'closure_config.sh' && echo yes || echo no)"
+
+    # --- the committed declaration --------------------------------------------
+    #
+    # THE DOCUMENT IN THE TREE IS A SUBJECT, not a fixture. Every other case here
+    # runs against a written fixture, and this one runs against the bytes the
+    # archive will carry, so a committed document that stopped parsing would fail
+    # here rather than in Step 5.
+    section "step 2 declaration: the committed document, read as the archive will"
+    if [ ! -f "$committed" ]; then
+        fail "step2/committed/exists" "no closure-config.txt at $committed"
+    else
+        config_call closure_config_parse "$committed"
+        chk "step2/committed/parses-clean" "0|" "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+        chk "step2/committed/root-specs" \
+            "python=root,current,python-3.13.9 git=root" \
+            "$(oneline "$(config_root_specs "$committed")")"
+        # The floor, the family list and the waiver, as the issue declares them.
+        # Their count is asserted rather than their whole content, so this case
+        # stays about the parser while the entries stay the issue's to own.
+        chk "step2/committed/floor-count" "10" \
+            "$(config_model "$committed" | grep -c '^floor ')"
+        chk "step2/committed/family-count" "2" \
+            "$(config_model "$committed" | grep -c '^family ')"
+        chk "step2/committed/waiver-is-the-declared-one" \
+            "waiver libsqlite3.so.0 python-sqlite-support" \
+            "$(oneline "$(config_model "$committed" | grep '^waiver ')")"
+        chk "step2/committed/sqlite-location-is-constrained" \
+            "floor libsqlite3.so.0 tools/python" \
+            "$(oneline "$(config_model "$committed" | grep '^floor libsqlite3')")"
+    fi
+
+    # --- the grammar, accepted -------------------------------------------------
+    section "step 2 grammar: the valid example, and one envelope"
+    step2_write_valid_config "$dir/valid.txt"
+    config_call closure_config_parse "$dir/valid.txt"
+    chk "step2/valid/config-parses" "0|" "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+    chk "step2/valid/root-order-is-the-loaders" "python=root,current git=" \
+        "$(oneline "$(config_root_specs "$dir/valid.txt")")"
+    d1=$(config_digest "$dir/valid.txt")
+    step2_write_envelope "$dir/valid-env.txt" "$d1" "a/b/closure-config.txt" \
+        "0123456789abcdef0123456789abcdef01234567"
+    config_call closure_envelope_parse "$dir/valid-env.txt"
+    chk "step2/valid/envelope-parses" "0|" "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+    # A comment line and a blank line are IGNORED here, because a human authors
+    # both documents. The evidence document refuses them, and that difference is
+    # Step 6's to assert on its own table.
+    { printf '# a human wrote this\n'; printf '\n'; cat "$dir/valid.txt"; } > "$dir/commented.txt"
+    config_call closure_config_parse "$dir/commented.txt"
+    chk "step2/valid/comments-and-blanks-ignored" "0|" "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+
+    # --- the grammar, refused --------------------------------------------------
+    #
+    # One planted defect per case, each naming its own refusal. The control for
+    # all of them is `step2/valid/config-parses` above: the same document without
+    # the mutation is accepted, so every refusal below is about the record it
+    # names and not about the fixture.
+    section "step 2 grammar: nine refusals, each named"
+    # `git` and not `python`, because dropping the first root record would make
+    # the document refuse the ORDER rule and break three cross-references with
+    # it, and a case planting four defects proves none of them.
+    step2_refuse "$dir" field-count 'root|git' 'root|git|extra' \
+        field-count "root takes 2 fields and this record has 3"
+    step2_refuse "$dir" duplicate-key '' 'root|git' \
+        duplicate "root: git"
+    step2_refuse "$dir" duplicate-subdir-pair '' 'subdir|python|current' \
+        duplicate "subdir: python current"
+    step2_refuse "$dir" undeclared-root-in-subdir 'subdir|python|current' 'subdir|perl|root' \
+        cross-reference "subdir-root names the undeclared root perl"
+    step2_refuse "$dir" absolute-floor-location 'floor|libc.so.6|any' 'floor|libc.so.6|/usr/lib' \
+        domain "location: /usr/lib"
+    step2_refuse "$dir" floor-location-undeclared-root 'floor|libc.so.6|any' 'floor|libc.so.6|tools/perl' \
+        cross-reference "floor-root names the undeclared root perl"
+    step2_refuse "$dir" two-wildcard-glob 'family|binutils-bfd|libbfd-*.so|1' 'family|binutils-bfd|lib*bfd*.so|1' \
+        domain "soname-glob: lib*bfd*.so"
+    step2_refuse "$dir" leading-zero-generations 'family|binutils-bfd|libbfd-*.so|1' 'family|binutils-bfd|libbfd-*.so|01' \
+        domain "generations: 01"
+    step2_refuse "$dir" waiver-not-on-the-floor 'waiver|libsqlite3.so.0|python-sqlite-support' 'waiver|libnothing.so.1|python-sqlite-support' \
+        cross-reference "waiver names libnothing.so.1, which the floor does not declare"
+    step2_refuse "$dir" unknown-record-token '' 'mount|somewhere' \
+        unknown-record "mount"
+    step2_refuse "$dir" undefined-escape 'floor|libc.so.6|any' 'floor|libc%2Fso.6|any' \
+        escape "%2F is not a defined escape, and only %7C and %25 are"
+    # Two more the shared lexical shape owns rather than the record table.
+    step2_refuse "$dir" empty-field 'floor|libc.so.6|any' 'floor||any' \
+        empty-field "a record may carry no empty field"
+    step2_refuse "$dir" trailing-empty-field 'root|git' 'root|git|' \
+        empty-field "a record may carry no empty field"
+    step2_refuse "$dir" multi-segment-subdir 'subdir|python|current' 'subdir|python|a/b' \
+        domain "subdir-name: a/b"
+    # Ordering is significant for `root` and for nothing else, so the one order
+    # rule that exists is asserted and its absence elsewhere is asserted with it.
+    { printf 'CPLX-CLOSURE/1\n'; printf 'root|git\n'; printf 'root|python\n'; } > "$dir/order.txt"
+    config_call closure_config_parse "$dir/order.txt"
+    chk "step2/refuse/root-order" \
+        "REFUSED|2|order|the first root record must be python, and this one is git" \
+        "$(oneline "$CONFIG_OUT")"
+    { printf 'CPLX-CLOSURE/1\n'; printf 'root|python\n'
+      printf 'floor|libc.so.6|any\n'; printf 'subdir|python|current\n'; } > "$dir/reorder.txt"
+    config_call closure_config_parse "$dir/reorder.txt"
+    chk "step2/refuse/control/other-records-are-order-free" "0|" \
+        "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+    { printf 'CPLX-CLOSURE/1\nsubdir|python|current\nroot|python\n'; } > "$dir/forward.txt"
+    config_call closure_config_parse "$dir/forward.txt"
+    chk "step2/forward/subdir-before-root-accepted" "0|" "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+    chk "step2/forward/subdir-before-root-retained" "python=current" \
+        "$(oneline "$(config_root_specs "$dir/forward.txt")")"
+    { printf 'CPLX-CLOSURE/1\nsubdir|python|current\nsubdir|python|current\nroot|python\n'; } > "$dir/forward-duplicate.txt"
+    config_call closure_config_parse "$dir/forward-duplicate.txt"
+    chk "step2/forward/duplicate-before-root-refused" "1|REFUSED|3|duplicate|subdir: python current" \
+        "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+    # A version line that is not this version, and a document with none at all.
+    { printf 'CPLX-CLOSURE/2\n'; printf 'root|python\n'; } > "$dir/version.txt"
+    config_call closure_config_parse "$dir/version.txt"
+    chk "step2/refuse/version-line" \
+        "REFUSED|1|version|the first record line must be CPLX-CLOSURE/1, and this one is CPLX-CLOSURE/2" \
+        "$(oneline "$CONFIG_OUT")"
+
+    # --- decoding precedes domain validation -----------------------------------
+    #
+    # THE PAIR IS THE PROOF, not either half. An undefined escape is refused as an
+    # escape and never reaches its domain; a DEFINED escape is decoded and then
+    # refused BY THE DOMAIN, naming the decoded value. Reversing the order would
+    # have made the second case refuse on the raw text, and %2F would have passed
+    # a no-slash domain and become a separator afterwards.
+    section "step 2 order: decode, then validate, shown by the reason"
+    step2_refuse "$dir" defined-escape-reaches-the-domain 'floor|libc.so.6|any' 'floor|libc%7Cso.6|any' \
+        domain "lookup-name: libc|so.6"
+
+    # --- the digest domain -----------------------------------------------------
+    section "step 2 digest: the exact committed bytes, and nothing else"
+    if [ "$(capability_state sha256sum)" != "supported" ]; then
+        unanswered "the digest domain cases" \
+          "  re-run on a host whose sha256sum answers its probe"
+    else
+        d1=$(config_digest "$dir/valid.txt")
+        chk "step2/digest/is-64-lowercase-hex" "yes" \
+            "$(printf '%s' "$d1" | grep -qE '^[0-9a-f]{64}$' && echo yes || echo no)"
+        # THE SAME BYTES THROUGH A DIFFERENT PATH ARE THE SAME DOCUMENT. The
+        # domain is the content and never the location, which is what lets the
+        # archive and cplx reach the same value from two different trees.
+        mkdir -p -- "$dir/elsewhere"
+        cp -- "$dir/valid.txt" "$dir/elsewhere/renamed.txt"
+        chk "step2/digest/same-bytes-other-path" "$d1" "$(config_digest "$dir/elsewhere/renamed.txt")"
+        # CRLF IS A DIFFERENT DOCUMENT. No normalisation pass exists, so a line
+        # ending is content, and a party that normalised before hashing would
+        # produce a value nobody else can reproduce.
+        sed -e 's/$/\r/' "$dir/valid.txt" > "$dir/crlf.txt"
+        d2=$(config_digest "$dir/crlf.txt")
+        chk "step2/digest/crlf-is-a-different-digest" "different" \
+            "$( [ "$d1" != "$d2" ] && echo different || echo same )"
+        # Its control: the CRLF document is still a document, so the difference
+        # above is about bytes and not about one of the two files being empty.
+        chk "step2/digest/control/crlf-still-digests" "yes" \
+            "$(printf '%s' "$d2" | grep -qE '^[0-9a-f]{64}$' && echo yes || echo no)"
+    fi
+
+    # --- the envelope ----------------------------------------------------------
+    section "step 2 envelope: five refusals the identity half owns"
+    d1=$(config_digest "$dir/valid.txt")
+    commit="0123456789abcdef0123456789abcdef01234567"
+    step2_write_envelope "$dir/e-upper.txt" "${d1^^}" "a/b/c.txt" "$commit"
+    config_call closure_envelope_parse "$dir/e-upper.txt"
+    chk "step2/envelope/uppercase-digest" "yes" \
+        "$(printf '%s' "$CONFIG_OUT" | grep -q 'domain|sha256' && echo yes || echo no)"
+    step2_write_envelope "$dir/e-short.txt" "$d1" "a/b/c.txt" "9f2c"
+    config_call closure_envelope_parse "$dir/e-short.txt"
+    chk "step2/envelope/short-commit" "REFUSED|3|domain|commit: 9f2c" \
+        "$(printf '%s' "$CONFIG_OUT" | grep '^REFUSED|3|')"
+    step2_write_envelope "$dir/e-branch.txt" "$d1" "a/b/c.txt" "main"
+    config_call closure_envelope_parse "$dir/e-branch.txt"
+    chk "step2/envelope/branch-instead-of-a-commit" "REFUSED|3|domain|commit: main" \
+        "$(printf '%s' "$CONFIG_OUT" | grep '^REFUSED|3|')"
+    { printf 'CPLX-CLOSURE-ENVELOPE/1\n'; printf 'digest|%s\n' "$d1"
+      printf 'digest|%s\n' "$d1"; printf 'source|a/b/c.txt|%s\n' "$commit"; } > "$dir/e-two.txt"
+    config_call closure_envelope_parse "$dir/e-two.txt"
+    chk "step2/envelope/two-digest-records" \
+        "REFUSED|0|cardinality|the envelope carries 2 digest records and must carry exactly one" \
+        "$(oneline "$CONFIG_OUT")"
+    { printf 'CPLX-CLOSURE-ENVELOPE/1\n'; printf 'digest|%s\n' "$d1"; } > "$dir/e-nosource.txt"
+    config_call closure_envelope_parse "$dir/e-nosource.txt"
+    chk "step2/envelope/missing-source-record" \
+        "REFUSED|0|cardinality|the envelope carries 0 source records and must carry exactly one" \
+        "$(oneline "$CONFIG_OUT")"
+    # The control: the same envelope with a 40-hex commit and one of each record
+    # is accepted, so the five refusals above are about what they name.
+    step2_write_envelope "$dir/e-ok.txt" "$d1" "a/b/c.txt" "$commit"
+    config_call closure_envelope_parse "$dir/e-ok.txt"
+    chk "step2/envelope/control/valid-envelope-accepted" "0|" \
+        "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+    { printf 'CPLX-CLOSURE-ENVELOPE/1\ndigest|%s|\nsource|a/b/c.txt|%s\n' "$d1" "$commit"; } > "$dir/e-trailing.txt"
+    config_call closure_envelope_parse "$dir/e-trailing.txt"
+    chk "step2/envelope/trailing-empty-field-refused" "1" "$CONFIG_RC"
+    chk "step2/envelope/trailing-empty-field-named" \
+        "REFUSED|2|empty-field|a record may carry no empty field" \
+        "$(printf '%s' "$CONFIG_OUT" | grep '^REFUSED|2|')"
+
+    # --- the agent, which checks consistency and not authority -----------------
+    section "step 2 agent: internal consistency, and its limit said out loud"
+    cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+    step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" "$commit"
+    config_call closure_envelope_check "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+    chk "step2/agent/consistent-bundle-accepted" "0" "$CONFIG_RC"
+    chk "step2/agent/verdict-is-typed" "yes" \
+        "$(printf '%s' "$CONFIG_OUT" | grep -q "^CONSISTENT|$d1|" && echo yes || echo no)"
+    chk "step2/agent/verdict-states-its-limit" "yes" \
+        "$(printf '%s' "$CONFIG_OUT" | grep -q 'INTERNAL CONSISTENCY ONLY' && echo yes || echo no)"
+    # A document that does not hash to the digest its envelope names: refused,
+    # and the refusal carries both values so a reader can see which is which.
+    printf 'floor|libextra.so.1|any\n' >> "$bundle/closure-config.txt"
+    config_call closure_envelope_check "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+    chk "step2/agent/corrupted-document-refused" "1" "$CONFIG_RC"
+    chk "step2/agent/refusal-names-both-digests" "yes" \
+        "$(printf '%s' "$CONFIG_OUT" | grep -q "and its envelope names $d1" && echo yes || echo no)"
+    chk "step2/agent/refusal-still-states-the-limit" "yes" \
+        "$(printf '%s' "$CONFIG_OUT" | grep -q '^INCONSISTENT|INTERNAL CONSISTENCY ONLY' && echo yes || echo no)"
+    # A bundle carrying no configuration at all. Absence is not a pass, and the
+    # refusal names the path rather than reporting an empty declaration.
+    cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+    rm -f -- "$dir/absent-config.txt"
+    config_call closure_envelope_check "$dir/absent-config.txt" "$bundle/closure-envelope.txt"
+    chk "step2/agent/no-configuration-at-all" "1" "$CONFIG_RC"
+    chk "step2/agent/absence-names-the-path" "yes" \
+        "$(printf '%s' "$CONFIG_OUT" | grep -q "absent|no configuration document at $dir/absent-config.txt" && echo yes || echo no)"
+    config_call closure_envelope_check "$bundle/closure-config.txt" "$dir/absent-envelope.txt"
+    chk "step2/agent/no-envelope-at-all" "1" "$CONFIG_RC"
+
+    # --- the three parties, and the paired edit --------------------------------
+    #
+    # THIS IS THE POINT OF THE WHOLE AREA and it is asserted from every side that
+    # exists yet. A floor entry is deleted and the document re-hashed to match its
+    # own envelope: the agent ACCEPTS, because internal consistency is all it can
+    # read, and packaging REFUSES, because it resolves the authoritative document
+    # from cplx and compares against that.
+    section "step 2 authority: the paired edit, from every side that exists"
+    git_bin=$(type -P git 2>/dev/null) || git_bin=""
+    if [ -z "$git_bin" ] || [ "$(capability_state git)" != "supported" ]; then
+        unanswered "the packaging side of the configuration authority" \
+          "  re-run on a host that supplies git, where the cplx-side resolution can be exercised"
+    else
+        step2_build_repo "$repo" "$dir/valid.txt" || {
+            fail "step2/authority/fixture" "cannot build the fixture repository at $repo"
+            return
+        }
+        commit=$(git -C "$repo" rev-parse HEAD 2>/dev/null)
+        chk "step2/authority/fixture-commit-is-40-hex" "yes" \
+            "$(printf '%s' "$commit" | grep -qE '^[0-9a-f]{40}$' && echo yes || echo no)"
+        cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+        step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" "$commit"
+        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/honest-bundle-accepted" "0" "$CONFIG_RC"
+        chk "step2/authority/verdict-names-the-commit" "yes" \
+            "$(printf '%s' "$CONFIG_OUT" | grep -q "^AUTHORITATIVE|$d1|$commit" && echo yes || echo no)"
+
+        # The paired edit. The floor entry and its payload would go in one edit;
+        # here the entry goes and the envelope is re-hashed to match.
+        step2_mutate "$dir/valid.txt" "$bundle/closure-config.txt" 'floor|libsqlite3.so.0|tools/python' ''
+        step2_mutate "$bundle/closure-config.txt" "$dir/paired.txt" 'waiver|libsqlite3.so.0|python-sqlite-support' ''
+        cp -- "$dir/paired.txt" "$bundle/closure-config.txt"
+        d2=$(config_digest "$bundle/closure-config.txt")
+        chk "step2/authority/paired-edit-planted" "different" \
+            "$( [ "$d1" != "$d2" ] && echo different || echo same )"
+        step2_write_envelope "$bundle/closure-envelope.txt" "$d2" "cfg/closure-config.txt" "$commit"
+        config_call closure_envelope_check "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/paired-edit/agent-ACCEPTS" "0" "$CONFIG_RC"
+        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/paired-edit/packaging-REFUSES" "1" "$CONFIG_RC"
+        chk "step2/authority/paired-edit/refusal-names-both" "yes" \
+            "$(printf '%s' "$CONFIG_OUT" | grep -q "authority|the embedded document hashes to $d2 and cplx holds $d1" && echo yes || echo no)"
+        note "step2/authority/paired-edit/publication-REFUSES" \
+             "pending: closure_publish.sh resolves the same way at the release commit; Step 5 asserts it"
+
+        # An authentic bundle swapped for a DIFFERENT authentic bundle. Both are
+        # internally consistent, so co-location binds nothing and only the party
+        # that resolves for itself can tell them apart.
+        step2_write_valid_config "$dir/other.txt"
+        printf 'floor|libother.so.1|any\n' >> "$dir/other.txt"
+        cp -- "$dir/other.txt" "$bundle/closure-config.txt"
+        d2=$(config_digest "$bundle/closure-config.txt")
+        step2_write_envelope "$bundle/closure-envelope.txt" "$d2" "cfg/closure-config.txt" "$commit"
+        config_call closure_envelope_check "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/authentic-swap/agent-ACCEPTS" "0" "$CONFIG_RC"
+        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/authentic-swap/packaging-REFUSES" "1" "$CONFIG_RC"
+        note "step2/authority/authentic-swap/publication-REFUSES" \
+             "pending: publication resolves the digest itself rather than reading the archive's; Step 5 asserts it"
+
+        # A commit that does not hold that configuration at that path.
+        cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+        step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/not-there.txt" "$commit"
+        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/path-absent-at-that-commit" "1" "$CONFIG_RC"
+        chk "step2/authority/path-absent-names-it" "yes" \
+            "$(printf '%s' "$CONFIG_OUT" | grep -q "source|$commit holds no blob at cfg/not-there.txt" && echo yes || echo no)"
+
+        # A 40-hexadecimal value that is not a commit object. The domain accepts
+        # the shape, and the resolution refuses the OBJECT, which is the half a
+        # lexical check alone cannot answer.
+        d2=$(git -C "$repo" rev-parse HEAD:cfg/closure-config.txt 2>/dev/null)
+        step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" "$d2"
+        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/40-hex-that-is-a-blob" "1" "$CONFIG_RC"
+        chk "step2/authority/40-hex-blob-names-the-type" "yes" \
+            "$(printf '%s' "$CONFIG_OUT" | grep -q "names a blob in $repo rather than a commit" && echo yes || echo no)"
+        # And a branch name, which the envelope domain refuses before the
+        # resolution is ever reached: packaging cannot PRODUCE such a bundle.
+        step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" "develop"
+        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        chk "step2/authority/branch-refused-before-resolution" "1" "$CONFIG_RC"
+        chk "step2/authority/branch-refusal-is-lexical" "yes" \
+            "$(printf '%s' "$CONFIG_OUT" | grep -q 'domain|commit: develop' && echo yes || echo no)"
+    fi
+
+    # --- the checker's own gate ------------------------------------------------
+    #
+    # A bundle that could not be established stops the run BEFORE any invariant.
+    # The assertion is the absence of every typed scope line, not the exit code
+    # alone: a checker that refused and still classified would have answered a
+    # question against a declaration nobody could vouch for.
+    section "step 2 gate: the bundle is read before anything else runs"
+    tree="$SCRATCH/step2/prefix"
+    mkdir -p -- "$tree/tools/python/root/lib" "$tree/tools/git/root/lib" || true
+    cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+    d1=$(config_digest "$bundle/closure-config.txt")
+    step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" \
+        "0123456789abcdef0123456789abcdef01234567"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" --bundle "$bundle"
+    chk "step2/gate/good-bundle-exit-code" "0" "$CHECKER_RC"
+    chk "step2/gate/roots-came-from-the-bundle" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'source      the bundle at' && echo yes || echo no)"
+    chk "step2/gate/roots-are-the-declared-ones" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'roots       python=root,current git=' && echo yes || echo no)"
+    chk "step2/gate/report-states-the-limit" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'internal consistency and NOT authority' && echo yes || echo no)"
+    chk "step2/gate/report-carries-the-digest" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q "digest      $d1, the sha256sum" && echo yes || echo no)"
+    # Its control and the point of the section: corrupt the document and the same
+    # call produces NO typed scope line at all.
+    printf 'floor|libextra.so.1|any\n' >> "$bundle/closure-config.txt"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" --bundle "$bundle"
+    chk "step2/gate/bad-bundle-exit-code" "1" "$CHECKER_RC"
+    chk "step2/gate/bad-bundle-refuses-by-name" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE BUNDLE REFUSED' && echo yes || echo no)"
+    chk "step2/gate/bad-bundle-ran-no-invariant" "0|0|0" \
+        "$(typed_count PRESENT)|$(typed_count ABSENT)|$(typed_count UNEXPECTED)"
+    # An explicit --root still wins over the bundle, which is what keeps every
+    # step 1 case driving the classification from a shape the document does not
+    # carry.
+    cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" --bundle "$bundle" \
+        --root "python=current"
+    chk "step2/gate/explicit-root-wins" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'source      the --root arguments' && echo yes || echo no)"
+    # And the two ways of declaring nothing are still a usage error rather than a
+    # verdict, because a defaulted declaration would be an invented one.
+    run_checker "$checker" --prefix "$tree" --installer "$installer"
+    chk "step2/gate/neither-root-nor-bundle" "2" "$CHECKER_RC"
+}
+
+# One planted grammar defect, its refusal, and the control that the same document
+# without it is accepted. The mutation is asserted to be IN the file before the
+# parser is asked, so a case cannot report a refusal for a record it never wrote.
+#
+# THE LINE NUMBER IS DERIVED FROM THE PLANTED FIXTURE, never written into the
+# expectation. The mutated record is always the last line, so its number is the
+# file's line count; hard-coding it instead made the expectation depend on how
+# many records the base document happens to carry, which is a fact about the
+# fixture rather than about the refusal being asserted.
+step2_refuse() {
+    local dir="$1" label="$2" drop="$3" add="$4" code="$5" detail="$6"
+    local file="$dir/refuse-$label.txt" n
+    step2_mutate "$dir/valid.txt" "$file" "$drop" "$add"
+    if ! grep -Fqx "$add" "$file"; then
+        fail "step2/refuse/$label" "the mutation was not planted: $add"
+        return
+    fi
+    n=$(grep -c '' "$file")
+    config_call closure_config_parse "$file"
+    chk "step2/refuse/$label" "REFUSED|$n|$code|$detail" "$(oneline "$CONFIG_OUT")"
+}
+
+# The fixture repository the cplx-side resolution reads. It is built here rather
+# than pointed at cplx itself: the case needs a commit that holds a KNOWN
+# document at a known path, and reading this repository's own history would make
+# the case depend on what happened to be committed when it ran.
+step2_build_repo() {
+    local repo="$1" config="$2"
+    rm -rf -- "$repo"
+    mkdir -p -- "$repo/cfg" || return 1
+    cp -- "$config" "$repo/cfg/closure-config.txt" || return 1
+    git -C "$repo" init -q . >/dev/null 2>&1 || return 1
+    git -C "$repo" config user.email closure@example.invalid >/dev/null 2>&1 || return 1
+    git -C "$repo" config user.name closure >/dev/null 2>&1 || return 1
+    git -C "$repo" add -A >/dev/null 2>&1 || return 1
+    git -C "$repo" commit -q -m "the reviewed declaration" >/dev/null 2>&1 || return 1
+    return 0
+}
+
 # The stub installer that refuses at source time, shaped like the installer's own
 # `fatal`: it prints and then calls `exit`. Written through a single-quoted
 # variable rather than a heredoc so the dollar-brace operands reach the file
@@ -1257,6 +1827,7 @@ run_one_step() {
         case "$step" in
             0) step0_suite ;;
             1) step1_suite ;;
+            2) step2_suite ;;
         esac
     else
         section "step $step suite"
