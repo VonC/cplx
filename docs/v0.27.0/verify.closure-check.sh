@@ -11,17 +11,22 @@
 # on, and refuses rather than answering a cheaper question.
 #
 # SUITES THAT EXIST TODAY: step 0, the instrument itself, step 1, the declared
-# candidate shape and the observed loader scope, and step 2, the configuration
-# bundle and its authority. Step 1 asserts three things a later reader should not
-# have to reconstruct: that the four checker modules were created together and no
-# fifth exists, that the observed scope is `build_elf_rpath`'s own output byte for
-# byte rather than a copy of its logic, and that a loader scope which could not be
+# candidate shape and the observed loader scope, step 2, the configuration bundle
+# and its authority, and step 3, the static subject set and the derived
+# membership half. Step 1 asserts three things a later reader should not have to
+# reconstruct: that the four checker modules were created together and no fifth
+# exists, that the observed scope is `build_elf_rpath`'s own output byte for byte
+# rather than a copy of its logic, and that a loader scope which could not be
 # observed becomes a typed UNDETERMINED instead of an empty one. Step 2 asserts
 # the asymmetry that makes the declaration mean anything: the agent checks
 # INTERNAL CONSISTENCY and says so, packaging resolves the authoritative document
 # from cplx, and the paired edit is accepted by the first and refused by the
-# second. Steps 3 to 7 are still the red baseline, and each refusal names the step
-# that will fill it.
+# second. Step 3 asserts the rule the measurement forced: the subject set is the
+# WALK of the tree and not a closure from the entry points, so a lib-dynload
+# module no edge reaches is still examined and still refuses; and it MEASURES the
+# cost rule from a run rather than from the source text, one walk and one index
+# construction with the index built first. Steps 4 to 7 are still the red
+# baseline, and each refusal names the step that will fill it.
 #
 # Usage:
 #   bash verify.closure-check.sh [--step N] [--contract PATH] [--corpus PATH]
@@ -112,7 +117,7 @@ while [ "$#" -gt 0 ]; do
         # none, so this resolves to a directory holding no `closure_*.sh` and the
         # mechanical assertion reports zero subjects rather than inventing one.
         --shipped-dir) SHIPPED_DIR_ARG="${2:-}"; shift 2 ;;
-        -h|--help) sed -n '4,72p' "$0"; exit 0 ;;
+        -h|--help) sed -n '4,77p' "$0"; exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -444,7 +449,7 @@ step_filled_by() {
 
 step_suite_exists() {
     case "$1" in
-        0|1|2) return 0 ;;
+        0|1|2|3) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -640,6 +645,69 @@ refuse_capability() {
     esac
 }
 
+# ------------------------------------------------- the step 0 refusal subject ---
+# The first step whose suite does not exist yet, or nothing when every suite
+# exists. It is DERIVED from `step_suite_exists`, the same function the dispatch
+# reads, because the step 0 refusal control needs a step that still refuses and a
+# written-down number stops being one the moment that step is filled.
+step0_first_unfilled() {
+    local n
+    for n in 1 2 3 4 5 6 7; do
+        if ! step_suite_exists "$n"; then printf '%s' "$n"; return 0; fi
+    done
+    printf ''
+}
+
+# THE REFUSAL PATH, over the step the line above names. Two children of this same
+# file: one under a PATH stripped to the harness's own tools, which must refuse on
+# the missing `readelf`, and one under the host's real PATH, which must refuse on
+# the ABSENT SUITE instead. The pair is the point: a harness that printed the
+# missing-tool sentence unconditionally would satisfy the first alone.
+step0_refusal_path() {
+    local shim="$1" out rc found unfilled
+
+    unfilled=$(step0_first_unfilled)
+    if [ -z "$unfilled" ]; then
+        note "step0/refusal/subject" "every suite exists, so nothing can carry the absent-suite half"
+        unanswered "the step 0 refusal path" \
+          "  every step now has a suite, so this control has no subject left; retire it with the red baseline it measures"
+        return 0
+    fi
+    note "step0/refusal/subject" "step $unfilled, the first whose suite does not exist yet"
+
+    out=$(PATH="$shim" "${BASH:-bash}" "$0" --step "$unfilled" --contract "$CONTRACT" --corpus "$CORPUS" 2>&1)
+    rc=$?
+    chk "step0/refusal/missing-tool-exit-code" "5" "$rc"
+    if printf '%s' "$out" | grep -q 'readelf is not on PATH here'; then found=yes; else found=no; fi
+    chk "step0/refusal/names-the-missing-command" "yes" "$found"
+
+    # The control that stops the case above being satisfied by any refusal: the
+    # SAME step, on this host's real PATH, must refuse for a DIFFERENT reason and
+    # must not name a missing readelf.
+    #
+    # IT ONLY MEANS ANYTHING WHERE THE HOST SUPPLIES `readelf`. On a host where
+    # readelf is unavailable anyway, both children refuse for the same reason and
+    # a pass would say nothing about the shim, so the control is not run and the
+    # obligation is reported unanswered rather than recorded green. The authoring
+    # host is that case: Windows carries no readelf, and an earlier revision of
+    # this control FAILED there for exactly this reason, which is how the
+    # distinction came to be measured rather than assumed.
+    out=$("${BASH:-bash}" "$0" --step "$unfilled" --contract "$CONTRACT" --corpus "$CORPUS" 2>&1)
+    rc=$?
+    chk "step0/refusal/suite-absent-exit-code" "5" "$rc"
+    if [ "$(capability_state readelf)" != "supported" ]; then
+        note "step0/refusal/two-refusals-are-distinct" \
+             "not run: readelf is $(capability_state readelf) here, so both children refuse alike"
+        unanswered "the distinctness of the two step $unfilled refusals" \
+          "  re-run on a host that supplies readelf, where the shimmed child refuses on the tool and the real-PATH child refuses on the absent suite"
+        return 0
+    fi
+    if printf '%s' "$out" | grep -q 'readelf is not on PATH here'; then found=yes; else found=no; fi
+    chk "step0/refusal/two-refusals-are-distinct" "no" "$found"
+    if printf '%s' "$out" | grep -q "no suite exists for step $unfilled yet"; then found=yes; else found=no; fi
+    chk "step0/refusal/suite-absent-names-the-step" "yes" "$found"
+}
+
 # =============================================================== the step 0 suite ===
 step0_suite() {
     local shim="$SCRATCH/shim" stub="$SCRATCH/stub" fix="$SCRATCH/fixture"
@@ -707,38 +775,15 @@ step0_suite() {
     done
 
     # --- the refusal path, driven through a real child process ----------------
-    section "step 0 refusal path: a step whose declared tool is missing"
-    out=$(PATH="$shim" "${BASH:-bash}" "$0" --step 3 --contract "$CONTRACT" --corpus "$CORPUS" 2>&1)
-    rc=$?
-    chk "step0/refusal/missing-tool-exit-code" "5" "$rc"
-    if printf '%s' "$out" | grep -q 'readelf is not on PATH here'; then found=yes; else found=no; fi
-    chk "step0/refusal/names-the-missing-command" "yes" "$found"
-    # The control that stops the case above being satisfied by any refusal: the
-    # SAME step, on this host's real PATH, must refuse for a DIFFERENT reason and
-    # must not name a missing readelf. Without it, a harness that always printed
-    # the sentence would pass both.
     #
-    # IT ONLY MEANS ANYTHING WHERE THE HOST SUPPLIES `readelf`. On a host where
-    # readelf is unavailable anyway, both children refuse for the same reason and
-    # a pass would say nothing about the shim, so the control is not run and the
-    # obligation is reported unanswered rather than recorded green. The authoring
-    # host is that case: Windows carries no readelf, and an earlier revision of
-    # this control FAILED there for exactly this reason, which is how the
-    # distinction below came to be measured rather than assumed.
-    out=$("${BASH:-bash}" "$0" --step 3 --contract "$CONTRACT" --corpus "$CORPUS" 2>&1)
-    rc=$?
-    chk "step0/refusal/suite-absent-exit-code" "5" "$rc"
-    if [ "$(capability_state readelf)" = "supported" ]; then
-        if printf '%s' "$out" | grep -q 'readelf is not on PATH here'; then found=yes; else found=no; fi
-        chk "step0/refusal/two-refusals-are-distinct" "no" "$found"
-        if printf '%s' "$out" | grep -q 'no suite exists for step 3 yet'; then found=yes; else found=no; fi
-        chk "step0/refusal/suite-absent-names-the-step" "yes" "$found"
-    else
-        note "step0/refusal/two-refusals-are-distinct" \
-             "not run: readelf is $(capability_state readelf) here, so both children refuse alike"
-        unanswered "the distinctness of the two step 3 refusals" \
-          "  re-run on a host that supplies readelf, where the shimmed child refuses on the tool and the real-PATH child refuses on the absent suite"
-    fi
+    # THE SUBJECT STEP IS DERIVED, NOT WRITTEN DOWN. This case needs a step whose
+    # suite does not exist yet, and step 3 was that step until step 3 filled it:
+    # a hard-coded number turns "the suite is absent" into a claim that quietly
+    # becomes false, and the step that filled it fails step 0 while step 0 is not
+    # what it broke. `step0_first_unfilled` asks the same function the dispatch
+    # asks, so this control follows the red baseline as it recedes.
+    section "step 0 refusal path: a step whose declared tool is missing"
+    step0_refusal_path "$shim"
 
     # --- steps 1 to 7 have a declared host and a declared refusal path --------
     #
@@ -1763,6 +1808,1122 @@ step1_write_fatal_stub() {
       printf 'fatal "the sourced installer refuses" 3\n'; } > "$1"
 }
 
+# ------------------------------------------------------------ the fixture engine ---
+# Q07's decision, in code: an ELF with a real dynamic section cannot be conjured
+# from text, so the harness FINDS a donor on the host, VALIDATES it against the
+# corpus donor row, copies it, applies the row's mutation and ASSERTS the row's
+# semantic result before any case may use the object.
+#
+# THE ENGINE NEVER REBUILDS AN ELF. It writes a name into the reserved tail of
+# the donor's own `.dynstr` and repoints one dynamic entry at that offset, which
+# is why no fixture name is bounded by the length of the string it replaces. The
+# corpus header states the same mechanism where the rows live.
+#
+# `dd` and `readelf` are the engine's own tools and are resolved HERE rather than
+# in the harness preflight: the step 0 refusal cases re-invoke this file with a
+# PATH holding exactly the preflight list, and every name added there widens the
+# environment those cases run in. A host that cannot supply one of these reports
+# UNANSWERED naming it, which is not a pass.
+FIXTURE_READELF=""
+FIXTURE_DD=""
+# The four magic bytes, held once so no case has to spell them inline.
+FIXTURE_ELF_MAGIC=$'\x7fELF'
+
+fixture_resolve_tools() {
+    FIXTURE_READELF=$(type -P readelf 2>/dev/null) || FIXTURE_READELF=""
+    FIXTURE_DD=$(type -P dd 2>/dev/null) || FIXTURE_DD=""
+    [ -n "$FIXTURE_READELF" ] && [ -n "$FIXTURE_DD" ]
+}
+
+# "<file-offset> <size>", both decimal, of one section, read from readelf's own
+# section table rather than from the section headers by hand. The comparison is a
+# string equality over the split row and not a regular expression: a section name
+# carries a dot, and an expression would have to be escaped at every call site.
+elf_section() {
+    local file="$1" want="$2" line
+    while IFS= read -r line; do
+        line="${line#*]}"
+        # shellcheck disable=SC2086  # readelf's own fixed columns, split on purpose
+        set -- $line
+        [ "${1:-}" = "$want" ] || continue
+        printf '%s %s' "$(( 16#$4 ))" "$(( 16#$5 ))"
+        return 0
+    done <<< "$(LC_ALL=C "$FIXTURE_READELF" -S -W -- "$file" 2>/dev/null)"
+    return 1
+}
+
+elf_dyn_lines() { LC_ALL=C "$FIXTURE_READELF" -d -- "$1" 2>/dev/null | grep -E '^ 0x' || true; }
+elf_dyn_used()  { elf_dyn_lines "$1" | grep -c . || true; }
+elf_dyn_count() { elf_dyn_lines "$1" | grep -c "($2)" || true; }
+
+# The 0-based slot index of the first entry of that type. readelf walks the
+# dynamic array in order and stops after DT_NULL, so its Nth printed entry is
+# slot N and the terminator's index is where the spare slots begin.
+elf_dyn_slot() {
+    local file="$1" want="$2" n=0 line
+    while IFS= read -r line; do
+        case "$line" in
+            *"($want)"*) printf '%s' "$n"; return 0 ;;
+        esac
+        n=$(( n + 1 ))
+    done <<< "$(elf_dyn_lines "$file")"
+    return 1
+}
+
+elf_needed_names() {
+    LC_ALL=C "$FIXTURE_READELF" -d -- "$1" 2>/dev/null \
+      | grep -E '\(NEEDED\)' | sed -e 's/^.*\[//' -e 's/\].*$//' || true
+}
+
+elf_soname() {
+    LC_ALL=C "$FIXTURE_READELF" -d -- "$1" 2>/dev/null \
+      | grep -E '\(SONAME\)' | sed -e 's/^.*\[//' -e 's/\].*$//' || true
+}
+
+elf_poke_u64() {
+    local file="$1" off="$2" val="$3" i esc=""
+    for i in 0 1 2 3 4 5 6 7; do
+        esc="$esc\\x$(printf '%02x' $(( (val >> (8 * i)) & 255 )))"
+    done
+    # shellcheck disable=SC2059  # the escapes ARE the format string here
+    printf "$esc" | "$FIXTURE_DD" of="$file" bs=1 seek="$off" conv=notrunc status=none 2>/dev/null
+}
+
+elf_poke_str() {
+    printf '%s\0' "$3" | "$FIXTURE_DD" of="$1" bs=1 seek="$2" conv=notrunc status=none 2>/dev/null
+}
+
+# The four 64-byte name slots in the reserved tail of `.dynstr`, as a dynstr-
+# relative offset. Slot 0 is the one a single-mutation row uses; the other three
+# exist for the rows a later step fills.
+elf_name_slot() { printf '%s' "$(( $1 - 256 + $2 * 64 ))"; }
+
+# --- donor validation, against the corpus rows and nothing else ---------------
+donor_valid_shared() {
+    local f="$1" hdr ds_size dy_size used
+    hdr=$(LC_ALL=C "$FIXTURE_READELF" -h -- "$f" 2>/dev/null) || return 1
+    printf '%s\n' "$hdr" | grep -qE 'Class: +ELF64' || return 1
+    printf '%s\n' "$hdr" | grep -q 'little endian' || return 1
+    printf '%s\n' "$hdr" | grep -qE 'Type: +DYN' || return 1
+    LC_ALL=C "$FIXTURE_READELF" -l -W -- "$f" 2>/dev/null | grep -q 'DYNAMIC' || return 1
+    elf_dyn_slot "$f" SONAME >/dev/null 2>&1 || return 1
+    [ "$(elf_dyn_count "$f" NEEDED)" -ge 1 ] || return 1
+    read -r _ ds_size <<< "$(elf_section "$f" .dynstr)"
+    [ -n "${ds_size:-}" ] && [ "$ds_size" -ge 512 ] || return 1
+    read -r _ dy_size <<< "$(elf_section "$f" .dynamic)"
+    [ -n "${dy_size:-}" ] || return 1
+    used=$(elf_dyn_used "$f")
+    [ "$(( dy_size / 16 - used ))" -ge 1 ] || return 1
+    return 0
+}
+
+donor_valid_program() {
+    local f="$1" hdr phdr
+    hdr=$(LC_ALL=C "$FIXTURE_READELF" -h -- "$f" 2>/dev/null) || return 1
+    printf '%s\n' "$hdr" | grep -qE 'Class: +ELF64' || return 1
+    printf '%s\n' "$hdr" | grep -qE 'Type: +(DYN|EXEC)' || return 1
+    phdr=$(LC_ALL=C "$FIXTURE_READELF" -l -W -- "$f" 2>/dev/null) || return 1
+    printf '%s\n' "$phdr" | grep -q 'INTERP' || return 1
+    printf '%s\n' "$phdr" | grep -q 'DYNAMIC' || return 1
+    return 0
+}
+
+# The first candidate that validates, over the two library layouts this effort's
+# hosts use. It is bounded on purpose: a host with no valid donor must refuse in
+# a moment rather than walk its whole filesystem looking for one.
+donor_find_shared() {
+    local c tried=0
+    for c in /usr/lib64/libz.so.1 /usr/lib64/libbz2.so.1 /usr/lib64/liblzma.so.5 \
+             /usr/lib64/libcap.so.2 /usr/lib64/libffi.so.8 \
+             /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu/libbz2.so.1 \
+             /lib/x86_64-linux-gnu/liblzma.so.5 /lib/x86_64-linux-gnu/libcap.so.2 \
+             /usr/lib64/lib*.so.[0-9] /lib/x86_64-linux-gnu/lib*.so.[0-9]; do
+        [ -f "$c" ] || continue
+        tried=$(( tried + 1 ))
+        [ "$tried" -le 60 ] || return 1
+        if donor_valid_shared "$c"; then printf '%s' "$c"; return 0; fi
+    done
+    return 1
+}
+
+donor_find_program() {
+    local c
+    for c in /bin/cat /usr/bin/cat /bin/id /usr/bin/id "${BASH:-/bin/bash}"; do
+        [ -f "$c" ] || continue
+        if donor_valid_program "$c"; then printf '%s' "$c"; return 0; fi
+    done
+    return 1
+}
+
+# --- one corpus row, planted and asserted -------------------------------------
+CORPUS_ROW_KIND=""
+CORPUS_ROW_DONOR=""
+CORPUS_ROW_PLACE=""
+CORPUS_ROW_MUT=""
+CORPUS_ROW_ASSERT=""
+DONOR_SHARED=""
+DONOR_PROGRAM=""
+DONOR_NEED_NAMES=""
+
+corpus_load_row() {
+    local row
+    row=$(grep -E "^spec\|$1\|" "$CORPUS" | sed -n 1p)
+    [ -n "$row" ] || return 1
+    IFS='|' read -r _ _ CORPUS_ROW_KIND CORPUS_ROW_DONOR CORPUS_ROW_PLACE \
+        CORPUS_ROW_MUT CORPUS_ROW_ASSERT <<< "$row"
+    return 0
+}
+
+# How many alias pairs `plant-alias-pairs` builds. The cost case sets it twice.
+FIXTURE_ALIAS_PAIRS=4
+
+# One alias pair: a versioned target carrying the soname, the soname link beside
+# it, and a consumer that names the soname. The three together are what makes a
+# link SELECTED, which is the only kind of link the reachability rule resolves.
+fixture_alias_pair() {
+    local prefix="$1" dir="$2" i="$3"
+    local target="$prefix/$dir/libcplxscale$i.so.1.2.3"
+    local link="$prefix/$dir/libcplxscale$i.so.1"
+    local user="$prefix/tools/python/current/lib/libcplxscaleuser$i.so.1"
+
+    cp -- "$DONOR_SHARED" "$target" || return 1
+    chmod u+w -- "$target" || return 1
+    elf_set_string_entry "$target" SONAME "libcplxscale$i.so.1" || return 1
+    rm -f -- "$link"
+    ln -s -- "$target" "$link" || return 1
+    cp -- "$DONOR_SHARED" "$user" || return 1
+    chmod u+w -- "$user" || return 1
+    elf_add_needed "$user" "libcplxscale$i.so.1" || return 1
+}
+
+# The two mutations the engine performs, factored out of `fixture_plant` so the
+# cost fixture builds the same objects the corpus rows describe rather than a
+# second implementation of them.
+elf_set_string_entry() {
+    local file="$1" tag="$2" value="$3" ds_off ds_size dy_off dy_size slot idx
+    read -r ds_off ds_size <<< "$(elf_section "$file" .dynstr)"
+    read -r dy_off dy_size <<< "$(elf_section "$file" .dynamic)"
+    if [ -z "${ds_size:-}" ] || [ -z "${dy_size:-}" ]; then return 1; fi
+    slot=$(elf_name_slot "$ds_size" 0)
+    elf_poke_str "$file" $(( ds_off + slot )) "$value"
+    idx=$(elf_dyn_slot "$file" "$tag") || return 1
+    elf_poke_u64 "$file" $(( dy_off + idx * 16 + 8 )) "$slot"
+}
+
+elf_add_needed() {
+    local file="$1" value="$2" ds_off ds_size dy_off dy_size slot idx
+    read -r ds_off ds_size <<< "$(elf_section "$file" .dynstr)"
+    read -r dy_off dy_size <<< "$(elf_section "$file" .dynamic)"
+    if [ -z "${ds_size:-}" ] || [ -z "${dy_size:-}" ]; then return 1; fi
+    slot=$(elf_name_slot "$ds_size" 0)
+    elf_poke_str "$file" $(( ds_off + slot )) "$value"
+    idx=$(elf_dyn_slot "$file" NULL) || return 1
+    elf_poke_u64 "$file" $(( dy_off + idx * 16 )) 1
+    elf_poke_u64 "$file" $(( dy_off + idx * 16 + 8 )) "$slot"
+}
+
+# The entry link and the real library of the chain last built, so the assert can
+# name what the shape actually produced rather than repeating its construction.
+FIXTURE_CHAIN_ENTRY=""
+FIXTURE_CHAIN_REAL=""
+
+# One link chain, built whole. Every shape ends at ONE real library under
+# `version/lib`, reached from an entry link in the provider directory the row
+# places it in, and a consumer names the entry link's soname so an edge selects
+# it. The three differ only in the path the links take to get there.
+fixture_chain() {
+    local prefix="$1" dir="$2" verb="$3" i prev
+    local base real link user
+
+    case "$verb" in
+        plant-chain-relative) base=libcplxrel ;;
+        plant-chain-updir) base=libcplxupdir ;;
+        *) base=libcplxdeep ;;
+    esac
+    real="tools/python/version/lib/$base.so.1.2"
+    FIXTURE_CHAIN_REAL="$real"
+    FIXTURE_CHAIN_ENTRY="$base.so.1"
+    link="$prefix/$dir/$base.so.1"
+    user="$prefix/tools/python/version/lib/${base}user.so.1"
+
+    mkdir -p -- "$prefix/tools/python/version/lib" "$prefix/$dir" || return 1
+    cp -- "$DONOR_SHARED" "$prefix/$real" || return 1
+    chmod u+w -- "$prefix/$real" || return 1
+    elf_set_string_entry "$prefix/$real" SONAME "$base.so.1" || return 1
+    cp -- "$DONOR_SHARED" "$user" || return 1
+    chmod u+w -- "$user" || return 1
+    elf_add_needed "$user" "$base.so.1" || return 1
+
+    rm -f -- "$link"
+    case "$verb" in
+        plant-chain-relative)
+            # Out of a sibling provider directory and back down THROUGH THE
+            # ALIAS, so a component INSIDE the target is itself a link. Taking
+            # the target whole resolves nothing further and lands on a path the
+            # walk never recorded.
+            ln -s -- "../../../current/lib/$base.so.1.2" "$link" || return 1 ;;
+        plant-chain-updir)
+            # Up THROUGH a link directory: `..` has to apply to the directory
+            # the resolution reached, not to the one the text names.
+            mkdir -p -- "$prefix/tools/python/version/deep" || return 1
+            rm -f -- "$prefix/tools/python/linkdir"
+            ln -s -- "version/deep" "$prefix/tools/python/linkdir" || return 1
+            ln -s -- "../../linkdir/../lib/$base.so.1.2" "$link" || return 1 ;;
+        *)
+            # Nine valid links ending at the real library, which the host
+            # resolves and which a bound tighter than the kernel's would refuse.
+            prev="$base.so.1.2"
+            i=1
+            while [ "$i" -le 9 ]; do
+                rm -f -- "$prefix/tools/python/version/lib/$base.hop$i"
+                ln -s -- "$prev" "$prefix/tools/python/version/lib/$base.hop$i" || return 1
+                prev="$base.hop$i"
+                i=$((i + 1))
+            done
+            ln -s -- "../../version/lib/$base.hop9" "$link" || return 1 ;;
+    esac
+}
+
+# The harness's own magic-byte test, kept apart from the checker's so a case
+# asserting "this is not an ELF" never asks the code under test whether it is.
+fixture_is_elf() {
+    local magic=""
+    [ -r "$1" ] || return 1
+    IFS= read -r -n 4 magic < "$1" 2>/dev/null || true
+    [ "$magic" = "$FIXTURE_ELF_MAGIC" ]
+}
+
+# Plants the row named by <id> under <prefix> and prints `ok`, or the reason the
+# asserted result was not observed. A row whose mutation this engine does not
+# implement prints `unimplemented:<verb>` rather than planting the donor
+# unchanged, because an un-mutated copy passing for a mutated one is exactly what
+# the assert column exists to prevent.
+fixture_plant() {
+    local prefix="$1" id="$2"
+    local target verb operand src ds_off ds_size dy_off dy_size slot idx name
+
+    corpus_load_row "$id" || { printf 'no-row'; return; }
+    target="$prefix/$CORPUS_ROW_PLACE"
+    verb="${CORPUS_ROW_MUT%%:*}"
+    operand="${CORPUS_ROW_MUT#*:}"
+    [ "$operand" != "$CORPUS_ROW_MUT" ] || operand=""
+
+    # The kind column and the mutation column are two statements about one row and
+    # have to agree: a `tree` row planting an ELF, or an `object` row planting a
+    # text file, is a corpus defect rather than a fixture.
+    case "$CORPUS_ROW_KIND" in
+        tree)
+            case "$verb" in
+                plant-text|plant-donor-need|symlink-to) ;;
+                *) printf 'kind-mismatch'; return ;;
+            esac ;;
+        object)
+            case "$verb" in
+                plant-text|plant-donor-need|symlink-to) printf 'kind-mismatch'; return ;;
+            esac ;;
+        *) printf 'unknown-kind'; return ;;
+    esac
+
+    case "$verb" in
+        plant-text)
+            mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
+            printf 'not an ELF: the %s fixture, planted from the corpus\n' "$id" > "$target" ;;
+        plant-donor-need)
+            mkdir -p -- "$target" || { printf 'no-directory'; return; }
+            for name in $DONOR_NEED_NAMES; do
+                printf 'not an ELF: the provider a donor need resolves to\n' > "$target/$name"
+            done ;;
+        plant-alias-pairs)
+            # THE COST FIXTURE. It replicates the declared alias shape, a
+            # versioned target with a soname link beside it and a consumer that
+            # names the soname, at the size `FIXTURE_ALIAS_PAIRS` asks for, so
+            # the alias resolution can be measured at two populations. The
+            # consumers go under a provider directory of their own so the
+            # planted names stay resolvable.
+            mkdir -p -- "$target" "$prefix/tools/python/current/lib" \
+                || { printf 'no-directory'; return; }
+            src="$DONOR_SHARED"
+            [ -n "$src" ] || { printf 'no-donor'; return; }
+            idx=1
+            while [ "$idx" -le "$FIXTURE_ALIAS_PAIRS" ]; do
+                fixture_alias_pair "$prefix" "$CORPUS_ROW_PLACE" "$idx" \
+                    || { printf 'pair-%s-failed' "$idx"; return; }
+                idx=$((idx + 1))
+            done ;;
+        plant-chain-relative|plant-chain-updir|plant-chain-deep)
+            # THE LINK CHAINS, each built whole because the shape is the fixture:
+            # a real library, the links that reach it, and a consumer that names
+            # the entry link so an edge selects it. The placement is the provider
+            # directory the entry link goes in.
+            src="$DONOR_SHARED"
+            [ -n "$src" ] || { printf 'no-donor'; return; }
+            fixture_chain "$prefix" "$CORPUS_ROW_PLACE" "$verb" \
+                || { printf 'chain-not-built'; return; } ;;
+        symlink-to)
+            # The soname beside its versioned target, which is the ordinary
+            # library layout and the one an alias rule has to survive. A host
+            # where `ln -s` copies instead of linking cannot plant it, and the
+            # assert below says so rather than passing over a plain copy.
+            mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
+            rm -f -- "$target"
+            ln -s -- "$prefix/$operand" "$target" 2>/dev/null ;;
+        needed-add|soname-set|interp-keep|mode-set|needed-offset-corrupt)
+            if [ "$CORPUS_ROW_DONOR" = "program" ]; then src="$DONOR_PROGRAM"; else src="$DONOR_SHARED"; fi
+            [ -n "$src" ] || { printf 'no-donor'; return; }
+            mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
+            cp -- "$src" "$target" || { printf 'no-copy'; return; }
+            chmod u+w -- "$target" || { printf 'not-writable'; return; } ;;
+        *) printf 'unimplemented:%s' "$verb"; return ;;
+    esac
+
+    case "$verb" in
+        needed-add|soname-set)
+            read -r ds_off ds_size <<< "$(elf_section "$target" .dynstr)"
+            read -r dy_off dy_size <<< "$(elf_section "$target" .dynamic)"
+            if [ -z "${ds_size:-}" ] || [ -z "${dy_size:-}" ]; then
+                printf 'no-sections'
+                return
+            fi
+            slot=$(elf_name_slot "$ds_size" 0)
+            elf_poke_str "$target" $(( ds_off + slot )) "$operand"
+            if [ "$verb" = "needed-add" ]; then
+                # The terminator becomes the added need, and the spare slot behind
+                # it terminates the array, which is what makes this an ADD.
+                idx=$(elf_dyn_slot "$target" NULL) || { printf 'no-null-slot'; return; }
+                elf_poke_u64 "$target" $(( dy_off + idx * 16 )) 1
+                elf_poke_u64 "$target" $(( dy_off + idx * 16 + 8 )) "$slot"
+            else
+                idx=$(elf_dyn_slot "$target" SONAME) || { printf 'no-soname-slot'; return; }
+                elf_poke_u64 "$target" $(( dy_off + idx * 16 + 8 )) "$slot"
+            fi ;;
+        needed-offset-corrupt)
+            # The STRING TABLE is left alone and the ENTRY is repointed past its
+            # end, which is how a supported reader is made to exit 0 and print a
+            # DT_NEEDED whose value it cannot resolve to a name.
+            read -r dy_off dy_size <<< "$(elf_section "$target" .dynamic)"
+            if [ -z "${dy_size:-}" ]; then printf 'no-sections'; return; fi
+            idx=$(elf_dyn_slot "$target" NEEDED) || { printf 'no-needed-slot'; return; }
+            elf_poke_u64 "$target" $(( dy_off + idx * 16 + 8 )) 9223372036854775807 ;;
+        mode-set) chmod "$operand" -- "$target" ;;
+    esac
+
+    case "$CORPUS_ROW_ASSERT" in
+        dt-needed-lists:*)
+            name="${CORPUS_ROW_ASSERT#dt-needed-lists:}"
+            if elf_needed_names "$target" | grep -Fxq "$name"; then printf 'ok'
+            else printf 'need-not-listed'; fi ;;
+        dt-needed-value-unreadable)
+            # TWO HALVES, and the second is what makes this fixture worth having:
+            # the reader must EXIT 0 over the object, so the case is about a
+            # value a supported reader could not resolve rather than about a
+            # reader that failed.
+            if ! LC_ALL=C "$FIXTURE_READELF" -d -V -- "$target" >/dev/null 2>&1; then
+                printf 'reader-refused'
+            elif elf_dyn_lines "$target" | grep -E '\(NEEDED\)' | grep -qv '\['; then
+                printf 'ok'
+            else
+                printf 'value-still-readable'
+            fi ;;
+        dt-soname-is:*)
+            name="${CORPUS_ROW_ASSERT#dt-soname-is:}"
+            if [ "$(elf_soname "$target")" = "$name" ]; then printf 'ok'
+            else printf 'soname-is-%s' "$(elf_soname "$target")"; fi ;;
+        pt-interp-present)
+            if LC_ALL=C "$FIXTURE_READELF" -l -W -- "$target" 2>/dev/null | grep -q 'INTERP'
+            then printf 'ok'; else printf 'no-interp'; fi ;;
+        read-refused)
+            if [ -r "$target" ]; then printf 'still-readable'; else printf 'ok'; fi ;;
+        chain-resolves)
+            # THE HOST'S OWN ANSWER IS THE ASSERTION. `-ef` on the entry link and
+            # the real library says the two are one file, so the fixture states
+            # what the resolver must reach rather than the harness assuming it.
+            if [ ! -L "$target/$FIXTURE_CHAIN_ENTRY" ]; then printf 'not-a-symlink'
+            elif [ "$target/$FIXTURE_CHAIN_ENTRY" -ef "$prefix/$FIXTURE_CHAIN_REAL" ]
+            then printf 'ok'
+            else printf 'chain-does-not-reach-the-file'; fi ;;
+        alias-pairs-present)
+            idx=1
+            while [ "$idx" -le "$FIXTURE_ALIAS_PAIRS" ]; do
+                if [ ! -L "$target/libcplxscale$idx.so.1" ] \
+                   || [ ! -f "$target/libcplxscale$idx.so.1.2.3" ] \
+                   || [ ! -f "$prefix/tools/python/current/lib/libcplxscaleuser$idx.so.1" ]; then
+                    printf 'pair-%s-absent' "$idx"
+                    return
+                fi
+                idx=$((idx + 1))
+            done
+            printf 'ok' ;;
+        symlink-resolves)
+            # BOTH HALVES. It has to BE a link, because a host where `ln -s`
+            # copies would otherwise plant two independent files and the alias
+            # case would pass over a shape it never built; and it has to resolve
+            # to the same file, because a dangling link reaches nothing.
+            if [ ! -L "$target" ]; then printf 'not-a-symlink'
+            elif [ "$target" -ef "$prefix/$operand" ]; then printf 'ok'
+            else printf 'link-does-not-resolve'; fi ;;
+        magic-is-not-elf)
+            if fixture_is_elf "$target"; then printf 'is-elf'; else printf 'ok'; fi ;;
+        donor-need-resolvable)
+            for name in $DONOR_NEED_NAMES; do
+                [ -f "$target/$name" ] || { printf 'missing-%s' "$name"; return; }
+            done
+            printf 'ok' ;;
+        *) printf 'unimplemented-assert' ;;
+    esac
+}
+
+# The value of one summary row of the last checker run, which is how a case reads
+# a count without re-deriving it from the typed lines the row summarises.
+report_field() {
+    printf '%s\n' "$CHECKER_OUT" | grep -E "^  $1 " | sed -n 1p \
+      | sed -e "s/^  $1  *//" -e 's/ .*$//'
+}
+
+# The provider index, asked of the module itself rather than of the report: the
+# name-to-paths map is bounded by the archive rather than by the scope, so
+# printing it whole would bury the findings a reader comes to the report for.
+step3_provider_paths() {
+    local dirs
+    dirs=$(observed_scope "$1" "$SHIPPED_DIR/install_pkg.sh" | sed -e 's/:/\n/g')
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        declare -F closure_provider_index >/dev/null 2>&1 || exit 92
+        closure_provider_index "$2"
+        printf "%s" "${CLOSURE_PROVIDER_PATHS[$3]:-}"
+    ' _ "$SHIPPED_DIR/closure_check.sh" "$dirs" "$2" 2>/dev/null
+}
+
+# THE COST MEASUREMENT. It counts the shell commands `closure_report_unreferenced
+# _by_edge` executes over a prepared tree, with a DEBUG trap, and it is the only
+# way to tell a lookup from a sweep: both answer the same, and only their growth
+# differs. The trap is set around that ONE call, so the walk and the index below
+# it are not counted.
+step3_alias_ops() {
+    local prefix="$1" dirs
+    dirs=$(observed_scope "$prefix" "$SHIPPED_DIR/install_pkg.sh" | sed -e 's/:/\n/g')
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        declare -F closure_report_unreferenced_by_edge >/dev/null 2>&1 || exit 92
+        closure_provider_index "$2"
+        closure_subjects_walk "$3/tools" >/dev/null
+        cplx_ops=0
+        # `set -T` is what makes the trap enter the function at all. Without
+        # functrace a DEBUG trap fires only in the calling shell, and the count
+        # comes back the same at every population, which reads exactly like a
+        # cost that does not grow.
+        set -T
+        trap "cplx_ops=\$((cplx_ops + 1))" DEBUG
+        closure_report_unreferenced_by_edge >/dev/null
+        trap - DEBUG
+        set +T
+        printf "%s" "$cplx_ops"
+    ' _ "$SHIPPED_DIR/closure_check.sh" "$dirs" "$prefix" 2>/dev/null
+}
+
+# A stub directory holding `readelf` and `find`. An empty body means "pass the
+# real tool through", and an empty `readelf` body with a PATH of exactly this
+# directory is how the absent-reader case is built: the directory still supplies
+# the walk, so the run reaches the objects and fails to READ them rather than
+# failing to find them. The find body exists for the mirror case, a traversal
+# that cannot be taken at all.
+#
+# `mktemp` and `rm` are passed through beside them, because the walk holds its
+# listing in a temporary file and the absent-reader case runs under a PATH of
+# exactly this directory. Without them that case refuses on the missing `mktemp`
+# and never reaches the reader it exists to remove, which is a green-looking
+# refusal for the wrong input.
+step3_write_stub() {
+    local dir="$1" body="$2" find_body="${3:-}" tool real
+    rm -rf -- "$dir"
+    mkdir -p -- "$dir" || return 1
+    for tool in find mktemp rm; do
+        real=$(type -P "$tool" 2>/dev/null) || return 1
+        { printf '#!/bin/bash\n'; printf 'exec "%s" "$@"\n' "$real"; } > "$dir/$tool"
+        chmod +x -- "$dir/$tool"
+    done
+    if [ -n "$find_body" ]; then
+        { printf '#!/bin/bash\n'; printf '%s\n' "$find_body"; } > "$dir/find"
+        chmod +x -- "$dir/find"
+    fi
+    if [ -n "$body" ]; then
+        { printf '#!/bin/bash\n'; printf '%s\n' "$body"; } > "$dir/readelf"
+        chmod +x -- "$dir/readelf"
+    fi
+}
+
+# A reader that answers honestly under LC_ALL=C and translates its field labels
+# otherwise, which is the build the pin exists for.
+step3_write_translating_stub() {
+    local dir="$1" real_find real_readelf
+    rm -rf -- "$dir"
+    mkdir -p -- "$dir" || return 1
+    real_find=$(type -P find 2>/dev/null) || return 1
+    real_readelf=$(type -P readelf 2>/dev/null) || return 1
+    { printf '#!/bin/bash\n'; printf 'exec "%s" "$@"\n' "$real_find"; } > "$dir/find"
+    { printf '#!/bin/bash\n'
+      printf 'out=$("%s" "$@"); rc=$?\n' "$real_readelf"
+      printf 'if [ "${LC_ALL:-}" = "C" ]; then printf "%%s\\n" "$out"; exit "$rc"; fi\n'
+      printf 'printf "%%s\\n" "$out" | sed -e "s/Shared library:/Bibliotheque partagee :/"'
+      printf ' -e "s/Library soname:/Nom de bibliotheque :/"'
+      printf ' -e "s/Dynamic section at offset/Section dynamique au decalage/"\n'
+      printf 'exit "$rc"\n'; } > "$dir/readelf"
+    chmod +x -- "$dir/find" "$dir/readelf"
+}
+
+# One checker run under a PATH the case states in full, so the reader the checker
+# resolves is the one the case planted.
+#
+# THE WHOLE VALUE IS THE ARGUMENT AND NOT A PREFIX. The absent-reader case needs
+# a PATH where `readelf` cannot be found at all, and a helper that prepended the
+# stub directory would leave the host's own reader one entry further down: the
+# case would then pass its stub over, resolve the real tool, and report a green
+# for the opposite of what it exists to show.
+step3_run_with_path() {
+    local path_value="$1"
+    shift
+    CHECKER_OUT=$(PATH="$path_value" "${BASH:-bash}" "$@" 2>&1)
+    CHECKER_RC=$?
+}
+
+# THE INSTRUMENTED RUN. The checker is reached through its own MAIN BOUNDARY seam
+# so the provider index can be wrapped in a counting shim, and `find` and
+# `readelf` are wrapped on PATH the same way. The three events land in ONE log in
+# the order they happened, which is what makes "the index was built before the
+# first object was read" an observation rather than a claim.
+step3_instrumented() {
+    local log="$1" stubs="$2"
+    shift 2
+    local dir="$stubs/instrumented" real_find real_readelf
+    rm -rf -- "$dir"
+    mkdir -p -- "$dir" || return 1
+    real_find=$(type -P find 2>/dev/null) || return 1
+    real_readelf=$(type -P readelf 2>/dev/null) || return 1
+    { printf '#!/bin/bash\n'; printf 'printf "WALK\\n" >> "%s"\n' "$log"
+      printf 'exec "%s" "$@"\n' "$real_find"; } > "$dir/find"
+    { printf '#!/bin/bash\n'; printf 'printf "READ\\n" >> "%s"\n' "$log"
+      printf 'exec "%s" "$@"\n' "$real_readelf"; } > "$dir/readelf"
+    chmod +x -- "$dir/find" "$dir/readelf"
+    : > "$log"
+    CHECKER_OUT=$(PATH="$dir:$PATH" "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        declare -F closure_provider_index >/dev/null 2>&1 || exit 92
+        declare -F closure_check_main >/dev/null 2>&1 || exit 92
+        log="$2"
+        orig=$(declare -f closure_provider_index)
+        eval "closure_provider_index_real${orig#closure_provider_index}"
+        closure_provider_index() {
+            printf "INDEX\n" >> "$log"
+            closure_provider_index_real "$@"
+        }
+        shift 2
+        closure_check_main "$@"
+    ' _ "$SHIPPED_DIR/closure_check.sh" "$log" "$@" 2>&1)
+    CHECKER_RC=$?
+}
+
+# =============================================================== the step 3 suite ===
+step3_suite() {
+    local checker="$SHIPPED_DIR/closure_check.sh"
+    local installer="$SHIPPED_DIR/install_pkg.sh"
+    local reader="$SHIPPED_DIR/closure_elf.sh"
+    local rules="$SHIPPED_DIR/closure_rules.sh"
+    local dir="$SCRATCH/step3" tree="$SCRATCH/step3/prefix" stubs="$SCRATCH/step3/stubs"
+    local log="$SCRATCH/step3/order.log"
+    local roots1="python=root,current" roots2="git=root,current"
+    local id result planted_files planted_elf edges shared_needs program_needs
+    local alias_ok=no small large dir_tree
+    local paths line
+
+    mkdir -p -- "$dir" "$stubs" || { fail "step3/scratch" "cannot create the scratch directory"; return; }
+
+    # --- the two modules are filled, and neither has taken the other's job ----
+    section "step 3 topology: the reader and the rules module have a body"
+    if [ ! -f "$reader" ] || [ ! -f "$rules" ]; then
+        fail "step3/topology/modules-exist" "closure_elf.sh or closure_rules.sh is missing"
+        unanswered "every step 3 case" \
+          "  fill src/setups/env/bin/closure_elf.sh and closure_rules.sh, then repeat this call"
+        return
+    fi
+    chk "step3/topology/reader-is-filled" "yes" \
+        "$( [ "$(module_body_lines "$reader")" -gt 0 ] && echo yes || echo no )"
+    chk "step3/topology/rules-is-filled" "yes" \
+        "$( [ "$(module_body_lines "$rules")" -gt 0 ] && echo yes || echo no )"
+    chk "step3/topology/reader-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$reader")")"
+    chk "step3/topology/rules-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$rules")")"
+    chk "step3/topology/checker-sources-the-reader" "yes" \
+        "$(sed -e 's/#.*$//' "$checker" | grep -q 'closure_elf.sh' && echo yes || echo no)"
+    chk "step3/topology/checker-sources-the-rules" "yes" \
+        "$(sed -e 's/#.*$//' "$checker" | grep -q 'closure_rules.sh' && echo yes || echo no)"
+    # THE BOUNDARY IS READING AGAINST DECIDING. The reader may emit no verdict and
+    # the checker may emit no invariant's finding, so the two words those results
+    # are printed with belong to exactly one file, and it is not either of these.
+    chk "step3/topology/reader-emits-no-verdict" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$reader" | grep -nE 'REFUSED\||UNREFERENCED\|' || true)")"
+    chk "step3/topology/membership-not-in-checker" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$checker" | grep -nE 'REFUSED\|derived|UNREFERENCED\|' || true)")"
+
+    # --- the fixture engine ----------------------------------------------------
+    section "step 3 fixtures: donors validated, every mutation asserted"
+    if ! fixture_resolve_tools; then
+        unanswered "the step 3 fixture generation" \
+          "  readelf and dd must both resolve here; re-run on a host that supplies them"
+        return
+    fi
+    note "step3/fixture/tools" "$FIXTURE_READELF, $FIXTURE_DD"
+    DONOR_SHARED=$(donor_find_shared) || DONOR_SHARED=""
+    DONOR_PROGRAM=$(donor_find_program) || DONOR_PROGRAM=""
+    chk "step3/fixture/shared-donor-validated" "yes" \
+        "$( [ -n "$DONOR_SHARED" ] && echo yes || echo no )"
+    chk "step3/fixture/program-donor-validated" "yes" \
+        "$( [ -n "$DONOR_PROGRAM" ] && echo yes || echo no )"
+    if [ -z "$DONOR_SHARED" ] || [ -z "$DONOR_PROGRAM" ]; then
+        unanswered "every step 3 fixture" \
+          "  no host object satisfies the corpus donor rows here; re-run on the RHEL 9.8 build host or on the Debian 12 agent"
+        return
+    fi
+    note "step3/fixture/donors" "shared $DONOR_SHARED, program $DONOR_PROGRAM"
+    shared_needs=$(elf_needed_names "$DONOR_SHARED" | grep -c .)
+    program_needs=$(elf_needed_names "$DONOR_PROGRAM" | grep -c .)
+    DONOR_NEED_NAMES=$( { elf_needed_names "$DONOR_SHARED"; elf_needed_names "$DONOR_PROGRAM"; } \
+                        | grep -v '^$' | sort -u )
+    # THE CONTROL FOR EVERY MUTATION BELOW: the donor itself carries none of the
+    # invented names, so a fixture that lists one was mutated rather than found.
+    chk "step3/fixture/control/donor-is-clean" "" \
+        "$(oneline "$(elf_needed_names "$DONOR_SHARED" | grep -E 'libcplx' || true)")"
+
+    for id in subject-lib-dynload-unresolved subject-site-packages-need \
+              subject-unreferenced-sound subject-second-libssl \
+              subject-program-entry-point provider-first-libssl \
+              subject-need-provider subject-libssl-consumer \
+              provider-alias-target subject-alias-consumer \
+              reader-not-an-elf provider-donor-need; do
+        result=$(fixture_plant "$tree" "$id")
+        chk "step3/fixture/$id" "ok" "$result"
+    done
+    # The soname link is planted last and judged apart, because a host where
+    # `ln -s` copies cannot build the alias shape at all and must report the
+    # obligation UNANSWERED rather than fail a case for its environment.
+    result=$(fixture_plant "$tree" provider-alias-link)
+    if [ "$result" = "not-a-symlink" ]; then
+        alias_ok=no
+        note "step3/fixture/provider-alias-link" "no symlink here: ln -s did not make one"
+        unanswered "the SONAME alias case" \
+          "  re-run on a host where ln -s makes a symlink, so a soname and its versioned target are two paths to one file"
+    else
+        alias_ok=yes
+        chk "step3/fixture/provider-alias-link" "ok" "$result"
+    fi
+    planted_elf=10
+    planted_files=$(( planted_elf + 1 + $(printf '%s\n' "$DONOR_NEED_NAMES" | grep -c .) ))
+    # Nine objects derived from the shared donor keep its own needs, the program
+    # copy keeps its own, and four rows add one name each. The soname link is not
+    # a regular file, so the walk does not reach it and it carries no needs.
+    edges=$(( 9 * shared_needs + 4 + program_needs ))
+    note "step3/fixture/planted" "$planted_files files, $planted_elf of them ELF, $edges edges"
+
+    # --- the subject set: every shipped ELF, none excluded ---------------------
+    #
+    # The measured gap this whole collection exists for: a walk from the entry
+    # points reaches neither the lib-dynload module nor the site-packages wheel,
+    # so a closure-based subject set reports this tree as a pass.
+    section "step 3 subjects: every shipped ELF, none excluded"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$roots1" --root "$roots2"
+    chk "step3/subjects/exit-code" "1" "$CHECKER_RC"
+    chk "step3/subjects/walked-every-file" "$planted_files" "$(report_field walked)"
+    chk "step3/subjects/count-equals-planted" "$planted_elf" "$(report_field subjects)"
+    chk "step3/subjects/none-unread" "0" "$(report_field unread)"
+    chk "step3/subjects/edges-counted" "$edges" "$(report_field edges)"
+    chk "step3/subjects/no-unexpected-directory" "0" "$(typed_count UNEXPECTED)"
+    # THE TRAVERSAL IS AN INPUT AND IT REPORTS ITS OWN OUTCOME. A walk that ended
+    # early observed no empty tree, it failed to observe one, and the difference
+    # has to be readable before any count below it means anything.
+    chk "step3/subjects/walk-is-complete" "complete" "$(report_field walk)"
+
+    # --- the derived membership half ------------------------------------------
+    section "step 3 membership: an unresolvable need, named with its subject"
+    chk "step3/membership/one-refusal" "1" "$(report_field refused)"
+    chk "step3/membership/names-subject-and-name" \
+        "REFUSED|derived|$tree/tools/python/current/lib/python3.13/lib-dynload/_cplxprobe.cpython-313-x86_64-linux-gnu.so|libcplxabsent.so.1" \
+        "$(oneline "$(typed_lines REFUSED | sed -e 's/|[^|]*$//')")"
+    chk "step3/membership/refusal-is-final" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE MEMBERSHIP REFUSED' && echo yes || echo no)"
+    # ITS CONTROL: the same tree with a file of that name in a provider directory
+    # is ACCEPTED, so the refusal is about the missing provider and not about the
+    # subject having been examined at all.
+    printf 'not an ELF: the provider the control plants\n' \
+        > "$tree/tools/git/current/lib/libcplxabsent.so.1"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$roots1" --root "$roots2"
+    chk "step3/membership/control/provider-accepted" "0" "$CHECKER_RC"
+    chk "step3/membership/control/no-refusal" "0" "$(report_field refused)"
+
+    # --- unreferenced is a finding, never an exclusion ------------------------
+    section "step 3 unreferenced: reported, and still accepted"
+    chk "step3/unreferenced/accepted-not-refused" "0" "$CHECKER_RC"
+    chk "step3/unreferenced/orphan-is-named" \
+        "UNREFERENCED-BY-EDGE|subject|$tree/tools/git/current/lib/libcplxorphan.so.1" \
+        "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F 'libcplxorphan' | sed -e 's/|[^|]*$//')")"
+    # THE NEGATIVE CONTROL. One subject in this tree IS reached by a DT_NEEDED
+    # edge and must not appear. Without it the finding would be satisfied by a
+    # function that named every subject it walked.
+    chk "step3/unreferenced/control/referenced-absent" "" \
+        "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F 'libcplxprovider.so.1' || true)")"
+    chk "step3/unreferenced/counted" "7" "$(report_field unreferenced)"
+    # AN EDGE REACHES A PATH AND NOT A NAME, which is the difference a name-keyed
+    # map cannot see. `libcplxsslconsumer.so.1` names `libssl.so.3`; the copy in a
+    # provider directory is what that edge resolves to, and the copy under
+    # `root/usr/bin` is reached by nothing because `build_elf_rpath` never adds
+    # that directory. Both halves are asserted, because a map keyed by name calls
+    # BOTH reached and reports neither.
+    chk "step3/unreferenced/resolved-copy-absent" "" \
+        "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F "$tree/tools/python/root/usr/lib64/libssl.so.3" || true)")"
+    chk "step3/unreferenced/unresolved-copy-named" \
+        "UNREFERENCED-BY-EDGE|subject|$tree/tools/python/root/usr/bin/libssl.so.3" \
+        "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F 'root/usr/bin/libssl.so.3' | sed -e 's/|[^|]*$//')")"
+    chk "step3/unreferenced/control/the-consumer-exists" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -qF 'libcplxsslconsumer.so.1' && echo yes || echo no)"
+    # THE ORDINARY LIBRARY LAYOUT, which is the shape a name-keyed alias test
+    # gets wrong in the other direction. `libcplxalias.so.1` is a symlink onto
+    # `libcplxalias.so.1.2.3`, a consumer names the soname, and the walk yields
+    # the TARGET under its versioned name. Resolving the alias by name finds no
+    # entry for that name and reports a normally loaded library as unreferenced,
+    # which is a false finding on every versioned library in a real archive.
+    if [ "$alias_ok" = "yes" ]; then
+        chk "step3/unreferenced/alias-target-absent" "" \
+            "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F 'libcplxalias.so.1.2.3' || true)")"
+        # Its control: the consumer that names the soname IS in the tree and is
+        # itself unreferenced, so the case above is about the alias resolving and
+        # not about an edge that was never recorded.
+        chk "step3/unreferenced/alias-consumer-named" "yes" \
+            "$(typed_lines UNREFERENCED-BY-EDGE | grep -qF 'libcplxaliasconsumer.so.1' \
+               && echo yes || echo no)"
+        chk "step3/unreferenced/alias-link-not-walked" "" \
+            "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F 'libcplxalias.so.1|' || true)")"
+    fi
+
+    # --- the alias resolution is a lookup, measured at two populations --------
+    #
+    # A RULE THAT COMPARES FILE IDENTITIES PAIR BY PAIR ANSWERS THE SAME AND
+    # GROWS DIFFERENTLY, so only a run at two sizes tells them apart. Nothing in
+    # the schema caps the number of aliased libraries and one soname link per
+    # library is the ordinary layout, so the product of links and subjects is not
+    # a constant to wave away. Quadrupling the population multiplies a linear
+    # cost by about four and a product cost by about sixteen.
+    section "step 3 cost: the alias resolution, measured as it grows"
+    if [ "$alias_ok" != "yes" ]; then
+        unanswered "the alias cost measurement" \
+          "  re-run on a host where ln -s makes a symlink, so an alias population can be planted"
+    else
+        FIXTURE_ALIAS_PAIRS=6
+        result=$(fixture_plant "$SCRATCH/step3/small" alias-scaling-population)
+        chk "step3/cost/alias-population-small" "ok" "$result"
+        small=$(step3_alias_ops "$SCRATCH/step3/small")
+        FIXTURE_ALIAS_PAIRS=24
+        result=$(fixture_plant "$SCRATCH/step3/large" alias-scaling-population)
+        chk "step3/cost/alias-population-large" "ok" "$result"
+        large=$(step3_alias_ops "$SCRATCH/step3/large")
+        note "step3/cost/alias-operations" "$small at 6 pairs, $large at 24 pairs"
+        # THE CONTROL COMES FIRST, and it is not "both counts are non-zero". A
+        # counter that never entered the function returns the same number at
+        # every population and satisfies any upper bound, which is exactly how
+        # this measurement first passed while measuring nothing. So the count
+        # must GROW with the population before its growth is judged.
+        chk "step3/cost/alias-counts-are-real" "yes" \
+            "$( [ "${small:-0}" -gt 0 ] && [ "${large:-0}" -gt "${small:-0}" ] && echo yes || echo no )"
+        # THE CLAIM IS WORK PER ALIAS, NOT A TOTAL RATIO, because the totals
+        # carry a base that is itself linear in the population and a loose ratio
+        # hides the product term inside it. A rule whose cost is linear does a
+        # CONSTANT amount of work per alias; a rule that sweeps does more per
+        # alias as the population grows. Measured here: the lookup holds at about
+        # 47 commands per pair at both sizes, and the `-ef` sweep it replaced
+        # went from 55 to 81, which is what this threshold catches.
+        #
+        # The comparison is integer and the numbers are deterministic: this
+        # counts COMMANDS over a planted tree, so a slow host cannot make it
+        # fail and a fast one cannot make it pass.
+        chk "step3/cost/alias-work-per-pair-is-flat" "yes" \
+            "$( [ $(( 4 * ${large:-0} * 6 )) -le $(( 5 * ${small:-0} * 24 )) ] \
+                && echo yes || echo no )"
+        # And the answer is still right at the larger size, so the cost case
+        # cannot be satisfied by a rule that stopped resolving anything.
+        run_checker "$checker" --prefix "$SCRATCH/step3/large" --installer "$installer" \
+            --root "$roots1" --root "$roots2"
+        chk "step3/cost/alias-still-resolves-at-scale" "" \
+            "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F 'libcplxscale1.so.1.2.3' || true)")"
+    fi
+
+    # --- the directory alias, which a whole-path lookup cannot resolve --------
+    #
+    # `tools/python/current -> version` is the alias layout this effort already
+    # reads, and it puts the link in a PREFIX of the selected path rather than at
+    # its end: the observed scope holds `current/lib/libcplxdir.so.1` while the
+    # walk, which does not follow a symlinked directory, records the object under
+    # `version/lib/libcplxdir.so.1.2.3`. Both links have to be applied, and the
+    # directory one first, or a normally loaded library is reported as reachable
+    # by nothing. This has its own tree because the alias must be a tool root's
+    # immediate subdirectory to be in scope at all.
+    section "step 3 aliases: a symlinked directory in the selected path"
+    if [ "$alias_ok" != "yes" ]; then
+        unanswered "the directory alias case" \
+          "  re-run on a host where ln -s makes a symlink, so a directory alias can be planted"
+    else
+        dir_tree="$SCRATCH/step3/diralias"
+        # The donor's own needs are planted here too, so the run below is
+        # ACCEPTED and the alias result is read from a tree with nothing else
+        # wrong in it.
+        for id in dir-alias-target dir-alias-consumer dir-alias-soname \
+                  dir-alias-directory provider-donor-need; do
+            result=$(fixture_plant "$dir_tree" "$id")
+            chk "step3/fixture/$id" "ok" "$result"
+        done
+        # Its control comes first: the scope really does reach the provider
+        # through the alias, so the case below is about resolving that alias and
+        # not about a directory nothing selects.
+        paths=$(step3_provider_paths "$dir_tree" "libcplxdir.so.1")
+        chk "step3/alias/selected-through-the-directory" "yes" \
+            "$(printf '%s\n' "$paths" | grep -q '/current/lib/libcplxdir.so.1$' \
+               && echo yes || echo no)"
+        run_checker "$checker" --prefix "$dir_tree" --installer "$installer" \
+            --root "python=current,version"
+        chk "step3/alias/directory-alias-exit-code" "0" "$CHECKER_RC"
+        chk "step3/alias/target-behind-the-alias-absent" "" \
+            "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F 'libcplxdir.so.1.2.3' || true)")"
+        chk "step3/alias/consumer-behind-the-alias-named" "yes" \
+            "$(typed_lines UNREFERENCED-BY-EDGE | grep -qF 'libcplxdiruser.so.1' \
+               && echo yes || echo no)"
+
+        # THREE CHAINS THE KERNEL RESOLVES, so the resolver must too. Each is
+        # built whole and asserts with `-ef` that the host reaches the same file,
+        # which is what makes the expectation the filesystem's answer rather than
+        # the harness's opinion.
+        for id in chain-relative-parent chain-through-updir chain-nine-links; do
+            result=$(fixture_plant "$dir_tree" "$id")
+            chk "step3/fixture/$id" "ok" "$result"
+        done
+        run_checker "$checker" --prefix "$dir_tree" --installer "$installer" \
+            --root "python=current,version,linkdir"
+        chk "step3/alias/chains-exit-code" "0" "$CHECKER_RC"
+        chk "step3/alias/no-chain-left-unresolved" "0" "$(report_field unresolved)"
+        for id in libcplxrel libcplxupdir libcplxdeep; do
+            chk "step3/alias/chain-reaches-$id" "" \
+                "$(oneline "$(typed_lines UNREFERENCED-BY-EDGE | grep -F "$id.so.1.2" || true)")"
+        done
+        # The controls: each chain's consumer IS in the list, so the three cases
+        # above are about the chain resolving and not about edges nobody made.
+        for id in libcplxrel libcplxupdir libcplxdeep; do
+            chk "step3/alias/chain-consumer-$id" "yes" \
+                "$(typed_lines UNREFERENCED-BY-EDGE | grep -qF "${id}user.so.1" \
+                   && echo yes || echo no)"
+        done
+    fi
+
+    # The tree the cases below read is the one the sections above prepared.
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$roots1" --root "$roots2"
+
+    # --- a subject is not a provider ------------------------------------------
+    #
+    # `build_elf_rpath` never adds `root/usr/bin`, so the second `libssl.so.3` is
+    # examined like every other shipped object and resolves nothing. The FIRST one
+    # exists in a provider directory, which is what stops this case passing merely
+    # because the index happens to hold no such name at all.
+    section "step 3 providers: shipped is not the same as resolvable"
+    paths=$(step3_provider_paths "$tree" "libssl.so.3")
+    chk "step3/providers/first-libssl-indexed" \
+        "$tree/tools/python/root/usr/lib64/libssl.so.3" "$(oneline "$paths")"
+    chk "step3/providers/second-libssl-not-indexed" "" \
+        "$(oneline "$(printf '%s\n' "$paths" | grep -F 'root/usr/bin' || true)")"
+    chk "step3/providers/second-libssl-is-a-subject" "yes" \
+        "$(typed_lines UNREFERENCED-BY-EDGE | grep -qF "$tree/tools/python/root/usr/bin/libssl.so.3" \
+           && echo yes || echo no)"
+    chk "step3/providers/directories" "3" "$(report_field providers)"
+
+    # --- one walk, one index, and the index first -----------------------------
+    #
+    # MEASURED FROM A RUN, never read out of the source text. A grep can show one
+    # occurrence of a function name and say nothing about how many times it ran or
+    # in what order, and the O(n^2) shape this forbids is exactly an index built
+    # inside the object loop, which a source-text count cannot see.
+    section "step 3 cost: one walk, one index, built before the first read"
+    step3_instrumented "$log" "$stubs" "--prefix" "$tree" "--installer" "$installer" \
+        "--root" "$roots1" "--root" "$roots2"
+    chk "step3/cost/one-tree-walk" "1" "$(grep -c '^WALK$' "$log" || true)"
+    chk "step3/cost/one-index-construction" "1" "$(grep -c '^INDEX$' "$log" || true)"
+    chk "step3/cost/index-before-the-walk" "INDEX" "$(sed -n 1p "$log")"
+    chk "step3/cost/one-read-per-object" "$planted_elf" "$(grep -c '^READ$' "$log" || true)"
+    chk "step3/cost/instrumented-run-agrees" "0" "$CHECKER_RC"
+
+    # --- the fail-closed reading rule -----------------------------------------
+    #
+    # AN UNAVAILABLE INPUT IS NOT A SEMANTIC REFUSAL. A refusal says the archive
+    # is wrong; this says the reading could not be taken. The consequence is the
+    # same where it matters, because an UNDETERMINED never counts toward a green.
+    section "step 3 reader: an input that could not be obtained"
+    result=$(fixture_plant "$tree" reader-unreadable-object)
+    if [ "$result" = "still-readable" ]; then
+        unanswered "the unreadable-object case" \
+          "  this account can read a mode 000 file, so re-run as a non-root user"
+    else
+        chk "step3/fixture/reader-unreadable-object" "ok" "$result"
+        run_checker "$checker" --prefix "$tree" --installer "$installer" \
+            --root "$roots1" --root "$roots2"
+        chk "step3/reader/unreadable-exit-code" "5" "$CHECKER_RC"
+        chk "step3/reader/unreadable-is-undetermined" "1" "$(report_field unread)"
+        chk "step3/reader/unreadable-names-the-object" \
+            "UNDETERMINED|object|$tree/tools/git/current/lib/libcplxunreadable.so.1" \
+            "$(oneline "$(typed_lines UNDETERMINED | sed -e 's/|[^|]*$//')")"
+        chk "step3/reader/unreadable-never-a-refusal" "0" "$(report_field refused)"
+        rm -f -- "$tree/tools/git/current/lib/libcplxunreadable.so.1"
+    fi
+
+    # A RECOGNIZED RECORD WHOSE VALUE CANNOT BE READ, taken with the REAL reader
+    # at status 0. A DT_NEEDED whose string offset falls outside the string table
+    # prints as the raw value with no brackets, so a parser matching only the
+    # bracketed shape drops the entry, records the object with an empty
+    # dependency set, and resolves and refuses nothing. The fixture asserts the
+    # reader exited 0, so this is a value that could not be read and not a reader
+    # that failed.
+    section "step 3 reader: a dynamic record whose value cannot be read"
+    # The baseline is taken from a run of its own rather than inherited from the
+    # case above, whose fixture stays planted on a host that can read a mode 000
+    # file and would move both numbers under this case without failing it.
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$roots1" --root "$roots2"
+    edges=$(report_field edges)
+    planted_elf=$(report_field subjects)
+    result=$(fixture_plant "$tree" reader-needed-value-unreadable)
+    chk "step3/fixture/reader-needed-value-unreadable" "ok" "$result"
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$roots1" --root "$roots2"
+    chk "step3/reader/unreadable-value-exit-code" "5" "$CHECKER_RC"
+    chk "step3/reader/unreadable-value-is-undetermined" "1" "$(report_field unread)"
+    chk "step3/reader/unreadable-value-names-the-field" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'a DT_NEEDED entry carries no readable name' \
+           && echo yes || echo no)"
+    chk "step3/reader/unreadable-value-names-the-object" "yes" \
+        "$(typed_lines UNDETERMINED | grep -qF 'libcplxbadneed.so.1' && echo yes || echo no)"
+    chk "step3/reader/unreadable-value-never-a-refusal" "0" "$(report_field refused)"
+    # NO PARTIAL MODEL. The refused object contributed no edge, so the count is
+    # the one the clean tree produced. A parser that recorded what it could parse
+    # and dropped the rest would leave a subject whose dependency set nobody can
+    # vouch for, which reads exactly like an object with fewer needs.
+    chk "step3/reader/unreadable-value-adds-no-edge" "$edges" "$(report_field edges)"
+    chk "step3/reader/unreadable-value-is-not-a-subject" "$planted_elf" "$(report_field subjects)"
+    rm -f -- "$tree/tools/git/current/lib/libcplxbadneed.so.1"
+
+    # AN INCOMPLETE TRAVERSAL IS AN UNAVAILABLE INPUT, and it is the input a
+    # green run is least able to survive: a walk that reached nothing reports an
+    # empty tree, and every count below it then agrees. Three ways it happens,
+    # each asserted against the same control, the complete walk above.
+    section "step 3 walk: a traversal that could not be taken"
+    mkdir -p -- "$tree/tools/git/current/lib/cplxlocked" || true
+    cp -- "$DONOR_SHARED" "$tree/tools/git/current/lib/cplxlocked/libcplxhidden.so.1" 2>/dev/null
+    chmod 000 -- "$tree/tools/git/current/lib/cplxlocked" 2>/dev/null
+    if find "$tree/tools/git/current/lib/cplxlocked" -type f >/dev/null 2>&1; then
+        chmod 755 -- "$tree/tools/git/current/lib/cplxlocked" 2>/dev/null
+        rm -rf -- "$tree/tools/git/current/lib/cplxlocked"
+        unanswered "the unreadable-subtree case" \
+          "  this account can traverse a mode 000 directory, so re-run as a non-root user"
+    else
+        run_checker "$checker" --prefix "$tree" --installer "$installer" \
+            --root "$roots1" --root "$roots2"
+        chk "step3/walk/locked-subtree-exit-code" "5" "$CHECKER_RC"
+        chk "step3/walk/locked-subtree-is-incomplete" "yes" \
+            "$( [ "$(report_field walk)" = "complete" ] && echo no || echo yes )"
+        chk "step3/walk/locked-subtree-typed" "yes" \
+            "$(typed_lines UNDETERMINED | grep -q '^UNDETERMINED|traversal|' && echo yes || echo no)"
+        # THE POINT OF THE CASE. Without the status the run is green: the hidden
+        # object never reaches the loop, so no object result can carry it.
+        chk "step3/walk/locked-subtree-not-green" "" \
+            "$(oneline "$(printf '%s' "$CHECKER_OUT" | grep -F 'CLOSURE MEMBERSHIP OK' || true)")"
+        chmod 755 -- "$tree/tools/git/current/lib/cplxlocked" 2>/dev/null
+        rm -rf -- "$tree/tools/git/current/lib/cplxlocked"
+    fi
+
+    step3_write_stub "$stubs/nofind" "" 'exit 1'
+    step3_run_with_path "$stubs/nofind:$PATH" "$checker" --prefix "$tree" \
+        --installer "$installer" --root "$roots1" --root "$roots2"
+    chk "step3/walk/failing-finder-exit-code" "5" "$CHECKER_RC"
+    chk "step3/walk/failing-finder-typed" "yes" \
+        "$(typed_lines UNDETERMINED | grep -q '^UNDETERMINED|traversal|' && echo yes || echo no)"
+    chk "step3/walk/failing-finder-not-green" "" \
+        "$(oneline "$(printf '%s' "$CHECKER_OUT" | grep -F 'CLOSURE MEMBERSHIP OK' || true)")"
+
+    # And the finder that does not resolve at all, which is the mirror of the
+    # absent-reader case below and must not be mistaken for an empty tree either.
+    # The reader here reaches the REAL binary by its resolved path, because a
+    # stub that called `readelf` under a PATH holding only itself would recurse.
+    rm -rf -- "$stubs/onlyreadelf"
+    mkdir -p -- "$stubs/onlyreadelf"
+    { printf '#!/bin/bash\n'; printf 'exec "%s" "$@"\n' "$FIXTURE_READELF"; } \
+        > "$stubs/onlyreadelf/readelf"
+    chmod +x -- "$stubs/onlyreadelf/readelf"
+    step3_run_with_path "$stubs/onlyreadelf" "$checker" --prefix "$tree" \
+        --installer "$installer" --root "$roots1" --root "$roots2"
+    chk "step3/walk/absent-finder-exit-code" "5" "$CHECKER_RC"
+    chk "step3/walk/absent-finder-names-it" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'find did not resolve' && echo yes || echo no)"
+
+    # THE CONTROL FOR ALL THREE: the same tree on the real PATH walks completely.
+    run_checker "$checker" --prefix "$tree" --installer "$installer" \
+        --root "$roots1" --root "$roots2"
+    chk "step3/walk/control/complete-again" "complete" "$(report_field walk)"
+    chk "step3/walk/control/green-again" "0" "$CHECKER_RC"
+
+    section "step 3 reader: a reader that could not be reached"
+    step3_write_stub "$stubs/absent" ""
+    step3_run_with_path "$stubs/absent" "$checker" --prefix "$tree" \
+        --installer "$installer" --root "$roots1" --root "$roots2"
+    chk "step3/reader/absent-exit-code" "5" "$CHECKER_RC"
+    chk "step3/reader/absent-names-the-input" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'readelf did not resolve' && echo yes || echo no)"
+
+    step3_write_stub "$stubs/failing" 'exit 3'
+    step3_run_with_path "$stubs/failing:$PATH" "$checker" --prefix "$tree" \
+        --installer "$installer" --root "$roots1" --root "$roots2"
+    chk "step3/reader/non-zero-exit-code" "5" "$CHECKER_RC"
+    chk "step3/reader/non-zero-all-undetermined" "$planted_elf" "$(report_field unread)"
+
+    step3_write_stub "$stubs/garbage" 'printf "cplx: not the output of a reader\n"'
+    step3_run_with_path "$stubs/garbage:$PATH" "$checker" --prefix "$tree" \
+        --installer "$installer" --root "$roots1" --root "$roots2"
+    chk "step3/reader/unparsable-exit-code" "5" "$CHECKER_RC"
+    chk "step3/reader/unparsable-all-undetermined" "$planted_elf" "$(report_field unread)"
+
+    # THE LOCALE PIN, MEASURED. The parse reads readelf's own field labels, so a
+    # translated build would silently yield empty needs. The stub translates
+    # unless LC_ALL is C, and the checker's pin is what keeps the run identical.
+    #
+    # THE AMBIENT VALUE IS `POSIX`, AND THAT IS THE WHOLE TRICK. What is under
+    # test is the PIN and not a translation, and the stub keys on the STRING it
+    # is handed: it answers honestly for `C` and translates for anything else. A
+    # French locale name would say the same thing and would make `setlocale`
+    # warn into the capture on every host that does not carry it, which is a
+    # message about the harness's own shell and not a result. `POSIX` resolves
+    # everywhere, is not the string `C`, and so is translated by the stub: if the
+    # checker did not pin, this is exactly the run that would return empty needs.
+    section "step 3 reader: the locale pin, shown by a translating reader"
+    step3_write_translating_stub "$stubs/translated"
+    line=$(LC_ALL=POSIX "$stubs/translated/readelf" -d -- "$DONOR_SHARED" \
+           | grep -c 'Shared library' || true)
+    chk "step3/reader/control/stub-really-translates" "0" "$line"
+    line=$(LC_ALL=C "$stubs/translated/readelf" -d -- "$DONOR_SHARED" \
+           | grep -c 'Shared library' || true)
+    chk "step3/reader/control/stub-is-honest-under-C" "$shared_needs" "$line"
+    LC_ALL=POSIX step3_run_with_path "$stubs/translated:$PATH" "$checker" --prefix "$tree" \
+        --installer "$installer" --root "$roots1" --root "$roots2"
+    chk "step3/reader/pinned-locale-still-parses" "0" "$(report_field unread)"
+    chk "step3/reader/pinned-locale-same-verdict" "0" "$CHECKER_RC"
+}
 # ============================================================== the run, one step ===
 run_one_step() {
     local step="$1" tool state host sha sha_state k
@@ -1828,6 +2989,7 @@ run_one_step() {
             0) step0_suite ;;
             1) step1_suite ;;
             2) step2_suite ;;
+            3) step3_suite ;;
         esac
     else
         section "step $step suite"
