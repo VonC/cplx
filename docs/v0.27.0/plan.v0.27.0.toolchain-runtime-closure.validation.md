@@ -4,13 +4,15 @@ No, it is not implemented.
 
 This document tracks the implementation of
 [plan.v0.27.0.toolchain-runtime-closure.md](plan.v0.27.0.toolchain-runtime-closure.md)
-step by step. Steps 0 and 1 are implemented and checked: the harness, its
-host-tool contract, its fixture corpus and the retained captures exist, and the
-four checker modules of the fixed topology now exist with `closure_check.sh`
-answering the scope question. There is still no configuration bundle, no object
-reader, no invariant and no packaging gate, so steps 2 to 7 are at their initial
-state and their check sections hold their placeholder. The document verdict
-above stays No until every step is checked.
+step by step. Steps 0, 1 and 2 are implemented and checked: the harness, its
+host-tool contract, its fixture corpus and the retained captures exist, the four
+checker modules of the fixed topology exist with `closure_check.sh` answering the
+scope question, and the configuration bundle is committed with the one parser,
+the digest, the agent's consistency check and the cplx-side resolution that make
+it authoritative rather than merely self-describing. There is still no object
+reader, no invariant and no packaging gate, so steps 3 to 7 are at their initial
+state and their check sections hold their placeholder. The document verdict above
+stays No until every step is checked.
 
 > Initial-skeleton note: the skeleton was written by the `write-plans` skill
 > before any implementation check, and it still governs every step no check has
@@ -744,9 +746,87 @@ No, no existing feature or reporting capability is impaired by Step 1.
 
 ### Analysis of Step 2 implementation state
 
-Not started. Step 2 is not implemented because
-`src/setups/env/closure/closure-config.txt` does not exist, no digest domain is
-defined anywhere, and the checker has no notion of an identity envelope.
+Yes. Step 2 has been fully implemented.
+
+`src/setups/env/closure/closure-config.txt` carries the four declarations as one
+document, `README.md` beside it states the digest domain where the data lives,
+and `closure_config.sh` is filled with the one parser, the digest, the envelope
+check and the cplx-side resolution. The digest is the SHA-256 of the document's
+exact committed bytes and covers the envelope nowhere, which two driven cases
+show rather than assert: the same declaration with CRLF endings produces a
+different value, and byte-identical bytes read through another path produce the
+same one. The three parties are asymmetric and every side that exists yet is
+asserted: the agent ACCEPTS a paired edit and an authentic-but-wrong bundle
+because internal consistency is the whole of what a host without cplx can read,
+and packaging REFUSES both because it resolves the authoritative document from
+cplx at the commit the envelope names. The agent's verdict states that limit on
+every line it prints, and the checker reads the bundle before anything else runs,
+which the absence of every typed scope line proves rather than the exit code
+alone. Every Step 2 completion criterion is green on the RHEL 9.8 build host: 85
+cases and 0 failures for `--step 2`, 48 tracked scripts clean for the lint gate,
+the digest and the consistency statement both found in `closure_check.sh`, the
+installer-purity grep silent and an empty diff on `install_pkg.sh`.
+
+FIVE OF THE EXPECTATIONS BELOW ARE STEP 6'S AND ARE NOT ANSWERED HERE, and that
+is a skeleton defect rather than a gap in this step. The bullets naming evidence
+negatives, the derived verdict truth table, the evidence semantic negatives and
+the canonical evidence bytes all describe `CPLX-CLOSURE-EVIDENCE/1`, which Q10
+routes to "Step 6 emit and `closure_evidence_parse`" and which this plan's Step 6
+section already carries. They were written into this step's expectation list from
+the whole Q10 answer rather than from the half Step 2 schedules. Step 2's own
+behavior list is the four configuration and envelope functions, all four exist,
+and the evidence document is named in `closure_config.sh` as the third table a
+later step adds rather than silently omitted.
+
+### Independent reviewer validation for Step 2 (round 1)
+
+The received index was `5341871357e54b28529ea3170dcfe55a7c79f461`.
+The reviewer reproduced two Step 2 defects and repaired both within the existing
+module boundary: a trailing empty field was discarded by Bash `read -a`, and a
+subdirectory before its root was accepted but omitted from the parsed model.
+Duplicate subdirectories before their root were also accepted. The shared lexer
+now refuses a trailing separator before splitting. Subdirectory insertion and
+duplicate detection now run during the existing cross-reference pass, after all
+roots are known. No declaration, envelope authority rule, or other step changed.
+
+Six regression assertions cover configuration and envelope trailing fields,
+forward-subdirectory acceptance and retention, and duplicate forward references.
+Independent RHEL 9.8 runs over matching inputs pass before repairs (85 cases)
+and after repairs (91 cases), with zero failures. Steps 1 and 0 remain at 70 and
+66 cases; relocation Step 3 remains at 104. All 13 measured remote input hashes
+match their corresponding local baseline or repaired files. The project lint
+passes for 48 scripts and the harness ShellCheck passes. The Windows Step 2 run
+has zero failures and exits 5 for unavailable host identity; it is not counted
+as Linux evidence. The validation resolver reports no drift.
+
+The reviewer retains both full independent runs in ignored review evidence, and
+recorded here that the retained `verify.closure.step2.rhel.txt` was still the
+original 85-case capture at the time it wrote this. The requestor has since
+accepted both repairs, re-run the walk on the accepted bytes and replaced that
+capture with the 91-case run, whose `round 1 repairs` section records both
+defects, the superseded measurements beside the accepted ones, and which two of
+the six digests moved. These substantive reviewer repairs require another round
+and do not authorize a commit. The implementation verdict above describes the
+repaired code. No umbrella row was changed.
+
+### Independent reviewer validation for Step 2 (round 2)
+
+Yes. Step 2 has been fully implemented.
+
+Both round 1 parser repairs and their six assertions are accepted unchanged.
+The final versioned capture names the repaired bytes and the 91-case run.
+Independent round 2 RHEL checks pass: Step 2 has 91 cases, Step 1 has 70,
+Step 0 has 66, and relocation Step 3 has 104, all with zero failures. All 13
+remote input hashes match the reviewed files. The 48-script lint gate and
+harness ShellCheck pass; the current validation resolver reports no drift.
+
+The requestor repaired the reviewer's earlier encoding error. The content before
+Step 2 and from Step 3 onward now matches the original submission byte for byte.
+This round changes review metadata only, using explicit UTF-8 encoding; the same
+outside-step bytes are checked before and after this update. The umbrella is
+unchanged, the seven-path six-group commit plan is valid, and no substantive
+repair or unresolved current finding remains. Commit readiness is advisory and
+the commit decision remains with the human.
 
 ### Goal for Step 2
 
@@ -812,27 +892,382 @@ internal consistency only, and publication resolves for itself.
 
 ### What was implemented for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **The configuration document**: `src/setups/env/closure/closure-config.txt`,
+  25 lines, carrying all four declarations in one file because a check that read
+  three of the four would evaluate a contract nobody wrote. Two `root` records in
+  the loader's order, four `subdir` records, the issue's ten `floor` entries with
+  `libsqlite3.so.0` constrained to `tools/python`, the two declared families at
+  one generation each, and the one initial waiver. It is a SUBJECT of the harness
+  and not a fixture: the committed bytes are parsed by the same parser the
+  archive will use, so a document that stopped parsing fails here rather than in
+  Step 5.
+- **The digest domain, stated beside the data it governs**:
+  `src/setups/env/closure/README.md` records that the digest is the SHA-256 of
+  `closure-config.txt`'s exact committed bytes, that the envelope is outside it
+  and cannot be committed here because it names the commit that holds the
+  document, and what each of the three parties checks and refuses on. A second
+  implementation reading only the code would have to infer the domain; this
+  states it where the data lives.
+- **The one parser**: `closure_config_parse` in `closure_config.sh`, implementing
+  the grammar Q10 fixes. Record shape, ordering significant for `root` and
+  nothing else with `python` first, duplicate keys, the two escapes with every
+  other percent sequence a refusal, the permitted relative-path form, unknown
+  records and the three cross-references. All of it fails closed.
+- **One lexer, a record table per document**: `closure_stream_read` reads the
+  shared lexical shape once and `closure_cfg_record` and `closure_env_record` are
+  the two tables over it. The table is selected by a value rather than by naming
+  a function to call, because an assembled command name is exactly the shape the
+  host-tool contract calls its own known lexical limit.
+- **The digest**: `closure_config_digest`, SHA-256 over the bytes on disk and
+  never over parsed content, printed bare so the value is the digest rather than
+  the tool's two-column line.
+- **The identity envelope**: `CPLX-CLOSURE-ENVELOPE/1`, parsed by
+  `closure_envelope_parse` with exactly one `digest` and one `source`, a
+  64-character lowercase digest domain and a 40-character commit domain, so a
+  short SHA, a branch and a tag all refuse at parse time.
+- **The agent's check**: `closure_envelope_check`, which prints
+  `CONSISTENT|<digest>|<limit>` or `INCONSISTENT|<limit>` and carries
+  `CLOSURE_CONSISTENCY_LIMIT` on both, so a green agent run cannot be read as
+  authority it does not have.
+- **The cplx-side resolution**: `closure_config_resolve_commit`, refusing a
+  reference that is not a 40-character commit SHA and refusing a 40-hexadecimal
+  value that names a blob, a tree or a tag rather than a commit. The second half
+  is the one a lexical check alone cannot answer.
+- **The packaging and publication check**: `closure_config_authority_check`,
+  which runs the agent's check first so an internally inconsistent bundle refuses
+  for that reason, then requires the embedded document to be byte-identical to
+  what cplx holds at the named commit. This is where the paired edit is refused.
+- **The checker reads the bundle**: `closure_check.sh` gains `--bundle DIR`, the
+  `closure_check_bundle` gate that runs before any classification, a report block
+  stating the agent's limit in words, and the derivation of its declared roots
+  from the parsed document when no `--root` is given. An explicit `--root` still
+  wins, and the report names which of the two the roots came from.
+- **The harness**: `verify.closure-check.sh` gains the step 2 suite, 85 cases,
+  and two step-aware repairs described in the architecture check below.
 
 ### New types or classes introduced for Step 2
 
-_(empty — no check has taken place yet.)_.
+The reviewer adds `closure_cfg_add_subdir`, called only by the cross-reference
+pass so forward declarations retain their subdirectories and duplicate checks.
+
+The production side introduces one document, one README and fifteen functions in
+the module the topology already reserved for them.
+
+- `closure_lex_decode`: the escape decoder. It reports through globals rather
+  than stdout because a command substitution would run it in a subshell and lose
+  the offending sequence with it, which is what makes the refusal name `%2F`
+  instead of saying only that something failed.
+- `closure_lex_record`: splits and decodes one record, owning the two refusals
+  that belong to the shared lexical shape rather than to any table, the empty
+  field and the undefined escape.
+- `closure_lex_domain`: the ONE place a lexical domain is decided, with ten
+  kinds. Every placeholder of all three grammars resolves to one of them, so
+  Step 6's evidence table adds records and not domains.
+- `closure_stream_read`: the one record-stream reader, shared by both documents.
+- `closure_cfg_record`, `closure_env_record`: the two record tables.
+- `closure_cfg_root`, `closure_cfg_subdir`, `closure_cfg_floor`,
+  `closure_cfg_family`, `closure_cfg_waiver`: one per configuration record.
+- `closure_cfg_cross_refs`: the three cross-references, validated once the whole
+  document is read so a record may name a root declared further down.
+- `closure_cfg_refuse`, `closure_cfg_count`, `closure_cfg_domain`: the refusal
+  shape, `REFUSED|<line>|<code>|<detail>`, with line 0 for a refusal about the
+  document rather than about one of its records.
+- `closure_config_reset`: empties the parsed model by unsetting keys rather than
+  redeclaring the arrays, because a redeclaration inside a function would make
+  them local to it and leave every caller reading the stale one.
+- `closure_config_parse`, `closure_config_digest`, `closure_envelope_parse`,
+  `closure_envelope_check`, `closure_config_resolve_commit`,
+  `closure_config_authority_check`: the four the plan names, plus the envelope
+  parser they share and the authority check that composes them.
+- `closure_config_root_specs`: the parsed roots in the `NAME=SUB,SUB` shape
+  `closure_check.sh --root` already takes. It is what makes the committed
+  declaration the source of the declared candidate shape rather than a document
+  nothing reads.
+- `closure_check_bundle` in `closure_check.sh`: the gate, and the only new
+  function there. The checker gains the call and the report and no logic.
+
+The harness side introduces four probes and one fixture builder.
+
+- `config_call`, `config_model`, `config_root_specs`, `config_digest`: each
+  reaches the module through its own file in a CHILD PROCESS, so a syntax error
+  fails a case instead of killing the harness and the parsed model one case
+  leaves behind cannot reach the next.
+- `step2_write_valid_config`, `step2_mutate`, `step2_write_envelope`,
+  `step2_refuse`: the valid base document, the one-record mutation, the envelope
+  writer, and the case that plants a defect, asserts it is planted, derives its
+  line number from the fixture and asserts the exact refusal.
+- `step2_build_repo`: the fixture repository the cplx-side resolution reads. It
+  is built rather than pointed at cplx itself, because the case needs a commit
+  holding a KNOWN document at a known path, and reading this repository's own
+  history would make the case depend on what happened to be committed when it
+  ran.
 
 ### Architecture check for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **The module boundary is exactly the topology's**: the grammar parser, the
+  digest, the envelope check and the cplx-side resolution live in
+  `closure_config.sh` and nowhere else, which is what lets `closure_publish.sh`
+  reuse them in Step 5 without pulling in the invariants. `closure_check.sh`
+  gains one call, one gate function and its report.
+- **No responsibility landed early**: `closure_elf.sh` and `closure_rules.sh`
+  still have a body of zero lines and still digest to the values the Step 1
+  capture recorded, so an object reader or an invariant written here would be
+  visible immediately. No `closure_scope.sh` exists in any shape.
+- **The dependency direction stays one-way**: `closure_config.sh` calls nothing
+  from `closure_check.sh` and knows nothing about scope; the checker sources the
+  module and not the reverse. The module is sourced at FILE SCOPE and not inside
+  a function, because `declare -A` inside a function makes the arrays local to it
+  and a lazy source would have left every later caller reading an empty model.
+- **The two host-tool contracts stay apart**: the installer-purity grep for
+  `readelf|sha256sum|tar -t` over `install_pkg.sh` prints nothing, and every
+  command the new module runs, `sha256sum`, `git`, `mktemp` and `rm`, already
+  carries an entry in `contract.closure-tools.txt`. The contract needed no edit,
+  which the harness proves mechanically rather than by inspection.
+- **The parser is pure Bash by contract and not by taste**: no `grep`, no `sed`,
+  no `tr`, no `wc`. Every word-initial `case` pattern is quoted, because unquoted
+  it sits in command position for the harness's lexical reader and would be
+  reported as an undeclared host dependency. That reader found one real instance
+  during this step, a bare `a` after a vertical bar inside an error string, and
+  the fix split the code and the detail into two globals rather than suppressing
+  the finding.
+- **Two step-aware harness repairs, both narrowing rather than widening**. The
+  sourced-function exemption now derives its names from any shipped script the
+  file NAMES IN CODE rather than from `install_pkg.sh` alone, since a checker
+  module may now be sourced by another; comments are stripped first, so a header
+  sentence naming a caller no longer earns the exemption, which the previous rule
+  would have granted. The module body assertion reads which side each module is
+  on from the topology's own `Filled by` column instead of a hand-kept list, so a
+  later step filling its file cannot read as a Step 1 regression.
+- **One harness case was repaired rather than left red**: the alias fixture
+  reported a code FAILURE on a host where `ln` resolves and cannot make a
+  symlink, which is the "resolved is not the same as able" distinction the
+  capability gate makes for every other tool. It is measured now and reports
+  UNANSWERED there, which is not a pass either. The RHEL result is unchanged.
+- **Payload against authoritative is still not exercised**: nothing is staged
+  into an archive in this step and no checker copy is executed to produce
+  evidence. Step 5 is where that boundary first has two sides.
+
+No DDD-Hexagonal violation or adapter smell needs to be addressed for Step 2.
 
 ### Cost and structure check for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **No `O(n^2)` and no `O(n log n)` path**: the parser is one pass over a
+  25-line document, the root, floor, family and waiver duplicate tests are
+  associative-array lookups, and nothing sorts. The cross-references are
+  collected during the pass and resolved in one pass over that list, so no record
+  is re-read. Round 1's repair moves the subdirectory append from the record
+  handler into that same cross-reference pass, which reorders the work rather
+  than adding any.
+- **One claim the round 1 answer corrected, recorded rather than argued away**:
+  the subdirectory membership test and append are a pattern match and a
+  concatenation on a comma-fenced string, so they are LINEAR in the length of one
+  root's declared list and not constant-time as this section first said. The
+  honest bound is linear in a list a human writes, four entries on the committed
+  declaration; the cost the plan's complexity clarification actually governs is
+  the per-object walk and the provider index, neither of which this module
+  performs. No observed performance change follows, and the correction is here
+  because a bound stated wrongly is worth more as a correction than as a
+  footnote.
+- **One file read and one digest per run**, as the plan's complexity impact
+  states. The commit resolution is one `git cat-file -t` and one
+  `git cat-file blob` at packaging time and none on the agent, which has no cplx
+  access by construction.
+- **The one temporary file is bounded and cleaned on every path**: the resolved
+  document is written through `mktemp` and removed on success and on both
+  refusal branches, so a refusal leaves nothing behind.
+- **No second walk reaches the production install path**: this step adds no line
+  to `install_pkg.sh` and touches `pkg.sh` not at all.
+- **The rule Step 3 must keep is still ahead**: one tree walk, one `readelf` per
+  ELF, a provider index built before the object loop. Nothing here walks a tree
+  or reads an object.
+- **Line budget, with every variance recorded**:
+
+| File | Before | After | Plan advisory | Band |
+| --- | --- | --- | --- | --- |
+| `closure_config.sh` | 35 | 637 | 140 to 190 | 550 to 650, AT RISK; ceiling 650 |
+| `closure_check.sh` | 429 | 523 | plus under 10 | below 550, safe |
+| `closure_elf.sh` | 26 | 26 | untouched | below 550, safe |
+| `closure_rules.sh` | 37 | 37 | untouched | below 550, safe |
+| `verify.closure-check.sh` | 1351 | 1922 | not stated | harness, not deployed |
+| `closure-config.txt` | 0 | 25 | data, no budget | data |
+| `README.md` | 0 | 86 | data, no budget | data |
+| `install_pkg.sh` | 1308 | 1308 | no growth | unchanged |
+| `pkg.sh` | 184 | 184 | no change this step | unchanged |
+
+  `closure_config.sh` is the one file in the AT RISK band and the one real
+  variance. At submission it had 623 lines, 195 comment and blank; the reviewer fixes
+  bring it to 637 lines, still below the ceiling. The 140-to-190 estimate
+  was written when Q10 was still a property rather than a specification: what
+  landed is one lexer, two record tables, ten exact lexical domains, an escape
+  decoder, a five-array parsed model with its reset, the digest, the envelope
+  check, the cplx-side resolution and the authority check that composes them. The
+  band's rule is to avoid growth where practical, and two reductions were made
+  for that reason and not for the count: the two near-identical parse loops
+  became one shared record-stream reader, which is also the "one lexer, three
+  record tables" shape the design asks for, and the subdirectory duplicate map
+  was removed in favour of the comma-fenced list that was already the one record
+  of what a root declares.
+
+- **`closure_check.sh` exceeds its advisory by 84 lines, and the completion
+  criteria are why.** Sourcing the module is the one line the estimate covered;
+  the rest is the `--bundle` entrance, the gate that reads the bundle before
+  anything else runs, and the report block. Two criteria require that block by
+  name: `rg -n 'sha256sum'` must show the digest and `rg -n 'consistency'` must
+  find the agent's own statement of its limit, and neither is satisfiable by a
+  file that only sources a module.
+- **A forward note for Step 6, recorded because this step is where the ceiling
+  became visible.** `CPLX-CLOSURE-EVIDENCE/1` is a record TABLE and not a parser,
+  so it costs less than this step's two did, but adding it to `closure_config.sh`
+  would take that file over 650 and the topology forbids a fifth module. The
+  table belongs with the two scripts that read evidence, `closure_verify.sh` and
+  `closure_publish.sh`, which are separate rows in the delivered script topology
+  rather than checker modules. Step 6 should place it there rather than
+  discovering the ceiling at the end of its own implementation.
+
+No, there is no performance issue that needs to be addressed for Step 2.
 
 ### Harness case check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The plan's six test-first cases and its two digest-domain cases are all present
+and all answered, in 91 cases with 0 failures on the RHEL 9.8 build host
+after the round 1 reviewer repairs (85 cases before them).
+
+- **The embedded document does not hash to the digest its envelope names**:
+  `step2/agent/corrupted-document-refused` with exit 1,
+  `step2/agent/refusal-names-both-digests` asserting both values travel in the
+  refusal, and `step2/agent/refusal-still-states-the-limit`. Its control is
+  `step2/agent/consistent-bundle-accepted` on the same bundle unmutated.
+- **The bundle carries no configuration at all**:
+  `step2/agent/no-configuration-at-all` and `step2/agent/absence-names-the-path`,
+  with the envelope half beside it, so absence is refused by name rather than
+  read as an empty declaration.
+- **The envelope names a branch or a tag rather than a commit SHA**:
+  `step2/envelope/branch-instead-of-a-commit` at parse time and
+  `step2/authority/branch-refused-before-resolution` end to end, with
+  `step2/authority/branch-refusal-is-lexical` showing the refusal is the domain's
+  and is reached before any resolution runs, which is what "packaging refuses to
+  produce it" means.
+- **THE PAIRED EDIT, ASSERTED FROM ALL THREE SIDES.** A floor entry deleted and
+  the document re-hashed to match its own envelope:
+  `step2/authority/paired-edit/agent-ACCEPTS` exit 0,
+  `step2/authority/paired-edit/packaging-REFUSES` exit 1,
+  `step2/authority/paired-edit/refusal-names-both` asserting the refusal carries
+  the embedded digest and the one cplx holds, and
+  `step2/authority/paired-edit/publication-REFUSES` recorded as a NOTE naming
+  Step 5 as the step that asserts it. The plan asks for all three sides and names
+  publication's half as pending, which is exactly how it is recorded.
+- **The bundle replaced with a different, internally consistent, authentic
+  bundle**: `step2/authority/authentic-swap/agent-ACCEPTS` and
+  `step2/authority/authentic-swap/packaging-REFUSES`, with publication's half
+  recorded by name as pending.
+- **The named cplx commit does not hold that configuration at that path**:
+  `step2/authority/path-absent-at-that-commit` and its naming case. Beside it a
+  case the plan does not list and the design implies:
+  `step2/authority/40-hex-that-is-a-blob`, a value that satisfies the lexical
+  domain and names a blob, refused on the OBJECT TYPE, which is the half a
+  lexical check alone cannot answer.
+- **The two digest-domain cases**: `step2/digest/crlf-is-a-different-digest` and
+  `step2/digest/same-bytes-other-path`, with `step2/digest/control/crlf-still-digests`
+  so the difference is about bytes and not about one of the two files being
+  empty.
+- **Decoding precedes domain validation, proved by the PAIR**:
+  `step2/refuse/undefined-escape` refuses `%2F` as an escape and never reaches
+  its domain, and `step2/refuse/defined-escape-reaches-the-domain` decodes `%7C`
+  first and is refused BY THE DOMAIN naming the decoded `libc|so.6`. Either half
+  alone would be satisfied by an implementation that validated first.
+- **Seventeen grammar refusals, each naming its own record**: a wrong field
+  count, a duplicate root, a duplicate subdirectory pair, an undeclared root in a
+  `subdir`, an absolute `floor` location, a `floor` location naming an undeclared
+  root, a two-wildcard glob, a leading zero in a generation count, a waiver
+  naming a member the floor does not declare, an unknown record token, an
+  undefined escape, an empty field, a TRAILING empty field, a multi-segment
+  subdirectory, an out-of-order root record, a wrong version line, and the
+  decoded-escape domain refusal. Each mutates ONE record of a base document that
+  parses clean, the mutation is asserted to be planted before the parser is
+  asked, and the line number is derived from the fixture rather than written into
+  the expectation.
+- **Forward references, which are what "ordering is significant for `root` and
+  for nothing else" actually means**: `step2/forward/subdir-before-root-accepted`
+  takes the record, and `step2/forward/subdir-before-root-retained` reads the
+  parsed model back as `python=current`, which is the half that matters. The
+  acceptance case alone would have passed against a parser that took the record
+  and silently dropped its subdirectory, which is exactly the round 1 defect.
+  `step2/forward/duplicate-before-root-refused` shows the duplicate test is not
+  lost with the deferral. The two envelope trailing-separator cases sit beside
+  them, because the shared lexer owns that refusal for both documents.
+- **The committed document as a subject**: `step2/committed/parses-clean`,
+  `step2/committed/root-specs`, the floor and family counts, the waiver and the
+  constrained sqlite location, so the bytes the archive will carry are read by
+  the same parser rather than trusted.
+- **The gate, and the point of it**: `step2/gate/bad-bundle-ran-no-invariant`
+  asserts ZERO `PRESENT`, `ABSENT` and `UNEXPECTED` lines, which is what a
+  checker that refused and still classified would have produced. Beside it the
+  good-bundle path, the roots coming from the document, the limit stated in the
+  report, the digest carried in it, the explicit `--root` still winning, and a
+  usage error for declaring neither.
+
+**One finding carried forward, recorded so it is not lost.** Five bullets of the
+`Step 2 improvement expectations` list above describe `CPLX-CLOSURE-EVIDENCE/1`:
+the evidence negatives, the derived verdict truth table, the evidence semantic
+negatives, the canonical evidence bytes and the all-three-grammars statement. Q10
+routes the evidence document to "Step 6 emit and `closure_evidence_parse`", the
+plan's Step 2 behavior lists only the four configuration and envelope functions,
+and this document's Step 6 section already carries the evidence records. The
+bullets were written into this step from the whole Q10 answer rather than from
+the half Step 2 schedules. They are left in place rather than moved, for the same
+reason the Step 1 corpus finding was: the step that first consumes them is the
+one that should correct them, and that step is Step 6.
+
+No, there is no Step 2 case below its declared coverage that needs completing.
+The plan's departure table replaces the pytest coverage number with a case count,
+and 85 cases answered with 0 failures is the whole of what this step declares.
 
 ### Feature integrity for Step 2
 
-_(empty — no check has taken place yet.)_.
+- **`install_pkg.sh` is untouched**:
+  `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0, and
+  the installer-purity grep for `readelf|sha256sum|tar -t` prints nothing, so
+  neither the installer nor its audited host-tool contract moved.
+- **`pkg.sh` gains no behavior**, at 184 lines unchanged. The packaging wiring is
+  Step 5's, so a half-built gate cannot refuse a real packaging run in the
+  meantime, which is exactly what the plan's Step 2 feature preservation asks
+  for.
+- **Step 1 still answers, and its two changed assertions changed for a reason**:
+  `--step 1` reports 70 cases and 0 failures. The topology case that measured
+  `closure_config.sh` at a body of zero became the case that measures it filled,
+  read from the topology's `Filled by` column rather than a hand-kept list; and
+  the alias fixture now reports UNANSWERED where `ln` resolves without making a
+  symlink instead of a code failure. Neither weakens an assertion on a host that
+  can answer it.
+- **Step 0 still answers**: `--step 0` reports 66 cases and 0 failures. Its red
+  baseline moved by one, since step 2 has a suite now and its two refusal cases
+  became the NOTE naming the step that filled it. The contract and corpus digests
+  it prints are unchanged, 78559532 and 558c66e5, so a reader can see step 2
+  added no host command and no fixture row.
+- **The suite that would notice an installer edit first is green**:
+  `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` reports 104 cases and 0
+  failures on the RHEL 9.8 build host, with and without
+  `--target-capability capability.rhel-9.8.txt`.
+- **The lint floor covers the new module**: `bash src/utils/lint_shell.sh`
+  reports 48 tracked scripts clean, and the new files were STAGED before that
+  run, which is not a formality: the gate reads `git ls-files`, so an unstaged
+  file is silently uncovered. It reported one real finding on the first covered
+  run, SC2034 over two of the three fixed-name variables the checker reads, and
+  each now carries its own scoped disable naming the reader.
+- **The harness itself is linted as this effort's plan addition**, since
+  `lint_shell.sh` excludes `docs/` by design. It is clean with SC2016 excluded,
+  and that exclusion is not new: the construct is the child-shell probe that must
+  carry its operands unexpanded, and its count went from 3 to 6 with the three
+  new module probes rather than introducing a different pattern.
+- **Reporting**: nothing existing is changed. The new reporting is the
+  configuration-bundle section of the checker's report, which prints the digest,
+  the named source and the statement of the agent's limit, and the declared-roots
+  section that names which of `--root` and the bundle the roots came from. A run
+  with no `--bundle` prints neither and behaves exactly as Step 1 left it.
+- **Nothing is deployed yet**: no staging into an archive, no packaging gate, and
+  no checker copy executed to produce evidence.
+
+No, no existing feature or reporting capability is impaired by Step 2.
 
 ---
 
