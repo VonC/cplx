@@ -1,0 +1,714 @@
+Harness: docs/v0.27.0/verify.closure-check.sh --step 3, then the same file at
+         --step 2, --step 1, --step 0 and with no --step, then
+         docs/v0.27.0/verify.relocation-rpath.sh --step 3 for the preserved
+         surface
+Target: RHEL 9.8 (Plow), bash 5.1.8(1)-release
+        readelf: GNU readelf version 2.35.2-72.el9
+        dd: dd (coreutils) 8.32
+        git: 2.52.0, from the tools tree rather than from the login PATH
+Captured: 2026-09-07, by hand, over ssh, from a copy of the repository subset
+          under /tmp on the build host.
+Purpose: Step 3 of the toolchain-runtime-closure plan, the static subject set and
+         the derived membership half. It walks the tree once, identifies every
+         ELF by its magic bytes, records the DT_SONAME, the DT_NEEDED list and
+         the version needs from one `readelf -d -V` per object, builds the
+         provider index before the walk, and refuses every DT_NEEDED name that
+         resolves nowhere in the observed loader scope.
+
+WHY THIS RUN NEEDS A HOST AT ALL. The fixtures are REAL ELF objects with real
+         dynamic sections, generated on the host from a donor found there, and
+         the Windows authoring host carries neither readelf nor a donor. It also
+         carries no /etc/os-release, so the any-linux gate reports UNANSWERED by
+         design rather than a result. The authoring-host half is recorded below,
+         and it is a refusal that names its three obligations, not a pass.
+
+WHAT THIS RUN PROVES, in the four claims step 3 makes.
+
+  THE SUBJECT SET IS THE WALK, AND THE MEASUREMENT IS WHY. A transitive walk
+         from 185 entry points reaches 176 names and misses 395 of 628 shipped
+         ELFs, among them the 76 lib-dynload modules and the 28 site-packages
+         extensions this whole collection exists for. The tree planted here
+         carries a lib-dynload module with an unresolvable DT_NEEDED that NO
+         entry point and NO edge reaches: a closure-based subject set reports
+         that tree as a pass, and this one refuses it by name.
+
+  UNREFERENCED IS A FINDING AND NEVER AN EXCLUSION. A shipped object nothing
+         reaches is examined like every other, ACCEPTED, and reported. The case
+         carries its negative control: one subject in the tree IS reached by a
+         DT_NEEDED edge and does not appear in the list, so the finding cannot be
+         satisfied by a function that names every subject it walked.
+
+  SHIPPED IS NOT THE SAME AS RESOLVABLE. `build_elf_rpath` never adds
+         `root/usr/bin`, so the second `libssl.so.3` there is a SUBJECT and never
+         a PROVIDER. The first one sits in a provider directory, which is what
+         stops the case passing merely because the index happens to hold no such
+         name; the index is asked for that name and answers with the lib64 path
+         alone.
+
+  THE COST RULE IS MEASURED FROM A RUN, NOT READ OUT OF THE SOURCE. `find`,
+         `readelf` and `closure_provider_index` are wrapped in counting shims and
+         one ordered log records what happened: exactly one tree walk, exactly
+         one index construction, the index first, and one reader invocation per
+         ELF. A source-text grep can show a single occurrence of a function name
+         and say nothing about how many times it ran or in what order, and the
+         O(n^2) shape this forbids is exactly an index built inside the object
+         loop.
+
+  AND THE READING RULE, TYPED CORRECTLY. An absent, non-zero or unparsable
+         reader, an object that cannot be opened, a recognized dynamic record
+         whose VALUE cannot be read, and a TRAVERSAL that could not be taken are
+         all UNAVAILABLE INPUTS: the result is UNDETERMINED naming what was
+         missing, the run exits 5, and no refusal is reported for them. A refusal
+         says the archive is wrong; this says the reading could not be taken.
+         Eight cases cover the eight ways it happens, and each asserts that
+         `refused` stayed at zero while the run stayed non-passing.
+
+  THE LAST TWO OF THOSE, AND THE PATH-KEYED REACHABILITY BESIDE THEM, ARE REVIEW
+         REPAIRS. Round 1 reproduced three defects the submitted suite did not
+         cover and round 2 found the alias half still wrong in the other
+         direction. All four are recorded at the end of this capture, each with
+         the run that shows its new cases failing against the code it repairs.
+
+  THE OBLIGATION THAT WAS OPEN IS NOW SCHEDULED. The design defined the
+         unreferenced finding as the conjunction of an edge half and an
+         entry-point half, and no step of this plan scheduled the declared input
+         the second half needs. The specification owner amended both documents on
+         2026-09-07: design Q13 splits the finding, plan Q13 gives this step the
+         edge half under its own result name and gives Step 4 the entry-point
+         half with the declaration it needs.
+
+===== the fixture engine, which is what makes the run possible =====
+
+Plan decision Q07 fixes the mechanism: mutate donor objects found on the host,
+after validating the donor's ELF class and section shape, and assert the mutated
+semantic result before any case may use the object. The engine landed with this
+step and its mechanism is recorded in the corpus header beside the rows:
+
+  the name slots     the LAST 256 bytes of the donor's own .dynstr, taken as four
+                     64-byte slots. A mutation writes its name into a slot and
+                     repoints one dynamic entry at that offset, so no fixture
+                     name is bounded by the length of the string it replaces. The
+                     bytes it overwrites are symbol names, which nothing in this
+                     effort reads.
+  the spare slot     the linker pads .dynamic past its terminating DT_NULL.
+                     `needed-add` turns the FIRST DT_NULL into a real DT_NEEDED
+                     and leaves the next spare slot as the terminator, so the
+                     need is ADDED rather than substituted for another.
+
+Both are DONOR REQUIREMENTS carried in the corpus donor row, not assumptions: a
+donor that cannot supply either is refused before a fixture is generated from it.
+Measured on this host, every candidate library carries four spare DT_NULL slots
+and a .dynstr well past the 512-byte floor, and /usr/lib64/libz.so.1 is the first
+that validates.
+
+The corpus gained sixteen rows for this step, each because a case would otherwise
+have proved something narrower than it claims: `provider-donor-need`, without
+which every generated subject would also refuse on the donor's own libc and the
+planted defect would be one refusal among several; `provider-first-libssl`,
+without which "absent from the provider index" would hold for the wrong reason;
+`subject-need-provider`, which is the one subject an edge reaches and so the
+negative control the unreferenced finding needs; from round 1 of the code review,
+`reader-needed-value-unreadable` and `subject-libssl-consumer`, which give the
+two reproduced false-green paths a fixture apiece; and from round 2,
+`provider-alias-target`, `provider-alias-link` and `subject-alias-consumer`, the
+ordinary `libz.so.1 -> libz.so.1.2.11` layout that a name-keyed alias test
+reports as an unreferenced library.
+
+`needed-offset-corrupt` is the round 1 verb, and it is worth naming because of
+what it does NOT touch: it repoints the first `DT_NEEDED` VALUE past the end of
+the string table and leaves the table itself alone. A supported reader then exits
+0 and prints the raw value with no brackets, which is the shape that made a
+bracket-only parser drop the entry.
+
+===== the step 3 suite =====
+
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 3 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /bin/sed
+  preflight/grep                                 PASS  /bin/grep
+  preflight/sort                                 PASS  /bin/sort
+  preflight/uniq                                 PASS  /bin/uniq
+  preflight/mkdir                                PASS  /bin/mkdir
+  preflight/rm                                   PASS  /bin/rm
+  preflight/chmod                                PASS  /bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  rhel 9.8
+  host/any-linux                                 PASS  rhel 9.8
+
+== capability gate: readelf assoc
+  capability/readelf/in-domain                   PASS  yes
+  capability/readelf                             NOTE  supported: /bin/readelf answered -d -V over /bin/bash
+  capability/assoc/in-domain                     PASS  yes
+  capability/assoc                               NOTE  supported: bash 5.1.8(1)-release, an associative assignment read back its own value
+
+
+
+
+
+
+== step 3 topology: the reader and the rules module have a body
+  step3/topology/reader-is-filled                PASS  yes
+  step3/topology/rules-is-filled                 PASS  yes
+  step3/topology/reader-declared-commands        PASS
+  step3/topology/rules-declared-commands         PASS
+  step3/topology/checker-sources-the-reader      PASS  yes
+  step3/topology/checker-sources-the-rules       PASS  yes
+  step3/topology/reader-emits-no-verdict         PASS
+  step3/topology/membership-not-in-checker       PASS
+
+== step 3 fixtures: donors validated, every mutation asserted
+  step3/fixture/tools                            NOTE  /bin/readelf, /bin/dd
+  step3/fixture/shared-donor-validated           PASS  yes
+  step3/fixture/program-donor-validated          PASS  yes
+  step3/fixture/donors                           NOTE  shared /usr/lib64/libz.so.1, program /bin/cat
+  step3/fixture/control/donor-is-clean           PASS
+  step3/fixture/subject-lib-dynload-unresolved   PASS  ok
+  step3/fixture/subject-site-packages-need       PASS  ok
+  step3/fixture/subject-unreferenced-sound       PASS  ok
+  step3/fixture/subject-second-libssl            PASS  ok
+  step3/fixture/subject-program-entry-point      PASS  ok
+  step3/fixture/provider-first-libssl            PASS  ok
+  step3/fixture/subject-need-provider            PASS  ok
+  step3/fixture/subject-libssl-consumer          PASS  ok
+  step3/fixture/provider-alias-target            PASS  ok
+  step3/fixture/subject-alias-consumer           PASS  ok
+  step3/fixture/reader-not-an-elf                PASS  ok
+  step3/fixture/provider-donor-need              PASS  ok
+  step3/fixture/provider-alias-link              PASS  ok
+  step3/fixture/planted                          NOTE  12 files, 10 of them ELF, 14 edges
+
+== step 3 subjects: every shipped ELF, none excluded
+  step3/subjects/exit-code                       PASS  1
+  step3/subjects/walked-every-file               PASS  12
+  step3/subjects/count-equals-planted            PASS  10
+  step3/subjects/none-unread                     PASS  0
+  step3/subjects/edges-counted                   PASS  14
+  step3/subjects/no-unexpected-directory         PASS  0
+  step3/subjects/walk-is-complete                PASS  complete
+
+== step 3 membership: an unresolvable need, named with its subject
+  step3/membership/one-refusal                   PASS  1
+  step3/membership/names-subject-and-name        PASS  REFUSED|derived|<scratch>/step3/prefix/tools/python/current/lib/python3.13/lib-dynload/_cplxprobe.cpython-313-x86_64-linux-gnu.so|libcplxabsent.so.1
+  step3/membership/refusal-is-final              PASS  yes
+  step3/membership/control/provider-accepted     PASS  0
+  step3/membership/control/no-refusal            PASS  0
+
+== step 3 unreferenced: reported, and still accepted
+  step3/unreferenced/accepted-not-refused        PASS  0
+  step3/unreferenced/orphan-is-named             PASS  UNREFERENCED-BY-EDGE|subject|<scratch>/step3/prefix/tools/git/current/lib/libcplxorphan.so.1
+  step3/unreferenced/control/referenced-absent   PASS
+  step3/unreferenced/counted                     PASS  7
+  step3/unreferenced/resolved-copy-absent        PASS
+  step3/unreferenced/unresolved-copy-named       PASS  UNREFERENCED-BY-EDGE|subject|<scratch>/step3/prefix/tools/python/root/usr/bin/libssl.so.3
+  step3/unreferenced/control/the-consumer-exists PASS  yes
+  step3/unreferenced/alias-target-absent         PASS
+  step3/unreferenced/alias-consumer-named        PASS  yes
+  step3/unreferenced/alias-link-not-walked       PASS
+
+== step 3 cost: the alias resolution, measured as it grows
+  step3/cost/alias-population-small              PASS  ok
+  step3/cost/alias-population-large              PASS  ok
+  step3/cost/alias-operations                    NOTE  1963 at 6 pairs, 7831 at 24 pairs
+  step3/cost/alias-counts-are-real               PASS  yes
+  step3/cost/alias-work-per-pair-is-flat         PASS  yes
+  step3/cost/alias-still-resolves-at-scale       PASS
+
+== step 3 aliases: a symlinked directory in the selected path
+  step3/fixture/dir-alias-target                 PASS  ok
+  step3/fixture/dir-alias-consumer               PASS  ok
+  step3/fixture/dir-alias-soname                 PASS  ok
+  step3/fixture/dir-alias-directory              PASS  ok
+  step3/fixture/provider-donor-need              PASS  ok
+  step3/alias/selected-through-the-directory     PASS  yes
+  step3/alias/directory-alias-exit-code          PASS  0
+  step3/alias/target-behind-the-alias-absent     PASS
+  step3/alias/consumer-behind-the-alias-named    PASS  yes
+  step3/fixture/chain-relative-parent            PASS  ok
+  step3/fixture/chain-through-updir              PASS  ok
+  step3/fixture/chain-nine-links                 PASS  ok
+  step3/alias/chains-exit-code                   PASS  0
+  step3/alias/no-chain-left-unresolved           PASS  0
+  step3/alias/chain-reaches-libcplxrel           PASS
+  step3/alias/chain-reaches-libcplxupdir         PASS
+  step3/alias/chain-reaches-libcplxdeep          PASS
+  step3/alias/chain-consumer-libcplxrel          PASS  yes
+  step3/alias/chain-consumer-libcplxupdir        PASS  yes
+  step3/alias/chain-consumer-libcplxdeep         PASS  yes
+
+== step 3 providers: shipped is not the same as resolvable
+  step3/providers/first-libssl-indexed           PASS  <scratch>/step3/prefix/tools/python/root/usr/lib64/libssl.so.3
+  step3/providers/second-libssl-not-indexed      PASS
+  step3/providers/second-libssl-is-a-subject     PASS  yes
+  step3/providers/directories                    PASS  3
+
+== step 3 cost: one walk, one index, built before the first read
+  step3/cost/one-tree-walk                       PASS  1
+  step3/cost/one-index-construction              PASS  1
+  step3/cost/index-before-the-walk               PASS  INDEX
+  step3/cost/one-read-per-object                 PASS  10
+  step3/cost/instrumented-run-agrees             PASS  0
+
+== step 3 reader: an input that could not be obtained
+  step3/fixture/reader-unreadable-object         PASS  ok
+  step3/reader/unreadable-exit-code              PASS  5
+  step3/reader/unreadable-is-undetermined        PASS  1
+  step3/reader/unreadable-names-the-object       PASS  UNDETERMINED|object|<scratch>/step3/prefix/tools/git/current/lib/libcplxunreadable.so.1
+  step3/reader/unreadable-never-a-refusal        PASS  0
+
+== step 3 reader: a dynamic record whose value cannot be read
+  step3/fixture/reader-needed-value-unreadable   PASS  ok
+  step3/reader/unreadable-value-exit-code        PASS  5
+  step3/reader/unreadable-value-is-undetermined  PASS  1
+  step3/reader/unreadable-value-names-the-field  PASS  yes
+  step3/reader/unreadable-value-names-the-object PASS  yes
+  step3/reader/unreadable-value-never-a-refusal  PASS  0
+  step3/reader/unreadable-value-adds-no-edge     PASS  14
+  step3/reader/unreadable-value-is-not-a-subject PASS  10
+
+== step 3 walk: a traversal that could not be taken
+  step3/walk/locked-subtree-exit-code            PASS  5
+  step3/walk/locked-subtree-is-incomplete        PASS  yes
+  step3/walk/locked-subtree-typed                PASS  yes
+  step3/walk/locked-subtree-not-green            PASS
+  step3/walk/failing-finder-exit-code            PASS  5
+  step3/walk/failing-finder-typed                PASS  yes
+  step3/walk/failing-finder-not-green            PASS
+  step3/walk/absent-finder-exit-code             PASS  5
+  step3/walk/absent-finder-names-it              PASS  yes
+  step3/walk/control/complete-again              PASS  complete
+  step3/walk/control/green-again                 PASS  0
+
+== step 3 reader: a reader that could not be reached
+  step3/reader/absent-exit-code                  PASS  5
+  step3/reader/absent-names-the-input            PASS  yes
+  step3/reader/non-zero-exit-code                PASS  5
+  step3/reader/non-zero-all-undetermined         PASS  10
+  step3/reader/unparsable-exit-code              PASS  5
+  step3/reader/unparsable-all-undetermined       PASS  10
+
+== step 3 reader: the locale pin, shown by a translating reader
+  step3/reader/control/stub-really-translates    PASS  0
+  step3/reader/control/stub-is-honest-under-C    PASS  1
+  step3/reader/pinned-locale-still-parses        PASS  0
+  step3/reader/pinned-locale-same-verdict        PASS  0
+
+== verdict
+  step        3
+  cases       124
+  failures    0
+  host        rhel 9.8
+  bash        5.1.8(1)-release
+  harness      472020dce4c630847493da8249855e8c3964f22b64daad2c190eae8535d4cf50
+  contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+  corpus-sha   697676f0149dd93895cd26c54b52feeffc0d57335977a26f85d04b6e3f10809c
+  capability   readelf=supported
+  capability   assoc=supported
+
+OBJECTIVE MET for step 3
+
+The absolute scratch paths are folded to <scratch> above; they are the harness's
+own per-process temporary directory and change on every run, so a retained
+capture that carried them would differ from its own re-run for no reason.
+
+===== the step 0 re-run, because the red baseline moved by one =====
+
+Step 0's refusal control needs a step whose suite does not exist, and step 3 was
+that step. A hard-coded number turns "the suite is absent" into a claim that
+quietly becomes false, and the step that filled it then fails step 0 while step 0
+is not what it broke. The subject is derived now, from the same
+`step_suite_exists` the dispatch reads, so the control follows the red baseline
+as it recedes:
+
+  step0/refusal/subject                          NOTE  step 4, the first whose suite does not exist yet
+  step0/refusal/missing-tool-exit-code           PASS  5
+  step0/refusal/names-the-missing-command        PASS  yes
+  step0/refusal/suite-absent-exit-code           PASS  5
+  step0/refusal/two-refusals-are-distinct        PASS  no
+  step0/refusal/suite-absent-names-the-step      PASS  yes
+
+  OBJECTIVE MET for step 0
+
+===== the step 1 and step 2 re-runs, unchanged =====
+
+Both matter because the checker gained a phase this step. A scope run that could
+not observe the loader scope must still report exactly fifteen UNDETERMINED
+lines, not sixteen, so the subject phase does NOT emit a typed line when it does
+not run: the provider directories ARE the observed scope, and inventing an empty
+index there would refuse every name the archive records and report one missing
+input as hundreds of findings.
+
+  OBJECTIVE MET for step 1
+  OBJECTIVE MET for step 2
+
+===== the aggregate, one step per process =====
+
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===
+  step 0  exit 0  OBJECTIVE MET for step 0
+  step 1  exit 0  OBJECTIVE MET for step 1
+  step 2  exit 0  OBJECTIVE MET for step 2
+  step 3  exit 0  OBJECTIVE MET for step 3
+  step 4  exit 5    no suite exists for step 4 yet; it is written by step 4, the floor, coherence, rule 1, rule 2 and aggregation
+  step 5  exit 5    no suite exists for step 5 yet; it is written by step 5, waivers, the packaging gate and the publication boundary
+  step 6  exit 5    no suite exists for step 6 yet; it is written by step 6, the foreign-host half of the verification
+  step 7  exit 5    no suite exists for step 7 yet; it is written by step 7, the acceptance on both hosts
+
+=== aggregate: exit 5
+
+===== the preserved surface =====
+
+Item 2's harness sources install_pkg.sh through the MAIN BOUNDARY seam and
+asserts the installer's own host-tool allowlist over its text. No step here
+changes an installer function, and this is the assertion rather than the
+expectation:
+
+  bash docs/v0.27.0/verify.relocation-rpath.sh --step 3
+       --target-capability docs/v0.27.0/capability.rhel-9.8.txt
+  OBJECTIVE MET for step 3
+
+===== the authoring-host half =====
+
+  bash docs/v0.27.0/verify.closure-check.sh --step 3        exit 5
+
+  == host gate: any-linux
+    host/identity                                  NOTE  no readable /etc/os-release
+  == capability gate: readelf assoc
+    capability/readelf                             NOTE  unavailable: type -P readelf found nothing on PATH
+  == step 3 topology: the reader and the rules module have a body
+    (all eight PASS, because they read the tree and need no host)
+  == step 3 fixtures: donors validated, every mutation asserted
+    (refused before the first fixture)
+
+  cases 17, failures 0, unanswered: the host identity, the readelf capability on
+  this host, the step 3 fixture generation
+
+  OBJECTIVE NOT MET for step 3: unanswered
+    /etc/os-release is not readable here, so this is not one of the two hosts
+    this effort validates on; re-run on the RHEL 9.8 build host or on the Debian
+    12 agent
+    readelf is not on PATH here; install it or re-run where it is, then repeat
+    this call
+    readelf and dd must both resolve here; re-run on a host that supplies them
+
+THE HARNESS DIGEST IS THE SAME ON BOTH HOSTS,
+472020dce4c630847493da8249855e8c3964f22b64daad2c190eae8535d4cf50, which is what
+says the green run above and this refusal are the same instrument answering two
+different hosts rather than two different files.
+
+===== line budget, measured against the plan's advisory estimates =====
+
+  file                                     before  after  body  band
+  src/setups/env/bin/closure_check.sh          523    636   357  550-650, at risk
+  src/setups/env/bin/closure_config.sh         637    637   434  untouched
+  src/setups/env/bin/closure_elf.sh             26    432   196  below 550, safe
+  src/setups/env/bin/closure_rules.sh           37    266   102  below 550, safe
+  docs/v0.27.0/verify.closure-check.sh        1922   3084  2019  harness, not deployed
+  docs/v0.27.0/fixtures.closure-corpus.txt      85    204    38  data, no budget
+
+FOUR VARIANCES, ALL AGAINST ADVISORY ESTIMATES, ALL RECORDED RATHER THAN ARGUED
+AWAY. The numbers below are the ROUND 1 figures, after the three repairs.
+
+`closure_elf.sh` was estimated at 200 to 260 and is 391, of which 204 are comment
+and blank. The submitted file was 274; round 1 added the fail-closed traversal,
+the bracketed-value reader and the paragraphs that say why each exists, because
+both were reproduced false-green paths rather than defensive extras.
+
+`closure_rules.sh` was estimated at plus 40 to 70 and is plus 110. The derived
+membership half is 24 lines of code; the rest is the unreferenced-by-edge half,
+which the step owns as a separate result, and the paragraphs that state why an
+edge reaches a PATH rather than a name and what the half does not consult.
+
+`closure_check.sh` was estimated at plus under 15 and is plus 105. The calls
+themselves are five lines. The rest is the branch that refuses to compute the
+phase when the scope could not be observed, the eight summary rows the harness
+reads its counts from, the three verdict lines and their exit codes, and the
+header paragraph that records the run order as the cost rule. The file is now IN
+the at-risk band, under the 650 ceiling, so the plan's rule applies: avoid growth
+where practical.
+
+A FORWARD NOTE FOR STEP 5, recorded here because this step is where the band was
+entered. `closure_check.sh` is filled by Steps 1 and 5, and step 5 adds the
+waiver outcomes and the packaging gate's entrance to it. At 636 it has 14 lines
+of headroom, which the waiver reporting alone will consume. The responsibility to
+move is the REPORT: the summary block and the verdict lines are formatting over
+counts other modules produce, and the topology already gives every verdict to
+`closure_rules.sh`. Step 5 should move the report there rather than discovering
+the ceiling at the end of its own implementation, and the topology forbids a
+fifth module so there is no other place for it to go.
+
+`verify.closure-check.sh` was estimated at plus 250 to 350 and is plus 807. The
+estimate did not carry the fixture engine, which Q07 decided but did not size:
+donor discovery and validation against the corpus donor row, the section and
+dynamic-array reader, the byte-level name-slot and dynamic-entry writer, the
+row-driven planting with its per-row assertion, the reader and finder stubs, and
+the instrumented run that wraps `find`, `readelf` and the provider index in
+counting shims. That engine is 250 lines on its own and it is the reason the two
+structural cases are measurements rather than greps; round 1 added the eleven
+walk and unreadable-value cases on top. The file is the harness, which the budget
+policy does not deploy and does not bound.
+
+===== round 1 repairs, and what they superseded =====
+
+The submission run of this step was green, at 69 cases and 0 failures on this
+same host, and it was green over three defects. The code review reproduced all
+three independently; recording that here is the point of a retained capture,
+because a green run over a defect is exactly the shape a later reader has to be
+able to see.
+
+  R1  A FAILED TRAVERSAL READ AS AN EMPTY TREE. The walk ran `find` inside a
+      process substitution, which discards the exit status, so a directory the
+      account cannot read held its shipped objects out of the listing while the
+      run printed `CLOSURE MEMBERSHIP OK` and exited 0. A finder that returned 1
+      produced the same green over a completely unwalked tree. The listing now
+      goes through a temporary file so the status is collected, and an
+      incomplete walk is a typed `UNDETERMINED|traversal|` that makes the run
+      non-passing on its own. It stays ONE `find` invocation, which the
+      instrumented case still measures.
+  R2  A RECOGNIZED RECORD WHOSE VALUE COULD NOT BE READ WAS DROPPED. The parser
+      matched only the bracketed shape, so a `DT_NEEDED` whose string offset
+      falls outside the string table, printed by a SUPPORTED reader at status 0
+      as a raw value with no brackets, left the object recorded with an empty
+      dependency set that resolved nothing and refused nothing. The parser now
+      refuses the whole object and names the field, and it commits its counters
+      only on success, so a refused output leaves no partial edge count behind.
+  R3  REACHABILITY WAS KEYED BY NAME RATHER THAN BY RESOLVED PATH. A consumer
+      naming `libssl.so.3` marked BOTH copies reached, so the second copy under
+      `root/usr/bin`, which is the subject the design distinguishes from a
+      provider, was never reported. An edge now reaches the ONE path the
+      observed scope selects for that name, with an `-ef` test against the
+      selected path of the subject's own basename for the alias case. The
+      result is renamed `UNREFERENCED-BY-EDGE`, because the design's finding is
+      that half AND an entry-point half no step of this plan supplies, and a
+      reader who took this list for the design's finding would read a shipped
+      executable as an object nothing can load.
+
+THE THREE REGRESSIONS WERE RUN AGAINST THE SUBMITTED CODE, which is the only
+thing that shows they bite. The repaired harness was pointed at the submitted
+modules through `--shipped-dir`:
+
+  bash docs/v0.27.0/verify.closure-check.sh --step 3 --shipped-dir <submitted>
+  93 cases, 19 failures, and among them:
+
+  step3/walk/failing-finder-not-green   want [] got [CLOSURE MEMBERSHIP OK: 0
+                                        edges over 0 subjects all resolve, 0
+                                        reported unreferenced]
+  step3/walk/locked-subtree-not-green   want [] got [CLOSURE MEMBERSHIP OK: 11
+                                        edges over 8 subjects all resolve, 5
+                                        reported unreferenced]
+  step3/reader/unreadable-value-is-not-a-subject   want [8] got [9]
+  step3/unreferenced/unresolved-copy-named         want [the bin copy] got []
+  step3/unreferenced/counted                       want [6] got [5]
+
+The first two lines are the false greens in the submitted code's own words.
+
+===== round 2 repairs, and the obligation still open =====
+
+Round 2 accepted R1 and R2 as repaired and found the R3 alias half still wrong in
+the other direction.
+
+  R3a  A SONAME SYMLINK'S DIFFERENTLY NAMED TARGET WAS REPORTED UNREFERENCED.
+       The round 1 repair keyed the alias test by the SUBJECT's basename, and the
+       ordinary library layout does not share a name across the two paths:
+       `libz.so.1 -> libz.so.1.2.11`. A consumer names the soname, the index
+       selects the symlink, and the walk yields the target under its versioned
+       name, for which there is no entry. Resolution is by FILE IDENTITY now:
+       each selected provider that IS a symlink is matched against the subjects
+       with `-ef` until its target is found, stopping at the first match, and a
+       selected provider is examined once however many edges chose it. A selected
+       provider that is a real file is already reached under its own path and is
+       not swept.
+
+  R3b  THE DECLARED ENTRY-POINT INPUT REMAINS OPEN, and it is not an
+       implementation gap this step can close. It is recorded in the validation
+       record with the two plan lines that disagree, and the verdict stays No
+       until the documents that own the definition agree.
+
+The alias regression against the ROUND 2 modules, through `--shipped-dir`:
+
+  99 cases, 2 failures
+
+  step3/unreferenced/counted            want [7] got [8]
+  step3/unreferenced/alias-target-absent   want [] got
+      [UNREFERENCED-BY-EDGE|subject|<scratch>/tools/python/root/usr/lib64/
+       libcplxalias.so.1.2.3|no DT_NEEDED edge in the archive resolves to
+       this path]
+
+That second line is a normally loaded library reported as reachable by nothing,
+which is the false finding the repair removes.
+
+===== round 3 repair, and the obligation still open =====
+
+Round 3 accepted R3a as functionally repaired and R3b as a specification gap that
+both roles now classify the same way, and it filed one new finding against the
+repair itself.
+
+  R4  THE ALIAS RESOLUTION WAS QUADRATIC. Resolving by file identity meant
+      comparing each selected link against the subjects until its target was
+      found, which is a product of the links and the subjects. Nothing in the
+      schema caps the number of aliased libraries and one soname link per
+      library is the ordinary layout, so the product was not a constant to wave
+      away, and the plan forbids that shape outright. THE ONE WALK NOW RECORDS
+      WHERE EVERY LINK POINTS: `find` is asked for the link targets in the same
+      invocation that lists the subjects, and resolving an alias became a
+      lookup. The chase is bounded at eight hops so a cycle cannot hang it.
+
+  R3b  UNCHANGED AND STILL OPEN. Both roles agree it is a plan and design
+       reconciliation rather than an implementation gap, and that neither role
+       can make the call. It goes to the specification owner.
+
+The cost regression measures COMMANDS EXECUTED, with a DEBUG trap under
+`functrace`, at two alias populations, because a sweep and a lookup answer the
+same and differ only in growth. Work per alias pair:
+
+  the lookup        282 at 6 pairs, 1110 at 24 pairs   47 then 46 per pair
+  the -ef sweep     328 at 6 pairs, 1939 at 24 pairs   55 then 81 per pair
+
+The threshold is stated as work per pair rather than as a total ratio, because
+the totals carry a base that is itself linear in the population: the sweep's
+total grew 5.9 times for a fourfold population, which a loose ratio would have
+let through. Against the ROUND 3 module the case fails; against this one it
+passes.
+
+===== round 4 repair, and the obligation still open =====
+
+Round 4 accepted R4 as repaired and found that the repair had lost a case the
+sweep it replaced used to handle.
+
+  R5  A SYMLINKED DIRECTORY IN THE SELECTED PATH WAS NOT RESOLVED. The link map
+      is keyed by whole paths, and `tools/python/current -> version` puts the
+      link in a PREFIX of the selected path rather than at its end: the observed
+      scope holds `current/lib/libcplxdir.so.1` while the walk, which does not
+      follow a symlinked directory, records the object under `version/lib`. A
+      lookup of the whole path cannot apply a link that sits inside it, so a
+      normally loaded library was again reported as reachable by nothing. This is
+      the `current` alias layout this effort already reads, not a new convention.
+      `closure_rules_physical` rebuilds the path one component at a time and
+      resolves each prefix while the link map names it, which handles the
+      directory link and the soname link in one pass and in the right order. The
+      result is cached by input path, so it stays a lookup.
+
+  R3b  RESOLVED BY AMENDMENT on 2026-09-07, recorded in design Q13 and plan Q13.
+
+Against the ROUND 4 module, through `--shipped-dir`:
+
+  113 cases, 1 failure
+
+  step3/alias/target-behind-the-alias-absent   want [] got
+      [UNREFERENCED-BY-EDGE|subject|<scratch>/step3/diralias/tools/python/
+       version/lib/libcplxdir.so.1.2.3|no DT_NEEDED edge in the archive
+       resolves to this path]
+
+The 113-case run it produced has been superseded by the one above.
+
+===== round 5 repair, and the obligation still open =====
+
+Round 5 found the component walk still wrong in three ways, all of them the same
+obligation seen from different angles, and all reproduced with real files.
+
+  R5 again  A LINK TARGET IS A PATH, NOT A DESTINATION. The component loop
+            substituted a target WHOLE and then asked only whether that whole
+            target was another link, so a component INSIDE the target was never
+            resolved. The reader also reduced `..` lexically when it recorded the
+            target, before the components before it had been expanded, and `..`
+            applies to the directory the resolution actually REACHED. And the
+            hop bound cached a partially chased path as though it were physical.
+            The resolution is now the filesystem's own: components are taken one
+            at a time from a queue, a link's target is SPLICED BACK INTO that
+            queue rather than taken whole, an absolute target restarts from the
+            root, and `..` pops the directory reached so far. The reader records
+            the raw target and reduces nothing. A chase that exceeds the bound is
+            typed UNDETERMINED and NOTHING is cached.
+
+            The bound is the kernel's own SYMLOOP_MAX rather than a number this
+            effort invented, because nothing in the plan says how deep a valid
+            chain may be and a nine-link chain resolves on the supported host.
+
+  R3b       RESOLVED BY AMENDMENT on 2026-09-07, not by either role choosing.
+            The plan carried two lines that disagreed about what this step owes,
+            and design Q13 and plan Q13 now split the finding and schedule the
+            half this step does not own.
+
+Three shapes carry it, each asserting with `-ef` that the HOST reaches the same
+file, so the expectation is the filesystem's answer rather than the harness's:
+a target that comes back down through an alias directory, a target that goes up
+through a link directory, and nine valid links to one library.
+
+Against the ROUND 5 module, through `--shipped-dir`: 124 cases, 4 failures, all
+three libraries reported reachable by nothing. The 124-case run recorded above is
+the repaired one.
+
+
+===== the amendment that closed R3b =====
+
+R3b was never an implementation defect: the reviewed plan carried two lines that
+disagreed about what step 3 owes, and neither the writer nor the reviewer could
+choose between them.
+
+  Step 3 behavior:          the finding is "computed from the edges already
+                            collected rather than from a second walk"
+  Step 3 expected outcome:  "A shipped ELF reached by no entry point and no
+                            DT_NEEDED edge ... is ACCEPTED and reported
+                            unreferenced"
+
+The first specifies what was built. The second quotes the design's conjunction,
+whose first term needs a DECLARED ENTRY-POINT SET that no step of this plan
+schedules and no record of the CPLX-CLOSURE/1 grammar carries.
+
+The specification owner amended both documents on 2026-09-07:
+
+  design Q13   the finding has two halves with separate inputs. The edge half is
+               computed from the collected edges and reported as
+               UNREFERENCED-BY-EDGE. The entry-point half needs the declared
+               entry-point set, which is configuration: the locations whose
+               shipped objects are entry points, DECLARED and never derived, for
+               the same reason the subject rule refuses a heuristic.
+  plan Q13     step 3 owns the edge half, under its own result name. STEP 4 owns
+               the entry-point half, the grammar record that declares the set,
+               and the result that combines the two, with the pair of cases that
+               shows the declaration is read: a declared entry point is NOT
+               reported, and the same object without the declaration IS.
+
+So the result this capture records is what the amended plan asks for, and the
+name it carries is what stops a reader taking it for the whole finding.
+===== the completion criteria, run and recorded =====
+
+  bash docs/v0.27.0/verify.closure-check.sh --step 3            OBJECTIVE MET
+  bash src/utils/lint_shell.sh                                  48 scripts, clean
+  the walk and index counts, instrumented rather than grepped   1 walk, 1 index,
+                                                                index first, 10 reads
+  rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh   nothing
+  git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh      exit 0
+
+===== the route a reviewer repeats =====
+
+The mandatory command cannot answer on the Windows authoring host: it carries no
+/etc/os-release and no readelf, so the run refuses by design rather than
+answering a cheaper question. The declared route is the one this capture used:
+
+  ssh <the RHEL 9.8 build host, per a.infra-access.local.md>
+  cd /tmp/cplx-step3
+  export PATH=<the tools git bin>:$PATH
+  bash docs/v0.27.0/verify.closure-check.sh --step 3
+
+and, for the preserved surface, in the same session:
+
+  bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 \
+       --target-capability docs/v0.27.0/capability.rhel-9.8.txt
+
+The /tmp subset must carry docs/v0.27.0/contract.closure-tools.txt,
+fixtures.closure-corpus.txt, contract.cplx-elf-1.txt and contract.host-tools.txt
+beside the two harnesses, src/setups/env/bin/install_pkg.sh and the four checker
+modules, and src/setups/env/closure/closure-config.txt, which the step 2 suite
+reads as one of its subjects.
+
+The PATH export is part of the route rather than an optional convenience: the git
+on the login PATH of that host is absent, and without it step 2 reports UNANSWERED
+and the relocation harness fails its frozen-corpus case on `git hash-object`
+rather than on a finding. Step 3 itself needs no git; it needs readelf and dd,
+both of which that host supplies from /bin.
+
+The run must NOT be made as root. The unreadable-object case asserts that a mode
+000 file cannot be opened, which is false for root; the harness detects that and
+reports the case UNANSWERED naming the account rather than failing it, so a root
+run produces a weaker result that still reads as a refusal.
