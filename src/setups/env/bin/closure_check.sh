@@ -5,28 +5,48 @@
 # It answers the SCOPE question of the archive closure: which directories the
 # loader will search under an installation prefix, which of them the
 # configuration declares, and which of them nobody declared. Step 1 fills the
-# entry point, the run order, the scope derivation and the classification; the
-# four archive invariants arrive with `closure_rules.sh` in later steps, so THIS
-# RUN'S VERDICT IS EXPLICITLY PARTIAL and says so on every run. A green scope
-# check is not a green archive.
+# entry point, the run order, the scope derivation and the classification; Step 2
+# adds the configuration bundle it reads its declaration from; the four archive
+# invariants arrive with `closure_rules.sh` in later steps, so THIS RUN'S VERDICT
+# IS EXPLICITLY PARTIAL and says so on every run. A green scope check is not a
+# green archive.
 #
 # Usage:
-#   closure_check.sh [--prefix DIR] [--installer PATH] --root NAME[=SUB,SUB...]
+#   closure_check.sh [--prefix DIR] [--installer PATH] [--bundle DIR]
+#                    [--root NAME[=SUB,SUB...]]
 #
 #   --prefix     the installation prefix holding `tools`; defaults to $HOME,
 #                which is the installer's own default.
 #   --root       one declared tool root and its declared immediate
 #                subdirectories, comma separated. Repeat it once per root, in
 #                the loader's order, python first.
+#   --bundle     the configuration bundle directory, `tools/closure` inside an
+#                archive or an installed tree. Its two parts are read and
+#                checked before anything else runs, and when no `--root` is
+#                given the declared roots come from the document it carries.
 #   --installer  where `install_pkg.sh` lives; defaults to this script's own
 #                directory, which is where it sits both in cplx and in a
 #                deployed `tools/bin`.
 #
-# Exit codes: 0 nothing undeclared was observed, 1 at least one UNEXPECTED
-# directory, which is a refusal, 2 the arguments are unusable, 5 the loader
-# scope could not be observed, so the comparison is UNDETERMINED. 5 is not a
-# softer 0: an UNDETERMINED result is neither a pass nor a failure, it is
-# reported with the input it lacked, and it never counts toward a green.
+# At least one of `--root` and `--bundle` is required: the declared shape has to
+# come from somewhere, and defaulting it would invent a declaration.
+#
+# Exit codes: 0 nothing undeclared was observed, 1 a refusal, which is either at
+# least one UNEXPECTED directory or a configuration bundle that could not be
+# established, 2 the arguments are unusable, 5 an input could not be obtained, so
+# the answer is UNDETERMINED: the loader scope could not be observed, or the
+# configuration module is not beside this script. 5 is not a softer 0: an
+# UNDETERMINED result is neither a pass nor a failure, it is reported with the
+# input it lacked, and it never counts toward a green.
+#
+# THE BUNDLE IS READ FIRST, AND ITS READING IS INTERNAL CONSISTENCY ONLY. A
+# bundle that is absent, substituted or corrupted refuses before any invariant
+# runs, because a check evaluated against a declaration nobody can vouch for is
+# worth less than no check at all. What a host without cplx can establish is that
+# the embedded document hashes to the digest its own envelope names, and the
+# report says so in those words: a paired edit and an authentic-but-wrong bundle
+# both pass here, and both are refused by packaging and by publication, which
+# resolve the authoritative document from cplx themselves.
 #
 # TWO SCOPES, AND THEY ARE NEVER MERGED.
 #
@@ -81,6 +101,17 @@ set -u
 CLOSURE_CHECK_DIR="${BASH_SOURCE[0]%/*}"
 if [ "$CLOSURE_CHECK_DIR" = "${BASH_SOURCE[0]}" ]; then
     CLOSURE_CHECK_DIR="."
+fi
+
+# The configuration module, sourced at FILE SCOPE and not from inside a function.
+# It declares associative arrays, and `declare -A` executed inside a function
+# makes them local to that function, so a lazy source would leave every later
+# caller reading an empty model. The source is guarded rather than assumed: a
+# deployed tree missing the module must produce a typed UNDETERMINED naming what
+# it lacked, never a run that quietly skips the bundle.
+# shellcheck source=/dev/null
+if [ -f "$CLOSURE_CHECK_DIR/closure_config.sh" ]; then
+    source "$CLOSURE_CHECK_DIR/closure_config.sh"
 fi
 
 # Set by `closure_scope_observed`, read by its caller. A shell function cannot
@@ -303,21 +334,56 @@ closure_scope_undetermined() {
     done <<< "$declared"
 }
 
+# The configuration bundle, read before anything else this checker does. It
+# prints the typed consistency verdict the module produces, then states in words
+# what that verdict does and does not establish, because a green line whose limit
+# is stated somewhere else is a green line somebody will read as authority.
+#
+# Returns 0 consistent, 1 refused, 5 the module could not be reached. The digest
+# it leaves behind is POLICY identity: it identifies the declaration and is the
+# same value for every archive built under it, so nothing here may read it as
+# saying which archive anything was observed on.
+CLOSURE_CHECK_DIGEST=""
+closure_check_bundle() {
+    local dir="$1"
+
+    CLOSURE_CHECK_DIGEST=""
+    printf '\n== configuration bundle\n'
+    printf '  directory   %s\n' "$dir"
+    if ! declare -F closure_envelope_check >/dev/null 2>&1; then
+        printf '  UNDETERMINED: no closure_config.sh beside %s, so the bundle was not read\n' \
+            "$CLOSURE_CHECK_DIR"
+        return 5
+    fi
+    closure_envelope_check "$dir/$CLOSURE_CONFIG_BASENAME" "$dir/$CLOSURE_ENVELOPE_BASENAME" || return 1
+    CLOSURE_CHECK_DIGEST="$CLOSURE_ENVELOPE_DIGEST"
+    printf '  digest      %s, the sha256sum of the document bytes\n' "$CLOSURE_CHECK_DIGEST"
+    printf '  source      %s at %s\n' "$CLOSURE_ENVELOPE_PATH" "$CLOSURE_ENVELOPE_COMMIT"
+    printf '  this reading is internal consistency and NOT authority: it shows the\n'
+    printf '  embedded document hashes to the digest its own envelope names, and a\n'
+    printf '  host with no cplx access cannot say whether that is the configuration\n'
+    printf '  cplx reviewed. A paired edit and an authentic-but-wrong bundle both\n'
+    printf '  pass here, and packaging and publication refuse both.\n'
+    return 0
+}
+
 closure_check_usage() {
-    printf 'usage: closure_check.sh [--prefix DIR] [--installer PATH] --root NAME[=SUB,SUB...]\n' >&2
-    printf '       --root is repeatable and required, in the loader order, python first\n' >&2
+    printf 'usage: closure_check.sh [--prefix DIR] [--installer PATH] [--bundle DIR] [--root NAME[=SUB,SUB...]]\n' >&2
+    printf '       --root is repeatable, in the loader order, python first\n' >&2
+    printf '       at least one of --root and --bundle is required\n' >&2
 }
 
 # ------------------------------------------------------------------- the run ---
 closure_check_main() {
-    local prefix="${HOME:-}" installer="$CLOSURE_CHECK_DIR/install_pkg.sh"
+    local prefix="${HOME:-}" installer="$CLOSURE_CHECK_DIR/install_pkg.sh" bundle=""
     local specs=()
     local declared="" observed="" results="" line kind
-    local present=0 absent=0 unexpected=0 undetermined=0
+    local rootsource="the --root arguments"
+    local present=0 absent=0 unexpected=0 undetermined=0 rc=0
 
     while [ "$#" -gt 0 ]; do
         case "$1" in
-            --prefix|--installer|--root)
+            --prefix|--installer|--root|--bundle)
                 if [ "$#" -lt 2 ]; then
                     printf 'closure_check: missing operand for %s\n' "$1" >&2
                     closure_check_usage
@@ -327,6 +393,7 @@ closure_check_main() {
                     --prefix) prefix="$2" ;;
                     --installer) installer="$2" ;;
                     --root) specs+=("$2") ;;
+                    --bundle) bundle="$2" ;;
                 esac
                 shift 2
                 ;;
@@ -342,8 +409,36 @@ closure_check_main() {
         printf 'closure_check: no prefix: HOME is unset, so pass --prefix DIR\n' >&2
         return 2
     fi
+
+    printf '=== closure_check, v0.27.0 toolchain-runtime-closure, scope ===\n'
+    printf '  prefix      %s\n' "$prefix"
+    printf '  installer   %s\n' "$installer"
+
+    # THE BUNDLE IS READ BEFORE ANYTHING ELSE, and a refusal here stops the run
+    # rather than downgrading it: every result below is stated against a declared
+    # shape, so a declaration that could not be established leaves nothing to
+    # state them against.
+    if [ -n "$bundle" ]; then
+        closure_check_bundle "$bundle"
+        rc=$?
+        if [ "$rc" -ne 0 ]; then
+            printf '\nCLOSURE BUNDLE REFUSED: the declaration was not established, so no scope result was computed\n'
+            return "$rc"
+        fi
+        # An explicit --root still wins, which is what lets the harness drive the
+        # classification with a shape the committed document does not carry. The
+        # report names which of the two the roots came from, so a run can never
+        # be read as having consulted a declaration it did not use.
+        if [ "${#specs[@]}" -eq 0 ]; then
+            while IFS= read -r line; do
+                if [ -n "$line" ]; then specs+=("$line"); fi
+            done <<< "$(closure_config_root_specs)"
+            rootsource="the bundle at $bundle"
+        fi
+    fi
+
     if [ "${#specs[@]}" -eq 0 ]; then
-        printf 'closure_check: no declared root: pass at least one --root NAME[=SUB,SUB...]\n' >&2
+        printf 'closure_check: no declared root: pass --root NAME[=SUB,SUB...] or a --bundle that declares one\n' >&2
         closure_check_usage
         return 2
     fi
@@ -370,10 +465,9 @@ closure_check_main() {
         fi
     done <<< "$results"
 
-    printf '=== closure_check, v0.27.0 toolchain-runtime-closure, scope ===\n'
-    printf '  prefix      %s\n' "$prefix"
-    printf '  installer   %s\n' "$installer"
+    printf '\n== declared roots\n'
     printf '  roots       %s\n' "${specs[*]}"
+    printf '  source      %s\n' "$rootsource"
     printf '\n== typed results\n'
     printf '%s\n' "$results"
     printf '\n== summary\n'
