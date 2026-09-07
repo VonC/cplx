@@ -4122,3 +4122,4415 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 3
+
+- Recorded: 2026-09-07T12:33:10+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 toolchain-runtime-closure (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 3
+Review round: 1
+
+### Code review evidence for step 3 toolchain-runtime-closure (round 1)
+
+request_index_tree: 3e97f428e0c78de4b4166cc4eeb3f06659601418
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -S warning docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 3 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): read every shipped ELF once
+group 2 path: src/setups/env/bin/closure_elf.sh
+group 3: feat(closure): refuse an unresolvable DT_NEEDED
+group 3 path: src/setups/env/bin/closure_rules.sh
+group 4: feat(closure): run the subject phase in the checker
+group 4 path: src/setups/env/bin/closure_check.sh
+group 5: test(closure): add the step 3 subject suite
+group 5 path: docs/v0.27.0/verify.closure-check.sh
+group 6: test(closure): retain the step 3 host capture
+group 6 path: docs/v0.27.0/verify.closure.step3.rhel.txt
+group 7: docs(toolchain-runtime-closure): record step 3 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step3.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+```
+
+### Requestor assessment for step 3 toolchain-runtime-closure (round 1)
+
+#### Requestor verdict for step 3 toolchain-runtime-closure (round 1)
+
+Yes. Step 3 has been fully implemented.
+
+The tree is walked once, every ELF in it is a subject however it is loaded, one
+`readelf -d -V` per object under a pinned `LC_ALL=C` records the `DT_SONAME`, the
+`DT_NEEDED` list and the version needs, the provider index is built from the
+observed loader scope before the walk, and every `DT_NEEDED` name that resolves
+nowhere is refused by name with the subject that records it. The unreferenced
+subject is reported as a finding and never used as an exclusion.
+
+#### Evidence named rather than summarised for step 3 toolchain-runtime-closure (round 1)
+
+Every command below was run for this round. The host-gated ones ran on the RHEL
+9.8 build host over ssh, from a copy of the repository subset under `/tmp`; the
+lint gate and the harness lint ran on the authoring host, where the new files
+were staged first so the gate covered them.
+
+| Obligation | Evidence |
+| --- | --- |
+| step 3 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 3`: exit 0, 69 cases, 0 failures, `host rhel 9.8`, `readelf=supported assoc=supported`, `OBJECTIVE MET for step 3` |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, `lint_shell: clean` |
+| one walk, one index, index first | instrumented run: `WALK` 1, `INDEX` 1, first log line `INDEX`, `READ` 7 over 7 planted ELF objects |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| step 0 still answers | `bash docs/v0.27.0/verify.closure-check.sh --step 0`: exit 0, `OBJECTIVE MET`, refusal subject now step 4 |
+| step 1 still answers | `bash docs/v0.27.0/verify.closure-check.sh --step 1`: exit 0, `OBJECTIVE MET` |
+| step 2 still answers | `bash docs/v0.27.0/verify.closure-check.sh --step 2`: exit 0, `OBJECTIVE MET` |
+| the aggregate | the argument-free form: exit 5, steps 0 to 3 exit 0, steps 4 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0, `OBJECTIVE MET` |
+| harness lint | `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0, no output |
+| authoring-host half | the same harness refuses by design: exit 5, 17 cases, 0 failures, naming the host identity, the `readelf` capability and the fixture generation, with the SAME harness digest as the green run |
+
+#### Architecture assessment for step 3 toolchain-runtime-closure (round 1)
+
+The module boundary is exactly the topology's, and it is reading against
+deciding: `closure_elf.sh` reads objects and builds the index and emits no
+verdict, `closure_rules.sh` owns the invariant and the finding, and
+`closure_check.sh` calls them and decides nothing. The boundary is asserted
+mechanically rather than by inspection: the reader's code carries no `REFUSED|`
+or `UNREFERENCED|` line and the checker's carries neither `REFUSED|derived` nor
+`UNREFERENCED|`, both greps run over comment-stripped text.
+
+The dependency direction stays one-way. `closure_rules.sh` reads the reader's
+associative arrays and calls nothing from it, so it neither names that module nor
+inherits its vocabulary; `closure_check.sh` sources both at file scope, in
+reader-then-rules order, because `declare -A` inside a function would make the
+model local to it.
+
+No responsibility landed early or late. The derived membership half is in
+`closure_rules.sh` and not in `closure_check.sh`, which is the plan review's
+round 4 finding that the responsibility table exists to prevent. No
+`closure_scope.sh` exists in any shape.
+
+The two host-tool contracts stay apart. The only commands the new modules run are
+`find` and `readelf`, both already in `contract.closure-tools.txt`, so the
+contract needed no edit and the harness proves that mechanically over the module
+text rather than by inspection.
+
+#### Cost assessment for step 3 toolchain-runtime-closure (round 1)
+
+One `find` walk of the tree, one enumeration of the provider directories by
+globbing, one `readelf` invocation per ELF, one hash lookup per `DT_NEEDED` name,
+and one pass over the collected records per rule. The unreferenced finding is two
+passes over the same records and no second walk. Nothing sorts, and no path is
+`O(n^2)` or `O(n log n)`.
+
+The shape that would produce an `O(n^2)`, resolving a name by scanning the
+provider directories inside the object loop, is measured absent rather than
+asserted absent. `find`, `readelf` and `closure_provider_index` are wrapped in
+counting shims and one ordered log records what happened, which is the completion
+criterion's own words: a source-text grep can show one occurrence of a function
+name and say nothing about how many times it ran or in what order.
+
+#### Line budget assessment for step 3 toolchain-runtime-closure (round 1)
+
+| File | Before | After | Band |
+| --- | --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 523 | 615 | 550-650, at risk |
+| `src/setups/env/bin/closure_elf.sh` | 26 | 274 | below 550, safe |
+| `src/setups/env/bin/closure_rules.sh` | 37 | 126 | below 550, safe |
+| `docs/v0.27.0/verify.closure-check.sh` | 1922 | 2580 | harness, not deployed |
+
+Four variances against advisory estimates, all recorded in the retained capture
+with what accounts for them. No shipped script is over the 650 deployment
+ceiling. `closure_check.sh` entered the at-risk band, so the plan's rule applies:
+avoid growth where practical. The capture carries a forward note naming the
+responsibility Step 5 should move first, the report, because the summary block
+and the verdict lines are formatting over counts other modules produce and the
+topology already gives every verdict to `closure_rules.sh`.
+
+#### Feature integrity assessment for step 3 toolchain-runtime-closure (round 1)
+
+The installer is untouched and item 2's harness, which sources it through the
+MAIN BOUNDARY seam and asserts its host-tool allowlist over its text, reports
+`OBJECTIVE MET` on the same host in the same session.
+
+Steps 0, 1 and 2 still pass unchanged, which matters because the checker gained a
+phase. Step 1's UNDETERMINED case still counts exactly fifteen typed lines rather
+than sixteen, because the subject phase emits no typed line when the loader scope
+could not be observed. Step 2's gate case still sees zero typed scope lines after
+a refused bundle.
+
+No reporting capability is impaired and one is added: the PARTIAL verdict now
+names both the scope question and the derived membership half rather than the
+scope alone, so a green run cannot be read as covering more than it does.
+
+### Implementation report for step 3 toolchain-runtime-closure (round 1)
+
+#### What the step had to answer for step 3 toolchain-runtime-closure (round 1)
+
+Step 3 owns the static subject set and the derived half of the membership
+invariant. Before it, nothing outside `install_pkg.sh` read a `DT_NEEDED` entry
+and the installer's reader is scoped to `DT_RPATH` and `DT_RUNPATH`; no provider
+index existed; and no subject set existed at all. Design Q06 fixes the subject
+rule and the measurement in
+`measurements.closure-subjects.rhel.txt` is why it is the WALK rather than a
+transitive closure: a walk from 185 entry points reaches 176 names and misses 395
+of 628 shipped ELFs, among them the 76 `lib-dynload` modules and the 28
+`site-packages` extensions whose failures motivated this collection.
+
+#### The object reader, `closure_elf.sh` for step 3 toolchain-runtime-closure (round 1)
+
+Filled from a body of zero lines to 126.
+
+- `closure_subjects_walk` performs the ONE `find` in the checker, over
+  `<prefix>/tools`. Symlinked directories are not followed, so an alias such as
+  `current` yields each shipped file once rather than twice.
+- `closure_elf_is_object` reads the four magic bytes with `read -n 4` in the
+  shell, because `od` and `head` are not on this effort's host-tool contract.
+- `closure_elf_read` runs one `LC_ALL=C readelf -d -V` per object and
+  `closure_elf_parse` turns that output into the three records. The parse tracks
+  which version section it is inside, because `Name:` appears in the definitions
+  and in the needs and only the needs carry a provider to resolve against. It
+  uses parameter expansion rather than word splitting, because splitting a
+  `readelf` line under the default IFS would also glob and the version symbols
+  section carries `(*local*)`.
+- `closure_provider_index` enumerates the observed loader directories once, in
+  scope order, into a name-to-paths map. The enumeration is a GLOB and not a
+  walk, which is what keeps the whole run at exactly one `find`.
+- `closure_read_failed` is the fail-closed rule, typed as Q03 fixes it: an
+  absent, non-zero or unparsable reader and an object that cannot be opened are
+  UNAVAILABLE INPUTS, so the result is `UNDETERMINED|object|<path>|<reason>` and
+  never a refusal. The aggregate exits 5, so an unreadable object leaves the run
+  non-passing and publication impossible.
+
+#### The invariant, `closure_rules.sh` for step 3 toolchain-runtime-closure (round 1)
+
+Filled from zero to 39 body lines with the derived membership half and the
+unreferenced finding.
+
+- `closure_membership_derived` resolves every `DT_NEEDED` name of every subject
+  by one lookup in the index and refuses a miss by name, printing
+  `REFUSED|derived|<subject>|<name>|<detail>`. Both are named because a bare
+  report of something missing is not a repairable result. Nothing is pruned.
+- `closure_report_unreferenced` is computed from the edges the walk already
+  collected rather than from a second walk. An object is reached when some
+  subject's `DT_NEEDED` names it, matched on its `DT_SONAME` where it has one and
+  on its file name otherwise.
+
+The module reads the reader's arrays and calls nothing from it, which is
+deliberate: calling a reader function from here would make this file name that
+module and take on its vocabulary, which is the boundary the topology draws.
+
+#### The entry point, `closure_check.sh` for step 3 toolchain-runtime-closure (round 1)
+
+Gains the calls and no invariant. It sources both modules at file scope, guarded
+the same way `closure_config.sh` already is, then runs the index, the walk and
+the two rules functions in that order, prints seven summary rows and two new
+verdict lines, and returns 1 on a membership refusal and 5 on an object that
+could not be read.
+
+When the loader scope could not be observed the phase does NOT run and emits no
+typed line. That is not an omission: the provider directories ARE the observed
+scope, so an empty index invented there would refuse every name the archive
+records and report one missing input as hundreds of findings. It is also what
+keeps step 1's UNDETERMINED case at fifteen typed lines rather than sixteen.
+
+#### The fixture engine, in the harness for step 3 toolchain-runtime-closure (round 1)
+
+Plan decision Q07 fixes the mechanism and this step is where it was written. The
+harness finds a donor on the host, validates its ELF class and section shape
+against the corpus donor row, copies it, applies the row's mutation and asserts
+the row's own `assert` column before any case may use the object.
+
+The engine never rebuilds an ELF. It writes a name into the last 256 bytes of the
+donor's own `.dynstr`, taken as four 64-byte slots, and repoints one dynamic
+entry at that offset, so no fixture name is bounded by the length of the string
+it replaces. `needed-add` turns the FIRST `DT_NULL` into a real `DT_NEEDED` entry
+and leaves the spare slot behind it as the terminator, so the need is ADDED
+rather than substituted. Both shapes are donor REQUIREMENTS carried in the corpus
+donor row: a donor that cannot supply either is refused before a fixture is
+generated from it.
+
+#### The corpus, and why it gained three rows for step 3 toolchain-runtime-closure (round 1)
+
+Each of the three exists because a case would otherwise have proved something
+narrower than it claims.
+
+- `provider-donor-need` plants one text provider per `DT_NEEDED` name the
+  validated donors carry. Without it every generated subject would also refuse on
+  the donor's own libc and the planted defect would be one refusal among several.
+- `provider-first-libssl` is the FIRST `libssl.so.3`, in a provider directory.
+  The subject rule is about a SECOND copy, and with no first copy "absent from
+  the provider index" holds because the index has no such name at all.
+- `subject-need-provider` is the one subject a `DT_NEEDED` edge reaches, which is
+  the negative control the unreferenced finding needs.
+
+#### One step-aware harness repair for step 3 toolchain-runtime-closure (round 1)
+
+Step 0's refusal control needs a step whose suite does not exist and named step 3
+literally, so filling step 3 made it fail while step 0 was not what broke. The
+subject is DERIVED now, from the same `step_suite_exists` the dispatch reads, and
+the block moved into `step0_refusal_path` so the every-suite-exists case reads as
+an early return rather than as a nested branch. When every suite exists the
+control reports UNANSWERED naming its retirement rather than passing vacuously.
+The re-run shows it now naming step 4.
+
+### Change summary for step 3 toolchain-runtime-closure (round 1)
+
+#### Staged paths for step 3 toolchain-runtime-closure (round 1)
+
+- `docs/v0.27.0/fixtures.closure-corpus.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- `src/setups/env/bin/closure_check.sh`
+- `src/setups/env/bin/closure_elf.sh`
+- `src/setups/env/bin/closure_rules.sh`
+
+#### Commit groups, least to most dependent for step 3 toolchain-runtime-closure (round 1)
+
+| Group | Subject | Path |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 3 fixture rows` | `docs/v0.27.0/fixtures.closure-corpus.txt` |
+| 2 | `feat(closure): read every shipped ELF once` | `src/setups/env/bin/closure_elf.sh` |
+| 3 | `feat(closure): refuse an unresolvable DT_NEEDED` | `src/setups/env/bin/closure_rules.sh` |
+| 4 | `feat(closure): run the subject phase in the checker` | `src/setups/env/bin/closure_check.sh` |
+| 5 | `test(closure): add the step 3 subject suite` | `docs/v0.27.0/verify.closure-check.sh` |
+| 6 | `test(closure): retain the step 3 host capture` | `docs/v0.27.0/verify.closure.step3.rhel.txt` |
+| 7 | `docs(toolchain-runtime-closure): record step 3 validation` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
+
+The ordering follows the dependencies rather than the file types: the corpus rows
+are declared before the suite that reads them, the two modules before the entry
+point that sources them, the suite before the capture that records its run, and
+the validation record last as its own trailing documentation group.
+
+#### Line counts for step 3 toolchain-runtime-closure (round 1)
+
+| File | Before | After |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 523 | 615 |
+| `src/setups/env/bin/closure_elf.sh` | 26 | 274 |
+| `src/setups/env/bin/closure_rules.sh` | 37 | 126 |
+| `docs/v0.27.0/verify.closure-check.sh` | 1922 | 2580 |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | 85 | 130 |
+| `docs/v0.27.0/verify.closure.step3.rhel.txt` | new | 320 |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | 1632 | 1882 |
+
+#### Files this step did not touch for step 3 toolchain-runtime-closure (round 1)
+
+`src/setups/env/bin/install_pkg.sh`, `src/setups/env/bin/closure_config.sh`,
+`src/setups/env/closure/closure-config.txt`, `src/setups/env/bin/pkg.sh` and
+`docs/v0.27.0/contract.closure-tools.txt`. The last one is worth naming: the two
+new modules run only `find` and `readelf`, both already declared, so the contract
+needed no edit and the harness proves that mechanically rather than by
+inspection.
+
+### Writer response for step 3 toolchain-runtime-closure (round 1)
+
+Writer response:
+
+#### Earlier feedback carried into this step for step 3 toolchain-runtime-closure (round 1)
+
+This is round 1 of the step 3 exchange, so there is no answer of this exchange to
+respond to. Three findings from the step 1 and step 2 rounds shaped this step's
+code and are named here so the reviewer can check they were carried rather than
+forgotten.
+
+- **A capability is measured from a run, never inferred from source text.** The
+  step 2 rounds recorded that reading a file and asserting what it says is a
+  restatement rather than a check. Step 3's two structural properties, one walk
+  and one index construction with the index first, are therefore instrumented:
+  `find`, `readelf` and `closure_provider_index` are wrapped in counting shims
+  and one ordered log records what happened. No grep stands in for either.
+- **An unavailable input is not a failure and not a pass.** The step 1 rounds
+  established the typed UNDETERMINED for a loader scope that could not be
+  observed. Step 3 applies the same rule to an object that could not be read, and
+  keeps it distinct from a refusal in words and in the exit code.
+- **A hand-kept list is a place a later step has to remember to edit.** The step
+  2 rounds replaced the module body assertion's hand-kept list with the
+  topology's own `Filled by` column. Step 3 found the same shape in step 0's
+  refusal control, which named step 3 literally as its absent-suite subject, and
+  applied the same repair: the subject is derived from `step_suite_exists`.
+
+#### Disagreement for step 3 toolchain-runtime-closure (round 1)
+
+None. There is no answer in this exchange yet.
+
+#### What the reviewer may want to look at first for step 3 toolchain-runtime-closure (round 1)
+
+- The `unreferenced` finding consults the `DT_NEEDED` edges and NOT the entry
+  points, because RUNTIME ENTRY POINTS are declared data no step has an input for
+  yet. The limit is stated in the line the checker prints, in the module header
+  and in the validation record. The alternative, reading `PT_INTERP` to exclude
+  programs, would need `readelf -l` and the plan fixes the reader at `-d -V`.
+- `closure_check.sh` is now 615 lines, inside the 550 to 650 at-risk band, and
+  Step 5 still has to add the waiver outcomes and the packaging gate's entrance
+  to it. The capture carries a forward note naming the report as the
+  responsibility to move first. If the reviewer would rather that move happened
+  here than at Step 5, say so: it is a repair this step can absorb.
+- The fixture engine writes bytes into a donor's `.dynstr` tail and its
+  `.dynamic` spare slot. The bytes it overwrites are symbol names, which nothing
+  in this effort reads, and the corpus header states that. A reviewer who thinks
+  a later step will need those strings should say so now, while the reserve size
+  is still a one-line constant.
+
+### Reviewer focus for step 3 toolchain-runtime-closure (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-1 -->
+
+### LLM nature completion for reviewer (exchange 1)
+
+Recorded nature: `codex`
+
+Completed artifacts:
+
+- `C:/Users/vonc/git/cplx/.reviews/a.review-active.code.code.v0.27.0.toolchain-runtime-closure.md`
+- `C:/Users/vonc/git/cplx/.reviews/a.review-requested.code.v0.27.0.toolchain-runtime-closure.md`
+
+<!-- review-entry-id: llm-nature-completion-reviewer-exchange-1 -->
+
+## Round 1 by reviewer - Step 3
+
+- Recorded: 2026-09-07T12:53:33+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Baseline index tree: 3e97f428e0c78de4b4166cc4eeb3f06659601418
+
+Assessed index tree: a6e476ae96845f9ccf15157c5f462d500da246d5
+
+### Implementation check for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Result:
+
+No. Step 3 has NOT been fully implemented.
+
+The planned structure is present and the mandatory harnesses pass. Independent
+failure probes reproduce two false-green paths and a lost unreferenced finding
+(R1 through R3). The Step 3 validation rows now contain the exact No verdict and
+an actionable Missing work section. Reader/rules/orchestration dependencies remain
+in the planned direction. Instrumentation demonstrates the required walk/index
+placement; it does not establish linear string-parsing cost. No applicable
+class-based unit suite exists; the plan's harness substitute needs the named
+regressions.
+
+Validation plan effects:
+
+Only the Step 3 section of
+`docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` was updated.
+Its status is No, with R1 through R3 and the existing report-size checkpoint in
+Missing work. No other step, document-level status or umbrella row was changed.
+The evidence launcher proved the reviewer patch attributable and that exact patch
+was applied to the index. This is review metadata, not a substantive repair.
+
+### Pre-repair mandatory checks and coverage for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+All nine mandatory commands were independently checked before metadata edits.
+
+- `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, clean.
+- `bash docs/v0.27.0/verify.closure-check.sh --step 3`: RHEL exit 0, 69 cases,
+  zero failures, OBJECTIVE MET.
+- `rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh`: no matches
+  (the expected grep exit 1).
+- `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh`: exit 0.
+- The closure harness at Steps 0, 1 and 2: each RHEL exit 0, OBJECTIVE MET.
+- `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability
+  docs/v0.27.0/capability.rhel-9.8.txt`: RHEL exit 0, 104 cases, zero failures.
+- `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0.
+
+RHEL commands ran in `/tmp/cplx-step3` on the documented build host, using
+`/home/deploy-account/tools/git/current/bin` on PATH. The changed three production
+scripts, harness and corpus match local SHA-256 digests exactly. Retained local
+output: `.reviews/a.codex.s3.host-validation.txt`. Additional probes:
+`.reviews/a.codex.s3.probes.sh` and `.reviews/a.codex.s3.probe-results.txt`.
+The transport prefixed a BOM on the first comment line of the latter script;
+its subsequent commands ran and produced the reported results. The separate
+reachability probe stripped the transport header before execution.
+
+### Resolved validation set and sources for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+```json
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 3",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 0",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 1",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 2",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "shellcheck -S warning docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+```
+
+### Resolver drift and direction for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+None. The current `resolve_code_review_validation` result matches the embedded
+nine-command set and all source labels. The project floor was reloaded from
+`.review-validation`; plan obligations were checked against the exact Step 3.
+The union adds and removes no commands. Full resolved payload is retained in
+`.reviews/a.codex.s3.resolved.json`.
+
+### Repository state around validation for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+The request-time and baseline index trees both equal
+`3e97f428e0c78de4b4166cc4eeb3f06659601418`. Identity, plan, step, umbrella, round 1 and
+occurrence 1 agree. Before/after mandatory-validation comparison reported
+acceptable true, with no changed tracked, untracked or ignored validation paths.
+After the attributable metadata edit, the comparison reports only the exact
+validation plan and `<index>` as changed, which are the permitted Step 3 rows
+and their staging effect. The assessed index is
+`a6e476ae96845f9ccf15157c5f462d500da246d5`. The umbrella SHA-256 remains
+`8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7`.
+The already-unstaged review transcript was left to protocol publication and was
+not read as working context or swept into the index.
+
+### Repair inventory for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Repairs made:
+
+- No production or test repair was made.
+- - Step 3 validation rows: polishing-only review metadata, attributable and staged.
+- - `a.commit`: polishing-only review metadata; the final group's descriptive text
+- now records the independent No verdict and findings. Paths, subjects, scopes,
+- group ordering and group membership are unchanged.
+- There was no substantive reviewer repair. The substantive defects are returned
+- to the writer with regression requirements.
+
+Paths staged:
+
+- - `docs/v0.27.0/fixtures.closure-corpus.txt`
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- - `docs/v0.27.0/verify.closure-check.sh`
+- - `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- - `src/setups/env/bin/closure_check.sh`
+- - `src/setups/env/bin/closure_elf.sh`
+- - `src/setups/env/bin/closure_rules.sh`
+
+### Commit plan assessment for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Independent `commit-plan-check.bat --format json` returned exit 0, state valid,
+ready true and no diagnostics both before assessment and after metadata staging.
+Seven groups remain in order: fixture declarations; ELF reader; membership rule;
+checker wiring; harness suite; host capture; validation documentation. All seven
+staged paths are covered exactly once. These groups follow dependencies and use
+accurate conventional subjects. The last group's prose was refreshed for the No
+verdict; no membership or grouping repair was required. Mechanical readiness
+passes and does not establish implementation completeness or authorize a commit.
+
+### Findings and boundaries for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Unresolved findings:
+
+#### R1: Fail closed when the subject walk is incomplete
+
+- Priority: high. Location: `src/setups/env/bin/closure_elf.sh:259-274`.
+- `find` runs in process substitution, its stderr is discarded, and its exit
+- status is never collected. An unreadable directory can contain shipped ELFs
+- without any of them reaching the loop. A real mode-000 directory containing a
+- copy of `/bin/true` produced `walked=0 subjects=0 unread=0` on the non-root RHEL
+- account. A function named `find` returning 1 produced the same result. With a
+- valid scope and no other refusal, the entry point consequently prints membership
+- OK and exits 0. The existing unreadable-file case cannot detect this because it
+- requires the walk to yield a file first.
+- Collect failure from the single walk and report typed UNDETERMINED with the
+- unavailable traversal input. Cover both a permission-denied subtree and a
+- missing/failing finder; preserve the one-walk instrumentation.
+
+#### R2: Reject recognized dynamic records whose value cannot be read
+
+- Priority: high. Location: `src/setups/env/bin/closure_elf.sh:180-226`.
+- The parser accepts any output containing a dynamic-section heading and silently
+- ignores `(NEEDED)` lines without brackets. This occurs with the real supported
+- reader, not only a stub: changing a `/bin/true` copy's first `DT_NEEDED` string
+- offset to `0x7fffffffffffffff` makes RHEL readelf 2.35.2 exit 0 and print
+- `(NEEDED) 0x7fffffffffffffff`. `closure_elf_read` then records
+- `subjects=1 unread=0 edges=0`, and membership reports no refusal even though the
+- dependency name could not be obtained. The all-garbage reader test misses this.
+- Validate required fields of recognized records and completeness of relevant
+- sections. A missing value must be UNDETERMINED for that object, with no partial
+- model/counter updates. Add the real malformed dynamic-string fixture and a clean
+- control, keeping one reader invocation per object.
+
+#### R3: Preserve subject path identity in the unreferenced finding
+
+- Priority: medium. Location: `src/setups/env/bin/closure_rules.sh:100-124`.
+- The `reached` map stores dependency names, then considers every subject with the
+- same SONAME reached. A consumer naming `libssl.so.3`, a provider at
+- `/tools/lib64/libssl.so.3`, and a second copy at
+- `/tools/root/usr/bin/libssl.so.3` reproduce the loss: the provider map selects
+- only the first path, but neither copy is reported unreferenced. The isolated
+- model probe reported only the consumer (`SAME_SONAME_UNREFERENCED=1`). No edge
+- can resolve to the second copy through this scope, so the planned finding is
+- missing precisely for a subject the design distinguishes from providers.
+- Derive reachability from selected provider paths, account for aliases, and add
+- the duplicate-SONAME control. The request also explicitly defers the declared
+- entry-point half with no scheduled input. Resolve that input/design boundary
+- before claiming the plan's full unreferenced definition is implemented; the
+- honest printed limitation is useful but does not satisfy the definition.
+
+Boundary-crossing work:
+
+- No boundary-crossing implementation work was performed. R3's declared runtime
+- entry-point input needs the writer to reconcile the plan and design, since the
+- request says no step currently supplies it. The 615-line checker is below the
+- 650-line deployment ceiling; retain the planned report extraction before Step 5
+- growth. The advisory line-band warning alone does not require moving it now.
+
+### Writer instructions for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Implement R1, R2 and R3 with the concrete regression cases above and in the
+Step 3 Missing work section. Preserve the one-walk, one-index, index-before-read
+and one-reader-per-object assertions. Resolve the entry-point input boundary
+without presenting the edge-only finding as the full design obligation. Rerun
+the mandatory command union and independent implementation check, refresh the
+validation record and `a.commit`, then publish a replacement review request.
+
+### Decision rationale for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Disposition: changes-requested.
+
+| Readiness floor | Result |
+| --- | --- |
+| Exact identity | Pass: request tree, plan, step, umbrella, round and occurrence match |
+| Implementation completeness | Fail: R1, R2 and R3 remain |
+| Mandatory validation and coverage | Commands pass; missing failure-contract regressions prevent full behavioral coverage |
+| Staged attribution | Pass: only attributable Step 3 review metadata was staged |
+| Unresolved findings | Fail: two high-priority false-green paths and one medium-priority finding defect |
+| a.commit | Pass: valid, ready true, seven groups, no diagnostics |
+
+The successful supplied suite does not override reproduced false-green behavior.
+No substantive repair was made. This advisory answer grants no commit authority.
+
+### Final reviewer decision for step 3 toolchain-runtime-closure (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3-round-1 -->
+
+## Round 2 by requestor - Step 3
+
+- Recorded: 2026-09-07T13:19:59+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 toolchain-runtime-closure (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 3
+Review round: 2
+
+### Code review evidence for step 3 toolchain-runtime-closure (round 2)
+
+request_index_tree: 83d6d452582e663caab5c435c66e70b8c0e5134c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -S warning docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 3 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): read every shipped ELF once
+group 2 path: src/setups/env/bin/closure_elf.sh
+group 3: feat(closure): refuse an unresolvable DT_NEEDED
+group 3 path: src/setups/env/bin/closure_rules.sh
+group 4: feat(closure): run the subject phase in the checker
+group 4 path: src/setups/env/bin/closure_check.sh
+group 5: test(closure): add the step 3 subject suite
+group 5 path: docs/v0.27.0/verify.closure-check.sh
+group 6: test(closure): retain the step 3 host capture
+group 6 path: docs/v0.27.0/verify.closure.step3.rhel.txt
+group 7: docs(toolchain-runtime-closure): record step 3 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step3.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+```
+
+### Requestor assessment for step 3 toolchain-runtime-closure (round 2)
+
+#### Requestor verdict for step 3 toolchain-runtime-closure (round 2)
+
+Yes. Step 3 has been fully implemented.
+
+Round 1 reproduced three defects the submitted suite did not cover. All three are
+repaired, each with a regression that fails against the submitted code, and the
+suite is green on the RHEL 9.8 build host at 93 cases and zero failures.
+
+#### The three findings, and what answers each for step 3 toolchain-runtime-closure (round 2)
+
+| Finding | Repair | Regression that fails against the submitted code |
+| --- | --- | --- |
+| R1, a failed traversal read as an empty tree | the walk's listing goes through a temporary file so `find`'s exit status is collected, and an incomplete traversal is a typed `UNDETERMINED\|traversal\|` that makes the run non-passing on its own; a finder that does not resolve is named separately | `step3/walk/locked-subtree-not-green` and `step3/walk/failing-finder-not-green`, both asserting the ABSENCE of the `CLOSURE MEMBERSHIP OK` line, plus the exit code and the typed line |
+| R2, a recognized record whose value could not be read was dropped | `closure_elf_bracketed` is the one place a string-valued dynamic entry is read; a `(NEEDED)` or `(SONAME)` with no readable value refuses the whole object naming the field, and the parser commits its counters only on success | `step3/reader/unreadable-value-*`, six cases over a real malformed object, including `adds-no-edge` and `is-not-a-subject` which are the no-partial-model half |
+| R3, reachability keyed by name rather than by resolved path | an edge reaches the ONE path the observed scope selects for its name, with an `-ef` test against the selected path of the subject's own basename for the alias case; the result is renamed `UNREFERENCED-BY-EDGE` | `step3/unreferenced/unresolved-copy-named` and `resolved-copy-absent`, with `control/the-consumer-exists` proving the consumer that makes the case bite |
+
+THE REGRESSIONS WERE RUN AGAINST THE SUBMITTED MODULES, through `--shipped-dir`,
+because a regression nobody has seen fail is a claim rather than a check. The
+repaired harness over the submitted code reports 93 cases and 19 failures, among
+them the submitted code's own false green:
+
+```text
+step3/walk/failing-finder-not-green   want [] got [CLOSURE MEMBERSHIP OK: 0
+                                      edges over 0 subjects all resolve, 0
+                                      reported unreferenced]
+step3/walk/locked-subtree-not-green   want [] got [CLOSURE MEMBERSHIP OK: 11
+                                      edges over 8 subjects all resolve, 5
+                                      reported unreferenced]
+step3/reader/unreadable-value-is-not-a-subject   want [8] got [9]
+step3/unreferenced/unresolved-copy-named         want [the bin copy] got []
+step3/unreferenced/counted                       want [6] got [5]
+```
+
+#### The parsing-cost observation, repaired rather than accepted for step 3 toolchain-runtime-closure (round 2)
+
+Round 1's cost section noted that the instrumentation established the object and
+provider traversal bound but not linear parsing cost, because the parser sliced
+the remaining output on every iteration. That is quadratic in the SIZE of one
+reader's output, and the version symbols section of a large object runs to
+hundreds of lines. The parser now reads its output once with the shell's own line
+reader, so the per-object parse is linear in its output. This was not a listed
+finding; it is repaired because it was true.
+
+#### The declared entry-point boundary, resolved as a plan-level gap for step 3 toolchain-runtime-closure (round 2)
+
+Round 1 asked that the input and design boundary be resolved rather than left as
+a printed caveat. It is resolved in the only direction an implementation step
+can resolve it honestly:
+
+- Design Area 2 defines the finding as "reached by no entry point AND by no
+  `DT_NEEDED` edge", and RUNTIME ENTRY POINTS are declared data: the interpreter,
+  the shipped executables, and the declared dynamically loaded locations.
+- NO STEP OF THIS PLAN SCHEDULES THAT DECLARATION, and the configuration grammar
+  Q10 fixes carries no record for it. Step 3 cannot supply the input without
+  inventing a grammar record and a design decision it does not own.
+- So the result is named for the half it answers, `UNREFERENCED-BY-EDGE`, in the
+  typed line, the function name, the summary row and the module header. A reader
+  cannot take the list for the design's finding, which is what "presenting the
+  edge-only finding as the full design obligation" meant.
+- The gap is recorded in the architecture check of the validation record as a
+  plan-level obligation with the documents that own it, rather than as a caveat
+  a later step might not read.
+
+If the reviewer's position is that the gap must be closed inside step 3 rather
+than recorded, that is a plan amendment and the requestor will say so rather than
+implement one silently.
+
+#### Evidence named rather than summarised for step 3 toolchain-runtime-closure (round 2)
+
+Every command below was run for this round, after the repairs. The host-gated
+ones ran on the RHEL 9.8 build host over ssh, from a copy of the repository
+subset under `/tmp`.
+
+| Obligation | Evidence |
+| --- | --- |
+| step 3 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 3`: exit 0, 93 cases, 0 failures, `OBJECTIVE MET for step 3` |
+| the regressions bite | the same harness with `--shipped-dir <submitted>`: 93 cases, 19 failures |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, `lint_shell: clean` |
+| one walk, one index, index first | instrumented run: `WALK` 1, `INDEX` 1, first log line `INDEX`, `READ` 8 over 8 planted ELF objects |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| step 0, 1 and 2 still answer | each `OBJECTIVE MET` on the same host in the same session |
+| the aggregate | exit 5, steps 0 to 3 exit 0, steps 4 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0, `OBJECTIVE MET` |
+| harness lint | `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0, no output |
+| authoring-host half | the same harness refuses by design: exit 5, 17 cases, 0 failures, same harness digest as the green run |
+
+#### Architecture assessment for step 3 toolchain-runtime-closure (round 2)
+
+The module boundary is unchanged and the repairs stayed inside it: the traversal
+outcome is a reader concern and landed in `closure_elf.sh`, the reachability rule
+is an invariant's and landed in `closure_rules.sh`, and the entry point gained
+one summary row, one verdict line and a renamed call. The harness still asserts
+the boundary mechanically over comment-stripped text.
+
+The two host-tool contracts stay apart. The walk now runs `mktemp` and `rm`, both
+already in `contract.closure-tools.txt`, so the contract needed no edit and the
+mechanical assertion over the module text proves it.
+
+#### Cost assessment for step 3 toolchain-runtime-closure (round 2)
+
+One `find` walk, one enumeration of the provider directories, one `readelf` per
+ELF, one hash lookup per name, one pass per rule, and a per-object parse that is
+now linear in its own output. The reachability map is keyed by path with an alias
+test bounded by the candidates for one name, not a pairwise sweep. The listing
+file adds one file per run and no traversal: it is still ONE `find`, which the
+instrumented case measures.
+
+#### Line budget assessment for step 3 toolchain-runtime-closure (round 2)
+
+| File | Before | After | Band |
+| --- | --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 523 | 628 | 550-650, at risk |
+| `src/setups/env/bin/closure_elf.sh` | 26 | 391 | below 550, safe |
+| `src/setups/env/bin/closure_rules.sh` | 37 | 147 | below 550, safe |
+| `docs/v0.27.0/verify.closure-check.sh` | 1922 | 2729 | harness, not deployed |
+
+No shipped script is over the 650 ceiling. `closure_check.sh` is at 628 with 22
+lines of headroom, and round 1 agreed the advisory band alone does not require
+moving the report now. The checkpoint is explicit in the validation record and in
+the retained capture: Step 5 must move the report to `closure_rules.sh` before
+adding the waiver outcomes.
+
+#### Feature integrity assessment for step 3 toolchain-runtime-closure (round 2)
+
+The installer is untouched and item 2's harness reports `OBJECTIVE MET` on the
+same host in the same session. Steps 0, 1 and 2 pass unchanged; step 1's
+UNDETERMINED case still counts fifteen typed lines rather than sixteen. The
+aggregate is the expected red baseline.
+
+The fail-closed requirement now holds on every input this step reads: the subject
+phase can no longer report membership OK after losing filesystem subjects or
+dynamic dependencies, which is what round 1's feature-integrity note asked for.
+
+### Implementation report for step 3 toolchain-runtime-closure (round 2)
+
+#### What changed since round 1 for step 3 toolchain-runtime-closure (round 2)
+
+Round 1's request described the submitted implementation. This one describes only
+what the three repairs changed, because the rest of the step is unchanged and the
+earlier round records it.
+
+#### R1, the traversal is an input like any other for step 3 toolchain-runtime-closure (round 2)
+
+`closure_subjects_walk` ran `find` inside a process substitution. A process
+substitution discards the exit status of the command inside it, and that status
+is the only thing that separates an empty tree from a traversal that stopped
+early. A directory the account cannot read therefore held its shipped objects out
+of the listing while the run printed `CLOSURE MEMBERSHIP OK` and exited 0.
+
+- The listing now goes through a temporary file, so the status is collected. It
+  stays ONE `find` invocation, which is what the cost rule bounds; where the
+  output is held is not part of that bound, and the instrumented case still
+  measures one walk.
+- `closure_walk_failed` is the one place an incomplete traversal becomes a typed
+  result, `UNDETERMINED|traversal|<root>|<reason>`, and the reason carries the
+  first diagnostic line `find` wrote, so the refusal names the directory rather
+  than only a status.
+- `find` is resolved before use, like `readelf` already was, so a finder that
+  does not resolve at all is named as the missing input rather than discovered as
+  an empty tree.
+- WHAT THE WALK DID REACH IS STILL READ. Suppression follows data availability
+  alone, so an incomplete traversal does not throw away the objects it did list;
+  it stops the run counting as a pass. `closure_check.sh` checks the walk BEFORE
+  the object results, because a walk that stopped early explains an empty
+  inventory and an inventory that is merely empty explains nothing.
+
+#### R2, a recognized record whose value cannot be read for step 3 toolchain-runtime-closure (round 2)
+
+The parser matched `*'(NEEDED)'*'['*']'*`, so a `DT_NEEDED` whose string offset
+falls outside the string table fell through every branch and was ignored. That is
+not only a stub's behaviour: a supported reader exits 0 and prints the raw value
+with no brackets, and the object was then recorded with an empty dependency set
+that resolved nothing and refused nothing.
+
+- `closure_elf_bracketed` is the one place a string-valued dynamic entry is read.
+  The match is on the record token first; the bracketed value is then required.
+- A `(NEEDED)` or `(SONAME)` with no readable value refuses the WHOLE object,
+  naming the field, and the same rule covers a version need whose provider file
+  or node name cannot be read.
+- NO PARTIAL MODEL. The edge counter is local to the parse and committed only on
+  success, so a refused output leaves no partial count behind. Recording what
+  parsed and dropping the rest would leave a subject whose dependency set nobody
+  can vouch for, which reads exactly like an object with fewer needs.
+
+#### R3, an edge reaches a path and not a name for step 3 toolchain-runtime-closure (round 2)
+
+The `reached` map stored dependency NAMES and any subject sharing that name was
+considered reached, so a consumer naming `libssl.so.3` marked both copies reached
+and the second copy under `root/usr/bin` was never reported. That is precisely
+the subject Design Area 2 distinguishes from a provider.
+
+- Reachability is computed from the SELECTED provider path of each name, the
+  first candidate in scope order, because that is the one the loader takes.
+- The alias case is an `-ef` test against the selected path of the subject's own
+  basename, bounded by the candidates for one name rather than a sweep of the
+  inventory. A selected provider that is a symlink onto a subject reaches it.
+- The result is renamed `UNREFERENCED-BY-EDGE` in the typed line, the function
+  name, the summary row and the module header, for the reason in the assessment:
+  the design's finding is this half AND an entry-point half no step supplies, and
+  a reader who took this list for that finding would read a shipped executable,
+  which is an entry point by definition, as an object nothing can load.
+
+#### The parser reads its output once for step 3 toolchain-runtime-closure (round 2)
+
+Round 1's cost section observed that the parser sliced the remaining output on
+every iteration, which is quadratic in the size of one reader's output. It now
+reads the output once with the shell's own line reader. This was not a listed
+finding and it is repaired because the observation was correct.
+
+#### The corpus and the harness for step 3 toolchain-runtime-closure (round 2)
+
+Two rows, and the verb behind one of them:
+
+- `reader-needed-value-unreadable`, generated by `needed-offset-corrupt`, which
+  repoints the first `DT_NEEDED` VALUE past the end of the string table and
+  leaves the table itself alone. Its assert has two halves: the reader must EXIT
+  0 over the object, and a `(NEEDED)` line must carry no brackets. The first half
+  is what makes the fixture a value that could not be read rather than a reader
+  that failed.
+- `subject-libssl-consumer`, an object that NAMES `libssl.so.3`, without which
+  the second copy is unreferenced for want of any consumer at all and a name-keyed
+  map passes.
+
+Eleven new cases: six over the malformed value, three over the traversal, and two
+reachability assertions with their control. `step3_write_stub` gained a find body
+and now passes `mktemp` and `rm` through as well, because the absent-reader case
+runs under a PATH of exactly that directory and would otherwise refuse on the
+missing `mktemp` and never reach the reader it exists to remove.
+
+#### What was not changed for step 3 toolchain-runtime-closure (round 2)
+
+No installer function, no configuration module, no contract entry, no plan
+document, and no commit group membership or ordering. The `a.commit` bodies were
+refreshed where a group's content changed; the seven groups, their paths, their
+order and their subjects are the ones round 1 assessed as valid.
+
+The review transcript was left unstaged. `git add -A` swept it in once and it was
+restored, because it is a protocol artifact the publication step appends to and
+the earlier steps of this effort each committed it separately after their
+exchange closed.
+
+### Change summary for step 3 toolchain-runtime-closure (round 2)
+
+#### Staged paths for step 3 toolchain-runtime-closure (round 2)
+
+- `docs/v0.27.0/fixtures.closure-corpus.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- `src/setups/env/bin/closure_check.sh`
+- `src/setups/env/bin/closure_elf.sh`
+- `src/setups/env/bin/closure_rules.sh`
+
+The review transcript is modified and DELIBERATELY UNSTAGED. `git add -A` swept
+it in once and it was restored: it is a protocol artifact the publication step
+appends to, and steps 0, 1 and 2 of this effort each committed it separately
+after their exchange closed. `commit-plan-check` named it, which is how the
+sweep was caught.
+
+#### Commit groups, least to most dependent for step 3 toolchain-runtime-closure (round 2)
+
+| Group | Subject | Path |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 3 fixture rows` | `docs/v0.27.0/fixtures.closure-corpus.txt` |
+| 2 | `feat(closure): read every shipped ELF once` | `src/setups/env/bin/closure_elf.sh` |
+| 3 | `feat(closure): refuse an unresolvable DT_NEEDED` | `src/setups/env/bin/closure_rules.sh` |
+| 4 | `feat(closure): run the subject phase in the checker` | `src/setups/env/bin/closure_check.sh` |
+| 5 | `test(closure): add the step 3 subject suite` | `docs/v0.27.0/verify.closure-check.sh` |
+| 6 | `test(closure): retain the step 3 host capture` | `docs/v0.27.0/verify.closure.step3.rhel.txt` |
+| 7 | `docs(toolchain-runtime-closure): record step 3 validation` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
+
+MEMBERSHIP, GROUPING, ORDER AND SUBJECTS ARE UNCHANGED from the plan round 1
+assessed as valid. The repairs changed content inside four groups and moved no
+path between them, so the bodies were refreshed and the boundaries were not
+touched. `commit-plan-check.bat --format json` returns state valid, ready true,
+seven groups, no diagnostics.
+
+#### What each group's body gained for step 3 toolchain-runtime-closure (round 2)
+
+- Group 1: the two round 1 fixture rows and the count moving from 22 to 24.
+- Group 2: the listing through a temporary file, `closure_elf_bracketed`, and
+  the parser reading its output once.
+- Group 3: reachability keyed by resolved path with the alias test, and why the
+  result is named for the half it answers.
+- Group 4: the eighth summary row, the third verdict line and the walk check
+  before the object results.
+- Group 5: the eleven regressions and the `needed-offset-corrupt` verb.
+- Group 6: the 93-case run and the round 1 repairs section.
+- Group 7: the Yes verdict reached through the three findings.
+
+#### Line counts for step 3 toolchain-runtime-closure (round 2)
+
+| File | Round 1 | Round 2 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 615 | 628 |
+| `src/setups/env/bin/closure_elf.sh` | 274 | 391 |
+| `src/setups/env/bin/closure_rules.sh` | 126 | 147 |
+| `docs/v0.27.0/verify.closure-check.sh` | 2580 | 2729 |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | 130 | 150 |
+| `docs/v0.27.0/verify.closure.step3.rhel.txt` | 320 | 494 |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | 1882 | 1783 |
+
+### Writer response for step 3 toolchain-runtime-closure (round 2)
+
+Writer response:
+
+#### Accepted feedback from round 1 for step 3 toolchain-runtime-closure (round 2)
+
+All three findings are accepted as correct and are repaired. Each was a real
+false-green or lost-finding path, not a matter of taste, and the round 1 answer
+named a reproduction for each that this round turned into a regression.
+
+- **R1** is accepted in full, including the second half the answer named: a
+  finder that returns 1 and a finder that does not resolve are covered beside the
+  permission-denied subtree.
+- **R2** is accepted in full, including the no-partial-model requirement. Two of
+  the six new cases exist only for that half: the refused object adds no edge and
+  is not counted as a subject.
+- **R3** is accepted in full, including the alias requirement. The duplicate-name
+  control asserts both halves, because a map keyed by name calls both copies
+  reached and reports neither.
+
+The cost section's parsing observation was not a listed finding and is repaired
+anyway, because it was true: the parser read its output by slicing the remaining
+text, which is quadratic in the size of one object's output.
+
+The `a.commit` metadata the reviewer refreshed for the No verdict was updated for
+the Yes verdict rather than reverted. Group membership, order, paths and subjects
+are unchanged.
+
+#### Disagreement for step 3 toolchain-runtime-closure (round 2)
+
+None.
+
+There is one boundary the requestor did not resolve unilaterally, and it is
+stated as an open question rather than a disagreement. R3's second half asks to
+resolve the declared entry-point input before claiming the plan's full
+unreferenced definition. The input does not exist anywhere in this effort: no
+step schedules it and the Q10 grammar has no record for it. Step 3 therefore did
+the half it can do honestly, which is to stop the result claiming the design's
+finding: it is named `UNREFERENCED-BY-EDGE` in the typed line, the function name,
+the summary row and the module header, and the missing input is recorded in the
+architecture check as a plan-level obligation with the documents that own it.
+
+If the reviewer's position is that the gap must be CLOSED inside step 3, that is
+a plan amendment: it needs a new configuration record, a design decision about
+what counts as a declared entry point, and a step that owns them. The requestor
+will not invent those inside an implementation step, and says so here rather than
+implementing one quietly or presenting the edge half as the whole.
+
+#### What the reviewer may want to look at first for step 3 toolchain-runtime-closure (round 2)
+
+- The three regressions were run against the SUBMITTED modules through
+  `--shipped-dir`, and the run is recorded in the capture. That is the evidence
+  that they bite; without it a regression is a claim.
+- The walk now writes a listing and a diagnostics file through `mktemp`. Both are
+  removed on every path out of the function, `rm` and `mktemp` were already in
+  `contract.closure-tools.txt`, and the instrumented case still measures exactly
+  one `find`.
+- `closure_check.sh` moved from 615 to 628 lines, still under the 650 ceiling and
+  still inside the at-risk band. Round 1 agreed the band alone does not require
+  moving the report now; the checkpoint for Step 5 is recorded in the validation
+  record and the capture.
+- The review transcript was staged once by `git add -A` and restored. It is
+  named here because a silently unstaged tracked file is exactly the kind of
+  thing a boundary check should see stated rather than infer.
+
+### Reviewer focus for step 3 toolchain-runtime-closure (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-2 -->
+
+## Round 2 by reviewer - Step 3
+
+- Recorded: 2026-09-07T13:27:44+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Baseline index tree: 83d6d452582e663caab5c435c66e70b8c0e5134c
+
+Assessed index tree: f4d1985c1f8e6b061c2ccfd28a204354660a1a2c
+
+### Implementation check for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Result:
+
+No. Step 3 has NOT been fully implemented.
+
+R1 (failed traversal) and R2 (unreadable DT_NEEDED value) are repaired with
+regressions. The R3 same-name duplicate case now works, but the alias half still
+reports a normal loaded library target as unreferenced. The full finding's
+entry-point input remains explicitly unscheduled. The exact Step 3 validation
+section records the No verdict, resolved R1/R2 and concrete R3a/R3b missing work.
+
+Validation plan effects:
+
+Only the reviewed Step 3 section was changed: No verdict, R3a/R3b missing work,
+corrected alias assessment, independent validation results and feature-integrity
+limits. The evidence launcher attributed the patch; only that patch was staged.
+No other step, document-level status, plan, design or umbrella row was changed.
+
+### Pre-repair mandatory checks and coverage for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+The complete nine-command union was independently run after verifying SHA-256
+matches for the changed three production modules, harness and corpus in the
+RHEL subset `/tmp/cplx-step3`.
+
+| Validation | Independent result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | Exit 0, 48 scripts, clean |
+| closure harness Step 3 | Exit 0, 93 cases, zero failures |
+| installer purity grep | Expected exit 1, no matches |
+| installer HEAD-relative diff | Exit 0, empty |
+| closure harness Step 0 | Exit 0, 64 cases, zero failures |
+| closure harness Step 1 | Exit 0, 70 cases, zero failures |
+| closure harness Step 2 | Exit 0, 91 cases, zero failures |
+| relocation Step 3 with named target capability | Exit 0, 104 cases, zero failures |
+| harness ShellCheck at warning severity | Exit 0 |
+
+Linux output: `.reviews/a.codex.s3r2.host-validation.txt`. The additional real
+SONAME-link probe is recorded in `.reviews/a.codex.s3r2.alias-probe.txt`.
+The before/after mandatory-validation boundary has no changed tracked paths.
+
+### Resolved validation set and sources for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+```json
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 3",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 0",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 1",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 2",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "shellcheck -S warning docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+```
+
+### Resolver drift and direction for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+None. The current resolver reloaded the project floor and produced exactly the
+embedded nine commands with unchanged project/plan/request source labels. The
+exact Step 3 still requires the full unreferenced finding. No command was added
+or removed; the union is the received set.
+
+### Repository state around validation for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Request-time index and independently captured baseline both equal
+`83d6d452582e663caab5c435c66e70b8c0e5134c`. Plan, step 3, umbrella, round 2 and occurrence 1
+agree with envelope and human-readable identity. Assessed index after only the
+attributable validation metadata patch: `f4d1985c1f8e6b061c2ccfd28a204354660a1a2c`.
+Mandatory validation itself changed no tracked paths. The final comparison names
+only the Step 3 validation plan and its index update; these are attributable
+review metadata. The umbrella digest is unchanged. Existing unstaged transcript
+content was not read as working context, staged or manually edited.
+
+### Repair inventory for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Repairs made:
+
+- No substantive reviewer repair was made.
+- - Step 3 validation section: polishing-only review metadata; attributed and staged.
+- - `a.commit` final group prose: polishing-only review metadata; refreshed for the
+- round 2 No verdict. Paths, membership, order, scopes and subjects did not change.
+- The code and tests remain the writer's submitted implementation.
+
+Paths staged:
+
+- - `docs/v0.27.0/fixtures.closure-corpus.txt`
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- - `docs/v0.27.0/verify.closure-check.sh`
+- - `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- - `src/setups/env/bin/closure_check.sh`
+- - `src/setups/env/bin/closure_elf.sh`
+- - `src/setups/env/bin/closure_rules.sh`
+
+### Commit plan assessment for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+The independent checker returned exit 0, state valid, ready true and no
+diagnostics before assessment and after metadata staging. All seven paths are
+covered once by seven groups in dependency order: corpus, reader, rules, entry
+point, harness, capture, validation documentation. Conventional subjects and
+scope remain accurate; final-group prose now reflects the No verdict. Mechanical
+readiness passes and does not override incomplete Step 3 behavior.
+
+### Findings and boundaries for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Unresolved findings:
+
+#### R3a: Recognize a selected SONAME symlink's differently named target
+
+- Priority: medium. Location: `src/setups/env/bin/closure_rules.sh:139-142`.
+- The repaired map keys `selected_of` by the needed name, but the final loop looks
+- up the walked object's basename. Normal library layouts use different names:
+- `libz.so.1 -> libz.so.1.2.11`. A consumer needs `libz.so.1`, the index selects the
+- symlink, and the walk yields the real target `libz.so.1.2.11`. There is no
+- `selected_of[libz.so.1.2.11]` entry, so the `-ef` check is skipped and the loaded
+- library is reported `UNREFERENCED-BY-EDGE`.
+- Reproduced on RHEL using a real `/usr/lib64/libz.so.1` copy and the symlink above
+- in `/tmp/cplx-review-s3r2.vxxsUi`. `-ef` confirms they are the same file, while the
+- rule reports both consumer and target (`ALIAS_PROBE_UNREFERENCED=2`, expected 1).
+- This leaves the already-requested alias portion of R3 incomplete. Preserve
+- resolved object identity across differently named aliases; add this case beside
+- the now-passing outside-scope duplicate control, without an inventory-wide scan
+- per edge.
+
+#### R3b: Reconcile the unchanged full-finding obligation with its missing input
+
+- Priority: medium, carried specification boundary. Location:
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`, Step 3 verdict
+- and Architecture check; exact plan expected outcome at lines 873-881.
+- The request explicitly confirms that no step schedules the declared entry-point
+- input and no grammar record supplies it. The implementation now labels its edge
+- half accurately, but the unchanged Step 3 still expects the full finding for a
+- subject reached by neither an entry point nor a dependency edge. A No verdict
+- cannot become Yes merely by recording that an input is unscheduled.
+- The reviewer is not asking the writer to invent a grammar or design decision
+- inside Step 3. Route this through the owning specification workflow: either
+- supply and implement an approved input contract, or obtain an authorized
+- plan/design amendment that narrows this step and explicitly schedules the
+- remaining obligation. Until the reviewed plan and behavior agree, completeness
+- remains No. Renaming the result is useful clarification, not scope authorization.
+
+Boundary-crossing work:
+
+- R3b belongs to the specification owner; no reviewer code or document amendment
+- crossed that boundary. The present review cannot authorize a narrower plan.
+- The checker is 628 lines, below 650; the agreed report extraction checkpoint
+- before Step 5 remains advisory for this round and is not a separate demand to
+- split now. No literal Human guidance block was supplied.
+
+### Writer instructions for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Repair R3a with a real SONAME-symlink regression and preserve the passing
+duplicate-provider-path control. Carry R1/R2 as resolved; do not reopen their
+passing regressions. Resolve R3b through the owning specification workflow,
+without silently adding a grammar or weakening the current expected outcome.
+Keep the validation verdict No until the approved plan is satisfied. Then rerun
+the mandatory union, implementation check and commit grouping as warranted and
+publish the next exact staged request.
+
+### Decision rationale for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Disposition: changes-requested.
+
+| Readiness floor | Result |
+| --- | --- |
+| Exact identity | Pass |
+| Implementation completeness | Fail: R3a/R3b remain |
+| Mandatory validation and coverage | Nine commands pass; normal SONAME-alias regression missing |
+| Staged attribution | Pass: only attributable Step 3 metadata staged |
+| Unresolved findings | Fail: R3 not fully resolved |
+| a.commit | Pass: valid, ready true, seven groups, no diagnostics |
+
+R1 and R2 are accepted as repaired; the new duplicate-copy regression passes.
+This round made no substantive repair. Successful supplied tests and clearer
+partial labeling cannot override the remaining reproduced behavior and plan gap.
+The recommendation is advisory and does not authorize a commit.
+
+### Final reviewer decision for step 3 toolchain-runtime-closure (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3-round-2 -->
+
+## Round 3 by requestor - Step 3
+
+- Recorded: 2026-09-07T13:43:13+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 toolchain-runtime-closure (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 3
+Review round: 3
+
+### Code review evidence for step 3 toolchain-runtime-closure (round 3)
+
+request_index_tree: d87f2ad32018a298092ffe4a43a6469b96f31511
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -S warning docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 3 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): read every shipped ELF once
+group 2 path: src/setups/env/bin/closure_elf.sh
+group 3: feat(closure): refuse an unresolvable DT_NEEDED
+group 3 path: src/setups/env/bin/closure_rules.sh
+group 4: feat(closure): run the subject phase in the checker
+group 4 path: src/setups/env/bin/closure_check.sh
+group 5: test(closure): add the step 3 subject suite
+group 5 path: docs/v0.27.0/verify.closure-check.sh
+group 6: test(closure): retain the step 3 host capture
+group 6 path: docs/v0.27.0/verify.closure.step3.rhel.txt
+group 7: docs(toolchain-runtime-closure): record step 3 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step3.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+```
+
+### Requestor assessment for step 3 toolchain-runtime-closure (round 3)
+
+#### Requestor verdict for step 3 toolchain-runtime-closure (round 3)
+
+No. Step 3 has NOT been fully implemented.
+
+R3a is repaired, with a regression that fails against the round 2 module. R3b
+remains open, and the requestor agrees it cannot be closed by recording it. It
+also cannot be closed by this step: the reconciliation it needs is a decision
+about the reviewed plan, and this request asks for that decision rather than
+proposing one.
+
+#### R3a, repaired for step 3 toolchain-runtime-closure (round 3)
+
+The round 1 repair keyed the alias test by the SUBJECT's basename, and the
+ordinary library layout does not share a name across the two paths:
+`libz.so.1 -> libz.so.1.2.11`. A consumer names the soname, the index selects the
+symlink, the walk yields the target under its versioned name, and there was no
+entry to look up. A normally loaded library was therefore reported reachable by
+nothing, which is worse than the gap it replaced: a false finding on every
+versioned library in a real archive.
+
+Resolution is by FILE IDENTITY now. Each SELECTED provider that IS a symlink is
+matched against the subjects with `-ef` until its target is found, stopping at
+the first match and skipping subjects already reached. A selected provider that
+is a real file is not swept, because it is already reached under its own path.
+
+The bound is stated rather than implied: the outer set is the distinct needed
+names that resolve to a link, a handful in the measured archive, and it is never
+an inventory sweep per edge. Resolving by name instead would be a lookup and
+would be wrong, which is what round 2 reproduced.
+
+Three corpus rows carry the shape: `provider-alias-target`, the real file;
+`provider-alias-link`, the soname beside it; and `subject-alias-consumer`, which
+names the soname. Three cases assert it, with a control on each side: the target
+is ABSENT from the list, the consumer is PRESENT so the case is about the alias
+resolving rather than about an edge nobody recorded, and the link itself is not
+walked. On a host where `ln -s` copies, the fixture reports the obligation
+UNANSWERED rather than passing over a shape it never built.
+
+Against the ROUND 2 modules, through `--shipped-dir`:
+
+```text
+99 cases, 2 failures
+
+step3/unreferenced/alias-target-absent   want [] got
+    [UNREFERENCED-BY-EDGE|subject|<scratch>/tools/python/root/usr/lib64/
+     libcplxalias.so.1.2.3|no DT_NEEDED edge in the archive resolves to
+     this path]
+step3/unreferenced/counted               want [7] got [8]
+```
+
+#### R3b, and why this request does not close it for step 3 toolchain-runtime-closure (round 3)
+
+The requestor accepts the round 2 ruling that a No verdict cannot become Yes by
+recording an unscheduled input, and the validation record now reads No with R3b
+in Missing work. Two things are added rather than argued.
+
+FIRST, THE PLAN DISAGREES WITH ITSELF ABOUT THIS FINDING, and the disagreement is
+in the reviewed document rather than between the document and the code:
+
+- Step 3 behavior, `closure_report_unreferenced`: "the separate finding, computed
+  from the edges already collected rather than from a second walk";
+- Step 3 expected outcome: "A shipped ELF reached by no entry point and no
+  `DT_NEEDED` edge, otherwise sound, is ACCEPTED and reported unreferenced".
+
+The first line specifies the edge computation and is what the implementation
+does. The second quotes the design's conjunction. An implementation step cannot
+choose between two lines of the document it is judged against, which is why this
+is recorded as a specification act and not as work the writer can schedule.
+
+SECOND, THIS IS RECORDED AS AN EXPLICIT DISAGREEMENT ABOUT CLASSIFICATION, not
+about the outcome. The requestor agrees the design's finding is not implemented
+and agrees the verdict is No. The requestor does not agree that this is a step 3
+implementation defect, because the plan line that governs this function specifies
+what was built. Whoever amends this owns both lines.
+
+The two routes round 2 named are the two the requestor sees, and neither is the
+writer's to take alone:
+
+- supply and implement an approved entry-point input contract, which needs a
+  configuration record the Q10 grammar does not have and a design decision about
+  what counts as a declared entry point; or
+- obtain an authorized plan and design amendment that narrows this step and
+  schedules the remaining obligation.
+
+The requestor is asking for that decision at the human gate rather than
+publishing further rounds that restate the same position.
+
+#### Evidence named rather than summarised for step 3 toolchain-runtime-closure (round 3)
+
+Every command below was run for this round, after the R3a repair.
+
+| Obligation | Evidence |
+| --- | --- |
+| step 3 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 3`: exit 0, 99 cases, 0 failures, `OBJECTIVE MET for step 3` |
+| the alias regression bites | the same harness with `--shipped-dir <round 2>`: 99 cases, 2 failures, the target reported unreferenced |
+| the round 1 regressions still bite | the same harness with `--shipped-dir <submitted>`: 19 failures |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, `lint_shell: clean` |
+| one walk, one index, index first | instrumented run: `WALK` 1, `INDEX` 1, first log line `INDEX`, `READ` 10 over 10 planted ELF objects |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| step 0, 1 and 2 still answer | each `OBJECTIVE MET` on the same host in the same session |
+| the aggregate | exit 5, steps 0 to 3 exit 0, steps 4 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0, `OBJECTIVE MET` |
+| harness lint | `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0, no output |
+
+#### Architecture assessment for step 3 toolchain-runtime-closure (round 3)
+
+The module boundary is unchanged and the R3a repair stayed inside it: the
+reachability rule is an invariant's and lives in `closure_rules.sh`. No new
+command was introduced, so `contract.closure-tools.txt` needed no edit and the
+mechanical assertion over the module text proves it.
+
+The 628-line entry point is unchanged this round, below the 650 ceiling and
+inside the at-risk band, with the Step 5 report-extraction checkpoint recorded.
+
+#### Cost assessment for step 3 toolchain-runtime-closure (round 3)
+
+Unchanged except for the alias resolution, whose bound is stated above and in the
+validation record: it is the one place that is not a lookup, it is bounded by the
+symlinked selected providers rather than by the inventory, and it stops at the
+first match.
+
+#### Feature integrity assessment for step 3 toolchain-runtime-closure (round 3)
+
+The false alias finding is gone, which is the one repair whose absence would have
+made the result actively misleading on a real archive rather than merely partial.
+The installer is untouched, steps 0, 1 and 2 pass unchanged, and the aggregate is
+the expected red baseline. The step's own reporting limit is stated in the result
+name and in the validation record.
+
+### Implementation report for step 3 toolchain-runtime-closure (round 3)
+
+#### What changed since round 2 for step 3 toolchain-runtime-closure (round 3)
+
+One repair and its fixtures. Rounds 1 and 2 record the rest of the step, and this
+round changes nothing else.
+
+#### R3a, resolution by file identity for step 3 toolchain-runtime-closure (round 3)
+
+`closure_report_unreferenced_by_edge` built two maps: `reached`, keyed by the
+selected provider path, and `selected_of`, keyed by the NEEDED NAME. The final
+loop then looked `selected_of` up by the SUBJECT's basename. Those two keys agree
+only when the soname and the file name are the same string, and in the ordinary
+library layout they are not: `libz.so.1 -> libz.so.1.2.11`.
+
+The alias branch therefore never fired for a real alias. It fired only for a
+subject whose own name a consumer happened to need, which is the case that has no
+alias to resolve.
+
+The repair drops `selected_of` and collects `links` instead: the selected
+provider paths that ARE symlinks. Each is matched against the subject list with
+`-ef` until its target is found, and the match marks that subject reached.
+
+- The sweep stops at the first match, and skips subjects already reached.
+- A selected provider that is a real file is not swept at all, because it is
+  already in `reached` under its own path.
+- The outer set is the distinct needed names that resolve to a link, so the cost
+  is bounded by that and not by the inventory. It is the one place in this module
+  that is not a lookup, and the module says so where the code is.
+
+#### The fixtures, and why three rows rather than one for step 3 toolchain-runtime-closure (round 3)
+
+- `provider-alias-target`, a donor copy at `libcplxalias.so.1.2.3` whose soname
+  is set to `libcplxalias.so.1`, which is the real file a loader ends up with.
+- `provider-alias-link`, a symlink at `libcplxalias.so.1` beside it, planted by
+  the `symlink-to` verb the corpus already declared for the scope alias case.
+- `subject-alias-consumer`, an object that NAMES `libcplxalias.so.1`, without
+  which no edge selects the link and the case proves nothing.
+
+`symlink-resolves` asserts BOTH halves: the fixture has to BE a link, because a
+host where `ln -s` copies would otherwise plant two independent files and the
+case would pass over a shape it never built; and it has to resolve to the same
+file, because a dangling link reaches nothing. Where `ln -s` cannot link, the
+suite reports the obligation UNANSWERED and skips the three assertions rather
+than failing them for the environment.
+
+#### The cases for step 3 toolchain-runtime-closure (round 3)
+
+- `step3/unreferenced/alias-target-absent`: the versioned target is NOT in the
+  list. This is the case that fails against round 2.
+- `step3/unreferenced/alias-consumer-named`: the consumer IS in the list, so the
+  case above is about the alias resolving rather than about an edge nobody
+  recorded.
+- `step3/unreferenced/alias-link-not-walked`: the link itself is not a subject,
+  because `find -type f` does not match it, so the two paths are one subject.
+
+The counts move with the fixtures and are asserted from what the harness planted:
+12 files walked, 10 ELF subjects, 14 edges, 7 reached by no edge.
+
+#### What was not changed for step 3 toolchain-runtime-closure (round 3)
+
+No installer function, no configuration module, no contract entry, no plan or
+design document, no commit group membership or ordering, and nothing in
+`closure_elf.sh` or `closure_check.sh`. The review transcript remains deliberately
+unstaged.
+
+### Change summary for step 3 toolchain-runtime-closure (round 3)
+
+#### Staged paths for step 3 toolchain-runtime-closure (round 3)
+
+- `docs/v0.27.0/fixtures.closure-corpus.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- `src/setups/env/bin/closure_check.sh`
+- `src/setups/env/bin/closure_elf.sh`
+- `src/setups/env/bin/closure_rules.sh`
+
+The review transcript is modified and DELIBERATELY UNSTAGED, as in round 2.
+
+#### Commit groups, least to most dependent for step 3 toolchain-runtime-closure (round 3)
+
+| Group | Subject | Path |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 3 fixture rows` | `docs/v0.27.0/fixtures.closure-corpus.txt` |
+| 2 | `feat(closure): read every shipped ELF once` | `src/setups/env/bin/closure_elf.sh` |
+| 3 | `feat(closure): refuse an unresolvable DT_NEEDED` | `src/setups/env/bin/closure_rules.sh` |
+| 4 | `feat(closure): run the subject phase in the checker` | `src/setups/env/bin/closure_check.sh` |
+| 5 | `test(closure): add the step 3 subject suite` | `docs/v0.27.0/verify.closure-check.sh` |
+| 6 | `test(closure): retain the step 3 host capture` | `docs/v0.27.0/verify.closure.step3.rhel.txt` |
+| 7 | `docs(toolchain-runtime-closure): record step 3 validation` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
+
+MEMBERSHIP, GROUPING, ORDER AND SUBJECTS ARE UNCHANGED across all three rounds.
+This round changed content inside four groups and moved no path between them.
+`commit-plan-check.bat --format json` returns state valid, ready true, seven
+groups, no diagnostics.
+
+#### What each group's body gained this round for step 3 toolchain-runtime-closure (round 3)
+
+- Group 1: the three alias rows and the count moving from 24 to 27.
+- Group 3: resolution of a symlinked selected provider by file identity.
+- Group 5: the alias regression, its two controls and the `symlink-to` verb.
+- Group 6: the 99-case run and the round 2 repairs section.
+- Group 7: the No verdict with R3b in Missing work.
+
+Groups 2 and 4 are unchanged this round.
+
+#### Line counts for step 3 toolchain-runtime-closure (round 3)
+
+| File | Round 2 | Round 3 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 628 | 628 |
+| `src/setups/env/bin/closure_elf.sh` | 391 | 392 |
+| `src/setups/env/bin/closure_rules.sh` | 147 | 168 |
+| `docs/v0.27.0/verify.closure-check.sh` | 2729 | 2779 |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | 150 | 161 |
+| `docs/v0.27.0/verify.closure.step3.rhel.txt` | 494 | 546 |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | 1783 | 1850 |
+
+### Writer response for step 3 toolchain-runtime-closure (round 3)
+
+Writer response:
+
+#### Accepted feedback from round 2 for step 3 toolchain-runtime-closure (round 3)
+
+R3a is accepted as correct and is repaired. It was the worse of the two shapes:
+the round 1 repair removed a missing finding and introduced a false one, and a
+false unreferenced report on every versioned library in a real archive is a
+result nobody could act on. The regression fails against the round 2 module.
+
+R1 and R2 are carried as resolved and their regressions are untouched, as the
+round 2 instructions ask.
+
+The round 2 ruling on R3b is accepted in its outcome: the verdict is No, and the
+validation record reads No with R3b in Missing work. A renamed result is
+clarification and not scope authorization.
+
+#### Disagreement for step 3 toolchain-runtime-closure (round 3)
+
+One, about CLASSIFICATION rather than about the outcome.
+
+The requestor agrees the design's conjunction is not implemented and agrees the
+step is not complete. The requestor does not agree that this is a step 3
+implementation defect, because the plan line that governs this very function
+specifies what was built:
+
+- Step 3 behavior: `closure_report_unreferenced`, "the separate finding, computed
+  from the edges already collected rather than from a second walk";
+- Step 3 expected outcome: "A shipped ELF reached by no entry point and no
+  `DT_NEEDED` edge, otherwise sound, is ACCEPTED and reported unreferenced".
+
+The reviewed plan therefore specifies the edge computation in one line and quotes
+the design's conjunction in another. The delivered behavior matches the first.
+Calling that an implementation gap puts the repair on the party that cannot make
+it: closing it needs a configuration record the Q10 grammar does not have and a
+design decision about what counts as a declared entry point, or an authorized
+amendment that narrows the step. Both are specification acts.
+
+This is recorded rather than argued further. The requestor is not asking the
+reviewer to accept the step, and is not going to publish another round that
+restates the same position: the decision belongs at the human gate, and this
+request is where it is being put.
+
+#### What the reviewer may want to look at first for step 3 toolchain-runtime-closure (round 3)
+
+- The alias sweep is the one thing in `closure_rules.sh` that is not a lookup.
+  Its bound is stated in the module, in the validation record and in the
+  assessment: the symlinked selected providers, not the inventory, with an early
+  exit. If the reviewer wants it strictly linear, that needs a file-identity key
+  the host-tool contract has no command for, and the requestor would rather be
+  told that now than infer it.
+- `provider-alias-link` reports UNANSWERED where `ln -s` copies instead of
+  linking. That follows the step 1 precedent for the same host property, and it
+  is not a pass.
+- The counts in the subject cases all move with the fixtures and are computed by
+  the harness from what it planted, so the three new rows did not require a
+  hand-edited expectation anywhere.
+
+### Reviewer focus for step 3 toolchain-runtime-closure (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-3 -->
+
+## Round 3 by reviewer - Step 3
+
+- Recorded: 2026-09-07T13:50:43+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Baseline index tree: d87f2ad32018a298092ffe4a43a6469b96f31511
+
+Assessed index tree: 3f401a24dc5fa7cd6cbb08523bdd40c784a4e071
+
+### Implementation check for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Result:
+
+No. Step 3 has NOT been fully implemented.
+
+R1, R2 and the functional R3a alias defect are resolved with passing regressions.
+R3b remains a specification gap, as both parties now agree. The new alias sweep
+introduces R4, a quadratic path prohibited by the exact plan. The Step 3
+validation rows retain No and now list both remaining obligations.
+
+Validation plan effects:
+
+Only the reviewed Step 3 section changed: R4 missing work, corrected cost
+assessment, independent round 3 validation and the current 99-case count. The
+No verdict and specification-owner classification of R3b remain. The launcher
+attributed the patch and only that patch was staged. No other step, plan, design,
+document-level status or umbrella row changed.
+
+### Pre-repair mandatory checks and coverage for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+All nine mandatory commands passed independently for this round.
+
+| Validation | Result |
+| --- | --- |
+| shell lint gate | Exit 0, 48 scripts, clean |
+| closure Step 3 | Exit 0, 99 cases, zero failures |
+| installer-purity grep | Expected exit 1, no matches |
+| installer HEAD-relative diff | Exit 0, empty |
+| closure Step 0 | Exit 0, 64 cases, zero failures |
+| closure Step 1 | Exit 0, 70 cases, zero failures |
+| closure Step 2 | Exit 0, 91 cases, zero failures |
+| relocation Step 3, declared target capability | Exit 0, 104 cases, zero failures |
+| harness ShellCheck at warning level | Exit 0 |
+
+RHEL runs used `/tmp/cplx-step3` with the documented Git directory on PATH.
+The three production modules, harness and corpus match local SHA-256 digests.
+Output is retained in `.reviews/a.codex.s3r3.host-validation.txt`. Additional
+operation-count evidence is in `.reviews/a.codex.s3r3.scaling.txt`.
+Mandatory validation changed no tracked subject paths.
+
+### Resolved validation set and sources for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+```json
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 3",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 0",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 1",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 2",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "shellcheck -S warning docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+```
+
+### Resolver drift and direction for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+None. The project floor was reloaded and the current resolver exactly matches
+the request's nine commands and source labels. The union adds and removes no
+commands. The exact plan's O(n)-per-phase and no-O(n^2)-path policy was reread
+alongside the reviewed Step 3 finding obligation.
+
+### Repository state around validation for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Exact envelope and human-readable identity agree: code/code/v0.27.0,
+toolchain-runtime-closure, Step 3, round 3, occurrence 1 and named umbrella.
+Request and independent baseline tree: `d87f2ad32018a298092ffe4a43a6469b96f31511`.
+Assessed tree after attributable metadata staging: `3f401a24dc5fa7cd6cbb08523bdd40c784a4e071`.
+The after-tests comparison reports no changed paths. The final comparison
+reports only the reviewed validation plan and its index update. The umbrella
+digest is unchanged. The existing unstaged transcript remains protocol-owned;
+it was not read as working context, staged or manually edited.
+
+### Repair inventory for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Repairs made:
+
+- No substantive reviewer repair was made.
+- - Step 3 validation rows: polishing-only review metadata, attributed and staged.
+- - `a.commit` last-group prose: polishing-only metadata, now records R3b/R4.
+- Group membership, ordering, scope, subjects and paths remain unchanged. No code,
+- fixture or harness was changed by the reviewer.
+
+Paths staged:
+
+- - `docs/v0.27.0/fixtures.closure-corpus.txt`
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- - `docs/v0.27.0/verify.closure-check.sh`
+- - `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- - `src/setups/env/bin/closure_check.sh`
+- - `src/setups/env/bin/closure_elf.sh`
+- - `src/setups/env/bin/closure_rules.sh`
+
+### Commit plan assessment for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+The independent checker returned exit 0, state valid, ready true and no
+diagnostics before assessment and after metadata staging. Seven groups cover
+the seven staged paths exactly once, in order: corpus, reader, rules, entry
+point, harness, capture, validation documentation. Conventional subjects remain
+accurate and the last group's prose reflects the No verdict and current missing
+work. Mechanical readiness passes but does not authorize a commit.
+
+### Findings and boundaries for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Unresolved findings:
+
+#### R4: Remove the quadratic selected-alias and subject sweep
+
+- Priority: medium. Location: `src/setups/env/bin/closure_rules.sh:153-161`.
+- The functional alias repair iterates every selected symlink and scans the entire
+- subject array until a matching target is found. Its bound is O(L*N), where L is
+- the number of distinct selected links and N is the subject count. L is not a
+- constant in the schema or code; ordinary versioned library layouts permit one
+- link per library. Early termination and skipping reached subjects do not remove
+- the product bound, because each unique target may occur late and skipped entries
+- are still visited.
+- A DEBUG trap counted production `-ef` checks over real distinct links/targets on
+- RHEL: 16 links / 17 subjects required 96 comparisons, 32 / 33 required 331, and
+- 64 / 65 required 1200. This is new work outside what the existing one-walk and
+- one-index counters observe. It contradicts the exact plan's O(n)-per-phase and
+- explicit no-O(n^2)-path policy at lines 154-164. Describing links as a handful
+- in one measured archive does not impose a constant bound.
+- Resolve file identity once and index it for reuse, preserving the now-correct
+- SONAME-link and duplicate-copy behaviors. Add an operation-count regression
+- with a growing alias population. Any additional host input must use the approved
+- tool contract; do not silently replace the plan's performance requirement.
+
+#### R3b: Specification owner must reconcile the full-finding obligation
+
+- Priority: medium, carried specification gap.
+- The reviewer accepts the requestor's classification: the unscheduled declared
+- entry-point input is a plan/design gap, not an instruction to invent grammar
+- inside Step 3. Both roles now agree on No and on the two legitimate routes:
+- approve an input contract and implement it, or authorize a plan/design amendment
+- that narrows this step and explicitly schedules the remaining half.
+- That classification does not close the obligation or permit a commit-ready
+- recommendation against the unchanged plan. Keep the No verdict until the
+- specification owner reconciles the required behavior. The reviewer cannot make
+- that human/specification choice or move the exchange to convergence merely to
+- obtain it. The requestor owns the appropriate human-decision/escalation route.
+
+Boundary-crossing work:
+
+- No specification amendment was made. R3b is explicitly classified as a
+- specification-owner decision, agreeing with the requestor's stated classification
+- concern. R4 is an implementation performance defect against the existing exact
+- plan, and can be repaired independently of that decision. The 628-line entry
+- point remains below 650; preserve the Step 5 report-extraction checkpoint without
+- requiring a split now. No literal Human guidance block was supplied.
+
+### Writer instructions for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Keep R1/R2 and the functional R3a issue closed. Repair R4's quadratic alias scan
+with an indexed identity approach and a meaningful operation-count regression,
+then rerun the mandatory validation union. Route R3b to the specification owner
+through the requestor's authorized workflow; do not publish repeated unchanged
+requests in place of that decision, and do not treat this answer as convergence
+or commit authorization. Retain No until both the performance requirement and
+the approved finding definition are satisfied. Refresh grouping and publish the
+next exact request when there is new implementation or authorized specification
+evidence to review.
+
+### Decision rationale for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Disposition: changes-requested.
+
+| Readiness floor | Result |
+| --- | --- |
+| Exact identity | Pass |
+| Implementation completeness | Fail: R3b specification gap and R4 complexity defect |
+| Mandatory validation and coverage | Nine commands pass; alias-scaling regression missing |
+| Staged attribution | Pass: only attributable Step 3 metadata staged |
+| Unresolved findings | Fail: R3b/R4 remain |
+| a.commit | Pass: valid, ready true, seven groups, no diagnostics |
+
+Functional R1/R2/R3a regressions pass. This round made no substantive repair.
+The specification classification disagreement is resolved in the requestor's
+terms; completeness still remains No. This advisory answer grants no commit or
+specification-amendment authority.
+
+### Final reviewer decision for step 3 toolchain-runtime-closure (exchange 1) (round 3)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3-round-3 -->
+
+## Round 4 by requestor - Step 3
+
+- Recorded: 2026-09-07T14:07:24+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 toolchain-runtime-closure (round 4)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 3
+Review round: 4
+
+### Code review evidence for step 3 toolchain-runtime-closure (round 4)
+
+request_index_tree: 4134478f09a3025b7843931aa67c4c8543c6a28f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -S warning docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 3 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): read every shipped ELF once
+group 2 path: src/setups/env/bin/closure_elf.sh
+group 3: feat(closure): refuse an unresolvable DT_NEEDED
+group 3 path: src/setups/env/bin/closure_rules.sh
+group 4: feat(closure): run the subject phase in the checker
+group 4 path: src/setups/env/bin/closure_check.sh
+group 5: test(closure): add the step 3 subject suite
+group 5 path: docs/v0.27.0/verify.closure-check.sh
+group 6: test(closure): retain the step 3 host capture
+group 6 path: docs/v0.27.0/verify.closure.step3.rhel.txt
+group 7: docs(toolchain-runtime-closure): record step 3 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step3.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+```
+
+### Requestor assessment for step 3 toolchain-runtime-closure (round 4)
+
+#### Requestor verdict for step 3 toolchain-runtime-closure (round 4)
+
+No. Step 3 has NOT been fully implemented.
+
+R4 is repaired, with a cost regression that fails against the round 3 module.
+R3b remains, and this is the last round the requestor will publish for it: both
+roles now classify it the same way and neither can make the call, so it goes to
+the specification owner as round 3 directed.
+
+#### R4, repaired for step 3 toolchain-runtime-closure (round 4)
+
+The round 2 repair was correct and quadratic. Resolving an alias by comparing
+file identities means scanning the subjects for each selected symlink, which is
+O(L*N) and not O(L): the scan still visits subjects skipped as already reached,
+an early break can come arbitrarily late, and nothing in the schema or the code
+caps L. One soname symlink per library is the ordinary layout, so L grows with N.
+
+THE ONE WALK NOW RECORDS WHERE EVERY LINK POINTS. `find` is asked for the link
+targets in the same invocation that lists the subjects:
+
+```text
+find "$root" \( -type f -printf 'F %p\n' \) -o \( -type l -printf 'L %p\nT %l\n' \)
+```
+
+Each field is on its own line, because a path may carry a space. The target is
+normalised against the link's own directory and its `.` and `..` segments are
+reduced, so a relative `libz.so.1.2.11`, an absolute path and a
+`../lib64/libz.so.1.2.11` all name the path the walk recorded. Resolving an alias
+is then a map lookup, with the chase bounded at eight hops so a link naming
+another link resolves and a cycle cannot hang it. No identity comparison is
+performed at all, and `-ef` is gone from the module.
+
+It is still ONE `find` invocation, which the instrumented case measures, and
+`walked` still counts FILES: a link is a second path to a file already counted.
+
+#### The cost regression, and why it is stated as work per pair for step 3 toolchain-runtime-closure (round 4)
+
+A sweep and a lookup ANSWER THE SAME and differ only in growth, so only a run at
+two populations tells them apart. `alias-scaling-population` replicates the
+declared alias shape at a size the harness chooses, and the case counts the
+commands the rule executes under a DEBUG trap with `functrace`.
+
+| Population | The lookup | The round 3 sweep |
+| --- | --- | --- |
+| 6 pairs | 282 commands, 47 per pair | 328 commands, 55 per pair |
+| 24 pairs | 1110 commands, 46 per pair | 1939 commands, 81 per pair |
+
+THE THRESHOLD IS WORK PER PAIR AND NOT A TOTAL RATIO. The totals carry a base
+that is itself linear in the population, and the round 3 sweep's total grew only
+5.9 times for a fourfold population: a ratio threshold loose enough not to be
+brittle would have let it through. Per pair the difference is unambiguous, and
+the comparison is integer over a command count, so a slow host cannot fail it and
+a fast one cannot pass it.
+
+Two controls: the counts must GROW with the population before their growth is
+judged, because a DEBUG trap without `functrace` returns the same number at every
+size and satisfies any upper bound. That is not hypothetical, it is how this
+measurement first passed while measuring nothing. And the alias must still
+resolve at the larger size, so the case cannot be satisfied by a rule that
+stopped resolving.
+
+Against the ROUND 3 module, through `--shipped-dir`: 104 cases, 1 failure,
+`step3/cost/alias-work-per-pair-is-flat`.
+
+#### R3b, routed rather than re-argued for step 3 toolchain-runtime-closure (round 4)
+
+Round 3 accepted the requestor's classification and said the requestor owns the
+escalation route. That is what happens next: when this round returns, if R3b is
+the only item left, the requestor escalates the exchange to the human rather than
+opening round 5. This request exists because R4 is new implementation evidence
+the reviewer asked to see, not to re-argue R3b.
+
+The validation record keeps the No verdict, with R3b the single remaining item in
+Missing work and both routes named.
+
+#### Evidence named rather than summarised for step 3 toolchain-runtime-closure (round 4)
+
+| Obligation | Evidence |
+| --- | --- |
+| step 3 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 3`: exit 0, 104 cases, 0 failures |
+| the cost regression bites | the same harness with `--shipped-dir <round 3>`: 104 cases, 1 failure |
+| the alias regression still bites | the same harness with `--shipped-dir <round 2>`: 2 failures |
+| the round 1 regressions still bite | the same harness with `--shipped-dir <submitted>`: 19 failures |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, clean |
+| one walk, one index, index first | instrumented run: `WALK` 1, `INDEX` 1, first log line `INDEX`, `READ` 10 |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| step 0, 1 and 2 still answer | each `OBJECTIVE MET` on the same host in the same session |
+| the aggregate | exit 5, steps 0 to 3 exit 0, steps 4 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0 |
+| harness lint | `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0 |
+
+#### Architecture assessment for step 3 toolchain-runtime-closure (round 4)
+
+The boundary is unchanged. The link map is the READER's, because it is something
+the walk observed, and the rules module reads it exactly as it reads the subject
+records. No new host command was introduced: `find` was already the walk's, and
+`-printf` is one of its primaries rather than a second tool, so
+`contract.closure-tools.txt` needed no edit and the mechanical assertion over the
+module text proves it.
+
+#### Cost assessment for step 3 toolchain-runtime-closure (round 4)
+
+One `find`, one provider enumeration, one reader call per ELF, one hash lookup
+per name, and now one hash lookup per alias hop. No path in the module has a
+product bound, and the case that would catch one returning runs in the suite.
+
+#### Feature integrity assessment for step 3 toolchain-runtime-closure (round 4)
+
+The alias behaviour of round 2 is preserved exactly: the target is absent from
+the list, the consumer is present, and the duplicate-copy control still holds.
+The installer is untouched, steps 0, 1 and 2 pass unchanged, and the aggregate is
+the expected red baseline.
+
+### Implementation report for step 3 toolchain-runtime-closure (round 4)
+
+#### What changed since round 3 for step 3 toolchain-runtime-closure (round 4)
+
+One repair, its fixture and its measurement. Rounds 1 to 3 record the rest.
+
+#### The walk asks for the link targets for step 3 toolchain-runtime-closure (round 4)
+
+`closure_subjects_walk` listed regular files only. It now asks the SAME `find`
+invocation for the symlinks and where each points, and the two answers are told
+apart by a leading token:
+
+- `F <path>` for a regular file, which is a subject;
+- `L <path>` then `T <target>` for a symlink, which is a second path to a file.
+
+Each field is on its own line, because `%p %l` on one line would split a path
+that carries a space. `walked` counts the `F` entries alone, so every count
+stated against it is unchanged: a link is not a second file.
+
+`closure_elf_link_path` normalises the target against the link's own directory
+and reduces its `.` and `..` segments, so a relative name, an absolute path and
+one that climbs a directory all resolve to the path the walk recorded. A segment
+that cannot be reduced leaves the path as it stands: the lookup then misses and
+the object is reported, rather than a resolution being claimed that nobody made.
+
+#### The rule resolves by lookup for step 3 toolchain-runtime-closure (round 4)
+
+`closure_report_unreferenced_by_edge` no longer collects the selected links and
+sweeps the subjects for each. For every edge it marks the selected path reached
+and then follows `CLOSURE_LINK_TARGET` while there is one, up to eight hops. That
+is constant work per edge and a bounded chase for a link that names another link;
+the bound also stops a cycle hanging the run.
+
+`-ef` is gone from the module. `links` is gone. The `reached` map is the only
+state the rule keeps.
+
+#### The cost fixture and its measurement for step 3 toolchain-runtime-closure (round 4)
+
+`alias-scaling-population` plants `FIXTURE_ALIAS_PAIRS` copies of the declared
+alias shape: a versioned target carrying the soname, the soname link beside it,
+and a consumer that names the soname. All three are needed, because a link is
+only SELECTED when an edge names it, and an unselected link is never resolved.
+
+The two mutations were factored into `elf_set_string_entry` and `elf_add_needed`,
+so the cost fixture builds the same objects the corpus rows describe rather than
+a second implementation of them.
+
+`step3_alias_ops` counts the commands the rule executes, with a DEBUG trap set
+around that ONE call so the walk and the index below it are not counted. `set -T`
+is what makes the trap enter the function: without functrace it fires only in the
+calling shell, and the count comes back identical at every population, which
+reads exactly like a cost that does not grow. That is not a hypothetical; it is
+how this measurement first passed while measuring nothing, and the control that
+now requires the count to GROW is there because of it.
+
+#### What was not changed for step 3 toolchain-runtime-closure (round 4)
+
+No installer function, no configuration module, no contract entry, no plan or
+design document, no commit group membership or ordering, and nothing in
+`closure_check.sh`. The review transcript remains deliberately unstaged.
+
+### Change summary for step 3 toolchain-runtime-closure (round 4)
+
+#### Staged paths for step 3 toolchain-runtime-closure (round 4)
+
+- `docs/v0.27.0/fixtures.closure-corpus.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- `src/setups/env/bin/closure_check.sh`
+- `src/setups/env/bin/closure_elf.sh`
+- `src/setups/env/bin/closure_rules.sh`
+
+The review transcript is modified and DELIBERATELY UNSTAGED, as in rounds 2 and 3.
+
+#### Commit groups, least to most dependent for step 3 toolchain-runtime-closure (round 4)
+
+| Group | Subject | Path |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 3 fixture rows` | `docs/v0.27.0/fixtures.closure-corpus.txt` |
+| 2 | `feat(closure): read every shipped ELF once` | `src/setups/env/bin/closure_elf.sh` |
+| 3 | `feat(closure): refuse an unresolvable DT_NEEDED` | `src/setups/env/bin/closure_rules.sh` |
+| 4 | `feat(closure): run the subject phase in the checker` | `src/setups/env/bin/closure_check.sh` |
+| 5 | `test(closure): add the step 3 subject suite` | `docs/v0.27.0/verify.closure-check.sh` |
+| 6 | `test(closure): retain the step 3 host capture` | `docs/v0.27.0/verify.closure.step3.rhel.txt` |
+| 7 | `docs(toolchain-runtime-closure): record step 3 validation` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
+
+MEMBERSHIP, GROUPING, ORDER AND SUBJECTS ARE UNCHANGED across all four rounds.
+`commit-plan-check.bat --format json` returns state valid, ready true, seven
+groups, no diagnostics.
+
+#### What each group's body gained this round for step 3 toolchain-runtime-closure (round 4)
+
+- Group 1: the `alias-scaling-population` row and the count moving from 27 to 28.
+- Group 2: the walk asking for the link targets in the same invocation.
+- Group 3: the alias resolution becoming a lookup with a bounded chase.
+- Group 5: the cost measurement, its two controls and the `plant-alias-pairs`
+  verb.
+- Group 6: the 104-case run and the round 3 repair section.
+- Group 7: R4 closed, R3b the single remaining item.
+
+Group 4 is unchanged this round.
+
+#### Line counts for step 3 toolchain-runtime-closure (round 4)
+
+| File | Round 3 | Round 4 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 628 | 628 |
+| `src/setups/env/bin/closure_elf.sh` | 392 | 448 |
+| `src/setups/env/bin/closure_rules.sh` | 168 | 169 |
+| `docs/v0.27.0/verify.closure-check.sh` | 2779 | 2940 |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | 161 | 170 |
+| `docs/v0.27.0/verify.closure.step3.rhel.txt` | 546 | 587 |
+
+### Writer response for step 3 toolchain-runtime-closure (round 4)
+
+Writer response:
+
+#### Accepted feedback from round 3 for step 3 toolchain-runtime-closure (round 4)
+
+R4 is accepted as correct and is repaired. The round 2 repair traded a false
+finding for a product bound, and the reviewer's measurement, 96, 331 and 1200
+comparisons at 16, 32 and 64 aliases, is the shape the plan forbids outright. The
+requestor's own defence of it, that the links are a handful in one measured
+archive, was exactly the kind of claim this effort refuses elsewhere: a bound
+that holds in one measurement is not a bound.
+
+The reviewer's classification of R3b is accepted, and the requestor notes that it
+matches the classification recorded as a disagreement in round 3. There is no
+disagreement left on that point.
+
+#### Disagreement for step 3 toolchain-runtime-closure (round 4)
+
+None.
+
+#### What the reviewer may want to look at first for step 3 toolchain-runtime-closure (round 4)
+
+- The link map is built by the WALK, not by the rule, and that is where the
+  boundary puts it: it is something the traversal observed. The rule reads it as
+  it reads the subject records, and calls nothing.
+- `-printf` is a `find` primary rather than a second tool, so no contract entry
+  was added. If the reviewer's position is that a primary needs its own
+  declaration, say so and it will be added rather than argued.
+- The cost case counts COMMANDS, not time, so it is deterministic. Its threshold
+  is work per alias pair, because the round 3 sweep's TOTAL grew only 5.9 times
+  for a fourfold population and a ratio loose enough to be robust would have let
+  it through.
+- The `functrace` control exists because the first version of this measurement
+  passed while measuring nothing. It is worth a moment: a cost case that cannot
+  fail is worse than no cost case, and requiring the count to grow with the
+  population is what makes it real.
+
+#### The route for R3b for step 3 toolchain-runtime-closure (round 4)
+
+Round 3 said the requestor owns the human-decision route, and the requestor
+agrees. If this round returns with R3b as the only open item, the requestor will
+escalate the exchange to the human rather than publish a fifth round. This
+request exists because R4 was new implementation evidence, not to re-argue R3b.
+
+### Reviewer focus for step 3 toolchain-runtime-closure (round 4)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-4 -->
+
+## Round 4 by reviewer - Step 3
+
+- Recorded: 2026-09-07T14:14:32+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Baseline index tree: 4134478f09a3025b7843931aa67c4c8543c6a28f
+
+Assessed index tree: 8484117875f3a0815228a1c65443618729430111
+
+### Implementation check for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Result:
+
+No. Step 3 has NOT been fully implemented.
+
+R4's quadratic sweep is removed and its operation-count regression passes. R1,
+R2, same-name duplicate handling and the direct SONAME-link case remain green.
+The new map loses selected paths through directory aliases (R5). R3b remains
+the agreed specification-owner decision. Only these two obligations remain in
+the reviewed-step missing-work list.
+
+Validation plan effects:
+
+Only the reviewed Step 3 section was updated: R4 resolved, R5 reproduced and
+listed with its regression requirement, independent validation recorded. The No
+verdict and R3b remain. The evidence launcher attributed the patch, and only that
+patch was staged. No plan, design, umbrella, other step or document-level status
+was changed.
+
+### Pre-repair mandatory checks and coverage for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+All nine mandatory commands were independently rerun. Local shell lint passes
+over 48 scripts; harness ShellCheck at warning severity exits 0; installer-purity
+grep has no matches (expected exit 1); the installer HEAD-relative diff is empty
+(exit 0). RHEL closure Steps 0/1/2/3 pass 64/70/91/104 cases, and relocation Step
+3 with the declared capability passes 104 cases, all exits 0 and zero failures.
+The new alias-work-per-pair scaling assertion passes.
+
+RHEL `/tmp/cplx-step3` production modules, harness and corpus match local SHA-256
+digests. Full Linux output is `.reviews/a.codex.s3r4.host-validation.txt`.
+Additional real-file evidence is `.reviews/a.codex.s3r4.directory-alias.txt`.
+Before/after mandatory-validation comparison reports no tracked side effects.
+
+### Resolved validation set and sources for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+```json
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 3",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 0",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 1",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 2",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "shellcheck -S warning docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+```
+
+### Resolver drift and direction for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+None. Reloading the project floor and running the current resolver returns the
+same nine commands and project/plan/request source labels as the request.
+The union is unchanged. The exact Step 3 and shared plan complexity requirements
+remain the assessment criteria.
+
+### Repository state around validation for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Request-time and baseline trees match: `4134478f09a3025b7843931aa67c4c8543c6a28f`.
+Assessed tree after attributable metadata staging: `8484117875f3a0815228a1c65443618729430111`.
+Envelope and prose agree on the exact plan, step 3, umbrella, round 4 and
+occurrence 1. Mandatory validation changed no tracked paths. The final boundary
+names only the exact validation plan and its index update, confined to Step 3
+review metadata. The umbrella digest is unchanged. Existing unstaged transcript
+content was left to the protocol and was not read as working context or staged.
+
+### Repair inventory for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Repairs made:
+
+- No substantive repair was made. The reviewer changed and staged only the
+- attributable Step 3 validation rows (polishing-only metadata), and refreshed
+- `a.commit` final-group prose to name R3b/R5 and resolved R4 (polishing-only
+- metadata). No production file, test, fixture, group membership, ordering, scope,
+- subject or path was changed by the reviewer.
+
+Paths staged:
+
+- - `docs/v0.27.0/fixtures.closure-corpus.txt`
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- - `docs/v0.27.0/verify.closure-check.sh`
+- - `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- - `src/setups/env/bin/closure_check.sh`
+- - `src/setups/env/bin/closure_elf.sh`
+- - `src/setups/env/bin/closure_rules.sh`
+
+### Commit plan assessment for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Independent checker before assessment and after metadata staging: exit 0,
+state valid, ready true, seven groups and no diagnostics. All seven staged paths
+are covered exactly once in dependency order: corpus, reader, rules, entry point,
+harness, capture, validation documentation. Subjects and scopes remain accurate;
+last-group prose now reflects R4 resolved and R3b/R5 remaining. This satisfies
+mechanical grouping only, and grants no commit authority.
+
+### Findings and boundaries for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Unresolved findings:
+
+#### R5: Resolve directory aliases before looking up the selected file
+
+- Priority: medium. Location: `src/setups/env/bin/closure_rules.sh:148-155`, with
+- the link-map population in `src/setups/env/bin/closure_elf.sh`.
+- The new link map uses complete path keys. The provider index can hold a path
+- under a symlinked directory, while the single non-following walk records the
+- same object under its physical directory. Looking up the whole selected path
+- cannot apply a link present only in a prefix of that path.
+- Reproduced with the production index, walk and rule on RHEL:
+- - `tools/pkg/current -> version`;
+- - `version/lib/libz.so.1 -> libz.so.1.2.11`, with a real library copy;
+- - a consumer needing `libz.so.1` and provider scope `tools/pkg/current/lib`.
+- The index selects `current/lib/libz.so.1`. The rule reports the real
+- `version/lib/libz.so.1.2.11` subject as `UNREFERENCED-BY-EDGE`; `-ef` confirms it
+- is the selected object. The link map knows `current -> version` and the physical
+- SONAME link, but the rule never resolves the directory component. This is the
+- normal `current` alias layout already recognized by this effort, not a new
+- provider convention. The previous identity sweep handled it, so this is a
+- behavioral regression introduced by the R4 repair.
+- Normalize selected paths through directory symlink components as well as final
+- file symlinks, using cached/indexed resolution so the quadratic subject sweep
+- does not return. Add this real directory-alias regression alongside the direct
+- SONAME, duplicate-copy and scaling controls. Keep the existing single walk and
+- index placement assertions.
+
+#### R3b: Specification-owner decision remains open
+
+- Priority: medium, carried specification gap. Classification and No verdict are
+- agreed by both parties. The specification owner must approve the entry-point
+- input contract or an explicit plan/design amendment that narrows this step and
+- schedules the remaining half. This review supplies no such authorization.
+- R3b should follow the requestor's human-decision route; R5 is separate
+- implementation work and does not require re-arguing that specification question.
+
+Boundary-crossing work:
+
+- No specification amendment or other boundary-crossing work was performed.
+- R3b remains with the specification owner and the requestor controls its human
+- route. R5 is a regression in the new in-step alias resolver. GNU find's `-printf`
+- usage introduces no extra executable; this review raises no separate tool-list
+- finding about that primary. The 628-line checker remains below the ceiling and
+- the existing Step 5 extraction checkpoint remains sufficient. No literal Human
+- guidance block was supplied.
+
+### Writer instructions for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Preserve R4's indexed approach and passing cost regression, and repair R5 by
+resolving symlinked directory components before matching selected providers to
+subject paths. Add the current-to-version layout regression and rerun the
+mandatory union. Refresh the validation and grouping evidence. Route the
+unchanged R3b decision to the specification owner as planned; do not silently
+change the plan or treat this advisory answer as a commit choice.
+
+### Decision rationale for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Disposition: changes-requested.
+
+| Readiness floor | Result |
+| --- | --- |
+| Exact identity | Pass |
+| Implementation completeness | Fail: R3b and R5 |
+| Mandatory validation and coverage | Nine commands pass; directory-alias regression missing |
+| Staged attribution | Pass: only attributable Step 3 metadata staged |
+| Unresolved findings | Fail: R3b/R5 remain |
+| a.commit | Pass: valid, ready true, seven groups, no diagnostics |
+
+R4's complexity defect is resolved. The replacement produces a false finding in
+a normal directory-alias layout, reproduced independently despite the supplied
+suite passing. No substantive reviewer repair was made. No commit is authorized.
+
+### Final reviewer decision for step 3 toolchain-runtime-closure (exchange 1) (round 4)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3-round-4 -->
+
+## Round 5 by requestor - Step 3
+
+- Recorded: 2026-09-07T14:26:33+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 toolchain-runtime-closure (round 5)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 3
+Review round: 5
+
+### Code review evidence for step 3 toolchain-runtime-closure (round 5)
+
+request_index_tree: 15d08e7f18b02eaba6e2b433ca1d4ba28ede2eec
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -S warning docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 3 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): read every shipped ELF once
+group 2 path: src/setups/env/bin/closure_elf.sh
+group 3: feat(closure): refuse an unresolvable DT_NEEDED
+group 3 path: src/setups/env/bin/closure_rules.sh
+group 4: feat(closure): run the subject phase in the checker
+group 4 path: src/setups/env/bin/closure_check.sh
+group 5: test(closure): add the step 3 subject suite
+group 5 path: docs/v0.27.0/verify.closure-check.sh
+group 6: test(closure): retain the step 3 host capture
+group 6 path: docs/v0.27.0/verify.closure.step3.rhel.txt
+group 7: docs(toolchain-runtime-closure): record step 3 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step3.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+```
+
+### Requestor assessment for step 3 toolchain-runtime-closure (round 5)
+
+#### Requestor verdict for step 3 toolchain-runtime-closure (round 5)
+
+No. Step 3 has NOT been fully implemented.
+
+R5 is repaired, with a regression that fails against the round 4 module. R3b
+remains, unchanged and with the specification owner. The suite is green on the
+RHEL 9.8 build host at 113 cases and zero failures.
+
+#### R5, repaired for step 3 toolchain-runtime-closure (round 5)
+
+Round 4's link map is keyed by whole paths, and `tools/python/current -> version`
+puts the link in a PREFIX of the selected path rather than at its end. The
+observed scope holds `current/lib/libcplxdir.so.1` while the walk, which does not
+follow a symlinked directory, records the object under `version/lib`. A lookup of
+the whole path cannot apply a link that sits inside it, so a normally loaded
+library was again reported as reachable by nothing. That layout is the `current`
+alias this effort already reads, not a new convention, and the identity sweep R4
+replaced had handled it.
+
+`closure_rules_physical` rebuilds the selected path ONE COMPONENT AT A TIME and
+resolves each prefix while the link map names it. That applies the directory link
+before the name inside it means anything, and the final soname link after, which
+is the order the two have to be applied in. The result is CACHED by input path;
+the distinct selected paths are bounded by the distinct `DT_NEEDED` names, so the
+resolution stays a lookup and the cost regression still passes.
+
+Four corpus rows carry the shape, in a tree of their own because the alias has to
+be a tool root's immediate subdirectory to be in scope at all: the versioned
+target, the soname link beside it, the directory link, and the consumer that
+names the soname. Its control comes first and asserts that the index really does
+select through the alias, so the case is about resolving it rather than about a
+directory nothing selects.
+
+Against the ROUND 4 module, through `--shipped-dir`:
+
+```text
+113 cases, 1 failure
+
+step3/alias/target-behind-the-alias-absent   want [] got
+    [UNREFERENCED-BY-EDGE|subject|<scratch>/step3/diralias/tools/python/
+     version/lib/libcplxdir.so.1.2.3|no DT_NEEDED edge in the archive
+     resolves to this path]
+```
+
+#### What the four rounds have shown about this rule for step 3 toolchain-runtime-closure (round 5)
+
+Recorded because it is the honest reading of the exchange rather than a
+complaint: every round has found a real defect in the reachability rule, and
+three of the four were introduced by the previous round's repair. Name-keyed
+reachability missed the second copy; path-keyed missed the soname alias;
+identity-keyed was quadratic; the whole-path map missed the directory alias. The
+suite now carries a case for each of the four, and each fails against the module
+it repairs. That is the useful outcome: the rule is small, and what it must
+satisfy is now written down in cases rather than in a reviewer's memory.
+
+#### Evidence named rather than summarised for step 3 toolchain-runtime-closure (round 5)
+
+| Obligation | Evidence |
+| --- | --- |
+| step 3 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 3`: exit 0, 113 cases, 0 failures |
+| the directory-alias regression bites | the same harness with `--shipped-dir <round 4>`: 113 cases, 1 failure |
+| the cost regression still bites | the same harness with `--shipped-dir <round 3>`: 1 failure |
+| the soname-alias regression still bites | the same harness with `--shipped-dir <round 2>`: 2 failures |
+| the round 1 regressions still bite | the same harness with `--shipped-dir <submitted>`: 19 failures |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, clean |
+| one walk, one index, index first | instrumented run: `WALK` 1, `INDEX` 1, first log line `INDEX`, `READ` 10 |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| step 0, 1 and 2 still answer | each `OBJECTIVE MET` on the same host in the same session |
+| the aggregate | exit 5, steps 0 to 3 exit 0, steps 4 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0 |
+| harness lint | `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0 |
+
+#### Architecture assessment for step 3 toolchain-runtime-closure (round 5)
+
+The boundary is unchanged. `closure_rules_physical` reads the reader's link map
+exactly as the rule already reads the subject records, and calls nothing. No new
+host command was introduced.
+
+#### Cost assessment for step 3 toolchain-runtime-closure (round 5)
+
+One `find`, one provider enumeration, one reader call per ELF, one hash lookup
+per name, and one component-wise resolution per DISTINCT selected path, cached.
+The cost case measures the rule at two alias populations and still reports flat
+work per pair.
+
+#### Feature integrity assessment for step 3 toolchain-runtime-closure (round 5)
+
+The three earlier alias behaviours are preserved: the outside-scope duplicate is
+still named, the soname target is still absent, and the scaling population still
+resolves. The installer is untouched, steps 0, 1 and 2 pass unchanged, and the
+aggregate is the expected red baseline.
+
+#### R3b for step 3 toolchain-runtime-closure (round 5)
+
+Unchanged, open, and with the specification owner. This request exists because
+R5 was new implementation evidence the reviewer asked to see.
+
+### Implementation report for step 3 toolchain-runtime-closure (round 5)
+
+#### What changed since round 4 for step 3 toolchain-runtime-closure (round 5)
+
+One repair and its fixtures. Rounds 1 to 4 record the rest.
+
+#### The selected path is resolved component by component for step 3 toolchain-runtime-closure (round 5)
+
+`closure_rules_physical` takes a selected provider path and returns the path the
+walk recorded for that file. It rebuilds the path one component at a time, and
+after appending each component it resolves that prefix while the link map names
+it, up to the same eight-hop bound:
+
+- a DIRECTORY component that is a link is applied as soon as it is appended, so
+  everything after it is built on the physical directory;
+- the FINAL component that is a link is applied last, which is the soname shape
+  round 2 added.
+
+Both are needed and the order matters: applying the final name first would look
+it up under a directory that does not hold it.
+
+The result is cached in `CLOSURE_RULES_PHYSICAL`, keyed by the input path. The
+distinct selected paths are bounded by the distinct `DT_NEEDED` names, and each
+is resolved once however many edges choose it, so the cost stays a lookup. The
+function reports through a global rather than stdout, because a command
+substitution would run it in a subshell and lose the cache with it.
+
+The rule's edge loop now marks the selected path reached and then the physical
+path it resolves to. The previous single-step chase over the final component is
+gone, subsumed by the component walk.
+
+#### The fixtures for step 3 toolchain-runtime-closure (round 5)
+
+Four rows in a tree of their own, because the alias has to be a tool root's
+immediate subdirectory for `build_elf_rpath` to put it in scope:
+
+- `dir-alias-target`, the real file at `version/lib/libcplxdir.so.1.2.3` carrying
+  the soname;
+- `dir-alias-soname`, the soname link beside it;
+- `dir-alias-directory`, `current -> version`;
+- `dir-alias-consumer`, an object that names the soname.
+
+`provider-donor-need` is planted there too, so the run is ACCEPTED and the alias
+result is read from a tree with nothing else wrong in it.
+
+Scope order puts `current/lib` before `version/lib`, so the index selects through
+the alias, which the case asserts first: without that control it would be a case
+about a directory nothing selects.
+
+#### What was not changed for step 3 toolchain-runtime-closure (round 5)
+
+No installer function, no configuration module, no contract entry, no plan or
+design document, no commit group membership or ordering, and nothing in
+`closure_elf.sh` or `closure_check.sh`. The review transcript remains
+deliberately unstaged.
+
+### Change summary for step 3 toolchain-runtime-closure (round 5)
+
+#### Staged paths for step 3 toolchain-runtime-closure (round 5)
+
+- `docs/v0.27.0/fixtures.closure-corpus.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- `src/setups/env/bin/closure_check.sh`
+- `src/setups/env/bin/closure_elf.sh`
+- `src/setups/env/bin/closure_rules.sh`
+
+The review transcript is modified and DELIBERATELY UNSTAGED, as in every round
+since the second.
+
+#### Commit groups, least to most dependent for step 3 toolchain-runtime-closure (round 5)
+
+| Group | Subject | Path |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 3 fixture rows` | `docs/v0.27.0/fixtures.closure-corpus.txt` |
+| 2 | `feat(closure): read every shipped ELF once` | `src/setups/env/bin/closure_elf.sh` |
+| 3 | `feat(closure): refuse an unresolvable DT_NEEDED` | `src/setups/env/bin/closure_rules.sh` |
+| 4 | `feat(closure): run the subject phase in the checker` | `src/setups/env/bin/closure_check.sh` |
+| 5 | `test(closure): add the step 3 subject suite` | `docs/v0.27.0/verify.closure-check.sh` |
+| 6 | `test(closure): retain the step 3 host capture` | `docs/v0.27.0/verify.closure.step3.rhel.txt` |
+| 7 | `docs(toolchain-runtime-closure): record step 3 validation` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
+
+MEMBERSHIP, GROUPING, ORDER AND SUBJECTS ARE UNCHANGED across all five rounds.
+`commit-plan-check.bat --format json` returns state valid, ready true, seven
+groups, no diagnostics.
+
+#### What each group's body gained this round for step 3 toolchain-runtime-closure (round 5)
+
+- Group 1: the four `dir-alias` rows and the count moving from 28 to 32.
+- Group 3: the component-wise resolution of the selected path, with its cache.
+- Group 5: the directory-alias regression and its control.
+- Group 6: the 113-case run and the round 4 repair section.
+- Group 7: R5 closed, R3b the single remaining item.
+
+Groups 2 and 4 are unchanged this round.
+
+#### Line counts for step 3 toolchain-runtime-closure (round 5)
+
+| File | Round 4 | Round 5 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 628 | 628 |
+| `src/setups/env/bin/closure_elf.sh` | 448 | 448 |
+| `src/setups/env/bin/closure_rules.sh` | 169 | 214 |
+| `docs/v0.27.0/verify.closure-check.sh` | 2940 | 2981 |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | 170 | 184 |
+| `docs/v0.27.0/verify.closure.step3.rhel.txt` | 587 | 630 |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | 1850 | 1894 |
+
+### Writer response for step 3 toolchain-runtime-closure (round 5)
+
+Writer response:
+
+#### Accepted feedback from round 4 for step 3 toolchain-runtime-closure (round 5)
+
+R5 is accepted as correct and is repaired. It is a regression the R4 repair
+introduced: the identity sweep R4 replaced was prefix-agnostic and handled a
+symlinked directory for free, and the whole-path map that replaced it could not.
+The layout is the `current` alias this effort already reads, so this was the
+common case rather than an exotic one, and the requestor should have carried the
+sweep's coverage into the map rather than assuming a whole-path key was enough.
+
+The reviewer's note that GNU `find`'s `-printf` introduces no extra executable
+and needs no tool-list entry is accepted as recorded.
+
+#### Disagreement for step 3 toolchain-runtime-closure (round 5)
+
+None.
+
+#### What the reviewer may want to look at first for step 3 toolchain-runtime-closure (round 5)
+
+- The resolution now walks the path and resolves EACH PREFIX, which subsumes the
+  round 4 single-step chase over the final component. The order is load bearing:
+  a directory link has to be applied before the name inside it means anything.
+- The cache is keyed by the input path and lives in the module, and the function
+  reports through a global rather than stdout, because a command substitution
+  would run it in a subshell and lose the cache. That is the same reason the
+  configuration module's lexer reports through globals.
+- The directory-alias case has its own tree. The alias must be a tool root's
+  immediate subdirectory to be in scope at all, and adding a third root to the
+  main tree would have moved every count in the subject cases for a reason that
+  has nothing to do with what they assert.
+- Its first assertion is the control: the index must actually select THROUGH the
+  alias. Without it the case would pass on a tree where nothing selects that
+  directory, which is the failure mode the round 3 cost case had.
+
+#### The route for R3b for step 3 toolchain-runtime-closure (round 5)
+
+Unchanged and agreed by both roles: it is with the specification owner. The
+requestor has put the decision and its two routes to the human, and this request
+exists because R5 was new implementation evidence the reviewer asked to see, not
+to re-argue R3b.
+
+### Reviewer focus for step 3 toolchain-runtime-closure (round 5)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-5 -->
+
+## Round 5 by reviewer - Step 3
+
+- Recorded: 2026-09-07T14:35:03+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Baseline index tree: 15d08e7f18b02eaba6e2b433ca1d4ba28ede2eec
+
+Assessed index tree: 7c986b096693e7c9eaf65da26860282da55414b9
+
+### Implementation check for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Result:
+
+No. Step 3 has NOT been fully implemented.
+
+The direct current-to-version layout is repaired and the 113-case suite passes.
+R5 still mishandles aliases introduced by substituted targets, parent components
+following directory links, and a host-resolvable nine-link chain. These related
+paths were tested together. R3b remains the agreed specification-owner decision.
+R1/R2/R4 and the existing direct SONAME/duplicate-copy controls remain resolved.
+
+Validation plan effects:
+
+Only the reviewed Step 3 section changed: the No verdict summary, the complete
+R5 missing-work list, path-resolution assessment and independent results. The
+launcher attributed the exact patch and only that patch was staged. R3b remains;
+no other step, plan, design, document-level status or umbrella row was changed.
+
+### Pre-repair mandatory checks and coverage for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+All nine mandatory commands were independently run and passed their declared
+expectations. Local lint: exit 0 over 48 scripts. Harness ShellCheck: exit 0.
+Installer-purity grep: no matches, expected exit 1. Installer HEAD diff: empty,
+exit 0. RHEL closure Steps 0/1/2/3: 64/70/91/113 cases; relocation Step 3 with
+the declared capability: 104 cases. All harnesses exited 0 with zero failures.
+
+The three production scripts, harness and corpus match local SHA-256 digests on
+RHEL `/tmp/cplx-step3`. Output: `.reviews/a.codex.s3r5.host-validation.txt`.
+Additional executable probes and output:
+`.reviews/a.codex.s3r5.path-probes.sh` and
+`.reviews/a.codex.s3r5.path-probes.txt`. Every probe uses the production index,
+walk and rule with real files, and the host confirms the selected alias and
+reported subject are the same file. Validation changed no tracked paths.
+
+### Resolved validation set and sources for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+```json
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 3",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 0",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 1",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 2",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "shellcheck -S warning docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+```
+
+### Resolver drift and direction for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+None. The project floor was reloaded and the current resolver matches all nine
+received commands and their project/plan/request source labels. The union is
+unchanged; no mandatory evidence was omitted.
+
+### Repository state around validation for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Request-time and independently captured baseline trees match:
+`15d08e7f18b02eaba6e2b433ca1d4ba28ede2eec`. Plan, Step 3, umbrella, round 5 and occurrence 1
+agree across envelope and prose. Assessed index after attributable metadata
+staging: `7c986b096693e7c9eaf65da26860282da55414b9`. Mandatory-validation comparison reports no
+changed paths. Final comparison names only the exact Step 3 validation plan and
+its index update. The umbrella digest is unchanged. Existing unstaged transcript
+content was not read as working context, staged or manually edited.
+
+### Repair inventory for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Repairs made:
+
+- No substantive reviewer repair was made. The attributable Step 3 validation
+- section was updated and staged as polishing-only review metadata. `a.commit`
+- final-group prose was refreshed for unresolved R3b/R5, also polishing-only
+- metadata. Production code, tests, fixtures, group membership, ordering, scopes,
+- subjects and paths remain unchanged by the reviewer.
+
+Paths staged:
+
+- - `docs/v0.27.0/fixtures.closure-corpus.txt`
+- - `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- - `docs/v0.27.0/verify.closure-check.sh`
+- - `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- - `src/setups/env/bin/closure_check.sh`
+- - `src/setups/env/bin/closure_elf.sh`
+- - `src/setups/env/bin/closure_rules.sh`
+
+### Commit plan assessment for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Independent checker before assessment and after metadata staging: exit 0,
+state valid, ready true, seven groups, no diagnostics. Seven staged paths are
+covered exactly once in dependency order: corpus, reader, rules, entry point,
+harness, capture and validation documentation. Subjects/scopes remain accurate;
+last-group prose now reflects the round 5 No verdict. Mechanical readiness passes
+and does not authorize a commit.
+
+### Findings and boundaries for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Unresolved findings:
+
+#### R5 remains: Resolve substituted targets with filesystem path semantics
+
+- Priority: medium. Locations: `closure_rules_physical` in
+- `src/setups/env/bin/closure_rules.sh` and `closure_elf_link_path` in
+- `src/setups/env/bin/closure_elf.sh`.
+- The new component loop handles directory links only in the original selected
+- path. A link replacement assigns the whole target to `prefix`, then only checks
+- whether that whole target is another map key. It never processes directory
+- components introduced inside the target. Separately, the reader reduces `..`
+- lexically before those components can be resolved. The eight-hop limit then
+- caches an intermediate link as a physical path even when the host resolves the
+- complete chain.
+- Three real-file production probes reproduce false UNREFERENCED-BY-EDGE results:
+- | Shape | Host-selected object | Incorrect cached result |
+- | --- | --- | --- |
+- | `providers/libprobe.so -> ../current/lib/libprobe.so.1.2`, `current -> version` | `version/lib/libprobe.so.1.2` | `current/lib/libprobe.so.1.2` |
+- | `providers/libprobe.so -> ../linkdir/../lib/libprobe.so.1.2`, `linkdir -> version/deep` | `version/lib/libprobe.so.1.2` | `pkg/lib/libprobe.so.1.2` |
+- | nine valid links ending at the same real library | `version/lib/libprobe.so.1.2` | `providers/link8` |
+- Each case prints `KERNEL_SAME_FILE=yes` using `-ef` on the selected provider and
+- the subject that the checker reports unreferenced. These are failures of the
+- same alias-resolution obligation, gathered together rather than as separate
+- requests for special cases.
+- Use one component-resolution algorithm for both the initial path and substituted
+- link targets. Preserve raw target components until symlink expansion has occurred;
+- apply `..` to the directory actually reached. Detect cycles/unresolved states
+- without silently caching a partially chased path as physical, and support valid
+- resolvable chains. Keep cache/index reuse and the passing operation-count bound;
+- do not restore an inventory scan. Add all three regressions alongside the
+- current-directory, direct-SONAME and duplicate-copy controls.
+
+#### R3b remains with the specification owner
+
+- The declared entry-point input and full-finding definition still require the
+- agreed specification decision. Nothing in this round changes that classification
+- or grants an amendment. Keep No until the approved plan and behavior agree;
+- use the requestor's human-decision route for this obligation.
+
+Boundary-crossing work:
+
+- No specification amendment was made. R3b remains with the specification owner.
+- R5 is incomplete implementation of path resolution; this review does not invent
+- a new entry-point grammar or packaging rule. The claim that a chain deeper than
+- eight links is a packaging defect has no approved rule in the reviewed plan,
+- and the real nine-link probe resolves successfully on the supported host.
+- The existing Step 5 report-extraction checkpoint remains sufficient for the
+- 628-line entry point. No literal Human guidance block was supplied.
+
+### Writer instructions for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Finish R5 with one consistent component resolver, covering substituted target
+prefixes, parent-component ordering, and the valid chain reproduced here. Keep
+raw link targets until resolution and cache only a resolved fact. Add the three
+regressions together while preserving cost, current-alias, SONAME and duplicate
+controls; rerun the mandatory union. Continue R3b through its unchanged
+specification-owner route. Do not publish a commit-ready claim while either
+obligation remains or treat this advisory answer as authorization to amend the
+specification or commit.
+
+### Decision rationale for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Disposition: changes-requested.
+
+| Readiness floor | Result |
+| --- | --- |
+| Exact identity | Pass |
+| Implementation completeness | Fail: R3b/R5 remain |
+| Mandatory validation and coverage | Nine commands pass; three related R5 regressions missing |
+| Staged attribution | Pass: only attributable Step 3 metadata staged |
+| Unresolved findings | Fail: R3b/R5 remain |
+| a.commit | Pass: valid, ready true, seven groups, no diagnostics |
+
+The originally reported directory case is fixed, but the full resolver remains
+incorrect on related valid paths. R4's product-bound repair stays intact. No
+substantive reviewer repair was made. This answer authorizes no commit.
+
+### Final reviewer decision for step 3 toolchain-runtime-closure (exchange 1) (round 5)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3-round-5 -->
+
+## Round 6 by requestor - Step 3
+
+- Recorded: 2026-09-07T14:49:59+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 toolchain-runtime-closure (round 6)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 3
+Review round: 6
+
+### Code review evidence for step 3 toolchain-runtime-closure (round 6)
+
+request_index_tree: f00c69a21d096fbc90d77c1def06ed261e5dceec
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -S warning docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 3 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): read every shipped ELF once
+group 2 path: src/setups/env/bin/closure_elf.sh
+group 3: feat(closure): refuse an unresolvable DT_NEEDED
+group 3 path: src/setups/env/bin/closure_rules.sh
+group 4: feat(closure): run the subject phase in the checker
+group 4 path: src/setups/env/bin/closure_check.sh
+group 5: test(closure): add the step 3 subject suite
+group 5 path: docs/v0.27.0/verify.closure-check.sh
+group 6: test(closure): retain the step 3 host capture
+group 6 path: docs/v0.27.0/verify.closure.step3.rhel.txt
+group 7: docs(toolchain-runtime-closure): record step 3 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step3.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+```
+
+### Requestor assessment for step 3 toolchain-runtime-closure (round 6)
+
+#### Requestor verdict for step 3 toolchain-runtime-closure (round 6)
+
+No. Step 3 has NOT been fully implemented.
+
+The three shapes round 5 reproduced are repaired, with a regression for each that
+fails against the round 5 module. R3b remains, unchanged and with the
+specification owner. The suite is green on the RHEL 9.8 build host at 124 cases
+and zero failures.
+
+#### R5, repaired properly this time for step 3 toolchain-runtime-closure (round 6)
+
+Round 5 named three faults in one obligation, and they were three symptoms of the
+same mistake: the resolution treated a link target as a DESTINATION rather than
+as a PATH.
+
+- **A component inside a target was never resolved.** The loop substituted the
+  target whole and then asked only whether that whole target was another link.
+- **`..` was reduced lexically when the target was recorded**, before the
+  components before it had been expanded. `..` applies to the directory the
+  resolution actually REACHED, and a component earlier in the path may be a link
+  that moves it.
+- **The hop bound cached a partially chased path** as though it were physical.
+
+The resolution is now the filesystem's own. Components are taken one at a time
+from a queue; a link's target is SPLICED BACK into that queue rather than taken
+whole, so its own components are resolved too; an absolute target restarts from
+the root; and `..` pops the directory reached so far. The reader records the raw
+target and reduces nothing, which is the change that makes the `..` rule
+possible. A chase past the cycle guard is typed UNDETERMINED and NOTHING is
+cached.
+
+THE CYCLE GUARD IS NOT A POLICY ANY MORE. Round 5 was right that "deeper than
+eight is a packaging defect" had no approved rule behind it, and that a nine-link
+chain resolves on the supported host. The bound is the kernel's own SYMLOOP_MAX
+now, so a chain a loader follows this checker follows, and a cycle still
+terminates.
+
+#### The three regressions for step 3 toolchain-runtime-closure (round 6)
+
+Each is built whole and each asserts with `-ef` that the HOST reaches the same
+file, so the expectation is the filesystem's answer rather than the harness's:
+
+| Shape | What it catches |
+| --- | --- |
+| a target that climbs out of a sibling provider directory and comes back down through `current -> version` | a component INSIDE the target left unresolved |
+| a target that goes up through a link directory, `../linkdir/../lib/x` | `..` reduced before the link was expanded |
+| nine valid links ending at one library | a bound tighter than the kernel's refusing a tree that works |
+
+Against the ROUND 5 module, through `--shipped-dir`: 124 cases, 4 failures, all
+three libraries reported reachable by nothing and the unresolved counter absent.
+
+#### Evidence named rather than summarised for step 3 toolchain-runtime-closure (round 6)
+
+| Obligation | Evidence |
+| --- | --- |
+| step 3 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 3`: exit 0, 124 cases, 0 failures |
+| the chain regressions bite | the same harness with `--shipped-dir <round 5>`: 4 failures |
+| the directory-alias regression still bites | the same harness with `--shipped-dir <round 4>`: 1 failure |
+| the cost regression still bites | the same harness with `--shipped-dir <round 3>`: 1 failure |
+| the soname-alias regression still bites | the same harness with `--shipped-dir <round 2>`: 2 failures |
+| the round 1 regressions still bite | the same harness with `--shipped-dir <submitted>`: 19 failures |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, clean |
+| one walk, one index, index first | instrumented run: `WALK` 1, `INDEX` 1, first log line `INDEX`, `READ` 10 |
+| the alias cost is still flat | 6 and 24 pairs, work per pair unchanged |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| step 0, 1 and 2 still answer | each `OBJECTIVE MET` on the same host in the same session |
+| the aggregate | exit 5, steps 0 to 3 exit 0, steps 4 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0 |
+| harness lint | `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0 |
+
+#### Architecture assessment for step 3 toolchain-runtime-closure (round 6)
+
+The boundary is unchanged. The reader records what the walk observed, raw; the
+rule resolves it. No new host command was introduced.
+
+`closure_check.sh` is 636 lines now, still under the 650 ceiling and inside the
+at-risk band, with 14 lines of headroom. The eighth summary row and the fourth
+verdict line are what grew it: a link chain that did not resolve is a third way
+an input can be unavailable, and it refuses the green like the other two.
+
+#### Cost assessment for step 3 toolchain-runtime-closure (round 6)
+
+One `find`, one provider enumeration, one reader call per ELF, one hash lookup
+per name, and one component-wise resolution per DISTINCT selected path, cached.
+The component walk uses a head index rather than shifting the queue, so walking a
+path is linear in its own length. The cost case still reports flat work per alias
+pair at both populations.
+
+#### Feature integrity assessment for step 3 toolchain-runtime-closure (round 6)
+
+Every earlier alias behaviour is preserved: the outside-scope duplicate is still
+named, the soname target and the directory-alias target are still absent, and the
+scaling population still resolves. The installer is untouched, steps 0, 1 and 2
+pass unchanged, and the aggregate is the expected red baseline.
+
+#### R3b for step 3 toolchain-runtime-closure (round 6)
+
+Unchanged, open, and with the specification owner. This request exists because
+R5's repair is new implementation evidence the reviewer asked to see.
+
+### Implementation report for step 3 toolchain-runtime-closure (round 6)
+
+#### What changed since round 5 for step 3 toolchain-runtime-closure (round 6)
+
+One repair, its three fixtures, and the counter the repair's failure mode needs.
+Rounds 1 to 5 record the rest.
+
+#### The reader records the target raw for step 3 toolchain-runtime-closure (round 6)
+
+`closure_elf_link_path` is gone. The map now holds exactly what the link carries,
+because joining and reducing it at record time is what made `..` wrong: a
+component before it may be a link that moves the directory `..` climbs out of, so
+the reduction has to happen while the path is being walked, not before.
+
+#### The rule resolves the path the way the kernel does for step 3 toolchain-runtime-closure (round 6)
+
+`closure_rules_physical` keeps a queue of components and a resolved prefix:
+
+- a component that is not a link is appended to the prefix;
+- `.` is skipped and `..` pops the prefix, which is the directory the resolution
+  has actually reached;
+- a component that IS a link has its target SPLICED BACK into the queue, so the
+  target's own components are resolved in turn, and an absolute target empties
+  the prefix first because that is what a link to an absolute path means;
+- the queue is consumed through a HEAD INDEX rather than by shifting, so walking
+  a path is linear in its own length rather than quadratic.
+
+A chase that exceeds `CLOSURE_RULES_LINK_HOPS` returns failure and caches
+nothing. The caller then prints `UNDETERMINED|resolution|<path>|<reason>` and
+counts it, because a link chain that could not be followed is an input that could
+not be obtained, which is the one thing this module's UNDETERMINED is reserved
+for. `closure_check.sh` gained the summary row and the verdict line for it, so
+the run exits 5 rather than reporting a subject nobody can place.
+
+`CLOSURE_RULES_LINK_HOPS` is 40, the kernel's own SYMLOOP_MAX. Round 5 was right
+that the previous 8 was a policy this effort had not been granted: a nine-link
+chain resolves on the supported host, and refusing it would have been the checker
+disagreeing with the loader it exists to model.
+
+#### The three fixtures for step 3 toolchain-runtime-closure (round 6)
+
+`fixture_chain` builds each shape whole, because the shape IS the fixture: a real
+library under `version/lib`, the links that reach it, and a consumer that names
+the entry link's soname so an edge selects it.
+
+- `chain-relative-parent`: the entry link sits in `root/usr/lib64` and its target
+  is `../../../current/lib/x`, so it climbs out and comes back down THROUGH the
+  alias directory. The component inside the target is itself a link.
+- `chain-through-updir`: the target is `../../linkdir/../lib/x` with `linkdir` a
+  link to `version/deep`, so `..` must apply to `version/deep` and not to the
+  directory the text names.
+- `chain-nine-links`: nine links in sequence ending at the library.
+
+`chain-resolves` asserts with `-ef` that the entry link and the real library are
+one file on the HOST. That is the reviewer's own `KERNEL_SAME_FILE` control, and
+it is what makes the expectation the filesystem's answer rather than the
+harness's opinion.
+
+#### What was not changed for step 3 toolchain-runtime-closure (round 6)
+
+No installer function, no configuration module, no contract entry, no plan or
+design document, and no commit group membership or ordering. The review
+transcript remains deliberately unstaged.
+
+### Change summary for step 3 toolchain-runtime-closure (round 6)
+
+#### Staged paths for step 3 toolchain-runtime-closure (round 6)
+
+- `docs/v0.27.0/fixtures.closure-corpus.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- `src/setups/env/bin/closure_check.sh`
+- `src/setups/env/bin/closure_elf.sh`
+- `src/setups/env/bin/closure_rules.sh`
+
+The review transcript is modified and DELIBERATELY UNSTAGED, as in every round
+since the second.
+
+#### Commit groups, least to most dependent for step 3 toolchain-runtime-closure (round 6)
+
+| Group | Subject | Path |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 3 fixture rows` | `docs/v0.27.0/fixtures.closure-corpus.txt` |
+| 2 | `feat(closure): read every shipped ELF once` | `src/setups/env/bin/closure_elf.sh` |
+| 3 | `feat(closure): refuse an unresolvable DT_NEEDED` | `src/setups/env/bin/closure_rules.sh` |
+| 4 | `feat(closure): run the subject phase in the checker` | `src/setups/env/bin/closure_check.sh` |
+| 5 | `test(closure): add the step 3 subject suite` | `docs/v0.27.0/verify.closure-check.sh` |
+| 6 | `test(closure): retain the step 3 host capture` | `docs/v0.27.0/verify.closure.step3.rhel.txt` |
+| 7 | `docs(toolchain-runtime-closure): record step 3 validation` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
+
+MEMBERSHIP, GROUPING, ORDER AND SUBJECTS ARE UNCHANGED across all six rounds.
+`commit-plan-check.bat --format json` returns state valid, ready true, seven
+groups, no diagnostics.
+
+#### What each group's body gained this round for step 3 toolchain-runtime-closure (round 6)
+
+- Group 1: the three chain rows and the count moving from 32 to 35.
+- Group 2: the link target recorded raw rather than joined and reduced.
+- Group 3: the filesystem-rule resolution, the UNDETERMINED for a chase past the
+  guard, and the guard set at the kernel's own limit.
+- Group 4: the ninth summary row and the fourth verdict line.
+- Group 5: the three chain regressions and their `-ef` assertions.
+- Group 6: the 124-case run and the round 5 repair section.
+- Group 7: R5 closed across all three shapes, R3b the single remaining item.
+
+#### Line counts for step 3 toolchain-runtime-closure (round 6)
+
+| File | Round 5 | Round 6 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_check.sh` | 628 | 636 |
+| `src/setups/env/bin/closure_elf.sh` | 448 | 432 |
+| `src/setups/env/bin/closure_rules.sh` | 214 | 266 |
+| `docs/v0.27.0/verify.closure-check.sh` | 2981 | 3084 |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | 184 | 204 |
+| `docs/v0.27.0/verify.closure.step3.rhel.txt` | 630 | 676 |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | 1894 | 1917 |
+
+`closure_elf.sh` SHRANK, because `closure_elf_link_path` was removed: the
+reduction it performed was the defect, and the resolution that replaced it lives
+with the rule that needs it.
+
+`closure_check.sh` is at 636 with 14 lines of headroom under the 650 ceiling. The
+Step 5 report-extraction checkpoint is recorded in the validation record and in
+the retained capture, and Step 5's waiver reporting will need more than 14 lines.
+
+### Writer response for step 3 toolchain-runtime-closure (round 6)
+
+Writer response:
+
+#### Accepted feedback from round 5 for step 3 toolchain-runtime-closure (round 6)
+
+All three sub-cases are accepted and repaired, and they were correctly gathered
+as one finding: they are three symptoms of treating a link target as a
+destination rather than as a path. The requestor's component loop resolved the
+components of the ORIGINAL path and none of the components a target introduced,
+which is the same class of mistake as the round 4 whole-path lookup one level in.
+
+The point about the hop bound is accepted with the correction that matters most:
+"a chain deeper than a few hops is a packaging defect" was a rule this effort had
+not been granted, and the nine-link probe is the evidence. The bound is the
+kernel's own SYMLOOP_MAX now, so a chain the loader follows this checker follows.
+
+The point about caching a partial chase is accepted too, and it was the worst of
+the three: a wrong answer stored under a key that later lookups trust. A chase
+past the guard now caches nothing and is typed UNDETERMINED, which makes the run
+non-passing rather than confidently wrong.
+
+#### Disagreement for step 3 toolchain-runtime-closure (round 6)
+
+None.
+
+#### What the reviewer may want to look at first for step 3 toolchain-runtime-closure (round 6)
+
+- The reader no longer normalises anything. `closure_elf_link_path` is gone and
+  the map holds the raw target, because the reduction it did was the defect: `..`
+  can only be applied while walking, against the directory actually reached.
+- The queue is consumed through a head index rather than by shifting, so walking
+  one path is linear in its length. A shift-based queue would have been quadratic
+  in the path depth, which is a small n but the same mistake as R4 in miniature.
+- A chase past the guard is a THIRD kind of unavailable input, beside an
+  unreadable object and an incomplete traversal, and it gets its own summary row
+  and verdict line rather than being folded into either.
+- The three fixtures assert with `-ef` that the host reaches the same file. That
+  is the reviewer's own control, adopted because it is better than the harness
+  restating what it built: the filesystem answers, and the checker has to agree
+  with it.
+
+#### The route for R3b for step 3 toolchain-runtime-closure (round 6)
+
+Unchanged and agreed by both roles: with the specification owner. The requestor
+has put the decision and its two routes to the human. This request exists because
+R5's repair is new implementation evidence, not to re-argue R3b.
+
+### Reviewer focus for step 3 toolchain-runtime-closure (round 6)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-6 -->
+
+## Round 6 by reviewer - Step 3
+
+- Recorded: 2026-09-07T15:00:41+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Baseline index tree: f00c69a21d096fbc90d77c1def06ed261e5dceec
+
+Assessed index tree: 1da43725fb60bb6196cbf80009dad487e944968b
+
+### Implementation check for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Result:
+
+No. Step 3 has NOT been fully implemented.
+
+R1, R2, R3a, R4 and R5 are resolved for the reviewed cases. No remaining
+implementation finding was identified. R3b is the sole readiness blocker:
+the approved specification lacks the declared entry-point input needed for its
+full unreferenced finding. A specification-owner decision is required.
+
+Validation plan effects:
+
+Only Step 3 assessment metadata was changed. Its verdict remains No and
+Missing work identifies R3b as the sole unresolved obligation. The stale R5
+assessment was consolidated into the round 6 result. Other steps, plan,
+design and umbrella were not changed.
+
+### Pre-repair mandatory checks and coverage for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+All nine commands in the resolved union were independently run successfully
+against the reviewed production content. On RHEL, closure Steps 0/1/2/3 passed
+64/70/91/124 cases respectively, and relocation Step 3 passed 104 cases, all
+with zero failures and exit 0. Local lint passed over 48 scripts; harness
+ShellCheck exited 0; installer purity returned no matches (expected exit 1)
+and its HEAD-relative diff exited 0. Production files, harness and corpus
+SHA-256 digests match the host. The alias operation-count regression passed.
+
+All three retained R5 real-file probes now resolve to the correct physical
+subject: a directory alias inside a link target, a parent component after a
+link, and a valid nine-link chain. A cycle control terminates as UNDETERMINED
+with unresolved count 1 and no cache entry. The plan's harness substitute for
+class-based coverage applies to this Bash repository and passes for implemented
+scope. There is no test claiming the missing R3b behavior is implemented.
+Host evidence: .reviews/a.codex.s3r6.host-validation.txt and
+.reviews/a.codex.s3r6.path-probes.txt.
+
+### Resolved validation set and sources for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+```json
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 3",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 0",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 1",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 2",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "shellcheck -S warning docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+```
+
+### Resolver drift and direction for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+None. The freshly resolved nine-command set exactly matches the request, including source provenance.
+
+### Repository state around validation for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Round 6, occurrence 1: baseline index f00c69a21d096fbc90d77c1def06ed261e5dceec;
+assessed index 1da43725fb60bb6196cbf80009dad487e944968b.
+Mandatory validation changed no tracked, untracked or ignored validation paths.
+The final comparison differs only in the attributable Step 3 validation file
+and index after metadata staging. a.commit received a prose correction only.
+Umbrella digest remained 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7.
+No production or harness content changed during this assessment.
+
+### Repair inventory for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Repairs made:
+
+- No substantive repair. The reviewer updated Step 3 validation evidence and
+- corrected a.commit's stale R3b/R5 phrase to the remaining R3b specification
+- obligation. The evidence launcher's attributable patch alone was staged;
+- no whole-file staging or unrelated changes were included.
+
+Paths staged:
+
+- - docs/v0.27.0/fixtures.closure-corpus.txt
+- - docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- - docs/v0.27.0/verify.closure-check.sh
+- - docs/v0.27.0/verify.closure.step3.rhel.txt
+- - src/setups/env/bin/closure_check.sh
+- - src/setups/env/bin/closure_elf.sh
+- - src/setups/env/bin/closure_rules.sh
+
+### Commit plan assessment for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Independent commit-plan-check returned state valid, ready true, seven groups,
+and zero diagnostics before and after review metadata edits. Each staged path
+is accounted for. The grouping result does not override the incomplete Step 3
+verdict or authorize a commit.
+
+### Findings and boundaries for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Unresolved findings:
+
+- R3b - specification boundary, sole remaining blocker.
+- Design Area 2 defines an unreferenced object as reached by no entry point AND
+- no DT_NEEDED edge. Step 3's behavior line computes from collected edges, while
+- its expected outcome retains the conjunction. Declared runtime entry points
+- have no input in the approved Q10 grammar and no implementation step schedules
+- one. The edge-only finding is accurately named, but does not discharge that
+- full obligation. Resolve this through the specification owner: approve the
+- required input and implementation, or explicitly narrow the step in both plan
+- and design and schedule the missing half. A validation note alone cannot do so.
+- All implementation findings R1/R2/R3a/R4/R5 are resolved; this answer requests
+- no further implementation repair within the unchanged scope.
+
+Boundary-crossing work:
+
+- R3b requires a specification-owner decision. The reviewer did not amend the
+- plan, design, grammar or umbrella. The 636-line checker remains below the 650
+- ceiling; retain the report extraction checkpoint before Step 5. That advisory
+- checkpoint is not a separate current readiness blocker.
+
+### Writer instructions for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Consume this answer and use the owning requestor workflow's human decision
+or escalation route for R3b. Do not schedule another unchanged implementation
+review to resolve a specification decision. Preserve the validated repairs and
+keep Step 3 marked No until the approved obligation and implementation agree.
+This answer grants neither specification amendment nor commit authority.
+
+### Decision rationale for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Disposition: changes-requested.
+
+| Readiness floor | Result |
+| --- | --- |
+| Exact identity | Pass: round 6, occurrence 1, Step 3 |
+| Implementation completeness | Fail: R3b specification obligation remains |
+| Mandatory validation and coverage | Pass for implemented scope: all nine commands and retained probes |
+| Staged attribution | Pass: attributable Step 3 metadata only |
+| Unresolved findings | Fail: sole R3b; all implementation findings resolved |
+| a.commit | Pass: valid, ready true, seven groups, no diagnostics |
+
+No substantive reviewer repair occurred. R3b must be resolved by the
+specification owner, not by repeatedly reviewing unchanged implementation.
+No commit is authorized.
+
+### Final reviewer decision for step 3 toolchain-runtime-closure (exchange 1) (round 6)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3-round-6 -->
+
+## Round 6 by human - Step 3 - escalation
+
+- Recorded: 2026-09-07T15:02:00+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: escalation
+
+Escalation of the step 3 code review to the specification owner
+
+## Why automation stops here
+
+Six rounds closed every implementation finding. Round 6 states it plainly: "All
+implementation findings R1/R2/R3a/R4/R5 are resolved; this answer requests no
+further implementation repair within the unchanged scope." One obligation
+remains, R3b, and both roles have recorded the same classification of it: it is a
+specification decision that neither the writer nor the reviewer may take.
+
+Continuing to publish rounds would restate two agreeing positions, which is the
+loop this escalation exists to stop.
+
+## The decision, stated once
+
+Design Area 2 defines the unreferenced finding as "reached by no entry point AND
+by no `DT_NEEDED` edge". RUNTIME ENTRY POINTS are declared data: the interpreter,
+the shipped executables and the declared dynamically loaded locations. No step of
+this plan schedules that declaration and the Q10 grammar carries no record for
+it.
+
+THE REVIEWED PLAN DISAGREES WITH ITSELF about what step 3 owes:
+
+- Step 3 behavior, `closure_report_unreferenced`: "the separate finding, computed
+  from the edges already collected rather than from a second walk";
+- Step 3 expected outcome: "A shipped ELF reached by no entry point and no
+  `DT_NEEDED` edge, otherwise sound, is ACCEPTED and reported unreferenced".
+
+The delivered behaviour matches the first line and is named for the half it
+answers, `UNREFERENCED-BY-EDGE`, so no reader can take the list for the design's
+finding. That is clarification and not scope authorization, and it does not
+discharge the second line.
+
+## The two routes, neither of them the writer's or the reviewer's
+
+1. Approve an entry-point input contract and schedule its implementation. It
+   needs a configuration record the Q10 grammar does not have and a design
+   decision about what counts as a declared entry point.
+2. Authorize a plan and design amendment that explicitly narrows step 3 to the
+   edge half and schedules the remaining half in a later step.
+
+## What is true of the work while this is decided
+
+- The step 3 suite is green on the RHEL 9.8 build host at 124 cases and zero
+  failures, and every finding of the six rounds has a regression that fails
+  against the module it repairs.
+- Steps 0, 1 and 2, the aggregate red baseline and item 2's preserved surface are
+  all green in the same session. The installer is untouched.
+- The validation record reads `No. Step 3 has NOT been fully implemented.` with
+  R3b as the single item in Missing work and both routes named.
+- `a.commit` is prepared, valid and unchanged in membership, grouping, order and
+  subjects across all six rounds. Nothing is committed.
+
+## What happens after the decision
+
+Whichever route the specification owner takes, the exchange resumes from the
+recorded evidence: route 1 adds implementation work to this step and a new round;
+route 2 amends the documents and the same evidence then supports a Yes.
+
+<!-- review-entry-id: escalation-round-6 -->
+
+## Round 7 by human - Step 3 - human-resolution
+
+- Recorded: 2026-09-07T15:12:28+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: human-resolution
+
+The specification owner's decision on R3b
+
+## The decision
+
+Route 2 of the two the escalation named: AMEND THE PLAN AND THE DESIGN so step 3
+owns the edge half of the unreferenced finding and a later step owns the
+entry-point half with the declaration it needs. Taken on 2026-09-07 by the
+specification owner, who is neither the writer nor the reviewer of this exchange.
+
+## What was amended, and where it is recorded
+
+- **Design Area 2**, `The static subject set is every shipped ELF, and the
+  measurement says why`: the finding is stated as two halves in a table naming
+  each half and its input, and the DECLARED ENTRY-POINT SET is defined as
+  configuration, the locations whose shipped objects are entry points. It is
+  declared and never derived, for the reason that area already gives for the
+  subject rule.
+- **The design acceptance rows** for that finding, split into the edge case and
+  the entry-point case.
+- **Design Q13**, added to the decision table with its date and its rejected
+  alternatives, under a preamble saying the table was amended after its rounds
+  closed rather than silently.
+- **Plan step 3 expected outcome**, narrowed to the edge half and naming the
+  result; the behavior line corrected to the function that shipped.
+- **Plan step 4 fix intent and expected outcome**, which now own the entry-point
+  half, the `CPLX-CLOSURE/1` record that declares the set, and the combined
+  result, with the pair of cases that shows the declaration is read: a declared
+  entry point is NOT reported, and the same object without the declaration IS.
+- **Plan Q13**, with the same treatment as the design's.
+
+## Why this is authoritative evidence rather than a writer's preference
+
+Both roles recorded the same classification before the decision: round 3 accepted
+the requestor's reading that this was a plan and design reconciliation rather
+than an implementation defect, and round 6 confirmed it was the sole remaining
+blocker with no further implementation repair requested. The escalation put the
+two routes to the specification owner, and this is the route taken.
+
+## The state the exchange resumes from
+
+Nothing else changed. The five implementation findings stay repaired, the suite
+stays green at 124 cases and zero failures on the RHEL 9.8 build host, the
+installer stays untouched, and `a.commit` gains one group for the two amended
+documents while every other group keeps its membership, order and subject. The
+validation record now reads `Yes. Step 3 has been fully implemented.` against the
+amended plan, and its Missing work section is gone because its one item is
+scheduled in step 4.
+
+<!-- review-entry-id: human-resolution-round-7 -->
+
+## Round 7 by requestor - Step 3
+
+- Recorded: 2026-09-07T15:14:07+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 toolchain-runtime-closure (round 7)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 3
+Review round: 7
+
+### Code review evidence for step 3 toolchain-runtime-closure (round 7)
+
+request_index_tree: 7a3e8eeaaa3ab01decea5926abd2876edf71d093
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt (sources: request)
+- shellcheck -S warning docs/v0.27.0/verify.closure-check.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): split the unreferenced finding
+group 1 path: docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: test(closure): declare the step 3 fixture rows
+group 2 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 3: feat(closure): read every shipped ELF once
+group 3 path: src/setups/env/bin/closure_elf.sh
+group 4: feat(closure): refuse an unresolvable DT_NEEDED
+group 4 path: src/setups/env/bin/closure_rules.sh
+group 5: feat(closure): run the subject phase in the checker
+group 5 path: src/setups/env/bin/closure_check.sh
+group 6: test(closure): add the step 3 subject suite
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 3 host capture
+group 7 path: docs/v0.27.0/verify.closure.step3.rhel.txt
+group 8: docs(toolchain-runtime-closure): record step 3 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step3.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+```
+
+### Requestor assessment for step 3 toolchain-runtime-closure (round 7)
+
+#### Requestor verdict for step 3 toolchain-runtime-closure (round 7)
+
+Yes. Step 3 has been fully implemented.
+
+This round carries AUTHORIZED SPECIFICATION EVIDENCE rather than an
+implementation repair. Round 6 stated that all implementation findings are
+resolved and requested no further repair; the one remaining blocker, R3b, was the
+reviewed plan disagreeing with itself, and the specification owner has amended
+both documents to settle it.
+
+#### What the specification owner decided for step 3 toolchain-runtime-closure (round 7)
+
+The escalation named two routes. Route 2 was taken on 2026-09-07: narrow step 3
+to the edge half of the unreferenced finding, and schedule the entry-point half
+with the declaration it needs.
+
+| Document | Amendment |
+| --- | --- |
+| Design Area 2 | the finding is stated as TWO HALVES in a table naming each half and its input; the DECLARED ENTRY-POINT SET is defined as configuration, the locations whose shipped objects are entry points, declared and never derived |
+| the design acceptance rows | split into the edge case and the entry-point case |
+| design Q13 | the decision, dated, with its rejected alternatives, under a preamble saying the table was amended after its rounds closed |
+| plan step 3 expected outcome | narrowed to the edge half and naming the result; the behavior line corrected to the function that shipped |
+| plan step 4 fix intent and expected outcome | own the entry-point half, the `CPLX-CLOSURE/1` record that declares the set, and the combined result, with the pair of cases that shows the declaration is read |
+| plan Q13 | the same treatment as the design's |
+
+WHY THE HALF IS SCHEDULED RATHER THAN DROPPED. Step 4 gets it because that is
+where `closure_rules.sh` is completed and where a rule that reads a new
+declaration belongs. The grammar record is declared with the step that uses it,
+because step 2 is closed and its record table is reviewed. The declaration is
+DECLARED and never derived, which is the same refusal Design Area 2 already makes
+for the subject rule: the loading mechanism at issue leaves no static trace, so a
+heuristic over `PT_INTERP`, a file name or a permission bit is wrong in both
+directions.
+
+#### Why step 3 is complete against the amended plan for step 3 toolchain-runtime-closure (round 7)
+
+- The edge half is implemented, and an edge resolves to ONE path through the
+  provider index and then through the links on the way to the file, by the
+  filesystem's own rules.
+- The result is named `UNREFERENCED-BY-EDGE`, so no reader takes it for the
+  design's whole finding. Under the amendment that name is the specified result
+  rather than a caveat.
+- The five implementation findings of the six rounds are repaired, each with a
+  regression that fails against the module it repairs.
+
+#### Evidence named rather than summarised for step 3 toolchain-runtime-closure (round 7)
+
+Every command was re-run after the amendment.
+
+| Obligation | Evidence |
+| --- | --- |
+| step 3 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 3`: exit 0, 124 cases, 0 failures |
+| every regression still bites | `--shipped-dir` against the submitted, round 2, round 3, round 4 and round 5 modules: 19, 2, 1, 1 and 4 failures |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, clean |
+| one walk, one index, index first | instrumented run: `WALK` 1, `INDEX` 1, first log line `INDEX`, `READ` 10 |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| step 0, 1 and 2 still answer | each `OBJECTIVE MET` on the same host in the same session |
+| the aggregate | exit 5, steps 0 to 3 exit 0, steps 4 to 7 refuse by name |
+| preserved surface | `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0 |
+| harness lint | `shellcheck -S warning docs/v0.27.0/verify.closure-check.sh`: exit 0 |
+
+#### Architecture assessment for step 3 toolchain-runtime-closure (round 7)
+
+No code changed this round. The module boundary, the dependency direction and the
+two host-tool contracts are as round 6 assessed them. `closure_check.sh` is 636
+lines, below the 650 ceiling, with the Step 5 report-extraction checkpoint
+recorded in the validation record and the capture.
+
+#### Cost assessment for step 3 toolchain-runtime-closure (round 7)
+
+Unchanged: one `find`, one provider enumeration, one reader call per ELF, one
+hash lookup per name, one cached component-wise resolution per distinct selected
+path. The cost case still reports flat work per alias pair at both populations.
+
+#### Feature integrity assessment for step 3 toolchain-runtime-closure (round 7)
+
+Unchanged and re-run: the installer is untouched, steps 0, 1 and 2 pass, the
+aggregate is the expected red baseline, and the preserved surface is green.
+
+#### What the reviewer is being asked to assess for step 3 toolchain-runtime-closure (round 7)
+
+The amendment as authorized specification evidence, and step 3 against the
+amended plan. The requestor is not asking the reviewer to approve the amendment's
+content: that was the specification owner's decision, and this request records it
+where the exchange can see it.
+
+### Implementation report for step 3 toolchain-runtime-closure (round 7)
+
+#### What changed since round 6 for step 3 toolchain-runtime-closure (round 7)
+
+NO PRODUCTION CODE, NO HARNESS, NO CORPUS. Round 6 requested no further
+implementation repair, and none was made. Two reviewed documents were amended by
+the specification owner, and the records that depend on them follow.
+
+#### The two amended documents for step 3 toolchain-runtime-closure (round 7)
+
+`docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md`
+
+- Design Area 2 states the unreferenced finding as two halves in a table, each
+  with its input: the edge half from the collected `DT_NEEDED` edges, the
+  entry-point half from the DECLARED ENTRY-POINT SET.
+- That set is defined as configuration: locations, relative to the archive, whose
+  shipped ELF objects are entry points. The measured motivation is named, the
+  interpreter, the shipped executable directories, `lib-dynload` and
+  `site-packages`, and so is the reason it is declared rather than derived.
+- The acceptance rows for the finding are split into the two cases.
+- Q13 is added to the decision table, dated 2026-09-07, with its rejected
+  alternatives, under a preamble stating that the table was amended after its
+  four rounds closed. The paragraph it changes carries the same date.
+
+`docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+
+- Step 3 expected outcome is narrowed to the edge half and names the result. The
+  line records what it used to say and why it changed, so the narrowing is
+  visible rather than inferred from a diff.
+- Step 3 behavior names `closure_report_unreferenced_by_edge`, the function that
+  shipped, and states that an edge reaches a PATH through the links on the way to
+  the file.
+- Step 4 fix intent gains the entry-point half, the `CPLX-CLOSURE/1` record that
+  declares the set, and the reason the grammar addition belongs to the step that
+  uses it rather than to the closed step 2.
+- Step 4 expected outcome gains the pair that shows the declaration is read: a
+  declared entry point is NOT reported by the combined finding, and the same
+  object without the declaration IS.
+- Q13 is added to the plan's decision table with the same treatment.
+
+#### The records that follow them for step 3 toolchain-runtime-closure (round 7)
+
+- The validation record's step 3 verdict is `Yes. Step 3 has been fully
+  implemented.` against the amended plan, its Missing work section is gone
+  because its one item is now scheduled, and its architecture check records the
+  amendment rather than the gap. Step 4's goal and expectations carry the
+  scheduled half.
+- The retained capture gains a section stating the two plan lines that disagreed,
+  the amendment that settled them, and what each document now says.
+- `a.commit` gains ONE group, first in the order, for the two amended documents.
+  Every other group keeps its membership, its order and its subject.
+
+#### What was not changed for step 3 toolchain-runtime-closure (round 7)
+
+No installer function, no checker module, no harness, no corpus, no contract, and
+no umbrella row. The review transcript remains deliberately unstaged.
+
+### Change summary for step 3 toolchain-runtime-closure (round 7)
+
+#### Staged paths for step 3 toolchain-runtime-closure (round 7)
+
+- `docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/fixtures.closure-corpus.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step3.rhel.txt`
+- `src/setups/env/bin/closure_check.sh`
+- `src/setups/env/bin/closure_elf.sh`
+- `src/setups/env/bin/closure_rules.sh`
+
+The first and third are new to the staged set this round: they are the two
+amended documents. The review transcript is modified and DELIBERATELY UNSTAGED,
+as in every round since the second.
+
+#### Commit groups, least to most dependent for step 3 toolchain-runtime-closure (round 7)
+
+| Group | Subject | Path |
+| --- | --- | --- |
+| 1 | `docs(toolchain-runtime-closure): split the unreferenced finding` | the design and the plan |
+| 2 | `test(closure): declare the step 3 fixture rows` | `docs/v0.27.0/fixtures.closure-corpus.txt` |
+| 3 | `feat(closure): read every shipped ELF once` | `src/setups/env/bin/closure_elf.sh` |
+| 4 | `feat(closure): refuse an unresolvable DT_NEEDED` | `src/setups/env/bin/closure_rules.sh` |
+| 5 | `feat(closure): run the subject phase in the checker` | `src/setups/env/bin/closure_check.sh` |
+| 6 | `test(closure): add the step 3 subject suite` | `docs/v0.27.0/verify.closure-check.sh` |
+| 7 | `test(closure): retain the step 3 host capture` | `docs/v0.27.0/verify.closure.step3.rhel.txt` |
+| 8 | `docs(toolchain-runtime-closure): record step 3 validation` | the validation plan |
+
+THE AMENDMENT GROUP IS FIRST because everything after it is implementation of
+what it specifies: the code, the cases and the capture all read the narrowed
+step, and the validation record states the verdict against it. The other seven
+groups keep the membership, order and subjects they have held since round 1.
+`commit-plan-check.bat --format json` returns state valid, ready true, eight
+groups, no diagnostics.
+
+#### Line counts for step 3 toolchain-runtime-closure (round 7)
+
+| File | Round 6 | Round 7 |
+| --- | --- | --- |
+| `docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md` | 896 | 932 |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` | 1950 | 1996 |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | 1917 | 1916 |
+| `docs/v0.27.0/verify.closure.step3.rhel.txt` | 676 | 714 |
+
+No source file changed this round.
+
+### Human guidance and writer response for step 3 toolchain-runtime-closure (round 7)
+
+Human guidance:
+
+#### The specification owner's decision on R3b for step 3 toolchain-runtime-closure (round 7)
+
+##### The decision for step 3 toolchain-runtime-closure (round 7)
+
+Route 2 of the two the escalation named: AMEND THE PLAN AND THE DESIGN so step 3
+owns the edge half of the unreferenced finding and a later step owns the
+entry-point half with the declaration it needs. Taken on 2026-09-07 by the
+specification owner, who is neither the writer nor the reviewer of this exchange.
+
+##### What was amended, and where it is recorded for step 3 toolchain-runtime-closure (round 7)
+
+- **Design Area 2**, `The static subject set is every shipped ELF, and the
+  measurement says why`: the finding is stated as two halves in a table naming
+  each half and its input, and the DECLARED ENTRY-POINT SET is defined as
+  configuration, the locations whose shipped objects are entry points. It is
+  declared and never derived, for the reason that area already gives for the
+  subject rule.
+- **The design acceptance rows** for that finding, split into the edge case and
+  the entry-point case.
+- **Design Q13**, added to the decision table with its date and its rejected
+  alternatives, under a preamble saying the table was amended after its rounds
+  closed rather than silently.
+- **Plan step 3 expected outcome**, narrowed to the edge half and naming the
+  result; the behavior line corrected to the function that shipped.
+- **Plan step 4 fix intent and expected outcome**, which now own the entry-point
+  half, the `CPLX-CLOSURE/1` record that declares the set, and the combined
+  result, with the pair of cases that shows the declaration is read: a declared
+  entry point is NOT reported, and the same object without the declaration IS.
+- **Plan Q13**, with the same treatment as the design's.
+
+##### Why this is authoritative evidence rather than a writer's preference for step 3 toolchain-runtime-closure (round 7)
+
+Both roles recorded the same classification before the decision: round 3 accepted
+the requestor's reading that this was a plan and design reconciliation rather
+than an implementation defect, and round 6 confirmed it was the sole remaining
+blocker with no further implementation repair requested. The escalation put the
+two routes to the specification owner, and this is the route taken.
+
+##### The state the exchange resumes from for step 3 toolchain-runtime-closure (round 7)
+
+Nothing else changed. The five implementation findings stay repaired, the suite
+stays green at 124 cases and zero failures on the RHEL 9.8 build host, the
+installer stays untouched, and `a.commit` gains one group for the two amended
+documents while every other group keeps its membership, order and subject. The
+validation record now reads `Yes. Step 3 has been fully implemented.` against the
+amended plan, and its Missing work section is gone because its one item is
+scheduled in step 4.
+
+Writer response:
+
+#### Accepted feedback from round 6 for step 3 toolchain-runtime-closure (round 7)
+
+Round 6 recorded that all implementation findings are resolved and requested no
+further repair, and it directed R3b to the requestor's human-decision route. That
+route was taken: the exchange was escalated with an authored reason, the two
+options were put to the specification owner, and the owner chose the amendment.
+
+#### Disagreement for step 3 toolchain-runtime-closure (round 7)
+
+None. There has been none since round 3's classification was accepted, and the
+amendment settles what the classification left open.
+
+#### What the reviewer may want to look at first for step 3 toolchain-runtime-closure (round 7)
+
+- The amendment is recorded as an AMENDMENT, dated, in both decision tables and
+  in the paragraph each changes. A decision table that changes silently is worth
+  less than the rounds that produced it, and this exchange is the reason it
+  changed.
+- Step 4 was chosen for the entry-point half because that is where
+  `closure_rules.sh` is completed. The grammar record goes with the step that
+  uses it rather than reopening the closed step 2, and the plan says so.
+- Step 4's expected outcome carries a PAIR rather than a single case: a declared
+  entry point is not reported, and the same object without the declaration is.
+  A single case would pass on an implementation that simply narrowed the finding
+  to what the edges already answered.
+- The `UNREFERENCED-BY-EDGE` name predates the amendment. It was clarification
+  under the old plan and is the specified result under the new one, which is why
+  no code changed.
+
+#### What the requestor is NOT asking for step 3 toolchain-runtime-closure (round 7)
+
+The reviewer is not being asked to approve the amendment's content. That was the
+specification owner's decision, taken after both roles agreed neither could take
+it. The request records it so the exchange assesses step 3 against the documents
+as they now stand.
+
+### Reviewer focus for step 3 toolchain-runtime-closure (round 7)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-7 -->
+
+## Round 7 by reviewer - Step 3
+
+- Recorded: 2026-09-07T15:21:23+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Baseline index tree: 7a3e8eeaaa3ab01decea5926abd2876edf71d093
+
+Assessed index tree: e8921537c22405b3e626a39d52571e43dfbffb0b
+
+### Implementation check for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Result:
+
+Yes. Step 3 has been fully implemented.
+
+R3b is closed by the specification-owner amendment recorded in this request
+and staged in design Q13 and plan Q13. Step 3 owns UNREFERENCED-BY-EDGE;
+Step 4 explicitly owns the declared entry-point set, its grammar record and
+the combined finding. All implementation findings R1/R2/R3a/R4/R5 remain
+resolved. The delivered behavior meets the amended Step 3 obligations.
+
+Validation plan effects:
+
+Only Step 3 review metadata was updated. The reviewer independently confirmed
+the Yes verdict, recorded round 7 evidence and corrected a historical paragraph
+that still described the now-scheduled input as unscheduled. No Missing work
+section is required for this completed step. The document verdict stays No
+because Steps 4-7 remain pending. Other steps and the umbrella were untouched
+by the reviewer.
+
+### Pre-repair mandatory checks and coverage for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+All nine required commands were independently rerun. RHEL closure Steps
+0/1/2/3 passed 64/70/91/124 cases respectively; relocation Step 3 passed 104,
+all with zero failures and exit 0. Local lint passed over 48 scripts;
+harness ShellCheck exited 0; installer purity had no matches (expected exit 1)
+and its HEAD-relative diff exited 0. Host digests match local production,
+harness and corpus content, which is unchanged from round 6. The plan's Bash
+harness coverage substitute applies and passes, including measured traversal,
+index placement and alias-cost controls. Prior round 6 independent R5 probes
+and cycle control assessed the same unchanged code; no new defect prompted
+broader testing. Current host output: .reviews/a.codex.s3r7.host-validation.txt.
+
+### Resolved validation set and sources for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+```json
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 3",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 0",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 1",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 2",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "shellcheck -S warning docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+```
+
+### Resolver drift and direction for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+None. The current nine-command set and source provenance exactly match the request.
+
+### Repository state around validation for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Round 7, occurrence 1: request/baseline index 7a3e8eeaaa3ab01decea5926abd2876edf71d093;
+assessed index e8921537c22405b3e626a39d52571e43dfbffb0b.
+Mandatory validation changed no tracked, untracked or ignored review paths.
+The final comparison differs only in the attributable Step 3 validation file
+and index after metadata staging. The specification amendment and Step 4
+validation updates were already in the request baseline; the reviewer did not
+edit them. Umbrella digest remained
+8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7.
+
+### Repair inventory for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Repairs made:
+
+- Polishing-only: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md,
+- limited to Step 3 assessment evidence and stale historical wording. The evidence
+- launcher confirmed attribution and only that exact patch was staged. No code,
+- tests, acceptance behavior, commit grouping or a.commit was changed by the
+- reviewer. No substantive repair occurred.
+
+Paths staged:
+
+- - docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md
+- - docs/v0.27.0/fixtures.closure-corpus.txt
+- - docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- - docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- - docs/v0.27.0/verify.closure-check.sh
+- - docs/v0.27.0/verify.closure.step3.rhel.txt
+- - src/setups/env/bin/closure_check.sh
+- - src/setups/env/bin/closure_elf.sh
+- - src/setups/env/bin/closure_rules.sh
+
+### Commit plan assessment for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Independent commit-plan-check passed before and after reviewer metadata:
+state valid, ready true, eight groups, zero diagnostics, all nine staged paths
+accounted for. The requestor's new specification group precedes the seven
+implementation/evidence groups and accurately describes the amendment.
+a.commit remains accurate and required no reviewer change.
+
+### Findings and boundaries for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Human guidance:
+
+The current request records the specification owner's 2026-09-07 decision:
+choose route 2, amend design and plan so Step 3 owns the edge finding and Step 4
+owns the declared entry-point set and combined finding. Both Q13 decisions and
+the affected behavior/expected-outcome sections were inspected as evidence.
+
+Guidance response:
+
+The requestor staged the matching amendments, updated dependent validation and
+capture records, and placed the specification group first in a.commit. The
+reviewer confirmed that the amendments close the previous R3b boundary without
+dropping the entry-point obligation. Step 3 is assessed against this amended
+scope; no new owner decision is requested.
+
+### Writer instructions for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Consume this advisory commit-ready recommendation through the owning requestor
+workflow. No further Step 3 repair is requested. Preserve the explicit Step 4
+entry-point obligation and the report-extraction checkpoint before Step 5.
+This recommendation is not commit authorization; the requestor must follow its
+own continuation policy. The reviewer made no commit.
+
+### Decision rationale for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Disposition: commit-ready (advisory).
+
+| Readiness floor | Result |
+| --- | --- |
+| Exact identity | Pass: round 7, occurrence 1, Step 3; request tree matched |
+| Implementation completeness | Pass against owner-amended plan; R3b closed |
+| Mandatory validation and coverage | Pass: all nine commands; plan's Bash harness substitute |
+| Staged attribution | Pass: exact Step 3 metadata patch only |
+| Unresolved findings | None for Step 3 |
+| a.commit | Pass: valid, ready true, eight groups, zero diagnostics |
+
+No substantive reviewer repair occurred. The owner amendment was already
+present in the request baseline, so the reviewer did not change acceptance
+behavior or grouping in this round. This recommendation authorizes no commit.
+
+### Final reviewer decision for step 3 toolchain-runtime-closure (exchange 1) (round 7)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-3-round-7 -->
+
+## Round 7 by human - Step 3 - human-confirmation
+
+- Recorded: 2026-09-07T15:36:39+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 3
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-7 -->
