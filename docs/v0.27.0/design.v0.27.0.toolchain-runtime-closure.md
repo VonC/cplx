@@ -378,6 +378,31 @@ noted as reached by no entry point and by no `DT_NEEDED` edge, because "the
 archive ships something nothing can load" is worth saying and is not a reason to
 stop checking it.
 
+THAT FINDING HAS TWO HALVES AND THEY DO NOT ARRIVE TOGETHER, amended here on
+2026-09-07 after the step 3 code review found the design owed an input no step
+supplied. The paragraph above stated a conjunction and named no source for its
+first term, which left an implementation able to compute one half and unable to
+say so honestly.
+
+| Half | What it reads | Where it comes from |
+| --- | --- | --- |
+| UNREFERENCED-BY-EDGE | no `DT_NEEDED` edge of any subject resolves to this object | the edges the static walk already collected |
+| UNREFERENCED-BY-ENTRY-POINT | no declared entry point is this object | THE DECLARED ENTRY-POINT SET, which is configuration |
+
+THE DECLARED ENTRY-POINT SET IS A CONFIGURATION DECLARATION, in the same document
+the roots, the floor, the families and the waivers live in. It lists LOCATIONS
+relative to the archive whose shipped ELF objects are entry points: the
+interpreter, the directories the shipped executables live in, and the
+dynamically loaded locations, `lib-dynload` and `site-packages` among them, that
+the interpreter opens by path. It is declared and not derived, for the reason
+this whole area exists: the loading mechanism at issue leaves no static trace, so
+a heuristic over file names or permission bits would be wrong in both directions.
+
+UNTIL BOTH HALVES EXIST, A CHECKER REPORTS THE HALF IT HAS UNDER THAT HALF'S OWN
+NAME and never as this finding. Reporting the edge half as the whole would name a
+shipped executable, which is an entry point by definition, as an object nothing
+can load.
+
 ### Membership, in two halves that cannot substitute for each other
 
 The DERIVED half asks whether every `DT_NEEDED` name recorded by every static
@@ -808,7 +833,8 @@ establishes.
 | --- | --- | --- |
 | a `lib-dynload` extension module with an unresolvable `DT_NEEDED`, reached by no entry-point walk | packaging refuses, naming the module | the measured 76-module gap; a walk-based subject set would report a pass |
 | a `site-packages` wheel extension with a version need its provider does not define | packaging refuses | the pymupdf class, and 28 of these ship today |
-| a shipped ELF that no entry point and no `DT_NEEDED` edge reaches, otherwise sound | ACCEPTED, and reported as unreferenced | unreferenced is a finding, never an exclusion |
+| a shipped ELF that no `DT_NEEDED` edge resolves to, otherwise sound | ACCEPTED, and reported UNREFERENCED-BY-EDGE | unreferenced is a finding, never an exclusion, and this is the half the static edges answer |
+| the same object, where the declared entry-point set names it | NOT reported once that set exists | a shipped executable is an entry point by definition |
 | a second `libssl.so.3` under `root/usr/bin` | examined as a SUBJECT, never counted as a PROVIDER | it is shipped, so its needs must resolve; `build_elf_rpath` never adds that directory, so nothing resolves through it |
 
 ### Scope: declared shape, observed loader scope, and the comparison
@@ -883,6 +909,15 @@ rows below name them: a comparison that rested on a claim packaging cannot
 observe, a configuration whose authority was asserted instead of resolved, and
 evidence that described no particular archive.
 
+AMENDED ONCE SINCE, ON 2026-09-07, and recorded here rather than folded into the
+rows above, because a decision table that changes silently is worth less than the
+rounds that produced it. The step 3 code review found that
+`Four sets, kept apart` defined the unreferenced finding as a conjunction whose
+first term had no declared source anywhere in this design or in the plan that
+schedules it: an implementation could compute the edge half and had no honest way
+to report it. The amendment is Q13 below, and the section it changes carries the
+same date.
+
 | Question | Decision | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
 | Q01 | The candidate shape is DECLARED, as a root list plus a subdirectory list, so an alias such as `current` is declared rather than refused, while the loader scope stays OBSERVED. Verification derives both sides from the archive it is about to install, so no packaging claim is transported. | Design Area 1: `The candidate shape is declared; the loader scope is observed`, `Where the comparison actually happens`, `One derivation, two callers` | A1, one shared derivation both callers invoke; A2, the installer emits the shape; A3, a written spec both implement; A4, the declared shape with the comparison still taken at packaging time |
@@ -894,3 +929,4 @@ evidence that described no particular archive.
 | Q07 | A complete inventory whose suppression follows DATA AVAILABILITY alone. UNDETERMINED is reserved for an input that was not there, so an independent deterministic result is never erased by an unrelated refusal. | Design Area 5: `Aggregation follows data availability, not the presence of another refusal` | G1, fail fast at the first refusal; G2, a flat complete inventory; G3, a complete inventory with a fixed order; G4, suppression driven by other refusals |
 | Q08 | The D10 policy takes requirements from the archive and capabilities from BOTH candidate generations, returns the lowest satisfying candidate, and reports an empty consumer set as inconclusive. Any non-identical re-read fails as non-convergent. | Design Area 6: `The evidence item 7 produces`, `The result the policy returns`, `When the reading must be taken again` | H1, leave the interface to item 7; H2, define the result only; H3, define both ends with the evidence read from the shipped provider alone |
 | Q09 | Verification reads the archive it is about to install, derives the pre-install observation from it, installs, derives the installed observation, and emits ONE result keyed by the SHA-256 of the completed archive bytes. Packaging's observation stays local, and publication recomputes that identity. | Design Area 7, all four subsections, in particular `How publication proves the evidence is this archive's` and `What this area does not do` | J1, the observation travels inside the archive, impossible because the digest does not exist until the tar is closed; J2, a digest-keyed sidecar pair, which keeps two evidence artifacts and two producers |
+| Q13 | The unreferenced finding has TWO HALVES with separate inputs, amended 2026-09-07 after the step 3 code review. The EDGE half is computed by the static checker from the collected `DT_NEEDED` edges and is reported under its own name, `UNREFERENCED-BY-EDGE`. The ENTRY-POINT half needs the DECLARED ENTRY-POINT SET, a configuration declaration of the locations whose shipped objects are entry points, and it is scheduled where that declaration lands rather than assumed available. A checker that has one half reports that half by name and never as this finding. | Design Area 2: `The static subject set is every shipped ELF, and the measurement says why`, and its acceptance rows | M1, deriving entry points from PT_INTERP or a permission bit, a heuristic this area already refuses for the same reason; M2, leaving the conjunction stated with no source, which is what the review found; M3, dropping the entry-point half entirely, which would stop the design saying that a shipped executable is reachable by definition |

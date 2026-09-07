@@ -876,8 +876,16 @@ No perf gates are affected.
   planted, with no object excluded for being unreachable.
 - An unresolvable `DT_NEEDED` is refused by name, with the subject that records
   it.
-- A shipped ELF reached by no entry point and no `DT_NEEDED` edge, otherwise
-  sound, is ACCEPTED and reported unreferenced.
+- A shipped ELF that no `DT_NEEDED` edge RESOLVES TO, otherwise sound, is
+  ACCEPTED and reported `UNREFERENCED-BY-EDGE`. AMENDED 2026-09-07: this line
+  read "reached by no entry point and no `DT_NEEDED` edge", which is the design's
+  conjunction, while the behavior line below specifies the edge computation. The
+  two disagreed, and the step 3 code review found that no step of this plan
+  schedules the declared entry-point input the first term needs. Design Q13
+  splits the finding into its two halves; this step owns the EDGE half and
+  reports it under its own name, and Step 4 owns the other. An edge resolves to
+  ONE path, the first candidate in scope order, through any symlinked directory
+  or name on the way to it.
 - A second `libssl.so.3` under `root/usr/bin` is examined as a subject and never
   counted as a provider.
 
@@ -962,8 +970,13 @@ counting index-construction calls during a run.
 - `closure_membership_derived`, in `closure_rules.sh`: for every subject and
   every `DT_NEEDED`, a lookup in the index; a miss is a refusal naming both the
   name and the subject.
-- `closure_report_unreferenced`: the separate finding, computed from the edges
-  already collected rather than from a second walk.
+- `closure_report_unreferenced_by_edge`: the separate finding, computed from the
+  edges already collected rather than from a second walk. AN EDGE REACHES A PATH
+  AND NOT A NAME: it resolves through the provider index to the first candidate
+  in scope order, and then to the file that path names, through a symlinked
+  directory component and a symlinked final name alike, by the filesystem's own
+  rules. A chain that cannot be followed within the kernel's own symlink bound is
+  UNDETERMINED and never a finding.
 
 ### Step 3 completion criteria
 
@@ -1042,6 +1055,23 @@ status policy.
   list and its permitted generation counts.
 - Implement the aggregation rule: UNDETERMINED means an input could not be
   obtained, and nothing else.
+- IMPLEMENT THE ENTRY-POINT HALF OF THE UNREFERENCED FINDING, scheduled here on
+  2026-09-07 by the same amendment that narrowed Step 3. Design Q13 splits the
+  finding: Step 3 owns the edge half and reports it as `UNREFERENCED-BY-EDGE`,
+  and this step owns the other half and the result that combines them. It needs
+  a DECLARED ENTRY-POINT SET, which is configuration and therefore an addition to
+  the `CPLX-CLOSURE/1` record table Q10 fixes: one record naming a location,
+  relative to the archive, whose shipped ELF objects are entry points. The
+  measured set that motivates it is the interpreter, the shipped executable
+  directories, and the dynamically loaded locations `lib-dynload` and
+  `site-packages`, which the interpreter opens by path and which no `DT_NEEDED`
+  edge names.
+  IT IS DECLARED AND NEVER DERIVED, for the reason Design Area 2 already gives
+  for the subject rule: the loading mechanism at issue leaves no static trace, so
+  a heuristic over `PT_INTERP`, a file name or a permission bit would be wrong in
+  both directions. The grammar addition is this step's, not Step 2's: Step 2 is
+  closed and its record table is reviewed, and a step that adds a record declares
+  it where it is used.
 
 ### Step 4 expected outcome
 
@@ -1052,6 +1082,13 @@ status policy.
   the positive control, and fails rule 2 on the measured `libbfd` pair.
 - An UNDETERMINED result is reported with the input it lacked and never counts
   toward a green.
+- A shipped ELF that the declared entry-point set names is NOT reported by the
+  combined unreferenced finding, and the same object with that declaration
+  removed IS. A shipped executable is an entry point by definition, so the pair
+  is what shows the declaration is being read rather than the finding being
+  narrowed to whatever the edges already answered.
+- The `UNREFERENCED-BY-EDGE` result Step 3 produces is unchanged and still
+  reported under its own name, so a reader can see which half each object failed.
 
 ### Step 4 framings
 
@@ -1923,9 +1960,17 @@ correctness gate rather than a timing one.
 
 The twelve questions the plan review settled across eight rounds, closed on
 2026-09-04 and recorded in
-[the review transcript](review.plan.v0.27.0.toolchain-runtime-closure.md). Each
-row is the decision, where the plan applies it, and what was rejected with the
-reason.
+[the review transcript](review.plan.v0.27.0.toolchain-runtime-closure.md), and a
+thirteenth added on 2026-09-07. Each row is the decision, where the plan applies
+it, and what was rejected with the reason.
+
+Q13 IS AN AMENDMENT AND NOT A ROUND, recorded here rather than folded into the
+twelve because a decision table that changes silently is worth less than the
+rounds that produced it. The step 3 code review found this plan carrying two
+lines that disagreed about what step 3 owes, and neither the writer nor the
+reviewer could choose between them; the amendment is recorded in
+[the code review transcript](review.code.v0.27.0.toolchain-runtime-closure.md)
+and in design Q13, which it follows.
 
 FIVE OF THESE ROWS EXIST BECAUSE A ROUND REFUSED AN EARLIER ANSWER, and the
 refused shapes are named rather than dropped: an archive that supplied its own
@@ -1948,3 +1993,4 @@ rejected alternative.
 | Q10 | Three literal grammars sharing one lexical shape, `CPLX-CLOSURE/1`, `CPLX-CLOSURE-ENVELOPE/1` and `CPLX-CLOSURE-EVIDENCE/1`, with exact lexical domains, decode before domain validation, a derived verdict truth table, and canonical evidence bytes | Step 2 behavior, `closure_config_parse`; Step 6 emit and `closure_evidence_parse` | K2, reusing the host-tools columns, a delimiter rather than a schema; K3, JSON, whose parser would be the largest new component and is used by nothing else here; K4, INI, which has no agreed rule for the repeated keys these documents must settle |
 | Q11 | A descriptor-bound transactional callback: exclusive staging, hash the completed copy, no-overwrite promotion, then invoke a constrained uploader with the open descriptor under a begin, write, abort, commit adapter ABI that commits only after the digest matches | Step 5 behavior and its seventeen handoff cases | L1, exclusive staging with a returned pathname, which reopens the time-of-check gap; L2, re-hashing before upload, which narrows the window rather than closing it; L4, item 7 owning descriptor stability, kept as item 7's prerequisite rather than this item's fallback; L5, leaving enforcement entirely to item 7 |
 | Q12 | Only pipeline-delivered workspace copies produce evidence. Embedded copies are compared byte for byte as a payload property and are never executed for evidence, including when identical | Delivered script topology; Step 6 behavior and its authority cases | M2, executing the embedded copy, which makes the archive certify itself with no bootstrap; M3, executing it after an out-of-band digest comparison, which moves the problem to whatever performs the comparison; M4, shipping no copies, which removes a real operator use |
+| Q13 | The unreferenced finding is TWO HALVES, amended 2026-09-07 after the step 3 code review found this plan disagreeing with itself: its Step 3 behavior line specified the edge computation while its Step 3 expected outcome quoted the design's conjunction, and no step scheduled the declared entry-point input the conjunction needs. Step 3 owns the EDGE half and reports it as `UNREFERENCED-BY-EDGE`; Step 4 owns the entry-point half, the `CPLX-CLOSURE/1` record that declares the set, and the combined result | Step 3 expected outcome and behavior; Step 4 fix intent and expected outcome; design Q13 | N1, leaving the two lines contradicting each other, which is what the review found; N2, deriving entry points from `PT_INTERP` or a permission bit, the heuristic Design Area 2 refuses for the subject rule and refuses again here; N3, letting Step 3 report the edge half AS the design's finding, which names a shipped executable as an object nothing can load |
