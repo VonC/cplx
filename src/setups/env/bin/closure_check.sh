@@ -6,12 +6,15 @@
 # loader will search under an installation prefix, which of them the
 # configuration declares, and which of them nobody declared. Step 1 fills the
 # entry point, the run order, the scope derivation and the classification; Step 2
-# adds the configuration bundle it reads its declaration from; STEP 3 ADDS THE
-# SUBJECT PHASE, which is one walk of the tree, one reader invocation per shipped
-# ELF and the DERIVED half of the membership invariant over what the walk
-# recorded. The three remaining invariants arrive with `closure_rules.sh` in later
-# steps, so THIS RUN'S VERDICT IS EXPLICITLY PARTIAL and says so on every run. A
-# green scope and membership check is not a green archive.
+# adds the configuration bundle it reads its declaration from; Step 3 adds the
+# subject phase, which is one walk of the tree and one reader invocation per
+# shipped ELF; STEP 4 RUNS ALL FOUR INVARIANTS over what that walk recorded, in
+# order, and reports each result under its own name.
+#
+# THE VERDICT IS STILL EXPLICITLY PARTIAL AND SAYS SO ON EVERY RUN. Two things
+# this cannot answer: a RUNNING process falling back to the host cache, which only
+# the live observer sees, and any invariant whose declaration a run never read,
+# since a floor nobody declared is not a floor this run met.
 #
 # THE RUN ORDER IS THE COST RULE. The provider index is built FIRST, from the
 # observed loader scope, and the tree is walked ONCE afterwards, so resolving a
@@ -40,67 +43,53 @@
 # At least one of `--root` and `--bundle` is required: the declared shape has to
 # come from somewhere, and defaulting it would invent a declaration.
 #
-# Exit codes: 0 nothing undeclared was observed, 1 a refusal, which is either at
-# least one UNEXPECTED directory or a configuration bundle that could not be
-# established, 2 the arguments are unusable, 5 an input could not be obtained, so
-# the answer is UNDETERMINED: the loader scope could not be observed, or the
-# configuration module is not beside this script. 5 is not a softer 0: an
-# UNDETERMINED result is neither a pass nor a failure, it is reported with the
-# input it lacked, and it never counts toward a green.
+# Exit codes: 0 nothing refused and every input was obtained, 1 a refusal from any
+# of the six results the summary names, or a bundle that could not be established,
+# 2 the arguments are unusable, 5 an input could not be obtained so the answer is
+# UNDETERMINED. 5 is not a softer 0: an UNDETERMINED is neither a pass nor a
+# failure, it is reported with the input it lacked, and it never counts toward a
+# green.
 #
-# THE BUNDLE IS READ FIRST, AND ITS READING IS INTERNAL CONSISTENCY ONLY. A
-# bundle that is absent, substituted or corrupted refuses before any invariant
-# runs, because a check evaluated against a declaration nobody can vouch for is
-# worth less than no check at all. What a host without cplx can establish is that
-# the embedded document hashes to the digest its own envelope names, and the
-# report says so in those words: a paired edit and an authentic-but-wrong bundle
-# both pass here, and both are refused by packaging and by publication, which
-# resolve the authoritative document from cplx themselves.
+# THE BUNDLE IS READ FIRST, AND ITS READING IS INTERNAL CONSISTENCY ONLY. A bundle
+# that is absent, substituted or corrupted refuses before any invariant runs,
+# because a check evaluated against a declaration nobody can vouch for is worth
+# less than no check at all. `closure_check_bundle` states the limit of that
+# reading, and the report prints it on every run.
 #
 # TWO SCOPES, AND THEY ARE NEVER MERGED.
 #
 #   the DECLARED CANDIDATE SHAPE is derived from three declared inputs and
-#   TOUCHES NO FILESYSTEM: the tool roots, the declared immediate
-#   subdirectories per root, and the relative suffixes this design fixes. It is
-#   what expectations are stated against.
+#   TOUCHES NO FILESYSTEM: the tool roots, the declared immediate subdirectories
+#   per root, and the relative suffixes this design fixes. It is what
+#   expectations are stated against.
 #
-#   the OBSERVED LOADER SCOPE is what the loader will actually search, and it
-#   comes from `build_elf_rpath` IN `install_pkg.sh`, called rather than
-#   reimplemented. Resolution is evaluated against it, because nothing may be
-#   resolved through a directory the loader would not search and nothing the
-#   loader would search may be excluded.
+#   the OBSERVED LOADER SCOPE is what the loader will actually search, and comes
+#   from `build_elf_rpath` IN `install_pkg.sh`, called rather than reimplemented.
+#   Resolution is evaluated against it, because nothing may resolve through a
+#   directory the loader would not search.
 #
 # THE SECOND DECLARED INPUT IS A SUBDIRECTORY LIST, NOT A VERSION LIST. The
 # installer's loop adds every immediate subdirectory it finds, so a declaration
 # enumerating only version-shaped names would leave the `current` alias
-# UNEXPECTED and refuse a tree that is correct. `root` is a declared immediate
-# subdirectory of every root by construction, and the dedupe absorbs its
-# duplicate contribution exactly as the installer's does.
+# UNEXPECTED and refuse a tree that is correct.
 #
-# WHY THIS FILE NAMES NO SUFFIX THE INSTALLER NAMES. The observed scope must
-# have exactly one definition, and a second one that agreed today would
-# reproduce, one level up, the drift this checker exists to remove. The Step 1
-# completion criteria therefore grep this file for the installer's tool-root
-# glob and for its first composed suffix, and both must be absent; the harness
-# asserts the same thing, and beside it a property case that compares this
-# checker's observed scope against `build_elf_rpath`'s own output byte for byte.
-# That is why the two `usr/` candidates below are composed from a directory
-# variable rather than spelled as one literal string.
+# WHY THIS FILE NAMES NO SUFFIX THE INSTALLER NAMES. The observed scope must have
+# exactly one definition, and a second one that agreed today would reproduce, one
+# level up, the drift this checker exists to remove. The harness greps this file
+# for the installer's tool-root glob and for its first composed suffix and
+# requires both absent, and compares the two scopes byte for byte beside it. That
+# is why the two `usr/` candidates below are composed from a directory variable.
 #
-# WHY THE INSTALLER IS SOURCED IN A SUBSHELL. `install_pkg.sh` returns early
-# when sourced, so sourcing it defines every function and performs no install.
-# It can still REFUSE while being sourced, through a `fatal` that calls `exit`,
-# and in this shell that would end the run and hand back the installer's exit
-# code as if it were a verdict. In a subshell it ends the probe instead, and the
-# result is a typed UNDETERMINED: NEVER an empty scope, which would report every
-# declared candidate absent and read exactly like a bare tree, and never an
-# inherited exit code. The report still runs to completion.
+# WHY THE INSTALLER IS SOURCED IN A SUBSHELL. Sourcing `install_pkg.sh` defines
+# every function and performs no install, but it can still REFUSE while being
+# sourced, through a `fatal` that calls `exit`, which in this shell would end the
+# run and hand back the installer's exit code as if it were a verdict.
+# `closure_scope_observed` explains the sentinel that keeps that from happening.
 #
 # UNEXPECTED IS UNWAIVABLE BY CONSTRUCTION. Waivers name floor members, and an
 # undeclared root or subdirectory is repaired by removing it or by declaring it.
-# No waiver code path exists here, and none may be added: the harness strips the
-# comments and refuses the word in code, so this paragraph states the property
-# and the assertion measures it.
+# No waiver code path exists here and none may be added: the harness strips the
+# comments and refuses the word in code, so the assertion measures the property.
 
 set -u
 
@@ -150,8 +139,7 @@ CLOSURE_OBSERVED_REASON=""
 # line. It touches no filesystem: nothing here tests, globs or reads a path.
 #
 # The order is the loader's: each root's own `root/` candidates first, then that
-# root's declared subdirectories, then the next declared root the same way, with
-# the dedupe preserving the first occurrence.
+# root's declared subdirectories, then the next root, dedupe keeping the first.
 closure_scope_declared() {
     local prefix="$1"
     shift
@@ -196,10 +184,9 @@ closure_scope_declared() {
 }
 
 # ---------------------------------------------------- the observed loader scope ---
-# Sources the installer through its MAIN BOUNDARY seam and calls
-# `build_elf_rpath`, in a subshell, and leaves the colon-joined value in
-# CLOSURE_OBSERVED_RPATH. Returns non-zero with CLOSURE_OBSERVED_REASON set when
-# the value could not be obtained; the caller turns that into UNDETERMINED.
+# Sources the installer through its MAIN BOUNDARY seam and calls `build_elf_rpath`
+# in a subshell, leaving the colon-joined value in CLOSURE_OBSERVED_RPATH. Returns
+# non-zero with CLOSURE_OBSERVED_REASON set when the value could not be obtained.
 #
 # INSTALL_PREFIX is assigned AFTER the source and not before, because sourcing
 # the installer assigns it too, and an assignment made first would be discarded.
@@ -248,9 +235,8 @@ closure_scope_observed() {
     return 1
 }
 
-# The colon-joined loader value, one directory per line. Split in the shell
-# because `tr` is not on this effort's host-tool contract, and an empty value
-# yields no line rather than one empty one.
+# The colon-joined loader value, one directory per line. Split in the shell because
+# `tr` is not on this effort's contract, and an empty value yields no line.
 closure_scope_observed_lines() {
     local rest="$1" item
     while [ -n "$rest" ]; do
@@ -344,10 +330,10 @@ closure_scope_classify() {
     done <<< "$observed"
 }
 
-# The typed result for a scope that could not be observed. EVERY declared
-# candidate is UNDETERMINED, one line each, because its presence is exactly what
-# could not be determined. Reporting them ABSENT instead would turn a missing
-# input into fourteen findings about the tree.
+# The typed result for a scope that could not be observed. EVERY declared candidate
+# is UNDETERMINED, one line each, because its presence is exactly what could not be
+# determined; reporting them ABSENT would turn one missing input into fourteen
+# findings about the tree.
 closure_scope_undetermined() {
     local declared="$1" reason="$2" path
     printf '%s|%s|%s|%s\n' UNDETERMINED observed 'the loader scope' "$reason"
@@ -358,15 +344,13 @@ closure_scope_undetermined() {
     done <<< "$declared"
 }
 
-# The configuration bundle, read before anything else this checker does. It
-# prints the typed consistency verdict the module produces, then states in words
-# what that verdict does and does not establish, because a green line whose limit
-# is stated somewhere else is a green line somebody will read as authority.
-#
-# Returns 0 consistent, 1 refused, 5 the module could not be reached. The digest
-# it leaves behind is POLICY identity: it identifies the declaration and is the
-# same value for every archive built under it, so nothing here may read it as
-# saying which archive anything was observed on.
+# The configuration bundle, read before anything else this checker does. It prints
+# the typed consistency verdict the module produces, then states in words what that
+# verdict does and does not establish, because a green line whose limit is stated
+# somewhere else is a green line somebody will read as authority. Returns 0
+# consistent, 1 refused, 5 the module could not be reached. The digest it leaves
+# behind is POLICY identity, the same value for every archive built under that
+# declaration, so nothing here may read it as naming an archive.
 CLOSURE_CHECK_DIGEST=""
 closure_check_bundle() {
     local dir="$1"
@@ -404,9 +388,9 @@ closure_check_main() {
     local declared="" observed="" results="" line kind
     local rootsource="the --root arguments"
     local present=0 absent=0 unexpected=0 undetermined=0 rc=0
-    local scope_ok=0 subjects_ran=0 walk="not run"
+    local scope_ok=0 subjects_ran=0 walk="not run" bundle_read="no"
     local providers=0 walked=0 subjects=0 unread=0 edges=0 refused=0 unreferenced=0
-    local unresolved=0
+    local unresolved=0 verdict=0
 
     while [ "$#" -gt 0 ]; do
         case "$1" in
@@ -452,6 +436,7 @@ closure_check_main() {
             printf '\nCLOSURE BUNDLE REFUSED: the declaration was not established, so no scope result was computed\n'
             return "$rc"
         fi
+        bundle_read="yes"
         # An explicit --root still wins, which is what lets the harness drive the
         # classification with a shape the committed document does not carry. The
         # report names which of the two the roots came from, so a run can never
@@ -503,7 +488,7 @@ closure_check_main() {
     # first, then ONE walk of the tree, then the invariants over what the walk
     # recorded. This function gains the calls and no invariant: the reading is
     # `closure_elf.sh`'s and every verdict is `closure_rules.sh`'s.
-    printf '\n== subjects and derived membership\n'
+    printf '\n== subjects and the four invariants\n'
     if [ "$scope_ok" -ne 1 ]; then
         # NOT AN EMPTY INDEX. The provider directories ARE the observed loader
         # scope, so a scope that could not be obtained leaves nothing to resolve
@@ -518,10 +503,19 @@ closure_check_main() {
             "no closure_elf.sh or closure_rules.sh beside $CLOSURE_CHECK_DIR, so nothing was read"
         undetermined=$((undetermined + 1))
     else
+        # THE ORDER IS HERE AND THE VERDICTS ARE NOT. Every invariant is
+        # evaluated on every run and none suppresses another: coherence answers
+        # even where rule 1 refuses, because scope order decides selection and
+        # refusing the ambiguity is not a reason to discard a real result.
         closure_provider_index "$observed"
         closure_subjects_walk "$prefix/tools"
+        closure_floor_check "$prefix"
         closure_membership_derived
+        closure_coherence_check "$prefix/tools"
+        closure_rule1_duplicates
+        closure_rule2_families
         closure_report_unreferenced_by_edge
+        closure_report_unreferenced "$bundle_read" "$prefix"
         subjects_ran=1
         providers="${#CLOSURE_PROVIDER_DIRS[@]}"
         walked="$CLOSURE_ELF_WALKED"
@@ -554,24 +548,30 @@ closure_check_main() {
     printf '  refused      %s unresolvable DT_NEEDED\n' "$refused"
     printf '  unreferenced %s subjects no edge resolves to\n' "$unreferenced"
     printf '  unresolved   %s link chains, reported UNDETERMINED\n' "$unresolved"
-    # Said on every run, green ones included. This checker answers the scope
-    # question and the DERIVED half of membership, and makes no claim about the
-    # declared floor, coherence, duplicate providers or declared families, and
-    # none at all about runtime host fallback, which only a running process can
+    printf '  floor        %s declared, %s refused\n' "${CLOSURE_RULES_FLOOR:-0}" "${CLOSURE_RULES_FLOOR_REFUSED:-0}"
+    printf '  coherence    %s needs, %s answered, %s refused\n' "${CLOSURE_RULES_NEEDS:-0}" "${CLOSURE_RULES_ANSWERED:-0}" "${CLOSURE_RULES_COHERENCE_REFUSED:-0}"
+    printf '  duplicates   %s names, %s multi-candidate, %s refused\n' "${CLOSURE_RULES_LOOKUPS:-0}" "${CLOSURE_RULES_MULTI:-0}" "${CLOSURE_RULES_RULE1_REFUSED:-0}"
+    printf '  families     %s declared, %s refused\n' "${CLOSURE_RULES_FAMILIES:-0}" "${CLOSURE_RULES_RULE2_REFUSED:-0}"
+    printf '  entrypoints  %s declared, %s subjects named, %s reached by neither half\n' "${CLOSURE_RULES_ENTRYPOINTS:-0}" "${CLOSURE_RULES_ENTRYSUBJECTS:-0}" "${CLOSURE_RULES_UNREACHABLE:-0}"
+    printf '  results      %s UNDETERMINED from the invariants\n' "${CLOSURE_RULES_UNDETERMINED:-0}"
+    # Said on every run, green ones included, and it names what a run ANSWERED so
+    # a declaration nobody read cannot read as an invariant nobody failed. No
+    # claim is made about runtime host fallback, which only a running process can
     # show.
-    printf '  verdict is PARTIAL: this run answers the scope question and the\n'
-    printf '  derived membership half, and no other invariant\n'
+    printf '  verdict is PARTIAL: scope, membership in both halves, coherence,\n'
+    printf '  duplicate providers and declared families, with the declared halves\n'
+    printf '  answered only where a bundle supplied them: bundle read %s\n' "$bundle_read"
 
-    if [ "$unexpected" -ne 0 ]; then
-        printf '\nCLOSURE SCOPE REFUSED: undeclared directories in the observed loader scope: %s\n' \
-            "$unexpected"
-        return 1
-    fi
-    if [ "$refused" -ne 0 ]; then
-        printf '\nCLOSURE MEMBERSHIP REFUSED: DT_NEEDED names resolving nowhere in the observed loader scope: %s\n' \
-            "$refused"
-        return 1
-    fi
+    # EVERY REFUSAL IS PRINTED, not the first one. Each invariant is independent,
+    # so a reader repairing an archive should see all of them rather than one per
+    # run; the exit code is the aggregate.
+    closure_check_refused SCOPE "$unexpected" 'undeclared directories in the observed loader scope' || verdict=1
+    closure_check_refused MEMBERSHIP "$refused" 'DT_NEEDED names resolving nowhere in the observed loader scope' || verdict=1
+    closure_check_refused FLOOR "${CLOSURE_RULES_FLOOR_REFUSED:-0}" 'declared floor members absent or outside their required location' || verdict=1
+    closure_check_refused COHERENCE "${CLOSURE_RULES_COHERENCE_REFUSED:-0}" 'version needs the selected provider does not satisfy' || verdict=1
+    closure_check_refused DUPLICATE "${CLOSURE_RULES_RULE1_REFUSED:-0}" 'lookup names whose candidates hold different content' || verdict=1
+    closure_check_refused FAMILY "${CLOSURE_RULES_RULE2_REFUSED:-0}" 'declared families over their permitted generation count' || verdict=1
+    if [ "$verdict" -ne 0 ]; then return 1; fi
     if [ "$undetermined" -ne 0 ]; then
         printf '\nCLOSURE SCOPE UNDETERMINED: %s\n' "$CLOSURE_OBSERVED_REASON"
         return 5
@@ -595,18 +595,34 @@ closure_check_main() {
             "$unread"
         return 5
     fi
+    if [ "${CLOSURE_RULES_UNDETERMINED:-0}" -ne 0 ]; then
+        printf '\nCLOSURE RESULTS UNDETERMINED: invariant results whose input could not be obtained: %s\n' \
+            "$CLOSURE_RULES_UNDETERMINED"
+        return 5
+    fi
     printf '\nCLOSURE SCOPE OK: %s declared, %s present, %s absent, nothing undeclared\n' \
         "$(closure_scope_line_count "$declared")" "$present" "$absent"
     if [ "$subjects_ran" -eq 1 ]; then
         printf 'CLOSURE MEMBERSHIP OK: %s edges over %s subjects all resolve, %s reached by no edge\n' \
             "$edges" "$subjects" "$unreferenced"
+        printf 'CLOSURE INVARIANTS OK: %s floor members, %s version needs answered, %s multi-candidate names, %s families\n' \
+            "${CLOSURE_RULES_FLOOR:-0}" "${CLOSURE_RULES_ANSWERED:-0}" "${CLOSURE_RULES_MULTI:-0}" "${CLOSURE_RULES_FAMILIES:-0}"
     fi
     return 0
 }
 
+# One refusal line per invariant that refused, and non-zero so the caller can
+# accumulate. The wording is the caller's because the report is this file's; the
+# invariants themselves print their typed results and no verdict.
+closure_check_refused() {
+    if [ "$2" -eq 0 ]; then return 0; fi
+    printf '\nCLOSURE %s REFUSED: %s: %s\n' "$1" "$3" "$2"
+    return 1
+}
+
 # Lines in a newline-separated list, counted in the shell because `wc` is not on
-# this effort's host-tool contract. An empty list is zero, not the one empty line
-# a naive count would report.
+# this effort's contract. An empty list is zero, not the one empty line a naive
+# count would report.
 closure_scope_line_count() {
     local n=0 line
     while IFS= read -r line; do
@@ -621,14 +637,12 @@ closure_scope_line_count() {
 # Sourcing this file defines its functions and runs nothing, so the verification
 # harness can call `closure_scope_declared` and `closure_scope_observed`
 # themselves rather than a copy, which is what lets it prove that the declared
-# derivation touches no filesystem. Step 3 uses the same seam for two more
-# things: it asks the provider index directly for the paths behind one lookup
-# name, and it wraps that index in a counting shim before calling
-# `closure_check_main`, which is how "one construction, before the first object
-# read" is measured from a run instead of grepped out of this text. Executing the
-# file is unchanged: BASH_SOURCE[0]
-# equals $0 there, so the guard is a no-op on the deployed path. This is the
-# same seam `install_pkg.sh` carries, and for the same reason.
+# derivation touches no filesystem. Step 3 uses the same seam for two more things:
+# it asks the provider index directly for the paths behind one lookup name, and it
+# wraps that index in a counting shim before calling `closure_check_main`, which
+# is how "one construction, before the first object read" is measured from a run
+# instead of grepped out of this text. Executing the file is unchanged, since
+# BASH_SOURCE[0] equals $0 there. This is the seam `install_pkg.sh` carries.
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
     return 0
 fi
