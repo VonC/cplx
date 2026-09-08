@@ -1630,60 +1630,161 @@ passes, including its measured traversal, index and alias-cost checks.
 
 ### Analysis of Step 4 implementation state
 
-Not started. Step 4 is not implemented because no floor check, no version
-coherence, no duplicate-provider rule, no declared-family rule and no
-UNDETERMINED producer exist.
+Yes. Step 4 has been fully implemented.
+
+Round 2 independently confirmed the earlier coherence classification, the
+alias-only digest guard and associative membership repairs. The definition
+index still copied the remaining node list on every iteration, violating the
+plan's linear-phase bound. The reviewer repaired that loop and the same
+list-consumption pattern in the other new step 4 invariant functions, and the
+requestor accepts that patch whole: a here-string keeps every loop in the
+current shell, so the counters, accumulators and associative writes it depends
+on all survive, and each nested loop redirects its own stdin.
+
+The one obligation round 2 left open is closed. Both mandatory Linux suites
+were rerun on RHEL 9.8 against the reviewer's own assessed index tree
+d469c6f0fe2c4e6f8e1cc048faed3448f4d011eb, with the module digests compared on
+both ends before the run: step 4 exits 0 at 152 cases and step 3 exits 0 at
+124 cases, no failures, on the same harness, contract and corpus digests as
+the request-time capture.
 
 ### Goal for Step 4
 
-Implement the declared floor half with its required-location column as the
-observable test, provider-aware version coherence resolved through the provider
-the object names, rule 1 over candidates of one exact lookup name compared by
-content digest, rule 2 over the declared family list, and the aggregation rule
-that reserves UNDETERMINED for an input that could not be obtained. Plan Q13 adds
-the ENTRY-POINT half of the unreferenced finding here, with the `CPLX-CLOSURE/1`
-record that declares the entry-point set and the result that combines the two
-halves.
+Check the declared floor, provider-aware version coherence, duplicate providers,
+declared family generations and missing-input aggregation independently.
+Combine the declared entry-point set with the unchanged edge-only finding.
 
 ### Step 4 improvement expectations
 
-- Every invariant is evaluated on every run, and no invariant suppresses another.
-- Coherence still answers when rule 1 refuses, against the first candidate in
-  scope order, which is the correction the design's round 2 required.
-- The 20 multi-candidate names of the measured archive pass rule 1, which is the
-  positive control against over-refusal.
-- A shipped ELF the declared entry-point set names is NOT reported by the combined
-  unreferenced finding, and the same object with that declaration removed IS. The
-  pair is what shows the declaration is read rather than the finding narrowed to
-  what the edges already answered.
-- The measured `libbfd` pair fails rule 2, and the same pair with the family
-  undeclared is not examined.
-- An UNDETERMINED result is reported with the input it lacked and never counts
-  toward a green.
+- Answer every version need against the first candidate in scope order.
+- Preserve the declared floor's required-location test.
+- Accept aliases of one provider without taking a digest.
+- Report each invariant independently, including missing inputs.
+- Traverse collected lists once and use indexed membership.
 
 ### What was implemented for Step 4
 
-_(empty — no check has taken place yet.)_.
+The configuration parser declares entry-point locations; the reader collects
+version definitions and classifies reached files as object, not-elf or unread.
+The rules module owns the floor, coherence, duplicate and family checks and
+the combined unreferenced finding. The checker owns their order, summaries
+and aggregate exit status. The eight configured entry-point locations and
+the step 2 floor-fixture adjustment remain appropriate to this step.
+
+Round 1's R1 is closed by definite refusals for known non-objects and absent
+definitions, and UNDETERMINED for unavailable readings. R2's distinct-target
+guard is retained. R3's associative membership changes are retained, with a
+further round 2 repair to avoid quadratic copying while reading the lists.
+
+The reviewer changed only closure_rules.sh substantively. Its new step 4
+list consumers now use IFS= read -r through here-strings, preserving literal
+values and final records without a trailing newline. The definition cache,
+scope ordering, first-candidate choice, counters and alias-only guard remain.
 
 ### New types or classes introduced for Step 4
 
-_(empty — no check has taken place yet.)_.
+No classes are introduced. The shell model adds declared entry points,
+version definitions, reached-file classifications, definition and digest
+caches, and invariant counters. The reviewer adds no new model or interface.
 
 ### Architecture check for Step 4
 
-_(empty — no check has taken place yet.)_.
+The parser, reader, rules and orchestration boundaries remain intact.
+The reader supplies facts; coherence supplies the verdict. The entry-point
+grammar and reader changes are necessary dependencies of step 4.
+The reviewer changes no module boundary or configuration contract.
+
+The shipped module counts are closure_check.sh 650, closure_config.sh 645,
+closure_elf.sh 479 and closure_rules.sh 635. All satisfy the 650-line ceiling.
+The plan owner still owns any topology or headroom decision needed before
+step 5; no future-step change is made here.
+
+No current architecture issue needs addressing for Step 4.
 
 ### Cost and structure check for Step 4
 
-_(empty — no check has taken place yet.)_.
+The definition-index builder originally consumed a shrinking string. On the
+authoring host, 1,000, 2,000 and 4,000 nodes took 0.260, 0.916 and 3.582
+seconds respectively. After the streaming repair the same measurements were
+0.038, 0.089 and 0.173 seconds, with all requested nodes indexed.
+These are diagnostic measurements, not a new timing gate.
+
+The same probe was rerun on the RHEL 9.8 target, over a series extended to
+8,000 nodes, each run asserting that every requested node was indexed. The
+received module took 0.154, 0.594, 2.307 and 9.096 seconds; the repaired one
+took 0.016, 0.028, 0.056 and 0.064. The received column multiplies by about
+four per doubling and the repaired column does not, which is the plan's
+linear-phase bound measured on the platform that ships rather than on the
+authoring host alone.
+
+The same streaming change covers the new floor candidate loop, coherence
+need loop, duplicate candidate loop, duplicate lookup-name loop and
+entry-location lookup. The associative sets and caches remain.
+The production walk and provider-index construction are unchanged.
+The family and entry-location dimensions remain declared configuration.
+
+No unresolved performance issue was found in the repaired step 4 assessment.
 
 ### Harness case check for Step 4
 
-_(empty — no check has taken place yet.)_.
+The plan substitutes Bash harness cases for Python class coverage.
+No Python unit suite or coverage percentage applies.
+
+The current resolver and the request contain the same seven commands, with
+no additions or removals. The project floor is bash src/utils/lint_shell.sh;
+the other commands come from the plan, including changed-harness shellcheck.
+
+Reviewer evidence on 2026-09-08:
+
+| Validation | Result |
+| --- | --- |
+| bash src/utils/lint_shell.sh | exit 0 after the final repair; 48 scripts, clean |
+| shellcheck docs/v0.27.0/verify.closure-check.sh | exit 0 |
+| bash docs/v0.27.0/verify.closure-check.sh --step 4 | RHEL 9.8, exit 0; 152 cases, 0 failures, on the assessed index tree |
+| bash docs/v0.27.0/verify.closure-check.sh --step 3 | RHEL 9.8, exit 0; 124 cases, 0 failures, same subset and run |
+| UNDETERMINED producer search | one definition and seven calls; no second invariant producer |
+| Installer-purity search | no matches, the required result |
+| Installer diff against HEAD | exit 0 |
+| Original/repaired invariant probe | exit 0; identical findings and counters |
+| Definition-index scaling probe | all requested nodes retained; measurements above |
+
+The local comparison includes three literal defined nodes, an absent node,
+a known non-object, unread and unresolved providers, repeated lookup names,
+candidate ordering, empty definitions and entry-point path boundaries.
+It preserves seven needs, five answered, two refused and two missing-input
+results, plus three duplicate lookup names and one multi-candidate name.
+
+Round 2's reviewer upload was rejected by automatic approval review. In round 3,
+the reviewer independently ran both mandatory Linux suites from the requestor's
+already-present subset, without transferring a repository payload. All nine
+validation-input digests matched the reviewed files before and after the runs.
+Step 4 returned exit 0 with 152 cases and no failures; step 3 returned exit 0
+with 124 cases and no failures. The independent lint checks also passed, and
+the validation-state comparison before this metadata update reported no tracked
+or untracked repository side effect. No substantive repair was made in round 3.
+
+The subset shipped to the host is `git archive` of the index tree, so the
+bytes measured are the staged bytes rather than a working-tree copy of them,
+and the two module digests were compared on both ends first:
+closure_rules.sh 779bab04a8c43050a8aa540c9f264a55fd7f2930c65348957d6a2c3cbd42bd2f
+and verify.closure-check.sh
+c4528edb6287863eb7899635534cdbdeef7a116d633665282345335a9de84f5b. Step 4's
+output is byte-for-byte the request-time capture apart from the run's own
+scratch and subset paths, which is the assertion a performance repair has to
+meet. Steps 0, 1 and 2, the aggregate and the preserved surface were rerun on
+the same subset and reproduce at 62, 70, 91, 104 cases and an aggregate green
+through step 4.
+
+No, no mandatory harness evidence for the repaired bytes is still missing.
 
 ### Feature integrity for Step 4
 
-_(empty — no check has taken place yet.)_.
+The installer remains unchanged and contains none of the prohibited checker
+tools. Earlier-step behavior is preserved by the local comparison and by the
+full Linux step 3 regression, which passes at 124 cases on the repaired bytes.
+The earlier suite captures remain historical evidence and are not rewritten.
+The combined entry-point finding remains separate from the edge-only finding.
+The umbrella and every other validation-plan step remain unchanged.
 
 ---
 
