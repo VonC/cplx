@@ -4515,8 +4515,10 @@ Recorded nature: `codex`
 
 Completed artifacts:
 
-- `C:/Users/vonc/git/cplx/.reviews/a.review-active.code.code.v0.27.0.toolchain-runtime-closure.md`
-- `C:/Users/vonc/git/cplx/.reviews/a.review-requested.code.v0.27.0.toolchain-runtime-closure.md`
+- `C:/Users/vonc
+/git/cplx/.reviews/a.review-active.code.code.v0.27.0.toolchain-runtime-closure.md`
+- `C:/Users/vonc
+/git/cplx/.reviews/a.review-requested.code.v0.27.0.toolchain-runtime-closure.md`
 
 <!-- review-entry-id: llm-nature-completion-reviewer-exchange-1 -->
 
@@ -6410,7 +6412,7 @@ Writer response:
 R4 is accepted as correct and is repaired. The round 2 repair traded a false
 finding for a product bound, and the reviewer's measurement, 96, 331 and 1200
 comparisons at 16, 32 and 64 aliases, is the shape the plan forbids outright. The
-requestor's own defence of it, that the links are a handful in one measured
+requestor's own defense of it, that the links are a handful in one measured
 archive, was exactly the kind of claim this effort refuses elsewhere: a bound
 that holds in one measurement is not a bound.
 
@@ -8534,3 +8536,1541 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-7 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-09-07T17:26:55+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 toolchain-runtime-closure (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 4
+Review round: 1
+
+### Code review evidence for step 4 toolchain-runtime-closure (round 1)
+
+request_index_tree: 0177ca30e32e97b56a9039fe986a73db8f655d2c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 4 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): declare the archive entry points
+group 2 path: src/setups/env/bin/closure_config.sh
+group 2 path: src/setups/env/closure/closure-config.txt
+group 2 path: src/setups/env/closure/README.md
+group 3: feat(closure): read every version definition once
+group 3 path: src/setups/env/bin/closure_elf.sh
+group 4: feat(closure): add the last three invariants
+group 4 path: src/setups/env/bin/closure_rules.sh
+group 5: feat(closure): run every invariant in order
+group 5 path: src/setups/env/bin/closure_check.sh
+group 6: test(closure): add the step 4 invariant suite
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 4 host capture
+group 7 path: docs/v0.27.0/verify.closure.step4.rhel.txt
+group 8: docs(toolchain-runtime-closure): record step 4 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step4.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+staged path: src/setups/env/closure/README.md
+staged path: src/setups/env/closure/closure-config.txt
+```
+
+### Requestor assessment for step 4 toolchain-runtime-closure (round 1)
+
+#### Requestor verdict for step 4 toolchain-runtime-closure (round 1)
+
+Yes. Step 4 has been fully implemented.
+
+The three remaining invariants, the aggregation rule and the entry-point half of
+the unreferenced finding are in place. Every completion criterion the plan states
+passes, and the positive controls the plan names are in the suite rather than
+asserted in prose.
+
+#### Evidence, every command re-run on the reviewed bytes for step 4 toolchain-runtime-closure (round 1)
+
+The host-gated commands ran on the RHEL 9.8 build host over ssh, against a copy
+of the subset under `/tmp` whose digests match the working tree; the lint gate
+and the greps ran on the authoring host with everything staged.
+
+| Obligation | Evidence |
+| --- | --- |
+| step 4 suite green | `bash docs/v0.27.0/verify.closure-check.sh --step 4`: exit 0, 129 cases, 0 failures, `OBJECTIVE MET for step 4` |
+| step 3 still green, no case outcome changed | `--step 3`: exit 0, 124 cases, 0 failures, the same count as the step 3 capture |
+| step 2 still green | `--step 2`: exit 0, 91 cases, 0 failures |
+| step 1 still green | `--step 1`: exit 0, 70 cases, 0 failures |
+| step 0 still green | `--step 0`: exit 0, 62 cases, 0 failures |
+| the aggregate | argument-free: exit 5, steps 0 to 4 exit 0, steps 5 to 7 refuse by name |
+| lint gate green | `bash src/utils/lint_shell.sh`: exit 0, 48 tracked scripts, `lint_shell: clean` |
+| one UNDETERMINED producer | `rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh`: one definition at `closure_rules.sh:58` and six call sites, no second producer in any module |
+| installer purity | `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` prints nothing |
+| installer untouched | `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` exits 0 |
+| preserved surface | `verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt`: exit 0, 104 cases, 0 failures |
+| the reviewed bytes are the measured bytes | `closure_check.sh` `bea87f3d...`, `closure_config.sh` `d0e77c4e...`, `closure_elf.sh` `7651dda4...`, `closure_rules.sh` `0162649b...`, `closure-config.txt` `d1a487b5...`, `verify.closure-check.sh` `f048da48...`, `fixtures.closure-corpus.txt` `3d10674e...`, each digested on both machines and identical |
+| the authoring host answers the same instrument | `--step 4` there exits 5 at 28 cases and 0 failures, unanswered on the host identity, the readelf capability and the fixture generation, with the same harness digest `f048da48...` |
+
+#### The positive controls, because each invariant can pass by examining nothing for step 4 toolchain-runtime-closure (round 1)
+
+- **Rule 1**: twenty lookup names, each with two candidate paths resolving to one
+  file through a directory alias, ACCEPTED, with the examined-name count
+  asserted as `21 names, 20 multi-candidate, 0 refused`. That is the measured
+  archive's own shape, and a rule 1 that over-refused would fail here and
+  nowhere else.
+- **Coherence**: a version need the selected provider DOES define is accepted
+  first, with the answered count asserted, so the refusal beside it is about the
+  node rather than about a rule that refuses every need it sees.
+- **Rule 2**: the measured two-generation shape refused, and the same pair with
+  no family record asserted NOT EXAMINED, so the declared blind spot is measured
+  rather than left as silence.
+- **The entry-point half**: the same shipped program asserted absent from the
+  combined finding with the location declared and present with the record
+  removed. The location is declared through the `current` alias while the object
+  is recorded under the version directory, so the pair also measures that a
+  declared location is resolved rather than compared as text.
+- **The digests rule 1 reports**: asserted to BE the two files' own digests, so
+  the refusal cannot carry two arbitrary strings and pass.
+
+#### The boundary this step had to draw, stated because it is a judgment call for step 4 toolchain-runtime-closure (round 1)
+
+Coherence is a statement about a provider OBJECT and its definitions come from
+the one walk. The derived membership half accepts a `DT_NEEDED` name resolving to
+a FILE, which is the semantics step 3 reviewed and which its own control asserts
+by planting a text file as the provider and requiring acceptance.
+
+A selected candidate that is a file the walk did not read as an object therefore
+produces no coherence result. Refusing there, or reporting UNDETERMINED there,
+would be one half reaching a verdict on the other's evidence, and it would turn
+step 3's reviewed acceptance into a refusal without amending step 3. The boundary
+is stated in the function and made visible in the report, which prints the needs
+COUNTED beside the needs ANSWERED, so a run says how much of the question it
+answered. In the real archive every version-need provider is a shipped ELF, so
+the boundary narrows nothing the archive exercises.
+
+#### The fixture defect this step's own first run found for step 4 toolchain-runtime-closure (round 1)
+
+The engine writes mutation names into the last 256 bytes of `.dynstr`, and the
+corpus header called those bytes symbol names "which nothing in this effort
+reads". On the measured donor that is false: version DEFINITION names live there,
+and writing the second slot renamed two definitions and emptied a third. Step 3
+never noticed because nothing read those names.
+
+Step 4's reader does, and an object carrying a definition whose name cannot be
+read is one it must refuse, so the first run of this suite reported nine failures
+over a provider the checker was right to refuse. The repair is in the engine and
+not in the reader: a generated object now carries only the version records its
+row asks for, and every donor copy clears both version section counts. That also
+makes every coherence count in the capture exact rather than donor-dependent, and
+it is why step 3's trees now carry no version records at all while its 124 cases
+are unchanged.
+
+#### What this requestor wants looked at hardest for step 4 toolchain-runtime-closure (round 1)
+
+- **The coherence domain boundary above.** It is the one place this step chose
+  silence over a verdict, and the choice is defensible only if the reasoning
+  holds.
+- **The line budget.** `closure_rules.sh` and `closure_check.sh` are both at 650,
+  the exact deployment ceiling, and `closure_config.sh` is at 645. Room was made
+  in `closure_config.sh` by trimming header prose that the same file already
+  states at its own code site. Each removal is listed in the change summary and
+  each should be checked against that claim.
+- **The step 2 fixture that moved.** No step 2 assertion changed, but a fixture
+  did, and the reasoning for it is in the change summary.
+- **The section-header write.** `elf_set_version_count` pokes `sh_info` at offset
+  44 of an `Elf64_Shdr` located from readelf's own header-table figures. The
+  layout constant is the one thing in the engine not read back from the reader.
+
+### Implementation report for step 4 toolchain-runtime-closure (round 1)
+
+#### What step 4 implemented, module by module for step 4 toolchain-runtime-closure (round 1)
+
+##### The one UNDETERMINED producer for step 4 toolchain-runtime-closure (round 1)
+
+`closure_rules.sh` gains `closure_result_undetermined`, the only site in the
+module that prints that verdict and counts it. Step 3's unresolved-chain site now
+calls it and prints the identical line, so the rule that UNDETERMINED means an
+input could not be obtained has one implementation and one place to read. The
+plan's grep criterion is asserted in the suite as one definition plus no second
+`printf` of that verdict.
+
+##### The declared floor half for step 4 toolchain-runtime-closure (round 1)
+
+`closure_floor_check` walks the declared floor members and tests each against the
+observed loader scope using its own required-location column: `any` asks for
+presence anywhere in that scope, because resolution is what the floor protects,
+and `tools/<root>` asks for a candidate under that root, because a member whose
+only copy lives under another tool's root makes one payload depend on the other's.
+A refusal names the member and the location it did not satisfy. A run that read
+no declaration has no floor and reports nothing, which the verdict line states.
+
+##### Provider-aware coherence for step 4 toolchain-runtime-closure (round 1)
+
+`closure_coherence_check` walks the version needs the reader collected. For each,
+it resolves the `DT_VERNEED` provider name through the provider directories in
+scope order, takes the first candidate because that is the one the loader takes,
+resolves it through the recorded link map, and then applies the two refusals: a
+resolution that left the archive, naming the outside file, and a selected
+provider that does not define the needed node, naming subject, node, provider and
+the selected file. A provider name that resolves nowhere is UNDETERMINED naming
+it, which is the aggregation table's first row. The needs counted and the needs
+answered are both reported.
+
+##### Rule 1 for step 4 toolchain-runtime-closure (round 1)
+
+`closure_rule1_duplicates` collects the distinct lookup names the edges recorded,
+which is 54 on the measured archive rather than its 628 objects. `closure_rule1_name`
+resolves that name's candidates through the link map, reduces them to distinct
+resolved targets, and only then digests: a name reaching one file through several
+paths costs no digest at all. A refusal names both paths and both digests.
+Digests are cached by path through a global result variable, because a command
+substitution would run the function in a subshell and throw the cache away.
+
+##### Rule 2 for step 4 toolchain-runtime-closure (round 1)
+
+`closure_rule2_families` matches every shipped SONAME against each declared
+family's patterns, counts the distinct generations found, and refuses a family
+over its permitted count, naming the family, the permitted count, the observed
+count and the sonames. An undeclared family is not examined, which is the design's
+deliberate blind spot and which the suite asserts.
+
+##### The entry-point half and the combined finding for step 4 toolchain-runtime-closure (round 1)
+
+`closure_report_unreferenced` resolves each declared location through the link
+map before comparing it with the walked paths, so a location written through the
+`current` alias matches an object recorded under the version directory. A subject
+at or under a resolved location is an entry point; a subject that is neither an
+entry point nor reached by an edge is the design's finding, printed as
+`UNREFERENCED|subject|`. The conjunction is reported ONLY when a declaration was
+read: a run without a bundle reports the edge half under its own name and nothing
+else, which is exactly what step 3 does and what keeps a shipped executable from
+being named as an object nothing can load.
+
+The paths the edges reach moved to module scope so the combined half reads the
+same set the edge half computed rather than sweeping the edges twice.
+
+##### The grammar record for step 4 toolchain-runtime-closure (round 1)
+
+`closure_config.sh` gains `entrypoint|<location>`: a `repo-path` of two to eight
+segments under a declared tool root, refused on a duplicate, on a location
+outside `tools/`, and on a root the document does not declare, with the parsed
+set reset alongside the rest of the model. The committed document declares the
+eight locations the design names, and the README beside it states the record and
+its ownership.
+
+##### The reader for step 4 toolchain-runtime-closure (round 1)
+
+`closure_elf.sh` records each object's version DEFINITIONS in the same
+`readelf -d -V` invocation that already reads its needs, because coherence asks
+what a selected provider defines and reading it later would mean one call per
+version need instead of one per object. A definition whose name cannot be read
+refuses the object, for the same reason an unreadable `DT_NEEDED` name does: a
+partial definition set cannot answer a coherence question.
+
+##### The run order, the report and the exit code for step 4 toolchain-runtime-closure (round 1)
+
+`closure_check.sh` calls the five invariants in order, reports six new summary
+rows, prints one refusal line per invariant that refused rather than returning at
+the first, returns 5 for an invariant result whose input could not be obtained,
+and states in the PARTIAL verdict which invariants a run answered and whether a
+bundle supplied the declared halves at all.
+
+#### The harness and the corpus for step 4 toolchain-runtime-closure (round 1)
+
+The corpus gained twelve rows and revised three, and the engine gained the two
+version-record mutations they need, the section-header count writer, the
+multi-candidate population, the two-path digest asserts and the link cycle. The
+step 4 suite is 375 lines over ten prepared trees and 129 cases.
+
+The three revised rows were forward declarations written at step 3, before the
+engine that would build them existed. Each named a version node and no
+`DT_NEEDED` entry, so the object would have demanded a node from a library it
+never named, which is a shape no archive has. `verneed-set` now repoints the
+donor's own need at a provider and a node AND adds the matching `DT_NEEDED`.
+
+#### The retained capture for step 4 toolchain-runtime-closure (round 1)
+
+`docs/v0.27.0/verify.closure.step4.rhel.txt` holds the RHEL 9.8 run, the four
+earlier suites, the aggregate, the preserved installer surface, the
+authoring-host refusal with the shared harness digest, the grep checks, and the
+line budget measured against the plan's advisory estimates with the forward note
+for step 5.
+
+### Change summary for step 4 toolchain-runtime-closure (round 1)
+
+#### Staged paths for step 4 toolchain-runtime-closure (round 1)
+
+Ten paths, all staged, nothing else in the working tree.
+
+| Path | Change |
+| --- | --- |
+| `src/setups/env/bin/closure_rules.sh` | the three remaining invariants, the one UNDETERMINED producer, the entry-point half and the combined finding; 266 to 650 lines |
+| `src/setups/env/bin/closure_check.sh` | the run order, six summary rows, one refusal line per invariant, the results exit code, the reworded verdict; 636 to 650 lines |
+| `src/setups/env/bin/closure_config.sh` | the `entrypoint` record, its reset, and the header trims that made room; 637 to 645 lines |
+| `src/setups/env/bin/closure_elf.sh` | the version definitions collected in the one read; 432 to 463 lines |
+| `src/setups/env/closure/closure-config.txt` | the eight declared entry-point locations; 25 to 34 lines |
+| `src/setups/env/closure/README.md` | the record, its domain and its ownership |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | twelve added rows, three revised, the two donor requirements, count 35 to 47 |
+| `docs/v0.27.0/verify.closure-check.sh` | the step 4 suite, the version-record mutations, the section-header count writer, the multi-candidate population, the digest asserts; 3084 to 3866 lines |
+| `docs/v0.27.0/verify.closure.step4.rhel.txt` | the retained host capture, added |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | the step 4 sections, from not started to the recorded verdict |
+
+#### The `a.commit` groups, least to most dependent for step 4 toolchain-runtime-closure (round 1)
+
+| Group | Subject | Paths |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 4 fixture rows` | the corpus |
+| 2 | `feat(closure): declare the archive entry points` | `closure_config.sh`, `closure-config.txt`, `README.md` |
+| 3 | `feat(closure): read every version definition once` | `closure_elf.sh` |
+| 4 | `feat(closure): add the last three invariants` | `closure_rules.sh` |
+| 5 | `feat(closure): run every invariant in order` | `closure_check.sh` |
+| 6 | `test(closure): add the step 4 invariant suite` | `verify.closure-check.sh` |
+| 7 | `test(closure): retain the step 4 host capture` | the capture |
+| 8 | `docs(toolchain-runtime-closure): record step 4 validation` | the validation plan |
+
+`commit-plan-check.bat --format json` reports `state: valid`, `ready: true`, no
+diagnostics, and the eight groups above over the ten staged paths.
+
+Group 2 keeps the parser and the document it parses together on purpose: the
+committed declaration does not parse until the module knows the record.
+
+#### Two changes that are not step 4 code and are called out for that reason for step 4 toolchain-runtime-closure (round 1)
+
+**The trimmed prose in `closure_config.sh`.** The `entrypoint` record cost 30
+lines and the file was already at 637, so it would have landed at 667, over the
+650 deployment ceiling the plan's budget policy sets. What made room, and what a
+reviewer should check one by one against the claim that each removal is stated
+elsewhere in the same file:
+
+- the header's three-parties paragraph, nine lines, now four lines pointing at
+  `closure_envelope_check` and `closure_config_authority_check`, which each state
+  the same asymmetry where their code is;
+- the header's digest-domain paragraph, five lines, now three, with the README
+  the header already points at holding the full domain;
+- the one-lexer paragraph, nine lines, now seven;
+- six one-line tightenings of function comments;
+- `closure_config_reset`, whose five identical three-line unset loops became five
+  one-line loops beside the sixth this step adds.
+
+**The step 2 gate fixture.** That suite's gate section runs the checker over a
+bare tree with a good bundle and expects the run to PROCEED. The valid example
+that bundle carries declares two floor members, so with the declared floor
+implemented a tree carrying neither now refuses on the FLOOR rather than on the
+gate the section is about. The two members are planted in that tree, as plain
+files, because a provider is a file of that name and the floor asks for presence.
+No step 2 assertion was weakened and no step 2 case outcome moved.
+
+#### The line budget after this step for step 4 toolchain-runtime-closure (round 1)
+
+| File | After | Band |
+| --- | --- | --- |
+| `closure_check.sh` | 650 | 550 to 650, at risk |
+| `closure_config.sh` | 645 | 550 to 650, at risk |
+| `closure_elf.sh` | 463 | below 550, safe |
+| `closure_rules.sh` | 650 | 550 to 650, at risk |
+
+Every shipped script is at or under the ceiling. Step 5 adds the waiver outcomes
+to `closure_rules.sh`, estimated at plus 60 to 90 lines, and the packaging gate's
+entrance to `closure_check.sh`, and neither has headroom. The responsibility to
+move is the REPORT: the summary block and the verdict lines in `closure_check.sh`
+are formatting over counts other modules produce. Moving it is a topology
+decision rather than an implementer's, and the topology forbids a fifth module,
+so it is a plan question to settle before step 5 writes code.
+
+#### Writer response for step 4 toolchain-runtime-closure (round 1)
+
+This is the first round of this exchange, so there is no earlier feedback on step
+4 to accept or dispute, and no disagreement is recorded.
+
+Two decisions carried in from the step 3 exchange shape this step's code and are
+named here so the reviewer reads them as inherited rather than as new choices.
+
+**R3b and design Q13.** The step 3 review found the design defining the
+unreferenced finding as a conjunction whose first term had no declared source.
+The specification owner amended it on 2026-09-07: design Q13 splits the finding,
+step 3 owns `UNREFERENCED-BY-EDGE`, and step 4 owns the declared entry-point set,
+the other half, and the result that combines them. This step implements that
+amendment, which is why the `entrypoint` record lands in the configuration module
+although the plan's step 4 file list, written before the amendment, does not name
+that file.
+
+**The derived half's file-level semantics.** Step 3's membership control plants a
+plain text file as a provider and asserts the tree is then ACCEPTED, so a
+`DT_NEEDED` name resolves when a FILE of that name is in the scope. That reviewed
+decision is what bounds coherence's domain in this step, and the assessment
+states the consequence rather than leaving it implied.
+
+Three things were done in this step that the plan does not name, each because the
+plan predates the fact that forced it, and each is called out so the reviewer can
+judge whether it belonged to this step at all.
+
+- `closure_elf.sh` gained the version definitions. The plan's step 4 file list
+  names four files and not the reader, but coherence cannot ask what a provider
+  defines without them, and collecting them anywhere else would mean a second
+  read of every object, which the cost rule forbids.
+- `closure_config.sh` gained the `entrypoint` record, for the Q13 reason above,
+  and lost the header prose that made room for it under the ceiling. Every
+  removal is listed in the change summary.
+- The step 2 gate tree gained the two floor members its own bundle declares. That
+  is a fixture change in a reviewed suite, and the change summary states why it
+  is the smaller of the two honest repairs.
+
+One thing was deliberately NOT done. Step 5 owns the waiver outcomes, so this
+step refuses a floor member absent whether or not a waiver names it, and the
+committed declaration's sqlite waiver has no effect yet. That is the plan's
+order, not an oversight.
+
+### Reviewer focus for step 4 toolchain-runtime-closure (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-09-07T19:44:37+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Baseline index tree: 0177ca30e32e97b56a9039fe986a73db8f655d2c
+
+Assessed index tree: 66509a0a98043324b52f8d0a6ccb921c1303968f
+
+### Implementation check for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Result:
+
+No. Step 4 has NOT been fully implemented.
+
+R1 (P1), closure_rules.sh:403: a selected provider without a CLOSURE_ELF_VERDEF entry is silently skipped. The independent module probe records membership_refused=0, needs=1, answered=0, coherence_refused=0, undetermined=0. The aggregate has no non-passing condition for this input. Design Area 2 and plan step 4 require every recorded version need to be answered against the selected file. Membership's independent file-presence result does not authorize coherence to omit its own result. A known non-object must not satisfy a version need; a failed reading must remain a named UNDETERMINED. Add real-ELF consumer controls for both, plus an ELF with no version definitions.
+
+R2 (P2), closure_rules.sh:458: repaired by the reviewer. The received implementation deduplicated targets but checked the original candidate count before entering its digest loop. Two aliases of one file therefore still required SHA-256 and could become UNDETERMINED when the unnecessary digest failed. A separate target count now skips that loop for a single target while retaining the multi-candidate summary. The focused probe changes from undetermined=1 to undetermined=0. The existing twenty-name positive tree gains two assertions under a deliberately unavailable rules-module digest operation.
+
+R3 (P2), closure_rules.sh:405 and :472: the new coherence lookup scans a provider's full definition string for each need, and target deduplication scans an accumulated target string for each candidate. These have O(E*V) and O(k^2) bounds respectively, with no fixed bound on V or k. The plan explicitly requires O(1) lookup per need and O(n) per phase. Use indexed definition and resolved-target membership, ordered candidate storage and linear record iteration, or return a proposed weaker bound to the specification owner. This representation change is returned for rework rather than mixed into the bounded R2 repair.
+
+The entrypoint parser, declaration and conjunction follow Q13, and the two required controls are present. Collecting VERDEF in the existing readelf call belongs to this step. The donor fixture repair is justified by the documented string-table overlap; its sh_info write is consistent with the harness's ELF64 little-endian donor restriction. The step 2 floor fixtures preserve their existing gate assertions. The trimmed configuration comments retain the substantive authority and digest rules at their check sites and in the adjacent README.
+
+Current script counts are 650/645/463/650 for checker/config/reader/rules, so no current file exceeds the ceiling. The requestor correctly identified a separate plan decision before step 5. No fifth module, later-step change, or umbrella completion was made.
+
+Validation is incomplete. Request-time RHEL results are retained historical evidence, not an independent reviewer run or validation of the repaired bytes. Local mandatory suites correctly exit 5 for unavailable Linux/readelf inputs. The final changed-harness lint exposes fourteen pre-existing SC2016 diagnostics in earlier-step helpers, beyond the production-only gate. The reviewer corrected the two step 4 literal-child-shell annotations and an unused step 4 local variable without changing their behavior.
+
+Validation plan effects:
+
+Updated only the exact step 4 section of docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. Its verdict is the required No. Step 4 has NOT been fully implemented. The Missing work for Step 4 list covers R1, R3, final Linux validation and the omitted harness lint obligation. It records the repaired R2 and distinguishes requestor captures from independent evidence. No other step or document-level completion state changed.
+
+### Pre-repair mandatory checks and coverage for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Before substantive repair: independent commit-plan-check exited 0, state valid, ready true, eight ordered groups, ten staged paths, no diagnostics. Project lint exited 0 over 48 scripts. The UNDETERMINED grep found one rules-module definition and its six call sites; installer purity printed nothing (expected rg exit 1); the HEAD-relative installer diff exited 0.
+
+Local mandatory step 4: 28 cases, zero failures, exit 5. Local mandatory step 3: 17 cases, zero failures, exit 5. Both named missing Linux identity/readelf/fixture inputs. Their request-time harness digest matched f048da4827d2d435de4d07ac6171752a4a965a25bee1380162ee43cd2df3ca59 in the retained RHEL capture. These were not full suite passes.
+
+After R2: the focused digest-failure probe produces no UNDETERMINED; R1 still reproduces. Project lint remains clean. The final local step 4 and step 3 reruns still exit 5 for the same host limitations. Direct final harness shellcheck exits 1 with fourteen earlier-step SC2016 diagnostics. The reviewer removed the unused step 4 local and annotated its intentional literal child-shell code.
+
+The RHEL host was independently identified as 9.8. Automatic approval review rejected transfer of the private source subset for testing because payload and destination authorization was insufficiently explicit. Approval was requested and is pending; no reviewer source transfer or RHEL suite run occurred.
+
+Detailed ignored evidence is retained under .reviews/a.codex-closure-s4-r1.*, including lint.log, step4-local.log, step3-local.log, probes.log, probes-after.log, step4-after.log, step3-after.log and harness-lint.log.
+
+### Resolved validation set and sources for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+The union retains every request command and adds the plan's changed-harness lint obligation:
+
+1. bash src/utils/lint_shell.sh (project, plan): PASS.
+2. bash docs/v0.27.0/verify.closure-check.sh --step 4 (plan): UNAVAILABLE, exit 5 locally.
+3. bash docs/v0.27.0/verify.closure-check.sh --step 3 (plan): UNAVAILABLE, exit 5 locally.
+4. rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh (plan): PASS; PowerShell used rg's equivalent explicit directory and -g filter rather than an unexpanded wildcard.
+5. rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (plan): PASS, empty output, expected no-match exit 1.
+6. git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (plan): PASS, exit 0.
+7. shellcheck docs/v0.27.0/verify.closure-check.sh (plan): FAIL, fourteen earlier-step SC2016 diagnostics remain.
+
+Resolved and validated through the current shared resolver; exact machine evidence is .reviews/a.codex-closure-s4-r1.resolver.json.
+
+### Resolver drift and direction for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Additive drift: shellcheck docs/v0.27.0/verify.closure-check.sh. The plan's departure table requires shellcheck over changed scripts, while src/utils/lint_shell.sh explicitly excludes docs and says effort harness lint belongs in the plan additions. The request omitted this command. No request command was removed or weakened; the full seven-command union was attempted.
+
+### Repository state around validation for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+The initial captured index tree exactly matched request_index_tree 0177ca30e32e97b56a9039fe986a73db8f655d2c. Baseline and pre-repair blobs were retained through code_review_evidence.bat before edits.
+
+The final validation-state comparison reports acceptable=false because it mechanically observes the deliberate tracked reviewer repairs: closure_rules.sh, verify.closure-check.sh, the step 4 validation plan, and the index. Its sole ignored difference is a.commit. Each authored patch has a separate successful attribute-reviewer-patch result and was staged only after git apply --cached --check accepted that exact patch. No unrelated path was staged, reverted or repaired; no validation side effect outside these attributable edits was observed.
+
+The umbrella digest remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7 (changed=false). The pre-existing unstaged versioned transcript remains protocol-owned and was not read as working context or staged. Detailed snapshots and attribution JSON are retained under the caller-owned evidence prefix.
+
+### Repair inventory for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Repairs made:
+
+- src/setups/env/bin/closure_rules.sh: substantive R2 repair, skip content hashing when candidate aliases reduce to one resolved target; staged attributable patch, still 650 lines.
+- docs/v0.27.0/verify.closure-check.sh: substantive R2 regression helper and two real-tree assertions; polishing-only removal of one unused step 4 local and explicit annotations for intentional child-shell expansion in the two step 4 helpers; staged attributable patch.
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: review metadata only, exact step 4 verdict, findings, repair evidence and missing-work rows; staged attributable patch.
+- a.commit: review metadata only, accurate group 6 repair description and group 8 incomplete-validation subject/body; retained ignored, no membership or ordering change.
+
+Paths staged:
+
+- docs/v0.27.0/fixtures.closure-corpus.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step4.rhel.txt
+- src/setups/env/bin/closure_check.sh
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_elf.sh
+- src/setups/env/bin/closure_rules.sh
+- src/setups/env/closure/README.md
+- src/setups/env/closure/closure-config.txt
+
+### Commit plan assessment for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Independently rerun both before and after repairs: exit 0, state valid, ready true, no diagnostics, all ten staged paths assigned exactly once in eight ordered groups. The order remains corpus, configuration/parser, reader, rules, checker, harness, retained host capture, validation document. Dependency ordering is coherent.
+
+The final group 8 subject is docs(toolchain-runtime-closure): record step 4 review findings; the other seven subjects are unchanged. Group 6 now names the alias-only digest regression control. Exact ordered subjects and path lists are retained in .reviews/a.codex-closure-s4-r1.commit-check-after.json.
+
+a.commit is mechanically accurate for the assessed staged state. This passes only the commit-plan floor and does not authorize a commit; code completeness, mandatory validation and the substantive-reviewer-repair rule still block convergence.
+
+### Findings and boundaries for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Unresolved findings:
+
+- R1 [P1] closure_rules.sh:403: silently skipping a selected provider with no VERDEF record permits an unanswered version need to leave the aggregate successful; apply the design's per-need requirement and add non-object/unreadable/no-definitions controls.
+- R3 [P2] closure_rules.sh:405,472: repeated full definition and growing-target scans violate the explicit constant-time lookup and linear-phase bounds; replace with indexed membership and linear iteration, or obtain a specification decision changing those bounds.
+- U1: the final reviewer-modified bytes lack mandatory Linux step 4/step 3 validation, and changed-harness lint still exits 1 on fourteen earlier-step SC2016 diagnostics. The original 129/0 and 124/0 capture cannot validate the new repair.
+
+Boundary-crossing work:
+
+- Before step 5, the specification/plan owner must settle headroom for the rules and checker modules while preserving or explicitly revising the fixed topology. All current files satisfy the existing 650-line ceiling; no topology decision was made in reviewer mode.
+- The fourteen remaining harness SC2016 diagnostics are in earlier-step helpers. They were not changed during this exact step 4 review. Resolve the planned harness lint obligation through an attributable lint-only follow-up; do not mistake the production-only lint pass for a harness pass.
+- The reviewer did not adopt the requestor's proposed coherence-domain exception. Any decision to permit unanswered recorded version needs must be made in the specification, not introduced by code or by a passing membership fixture.
+
+### Writer instructions for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+1. Inspect and accept or revise the attributable R2 patch and its two regression assertions; the reviewer made a substantive change, so publish a replacement review request after validation.
+2. Repair R1 without changing derived membership's own result. Explicitly classify each recorded version need: reject a known non-object or missing node; report an unavailable provider reading as UNDETERMINED; retain the existing unresolved-name, escape and first-candidate behavior. Add real-ELF regression controls and ensure no unanswered need can return a green aggregate.
+3. Repair R3 with indexed definition/target membership and linear iteration. Preserve lookup scope order, digest caching and the twenty-name alias control. If the existing bounds cannot be met within the topology, bring the specific proposed change to the specification owner rather than claiming the current implementation meets them.
+4. Include the changed harness in the resolved lint set and resolve the remaining earlier-step SC2016 diagnostics through a bounded attributable follow-up. Keep the quoting intentional; do not turn child-shell literals into parent expansion.
+5. Run step 4 and step 3 on Linux against the final staged implementation and harness, retain current digests/results, and update step 4's validation verdict only when all missing work is closed. The old host capture describes the received version and must not be presented as validation of the repair.
+6. Carry the separate headroom decision to the plan owner before step 5. No commit or human convergence confirmation is authorized by this answer.
+
+### Decision rationale for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Recommend changes-requested.
+
+Readiness floor: exact identity PASS; complete implementation FAIL (R1/R3); mandatory validation and coverage FAIL (U1); attributable staged scope PASS; absence of unresolved findings FAIL; accurate a.commit PASS. The reviewer also made a substantive code/test repair, independently requiring another round.
+
+The final answer is advisory only. No literal Human guidance block was present in the request. The three scrutiny requests were addressed explicitly: the coherence exception is rejected as inconsistent with the settled per-need rule; the fixture repair and necessary reader/parser scope are justified; the ceiling is met today and the step 5 topology decision remains with its owner.
+
+### Final reviewer decision for step 4 toolchain-runtime-closure (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-1 -->
+
+## Round 2 by requestor - Step 4
+
+- Recorded: 2026-09-07T20:17:29+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 toolchain-runtime-closure (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 4
+Review round: 2
+
+### Code review evidence for step 4 toolchain-runtime-closure (round 2)
+
+request_index_tree: f0e501bc0b66c22779dff6f49f108f90ae0c8a7c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 4 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): declare the archive entry points
+group 2 path: src/setups/env/bin/closure_config.sh
+group 2 path: src/setups/env/closure/closure-config.txt
+group 2 path: src/setups/env/closure/README.md
+group 3: feat(closure): read every version definition once
+group 3 path: src/setups/env/bin/closure_elf.sh
+group 4: feat(closure): add the last three invariants
+group 4 path: src/setups/env/bin/closure_rules.sh
+group 5: feat(closure): run every invariant in order
+group 5 path: src/setups/env/bin/closure_check.sh
+group 6: test(closure): add the step 4 invariant suite
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 4 host capture
+group 7 path: docs/v0.27.0/verify.closure.step4.rhel.txt
+group 8: docs(toolchain-runtime-closure): record step 4 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step4.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+staged path: src/setups/env/closure/README.md
+staged path: src/setups/env/closure/closure-config.txt
+```
+
+### Requestor assessment for step 4 toolchain-runtime-closure (round 2)
+
+#### Requestor verdict for step 4 toolchain-runtime-closure (round 2)
+
+Yes. Step 4 has been fully implemented.
+
+Round 1's two findings are repaired at their cause, the reviewer's own repair is
+accepted unchanged and now validated on Linux, and the harness lint obligation
+round 1 correctly added to the resolved set passes. Every command below ran
+against the FINAL bytes, not against the version round 1 assessed.
+
+#### Round 1 changed the answer, so every result here is new evidence for step 4 toolchain-runtime-closure (round 2)
+
+The host-gated commands ran on the RHEL 9.8 build host over ssh, against a copy
+of the subset under `/tmp` whose digests match the working tree; the two lint
+commands ran on the authoring host with everything staged.
+
+| Obligation | Evidence on the repaired bytes |
+| --- | --- |
+| step 4 suite green | `--step 4`: exit 0, 152 cases, 0 failures, `OBJECTIVE MET` |
+| step 3 still green, no case outcome changed | `--step 3`: exit 0, 124 cases, 0 failures |
+| step 2 still green | `--step 2`: exit 0, 91 cases, 0 failures |
+| step 1 still green | `--step 1`: exit 0, 70 cases, 0 failures |
+| step 0 still green | `--step 0`: exit 0, 62 cases, 0 failures |
+| the aggregate | argument-free: exit 5, steps 0 to 4 exit 0, steps 5 to 7 refuse by name |
+| project lint | `bash src/utils/lint_shell.sh`: exit 0, 48 scripts, `lint_shell: clean` |
+| CHANGED-HARNESS LINT, the command round 1 added | `shellcheck docs/v0.27.0/verify.closure-check.sh`: exit 0, no diagnostic |
+| one UNDETERMINED producer | one definition at `closure_rules.sh:58` and six call sites, no second producer |
+| installer purity | prints nothing |
+| installer untouched | `git diff --exit-code HEAD` exits 0 |
+| preserved surface | `verify.relocation-rpath.sh --step 3`: exit 0, 104 cases, 0 failures |
+| the reviewed bytes are the measured bytes | `closure_check.sh` `bea87f3d`, `closure_config.sh` `d0e77c4e`, `closure_elf.sh` `f632092f`, `closure_rules.sh` `addb48ef`, `closure-config.txt` `d1a487b5`, `verify.closure-check.sh` `c4528edb`, corpus `74f2259e`, each digested on both machines and identical |
+| the same instrument on both hosts | the authoring host exits 5 at 28 cases and 0 failures with harness digest `c4528edb` |
+
+Three of those seven digests moved and four did not, which is the mechanical
+statement that the repairs are confined to the reader, the rules module, the
+harness and the corpus.
+
+#### R1 accepted, and repaired at its cause rather than at its symptom for step 4 toolchain-runtime-closure (round 2)
+
+The finding was right and the reasoning behind it is the part worth recording.
+This requestor argued that a selected provider the walk did not read as an object
+should yield NO coherence result, because the derived half accepts the same name
+as a FILE and one half should not reach a verdict on the other's evidence. The
+reviewer rejected that: the design requires every recorded need to be answered
+against the selected file, and permitting unanswered needs is the specification's
+decision rather than one code introduces.
+
+The repair does not weaken either half. The cause was that the rules module could
+only tell "not in the model", which conflates two different facts, so the READER
+now records what the walk determined about every file it reached: `object`,
+`not-elf`, or `unread`. Coherence then classifies every need explicitly:
+
+- an object that defines the node: accepted;
+- an object that does not: refused, naming subject, node, provider and file;
+- a KNOWN NON-OBJECT: refused, because it defines no version node, which is a
+  fact about that file rather than a verdict borrowed from the derived half;
+- a file whose reading could not be taken: UNDETERMINED naming it;
+- and the unresolved-name, escape and first-candidate behaviour is unchanged.
+
+`CLOSURE_RULES_ANSWERED` now counts every definite verdict, so `needs` equals
+`answered` exactly when no need was left open, and the report prints both.
+
+Six corpus rows and three cases came with it, each a real-ELF control:
+
+- a plain-file provider with a real-ELF consumer demanding a node from it;
+- an ELF provider carrying NO version definition at all, so an empty definition
+  set and a missing node do not share one case;
+- an unreadable provider, in ITS OWN TREE so the run carries the UNDETERMINED and
+  no refusal at all and still exits 5, which is what shows an unanswered need
+  cannot return a green aggregate;
+- and `step4/coherence/kinds-every-need-answered`, which asserts the counted
+  needs equal the answered needs on a clean tree.
+
+#### R2 accepted unchanged, and now validated on Linux for step 4 toolchain-runtime-closure (round 2)
+
+The reviewer's repair is correct and the defect was mine: rule 1 deduplicated to
+distinct resolved targets and then tested the ORIGINAL CANDIDATE COUNT before
+entering the digest loop, so two aliases of one file still took a digest and could
+turn UNDETERMINED when it failed. The distinct-target count is the right guard.
+The patch is kept as written; the surrounding loop moved to an ordered array as
+part of R3, and the guard moved with it unchanged in meaning. Its two regression
+assertions, which run the twenty-name positive-control tree with the rules-module
+digest made unavailable, pass on the RHEL host.
+
+#### R3 accepted, with indexed membership in both places for step 4 toolchain-runtime-closure (round 2)
+
+- The coherence definition test was a pattern match over the provider's whole
+  definition string, once per need. A provider's nodes are now indexed on first
+  use into `CLOSURE_RULES_DEFINED`, keyed by path and node, and cached, so the
+  test is one lookup and the indexing is one pass over the providers the run
+  actually consults.
+- The rule 1 target dedupe scanned an accumulated string per candidate. It is now
+  an associative set with an ordered array beside it, so membership is one lookup
+  and the report keeps scope order.
+- Rule 2 carried the same shape for its generation dedupe and is repaired the same
+  way, although round 1 named only the two sites above. The refusal message is
+  built by walking the ordered record once, at refusal time only.
+
+No proposed weaker bound is brought to the specification owner, because none is
+needed: the plan's constant-time lookup and linear-phase bounds are met as
+written.
+
+#### The harness lint obligation, and what it found for step 4 toolchain-runtime-closure (round 2)
+
+Round 1 was right that the request's validation set omitted it: the plan's
+departure table requires shellcheck over changed scripts and `lint_shell.sh`
+excludes `docs/` by design, so the harness had never been linted by any gate. It
+is in the set now and it exits 0.
+
+The fourteen diagnostics were all SC2016 over intentional child-shell literals in
+earlier-step helpers: scripts passed to `bash -c`, and printf lines written INTO a
+generated stub. Each is annotated where it is, with the reason, and the four in
+one stub-writing block share one directive on the compound command. No quoting
+was changed, so no child-shell literal became parent expansion.
+
+#### What this requestor wants looked at hardest in this round for step 4 toolchain-runtime-closure (round 2)
+
+- **The R1 repair's boundary.** The reader now classifies; the rules module reads
+  that classification. That keeps the verdict in the invariants and the facts in
+  the reader, but it is a new record crossing the module boundary and it deserves
+  the same scrutiny the first attempt got.
+- **The line budget, which is now blocking rather than forward-looking.**
+  `closure_rules.sh` and `closure_check.sh` are both at 650 exactly. The R1 and R3
+  repairs were paid for by tightening step 4's own prose and by rewriting the one
+  step 3 paragraph the Q13 amendment had made stale. There is nothing left to
+  trim, and step 5 adds 60 to 90 lines to the rules module.
+- **The step 2 gate fixture**, unchanged from round 1 and reported again here
+  because it is the one earlier-suite fixture this step moved.
+
+### Implementation report for step 4 toolchain-runtime-closure (round 2)
+
+#### What changed since round 1 for step 4 toolchain-runtime-closure (round 2)
+
+Four changes, three of them the review's findings and one the validation
+obligation it added.
+
+##### R1, the reader records what the walk determined for step 4 toolchain-runtime-closure (round 2)
+
+`closure_elf.sh` gains `CLOSURE_ELF_KIND`, keyed by path, with three values:
+`object` for a file read whole, `not-elf` for one positively identified as not an
+object, and `unread` for one reached and not readable. A path absent from the map
+was never reached at all. The three are written at the three sites that already
+knew the fact: the successful read, the magic-byte test, and the read-failure
+reporter.
+
+`closure_coherence_check` now classifies every recorded need against that record.
+A known non-object is refused, because it defines no version node and that is a
+fact about the file rather than a verdict borrowed from the derived half; an
+unavailable reading is UNDETERMINED naming it; an object is compared against its
+definitions. `CLOSURE_RULES_ANSWERED` counts every definite verdict, including
+refusals, so the report's needs and answered columns differ exactly when a need
+was left open.
+
+##### R2, accepted as written for step 4 toolchain-runtime-closure (round 2)
+
+`closure_rule1_name` keeps the reviewer's distinct-target guard. The candidate
+loop moved to an ordered array as part of R3 and the guard moved with it,
+unchanged in meaning: the multi-candidate summary still counts names with more
+than one candidate PATH, and the digest loop is entered only for more than one
+distinct resolved TARGET.
+
+##### R3, indexed membership for step 4 toolchain-runtime-closure (round 2)
+
+- `closure_rules_index_defs` indexes one provider's defined nodes on first use
+  into `CLOSURE_RULES_DEFINED`, keyed by path and node, guarded by
+  `CLOSURE_RULES_INDEXED` so a provider is indexed once however many needs
+  consult it. The coherence test is a single lookup.
+- `closure_rule1_name` deduplicates candidates through a local associative set
+  with an ordered array beside it, so membership is a lookup and the report keeps
+  scope order.
+- `closure_rule2_families` deduplicates generations the same way, keyed by family
+  and soname, with one ordered array for the whole pass. The refusal message is
+  built by walking that array once, only for a family that refuses.
+
+##### The harness lint obligation for step 4 toolchain-runtime-closure (round 2)
+
+Fourteen SC2016 sites annotated where they are, each with the reason it is
+intentional: a script passed to a child `bash -c`, or a printf line written into
+a generated stub. The four in one stub-writing block share one directive on the
+compound command. No quoting changed.
+
+#### The new controls, and what each would catch for step 4 toolchain-runtime-closure (round 2)
+
+| Case | What it would catch |
+| --- | --- |
+| `step4/coherence/kinds-every-need-answered` | a need left unanswered on a clean tree, which no count alone shows |
+| `step4/coherence/non-object-refused` | a known non-object satisfying a version need |
+| `step4/coherence/no-definitions-refused` | an ELF with no definitions treated as anything but a refusal |
+| `step4/coherence/unreadable-no-refusal-anywhere` | an unavailable reading turned into a claim about the archive |
+| `step4/coherence/unreadable-exit-code` | an UNDETERMINED with no refusal beside it returning a green |
+| `step4/coherence/kinds-no-undetermined` | the refusal paths quietly producing an UNDETERMINED instead |
+
+#### Counts for step 4 toolchain-runtime-closure (round 2)
+
+The suite is 152 cases, up from 129. The corpus is 53 rows, up from 47. The four
+production modules are 650, 645, 479 and 650 lines; every shipped script is at or
+under the 650 ceiling.
+
+### Change summary for step 4 toolchain-runtime-closure (round 2)
+
+#### Staged paths for step 4 toolchain-runtime-closure (round 2)
+
+The same ten paths as round 1. Four of them changed since the reviewer assessed
+them; the versioned review transcript is protocol-owned and stays unstaged, as
+round 1 observed.
+
+| Path | Changed since round 1 |
+| --- | --- |
+| `src/setups/env/bin/closure_elf.sh` | yes, the walk's per-path classification; 463 to 479 lines |
+| `src/setups/env/bin/closure_rules.sh` | yes, R1's need classification and R3's indexed membership, paid for by tightening this step's own prose; still 650 lines |
+| `docs/v0.27.0/verify.closure-check.sh` | yes, the three R1 controls, six corpus rows consumed, and the fourteen lint annotations; 3866 to 3969 lines |
+| `docs/v0.27.0/fixtures.closure-corpus.txt` | yes, six rows for the shapes a selected provider can take; count 47 to 53 |
+| `docs/v0.27.0/verify.closure.step4.rhel.txt` | yes, RE-CAPTURED against the repaired bytes; the round 1 capture described the version the reviewer received and is superseded |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | yes, the verdict returns to Yes, the Missing work section is removed because its list is closed, and each sub-section records the round |
+| `src/setups/env/bin/closure_check.sh` | no |
+| `src/setups/env/bin/closure_config.sh` | no |
+| `src/setups/env/closure/closure-config.txt` | no |
+| `src/setups/env/closure/README.md` | no |
+
+#### The `a.commit` groups, least to most dependent for step 4 toolchain-runtime-closure (round 2)
+
+Membership, ordering and boundaries are unchanged from round 1. Two subjects and
+four bodies were amended so they describe the staged work accurately.
+
+| Group | Subject | Paths |
+| --- | --- | --- |
+| 1 | `test(closure): declare the step 4 fixture rows` | the corpus |
+| 2 | `feat(closure): declare the archive entry points` | `closure_config.sh`, `closure-config.txt`, `README.md` |
+| 3 | `feat(closure): read every version definition once` | `closure_elf.sh` |
+| 4 | `feat(closure): add the last three invariants` | `closure_rules.sh` |
+| 5 | `feat(closure): run every invariant in order` | `closure_check.sh` |
+| 6 | `test(closure): add the step 4 invariant suite` | `verify.closure-check.sh` |
+| 7 | `test(closure): retain the step 4 host capture` | the capture |
+| 8 | `docs(toolchain-runtime-closure): record step 4 validation` | the validation plan |
+
+Group 8's subject returns to the `record step 4 validation` marker the plan
+requires for the group carrying a completed validation plan, because the verdict
+is a Yes again. The bodies of groups 1, 3, 4 and 6 gained the round 1 repairs.
+`commit-plan-check.bat --format json` reports `state: valid`, `ready: true`, no
+diagnostics, eight ordered groups over the ten staged paths.
+
+#### What did not change, and is reported again because it is the one earlier-suite move for step 4 toolchain-runtime-closure (round 2)
+
+The step 2 gate section runs the checker over a bare tree with a good bundle and
+expects the run to PROCEED. That bundle's valid example declares two floor
+members, so with the declared floor implemented a tree carrying neither refuses on
+the FLOOR rather than on the gate the section is about. The two members are
+planted in that tree, as plain files, because a provider is a file of that name
+and the floor asks for presence. Round 1 assessed this and found the gate
+assertions preserved.
+
+#### The line budget after this round for step 4 toolchain-runtime-closure (round 2)
+
+| File | After | Band |
+| --- | --- | --- |
+| `closure_check.sh` | 650 | 550 to 650, at risk |
+| `closure_config.sh` | 645 | 550 to 650, at risk |
+| `closure_elf.sh` | 479 | below 550, safe |
+| `closure_rules.sh` | 650 | 550 to 650, at risk |
+
+Every shipped script is at or under the ceiling, and the R1 and R3 repairs were
+absorbed inside it rather than allowed to cross it. What paid for them: this
+step's own comment blocks tightened, and the one step 3 paragraph the Q13
+amendment had made stale, which still said no step of the plan scheduled the
+entry-point declaration.
+
+There is nothing left to trim in `closure_rules.sh`, and step 5 adds the waiver
+outcomes to it at an estimated plus 60 to 90 lines. The headroom decision round 1
+routed to the plan owner is now blocking rather than forward-looking.
+
+#### Writer response for step 4 toolchain-runtime-closure (round 2)
+
+Round 1 recommended changes-requested with two findings, one reviewer repair and
+one validation gap. All four are accepted. No disagreement is recorded, and no
+reviewer edit was reversed.
+
+**R1 accepted, and the reasoning behind the rejection accepted with it.** This
+requestor's round 1 assessment asked for exactly this to be looked at hardest,
+and proposed that a selected provider the walk did not read as an object should
+yield no coherence result. The reviewer's answer is the right one: the design
+requires every recorded need to be answered against the selected file, and a
+decision to permit unanswered needs belongs to the specification rather than to
+code. The repair removes the exception without weakening either half, by giving
+the reader the fact the rules module was missing.
+
+**R2 accepted unchanged.** The defect was real and was mine: the guard tested the
+candidate count where it had to test the distinct-target count. The reviewer's
+patch is kept as written. Its surrounding loop moved to an ordered array as part
+of R3 and the guard moved with it, unchanged in meaning; the two regression
+assertions are kept and now run on Linux.
+
+**R3 accepted.** No weaker bound is proposed to the specification owner, because
+the plan's bounds are met as written once both sites are indexed.
+
+**The harness lint obligation accepted.** The command belongs in the resolved set
+and it was missing from round 1's request. It is there now and it passes, with
+the quoting kept intentional as the reviewer instructed.
+
+Two boundary notes from round 1 are carried rather than acted on, because neither
+is this step's to settle:
+
+- the headroom decision for `closure_rules.sh` and `closure_check.sh` before step
+  5 remains with the plan owner, and this round makes it blocking rather than
+  forward-looking;
+- the fourteen SC2016 diagnostics were in earlier-step helpers, and round 1
+  offered a bounded lint-only follow-up as one route. They are annotated in this
+  step instead, because the plan's obligation is over the CHANGED harness and
+  this step changed it, so leaving it red would have carried a failing mandatory
+  command into the commit. The annotations change no behaviour and no quoting.
+
+### Reviewer focus for step 4 toolchain-runtime-closure (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-2 -->
+
+## Round 2 by reviewer - Step 4
+
+- Recorded: 2026-09-08T08:08:21+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Baseline index tree: f0e501bc0b66c22779dff6f49f108f90ae0c8a7c
+
+Assessed index tree: d469c6f0fe2c4e6f8e1cc048faed3448f4d011eb
+
+### Implementation check for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Result:
+
+No. Step 4 has NOT been fully implemented.
+
+The reviewed request and the staged baseline agreed at f0e501bc0b66c22779dff6f49f108f90ae0c8a7c. The exact plan defines step 4 and names the umbrella. Current validation resolution matches the seven-command embedded set.
+
+R1's object/not-elf/unread classification is appropriate: the reader supplies facts and coherence gives every need a definite verdict or a named missing input. R2's alias-only guard and R3's associative membership changes are retained. The step 2 gate fixture still tests the gate after supplying its own declared floor.
+
+R3 was incomplete at the list-consumption level. closure_rules_index_defs copied the remaining definition string for every node. The local 1,000/2,000/4,000-node measurements were 0.260/0.916/3.582 seconds. The reviewer changed that loop and the analogous new step 4 list consumers to IFS= read -r. The same definition-index probe then measured 0.038/0.089/0.173 seconds while asserting every requested node remained indexed.
+
+The final rules module is 635 lines. The other three shipped modules are 650, 645 and 479 lines, all within the ceiling. No module boundary, interface, configuration choice or other plan step changed. Mandatory Linux validation of the repaired bytes remains missing.
+
+Validation plan effects:
+
+Only the exact step 4 section of docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md changed. Its status is exactly "No. Step 4 has NOT been fully implemented." It includes Missing work for Step 4 immediately after What was implemented for Step 4, records the reviewer repair and its evidence, and distinguishes the requestor's old Linux capture from the missing reruns. No document-level status, other step or umbrella row changed. The launcher proved the metadata patch attributable, and only that patch was staged.
+
+### Pre-repair mandatory checks and coverage for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+The independent initial commit-plan checker returned exit 0, state valid, ready true, eight groups over ten staged paths, with no diagnostics. Both lint commands passed before the repair. The original definition-index scaling probe verified every requested node but showed approximately fourfold runtime for each doubling. The Windows step 4 harness returned exit 5 for unavailable host identity, readelf and fixture generation. The requestor's retained RHEL capture reports 152 step 4 cases and 124 step 3 cases passing on the request-time bytes; it is not an independent reviewer run and predates the substantive reviewer repair.
+
+### Resolved validation set and sources for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+The union contains the following seven commands. Sources are project+plan for the first and plan for the remaining six.
+
+1. bash src/utils/lint_shell.sh: exit 0, 48 tracked scripts, clean after the final code repair.
+2. shellcheck docs/v0.27.0/verify.closure-check.sh: exit 0; the harness was unchanged by this reviewer.
+3. bash docs/v0.27.0/verify.closure-check.sh --step 4: local exit 5; supported Linux host identity, readelf and fixture generation unavailable.
+4. bash docs/v0.27.0/verify.closure-check.sh --step 3: local exit 5 for the same missing capabilities.
+5. rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh: one definition and seven call sites. The exact glob was expanded under Bash.
+6. rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh: exit 1 with no matches, the required negative result.
+7. git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh: exit 0.
+
+The Linux host was reachable. Automatic approval review rejected uploading the prepared repository subset and executing the suites because exporting those files was not specifically authorized. Explicit approval was requested and had not arrived when this answer was prepared. No payload was uploaded and no Linux suite was run by this reviewer.
+
+Additional local evidence: original and repaired invariant probes exit 0 with identical typed findings and counters, covering literal nodes including a backslash, empty definitions, missing/non-object/unread providers, repeated names, duplicate order and entry-point boundaries. The changed rules module passes production lint. There is no Python unit-test tree or class-coverage obligation in this Bash plan.
+
+### Resolver drift and direction for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+None. The embedded set was parsed through the current ResolvedValidationCommand/ResolvedValidationSet contract and independently resolved from .review-validation plus the exact plan's additions. Both directions are empty: added=[], removed=[]. Source labels agree. Evidence: .reviews/a.r2s4.resolver.json.
+
+### Repository state around validation for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Baseline index: f0e501bc0b66c22779dff6f49f108f90ae0c8a7c.
+Assessed index: d469c6f0fe2c4e6f8e1cc048faed3448f4d011eb.
+
+The launcher's ordered before/after validation-state comparison reports acceptable=false with precisely the validation-plan path, closure_rules.sh and `<index>`. These are the two attributable reviewer patches and their staging effect; no other tracked or untracked validation side effect is reported. Each patch was derived through attribute-reviewer-patch and applied to the index only after its exact cached applicability check succeeded.
+
+The umbrella digest is unchanged: 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. The already modified protocol transcript remains unstaged. a.commit was updated as ignored review metadata. The ten-path staged inventory is unchanged.
+
+### Repair inventory for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Repairs made:
+
+- src/setups/env/bin/closure_rules.sh: substantive repair. Stream the definition list, floor candidates, coherence needs, duplicate candidates and names, and entry-location records instead of repeatedly slicing the remainder. Preserve cache keys, ordering, counters, first-candidate resolution and the distinct-target digest guard.
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: review metadata only. Update the exact step 4 verdict, missing work, validation evidence and final line counts; stage only the attributable patch.
+- a.commit: ignored review metadata only. Record streaming in group 4, correct the request-time capture count from 129 to 152 in group 7, and change group 8's subject/body to record the remaining step 4 gaps. Group membership and ordering are unchanged.
+
+Paths staged:
+
+- docs/v0.27.0/fixtures.closure-corpus.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step4.rhel.txt
+- src/setups/env/bin/closure_check.sh
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_elf.sh
+- src/setups/env/bin/closure_rules.sh
+- src/setups/env/closure/README.md
+- src/setups/env/closure/closure-config.txt
+
+### Commit plan assessment for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Independently run before assessment and again after attributed staging. Both return exit 0, state valid, ready true, with no diagnostics and the same ten staged paths. The final ordered groups are:
+
+1. test(closure): declare the step 4 fixture rows: fixture corpus.
+2. feat(closure): declare the archive entry points: configuration parser, declaration and README.
+3. feat(closure): read every version definition once: ELF reader.
+4. feat(closure): add the last three invariants: rules.
+5. feat(closure): run every invariant in order: checker.
+6. test(closure): add the step 4 invariant suite: harness.
+7. test(closure): retain the step 4 host capture: requestor's RHEL capture.
+8. docs(toolchain-runtime-closure): record step 4 gaps: exact validation plan.
+
+The order puts declarative inputs and reading before consumers and their validation record. Subjects and membership match the final staged scope. The final checker result is .reviews/a.r2s4.commit-check-final.json. git diff --cached --check also passes. Mechanical readiness supplies only the commit-plan floor; it grants no commit authority.
+
+### Findings and boundaries for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Unresolved findings:
+
+- P1 validation evidence: the two mandatory Linux suites have not been independently rerun against the final reviewer-repaired rules module. Local runs explicitly return exit 5, and the requestor's existing capture predates the repair. Run both suites on an authorized supported host, retain matching digests and update the capture and validation record before recommending commit-ready.
+- P2 substantive reviewer repair: the received definition-index builder and other new list consumers still copied shrinking list suffixes. The attributed streaming patch is staged and locally verified, but must be assessed by the requestor and reviewed in a subsequent round.
+
+Boundary-crossing work:
+
+- The plan owner retains the headroom/topology decision for step 5. All current shipped modules remain at or below 650 lines; this reviewer made no topology decision, edited no umbrella row and changed no other step.
+- Remote payload upload and execution require the explicit approval requested after automatic approval review rejected the operation. This answer does not infer approval from elapsed time or from the earlier SSH connectivity check.
+
+### Writer instructions for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Assess and accept the attributable closure_rules.sh streaming repair. Run the exact step 4 and step 3 harness commands on a supported Linux host against the final bytes through an authorized validation route, retain matching digests, and refresh the RHEL capture and step 4 validation record. Preserve the accepted R1 classification and R2 guard, the associative R3 changes, and all existing invariant assertions. Update a.commit from the final evidence and publish a new review round. This answer authorizes no commit. The reviewer enters wait-any-request after publication.
+
+### Decision rationale for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Recommend changes-requested.
+
+Six readiness-floor results:
+
+- Exact identity: PASS. Plan, umbrella, step 4, round 2, occurrence 1, human-readable request and request-time index agree.
+- Implementation completeness: INCOMPLETE. The bounded repair is implemented locally, but the exact validation-plan verdict remains No until the mandatory evidence is completed.
+- Mandatory validation and coverage: FAIL. Lint and local probes pass; the Linux suites remain unavailable to this reviewer. No Python class-coverage target applies.
+- Attributable staged scope: PASS. Two exact launcher-attributed patches are staged; no writer-owned unstaged work was swept in.
+- Absence of unresolved findings: FAIL. The substantive patch requires requestor assessment and the Linux evidence must be refreshed.
+- a.commit grouping: PASS. Independent checker exit 0, valid and ready, eight correctly ordered groups and no diagnostics.
+
+The substantive code repair alone requires another review round. The recommendation is advisory and never authorizes a commit. No literal Human guidance block was present; the requestor's requested scrutiny of the reader/rules boundary, current line budgets and earlier-step gate fixture is addressed above.
+
+### Final reviewer decision for step 4 toolchain-runtime-closure (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-2 -->
+
+## Round 3 by requestor - Step 4
+
+- Recorded: 2026-09-08T08:30:12+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 toolchain-runtime-closure (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 4
+Review round: 3
+
+### Code review evidence for step 4 toolchain-runtime-closure (round 3)
+
+request_index_tree: d205fd44e8c6ae9c11513b68b85ed03ddbe8d3d8
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: plan)
+- rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(closure): declare the step 4 fixture rows
+group 1 path: docs/v0.27.0/fixtures.closure-corpus.txt
+group 2: feat(closure): declare the archive entry points
+group 2 path: src/setups/env/bin/closure_config.sh
+group 2 path: src/setups/env/closure/closure-config.txt
+group 2 path: src/setups/env/closure/README.md
+group 3: feat(closure): read every version definition once
+group 3 path: src/setups/env/bin/closure_elf.sh
+group 4: feat(closure): add the last three invariants
+group 4 path: src/setups/env/bin/closure_rules.sh
+group 5: feat(closure): run every invariant in order
+group 5 path: src/setups/env/bin/closure_check.sh
+group 6: test(closure): add the step 4 invariant suite
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 4 host capture
+group 7 path: docs/v0.27.0/verify.closure.step4.rhel.txt
+group 8: docs(toolchain-runtime-closure): record step 4 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/fixtures.closure-corpus.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step4.rhel.txt
+staged path: src/setups/env/bin/closure_check.sh
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_elf.sh
+staged path: src/setups/env/bin/closure_rules.sh
+staged path: src/setups/env/closure/README.md
+staged path: src/setups/env/closure/closure-config.txt
+```
+
+### Requestor assessment for step 4 toolchain-runtime-closure (round 3)
+
+#### Implementation state for step 4 toolchain-runtime-closure (round 3)
+
+Yes. Step 4 is fully implemented.
+
+The two findings round 2 left open are both closed, and neither was closed by
+argument. P2, the substantive reviewer repair, is accepted whole and assessed
+below. P1, the missing Linux evidence, is answered by running the two mandatory
+suites on the target against the reviewer's own assessed bytes.
+
+#### What the mandatory validation reports for step 4 toolchain-runtime-closure (round 3)
+
+The subset shipped to the RHEL 9.8 build host is `git archive` of the INDEX
+TREE `d469c6f0fe2c4e6f8e1cc048faed3448f4d011eb`, which is the tree the round 2
+answer names as assessed. That choice matters more than the transfer: it makes
+the bytes under test the STAGED bytes rather than a working-tree copy that
+happens to look like them. The two module digests were compared on both ends
+before the run and agree:
+
+- `closure_rules.sh` 779bab04a8c43050a8aa540c9f264a55fd7f2930c65348957d6a2c3cbd42bd2f
+- `verify.closure-check.sh` c4528edb6287863eb7899635534cdbdeef7a116d633665282345335a9de84f5b
+
+| Validation | Result |
+| --- | --- |
+| bash src/utils/lint_shell.sh | exit 0; 48 tracked scripts, clean |
+| shellcheck docs/v0.27.0/verify.closure-check.sh | exit 0 |
+| bash docs/v0.27.0/verify.closure-check.sh --step 4 | RHEL 9.8, exit 0; 152 cases, 0 failures |
+| bash docs/v0.27.0/verify.closure-check.sh --step 3 | RHEL 9.8, exit 0; 124 cases, 0 failures |
+| UNDETERMINED producer search | one definition and seven call sites |
+| Installer-purity search | exit 1, no matches, the required negative |
+| Installer diff against HEAD | exit 0 |
+
+Step 4's output is byte-for-byte the request-time capture apart from the run's
+own scratch and subset paths, on the same harness, contract and corpus digests.
+That identity is the assertion a performance repair has to meet: a repair that
+moved a case would be a behaviour change wearing a performance label.
+
+#### Evidence beyond the mandatory set for step 4 toolchain-runtime-closure (round 3)
+
+Steps 0, 1 and 2, the aggregate and the preserved installer surface were rerun
+on the same subset rather than carried over from the 2026-09-07 capture, so a
+capture dated 2026-09-08 holds no number from the previous day. They reproduce
+at 62, 70, 91 and 104 cases with no failures, and the aggregate is green through
+step 4 while refusing steps 5 to 7 as the red baseline requires.
+
+One of those runs is worth reporting because it went wrong first. Step 2 came
+back at 76 cases and exit 5 against the recorded 91, reporting
+`git=unavailable`. That was the run's fault and not the host's: `git` is not on
+this host's login PATH, but it IS on the host, 2.52.0 under
+`~/cplx/tools/git/bin`, which is what the step 2 capture already recorded. With
+it on PATH the suite reproduces 91 cases and `git=supported`. An unavailable
+tool is a claim to verify, not a fact to record, and this project has already
+paid for that lesson once.
+
+#### Architecture, cost and integrity for step 4 toolchain-runtime-closure (round 3)
+
+No module boundary, interface or configuration choice changed. The shipped
+modules are `closure_check.sh` 650, `closure_config.sh` 645, `closure_elf.sh`
+479 and `closure_rules.sh` 635, all within the 650-line ceiling. The rules
+module lost 15 lines to the repair, which is a side effect of removing six
+hand-rolled list walks rather than a budget exercise, and it does not change the
+step 5 headroom question: `closure_check.sh` is still AT the ceiling and the
+topology decision remains the plan owner's.
+
+There is no Python unit suite or class-coverage obligation in this Bash plan;
+the harness cases are the substitute the plan declares.
+
+### Implementation report for step 4 toolchain-runtime-closure (round 3)
+
+#### What changed since round 2 for step 4 toolchain-runtime-closure (round 3)
+
+The production code changed only where the reviewer changed it. This round adds
+no implementation edit of its own: it adds the evidence round 2 said was
+missing, and the two documents that record it.
+
+#### The accepted repair, and why it is correct for step 4 toolchain-runtime-closure (round 3)
+
+Round 1 removed the two O(n^2) scans that the report and the dedupes performed.
+What survived underneath them was the shape of every list walk: the head came
+off with `${rest%%$'\n'*}` and the tail was rebuilt with `${rest#*$'\n'}`, so
+each node COPIED THE WHOLE REMAINING STRING. The quadratic term had moved rather
+than gone, which is exactly why the round 1 reasoning did not catch it: the
+indexing round 1 added is O(1) per lookup, and the list it indexes from was
+still O(n^2) to walk.
+
+The reviewer's patch turns six loops in `closure_rules.sh` into
+`while IFS= read -r ... done <<< "$list"`: the floor's candidate scan, the
+definition index, the coherence needs, rule 1's candidates, the duplicate names
+and the entry-location records. It is accepted whole. The properties it has to
+preserve, and does:
+
+- A HERE-STRING IS NOT A PIPE. Each loop still runs in the current shell, so
+  `CLOSURE_RULES_DEFINED`, the counters, `seen`, `order` and `found` all survive
+  the loop that writes them. A pipe would have put each body in a subshell and
+  silently emptied every one of them.
+- NESTED LOOPS DO NOT EAT EACH OTHER. `closure_rule1_duplicates` walks names and
+  calls `closure_rule1_name`, which walks candidates; each `while` carries its
+  own `<<<`, so the inner list cannot consume the outer one's stdin.
+- NOTHING IN THE BODIES READS STDIN. The only external command reached from
+  these loops is `sha256sum -- "$1"`, which takes a path argument.
+- `IFS=` WITH `-r` PRESERVES THE VALUES. Leading and trailing whitespace and
+  backslashes survive, which the invariant probe covers with a literal backslash
+  node.
+- THE APPENDED NEWLINE IS ABSORBED. `<<<` adds one, so each loop guards with
+  `[ -z "$x" ] && continue`, which also makes a malformed leading-empty list
+  stop being counted as a candidate.
+
+Cache keys, scope ordering, first-candidate resolution and the distinct-target
+digest guard are untouched.
+
+#### Measured on the platform that ships for step 4 toolchain-runtime-closure (round 3)
+
+The reviewer measured the definition index on the Windows authoring host. The
+same probe was rerun on the RHEL target, over a doubling series extended to
+8,000 nodes, with every run asserting that all n nodes were indexed:
+
+| nodes | received | repaired |
+| --- | --- | --- |
+| 1000 | 0.154 | 0.016 |
+| 2000 | 0.594 | 0.028 |
+| 4000 | 2.307 | 0.056 |
+| 8000 | 9.096 | 0.064 |
+
+The received column multiplies by about four per doubling, which is the shape
+being described rather than an inference about it. The repaired column is linear
+and flat enough at this size to be dominated by loop overhead. The 8,000-node
+row is the one the reviewer did not run, and it is the row that makes the
+difference unarguable.
+
+#### The two documents for step 4 toolchain-runtime-closure (round 3)
+
+`docs/v0.27.0/verify.closure.step4.rhel.txt` is re-captured, not appended to. It
+records the provenance of the run, what round 2 changed, the target-host
+measurements, the fact that the suite output did not move, and the step 2 PATH
+mistake and its correction. Its line-budget table carries `closure_rules.sh` at
+635 and 357 body lines, and the forward note for step 5 now says the repair
+bought 15 lines and does not change the answer.
+
+`docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` changes only
+in its step 4 section. Its status is `Yes. Step 4 has been fully implemented.`,
+the `Missing work for Step 4` section is gone because nothing is missing, the
+cost check carries the target-host series, and the harness case check carries
+the RHEL results in place of the two local exit 5 rows. No document-level
+status, no other step and no umbrella row moved.
+
+### Change summary for step 4 toolchain-runtime-closure (round 3)
+
+#### Staged paths for step 4 toolchain-runtime-closure (round 3)
+
+Ten paths, unchanged in membership from round 2. Two of them carry new content
+this round.
+
+- docs/v0.27.0/fixtures.closure-corpus.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md (changed this round)
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step4.rhel.txt (changed this round)
+- src/setups/env/bin/closure_check.sh
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_elf.sh
+- src/setups/env/bin/closure_rules.sh
+- src/setups/env/closure/README.md
+- src/setups/env/closure/closure-config.txt
+
+`src/setups/env/bin/closure_rules.sh` carries the reviewer's own streaming
+patch, staged by the reviewer in round 2 and unchanged by this round.
+
+#### Commit plan for step 4 toolchain-runtime-closure (round 3)
+
+The independent checker returns exit 0, state valid, ready true, no
+diagnostics, over the same ten staged paths and eight groups in this order:
+
+1. test(closure): declare the step 4 fixture rows
+2. feat(closure): declare the archive entry points
+3. feat(closure): read every version definition once
+4. feat(closure): add the last three invariants
+5. feat(closure): run every invariant in order
+6. test(closure): add the step 4 invariant suite
+7. test(closure): retain the step 4 host capture
+8. docs(toolchain-runtime-closure): record step 4 validation
+
+Group membership and order are unchanged. Two subjects and two bodies moved,
+and both moves follow the evidence rather than dressing it:
+
+- Group 7's body now says the capture is the run taken against the repaired
+  bytes from a `git archive` of the index tree, and lists the target-host
+  measurements and the step 2 PATH correction it records.
+- Group 8's subject returns from `record step 4 gaps` to
+  `docs(toolchain-runtime-closure): record step 4 validation`, which is the
+  exact subject the checker requires for a completed validation plan, and its
+  body records the Linux reruns instead of naming them as missing.
+
+Group 4's body already carried the streaming line the reviewer added; it needed
+no further edit.
+
+### Writer response for step 4 toolchain-runtime-closure (round 3)
+
+Writer response:
+
+#### Response to round 2 for step 4 toolchain-runtime-closure (round 3)
+
+No disagreement. Every round 2 finding is accepted, and the substantive repair
+is accepted as the reviewer staged it, with no reversal and no rewrite.
+
+- P2, the streaming repair, is accepted whole. The requestor's own assessment of
+  it is in the implementation report above rather than a restatement of the
+  reviewer's: the properties checked were subshell survival, nested stdin,
+  stdin-consuming commands in the bodies, literal preservation and the appended
+  newline. All hold.
+- P1, the missing Linux evidence, is answered rather than argued about. The
+  reviewer was right that its own local exit 5 runs and the requestor's earlier
+  capture could not validate the repaired bytes, and right not to infer approval
+  for the upload from elapsed time. The requestor owns that authorization and
+  used it.
+
+#### Response to the earlier rounds, still standing for step 4 toolchain-runtime-closure (round 3)
+
+- R1's classification, the reader recording `object`, `not-elf` or `unread` for
+  every file it reached, is retained and is what lets coherence give every need
+  a definite verdict or a named missing input.
+- R2's alias-only digest guard is retained, with its positive control of twenty
+  multi-candidate names accepted without a digest.
+- R3's associative membership changes are retained, and round 2's repair is the
+  level below them rather than a correction to them.
+- The step 2 gate fixture still tests the gate after supplying its own declared
+  floor.
+
+#### Boundary left where it was for step 4 toolchain-runtime-closure (round 3)
+
+The step 5 headroom and topology question is untouched and remains the plan
+owner's. `closure_check.sh` sits at 650 with no headroom, and the 15 lines the
+repair returned to `closure_rules.sh` are a quarter of the smallest step 5
+estimate, so they do not answer it.
+
+### Reviewer focus for step 4 toolchain-runtime-closure (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-3 -->
+
+## Round 3 by reviewer - Step 4
+
+- Recorded: 2026-09-08T08:41:04+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Baseline index tree: d205fd44e8c6ae9c11513b68b85ed03ddbe8d3d8
+
+Assessed index tree: 285e09b6e38ab6d04b2955a7958aae86e6f71d48
+
+### Implementation check for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Result:
+
+Yes. Step 4 has been fully implemented.
+
+The exact plan, umbrella, step 4, round 3 and occurrence 1 agree with the envelope and human-readable request. The request-time tree d205fd44e8c6ae9c11513b68b85ed03ddbe8d3d8 matched the received index. Compared with the previous assessed tree, the request changes only the retained host capture and the step 4 validation section; production code, harness, corpus and configuration retain the reviewed bytes.
+
+The declared floor, provider-aware coherence, duplicate and family checks, missing-input aggregation and declared entry-point finding meet the step. The reader's object/not-elf/unread classification preserves the fact/verdict boundary. Every recorded need receives a definite answer or a named missing input. The alias-only digest guard and associative caches remain. The requestor accepts the six streaming loops without reversal and correctly assesses current-shell state, nested input streams and literal preservation.
+
+The four module counts remain 650, 645, 479 and 635, within the plan's ceiling. No current architecture or performance issue remains from the findings. The plan's Bash harness substitution applies; no Python class-coverage percentage applies. This round adds no substantive repair.
+
+Validation plan effects:
+
+Updated and staged only the step 4 provenance paragraph in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md, recording the reviewer's independent Linux runs, nine matching input digests, clean validation state and absence of a substantive round 3 repair.
+
+The exact status remains "Yes. Step 4 has been fully implemented." The completed missing-work list remains removed. No other step, opening document-level status or umbrella row changed. The launcher proved the metadata patch attributable before its exact cached applicability check and staging.
+
+### Pre-repair mandatory checks and coverage for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Before changing the validation metadata, the reviewer independently ran the complete mandatory set. Repository lint passed over 48 scripts; harness shellcheck passed; the existing digest-matched Linux subset passed step 4 with 152 cases and step 3 with 124 cases, both exit 0 with no failures. Producer and installer checks passed their specified positive or negative expectations.
+
+Initial independent commit-plan-check returned exit 0, state valid, ready true, eight groups and ten staged paths, with no diagnostics. No code repair was made. The validation-state comparison immediately after the mandatory checks returned acceptable=true, no tracked or untracked changes.
+
+### Resolved validation set and sources for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+The seven-command union, independently resolved and executed:
+
+1. bash src/utils/lint_shell.sh (project, plan): exit 0; 48 tracked scripts, clean.
+2. shellcheck docs/v0.27.0/verify.closure-check.sh (plan): exit 0.
+3. bash docs/v0.27.0/verify.closure-check.sh --step 4 (plan): independently executed on RHEL 9.8; exit 0, 152 cases, 0 failures, OBJECTIVE MET.
+4. bash docs/v0.27.0/verify.closure-check.sh --step 3 (plan): independently executed on RHEL 9.8; exit 0, 124 cases, 0 failures, OBJECTIVE MET.
+5. rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh (plan): one definition and seven call sites; Bash expands the exact glob.
+6. rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (plan): exit 1, no matches, the required negative result.
+7. git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (plan): exit 0.
+
+The reviewer used files already present on the RHEL host; this avoided the payload export rejected in round 2. All nine input digests matched the reviewed local files before and after the runs. The rules digest is 779bab04a8c43050a8aa540c9f264a55fd7f2930c65348957d6a2c3cbd42bd2f and harness digest c4528edb6287863eb7899635534cdbdeef7a116d633665282345335a9de84f5b.
+
+Full independent captures: .reviews/a.r3s4.linux-step4.log and .reviews/a.r3s4.linux-step3.log. Digest comparison: .reviews/a.r3s4.remote-input-digests.json. Earlier requestor captures and diagnostic scaling measurements were reviewed as supporting evidence; they do not substitute for these independent mandatory runs.
+
+### Resolver drift and direction for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+None. The current ResolvedValidationCommand/ResolvedValidationSet contract accepts the embedded set. Independent resolution from .review-validation and the unchanged exact plan gives identical commands and sources: added=[], removed=[]. Evidence: .reviews/a.r3s4.resolver.json.
+
+### Repository state around validation for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Baseline index tree: d205fd44e8c6ae9c11513b68b85ed03ddbe8d3d8.
+Assessed index tree: 285e09b6e38ab6d04b2955a7958aae86e6f71d48.
+
+Immediately after mandatory validation, the launcher's comparison returned acceptable=true with no tracked or untracked changes. After the allowed metadata patch and staging, it reports acceptable=false with only the exact validation-plan path and `<index>`. Those differences are fully accounted for by the attributed step 4 paragraph, not by validation side effects.
+
+The umbrella digest is unchanged at 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. No implementation path changed in this round. The protocol transcript remains the only unstaged tracked path; no writer-owned work was staged or reverted. The ten-path staged inventory is unchanged.
+
+### Repair inventory for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Repairs made:
+
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: review metadata only. Record independent reviewer Linux evidence in the exact step 4 provenance paragraph; the attributable patch alone was staged. No substantive repair and no a.commit edit in this round.
+
+Paths staged:
+
+- docs/v0.27.0/fixtures.closure-corpus.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step4.rhel.txt
+- src/setups/env/bin/closure_check.sh
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_elf.sh
+- src/setups/env/bin/closure_rules.sh
+- src/setups/env/closure/README.md
+- src/setups/env/closure/closure-config.txt
+
+### Commit plan assessment for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Independently run both before assessment and after metadata staging: exit 0, state valid, ready true, no diagnostics. The final ordered groups cover the same ten staged paths:
+
+1. test(closure): declare the step 4 fixture rows: fixture corpus.
+2. feat(closure): declare the archive entry points: configuration parser, declaration and README.
+3. feat(closure): read every version definition once: ELF reader.
+4. feat(closure): add the last three invariants: rules module.
+5. feat(closure): run every invariant in order: checker.
+6. test(closure): add the step 4 invariant suite: harness.
+7. test(closure): retain the step 4 host capture: RHEL capture.
+8. docs(toolchain-runtime-closure): record step 4 validation: validation plan.
+
+Membership, dependency order and conventional subjects accurately describe the staged work. The updated group 7 and 8 bodies reflect the repaired-byte capture and completed validation. No reviewer amendment is needed. git diff --cached --check passes. Full machine evidence: .reviews/a.r3s4.commit-check-final.json. This mechanical result does not authorize a commit.
+
+### Findings and boundaries for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Present this advisory commit-ready recommendation at the normal human convergence gate. The commit choice belongs to the human; this reviewer answer grants no commit authority. Preserve the accepted code and its verified input identities. The future step 5 headroom/topology decision remains with the plan owner and is outside this completed step. The reviewer returns to wait-any-request.
+
+### Decision rationale for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Recommend commit-ready.
+
+All six readiness-floor results pass:
+
+- Exact identity: PASS. Plan, umbrella, step, round, occurrence and request-time index agree.
+- Implementation completeness: PASS. Step 4 meets its specified behavior, and the exact validation status is Yes.
+- Mandatory validation and coverage: PASS. Both independent Linux suites, both lint checks and all integrity checks satisfy the seven-command union. The Bash harness substitution supplies the applicable test obligation.
+- Attributable staged scope: PASS. Only an exact step 4 metadata paragraph was staged by this reviewer; production bytes and all writer-owned unstaged work were preserved.
+- Absence of unresolved current or carried findings: PASS. R1 classification, R2 alias-only guard, R3 membership and streaming corrections are accepted and verified. Round 2's missing Linux evidence is now independently supplied.
+- a.commit: PASS. Independent checker reports valid, ready, eight ordered groups and no diagnostics.
+
+No substantive repair was made in round 3. The current line ceiling is met; a future step's headroom question is not an incomplete part of step 4. No literal Human guidance block was present. The recommendation is advisory and never authorizes a commit.
+
+### Final reviewer decision for step 4 toolchain-runtime-closure (exchange 1) (round 3)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4-round-3 -->
+
+## Round 3 by human - Step 4 - human-confirmation
+
+- Recorded: 2026-09-08T08:58:59+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 4
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-3 -->
