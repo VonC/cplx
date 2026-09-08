@@ -416,7 +416,10 @@ step_tools() {
         1) printf 'assoc' ;;
         2) printf 'sha256sum git assoc' ;;
         3) printf 'readelf assoc' ;;
-        4) printf 'readelf assoc' ;;
+        # sha256sum is step 4's because rule 1 compares candidates by CONTENT
+        # DIGEST: the checker itself runs it, so the gate has to measure it here
+        # rather than leave a mandatory invariant resting on an unprobed tool.
+        4) printf 'readelf sha256sum assoc' ;;
         5) printf 'readelf assoc %s' "$(oneline "$(contract_entry_names)")" ;;
         6) printf 'readelf sha256sum assoc' ;;
         7) printf 'readelf sha256sum assoc' ;;
@@ -449,7 +452,7 @@ step_filled_by() {
 
 step_suite_exists() {
     case "$1" in
-        0|1|2|3) return 0 ;;
+        0|1|2|3|4) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -948,6 +951,7 @@ typed_count() { typed_lines "$1" | grep -c . || true; }
 # killing the harness. 91 and 92 are the harness's own codes for "the seam did
 # not hold", and they are distinct from anything the checker returns.
 declared_shape() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -959,6 +963,7 @@ declared_shape() {
 }
 
 observed_scope() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -974,6 +979,7 @@ observed_scope() {
 # observed scope is compared against THIS value, so a reimplementation that
 # agreed today and drifted tomorrow fails the moment it drifts.
 build_elf_rpath_value() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -1285,6 +1291,7 @@ step1_suite() {
 CONFIG_OUT=""
 CONFIG_RC=0
 config_call() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     CONFIG_OUT=$("${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -1301,6 +1308,7 @@ config_call() {
 # dump function the production code would carry for the tests alone. What a case
 # asserts is what a later step will read.
 config_model() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -1323,6 +1331,7 @@ config_model() {
 }
 
 config_root_specs() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -1717,6 +1726,16 @@ step2_suite() {
     section "step 2 gate: the bundle is read before anything else runs"
     tree="$SCRATCH/step2/prefix"
     mkdir -p -- "$tree/tools/python/root/lib" "$tree/tools/git/root/lib" || true
+    # THE DECLARATION THIS TREE CARRIES IS NOW ONE IT HAS TO MEET. Step 4 filled
+    # the declared floor half, so the valid example's two floor members have to be
+    # in the observed scope or this run refuses on the FLOOR rather than on the
+    # gate the section is about. They are planted as plain files because that is
+    # what a provider is, a file of that name in a provider directory, and the
+    # floor asks for presence rather than for content.
+    printf 'not an ELF: the floor member the gate tree carries\n' \
+        > "$tree/tools/python/root/lib/libc.so.6"
+    printf 'not an ELF: the floor member the gate tree carries\n' \
+        > "$tree/tools/python/root/lib/libsqlite3.so.0"
     cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
     d1=$(config_digest "$bundle/closure-config.txt")
     step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" \
@@ -1801,6 +1820,7 @@ step2_build_repo() {
 # case is about a refusal during sourcing, not about a missing function, and the
 # next case covers that one separately.
 step1_write_fatal_stub() {
+    # shellcheck disable=SC2016  # the stub's own body, expanded when the stub runs
     local body='fatal() { echo " FATAL ${2} : [stub] ${1}" >&2; exit "${2}"; }'
     { printf '#!/bin/bash\n'
       printf '%s\n' "$body"
@@ -1914,6 +1934,12 @@ donor_valid_shared() {
     [ -n "${dy_size:-}" ] || return 1
     used=$(elf_dyn_used "$f")
     [ "$(( dy_size / 16 - used ))" -ge 1 ] || return 1
+    # STEP 4'S TWO ADDED PARTS, and they are requirements rather than hopes: a
+    # version record cannot be created from text either, so a donor with no
+    # version need to repoint and no second version definition to rename cannot
+    # build a coherence fixture at all.
+    [ "$(elf_verneed_nodes "$f")" -ge 1 ] || return 1
+    elf_verdef_second "$f" >/dev/null 2>&1 || return 1
     return 0
 }
 
@@ -1986,13 +2012,11 @@ fixture_alias_pair() {
     local link="$prefix/$dir/libcplxscale$i.so.1"
     local user="$prefix/tools/python/current/lib/libcplxscaleuser$i.so.1"
 
-    cp -- "$DONOR_SHARED" "$target" || return 1
-    chmod u+w -- "$target" || return 1
+    fixture_copy_donor "$DONOR_SHARED" "$target" || return 1
     elf_set_string_entry "$target" SONAME "libcplxscale$i.so.1" || return 1
     rm -f -- "$link"
     ln -s -- "$target" "$link" || return 1
-    cp -- "$DONOR_SHARED" "$user" || return 1
-    chmod u+w -- "$user" || return 1
+    fixture_copy_donor "$DONOR_SHARED" "$user" || return 1
     elf_add_needed "$user" "libcplxscale$i.so.1" || return 1
 }
 
@@ -2022,6 +2046,223 @@ elf_add_needed() {
     elf_poke_u64 "$file" $(( dy_off + idx * 16 + 8 )) "$slot"
 }
 
+
+# --- the version records, which Step 4's coherence cases turn on ---------------
+#
+# THE ENGINE STILL REBUILDS NOTHING. A version need and a version definition are
+# fixed-size records pointing into `.dynstr`, exactly as a dynamic entry is, so a
+# mutation writes a name into a reserved slot and repoints one field at it. What
+# it cannot do is CREATE a section, which is why the shared donor now has to carry
+# one version need and at least two version definitions: an object with no
+# `.gnu.version_r` cannot be given one from text either.
+#
+# The offsets are read from readelf's own first column rather than computed, so a
+# donor whose linker laid the entries out differently is followed rather than
+# assumed. The one layout fact taken as fixed is `vd_aux`, the 20-byte header of
+# an `Elf64_Verdef`, which every linker-produced definition carries; the row's
+# assert is what catches a donor where that does not hold.
+elf_poke_u16() {
+    local file="$1" off="$2" val="$3" esc="" i
+    for i in 0 1; do
+        esc="$esc\\x$(printf '%02x' $(( (val >> (8 * i)) & 255 )))"
+    done
+    # shellcheck disable=SC2059  # the escapes ARE the format string here
+    printf "$esc" | "$FIXTURE_DD" of="$file" bs=1 seek="$off" conv=notrunc status=none 2>/dev/null
+}
+
+elf_poke_u32() {
+    local file="$1" off="$2" val="$3" esc="" i
+    for i in 0 1 2 3; do
+        esc="$esc\\x$(printf '%02x' $(( (val >> (8 * i)) & 255 )))"
+    done
+    # shellcheck disable=SC2059  # the escapes ARE the format string here
+    printf "$esc" | "$FIXTURE_DD" of="$file" bs=1 seek="$off" conv=notrunc status=none 2>/dev/null
+}
+
+elf_version_block() {
+    LC_ALL=C "$FIXTURE_READELF" -V -- "$1" 2>/dev/null | sed -n "/$2/,/^\$/p"
+}
+
+# The file offset of one section HEADER, which is where a section's entry count
+# lives. `readelf` prints the two header-table figures and the section index, so
+# the arithmetic is over values the reader gave rather than over a layout guess.
+elf_shdr_offset() {
+    local file="$1" want="$2" hdr shoff shent line n rest idx=""
+    hdr=$(LC_ALL=C "$FIXTURE_READELF" -h -- "$file" 2>/dev/null) || return 1
+    shoff=$(printf '%s\n' "$hdr" | sed -n 's/^ *Start of section headers: *\([0-9]*\).*$/\1/p')
+    shent=$(printf '%s\n' "$hdr" | sed -n 's/^ *Size of section headers: *\([0-9]*\).*$/\1/p')
+    [ -n "$shoff" ] && [ -n "$shent" ] || return 1
+    while IFS= read -r line; do
+        case "$line" in
+            *'['*']'*) ;;
+            *) continue ;;
+        esac
+        n="${line#*[}"
+        n="${n%%]*}"
+        n="${n// /}"
+        rest="${line#*]}"
+        # shellcheck disable=SC2086  # readelf's own fixed columns, split on purpose
+        set -- $rest
+        [ "${1:-}" = "$want" ] || continue
+        idx="$n"
+        break
+    done <<< "$(LC_ALL=C "$FIXTURE_READELF" -S -W -- "$file" 2>/dev/null)"
+    [ -n "$idx" ] || return 1
+    printf '%s' "$(( shoff + idx * shent ))"
+}
+
+# `sh_info` of a version section, which is the number of entries readelf reads
+# out of it. Absent section, nothing to set: a program donor carries no version
+# definitions and that is not a fixture failure.
+elf_set_version_count() {
+    local file="$1" section="$2" count="$3" off
+    off=$(elf_shdr_offset "$file" "$section") || return 0
+    elf_poke_u32 "$file" $(( off + 44 )) "$count"
+}
+
+# "<verneed-offset> <first-aux-offset>", both decimal and both relative to the
+# section, read from the offsets readelf prints in its first column.
+elf_verneed_offsets() {
+    local line tok vn="" aux=""
+    while IFS= read -r line; do
+        tok="${line%%:*}"
+        tok="${tok// /}"
+        tok="${tok#0x}"
+        case "$line" in
+            *'Version: '*'File: '*)
+                if [ -z "$vn" ]; then vn=$(( 16#$tok )); fi ;;
+            *'Name: '*)
+                if [ -n "$vn" ] && [ -z "$aux" ]; then aux=$(( 16#$tok )); fi ;;
+        esac
+    done <<< "$(elf_version_block "$1" 'Version needs section')"
+    [ -n "$vn" ] && [ -n "$aux" ] || return 1
+    printf '%s %s' "$vn" "$aux"
+}
+
+# The offset of the SECOND version definition, which is the first one that is not
+# the object's own BASE entry and therefore the one a mutation may rename.
+elf_verdef_second() {
+    local line tok n=0
+    while IFS= read -r line; do
+        case "$line" in
+            *'Rev: '*) ;;
+            *) continue ;;
+        esac
+        n=$(( n + 1 ))
+        if [ "$n" -ne 2 ]; then continue; fi
+        tok="${line%%:*}"
+        tok="${tok// /}"
+        tok="${tok#0x}"
+        printf '%s' "$(( 16#$tok ))"
+        return 0
+    done <<< "$(elf_version_block "$1" 'Version definition section')"
+    return 1
+}
+
+elf_verneed_nodes() {
+    elf_version_block "$1" 'Version needs section' | grep -c 'Name: ' || true
+}
+
+# A DONOR COPY CARRIES ONLY THE VERSION RECORDS ITS ROW ASKS FOR, and none of the
+# donor's own. THE REASON IS MEASURED: the name slots are the tail of `.dynstr`,
+# and on the RHEL 9.8 donor that tail holds VERSION DEFINITION names, so writing
+# slot 1 renamed two definitions and emptied a third. Step 3 never noticed because
+# nothing read those names; Step 4's checker does, and an object with a definition
+# whose name cannot be read is one the reader must refuse. Clearing the counts is
+# what keeps a mutation from producing a subject the checker cannot read, and it
+# also keeps every generated object's version records EXACTLY what its row states.
+fixture_copy_donor() {
+    cp -- "$1" "$2" || return 1
+    chmod u+w -- "$2" || return 1
+    elf_set_version_count "$2" .gnu.version_d 0
+    elf_set_version_count "$2" .gnu.version_r 0
+}
+
+# The donor's own version need, repointed at one provider and one node, WITH the
+# matching DT_NEEDED added. Both halves are the fixture: a version need is
+# recorded against a library the object also needs, and an object demanding a node
+# from a library it never names is not a shape any archive has.
+#
+# The record offsets are read from the DONOR rather than from the copy, because
+# the copy's counts are cleared and a reader shows no entries to take an offset
+# from. A poke moves no byte, so the two layouts are the same.
+elf_set_verneed() {
+    local file="$1" provider="$2" node="$3"
+    local ds_off ds_size vr_off vr_size dy_off dy_size off vn aux slot1 slot2 idx
+    read -r ds_off ds_size <<< "$(elf_section "$file" .dynstr)"
+    read -r vr_off vr_size <<< "$(elf_section "$file" .gnu.version_r)"
+    read -r dy_off dy_size <<< "$(elf_section "$file" .dynamic)"
+    if [ -z "${ds_size:-}" ] || [ -z "${vr_size:-}" ] || [ -z "${dy_size:-}" ]; then return 1; fi
+    off=$(elf_verneed_offsets "$DONOR_SHARED") || return 1
+    read -r vn aux <<< "$off"
+    slot1=$(elf_name_slot "$ds_size" 1)
+    slot2=$(elf_name_slot "$ds_size" 2)
+    elf_poke_str "$file" $(( ds_off + slot1 )) "$provider"
+    elf_poke_str "$file" $(( ds_off + slot2 )) "$node"
+    elf_poke_u32 "$file" $(( vr_off + vn + 4 )) "$slot1"
+    # ONE aux, so the donor's remaining GLIBC nodes stop being demanded from a
+    # provider that was never meant to define them.
+    elf_poke_u16 "$file" $(( vr_off + vn + 2 )) 1
+    elf_poke_u32 "$file" $(( vr_off + aux + 8 )) "$slot2"
+    idx=$(elf_dyn_slot "$file" NULL) || return 1
+    elf_poke_u64 "$file" $(( dy_off + idx * 16 )) 1
+    elf_poke_u64 "$file" $(( dy_off + idx * 16 + 8 )) "$slot1"
+    elf_set_version_count "$file" .gnu.version_r 1
+}
+
+# The donor's SECOND version definition, renamed. The first is the object's own
+# BASE entry, which names the file rather than a node, so the second is the first
+# one a consumer could demand. The count is set to two, so the entries behind it,
+# whose names the slot write may have moved, are never read.
+elf_set_verdef() {
+    local file="$1" node="$2" ds_off ds_size vd_off vd_size ent slot
+    read -r ds_off ds_size <<< "$(elf_section "$file" .dynstr)"
+    read -r vd_off vd_size <<< "$(elf_section "$file" .gnu.version_d)"
+    if [ -z "${ds_size:-}" ] || [ -z "${vd_size:-}" ]; then return 1; fi
+    ent=$(elf_verdef_second "$DONOR_SHARED") || return 1
+    slot=$(elf_name_slot "$ds_size" 1)
+    elf_poke_str "$file" $(( ds_off + slot )) "$node"
+    elf_poke_u32 "$file" $(( vd_off + ent + 20 )) "$slot"
+    elf_set_version_count "$file" .gnu.version_d 2
+}
+
+elf_verneed_demands() {
+    local file="$1" provider="$2" node="$3" block
+    block=$(elf_version_block "$file" 'Version needs section')
+    printf '%s\n' "$block" | grep -q "File: $provider" || return 1
+    printf '%s\n' "$block" | grep -q "Name: $node" || return 1
+    return 0
+}
+
+elf_verdef_defines() {
+    elf_version_block "$1" 'Version definition section' | grep -q "Name: $2"
+}
+
+# The harness's own digest, resolved where it is used rather than in the engine's
+# preflight: step 4 declares sha256sum and its capability gate measures it, while
+# step 3 neither declares nor needs it.
+fixture_digest() {
+    LC_ALL=C sha256sum -- "$1" 2>/dev/null | sed -e 's/ .*$//'
+}
+
+# How many lookup names `plant-multi-candidates` builds. Twenty is the measured
+# archive's own count of names with more than one candidate path.
+FIXTURE_MULTI_NAMES=20
+
+# One multi-candidate name: a library under the version directory and a consumer
+# that needs it. The directory alias planted beside them is what gives every one
+# of these names TWO candidate paths resolving to ONE file, which is the shape
+# `measurements.provider-candidates.rhel.txt` reports twenty times.
+fixture_multi_candidate() {
+    local prefix="$1" dir="$2" i="$3"
+    local lib="$prefix/$dir/libcplxmc$i.so.1"
+    local user="$prefix/$dir/libcplxmcuser$i.so.1"
+
+    fixture_copy_donor "$DONOR_SHARED" "$lib" || return 1
+    elf_set_string_entry "$lib" SONAME "libcplxmc$i.so.1" || return 1
+    fixture_copy_donor "$DONOR_SHARED" "$user" || return 1
+    elf_add_needed "$user" "libcplxmc$i.so.1" || return 1
+}
 # The entry link and the real library of the chain last built, so the assert can
 # name what the shape actually produced rather than repeating its construction.
 FIXTURE_CHAIN_ENTRY=""
@@ -2047,11 +2288,9 @@ fixture_chain() {
     user="$prefix/tools/python/version/lib/${base}user.so.1"
 
     mkdir -p -- "$prefix/tools/python/version/lib" "$prefix/$dir" || return 1
-    cp -- "$DONOR_SHARED" "$prefix/$real" || return 1
-    chmod u+w -- "$prefix/$real" || return 1
+    fixture_copy_donor "$DONOR_SHARED" "$prefix/$real" || return 1
     elf_set_string_entry "$prefix/$real" SONAME "$base.so.1" || return 1
-    cp -- "$DONOR_SHARED" "$user" || return 1
-    chmod u+w -- "$user" || return 1
+    fixture_copy_donor "$DONOR_SHARED" "$user" || return 1
     elf_add_needed "$user" "$base.so.1" || return 1
 
     rm -f -- "$link"
@@ -2114,12 +2353,13 @@ fixture_plant() {
     case "$CORPUS_ROW_KIND" in
         tree)
             case "$verb" in
-                plant-text|plant-donor-need|symlink-to) ;;
+                plant-text|plant-donor-need|symlink-to|symlink-to-donor|symlink-cycle|omit|plant-directory) ;;
                 *) printf 'kind-mismatch'; return ;;
             esac ;;
         object)
             case "$verb" in
-                plant-text|plant-donor-need|symlink-to) printf 'kind-mismatch'; return ;;
+                plant-text|plant-donor-need|symlink-to|symlink-to-donor|symlink-cycle|omit|plant-directory)
+                    printf 'kind-mismatch'; return ;;
             esac ;;
         *) printf 'unknown-kind'; return ;;
     esac
@@ -2167,12 +2407,74 @@ fixture_plant() {
             mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
             rm -f -- "$target"
             ln -s -- "$prefix/$operand" "$target" 2>/dev/null ;;
+        symlink-to-donor)
+            # A provider directory entry that LEAVES THE ARCHIVE. The donor lives
+            # on the host outside the prefix, so the resolution of this candidate
+            # lands somewhere the archive does not own, which is coherence's
+            # fourth condition and the only shape that makes it observable.
+            mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
+            [ -n "$DONOR_SHARED" ] || { printf 'no-donor'; return; }
+            rm -f -- "$target"
+            ln -s -- "$DONOR_SHARED" "$target" 2>/dev/null ;;
+        symlink-cycle)
+            # Two links naming each other. Nothing resolves through them, so the
+            # cycle guard is reached and the result is an UNDETERMINED with no
+            # refusal anywhere, which is the one aggregation row a tree with a
+            # real defect in it cannot produce.
+            mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
+            rm -f -- "$target" "$prefix/$operand"
+            ln -s -- "$prefix/$operand" "$target" 2>/dev/null
+            ln -s -- "$target" "$prefix/$operand" 2>/dev/null ;;
+        omit)
+            # A directory that exists with one named file deliberately NOT in it,
+            # which is what a floor member absent from the payload looks like.
+            mkdir -p -- "$target" || { printf 'no-directory'; return; }
+            rm -f -- "$target/$operand" ;;
+        plant-directory)
+            mkdir -p -- "$target" || { printf 'no-directory'; return; } ;;
+        content-copy|content-differ)
+            # TWO CANDIDATE PATHS FOR ONE LOOKUP NAME, identical or not. The
+            # second copy carries a different soname in the `differ` case, which
+            # changes the bytes without changing the file name the loader looks
+            # the candidate up by.
+            [ -n "$DONOR_SHARED" ] || { printf 'no-donor'; return; }
+            mkdir -p -- "${target%/*}" "$prefix/${operand%/*}" \
+                || { printf 'no-directory'; return; }
+            fixture_copy_donor "$DONOR_SHARED" "$target" || { printf 'no-copy'; return; }
+            fixture_copy_donor "$DONOR_SHARED" "$prefix/$operand" || { printf 'no-copy'; return; }
+            name="${target##*/}"
+            elf_set_string_entry "$target" SONAME "$name" || { printf 'no-soname'; return; }
+            if [ "$verb" = "content-differ" ]; then
+                elf_set_string_entry "$prefix/$operand" SONAME "cplxother-$name" \
+                    || { printf 'no-soname'; return; }
+            else
+                elf_set_string_entry "$prefix/$operand" SONAME "$name" \
+                    || { printf 'no-soname'; return; }
+            fi ;;
+        plant-multi-candidates)
+            [ -n "$DONOR_SHARED" ] || { printf 'no-donor'; return; }
+            mkdir -p -- "$target" || { printf 'no-directory'; return; }
+            idx=1
+            while [ "$idx" -le "$FIXTURE_MULTI_NAMES" ]; do
+                fixture_multi_candidate "$prefix" "$CORPUS_ROW_PLACE" "$idx" \
+                    || { printf 'name-%s-failed' "$idx"; return; }
+                idx=$((idx + 1))
+            done ;;
+        verneed-set|verdef-set)
+            [ -n "$DONOR_SHARED" ] || { printf 'no-donor'; return; }
+            mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
+            fixture_copy_donor "$DONOR_SHARED" "$target" || { printf 'no-copy'; return; }
+            if [ "$verb" = "verdef-set" ]; then
+                elf_set_verdef "$target" "$operand" || { printf 'no-verdef'; return; }
+            else
+                elf_set_verneed "$target" "${operand%%:*}" "${operand#*:}" \
+                    || { printf 'no-verneed'; return; }
+            fi ;;
         needed-add|soname-set|interp-keep|mode-set|needed-offset-corrupt)
             if [ "$CORPUS_ROW_DONOR" = "program" ]; then src="$DONOR_PROGRAM"; else src="$DONOR_SHARED"; fi
             [ -n "$src" ] || { printf 'no-donor'; return; }
             mkdir -p -- "${target%/*}" || { printf 'no-directory'; return; }
-            cp -- "$src" "$target" || { printf 'no-copy'; return; }
-            chmod u+w -- "$target" || { printf 'not-writable'; return; } ;;
+            fixture_copy_donor "$src" "$target" || { printf 'no-copy'; return; } ;;
         *) printf 'unimplemented:%s' "$verb"; return ;;
     esac
 
@@ -2263,6 +2565,61 @@ fixture_plant() {
             else printf 'link-does-not-resolve'; fi ;;
         magic-is-not-elf)
             if fixture_is_elf "$target"; then printf 'is-elf'; else printf 'ok'; fi ;;
+        dt-verneed-demands:*)
+            name="${CORPUS_ROW_ASSERT#dt-verneed-demands:}"
+            if elf_verneed_demands "$target" "${name%%:*}" "${name#*:}"; then printf 'ok'
+            else printf 'need-not-demanded'; fi ;;
+        dt-verdef-defines:*)
+            name="${CORPUS_ROW_ASSERT#dt-verdef-defines:}"
+            if elf_verdef_defines "$target" "$name"; then printf 'ok'
+            else printf 'node-not-defined'; fi ;;
+        two-paths-differ|two-paths-identical)
+            # BOTH HALVES. Two files have to exist at the two paths, or the case
+            # would compare one file with nothing; and their digests have to
+            # differ or match as the row says, or a mutation that silently did
+            # nothing would pass for one that worked.
+            if [ ! -f "$target" ] || [ ! -f "$prefix/$operand" ]; then
+                printf 'one-path-missing'
+            elif [ "$(fixture_digest "$target")" = "$(fixture_digest "$prefix/$operand")" ]; then
+                if [ "$CORPUS_ROW_ASSERT" = "two-paths-identical" ]; then printf 'ok'
+                else printf 'paths-are-identical'; fi
+            elif [ "$CORPUS_ROW_ASSERT" = "two-paths-differ" ]; then printf 'ok'
+            else printf 'paths-differ'; fi ;;
+        symlink-leaves-archive)
+            # A link, and one whose target is outside the prefix. Both halves,
+            # because a host where `ln -s` copies would plant a file INSIDE the
+            # archive and the case would then assert nothing.
+            if [ ! -L "$target" ]; then printf 'not-a-symlink'
+            elif [ ! "$target" -ef "$DONOR_SHARED" ]; then printf 'link-does-not-resolve'
+            else
+                case "$DONOR_SHARED" in
+                    "$prefix"/*) printf 'donor-is-inside-the-prefix' ;;
+                    *) printf 'ok' ;;
+                esac
+            fi ;;
+        symlink-cycle-present)
+            if [ ! -L "$target" ] || [ ! -L "$prefix/$operand" ]; then printf 'not-a-symlink'
+            elif [ -e "$target" ]; then printf 'cycle-resolves'
+            else printf 'ok'; fi ;;
+        named-file-absent)
+            if [ ! -d "$target" ]; then printf 'no-directory'
+            elif [ -e "$target/$operand" ]; then printf 'file-present'
+            else printf 'ok'; fi ;;
+        file-present)
+            if [ -f "$target" ]; then printf 'ok'; else printf 'file-absent'; fi ;;
+        directory-present)
+            if [ -d "$target" ]; then printf 'ok'; else printf 'directory-absent'; fi ;;
+        multi-candidates-present)
+            idx=1
+            while [ "$idx" -le "$FIXTURE_MULTI_NAMES" ]; do
+                if [ ! -f "$target/libcplxmc$idx.so.1" ] \
+                   || [ ! -f "$target/libcplxmcuser$idx.so.1" ]; then
+                    printf 'name-%s-absent' "$idx"
+                    return
+                fi
+                idx=$((idx + 1))
+            done
+            printf 'ok' ;;
         donor-need-resolvable)
             for name in $DONOR_NEED_NAMES; do
                 [ -f "$target/$name" ] || { printf 'missing-%s' "$name"; return; }
@@ -2285,6 +2642,7 @@ report_field() {
 step3_provider_paths() {
     local dirs
     dirs=$(observed_scope "$1" "$SHIPPED_DIR/install_pkg.sh" | sed -e 's/:/\n/g')
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -2303,6 +2661,7 @@ step3_provider_paths() {
 step3_alias_ops() {
     local prefix="$1" dirs
     dirs=$(observed_scope "$prefix" "$SHIPPED_DIR/install_pkg.sh" | sed -e 's/:/\n/g')
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -2364,6 +2723,8 @@ step3_write_translating_stub() {
     real_find=$(type -P find 2>/dev/null) || return 1
     real_readelf=$(type -P readelf 2>/dev/null) || return 1
     { printf '#!/bin/bash\n'; printf 'exec "%s" "$@"\n' "$real_find"; } > "$dir/find"
+    # shellcheck disable=SC2016  # every printf below writes INTO the stub, and the
+    # expansions belong to the stub when it runs rather than to this shell
     { printf '#!/bin/bash\n'
       printf 'out=$("%s" "$@"); rc=$?\n' "$real_readelf"
       printf 'if [ "${LC_ALL:-}" = "C" ]; then printf "%%s\\n" "$out"; exit "$rc"; fi\n'
@@ -2408,6 +2769,7 @@ step3_instrumented() {
       printf 'exec "%s" "$@"\n' "$real_readelf"; } > "$dir/readelf"
     chmod +x -- "$dir/find" "$dir/readelf"
     : > "$log"
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
     CHECKER_OUT=$(PATH="$dir:$PATH" "${BASH:-bash}" -c '
         set -u
         # shellcheck disable=SC1090
@@ -2924,6 +3286,528 @@ step3_suite() {
     chk "step3/reader/pinned-locale-still-parses" "0" "$(report_field unread)"
     chk "step3/reader/pinned-locale-same-verdict" "0" "$CHECKER_RC"
 }
+
+# ------------------------------------------------------ the step 4 helpers ---
+# The whole rest of one summary row, so a case can assert three counts in one
+# line instead of re-deriving them from the typed results the row summarises.
+# `report_field` answers the FIRST number of a row and these rows carry three.
+report_row() {
+    printf '%s\n' "$CHECKER_OUT" | grep -E "^  $1 " | sed -n 1p | sed -e "s/^  $1  *//"
+}
+
+# A bundle the checker will accept: the records this case needs, plus the
+# envelope naming their digest. The digest comes from the module's own function,
+# so a bundle is built the way packaging will build it rather than by a second
+# implementation of the domain.
+step4_write_bundle() {
+    local dir="$1" digest
+    shift
+    mkdir -p -- "$dir" || return 1
+    { printf 'CPLX-CLOSURE/1\n'; printf '%s\n' "$@"; } > "$dir/closure-config.txt"
+    digest=$(config_digest "$dir/closure-config.txt")
+    step2_write_envelope "$dir/closure-envelope.txt" "$digest" \
+        "src/setups/env/closure/closure-config.txt" \
+        "0123456789abcdef0123456789abcdef01234567"
+}
+
+# How many entry-point locations one document declares, asked of the module's own
+# parsed model rather than counted out of the text.
+step4_entry_count() {
+    # shellcheck disable=SC2016  # the child Bash expands its positional arguments
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        closure_config_parse "$2" >/dev/null || exit 93
+        printf "%s" "${#CLOSURE_CFG_ENTRY[@]}"
+    ' _ "$SHIPPED_DIR/closure_config.sh" "$1" 2>/dev/null
+}
+
+# One planted grammar defect, refused with the reason the record table names. The
+# control for every one of them is the committed document above, which parses.
+step4_refuse() {
+    local dir="$1" name="$2" body="$3" want="$4"
+    { printf 'CPLX-CLOSURE/1\n'; printf 'root|python\n'; printf '%s\n' "$body"; } \
+        > "$dir/g-$name.txt"
+    config_call closure_config_parse "$dir/g-$name.txt"
+    chk "step4/grammar/$name" "1|$want" "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+}
+
+step4_plant() {
+    local tree="$1" id result
+    shift
+    for id in "$@"; do
+        result=$(fixture_plant "$tree" "$id")
+        chk "step4/fixture/$id" "ok" "$result"
+    done
+}
+
+# Run the real checker with an unavailable digest operation in the rules module.
+# Configuration hashing still runs normally. An alias-only provider needs no
+# content comparison, so making this operation fail must not change its verdict.
+step4_run_without_digest() {
+    # shellcheck disable=SC2016  # the child Bash expands its positional arguments
+    CHECKER_OUT=$("${BASH:-bash}" -c '
+        source "$1" || exit 91
+        shift
+        closure_rules_digest() {
+            printf "__UNEXPECTED_DIGEST__\n"
+            return 1
+        }
+        closure_check_main "$@"
+    ' _ "$@" 2>&1)
+    CHECKER_RC=$?
+}
+
+# =============================================================== the step 4 suite ===
+step4_suite() {
+    local checker="$SHIPPED_DIR/closure_check.sh"
+    local installer="$SHIPPED_DIR/install_pkg.sh"
+    local rules="$SHIPPED_DIR/closure_rules.sh"
+    local config="$SHIPPED_DIR/closure_config.sh"
+    local reader="$SHIPPED_DIR/closure_elf.sh"
+    local committed="$SHIPPED_DIR/../closure/closure-config.txt"
+    local dir="$SCRATCH/step4"
+    local floor="$dir/floor" coh="$dir/coherence" esc="$dir/escape"
+    local same="$dir/same" diff="$dir/diff" pos="$dir/positive" kinds="$dir/kinds"
+    local sealed="$dir/sealed"
+    local fam="$dir/family" ep="$dir/entry" agg="$dir/aggregate" loop="$dir/loop"
+    local id line vn lookups
+    local famname permitted gencount gens dupname pa da pb db
+
+    mkdir -p -- "$dir" || { fail "step4/scratch" "cannot create the scratch directory"; return; }
+
+    # --- the boundary the topology draws, measured rather than described ------
+    section "step 4 topology: the invariants live where the boundary puts them"
+    if [ ! -f "$rules" ] || [ ! -f "$config" ] || [ ! -f "$reader" ]; then
+        fail "step4/topology/modules-exist" "a checker module is missing"
+        unanswered "every step 4 case" \
+          "  fill the four checker modules under src/setups/env/bin, then repeat this call"
+        return
+    fi
+    chk "step4/topology/rules-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$rules")")"
+    chk "step4/topology/config-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$config")")"
+    chk "step4/topology/reader-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$reader")")"
+    # THE COMPLETION CRITERION IN CODE. One definition of the UNDETERMINED
+    # producer, and no second site in this module printing that verdict, so the
+    # rule that it means a missing input has one implementation.
+    chk "step4/topology/undetermined-defined-once" "1" \
+        "$(grep -c '^closure_result_undetermined()' "$rules")"
+    chk "step4/topology/undetermined-has-no-second-producer" "1" \
+        "$(sed -e 's/#.*$//' "$rules" | grep -c 'printf.*UNDETERMINED')"
+    # The rules module decides and never orchestrates: no exit of its own, and the
+    # checker prints no invariant's typed verdict.
+    chk "step4/topology/rules-holds-no-exit" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$rules" | grep -nE '(^|[;&|] *)exit( |$)' || true)")"
+    chk "step4/topology/checker-holds-no-invariant-verdict" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$checker" | grep -nE 'REFUSED\|(floor|coherence|duplicates|families)' || true)")"
+    for id in closure_floor_check closure_coherence_check closure_rule1_duplicates \
+              closure_rule2_families; do
+        chk "step4/topology/checker-calls-$id" "yes" \
+            "$(sed -e 's/#.*$//' "$checker" | grep -q "$id" && echo yes || echo no)"
+    done
+    chk "step4/topology/checker-calls-the-combined-finding" "yes" \
+        "$(sed -e 's/#.*$//' "$checker" | grep -q 'closure_report_unreferenced "' && echo yes || echo no)"
+
+    # --- the record the declaration gained ------------------------------------
+    section "step 4 grammar: the entry-point record, and its four refusals"
+    if [ ! -f "$committed" ]; then
+        fail "step4/grammar/committed-exists" "no closure-config.txt at $committed"
+    else
+        config_call closure_config_parse "$committed"
+        chk "step4/grammar/committed-parses" "0|" "$CONFIG_RC|$(oneline "$CONFIG_OUT")"
+        chk "step4/grammar/committed-declares-entry-points" "8" \
+            "$(step4_entry_count "$committed")"
+    fi
+    step4_refuse "$dir" undeclared-root 'entrypoint|tools/perl/bin' \
+        'REFUSED|3|cross-reference|entrypoint-root names the undeclared root perl'
+    step4_refuse "$dir" outside-the-tools-tree 'entrypoint|opt/python/bin' \
+        'REFUSED|3|domain|entry-location: opt/python/bin'
+    step4_refuse "$dir" one-segment-location 'entrypoint|tools' \
+        'REFUSED|3|domain|entry-location: tools'
+    step4_refuse "$dir" duplicate-location \
+        "$(printf 'entrypoint|tools/python/bin\nentrypoint|tools/python/bin')" \
+        'REFUSED|4|duplicate|entrypoint: tools/python/bin'
+
+    # --- the fixture engine ---------------------------------------------------
+    section "step 4 fixtures: donors validated, every mutation asserted"
+    if ! fixture_resolve_tools; then
+        unanswered "the step 4 fixture generation" \
+          "  readelf and dd must both resolve here; re-run on a host that supplies them"
+        return
+    fi
+    DONOR_SHARED=$(donor_find_shared) || DONOR_SHARED=""
+    DONOR_PROGRAM=$(donor_find_program) || DONOR_PROGRAM=""
+    chk "step4/fixture/shared-donor-validated" "yes" \
+        "$( [ -n "$DONOR_SHARED" ] && echo yes || echo no )"
+    chk "step4/fixture/program-donor-validated" "yes" \
+        "$( [ -n "$DONOR_PROGRAM" ] && echo yes || echo no )"
+    if [ -z "$DONOR_SHARED" ] || [ -z "$DONOR_PROGRAM" ]; then
+        unanswered "every step 4 fixture" \
+          "  no host object satisfies the corpus donor rows here; re-run on the RHEL 9.8 build host or on the Debian 12 agent"
+        return
+    fi
+    DONOR_NEED_NAMES=$( { elf_needed_names "$DONOR_SHARED"; elf_needed_names "$DONOR_PROGRAM"; } \
+                        | grep -v '^$' | sort -u )
+    lookups=$(elf_needed_names "$DONOR_SHARED" | grep -c .)
+    vn=$(elf_verneed_nodes "$DONOR_SHARED")
+    note "step4/fixture/donors" "shared $DONOR_SHARED, $lookups needs, $vn version nodes"
+    # THE CONTROL FOR THE VERSION MUTATIONS: the donor demands none of the
+    # invented nodes and defines none of them, so a fixture that shows one was
+    # mutated rather than found.
+    chk "step4/fixture/control/donor-demands-no-cplx-node" "no" \
+        "$(elf_verneed_demands "$DONOR_SHARED" libcplxprovider.so.1 CPLX_1.0 && echo yes || echo no)"
+    chk "step4/fixture/control/donor-defines-no-cplx-node" "no" \
+        "$(elf_verdef_defines "$DONOR_SHARED" CPLX_1.0 && echo yes || echo no)"
+
+    # --- the declared floor half ----------------------------------------------
+    #
+    # THE REQUIRED-LOCATION COLUMN IS THE TEST, so the three runs below move ONE
+    # thing at a time: the member absent, the member present under the wrong root,
+    # and the member present under the right one.
+    section "step 4 floor: the declared half, and its location column"
+    step4_plant "$floor" floor-member-absent floor-member-elsewhere
+    step4_write_bundle "$floor/bundle" 'root|python' 'root|git' \
+        'subdir|python|current' 'subdir|git|current' \
+        'floor|libcplxfloor.so.1|any' 'floor|libcplxsql.so.0|tools/python'
+    run_checker "$checker" --prefix "$floor" --installer "$installer" \
+        --bundle "$floor/bundle" --root python=current --root git=current
+    chk "step4/floor/exit-code" "1" "$CHECKER_RC"
+    chk "step4/floor/counts" "2 declared, 2 refused" "$(report_row floor)"
+    chk "step4/floor/absent-member-named" "REFUSED|floor|libcplxfloor.so.1|any" \
+        "$(oneline "$(typed_lines REFUSED | grep -F 'libcplxfloor' | sed -e 's/|[^|]*$//')")"
+    chk "step4/floor/location-member-named" "REFUSED|floor|libcplxsql.so.0|tools/python" \
+        "$(oneline "$(typed_lines REFUSED | grep -F 'libcplxsql' | sed -e 's/|[^|]*$//')")"
+    chk "step4/floor/refusal-is-final" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE FLOOR REFUSED' && echo yes || echo no)"
+    # THE LOCATION CONTROL. The same member, present under the root its row
+    # requires, is accepted, so the refusal above is about the LOCATION and not
+    # about a member the archive never carried.
+    step4_plant "$floor" floor-member-present
+    run_checker "$checker" --prefix "$floor" --installer "$installer" \
+        --bundle "$floor/bundle" --root python=current --root git=current
+    chk "step4/floor/control/location-satisfied" "2 declared, 1 refused" "$(report_row floor)"
+    chk "step4/floor/control/only-the-absent-member-remains" "yes" \
+        "$(typed_lines REFUSED | grep -qF 'libcplxfloor' && echo yes || echo no)"
+    # AND THE PRESENCE CONTROL, planted here rather than from a row because it is
+    # the same shape the row already asserts, moved one directory.
+    printf 'not an ELF: the floor member the control plants\n' \
+        > "$floor/tools/python/current/lib/libcplxfloor.so.1"
+    run_checker "$checker" --prefix "$floor" --installer "$installer" \
+        --bundle "$floor/bundle" --root python=current --root git=current
+    chk "step4/floor/control/all-present-accepted" "0" "$CHECKER_RC"
+    chk "step4/floor/control/none-refused" "2 declared, 0 refused" "$(report_row floor)"
+
+    # --- an UNEXPECTED directory, with every local result still computed ------
+    section "step 4 aggregation: an unexpected directory suppresses nothing"
+    step4_plant "$floor" scope-unexpected-toolsubdir
+    run_checker "$checker" --prefix "$floor" --installer "$installer" \
+        --bundle "$floor/bundle" --root python=current --root git=current
+    chk "step4/aggregation/unexpected-exit-code" "1" "$CHECKER_RC"
+    chk "step4/aggregation/unexpected-counted" "1" "$(typed_count UNEXPECTED)"
+    chk "step4/aggregation/floor-still-computed" "2 declared, 0 refused" "$(report_row floor)"
+    chk "step4/aggregation/scope-refusal-is-named" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE SCOPE REFUSED' && echo yes || echo no)"
+    rm -rf -- "$floor/tools/python/cplxextra"
+
+    # --- provider-aware version coherence -------------------------------------
+    section "step 4 coherence: the provider the object names"
+    step4_plant "$coh" provider-donor-need coherence-provider-defines coherence-need-defined
+    step4_write_bundle "$coh/bundle" 'root|python' 'subdir|python|root' 'subdir|python|current'
+    run_checker "$checker" --prefix "$coh" --installer "$installer" \
+        --bundle "$coh/bundle" --root python=root,current
+    # THE POSITIVE CONTROL COMES FIRST: a need the selected provider DOES define
+    # is accepted, so the refusal below is about the node and not about a rule
+    # that refuses every version need it sees.
+    chk "step4/coherence/control/defined-need-accepted" "0" "$CHECKER_RC"
+    chk "step4/coherence/control/counts" "1 needs, 1 answered, 0 refused" \
+        "$(report_row coherence)"
+    step4_plant "$coh" coherence-need-undefined
+    run_checker "$checker" --prefix "$coh" --installer "$installer" \
+        --bundle "$coh/bundle" --root python=root,current
+    chk "step4/coherence/undefined-exit-code" "1" "$CHECKER_RC"
+    chk "step4/coherence/undefined-counts" "2 needs, 2 answered, 1 refused" \
+        "$(report_row coherence)"
+    chk "step4/coherence/refusal-names-subject-need-and-provider" \
+        "REFUSED|coherence|$coh/tools/python/current/lib/libcplxconsumer.so.1|CPLX_9.9|libcplxprovider.so.1" \
+        "$(oneline "$(typed_lines REFUSED | grep -F 'CPLX_9.9' | sed -e 's/|[^|]*$//')")"
+    chk "step4/coherence/refusal-names-the-selected-scope" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -qF "the selected provider $coh/tools/python/current/lib/libcplxprovider.so.1 defines no such version node" \
+           && echo yes || echo no)"
+    chk "step4/coherence/refusal-is-final" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE COHERENCE REFUSED' && echo yes || echo no)"
+    # A FLOOR MEMBER ABSENT SUPPRESSES NOTHING. The same tree with one more
+    # declared member refuses on the floor AND still answers every version need.
+    step4_write_bundle "$coh/bundle2" 'root|python' 'subdir|python|root' \
+        'subdir|python|current' 'floor|libcplxmissing.so.1|any'
+    run_checker "$checker" --prefix "$coh" --installer "$installer" \
+        --bundle "$coh/bundle2" --root python=root,current
+    chk "step4/aggregation/floor-absent-refuses" "1 declared, 1 refused" "$(report_row floor)"
+    chk "step4/aggregation/unrelated-needs-still-answered" \
+        "2 needs, 2 answered, 1 refused" "$(report_row coherence)"
+
+    # --- every recorded need gets a result, whatever the selected file is ------
+    #
+    # THE THREE SHAPES A SELECTED PROVIDER CAN TAKE besides an object that defines
+    # the node. Each has its own case, because a rule that answered them alike
+    # would let a known non-object satisfy a version need or turn an unavailable
+    # reading into a claim about the archive. The control for all three is the
+    # accepted need above, which the same invariant answers on the same tree
+    # shape.
+    section "step 4 coherence: a known non-object, and an object defining nothing"
+    step4_plant "$kinds" provider-donor-need coherence-provider-not-an-elf \
+        coherence-need-non-object coherence-provider-no-definitions \
+        coherence-need-no-definitions
+    step4_write_bundle "$kinds/bundle" 'root|python' 'subdir|python|root' 'subdir|python|current'
+    run_checker "$checker" --prefix "$kinds" --installer "$installer" \
+        --bundle "$kinds/bundle" --root python=root,current
+    chk "step4/coherence/kinds-exit-code" "1" "$CHECKER_RC"
+    chk "step4/coherence/kinds-counts" "2 needs, 2 answered, 2 refused" "$(report_row coherence)"
+    # NO NEED IS LEFT UNANSWERED, which is the property a silent skip would break
+    # and which no count alone would show.
+    chk "step4/coherence/kinds-every-need-answered" "yes" \
+        "$( [ "$(report_field coherence)" = "2" ] && echo yes || echo no )"
+    chk "step4/coherence/non-object-refused" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'is not an ELF object, so it defines no version node' \
+           && echo yes || echo no)"
+    chk "step4/coherence/non-object-names-the-subject" \
+        "REFUSED|coherence|$kinds/tools/python/current/lib/libcplxtextuser.so.1|CPLX_1.0|libcplxtext.so.1" \
+        "$(oneline "$(typed_lines REFUSED | grep -F 'libcplxtext.so.1' | sed -e 's/|[^|]*$//')")"
+    chk "step4/coherence/no-definitions-refused" \
+        "REFUSED|coherence|$kinds/tools/python/current/lib/libcplxbareuser.so.1|CPLX_1.0|libcplxbare.so.1" \
+        "$(oneline "$(typed_lines REFUSED | grep -F 'libcplxbare.so.1' | sed -e 's/|[^|]*$//')")"
+    chk "step4/coherence/kinds-no-undetermined" "0" "$(report_field results)"
+
+    # AND THE ONE THAT IS NOT A REFUSAL. A provider whose reading could not be
+    # taken defines nothing this run can state, so its need is UNDETERMINED naming
+    # it rather than a claim about the archive.
+    # ITS OWN TREE, so the run carries the UNDETERMINED and NOTHING ELSE: an
+    # unavailable reading has to leave the run non-passing on its own, and a
+    # refusal beside it would decide the exit code and hide that.
+    section "step 4 coherence: a provider whose reading could not be taken"
+    step4_plant "$sealed" provider-donor-need
+    result=$(fixture_plant "$sealed" coherence-provider-unreadable)
+    if [ "$result" = "still-readable" ]; then
+        unanswered "the unreadable-provider case" \
+          "  this account can read a mode 000 file, so re-run as a non-root user"
+    else
+        chk "step4/fixture/coherence-provider-unreadable" "ok" "$result"
+        step4_plant "$sealed" coherence-need-unreadable
+        step4_write_bundle "$sealed/bundle" 'root|python' 'subdir|python|root' \
+            'subdir|python|current'
+        run_checker "$checker" --prefix "$sealed" --installer "$installer" \
+            --bundle "$sealed/bundle" --root python=root,current
+        chk "step4/coherence/unreadable-exit-code" "5" "$CHECKER_RC"
+        chk "step4/coherence/unreadable-no-refusal-anywhere" "" \
+            "$(oneline "$(typed_lines REFUSED)")"
+        chk "step4/coherence/unreadable-counts" "1 needs, 0 answered, 0 refused" \
+            "$(report_row coherence)"
+        chk "step4/coherence/unreadable-is-undetermined" \
+            "UNDETERMINED|coherence|$sealed/tools/python/current/lib/libcplxsealeduser.so.1" \
+            "$(oneline "$(typed_lines UNDETERMINED | grep -F 'libcplxsealeduser' | sed -e 's/|[^|]*$//')")"
+        chk "step4/coherence/unreadable-names-the-input" "yes" \
+            "$(printf '%s' "$CHECKER_OUT" | grep -q 'whose reading could not be taken' \
+               && echo yes || echo no)"
+        # THE UNDETERMINED IS COUNTED AS ONE, so an unavailable reading was
+        # reported as a missing input rather than as a claim about the archive.
+        chk "step4/coherence/unreadable-counted-as-a-result" "1" "$(report_field results)"
+    fi
+
+    # --- the fourth coherence condition, which is static like the other three --
+    section "step 4 coherence: a resolution that leaves the archive"
+    step4_plant "$esc" provider-donor-need provider-escapes-archive \
+        coherence-resolution-leaves-archive
+    step4_write_bundle "$esc/bundle" 'root|python' 'subdir|python|root' 'subdir|python|current'
+    run_checker "$checker" --prefix "$esc" --installer "$installer" \
+        --bundle "$esc/bundle" --root python=root,current
+    chk "step4/coherence/escape-exit-code" "1" "$CHECKER_RC"
+    chk "step4/coherence/escape-names-subject-need-and-provider" \
+        "REFUSED|coherence|$esc/tools/python/current/lib/libcplxescape.so.1|CPLX_1.0|libcplxhostonly.so.1" \
+        "$(oneline "$(typed_lines REFUSED | grep '^REFUSED|coherence|' | sed -e 's/|[^|]*$//')")"
+    chk "step4/coherence/escape-names-the-outside-file" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -qF "leaves the archive and resolves to $DONOR_SHARED" \
+           && echo yes || echo no)"
+    # Its control: the DT_NEEDED half accepts that same candidate, because a file
+    # of that name IS in the scope. The two halves answer different questions and
+    # neither stands in for the other.
+    chk "step4/coherence/escape-membership-still-resolves" "0" "$(report_field refused)"
+
+    # --- rule 1, and the control that it does not over-refuse ------------------
+    section "step 4 duplicates: one file from several directories is one provider"
+    step4_plant "$same" provider-donor-need provider-duplicate-identical \
+        subject-identical-consumer
+    step4_write_bundle "$same/bundle" 'root|python' 'subdir|python|root' 'subdir|python|current'
+    run_checker "$checker" --prefix "$same" --installer "$installer" \
+        --bundle "$same/bundle" --root python=root,current
+    chk "step4/duplicates/identical-accepted" "0" "$CHECKER_RC"
+    chk "step4/duplicates/identical-counts" \
+        "$(( lookups + 1 )) names, 1 multi-candidate, 0 refused" "$(report_row duplicates)"
+
+    section "step 4 duplicates: two candidates, different content"
+    step4_plant "$diff" provider-donor-need provider-duplicate-different \
+        duplicate-first-defines duplicate-consumer-need
+    # The first candidate was replanted over the differing copy to give it the
+    # node the consumer demands, so the two paths are re-asserted to still differ
+    # rather than assumed to.
+    chk "step4/duplicates/two-paths-still-differ" "differ" \
+        "$( [ "$(fixture_digest "$diff/tools/python/current/lib/libcplxdup.so.1")" \
+             != "$(fixture_digest "$diff/tools/git/current/lib/libcplxdup.so.1")" ] \
+            && echo differ || echo same )"
+    step4_write_bundle "$diff/bundle" 'root|python' 'root|git' 'subdir|python|root' \
+        'subdir|python|current' 'subdir|git|current'
+    run_checker "$checker" --prefix "$diff" --installer "$installer" \
+        --bundle "$diff/bundle" --root python=root,current --root git=current
+    chk "step4/duplicates/different-exit-code" "1" "$CHECKER_RC"
+    chk "step4/duplicates/different-counts" \
+        "$(( lookups + 1 )) names, 1 multi-candidate, 1 refused" "$(report_row duplicates)"
+    line=$(typed_lines REFUSED | grep '^REFUSED|duplicates|' | sed -n 1p)
+    IFS='|' read -r _ _ dupname pa da pb db _ <<< "$line"
+    chk "step4/duplicates/refusal-names-name-and-both-paths" \
+        "libcplxdup.so.1|$diff/tools/python/current/lib/libcplxdup.so.1|$diff/tools/git/current/lib/libcplxdup.so.1" \
+        "$dupname|$pa|$pb"
+    chk "step4/duplicates/refusal-digests-differ" "differ" \
+        "$( [ "$da" != "$db" ] && echo differ || echo same )"
+    # THE DIGESTS ARE THE FILES'. Without this the refusal could carry any two
+    # strings and the case would still pass.
+    chk "step4/duplicates/refusal-digests-are-the-files" "yes" \
+        "$( [ "$da" = "$(fixture_digest "$pa")" ] && [ "$db" = "$(fixture_digest "$pb")" ] \
+            && echo yes || echo no )"
+    chk "step4/duplicates/refusal-is-final" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE DUPLICATE REFUSED' && echo yes || echo no)"
+    # THE ROUND 2 CORRECTION, ASSERTED AS THE PRESENCE OF A RESULT. Rule 1 refuses
+    # this name and coherence STILL EVALUATES against the first candidate in scope
+    # order, so the run carries a coherence answer beside the duplicate refusal
+    # rather than one instead of the other.
+    chk "step4/duplicates/coherence-still-answers" \
+        "1 needs, 1 answered, 0 refused" "$(report_row coherence)"
+
+    section "step 4 duplicates: the positive control, twenty names over one file"
+    step4_plant "$pos" provider-donor-need multi-candidate-population dir-alias-directory
+    step4_write_bundle "$pos/bundle" 'root|python' 'subdir|python|root' \
+        'subdir|python|current' 'subdir|python|version'
+    run_checker "$checker" --prefix "$pos" --installer "$installer" \
+        --bundle "$pos/bundle" --root python=root,current,version
+    chk "step4/duplicates/positive-control-accepted" "0" "$CHECKER_RC"
+    chk "step4/duplicates/positive-control-counts" \
+        "$(( lookups + 20 )) names, 20 multi-candidate, 0 refused" "$(report_row duplicates)"
+    step4_run_without_digest "$checker" --prefix "$pos" --installer "$installer" \
+        --bundle "$pos/bundle" --root python=root,current,version
+    chk "step4/duplicates/alias-only-needs-no-digest" "0" "$CHECKER_RC"
+    chk "step4/duplicates/alias-only-digest-not-called" "" \
+        "$(printf '%s\n' "$CHECKER_OUT" | grep '^__UNEXPECTED_DIGEST__$' || true)"
+
+    # --- rule 2, declared and undeclared --------------------------------------
+    section "step 4 families: declared generations, and the declared blind spot"
+    step4_plant "$fam" provider-donor-need family-two-generations family-two-generations-peer
+    step4_write_bundle "$fam/bundle" 'root|python' 'root|git' 'subdir|python|root' \
+        'subdir|git|root' 'subdir|git|current' 'family|cplx-bfd|libcplxbfd-*.so|1'
+    run_checker "$checker" --prefix "$fam" --installer "$installer" \
+        --bundle "$fam/bundle" --root python=root --root git=root,current
+    chk "step4/families/declared-exit-code" "1" "$CHECKER_RC"
+    chk "step4/families/declared-counts" "1 declared, 1 refused" "$(report_row families)"
+    line=$(typed_lines REFUSED | grep '^REFUSED|families|' | sed -n 1p)
+    IFS='|' read -r _ _ famname permitted gencount gens <<< "$line"
+    chk "step4/families/refusal-fields" "cplx-bfd|1|2" "$famname|$permitted|$gencount"
+    chk "step4/families/refusal-names-both-generations" "yes" \
+        "$( printf '%s' "$gens" | grep -q 'libcplxbfd-1.1.so' \
+            && printf '%s' "$gens" | grep -q 'libcplxbfd-1.2.so' && echo yes || echo no )"
+    chk "step4/families/refusal-is-final" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE FAMILY REFUSED' && echo yes || echo no)"
+    # THE DECLARED BLIND SPOT, asserted rather than left as silence: the same
+    # pair, with no family record, is NOT EXAMINED.
+    step4_write_bundle "$fam/bundle2" 'root|python' 'root|git' 'subdir|python|root' \
+        'subdir|git|root' 'subdir|git|current'
+    run_checker "$checker" --prefix "$fam" --installer "$installer" \
+        --bundle "$fam/bundle2" --root python=root --root git=root,current
+    chk "step4/families/undeclared-accepted" "0" "$CHECKER_RC"
+    chk "step4/families/undeclared-not-examined" "0 declared, 0 refused" "$(report_row families)"
+
+    # --- the entry-point half, and the finding that combines the two ----------
+    section "step 4 entry points: the half a declaration supplies"
+    step4_plant "$ep" provider-donor-need entry-point-program dir-alias-directory
+    step4_write_bundle "$ep/bundle" 'root|python' 'subdir|python|root' \
+        'subdir|python|current' 'subdir|python|version' \
+        'entrypoint|tools/python/current/bin'
+    run_checker "$checker" --prefix "$ep" --installer "$installer" \
+        --bundle "$ep/bundle" --root python=root,current,version
+    chk "step4/entrypoints/declared-accepted" "0" "$CHECKER_RC"
+    # The location is declared through the ALIAS and the walk recorded the object
+    # under the version directory, so this line also measures that the declared
+    # location is resolved rather than compared as text.
+    chk "step4/entrypoints/declared-counts" \
+        "1 declared, 1 subjects named, 0 reached by neither half" "$(report_row entrypoints)"
+    chk "step4/entrypoints/program-not-in-the-finding" "" \
+        "$(oneline "$(typed_lines UNREFERENCED | grep -F 'cplxentry' || true)")"
+    # ITS CONTROL: the EDGE half still names the same object under its own name,
+    # so the case is about the declaration and not about an edge that reached it.
+    chk "step4/entrypoints/edge-half-still-names-it" "yes" \
+        "$(typed_lines UNREFERENCED-BY-EDGE | grep -qF 'cplxentry' && echo yes || echo no)"
+    # AND THE PAIR THAT SHOWS THE DECLARATION IS READ: the same object, with the
+    # record removed, IS reported by the combined finding.
+    step4_write_bundle "$ep/bundle2" 'root|python' 'subdir|python|root' \
+        'subdir|python|current' 'subdir|python|version'
+    run_checker "$checker" --prefix "$ep" --installer "$installer" \
+        --bundle "$ep/bundle2" --root python=root,current,version
+    chk "step4/entrypoints/undeclared-counts" \
+        "0 declared, 0 subjects named, 1 reached by neither half" "$(report_row entrypoints)"
+    chk "step4/entrypoints/program-in-the-finding" \
+        "UNREFERENCED|subject|$ep/tools/python/version/bin/cplxentry" \
+        "$(oneline "$(typed_lines UNREFERENCED | sed -e 's/|[^|]*$//')")"
+    chk "step4/entrypoints/finding-is-not-a-refusal" "0" "$CHECKER_RC"
+
+    # --- aggregation: UNDETERMINED means one thing ----------------------------
+    section "step 4 aggregation: a version need with no provider file to read"
+    step4_plant "$agg" provider-donor-need coherence-need-unresolved
+    step4_write_bundle "$agg/bundle" 'root|python' 'subdir|python|root' 'subdir|python|current'
+    run_checker "$checker" --prefix "$agg" --installer "$installer" \
+        --bundle "$agg/bundle" --root python=root,current
+    chk "step4/aggregation/unresolved-exit-code" "1" "$CHECKER_RC"
+    chk "step4/aggregation/the-name-is-a-refusal" "yes" \
+        "$(typed_lines REFUSED | grep -q '^REFUSED|derived|.*|libcplxnoprovider.so.1|' \
+           && echo yes || echo no)"
+    chk "step4/aggregation/the-need-is-undetermined" \
+        "UNDETERMINED|coherence|$agg/tools/python/current/lib/libcplxlost.so.1" \
+        "$(oneline "$(typed_lines UNDETERMINED | sed -e 's/|[^|]*$//')")"
+    chk "step4/aggregation/undetermined-names-the-provider" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" \
+           | grep -q 'names libcplxnoprovider.so.1, which resolves nowhere' && echo yes || echo no)"
+    chk "step4/aggregation/undetermined-counted" "1" "$(report_field results)"
+
+    section "step 4 aggregation: an UNDETERMINED and no refusal is not a pass"
+    step4_plant "$loop" entry-point-cycle
+    step4_write_bundle "$loop/bundle" 'root|python' 'subdir|python|root' \
+        'entrypoint|tools/python/loop/a'
+    run_checker "$checker" --prefix "$loop" --installer "$installer" \
+        --bundle "$loop/bundle" --root python=root
+    chk "step4/aggregation/no-refusal-anywhere" "" "$(oneline "$(typed_lines REFUSED)")"
+    chk "step4/aggregation/still-not-a-pass" "5" "$CHECKER_RC"
+    chk "step4/aggregation/names-the-location-it-lacked" \
+        "UNDETERMINED|entry-point|tools/python/loop/a" \
+        "$(oneline "$(typed_lines UNDETERMINED | sed -e 's/|[^|]*$//')")"
+    chk "step4/aggregation/verdict-is-undetermined" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE RESULTS UNDETERMINED' && echo yes || echo no)"
+
+    # --- the verdict says what it answered ------------------------------------
+    section "step 4 verdict: partial, and it names what a run answered"
+    chk "step4/verdict/says-it-is-partial" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'verdict is PARTIAL' && echo yes || echo no)"
+    chk "step4/verdict/names-the-bundle-state" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'bundle read yes' && echo yes || echo no)"
+    run_checker "$checker" --prefix "$loop" --installer "$installer" --root python=root
+    chk "step4/verdict/no-bundle-is-said-so" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'bundle read no' && echo yes || echo no)"
+    # WITHOUT A DECLARATION THERE IS NO ENTRY-POINT HALF, so the combined finding
+    # is not reported at all and the edge half keeps its own name. A run that
+    # printed the conjunction from a set nobody declared would name a shipped
+    # executable as an object nothing can load.
+    chk "step4/verdict/no-bundle-no-combined-finding" "" \
+        "$(oneline "$(typed_lines UNREFERENCED)")"
+    chk "step4/verdict/no-bundle-no-entry-points" \
+        "0 declared, 0 subjects named, 0 reached by neither half" "$(report_row entrypoints)"
+}
 # ============================================================== the run, one step ===
 run_one_step() {
     local step="$1" tool state host sha sha_state k
@@ -2990,6 +3874,7 @@ run_one_step() {
             1) step1_suite ;;
             2) step2_suite ;;
             3) step3_suite ;;
+            4) step4_suite ;;
         esac
     else
         section "step $step suite"
