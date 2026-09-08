@@ -4,14 +4,16 @@
 # Created at Step 1 with this contract and nothing else, because the module set
 # of this effort is FIXED AND UNCONDITIONAL and a topology that could still gain
 # a module is not a contract. FILLED HERE BY STEP 3 with the two responsibilities
-# that topology gives it, and with nothing else.
+# that topology gives it, and with nothing else. STEP 4 ADDS ONE RECORD TO THE
+# READ, the version DEFINITIONS, because coherence asks what a selected provider
+# defines and the one invocation already prints it.
 #
 # THIS MODULE OWNS, AND IS THE ONLY PLACE THAT MAY OWN:
 #
 #   the object reader      one `readelf -d -V` per shipped ELF, answering the
-#                          dynamic entries and the version needs together. Four
-#                          invariants asking separately would fork 2512 times
-#                          where 628 suffice.
+#                          dynamic entries, the version needs and the version
+#                          definitions together. Four invariants asking
+#                          separately would fork 2512 times where 628 suffice.
 #   the provider index     the provider directories enumerated ONCE into a
 #                          name-to-paths map, so resolving a DT_NEEDED name is a
 #                          hash lookup and not a directory scan per name. The
@@ -100,13 +102,33 @@ CLOSURE_ELF_PARSE_REASON=""
 CLOSURE_ELF_VALUE=""
 
 # Keyed by object path. NEEDED holds the DT_NEEDED names separated by newlines,
-# VERNEED holds one `provider|node` per line, both empty when the object records
-# none. The version needs are collected HERE, in the one read, and consumed by
-# the coherence invariant Step 4 fills: collecting them later would mean reading
-# every object twice.
+# VERNEED holds one `provider|node` per line, VERDEF one defined node per line,
+# all empty when the object records none. The version records are collected HERE,
+# in the one read, and consumed by the coherence invariant Step 4 fills:
+# collecting them later would mean reading every object twice.
+#
+# BOTH SIDES OF COHERENCE COME OUT OF THE SAME INVOCATION. Step 3 needed only the
+# needs, and Step 4 asks whether the SELECTED PROVIDER defines the node it is
+# asked for, which is a fact about that provider's own definitions. Reading them
+# when the question is asked would mean one `readelf` per version need instead of
+# one per object, which is the shape the cost rule forbids; `readelf -d -V`
+# already prints the definition section beside the need section, so the record is
+# free here and unobtainable anywhere else.
 declare -A CLOSURE_ELF_SONAME=()
 declare -A CLOSURE_ELF_NEEDED=()
 declare -A CLOSURE_ELF_VERNEED=()
+declare -A CLOSURE_ELF_VERDEF=()
+
+# WHAT THE WALK DETERMINED ABOUT EVERY FILE IT REACHED, keyed by path: `object`
+# read whole, `not-elf` positively identified as not one, `unread` reached and
+# not readable. A path absent from this map was never reached at all.
+#
+# THE THREE ARE NOT INTERCHANGEABLE TO AN INVARIANT ASKING ABOUT A SELECTED
+# PROVIDER. A known non-object defines no version node, which is a fact and a
+# refusal; a file whose reading could not be taken defines nothing this run can
+# state, which is an UNDETERMINED. Without the record an invariant can only tell
+# "not in the model", and it would have to answer both with one verdict.
+declare -A CLOSURE_ELF_KIND=()
 
 # name -> the provider paths holding a file of that name, in scope order, one per
 # line. The map is the whole point of the index: membership resolution is a
@@ -176,6 +198,7 @@ closure_elf_is_object() {
 # business reaching.
 closure_read_failed() {
     printf '%s|%s|%s|%s\n' UNDETERMINED object "$1" "$2"
+    CLOSURE_ELF_KIND["$1"]=unread
     CLOSURE_ELF_UNREAD=$((CLOSURE_ELF_UNREAD + 1))
 }
 
@@ -224,7 +247,7 @@ closure_elf_bracketed() {
 closure_elf_parse() {
     local path="$1" text="$2"
     local line section="" file="" node="" shape=0 value=""
-    local soname="" needed="" verneed="" edges=0
+    local soname="" needed="" verneed="" verdef="" edges=0
 
     CLOSURE_ELF_PARSE_REASON=""
     # READ THE OUTPUT ONCE, LINE BY LINE. Slicing the remaining text with
@@ -257,6 +280,25 @@ closure_elf_parse() {
                 soname="$CLOSURE_ELF_VALUE"
                 continue ;;
         esac
+        # THE DEFINITION SECTION IS READ IN ITS OWN BRANCH, because `Name:`
+        # appears in both halves and only the needs half carries a provider to
+        # resolve against. A definition entry's continuation line names a PARENT
+        # rather than a node and carries no `Name:`, so the version tree collapses
+        # to the node list this checker compares against, which is what the
+        # coherence question asks for.
+        if [ "$section" = "defs" ]; then
+            case "$line" in
+                *'Name: '*)
+                    node="${line#*Name: }"
+                    node="${node%% *}"
+                    if [ -z "$node" ]; then
+                        CLOSURE_ELF_PARSE_REASON='a version definition carries no readable node name'
+                        return 1
+                    fi
+                    verdef="${verdef:+$verdef$'\n'}$node" ;;
+            esac
+            continue
+        fi
         if [ "$section" != "needs" ]; then continue; fi
         case "$line" in
             *'File: '*)
@@ -289,6 +331,7 @@ closure_elf_parse() {
     CLOSURE_ELF_SONAME["$path"]="$soname"
     CLOSURE_ELF_NEEDED["$path"]="$needed"
     CLOSURE_ELF_VERNEED["$path"]="$verneed"
+    CLOSURE_ELF_VERDEF["$path"]="$verdef"
     CLOSURE_ELF_EDGES=$((CLOSURE_ELF_EDGES + edges))
     return 0
 }
@@ -314,6 +357,7 @@ closure_elf_read() {
         return 1
     fi
     CLOSURE_ELF_PATHS+=("$path")
+    CLOSURE_ELF_KIND["$path"]=object
     CLOSURE_ELF_SUBJECTS=$((CLOSURE_ELF_SUBJECTS + 1))
     return 0
 }
@@ -425,7 +469,10 @@ closure_subjects_walk() {
             closure_read_failed "$path" 'the file could not be opened for reading here'
             continue
         fi
-        if ! closure_elf_is_object "$path"; then continue; fi
+        if ! closure_elf_is_object "$path"; then
+            CLOSURE_ELF_KIND["$path"]=not-elf
+            continue
+        fi
         closure_elf_read "$path" || true
     done < "$listing"
     rm -f -- "$listing"
