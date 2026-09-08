@@ -4,7 +4,9 @@
 # checker. Created at Step 1 with its contract comment and a body of zero lines,
 # because the module set of this effort is FIXED AND UNCONDITIONAL and a topology
 # that could still gain a module is not a contract. FILLED HERE BY STEP 2 with
-# the four responsibilities that topology gives it, and with nothing else.
+# the four responsibilities that topology gives it. STEP 4 ADDS ONE RECORD to the
+# table below, `entrypoint`, because Q13 makes the declared entry-point set
+# configuration and it belongs in the one parser every party uses.
 #
 # THIS MODULE OWNS, AND IS THE ONLY PLACE THAT MAY OWN:
 #
@@ -28,48 +30,37 @@
 # executed. Keeping it apart from the invariants is what lets publication reuse
 # the parser and the digest without pulling in the four archive rules.
 #
-# THE THREE PARTIES ARE ASYMMETRIC, AND THAT ASYMMETRY IS THE REQUIREMENT.
-# Packaging and publication have cplx: each resolves the authoritative document
-# itself, at the commit it is about to name, and requires the embedded bytes to
-# BE that document. The Debian agent has none by construction, so it can only
-# check that the embedded document hashes to the digest its own envelope names. A
-# paired edit, where a floor entry is deleted in the same edit that removes the
-# payload and the document is re-hashed, PASSES on the agent, and so does an
-# authentic-but-wrong bundle. Both are refused by the two parties that can see
-# cplx, and the agent's verdict states that limit on every line it prints.
+# THE THREE PARTIES ARE ASYMMETRIC, AND THAT ASYMMETRY IS THE REQUIREMENT. What
+# each party can establish is stated where its check is, so this file says it
+# once: `closure_envelope_check` for the Debian agent, which has no cplx, and
+# `closure_config_authority_check` for packaging and publication, which resolve
+# the authoritative document themselves.
 #
-# THE DIGEST DOMAIN IS THE DOCUMENT'S EXACT COMMITTED BYTES: UTF-8, LF endings,
-# no normalisation, no canonicalisation pass, no re-serialisation, comment lines
-# and the trailing newline included. It covers the configuration document and
-# NEVER the envelope, so it cannot cover itself. The README beside the data
-# states the same domain where the data lives.
+# THE DIGEST DOMAIN IS THE DOCUMENT'S EXACT COMMITTED BYTES. It covers the
+# configuration document and NEVER the envelope, so it cannot cover itself, and
+# the README beside the data states the domain in full where the data lives.
 #
 # ONE LEXER, AND A RECORD TABLE PER DOCUMENT. The shared shape is a version line
 # first, one record per line, fields separated by a vertical bar, no empty field,
 # %7C for a literal bar and %25 for a literal percent, any other percent sequence
 # a refusal, an unknown record token a refusal, and a known token with the wrong
 # field count a refusal. Two tables live here; the third, CPLX-CLOSURE-EVIDENCE/1,
-# is Step 6's and adds a table rather than a parser. Blank and comment lines are
-# IGNORED in both tables here, because a human authors both documents, and are
-# REFUSED in the evidence document, which only a machine writes and which Q06
-# compares byte for byte. That difference belongs to the table, not to the lexer.
+# is Step 6's and adds a table rather than a parser, and it REFUSES the blank and
+# comment lines these two ignore, because only a machine writes it.
 #
 # DECODING PRECEDES DOMAIN VALIDATION, and the order is a rule rather than an
 # implementation accident: validating first would let %2F pass a no-slash domain
 # and become a separator afterwards. The observable consequence is the REFUSAL
-# REASON. A field carrying %2F is refused as an undefined escape and never
-# reaches its domain; a field carrying the defined %7C is decoded first and then
-# refused BY THE DOMAIN, which is what shows the domain saw the decoded value.
+# REASON: %2F is refused as an undefined escape and never reaches its domain,
+# while the defined %7C is decoded and then refused BY THE DOMAIN.
 #
 # WHY THIS FILE SPAWNS ALMOST NO PROCESS. Every command a shipped script depends
 # on the host to supply has to be declared in contract.closure-tools.txt, and the
 # harness extracts every command-position word from this file and fails on any
 # word absent from it. The parser is therefore pure Bash: no grep, no sed, no tr,
-# no wc. The four commands it does use are sha256sum for the digest, git for the
-# cplx-side resolution, and mktemp with rm for the one temporary file that
-# resolution writes. For the same reading rule every word-initial case pattern
-# below is quoted: unquoted, it sits in command position for that lexical reader
-# and would be reported as a host dependency nobody declared.
+# no wc. For the same reading rule every word-initial case pattern below is
+# quoted: unquoted, it sits in command position for that lexical reader and would
+# be reported as a host dependency nobody declared.
 
 # ---------------------------------------------------------------- fixed names ---
 CLOSURE_CONFIG_VERSION="CPLX-CLOSURE/1"
@@ -85,16 +76,14 @@ CLOSURE_CONFIG_BASENAME="closure-config.txt"
 # shellcheck disable=SC2034  # read by closure_check.sh and by Step 5's staging
 CLOSURE_ENVELOPE_BASENAME="closure-envelope.txt"
 
-# The one statement of what an agent-side pass does and does not mean. It travels
-# with every consistency verdict rather than being written at each caller,
-# because a limit stated in one place and omitted in another is a limit nobody
-# can rely on.
+# The one statement of what an agent-side pass does and does not mean, travelling
+# with every consistency verdict: a limit stated at one caller and omitted at
+# another is a limit nobody can rely on.
 CLOSURE_CONSISTENCY_LIMIT="INTERNAL CONSISTENCY ONLY: a host with no cplx access cannot tell an authentic bundle from the reviewed one"
 
-# The lexical domains, one exact expression each, so a one-segment root name, a
-# multi-segment subdirectory and a two-wildcard glob are decidable rather than a
-# matter of reading. They are variables because a quoted pattern is matched
-# literally by the shell's own matcher.
+# The lexical domains, one exact expression each, so a one-segment root name and
+# a two-wildcard glob are decidable rather than a matter of reading. They are
+# variables because a quoted pattern is matched literally by the shell.
 CLOSURE_RE_SEGMENT='^[A-Za-z0-9._+-]{1,64}$'
 CLOSURE_RE_LOOKUP='^[A-Za-z0-9._+-]{1,128}$'
 CLOSURE_RE_LOWER='^[a-z0-9-]{1,64}$'
@@ -109,13 +98,16 @@ CLOSURE_RE_COMMIT='^[0-9a-f]{40}$'
 # shape ,root,current, so a membership test is one pattern match; a root with no
 # subdir record holds a single comma, which is a DECLARED root with an empty list
 # and not an undeclared one, and that difference is what the cross-reference pass
-# reads. CLOSURE_CFG_XREF holds the cross-references collected while the records
-# are read and validated once the whole document is, so a record may name a root
-# the document declares further down: resolving them against a partial model
-# would have made ordering significant for every record instead of for roots.
+# reads. CLOSURE_CFG_XREF holds the cross-references, collected as the records are
+# read and resolved once the whole document is, which is what closure_cfg_cross_refs
+# explains where it applies them.
+# CLOSURE_CFG_ENTRY is Step 4's addition, the DECLARED ENTRY-POINT SET of design
+# Q13, keyed by location because order carries no meaning here: entry points are
+# a set, and `root` is the one ordering this grammar makes significant.
 CLOSURE_CFG_ROOTS=()
 CLOSURE_CFG_XREF=()
 CLOSURE_CFG_BAD=0
+declare -A CLOSURE_CFG_ENTRY=()
 declare -A CLOSURE_CFG_SUBDIRS=()
 declare -A CLOSURE_CFG_FLOOR=()
 declare -A CLOSURE_CFG_FAMILY=()
@@ -322,6 +314,7 @@ closure_cfg_record() {
         'floor') closure_cfg_floor "$n" "$count" ;;
         'family') closure_cfg_family "$n" "$count" ;;
         'waiver') closure_cfg_waiver "$n" "$count" ;;
+        'entrypoint') closure_cfg_entrypoint "$n" "$count" ;;
         *) closure_cfg_refuse "$n" unknown-record "$token" ;;
     esac
 }
@@ -358,8 +351,7 @@ closure_cfg_add_subdir() {
     local n="$1" root="$2" sub="$3"
     # The comma-fenced list is the ONE record of what a root declares, so the
     # duplicate test is a membership test on it rather than a second map that
-    # could disagree with it. An undeclared root holds nothing to test against
-    # and is refused by the cross-reference pass instead.
+    # could disagree with it. An undeclared root holds nothing to test against.
     if [ -z "${CLOSURE_CFG_SUBDIRS[$root]:-}" ]; then return 0; fi
     case "${CLOSURE_CFG_SUBDIRS[$root]}" in
         *",$sub,"*)
@@ -424,17 +416,43 @@ closure_cfg_waiver() {
     CLOSURE_CFG_XREF+=("$n waiver-member $member")
 }
 
-# The cross-references, validated once the whole document is read. A subdir names
-# a declared root, a floor location other than `any` names a declared root, and a
-# waiver names a member the floor declares. An unknown waiver is a refusal here
-# rather than a silent exception, which is the contract the issue states: waivers
-# name FLOOR MEMBERS ONLY.
+# THE DECLARED ENTRY-POINT SET, added by Step 4 under design Q13. One record names
+# one LOCATION relative to the archive whose shipped ELF objects are entry points:
+# the interpreter, the shipped executable directories, and the dynamically loaded
+# locations the interpreter opens by path. IT IS DECLARED AND NEVER DERIVED, for
+# the reason the subject rule already gives: the loading mechanism at issue leaves
+# no static trace, so a heuristic over `PT_INTERP`, a file name or a permission bit
+# would be wrong in both directions. The location is a `repo-path` under a DECLARED
+# tool root, so a typo fails closed rather than naming a location nothing is under.
+closure_cfg_entrypoint() {
+    local n="$1" count="$2" location root
+    closure_cfg_count "$n" entrypoint 2 "$count" || return 0
+    location="${CLOSURE_LEX_FIELDS[1]}"
+    closure_cfg_domain "$n" entry-location repo-path "$location" || return 0
+    root="${location#tools/}"
+    if [ "$root" = "$location" ]; then
+        closure_cfg_refuse "$n" domain "entry-location: $location"
+        return 0
+    fi
+    if [ -n "${CLOSURE_CFG_ENTRY[$location]:-}" ]; then
+        closure_cfg_refuse "$n" duplicate "entrypoint: $location"
+        return 0
+    fi
+    CLOSURE_CFG_ENTRY["$location"]=1
+    CLOSURE_CFG_XREF+=("$n entrypoint-root ${root%%/*}")
+}
+
+# The cross-references, validated once the whole document is read. A subdir, a
+# floor location other than `any` and an entry-point location each name a declared
+# root, and a waiver names a member the floor declares. An unknown waiver is a
+# refusal here rather than a silent exception, which is the contract the issue
+# states: waivers name FLOOR MEMBERS ONLY.
 closure_cfg_cross_refs() {
     local entry n kind value sub
     for entry in ${CLOSURE_CFG_XREF[@]+"${CLOSURE_CFG_XREF[@]}"}; do
         read -r n kind value sub <<< "$entry"
         case "$kind" in
-            'subdir-root'|'floor-root')
+            'subdir-root'|'floor-root'|'entrypoint-root')
                 if [ -z "${CLOSURE_CFG_SUBDIRS[$value]:-}" ]; then
                     closure_cfg_refuse "$n" cross-reference "$kind names the undeclared root $value"
                 elif [ "$kind" = "subdir-root" ]; then
@@ -448,26 +466,16 @@ closure_cfg_cross_refs() {
     done
 }
 
-# The parsed model, emptied. Keys are unset one by one rather than through a
-# global redeclaration, because redeclaring inside a function would make the
-# array local to it and leave every caller reading the stale one.
+# The parsed model, emptied. Keys are unset one by one rather than through a global
+# redeclaration, which inside a function would make the array local to it.
 closure_config_reset() {
     local k
-    for k in ${CLOSURE_CFG_SUBDIRS[@]+"${!CLOSURE_CFG_SUBDIRS[@]}"}; do
-        unset "CLOSURE_CFG_SUBDIRS[$k]"
-    done
-    for k in ${CLOSURE_CFG_FLOOR[@]+"${!CLOSURE_CFG_FLOOR[@]}"}; do
-        unset "CLOSURE_CFG_FLOOR[$k]"
-    done
-    for k in ${CLOSURE_CFG_FAMILY[@]+"${!CLOSURE_CFG_FAMILY[@]}"}; do
-        unset "CLOSURE_CFG_FAMILY[$k]"
-    done
-    for k in ${CLOSURE_CFG_FAMILY_GEN[@]+"${!CLOSURE_CFG_FAMILY_GEN[@]}"}; do
-        unset "CLOSURE_CFG_FAMILY_GEN[$k]"
-    done
-    for k in ${CLOSURE_CFG_WAIVER[@]+"${!CLOSURE_CFG_WAIVER[@]}"}; do
-        unset "CLOSURE_CFG_WAIVER[$k]"
-    done
+    for k in ${CLOSURE_CFG_SUBDIRS[@]+"${!CLOSURE_CFG_SUBDIRS[@]}"}; do unset "CLOSURE_CFG_SUBDIRS[$k]"; done
+    for k in ${CLOSURE_CFG_FLOOR[@]+"${!CLOSURE_CFG_FLOOR[@]}"}; do unset "CLOSURE_CFG_FLOOR[$k]"; done
+    for k in ${CLOSURE_CFG_FAMILY[@]+"${!CLOSURE_CFG_FAMILY[@]}"}; do unset "CLOSURE_CFG_FAMILY[$k]"; done
+    for k in ${CLOSURE_CFG_FAMILY_GEN[@]+"${!CLOSURE_CFG_FAMILY_GEN[@]}"}; do unset "CLOSURE_CFG_FAMILY_GEN[$k]"; done
+    for k in ${CLOSURE_CFG_WAIVER[@]+"${!CLOSURE_CFG_WAIVER[@]}"}; do unset "CLOSURE_CFG_WAIVER[$k]"; done
+    for k in ${CLOSURE_CFG_ENTRY[@]+"${!CLOSURE_CFG_ENTRY[@]}"}; do unset "CLOSURE_CFG_ENTRY[$k]"; done
     CLOSURE_CFG_ROOTS=()
     CLOSURE_CFG_XREF=()
     CLOSURE_CFG_BAD=0
@@ -485,8 +493,8 @@ closure_config_parse() {
 }
 
 # The declared roots and their subdirectory lists, in the same NAME=SUB,SUB shape
-# closure_check.sh already takes. This is what makes the committed declaration
-# the source of the declared candidate shape rather than a document nothing reads.
+# closure_check.sh already takes, which is what makes the committed declaration the
+# source of the declared candidate shape rather than a document nothing reads.
 closure_config_root_specs() {
     local root subs
     for root in ${CLOSURE_CFG_ROOTS[@]+"${CLOSURE_CFG_ROOTS[@]}"}; do

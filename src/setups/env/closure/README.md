@@ -8,7 +8,7 @@ implementation cannot get the domain wrong by reading the code instead.
 
 | Part | Content | In the digest |
 | --- | --- | --- |
-| `closure-config.txt` | the four declarations, one document | yes, and nothing else is |
+| `closure-config.txt` | the five declarations, one document | yes, and nothing else is |
 | the identity envelope | the document's digest, and the cplx commit that holds it | no, so the digest never covers itself |
 
 The envelope is NOT committed here, and cannot be: it names the commit SHA that
@@ -50,12 +50,21 @@ unresolved cross-references all fail closed.
 | `subdir` | `subdir\|<root-name>\|<subdir-name>` |
 | `floor` | `floor\|<lookup-name>\|<location>` |
 | `family` | `family\|<family-name>\|<soname-glob>\|<generations>` |
+| `entrypoint` | `entrypoint\|<location>` |
 | `waiver` | `waiver\|<lookup-name>\|<owning-requirement>` |
 
 Ordering is significant for `root` and for nothing else: those records are the
 loader's order and `python` comes first. A `subdir` names a declared root, a
 `waiver` names a member the floor declares, and a `location` other than `any` is
 exactly `tools/<root-name>` with a declared root.
+
+An `entrypoint` location is a relative path of two to eight segments under
+`tools/<declared-root>`, and every shipped ELF at or under it is a runtime entry
+point. The set is DECLARED and never derived: the loading mechanism at issue,
+the interpreter opening an extension module by path, leaves no static trace, so
+a heuristic over `PT_INTERP`, a file name or a permission bit would be wrong in
+both directions. It feeds the unreferenced finding and nothing else, so an
+incomplete list widens that report rather than refusing anything.
 
 ## Self-describing is not the same as authoritative
 
@@ -79,7 +88,9 @@ caught by the two parties that have it.
 ## Ownership
 
 The floor, the declared family list and the waiver list are established by
-`docs/v0.27.0/issue.v0.27.0.toolchain-runtime-closure.md`. A later requirement
+`docs/v0.27.0/issue.v0.27.0.toolchain-runtime-closure.md`, and the entry-point
+list by design decision Q13 of
+`docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md`. A later requirement
 may add, change or remove an entry only by saying so in its own document:
 `python-sqlite-support` removes the sqlite waiver rather than the floor entry,
 and `tools-archive-rebuild` may add an entry if the rebuilt payload introduces

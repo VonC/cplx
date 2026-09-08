@@ -1,9 +1,10 @@
 CPLX-CLOSURE/1
 # The v0.27.0 runtime-closure declaration, and the whole of it: the tool roots
 # with their declared immediate subdirectories, the floor with its required
-# locations, the declared families with their permitted generation counts, and
-# the active waivers. Its identity is the SHA-256 of these exact bytes, these
-# comment lines included. See README.md beside this file.
+# locations, the declared families with their permitted generation counts, the
+# declared entry-point locations, and the active waivers. Its identity is the
+# SHA-256 of these exact bytes, these comment lines included. See README.md
+# beside this file.
 root|python
 root|git
 subdir|python|root
@@ -22,4 +23,12 @@ floor|libssl.so.3|any
 floor|libsqlite3.so.0|tools/python
 family|binutils-bfd|libbfd-*.so|1
 family|binutils-opcodes|libopcodes-*.so|1
+entrypoint|tools/python/current/bin
+entrypoint|tools/python/root/usr/bin
+entrypoint|tools/python/current/lib/python3.13/lib-dynload
+entrypoint|tools/python/current/lib/python3.13/site-packages
+entrypoint|tools/git/current/bin
+entrypoint|tools/git/current/libexec/git-core
+entrypoint|tools/git/root/usr/bin
+entrypoint|tools/git/root/usr/sbin
 waiver|libsqlite3.so.0|python-sqlite-support
