@@ -1,0 +1,628 @@
+Harness: docs/v0.27.0/verify.closure-check.sh --step 4, then the same file at
+         --step 3, --step 2, --step 1, --step 0 and with no --step, then
+         docs/v0.27.0/verify.relocation-rpath.sh --step 3 for the preserved
+         surface.
+Target: RHEL 9.8 (Plow), bash 5.1.8(1)-release
+        readelf: GNU readelf version 2.35.2-72.el9
+        dd: dd (coreutils) 8.32
+        sha256sum: coreutils 8.32
+Captured: 2026-09-08, by hand, over ssh, from a copy of the repository subset
+          under /tmp on the build host. RE-CAPTURED after round 2 of the code
+          review, against the bytes the reviewer repaired there: each earlier
+          capture described the version its reviewer received and is superseded
+          by this one. The subset is `git archive` of the INDEX TREE
+          d469c6f0fe2c4e6f8e1cc048faed3448f4d011eb, which is the tree the round 2
+          answer names as assessed, so the bytes measured here are the staged
+          bytes and not a working-tree copy of them. The two module digests were
+          compared on both ends before the run:
+          closure_rules.sh 779bab04a8c43050a8aa540c9f264a55fd7f2930c65348957d6a2c3cbd42bd2f,
+          verify.closure-check.sh c4528edb6287863eb7899635534cdbdeef7a116d633665282345335a9de84f5b.
+Purpose: Step 4 of the toolchain-runtime-closure plan, the three remaining
+         invariants and the aggregation. It adds the DECLARED FLOOR beside the
+         derived membership half, PROVIDER-AWARE VERSION COHERENCE, RULE 1 over
+         duplicate providers compared by content digest, RULE 2 over declared
+         family generations, the one UNDETERMINED producer, and the ENTRY-POINT
+         half of the unreferenced finding with the `entrypoint` record that
+         declares it.
+
+WHY THIS RUN NEEDS A HOST AT ALL. The fixtures are REAL ELF objects with real
+         dynamic AND version sections, generated on the host from a donor found
+         there. The Windows authoring host carries neither readelf nor a donor,
+         and no /etc/os-release, so the any-linux gate reports UNANSWERED by
+         design. The authoring-host half is recorded below, and it is a refusal
+         that names its three obligations, not a pass.
+
+WHAT THIS RUN PROVES, in the six claims step 4 makes.
+
+  THE DECLARED FLOOR IS A SECOND HALF AND NOT A SECOND SPELLING OF THE FIRST.
+         Its test is the REQUIRED-LOCATION COLUMN, so the three floor runs move
+         one thing at a time: the member absent, the member present under the
+         wrong root, the member present under the right one. The middle run is
+         the one only a location column can refuse, and it is the shape the
+         missing `libsqlite3.so.0` has.
+
+  EVERY RECORDED VERSION NEED GETS A RESULT. Coherence resolves through the
+         provider the object names, and the walk's own classification of the
+         selected file decides which result: an object that defines the node is
+         accepted, an object that does not is refused, a KNOWN NON-OBJECT is
+         refused because it defines nothing, and a file whose reading could not
+         be taken is UNDETERMINED naming it. The fourth condition, the
+         resolution staying inside the archive, is exercised by a provider
+         directory entry that is a symlink onto a file outside the prefix, and
+         it refuses while the derived half still resolves the same name.
+
+  RULE 1 IS READ IN THE LOADER'S TERMS AND HAS A POSITIVE CONTROL. Twenty lookup
+         names, each with two candidate paths resolving to ONE file through a
+         directory alias, are ACCEPTED without a digest being taken at all,
+         which is the measured archive's own shape. Beside it, two candidates of
+         DIFFERENT content are refused with both paths and both digests, and the
+         capture asserts those digests ARE the two files'.
+
+  RULE 2 IS DECLARED DATA AND SAYS SO. The measured `libbfd` shape, two
+         generations under one declared family, is refused; the same pair with
+         no family record is NOT EXAMINED, and that blind spot is asserted
+         rather than left as silence.
+
+  THE UNREFERENCED FINDING HAS TWO HALVES AND ONLY REPORTS THE CONJUNCTION WHEN
+         BOTH EXIST. A shipped program under a declared entry-point location is
+         NOT named by the combined finding, and the same object with the record
+         removed IS. The location is declared through the `current` alias while
+         the walk recorded the object under the version directory, so the pair
+         also measures that a declared location is RESOLVED rather than compared
+         as text. The edge half keeps its own name in both runs, and a run given
+         no bundle reports no conjunction at all.
+
+  UNDETERMINED MEANS ONE THING. A version need whose provider name resolves
+         nowhere is UNDETERMINED beside the derived half's refusal of that same
+         name; a provider whose reading could not be taken is UNDETERMINED in a
+         tree with no refusal at all, which still exits 5; and a declared
+         entry-point location that resolves through a link cycle leaves the same
+         shape. Those two runs are the aggregation rows a tree with a real
+         defect in it cannot produce.
+
+===== what round 1 of the code review changed =====
+
+The reviewer recommended changes-requested with two findings and a repair, and
+all three are closed against the bytes this capture measures.
+
+  R1, AND IT IS THE FINDING WORTH KEEPING. The received version SILENTLY SKIPPED
+         a version need whose selected provider carried no version-definition
+         record, on this requestor's reasoning that the derived half had already
+         accepted the same name as a FILE and that coherence should not reach a
+         verdict on the other half's evidence. The reviewer rejected the
+         exception: the design requires every recorded need to be answered
+         against the selected file, and a decision to permit unanswered needs is
+         the specification's to make rather than one code introduces. The repair
+         is the reader recording WHAT THE WALK DETERMINED about every file it
+         reached, `object`, `not-elf` or `unread`, so coherence can refuse a
+         known non-object as a fact and report an unavailable reading as an
+         UNDETERMINED without either half judging on the other's evidence. Six
+         corpus rows and three cases came with it.
+
+  R2, REPAIRED BY THE REVIEWER AND ACCEPTED HERE. Rule 1 deduplicated its
+         candidates to distinct resolved targets and then tested the ORIGINAL
+         CANDIDATE COUNT before entering the digest loop, so two aliases of one
+         file still took a digest and could turn UNDETERMINED when that digest
+         failed. The count is now the distinct targets.
+
+  R3, THE TWO SCANS. The definition lookup scanned a provider's whole definition
+         string per need, O(E*V), and the target dedupe scanned an accumulated
+         string per candidate, O(k^2), with no fixed bound on either. Both are
+         indexed now: a provider's nodes are indexed on first use and cached, and
+         the candidate and family dedupes are associative sets with an ordered
+         list beside them for the report.
+
+  THE HARNESS LINT OBLIGATION. The plan's departure table requires shellcheck
+         over changed scripts and `src/utils/lint_shell.sh` excludes `docs/`, so
+         the harness was never linted by the project gate. It is now clean: the
+         fourteen SC2016 diagnostics were intentional child-shell literals in
+         earlier-step helpers, and each is annotated where it is rather than
+         rewritten into parent expansion.
+
+===== what round 2 of the code review changed =====
+
+The reviewer recommended changes-requested with one substantive repair, made it
+itself, and left it staged. It is accepted whole, and this capture is the
+evidence the answer said was missing.
+
+  THE LIST CONSUMERS WERE STILL QUADRATIC, AND ROUND 1 ONLY FIXED THE HALF THAT
+         SHOWED. Round 1 replaced the two O(n^2) scans that the report and the
+         dedupes performed. What survived is the shape underneath them: every
+         loop over a newline-joined list took the head with `${rest%%$'\n'*}`
+         and rebuilt the tail with `${rest#*$'\n'}`, so each node COPIED THE
+         WHOLE REMAINING STRING. The indexing that round 1 added is O(1) per
+         lookup and the list it indexes from was still O(n^2) to walk, which is
+         why the cost stayed and the earlier reasoning did not catch it: the
+         quadratic term had moved, not gone.
+
+  THE REPAIR READS EACH LIST ONCE. Six loops in `closure_rules.sh` became
+         `while IFS= read -r … done <<< "$list"`: the floor's candidate scan, the
+         definition index, the coherence needs, rule 1's candidates, the
+         duplicate names and the entry-location records. A here-string is not a
+         pipe, so every loop still runs IN THE CURRENT SHELL and the counters,
+         the `seen`/`order` accumulators and the associative writes all persist;
+         each nested loop redirects its own stdin, so an inner list cannot
+         consume the outer one; and the `[ -z … ] && continue` guards absorb the
+         newline `<<<` appends. Cache keys, ordering, first-candidate resolution
+         and the distinct-target digest guard are untouched.
+
+  MEASURED ON THIS HOST, NOT ONLY ON THE AUTHORING ONE. The reviewer measured
+         the definition index on Windows. Re-measured here, on the target, over
+         a doubling series extended to 8,000 nodes, with every run asserting
+         that all n nodes were indexed:
+
+           nodes   received   repaired
+            1000      0.154      0.016
+            2000      0.594      0.028
+            4000      2.307      0.056
+            8000      9.096      0.064
+
+         The received column multiplies by about four per doubling, which is the
+         definition of the shape being described; the repaired column is linear
+         and flat enough at this size to be dominated by loop overhead. The
+         8,000-node row is the one the reviewer did not run, and it is the row
+         that makes the difference unarguable.
+
+  THE SUITE OUTPUT DID NOT MOVE, AND THAT IS THE POINT. This capture's step 4
+         section is byte-for-byte the previous one apart from the run's own
+         scratch and subset paths: the same 152 cases, the same 0 failures, and
+         the same harness, contract and corpus digests. A performance repair that
+         changed an assertion would be a behaviour change wearing a performance
+         label. This one changed no case, and step 3's 124 cases are green
+         against the same bytes.
+
+  EVERY SECTION BELOW WAS RE-RUN, not only the two the review made mandatory.
+         Steps 0, 1 and 2, the aggregate and the preserved surface were taken
+         again on this subset so that a capture dated 2026-09-08 does not carry
+         a single number from 2026-09-07. All of them reproduce: 62, 70, 91, 124
+         and 152 cases with no failures, the aggregate green through step 4 and
+         refusing steps 5 to 7, and the preserved surface at 104.
+
+  THE STEP 2 RUN FIRST REPORTED `git=unavailable`, AND THAT WAS THE RUN'S FAULT.
+         It came back at 76 cases and exit 5 against the recorded 91, because
+         `git` is not on this host's login PATH. It IS on the host: 2.52.0 under
+         `~/cplx/tools/git/bin`, which is what the step 2 capture already says
+         and what the re-run used to reproduce 91 and `git=supported`. The
+         earlier number was never in doubt; recording an absence read off one
+         shell's PATH is the mistake this project has already paid for once.
+
+===== what the fixture engine had to learn for this step =====
+
+The corpus gained EIGHTEEN rows and REVISED THREE, and the engine gained the two
+version-record mutations they need. Nothing here rebuilds an ELF: a version need
+and a version definition are fixed-size records pointing into `.dynstr`, so
+`verneed-set` repoints the donor's own need at a provider and a node and adds the
+matching DT_NEEDED, and `verdef-set` renames the donor's second definition. The
+offsets come from readelf's own first column rather than from a layout guess.
+
+ONE THING THE ENGINE GOT WRONG UNTIL THIS STEP, and it is worth the paragraph
+because it was a fixture defect that read as a code defect. The name slots are
+the last 256 bytes of `.dynstr`, and the corpus header called those bytes symbol
+names "which nothing in this effort reads". On this host that is false: the
+donor's VERSION DEFINITION names live there, and writing slot 1 renamed two
+definitions and emptied a third. Step 3 never noticed because nothing read those
+names. Step 4's reader does, and an object carrying a definition whose name
+cannot be read is one it must refuse, so the first run of this suite reported
+nine failures over a provider the checker was right to refuse.
+
+The repair is in the engine and not in the reader: a generated object now carries
+ONLY the version records its row asks for, and none of the donor's. Every donor
+copy clears both version section counts, and the two version verbs set the count
+they need back. That also makes every coherence count in this capture exact
+rather than donor-dependent, and it is why step 3's trees now carry no version
+records at all and its 124 cases are unchanged.
+
+===== the step 4 suite =====
+
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 4 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /bin/sed
+  preflight/grep                                 PASS  /bin/grep
+  preflight/sort                                 PASS  /bin/sort
+  preflight/uniq                                 PASS  /bin/uniq
+  preflight/mkdir                                PASS  /bin/mkdir
+  preflight/rm                                   PASS  /bin/rm
+  preflight/chmod                                PASS  /bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  rhel 9.8
+  host/any-linux                                 PASS  rhel 9.8
+
+== capability gate: readelf sha256sum assoc
+  capability/readelf/in-domain                   PASS  yes
+  capability/readelf                             NOTE  supported: /bin/readelf answered -d -V over /bin/bash
+  capability/sha256sum/in-domain                 PASS  yes
+  capability/sha256sum                           NOTE  supported: /bin/sha256sum digested the empty input correctly
+  capability/assoc/in-domain                     PASS  yes
+  capability/assoc                               NOTE  supported: bash 5.1.8(1)-release, an associative assignment read back its own value
+
+== step 4 topology: the invariants live where the boundary puts them
+  step4/topology/rules-declared-commands         PASS
+  step4/topology/config-declared-commands        PASS
+  step4/topology/reader-declared-commands        PASS
+  step4/topology/undetermined-defined-once       PASS  1
+  step4/topology/undetermined-has-no-second-producer PASS  1
+  step4/topology/rules-holds-no-exit             PASS
+  step4/topology/checker-holds-no-invariant-verdict PASS
+  step4/topology/checker-calls-closure_floor_check PASS  yes
+  step4/topology/checker-calls-closure_coherence_check PASS  yes
+  step4/topology/checker-calls-closure_rule1_duplicates PASS  yes
+  step4/topology/checker-calls-closure_rule2_families PASS  yes
+  step4/topology/checker-calls-the-combined-finding PASS  yes
+
+== step 4 grammar: the entry-point record, and its four refusals
+  step4/grammar/committed-parses                 PASS  0|
+  step4/grammar/committed-declares-entry-points  PASS  8
+  step4/grammar/undeclared-root                  PASS  1|REFUSED|3|cross-reference|entrypoint-root names the undeclared root perl
+  step4/grammar/outside-the-tools-tree           PASS  1|REFUSED|3|domain|entry-location: opt/python/bin
+  step4/grammar/one-segment-location             PASS  1|REFUSED|3|domain|entry-location: tools
+  step4/grammar/duplicate-location               PASS  1|REFUSED|4|duplicate|entrypoint: tools/python/bin
+
+== step 4 fixtures: donors validated, every mutation asserted
+  step4/fixture/shared-donor-validated           PASS  yes
+  step4/fixture/program-donor-validated          PASS  yes
+  step4/fixture/donors                           NOTE  shared /usr/lib64/libz.so.1, 1 needs, 4 version nodes
+  step4/fixture/control/donor-demands-no-cplx-node PASS  no
+  step4/fixture/control/donor-defines-no-cplx-node PASS  no
+
+== step 4 floor: the declared half, and its location column
+  step4/fixture/floor-member-absent              PASS  ok
+  step4/fixture/floor-member-elsewhere           PASS  ok
+  step4/floor/exit-code                          PASS  1
+  step4/floor/counts                             PASS  2 declared, 2 refused
+  step4/floor/absent-member-named                PASS  REFUSED|floor|libcplxfloor.so.1|any
+  step4/floor/location-member-named              PASS  REFUSED|floor|libcplxsql.so.0|tools/python
+  step4/floor/refusal-is-final                   PASS  yes
+  step4/fixture/floor-member-present             PASS  ok
+  step4/floor/control/location-satisfied         PASS  2 declared, 1 refused
+  step4/floor/control/only-the-absent-member-remains PASS  yes
+  step4/floor/control/all-present-accepted       PASS  0
+  step4/floor/control/none-refused               PASS  2 declared, 0 refused
+
+== step 4 aggregation: an unexpected directory suppresses nothing
+  step4/fixture/scope-unexpected-toolsubdir      PASS  ok
+  step4/aggregation/unexpected-exit-code         PASS  1
+  step4/aggregation/unexpected-counted           PASS  1
+  step4/aggregation/floor-still-computed         PASS  2 declared, 0 refused
+  step4/aggregation/scope-refusal-is-named       PASS  yes
+
+== step 4 coherence: the provider the object names
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/coherence-provider-defines       PASS  ok
+  step4/fixture/coherence-need-defined           PASS  ok
+  step4/coherence/control/defined-need-accepted  PASS  0
+  step4/coherence/control/counts                 PASS  1 needs, 1 answered, 0 refused
+  step4/fixture/coherence-need-undefined         PASS  ok
+  step4/coherence/undefined-exit-code            PASS  1
+  step4/coherence/undefined-counts               PASS  2 needs, 2 answered, 1 refused
+  step4/coherence/refusal-names-subject-need-and-provider PASS  REFUSED|coherence|<scratch>/step4/coherence/tools/python/current/lib/libcplxconsumer.so.1|CPLX_9.9|libcplxprovider.so.1
+  step4/coherence/refusal-names-the-selected-scope PASS  yes
+  step4/coherence/refusal-is-final               PASS  yes
+  step4/aggregation/floor-absent-refuses         PASS  1 declared, 1 refused
+  step4/aggregation/unrelated-needs-still-answered PASS  2 needs, 2 answered, 1 refused
+
+== step 4 coherence: a known non-object, and an object defining nothing
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/coherence-provider-not-an-elf    PASS  ok
+  step4/fixture/coherence-need-non-object        PASS  ok
+  step4/fixture/coherence-provider-no-definitions PASS  ok
+  step4/fixture/coherence-need-no-definitions    PASS  ok
+  step4/coherence/kinds-exit-code                PASS  1
+  step4/coherence/kinds-counts                   PASS  2 needs, 2 answered, 2 refused
+  step4/coherence/kinds-every-need-answered      PASS  yes
+  step4/coherence/non-object-refused             PASS  yes
+  step4/coherence/non-object-names-the-subject   PASS  REFUSED|coherence|<scratch>/step4/kinds/tools/python/current/lib/libcplxtextuser.so.1|CPLX_1.0|libcplxtext.so.1
+  step4/coherence/no-definitions-refused         PASS  REFUSED|coherence|<scratch>/step4/kinds/tools/python/current/lib/libcplxbareuser.so.1|CPLX_1.0|libcplxbare.so.1
+  step4/coherence/kinds-no-undetermined          PASS  0
+
+== step 4 coherence: a provider whose reading could not be taken
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/coherence-provider-unreadable    PASS  ok
+  step4/fixture/coherence-need-unreadable        PASS  ok
+  step4/coherence/unreadable-exit-code           PASS  5
+  step4/coherence/unreadable-no-refusal-anywhere PASS
+  step4/coherence/unreadable-counts              PASS  1 needs, 0 answered, 0 refused
+  step4/coherence/unreadable-is-undetermined     PASS  UNDETERMINED|coherence|<scratch>/step4/sealed/tools/python/current/lib/libcplxsealeduser.so.1
+  step4/coherence/unreadable-names-the-input     PASS  yes
+  step4/coherence/unreadable-counted-as-a-result PASS  1
+
+== step 4 coherence: a resolution that leaves the archive
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/provider-escapes-archive         PASS  ok
+  step4/fixture/coherence-resolution-leaves-archive PASS  ok
+  step4/coherence/escape-exit-code               PASS  1
+  step4/coherence/escape-names-subject-need-and-provider PASS  REFUSED|coherence|<scratch>/step4/escape/tools/python/current/lib/libcplxescape.so.1|CPLX_1.0|libcplxhostonly.so.1
+  step4/coherence/escape-names-the-outside-file  PASS  yes
+  step4/coherence/escape-membership-still-resolves PASS  0
+
+== step 4 duplicates: one file from several directories is one provider
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/provider-duplicate-identical     PASS  ok
+  step4/fixture/subject-identical-consumer       PASS  ok
+  step4/duplicates/identical-accepted            PASS  0
+  step4/duplicates/identical-counts              PASS  2 names, 1 multi-candidate, 0 refused
+
+== step 4 duplicates: two candidates, different content
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/provider-duplicate-different     PASS  ok
+  step4/fixture/duplicate-first-defines          PASS  ok
+  step4/fixture/duplicate-consumer-need          PASS  ok
+  step4/duplicates/two-paths-still-differ        PASS  differ
+  step4/duplicates/different-exit-code           PASS  1
+  step4/duplicates/different-counts              PASS  2 names, 1 multi-candidate, 1 refused
+  step4/duplicates/refusal-names-name-and-both-paths PASS  libcplxdup.so.1|<scratch>/step4/diff/tools/python/current/lib/libcplxdup.so.1|<scratch>/step4/diff/tools/git/current/lib/libcplxdup.so.1
+  step4/duplicates/refusal-digests-differ        PASS  differ
+  step4/duplicates/refusal-digests-are-the-files PASS  yes
+  step4/duplicates/refusal-is-final              PASS  yes
+  step4/duplicates/coherence-still-answers       PASS  1 needs, 1 answered, 0 refused
+
+== step 4 duplicates: the positive control, twenty names over one file
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/multi-candidate-population       PASS  ok
+  step4/fixture/dir-alias-directory              PASS  ok
+  step4/duplicates/positive-control-accepted     PASS  0
+  step4/duplicates/positive-control-counts       PASS  21 names, 20 multi-candidate, 0 refused
+  step4/duplicates/alias-only-needs-no-digest    PASS  0
+  step4/duplicates/alias-only-digest-not-called  PASS
+
+== step 4 families: declared generations, and the declared blind spot
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/family-two-generations           PASS  ok
+  step4/fixture/family-two-generations-peer      PASS  ok
+  step4/families/declared-exit-code              PASS  1
+  step4/families/declared-counts                 PASS  1 declared, 1 refused
+  step4/families/refusal-fields                  PASS  cplx-bfd|1|2
+  step4/families/refusal-names-both-generations  PASS  yes
+  step4/families/refusal-is-final                PASS  yes
+  step4/families/undeclared-accepted             PASS  0
+  step4/families/undeclared-not-examined         PASS  0 declared, 0 refused
+
+== step 4 entry points: the half a declaration supplies
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/entry-point-program              PASS  ok
+  step4/fixture/dir-alias-directory              PASS  ok
+  step4/entrypoints/declared-accepted            PASS  0
+  step4/entrypoints/declared-counts              PASS  1 declared, 1 subjects named, 0 reached by neither half
+  step4/entrypoints/program-not-in-the-finding   PASS
+  step4/entrypoints/edge-half-still-names-it     PASS  yes
+  step4/entrypoints/undeclared-counts            PASS  0 declared, 0 subjects named, 1 reached by neither half
+  step4/entrypoints/program-in-the-finding       PASS  UNREFERENCED|subject|<scratch>/step4/entry/tools/python/version/bin/cplxentry
+  step4/entrypoints/finding-is-not-a-refusal     PASS  0
+
+== step 4 aggregation: a version need with no provider file to read
+  step4/fixture/provider-donor-need              PASS  ok
+  step4/fixture/coherence-need-unresolved        PASS  ok
+  step4/aggregation/unresolved-exit-code         PASS  1
+  step4/aggregation/the-name-is-a-refusal        PASS  yes
+  step4/aggregation/the-need-is-undetermined     PASS  UNDETERMINED|coherence|<scratch>/step4/aggregate/tools/python/current/lib/libcplxlost.so.1
+  step4/aggregation/undetermined-names-the-provider PASS  yes
+  step4/aggregation/undetermined-counted         PASS  1
+
+== step 4 aggregation: an UNDETERMINED and no refusal is not a pass
+  step4/fixture/entry-point-cycle                PASS  ok
+  step4/aggregation/no-refusal-anywhere          PASS
+  step4/aggregation/still-not-a-pass             PASS  5
+  step4/aggregation/names-the-location-it-lacked PASS  UNDETERMINED|entry-point|tools/python/loop/a
+  step4/aggregation/verdict-is-undetermined      PASS  yes
+
+== step 4 verdict: partial, and it names what a run answered
+  step4/verdict/says-it-is-partial               PASS  yes
+  step4/verdict/names-the-bundle-state           PASS  yes
+  step4/verdict/no-bundle-is-said-so             PASS  yes
+  step4/verdict/no-bundle-no-combined-finding    PASS
+  step4/verdict/no-bundle-no-entry-points        PASS  0 declared, 0 subjects named, 0 reached by neither half
+
+== verdict
+  step        4
+  cases       152
+  failures    0
+  host        rhel 9.8
+  bash        5.1.8(1)-release
+  contract    <subset>/docs/v0.27.0/contract.closure-tools.txt
+  corpus      <subset>/docs/v0.27.0/fixtures.closure-corpus.txt
+  shipped-dir <subset>/docs/v0.27.0/../../src/setups/env/bin
+  harness      c4528edb6287863eb7899635534cdbdeef7a116d633665282345335a9de84f5b
+  contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+  corpus-sha   74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472
+  capability   readelf=supported
+  capability   sha256sum=supported
+  capability   assoc=supported
+
+OBJECTIVE MET for step 4
+
+The absolute scratch paths are folded to <scratch> above and the /tmp copy of the
+repository subset to <subset>; they are the harness's own temporary tree and the
+route this capture used, and neither is a property of the result.
+
+===== the three earlier steps, still green =====
+
+The checker gained four invariants and a record this step, so the three suites
+that were green before it are the assertion that nothing they cover moved. Step 3
+matters most: its trees are the ones the new invariants now walk over.
+
+  == verdict
+    step        0
+    cases       62
+    failures    0
+  OBJECTIVE MET for step 0
+
+  == verdict
+    step        1
+    cases       70
+    failures    0
+  OBJECTIVE MET for step 1
+
+  == verdict
+    step        2
+    cases       91
+    failures    0
+  OBJECTIVE MET for step 2
+
+  == verdict
+    step        3
+    cases       124
+    failures    0
+  OBJECTIVE MET for step 3
+
+ONE STEP 2 FIXTURE MOVED, AND IT IS RECORDED RATHER THAN FOLDED IN. The step 2
+gate section runs the checker over a bare tree with a good bundle and expects the
+run to PROCEED. That bundle's valid example declares two floor members, and with
+the declared floor implemented a tree carrying neither now refuses on the FLOOR
+rather than on the gate the section is about. The two members are planted in that
+tree, as plain files, because a provider is a file of that name and the floor asks
+for presence. No step 2 assertion was weakened and no step 2 case outcome moved;
+what changed is that a tree which carries a declaration now meets it.
+
+===== the aggregate, one step per process =====
+
+  === verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===
+    step 0  exit 0  OBJECTIVE MET for step 0
+    step 1  exit 0  OBJECTIVE MET for step 1
+    step 2  exit 0  OBJECTIVE MET for step 2
+    step 3  exit 0  OBJECTIVE MET for step 3
+    step 4  exit 0  OBJECTIVE MET for step 4
+    step 5  exit 5    no suite exists for step 5 yet
+    step 6  exit 5    no suite exists for step 6 yet
+    step 7  exit 5    no suite exists for step 7 yet
+
+  === aggregate: exit 5
+
+The aggregate is the red baseline of the three unfilled steps and nothing else.
+Step 0's refusal control needs a step whose suite does not exist, and step 4 was
+that step until this change; it is now step 5, which step 0's own 62 cases
+confirm above.
+
+===== the preserved surface =====
+
+Item 2's harness sources install_pkg.sh through the MAIN BOUNDARY seam and
+asserts the installer's own host-tool allowlist over its text. No step here
+changes an installer function, and this is the assertion rather than the
+expectation:
+
+  bash docs/v0.27.0/verify.relocation-rpath.sh --step 3
+       --target-capability docs/v0.27.0/capability.rhel-9.8.txt
+  cases 104, failures 0
+  OBJECTIVE MET for step 3
+
+  git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh   exit 0
+  rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh   prints nothing
+
+===== the authoring-host half =====
+
+  bash docs/v0.27.0/verify.closure-check.sh --step 4        exit 5
+
+  == host gate: any-linux
+    host/identity                                  NOTE  no readable /etc/os-release
+  == capability gate: readelf sha256sum assoc
+    capability/readelf                             NOTE  unavailable: type -P readelf found nothing on PATH
+    capability/sha256sum                           NOTE  supported
+    capability/assoc                               NOTE  supported: bash 5.3.9(1)-release
+  == step 4 topology: the invariants live where the boundary puts them
+    (all twelve PASS, because they read the tree and need no host)
+  == step 4 grammar: the entry-point record, and its four refusals
+    (all six PASS, because the parser needs no host either)
+  == step 4 fixtures: donors validated, every mutation asserted
+    (refused before the first fixture)
+
+  cases 28, failures 0, unanswered: the host identity, the readelf capability on
+  this host, the step 4 fixture generation
+
+  OBJECTIVE NOT MET for step 4: unanswered
+    /etc/os-release is not readable here, so this is not one of the two hosts
+    this effort validates on; re-run on the RHEL 9.8 build host or on the Debian
+    12 agent
+    readelf is not on PATH here; install it or re-run where it is, then repeat
+    this call
+    readelf and dd must both resolve here; re-run on a host that supplies them
+
+THE HARNESS DIGEST IS THE SAME ON BOTH HOSTS,
+c4528edb6287863eb7899635534cdbdeef7a116d633665282345335a9de84f5b, which is what
+says the green run above and this refusal are the same instrument answering two
+different hosts rather than two different files. The four modules, the corpus and
+the committed declaration were digested on both machines and are identical:
+closure_check.sh bea87f3d, closure_config.sh d0e77c4e, closure_elf.sh f632092f,
+closure_rules.sh addb48ef, closure-config.txt d1a487b5, corpus 74f2259e.
+
+===== the step 4 grep checks =====
+
+  rg -n 'closure_result_undetermined' src/setups/env/bin/closure_*.sh
+
+  ONE DEFINITION AND SIX CALL SITES, all in closure_rules.sh, and no second
+  producer: the harness case `step4/topology/undetermined-has-no-second-producer`
+  counts the printf sites of that verdict in the module and requires exactly one,
+  which is the property the criterion is about rather than the raw occurrence
+  count.
+
+  bash src/utils/lint_shell.sh
+    lint_shell: 48 tracked scripts
+    lint_shell: clean
+
+  shellcheck docs/v0.27.0/verify.closure-check.sh
+    exit 0, no diagnostic
+
+The harness lint is the plan's departure-table obligation over changed scripts,
+and it was missing from round 1's validation set because `src/utils/lint_shell.sh`
+excludes `docs/` by design. Round 1 of the review named that omission; the command
+is in the set now and it passes.
+
+===== line budget, measured against the plan's advisory estimates =====
+
+  file                                     before  after  body  band
+  src/setups/env/bin/closure_check.sh          636    650   379  550-650, at risk
+  src/setups/env/bin/closure_config.sh         637    645   444  550-650, at risk
+  src/setups/env/bin/closure_elf.sh            432    479   217  below 550, safe
+  src/setups/env/bin/closure_rules.sh          266    635   357  550-650, at risk
+  docs/v0.27.0/verify.closure-check.sh        3084   3969  2662  harness, not deployed
+  docs/v0.27.0/fixtures.closure-corpus.txt     204    310    56  data, no budget
+  src/setups/env/closure/closure-config.txt     25     34    28  data, no budget
+
+FOUR VARIANCES, ALL RECORDED RATHER THAN ARGUED AWAY.
+
+`closure_rules.sh` was estimated at 220 to 300 lines and is 635. It now holds
+five invariants, the two report halves, the physical-path resolver, the digest
+and definition caches and the UNDETERMINED producer, which is what "ALL FOUR
+INVARIANTS" costs when each carries the paragraph that says why it is written the
+way it is. The round 1 repairs were paid for by tightening step 4's own prose and
+by rewriting the one step 3 paragraph the amendment made stale, which said no
+step scheduled the entry-point declaration. Round 2 then took it from 650 to 635:
+six hand-rolled list walks became six `read` loops, and the fifteen lines are
+what the manual head-and-tail slicing cost. The reduction is a side effect of the
+performance repair rather than a budget exercise, which is the only reason it is
+worth recording here.
+
+`closure_config.sh` was in no step 4 checkpoint at all, because the plan's
+addendum predates the 2026-09-07 amendment that put the entry-point record here.
+The record cost 30 lines and the file was already at 637, so it would have landed
+at 667. What made room was TRIMMING PROSE THAT THE SAME FILE ALREADY STATES AT
+ITS OWN CODE SITE: the header's three-parties paragraph, which
+`closure_envelope_check` and `closure_config_authority_check` each state where
+they are, the digest-domain paragraph the README owns and the header already
+points at, and five one-line tightenings. The reset function's five identical
+three-line loops became five one-line loops, which is a table of six identical
+operations rather than a rewrite. Nothing was removed that this file was the only
+place to read.
+
+`closure_check.sh` was estimated at plus 30 to 50 and is plus 14. The additions
+are the five invariant calls, six summary rows, the refusal helper and the sixth
+verdict line; what paid for them is the same kind of trimming, and the stale
+paragraph that said the run answered "the derived membership half, and no other
+invariant" had to be rewritten anyway.
+
+`verify.closure-check.sh` was estimated at plus 250 to 350 and is plus 885. The
+step 4 suite is 448 lines over eleven trees, and the engine gained the two
+version-record mutations, the section-header count writer, the multi-candidate
+population, the two-path digest asserts and the fourteen intentional-quoting
+annotations the harness lint obligation required.
+
+A FORWARD NOTE FOR STEP 5, and it repeats the one step 3 left, with two review
+rounds behind it. Step 5 adds the waiver outcomes to `closure_rules.sh`,
+estimated at plus 60 to 90, and that file is now at 635: the round 2 repair
+bought 15 lines, which is a quarter of the smallest estimate and does not change
+the answer. `closure_check.sh` is at 650 with no headroom at all and step 5 adds
+the packaging gate's entrance to it. The responsibility to move is the REPORT: the summary block and the verdict
+lines in `closure_check.sh` are formatting over counts other modules produce.
+Moving it is a topology decision rather than an implementer's, and the topology
+forbids a fifth module, so it is a plan question to settle before step 5 writes
+code rather than after. Round 1 of the code review reached the same conclusion
+independently and left the decision with its owner.
