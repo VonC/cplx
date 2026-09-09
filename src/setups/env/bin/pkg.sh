@@ -37,12 +37,16 @@ fi
 # in order, so a consuming project can inject its own exclusion rules
 # without forking this script (my-project does: see its
 # tools/pkg_pdfs.sh overlay).
-PKG_USAGE="Usage: $0 <folder_name> [--add <item>]... [-- <tar args...>]"
+PKG_USAGE="Usage: $0 <folder_name> [--closure-gate] [--add <item>]... [-- <tar args...>]"
 TARGET_FOLDER=""
 EXTRA_ITEMS=()
 EXTRA_TAR_PARAMS=()
+CLOSURE_GATE=0
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        --closure-gate)
+            CLOSURE_GATE=1
+            ;;
         --add)
             if [ -z "$2" ]; then
                 fatal "--add requires an item argument. $PKG_USAGE" 1
@@ -69,6 +73,30 @@ while [ "$#" -gt 0 ]; do
 done
 if [ -z "$TARGET_FOLDER" ]; then
     fatal "$PKG_USAGE" 1
+fi
+
+# THE SELECTOR IS TOTAL, WHICH IS WHY THERE ARE TWO REFUSALS AND NOT ONE. The
+# gate is entered when and only when `--closure-gate` is present, and both
+# corners where the flag and the target disagree are errors rather than
+# defaults:
+#
+#   the flag with any other target has NO CONTRACT. This gate stages a
+#   configuration that declares the toolchain's roots, floor and entry points;
+#   applied to another payload it would judge that payload against a
+#   declaration written for this one.
+#
+#   the target `tools` WITHOUT the flag is the run this requirement exists to
+#   gate, and letting it through by omission is exactly the failure the flag was
+#   chosen to make impossible. A quietly ungated toolchain archive is
+#   indistinguishable from a checked one once it leaves this account.
+#
+# Every other target with no flag behaves as it did before this effort and never
+# reaches the branch, which is the property `verify.install-pkg.sh` still holds.
+if [ "$CLOSURE_GATE" -eq 1 ] && [ "$TARGET_FOLDER" != "tools" ]; then
+    fatal "--closure-gate applies to the 'tools' payload only, and this run packages '$TARGET_FOLDER'. $PKG_USAGE" 1
+fi
+if [ "$CLOSURE_GATE" -eq 0 ] && [ "$TARGET_FOLDER" = "tools" ]; then
+    fatal "packaging 'tools' requires --closure-gate: an ungated toolchain archive is not producible here. $PKG_USAGE" 1
 fi
 
 # Destination for packages
@@ -126,6 +154,186 @@ fi
 # --sort=name                  : Ensures consistent file ordering for hash stability
 # -cf -                        : Output to stdout (pipe) instead of a file
 # gzip -n                      : Compresses without timestamp for hash stability
+# ================= THE CLOSURE GATE =================
+# Staging, checking and refusing, in that order and before any tar runs.
+#
+# THE GATE IS KEYED TO THE SELECTOR, NEVER TO THE BUNDLE'S PRESENCE. Once the
+# branch is entered, a missing source file, a failed copy or an absent staged
+# bundle is a REFUSAL, never a reason to skip the check. Deleting the bundle
+# cannot turn the gate off, which is the hole a bundle-presence trigger leaves.
+#
+# THE SOURCE IS THE DEPLOYED CPLX TREE, AND THIS ACCOUNT RESOLVES NOTHING.
+# An earlier version of this gate read every staged byte out of a Git commit,
+# on the reasoning that a dirty working tree must not ship a declaration nobody
+# reviewed. THE PREMISE WAS FALSE ON THE ONLY MACHINE THAT RUNS THIS: cplx
+# arrives on the build account as copied scripts, not as a clone; neither
+# `~/cplx/bin` nor `~/tools/bin` is inside a repository; and the one checkout
+# that happens to sit on that account is a year stale, so resolving from it
+# would have staged an old declaration while calling it authoritative.
+#
+# This file has never known anything about Git and does not learn now. The
+# envelope is a COMMITTED FILE beside the declaration, so nothing produces it on
+# the way here and nothing resolves a commit at deploy time. What this account
+# can prove locally is that the document and its envelope agree, which is
+# exactly what the agent proves and no more: a declaration and an envelope
+# edited TOGETHER are self-consistent and this gate ACCEPTS them. The binding
+# that catches that lives in publication, which resolves the configuration
+# itself and runs where cplx is.
+#
+# The declaration is found the way `echos` already is, one level up from this
+# script's own directory, because the deployed tree mirrors the repository:
+# `src/setups/env/<x>` arrives as `<cplx root>/<x>`.
+CLOSURE_SELF_DIR="${BASH_SOURCE[0]%/*}"
+if [ "$CLOSURE_SELF_DIR" = "${BASH_SOURCE[0]}" ]; then
+    CLOSURE_SELF_DIR="."
+fi
+CLOSURE_PAYLOAD_MODULES=(closure_check.sh closure_config.sh closure_elf.sh \
+    closure_report.sh closure_rules.sh)
+
+# One staged file, copied and then VERIFIED AGAINST ITS SOURCE. The verification
+# is a SECOND READ OF THE SOURCE compared with the destination, not a re-hash of
+# what was just written: what it has to catch is a truncated or partial write,
+# and a file compared with itself catches nothing.
+closure_stage_one() {
+    local src="$1" dest="$2" want="" got=""
+    if [ ! -f "$src" ]; then
+        fatal "closure gate: $src is not in the deployed cplx tree, so it cannot be staged." 3
+    fi
+    if ! cat -- "$src" > "$dest"; then
+        fatal "closure gate: $src could not be staged to $dest." 3
+    fi
+    want=$(sha256sum < "$src") || want=""
+    got=$(sha256sum < "$dest") || got=""
+    if [ -z "$want" ] || [ "$want" != "$got" ]; then
+        fatal "closure gate: the staged copy of $src does not match its source." 3
+    fi
+}
+
+# The digest the deployed envelope names, read in the shell because this file
+# depends on no parser and needs one field. The first `digest` record wins, so
+# an envelope that repeats the field cannot change the answer by appending.
+closure_envelope_digest() {
+    local envelope="$1" line="" found=""
+    while IFS= read -r line; do
+        case "$line" in
+            'digest|'*) [ -n "$found" ] || found="${line#digest|}" ;;
+        esac
+    done < "$envelope"
+    printf '%s' "$found"
+}
+
+closure_gate_run() {
+    local root="" srcdir="" target="" stage="" bindir="" module="" rc=0
+    local named="" computed=""
+    root=$(cd -- "$CLOSURE_SELF_DIR/.." 2>/dev/null && pwd -P) || root=""
+    if [ -z "$root" ]; then
+        fatal "closure gate: the cplx tree above $CLOSURE_SELF_DIR could not be resolved." 3
+    fi
+    srcdir="$root/closure"
+    if [ ! -d "$srcdir" ]; then
+        fatal "closure gate: no closure declaration is deployed at $srcdir, and the gate does not run without one." 3
+    fi
+
+    stage="$HOME/$TARGET_FOLDER/closure"
+    bindir="$HOME/$TARGET_FOLDER/bin"
+    # THE SOURCE AND THE DESTINATION MUST DIFFER. This script exists both in the
+    # deployed cplx tree and again inside the tools tree it packages, so a gated
+    # run started from the copy INSIDE the payload would read its declaration
+    # out of the directory it is about to write. That is not a misconfiguration
+    # to warn about: it is a run certifying its own output, so it refuses.
+    target=$(cd -- "$HOME/$TARGET_FOLDER" 2>/dev/null && pwd -P) || target="$HOME/$TARGET_FOLDER"
+    if [ "$root" = "$target" ]; then
+        fatal "closure gate: this pkg.sh lives inside '$TARGET_FOLDER', so its source is its own destination; run the gated packaging from the deployed cplx tree." 3
+    fi
+
+    # THE ENVELOPE IS VERIFIED, NOT WRITTEN. It is committed beside the
+    # declaration and travels with it; this account digests the document and
+    # requires the envelope to name that digest. That is a self-consistency
+    # check and not an authority one.
+    if [ ! -f "$srcdir/closure-config.txt" ] || [ ! -f "$srcdir/closure-envelope.txt" ]; then
+        fatal "closure gate: the deployed bundle at $srcdir is missing its declaration or its envelope." 3
+    fi
+    named=$(closure_envelope_digest "$srcdir/closure-envelope.txt")
+    computed=$(sha256sum < "$srcdir/closure-config.txt") || computed=""
+    computed="${computed%% *}"
+    if [ -z "$named" ] || [ -z "$computed" ] || [ "$named" != "$computed" ]; then
+        fatal "closure gate: the deployed declaration hashes to ${computed:-nothing} and its envelope names ${named:-nothing}." 3
+    fi
+
+    mkdir -p -- "$stage" "$bindir" \
+        || fatal "closure gate: cannot create the staging directories under $HOME/$TARGET_FOLDER." 3
+    # Reject aliases before registering cleanup paths: unlinking a destination
+    # reached through a directory symlink could otherwise remove a source file.
+    for module in closure-config.txt closure-envelope.txt; do
+        if [ "$srcdir/$module" -ef "$stage/$module" ]; then
+            fatal "closure gate: source and destination name the same bundle file: $module." 3
+        fi
+    done
+    for module in "${CLOSURE_PAYLOAD_MODULES[@]}"; do
+        if [ "$CLOSURE_SELF_DIR/$module" -ef "$bindir/$module" ]; then
+            fatal "closure gate: source and destination name the same module: $module." 3
+        fi
+    done
+    CLOSURE_STAGED=("$stage/closure-config.txt" "$stage/closure-envelope.txt")
+    for module in "${CLOSURE_PAYLOAD_MODULES[@]}"; do
+        CLOSURE_STAGED+=("$bindir/$module")
+    done
+
+    task "Closure gate: staging the deployed declaration from $srcdir"
+    closure_stage_one "$srcdir/closure-config.txt" "$stage/closure-config.txt"
+    closure_stage_one "$srcdir/closure-envelope.txt" "$stage/closure-envelope.txt"
+
+    # THE PAYLOAD COPIES, AND THEY ARE PAYLOAD. An operator debugging an
+    # installed tree can read them; nothing executes them to produce evidence,
+    # including when they are byte-identical to the authoritative copies. The
+    # checker run below is the deployed cplx tree's, not one of these.
+    for module in "${CLOSURE_PAYLOAD_MODULES[@]}"; do
+        closure_stage_one "$CLOSURE_SELF_DIR/$module" "$bindir/$module"
+    done
+
+    if [ ! -s "$stage/closure-config.txt" ] || [ ! -s "$stage/closure-envelope.txt" ]; then
+        fatal "closure gate: the staged bundle is absent or empty after staging." 3
+    fi
+
+    task "Closure gate: checking the tree the archive would carry"
+    bash "$CLOSURE_SELF_DIR/closure_check.sh" --prefix "$HOME" \
+        --installer "$CLOSURE_SELF_DIR/install_pkg.sh" \
+        --bundle "$stage" || rc=$?
+    case "$rc" in
+        0) task "Closure gate: the tree is closed, packaging continues" ;;
+        3)
+            # NOT A PASS AND NOT A REFUSAL. The archive is produced and it is a
+            # VALIDATION ARTIFACT; the boundary that acts on that is publication,
+            # which refuses it with no mode and no flag that permits one. Saying
+            # so here is a report, not permission.
+            task "Closure gate: an accepted exception carried this run, so the archive is a VALIDATION ARTIFACT and is not publishable"
+            ;;
+        *)
+            closure_gate_unstage
+            fatal "closure gate: the checker refused with status $rc, so no archive is produced." "$rc"
+            ;;
+    esac
+}
+
+# A REFUSAL LEAVES NOTHING BEHIND, so a later run cannot inherit a bundle it did
+# not stage and then be judged against it.
+closure_gate_unstage() {
+    local staged
+    for staged in ${CLOSURE_STAGED[@]+"${CLOSURE_STAGED[@]}"}; do
+        rm -f -- "$staged"
+    done
+}
+
+CLOSURE_STAGED=()
+if [ "$CLOSURE_GATE" -eq 1 ]; then
+    # Include source, write and verification failures, all of which may exit
+    # through fatal before the checker is reached. Register destinations before
+    # writing them so even a partially written module is removed.
+    trap 'if [ "$?" -ne 0 ]; then closure_gate_unstage; fi' EXIT
+    closure_gate_run
+fi
+# ====================================================
+
 task "Creating candidate archive..."
 if ! tar --sort=name "${EXCLUDE_PARAMS[@]}" -C "$HOME" -cf - "${ITEMS_TO_ARCHIVE[@]}" | gzip -n > "$TAR_PATH"; then
     fatal "Failed to create archive." 2
