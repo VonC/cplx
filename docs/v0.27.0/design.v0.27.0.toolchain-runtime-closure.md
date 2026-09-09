@@ -497,9 +497,25 @@ halves can no longer disagree.
 
 | Party | Has cplx access | Resolves the authoritative configuration | Checks | Refuses on |
 | --- | --- | --- | --- | --- |
-| packaging | yes | reads it at the commit it is about to name | the document it embeds is byte-identical to that source, and the envelope's digest is that document's | mismatch, or a source that is not a committed state |
+| packaging | NO, corrected in v0.27.0 step 5 | cannot; it verifies the envelope deployed with the declaration | the document it embeds hashes to the digest its envelope names | mismatch, or an absent declaration or envelope |
 | verification, Debian agent | no | cannot | the embedded document hashes to the digest its envelope names | absent, substituted or corrupted configuration |
 | publication, umbrella item 7 | yes | RESOLVES IT ITSELF, at the release commit being published, independently of anything the archive says | the archive's envelope digest equals the digest of the configuration publication resolved | any difference, and any active waiver |
+
+THE FIRST ROW WAS WRONG ABOUT A FACT, and step 5 corrected it against the
+account rather than against the document. Packaging runs on a build account that
+has NO cplx checkout: cplx arrives there as copied scripts, `pkg.sh` has never
+named Git in its life, and `install_pkg.sh` prunes `.git` as debris. The
+resolution that row described could not happen, and the only checkout on that
+account is a year stale, so performing it would have staged an old declaration
+while calling it authoritative.
+
+The correction costs nothing this design claimed, and the paragraph below is why:
+packaging's read was never the binding. The envelope is a COMMITTED FILE beside
+the declaration, and it travels with it; nothing resolves a commit at deploy
+time and nothing produces the envelope on the way. Packaging verifies it, which
+is the same check the second row already describes for the agent, and the commit
+the envelope names is a record of which reviewed version the declaration is
+rather than a check packaging can perform.
 
 THE THIRD ROW IS WHERE THE BINDING ACTUALLY LIVES. Round 2 was right that
 putting a bundle inside a tar prevents nothing: an authentic bundle can be
@@ -860,9 +876,9 @@ establishes.
 | the embedded document does not hash to the digest its envelope names | every host refuses, before any invariant runs | substitution or corruption in transit |
 | the bundle carries no configuration at all | every host refuses | absence is not a pass |
 | the envelope names a branch or a tag rather than a commit SHA | packaging refuses to produce it | only a commit SHA is immutable |
-| a floor entry deleted in the same edit that removes the payload, and the document re-hashed to match its own envelope | the Debian agent ACCEPTS, and packaging and publication both refuse | the paired edit, caught only where cplx is visible, and the agent's limit stated rather than hidden |
+| a floor entry deleted in the same edit that removes the payload, and the document re-hashed to match its own envelope | the Debian agent ACCEPTS, PACKAGING ACCEPTS since v0.27.0 step 5, and PUBLICATION refuses | the paired edit, caught only where cplx is visible, and packaging is not: it has no checkout, so it verifies the same self-consistency the agent does. Publication resolves the declaration itself and is where this is caught |
 | the bundle replaced with a different, internally consistent, authentic bundle | the Debian agent ACCEPTS it, and publication refuses on the digest it resolved itself | co-location binds nothing; publication's own resolution does |
-| the named cplx commit does not hold that configuration at that path | packaging and publication refuse | the source is a path at a commit, and both parties can read it |
+| the named cplx commit does not hold that configuration at that path | PUBLICATION refuses; packaging cannot see it | corrected in v0.27.0 step 5: the source is a path at a commit and only publication can read it, because packaging runs where there is no checkout |
 
 ### Evidence identity
 
