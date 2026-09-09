@@ -202,7 +202,7 @@ New validation files this effort creates, all under `docs/v0.27.0/`:
   synthetic ELF objects and tree shapes into its scratch directory.
 
 Nothing binary enters the repository, and nothing changes about what the archive
-carries beyond the configuration bundle Step 2 adds and the four payload
+carries beyond the configuration bundle Step 2 adds and the five payload
 checker modules Step 5 stages under `tools/bin/`.
 
 ## Line budget policy for v0.27.0 toolchain-runtime-closure
@@ -225,24 +225,25 @@ Step 1 and a grep in the shared checklist.
 
 ## Delivered script topology for v0.27.0 toolchain-runtime-closure
 
-Creating a source file is not delivering it. NINE production scripts exist by
+Creating a source file is not delivering it. TEN production scripts exist by
 the end of Step 7, and they do not all travel the same way, so the topology is
-fixed here rather than left to each step. The table's first nine rows are those
-nine scripts; the tenth row is the payload copies, which are not a tenth script
-but the four checker modules again, staged into the archive.
+fixed here rather than left to each step. The table's first ten rows are those
+ten scripts; the eleventh row is the payload copies, which are not an eleventh
+script but the five checker modules again, staged into the archive.
 
 | Script | Runs on | Where it is executed from | How it gets there |
 | --- | --- | --- | --- |
-| `closure_check.sh` | build account, and the Debian job | the cplx checkout on the build account; the pipeline workspace on the Debian job | present in cplx for packaging; delivered to the Debian workspace by the pipeline at the resolved cplx commit |
+| `closure_check.sh` | build account, and the Debian job | the DEPLOYED cplx tree on the build account; the pipeline workspace on the Debian job | present in cplx for packaging; delivered to the Debian workspace by the pipeline at the resolved cplx commit |
 | `closure_config.sh` | the same | the same | the same, sourced by `closure_check.sh` |
 | `closure_elf.sh` | the same | the same | the same, sourced by `closure_check.sh` |
+| `closure_report.sh` | the same | the same | the same, sourced by `closure_check.sh` |
 | `closure_rules.sh` | the same | the same | the same, sourced by `closure_check.sh` |
 | `closure_verify.sh` | the Debian job | the pipeline workspace, OUTSIDE the candidate archive | delivered by the pipeline at the resolved cplx commit, before the archive is opened |
 | `closure_observe_live.sh` | the foreign host | the same | the same, invoked by `closure_verify.sh` |
 | `closure_publish.sh` | publication host, umbrella item 7 | cplx only | never staged into the archive |
 | `closure_d10.sh` | build account | cplx only | item 7 consumes it from cplx |
 | `ci/deliver-closure-tools.sh` | the Debian job, first | the pipeline workspace | the pipeline runs it from the cplx checkout at the resolved commit; it is what PLACES the five authoritative copies, so it cannot itself be delivered by them, and it refuses rather than continuing when it cannot obtain them |
-| the embedded copies of `closure_check.sh`, `closure_config.sh`, `closure_elf.sh` and `closure_rules.sh` | an installed tree, for an operator | `<prefix>/tools/bin/`, the directory `install_pkg.sh` promotes its own entries into | all four staged into the archive by Step 5 for LATER OPERATOR DIAGNOSTICS only, and never executed to produce evidence |
+| the embedded copies of `closure_check.sh`, `closure_config.sh`, `closure_elf.sh`, `closure_report.sh` and `closure_rules.sh` | an installed tree, for an operator | `<prefix>/tools/bin/`, the directory `install_pkg.sh` promotes its own entries into | all five staged into the archive by Step 5 for LATER OPERATOR DIAGNOSTICS only, and never executed to produce evidence |
 
 NO SCRIPT THAT PRODUCES EVIDENCE COMES OUT OF THE ARCHIVE IT JUDGES. Round 2 of
 the review found the defect the first version of this table carried: staging
@@ -274,15 +275,35 @@ four modules were conditional on a measured count: `closure_elf.sh` and
 `closure_rules.sh` were created only if a budget required them, and
 `closure_scope.sh` and `closure_config.sh` were held in reserve without
 appearing in the table at all. A topology that can still change is not a
-contract. Step 1 creates all four checker files, each with its contract comment
-and nothing else, and the step that owns a responsibility fills its file:
+contract. Each checker file carries its contract comment from the step that
+creates it and nothing else, and the step that owns a responsibility fills it:
 
-| Module | Owns | Filled by |
-| --- | --- | --- |
-| `closure_check.sh` | the entry point, the run order, the scope derivation and classification, the report and the exit code | Steps 1 and 5 |
-| `closure_config.sh` | the grammar parser, the digest, the envelope check and the cplx-side resolution | Step 2 |
-| `closure_elf.sh` | the object reader and the provider index, with no verdict of its own | Step 3 |
-| `closure_rules.sh` | ALL FOUR INVARIANTS, the derived membership half included, the waiver outcomes and the UNDETERMINED producer | Steps 3, 4 and 5 |
+| Module | Owns | Created by | Filled by |
+| --- | --- | --- | --- |
+| `closure_check.sh` | the entry point, the run order, the scope derivation and classification, and the exit code | Step 1 | Steps 1 and 5 |
+| `closure_config.sh` | the grammar parser, the digest, the envelope check and the cplx-side resolution | Step 1 | Step 2 |
+| `closure_elf.sh` | the object reader and the provider index, with no verdict of its own | Step 1 | Step 3 |
+| `closure_report.sh` | THE REPORT ALONE: the summary block, the partial verdict, the refusal lines and the closing lines, with no verdict and no exit code of its own | Step 5 | Step 5 |
+| `closure_rules.sh` | ALL FOUR INVARIANTS, the derived membership half included, the waiver outcomes and the UNDETERMINED producer | Step 1 | Steps 3, 4 and 5 |
+
+THE FIFTH MODULE IS AN AMENDMENT, AND IT IS RECORDED AS ONE. Steps 3 and 4
+measured what the earlier four-module set costs: `closure_check.sh` reached the
+650-line ceiling and `closure_rules.sh` reached 635 with Step 5's waiver
+outcomes, an advisory 60 to 90 lines, still to be added. The rule below says a
+module at the ceiling moves a responsibility to the module that already owns
+its neighbours. THE REPORT HAS NO SUCH MODULE. It is formatting over counters
+that the reader, the rules module and the configuration module all produce, so
+it is downstream of every one of them and a neighbour of none, which is why two
+code-review rounds left it as a plan decision rather than an implementer's.
+
+This does not reintroduce what round 3 refused. What that finding forbade was a
+module set that a MEASUREMENT could still change: files created only if a budget
+required them. This table decides the set, unconditionally, before Step 5 writes
+code: there are five modules, `closure_report.sh` is one of them whatever any
+later count says, and no step may add a sixth by measuring its way to one. The
+amendment is dated by its `Created by` column, which is Step 5 rather than Step
+1 because Steps 0 to 4 shipped against the earlier table and are not rewritten
+to pretend otherwise.
 
 DERIVED MEMBERSHIP HAS ONE OWNER AND IT IS `closure_rules.sh`. Round 4 found
 Step 3 implementing it in `closure_check.sh` while this table assigned every
@@ -293,11 +314,14 @@ derived membership half in `closure_rules.sh`. `closure_check.sh` gains the call
 and nothing else.
 
 `closure_scope.sh` does not exist in any shape: scope derivation stays in
-`closure_check.sh`, which is where the run order that consumes it lives. No step
-carries conditional split guidance any more, because there is no conditional
-split left to guide; each step carries a budget it must stay inside, and a
-module that would exceed 650 is a signal to move a responsibility to the module
-that already owns its neighbours rather than to invent a fifth file.
+`closure_check.sh`, which is where the run order that consumes it lives, and
+that is the difference between it and the report. Scope derivation HAS a module
+that owns its neighbours; the report does not. No step carries conditional split
+guidance any more, because there is no conditional split left to guide; each
+step carries a budget it must stay inside, and a module that would exceed 650
+moves a responsibility to the module that already owns its neighbours. Only
+where no such module exists is the answer a new one, and then this table decides
+it once, for every later step, rather than the step that hit the ceiling.
 
 The staging mechanism is the one Step 5 adds for the configuration bundle,
 extended to `tools/bin/` for the payload copies only. A staging failure is a
@@ -305,6 +329,73 @@ pre-tar refusal, never a warning. The pipeline delivery of the authoritative
 copies is a separate mechanism with a separate failure: a Debian job that cannot
 obtain them refuses before it opens the archive, and never falls back to a copy
 it found inside.
+
+## THE BUILD ACCOUNT HAS NO CPLX CHECKOUT, and step 5 is where that was found
+
+Corrected during step 5, against the account itself rather than against the
+document. Every earlier statement in this plan and in the design that has
+PACKAGING resolving a configuration out of a Git commit assumed a cplx checkout
+on the machine that runs `pkg.sh`. There is none, and there never was:
+
+- cplx reaches that account as SCRIPTS COPIED FROM THE DEVELOPMENT MACHINE, not
+  as a clone. `~/cplx/bin` and `~/tools/bin` hold `pkg.sh`, and neither tree has
+  a `.git` of any kind.
+- the one checkout on the account, `~/cplx_repo`, is a year stale: its HEAD is
+  `6930be2` from 2025-08-24, a commit that is not even an object in the working
+  repository this effort is developed in. Resolving from it would have staged a
+  2025 declaration while reporting it as authoritative, which is worse than
+  staging the working tree.
+- `pkg.sh` HAS NEVER KNOWN ANYTHING ABOUT GIT. At `main` it carries no mention
+  of the word, and `install_pkg.sh` names `.git` exactly twice, both times to
+  PRUNE it, which is the installer stating that a deployed tree is not a
+  repository.
+
+WHAT THIS DOES NOT COST, and the design says so itself. Design Area 3's table
+gives packaging a cplx-side resolution, and the paragraph directly under that
+table says THE THIRD ROW IS WHERE THE BINDING ACTUALLY LIVES: publication
+resolving the configuration itself, at the release commit, independently of
+anything the archive says. Packaging's read was never the security boundary, so
+moving it off the build account weakens no stated guarantee.
+
+WHERE THE COMMIT IS RESOLVED INSTEAD. Nowhere at deploy time, and this wording
+replaces an earlier version of this paragraph that described a deploy-time
+resolver. The envelope is a COMMITTED FILE beside the declaration, written in
+the repository when the declaration changes and travelling to the build account
+the way every other cplx file travels. The build account VERIFIES it with
+`sha256sum` and nothing else. The commit the `source` line names is a RECORD of
+which reviewed version the declaration is, read by
+`closure_config_authority_check` where cplx exists, and never resolved here.
+
+The commit field stays in the envelope. On the build account it is printed and
+never resolved, but `closure_config_authority_check` consumes it where cplx
+exists, and it is the only statement an archive carries of WHICH reviewed
+version its policy is. Dropping it would cost that for no gain.
+
+### The envelope is a committed file, and that is all it needs to be
+
+WHAT THE ENVELOPE IS. Two facts beside the declaration inside the archive: the
+SHA-256 of `closure-config.txt`, and the path and commit those bytes came from.
+
+WHO IT IS FOR. The Debian verification agent, which has no cplx and therefore
+cannot compare the declaration against anything. The digest lets it detect a
+bundle that is absent, truncated or replaced with garbage, and that is the whole
+job. It does NOT detect a careful edit: someone who changes the declaration and
+recomputes the digest passes, which is why `closure_envelope_check` prints its
+own limit on every run, "internal consistency and NOT authority". Authority
+comes from publication, which resolves the configuration itself.
+
+SO IT IS COMMITTED, `src/setups/env/closure/closure-envelope.txt`, beside the
+declaration it describes. It travels to the build account the way every other
+cplx file travels, and packaging stages both and verifies that they agree. There
+is no producer to run, no deploy-time step, and no `git` anywhere on that
+account.
+
+THE MAINTENANCE RULE IS ONE LINE, AND THE HARNESS HOLDS IT: when the declaration
+changes, the envelope is regenerated. The step 5 suite asserts that the
+committed envelope's digest is the committed declaration's digest, so a
+declaration edited without its envelope is a failing case rather than an archive
+that ships a receipt for bytes it does not carry.
+
 
 ## Shared execution command checklist for all v0.27.0 toolchain-runtime-closure steps
 
@@ -695,7 +786,9 @@ that copies the logic fails immediately.
 None to decide here, and that is the point: the four modules and their
 responsibilities are the topology table's, they are created in this step, and no
 later step may add a fifth or move a responsibility without changing that table
-first. A module approaching 650 moves work to the module that already owns its
+first. STEP 5 EXERCISED THAT CLAUSE RATHER THAN BREAKING IT: it added
+`closure_report.sh` by amending the table before writing a line of it, which is
+the permitted route and the only one. A module approaching 650 moves work to the module that already owns its
 neighbours.
 
 ### Step 1 workflow timing readiness
@@ -780,9 +873,11 @@ Cases from the design's `Configuration authority` table:
 - the envelope names a branch or a tag rather than a commit SHA: packaging
   refuses to produce it;
 - a floor entry deleted in the same edit that removes the payload, re-hashed to
-  match its own envelope: the agent ACCEPTS, packaging and publication refuse.
-  This case is the point of the whole area and must be asserted from all three
-  sides, not only from the two that refuse;
+  match its own envelope: the agent ACCEPTS, PACKAGING ACCEPTS, and publication
+  refuses. Corrected in step 5, which found that packaging runs on an account
+  with no cplx checkout and therefore proves the same self-consistency the agent
+  does. This case is still the point of the whole area and must be asserted from
+  all three sides, but two of the three now accept and only publication refuses;
 - the bundle replaced with a different, internally consistent, authentic bundle:
   the agent ACCEPTS, and publication refuses on the digest it resolved itself.
   Publication's half lands in Step 5; this step asserts the agent's acceptance
@@ -1290,8 +1385,18 @@ produces exactly the archive it produces today plus the staged bundle. Cases in
   asserts that path rather than assuming it.
 - `src/setups/env/bin/closure_rules.sh` (existing, to be updated) with the
   waiver outcomes.
+- `src/setups/env/bin/closure_report.sh` (new, to be created), the fifth module
+  the amended topology declares. It receives the report `closure_check.sh`
+  carries today, unchanged in output: the summary block, the partial verdict,
+  the refusal lines and the closing lines.
+- `src/setups/env/bin/closure_check.sh` (existing, to be updated), which loses
+  the report to that module, keeps the run order and the exit code, and sources
+  the new module the way it already sources the other three.
 - `src/setups/env/bin/closure_publish.sh` (new, to be created), sourcing
-  `closure_config.sh` for the resolution and the digest.
+  `closure_config.sh` for the resolution and the digest. THIS one keeps the
+  cplx-side resolution, because the topology puts it in cplx only and it runs
+  where the repository is. Packaging and publication are on opposite sides of
+  that line, and only packaging was on the wrong side.
 - `docs/v0.27.0/verify.closure-check.sh` (existing, to be updated).
 
 OUT-OF-REPOSITORY CALLERS ARE A HANDOFF, NOT A SILENT BREAK. A consuming project
@@ -1407,14 +1512,44 @@ and a duplicate archive is still deduplicated by SHA1 to the previous file.
   the Step 5 test-first list, including a renamed target such as `tools2`, which
   must neither receive the gate nor be able to stand in for `tools`.
 - Staging is what that branch does first. It copies the configuration document,
-  the envelope and the four PAYLOAD checker modules, `closure_check.sh`,
-  `closure_config.sh`, `closure_elf.sh` and `closure_rules.sh`, into the target
-  folder, verifies every destination byte against its source, then calls the
-  checker, then tars. THE SOURCE IS THE RESOLVED COMMIT, NOT THE WORKING TREE:
-  the bytes staged are the bytes cplx holds at the commit the envelope names,
-  read at that commit, so a dirty working tree cannot ship a declaration nobody
-  reviewed. On a run that succeeds the staged files PERSIST in the packaged
-  tree, which is what puts them in the archive.
+  the envelope and the five PAYLOAD checker modules, `closure_check.sh`,
+  `closure_config.sh`, `closure_elf.sh`, `closure_report.sh` and
+  `closure_rules.sh`, into the target folder, verifies every destination byte
+  against its source, then calls the checker, then tars. On a run that succeeds
+  the staged files PERSIST in the packaged tree, which is what puts them in the
+  archive.
+- THE SOURCE IS THE DEPLOYED CPLX TREE, AND THE BUILD ACCOUNT RESOLVES NOTHING.
+  This is the correction the section above records: that account has no cplx
+  checkout, so staging reads the declaration, the envelope and the modules from
+  the deployed tree `pkg.sh` itself was deployed into, found the way it already
+  finds `echos`, one level up from its own directory. It VERIFIES the envelope
+  it was given, by digesting the document beside it, and it resolves no commit
+  and runs no `git`.
+- THE BUILD ACCOUNT PROVES SELF-CONSISTENCY AND NOTHING MORE, and this replaces
+  an earlier claim in this plan that it still held the anti-dirty-tree
+  guarantee. It does not. Packaging hashes the declaration and requires the
+  envelope beside it to name that digest, which is exactly what the Debian agent
+  proves and exactly as far as it goes: a declaration and an envelope edited
+  TOGETHER are self-consistent and packaging ACCEPTS them. Publication is where
+  that is caught, because it resolves the declaration itself at the release
+  commit and compares. Saying packaging still guarantees a reviewed declaration
+  would be claiming a check that no longer exists there.
+- THE ENVELOPE IS COMMITTED RATHER THAN PRODUCED, so nothing is written at
+  deploy time. It is a file beside the declaration in the repository, it travels
+  with everything else, and the suite asserts the committed pair agrees. The
+  wording this bullet replaced described a deploy-time producer that was never
+  needed once the envelope was read for what it is: a checksum whose consumer
+  cannot resolve anything.
+
+  What the earlier wording got right is only this: an envelope names the commit
+  its declaration came from, which is the one statement an archive carries about
+  WHICH reviewed version its policy is. That is a record, not a check.
+- THE STAGING SOURCE AND DESTINATION MUST DIFFER, and the run refuses when they
+  do not. `pkg.sh` exists in the deployed cplx tree and again inside the tools
+  tree it packages, so a gated run started from the copy INSIDE the payload
+  would take its source from the directory it is about to write. That is not a
+  configuration error to warn about; it is a run that would certify its own
+  output, so it refuses.
 - THE GATE IS KEYED TO THE SELECTOR, NOT TO THE BUNDLE'S PRESENCE: once the
   branch is entered, a missing source file, a failed copy or an absent staged
   bundle is a REFUSAL BEFORE `tar`, never a reason to skip the check. Deleting
@@ -1567,8 +1702,17 @@ and a duplicate archive is still deduplicated by SHA1 to the previous file.
 ### Step 5 completion criteria
 
 - `bash docs/v0.27.0/verify.closure-check.sh --step 5` green.
-- `bash docs/v0.27.0/verify.install-pkg.sh` still green, which is the suite that
-  owns `pkg.sh` behavior today.
+- `bash docs/v0.27.0/verify.install-pkg.sh --step 2` and `--step 3` still green,
+  which is the suite that owns `pkg.sh` behavior today. THE STEPS ARE NAMED
+  BECAUSE THE BARE FORM IS NOT A RUN: that harness refuses without a `--step`,
+  exiting 2 at its own preflight, and its `--step 1` deliberately encodes the
+  installer BEFORE the rsync-cp-fallback effort changed the call sites, so it
+  expects an engine this tree no longer selects. Neither says anything about
+  `pkg.sh`. The two steps that exist and exercise the current installer pass at
+  49 and 63 cases, and those are the regression this criterion is for: step 5 is
+  the first thing in this effort to modify `pkg.sh`, so the point is that
+  `--add`, the `--` passthrough, the SHA1 deduplication and the `latest` symlink
+  still behave as they did.
 - `bash src/utils/lint_shell.sh` green.
 - `rg -n 'closure_check' src/setups/env/bin/pkg.sh` shows the gate before the
   `tar` at the archive-creation site, and
@@ -1590,6 +1734,17 @@ and a duplicate archive is still deduplicated by SHA1 to the previous file.
 - `src/setups/env/bin/pkg_tools.sh`: before 18; one line changes.
 - `src/setups/env/bin/closure_rules.sh`: waiver handling adds an expected 60 to
   90 lines (advisory).
+- `src/setups/env/bin/closure_report.sh`: 0; below-550 safe at creation;
+  expected 120 to 170 lines (advisory), all of it moved rather than written.
+- `src/setups/env/bin/closure_check.sh`: before 650, AT the ceiling, which is
+  why the move happens in this step; expected minus 100 to 150 lines. It is the
+  one module this step is required to SHRINK, and the checkpoint records the
+  measured after-count rather than accepting the estimate.
+
+THE BUDGET IS A COMPLETION CRITERION HERE, NOT AN OBSERVATION. Two modules enter
+this step with no headroom, so the step is not done while either is over: the
+validation record carries the measured count of all five modules, and a count
+above 650 is a refusal to complete rather than a variance to explain.
 
 ### Step 5 module boundary
 
@@ -1598,6 +1753,14 @@ needs the configuration parser, the digest and the resolution and needs none of
 the invariants, so `closure_publish.sh` sources `closure_config.sh` alone. Every
 shipped script is counted here and the counts are recorded in the validation
 document, as a check against the budget rather than as a split decision.
+
+The report module is the other half of that proof, and it is a MOVE rather than
+a rewrite: the same lines print the same bytes, which is what lets the step 0 to
+step 4 suites stay green through a topology change and makes any output
+difference a defect rather than an expected consequence. `closure_report.sh`
+takes no verdict and no exit code with it. It prints what the run found;
+`closure_check.sh` still decides what the run returns, because the exit code is
+the checker's contract with `pkg.sh` and moving it would move the gate.
 
 ### Step 5 workflow timing readiness
 
@@ -1981,10 +2144,10 @@ rejected alternative.
 
 | Question | Decision | Where it applies | Alternatives rejected |
 | --- | --- | --- | --- |
-| Q01 | AUTHORITATIVE against PAYLOAD, with four checker modules created unconditionally at Step 1 and nine production scripts in total. The pipeline delivers the authoritative copies from the resolved cplx commit; the embedded copies are operator payload | Delivered script topology; Steps 1 to 6 files-involved, budgets and module boundaries | A1, per-step delivery decisions, which is how the round 2 defect entered; A2, everything travelling in the archive, which makes the archive certify itself and has no bootstrap; A3, the same trust boundary with a conditional module set, which left the deployment contract unknowable until Step 4; A5, no embedded copies, which strands an operator with no cplx access |
+| Q01 | AUTHORITATIVE against PAYLOAD, with FIVE checker modules created unconditionally, four at Step 1 and `closure_report.sh` added by the Step 5 topology amendment, and ten production scripts in total. The pipeline delivers the authoritative copies from the resolved cplx commit; the embedded copies are operator payload | Delivered script topology; Steps 1 to 6 files-involved, budgets and module boundaries | A1, per-step delivery decisions, which is how the round 2 defect entered; A2, everything travelling in the archive, which makes the archive certify itself and has no bootstrap; A3, the same trust boundary with a conditional module set, which left the deployment contract unknowable until Step 4; A5, no embedded copies, which strands an operator with no cplx access |
 | Q02 | Call `build_elf_rpath` in a status-tested subshell, mapping a source or call failure to the typed UNDETERMINED result | Step 1 behavior and completion criteria | B1, sourcing into the checker process, whose inherited `fatal` can exit a run that must report every invariant; B3, a `--print-scope` mode, which edits the installer three criteria forbid; B4, a second derivation with an equality case, the drift the design names |
 | Q03 | `readelf` only, pinned to `LC_ALL=C`, with an absent, non-zero or unparsable reader typed UNDETERMINED and the aggregate non-passing | Step 3 behavior, `closure_read_failed`; the host matrix | C2, a second `od` reader with no rule for which answer wins; C3, `od` only, the largest body of Bash in the effort written for a host nobody has; C4, pushing the dependency into another umbrella item this plan does not own |
-| Q04 | Two files at the fixed archive path `tools/closure/`, staged from the exact resolved commit, byte-verified before the tar, persisting on success and removed on refusal | Step 2 files and behavior; Step 5 staging | D2, one file with a header excluded from the digest, which reintroduces the normalisation Design Area 3 refuses; D3, `tools/etc/`, a directory that does not exist and says less; D4, `--add`, which ships the bundle outside the folder it describes |
+| Q04 | Two files at the fixed archive path `tools/closure/`, staged from the DEPLOYED cplx tree and verified against the committed envelope, byte-verified before the tar, persisting on success and removed on refusal | Step 2 files and behavior; Step 5 staging | D2, one file with a header excluded from the digest, which reintroduces the normalisation Design Area 3 refuses; D3, `tools/etc/`, a directory that does not exist and says less; D4, `--add`, which ships the bundle outside the folder it describes |
 | Q05 | An explicit `--closure-gate` flag as the only entrance, with the paired refusals that the flag with another target refuses and `tools` without the flag refuses | Step 5 behavior, test-first list and files-involved; `pkg_tools.sh` line 18 | E1, gating every target, which drives a consuming project to fork; E2, triggering on the bundle's presence, which lets a deletion switch the gate off; E4, an environment opt-in, which is not a gate |
 | Q06 | An explicitly supplied results root keyed by archive identity, complete-only occupancy through no-overwrite promotion, byte-identical results idempotent, a differing result retained under a conflict name and stopping publication | Step 6 behavior, `closure_verify_emit` | F2, one appended file, a scan rather than a lookup with interleaved writers; F3, beside the archive, the co-location the design refuses as a binding; F4, deferring to item 7 while Step 5 implements the consumer here |
 | Q07 | Mutate donor objects found on the host, after validating the donor's ELF class and section shape and asserting the mutated semantic result | Step 0 fixture corpus; Steps 3 and 4 cases | G2, hand-built hex nobody will review; G3, a compiler as a harness prerequisite on both hosts; G4, committed binary fixtures, which both earlier items refused |
