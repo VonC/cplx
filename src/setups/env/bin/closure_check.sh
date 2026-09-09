@@ -127,6 +127,17 @@ if [ -f "$CLOSURE_CHECK_DIR/closure_rules.sh" ]; then
     source "$CLOSURE_CHECK_DIR/closure_rules.sh"
 fi
 
+# The report, the fifth module of the amended topology, sourced last because it
+# READS what the other three produce and produces nothing they read. The guard
+# is the same as theirs, and its failure mode is the one that matters least: a
+# tree missing this module still reaches every verdict and every exit code, and
+# loses only the sentences that describe them. That asymmetry is the boundary
+# working, not a weakness in it.
+# shellcheck source=/dev/null
+if [ -f "$CLOSURE_CHECK_DIR/closure_report.sh" ]; then
+    source "$CLOSURE_CHECK_DIR/closure_report.sh"
+fi
+
 # Set by `closure_scope_observed`, read by its caller. A shell function cannot
 # return two values, and the pair here is load bearing: the value AND whether it
 # could be obtained at all.
@@ -478,11 +489,7 @@ closure_check_main() {
         fi
     done <<< "$results"
 
-    printf '\n== declared roots\n'
-    printf '  roots       %s\n' "${specs[*]}"
-    printf '  source      %s\n' "$rootsource"
-    printf '\n== typed results\n'
-    printf '%s\n' "$results"
+    closure_report_roots "${specs[*]}" "$rootsource" "$results"
 
     # THE SUBJECT PHASE, IN THE ORDER THE COST RULE FIXES: the provider index
     # first, then ONE walk of the tree, then the invariants over what the walk
@@ -531,49 +538,22 @@ closure_check_main() {
         fi
     fi
 
-    printf '\n== summary\n'
-    printf '  declared     %s\n' "$(closure_scope_line_count "$declared")"
-    printf '  observed     %s\n' "$(closure_scope_line_count "$observed")"
-    printf '  present      %s\n' "$present"
-    printf '  absent       %s\n' "$absent"
-    printf '  unexpected   %s\n' "$unexpected"
-    printf '  undetermined %s\n' "$undetermined"
-    printf '  providers    %s directories, %s names\n' "$providers" \
-        "${CLOSURE_PROVIDER_NAMES:-0}"
-    printf '  walk         %s\n' "$walk"
-    printf '  walked       %s files\n' "$walked"
-    printf '  subjects     %s ELF objects\n' "$subjects"
-    printf '  unread       %s objects, reported UNDETERMINED\n' "$unread"
-    printf '  edges        %s DT_NEEDED edges\n' "$edges"
-    printf '  refused      %s unresolvable DT_NEEDED\n' "$refused"
-    printf '  unreferenced %s subjects no edge resolves to\n' "$unreferenced"
-    printf '  unresolved   %s link chains, reported UNDETERMINED\n' "$unresolved"
-    printf '  floor        %s declared, %s refused\n' "${CLOSURE_RULES_FLOOR:-0}" "${CLOSURE_RULES_FLOOR_REFUSED:-0}"
-    printf '  coherence    %s needs, %s answered, %s refused\n' "${CLOSURE_RULES_NEEDS:-0}" "${CLOSURE_RULES_ANSWERED:-0}" "${CLOSURE_RULES_COHERENCE_REFUSED:-0}"
-    printf '  duplicates   %s names, %s multi-candidate, %s refused\n' "${CLOSURE_RULES_LOOKUPS:-0}" "${CLOSURE_RULES_MULTI:-0}" "${CLOSURE_RULES_RULE1_REFUSED:-0}"
-    printf '  families     %s declared, %s refused\n' "${CLOSURE_RULES_FAMILIES:-0}" "${CLOSURE_RULES_RULE2_REFUSED:-0}"
-    printf '  entrypoints  %s declared, %s subjects named, %s reached by neither half\n' "${CLOSURE_RULES_ENTRYPOINTS:-0}" "${CLOSURE_RULES_ENTRYSUBJECTS:-0}" "${CLOSURE_RULES_UNREACHABLE:-0}"
-    printf '  results      %s UNDETERMINED from the invariants\n' "${CLOSURE_RULES_UNDETERMINED:-0}"
-    # Said on every run, green ones included, and it names what a run ANSWERED so
-    # a declaration nobody read cannot read as an invariant nobody failed. No
-    # claim is made about runtime host fallback, which only a running process can
-    # show.
-    printf '  verdict is PARTIAL: scope, membership in both halves, coherence,\n'
-    printf '  duplicate providers and declared families, with the declared halves\n'
-    printf '  answered only where a bundle supplied them: bundle read %s\n' "$bundle_read"
+    # THE REPORT IS `closure_report.sh`'S AND THE EXIT CODE IS STILL THIS
+    # FILE'S. Every line below prints; every decision below stays here, because
+    # what this function returns is the checker's contract with `pkg.sh` and
+    # moving it would move the gate.
+    closure_report_summary_open \
+        "$(closure_report_line_count "$declared")" \
+        "$(closure_report_line_count "$observed")" \
+        "$present" "$absent" "$unexpected" "$undetermined"
+    closure_report_summary_walk "$providers" "$walk" "$walked" "$subjects" \
+        "$unread" "$edges" "$refused" "$unreferenced" "$unresolved"
+    closure_report_summary_invariants "$bundle_read"
 
-    # EVERY REFUSAL IS PRINTED, not the first one. Each invariant is independent,
-    # so a reader repairing an archive should see all of them rather than one per
-    # run; the exit code is the aggregate.
-    closure_check_refused SCOPE "$unexpected" 'undeclared directories in the observed loader scope' || verdict=1
-    closure_check_refused MEMBERSHIP "$refused" 'DT_NEEDED names resolving nowhere in the observed loader scope' || verdict=1
-    closure_check_refused FLOOR "${CLOSURE_RULES_FLOOR_REFUSED:-0}" 'declared floor members absent or outside their required location' || verdict=1
-    closure_check_refused COHERENCE "${CLOSURE_RULES_COHERENCE_REFUSED:-0}" 'version needs the selected provider does not satisfy' || verdict=1
-    closure_check_refused DUPLICATE "${CLOSURE_RULES_RULE1_REFUSED:-0}" 'lookup names whose candidates hold different content' || verdict=1
-    closure_check_refused FAMILY "${CLOSURE_RULES_RULE2_REFUSED:-0}" 'declared families over their permitted generation count' || verdict=1
+    closure_report_refusals "$unexpected" "$refused" || verdict=1
     if [ "$verdict" -ne 0 ]; then return 1; fi
     if [ "$undetermined" -ne 0 ]; then
-        printf '\nCLOSURE SCOPE UNDETERMINED: %s\n' "$CLOSURE_OBSERVED_REASON"
+        closure_report_undetermined SCOPE "$CLOSURE_OBSERVED_REASON"
         return 5
     fi
     # AN UNDETERMINED NEVER COUNTS TOWARD A GREEN. Nothing here refused, and the
@@ -582,53 +562,40 @@ closure_check_main() {
     # objects, because a walk that stopped early explains an empty inventory and
     # an inventory that is merely empty explains nothing.
     if [ "$subjects_ran" -eq 1 ] && [ "$walk" != "complete" ]; then
-        printf '\nCLOSURE WALK UNDETERMINED: %s\n' "$walk"
+        closure_report_undetermined WALK "$walk"
         return 5
     fi
     if [ "$unresolved" -ne 0 ]; then
-        printf '\nCLOSURE LINKS UNDETERMINED: link chains that did not resolve: %s\n' \
-            "$unresolved"
+        closure_report_undetermined LINKS \
+            "link chains that did not resolve: $unresolved"
         return 5
     fi
     if [ "$unread" -ne 0 ]; then
-        printf '\nCLOSURE OBJECTS UNDETERMINED: objects whose reading could not be taken: %s\n' \
-            "$unread"
+        closure_report_undetermined OBJECTS \
+            "objects whose reading could not be taken: $unread"
         return 5
     fi
     if [ "${CLOSURE_RULES_UNDETERMINED:-0}" -ne 0 ]; then
-        printf '\nCLOSURE RESULTS UNDETERMINED: invariant results whose input could not be obtained: %s\n' \
-            "$CLOSURE_RULES_UNDETERMINED"
+        closure_report_undetermined RESULTS \
+            "invariant results whose input could not be obtained: $CLOSURE_RULES_UNDETERMINED"
         return 5
     fi
-    printf '\nCLOSURE SCOPE OK: %s declared, %s present, %s absent, nothing undeclared\n' \
-        "$(closure_scope_line_count "$declared")" "$present" "$absent"
-    if [ "$subjects_ran" -eq 1 ]; then
-        printf 'CLOSURE MEMBERSHIP OK: %s edges over %s subjects all resolve, %s reached by no edge\n' \
-            "$edges" "$subjects" "$unreferenced"
-        printf 'CLOSURE INVARIANTS OK: %s floor members, %s version needs answered, %s multi-candidate names, %s families\n' \
-            "${CLOSURE_RULES_FLOOR:-0}" "${CLOSURE_RULES_ANSWERED:-0}" "${CLOSURE_RULES_MULTI:-0}" "${CLOSURE_RULES_FAMILIES:-0}"
+    # A RUN THAT REFUSED NOTHING AND WAS CARRIED BY AN ACCEPTED EXCEPTION IS NOT
+    # A PASS, and 3 is what says so. It comes AFTER every refusal and every
+    # UNDETERMINED on purpose: an exception cannot mask a refusal, and a question
+    # that stayed open is not an exception that was granted.
+    #
+    # This file reads a COUNT and does not know what raised it. The rules module
+    # owns what an exception is, which is what keeps the unexpected-root refusal
+    # above unwaivable by construction rather than by care: the scope refusal is
+    # counted into `verdict` and returns 1 long before this line is reached.
+    if [ "${CLOSURE_RULES_EXCEPTIONS:-0}" -ne 0 ]; then
+        closure_report_exceptions "$CLOSURE_RULES_EXCEPTIONS"
+        return 3
     fi
+    closure_report_ok "$(closure_report_line_count "$declared")" \
+        "$present" "$absent" "$subjects_ran" "$edges" "$subjects" "$unreferenced"
     return 0
-}
-
-# One refusal line per invariant that refused, and non-zero so the caller can
-# accumulate. The wording is the caller's because the report is this file's; the
-# invariants themselves print their typed results and no verdict.
-closure_check_refused() {
-    if [ "$2" -eq 0 ]; then return 0; fi
-    printf '\nCLOSURE %s REFUSED: %s: %s\n' "$1" "$3" "$2"
-    return 1
-}
-
-# Lines in a newline-separated list, counted in the shell because `wc` is not on
-# this effort's contract. An empty list is zero, not the one empty line a naive
-# count would report.
-closure_scope_line_count() {
-    local n=0 line
-    while IFS= read -r line; do
-        if [ -n "$line" ]; then n=$((n + 1)); fi
-    done <<< "${1-}"
-    printf '%s' "$n"
 }
 
 # --- MAIN BOUNDARY ---
