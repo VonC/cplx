@@ -15,4 +15,10 @@ if [ ! -f "${PKG_TOOLS_DIR}/pkg.sh" ]; then
     echo " FATAL 1 : [pkg_tools.sh] pkg.sh not found next to this script (${PKG_TOOLS_DIR})" >&2
     exit 1
 fi
-exec bash "${PKG_TOOLS_DIR}/pkg.sh" tools "$@"
+# THE ONE IN-SCOPE CALLER, so this is where the gate is switched on. `pkg.sh`
+# refuses the `tools` target without the flag, which makes this line the only
+# way to package the toolchain from this repository and stops the gate being
+# quietly omitted for the one run it exists for. A consuming project that
+# packages `tools` through its own overlay starts refusing until it adopts the
+# flag, which is the intended handoff rather than a silent break.
+exec bash "${PKG_TOOLS_DIR}/pkg.sh" tools --closure-gate "$@"
