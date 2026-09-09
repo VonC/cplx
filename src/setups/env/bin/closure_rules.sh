@@ -136,99 +136,8 @@ CLOSURE_RULES_UNREFERENCED=0
 # is no reset, for the reason the reader has none: one run is one process.
 declare -A CLOSURE_RULES_REACHED=()
 
-# The kernel's own SYMLOOP_MAX, so a chain a loader resolves this checker also
-# resolves, and a cycle still terminates.
-CLOSURE_RULES_LINK_HOPS=40
-CLOSURE_RULES_PARTS=()
 CLOSURE_RULES_UNRESOLVED=0
 
-# The PHYSICAL path of a selected provider, which is the path the walk recorded
-# for that file. Two things stand between the two, and only resolving both makes
-# the reachability answer right:
-#
-#   a DIRECTORY component may be a link. `tools/python/current -> python-3.13.9`
-#   is the alias layout this effort already reads, and the observed loader scope
-#   holds `current/lib` while the walk, which does not follow a symlinked
-#   directory, records the object under `python-3.13.9/lib`. A lookup of the
-#   whole selected path cannot apply a link that sits in a PREFIX of it.
-#   the FINAL component may be a link, the `libz.so.1 -> libz.so.1.2.11` soname
-#   shape, which is the same resolution applied at the end of the walk.
-#
-# So the path is rebuilt one component at a time and each prefix is resolved
-# while the link map names it, which handles both in one pass and in the right
-# order: a directory link has to be applied before the name inside it means
-# anything.
-#
-# The result is CACHED by input path. The distinct selected paths are bounded by
-# the distinct DT_NEEDED names, and each is resolved once however many edges
-# choose it, so this stays a lookup rather than the subject sweep it replaced.
-declare -A CLOSURE_RULES_PHYSICAL=()
-CLOSURE_RULES_PHYSICAL_RESULT=""
-
-closure_rules_split() {
-    local rest="$1" part
-    CLOSURE_RULES_PARTS=()
-    while [ -n "$rest" ]; do
-        part="${rest%%/*}"
-        if [ "$part" = "$rest" ]; then rest=""; else rest="${rest#*/}"; fi
-        if [ -n "$part" ]; then CLOSURE_RULES_PARTS+=("$part"); fi
-    done
-}
-
-closure_rules_physical() {
-    local path="$1" out="" part target steps=0 head=0
-    local pending=()
-
-    CLOSURE_RULES_PHYSICAL_RESULT=""
-    if [ -n "${CLOSURE_RULES_PHYSICAL[$path]:-}" ]; then
-        CLOSURE_RULES_PHYSICAL_RESULT="${CLOSURE_RULES_PHYSICAL[$path]}"
-        return 0
-    fi
-    closure_rules_split "$path"
-    pending=(${CLOSURE_RULES_PARTS[@]+"${CLOSURE_RULES_PARTS[@]}"})
-
-    # A HEAD INDEX rather than a shift, because rebuilding the queue for every
-    # component would make walking a path quadratic in its own length.
-    while [ "$head" -lt "${#pending[@]}" ]; do
-        part="${pending[$head]}"
-        head=$((head + 1))
-        case "$part" in
-            '.') continue ;;
-            '..')
-                # UP FROM WHERE THE RESOLUTION ACTUALLY IS, which is why the raw
-                # target is kept: a component before this one may have been a
-                # link that moved the directory `..` climbs out of.
-                out="${out%/*}"
-                continue ;;
-        esac
-        target="${CLOSURE_LINK_TARGET[$out/$part]:-}"
-        if [ -z "$target" ]; then
-            out="$out/$part"
-            continue
-        fi
-        steps=$((steps + 1))
-        if [ "$steps" -gt "$CLOSURE_RULES_LINK_HOPS" ]; then
-            # UNRESOLVED, AND NOTHING IS CACHED. A partially chased path is not
-            # the physical one, and storing it would answer later lookups with a
-            # location the file is not at.
-            return 1
-        fi
-        # The target's OWN components go back into the queue rather than being
-        # taken whole, because any of them may be a link too. An absolute target
-        # restarts the resolution from the root, which is what a link to an
-        # absolute path means.
-        closure_rules_split "$target"
-        case "$target" in
-            /*) out="" ;;
-        esac
-        pending=(${CLOSURE_RULES_PARTS[@]+"${CLOSURE_RULES_PARTS[@]}"} ${pending[@]+"${pending[@]:head}"})
-        head=0
-    done
-
-    CLOSURE_RULES_PHYSICAL["$path"]="$out"
-    CLOSURE_RULES_PHYSICAL_RESULT="$out"
-    return 0
-}
 
 closure_report_unreferenced_by_edge() {
     local path rest name selected
@@ -252,8 +161,8 @@ closure_report_unreferenced_by_edge() {
             # well as a symlinked final name, because the observed scope may
             # reach a provider through an alias directory while the walk
             # recorded it under the physical one.
-            if closure_rules_physical "$selected"; then
-                CLOSURE_RULES_REACHED["$CLOSURE_RULES_PHYSICAL_RESULT"]=1
+            if closure_elf_physical "$selected"; then
+                CLOSURE_RULES_REACHED["$CLOSURE_ELF_PHYSICAL_RESULT"]=1
             else
                 closure_result_undetermined resolution "$selected" \
                     'the link chain did not resolve within the cycle guard, so the file it names is unknown'
@@ -282,26 +191,120 @@ closure_report_unreferenced_by_edge() {
 CLOSURE_RULES_FLOOR=0
 CLOSURE_RULES_FLOOR_REFUSED=0
 
+# THE FLOOR ENTRY'S OWN TEST, in one function because two callers must not be
+# able to disagree about it. The floor half asks it to decide whether a declared
+# member is satisfied; the waiver half asks it to decide whether an exception has
+# expired. The design fixes that a waiver's removal condition IS "that floor
+# entry's own test succeeding", so a second copy of this test written for the
+# waiver would be a second definition of when a waiver dies.
+closure_floor_satisfied() {
+    local prefix="$1" name="$2" location path
+    location="${CLOSURE_CFG_FLOOR[$name]:-}"
+    if [ -z "$location" ]; then return 1; fi
+    while IFS= read -r path; do
+        if [ -z "$path" ]; then continue; fi
+        if [ "$location" = "any" ]; then return 0; fi
+        case "$path" in
+            "$prefix/$location/"*) return 0 ;;
+        esac
+    done <<< "${CLOSURE_PROVIDER_PATHS[$name]:-}"
+    return 1
+}
+
 closure_floor_check() {
-    local prefix="$1" name location path found
+    local prefix="$1" name location
 
     CLOSURE_RULES_FLOOR=0
     CLOSURE_RULES_FLOOR_REFUSED=0
     for name in ${CLOSURE_CFG_FLOOR[@]+"${!CLOSURE_CFG_FLOOR[@]}"}; do
         CLOSURE_RULES_FLOOR=$((CLOSURE_RULES_FLOOR + 1))
         location="${CLOSURE_CFG_FLOOR[$name]}"
-        found=0
-        while IFS= read -r path; do
-            if [ -z "$path" ]; then continue; fi
-            if [ "$location" = "any" ]; then found=1; break; fi
-            case "$path" in
-                "$prefix/$location/"*) found=1; break ;;
-            esac
-        done <<< "${CLOSURE_PROVIDER_PATHS[$name]:-}"
-        if [ "$found" -eq 1 ]; then continue; fi
+        if closure_floor_satisfied "$prefix" "$name"; then continue; fi
+        # AN ACTIVE WAIVER CHANGES WHAT THIS MEMBER'S ABSENCE MEANS, and nothing
+        # else about the run. The member is still absent and the exception is
+        # still reported, by `closure_waiver_validate` and under its own subject,
+        # so the absence is never silent. What it stops is the refusal, which is
+        # the whole of what the waiver buys.
+        if [ -n "${CLOSURE_CFG_WAIVER[$name]:-}" ]; then
+            continue
+        fi
         printf '%s|%s|%s|%s|%s\n' REFUSED floor "$name" "$location" \
             'no candidate of that name in the observed loader scope satisfies the required location'
         CLOSURE_RULES_FLOOR_REFUSED=$((CLOSURE_RULES_FLOOR_REFUSED + 1))
+    done
+    # THE DECLARED HALF INCLUDES ITS OWN EXCEPTIONS, which is why the validation
+    # below runs from here rather than from the entry point. Two reasons, and the
+    # second is the load-bearing one:
+    #
+    # they are one subject. A waiver's removal condition IS a floor entry's test,
+    # so a caller that could run the floor without its exceptions could report a
+    # member as refused while a live waiver carried it.
+    #
+    # AND THE ENTRY POINT MUST NOT KNOW. `closure_check.sh` states that the
+    # unexpected-root refusal is unwaivable BY CONSTRUCTION, and the harness
+    # measures that property by refusing the word in that file's code at all. A
+    # call from there would put it back. The entry point runs the declared half
+    # and reads a count of accepted exceptions; what an exception IS lives here.
+    closure_waiver_validate "$prefix"
+}
+
+# ---------------------------------------------------------------- the waivers ---
+# A WAIVER IS AN EXCEPTION WITH AN EXPIRY CONDITION, NOT A MUTE, so this function
+# produces three outcomes and the model itself is what fails in two of them.
+#
+#   UNKNOWN  the waiver names nothing the floor declares. The configuration's own
+#            cross-reference refuses this at parse time, and it is refused here
+#            too, because the parse-time check protects the DOCUMENT and this one
+#            protects the RUN: a bundle that reached a checker without passing the
+#            envelope check must not get a free exception out of it.
+#   STALE    the removal condition is already satisfied, tested with the floor
+#            entry's own test. A dead exception must not outlive its cause.
+#   ACTIVE   the member is genuinely absent and the exception stands. The run
+#            produces no refusal from it and the archive it gates becomes a
+#            VALIDATION ARTIFACT, which publication refuses.
+#
+# A TOOL ROOT CANNOT BE NAMED HERE AND THAT IS NOT AN OMISSION. Round 2 of the
+# design review refused a second subject type for roots, so an undeclared root
+# stays unwaivable and a waiver naming one is simply a waiver naming something the
+# floor does not declare, which is UNKNOWN by the first rule above.
+CLOSURE_RULES_WAIVERS=0
+CLOSURE_RULES_WAIVED=0
+CLOSURE_RULES_WAIVER_REFUSED=0
+
+# The count the ENTRY POINT reads to decide that a run passed with an accepted
+# exception. It is named for what it is rather than for what produces it: the
+# checker owns the run order and the exit code and has no waiver concept of its
+# own, which is the property that keeps the unexpected-root refusal unwaivable.
+# Waivers are the only thing in this effort that raises it.
+CLOSURE_RULES_EXCEPTIONS=0
+
+closure_waiver_validate() {
+    local prefix="$1" member owner
+
+    CLOSURE_RULES_WAIVERS=0
+    CLOSURE_RULES_WAIVED=0
+    CLOSURE_RULES_WAIVER_REFUSED=0
+    for member in ${CLOSURE_CFG_WAIVER[@]+"${!CLOSURE_CFG_WAIVER[@]}"}; do
+        CLOSURE_RULES_WAIVERS=$((CLOSURE_RULES_WAIVERS + 1))
+        owner="${CLOSURE_CFG_WAIVER[$member]}"
+        if [ -z "${CLOSURE_CFG_FLOOR[$member]:-}" ]; then
+            printf '%s|%s|%s|%s|%s\n' REFUSED waiver "$member" "$owner" \
+                'unknown: the waiver names nothing the declared floor carries, and waivers name floor members only'
+            CLOSURE_RULES_WAIVER_REFUSED=$((CLOSURE_RULES_WAIVER_REFUSED + 1))
+            continue
+        fi
+        if closure_floor_satisfied "$prefix" "$member"; then
+            printf '%s|%s|%s|%s|%s\n' REFUSED waiver "$member" "$owner" \
+                'stale: the floor entry this waiver names is satisfied, so its removal condition has already been met'
+            CLOSURE_RULES_WAIVER_REFUSED=$((CLOSURE_RULES_WAIVER_REFUSED + 1))
+            continue
+        fi
+        # PRINTED ON EVERY RUN, green ones included. An exception nobody sees is
+        # a mute, which is the thing this model exists not to be.
+        printf '%s|%s|%s|%s|%s\n' WAIVED waiver "$member" "$owner" \
+            'active: the floor member is absent and this waiver carries it, so the archive is a validation artifact'
+        CLOSURE_RULES_WAIVED=$((CLOSURE_RULES_WAIVED + 1))
+        CLOSURE_RULES_EXCEPTIONS=$((CLOSURE_RULES_EXCEPTIONS + 1))
     done
 }
 
@@ -372,12 +375,12 @@ closure_coherence_check() {
                 continue
             fi
             selected="${selected%%$'\n'*}"
-            if ! closure_rules_physical "$selected"; then
+            if ! closure_elf_physical "$selected"; then
                 closure_result_undetermined coherence "$path" \
                     "the version need $node names $provider at $selected, whose link chain did not resolve within the cycle guard"
                 continue
             fi
-            physical="$CLOSURE_RULES_PHYSICAL_RESULT"
+            physical="$CLOSURE_ELF_PHYSICAL_RESULT"
             case "$physical" in
                 "$root"/*) ;;
                 *)
@@ -427,22 +430,6 @@ closure_coherence_check() {
 CLOSURE_RULES_LOOKUPS=0
 CLOSURE_RULES_MULTI=0
 CLOSURE_RULES_RULE1_REFUSED=0
-declare -A CLOSURE_RULES_DIGEST=()
-CLOSURE_RULES_DIGEST_RESULT=""
-
-# The digest of one file, cached by path. It travels through a global because a
-# command substitution would run this in a subshell and lose the cache with it.
-closure_rules_digest() {
-    local out=""
-    CLOSURE_RULES_DIGEST_RESULT="${CLOSURE_RULES_DIGEST[$1]:-}"
-    if [ -n "$CLOSURE_RULES_DIGEST_RESULT" ]; then return 0; fi
-    out=$(sha256sum -- "$1" 2>/dev/null) || return 1
-    out="${out%% *}"
-    if [ -z "$out" ]; then return 1; fi
-    CLOSURE_RULES_DIGEST["$1"]="$out"
-    CLOSURE_RULES_DIGEST_RESULT="$out"
-    return 0
-}
 
 # One lookup name, its candidates collected in scope order and reduced to DISTINCT
 # RESOLVED TARGETS before any digest is taken.
@@ -454,12 +441,12 @@ closure_rule1_name() {
     while IFS= read -r path; do
         if [ -z "$path" ]; then continue; fi
         count=$((count + 1))
-        if ! closure_rules_physical "$path"; then
+        if ! closure_elf_physical "$path"; then
             closure_result_undetermined duplicates "$name" \
                 "the candidate $path did not resolve within the cycle guard, so its content could not be compared"
             return 0
         fi
-        physical="$CLOSURE_RULES_PHYSICAL_RESULT"
+        physical="$CLOSURE_ELF_PHYSICAL_RESULT"
         # A SET AND AN ORDER, not a string scanned per candidate: one lookup, and
         # the report keeps scope order.
         if [ -n "${seen[$physical]:-}" ]; then continue; fi
@@ -474,19 +461,19 @@ closure_rule1_name() {
     for entry in "${order[@]}"; do
         physical="${entry%%|*}"
         path="${entry#*|}"
-        if ! closure_rules_digest "$physical"; then
+        if ! closure_elf_digest "$physical"; then
             closure_result_undetermined duplicates "$name" \
                 "the candidate $path resolves to $physical, whose content digest could not be taken here"
             return 0
         fi
         if [ -z "$first" ]; then
             first="$path"
-            first_digest="$CLOSURE_RULES_DIGEST_RESULT"
+            first_digest="$CLOSURE_ELF_DIGEST_RESULT"
             continue
         fi
-        if [ "$CLOSURE_RULES_DIGEST_RESULT" = "$first_digest" ]; then continue; fi
+        if [ "$CLOSURE_ELF_DIGEST_RESULT" = "$first_digest" ]; then continue; fi
         printf '%s|%s|%s|%s|%s|%s|%s|%s\n' REFUSED duplicates "$name" \
-            "$first" "$first_digest" "$path" "$CLOSURE_RULES_DIGEST_RESULT" \
+            "$first" "$first_digest" "$path" "$CLOSURE_ELF_DIGEST_RESULT" \
             'two candidate paths for one lookup name hold different content'
         CLOSURE_RULES_RULE1_REFUSED=$((CLOSURE_RULES_RULE1_REFUSED + 1))
         return 0
@@ -614,12 +601,12 @@ closure_report_unreferenced() {
 
     for location in ${CLOSURE_CFG_ENTRY[@]+"${!CLOSURE_CFG_ENTRY[@]}"}; do
         CLOSURE_RULES_ENTRYPOINTS=$((CLOSURE_RULES_ENTRYPOINTS + 1))
-        if ! closure_rules_physical "$prefix/$location"; then
+        if ! closure_elf_physical "$prefix/$location"; then
             closure_result_undetermined entry-point "$location" \
                 'the declared entry-point location did not resolve within the cycle guard'
             continue
         fi
-        CLOSURE_RULES_ENTRY_DIRS="$CLOSURE_RULES_ENTRY_DIRS$CLOSURE_RULES_PHYSICAL_RESULT"$'\n'
+        CLOSURE_RULES_ENTRY_DIRS="$CLOSURE_RULES_ENTRY_DIRS$CLOSURE_ELF_PHYSICAL_RESULT"$'\n'
     done
 
     for path in ${CLOSURE_ELF_PATHS[@]+"${CLOSURE_ELF_PATHS[@]}"}; do
