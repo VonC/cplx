@@ -14,7 +14,7 @@
 # candidate shape and the observed loader scope, step 2, the configuration bundle
 # and its authority, and step 3, the static subject set and the derived
 # membership half. Step 1 asserts three things a later reader should not have to
-# reconstruct: that the four checker modules were created together and no fifth
+# reconstruct: that the five checker modules exist and no sixth
 # exists, that the observed scope is `build_elf_rpath`'s own output byte for byte
 # rather than a copy of its logic, and that a loader scope which could not be
 # observed becomes a typed UNDETERMINED instead of an empty one. Step 2 asserts
@@ -113,7 +113,7 @@ while [ "$#" -gt 0 ]; do
         # them beside it under the pipeline's own layout.
         --contract) CONTRACT_ARG="${2:-}"; shift 2 ;;
         --corpus) CORPUS_ARG="${2:-}"; shift 2 ;;
-        # Where the nine production scripts live once they exist. Step 0 ships
+        # Where the ten production scripts live once they exist. Step 0 ships
         # none, so this resolves to a directory holding no `closure_*.sh` and the
         # mechanical assertion reports zero subjects rather than inventing one.
         --shipped-dir) SHIPPED_DIR_ARG="${2:-}"; shift 2 ;;
@@ -452,7 +452,7 @@ step_filled_by() {
 
 step_suite_exists() {
     case "$1" in
-        0|1|2|3|4) return 0 ;;
+        0|1|2|3|4|5) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -467,6 +467,7 @@ SHIPPED_SCRIPTS=(
     "$SHIPPED_DIR/closure_check.sh"
     "$SHIPPED_DIR/closure_config.sh"
     "$SHIPPED_DIR/closure_elf.sh"
+    "$SHIPPED_DIR/closure_report.sh"
     "$SHIPPED_DIR/closure_rules.sh"
     "$SHIPPED_DIR/closure_verify.sh"
     "$SHIPPED_DIR/closure_observe_live.sh"
@@ -487,9 +488,14 @@ SHIPPED_VOCABULARY=(
     'case' 'esac' 'in' 'function' 'return' 'exit' 'break' 'continue'
     'local' 'export' 'unset' 'shift' 'eval' 'set' 'trap' 'echo' 'printf'
     'source' 'cd' 'pwd' 'read' 'test' 'true' 'false' 'declare' 'typeset'
-    'let' 'readonly' 'command' 'exec' 'builtin' 'type' 'times' 'wait'
+    'let' 'readonly' 'command' 'exec' 'builtin' 'type' 'times' 'wait' 'kill'
     'umask' 'getopts' 'hash'
 )
+# `kill` joined `wait` in step 5, and for the same reason `wait` was here first:
+# both are job-control BUILTINS, the interpreter rather than the host, and the
+# publication transaction needs the pair. It ends a hasher that is still blocked
+# on a FIFO nobody opened, which is a liveness obligation `wait` alone cannot
+# meet: awaiting a participant is not the same as guaranteeing it can be awaited.
 
 # Command-position words: the first token of a line, and any token introduced by
 # a pipe, a list operator, a command substitution, or a `then`, `do` or `else`
@@ -530,7 +536,7 @@ shipped_function_names() {
 # quietly widen to a script that never sources it, and a file never exempts
 # itself twice.
 #
-# The candidate set is the installer plus the four checker modules, which is the
+# The candidate set is the installer plus the five checker modules, which is the
 # whole of what a shipped script here may source. Widening it later means adding
 # a source relationship the topology does not have.
 shipped_sourced_functions() {
@@ -824,8 +830,16 @@ step0_suite() {
     # The contract is ENUMERATED, so the harness asserts the whole set rather
     # than sampling it. Round 7 of the plan review refused a version that claimed
     # this coverage while listing seven of the thirteen commands.
+    #
+    # FIFTEEN SINCE STEP 5, and the two it added are here rather than in the
+    # step 5 suite on purpose: this line is the review gate the contract's own
+    # header describes, so a command a later step needs has to be added to the
+    # contract AND to this expectation, where a reader of step 0 sees it. The
+    # four adapter operations are deliberately NOT among them: they are supplied
+    # by the caller, not by the host, and `closure_publish.sh` carries refusing
+    # defaults for all four so a run without an adapter refuses.
     chk "step0/contract/enumerated-set" \
-        "cat chmod cp find git ln mkfifo mktemp readelf rm sha256sum tar tee" \
+        "bash cat chmod cp find git ln mkdir mkfifo mktemp readelf rm sha256sum tar tee" \
         "$(oneline "$(contract_entry_names | sort)")"
 
     mkdir -p -- "$fix" || { fail "step0/contract/fixture" "cannot create the fixture directory"; return; }
@@ -878,7 +892,12 @@ step0_suite() {
             absent="${absent:+$absent }${path##*/}"
         fi
     done
-    chk "step0/mechanical/topology-is-nine" "9" "${#SHIPPED_SCRIPTS[@]}"
+    # TEN SINCE STEP 5, and the number is asserted rather than counted loosely
+    # because it is the whole point of a fixed topology: the table names every
+    # script the deployment carries, so a script added without a row is a finding
+    # here rather than a surprise on a bare account. Step 5's amendment added
+    # `closure_report.sh` to that table, and this is the line that agrees with it.
+    chk "step0/mechanical/topology-is-ten" "10" "${#SHIPPED_SCRIPTS[@]}"
     note "step0/mechanical/shipped-present" "$present of ${#SHIPPED_SCRIPTS[@]}"
     if [ -n "$absent" ]; then note "step0/mechanical/shipped-absent" "$absent"; fi
 
@@ -907,11 +926,14 @@ step0_suite() {
 }
 
 # ---------------------------------------------------------- the checker modules ---
-# The four modules the delivered script topology fixes, in the order the topology
-# table lists them. Step 1 creates all four; the file name that must NOT exist in
-# any shape is named beside them, because "no fifth module" is a property of the
-# tree rather than of a table nobody re-reads.
-CLOSURE_MODULES=(closure_check.sh closure_config.sh closure_elf.sh closure_rules.sh)
+# The five modules the delivered script topology fixes, in the order the topology
+# table lists them. Step 1 creates four of them and step 5 adds `closure_report.sh`,
+# which the plan's amended table declares unconditionally rather than on a measured
+# count; the file name that must NOT exist in any shape is named beside them,
+# because "no `closure_scope.sh`" is a property of the tree rather than of a table
+# nobody re-reads. The forbidden name did not change when the set grew: scope
+# derivation still has a module that owns its neighbours, and the report did not.
+CLOSURE_MODULES=(closure_check.sh closure_config.sh closure_elf.sh closure_report.sh closure_rules.sh)
 CLOSURE_FORBIDDEN_MODULE=closure_scope.sh
 
 # The step that FILLS each module, parallel to the array above and taken from the
@@ -921,7 +943,7 @@ CLOSURE_FORBIDDEN_MODULE=closure_scope.sh
 # every other module must still have none. Hand-listing the empty ones made step
 # 1 the place a later step had to remember to edit, and a forgotten edit there
 # reads as a step 1 regression rather than as the step that filled the file.
-CLOSURE_MODULE_FILLED_BY=(1 2 3 3)
+CLOSURE_MODULE_FILLED_BY=(1 2 3 5 3)
 
 # The BODY of a module: its lines that are neither blank nor a comment. A module
 # created with its contract comment and nothing else has a body of zero, and that
@@ -1000,7 +1022,7 @@ step1_suite() {
 
     # --- the module set, fixed and unconditional -------------------------------
     mkdir -p -- "$stubs" || { fail "step1/scratch" "cannot create the stub directory"; return; }
-    section "step 1 topology: four modules, created together, no fifth"
+    section "step 1 topology: five modules, the fifth added by step 5, no sixth"
     for module in "${CLOSURE_MODULES[@]}"; do
         chk "step1/topology/$module/exists" "yes" \
             "$( [ -f "$SHIPPED_DIR/$module" ] && echo yes || echo no )"
@@ -1736,7 +1758,17 @@ step2_suite() {
         > "$tree/tools/python/root/lib/libc.so.6"
     printf 'not an ELF: the floor member the gate tree carries\n' \
         > "$tree/tools/python/root/lib/libsqlite3.so.0"
-    cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+    # AND THE WAIVER GOES, for the same reason the members were planted. Step 5
+    # made a waiver whose member is PRESENT a stale one, and the valid example
+    # waives `libsqlite3.so.0` while the line above plants it, so the unmutated
+    # example would now refuse here on the WAIVER rather than on the gate this
+    # section is about. Dropping the record is the smaller change than leaving
+    # the member out: this tree exists to carry a declaration it MEETS, and a
+    # gate section that measured an active exception would be measuring step 5.
+    # The shared example keeps the record, because the step 2 cases that mutate
+    # it are the ones the record is there for.
+    step2_mutate "$dir/valid.txt" "$bundle/closure-config.txt" \
+        'waiver|libsqlite3.so.0|python-sqlite-support' ''
     d1=$(config_digest "$bundle/closure-config.txt")
     step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" \
         "0123456789abcdef0123456789abcdef01234567"
@@ -1762,7 +1794,13 @@ step2_suite() {
     # An explicit --root still wins over the bundle, which is what keeps every
     # step 1 case driving the classification from a shape the document does not
     # carry.
-    cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
+    # THE SAME BUNDLE THIS SECTION ESTABLISHED, restored rather than replaced by
+    # the shared example: the envelope above carries the digest of the
+    # waiver-stripped document, so copying the unmutated one back would refuse on
+    # the digest and this case would report a bundle failure as a root-precedence
+    # failure.
+    step2_mutate "$dir/valid.txt" "$bundle/closure-config.txt" \
+        'waiver|libsqlite3.so.0|python-sqlite-support' ''
     run_checker "$checker" --prefix "$tree" --installer "$installer" --bundle "$bundle" \
         --root "python=current"
     chk "step2/gate/explicit-root-wins" "yes" \
@@ -3350,7 +3388,7 @@ step4_run_without_digest() {
     CHECKER_OUT=$("${BASH:-bash}" -c '
         source "$1" || exit 91
         shift
-        closure_rules_digest() {
+        closure_elf_digest() {
             printf "__UNEXPECTED_DIGEST__\n"
             return 1
         }
@@ -3382,7 +3420,7 @@ step4_suite() {
     if [ ! -f "$rules" ] || [ ! -f "$config" ] || [ ! -f "$reader" ]; then
         fail "step4/topology/modules-exist" "a checker module is missing"
         unanswered "every step 4 case" \
-          "  fill the four checker modules under src/setups/env/bin, then repeat this call"
+          "  fill the five checker modules under src/setups/env/bin, then repeat this call"
         return
     fi
     chk "step4/topology/rules-declared-commands" "" \
@@ -3808,6 +3846,1557 @@ step4_suite() {
     chk "step4/verdict/no-bundle-no-entry-points" \
         "0 declared, 0 subjects named, 0 reached by neither half" "$(report_row entrypoints)"
 }
+
+# ------------------------------------------------------------------- step 5 ---
+# THE GATE, THE WAIVERS AND THE PUBLICATION BOUNDARY. Step 4 finished the
+# invariants and nothing called them: `pkg.sh` tarred with no gate in front of
+# it, so every invariant implemented so far was unreachable from a real
+# packaging run. This suite asserts the three things that changes.
+#
+# THE SELECTOR IS TESTED AT ALL FOUR CORNERS, each its own case, because they
+# fail for four different reasons and one case would assert only the corner it
+# planted. The two that refuse are the ones that make the selector TOTAL rather
+# than optional: a flag with no contract for the payload it was given, and the
+# one payload this requirement exists to gate being packaged without it.
+#
+# THE WAIVER MODEL IS TESTED BY THE FAILURES IT MUST ITSELF PRODUCE. An exception
+# that cannot expire is a mute, so the stale case is the one that matters most:
+# it plants the waived member and requires the run to refuse the WAIVER rather
+# than pass the floor.
+#
+# PUBLICATION IS TESTED AS AN ORDER. A stripped configuration must fail at step 1
+# and never reach step 4, because "no active waivers" returned by an absence is
+# the failure the order exists to prevent.
+#
+# THE TRANSACTION IS PROVED BY WHAT IT LEAVES BEHIND ON FAILURE, not by what it
+# does on success, so the stub uploader is ASKED WHAT IT HAS PUBLISHED rather
+# than being trusted to have exited correctly.
+
+# A DEPLOYED CPLX TREE, which is what the build account actually has. It is not a
+# checkout and it must not be one: step 5 found that the machine running `pkg.sh`
+# has no cplx repository, that cplx arrives there as copied scripts, and that the
+# one stale checkout on that account would have supplied a year-old declaration
+# while looking authoritative. A fixture built with `git init` would have proved
+# the gate works in a situation that never occurs.
+#
+# The layout mirrors the repository the way the deployment does, `src/setups/env/<x>`
+# arriving as `<cplx root>/<x>`, because that is how `pkg.sh` finds both `echos`
+# and now the declaration.
+step5_make_deployed_tree() {
+    local root="$1" src="$2" module
+    mkdir -p -- "$root/bin" "$root/closure" || return 1
+    for module in "${CLOSURE_MODULES[@]}"; do
+        cp -- "$src/$module" "$root/bin/$module" || return 1
+    done
+    cp -- "$src/install_pkg.sh" "$root/bin/install_pkg.sh" || return 1
+    cp -- "$src/pkg.sh" "$root/bin/pkg.sh" || return 1
+    cp -- "$src/pkg_tools.sh" "$root/bin/pkg_tools.sh" || return 1
+    # THE DISPATCHER ITSELF, because `pkg tools` finding the overlay beside it is
+    # the path the plan names and running `pkg_tools.sh` directly does not prove.
+    if [ -f "$src/pkg" ]; then cp -- "$src/pkg" "$root/bin/pkg" || return 1; fi
+    if [ -d "$src/../echos" ]; then cp -r -- "$src/../echos" "$root/echos"; fi
+    cp -- "$src/../closure/closure-config.txt" "$root/closure/closure-config.txt" || return 1
+    # THE COMMITTED ENVELOPE IS COPIED, NOT REGENERATED. It is a file in the
+    # repository beside the declaration, so the fixture ships what the deployment
+    # ships; a fixture that wrote its own would test a bundle nobody deploys and
+    # would pass even if the committed pair disagreed.
+    cp -- "$src/../closure/closure-envelope.txt" "$root/closure/closure-envelope.txt" || return 1
+    return 0
+}
+
+# The envelope regenerated for the cases that need a bundle they have MUTATED,
+# where the committed pair is deliberately not the subject.
+step5_write_deployed_envelope() {
+    local dir="$1" digest=""
+    digest=$(sha256sum < "$dir/closure-config.txt") || return 1
+    digest="${digest%% *}"
+    { printf 'CPLX-CLOSURE-ENVELOPE/1\n'
+      printf 'digest|%s\n' "$digest"
+      printf 'source|%s|%s\n' "src/setups/env/closure/closure-config.txt" \
+        "0123456789abcdef0123456789abcdef01234567"; } > "$dir/closure-envelope.txt"
+}
+
+# A cplx checkout for the PUBLICATION cases only. Publication is "cplx only" in
+# the topology and resolves the configuration from a commit itself, so a repository
+# is the right fixture there and the wrong one for the gate. Prints the commit.
+step5_make_publication_repo() {
+    local repo="$1" src="$2" module
+    mkdir -p -- "$repo/src/setups/env/bin" "$repo/src/setups/env/closure" || return 1
+    for module in "${CLOSURE_MODULES[@]}"; do
+        cp -- "$src/$module" "$repo/src/setups/env/bin/$module" || return 1
+    done
+    cp -- "$src/install_pkg.sh" "$repo/src/setups/env/bin/install_pkg.sh" || return 1
+    cp -- "$src/../closure/closure-config.txt" \
+        "$repo/src/setups/env/closure/closure-config.txt" || return 1
+    ( cd "$repo" || exit 1
+      git init -q . >/dev/null 2>&1 || exit 1
+      git config user.email harness@example.invalid
+      git config user.name harness
+      git add -A >/dev/null 2>&1
+      git commit -q -m 'the reviewed declaration' >/dev/null 2>&1 ) || return 1
+    git -C "$repo" rev-parse HEAD 2>/dev/null
+}
+
+# The stub uploader, which implements the four-operation ABI and RECORDS what it
+# was asked to do. Its public objects live under one directory, so "nothing is
+# public" is a directory listing rather than an exit status.
+# shellcheck disable=SC2016  # every expansion below belongs to the ADAPTER this
+# writes, not to the harness: the stub is a file the publication run sources, so
+# `$1` is its own argument and `$CPLX_STUB_ROOT` its own variable. Expanding them
+# here would bake this harness's values into a script whose whole purpose is to
+# be driven by another process, which is the same intentional-literal rule the
+# earlier steps' child-shell helpers carry.
+step5_write_adapter() {
+    local out="$1" root="$2" mode="${3:-ok}"
+    { printf '#!/bin/bash\n'
+      printf 'CPLX_STUB_ROOT=%s\n' "$root"
+      printf 'CPLX_STUB_MODE=%s\n' "$mode"
+      printf 'upload_begin() {\n'
+      printf '    if [ "$CPLX_STUB_MODE" = "begin-fails" ]; then return 1; fi\n'
+      printf '    mkdir -p -- "$CPLX_STUB_ROOT/stage" || return 1\n'
+      printf '    printf %s >> "$CPLX_STUB_ROOT/begin.log"\n' "'begin\\n'"
+      printf '    printf %s "$CPLX_STUB_ROOT/stage/object"\n' '%s'
+      printf '}\n'
+      printf 'upload_write() {\n'
+      printf '    if [ "$CPLX_STUB_MODE" = "write-fails" ]; then dd of=/dev/null 2>/dev/null; return 1; fi\n'
+      # THE STREAM IS HELD OPEN ON REQUEST, so an interruption can be delivered
+      # while the transaction is DEMONSTRABLY streaming rather than at a moment
+      # the harness guessed. The readiness file is written BEFORE the wait, so
+      # the caller learns the phase was ENTERED rather than that time passed.
+      printf '    if [ "$CPLX_STUB_MODE" = "stream-waits" ]; then\n'
+      printf '        printf %s > "$CPLX_STUB_ROOT/streaming.ready"\n' "'streaming\\n'"
+      printf '        while [ ! -e "$CPLX_STUB_ROOT/stream.release" ]; do sleep 0.1; done\n'
+      printf '    fi\n'
+      printf '    dd of="$1" 2>/dev/null\n'
+      printf '}\n'
+      printf 'upload_abort() {\n'
+      printf '    printf %s >> "$CPLX_STUB_ROOT/abort.log"\n' "'abort\\n'"
+      # THE ABORT IS HELD OPEN THE SAME WAY, and the count is appended BEFORE the
+      # wait. A second entry is therefore visible even when the process never
+      # leaves the first one, which is what the cleanup interruption needs: it
+      # counts ENTRIES rather than completions.
+      printf '    if [ "$CPLX_STUB_MODE" = "abort-waits" ]; then\n'
+      printf '        printf %s > "$CPLX_STUB_ROOT/aborting.ready"\n' "'aborting\\n'"
+      printf '        while [ ! -e "$CPLX_STUB_ROOT/abort.release" ]; do sleep 0.1; done\n'
+      printf '    fi\n'
+      printf '    if [ "$CPLX_STUB_MODE" = "abort-fails" ]; then return 1; fi\n'
+      printf '    rm -f -- "$1"\n'
+      printf '}\n'
+      printf 'upload_commit() {\n'
+      printf '    if [ "$CPLX_STUB_MODE" = "commit-fails" ]; then return 1; fi\n'
+      printf '    mkdir -p -- "$CPLX_STUB_ROOT/public" || return 1\n'
+      printf '    cp -- "$1" "$CPLX_STUB_ROOT/public/object"\n'
+      printf '}\n'; } > "$out"
+}
+
+# What the stub has made PUBLIC, which is the only question worth asking it.
+step5_public_count() {
+    local root="$1"
+    if [ ! -d "$root/public" ]; then printf '0'; return; fi
+    find "$root/public" -type f 2>/dev/null | grep -c . || true
+}
+
+step5_abort_count() {
+    local root="$1"
+    if [ ! -f "$root/abort.log" ]; then printf '0'; return; fi
+    grep -c . < "$root/abort.log" || true
+}
+
+# Whether a stage was ever begun, which is the difference between a failure
+# BEFORE the transaction owns anything and one after. A case that only counts
+# aborts cannot tell those apart: no abort is the right answer for both.
+step5_begin_count() {
+    local root="$1"
+    if [ ! -f "$root/begin.log" ]; then printf '0'; return; fi
+    grep -c . < "$root/begin.log" || true
+}
+
+# A minimal prefix tree that satisfies the committed declaration's floor, so a
+# gate run over it is green for reasons this suite planted rather than by luck.
+step5_make_tree() {
+    local home="$1" member
+    mkdir -p -- "$home/tools/python/root/lib" "$home/tools/git/root/lib" || return 1
+    mkdir -p -- "$home/tools/python/current" "$home/tools/python/python-3.13.9" || return 1
+    for member in libc.so.6 libpthread.so.0 libdl.so.2 librt.so.1 libutil.so.1 \
+                  libstdc++.so.6 libgcc_s.so.1 libcrypto.so.3 libssl.so.3; do
+        printf 'not an ELF: a planted floor member\n' > "$home/tools/python/root/lib/$member"
+    done
+    mkdir -p -- "$home/tools/python/root/lib" || return 1
+    printf 'not an ELF: the waived member, present\n' \
+        > "$home/tools/python/root/lib/libsqlite3.so.0"
+    # THE PAYLOAD CARRIES ITS OWN COPY OF THE PACKAGING SCRIPTS, which is true of
+    # the real account and is what makes the source-equals-destination case
+    # reachable: `~/tools/bin/pkg.sh` exists there, and a gated run started from
+    # it would stage into the directory it read from.
+    mkdir -p -- "$home/tools/bin" || return 1
+    cp -- "$SHIPPED_DIR/pkg.sh" "$home/tools/bin/pkg.sh" || return 1
+    cp -- "$SHIPPED_DIR/pkg_tools.sh" "$home/tools/bin/pkg_tools.sh" || return 1
+    return 0
+}
+
+step5_suite() {
+    local dir="$SCRATCH/step5"
+    local src="$SHIPPED_DIR"
+    local report="$SHIPPED_DIR/closure_report.sh"
+    local publish="$SHIPPED_DIR/closure_publish.sh"
+    local pkg="$SHIPPED_DIR/pkg.sh"
+    local repo="" commit="" home="" out="" rc=0 stub="" adapter="" root="" cplxrepo=""
+    local before="" archive="" id="" cfg="" tool="" tp="" cleanrepo="" cleancommit="" module="" hashdigest=""
+
+    mkdir -p -- "$dir" || { fail "step5/scratch" "cannot create the scratch directory"; return; }
+
+    # --- the amended topology --------------------------------------------------
+    section "step 5 topology: the fifth module, and what it is not allowed to own"
+    if [ ! -f "$report" ] || [ ! -f "$publish" ] || [ ! -f "$pkg" ]; then
+        fail "step5/topology/files-exist" "a step 5 file is missing"
+        unanswered "every step 5 case" \
+          "  create closure_report.sh and closure_publish.sh under src/setups/env/bin, then repeat this call"
+        return
+    fi
+    chk "step5/topology/report-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$report")")"
+    chk "step5/topology/publish-declared-commands" "" \
+        "$(oneline "$(shipped_undeclared_words "$publish")")"
+    # THE REPORT OWNS NO VERDICT AND NO EXIT CODE. The move would be pointless if
+    # the report module could decide what a run returns, so the assertion is
+    # mechanical and it is about the CHECKER'S STATUS CODES, 2, 3 and 5, not
+    # about `return 1`. A refusal helper returning 1 to its own aggregator is an
+    # ordinary boolean and appears in this module by design; 2, 3 and 5 are the
+    # values `closure_check.sh` hands to `pkg.sh`, and none of them may be
+    # decided here.
+    chk "step5/topology/report-decides-no-checker-status" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$report" | grep -nE 'return [235]$' || true)")"
+    # AND THE ENTRY POINT STILL HOLDS THEM, so the assertion above measures a
+    # boundary rather than the absence of exit codes anywhere.
+    chk "step5/topology/entry-point-still-decides-status" "yes" \
+        "$(sed -e 's/#.*$//' "$SHIPPED_DIR/closure_check.sh" | grep -qE 'return 3$' && echo yes || echo no)"
+    # AND THE ENTRY POINT STILL HAS NO WAIVER CODE PATH, which is the property
+    # step 1 measures and step 5 is the step most likely to break, because this
+    # is where waivers arrive.
+    chk "step5/topology/entry-point-has-no-waiver-path" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$SHIPPED_DIR/closure_check.sh" | grep -nE 'waiv' || true)")"
+    # NO SIXTH MODULE, stated against the tree the way step 1 states the fifth.
+    chk "step5/topology/no-closure_scope.sh" "no" \
+        "$( [ -f "$SHIPPED_DIR/closure_scope.sh" ] && echo yes || echo no )"
+
+    # THE COMMITTED PAIR MUST AGREE, which is the whole maintenance rule the
+    # envelope carries. It is a file in the repository rather than something a
+    # deploy step produces, so the only way it can go wrong is a declaration
+    # edited without its receipt, and that is exactly what this asserts. An
+    # archive shipping a receipt for bytes it does not carry would otherwise be
+    # a green run.
+    chk "step5/envelope/committed-pair-agrees" \
+        "$(sha256sum < "$SHIPPED_DIR/../closure/closure-config.txt" | cut -d' ' -f1)" \
+        "$(sed -n 's/^digest|//p' "$SHIPPED_DIR/../closure/closure-envelope.txt" | head -1)"
+    chk "step5/envelope/committed-envelope-names-a-source" "yes" \
+        "$(grep -qE '^source\|[^|]+\|[0-9a-f]{40}$' "$SHIPPED_DIR/../closure/closure-envelope.txt" && echo yes || echo no)"
+
+    # --- the selector, at all four corners -------------------------------------
+    section "step 5 selector: four corners, and two of them refuse"
+    home="$dir/home"
+    step5_make_tree "$home" || { fail "step5/selector/tree" "cannot plant the prefix tree"; return; }
+    repo="$dir/cplx"
+    step5_make_deployed_tree "$repo" "$src" \
+        || { fail "step5/selector/deployed-tree" "cannot plant the deployed cplx tree"; return; }
+    # THE FIXTURE IS NOT A CHECKOUT, and the case says so out loud, because the
+    # defect this replaced was a gate that only worked inside one.
+    chk "step5/selector/fixture-is-not-a-checkout" "no" \
+        "$( [ -e "$repo/.git" ] && echo yes || echo no )"
+
+    # The flag with a target that is not `tools`: no contract for that payload.
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" other --closure-gate 2>&1); rc=$?
+    chk "step5/selector/flag-with-other-target-refuses" "1" "$rc"
+    chk "step5/selector/flag-with-other-target-says-why" "yes" \
+        "$(printf '%s' "$out" | grep -q "applies to the 'tools' payload only" && echo yes || echo no)"
+    # The target `tools` with no flag: the run this requirement exists to gate.
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" tools 2>&1); rc=$?
+    chk "step5/selector/tools-without-flag-refuses" "1" "$rc"
+    chk "step5/selector/tools-without-flag-says-why" "yes" \
+        "$(printf '%s' "$out" | grep -q 'requires --closure-gate' && echo yes || echo no)"
+    # A RENAMED TARGET NEITHER RECEIVES THE GATE NOR STANDS IN FOR `tools`.
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" tools2 2>&1); rc=$?
+    chk "step5/selector/tools2-is-not-tools" "yes" \
+        "$(printf '%s' "$out" | grep -q 'requires --closure-gate' && echo no || echo yes)"
+    # AN UNRELATED TARGET WITH NO FLAG BEHAVES AS IT DID BEFORE THIS EFFORT and
+    # never enters the branch, which a grep for the gate's own output proves.
+    mkdir -p -- "$home/other" && printf 'payload\n' > "$home/other/file.txt"
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" other 2>&1); rc=$?
+    chk "step5/selector/unrelated-target-unchanged" "0" "$rc"
+    chk "step5/selector/unrelated-target-skips-the-gate" "yes" \
+        "$(printf '%s' "$out" | grep -q 'Closure gate' && echo no || echo yes)"
+
+    # --- the gate, run rather than grepped -------------------------------------
+    #
+    # THE DISPATCHER IS EXECUTED. A grep for the flag in the overlay proves the
+    # text contains it, which is not the same claim as the gate being reached
+    # through `pkg tools`, and the reviewer was right that the weaker one was
+    # standing in for the stronger.
+    section "step 5 gate: staged from the deployed tree, and no repository anywhere"
+    rm -f -- "$home/tools/python/root/lib/libsqlite3.so.0"
+    # `pkg tools` THROUGH THE DISPATCHER, which is the path the plan names: the
+    # dispatcher finds the `pkg_tools.sh` overlay beside it and execs that, and
+    # the overlay adds the flag. Running the overlay directly skips the first
+    # half of that and proves only the second.
+    if [ -f "$repo/bin/pkg" ]; then
+        out=$(HOME="$home" bash "$repo/bin/pkg" tools 2>&1); rc=$?
+        chk "step5/gate/dispatcher-reaches-the-gate" "yes" \
+            "$(printf '%s' "$out" | grep -q 'Closure gate' && echo yes || echo no)"
+    else
+        out=$(HOME="$home" bash "$repo/bin/pkg_tools.sh" 2>&1); rc=$?
+        note "step5/gate/dispatcher" "no pkg dispatcher in the tree; the overlay was run directly"
+    fi
+    # The plan's own acceptance case: the waived member absent, the waiver
+    # active, an archive produced and MARKED a validation artifact.
+    chk "step5/gate/active-waiver-still-produces-an-archive" "0" "$rc"
+    chk "step5/gate/active-waiver-is-marked" "yes" \
+        "$(printf '%s' "$out" | grep -q 'VALIDATION ARTIFACT' && echo yes || echo no)"
+    chk "step5/gate/archive-exists" "1" \
+        "$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)"
+    # THE STAGED FILES PERSIST ON A RUN THAT PRODUCED AN ARCHIVE, which is what
+    # puts them inside it.
+    chk "step5/gate/declaration-staged" "yes" \
+        "$( [ -f "$home/tools/closure/closure-config.txt" ] && echo yes || echo no )"
+    chk "step5/gate/envelope-staged" "yes" \
+        "$( [ -f "$home/tools/closure/closure-envelope.txt" ] && echo yes || echo no )"
+    chk "step5/gate/five-payload-modules-staged" "5" \
+        "$(find "$home/tools/bin" -maxdepth 1 -name 'closure_*.sh' -type f 2>/dev/null | grep -c . || true)"
+
+    # SOURCE AND DESTINATION MUST DIFFER. `pkg.sh` now exists inside the payload
+    # too, and a gated run from that copy would read its declaration out of the
+    # directory it is about to write, certifying its own output.
+    out=$(HOME="$home" bash "$home/tools/bin/pkg.sh" tools --closure-gate 2>&1); rc=$?
+    chk "step5/gate/inside-the-payload-refuses" "3" "$rc"
+    chk "step5/gate/inside-the-payload-says-why" "yes" \
+        "$(printf '%s' "$out" | grep -q 'its own destination' && echo yes || echo no)"
+
+    # A different spelling of the payload is still the same source directory.
+    # Refusal must preserve source bytes, not truncate them and then refuse.
+    local alias_prefix="$dir/alias-prefix" alias_tree="$dir/alias-tree"
+    local alias_source="$dir/alias-source" alias_digest=""
+    mkdir -p -- "$alias_prefix/tools"
+    step5_make_deployed_tree "$alias_prefix/tools" "$src" \
+        || { fail "step5/alias/fixture" "cannot plant the payload source"; return; }
+    ln -s "$alias_prefix/tools" "$alias_tree" \
+        || { fail "step5/alias/link-fixture" "cannot create the directory alias"; return; }
+    alias_digest=$(config_digest "$alias_prefix/tools/closure/closure-config.txt")
+    out=$(HOME="$alias_prefix" bash "$alias_tree/bin/pkg.sh" tools --closure-gate 2>&1); rc=$?
+    chk "step5/gate/payload-directory-alias-refuses" "3" "$rc"
+    chk "step5/gate/payload-directory-alias-preserves-source" "$alias_digest" \
+        "$(config_digest "$alias_prefix/tools/closure/closure-config.txt")"
+
+    # Distinct roots can still share one file through a hard link. Detect that
+    # before any destination is registered for failure cleanup.
+    step5_make_deployed_tree "$alias_source" "$src" \
+        || { fail "step5/alias/source-fixture" "cannot plant the separate source"; return; }
+    rm -f -- "$alias_prefix/tools/closure/closure-config.txt"
+    ln "$alias_source/closure/closure-config.txt" "$alias_prefix/tools/closure/closure-config.txt" \
+        || { fail "step5/alias/hardlink-fixture" "cannot create the file alias"; return; }
+    alias_digest=$(config_digest "$alias_source/closure/closure-config.txt")
+    out=$(HOME="$alias_prefix" bash "$alias_source/bin/pkg.sh" tools --closure-gate 2>&1); rc=$?
+    chk "step5/gate/shared-file-refuses" "3" "$rc"
+    chk "step5/gate/shared-file-preserves-source" "$alias_digest" \
+        "$(config_digest "$alias_source/closure/closure-config.txt")"
+
+    # A MISSING DECLARATION REFUSES, and the gate stays keyed to the selector
+    # rather than to the bundle's presence: deleting the source cannot turn it
+    # off, it only makes the run refuse.
+    mv -- "$repo/closure" "$repo/closure.away"
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1); rc=$?
+    chk "step5/gate/absent-declaration-refuses" "3" "$rc"
+    chk "step5/gate/absent-declaration-does-not-skip" "yes" \
+        "$(printf '%s' "$out" | grep -q 'no closure declaration is deployed' && echo yes || echo no)"
+    mv -- "$repo/closure.away" "$repo/closure"
+
+    # A DEPLOYED ENVELOPE THAT DOES NOT DESCRIBE ITS DECLARATION REFUSES. This is
+    # the whole of what this account can prove locally, so it has to prove it.
+    printf 'root|tampered\n' >> "$repo/closure/closure-config.txt"
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1); rc=$?
+    chk "step5/gate/envelope-mismatch-refuses" "3" "$rc"
+    chk "step5/gate/envelope-mismatch-says-both-digests" "yes" \
+        "$(printf '%s' "$out" | grep -q 'its envelope names' && echo yes || echo no)"
+    step5_write_deployed_envelope "$repo/closure"
+
+    # A REFUSAL LEAVES NOTHING BEHIND, and the case has to be built to mean that.
+    # It is about the files THE REFUSING RUN staged, not about files an earlier
+    # successful run left: those PERSIST by design, because persisting is what
+    # puts them in the archive. So the destination is cleared first, and the
+    # refusal is one that happens AFTER staging has written, which is the checker
+    # refusing on a tree carrying an undeclared root.
+    rm -rf -- "$home/tools/closure" "$home/tools/bin/closure_check.sh" \
+        "$home/tools/bin/closure_config.sh" "$home/tools/bin/closure_elf.sh" \
+        "$home/tools/bin/closure_report.sh" "$home/tools/bin/closure_rules.sh"
+    # The refusal is a FLOOR one, and an UNWAIVED member is what makes it a
+    # refusal rather than the accepted exception the run above carried. An
+    # undeclared root would not do: this tree's extra directories never enter the
+    # OBSERVED loader scope, so nothing would refuse and the case would pass for
+    # the wrong reason.
+    mv -- "$home/tools/python/root/lib/libssl.so.3" "$home/libssl.so.3.away"
+    # COUNTED BEFORE AND AFTER, because this tree already holds the archive the
+    # green run produced. Asserting that some archive exists would pass on the
+    # earlier one; the claim is that the REFUSING run added none.
+    before=$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1); rc=$?
+    chk "step5/gate/checker-refusal-adds-no-archive" "$before" \
+        "$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)"
+    chk "step5/gate/checker-refusal-refuses-the-run" "1" "$rc"
+    chk "step5/gate/checker-refusal-names-the-floor" "yes" \
+        "$(printf '%s' "$out" | grep -q 'CLOSURE FLOOR REFUSED' && echo yes || echo no)"
+    chk "step5/gate/refusal-unstages-the-declaration" "no" \
+        "$( [ -f "$home/tools/closure/closure-config.txt" ] && echo yes || echo no )"
+    chk "step5/gate/refusal-unstages-every-module" "" \
+        "$(oneline "$(find "$home/tools/bin" -maxdepth 1 -name 'closure_*.sh' -type f 2>/dev/null)")"
+
+    # A COPY THAT FAILS MIDWAY REFUSES AND LEAVES NOTHING, which is a different
+    # path from a missing source: the source is there, the write is what breaks.
+    # A `cat` stub that exits non-zero is exactly that failure at the one place
+    # staging performs it.
+    rm -rf -- "$home/tools/closure"
+    mkdir -p -- "$dir/copyfail" || true
+    printf '#!/bin/bash\nexit 1\n' > "$dir/copyfail/cat"
+    chmod +x "$dir/copyfail/cat"
+    out=$(PATH="$dir/copyfail:$PATH" HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1)
+    rc=$?
+    chk "step5/gate/failed-copy-refuses" "3" "$rc"
+    chk "step5/gate/failed-copy-unstages" "no" \
+        "$( [ -f "$home/tools/closure/closure-config.txt" ] && echo yes || echo no )"
+
+    # A STAGED BUNDLE THAT ENDS UP EMPTY refuses too, and this is the assertion
+    # that the gate checks what it produced rather than assuming the copy worked.
+    # The stub succeeds and writes nothing, which is the shape a truncated write
+    # leaves behind.
+    mkdir -p -- "$dir/emptycopy" || true
+    printf '#!/bin/bash\nexit 0\n' > "$dir/emptycopy/cat"
+    chmod +x "$dir/emptycopy/cat"
+    out=$(PATH="$dir/emptycopy:$PATH" HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1)
+    rc=$?
+    chk "step5/gate/empty-staged-bundle-refuses" "3" "$rc"
+    chk "step5/gate/empty-staged-bundle-unstages" "no" \
+        "$( [ -f "$home/tools/closure/closure-config.txt" ] && echo yes || echo no )"
+
+    # A PARTIAL WRITE IS NOT AN IMMEDIATE FAILURE, and it is the failure the
+    # byte verification exists for: the copy produces SOME bytes and then stops,
+    # so a destination that merely exists is not evidence and only comparing it
+    # against a second read of the source catches it.
+    rm -rf -- "$home/tools/closure"
+    before=$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)
+    mkdir -p -- "$dir/partial" || true
+    printf '#!/bin/bash\nprintf %s\nexit 1\n' "'truncated'" > "$dir/partial/cat"
+    chmod +x "$dir/partial/cat"
+    out=$(PATH="$dir/partial:$PATH" HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1)
+    rc=$?
+    chk "step5/gate/partial-write-refuses" "3" "$rc"
+    chk "step5/gate/partial-write-adds-no-archive" "$before" \
+        "$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)"
+    chk "step5/gate/partial-write-unstages-completely" "" \
+        "$(oneline "$(find "$home/tools/closure" "$home/tools/bin" -maxdepth 1 \( -name 'closure-*.txt' -o -name 'closure_*.sh' \) -type f 2>/dev/null)")"
+
+    # A COMPLETED BUNDLE REMOVED BEFORE THE CHECK. Staging succeeded and the
+    # gate's own emptiness test passed, so this is the window between them and
+    # the checker call. The stub `bash` deletes the staged declaration and then
+    # runs the real checker, which is the only way to land inside that window
+    # from outside the process.
+    # THE FLOOR IS RESTORED FIRST, and that restoration is the difference
+    # between this case and one that cannot fail. The earlier floor-refusal
+    # fixture had moved `libssl.so.3` away, so a run here refused on the FLOOR
+    # whatever the deletion stub did: every assertion passed with the stub doing
+    # nothing at all. With the member back, the only thing that can refuse this
+    # run is the removal under test.
+    mv -- "$home/libssl.so.3.away" "$home/tools/python/root/lib/libssl.so.3"
+    rm -rf -- "$home/tools/closure"
+    before=$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)
+    mkdir -p -- "$dir/racebin" || true
+    { printf '#!/bin/bash\n'
+      printf 'rm -f -- "%s/tools/closure/closure-config.txt"\n' "$home"
+      printf 'exec /bin/bash "$@"\n'; } > "$dir/racebin/bash"
+    chmod +x "$dir/racebin/bash"
+    out=$(PATH="$dir/racebin:$PATH" HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1)
+    rc=$?
+    chk "step5/gate/bundle-removed-before-check-refuses" "1" "$rc"
+    # THE DIAGNOSTIC IS THE ASSERTION. A non-zero status is what every refusal
+    # in this section returns, so it identifies none of them; the checker
+    # refusing on a bundle it cannot establish is what this case is about.
+    chk "step5/gate/bundle-removed-names-the-bundle" "yes" \
+        "$(printf '%s' "$out" | grep -q 'CLOSURE BUNDLE REFUSED' && echo yes || echo no)"
+    chk "step5/gate/bundle-removed-adds-no-archive" "$before" \
+        "$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)"
+    chk "step5/gate/bundle-removed-unstages-completely" "" \
+        "$(oneline "$(find "$home/tools/closure" "$home/tools/bin" -maxdepth 1 \( -name 'closure-*.txt' -o -name 'closure_*.sh' \) -type f 2>/dev/null)")"
+    # THE CONTROL: the same run with a stub that deletes NOTHING must succeed,
+    # which is what proves the three assertions above depend on the removal
+    # rather than on anything the fixture left behind.
+    rm -rf -- "$home/tools/closure"
+    { printf '#!/bin/bash\n'; printf 'exec /bin/bash "$@"\n'; } > "$dir/racebin/bash"
+    chmod +x "$dir/racebin/bash"
+    out=$(PATH="$dir/racebin:$PATH" HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate 2>&1)
+    chk "step5/gate/bundle-removed-control-passes-the-gate" "yes" \
+        "$(printf '%s' "$out" | grep -q 'CLOSURE BUNDLE REFUSED' && echo no || echo yes)"
+
+    # --- what the gate must not have changed for everyone else -----------------
+    #
+    # THE CRITERION THIS ANSWERS IS A REGRESSION ONE. Step 5 is the first thing
+    # in this effort to modify `pkg.sh`, so the behaviour every other caller
+    # depends on has to be shown intact ON A TARGET THAT NEVER ENTERS THE GATE.
+    section "step 5 preservation: --add, the passthrough and the SHA1 deduplication"
+    mkdir -p -- "$home/extra" && printf 'an extra item\n' > "$home/extra/thing.txt"
+    printf 'excluded\n' > "$home/other/skipme.txt"
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" other --add extra -- --exclude=skipme.txt 2>&1)
+    rc=$?
+    chk "step5/preserve/add-and-passthrough-succeed" "0" "$rc"
+    archive=$(printf '%s' "$out" | grep -oE '[^ ]*other\.[0-9_-]+\.tar\.gz' | tail -1)
+    if [ -z "$archive" ]; then
+        archive=$(find "$home/pkgs" -name 'other.*.tar.gz' -type f 2>/dev/null | sort | tail -1)
+    fi
+    chk "step5/preserve/add-ships-the-extra-item" "yes" \
+        "$(tar -tzf "$archive" 2>/dev/null | grep -q '^extra/' && echo yes || echo no)"
+    chk "step5/preserve/passthrough-applied-the-exclusion" "yes" \
+        "$(tar -tzf "$archive" 2>/dev/null | grep -q 'skipme.txt' && echo no || echo yes)"
+    # THE SAME CONTENT TWICE IS ONE ARCHIVE. The second run computes the same
+    # SHA1, deletes its own tarball and names the first, which is the behaviour
+    # a consuming project relies on to avoid a pile of identical archives.
+    #
+    # THE SECOND IS SPACED BY A SECOND ON PURPOSE. `pkg.sh` names archives by a
+    # timestamp resolved to the second, so two runs inside one second target the
+    # SAME filename: the second overwrites the first and then deduplicates the
+    # only copy away. That is the tool's own naming granularity rather than
+    # anything this step introduced, and a case that ran both in one second
+    # would be asserting against it rather than against deduplication.
+    sleep 1
+    before=$(find "$home/pkgs" -name 'other.*.tar.gz' -type f 2>/dev/null | grep -c . || true)
+    out=$(HOME="$home" bash "$repo/bin/pkg.sh" other --add extra -- --exclude=skipme.txt 2>&1)
+    chk "step5/preserve/duplicate-is-deduplicated" "$before" \
+        "$(find "$home/pkgs" -name 'other.*.tar.gz' -type f 2>/dev/null | grep -c . || true)"
+    chk "step5/preserve/duplicate-says-so" "yes" \
+        "$(printf '%s' "$out" | grep -q 'Duplicate detected' && echo yes || echo no)"
+    # THE `latest` SYMLINK POINTS AT THE RETAINED ARCHIVE, which is the half of
+    # deduplication a consuming project actually follows: it is not enough that
+    # the duplicate went away, the surviving name has to be the one reachable.
+    #
+    # THE TARGET IS COMPARED, not merely the link's existence. A tree that
+    # already held an earlier archive satisfies `-e` whatever deduplication did,
+    # so that assertion would have passed without the retained object being the
+    # one linked.
+    archive=$(find "$home/pkgs" -name 'other.*.tar.gz' -type f 2>/dev/null | sort | tail -1)
+    chk "step5/preserve/latest-resolves-to-the-retained-archive" \
+        "$(sha256sum < "$archive" | cut -d' ' -f1)" \
+        "$(sha256sum < "$home/pkgs/other.latest.tar.gz" 2>/dev/null | cut -d' ' -f1)"
+
+    # A SOURCE MUTATED DURING THE COPY yields a digest describing the COMPLETED
+    # COPY, never the source. The stub appends a byte on every read, so the copy
+    # promotion captured differs from the file the caller named, and the identity
+    # must describe what was captured: certifying the source would certify bytes
+    # that no longer exist anywhere.
+    root="$dir/mutate"
+    rm -rf -- "$root"
+    mkdir -p -- "$root/staging" "$root/fakebin" || true
+    chmod 700 "$root/staging"
+    printf 'the source bytes\n' > "$root/candidate.bin"
+    # shellcheck disable=SC2016  # the stub's own expansions
+    { printf '#!/bin/bash\n'
+      printf '/bin/cat "$@"\n'
+      printf 'printf %s\n' "'m'"; } > "$root/fakebin/cat"
+    chmod +x "$root/fakebin/cat"
+    got=$( ( set +u
+        # shellcheck disable=SC2030  # local to this subshell on purpose: the stub
+        # must be visible to the production code sourced below and to nothing else.
+        PATH="$root/fakebin:$PATH"
+        # shellcheck source=/dev/null
+        . "$publish"
+        # shellcheck disable=SC2034  # read by the sourced production module
+        CLOSURE_PUBLISH_STAGING="$root/staging"
+        closure_publish_promote "$root/candidate.bin" "$root/staging" >/dev/null 2>&1 || exit 1
+        printf '%s %s' "$CLOSURE_PUBLISH_IDENTITY" "$CLOSURE_PUBLISH_PROMOTED" ) 2>/dev/null )
+    want=$(sha256sum < "$root/candidate.bin"); want="${want%% *}"
+    chk "step5/promote/mutation-identity-is-not-the-source" "yes" \
+        "$( [ -n "${got%% *}" ] && [ "${got%% *}" != "$want" ] && echo yes || echo no )"
+    chk "step5/promote/mutation-identity-describes-the-copy" "yes" \
+        "$( [ -f "${got#* }" ] && [ "$(sha256sum < "${got#* }" | cut -d' ' -f1)" = "${got%% *}" ] && echo yes || echo no )"
+
+    # --- the waiver outcomes ---------------------------------------------------
+    #
+    # The committed declaration waives `libsqlite3.so.0`, so the three outcomes
+    # are reached by moving ONE thing at a time: the member present makes the
+    # waiver stale, the member absent makes it active, and a waiver naming
+    # something the floor does not carry is unknown.
+    section "step 5 waivers: unknown, stale, and the exception that stands"
+    # THE GATE SECTION ABOVE REMOVED THE WAIVED MEMBER to reach its active-waiver
+    # case, and the stale case needs it back. Replanting here rather than
+    # depending on section order is the difference between a suite that asserts
+    # what it planted and one that inherits whatever ran before it.
+    printf 'not an ELF: the waived member, present again\n' \
+        > "$home/tools/python/root/lib/libsqlite3.so.0"
+    root="$dir/waiver"
+    mkdir -p -- "$root/bundle" || true
+    cp -- "$src/../closure/closure-config.txt" "$root/bundle/closure-config.txt"
+    step2_write_envelope "$root/bundle/closure-envelope.txt" \
+        "$(config_digest "$root/bundle/closure-config.txt")" \
+        "src/setups/env/closure/closure-config.txt" \
+        "0123456789abcdef0123456789abcdef01234567"
+    # STALE: the member the waiver names is present, so the exception has
+    # already expired and the run refuses the waiver rather than passing.
+    run_checker "$SHIPPED_DIR/closure_check.sh" --prefix "$home" \
+        --installer "$SHIPPED_DIR/install_pkg.sh" --bundle "$root/bundle"
+    chk "step5/waiver/stale-exit-code" "1" "$CHECKER_RC"
+    chk "step5/waiver/stale-is-named" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'REFUSED|waiver|libsqlite3.so.0|python-sqlite-support|stale' && echo yes || echo no)"
+    chk "step5/waiver/stale-counts" "1 declared, 0 active, 1 refused" \
+        "$(printf '%s' "$CHECKER_OUT" | sed -n 's/^  waivers      //p')"
+    # ACTIVE: remove the member and the same declaration carries the run.
+    rm -f -- "$home/tools/python/root/lib/libsqlite3.so.0"
+    run_checker "$SHIPPED_DIR/closure_check.sh" --prefix "$home" \
+        --installer "$SHIPPED_DIR/install_pkg.sh" --bundle "$root/bundle"
+    chk "step5/waiver/active-exit-code" "3" "$CHECKER_RC"
+    chk "step5/waiver/active-is-named" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'WAIVED|waiver|libsqlite3.so.0|python-sqlite-support|active' && echo yes || echo no)"
+    chk "step5/waiver/active-says-validation-artifact" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'CLOSURE VALIDATION ARTIFACT' && echo yes || echo no)"
+    chk "step5/waiver/active-refuses-no-floor-member" "yes" \
+        "$(printf '%s' "$CHECKER_OUT" | grep -q 'REFUSED|floor|libsqlite3.so.0' && echo no || echo yes)"
+    chk "step5/waiver/active-counts" "1 declared, 1 active, 0 refused" \
+        "$(printf '%s' "$CHECKER_OUT" | sed -n 's/^  waivers      //p')"
+    # UNKNOWN IS REACHED THROUGH THE MODEL, NOT THROUGH A BUNDLE, and that is a
+    # statement about the design rather than a convenience. The configuration's
+    # own cross-reference refuses a waiver the floor does not declare at PARSE
+    # time, which step 2 already asserts, so no bundle that passes the envelope
+    # check can carry one. The validation below still exists because the two
+    # checks protect different things: the parse-time one protects the DOCUMENT,
+    # and this one protects the RUN, so a model reaching a checker some other way
+    # cannot get a free exception out of it. Driving it directly is the only way
+    # to reach that guard, and a case that went through a bundle would be
+    # asserting the parser twice and this rule never.
+    # shellcheck disable=SC2034  # the model below is planted for the PRODUCTION
+    # functions sourced inside the subshell to read, so every consumer of these
+    # names is one file over and invisible to a per-file reader.
+    step5_waiver_call() {
+        WAIVER_OUT=$( ( set +u
+            # shellcheck source=/dev/null
+            source "$SHIPPED_DIR/closure_config.sh"
+            # shellcheck source=/dev/null
+            source "$SHIPPED_DIR/closure_elf.sh"
+            # shellcheck source=/dev/null
+            source "$SHIPPED_DIR/closure_rules.sh"
+            CLOSURE_CFG_FLOOR=()
+            CLOSURE_CFG_WAIVER=()
+            CLOSURE_PROVIDER_PATHS=()
+            CLOSURE_CFG_FLOOR["libc.so.6"]="any"
+            CLOSURE_CFG_WAIVER["$1"]="some-owner"
+            closure_waiver_validate "$2" ) 2>&1 )
+    }
+    step5_waiver_call "libnothing.so.9" "$home"
+    chk "step5/waiver/unknown-is-named" "yes" \
+        "$(printf '%s' "$WAIVER_OUT" | grep -q 'REFUSED|waiver|libnothing.so.9|some-owner|unknown' && echo yes || echo no)"
+    # A WAIVER CANNOT NAME A TOOL ROOT, and this is the case that shows the code
+    # has no rule for roots at all. `python` is a declared root and not a floor
+    # member, so it is UNKNOWN by the FIRST rule rather than by a rule written
+    # for roots, which is what keeps the unexpected-root refusal unwaivable
+    # without a second subject type the design refused to add.
+    step5_waiver_call "python" "$home"
+    chk "step5/waiver/root-is-unknown-not-special" "yes" \
+        "$(printf '%s' "$WAIVER_OUT" | grep -q 'REFUSED|waiver|python|some-owner|unknown' && echo yes || echo no)"
+
+    # --- the promotion order ---------------------------------------------------
+    section "step 5 promotion: the gate refuses to act on a path it was shown"
+    root="$dir/promote"
+    mkdir -p -- "$root/staging" || true
+    chmod 700 "$root/staging"
+    printf 'candidate bytes\n' > "$root/candidate.bin"
+    publish_call() {
+        PUBLISH_OUT=$( ( set +u
+            # shellcheck source=/dev/null
+            source "$publish"
+            CLOSURE_PUBLISH_STAGING="$1"
+            shift
+            "$@" ) 2>&1 )
+        PUBLISH_RC=$?
+    }
+    publish_call "$root/staging" closure_publish_promote "$root/candidate.bin" "$root/staging"
+    chk "step5/promote/first-promotion-succeeds" "0" "$PUBLISH_RC"
+    # A PRE-EXISTING DESTINATION REFUSES RATHER THAN OVERWRITING, which is the
+    # whole reason the promotion links instead of renaming.
+    publish_call "$root/staging" closure_publish_promote "$root/candidate.bin" "$root/staging"
+    chk "step5/promote/pre-existing-destination-refuses" "1" "$PUBLISH_RC"
+    chk "step5/promote/pre-existing-says-why" "yes" \
+        "$(printf '%s' "$PUBLISH_OUT" | grep -q 'never overwritten' && echo yes || echo no)"
+    # A GROUP-WRITABLE STAGING ROOT REFUSES BEFORE ANY COPY RUNS.
+    mkdir -p -- "$root/loose" || true
+    chmod 770 "$root/loose"
+    publish_call "$root/loose" closure_publish_promote "$root/candidate.bin" "$root/loose"
+    chk "step5/promote/group-writable-root-refuses" "1" "$PUBLISH_RC"
+    chk "step5/promote/group-writable-copies-nothing" "" \
+        "$(oneline "$(find "$root/loose" -type f 2>/dev/null)")"
+    # A SYMLINKED STAGING ROOT IS REFUSED.
+    ln -s "$root/staging" "$root/linked" 2>/dev/null || true
+    publish_call "$root/linked" closure_publish_promote "$root/candidate.bin" "$root/linked"
+    chk "step5/promote/symlinked-root-refuses" "1" "$PUBLISH_RC"
+
+    # A destination directory (or a symlink to one) is still an EXISTING
+    # destination, not permission for ln to create a link inside it.
+    local promoted_digest=""
+    promoted_digest=$(sha256sum < "$root/candidate.bin")
+    promoted_digest="${promoted_digest%% *}"
+    mkdir -p -- "$root/directory/$promoted_digest" "$root/symlink" "$root/other"
+    chmod 700 "$root/directory" "$root/symlink"
+    publish_call "$root/directory" closure_publish_promote \
+        "$root/candidate.bin" "$root/directory"
+    chk "step5/promote/directory-destination-refuses" "1" "$PUBLISH_RC"
+    chk "step5/promote/directory-destination-untouched" "" \
+        "$(oneline "$(find "$root/directory/$promoted_digest" -type f)")"
+    ln -s "$root/other" "$root/symlink/$promoted_digest"
+    publish_call "$root/symlink" closure_publish_promote \
+        "$root/candidate.bin" "$root/symlink"
+    chk "step5/promote/symlink-destination-refuses" "1" "$PUBLISH_RC"
+    chk "step5/promote/symlink-target-untouched" "" \
+        "$(oneline "$(find "$root/other" -type f)")"
+
+    # A failed permission query is an unknown permission, never a protected root.
+    step5_failed_permission_query() {
+        find() { return 1; }
+        closure_publish_promote "$1" "$2"
+    }
+    publish_call "$root/staging" step5_failed_permission_query \
+        "$root/candidate.bin" "$root/staging"
+    chk "step5/promote/permission-query-failure-refuses" "1" "$PUBLISH_RC"
+    chk "step5/promote/permission-query-failure-reason" "yes" \
+        "$(printf '%s' "$PUBLISH_OUT" | grep -q 'permissions could not be checked' && echo yes || echo no)"
+
+    # THE PUBLICATION REPOSITORY IS BUILT HERE, before the cases that drive the
+    # real entry point, because `closure_publish_main` resolves a configuration
+    # from a commit and both the instance cases and the publication order cases
+    # need one.
+    cplxrepo="$dir/cplxrepo"
+    commit=$(step5_make_publication_repo "$cplxrepo" "$src")
+    if [ -z "$commit" ]; then
+        unanswered "the step 5 publication and instance cases" \
+          "  publication resolves from a cplx commit and this host supplies no git; install it or re-run where it is"
+        return
+    fi
+    chk "step5/publication/repo-commit-is-a-sha" "40" "${#commit}"
+
+    # --- the transactional handoff ---------------------------------------------
+    #
+    # A transaction is proved by its failure paths, so every case below asks the
+    # stub WHAT IT HAS PUBLISHED rather than reading an exit status.
+    section "step 5 handoff: four operations, and nothing public on any failure"
+    # shellcheck disable=SC2034  # the staging root and the descriptor are read by
+    # the production module sourced inside the subshell: the descriptor by the
+    # `cat <&` that is the whole point of the handoff.
+    step5_handoff() {
+        local mode="$1" expected="$2" name="$3"
+        stub="$dir/stub.$name"
+        rm -rf -- "$stub"
+        mkdir -p -- "$stub/staging" || return
+        chmod 700 "$stub/staging"
+        adapter="$stub/adapter.sh"
+        step5_write_adapter "$adapter" "$stub" "$mode"
+        printf 'the archive bytes\n' > "$stub/archive.bin"
+        # EVERY HANDOFF CASE IS BOUNDED, not only the two that plant a failing
+        # command on PATH. Round 4 of the review found this helper running
+        # unbounded while the round's own assessment claimed each case was
+        # `timeout -k` bounded with scratch postconditions, which was wrong about
+        # the cases that go through here. A liveness claim is only as good as its
+        # weakest runner, so the bound belongs in the shared helper.
+        # shellcheck disable=SC2016  # the body belongs to the bounded child shell
+        HANDOFF_OUT=$(timeout -k 5 20 "${BASH:-bash}" -c '
+            set +u
+            . "$1"
+            . "$2"
+            CLOSURE_PUBLISH_STAGING="$3"
+            exec {CPLX_CLOSURE_ARCHIVE_FD}< "$4"
+            closure_publish_upload "$5"
+        ' _ "$publish" "$adapter" "$stub/staging" "$stub/archive.bin" "$expected" 2>&1)
+        HANDOFF_RC=$?
+    }
+
+    # THE POSTCONDITIONS EVERY FAILING CASE OWES, asserted per case rather than
+    # once at the end. Checking scratch only after the last fixture says nothing
+    # about the ones before it, which is the second half of the same finding.
+    step5_handoff_refused() {
+        local name="$1" aborts="$2"
+        chk "step5/handoff/$name-refuses-promptly" "1" "$HANDOFF_RC"
+        chk "step5/handoff/$name-publishes-nothing" "0" "$(step5_public_count "$stub")"
+        chk "step5/handoff/$name-aborts-expected-times" "$aborts" "$(step5_abort_count "$stub")"
+        chk "step5/handoff/$name-removes-scratch" "" \
+            "$(oneline "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)")"
+    }
+    local want="" got=""
+    want=$(printf 'the archive bytes\n' | sha256sum); want="${want%% *}"
+    # The happy path: the stub accepts, hashes and streams one read, and commits.
+    step5_handoff ok "$want" commits
+    chk "step5/handoff/commit-succeeds" "0" "$HANDOFF_RC"
+    chk "step5/handoff/one-object-is-public" "1" "$(step5_public_count "$stub")"
+    chk "step5/handoff/no-abort-on-success" "0" "$(step5_abort_count "$stub")"
+    # A WRONG EXPECTED DIGEST ABORTS AND NOTHING IS PUBLIC.
+    step5_handoff ok "0000000000000000000000000000000000000000000000000000000000000000" mismatch
+    step5_handoff_refused digest-mismatch 1
+    # `upload_write` FAILING is carried out of the pipeline rather than hidden by
+    # the last stage's status, which is what `pipefail` is in the flow for.
+    step5_handoff write-fails "$want" writefails
+    step5_handoff_refused write-failure 1
+    # A COMMIT FAILURE leaves nothing public, because the committed flag is still
+    # 0 when the trap runs.
+    step5_handoff commit-fails "$want" commitfails
+    step5_handoff_refused commit-failure 1
+    # AN `upload_begin` FAILURE stages nothing, and NO ABORT IS ATTEMPTED,
+    # because no stage exists to abort.
+    step5_handoff begin-fails "$want" beginfails
+    step5_handoff_refused begin-failure 0
+    # AN ABORT FAILURE still refuses, and names the stage on stderr so an
+    # operator can find what may persist. Its scratch postcondition is the same
+    # as the others: a failing abort does not excuse a retained scratch.
+    step5_handoff abort-fails "0000000000000000000000000000000000000000000000000000000000000000" abortfails
+    step5_handoff_refused abort-failure 1
+    chk "step5/handoff/abort-failure-names-the-stage" "yes" \
+        "$(printf '%s' "$HANDOFF_OUT" | grep -q 'may persist' && echo yes || echo no)"
+
+    # A WRITER THAT NEVER ARRIVES MUST NOT HANG THE RUN, which is a LIVENESS
+    # claim and needs a bounded case to be one. The hasher blocks in its own
+    # open until something opens the FIFO for writing, so a `tee` that fails
+    # immediately used to leave this process waiting for a writer that would
+    # never exist. The assertion is that the run ENDS, and `timeout` reporting
+    # 124 is what failure looks like here.
+    stub="$dir/stub.teefails"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub/staging" "$stub/fakebin" || true
+    chmod 700 "$stub/staging"
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    printf 'the archive bytes\n' > "$stub/archive.bin"
+    printf '#!/bin/bash\nexit 1\n' > "$stub/fakebin/tee"
+    chmod +x "$stub/fakebin/tee"
+    if ! command -v timeout >/dev/null 2>&1; then
+        fail "step5/handoff/bounded-runner" "timeout is required for the liveness case"
+        return
+    fi
+    # shellcheck disable=SC2016  # the body belongs to the bounded child shell:
+    # its `$1`..`$5` are the arguments passed after `_`, and expanding them here
+    # would bake this harness's values into the process being measured.
+    timeout -k 1 20 "${BASH:-bash}" -c '
+        set +u
+        . "$1"
+        . "$2"
+        PATH="$3:$PATH"
+        CLOSURE_PUBLISH_STAGING="$4"
+        exec {CPLX_CLOSURE_ARCHIVE_FD}< "$5"
+        closure_publish_upload 0000000000000000000000000000000000000000000000000000000000000000
+    ' _ "$publish" "$adapter" "$stub/fakebin" "$stub/staging" "$stub/archive.bin" \
+        > /dev/null 2>&1
+    rc=$?
+    chk "step5/handoff/writer-never-arrives-refuses-promptly" "1" "$rc"
+    chk "step5/handoff/writer-never-arrives-aborts-once" "1" "$(step5_abort_count "$stub")"
+    chk "step5/handoff/writer-never-arrives-removes-scratch" "" \
+        "$(oneline "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)")"
+    chk "step5/handoff/writer-never-arrives-publishes-nothing" "0" "$(step5_public_count "$stub")"
+
+    # THE DESCRIPTOR BINDS THE CHECKS AND THE UPLOAD TO ONE INODE. The promoted
+    # name is inside a directory this account owns, so it can be unlinked and
+    # replaced after promotion; what must not change is what an already-open
+    # descriptor reads. This is the property that makes checked bytes and
+    # uploaded bytes the same file rather than the same path.
+    root="$dir/instance"
+    mkdir -p -- "$root/staging" || true
+    chmod 700 "$root/staging"
+    printf 'the original archive bytes\n' > "$root/candidate.bin"
+    want=$(sha256sum < "$root/candidate.bin"); want="${want%% *}"
+    # shellcheck disable=SC2034,SC2016  # the staging root is read by the
+    # production module sourced inside the subshell, and the single-quoted body
+    # of the bounded child above belongs to that child rather than to this file.
+    got=$( ( set +u
+        # shellcheck source=/dev/null
+        . "$publish"
+        CLOSURE_PUBLISH_STAGING="$root/staging"
+        closure_publish_promote "$root/candidate.bin" "$root/staging" >/dev/null 2>&1 || exit 1
+        exec {fd}< "$CLOSURE_PUBLISH_PROMOTED"
+        # The name is replaced AFTER the open, which is exactly the window the
+        # pathname-based version left open between checking and uploading.
+        rm -f -- "$CLOSURE_PUBLISH_PROMOTED"
+        printf 'entirely different bytes\n' > "$CLOSURE_PUBLISH_PROMOTED"
+        sha256sum < "/dev/fd/$fd" ) 2>/dev/null )
+    got="${got%% *}"
+    chk "step5/instance/open-descriptor-survives-replacement" "$want" "$got"
+
+    # AND AN IN-PLACE WRITE IS CAUGHT, which the descriptor alone does not stop.
+    # `/dev/fd/N` returns to the same INODE rather than to a frozen copy, so an
+    # A-to-B-to-A sequence could let the checks read B while the upload hashed A.
+    # The snapshot the checks run against is refused unless it hashes to the
+    # identity, so the two halves are bound to one value rather than to one path.
+    # IT DRIVES `closure_publish_main`, AND THAT IS THE POINT OF THE CASE. An
+    # earlier version recreated the snapshot copy and the comparison inside the
+    # harness, so it asserted that the harness could compute a digest: deleting
+    # the production guard would have left it passing. A regression case that
+    # survives the removal of the thing it guards is not a regression case.
+    #
+    # The mutation is injected where the production code reads, by putting a
+    # `cat` earlier on PATH that appends a byte. Promotion hashes the completed
+    # copy, so the identity is the digest of what promotion captured; the
+    # snapshot read then goes through the stub again and yields different bytes,
+    # which is an in-place change from the guard's point of view. WITHOUT the
+    # guard the run proceeds into step 1 on bytes the identity does not describe,
+    # and the last assertion below is what fails in that case.
+    root="$dir/inplace"
+    rm -rf -- "$root"
+    mkdir -p -- "$root/staging" "$root/results" "$root/fakebin" || true
+    chmod 700 "$root/staging"
+    printf 'the original archive bytes\n' > "$root/candidate.bin"
+    # shellcheck disable=SC2016  # `$real` and `$@` belong to the stub being
+    # written, not to this harness: expanding them here would bake this file's
+    # values into a script the production code is about to invoke.
+    { printf '#!/bin/bash\n'
+      printf 'real=/bin/cat\n'
+      printf '"$real" "$@"\n'
+      printf 'printf %s\n' "'x'"; } > "$root/fakebin/cat"
+    chmod +x "$root/fakebin/cat"
+    # shellcheck disable=SC2031  # scoped to this command on purpose: the stub
+    # applies to the run under test and to nothing else.
+    out=$(PATH="$root/fakebin:$PATH" timeout 60 bash "$publish" \
+        --archive "$root/candidate.bin" --commit "$commit" --repo "$cplxrepo" \
+        --results "$root/results" --staging-root "$root/staging" 2>&1); rc=$?
+    chk "step5/instance/in-place-write-refuses" "1" "$rc"
+    chk "step5/instance/in-place-write-refused-at-step-0" "yes" \
+        "$(printf '%s' "$out" | grep -q 'REFUSED at step 0' && echo yes || echo no)"
+    # THE DIAGNOSTIC NAMES THE CHANGE, which is what distinguishes this refusal
+    # from every other step 0 refusal and is what would stop being printed if the
+    # guard were removed.
+    chk "step5/instance/in-place-write-names-the-change" "yes" \
+        "$(printf '%s' "$out" | grep -q 'changed under its own identity' && echo yes || echo no)"
+
+    # DESCRIPTOR VERSUS PATHNAME, PROVED BY WHAT WAS PUBLISHED. Hashing
+    # `/dev/fd/N` in the harness shows that a descriptor survives replacement; it
+    # cannot show that the PRODUCTION UPLOADER reads that descriptor rather than
+    # reopening the promoted name. Only the bytes the stub received can say that,
+    # so this case replaces the name after the open and then compares what the
+    # uploader made public against the ORIGINAL content.
+    stub="$dir/stub.replaced"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub/staging" || true
+    chmod 700 "$stub/staging"
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    printf 'the original archive bytes\n' > "$stub/archive.bin"
+    want=$(sha256sum < "$stub/archive.bin"); want="${want%% *}"
+    # shellcheck disable=SC2016  # the body belongs to the bounded child shell
+    HANDOFF_OUT=$(timeout -k 5 20 "${BASH:-bash}" -c '
+        set +u
+        . "$1"
+        . "$2"
+        CLOSURE_PUBLISH_STAGING="$3"
+        closure_publish_promote "$4" "$3" >/dev/null 2>&1 || exit 1
+        exec {CPLX_CLOSURE_ARCHIVE_FD}< "$CLOSURE_PUBLISH_PROMOTED"
+        rm -f -- "$CLOSURE_PUBLISH_PROMOTED"
+        printf "an entirely different archive\n" > "$CLOSURE_PUBLISH_PROMOTED"
+        closure_publish_upload "$5"
+    ' _ "$publish" "$adapter" "$stub/staging" "$stub/archive.bin" "$want" 2>&1)
+    HANDOFF_RC=$?
+    chk "step5/instance/upload-after-replacement-succeeds" "0" "$HANDOFF_RC"
+    chk "step5/instance/published-bytes-are-the-original" "$want" \
+        "$(sha256sum < "$stub/public/object" 2>/dev/null | cut -d' ' -f1)"
+    # AND THE REPLACEMENT IS REALLY THERE, so the case cannot pass because the
+    # replacement silently failed to happen.
+    chk "step5/instance/the-name-really-was-replaced" "yes" \
+        "$( [ "$(find "$stub/staging" -maxdepth 1 -type f ! -name '.*' -exec sha256sum {} + 2>/dev/null | cut -d' ' -f1 | grep -c "^$want$" || true)" = "0" ] && echo yes || echo no )"
+
+    # A `cat` FAILURE IS THE TWIN OF THE `tee` ONE, and it is a separate case
+    # because `pipefail` is what makes either visible: without it the captured
+    # status carries only the last stage of the pipeline.
+    stub="$dir/stub.catfails"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub/staging" "$stub/fakebin" || true
+    chmod 700 "$stub/staging"
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    printf 'the archive bytes\n' > "$stub/archive.bin"
+    printf '#!/bin/bash\nexit 1\n' > "$stub/fakebin/cat"
+    chmod +x "$stub/fakebin/cat"
+    # THE FAILING STAGE IS ISOLATED. The stub adapter writes with `dd`, so a
+    # `cat` that fails takes down the pipeline's FIRST stage and nothing else;
+    # an adapter that also used `cat` would have failed two stages at once and
+    # the case could not say which one it measured.
+    #
+    # THE EXPECTED DIGEST IS THE REAL ONE, so the refusal cannot come from a
+    # mismatch this case planted rather than from the failure it is about.
+    want=$(sha256sum < "$stub/archive.bin"); want="${want%% *}"
+    # shellcheck disable=SC2016  # the body belongs to the bounded child shell.
+    timeout -k 5 20 "${BASH:-bash}" -c '
+        set +u
+        . "$1"
+        . "$2"
+        PATH="$3:$PATH"
+        CLOSURE_PUBLISH_STAGING="$4"
+        exec {CPLX_CLOSURE_ARCHIVE_FD}< "$5"
+        closure_publish_upload "$6"
+    ' _ "$publish" "$adapter" "$stub/fakebin" "$stub/staging" "$stub/archive.bin" "$want" \
+        > /dev/null 2>&1
+    rc=$?
+    chk "step5/handoff/cat-failure-refuses-promptly" "1" "$rc"
+    chk "step5/handoff/cat-failure-aborts-once" "1" "$(step5_abort_count "$stub")"
+    chk "step5/handoff/cat-failure-removes-scratch" "" \
+        "$(oneline "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)")"
+    chk "step5/handoff/cat-failure-publishes-nothing" "0" "$(step5_public_count "$stub")"
+
+
+    # ONE SHAPE, FIVE FAILURES. Each plants a failing stub for one command the
+    # transaction depends on, earlier on PATH, and every case asserts the same
+    # postconditions: the run ends within a bound, refuses, publishes nothing.
+    # They differ in WHERE the failure lands, which is the whole point: preflight
+    # refuses before a stage exists, and the later ones refuse after one does.
+    # EACH CASE STATES ITS OWN LIFECYCLE, because termination and no public
+    # object are the same answer for every failure and therefore distinguish
+    # none of them. What differs is WHERE the failure lands: `chmod` runs before
+    # `upload_begin`, so nothing is ever staged and nothing may be aborted;
+    # everything after it owns a stage and must abort exactly once and leave no
+    # scratch behind.
+    step5_stub_failure() {
+        local tool="$1" name="$2" begins="$3" aborts="$4" body="${5:-exit 1}"
+        stub="$dir/stub.$name"
+        rm -rf -- "$stub"
+        mkdir -p -- "$stub/staging" "$stub/fakebin" || return
+        chmod 700 "$stub/staging"
+        adapter="$stub/adapter.sh"
+        step5_write_adapter "$adapter" "$stub" ok
+        printf 'the archive bytes\n' > "$stub/archive.bin"
+        printf '#!/bin/bash\n%s\n' "$body" > "$stub/fakebin/$tool"
+        chmod +x "$stub/fakebin/$tool"
+        want=$(sha256sum < "$stub/archive.bin"); want="${want%% *}"
+        # shellcheck disable=SC2016  # the body belongs to the bounded child shell
+        HANDOFF_OUT=$(timeout -k 5 20 "${BASH:-bash}" -c '
+            set +u
+            . "$1"
+            . "$2"
+            PATH="$3:$PATH"
+            CLOSURE_PUBLISH_STAGING="$4"
+            exec {CPLX_CLOSURE_ARCHIVE_FD}< "$5"
+            closure_publish_upload "$6"
+        ' _ "$publish" "$adapter" "$stub/fakebin" "$stub/staging" "$stub/archive.bin" "$want" 2>&1)
+        HANDOFF_RC=$?
+        chk "step5/handoff/$name-terminates" "yes" \
+            "$( [ "$HANDOFF_RC" -ne 124 ] && echo yes || echo no )"
+        chk "step5/handoff/$name-refuses" "1" "$HANDOFF_RC"
+        chk "step5/handoff/$name-publishes-nothing" "0" "$(step5_public_count "$stub")"
+        chk "step5/handoff/$name-stages-as-expected" "$begins" "$(step5_begin_count "$stub")"
+        chk "step5/handoff/$name-aborts-as-expected" "$aborts" "$(step5_abort_count "$stub")"
+        chk "step5/handoff/$name-removes-scratch" "" \
+            "$(oneline "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)")"
+    }
+
+    # PREFLIGHT, AND THE PARTICIPANT IS ISOLATED. An earlier version pointed PATH
+    # at a nonexistent directory, which removed `mktemp` along with the intended
+    # participant: `mktemp -d` then failed before a stage existed and the case's
+    # three assertions all passed WITHOUT the preflight loop being involved at
+    # all. Removing every tool proves nothing about a loop that checks for one.
+    #
+    # So the fixture keeps every command the transaction needs and withholds
+    # exactly one, `tee`, by building a directory of links to the real tools and
+    # pointing PATH at it alone. The diagnostic naming that command is what
+    # separates this from any other early failure.
+    stub="$dir/stub.preflight"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub/staging" "$stub/onlybin" || true
+    chmod 700 "$stub/staging"
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    printf 'the archive bytes\n' > "$stub/archive.bin"
+    for tool in cat mkfifo sha256sum mktemp chmod rm dd find ln; do
+        tp=$(command -v "$tool" 2>/dev/null) || continue
+        ln -s -- "$tp" "$stub/onlybin/$tool" 2>/dev/null || true
+    done
+    want=$(sha256sum < "$stub/archive.bin"); want="${want%% *}"
+    # shellcheck disable=SC2016  # the body belongs to the bounded child shell
+    HANDOFF_OUT=$(timeout -k 5 20 "${BASH:-bash}" -c '
+        set +u
+        . "$1"
+        . "$2"
+        PATH="$3"
+        CLOSURE_PUBLISH_STAGING="$4"
+        exec {CPLX_CLOSURE_ARCHIVE_FD}< "$5"
+        closure_publish_upload "$6"
+    ' _ "$publish" "$adapter" "$stub/onlybin" "$stub/staging" "$stub/archive.bin" "$want" 2>&1)
+    HANDOFF_RC=$?
+    chk "step5/handoff/preflight-refuses" "1" "$HANDOFF_RC"
+    # THE DIAGNOSTIC NAMES THE MISSING COMMAND, which is the assertion that
+    # cannot pass without the preflight loop: every other early failure refuses
+    # for a different reason and says so.
+    chk "step5/handoff/preflight-names-the-missing-command" "yes" \
+        "$(printf '%s' "$HANDOFF_OUT" | grep -q 'the transaction needs tee' && echo yes || echo no)"
+    chk "step5/handoff/preflight-stages-nothing" "0" "$(step5_begin_count "$stub")"
+    chk "step5/handoff/preflight-leaves-no-scratch" "" \
+        "$(oneline "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)")"
+    chk "step5/handoff/preflight-publishes-nothing" "0" "$(step5_public_count "$stub")"
+
+    # SETUP AND PARTICIPANT FAILURES, each with the lifecycle its position
+    # implies: `chmod` runs before `upload_begin`, the rest after it.
+    step5_stub_failure chmod chmod-fails 0 0
+    step5_stub_failure mkfifo mkfifo-fails 1 1
+    # A HASHER THAT FAILS is not the same as one that hangs: this one exits, and
+    # the comparison must still refuse rather than accept an absent digest.
+    # THE STUB MUST DRAIN THE FIFO BEFORE FAILING, or it is not the case it
+    # claims. A hasher that exits immediately never opens the FIFO for reading,
+    # so `tee` fails on a pipe with no reader and the refusal comes from the
+    # PIPELINE rather than from the hasher branch: the assertions pass and the
+    # branch under test never runs. Reading stdin to the end first is what makes
+    # the failure the hasher's own.
+    # AND IT EMITS THE CORRECT DIGEST WHILE FAILING, which is the only way this
+    # case tests what it names. Production checks the digest file for CONTENT
+    # before it tests the awaited status, so a stub that drains and prints
+    # nothing refuses through the empty-file branch and the status capture is
+    # never consulted: the case would pass unchanged if `hash_rc` were ignored
+    # entirely. Emitting the RIGHT digest removes every other reason to refuse
+    # and leaves the awaited status as the only one.
+    hashdigest=$(printf 'the archive bytes\n' | sha256sum); hashdigest="${hashdigest%% *}"
+    step5_stub_failure sha256sum hasher-fails 1 1 \
+        "cat > /dev/null; printf '%s  -\\n' $hashdigest; exit 1"
+    # AN EMPTY DIGEST RESULT is checked for CONTENT before it is read, so the run
+    # refuses rather than comparing an empty string to the identity.
+    # THE SAME DRAIN, and then a clean exit that writes nothing: the digest file
+    # exists and is EMPTY, which is the branch that checks for content before
+    # reading rather than comparing an empty string to the identity.
+    step5_stub_failure sha256sum empty-digest 1 1 'cat > /dev/null; exit 0'
+    chk "step5/handoff/empty-digest-names-the-read-back" "yes" \
+        "$(printf '%s' "$HANDOFF_OUT" | grep -q 'digest could not be read back' && echo yes || echo no)"
+    # SCRATCH REMOVAL FAILING DOES NOT CHANGE THE VERDICT, and this case is
+    # deliberately NOT run through the helper above, because the helper asserts a
+    # refusal and a refusal is the wrong answer here. The design is explicit:
+    # local cleanup is an operator concern and the publication verdict does not
+    # depend on it, so a run whose only failure is `rm` COMMITS, stays exit 0,
+    # leaves its object public, and names the retained path on stderr. Asserting
+    # a refusal would have encoded the opposite rule.
+    stub="$dir/stub.rmfails"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub/staging" "$stub/fakebin" || true
+    chmod 700 "$stub/staging"
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    printf 'the archive bytes\n' > "$stub/archive.bin"
+    printf '#!/bin/bash\nexit 1\n' > "$stub/fakebin/rm"
+    chmod +x "$stub/fakebin/rm"
+    want=$(sha256sum < "$stub/archive.bin"); want="${want%% *}"
+    # shellcheck disable=SC2016  # the body belongs to the bounded child shell
+    HANDOFF_OUT=$(timeout -k 5 20 "${BASH:-bash}" -c '
+        set +u
+        . "$1"
+        . "$2"
+        PATH="$3:$PATH"
+        CLOSURE_PUBLISH_STAGING="$4"
+        exec {CPLX_CLOSURE_ARCHIVE_FD}< "$5"
+        closure_publish_upload "$6"
+    ' _ "$publish" "$adapter" "$stub/fakebin" "$stub/staging" "$stub/archive.bin" "$want" 2>&1)
+    HANDOFF_RC=$?
+    chk "step5/handoff/scratch-removal-failure-keeps-the-verdict" "0" "$HANDOFF_RC"
+    chk "step5/handoff/scratch-removal-failure-still-published" "1" "$(step5_public_count "$stub")"
+    chk "step5/handoff/scratch-removal-failure-names-the-path" "yes" \
+        "$(printf '%s' "$HANDOFF_OUT" | grep -q 'NOT removed' && echo yes || echo no)"
+
+    # A CANDIDATE PATHNAME OFFERED WHERE THE DESCRIPTOR BELONGS, and the oracle
+    # is what the stub made PUBLIC rather than the exit status. The expected
+    # digest handed in is the REAL digest of the file that pathname names, so an
+    # implementation that quietly reopened the name would stream those bytes,
+    # match the identity, commit, and leave one public object. "Nothing public
+    # while the expected digest is correct" is therefore an assertion the
+    # pathname-reopening version cannot pass, which "it refused" is not: every
+    # refusal in this section shares that status.
+    stub="$dir/stub.pathname"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub/staging" || true
+    chmod 700 "$stub/staging"
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    printf 'the archive bytes\n' > "$stub/archive.bin"
+    want=$(sha256sum < "$stub/archive.bin"); want="${want%% *}"
+    # shellcheck disable=SC2016  # the body belongs to the bounded child shell:
+    # `$4` is the PATHNAME this case puts where a descriptor number belongs, and
+    # the production module is what has to refuse it.
+    HANDOFF_OUT=$(timeout -k 5 20 "${BASH:-bash}" -c '
+        set +u
+        . "$1"
+        . "$2"
+        CLOSURE_PUBLISH_STAGING="$3"
+        CPLX_CLOSURE_ARCHIVE_FD="$4"
+        closure_publish_upload "$5"
+    ' _ "$publish" "$adapter" "$stub/staging" "$stub/archive.bin" "$want" 2>&1)
+    HANDOFF_RC=$?
+    chk "step5/handoff/pathname-terminates" "yes" \
+        "$( [ "$HANDOFF_RC" -ne 124 ] && echo yes || echo no )"
+    chk "step5/handoff/pathname-refuses" "1" "$HANDOFF_RC"
+    chk "step5/handoff/pathname-publishes-nothing" "0" "$(step5_public_count "$stub")"
+    chk "step5/handoff/pathname-stages-once" "1" "$(step5_begin_count "$stub")"
+    chk "step5/handoff/pathname-aborts-once" "1" "$(step5_abort_count "$stub")"
+    chk "step5/handoff/pathname-removes-scratch" "" \
+        "$(oneline "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)")"
+    # AND THE REFUSAL IS THE TRANSACTION'S OWN, at step 4, rather than a shell
+    # error that ended the run before a stage ever existed.
+    chk "step5/handoff/pathname-refuses-at-step-4" "yes" \
+        "$(printf '%s' "$HANDOFF_OUT" | grep -q 'REFUSED at step 4' && echo yes || echo no)"
+
+    # THE CONTROL FOR IT: same fixture, same file, same expected digest, same
+    # stub, and a REAL descriptor. It commits and publishes exactly those bytes.
+    # Without this pair the refusal above could come from anything in the
+    # fixture rather than from the substitution the case is named for.
+    stub="$dir/stub.descriptor-control"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub/staging" || true
+    chmod 700 "$stub/staging"
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    printf 'the archive bytes\n' > "$stub/archive.bin"
+    want=$(sha256sum < "$stub/archive.bin"); want="${want%% *}"
+    # shellcheck disable=SC2016  # the body belongs to the bounded child shell
+    HANDOFF_OUT=$(timeout -k 5 20 "${BASH:-bash}" -c '
+        set +u
+        . "$1"
+        . "$2"
+        CLOSURE_PUBLISH_STAGING="$3"
+        exec {CPLX_CLOSURE_ARCHIVE_FD}< "$4"
+        closure_publish_upload "$5"
+    ' _ "$publish" "$adapter" "$stub/staging" "$stub/archive.bin" "$want" 2>&1)
+    HANDOFF_RC=$?
+    chk "step5/handoff/descriptor-control-commits" "0" "$HANDOFF_RC"
+    chk "step5/handoff/descriptor-control-publishes-the-bytes" "$want" \
+        "$(sha256sum < "$stub/public/object" 2>/dev/null | cut -d' ' -f1)"
+
+    # --- a real signal, and the cleanup it cannot enter twice --------------------
+    #
+    # EVERY FAILURE PLANTED ABOVE IS A COMMAND EXITING NON-ZERO. A signal is a
+    # different shape: it arrives asynchronously, it reaches `cat`, `tee` and the
+    # uploader subshell as well as the shell that traps it, and the cleanup it
+    # triggers can itself be interrupted. Nothing above measures any of that, so
+    # the trap block and the single-entry cleanup were the only part of this
+    # transaction with no case behind them.
+    #
+    # THE SIGNAL IS SYNCHRONISED WITH A PHASE, NOT WITH A CLOCK. The stub writes
+    # a readiness file on ENTRY to the phase under test and then waits there, so
+    # the signal is delivered while the run is demonstrably inside that phase. A
+    # `sleep` in the harness would deliver it wherever the machine happened to
+    # be, and the case would measure load rather than behaviour.
+    #
+    # THE SIGNAL GOES TO A PROCESS GROUP, which is what Ctrl-C does and is the
+    # only delivery that reaches the pipeline as well as the shell that traps it.
+    # Signalling the shell alone proves nothing here: bash defers a trap until
+    # the foreground command completes, so the pipeline would run to the end and
+    # the transaction would commit before the trap was ever consulted. `setsid`
+    # gives the run its own process group, so the group IS the run: `timeout`
+    # stays outside it and keeps its bound over a case that kills a group.
+    section "step 5 signals: an interruption, and the cleanup it cannot enter twice"
+    step5_signal_wait() {
+        local marker="$1" i=0
+        while [ ! -e "$marker" ] && [ "$i" -lt 300 ]; do sleep 0.1; i=$((i + 1)); done
+        [ -e "$marker" ]
+    }
+    # One runner for both interruption cases. It records the phase it reached,
+    # because "the signal was delivered somewhere" and "the signal was delivered
+    # in the stream" are different claims and only the second one is the case.
+    step5_signal_run() {
+        local name="$1" mode="$2" expected="$3" marker="$4" release="$5"
+        local pid="" i=0
+        stub="$dir/stub.$name"
+        rm -rf -- "$stub"
+        mkdir -p -- "$stub/staging" || return
+        chmod 700 "$stub/staging"
+        adapter="$stub/adapter.sh"
+        step5_write_adapter "$adapter" "$stub" "$mode"
+        printf 'the archive bytes\n' > "$stub/archive.bin"
+        if [ "$expected" = real ]; then
+            expected=$(sha256sum < "$stub/archive.bin"); expected="${expected%% *}"
+        fi
+        # shellcheck disable=SC2016  # the body belongs to the bounded child
+        # shell. `$$` is ITS pid, and `setsid` has made that pid its own process
+        # group, which is the value this case signals.
+        timeout -k 5 30 setsid --wait "${BASH:-bash}" -c '
+            set +u
+            . "$1"
+            . "$2"
+            CLOSURE_PUBLISH_STAGING="$3"
+            printf "%s\n" "$$" > "$6"
+            exec {CPLX_CLOSURE_ARCHIVE_FD}< "$4"
+            closure_publish_upload "$5"
+        ' _ "$publish" "$adapter" "$stub/staging" "$stub/archive.bin" "$expected" \
+            "$stub/child.pid" > "$stub/out.log" 2>&1 &
+        SIGNAL_RUNNER=$!
+        if step5_signal_wait "$stub/$marker"; then
+            SIGNAL_PHASE=reached
+            pid=$(cat "$stub/child.pid" 2>/dev/null)
+            kill -INT -"$pid" 2>/dev/null || true
+            while kill -0 "$pid" 2>/dev/null && [ "$i" -lt 30 ]; do
+                sleep 0.1; i=$((i + 1))
+            done
+        else
+            SIGNAL_PHASE=missed
+        fi
+        # THE RELEASE IS A SAFETY VALVE AND NOT A TIMING ASSUMPTION. The phase
+        # was reached by observation and the signal has already been sent; this
+        # only guarantees that a run the signal FAILED to end still finishes and
+        # fails loudly rather than sitting on the bound. On a passing run the
+        # process is gone before it is written, so it decides nothing.
+        : > "$stub/$release"
+        wait "$SIGNAL_RUNNER"; SIGNAL_RC=$?
+    }
+
+    if ! command -v setsid >/dev/null 2>&1; then
+        fail "step5/signal/group-runner" "setsid is required for the two interruption cases"
+    else
+        # AN INTERRUPTION DURING THE STREAM. The stub announces that
+        # `upload_write` has been entered and holds the pipeline open there, so
+        # the group signal lands with bytes in flight rather than before or
+        # after. The trap converts it into `exit 130`, the EXIT trap aborts the
+        # one stage that exists, and nothing is public.
+        step5_signal_run stream-interrupted stream-waits real \
+            streaming.ready stream.release
+        chk "step5/signal/stream-reaches-the-stream" "reached" "$SIGNAL_PHASE"
+        chk "step5/signal/stream-terminates" "yes" \
+            "$( [ "$SIGNAL_RC" -ne 124 ] && echo yes || echo no )"
+        chk "step5/signal/stream-exits-130" "130" "$SIGNAL_RC"
+        chk "step5/signal/stream-publishes-nothing" "0" "$(step5_public_count "$stub")"
+        chk "step5/signal/stream-had-a-stage-to-abort" "1" "$(step5_begin_count "$stub")"
+        chk "step5/signal/stream-aborts-exactly-once" "1" "$(step5_abort_count "$stub")"
+        chk "step5/signal/stream-removes-scratch" "" \
+            "$(oneline "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)")"
+
+        # A SIGNAL DURING CLEANUP. A wrong expected digest refuses at step 4, the
+        # EXIT trap enters `closure_publish_cleanup`, and the stub announces that
+        # `upload_abort` has been entered and waits there. The group signal
+        # arrives inside that abort.
+        #
+        # THE ORACLE IS THE ABORT COUNT AND NOT THE EXIT STATUS, which is the
+        # plan's own wording for this case: cleanup resets EXIT, INT, TERM and
+        # HUP on entry, so the second signal ends the process, and every failure
+        # in this section already shares a status. What distinguishes a
+        # single-entry cleanup from a re-entrant one is that `upload_abort` was
+        # entered ONCE, and the stub appends its count before it waits so a
+        # second entry would be visible even though the first never returns.
+        #
+        # THE SCRATCH IS ASSERTED PRESENT HERE, and that is the honest statement
+        # of its lifetime on this one path rather than an exception carved out
+        # for convenience: the process was killed inside the abort, so the
+        # removal that follows the abort never ran. The stage object the stub
+        # was told to destroy is still there for the same reason, and that is
+        # what proves the signal landed in the cleanup rather than beside it.
+        step5_signal_run cleanup-interrupted abort-waits \
+            0000000000000000000000000000000000000000000000000000000000000000 \
+            aborting.ready abort.release
+        chk "step5/signal/cleanup-reaches-the-abort" "reached" "$SIGNAL_PHASE"
+        chk "step5/signal/cleanup-terminates" "yes" \
+            "$( [ "$SIGNAL_RC" -ne 124 ] && echo yes || echo no )"
+        chk "step5/signal/cleanup-refused-before-the-abort" "yes" \
+            "$(grep -q 'REFUSED at step 4' "$stub/out.log" && echo yes || echo no)"
+        chk "step5/signal/cleanup-aborts-exactly-once" "1" "$(step5_abort_count "$stub")"
+        chk "step5/signal/cleanup-publishes-nothing" "0" "$(step5_public_count "$stub")"
+        chk "step5/signal/cleanup-ended-inside-the-abort" "yes" \
+            "$( [ -e "$stub/stage/object" ] && echo yes || echo no )"
+        chk "step5/signal/cleanup-keeps-the-scratch-it-died-in" "yes" \
+            "$( [ -n "$(find "$stub/staging" -maxdepth 1 -name '.pub.*' -type d 2>/dev/null)" ] \
+                && echo yes || echo no )"
+        note "step5/signal/cleanup-status" "$SIGNAL_RC"
+    fi
+    # --- publication as an ORDER ------------------------------------------------
+    #
+    # PUBLICATION KEEPS ITS REPOSITORY, and the contrast with the gate above is
+    # the point rather than an inconsistency. The topology puts `closure_publish.sh`
+    # in cplx only: it runs where the repository is, so resolving a configuration
+    # out of a commit is something it can actually do. Packaging runs on an
+    # account that has no repository, which is why the gate above stages from a
+    # deployed tree. One effort, two sides of that line, and only packaging was
+    # ever on the wrong one.
+    section "step 5 publication: the order is the assertion, not the set"
+    root="$dir/publication"
+    mkdir -p -- "$root/staging" "$root/results" || true
+    chmod 700 "$root/staging"
+    # An archive whose bundle was stripped must fail at STEP 1, before the waiver
+    # question is ever asked. The assertion is the step NUMBER in the refusal.
+    mkdir -p -- "$root/tree/tools/closure" || true
+    printf 'nothing useful\n' > "$root/tree/tools/placeholder"
+    tar -czf "$root/stripped.tar.gz" -C "$root/tree" tools 2>/dev/null
+    out=$(bash "$publish" --archive "$root/stripped.tar.gz" --commit "$commit" \
+        --repo "$cplxrepo" --results "$root/results" --staging-root "$root/staging" 2>&1); rc=$?
+    chk "step5/publication/stripped-bundle-refuses" "1" "$rc"
+    chk "step5/publication/stripped-fails-at-step-1" "yes" \
+        "$(printf '%s' "$out" | grep -q 'REFUSED at step 1' && echo yes || echo no)"
+    chk "step5/publication/stripped-never-reaches-the-waiver-question" "yes" \
+        "$(printf '%s' "$out" | grep -q 'REFUSED at step 4' && echo no || echo yes)"
+    # AN ARCHIVE WHOSE COMPARISON NEVER RAN is refused at step 2, and the
+    # refusal names the identity publication computed rather than one it read.
+    rm -rf -- "$root/tree"
+    mkdir -p -- "$root/tree/tools/closure" || true
+    cp -- "$cplxrepo/src/setups/env/closure/closure-config.txt" "$root/tree/tools/closure/closure-config.txt"
+    step2_write_envelope "$root/tree/tools/closure/closure-envelope.txt" \
+        "$(config_digest "$root/tree/tools/closure/closure-config.txt")" \
+        "src/setups/env/closure/closure-config.txt" "$commit"
+    tar -czf "$root/candidate.tar.gz" -C "$root/tree" tools 2>/dev/null
+    out=$(bash "$publish" --archive "$root/candidate.tar.gz" --commit "$commit" \
+        --repo "$cplxrepo" --results "$root/results" --staging-root "$root/staging" 2>&1); rc=$?
+    chk "step5/publication/no-comparison-refuses" "1" "$rc"
+    chk "step5/publication/no-comparison-fails-at-step-2" "yes" \
+        "$(printf '%s' "$out" | grep -q 'REFUSED at step 2' && echo yes || echo no)"
+    chk "step5/publication/step-2-names-the-computed-identity" "yes" \
+        "$(printf '%s' "$out" | grep -q 'keyed to archive identity' && echo yes || echo no)"
+
+    # Keeping the envelope while stripping or changing its document must fail
+    # at step 1 too. A valid envelope alone proves nothing about carried bytes.
+    printf '\n# changed after the envelope was written\n' \
+        >> "$root/tree/tools/closure/closure-config.txt"
+    tar -czf "$root/changed-config.tar.gz" -C "$root/tree" tools
+    out=$(bash "$publish" --archive "$root/changed-config.tar.gz" --commit "$commit" \
+        --repo "$cplxrepo" --results "$root/results" --staging-root "$root/staging" 2>&1); rc=$?
+    chk "step5/publication/changed-config-refuses" "1" "$rc"
+    chk "step5/publication/changed-config-fails-at-step-1" "yes" \
+        "$(printf '%s' "$out" | grep -q 'REFUSED at step 1' && echo yes || echo no)"
+    rm -f -- "$root/tree/tools/closure/closure-config.txt"
+    tar -czf "$root/missing-config.tar.gz" -C "$root/tree" tools
+    out=$(bash "$publish" --archive "$root/missing-config.tar.gz" --commit "$commit" \
+        --repo "$cplxrepo" --results "$root/results" --staging-root "$root/staging" 2>&1); rc=$?
+    chk "step5/publication/missing-config-refuses" "1" "$rc"
+    chk "step5/publication/missing-config-fails-at-step-1" "yes" \
+        "$(printf '%s' "$out" | grep -q 'REFUSED at step 1' && echo yes || echo no)"
+
+    # Isolate the final adapter gate: even after all checks pass, absence of an
+    # uploader cannot report a committed publication.
+    # shellcheck disable=SC2034  # these fixture globals are read by the sourced publication entry point
+    # THE IDENTITY MUST BE THE REAL DIGEST, or this case never reaches the branch
+    # it names. A literal placeholder is rejected by the snapshot guard at step 0,
+    # so both assertions below would pass while the missing-adapter path stayed
+    # unexecuted: a refusal is not evidence of the refusal you meant.
+    step5_missing_adapter() {
+        local real=""
+        real=$(sha256sum -- "$1"); real="${real%% *}"
+        closure_publish_promote() {
+            CLOSURE_PUBLISH_PROMOTED="$1"
+            CLOSURE_PUBLISH_IDENTITY="$real"
+        }
+        closure_publish_step1() { CLOSURE_PUBLISH_CONFIG_DIGEST="checked-policy"; }
+        closure_publish_step2() { return 0; }
+        closure_publish_step34() { return 0; }
+        closure_publish_main --archive "$1" --commit "$2" --repo "$3" \
+            --results "$4" --staging-root "$5"
+    }
+    publish_call "$root/staging" step5_missing_adapter \
+        "$root/candidate.tar.gz" "$commit" "$cplxrepo" "$root/results" "$root/staging"
+    chk "step5/publication/no-adapter-refuses-after-checks" "1" "$PUBLISH_RC"
+    # THE STEP NUMBER IS THE ASSERTION. Step 4 is the missing-adapter branch, and
+    # naming it is what distinguishes this from the step 0 refusal the previous
+    # version of this case was actually measuring.
+    chk "step5/publication/no-adapter-refuses-at-step-4" "yes" \
+        "$(printf '%s' "$PUBLISH_OUT" | grep -q 'REFUSED at step 4' && echo yes || echo no)"
+    chk "step5/publication/no-adapter-reached-the-adapter-gate" "yes" \
+        "$(printf '%s' "$PUBLISH_OUT" | grep -q 'REFUSED at step 0' && echo no || echo yes)"
+    chk "step5/publication/no-adapter-never-reports-success" "yes" \
+        "$(printf '%s' "$PUBLISH_OUT" | grep -q 'CLOSURE PUBLICATION OK' && echo no || echo yes)"
+
+    # --- the gate and the boundary, end to end --------------------------------
+    #
+    # THE TWO HALVES MEET HERE. Everything above tests the gate or publication
+    # alone; this takes the archive the GATE actually produced, with an active
+    # waiver carried through it, and hands it to publication. The claim the whole
+    # step exists for is that such an archive is producible and NOT publishable,
+    # and only this case can make it.
+    section "step 5 end to end: a gated archive with an active waiver is refused"
+    # THE CASE PRODUCES ITS OWN ARCHIVE rather than taking whichever one is
+    # newest. Reading the last archive made this case depend on the order of
+    # every fixture above it: a later case that packaged again silently changed
+    # what was being published, and the refusal then came from somewhere other
+    # than the waiver. The state is planted here and the gate is run here.
+    # AND THE DEPLOYED DECLARATION IS RESTORED FIRST. The envelope-mismatch case
+    # above tampers with it and then regenerates a matching envelope, which
+    # leaves the deployed tree self-consistent but NOT what cplx holds. A gated
+    # archive built from it is refused by publication at STEP 1, correctly and
+    # for a reason that has nothing to do with waivers, and the case would be
+    # measuring that instead of the boundary it names.
+    cp -- "$src/../closure/closure-config.txt" "$repo/closure/closure-config.txt"
+    cp -- "$src/../closure/closure-envelope.txt" "$repo/closure/closure-envelope.txt"
+    rm -f -- "$home/tools/python/root/lib/libsqlite3.so.0"
+    rm -rf -- "$home/tools/closure"
+    HOME="$home" bash "$repo/bin/pkg.sh" tools --closure-gate > /dev/null 2>&1
+    archive=$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f -newer "$home/tools/bin/closure_check.sh" 2>/dev/null | sort | tail -1)
+    if [ -z "$archive" ]; then
+        archive=$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | sort | tail -1)
+    fi
+    if [ -z "$archive" ]; then
+        fail "step5/e2e/archive-exists" "the gate produced no archive to publish"
+    else
+        root="$dir/e2e"
+        rm -rf -- "$root"
+        mkdir -p -- "$root/staging" "$root/results" || true
+        chmod 700 "$root/staging"
+        # The verification result publication requires at step 2, keyed to the
+        # identity IT computes and naming the configuration IT resolved. Written
+        # here because verification is step 6's subject, not this step's.
+        id=$(sha256sum -- "$archive" | cut -d' ' -f1)
+        cfg=$(config_digest "$cplxrepo/src/setups/env/closure/closure-config.txt")
+        { printf 'state|passing\n'; printf 'configuration|%s\n' "$cfg"; } > "$root/results/$id"
+        out=$(bash "$publish" --archive "$archive" --commit "$commit" \
+            --repo "$cplxrepo" --results "$root/results" \
+            --staging-root "$root/staging" 2>&1); rc=$?
+        chk "step5/e2e/gated-archive-is-refused" "1" "$rc"
+        # STEP 4 IS THE ASSERTION. Refusing earlier would mean the archive failed
+        # for a reason that has nothing to do with the waiver, and the case would
+        # be green while proving nothing about the boundary it names.
+        chk "step5/e2e/refused-at-the-waiver-step" "yes" \
+            "$(printf '%s' "$out" | grep -q 'REFUSED at step 4' && echo yes || echo no)"
+        chk "step5/e2e/refusal-names-the-validation-artifact" "yes" \
+            "$(printf '%s' "$out" | grep -q 'validation artifact' && echo yes || echo no)"
+        chk "step5/e2e/no-mode-permits-it" "yes" \
+            "$(printf '%s' "$out" | grep -q 'no mode or flag permits' && echo yes || echo no)"
+    fi
+
+    # A PUBLICATION THAT SUCCEEDS, through the real entry point and a stub
+    # uploader. Every other publication case here is a refusal, and a boundary
+    # that only ever refuses is indistinguishable from one that refuses
+    # everything. This is the case that says the five steps can be satisfied.
+    #
+    # IT NEEDS A DECLARATION WITH NO WAIVER, because the committed one waives a
+    # member: present, the waiver is stale and refuses; absent, it is active and
+    # the archive is a validation artifact. Neither is a clean pass, so the
+    # fixture commits a waiver-free declaration and the archive carries it.
+    root="$dir/success"
+    rm -rf -- "$root"
+    mkdir -p -- "$root/staging" "$root/results" "$root/tree" || true
+    chmod 700 "$root/staging"
+    cleanrepo="$dir/cleanrepo"
+    mkdir -p -- "$cleanrepo/src/setups/env/bin" "$cleanrepo/src/setups/env/closure" || true
+    for module in "${CLOSURE_MODULES[@]}"; do
+        cp -- "$src/$module" "$cleanrepo/src/setups/env/bin/$module"
+    done
+    cp -- "$src/install_pkg.sh" "$cleanrepo/src/setups/env/bin/install_pkg.sh"
+    grep -v '^waiver|' "$src/../closure/closure-config.txt" \
+        > "$cleanrepo/src/setups/env/closure/closure-config.txt"
+    ( cd "$cleanrepo" || exit 1
+      git init -q . >/dev/null 2>&1
+      git config user.email harness@example.invalid
+      git config user.name harness
+      git add -A >/dev/null 2>&1
+      git commit -q -m 'a declaration with no waiver' >/dev/null 2>&1 ) || true
+    cleancommit=$(git -C "$cleanrepo" rev-parse HEAD 2>/dev/null)
+    # The tree the archive carries: the same one the gate checked, with the
+    # previously waived member present so nothing is absent and nothing is
+    # excused.
+    cp -r -- "$home/tools" "$root/tree/tools" 2>/dev/null
+    printf 'not an ELF: present, so nothing needs waiving\n' \
+        > "$root/tree/tools/python/root/lib/libsqlite3.so.0"
+    rm -rf -- "$root/tree/tools/closure"
+    mkdir -p -- "$root/tree/tools/closure" || true
+    cp -- "$cleanrepo/src/setups/env/closure/closure-config.txt" \
+        "$root/tree/tools/closure/closure-config.txt"
+    step2_write_envelope "$root/tree/tools/closure/closure-envelope.txt" \
+        "$(config_digest "$root/tree/tools/closure/closure-config.txt")" \
+        "src/setups/env/closure/closure-config.txt" "$cleancommit"
+    tar -czf "$root/candidate.tar.gz" -C "$root/tree" tools 2>/dev/null
+    id=$(sha256sum -- "$root/candidate.tar.gz" | cut -d' ' -f1)
+    cfg=$(config_digest "$cleanrepo/src/setups/env/closure/closure-config.txt")
+    { printf 'state|passing\n'; printf 'configuration|%s\n' "$cfg"; } > "$root/results/$id"
+    stub="$dir/stub.success"
+    rm -rf -- "$stub"
+    mkdir -p -- "$stub" || true
+    adapter="$stub/adapter.sh"
+    step5_write_adapter "$adapter" "$stub" ok
+    out=$(timeout -k 5 120 bash "$publish" --archive "$root/candidate.tar.gz" \
+        --commit "$cleancommit" --repo "$cleanrepo" --results "$root/results" \
+        --staging-root "$root/staging" --adapter "$adapter" 2>&1)
+    rc=$?
+    chk "step5/e2e/clean-publication-succeeds" "0" "$rc"
+    chk "step5/e2e/clean-publication-says-so" "yes" \
+        "$(printf '%s' "$out" | grep -q 'CLOSURE PUBLICATION OK' && echo yes || echo no)"
+    chk "step5/e2e/one-object-is-public" "1" "$(step5_public_count "$stub")"
+    # THE PUBLIC BYTES ARE THE ARCHIVE'S, asserted by digest rather than by the
+    # uploader's exit status. This is the property the whole descriptor and
+    # snapshot machinery exists to deliver, and it is the only case that can
+    # check it, because it is the only one that publishes anything.
+    chk "step5/e2e/public-bytes-are-the-archive" "$id" \
+        "$(sha256sum < "$stub/public/object" 2>/dev/null | cut -d' ' -f1)"
+}
 # ============================================================== the run, one step ===
 run_one_step() {
     local step="$1" tool state host sha sha_state k
@@ -3875,6 +5464,7 @@ run_one_step() {
             2) step2_suite ;;
             3) step3_suite ;;
             4) step4_suite ;;
+            5) step5_suite ;;
         esac
     else
         section "step $step suite"
