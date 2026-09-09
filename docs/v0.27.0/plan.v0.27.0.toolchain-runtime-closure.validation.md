@@ -1792,107 +1792,313 @@ The umbrella and every other validation-plan step remain unchanged.
 
 ### Analysis of Step 5 implementation state
 
-Not started. Step 5 is not implemented because `pkg.sh` still runs its `tar`
-with no gate in front of it, no waiver is validated, and
-`src/setups/env/bin/closure_publish.sh` does not exist.
+Yes. Step 5 has been fully implemented.
+
+Round 9 adds the last three acceptance cases the earlier rounds named: an
+interruption during the upload stream, a signal during cleanup, and a candidate
+pathname offered where the descriptor belongs. On RHEL 9.8 the step 5 suite is
+exit 0 at 223 cases, and no production behaviour changed in this round.
+
+BOTH SIGNAL CASES DELIVER A REAL SIGNAL TO A PROCESS GROUP. The stub announces
+entry to `upload_write` or to `upload_abort` and holds the run there, so SIGINT
+arrives while the run is demonstrably inside the phase under test rather than at
+a moment a `sleep` guessed. `setsid` gives the run its own process group, which
+is the only delivery that reaches `cat`, `tee` and the uploader subshell as well
+as the shell that traps them. Signalling the shell alone would prove nothing
+here: bash defers a trap until the foreground command completes, so the pipeline
+would run to the end and the transaction would commit before the trap was ever
+consulted.
+
+THE PATHNAME CASE IS PROVED BY WHAT WAS PUBLISHED. It hands the production
+handoff the REAL digest of the file whose name it puts in
+`CPLX_CLOSURE_ARCHIVE_FD`, so an implementation that reopened that name would
+stream those bytes, match the identity, commit, and leave one public object.
+"Nothing public while the expected digest is correct" is therefore an assertion
+the pathname-reopening version cannot pass, which "it refused" is not: every
+refusal in that section shares a status. A descriptor control on the same
+fixture commits and publishes exactly those bytes.
+
+FIVE MUTATIONS WERE RUN AGAINST THE PRODUCTION MODULE, and the two that changed
+nothing are reported below beside the three that did. A case that survives the
+removal of what it guards is not a guard, and the only way to know which is
+which is to remove the line and look.
+
+Round 7 closed the duplicated-document regression: the complete suffix from
+step 6 matches the prior request byte for byte and steps 5, 6 and 7 each occur
+once. The real upload-after-replacement case and partial-copy failure are
+present with their public-byte or unstaging assertions. The drained successful
+empty-digest case asserts the read-back diagnostic and is accepted.
+
+Round 8 closed both of those oracles and left the two signal cases and the
+pathname-instead-of-descriptor refusal, which is what round 9 completes.
+
+THE FAILING HASHER NOW EMITS THE CORRECT DIGEST. It drained the stream but
+printed nothing, and production checks the digest file for CONTENT before it
+tests the awaited status, so the refusal came from the empty-file branch and the
+case would have passed unchanged if the status capture were deleted. Printing
+the RIGHT digest while exiting non-zero removes every other reason to refuse and
+leaves the awaited status as the only one.
+
+THE REMOVED-BUNDLE FIXTURE RESTORES THE FLOOR FIRST. The earlier floor-refusal
+case had moved `libssl.so.3` away, so that run refused on the FLOOR whatever the
+deletion stub did. The library is put back before the case, the refusal now
+asserts the bundle diagnostic rather than a bare non-zero status, and a CONTROL
+runs the same fixture with a stub that deletes nothing and requires the gate to
+pass, which is what makes the three assertions depend on the removal.
+
+ONE MORE FIXTURE WAS FOUND COUPLED TO ITS NEIGHBOURS. The end-to-end case took
+whichever archive was newest, so a later case that packaged again changed what
+was published; and the envelope-mismatch case leaves the deployed declaration
+tampered and self-consistent, which publication correctly refuses at STEP 1 for
+a reason unrelated to waivers. The case now restores the deployed bundle, plants
+the waiver state and runs the gate itself.
+
+On RHEL 9.8 the step 5 suite is exit 0 at 223 cases, with steps 0 to 4 at 62,
+73, 91, 124 and 152, the installer suite at 49 and 63, and the preserved surface
+at 104. No production behaviour has changed since round 3.
 
 ### Goal for Step 5
 
-Stage the configuration bundle into the tree before the tar, call the checker
-from `pkg.sh` and refuse the run on any refusal, implement the unknown, stale and
-active waiver outcomes, and add the publication re-check in its fixed five-step
-order with step 0 computing the archive identity.
+Stage and validate the deployed bundle before packaging, report unknown, stale
+and active waivers, and bind the fixed publication checks and transactional
+upload to the completed archive's identity.
 
 ### Step 5 improvement expectations
 
-- A missing floor member with no waiver refuses and produces no archive.
-- The same run with the sqlite waiver active produces an archive, marks it a
-  validation artifact, and publication refuses it.
-- A waiver whose member is present is refused as stale, using the floor entry's
-  own location test rather than a document fact.
-- A waiver naming a tool root is refused as UNKNOWN, since waivers name floor
-  members only.
-- A stripped configuration fails at publication step 1, before the waiver
-  question is asked, which is why the order is asserted as an order.
-- Every existing `pkg.sh` behavior is preserved: `--add`, the `--` passthrough,
-  `--exclude=old`, the SHA1 deduplication and the `latest` symlink, including
-  the `tar --sort=name` form at line 130, which this effort does not change.
-- The selector is the explicit `--closure-gate` flag, and all four corners plus
-  the two boundary cases are in Step 5's own test-first list rather than
-  promised in prose: the flag with `tools`, the flag with another target,
-  `tools` without the flag, an unrelated target with no flag, a renamed `tools2`
-  target, and `pkg tools` reaching the gate through the `pkg_tools.sh` overlay.
-- The caller migration is named: `src/setups/env/bin/pkg_tools.sh` line 18 is
-  the one in-scope invocation that changes, the `pkg` dispatcher needs no
-  change, and any out-of-repository path that packages `tools` refuses on
-  purpose until umbrella item 7 adopts the flag.
-- Staged bytes come from the resolved commit rather than the working tree, and a
-  case with a dirty working tree proves the shipped declaration is the reviewed
-  one. Staged files persist on success and are removed on refusal.
-- Negative cases exist for a MISSING SOURCE file, a FAILED COPY and an ABSENT
-  STAGED bundle, and each refuses before `tar` rather than skipping the check.
-- Publication stages exclusively: a case with a SOURCE MUTATED DURING THE COPY
-  proves the digest describes the completed copy and not the source; cases with
-  a PRE-EXISTING and with a SYMLINKED destination prove the promotion refuses
-  rather than overwrites or follows; and a case with a group-writable staging
-  root refuses before any copy.
-- THE HANDOFF IS A DESCRIPTOR, NOT A PATHNAME, under the interface Q11 fixes:
-  `CPLX_CLOSURE_ARCHIVE_FD` and `CPLX_CLOSURE_ARCHIVE_SHA256`, no pathname
-  passed at all, the gate owning the descriptor's lifetime, a single pass that
-  feeds hashing and streaming from the same read, and any non-zero callback exit
-  a publication refusal.
-- THE UPLOAD IS TRANSACTIONAL: `upload_begin` creates a non-public object,
-  `upload_write` fills it, both pipeline participants are awaited and their
-  statuses collected, the digest is compared, and only then does `upload_commit`
-  make it public. `upload_abort` runs on every failure path.
-- The four operation names are THIS EFFORT'S ADAPTER ABI, implemented and
-  tested here; umbrella item 7 keeps its own public API and supplies an adapter
-  with the same lifecycle.
-- Every command whose absence could strand state is PREFLIGHTED BEFORE
-  `upload_begin`: `cat`, `tee`, `mkfifo`, `sha256sum`, `mktemp`, `chmod` and
-  `rm`, all declared in the closure host-tool contract.
-- `set -o pipefail` is in the executable flow, so an independent `cat` or `tee`
-  failure reaches the status check instead of being masked by the last stage.
-- The cleanup trap is armed as soon as the scratch directory exists, aborts only
-  when a stage exists, disarms itself on entry so a signal cannot re-enter it,
-  and names the scratch path on stderr without changing the verdict when
-  removal itself fails.
-- A STUB UPLOADER implementing the four operations demonstrates the contract on
-  seventeen cases: the good path; a pathname refused; the original bytes still
-  streamed after the promoted path is mutated, unlinked and replaced; and NO
-  PUBLIC OBJECT after each of a wrong expected digest, a failing hasher, a
-  failing `cat`, a failing `tee`, a failing `upload_write`, a preflight failure,
-  a `chmod` failure, an `upload_begin` failure, a setup failure, an
-  interruption, a digest-read failure, an abort failure and a commit failure.
-  Two further cases assert that an `upload_begin` failure attempts NO abort,
-  since no stage exists, and that a signal during cleanup aborts EXACTLY ONCE,
-  counted from the stub rather than inferred. Each outcome is asserted by asking
-  the stub what it has made public, and the scratch directory is asserted gone
-  wherever removal succeeds.
+- The selector gates tools and refuses mismatched flag/target combinations.
+- Packaging verifies the deployed declaration and its committed envelope;
+  publication resolves the authoritative declaration independently from Git.
+- Refusals precede tar and clean the files staged by that run without corrupting
+  an aliased source. Successful staging persists in the archive.
+- An active waiver permits a marked validation artifact and prevents publication.
+- The checked snapshot and streamed upload both hash to the promoted identity.
+- Every planned transaction failure is bounded and checks its exact exit,
+  abort count, scratch lifetime and public-object outcome.
+- Existing --add, -- passthrough, exclusion, SHA1 deduplication and latest-link
+  behavior remain covered by executable preservation cases.
 
 ### What was implemented for Step 5
 
-_(empty — no check has taken place yet.)_.
+The five-module topology separates reporting from checker status decisions.
+Physical-path and digest facts moved to the reader; waiver decisions remain in
+the rules module and use the floor entry's own predicate. Packaging stages the
+committed declaration/envelope pair and five modules from the deployed tree.
+The real pkg dispatcher invokes the overlay that adds --closure-gate.
+
+Publication copies and promotes without overwrite, keeps the descriptor open,
+reads a separate snapshot and refuses unless its digest is the promoted identity.
+The checks consume that snapshot, and upload verifies its streamed digest before
+commit. The pipeline-failure path terminates and awaits the hasher. Earlier
+source-alias preservation and bounded tee-failure repairs remain present.
+
+The declaration SHA-256 is
+`d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1`, matching
+the committed envelope. A separate deploy-time envelope producer is not required
+under the corrected contract.
+
+Round 9 adds harness coverage only. The stub adapter gains two waiting modes so
+a phase can announce that it has been ENTERED and hold the run there, which is
+what lets a signal be aimed at a phase rather than at a clock; and the handoff
+section gains the pathname refusal with its descriptor control beside it.
+
+### Completed acceptance cases for Step 5
+
+None. The three cases this section carried are closed, each by the shape the
+round 8 instructions asked for.
+
+- The interruption during streaming is `step5/signal/stream-*`. The stub
+  announces entry to `upload_write` and holds the pipeline there; SIGINT goes to
+  the run's own process group under `setsid`, bounded by `timeout`. It asserts
+  exit 130, one begun stage, exactly one abort, no public object and a removed
+  scratch directory.
+
+- The signal during cleanup is `step5/signal/cleanup-*`. A wrong expected digest
+  refuses at step 4, the EXIT trap enters `closure_publish_cleanup`, and the stub
+  announces entry to `upload_abort` and waits there. The group signal arrives
+  inside that abort. It asserts termination, exactly one abort, no public object,
+  and the two facts that place the signal inside the cleanup rather than beside
+  it: the stage object the stub was told to destroy still exists, and the scratch
+  directory the removal follows is still there.
+
+- The pathname-instead-of-descriptor refusal is `step5/handoff/pathname-*` with
+  `step5/handoff/descriptor-control-*` beside it. No production repair was
+  required: the handoff already refuses, aborts once and leaves nothing public.
+
+Production was not changed. Each new case was checked against a mutated module
+rather than trusted, and the results, including two mutations that changed
+nothing, are in the harness case check below.
 
 ### New types or classes introduced for Step 5
 
-_(empty — no check has taken place yet.)_.
+No classes: this is Bash. The new interfaces are archive identity, the
+four-operation upload adapter and checker status 3 for accepted exceptions.
 
 ### Architecture check for Step 5
 
-_(empty — no check has taken place yet.)_.
+The five-module topology, shared floor predicate and independent publication
+policy resolution fit the amended plan. The snapshot and upload each verify the
+promoted digest. The committed-envelope authority wording now agrees across the
+plan, design and pkg.sh comments. No producer is missing and no new DDD layering
+defect was identified. The integration acceptance gaps that Missing work for
+Step 5 carried are closed.
+
+No, integration coverage no longer needs completion; the authority-text finding
+stays closed and requires no further design work. The two interruption cases
+touch no module boundary: they drive the existing four-operation adapter ABI
+through the stub the earlier handoff cases already use.
 
 ### Cost and structure check for Step 5
 
-_(empty — no check has taken place yet.)_.
+The moved caches retain their previous bounds. Snapshot copying and hashing add
+linear archive IO, with no new quadratic collection scan found. The known
+tee-before-FIFO hang has an explicit termination path, and every failure path
+this step names now has a bounded case: the two interruptions run under
+`timeout` with `setsid`, and each one waits on a readiness file rather than on a
+duration, so neither adds a fixed cost to the suite.
+
+| File | Physical lines, unchanged since round 6 |
+| --- | --- |
+| closure_check.sh | 617 |
+| closure_config.sh | 645 |
+| closure_elf.sh | 607 |
+| closure_report.sh | 196 |
+| closure_rules.sh | 622 |
+| closure_publish.sh | 569 |
+| pkg.sh | 392 |
+| pkg_tools.sh | 24 |
+
+All are below 650, and round 9 changed none of them. No measured performance
+regression was established, and the bounded failure-path validation this line
+used to defer is now in the suite.
 
 ### Harness case check for Step 5
 
-_(empty — no check has taken place yet.)_.
+This Bash plan uses harness cases rather than Python class coverage.
+
+| Independent round 8 validation | Result |
+| --- | --- |
+| Bash lint wrapper, all 50 tracked production scripts | exit 0, clean |
+| ShellCheck, changed verification harness | exit 0 |
+| Closure steps 5/4/3 on RHEL 9.8 | exit 0; 200/152/124 cases, zero failures |
+| Installer steps 2/3 on RHEL 9.8 | exit 0; 49/63 cases, zero failures |
+| Copied validation inputs | all 92 SHA-256 values match the local files |
+| Tar form and ordering | one tar --sort=name; checker line 299, tar line 338 |
+| Installer purity | no matches, expected exit 1 |
+| Installer diff against HEAD | empty, exit 0 |
+| Independent commit-plan-check | valid, ready, ten groups/fourteen paths, no diagnostics |
+
+The current resolver adds the plan's closure_check call-location search to the
+received ten-command set. No command was removed and all eleven passed with
+their required expectations, including the negative installer-purity search.
+Current evidence is retained under `.reviews/a.closure-s5r8.*`.
+
+The earlier unavailable-runtime finding is closed. This reviewer independently
+ran the received harness and production files on RHEL 9.8 after verifying the
+copied input hashes. The failing hasher now drains and prints the correct digest
+before returning nonzero; the removed-bundle case restores the missing floor
+member and requires the bundle diagnostic. Both round 7 oracle findings are
+accepted. Validation produced no tracked or untracked repository side effects.
+
+The upload-after-replacement, partial-copy and drained empty-digest cases are
+now accepted. The full successful-publication fixture asserts the public-byte digest. The
+latest check compares the retained archive's digest. Both are accepted, as are
+the new begin/abort/scratch assertions for command failures. Their acceptance
+does not fill the distinct remaining cases above. The pre-existing second-level
+archive-name collision remains separate work and adds no step 5 blocker.
+
+| Round 9 writer validation | Result |
+| --- | --- |
+| Closure steps 5/4/3/2/1/0 on RHEL 9.8 | exit 0; 223/152/124/91/73/62 cases, zero failures |
+| Installer steps 2/3 on RHEL 9.8 | exit 0; 49/63 cases, zero failures |
+| Relocation step 3 on RHEL 9.8 | exit 0; 104 cases, zero failures |
+| Bash lint wrapper, all 50 tracked production scripts | exit 0, clean |
+| ShellCheck, changed verification harness | exit 0 |
+| Copied validation inputs | all 92 SHA-256 values match the local files |
+
+The step 5 suite has gone 76, 110, 121, 133, 166, 188, 198, 200, 223. The
+twenty-three new cases are the nine of the pathname pair and the fourteen of the
+two interruptions.
+
+THE UNION WAS RUN MORE THAN ONCE against harness digest
+`7dd46afdaa84eb49a3be46fc1f99c904933daea937c2b3739db7faed375100f1`, which is the
+SHA-256 of the submitted `verify.closure-check.sh`, and every run reported the
+same case counts and the same verdicts. The retained capture holds the log of
+one of them. Two lines in it differ between runs, both of them digests of a tar
+the run builds itself, so they are run artifacts rather than assertions about
+these bytes; every other line is identical.
+
+EACH NEW CASE WAS CHECKED AGAINST A MUTATED MODULE. The point of the exercise is
+that two of the five mutations changed nothing, which is a fact about what these
+cases can and cannot see and is recorded rather than left out.
+
+| Mutation of closure_publish.sh | Step 5 result |
+| --- | --- |
+| M1: delete `trap 'exit 130' INT` | 223 cases, zero failures |
+| M2: delete the `trap -` disarm at the head of cleanup | 223 cases, zero failures |
+| M3: read `CPLX_CLOSURE_ARCHIVE_FD` as a NAME rather than a descriptor | 17 failures, six of them the pathname pair |
+| M4: delete `trap closure_publish_cleanup EXIT` | 28 failures, six of them the new cases |
+| M5: signal traps call cleanup directly AND cleanup does not disarm | 5 failures, both abort counters reading 2 |
+
+M3 and M4 are what make the new cases guards rather than descriptions: with the
+descriptor read as a name the pathname case publishes an object and says so,
+and with no EXIT trap both interruptions leave zero aborts and a retained
+scratch. M5 is the re-entrant cleanup the disarm exists to forbid, and both
+abort counters read 2 under it.
+
+M1 AND M2 CHANGED NOTHING, AND THAT IS NOT A GAP IN THE CASES. Bash runs the
+EXIT trap on its own termination path, so removing the INT trap alone still
+aborts once and still ends at 130; and bash already refuses to re-enter an EXIT
+trap, so removing the disarm alone cannot produce a second abort either. The two
+lines are distinguishable only together, which is what M5 measures. The cases
+assert the transaction's postconditions under interruption, and they are honest
+about which line each one reaches.
+
+Yes, the three acceptance cases that Missing work for Step 5 carried are
+complete and their evidence is above. No, there is no unit-tested class below
+100% that needs completing.
+
+Independent round 9 review confirms the completed cases on the received harness
+digest `7dd46afdaa84eb49a3be46fc1f99c904933daea937c2b3739db7faed375100f1`.
+All 92 copied input hashes matched before execution. Closure steps 5/4/3/2/1/0
+passed at 223/152/124/91/73/62 cases; installer steps 2/3 passed at 49/63;
+relocation step 3 passed at 104. Every command exited 0 with zero case failures.
+Relocation's inherited step 0 capability note is outside its step 3 criteria.
+The local lint wrapper passed all 50 tracked scripts and the harness ShellCheck
+passed. The tar, call-order and installer checks passed with their declared
+expectations. The fifteen-command resolver set has no drift. Evidence is
+retained under `.reviews/a.closure-s5r9.*`.
+
+R8-F1 and R8-F2 are closed. The streaming interruption aborts once and removes
+scratch. Interruption inside abort leaves its private stage and scratch, with
+one abort entry and no public object; the fixture records that interrupted
+cleanup explicitly. The pathname refusal and valid-descriptor control exercise
+the production handoff with the same expected bytes. No substantive reviewer
+repair was needed and no required acceptance case remains open.
 
 ### Feature integrity for Step 5
 
-_(empty — no check has taken place yet.)_.
+The tar form, SHA1 implementation and installer bytes remain unchanged. The
+real dispatcher, full successful publication, upload after name replacement and
+latest identity are covered by the received harness. No production code or tests
+were changed by this reviewer.
+
+R6-F3 remains closed. In round 8 this reviewer updated only the step 5 validation
+rows, retaining the exact No verdict and its existing completion list. The
+surrounding steps, umbrella, document-level status, production code, tests and
+a.commit are unchanged. The commit grouping remains mechanically ready.
+
+In round 9 the writer changed the verdict because the work changed: the three
+cases that verdict was waiting on exist, run and were checked against a mutated
+module. Nothing in the round 8 record was reversed, and no production file,
+other step, umbrella row or document-level status was touched. The only edited
+files are the harness and this record.
+
+The round 9 reviewer updated only this step's review metadata and the stale
+completion descriptions in a.commit. Commit membership, order and subjects are
+unchanged. Validation alone produced no tracked or untracked side effects, and
+the reviewer preserved all surrounding steps and the umbrella. Step 5 is
+recommended commit-ready; that advisory recommendation grants no commit
+authority and does not complete the later steps of this effort.
 
 ---
 
