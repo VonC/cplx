@@ -404,7 +404,7 @@ closure_walk_failed() {
 # that directory somewhere else. `providers/x -> ../linkdir/../lib/y` with
 # `linkdir` a link is exactly that shape, and reducing it lexically lands
 # somewhere the file is not. The resolution belongs to whoever walks the path,
-# which is `closure_rules_physical`, and it needs the raw text to do it.
+# which is `closure_elf_physical`, and it needs the raw text to do it.
 
 # shellcheck disable=SC2034  # the link map is written here and read by
 # closure_rules.sh, which closure_check.sh sources beside this file; shellcheck
@@ -476,4 +476,132 @@ closure_subjects_walk() {
         closure_elf_read "$path" || true
     done < "$listing"
     rm -f -- "$listing"
+}
+
+# ---------------------------------------- facts about files, and no verdict ---
+# MOVED HERE BY STEP 5, from `closure_rules.sh`, and the move is the topology
+# rule applied rather than an exception to it. This module owns "the object
+# reader and the provider index, with no verdict of its own", and a physical
+# path and a content digest are exactly that: facts about a file that decide
+# nothing. The rules module was at 635 lines with Step 5 waivers still to add,
+# and the plan says a module at the ceiling moves a responsibility to the
+# module that ALREADY OWNS ITS NEIGHBOURS. Here one does, which is why this is
+# a move and not a fifth file: the link map these functions resolve through is
+# built by the walk above, so they were reading this module all along.
+#
+# THE COUNTER DID NOT COME WITH THEM. `closure_elf_physical` never touched
+# `CLOSURE_RULES_UNRESOLVED`; it returns non-zero and its CALLER counts, which
+# is the boundary already being right. An unresolved chain is a fact here and
+# an UNDETERMINED result there, and those are two different statements.
+# The kernel's own SYMLOOP_MAX, so a chain a loader resolves this checker also
+# resolves, and a cycle still terminates.
+CLOSURE_ELF_LINK_HOPS=40
+CLOSURE_ELF_PARTS=()
+# The PHYSICAL path of a selected provider, which is the path the walk recorded
+# for that file. Two things stand between the two, and only resolving both makes
+# the reachability answer right:
+#
+#   a DIRECTORY component may be a link. `tools/python/current -> python-3.13.9`
+#   is the alias layout this effort already reads, and the observed loader scope
+#   holds `current/lib` while the walk, which does not follow a symlinked
+#   directory, records the object under `python-3.13.9/lib`. A lookup of the
+#   whole selected path cannot apply a link that sits in a PREFIX of it.
+#   the FINAL component may be a link, the `libz.so.1 -> libz.so.1.2.11` soname
+#   shape, which is the same resolution applied at the end of the walk.
+#
+# So the path is rebuilt one component at a time and each prefix is resolved
+# while the link map names it, which handles both in one pass and in the right
+# order: a directory link has to be applied before the name inside it means
+# anything.
+#
+# The result is CACHED by input path. The distinct selected paths are bounded by
+# the distinct DT_NEEDED names, and each is resolved once however many edges
+# choose it, so this stays a lookup rather than the subject sweep it replaced.
+declare -A CLOSURE_ELF_PHYSICAL=()
+# shellcheck disable=SC2034  # written here and read by closure_rules.sh, which
+# is what moving the resolver into the facts module means: the value crosses a
+# file boundary now, and a per-file reader cannot see the consumer.
+CLOSURE_ELF_PHYSICAL_RESULT=""
+
+closure_elf_split() {
+    local rest="$1" part
+    CLOSURE_ELF_PARTS=()
+    while [ -n "$rest" ]; do
+        part="${rest%%/*}"
+        if [ "$part" = "$rest" ]; then rest=""; else rest="${rest#*/}"; fi
+        if [ -n "$part" ]; then CLOSURE_ELF_PARTS+=("$part"); fi
+    done
+}
+
+closure_elf_physical() {
+    local path="$1" out="" part target steps=0 head=0
+    local pending=()
+
+    CLOSURE_ELF_PHYSICAL_RESULT=""
+    if [ -n "${CLOSURE_ELF_PHYSICAL[$path]:-}" ]; then
+        CLOSURE_ELF_PHYSICAL_RESULT="${CLOSURE_ELF_PHYSICAL[$path]}"
+        return 0
+    fi
+    closure_elf_split "$path"
+    pending=(${CLOSURE_ELF_PARTS[@]+"${CLOSURE_ELF_PARTS[@]}"})
+
+    # A HEAD INDEX rather than a shift, because rebuilding the queue for every
+    # component would make walking a path quadratic in its own length.
+    while [ "$head" -lt "${#pending[@]}" ]; do
+        part="${pending[$head]}"
+        head=$((head + 1))
+        case "$part" in
+            '.') continue ;;
+            '..')
+                # UP FROM WHERE THE RESOLUTION ACTUALLY IS, which is why the raw
+                # target is kept: a component before this one may have been a
+                # link that moved the directory `..` climbs out of.
+                out="${out%/*}"
+                continue ;;
+        esac
+        target="${CLOSURE_LINK_TARGET[$out/$part]:-}"
+        if [ -z "$target" ]; then
+            out="$out/$part"
+            continue
+        fi
+        steps=$((steps + 1))
+        if [ "$steps" -gt "$CLOSURE_ELF_LINK_HOPS" ]; then
+            # UNRESOLVED, AND NOTHING IS CACHED. A partially chased path is not
+            # the physical one, and storing it would answer later lookups with a
+            # location the file is not at.
+            return 1
+        fi
+        # The target's OWN components go back into the queue rather than being
+        # taken whole, because any of them may be a link too. An absolute target
+        # restarts the resolution from the root, which is what a link to an
+        # absolute path means.
+        closure_elf_split "$target"
+        case "$target" in
+            /*) out="" ;;
+        esac
+        pending=(${CLOSURE_ELF_PARTS[@]+"${CLOSURE_ELF_PARTS[@]}"} ${pending[@]+"${pending[@]:head}"})
+        head=0
+    done
+
+    CLOSURE_ELF_PHYSICAL["$path"]="$out"
+    # shellcheck disable=SC2034  # the consumer is closure_rules.sh, one file over
+    CLOSURE_ELF_PHYSICAL_RESULT="$out"
+    return 0
+}
+
+declare -A CLOSURE_ELF_DIGEST=()
+CLOSURE_ELF_DIGEST_RESULT=""
+
+# The digest of one file, cached by path. It travels through a global because a
+# command substitution would run this in a subshell and lose the cache with it.
+closure_elf_digest() {
+    local out=""
+    CLOSURE_ELF_DIGEST_RESULT="${CLOSURE_ELF_DIGEST[$1]:-}"
+    if [ -n "$CLOSURE_ELF_DIGEST_RESULT" ]; then return 0; fi
+    out=$(sha256sum -- "$1" 2>/dev/null) || return 1
+    out="${out%% *}"
+    if [ -z "$out" ]; then return 1; fi
+    CLOSURE_ELF_DIGEST["$1"]="$out"
+    CLOSURE_ELF_DIGEST_RESULT="$out"
+    return 0
 }
