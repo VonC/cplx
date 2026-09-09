@@ -13,12 +13,21 @@
 # execution checklist runs at every step. Two contracts, two subject sets, one
 # reading rule.
 #
-# The rows below are ENUMERATED, not sampled. The plan names the thirteen
-# commands the packaging, verification and publication paths execute, and every
-# one carries an entry here, so a reader can tell the contract from a summary of
-# it. A command a later step needs is added here, and reviewed, before that step
-# can pass: `verify.closure-check.sh` extracts every command-position word from
-# every shipped script and fails on any word absent from this file.
+# The rows below are ENUMERATED, not sampled. The plan names the commands the
+# packaging, verification and publication paths execute, and every one carries an
+# entry here, so a reader can tell the contract from a summary of it. A command a
+# later step needs is added here, and reviewed, before that step can pass:
+# `verify.closure-check.sh` extracts every command-position word from every
+# shipped script and fails on any word absent from this file. Step 5 added two,
+# `bash` and `mkdir`, both for the publication re-check.
+#
+# WHAT THE ADAPTER ABI IS NOT. `upload_begin`, `upload_write`, `upload_abort` and
+# `upload_commit` are NOT here, and their absence is deliberate rather than an
+# omission. This file enumerates what a shipped script depends on the HOST to
+# supply; those four are supplied by the CALLER, and `closure_publish.sh` defines
+# refusing defaults for all four so that a run with no adapter refuses rather
+# than reaching an undefined command. Declaring them here would say the host owed
+# them, which is the one thing umbrella item 7 must not be able to read into it.
 #
 # ENTRY rows, five columns, all required:
 #   name           | the command word as written
@@ -80,16 +89,19 @@
 # launcher|token|owner|short-options|long-options
 launcher|command|command||
 launcher|exec|exec||
+launcher|bash|bash||
 launcher|-exec|find||
 launcher|-execdir|find||
 #
 # name|form|resolver|runs-argument|why
+bash|direct|-|yes|re-run the static checker over a candidate as a CHILD PROCESS, so the verdict is one publication could not have produced
 cat|direct|-|no|read one bundle part whole, so the digest domain is the bytes on disk
 chmod|direct|-|no|make a staged copy readable, and a promoted entry executable
 cp|direct|-|no|stage the configuration bundle and the payload checker modules
 find|direct|-|yes|the single tree walk that collects every per-object fact
 git|direct|-|no|resolve the authoritative configuration from a cplx commit and path
 ln|direct|-|no|promote a completed staging copy without overwriting an existing one
+mkdir|direct|-|no|create the work and policy directories a publication re-check is driven from
 mkfifo|direct|-|no|the descriptor handed to the constrained uploader under the begin, write, abort, commit ABI
 mktemp|direct|-|no|the exclusive staging directory publication writes into before it promotes
 readelf|direct|-|no|read dynamic entries and version needs, one invocation per shipped ELF
