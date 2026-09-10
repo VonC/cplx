@@ -2106,9 +2106,19 @@ authority and does not complete the later steps of this effort.
 
 ### Analysis of Step 6 implementation state
 
-Not started. Step 6 is not implemented because nothing derives the archive-side
-observation, nothing compares two observations, no live observer exists, and no
-evidence artifact is produced for publication to check.
+Yes. Step 6 has been fully implemented.
+
+Independent round 8 validation confirms the completed implementation. The
+requestor accepted round 7's conflict-suffix wording correction, and the received
+index is exactly the previous assessed tree. All fifteen mandatory commands
+were rerun: 222 portable Step 6 cases pass, and retained Debian build 151 reports
+223 cases, zero failures and matching digests for all eighteen inputs.
+
+R6-F1 and all earlier findings remain closed. The distinguishing regression
+proved in round 7 applies to the unchanged production and harness bytes. No
+implementation, regression, architecture or cost gap remains, and this round
+makes no substantive reviewer repair. All six readiness floors pass; the
+commit-ready recommendation is advisory and grants no commit authority.
 
 ### Goal for Step 6
 
@@ -2156,27 +2166,598 @@ artifact keyed by the SHA-256 of the archive file.
 
 ### What was implemented for Step 6
 
-_(empty — no check has taken place yet.)_.
+Three production scripts, and the wiring the behavior section names.
+
+`closure_verify.sh` runs on the Debian job from the pipeline workspace. It
+requires the delivery BEFORE it opens the archive, computes the identity over
+the archive file, derives the pre-install observation, installs through
+`install_pkg.sh` with no argument it invented, derives the installed
+observation, compares, compares the embedded payload copies, runs the checker
+and the live observer, and emits one artifact keyed by that identity.
+
+`closure_observe_live.sh` is the live half. It spawns nothing: the command name,
+the argument vector and the mapped objects all come from the process filesystem,
+whose root is an argument so the empty-inventory refusal is assertable off the
+agent. An empty inventory is INCONCLUSIVE with its own exit code.
+
+`ci/deliver-closure-tools.sh` resolves eight authoritative scripts from a commit
+and WITHDRAWS everything it wrote on any failure, because a workspace holding
+four of eight is worse than an empty one.
+
+ONE DERIVATION ANSWERS BOTH SIDES, and that is a departure from the behavior
+section's three names. The plan names `closure_verify_preinstall`,
+`closure_verify_installed` and `closure_verify_compare`; the implementation has
+`closure_verify_side` called twice and `closure_verify_verdict` over the pair.
+The archive side gets a tree by recreating the archive's DIRECTORY SKELETON from
+its table of contents, empty directories and no file extracted, so both sides go
+through `closure_scope_declared`, `closure_scope_observed` and
+`closure_scope_classify` and the observed scope on either side is the
+installer's own `build_elf_rpath`. Q01 settles that how the sharing is expressed
+is an implementation concern and that exactly one definition exists is not, so
+the departure is in the names and not in the rule.
+
+FOUR FILES THE STEP 6 FILE LIST DID NOT NAME WERE CHANGED, and the plan now
+names three of them. `closure_config.sh` gained the three closed
+enumerations of the evidence table, the reader's strictness for it and its
+dispatch arm, and LOST the cplx-side resolution. `closure_report.sh` received
+the `CPLX-CLOSURE-EVIDENCE/1` grammar, `closure_evidence_parse` and the
+conflict-name derivation, by the topology table's second amendment, which the
+plan carries before this record does. `closure_publish.sh` received the
+resolution pair and now reads step 2 through `closure_evidence_parse` instead of
+a two-field loop, sourcing the report module rather than the driver.
+`contract.closure-tools.txt` gained no row, since every command
+the three new scripts execute was already declared, and had the `why` column of
+seven rows widened plus a stale count corrected from nine scripts to ten.
+
+The harness gained a `--ci-dir` argument. The delivery script is the bootstrap
+that PLACES the shipped directory, so it travels with the pipeline rather than
+with what it delivers, and a workspace that lays the two out differently has to
+be able to say so rather than be guessed at.
+
+THE PRODUCER NOW DRIVES THE CONSUMER, which the first check of this step found
+missing. The end-to-end run publishes against the archive it verified, using the
+artifact it emitted: that pair takes publication PAST step 2 and the run refuses
+later, this archive being a validation artifact by construction, so the
+assertion is which step refused rather than whether the run was green. A second
+archive the same artifact does not describe is refused AT step 2, naming the
+identity publication computed itself. The fixture-written documents stay beside
+them for the shapes a producer cannot emit, such as a result whose configuration
+digest is one publication did not resolve. The deployed envelope is rewritten to
+name the fixture commit before packaging, or publication would refuse at step 1
+for want of a checkout and the pair would read that refusal as its own.
+
+### Repair assessment for Step 6 across rounds 2 to 7
+
+Round 4 closes round 3's exact-byte retention defect. A reserved conflict name
+blocks the shared reader even if copying fails, and the digest check now compares
+this document at this destination before removing the complete temporary copy.
+The independent link-plus-copy, partial-copy and prior-conflict reproductions
+each retain one exact copy of the new differing document and refuse publication
+and the agreeing rerun. The earlier conflict no longer stands in for the new
+document, and an empty destination no longer causes its deletion.
+
+Round 5 establishes the conflict name before writing when the canonical name
+already exists. This closes the earlier post-write reservation-failure branch.
+The writer's refusal-before-writing interpretation is accepted for an initial
+allocation failure: the call stores no document, and the previous PASS remains
+unchanged. The real directory-permission transition after writing now leaves
+the complete document under its conflict name, and both consumers refuse.
+
+ROUND 6 REMOVES THE QUESTION THAT CREATED THE LAST PATH. Round 5 asked whether
+the canonical name was taken and reserved accordingly, which left a fallback for
+the case where a concurrent emitter took it in between, and that fallback deleted
+a complete document before a fallible reservation. Asking the occupancy question
+is itself the window, so it is not asked: every document is written under the
+conflict name it might need, and the no-overwrite link afterwards makes the
+canonical name a second name for the same bytes.
+
+The consequences are that an ordinary write ends with exactly one file, that a
+differing result is at its final name before any other actor exists, and that
+nothing is ever deleted except a document which agrees with the canonical result
+or has just become it. The race the review reproduced has no branch to take: the
+loser of the canonical name already holds its conflict name, so it refuses, both
+consumers refuse, and its bytes are the differing document. The initial-allocation
+refusal round 5 accepted is unchanged, and the older copy-failure paths remain
+closed.
+
+WHAT IT COSTS is a conflict-named file that exists for the length of one link on
+the ordinary path. A crash inside that window leaves a name a human must clear,
+which is the direction this contract chooses everywhere else: a crash that leaves
+a STOP is recoverable, and a crash that leaves a missed stop publishes an archive
+whose verification disagreed. The canonical rule is untouched, since the canonical
+name is still only ever occupied by a complete result.
+
+The skeleton reconstructs directory aliases from a second pass over the archive
+index, in BOTH of their spellings. Round 2 found the earlier test refusing every
+target holding `..`, which dropped `../python/python-3.13.9` while accepting the
+equivalent `python-3.13.9`: one directory, two spellings, two verdicts, and the
+installed tree resolving both. Containment is what the archive side needs, so
+the link's own depth is counted and the target walked from there; a step above
+the archive root refuses and an absolute target is outside by definition. The
+two spellings now produce identical presence lines and a PASS comparison, with
+escaping and absolute controls asserting the refusal is still there.
+A symlinked directory is listed by name with no
+trailing slash, so the plain index gives its parent and drops the alias; the
+verbose index carries the link records. A real entry of the same name still
+wins. The case builds a real tar carrying `current`, derives the skeleton
+through the production function and compares it against the tree the archive was
+made from, through the same scope derivation both sides use, with a broken alias
+still DIVERGENT.
+
+ONLY A COLLECTED INVENTORY COUNTS. The mapped objects are read through a command
+substitution whose status the loop can see, rather than a process substitution
+whose completion it could not, and a collection that yields no object record is a
+failure rather than a count of zero. An empty readable `maps`, which is what an
+exited or zombie process leaves, and an unreadable one are both INCONCLUSIVE and
+name the process as `UNUSABLE`; one usable inventory beside one unusable is
+conclusive on the usable one.
+
+The installer-selection cases bind the tree to the candidate, with the installer
+byte-identical and no argument added, and round 3 closes the gap round 2 found in
+that binding. An UNCHECKED marker removal bypassed it: a package directory that
+refuses the unlink still lets the candidate file be overwritten, so the stale
+marker survived, the installer skipped, and the check after the call read that
+same stale marker as proof of an install the run never made. The removal is now
+checked before the call, so the marker's absence is established rather than
+assumed, and the case reproduces it with real permissions and the real installer,
+against a control that changes only the directory's writability.
+The driver refuses a competing archive newer than
+its copy before the call, removes the done marker for its own candidate so a
+rerun really installs, and requires that marker to exist after the call. The
+cases run the real installer for the first two; the third uses a stand-in that
+SOURCES the real installer to exercise the missing-marker refusal independently
+of archive-selection timing.
+
+THE DEBIAN STEP 3 AND 4 FAILURES ARE DIAGNOSED, AND THE DEFECT IS THE HARNESS'S.
+The fixture engine wrote its name slots into the last 256 bytes of a donor's
+`.dynstr`, calling that tail reserved. It is not: it is where a donor's own
+NEEDED, SONAME and version strings sit on the agent's donors, so the write left
+those entries pointing into the middle of the fixture name and `readelf`
+reported `.1`, `so.1` and `1`. The window is now MEASURED per donor, as the
+first run of bytes no dynamic entry or version record points at, and a donor
+without such a run is refused rather than used. Five cases assert that a
+mutation adds exactly one need, changes no other, keeps the soname, and leaves
+the string table byte-identical either side of the measured window.
+
+### Independent reviewer validation for Step 6 (round 3)
+
+The received index is `bedc2fd40f186052832861e5e1c3688413872d9c`.
+Independent RHEL 9.8 runs report 208 cases and zero failures for Step 6, with
+exit 5 for the Debian-only host gate. Steps 0 to 5 pass at 63, 73, 91, 132, 152
+and 223 cases; installer Steps 2 and 3 pass at 49 and 63; relocation Step 3
+passes at 104. Project lint passes for 53 scripts, harness ShellCheck passes,
+the archive-file digest check passes, installer purity returns 1 with no hits,
+and the installer remains byte-identical to HEAD. The staged whitespace check
+also passes. No tracked validation side effect was observed before metadata
+updates. The resolver adds only the `plan` source to project lint and changes
+no command.
+
+The Debian build 146 capture reported 209 Step 6 cases and zero failures, with
+all eighteen input digests matching the files reviewed in that round. Round 3's
+independent reproduction confirmed that the real unremovable marker refuses before comparison
+and emits no evidence, that the writable control installs candidate A, that both
+contained alias spellings are PRESENT on both sides and compare PASS, and that
+the link-failure control retains the disagreement and both consumers refuse.
+
+The two scenarios round 3 left open are recorded in
+`.reviews/a.codex-s6r3.retention.sh` and
+`.reviews/a.codex-s6r3.retention-results.txt`, and the earlier finding controls
+in `.reviews/a.codex-s6r3.reproduce.sh` and
+`.reviews/a.codex-s6r3.reproduce-results.txt`. Round 4 drives both through the
+production emitter: the link-plus-fill injection now asserts the two downstream
+refusals, and the kept bytes are digested against the differing document rather
+than counted, so a zero-byte survivor fails the case instead of passing it.
+
+### Independent reviewer validation for Step 6 (round 4)
+
+The received index is `1fb0ed367371d226a84652494fde8df71ec71312`.
+Independent RHEL 9.8 runs report 215 cases and zero failures for Step 6, with
+exit 5 for the Debian-only host gate. Steps 0 to 5 pass at 63, 73, 91, 132, 152
+and 223 cases; installer Steps 2 and 3 pass at 49 and 63; relocation Step 3
+passes at 104. Project lint passes for 53 scripts, harness ShellCheck passes,
+the archive-file digest check passes, installer purity returns 1 with no hits,
+and the installer remains byte-identical to HEAD. Staged whitespace passes.
+The Debian build 148 capture reported 216 Step 6 cases and zero failures, and
+all eighteen input digests independently matched the files reviewed in round 4. No command was
+added or removed by the resolver; only project lint gains the `plan` source.
+
+The three previous retention reproductions pass their byte-preservation and
+downstream-refusal checks in `.reviews/a.codex-s6r4.retention.sh` and
+`.reviews/a.codex-s6r4.retention-results.txt`. The branch that remained is
+recorded in `.reviews/a.codex-s6r4.reservation.sh` and
+`.reviews/a.codex-s6r4.reservation-results.txt`: both the scoped reservation
+failure and the real directory-permission transition left one complete anonymous
+differing document while publication and the agreeing rerun returned 0. Round 5
+changes those outcomes: the initial reservation failure now precedes the write,
+while the permission-transition case retains a discoverable differing document.
+The new race fallback is assessed separately below. The earlier
+marker-removal, alias and successful-retention controls still pass in
+`.reviews/a.codex-s6r4.reproduce.sh` and its `reproduce-results.txt` companion.
+
+Validation caused no tracked side effect before metadata updates. The umbrella
+digest is unchanged. The reviewer changed only these Step 6 validation rows and
+ignored `a.commit` descriptions; no production or test repair was made and no
+other step or umbrella row changed. The commit-plan checker is mechanically
+valid; the unresolved publication-stop finding prevents commit readiness.
+
+### Independent reviewer validation for Step 6 (round 5)
+
+The received index is `4c9fd6c46e914b11e293b6bf3ae5b67b66d83bdc`.
+Independent RHEL 9.8 runs report 214 cases and zero failures for Step 6, with
+exit 5 for its Debian-only host gate. Steps 0 to 5 pass at 63, 73, 91, 132, 152
+and 223 cases; installer Steps 2 and 3 pass at 49 and 63; relocation Step 3
+passes at 104. Project lint passes for 53 scripts, harness ShellCheck passes,
+the archive-file digest check passes, installer purity returns 1 with no hits,
+and the installer remains byte-identical to HEAD. Staged whitespace passes.
+The Debian build 149 capture reported 215 Step 6 cases with zero failures, and
+all eighteen assembled input digests matched the files reviewed in round 5. Resolver drift
+adds only the plan source to project lint; the command union remains fifteen.
+
+The prior retention and permission controls are recorded in
+`.reviews/a.codex-s6r5.retention-results.txt` and
+`.reviews/a.codex-s6r5.reservation-results.txt`. Marker-removal and contained-alias
+controls still pass in `.reviews/a.codex-s6r5.reproduce-results.txt`.
+The race round 5 reproduced is recorded in `.reviews/a.codex-s6r5.race.sh` and
+`.reviews/a.codex-s6r5.race-results.txt`, with two real production emitters and
+one scoped allocation failure. Round 6 removed the defective production branch,
+and round 7 puts the distinguishing schedule in the committed suite: two real
+emitters interleaved at the fill of the temporary file, with the injection
+failing conflict allocations attempted after it. Measured on the build host, the
+staged store passes all four assertions and the round 5 store fails three of them
+with the review's own values, so the case earns the word regression.
+
+Validation caused no tracked side effects before metadata edits. The umbrella
+digest is unchanged. All eight commit groups and eleven staged members are
+unchanged and mechanically valid.
+
+### Independent reviewer validation for Step 6 (round 6)
+
+The received index is `f0f761b1ad859f7e89d0ea0f917c5e001f7bfc4f`.
+The fifteen mandatory commands were independently rerun. On isolated RHEL 9.8,
+Step 6 reports 220 cases and zero failures, with exit 5 for its Debian-only host
+gate. Steps 0 to 5 pass at 63, 73, 91, 132, 152 and 223 cases; installer Steps
+2 and 3 pass at 49 and 63; relocation Step 3 passes at 104. Lint is clean for
+53 scripts, harness ShellCheck passes, the archive-file digest check finds
+line 147, installer purity returns 1 with no hits and the installer diff against
+HEAD returns 0. Staged whitespace passes. Debian build 150 reports 221 cases,
+zero failures and exit 0 for Step 6, with all eighteen input digests matching.
+
+The current store closes R5-F1. The schedule in
+`.reviews/a.codex-s6r6.interleaving.sh` allows initial allocation, fills the first
+emitter's differing document, runs the second real emitter before the first
+link, and refuses any later conflict-name allocation. With the current store,
+both its control and injected variant retain one exact differing copy and both
+consumers return 1. With the round 5 store, the injected variant retains zero
+copies and both consumers return 0. Logs are
+`.reviews/a.codex-s6r6.logs/interleaving-r6.log` and
+`.reviews/a.codex-s6r6.logs/interleaving-r5.log`.
+
+At round 6 the committed cases did not detect the defect: the full 220-case
+suite passed with the defective round 5 store because its two calls were
+sequential. The report module was the only production difference between the
+two shipped sets. Evidence is retained at
+`.reviews/a.codex-s6r6.logs/closure6-r5-store.log`.
+The round 7 validation below records closure of that regression finding.
+
+Earlier retention, permission-transition, marker-removal and contained-alias
+controls still pass in the same log directory. Initial allocation refusal is
+still accepted. The temporary conflict name and recovery cost are the declared
+tradeoff, and no further production defect is found. Validation caused no
+tracked side effects, the umbrella digest is unchanged and reviewer edits are
+limited to Step 6 validation and ignored commit-plan descriptions. At that round, the missing
+regression prevented commit readiness.
+
+### Independent reviewer validation for Step 6 (round 7)
+
+The received index is `c6716678c9eec8726bd230396af358cc2378f543`.
+Only the harness, Debian capture and Step 6 validation changed from the
+previous assessed index; production scripts and the implementation plan were
+unchanged at receipt.
+
+All fifteen mandatory commands were independently rerun. On isolated RHEL 9.8,
+Step 6 reports 222 cases, zero failures and exit 5 solely for its Debian host
+gate. Closure Steps 0 to 5 pass at 63, 73, 91, 132, 152 and 223 cases;
+installer Steps 2 and 3 pass at 49 and 63; relocation Step 3 passes at 104.
+Lint is clean for 53 scripts, harness ShellCheck passes, the archive-file digest
+search finds line 147, installer purity returns 1 with no matches and the
+installer diff against HEAD returns 0. Staged whitespace passes.
+Debian build 151 reports Step 6 exit 0, 223 cases and zero failures; all eighteen
+assembled input digests independently match the reviewed bytes.
+
+The revised committed harness was also run against the isolated round 5 shipped
+set. The report module is the only production difference, verified by directory
+comparison and both report digests. This mutation reports 222 cases, three
+failures and exit 1: `exact_differing_copies=0`,
+`publication_step2_rc=0` and `agreeing_rerun_rc=0`. All four injected
+assertions pass with the current store, and the uninjected control passes on
+both. R6-F1 is closed, and R5-F1 remains closed in production. Evidence is in
+`.reviews/a.codex-s6r7.logs/closure6.log` and
+`.reviews/a.codex-s6r7.logs/closure6-r5-store.log`; digest checks are in
+`.reviews/a.codex-s6r7.debian-digests.json`.
+
+Prior retention, post-write permission-transition, marker-removal and
+contained-alias controls pass in the same log directory. Refusal before initial
+allocation succeeds remains accepted. No new architecture, cost or feature
+integrity defect was found; no numerical class-coverage gate applies to Bash.
+
+Validation caused no tracked, untracked or ignored changes before repairs.
+The umbrella digest remains unchanged. The reviewer corrected one stale
+conflict-suffix description in the Step 6 plan, restored the historical round 6
+capture reference, recorded this assessment and corrected ignored commit-plan
+descriptions. The eight groups and eleven staged members remain unchanged.
+The implementation is complete, but the protocol treats the tracked plan edit
+as a substantive reviewer repair and requires another review round. No
+production or test repair occurred.
+
+### Independent reviewer validation for Step 6 (round 8)
+
+The received index is `af374b1041ec9f265037b338212d0497034137d6`, exactly
+round 7's assessed tree. The requestor accepted the plan correction without
+changing any staged path. The plan now describes the timestamp and exclusive
+random suffix that the store already uses.
+
+All fifteen mandatory commands were independently rerun. The isolated RHEL 9.8
+source copy was checked against all eighteen current input digests before the
+suites ran. Step 6 reports 222 cases, zero failures and exit 5 solely for its
+Debian host gate. Closure Steps 0 to 5 pass at 63, 73, 91, 132, 152 and 223
+cases; installer Steps 2 and 3 pass at 49 and 63; relocation Step 3 passes at
+104. Each of those other suites exits 0 with zero failures. Lint passes for
+53 scripts, harness ShellCheck passes, the archive-file digest search finds
+line 147, installer purity returns 1 with no matches, and the installer diff
+against HEAD returns 0. The current resolver adds the plan source to the lint
+command; no command is added or removed from the requested union.
+
+Retained Debian build 151 remains applicable: Step 6 exits 0 with 223 cases
+and zero failures, and all eighteen captured input digests independently match
+the reviewed files. No new Debian build is claimed for round 8. Fresh suite
+logs are in `.reviews/a.codex-s6r8.logs`; the digest comparison is in
+`.reviews/a.codex-s6r8.debian-digests.json`. Round 7's independent old-store
+mutation and uninjected controls remain supplemental evidence for unchanged
+production and harness bytes; they were not rerun in round 8.
+
+Mandatory validation changed no tracked, untracked or ignored review paths.
+Only these exact Step 6 validation rows are updated by the reviewer. Other
+steps, the implementation plan, production files, tests and ignored `a.commit`
+are unchanged. No missing-work section remains and no numerical class-coverage
+gate applies to Bash. The existing architecture, cost, harness and feature
+integrity assessments below remain valid. The eight commit groups cover the
+same eleven staged paths and the independent checker reports valid and ready.
+No unresolved current or carried finding remains. No substantive reviewer
+repair was made, so the recommendation is commit-ready, subject to the human
+commit decision in the owning workflow.
 
 ### New types or classes introduced for Step 6
 
-_(empty — no check has taken place yet.)_.
+No classes: this is Bash. The new interfaces are the `CPLX-CLOSURE-EVIDENCE/1`
+record document and its shared reader, the pipeline delivery manifest, and the
+live observer's typed lines with their three outcomes.
+
+The evidence document is CANONICAL BY CONSTRUCTION. It refuses the blank lines
+and comment lines the other two grammars ignore, it fixes a record order that a
+stage number enforces, its `post` records mirror its `pre` records path for path
+and in order, and its `verdict` is DERIVED by the reader rather than trusted, so
+a document asserting PASS over a divergent pair or over an unexpected finding is
+refused before publication reads a field of it.
 
 ### Architecture check for Step 6
 
-_(empty — no check has taken place yet.)_.
+The topology holds at ten production scripts and no eleventh module. The live
+observer is its own file from the start, which is the split guidance, and it is
+the only component that runs on the foreign host alone.
+
+THE TOPOLOGY TEXT AND THE CODE AGREE NOW, and the plan changed first. Round 1
+found the `CPLX-CLOSURE-EVIDENCE/1` table living in `closure_verify.sh` with
+`closure_publish.sh` sourcing the DRIVER to obtain a reader, which the module
+table did not describe. The plan's second amendment moves the record, its
+grammar and its one reader to `closure_report.sh`: the evidence document is the
+same run outcome that module already writes, in a machine grammar rather than a
+human one, over the same counters and downstream of the same producers, so it is
+the module that owns the neighbour rather than merely the module with room. No
+shipped script sources the driver any more. The other move stands unchanged: the
+cplx-side resolution left the grammar module for publication, its one production
+caller, which also takes `git` off the dependency surface of the copies the
+archive carries.
+
+No layer reads a layer it should not. Publication still takes no policy and no
+evidence from the archive; the agent still establishes internal consistency and
+says so; the verifier sources the checker only inside `closure_verify_load`, so
+a publication that wants the reader does not acquire the four invariants with
+it. No script that produces evidence comes out of the archive it judges.
+
+THE STORE FOLLOWED THE RECORD AT ROUND 4, under the same rule and by the same
+route. Round 3's repairs put the driver over the ceiling again, and the store's
+neighbours were all in the report module already: the reader consumes exactly
+what the store writes, the conflict lookup derives the names it creates, and both
+of its consumers reach that module for them. Only the writer was in the driver,
+which left the occupancy rule the one part of the record contract a reader could
+not find beside the contract. The root validation, the promotion and the conflict
+retention moved; observation, comparison and the run order stayed.
+
+Both moves are MOVES and not a sixth module: the topology holds at ten production
+scripts and five checker modules, `closure_scope.sh` still exists in no shape,
+and each amendment was written into the plan before a line of code followed it,
+which is the permitted route and the only one. The plan also names why there were
+two: the driver was carrying the run AND the record, and each amendment took one
+layer of the record away. No third layer remains to move.
+
+No, no topology reconciliation remains open for the plan owner.
 
 ### Cost and structure check for Step 6
 
-_(empty — no check has taken place yet.)_.
+No new quadratic production traversal was found. The fixture-only donor-window
+search compares each string against the referenced-name set; its cost is bounded
+by the donor string table and does not enter verification or publication.
+The pre-install half is two passes over the archive index
+and no unpacking; the skeleton is built from those passes; the installed half
+is one `find` walk; the evidence reader walks its document once and pairs the
+two sides by position rather than by search; the duplicate test in the reader is
+an associative lookup rather than a scan.
+
+| File | Physical lines | Plan expectation |
+| --- | --- | --- |
+| closure_verify.sh | 546 | 200 to 280, advisory |
+| closure_observe_live.sh | 195 | 80 to 120, advisory |
+| closure_report.sh | 549 | plus 330 to 380, advisory, from 196 |
+| ci/deliver-closure-tools.sh | 128 | none stated |
+| closure_config.sh | 636 | unchanged band, down from 645 |
+| closure_publish.sh | 650 | unchanged band, up from 569 |
+
+Both step 6 advisory bands are still exceeded, and the driver is now furthest
+below its ceiling since the step began. It gave the evidence RECORD to the report
+module at round 2, which took it from 650 to 597; round 3's three repairs brought
+it back to 650, met by tightening prose; round 4's repairs would have passed it
+again, so the STORE followed the record under the same rule and the file is at
+546. The pattern is named in the plan rather than repeated silently: the driver
+was carrying two subjects, the run and the record, and each amendment took one
+layer of the record away.
+
+The observer exposes a testable process-filesystem root and reports an unusable
+inventory apart from an empty one. The report module now carries the record, its
+reader and its store, at 549 against the same 650 ceiling. Publication is at
+exactly 650 having gained no line across every round: its only change is which
+module it sources, and the conflict stop it needs lives inside the shared reader
+rather than beside its call.
+
+No measured runtime-cost defect was found. The archive side costs one extra pass
+over the archive INDEX, for the link records the plain listing does not carry,
+and still unpacks nothing. The competing-archive check is one bounded `find`
+over four directories at depth one, taken once per run beside an install that
+walks a whole tree.
 
 ### Harness case check for Step 6
 
-_(empty — no check has taken place yet.)_.
+This Bash plan uses harness cases rather than Python class coverage.
+
+| Validation | Result |
+| --- | --- |
+| verify.closure-check.sh --step 6, Debian 12 agent | exit 0; 223 cases, 0 failures, build 151 |
+| the same suite on RHEL 9.8 | 222 cases, 0 failures, exit 5 on the host gate |
+| steps 0 to 5 on RHEL 9.8 | exit 0; 63, 73, 91, 132, 152 and 223 cases |
+| steps 3 and 4 on the Debian 12 agent | exit 0; 132 and 152 cases, 0 failures, build 151 |
+| verify.install-pkg.sh --step 2 and --step 3 | exit 0; 49 and 63 cases |
+| verify.relocation-rpath.sh --step 3 | exit 0; 104 cases |
+| bash src/utils/lint_shell.sh | exit 0; 53 tracked scripts, clean |
+| shellcheck over the harness and every changed script | exit 0 |
+| rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh | the identity is over the archive FILE at line 147 |
+| installer purity and installer diff against HEAD | exit 1 no matches; exit 0 |
+
+The union of mandatory commands was rerun on the repaired sources. On an
+isolated RHEL 9.8 copy, steps 0 to 5 pass with the counts above, step 6 has 222
+cases and zero failures and returns 5 because only Debian can satisfy its host
+gate, both installer suites pass, and relocation step 3 passes at 104 cases.
+Local project lint and harness shellcheck are clean; the identity grep finds the
+archive-file digest; the installer purity grep returns 1 with no matches and the
+installer diff against HEAD returns 0, so `install_pkg.sh` is byte-identical.
+
+Step 6 grew from 143 portable cases to 183 at round 2, 208 at round 3, 215 at
+round 4, 214 at round 5, 220 at round 6 and 222 at round 7, and step 3 from 124
+to 132: the difference is the six regression sets, which the repair section lists and
+which drive the real producer, a real archive, the real installer and a real
+donor rather than a fixture standing in for any of them. The failure injections
+are scoped to one named operation each, so the retention path is measured with
+every other link, copy and temporary file in the run still working, and the
+marker case makes a package directory non-writable with real permissions while
+the real installer runs against it.
+
+THE COUNT WENT DOWN AT ROUND 5 AND UP AGAIN AFTERWARDS, and every move is the
+repair rather than churn. Round 5 removed the cases that measured a promotion
+which could fail after the bytes existed, because the promotion stopped existing.
+Round 6 removed the occupancy question and its fallback. Round 7 replaced round
+6's two sequential calls, which observed a canonical name that was already there
+and so never entered the race, with the schedule that does: a `cat` shim lets the
+first emitter finish filling its temporary file, runs a second real emitter to
+create the canonical result, and returns, so the first arrives at its link with
+the name taken.
+
+A REGRESSION HAS TO FAIL ON THE CODE IT REGRESSES, and this one is measured
+doing so. Against the staged store the four assertions pass; against the round 5
+store, recovered from the pipeline repository at its round 5 commit and dropped
+into the same tree, three fail with `exact_differing_copies=0`,
+`publication_step2_rc=0` and `agreeing_rerun_rc=0`. The control runs the same
+schedule without the injection and both stores retain the document.
+
+THE CASES ASSERT WHAT DID NOT HAPPEN as much as what did, which is where the
+early rounds were thin: no conflict name and exactly one file after an ordinary
+write, no anonymous document beside a retained conflict, nothing differing
+written when the name cannot be created, the loser's bytes digested against the
+differing document rather than counted, and the canonical result untouched
+throughout.
+
+THE DEBIAN ROW IS A FRESH RUN OVER THE REPAIRED SOURCES, not retained history.
+Build 151 assembled eighteen files and printed the SHA-256 of every one, and all
+eighteen match the canonical cplx bytes staged here, the harness included. Every
+step from 0 to 6 answers `OBJECTIVE MET` on that host, and steps 3 and 4 report
+132 and 152 cases with zero failures, which are the same counts the build host
+reports for the same bytes. The aggregate still exits 5, because step 7 has no
+suite yet and says so.
+
+No numerical coverage gate applies to this Bash plan. The counts above are
+measured on RHEL 9.8 and on the Debian agent, whose eighteen assembled digests
+match the staged files. The only resolver drift the reviewer recorded is the
+additional `plan` source on project lint: the current plan also names that
+command, and no command was added or removed.
+
+THE THREE PATHS ROUND 2 REPRODUCED NOW HAVE CASES, and each one fails without its
+repair. The reviewer's own reproductions, retained in
+`.reviews/a.codex-s6r2.reproduce.sh` and
+`.reviews/a.codex-s6r2.reproduce-results.txt`, showed:
+
+- failed conflict retention returns 1, then publication step 2 and an agreeing
+  rerun both return 0, with only the canonical PASS file retained;
+- a valid parent-relative alias is PRESENT in the installed tree and ABSENT in
+  the skeleton, giving DIVERGENT, while its direct-target equivalent gives PASS;
+- a real marker-removal permission failure leaves `stale-B` installed while the
+  driver emits `verdict|PASS` for candidate A and publication step 2 returns 0;
+  making the package directory writable causes the real installer to install A.
+
+The suite now drives all three. The marker case uses real permissions, the real
+installer and a pre-existing older tree; the retention cases inject failure into
+one named operation at a time, so every other link and copy in the run still
+works; the alias cases build a real archive in both spellings. The reviewer's
+note that both marker runs return 1 for separately reported static and live
+fixture conditions is why the marker case asserts the ABSENCE of a comparison
+line and of an artifact rather than reading the exit code alone. A run that
+refused for some other reason and still emitted a comparison would have satisfied
+a status-only assertion while leaving publication free to accept evidence for a
+tree the candidate did not install.
 
 ### Feature integrity for Step 6
 
-_(empty — no check has taken place yet.)_.
+The installer is byte-identical to HEAD, and its archive discovery is part of
+the driver's integration contract rather than something the driver may steer.
+Copying the candidate into `prefix/pkgs` does not select it exclusively, so the
+selection is checked on both sides of an unchanged call: a newer competitor
+refuses before it, the removal of this candidate's done marker is verified before
+it, and that marker is required after it. The middle check is round 3's, and
+without it the other two were defeated by a package directory that refused the
+unlink while still accepting the overwrite. The tar form, SHA1 deduplication and
+packaging gate are unchanged.
+
+THE DEBIAN STEP 3 AND 4 FAILURES WERE A HARNESS DEFECT, NOT A CHECKER ONE, and
+the round 1 hypothesis was right about the mechanism. The fixture engine wrote
+its name slots at `dynstr_size - 256`, calling that tail reserved. The tail is
+reserved on neither host: it is where a donor's own NEEDED, SONAME and version
+strings sit, and the measurement is in the record. On the build host's `libz`
+donor the first referenced string starts 28 bytes past that offset, so a
+nineteen-byte fixture name fitted in front of it by luck; on the agent's donor it
+does not, so the write landed on the donor's own strings and its entries then
+read the TAIL of the fixture name, which is exactly the `.1`, `so.1` and `1` the
+capture recorded. The step 4 counts are the same cause seen through the version
+records, which index the same table.
+
+THE REPAIR IS IN THE HARNESS AND IN NO SHIPPED SCRIPT, so it belongs to this step
+rather than to steps 3 or 4: no step 3 or step 4 source file changes, their
+validation verdicts are untouched, and the fixture engine is step 6's to fix
+because step 6 is what first ran those suites on the second host. The window is
+now measured per donor, a donor without one is refused rather than used, and five
+cases assert that a mutation adds exactly one need, changes no other, keeps the
+soname and leaves the string table byte-identical either side of the window.
+
+Q03 requires one mechanism on both hosts, and there now is one: build 151
+answers `OBJECTIVE MET` for every step from 0 to 6 on the Debian agent, with
+steps 3 and 4 at the same 132 and 152 cases and zero failures the build host
+reports. The regression evidence for step 6 is therefore measured on both hosts
+rather than on one, which is what the earlier record could not say.
 
 ---
 
