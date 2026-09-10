@@ -23,8 +23,15 @@
 #   closure_envelope_check         the agent-side check, which is INTERNAL
 #                                  CONSISTENCY and not authority, and whose
 #                                  output states that limit itself.
-#   closure_config_resolve_commit  the cplx-side resolution, refusing a reference
-#                                  that is not a commit SHA.
+#
+# THE CPLX-SIDE RESOLUTION IS NOT HERE, AND STEP 6 IS WHY IT LEFT. It moved to
+# closure_publish.sh, because the rule for a module at the ceiling is to move a
+# responsibility to the module that already owns its neighbours, and publication
+# owns that one outright: the design settles that only publication can resolve a
+# path at a commit, since packaging runs on an account with no checkout and the
+# Debian agent has no checkout either. The move also takes `git` off the
+# dependency surface of the copies the archive carries, which could never have
+# used it.
 #
 # It is SOURCED by closure_check.sh and by closure_publish.sh, and never
 # executed. Keeping it apart from the invariants is what lets publication reuse
@@ -47,6 +54,15 @@
 # field count a refusal. Two tables live here; the third, CPLX-CLOSURE-EVIDENCE/1,
 # is Step 6's and adds a table rather than a parser, and it REFUSES the blank and
 # comment lines these two ignore, because only a machine writes it.
+#
+# THE THIRD TABLE DOES NOT LIVE HERE, AND THE REASON IS MEASURED RATHER THAN
+# argued. Written in this file's style it is 164 lines, which puts this module at
+# 762 against a 650 deployment ceiling, and no other module has that much room.
+# It sits in closure_verify.sh, which both of its readers can reach: the emitter
+# IS that file, and closure_publish.sh sources it for the reader alone. What the
+# rule protects is that ONE reader exists, not which file holds it. The evidence
+# document is also the one grammar of the three that no copy inside the archive
+# ever reads, so keeping it out of the payload costs the payload nothing.
 #
 # DECODING PRECEDES DOMAIN VALIDATION, and the order is a rule rather than an
 # implementation accident: validating first would let %2F pass a no-slash domain
@@ -206,6 +222,13 @@ closure_lex_domain() {
         'generations') [[ $value =~ $CLOSURE_RE_GENERATIONS ]] || return 1 ;;
         'sha256') [[ $value =~ $CLOSURE_RE_SHA256 ]] || return 1 ;;
         'commit') [[ $value =~ $CLOSURE_RE_COMMIT ]] || return 1 ;;
+        # The three closed enumerations of the evidence table. They are decided
+        # HERE with every other domain rather than beside the table that uses
+        # them, because a domain decided at its call site is a domain each new
+        # caller gets to reinterpret.
+        'presence') case "$value" in 'present'|'absent') ;; *) return 1 ;; esac ;;
+        'verdict') case "$value" in 'PASS'|'DIVERGENT') ;; *) return 1 ;; esac ;;
+        'side') case "$value" in 'pre'|'post') ;; *) return 1 ;; esac ;;
         'glob')
             stripped="${value//\*/}"
             stars=$(( ${#value} - ${#stripped} ))
@@ -281,8 +304,24 @@ closure_stream_read() {
     while IFS= read -r line || [ -n "$line" ]; do
         n=$((n + 1))
         stripped="${line//[[:space:]]/}"
-        if [ -z "$stripped" ]; then continue; fi
-        case "$line" in '#'*) continue ;; esac
+        # THE EVIDENCE DOCUMENT REFUSES WHAT THE OTHER TWO IGNORE. A person edits
+        # a configuration and an envelope, so a blank line and a comment are
+        # courtesies there; only a machine writes evidence, and one observation
+        # must have exactly one byte sequence for a byte comparison to compare
+        # meaning. So the same reader is strict for one table and lenient for two.
+        if [ -z "$stripped" ]; then
+            if [ "$table" = "evidence" ]; then
+                closure_cfg_refuse "$n" blank-line "a machine writes this document and leaves no blank line in it"
+            fi
+            continue
+        fi
+        case "$line" in
+            '#'*)
+                if [ "$table" = "evidence" ]; then
+                    closure_cfg_refuse "$n" comment "a machine writes this document and leaves no comment in it"
+                fi
+                continue ;;
+        esac
         if [ "$seen_version" -eq 0 ]; then
             seen_version=1
             if [ "$line" != "$version" ]; then
@@ -297,6 +336,10 @@ closure_stream_read() {
         case "$table" in
             'config') closure_cfg_record "$n" "${#CLOSURE_LEX_FIELDS[@]}" ;;
             'envelope') closure_env_record "$n" "${#CLOSURE_LEX_FIELDS[@]}" ;;
+            # Defined by closure_verify.sh, which sources this file. The arm is
+            # here because the dispatch is the reader's, and a caller that has
+            # not loaded the third table reaches it only by naming it.
+            'evidence') closure_evi_record "$n" "${#CLOSURE_LEX_FIELDS[@]}" ;;
         esac
     done < "$file"
     if [ "$seen_version" -eq 0 ]; then
@@ -544,7 +587,13 @@ closure_env_record() {
 closure_envelope_parse() {
     CLOSURE_CFG_BAD=0
     CLOSURE_ENVELOPE_DIGEST=""
+    # The path and the commit are parsed here and read one module away, by the
+    # cplx-side resolution Step 6 moved into closure_publish.sh. They stay in the
+    # envelope model because they are what the envelope SAYS; who acts on them is
+    # a separate question, and only publication can.
+    # shellcheck disable=SC2034  # read by closure_publish.sh after the move
     CLOSURE_ENVELOPE_PATH=""
+    # shellcheck disable=SC2034  # read by closure_publish.sh after the move
     CLOSURE_ENVELOPE_COMMIT=""
     CLOSURE_ENV_DIGESTS=0
     CLOSURE_ENV_SOURCES=0
@@ -583,63 +632,5 @@ closure_envelope_check() {
         return 1
     fi
     printf '%s|%s|%s\n' CONSISTENT "$computed" "$CLOSURE_CONSISTENCY_LIMIT"
-    return 0
-}
-
-# ---------------------------------------------------- the cplx-side resolution ---
-# Writes the authoritative document, as cplx holds it at the named commit and
-# path, into the given output file. It refuses a reference that is not a
-# 40-character commit SHA, and it refuses a 40-hexadecimal value naming something
-# other than a commit object, because a branch or a tag would let the named
-# content change under a fixed name and that is the drift this area exists to
-# remove.
-closure_config_resolve_commit() {
-    local repo="$1" path="$2" commit="$3" out="$4" kind=""
-
-    if ! closure_lex_domain commit "$commit"; then
-        closure_cfg_refuse 0 commit "the named source is $commit, and only a 40-character commit SHA is immutable"
-        return 1
-    fi
-    kind=$(git -C "$repo" cat-file -t "$commit" 2>/dev/null)
-    if [ "$kind" != "commit" ]; then
-        closure_cfg_refuse 0 commit "$commit names a ${kind:-missing object} in $repo rather than a commit"
-        return 1
-    fi
-    if ! git -C "$repo" cat-file blob "$commit:$path" > "$out" 2>/dev/null; then
-        closure_cfg_refuse 0 source "$commit holds no blob at $path"
-        return 1
-    fi
-    return 0
-}
-
-# THE PACKAGING AND PUBLICATION CHECK, which is the one that binds. It runs the
-# agent's check first, so a bundle that is not even internally consistent refuses
-# for that reason rather than for a mismatch, and then requires the embedded
-# document to be byte-identical to what cplx holds at the commit the envelope
-# names. The paired edit is refused HERE: the edited document agrees with its own
-# re-hashed envelope, and it does not agree with cplx.
-closure_config_authority_check() {
-    local repo="$1" config="$2" envelope="$3"
-    local tmp="" resolved="" embedded=""
-
-    if ! closure_envelope_check "$config" "$envelope"; then
-        return 1
-    fi
-    embedded=$(closure_config_digest "$config")
-    tmp=$(mktemp) || {
-        closure_cfg_refuse 0 source "no writable temporary file for the resolved document"
-        return 1
-    }
-    if ! closure_config_resolve_commit "$repo" "$CLOSURE_ENVELOPE_PATH" "$CLOSURE_ENVELOPE_COMMIT" "$tmp"; then
-        rm -f -- "$tmp"
-        return 1
-    fi
-    resolved=$(closure_config_digest "$tmp")
-    rm -f -- "$tmp"
-    if [ "$resolved" != "$embedded" ]; then
-        closure_cfg_refuse 0 authority "the embedded document hashes to $embedded and cplx holds $resolved at $CLOSURE_ENVELOPE_COMMIT"
-        return 1
-    fi
-    printf '%s|%s|%s\n' AUTHORITATIVE "$embedded" "$CLOSURE_ENVELOPE_COMMIT"
     return 0
 }

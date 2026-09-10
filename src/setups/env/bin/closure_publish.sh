@@ -31,10 +31,15 @@
 # policy, so it cannot bind evidence to an artifact; the ARCHIVE identity does,
 # and publication computes it rather than reading it.
 #
-# It sources `closure_config.sh` alone. Publication needs the parser, the digest
-# and the cplx-side resolution and needs none of the invariants, which is the
+# IT SOURCES TWO FILES AND TAKES ONE THING FROM EACH: the grammar module for the
+# parser and the digest, and `closure_report.sh` for `closure_evidence_parse`
+# alone. It needs no invariant, no summary block and no driver, which is the
 # module boundary paying for itself: the checker re-run in step 3 is a CHILD
-# PROCESS, so the verdict it returns is one this file could not have produced.
+# PROCESS, so its verdict is one this file could not have produced.
+#
+# IT ALSO OWNS THE CPLX-SIDE RESOLUTION SINCE STEP 6. Resolving a path at a commit
+# is a thing only publication can do, since packaging and the agent run where there
+# is no checkout, and this file was that pair's one caller.
 
 set -u
 
@@ -45,6 +50,14 @@ fi
 # shellcheck source=/dev/null
 if [ -f "$CLOSURE_PUBLISH_DIR/closure_config.sh" ]; then
     source "$CLOSURE_PUBLISH_DIR/closure_config.sh"
+fi
+# The evidence reader, and nothing else from that file: the report module defines
+# functions only, so sourcing it acquires no verdict and no run. The reader an
+# emitter cannot disagree with is the one the emitter reads its own document back
+# through, and this module is where the topology table now puts it.
+# shellcheck source=/dev/null
+if [ -f "$CLOSURE_PUBLISH_DIR/closure_report.sh" ]; then
+    source "$CLOSURE_PUBLISH_DIR/closure_report.sh"
 fi
 
 CLOSURE_PUBLISH_USAGE="Usage: closure_publish.sh --archive PATH --commit SHA --repo DIR --results DIR [--staging-root DIR] [--adapter FILE]"
@@ -180,6 +193,63 @@ closure_publish_promote() {
     return 0
 }
 
+# ------------------------------------------------ the cplx-side resolution ---
+# MOVED HERE BY STEP 6, and the file header says why. Writes the authoritative
+# document, as cplx holds it at the named commit and
+# path, into the given output file. It refuses a reference that is not a
+# 40-character commit SHA, and it refuses a 40-hexadecimal value naming something
+# other than a commit object: a branch or a tag would let the named content
+# change under a fixed name, which is the drift this area removes.
+closure_config_resolve_commit() {
+    local repo="$1" path="$2" commit="$3" out="$4" kind=""
+
+    if ! closure_lex_domain commit "$commit"; then
+        closure_cfg_refuse 0 commit "the named source is $commit, and only a 40-character commit SHA is immutable"
+        return 1
+    fi
+    kind=$(git -C "$repo" cat-file -t "$commit" 2>/dev/null)
+    if [ "$kind" != "commit" ]; then
+        closure_cfg_refuse 0 commit "$commit names a ${kind:-missing object} in $repo rather than a commit"
+        return 1
+    fi
+    if ! git -C "$repo" cat-file blob "$commit:$path" > "$out" 2>/dev/null; then
+        closure_cfg_refuse 0 source "$commit holds no blob at $path"
+        return 1
+    fi
+    return 0
+}
+
+# THE PACKAGING AND PUBLICATION CHECK, the one that binds. It runs the agent check
+# first, so an internally inconsistent bundle refuses for that reason rather than
+# for a mismatch, then requires the embedded document to be byte-identical to what
+# cplx holds at the named commit. The paired edit is refused HERE: it agrees with
+# its own re-hashed envelope, and not with cplx.
+closure_config_authority_check() {
+    local repo="$1" config="$2" envelope="$3"
+    local tmp="" resolved="" embedded=""
+
+    if ! closure_envelope_check "$config" "$envelope"; then
+        return 1
+    fi
+    embedded=$(closure_config_digest "$config")
+    tmp=$(mktemp) || {
+        closure_cfg_refuse 0 source "no writable temporary file for the resolved document"
+        return 1
+    }
+    if ! closure_config_resolve_commit "$repo" "$CLOSURE_ENVELOPE_PATH" "$CLOSURE_ENVELOPE_COMMIT" "$tmp"; then
+        rm -f -- "$tmp"
+        return 1
+    fi
+    resolved=$(closure_config_digest "$tmp")
+    rm -f -- "$tmp"
+    if [ "$resolved" != "$embedded" ]; then
+        closure_cfg_refuse 0 authority "the embedded document hashes to $embedded and cplx holds $resolved at $CLOSURE_ENVELOPE_COMMIT"
+        return 1
+    fi
+    printf '%s|%s|%s\n' AUTHORITATIVE "$embedded" "$CLOSURE_ENVELOPE_COMMIT"
+    return 0
+}
+
 # ------------------------------------------------------------- the five steps ---
 # Step 1: the archive's own envelope must name the digest of the document cplx
 # holds at the release commit. The comparison is against what PUBLICATION
@@ -220,33 +290,44 @@ closure_publish_step1() {
     return 0
 }
 
-# Step 2: the verification result, KEYED TO THE IDENTITY STEP 0 COMPUTED. A
-# result that exists for some archive is not evidence about this one, so the
-# lookup is by that identity and the record must also name the configuration
-# digest publication resolved.
+# Step 2: the verification result, KEYED TO THE IDENTITY STEP 0 COMPUTED. A result
+# that exists for some archive is not evidence about this one, so it opens the
+# EXACT keyed path and nothing else: it never scans the results root and never
+# derives a location from the archive path, either of which would reintroduce the
+# co-location binding Design Area 7 refuses. Step 6 replaced a hand-read record
+# with the SHARED READER, which refuses a document whose verdict contradicts its
+# own observations: the two-field loop it replaced would have believed one.
 closure_publish_step2() {
-    local results="$1" record="$2/$CLOSURE_PUBLISH_IDENTITY" state="" cfg="" line=""
+    local results="$1" record="$2/$CLOSURE_PUBLISH_IDENTITY"
 
     if [ ! -f "$record" ]; then
         closure_publish_refuse 2 "no verification result is keyed to archive identity $CLOSURE_PUBLISH_IDENTITY"
         return 1
     fi
-    # READ IN THE SHELL, for the reason the line counter upstream is: `grep` is
-    # not on this effort's contract, and a record of two fields does not need a
-    # process to read it. The first occurrence of each field wins, so a record
-    # that repeats one cannot change the answer by appending to itself.
-    while IFS= read -r line; do
-        case "$line" in
-            'state|'*) [ -n "$state" ] || state="${line#state|}" ;;
-            'configuration|'*) [ -n "$cfg" ] || cfg="${line#configuration|}" ;;
-        esac
-    done < "$record"
-    if [ "$cfg" != "$CLOSURE_PUBLISH_CONFIG_DIGEST" ]; then
-        closure_publish_refuse 2 "the verification result was taken under configuration ${cfg:-none} and publication resolved $CLOSURE_PUBLISH_CONFIG_DIGEST"
+    if ! declare -F closure_evidence_parse >/dev/null 2>&1; then
+        closure_publish_refuse 2 "the evidence reader is not loaded, and this gate reads no document without it"
         return 1
     fi
-    if [ "$state" != "passing" ]; then
-        closure_publish_refuse 2 "the verification result for this archive is '${state:-absent}' rather than passing"
+    # THE READER IS CALLED IN THIS SHELL AND NEVER IN A SUBSTITUTION. Its result
+    # travels through the parsed model, so capturing its output would run it in a
+    # subshell and leave every field unset here: the same rule the lexer states
+    # one module away, met from the other side. Its own typed refusal lines are
+    # the diagnostic, and they name the record and the defect better than a
+    # folded copy of them would.
+    if ! closure_evidence_parse "$record"; then
+        closure_publish_refuse 2 "the verification result at $record is not a valid evidence document"
+        return 1
+    fi
+    if [ "$CLOSURE_EVI_ARCHIVE" != "$CLOSURE_PUBLISH_IDENTITY" ]; then
+        closure_publish_refuse 2 "the result stored under $CLOSURE_PUBLISH_IDENTITY names archive $CLOSURE_EVI_ARCHIVE"
+        return 1
+    fi
+    if [ "$CLOSURE_EVI_CONFIG" != "$CLOSURE_PUBLISH_CONFIG_DIGEST" ]; then
+        closure_publish_refuse 2 "the verification result was taken under configuration ${CLOSURE_EVI_CONFIG:-none} and publication resolved $CLOSURE_PUBLISH_CONFIG_DIGEST"
+        return 1
+    fi
+    if [ "$CLOSURE_EVI_VERDICT" != "PASS" ]; then
+        closure_publish_refuse 2 "the verification result for this archive is '${CLOSURE_EVI_VERDICT:-absent}' rather than PASS"
         return 1
     fi
     return 0
