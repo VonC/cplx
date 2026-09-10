@@ -14228,3 +14228,4407 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-9 -->
+
+## Round 1 by requestor - Step 6
+
+- Recorded: 2026-09-09T17:58:01+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 1
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 1)
+
+request_index_tree: 5708f97bb7f913a696adcada3f7fa45fac15ab81
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(closure): widen the host-tool contract to the verification path
+group 1 path: docs/v0.27.0/contract.closure-tools.txt
+group 2: feat(closure): add the live observer
+group 2 path: src/setups/env/bin/closure_observe_live.sh
+group 3: feat(closure): add the verification driver and bind publication to its evidence
+group 3 path: src/setups/env/bin/closure_config.sh
+group 3 path: src/setups/env/bin/closure_verify.sh
+group 3 path: src/setups/env/bin/closure_publish.sh
+group 4: feat(closure): add the pipeline delivery of the authoritative tools
+group 4 path: ci/deliver-closure-tools.sh
+group 5: test(closure): add the step 6 suite and the shared evidence fixtures
+group 5 path: docs/v0.27.0/verify.closure-check.sh
+group 6: test(closure): retain the step 6 Debian capture
+group 6 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 7: docs(toolchain-runtime-closure): record step 6 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 1)
+
+#### Implementation state for step 6 toolchain-runtime-closure (round 1)
+
+Yes. Step 6 is fully implemented. Every completion criterion the plan names is
+met, every case its test-first list requires exists, and the step is green on
+the one host that can answer it.
+
+#### The four completion criteria for step 6 toolchain-runtime-closure (round 1)
+
+| Criterion | Result |
+| --- | --- |
+| verify.closure-check.sh --step 6 green on the Debian agent, capture retained | exit 0; 144 cases, 0 failures; `docs/v0.27.0/verify.closure.step6.debian.txt` |
+| bash src/utils/lint_shell.sh green | exit 0; 53 tracked scripts, clean |
+| rg -n 'sha256sum' closure_verify.sh shows the identity over the archive FILE | line 347, `closure_verify_identity`, over `$archive` and never over a tree |
+| installer purity and installer untouched | exit 1 no matches; `git diff --exit-code HEAD` empty |
+
+#### The rest of the validation for step 6 toolchain-runtime-closure (round 1)
+
+| Validation | Result |
+| --- | --- |
+| --step 6 on RHEL 9.8 | 143 cases, 0 failures, exit 5 on the host gate, which is the refusal path |
+| --step 5 / 4 / 3 / 2 / 1 / 0 on RHEL 9.8 | exit 0; 223, 152, 124, 91, 73 and 62 cases |
+| verify.install-pkg.sh --step 2 / --step 3 | exit 0; 49 and 63 cases |
+| verify.relocation-rpath.sh --step 3 | exit 0; 104 cases |
+| shellcheck over the three new scripts and the two changed modules | exit 0 |
+| commit-plan-check --format json | valid, ready, seven groups, nine paths, no diagnostics |
+
+The two host runs differ by exactly one case, the host gate itself. All fifteen
+digests the Debian run printed for the assembled tree match the canonical cplx
+files byte for byte, which is what makes that capture evidence about these bytes
+rather than about a copy.
+
+#### Two boundary decisions I need you to rule on for step 6 toolchain-runtime-closure (round 1)
+
+THE EVIDENCE GRAMMAR IS NOT IN THE GRAMMAR MODULE, and the reason is measured.
+In `closure_config.sh`'s style the table is 164 lines, which puts that module at
+762 against a 650 deployment ceiling, and no other module has that room. It sits
+in `closure_verify.sh`, which both readers reach, and `closure_publish.sh`
+sources that file for `closure_evidence_parse` alone. I read the shared-reader
+rule as protecting that ONE reader exists rather than which file holds it, and
+the evidence document is the one grammar of the three no copy inside the archive
+reads. The topology text does not describe either the placement or that source
+relationship.
+
+THE CPLX-SIDE RESOLUTION MOVED to `closure_publish.sh`, its one production
+caller, which is what made room for the domains and the dispatch the table needs
+in the grammar module. It also takes `git` off the dependency surface of the
+copies the archive carries. The six step 2 authority cases now source the module
+that owns those functions.
+
+#### Two files with no headroom for step 6 toolchain-runtime-closure (round 1)
+
+`closure_verify.sh` is 650 and `closure_publish.sh` is 649, both one line under
+the ceiling. Step 7 adds `closure_d10.sh` and no line to either, so nothing
+scheduled needs that room, but a later change to either has none to spend. Both
+step 6 advisory bands are exceeded: 650 against 200 to 280, and 173 against 80
+to 120 for the observer.
+
+#### A finding that is not this step's for step 6 toolchain-runtime-closure (round 1)
+
+STEPS 3 AND 4 DO NOT PASS ON THE DEBIAN AGENT. Step 3 reports 15 failures and
+step 4 reports 10, and both are green on RHEL with the identical bytes. This is
+the first run able to see it: until the shipped set travelled there, every step
+refused for want of a subject and steps 1 to 6 had never executed on that host.
+
+Step 3 reads DT_NEEDED names as truncated suffixes, `so.1` and `.1` and `1`
+where `libcplxabsent.so.1` is expected; step 4 counts fewer planted names and
+version definitions than its fixtures wrote. Both are consistent with the
+synthetic ELF fixtures planting into donor-dependent offsets. I have not
+diagnosed it and I have changed neither `closure_elf.sh` nor `closure_rules.sh`.
+It matters because Q03 settles that one mechanism answers on both hosts, and
+those two steps recorded their Yes against the RHEL half alone.
+
+#### Architecture, performance and feature integrity for step 6 toolchain-runtime-closure (round 1)
+
+No module boundary moved beyond the two decisions above. The topology holds at
+ten scripts and no eleventh module. No new quadratic work: one pass over the
+archive index, one `find` walk, one document walk, positional pairing and an
+associative duplicate test. The installer is byte-identical to HEAD and the
+driver adds no argument to it. Steps 0 to 5 are green, so nothing earlier
+regressed.
+
+#### Coverage for step 6 toolchain-runtime-closure (round 1)
+
+This Bash effort uses harness coverage. Step 6 has 143 cases on RHEL and 144 on
+Debian. No unit-tested class is below 100%, because there is none.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 1)
+
+#### The driver, and the skeleton that lets one derivation answer both sides for step 6 toolchain-runtime-closure (round 1)
+
+`closure_verify.sh` requires the pipeline delivery BEFORE it opens the archive.
+That ordering is the whole bootstrap argument, so it is the first thing the file
+does and the refusal names what is missing. There is no fallback: a copy inside
+the candidate is payload under examination, never a source of evidence.
+
+The archive side needs a tree, and the design forbids unpacking. So the driver
+rebuilds the archive's DIRECTORY SKELETON from its table of contents: empty
+directories, no file extracted, one pass over the index. `build_elf_rpath` only
+ever tests whether a directory exists, so a skeleton answers it exactly as the
+unpacked tree would, and both sides then go through `closure_scope_declared`,
+`closure_scope_observed` and `closure_scope_classify` from the authoritative
+checker. That is why there is one `closure_verify_side` called twice rather than
+the three functions the behavior section names.
+
+#### The evidence document, and why its verdict is derived for step 6 toolchain-runtime-closure (round 1)
+
+The reader refuses the blank lines and comment lines the other two grammars
+ignore, because only a machine writes this one and one observation must have
+exactly one byte sequence. It enforces a fixed record order through a stage
+number that may not go backwards, and it requires `post` to mirror `pre` path
+for path and in order.
+
+The verdict is DERIVED and never trusted. A document asserting PASS over a
+divergent pair, or over an unexpected finding, is refused before publication
+reads a field of it, so an emitter cannot assert a verdict its own records deny.
+That is what lets step 2 treat the document as evidence rather than as a claim.
+
+#### One reader, and the bug that proved it for step 6 toolchain-runtime-closure (round 1)
+
+`closure_publish_step2` calls `closure_evidence_parse` IN ITS OWN SHELL. My
+first version captured the output in a command substitution, which ran the
+reader in a subshell and left every field of the parsed model unset in the
+caller. Under `set -u` that aborted loudly rather than comparing empty strings,
+which is the better failure, and it is the same rule the lexer states one module
+away from the other side.
+
+#### The live observer for step 6 toolchain-runtime-closure (round 1)
+
+It spawns nothing. The command name, the argument vector and the mapped objects
+all come from the process filesystem, read by the shell itself, so a tool it
+does not use is a tool the foreign host does not have to have. The root is an
+argument defaulting to /proc, which is what lets the empty-inventory refusal be
+asserted without arranging a process that must not exist.
+
+#### What the suite found in itself for step 6 toolchain-runtime-closure (round 1)
+
+Two harness defects the first RHEL run exposed. A staging root reused across
+publications made the second publish of one archive refuse at step 0, since the
+gate promotes without overwrite, so every case after it was measuring that
+refusal. And the modified-archive case appended bytes to a `.tar.gz`, which made
+it unreadable, so publication refused at step 1 while the case claimed step 2.
+Both are fixed and the reason is written where the fixture is.
+
+#### The evidence obtained outside this repository for step 6 toolchain-runtime-closure (round 1)
+
+The Debian capture required work in `my-project`, which carries the
+verification-only copies and the probe. Three commits there, pushed to the cicd
+remote Jenkins clones: the transport of the shipped set and the step 6 probe,
+the case output for the two steps that fail on that host, and the refresh to the
+143-case suite. Build 143 produced the retained artifact. None of that is in
+this repository's staged set, and it is named here because the capture cannot be
+reproduced without it.
+
+### Change summary for step 6 toolchain-runtime-closure (round 1)
+
+#### Staged paths for step 6 toolchain-runtime-closure (round 1)
+
+Nine.
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_verify.sh
+
+#### Three the step 6 file list does not name for step 6 toolchain-runtime-closure (round 1)
+
+`closure_config.sh`, `closure_publish.sh` and `contract.closure-tools.txt` are
+consequences rather than a widening. The grammar module gained the three closed
+enumerations, the reader's strictness for the evidence table and its dispatch
+arm, and lost the cplx-side resolution. Publication received that pair and now
+reads step 2 through the shared reader. The contract gained no row, since every
+command the three new scripts execute was already declared, and had seven `why`
+cells widened plus a stale count corrected from nine scripts to ten.
+
+#### What changed in production, and what did not for step 6 toolchain-runtime-closure (round 1)
+
+Three new files and two changed ones. `install_pkg.sh` is byte-identical to
+HEAD, `pkg.sh` and `pkg_tools.sh` are untouched, and the checker modules other
+than `closure_config.sh` are untouched.
+
+#### Commit plan for step 6 toolchain-runtime-closure (round 1)
+
+Exit 0, valid, ready, no diagnostics, seven groups over nine paths. The three
+interlocking files share one group because separating them would leave an
+intermediate commit where publication sources a file that does not exist yet, or
+where the grammar module has lost the resolution before publication has gained
+it. The final group carries the exact `record step 6 validation` title.
+
+### Writer response for step 6 toolchain-runtime-closure (round 1)
+
+Writer response:
+
+#### First round of this step, and what I already corrected myself for step 6 toolchain-runtime-closure (round 1)
+
+No earlier feedback to answer. Two things were found and fixed before this
+request, by the cycle rather than by me noticing.
+
+THE IMPLEMENTATION CHECK RETURNED NO ON THIS STEP FIRST. The plan's test-first
+list requires the publication identity-binding case to be "driven by a real
+producer rather than a fixture", and all five of my publication cases handed the
+gate a document the harness wrote. That is the shape step 5 already had, so a
+fixture there left the step short of its own point. The end-to-end run now
+publishes against the archive it verified using the artifact it emitted, and
+against a second archive that artifact does not describe.
+
+THE FIRST DEBIAN BUILD MADE ME CHANGE THE PROBE RATHER THAN THE RECORD. It
+reported steps 3 and 4 failing with a count and no detail, and a count is not a
+finding. I pushed a second pipeline commit purely to print their case output
+before writing anything about them.
+
+#### Where I want you to push for step 6 toolchain-runtime-closure (round 1)
+
+The two boundary decisions in the assessment are the ones I am least sure of.
+The evidence grammar's placement is measured rather than argued, but the
+topology text does not describe it, and publication sourcing the driver is a new
+source relationship. If you think either belongs in the plan before the code, I
+would rather hear it now than after step 7.
+
+The steps 3 and 4 Debian failures are the other thing worth your attention. I
+have deliberately not diagnosed them inside this step, and I have not touched
+`closure_elf.sh` or `closure_rules.sh`. If you read that as ducking work this
+step should own, say so.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-1 -->
+
+## Round 1 by reviewer - Step 6
+
+- Recorded: 2026-09-10T08:02:26+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Baseline index tree: 5708f97bb7f913a696adcada3f7fa45fac15ab81
+
+Assessed index tree: 37dc7d52de2a33562ce5ab7ca852c5baefa2b6e3
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The driver, observer, delivery helper and shared evidence reader exist, and the producer-to-consumer test is useful. Four independently reproduced paths violate the step's guarantees: conflict persistence, directory-alias scope, usable live inventory, and selection of the archive being verified. The current suite omits them. The Debian step 3 and 4 failures remain undiagnosed.
+
+Reviewer disposition: changes-requested. No substantive implementation or harness repair was made.
+
+Validation plan effects:
+
+Updated only Step 6 in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: exact No sentence, concrete Missing work section, qualified architecture and line-budget assessment, reviewer validation results and feature-integrity limits. The attributable patch's original hunks are confined to lines 2106-2350, inside Step 6. Earlier steps, Step 7 and umbrella status were preserved. Updated the ignored a.commit Group 7 body to describe No and the required repairs accurately.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+All commands ran against unchanged implementation sources. Linux harnesses ran in an isolated RHEL 9.8 copy; local checks used the actual repository. The source copy did not modify the consuming repository.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | 5; 143 cases, 0 failures; required Debian host obligation unanswered |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | 0; archive-file identity at line 347 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | 1 with no output, expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 5` | 0; 223 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 4` | 0; 152 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 3` | 0; 124 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 2` | 0; 91 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 1` | 0; 73 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 0` | 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | 0; 104 cases, 0 failures |
+
+Initial Git-dependent Linux failures were a PATH/setup problem, not a missing installation. Restoring the installed Git and rerunning only closure steps 6/5/2 and relocation step 3 resolved them. Retained original diagnostics remain in ignored reviewer evidence.
+
+The retained Debian build 143 capture reports step 6 at 144/0. All 15 recorded source digests independently match the current sources. This is historical writer evidence, not a fresh reviewer run on Debian. Its step 3 (15 failures) and step 4 (10 failures) results remain unresolved; donor-dependent fixture offsets are a hypothesis.
+
+Four additional isolated reproductions are retained in `.reviews/a.codex-s6r1.reproduce.sh` and `.reviews/a.codex-s6r1.reproduce-results.txt`. A valid PASS parses with status 0; after the conflicting emit returns 1, publication step 2 returns 0 and an identical rerun returns 0. Empty maps gives CONCLUSIVE/0. The tar skeleton lacks a directory alias which resolves in the installed tree. The real installer selects and installs a competing future-dated archive with status 0.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+The current resolver loaded .review-validation and the exact Step 6 plan additions, preserving request additions. It produced 15 ordered commands, identical to the request. Source labels are project+plan for project shell lint; plan for harness shellcheck, closure step 6, both rg checks and installer diff; request for closure steps 5 through 0, installer steps 2/3 and relocation step 3. The union was run. Full machine-readable sets: `.reviews/a.codex-s6r1.resolver.json`.
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+None: no added commands, removed commands or source-label changes.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Request and baseline index: 5708f97bb7f913a696adcada3f7fa45fac15ab81. Assessed index: 37dc7d52de2a33562ce5ab7ca852c5baefa2b6e3.
+
+Validation before metadata edits left every captured tracked and ignored path unchanged. After the permitted metadata edits, validation-state compare reports acceptable=false with tracked paths [validation plan, `<index>`] and ignored path [a.commit], no untracked paths. These are exactly the authored Step 6 metadata patch and its staging, not test side effects. Attribution reported true and git apply --cached --check passed before the exact patch was applied.
+
+Umbrella digest compare: unchanged, 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. The pre-existing unstaged protocol transcript modification was neither reviewed as context nor staged. git diff --check passed.
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Repairs made:
+
+- Review metadata only: staged the attributable Step 6 validation-plan patch and updated ignored a.commit Group 7. No production code, tests, earlier-step rows or umbrella changes.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+The independent checker ran before grouping assessment and again after metadata repair. Both returned exit 0, state=valid, ready=true, diagnostics=[]. Staged membership remains the same nine paths. Final ordered groups:
+
+1. `chore(closure): widen the host-tool contract to the verification path`: `docs/v0.27.0/contract.closure-tools.txt`
+2. `feat(closure): add the live observer`: `src/setups/env/bin/closure_observe_live.sh`
+3. `feat(closure): add the verification driver and bind publication to its evidence`: `src/setups/env/bin/closure_config.sh`, `src/setups/env/bin/closure_verify.sh`, `src/setups/env/bin/closure_publish.sh`
+4. `feat(closure): add the pipeline delivery of the authoritative tools`: `ci/deliver-closure-tools.sh`
+5. `test(closure): add the step 6 suite and the shared evidence fixtures`: `docs/v0.27.0/verify.closure-check.sh`
+6. `test(closure): retain the step 6 Debian capture`: `docs/v0.27.0/verify.closure.step6.debian.txt`
+7. `docs(toolchain-runtime-closure): record step 6 validation`: `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+
+The order is coherent: contract and observer, verifier/reader/publication wiring, delivery, harness, retained capture, validation record. Subjects and membership remain accurate after the Group 7 body was corrected. This satisfies only the mechanical commit-plan floor and does not authorize a commit.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Unresolved findings:
+
+- [P1] F1 — A retained conflict does not stop publication. src/setups/env/bin/closure_verify.sh:276-312 and src/setups/env/bin/closure_publish.sh:299-331. Emit a valid canonical PASS, then a valid DIVERGENT document for the same archive/configuration. The second emit retains a conflict and returns 1, but publication step 2 still returns 0 because it reads only the original PASS. A subsequent identical PASS emit also returns 0 despite unresolved conflicting evidence. This violates Step 6's explicit human-recovery/publication-stop rule. Add the full emit-conflict-publish/rerun regression and preserve all conflicts when timestamp names collide.
+- [P1] F2 — Archive reconstruction loses supported directory aliases. src/setups/env/bin/closure_verify.sh:357-382. tar -t lists a symlink such as tools/python/current without a trailing slash; the skeleton creates only its parent and omits the alias. The installed tree resolves current/lib, while the pre-install skeleton reports it absent. The committed policy explicitly declares python/current. An isolated tar with the same internal alias pattern reproduced absent in the skeleton and present installed, so a normal supported archive can become falsely DIVERGENT. Test actual tar reconstruction and shared scope derivation, not two hand-created directory trees.
+- [P2] F3 — An empty or failed map read can be reported conclusive. src/setups/env/bin/closure_observe_live.sh:132-144. The loop increments inventoried before collecting mappings, and process-substitution completion is not checked. A readable empty maps file for a matching process produces PROCESS, HOSTS=0 and LIVE CONCLUSIVE with exit 0. Empty maps occur for exited/zombie processes; disappearing or failed reads also cannot establish a usable inventory. Count only successfully collected usable inventories and add empty/read-failure controls.
+- [P1] F4 — The installed archive is not bound to the driver's recorded identity. src/setups/env/bin/closure_verify.sh:581-587. Copying the candidate into prefix/pkgs and invoking the installer does not exclusively select it: install_pkg.sh:1185 searches prefix, HOME and both package directories by newest mtime, then may skip through its done marker. With candidate A copied exactly as the driver does and future-dated B in HOME/pkgs, the actual installer returned 0 and installed B. If their directory shapes agree, the comparison can PASS under A's digest despite the post-install observation belonging to B. Isolate and verify candidate selection, including reruns/done markers, while preserving the installer's frozen interface.
+- [P2] F5 — Debian regression evidence is unresolved. docs/v0.27.0/verify.closure.step6.debian.txt and the Step 6 validation row report 15 failures in closure step 3 and 10 in step 4. The reviewer verified all 15 capture digests and passed these suites on RHEL, which does not diagnose the Debian failures. Do not assert that step 6 did not regress earlier behavior until the cause is established and the required host evidence is green.
+- [P2] F6 — The evidence reader still differs from the plan's explicit grammar boundary. Moving cplx resolution to its sole production caller is reasonable; sharing one evidence reader also preserves a useful invariant. However, placing that reader in the verifier and sourcing it from publication leaves the canonical topology text stale. Reconcile the contract through the plan owner without requiring approval merely for the current at-or-below-ceiling line counts.
+
+Boundary-crossing work:
+
+- Reconcile the canonical plan/design topology through its owner; those documents are outside the permitted Step 6 validation-row edit. Diagnose and route any Debian step 3/4 fixes to those owning steps. Do not modify their validation verdicts or umbrella rows from this review. No such boundary-crossing repair was made.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Address the six bullets in Step 6's Missing work section. Fix F1-F4 and add regression cases exercising the real producer/consumer, real archive alias handling, unusable live inventories and competing installer archives. Stay within the ten-script topology and 650-line ceiling; follow the established split workflow if required. Keep install_pkg.sh unchanged.
+
+Diagnose F5 rather than declaring it unrelated. Resolve F6 through the plan owner. Rerun the union of mandatory validation commands and retain a fresh Debian capture whose digests match the repaired bytes. Update only supported validation claims and a.commit, then publish a new code-review round for the staged implementation. This answer grants no commit or push authority.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Changes-requested.
+
+| Readiness floor | Assessment |
+| --- | --- |
+| Exact identity | PASS: plan, step 6, round 1, occurrence 1 and request index matched before assessment |
+| Implementation completeness | FAIL: F1-F4 reproduced; exact No and missing-work rows recorded |
+| Mandatory validation and coverage | INCOMPLETE: current RHEL host cannot answer the Debian step 6 gate; matching historical capture does not resolve Debian step 3/4 failures or missing regression cases |
+| Staged attribution | PASS: nine received paths retained; only attributable Step 6 metadata patch added; umbrella and other steps preserved |
+| Unresolved findings | FAIL: F1-F6 remain open |
+| a.commit | PASS: independent checker valid/ready, no diagnostics; grouping and corrected body assessed |
+
+No substantive reviewer repair was made. The implementation and evidence failures block readiness regardless of the valid commit plan. There was no literal Human guidance block to answer.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-1 -->
+
+## Round 2 by requestor - Step 6
+
+- Recorded: 2026-09-10T09:24:05+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 2
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 2)
+
+request_index_tree: 540a80f8aff9b504aaf26e71654714cad6f6f1d8
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): give the evidence record to the report module
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: chore(closure): widen the host-tool contract to the verification path
+group 2 path: docs/v0.27.0/contract.closure-tools.txt
+group 3: feat(closure): add the live observer
+group 3 path: src/setups/env/bin/closure_observe_live.sh
+group 4: feat(closure): add the verification driver and bind publication to its evidence
+group 4 path: src/setups/env/bin/closure_config.sh
+group 4 path: src/setups/env/bin/closure_report.sh
+group 4 path: src/setups/env/bin/closure_verify.sh
+group 4 path: src/setups/env/bin/closure_publish.sh
+group 5: feat(closure): add the pipeline delivery of the authoritative tools
+group 5 path: ci/deliver-closure-tools.sh
+group 6: test(closure): add the step 6 suite and measure the fixture name window
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 6 Debian capture
+group 7 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 8: docs(toolchain-runtime-closure): record step 6 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_report.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 2)
+
+#### Writer assessment for step 6 toolchain-runtime-closure (round 2)
+
+##### Is the exact step fully implemented for step 6 toolchain-runtime-closure (round 2)
+
+Yes. Step 6 of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` is fully
+implemented in the staged work.
+
+Every behavior the step names exists and is exercised: the verification driver
+that requires the pipeline delivery before it opens the archive, the archive-side
+observation derived from the archive index, the install through an unchanged
+`install_pkg.sh`, the installed-side observation, the comparison and its DIVERGENT
+refusal, the payload comparison that authorises nothing, the live observer with
+its three outcomes, and one evidence artifact keyed by the SHA-256 of the archive
+file, written into a validated results root by a promotion that never overwrites.
+
+Round 1 returned six findings and no reviewer repair to production code or to the
+harness. All six are repaired, each with a regression case that drives the real
+producer, a real archive, the real installer or a real donor.
+
+##### Test evidence for step 6 toolchain-runtime-closure (round 2)
+
+The union of mandatory validation commands was rerun on the repaired sources.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | exit 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | exit 0 on the Debian 12 agent; 184 cases, 0 failures, build 145 |
+| the same suite on RHEL 9.8 | exit 5 on the host gate; 183 cases, 0 failures |
+| `--step 5` on RHEL 9.8 | exit 0; 223 cases, 0 failures |
+| `--step 4` on RHEL 9.8 | exit 0; 152 cases, 0 failures |
+| `--step 3` on RHEL 9.8 | exit 0; 132 cases, 0 failures |
+| `--step 2` on RHEL 9.8 | exit 0; 91 cases, 0 failures |
+| `--step 1` on RHEL 9.8 | exit 0; 73 cases, 0 failures |
+| `--step 0` on RHEL 9.8 | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | exit 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | exit 0; 104 cases, 0 failures |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | the identity is over the archive FILE, at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | exit 1 with no output, the expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | exit 0 |
+
+The Debian row is a fresh run over the repaired sources rather than retained
+history. Build 145 assembled eighteen files and printed the SHA-256 of every one,
+and all eighteen match the canonical cplx bytes staged here, the harness
+included. Every step from 0 to 6 answers `OBJECTIVE MET` on that host, and steps
+3 and 4 report 132 and 152 cases with zero failures, the same counts the build
+host reports for the same bytes. The aggregate still exits 5, because step 7 has
+no suite yet and says so, which is unchanged from the earlier capture.
+
+Step 6 grew from 143 portable cases to 183 and step 3 from 124 to 132. The
+difference is the round 2 regression set: six cases and one control for the
+durable conflict stop, four for the real-archive directory alias with its broken
+alias control, five for the unusable inventories with their control, six for the
+installer selection, and five for the collateral a fixture mutation must not
+cause.
+
+##### Static-check evidence for step 6 toolchain-runtime-closure (round 2)
+
+`bash src/utils/lint_shell.sh` covers every tracked shell script and is clean.
+`shellcheck` over the harness is clean, and the project lint covers the four
+changed shipped scripts. No `shellcheck` directive was added to make a file pass:
+the two `disable` comments introduced this round are `SC2034` for read variables
+that consume a record shape, which the live observer already used for the same
+reason, and `SC2016` for a guard written into a CHILD script's text.
+
+##### Coverage evidence for step 6 toolchain-runtime-closure (round 2)
+
+No coverage gate applies to a Bash plan. Harness cases are the coverage
+evidence, and every defect round 1 reproduced now has one that fails without the
+repair. The three that could be driven through production entry points are:
+`closure_verify_emit` and `closure_publish.sh` for the conflict,
+`closure_verify_skeleton` and `closure_verify_side` for the alias, and the driver
+end to end for the installer selection. The one that could not is the marker gate
+after the call, which needs an installer that returns success without processing
+the candidate; a tie in modification time or a race is the only way the real
+installer reaches that state, so the case uses a stand-in that SOURCES the real
+installer and replaces only its execution path.
+
+##### Architecture evidence for step 6 toolchain-runtime-closure (round 2)
+
+The topology holds at ten production scripts and five checker modules, and
+`closure_scope.sh` still exists in no shape. The one structural change is a MOVE
+of the evidence record to `closure_report.sh`, written into the plan's module
+table before a line of code followed it, which is the route step 5 used and the
+only one the plan permits. After the move no shipped script sources the
+verification driver, and the harness's sourced-function exemption is narrowed
+accordingly rather than left granting names nobody takes.
+
+Line counts: `closure_verify.sh` 597, `closure_observe_live.sh` 195,
+`closure_report.sh` 418, `closure_config.sh` 636, `closure_publish.sh` 650,
+`ci/deliver-closure-tools.sh` 128. Every file is at or under the 650 ceiling and
+publication gained no line.
+
+##### Performance evidence for step 6 toolchain-runtime-closure (round 2)
+
+No new quadratic work. The archive side costs one additional pass over the
+archive INDEX, for the link records the plain listing cannot carry, and still
+unpacks nothing. The competing-archive check is one bounded `find` at depth one
+over four directories, taken once per run beside an install that walks a whole
+tree. The measured fixture window costs two `readelf` invocations and one `dd`
+per donor validation and per mutation, in a harness that is not deployed.
+
+##### Feature-integrity evidence for step 6 toolchain-runtime-closure (round 2)
+
+`install_pkg.sh` is byte-identical to HEAD: the diff against HEAD returns 0 and
+the purity grep returns 1 with no output. The driver adds no argument to the
+installer call and steers no selection; it refuses before and verifies after.
+
+Steps 0 to 5 pass on RHEL 9.8 with the counts above, and every step from 0 to 6
+passes on the Debian 12 agent at build 145. The regression evidence for step 6 is
+therefore measured on BOTH hosts, which is what Q03 asks for and what the earlier
+record could not say.
+
+The Debian step 3 and 4 failures round 1 left undiagnosed were a defect in the
+harness fixture engine and in no shipped script. No step 3 or step 4 source file
+changed and neither step's validation verdict was touched.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 2)
+
+#### What changed for step 6 toolchain-runtime-closure (round 2)
+
+##### The shape of the round for step 6 toolchain-runtime-closure (round 2)
+
+Round 1 accepted the step's structure and refused its readiness: three new
+scripts and the wiring were in place, four correctness paths were reproduced
+broken, one cross-distribution failure was undiagnosed, and the topology text no
+longer described the code. Round 2 changes no structure. It repairs the four
+paths, diagnoses and fixes the fifth, and makes the plan and the code agree by
+moving one responsibility to the module the plan's own rule names.
+
+##### The topology amendment, written before the code followed it for step 6 toolchain-runtime-closure (round 2)
+
+`docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` gains a second
+amendment to the module table. The report module now owns how a run's outcome is
+WRITTEN in both of its forms: the human summary block it already carried, and the
+`CPLX-CLOSURE-EVIDENCE/1` record with its single reader. It still owns no verdict
+and no exit code.
+
+The rule the plan already carried decided the destination. A module that would
+exceed the 650-line ceiling moves a responsibility to the module that already
+owns its neighbours, and the evidence document has one: it is the same run
+outcome the report module writes, over the same counters, downstream of the same
+producers, in a machine grammar rather than a human one. What made the move
+necessary rather than tidy is that three of the four repairs land in
+`closure_verify.sh`, which entered this round at exactly 650.
+
+The plan also records the repairs themselves: the durable conflict stop, the
+directory aliases the verbose index carries, the inventory that must be
+collected before it counts, the three checks around an unchanged installer call,
+and the nine test-first cases they require.
+
+##### The evidence record, moved with its reader for step 6 toolchain-runtime-closure (round 2)
+
+`src/setups/env/bin/closure_report.sh` receives the grammar table, the record
+functions, `closure_evidence_reset`, `closure_evidence_parse` and the new
+`closure_evidence_conflicts`, and it guards a source of `closure_config.sh` for
+the lexer the way the driver does. It goes from 196 to 418 lines.
+
+`src/setups/env/bin/closure_verify.sh` loses that table and gains the three
+driver repairs, going from 650 to 597. It sources the report module for the
+reader it writes its own document through, which is what "one reader" means from
+the emitter's side.
+
+`src/setups/env/bin/closure_publish.sh` sources the report module instead of the
+driver and gains NO line, staying at exactly 650. Its step 2 needs no rule of its
+own for the conflict, because the shared reader refuses that state.
+
+##### F1, the conflict that now stays a stop for step 6 toolchain-runtime-closure (round 2)
+
+`closure_evidence_conflicts` derives the conflict names from the keyed path, a
+lookup rather than the scan of the results root Design Area 7 forbids.
+`closure_evidence_parse` refuses a record beside which one is retained, before it
+reads a field, so publication's step 2 stops on the same state the emitter does.
+
+`closure_verify_emit` refuses the AGREEING rerun: matching the canonical file
+while a differing result sits beside it is not resolving the pair. The conflict
+name carries the run's timestamp and the result's digest, so two differing
+results inside one second are both retained; a retention that could not be made
+is reported as `CONFLICT-UNRETAINED` rather than passed over.
+
+##### F2, the archive skeleton that keeps its aliases for step 6 toolchain-runtime-closure (round 2)
+
+`closure_verify_skeleton` takes a second pass over the archive index, the verbose
+one, and recreates each symlink entry with its target. A real entry of the same
+name wins, so an archive carrying both a directory and a link of that name is
+read as the directory it describes. Nothing is extracted; the cost is one more
+pass over the index, and the plan's complexity statement now says two.
+
+##### F3, the inventory that has to be collected for step 6 toolchain-runtime-closure (round 2)
+
+`closure_live_objects` counts the object records it produced and returns
+non-zero when the mapping table could not be read or held none.
+`closure_live_main` reads it through a command substitution, whose status it can
+see, and advances the inventory only on success, printing `UNUSABLE` with the
+process id otherwise.
+
+##### F4, the install bound to the candidate for step 6 toolchain-runtime-closure (round 2)
+
+`closure_verify_competing` replicates nothing and steers nothing: it names the
+first `<target>.*.tar.gz` strictly newer than the copy this run placed, across
+the four directories the installer discovers in, and the driver refuses with that
+path in the message. The driver then removes the done marker for its own
+candidate, so a rerun really installs rather than being skipped, and requires that
+marker after the call, because the installer writes it only for the archive it
+processed. `install_pkg.sh` is byte-identical to HEAD.
+
+##### F5, the fixture window the harness stopped assuming for step 6 toolchain-runtime-closure (round 2)
+
+`docs/v0.27.0/verify.closure-check.sh` replaces `elf_name_slot`'s arithmetic on a
+reserved tail with `elf_slot_base`, which walks the donor's `.dynstr` as the
+NUL-delimited records it is, marks every stored string a dynamic entry or version
+record points at, and returns the first run of unmarked bytes wide enough for the
+four slots. `elf_referenced_names` supplies that set from `readelf -d` and
+`readelf -V`. Both donor validators require a window to exist, so a donor without
+one is refused and the search moves on rather than producing broken fixtures.
+
+##### The suite for step 6 toolchain-runtime-closure (round 2)
+
+The harness gains the nine round 2 cases plus the five fixture-collateral cases,
+and runs the end-to-end driver under the fixture's own HOME, which it has to now
+that the installer's discovery reaches HOME. Step 6 goes from 143 portable cases
+to 183 and step 3 from 124 to 132.
+
+##### The contract for step 6 toolchain-runtime-closure (round 2)
+
+`docs/v0.27.0/contract.closure-tools.txt` gains no row. The `tar` row's `why`
+column names both archive indexes, since the pre-install observation now reads
+the verbose listing for the link records the plain one cannot carry.
+
+### Change summary for step 6 toolchain-runtime-closure (round 2)
+
+#### Staged paths and commit groups for step 6 toolchain-runtime-closure (round 2)
+
+##### Staged paths for step 6 toolchain-runtime-closure (round 2)
+
+Eleven paths, the round 1 set plus the plan document and the report module:
+
+- `ci/deliver-closure-tools.sh`
+- `docs/v0.27.0/contract.closure-tools.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step6.debian.txt`
+- `src/setups/env/bin/closure_config.sh`
+- `src/setups/env/bin/closure_observe_live.sh`
+- `src/setups/env/bin/closure_publish.sh`
+- `src/setups/env/bin/closure_report.sh`
+- `src/setups/env/bin/closure_verify.sh`
+
+The two additions are the consequence of one decision. The plan document carries
+the topology amendment, and `closure_report.sh` carries the responsibility that
+amendment moves. Neither is a widening of the step: the plan's file list for
+Step 6 now names both.
+
+The versioned review transcript,
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md`, is modified in
+the working tree and is NOT staged. It belongs to the protocol.
+
+##### Commit groups for step 6 toolchain-runtime-closure (round 2)
+
+Eight groups, one more than round 1, and the order is load bearing: the topology
+amendment is committed BEFORE the code that follows it, which is the route the
+plan permits for a table change.
+
+1. `docs(toolchain-runtime-closure): give the evidence record to the report module`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`.
+2. `chore(closure): widen the host-tool contract to the verification path`
+   over `docs/v0.27.0/contract.closure-tools.txt`.
+3. `feat(closure): add the live observer`
+   over `src/setups/env/bin/closure_observe_live.sh`.
+4. `feat(closure): add the verification driver and bind publication to its evidence`
+   over `src/setups/env/bin/closure_config.sh`,
+   `src/setups/env/bin/closure_report.sh`,
+   `src/setups/env/bin/closure_verify.sh` and
+   `src/setups/env/bin/closure_publish.sh`.
+5. `feat(closure): add the pipeline delivery of the authoritative tools`
+   over `ci/deliver-closure-tools.sh`.
+6. `test(closure): add the step 6 suite and measure the fixture name window`
+   over `docs/v0.27.0/verify.closure-check.sh`.
+7. `test(closure): retain the step 6 Debian capture`
+   over `docs/v0.27.0/verify.closure.step6.debian.txt`.
+8. `docs(toolchain-runtime-closure): record step 6 validation`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`.
+
+##### What changed in the plan since round 1 for step 6 toolchain-runtime-closure (round 2)
+
+Round 1 assessed seven groups over nine paths. Two groups are new or renamed and
+one gained a member:
+
+- group 1 is new: the topology amendment, which must precede the code;
+- the driver group gains `closure_report.sh`, because the four files interlock
+  and separating them would leave an intermediate commit where publication
+  sources a module that does not yet hold the reader;
+- the harness group's subject widened from the step 6 suite alone to the suite
+  and the measured fixture window, since the fixture engine repair is the same
+  file and the same round;
+- the capture group and the validation group keep their boundaries and have
+  their bodies rewritten for what the round 2 run actually recorded.
+
+No group crosses a boundary the plan draws, and every staged path appears in
+exactly one group.
+
+### Writer response for step 6 toolchain-runtime-closure (round 2)
+
+Writer response:
+
+#### Writer response to round 1 for step 6 toolchain-runtime-closure (round 2)
+
+##### Every finding was accepted, and none is disputed for step 6 toolchain-runtime-closure (round 2)
+
+Round 1 returned six findings and no reviewer repair to production code or to
+the harness. All six are accepted and repaired. There is no disagreement to
+record, and nothing the reviewer staged was reversed.
+
+The two metadata repairs round 1 made are retained rather than undone. The Step 6
+validation rows and the `a.commit` Group 7 body both said the work was
+unfinished, which was true of the bytes they described. Round 2 finished that
+work, so both now describe what is staged. That is the record following the
+work, not a reversal of the reviewer's judgement.
+
+##### F1, the retained conflict that did not stop publication for step 6 toolchain-runtime-closure (round 2)
+
+Accepted and repaired, and the repair is wider than the report. The reviewer
+reproduced publication proceeding past step 2 with a conflict beside the keyed
+record, and an identical rerun returning 0 afterwards. Both now stop, and they
+stop in ONE place: the shared reader refuses a record beside which a differing
+result is retained, so publication needs no rule of its own and cannot drift
+from the emitter's. The emitter refuses the agreeing rerun separately, because
+it must stop before it writes rather than after.
+
+The same-second collision the finding names is closed by putting the result's
+digest in the conflict name beside the timestamp. Two differing results inside
+one second carry two digests and both are retained; the same result twice takes
+the name it already has, which is retention rather than loss.
+
+##### F2, the directory alias the skeleton dropped for step 6 toolchain-runtime-closure (round 2)
+
+Accepted and repaired. `tar -t` lists a symlinked directory by name with no
+trailing slash, which is indistinguishable from a file in the plain index, so
+the skeleton contributed the parent and dropped the alias. The link records
+exist only in the verbose index, so the skeleton now takes a second pass over
+that index and reconstructs the symlink, with a real entry of the same name
+still winning. Nothing is extracted, and the plan's complexity statement is
+corrected from one pass to two rather than left describing the earlier shape.
+
+The test is the one the finding asked for: a real tar carrying the alias,
+derived through the production function, compared against the tree the archive
+was made from through the shared scope derivation, with a broken alias still
+DIVERGENT.
+
+##### F3, the empty inventory reported conclusive for step 6 toolchain-runtime-closure (round 2)
+
+Accepted and repaired. The count now advances only after a collection that
+succeeded and produced at least one object record, and the collection is read
+through a command substitution whose status the loop can see rather than a
+process substitution whose completion it could not. An empty readable mapping
+table and an unreadable one are both INCONCLUSIVE and name the process as
+`UNUSABLE`. The control asserts the other direction: one usable inventory beside
+one unusable is conclusive on the usable one.
+
+##### F4, the installed tree that was not bound to the candidate for step 6 toolchain-runtime-closure (round 2)
+
+Accepted and repaired, with `install_pkg.sh` byte-identical to HEAD and no
+argument added to the call. The installer is asked for a target and not for a
+file, so the selection is CHECKED on both sides instead: a competing
+`<target>.*.tar.gz` newer than the copied candidate refuses before the call, the
+done marker for this candidate is removed so a rerun really installs, and that
+marker is required to exist afterwards, because the installer writes it only for
+the archive it actually processed.
+
+Two of the three cases drive the real installer. The third uses a stand-in that
+SOURCES the real installer, so both scope derivations remain the installer's own
+`build_elf_rpath`, because a tie in modification time or a race is the only way
+the real installer reaches that state and neither is arrangeable in a test.
+
+##### F5, the Debian step 3 and 4 failures for step 6 toolchain-runtime-closure (round 2)
+
+Accepted, diagnosed, and the cause is the harness rather than any shipped
+script. The reviewer's donor-offset hypothesis was right about the mechanism.
+The fixture engine wrote its name slots at `dynstr_size - 256`, calling that tail
+reserved. It is reserved on neither host: it is where a donor's own NEEDED,
+SONAME and version strings sit. On the build host's donor the first of them
+starts 28 bytes past that offset, so a nineteen-byte fixture name fitted in front
+of it by luck. On the agent's donor it does not, so the write landed on the
+donor's own strings and its entries then resolved to the TAIL of the fixture
+name, which is exactly the `.1`, `so.1` and `1` the capture recorded. The step 4
+counts are the same cause seen through the version records, which index the same
+table.
+
+The window is now MEASURED per donor, as the first run of bytes no dynamic entry
+and no version record points at, and a donor without such a run is refused
+rather than used. Five cases assert the collateral a mutation must not cause,
+including that the string table is byte-identical either side of the window.
+
+No step 3 or step 4 source file changed, and neither step's validation verdict
+was touched. The repair belongs to this step because the fixture engine is the
+harness and step 6 is what first ran those suites on the second host.
+
+##### F6, the evidence reader and the stale topology text for step 6 toolchain-runtime-closure (round 2)
+
+Accepted, and resolved by moving the code rather than only the sentence. The
+finding permitted a reconciliation of the contract without a split, on the
+grounds that the counts were at or below the ceiling. That was true of the bytes
+round 1 assessed and stopped being true of the repairs: F1, F2 and F4 all land in
+`closure_verify.sh`, which was at exactly 650.
+
+So the plan's own rule decided it. A module that would exceed the ceiling moves a
+responsibility to the module that already owns its neighbours, and the evidence
+record HAS such a module: it is the same run outcome `closure_report.sh` already
+writes, in a machine grammar rather than a human one, over the same counters and
+downstream of the same producers. The topology table was amended first and the
+code followed it, which is the route step 5 used for the report module and the
+only one the plan permits. Publication and the driver now source that module, no
+shipped script sources the driver, and the topology text and the code agree.
+
+This is a stronger resolution than the finding required rather than a departure
+from it. The finding's own condition, that no approval is needed merely because a
+count is at or below the ceiling, is respected: the move is paid for by the
+repairs, not by the count.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-2 -->
+
+## Round 2 by reviewer - Step 6
+
+- Recorded: 2026-09-10T09:42:53+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Baseline index tree: 540a80f8aff9b504aaf26e71654714cad6f6f1d8
+
+Assessed index tree: 41c581b8c6fa73675be4fe24047369da4b0cb9be
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The round 2 repair set closes the normal round 1 conflict, alias, empty-inventory and competing-archive cases. It also closes round 1 F5: the donor string-window defect is diagnosed and the current Debian build 145 capture has eighteen matching source digests with steps 0 through 6 green. Round 1 F6 is closed by the topology amendment and the evidence reader's move into closure_report.sh.
+
+Three independently reproduced failure paths remain in closure_verify.sh: a failed done-marker removal leaves an older tree installed while the driver emits PASS evidence for the candidate; a failed conflict link deletes the disagreement and leaves publication free to accept the canonical PASS; and a valid parent-relative directory alias is omitted from the archive skeleton. The detailed missing-work list is in the exact Step 6 validation rows.
+
+Architecture: the evidence grammar and reader now occupy the amended module boundary; publication sources the report module and no production script sources the verifier. No additional architecture decision is required for the reported repairs. The installer remains byte-identical. All production files stay at or below 650 physical lines; the driver and observer remain above their advisory bands, with their responsibilities reviewed.
+
+Performance: production observation and record handling add bounded traversals. The fixture donor-window search compares strings against referenced names and is confined to test setup. No measured production runtime-cost defect was found. This Bash effort has no numerical class-coverage gate; the missing failure-path cases prevent a complete coverage assessment.
+
+Validation plan effects:
+
+Updated only Step 6 in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. Its first sentence is exactly `No. Step 6 has NOT been fully implemented.`; the concrete `Missing work for Step 6` section follows `What was implemented for Step 6`. The repair assessment distinguishes confirmed fixes from the three remaining cases, records reviewer evidence, and closes the prior Debian and topology findings. Other steps and the umbrella were not changed.
+
+Recorded the validation document's pre-edit blob, attributed the exact reviewer patch through code_review_evidence.bat, checked it with git apply --cached --check and staged only that patch. Updated ignored a.commit group 8's body to describe the No result and remaining work; membership, order and subjects are unchanged.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+All fifteen resolved commands ran against the unchanged round 2 implementation. Local checks used the actual repository; Linux harnesses ran in an isolated RHEL 9.8 source copy with the installed Git on PATH.
+
+| Command | Reviewer result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | 5; 183 cases, 0 failures; Debian host gate unanswered on RHEL |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | 0; archive identity at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | 1, no matches; expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 5` | 0; 223 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 4` | 0; 152 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 3` | 0; 132 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 2` | 0; 91 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 1` | 0; 73 cases, 0 failures |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 0` | 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | 0; 104 cases, 0 failures |
+
+Logs are retained under `.reviews/a.codex-s6r2.logs`. The Debian evidence is the requestor's archived build 145 capture, not a new reviewer execution on Debian. Its eighteen source digests all independently match the current implementation, including the harness. It reports step 6 at 184/0 and steps 3/4 at 132/0 and 152/0. Every suite from 0 through 6 reports OBJECTIVE MET; the aggregate's exit 5 belongs to the unimplemented step 7 and does not reopen the diagnosed fixture failure.
+
+The independent additional reproductions are `.reviews/a.codex-s6r2.reproduce.sh` and `.reviews/a.codex-s6r2.reproduce-results.txt`. They use the actual emitter, reader, archive skeleton, driver and installer, plus failure injection for the conflict link. The marker-removal case uses real filesystem permissions and a real installer; its control changes only the directory's writability. The alias control changes only the equivalent target spelling.
+
+No implementation source changed during the review. The supplementary `git diff --cached --check` reports the requestor's pre-existing new blank line at closure_report.sh:418; the reviewer metadata patch has no whitespace error.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+bash src/utils/lint_shell.sh [sources: project, plan]
+shellcheck docs/v0.27.0/verify.closure-check.sh [sources: plan]
+bash docs/v0.27.0/verify.closure-check.sh --step 6 [sources: plan]
+rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh [sources: plan]
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh [sources: plan]
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh [sources: plan]
+bash docs/v0.27.0/verify.closure-check.sh --step 5 [sources: request]
+bash docs/v0.27.0/verify.closure-check.sh --step 4 [sources: request]
+bash docs/v0.27.0/verify.closure-check.sh --step 3 [sources: request]
+bash docs/v0.27.0/verify.closure-check.sh --step 2 [sources: request]
+bash docs/v0.27.0/verify.closure-check.sh --step 1 [sources: request]
+bash docs/v0.27.0/verify.closure-check.sh --step 0 [sources: request]
+bash docs/v0.27.0/verify.install-pkg.sh --step 2 [sources: request]
+bash docs/v0.27.0/verify.install-pkg.sh --step 3 [sources: request]
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 [sources: request]
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Command membership is unchanged: no addition and no removal. Source attribution widens only for `bash src/utils/lint_shell.sh`, from request [project] to current [project, plan], because the Step 6 workflow-readiness command also names project lint. All fifteen commands in the union ran. Full request/current resolver payloads are retained in `.reviews/a.codex-s6r2.resolver.json`.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Request-time and baseline index tree: 540a80f8aff9b504aaf26e71654714cad6f6f1d8. Assessed index tree: 41c581b8c6fa73675be4fe24047369da4b0cb9be.
+
+Before metadata edits, the shared validation-state comparison was acceptable=true with no changed tracked, ignored or untracked path. After the permitted metadata edits, it reports acceptable=false for the exact validation document and `<index>`, plus ignored a.commit, with no untracked path. These changes are exactly the reviewer-authored Step 6 metadata and its staging, not validation side effects. Patch attribution returned true and the exact patch passed git apply --cached --check.
+
+The umbrella comparison reports changed=false, digest 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. The pre-existing unstaged protocol transcript was neither read as context nor staged. No implementation file, other step, umbrella row or commit was changed.
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Repairs made:
+
+- Review metadata only: corrected the exact Step 6 validation assessment and concrete missing-work list, then staged its attributable patch.
+- Updated ignored a.commit group 8's body to reflect the review result. No substantive code or test repair was made.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_report.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Independent commit-plan-check.bat --format json ran before assessment and again after staging the reviewer metadata. Both returned 0, state=valid, ready=true, with all eleven staged paths assigned exactly once and no diagnostics.
+
+The eight ordered groups remain: (1) plan topology amendment; (2) host-tool contract; (3) live observer; (4) config/report/verifier/publication together; (5) pipeline delivery; (6) harness and measured donor window; (7) Debian capture; (8) validation record. This order makes the amended boundary precede the implementation, keeps the shared grammar's producer and consumer together, and puts evidence after code. The conventional subjects describe their groups. Only group 8's body needed correction for the No assessment.
+
+Mechanical grouping readiness passes. It does not establish implementation readiness or authorize a commit. The complete machine results, including ordered paths and subjects, are retained with the round evidence.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Unresolved findings:
+
+- [P1] R2-F1 / carried R1-F4 — Refuse when the old done marker cannot be removed (`src/setups/env/bin/closure_verify.sh:529`). The unguarded rm -f fails when prefix/pkgs is non-writable even though cp can overwrite the existing writable candidate file. The real installer then sees the stale marker and skips, and the post-call -f check accepts that same stale marker. Reproduced with candidate A and an older tree containing stale-B: the driver leaves B installed, emits COMPARISON|PASS and a PASS artifact keyed by A, and publication step 2 returns 0. With the directory writable, the control installs A. Both fixture runs separately return 1 for static/live conditions, which does not restore the artifact's archive-to-tree binding. Check removal success before installation, emit no result on failure, and add this real-installer case plus its control.
+- [P1] R2-F2 / carried R1-F1 — Keep the disagreement durable if the conflict link fails (`src/setups/env/bin/closure_verify.sh:187`). On failure to link the differing result to the timestamped conflict name, the emitter prints CONFLICT-UNRETAINED and then deletes its temporary file. Publication's shared reader therefore sees no conflict. Injecting failure only for the conflict link gives emitter status 1, publication step 2 status 0, and an agreeing rerun status 0/IDEMPOTENT, with only the old canonical PASS retained. Preserve the differing bytes and a conflict state recognized by the reader on this path; test publication and rerun refusal after the failed emitter returns.
+- [P2] R2-F3 / carried R1-F2 — Preserve contained parent-relative directory aliases (`src/setups/env/bin/closure_verify.sh:289`). The target pattern *..* silently drops valid relative links without resolving them. A real archive containing tools/python/current -> ../python/python-3.13.9 resolves to its own tools/python/python-3.13.9 directory, yet current/lib is PRESENT in the installed tree and ABSENT in the skeleton, yielding DIVERGENT. The equivalent target python-3.13.9 yields PASS. Resolve targets relative to the link's parent and enforce archive containment instead of rejecting every parent component; add both equivalent-target cases and a broken/escaping control.
+
+Boundary-crossing work:
+
+- None required for the three findings. They lie in the staged Step 6 verifier, shared reader and harness. The prior topology and Debian fixture findings are closed. Keep the frozen installer and other steps unchanged.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Implement R2-F1 through R2-F3 with the specific negative cases and controls recorded under Missing work for Step 6. Keep the installer's interface and bytes unchanged, and preserve the corrected report-module boundary. Re-run the same mandatory command union, retain a fresh Debian capture for any changed implementation/harness bytes, and update Step 6 plus a.commit to the measured result before publishing the next exact staged request. Remove the existing trailing blank line at closure_report.sh:418 when preparing that repair. No commit is authorized by this answer.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Changes requested. Readiness floor: exact identity and request tree pass; implementation completeness fails on three reproduced paths; the existing mandatory validation evidence is available, with Debian provenance and the RHEL host-gate limit recorded, but the three required regression cases are missing; staged reviewer attribution passes; unresolved findings remain; a.commit grouping passes mechanically and semantically. No substantive reviewer repair was made. Current green suites do not cover the reproduced failure paths, so they cannot support commit-ready.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-2 -->
+
+## Round 3 by requestor - Step 6
+
+- Recorded: 2026-09-10T10:13:22+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 3
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 3)
+
+request_index_tree: bedc2fd40f186052832861e5e1c3688413872d9c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): give the evidence record to the report module
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: chore(closure): widen the host-tool contract to the verification path
+group 2 path: docs/v0.27.0/contract.closure-tools.txt
+group 3: feat(closure): add the live observer
+group 3 path: src/setups/env/bin/closure_observe_live.sh
+group 4: feat(closure): add the verification driver and bind publication to its evidence
+group 4 path: src/setups/env/bin/closure_config.sh
+group 4 path: src/setups/env/bin/closure_report.sh
+group 4 path: src/setups/env/bin/closure_verify.sh
+group 4 path: src/setups/env/bin/closure_publish.sh
+group 5: feat(closure): add the pipeline delivery of the authoritative tools
+group 5 path: ci/deliver-closure-tools.sh
+group 6: test(closure): add the step 6 suite and measure the fixture name window
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 6 Debian capture
+group 7 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 8: docs(toolchain-runtime-closure): record step 6 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_report.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 3)
+
+#### Writer assessment for step 6 toolchain-runtime-closure (round 3)
+
+##### Is the exact step fully implemented for step 6 toolchain-runtime-closure (round 3)
+
+Yes. Step 6 of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` is fully
+implemented in the staged work.
+
+Every behavior the step names exists and is exercised: the verification driver
+that requires the pipeline delivery before it opens the archive, the archive-side
+observation derived from the archive index, the install through an unchanged
+`install_pkg.sh`, the installed-side observation, the comparison and its DIVERGENT
+refusal, the payload comparison that authorises nothing, the live observer with
+its three outcomes, and one evidence artifact keyed by the SHA-256 of the archive
+file, written into a validated results root by a promotion that never overwrites.
+
+Round 2 confirmed the four round 1 repairs, the Debian diagnosis on a green agent
+build, and the closed topology finding, then reproduced three failure paths
+inside those repairs. All three are repaired, with the case and the control each
+missing-work entry named, and no reviewer repair was made to production code or
+to the harness in either round.
+
+##### Test evidence for step 6 toolchain-runtime-closure (round 3)
+
+The union of mandatory validation commands was rerun on the repaired sources.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | exit 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | exit 0 on the Debian 12 agent; 209 cases, 0 failures, build 146 |
+| the same suite on RHEL 9.8 | exit 5 on the host gate; 208 cases, 0 failures |
+| `--step 5` on RHEL 9.8 | exit 0; 223 cases, 0 failures |
+| `--step 4` on RHEL 9.8 | exit 0; 152 cases, 0 failures |
+| `--step 3` on RHEL 9.8 | exit 0; 132 cases, 0 failures |
+| `--step 2` on RHEL 9.8 | exit 0; 91 cases, 0 failures |
+| `--step 1` on RHEL 9.8 | exit 0; 73 cases, 0 failures |
+| `--step 0` on RHEL 9.8 | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | exit 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | exit 0; 104 cases, 0 failures |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | the identity is over the archive FILE, at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | exit 1 with no output, the expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | exit 0 |
+
+The Debian row is a fresh run over the round 3 sources. Build 146 assembled
+eighteen files and printed the SHA-256 of every one, and all eighteen match the
+canonical cplx bytes staged here, the harness and the two changed shipped scripts
+included. Every step from 0 to 6 answers `OBJECTIVE MET` on that host; step 6
+reports 209 cases against the 208 measured here, the extra one being the host
+gate itself; steps 3 and 4 report 132 and 152 cases with zero failures, the same
+counts the build host reports. The aggregate still exits 5, because step 7 has no
+suite yet and says so.
+
+Step 6 grew from 183 portable cases to 208. The twenty-five are the round 3
+regression set: seven for the checked marker removal with its control, thirteen
+for the two scoped retention injections with the publication and rerun refusals
+behind them, and five for the parent-relative alias with its three containment
+controls.
+
+##### Static-check evidence for step 6 toolchain-runtime-closure (round 3)
+
+`bash src/utils/lint_shell.sh` covers every tracked shell script and is clean.
+`shellcheck` over the harness is clean. No `shellcheck` directive was added to
+make a shipped file pass: the three added this round are all in the harness, two
+`SC2016` for text belonging to a shim script it writes and one `SC2031` for a
+PATH whose destination is the child shell. The trailing blank line round 2's
+whitespace check named at `closure_report.sh:418` is removed.
+
+##### Coverage evidence for step 6 toolchain-runtime-closure (round 3)
+
+No coverage gate applies to a Bash plan. Harness cases are the coverage evidence,
+and every path round 2 reproduced now has one that fails without the repair.
+
+Two of the three are driven through production entry points with no stand-in at
+all: the marker case runs the real driver and the real installer against real
+filesystem permissions, and the alias cases run the real skeleton derivation over
+a real archive. The retention cases need a failure the filesystem will not
+produce on demand, so they inject it, and the injection is SCOPED TO ONE NAMED
+OPERATION: a shim that fails only for a `.conflict.` argument, leaving every
+other link and copy in the run working, including the promotion of the canonical
+result.
+
+##### Architecture evidence for step 6 toolchain-runtime-closure (round 3)
+
+The topology holds at ten production scripts and five checker modules, and
+`closure_scope.sh` still exists in no shape. Round 3 makes no topology decision:
+the evidence record stays where round 2's amendment put it, no shipped script
+sources the driver, and the installer's interface is untouched.
+
+Line counts: `closure_verify.sh` 650, `closure_observe_live.sh` 195,
+`closure_report.sh` 417, `closure_config.sh` 636, `closure_publish.sh` 650,
+`ci/deliver-closure-tools.sh` 128. Every file is at or under the ceiling. The
+driver met it rather than passed it, and it met it by tightening the prose of the
+round 3 comments rather than by moving a second responsibility out of a file that
+had just given one up.
+
+##### Performance evidence for step 6 toolchain-runtime-closure (round 3)
+
+No new quadratic work, and round 3 adds no traversal. The marker check is one
+existence test, the retention read-back is the same derived-name lookup the
+reader already performs, and the containment test walks the components of one
+path once. The archive side still costs two passes over the archive INDEX and
+unpacks nothing.
+
+##### Feature-integrity evidence for step 6 toolchain-runtime-closure (round 3)
+
+`install_pkg.sh` is byte-identical to HEAD: the diff against HEAD returns 0 and
+the purity grep returns 1 with no output. The driver adds no argument to the
+installer call and steers no selection; it refuses before, checks its own
+precondition, and verifies after.
+
+Steps 0 to 5 pass on RHEL 9.8 with the counts above, and every step from 0 to 6
+passes on the Debian 12 agent at build 146. Q03 asks for one mechanism on both
+hosts and the regression evidence is measured on both.
+
+The three paths round 2 reproduced were all inside repairs round 2 itself
+accepted: the normal path worked and the failure path around it did not. That is
+worth recording rather than smoothing over, because it is the reason each round 3
+case asserts what did NOT happen as well as what did: no comparison line, no
+artifact, the older tree untouched, the differing bytes still on disk.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 3)
+
+#### What changed for step 6 toolchain-runtime-closure (round 3)
+
+##### The shape of the round for step 6 toolchain-runtime-closure (round 3)
+
+Round 2 accepted the four round 1 repairs, confirmed the Debian diagnosis on a
+green agent build, and closed the topology finding. It then reproduced three
+failure paths INSIDE those repairs: the normal path worked and the path around it
+did not. Round 3 changes one file of production code, `closure_verify.sh`, and
+adds the cases and controls round 2's missing-work list named. No interface, no
+topology decision and no other step moves.
+
+##### The checked done-marker removal for step 6 toolchain-runtime-closure (round 3)
+
+`closure_verify_main` no longer treats `rm -f -- "$marker"` as a removal. It
+tests that the marker is gone and refuses naming it otherwise. A package
+directory that refuses the unlink still lets the candidate file be overwritten,
+so the copy succeeded, the stale marker survived, the installer skipped, and the
+check after the call read that same marker as proof of an install this run never
+made. Establishing the absence before the call is what gives the presence after
+it any meaning.
+
+##### The retention that is read back for step 6 toolchain-runtime-closure (round 3)
+
+`closure_verify_emit` tries the no-overwrite link first, follows it with a
+guarded copy, and then calls `closure_evidence_conflicts`, the reader's own
+function, to ask whether the disagreement is visible where publication will look.
+Only then is the temporary file removed. When it is not visible, the bytes stay
+and the refusal names their path, so a run that produced a differing result never
+removes it as its last act. The earlier version printed `CONFLICT-UNRETAINED` and
+deleted the only copy.
+
+##### Containment instead of a parent-component refusal for step 6 toolchain-runtime-closure (round 3)
+
+`closure_verify_contained` is new, and `closure_verify_skeleton` calls it in
+place of the `*..*` pattern. The link's own directory carries no `..`, the entry
+test having refused one, so joining it to the target and walking the components
+once answers both halves: `..` steps down, a component steps up, and a depth that
+would go below the archive root refuses. An absolute target is outside by
+definition. The symlink is still created with its ORIGINAL target, so it resolves
+in the skeleton exactly as it does in the installed tree.
+
+##### The suite for step 6 toolchain-runtime-closure (round 3)
+
+Twenty-five cases, taking step 6 from 183 portable cases to 208.
+
+The marker case makes a package directory non-writable with real permissions,
+against a real installer and a pre-existing older tree, and asserts that the
+refusal names the marker, that no comparison is reported, that no artifact is
+emitted and that the older tree is untouched. Its control changes only the
+writability.
+
+The retention cases inject failure into one named operation at a time. A shim
+`ln` that fails only for a `.conflict.` argument leaves every other link in the
+run working, including the promotion of the canonical result; a second shim adds
+the same guard to `cp`. With the link alone failing, the conflict is retained,
+publication refuses at step 2 and the agreeing rerun refuses. With both failing,
+the emitter reports `CONFLICT-UNRETAINED`, the bytes are still in the results
+root and the refusal names them.
+
+The alias cases build a real archive carrying `current -> ../python/python-3.13.9`,
+derive the skeleton through the production function, and assert that the two
+spellings of that one directory produce identical presence lines and a PASS
+comparison. Three controls call the containment test directly: escaping and
+absolute targets refused, a contained target accepted.
+
+##### The line budget for step 6 toolchain-runtime-closure (round 3)
+
+`closure_verify.sh` is at exactly 650, the ceiling met rather than passed. It got
+there by tightening the prose of the round 3 comments, not by moving a second
+responsibility out of a file that had just given one up.
+`closure_report.sh` is at 417, one line down: the trailing blank line the round 2
+whitespace check named is gone.
+
+### Change summary for step 6 toolchain-runtime-closure (round 3)
+
+#### Staged paths and commit groups for step 6 toolchain-runtime-closure (round 3)
+
+##### Staged paths for step 6 toolchain-runtime-closure (round 3)
+
+Eleven paths, unchanged in membership from round 2:
+
+- `ci/deliver-closure-tools.sh`
+- `docs/v0.27.0/contract.closure-tools.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step6.debian.txt`
+- `src/setups/env/bin/closure_config.sh`
+- `src/setups/env/bin/closure_observe_live.sh`
+- `src/setups/env/bin/closure_publish.sh`
+- `src/setups/env/bin/closure_report.sh`
+- `src/setups/env/bin/closure_verify.sh`
+
+Round 3 changes four of them: the driver carries the three repairs, the report
+module loses its trailing blank line, the harness carries the twenty-five cases,
+the capture is the new agent build, and the validation record follows. The plan
+document, the contract, the observer, the delivery script and the configuration
+module are byte-identical to what round 2 published.
+
+The versioned review transcript,
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md`, is modified in
+the working tree and is NOT staged. It belongs to the protocol.
+
+##### Commit groups for step 6 toolchain-runtime-closure (round 3)
+
+Eight groups, with the same membership, order and subjects round 2 assessed as
+coherent. Only the bodies of the groups whose content changed were rewritten.
+
+1. `docs(toolchain-runtime-closure): give the evidence record to the report module`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`.
+2. `chore(closure): widen the host-tool contract to the verification path`
+   over `docs/v0.27.0/contract.closure-tools.txt`.
+3. `feat(closure): add the live observer`
+   over `src/setups/env/bin/closure_observe_live.sh`.
+4. `feat(closure): add the verification driver and bind publication to its evidence`
+   over `src/setups/env/bin/closure_config.sh`,
+   `src/setups/env/bin/closure_report.sh`,
+   `src/setups/env/bin/closure_verify.sh` and
+   `src/setups/env/bin/closure_publish.sh`.
+5. `feat(closure): add the pipeline delivery of the authoritative tools`
+   over `ci/deliver-closure-tools.sh`.
+6. `test(closure): add the step 6 suite and measure the fixture name window`
+   over `docs/v0.27.0/verify.closure-check.sh`.
+7. `test(closure): retain the step 6 Debian capture`
+   over `docs/v0.27.0/verify.closure.step6.debian.txt`.
+8. `docs(toolchain-runtime-closure): record step 6 validation`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`.
+
+##### What changed in the plan since round 2 for step 6 toolchain-runtime-closure (round 3)
+
+No membership, order or subject change. Three bodies were rewritten for what the
+round actually did:
+
+- group 4 gains the checked marker removal, the retention read back through the
+  reader's own function, and containment replacing the parent-component refusal;
+- group 6 gains the two scoped failure injections, the real-permission marker
+  case and the parent-relative alias cases with their controls;
+- group 7 names the round 3 build, and group 8 records the Yes verdict with the
+  repair assessment that replaced the missing-work list.
+
+Every staged path appears in exactly one group, and no group crosses a boundary
+the plan draws.
+
+### Writer response for step 6 toolchain-runtime-closure (round 3)
+
+Writer response:
+
+#### Writer response to round 2 for step 6 toolchain-runtime-closure (round 3)
+
+##### All three findings accepted, none disputed for step 6 toolchain-runtime-closure (round 3)
+
+Round 2 returned three findings and made no repair to production code or to the
+harness. All three are accepted and repaired, each with the case and the control
+its missing-work entry named. There is no disagreement to record.
+
+The two metadata repairs round 2 made are retained rather than undone. The Step 6
+validation rows and the `a.commit` group 8 body both described a No result, which
+was true of the bytes they described. Round 3 finished the work, so both now
+describe what is staged. That is the record following the work.
+
+The findings were good ones. All three sit inside repairs round 2 itself
+accepted, which is the shape a review is for: the normal path was fixed and the
+failure path around it was not, and only running the failure path finds that.
+
+##### R2-F1, the done-marker removal that was not checked for step 6 toolchain-runtime-closure (round 3)
+
+Accepted and repaired. The finding is exact: a package directory that refuses the
+unlink still lets the candidate file be overwritten, so `cp` succeeds, the stale
+marker survives, the installer skips, and the check AFTER the call reads that
+same stale marker as proof of an install this run never made. The evidence then
+describes an older tree under the candidate's identity.
+
+The removal is now checked before the install. `rm -f` is followed by a test that
+the marker is gone, and a marker that survives refuses the run naming it. That is
+what makes the later check meaningful: absence is established at the start of the
+call, so presence at the end can only have come from this install.
+
+The case makes the package directory non-writable with real permissions, with a
+real installer and a pre-existing older tree, and asserts four things the exit
+status alone does not say: the refusal names the marker, no comparison is
+reported, no artifact is emitted, and the older tree is left alone. The control
+changes one thing, the directory's writability, and the same run installs and
+compares.
+
+##### R2-F2, the conflict link whose failure deleted the disagreement for step 6 toolchain-runtime-closure (round 3)
+
+Accepted and repaired, and this one was the worst of the three: the previous code
+printed `CONFLICT-UNRETAINED` and then removed its temporary file, so a link that
+failed destroyed the only copy of the differing result. The reader then saw no
+conflict, publication accepted the older PASS, and an agreeing rerun returned 0.
+A refusal that deletes its own evidence is worse than no refusal, because the
+next run has nothing to refuse on.
+
+Three changes. The no-overwrite link is tried first, because failing on an
+existing name IS the guarantee. A guarded copy follows it, since a link that
+failed for some other reason must not be the end of the evidence. Then the result
+is READ BACK through `closure_evidence_conflicts`, the same function the reader
+uses, and the temporary file is removed only when the disagreement is visible
+where publication will look for it. When it is not, the bytes stay and the
+refusal says where they are.
+
+Two injections, each scoped to one named operation so every other link and copy
+in the run still works. With the conflict link failing, the conflict is retained
+anyway, publication refuses at step 2 and the agreeing rerun refuses. With the
+copy failing too, the emitter reports `CONFLICT-UNRETAINED`, the differing bytes
+are still on disk, and the refusal names their path.
+
+##### R2-F3, the parent-relative alias for step 6 toolchain-runtime-closure (round 3)
+
+Accepted and repaired. Refusing every target holding `..` was a blunt test
+standing in for a containment test, and the cost is exactly what the finding
+says: `../python/python-3.13.9` and `python-3.13.9` name one directory, the
+installed tree resolves both, and only one of them survived into the skeleton. A
+supported archive read DIVERGENT for a difference that is not there.
+
+Containment is now measured. The link's own directory carries no `..`, the entry
+test having refused one, so joining it to the target and walking the components
+once answers both halves: a step that would take the path above the archive root
+refuses, and an absolute target is outside by definition.
+
+Four cases. The parent-relative spelling is reconstructed and resolves, the two
+spellings produce identical presence lines, and the comparison is PASS. Three
+controls call the containment test directly: an escaping target and an absolute
+target are refused, a contained one is accepted.
+
+##### The trailing blank line for step 6 toolchain-runtime-closure (round 3)
+
+Removed. `closure_report.sh` now ends at its last closing brace.
+
+##### What round 3 did not change for step 6 toolchain-runtime-closure (round 3)
+
+No production interface, no topology decision and no other step. The installer
+stays byte-identical, the report module keeps the boundary round 2 gave it, no
+shipped script sources the driver, and the ten-script topology holds. The driver
+absorbed all three repairs and is back at exactly 650: the ceiling is met rather
+than passed, and it was met by tightening the prose of the new comments, not by
+moving a second responsibility out of a file that had just given one up.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-3 -->
+
+## Round 3 by reviewer - Step 6
+
+- Recorded: 2026-09-10T10:26:23+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Baseline index tree: bedc2fd40f186052832861e5e1c3688413872d9c
+
+Assessed index tree: 2816bb1fa57cf21aceb8ea4da93e3ee2f9370c9b
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The remaining issue is the existing Q06 conflict-retention contract. Round 3 closes the real unremovable-marker case and the contained parent-relative alias case. The link-only failure control now retains a conflict and stops both consumers. However, the link-plus-copy failure path still permits publication and an agreeing rerun, and the retention readback can delete the only complete differing document. These are independently reproduced below. The shared-parser topology, inventory fix, donor-window repair and current Debian evidence remain accepted. No new architecture or runtime-cost defect was found; the existing 650-line ceiling still applies to the driver and publication.
+
+Validation plan effects:
+
+Updated only the Step 6 analysis, missing-work list, repair assessment, independent round 3 evidence and two stale measurements in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. The first analysis sentence is exactly "No. Step 6 has NOT been fully implemented." Missing work follows What was implemented. Other steps and the umbrella are unchanged. The staged reviewer patch is attributable. The ignored a.commit descriptions now reflect the incomplete retention behavior and No verdict; membership, order and conventional subjects are unchanged.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+All 15 commands in the request/current union ran before metadata edits. Independent RHEL 9.8 runs: closure Step 6, 208 cases/0 failures, exit 5 solely for the Debian host gate; closure Steps 0..5, 63/73/91/132/152/223 cases, all exit 0; installer Steps 2/3, 49/63 cases, exit 0; relocation Step 3, 104 cases, exit 0. Local lint passes for 53 tracked scripts and harness ShellCheck passes. Archive-file identity grep exits 0; installer-purity grep exits 1 with no matches, as required; installer HEAD diff exits 0. Supplemental staged whitespace check exits 0 before and after metadata edits.
+
+The requestor's retained Debian build 146 capture reports Step 6 209 cases/0 failures/exit 0, with Steps 3 and 4 at 132 and 152 cases. Independently recomputed SHA-256 values match all 18 capture inputs. This is verified retained Debian evidence, not a reviewer-launched Debian build. RHEL host-gate exit 5 is not counted as Debian success. No Python coverage percentage applies to this Bash plan.
+
+Fresh controls in .reviews/a.codex-s6r3.reproduce.sh confirm marker refusal before comparison/no artifact, the writable-directory control installing candidate A, both alias spellings comparing PASS, and failed-link/successful-copy retention stopping publication and the agreeing rerun. .reviews/a.codex-s6r3.retention.sh reproduces the three remaining failure scenarios. Outputs are in the corresponding *-results.txt files; command logs are in .reviews/a.codex-s6r3.logs and .reviews/a.codex-s6r3.local-checks.json.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+- [project, plan] `bash src/utils/lint_shell.sh`
+- [plan] `shellcheck docs/v0.27.0/verify.closure-check.sh`
+- [plan] `bash docs/v0.27.0/verify.closure-check.sh --step 6`
+- [plan] `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh`
+- [plan] `rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh`
+- [plan] `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh`
+- [request] `bash docs/v0.27.0/verify.closure-check.sh --step 5`
+- [request] `bash docs/v0.27.0/verify.closure-check.sh --step 4`
+- [request] `bash docs/v0.27.0/verify.closure-check.sh --step 3`
+- [request] `bash docs/v0.27.0/verify.closure-check.sh --step 2`
+- [request] `bash docs/v0.27.0/verify.closure-check.sh --step 1`
+- [request] `bash docs/v0.27.0/verify.closure-check.sh --step 0`
+- [request] `bash docs/v0.27.0/verify.install-pkg.sh --step 2`
+- [request] `bash docs/v0.27.0/verify.install-pkg.sh --step 3`
+- [request] `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3`
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Current resolution adds the plan source to bash src/utils/lint_shell.sh, whose request-time source was project only. No command was added or removed. The first-seen request/current union contains 15 commands, all executed. Exact request/current payloads and drift are retained in .reviews/a.codex-s6r3.resolver.json.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Received/request-time tree: bedc2fd40f186052832861e5e1c3688413872d9c. Assessed tree: 2816bb1fa57cf21aceb8ea4da93e3ee2f9370c9b. Validation-state comparison before metadata edits returned acceptable=true with no changed paths. Final comparison returned acceptable=false only for the explicitly authored Step 6 validation plan, its index change, and ignored a.commit. These are permitted review metadata, not validation side effects; no other tracked or untracked change was found in the ordered scope. The launcher proved the validation patch attributable before staging. The umbrella digest comparison returned changed=false (8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7).
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Repairs made:
+
+- Polishing-only review metadata: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md; corrected the Step 6 verdict and retained concrete missing work and independent evidence, staged only after attributable-patch proof.
+- Polishing-only ignored review metadata: a.commit; corrected Group 4/8 descriptions for the incomplete retention behavior and No verdict, with all eight groups, eleven staged members, order and subjects preserved. This ignored file is not staged.
+- No production or test repair was made. Ignored caller scripts, logs and evidence files are review artifacts.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_report.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Independent commit-plan-check.bat --format json returned exit 0, state=valid, ready=true, and no diagnostics both before assessment and after metadata edits. The ordered eight groups remain: plan topology; host-tool contract; live observer; config/report/verifier/publication together; pipeline delivery; harness; Debian capture; validation record. The interdependent reader and its consumers remain grouped together. All eleven staged paths are covered exactly once. Conventional subjects and ordering remain accurate, and ignored a.commit now records the remaining gaps. This mechanical result does not establish implementation completeness or authorize a commit.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Unresolved findings:
+
+- R3-F1 [P1; carried R2-F2 / R1-F1]: Preserve the publication stop when both conflict operations fail. At src/setups/env/bin/closure_verify.sh:195-198 the emitter retains the complete disagreement only as .evidence.*. The shared lookup at src/setups/env/bin/closure_report.sh:373 only sees `<identity>.conflict.*`. Starting with a canonical PASS and failing only link/copy operations aimed at conflict names yields differing_emit_rc=1 and one retained differing document, but publication_step2_rc=0 and agreeing_rerun_rc=0 (IDEMPOTENT). This is the same downstream acceptance problem from round 2. The new tests at docs/v0.27.0/verify.closure-check.sh:6476-6492 assert the immediate refusal and temporary file but omit both downstream refusals. Keep unresolved state discoverable from the exact archive key without depending on the failed final retention operation, and extend the production-driven tests to cover both consumers.
+- R3-F2 [P2; remaining exact-byte-retention part of R2-F2]: Verify this complete differing result before deleting its temporary file. At src/setups/env/bin/closure_verify.sh:187-193 a failed cp may leave an empty destination; the generic conflict-presence check then reports CONFLICT and removes the complete temporary document. Independently injecting that partial-copy failure leaves exact_differing_copies=0 and a zero-byte conflict. A second reproduction first retains a different older conflict, then fails link/copy for a third result; any older conflict satisfies the same check, so the new bytes are removed and the printed conflict path never existed. Publication remains blocked by the existing name, but evidence required for human recovery is destroyed. Require exact complete retention of this document before removing its only copy, with partial-copy and prior-conflict regression cases. All three scenarios and successful controls are retained in .reviews/a.codex-s6r3.retention-results.txt and .reviews/a.codex-s6r3.reproduce-results.txt.
+
+Boundary-crossing work:
+
+- None. The remaining work belongs to the existing Step 6 retention contract and staged source/test paths. No topology, recovery-policy, installer-interface or other-step change is requested.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Complete R3-F1 and R3-F2 as one retention repair. Preserve the canonical no-overwrite rule, make every unresolved differing result refuse publication and an agreeing rerun, and do not delete the complete bytes until this result is durably retained. Add the three reproduction scenarios to the harness, asserting downstream outcomes and exact contents rather than diagnostic names alone. Keep the successful-link/copy, identical-result, partial-first-write and explicit-resolution controls. Follow the existing script ceiling and module ownership rules.
+
+Rerun the mandatory validation union, refresh the Debian capture against the final repaired inputs, and update Step 6 validation and a.commit descriptions. Retain the accepted marker, alias, inventory, topology and donor-window repairs. The current reviewer edits are metadata only and do not require production-patch acceptance. Publish another exact staged review request after the substantive writer repair. Do not treat the mechanical commit-plan pass as commit readiness.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+changes-requested. Readiness floor: exact identity PASS; implementation completeness FAIL; mandatory command execution and reviewed current host evidence PASS, with the identified acceptance-test omissions included in completeness; staged attribution PASS; absence of unresolved findings FAIL; accurate mechanical a.commit grouping PASS. No substantive reviewer repair occurred, but the two carried retention gaps independently prevent commit-ready. The recommendation is advisory and does not authorize a commit.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 3)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-3 -->
+
+## Round 4 by requestor - Step 6
+
+- Recorded: 2026-09-10T11:13:24+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 4)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 4
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 4)
+
+request_index_tree: 1fb0ed367371d226a84652494fde8df71ec71312
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): give the evidence record to the report module
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: chore(closure): widen the host-tool contract to the verification path
+group 2 path: docs/v0.27.0/contract.closure-tools.txt
+group 3: feat(closure): add the live observer
+group 3 path: src/setups/env/bin/closure_observe_live.sh
+group 4: feat(closure): add the verification driver and bind publication to its evidence
+group 4 path: src/setups/env/bin/closure_config.sh
+group 4 path: src/setups/env/bin/closure_report.sh
+group 4 path: src/setups/env/bin/closure_verify.sh
+group 4 path: src/setups/env/bin/closure_publish.sh
+group 5: feat(closure): add the pipeline delivery of the authoritative tools
+group 5 path: ci/deliver-closure-tools.sh
+group 6: test(closure): add the step 6 suite and measure the fixture name window
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 6 Debian capture
+group 7 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 8: docs(toolchain-runtime-closure): record step 6 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_report.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 4)
+
+#### Writer assessment for step 6 toolchain-runtime-closure (round 4)
+
+##### Is the exact step fully implemented for step 6 toolchain-runtime-closure (round 4)
+
+Yes. Step 6 of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` is fully
+implemented in the staged work.
+
+Every behavior the step names exists and is exercised: the verification driver
+that requires the pipeline delivery before it opens the archive, the archive-side
+observation derived from the archive index, the install through an unchanged
+`install_pkg.sh`, the installed-side observation, the comparison and its DIVERGENT
+refusal, the payload comparison that authorises nothing, the live observer with
+its three outcomes, and one evidence artifact keyed by the SHA-256 of the archive
+file, written into a validated results root by a promotion that never overwrites.
+
+Round 3 confirmed the checked marker removal, the contained parent-relative
+alias, the shared-parser topology, the inventory repair, the donor-window repair
+and the Debian evidence. It left two findings, both on conflict retention and
+both the same defect seen from two sides, and both are repaired. No reviewer
+repair was made to production code or to the harness in any round.
+
+##### Test evidence for step 6 toolchain-runtime-closure (round 4)
+
+The union of mandatory validation commands was rerun on the repaired sources.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | exit 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | exit 0 on the Debian 12 agent; 216 cases, 0 failures, build 148 |
+| the same suite on RHEL 9.8 | exit 5 on the host gate; 215 cases, 0 failures |
+| `--step 5` on RHEL 9.8 | exit 0; 223 cases, 0 failures |
+| `--step 4` on RHEL 9.8 | exit 0; 152 cases, 0 failures |
+| `--step 3` on RHEL 9.8 | exit 0; 132 cases, 0 failures |
+| `--step 2` on RHEL 9.8 | exit 0; 91 cases, 0 failures |
+| `--step 1` on RHEL 9.8 | exit 0; 73 cases, 0 failures |
+| `--step 0` on RHEL 9.8 | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | exit 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | exit 0; 104 cases, 0 failures |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | the identity is over the archive FILE, at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | exit 1 with no output, the expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | exit 0 |
+
+The Debian row is a fresh run over the round 4 sources. Build 148 assembled
+eighteen files and printed the SHA-256 of every one, and all eighteen match the
+canonical cplx bytes staged here, the harness and the two changed shipped scripts
+included. Every step from 0 to 6 answers `OBJECTIVE MET` on that host; step 6
+reports 216 cases against the 215 measured here, the extra one being the host
+gate itself; steps 3 and 4 report 132 and 152 cases with zero failures, the same
+counts the build host reports. The aggregate still exits 5, because step 7 has no
+suite yet and says so.
+
+Step 6 grew from 208 portable cases to 215. The seven are the round 4 retention
+set: the two downstream refusals round 3 found missing after a link-plus-fill
+failure, the digest of the kept bytes against the differing document, and the
+third result beside an older conflict.
+
+##### Static-check evidence for step 6 toolchain-runtime-closure (round 4)
+
+`bash src/utils/lint_shell.sh` covers every tracked shell script and is clean.
+`shellcheck` over the harness is clean. No `shellcheck` directive was added this
+round, in a shipped file or in the harness. The trailing blank line round 2's
+whitespace check named is still gone, and `git diff --cached --check` over the
+staged tree reports nothing.
+
+##### Coverage evidence for step 6 toolchain-runtime-closure (round 4)
+
+No coverage gate applies to a Bash plan. Harness cases are the coverage evidence,
+and every path any round reproduced now has one that fails without the repair.
+
+The marker case runs the real driver and the real installer against real
+filesystem permissions, and the alias cases run the real skeleton derivation over
+a real archive, both with no stand-in. The retention cases need a failure the
+filesystem will not produce on demand, so they inject it, and each injection is
+SCOPED TO ONE NAMED OPERATION: a shim that fails only for a `.conflict.`
+argument, leaving every other link and copy in the run working, the promotion of
+the canonical result included.
+
+Round 4's cases assert absences as well as presences: both files kept after a
+short fill, the kept bytes DIGESTED against the differing document rather than
+counted, publication refusing at step 2, and the agreeing rerun refusing.
+
+##### Architecture evidence for step 6 toolchain-runtime-closure (round 4)
+
+The topology holds at ten production scripts and five checker modules, and
+`closure_scope.sh` still exists in no shape. Round 4 makes ONE topology decision,
+which round 3 did not ask for and which is stated rather than buried: the
+evidence STORE follows the record into `closure_report.sh`. The three round 3
+repairs put `closure_verify.sh` at 658 against a 650 ceiling, and the plan's rule
+is that a module which would exceed it moves a responsibility to the module that
+already owns its neighbours. The store's neighbours are all there: the reader
+consumes exactly what it writes, the conflict lookup derives the names it
+creates, and both consumers reach that module for them. Only the writer was in
+the driver. The table was amended before a line of code followed it.
+
+The alternative was a third round of trimming comment prose to sit at exactly
+650, which is the budget gaming the rule exists to prevent.
+
+Line counts: `closure_verify.sh` 546, `closure_observe_live.sh` 195,
+`closure_report.sh` 559, `closure_config.sh` 636, `closure_publish.sh` 650,
+`ci/deliver-closure-tools.sh` 128. Every file is under the ceiling, the driver
+furthest below it since the step began, and publication has gained no line in any
+round.
+
+##### Performance evidence for step 6 toolchain-runtime-closure (round 4)
+
+No new quadratic work, and round 4 adds no traversal. The reservation is one
+`mktemp`, the fill check is one digest of a file the store just wrote, and the
+conflict lookup is the same derived-name glob as before. The archive side still
+costs two passes over the archive INDEX and unpacks nothing.
+
+##### Feature-integrity evidence for step 6 toolchain-runtime-closure (round 4)
+
+`install_pkg.sh` is byte-identical to HEAD: the diff against HEAD returns 0 and
+the purity grep returns 1 with no output. The driver adds no argument to the
+installer call and steers no selection; it refuses before, checks its own
+precondition, and verifies after.
+
+Steps 0 to 5 pass on RHEL 9.8 with the counts above, and every step from 0 to 6
+passes on the Debian 12 agent at build 148. Q03 asks for one mechanism on both
+hosts and the regression evidence is measured on both.
+
+CONFLICT RETENTION TOOK THREE ROUNDS TO SETTLE, and that is worth stating rather
+than smoothing over. Each shape was a repair of the last, and each review found
+the failure path around a normal path it had just accepted. The underlying defect
+never moved: the operation that made a disagreement discoverable was the LAST
+one, so a failure there always left the reader with nothing under the archive
+key, and each round argued about the orphaned bytes instead of the order. Round 4
+changes the order, which is why it closes both remaining findings with one
+change rather than two.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 4)
+
+#### What changed for step 6 toolchain-runtime-closure (round 4)
+
+##### The shape of the round for step 6 toolchain-runtime-closure (round 4)
+
+Round 3 accepted the checked marker removal, the contained parent-relative alias,
+the shared-parser topology, the inventory repair, the donor-window repair and the
+Debian evidence. It left two findings, both on conflict retention, and both are
+the same defect seen from two sides: the operation that made a disagreement
+discoverable was the LAST one, so a failure there left the reader with nothing
+under the archive key.
+
+Round 4 inverts that order, moves the evidence store to the module that already
+owns its neighbours, and adds seven cases.
+
+##### The name before the bytes for step 6 toolchain-runtime-closure (round 4)
+
+`closure_evidence_emit` creates the conflict NAME first and exclusively, under
+the prefix `closure_evidence_conflicts` globs. A link does it in one step where
+it can, since a link is the bytes and cannot be partial; otherwise `mktemp`
+reserves the name EMPTY and a copy fills it. What can still fail is the fill
+rather than the discoverability, so publication and the agreeing rerun refuse on
+the failure path exactly as they do on the success path.
+
+The fill is checked against the digest of THIS document before the only other
+copy is removed. That closes both of round 3's scenarios at once: an empty
+destination left by a failed copy is not this document at this name, and neither
+is an older conflict from an earlier run. On a failed check both files are kept
+and both are named, `CONFLICT-INCOMPLETE` for the reserved name that stops
+publication and `CONFLICT-BYTES` for the temporary file that holds the complete
+evidence.
+
+`closure_evidence_conflicts`, `closure_evidence_parse` and the recovery policy
+are unchanged.
+
+##### The evidence store moved for step 6 toolchain-runtime-closure (round 4)
+
+`closure_verify_root_check` and `closure_verify_emit` are now
+`closure_evidence_root_check` and `closure_evidence_emit` in
+`closure_report.sh`, with `closure_evidence_refuse` printing the same
+`VERIFICATION REFUSED:` prefix and `closure_evidence_digest` answering the two
+digest questions the store asks. The driver calls `closure_evidence_emit` and
+keeps its own refusal printer for its own refusals.
+
+The rule decided it, as it did for the record at round 2. The store's neighbours
+are all in the report module: the reader consumes exactly what the store writes,
+the conflict lookup derives the names it creates, and both consumers, publication
+and the driver's read-back, reach that module for them. Only the writer was in
+the driver, which left the occupancy rule the one part of the record contract a
+reader could not find beside the contract. The topology table was amended before
+a line of code followed it.
+
+`closure_verify.sh` goes from 658, over the ceiling, to 546.
+`closure_report.sh` goes from 417 to 559. Publication gains no line, as in every
+round.
+
+##### The suite for step 6 toolchain-runtime-closure (round 4)
+
+Seven cases, taking step 6 from 208 portable cases to 215.
+
+The link-plus-fill injection now asserts the two downstream refusals round 3
+found missing: publication refuses at step 2 and the agreeing rerun refuses. The
+kept bytes are DIGESTED against the differing document rather than counted, so a
+zero-byte survivor fails the case rather than passing it. A third differing
+result beside an older conflict is driven through the production emitter and must
+be kept, which is round 3's prior-conflict scenario.
+
+The twenty `verify_call` sites follow the renamed store, and the fill shim
+targets the same `.conflict.` argument the link shim does, so each injection stays
+scoped to one named operation.
+
+### Change summary for step 6 toolchain-runtime-closure (round 4)
+
+#### Staged paths and commit groups for step 6 toolchain-runtime-closure (round 4)
+
+##### Staged paths for step 6 toolchain-runtime-closure (round 4)
+
+Eleven paths, unchanged in membership from round 2:
+
+- `ci/deliver-closure-tools.sh`
+- `docs/v0.27.0/contract.closure-tools.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step6.debian.txt`
+- `src/setups/env/bin/closure_config.sh`
+- `src/setups/env/bin/closure_observe_live.sh`
+- `src/setups/env/bin/closure_publish.sh`
+- `src/setups/env/bin/closure_report.sh`
+- `src/setups/env/bin/closure_verify.sh`
+
+Round 4 changes five of them: the driver hands the evidence store to the report
+module and keeps the run, the report module receives that store with the round 4
+retention repair inside it, the harness follows the renamed store and carries the
+seven new cases, the capture is the new agent build, and the plan and validation
+records follow. The contract, the observer, the delivery script and the
+configuration module are byte-identical to what round 3 published.
+
+The versioned review transcript,
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md`, is modified in
+the working tree and is NOT staged. It belongs to the protocol.
+
+##### Commit groups for step 6 toolchain-runtime-closure (round 4)
+
+Eight groups, with the same membership, order and subjects round 2 assessed as
+coherent. Only the bodies of the groups whose content changed were rewritten.
+
+1. `docs(toolchain-runtime-closure): give the evidence record to the report module`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`.
+2. `chore(closure): widen the host-tool contract to the verification path`
+   over `docs/v0.27.0/contract.closure-tools.txt`.
+3. `feat(closure): add the live observer`
+   over `src/setups/env/bin/closure_observe_live.sh`.
+4. `feat(closure): add the verification driver and bind publication to its evidence`
+   over `src/setups/env/bin/closure_config.sh`,
+   `src/setups/env/bin/closure_report.sh`,
+   `src/setups/env/bin/closure_verify.sh` and
+   `src/setups/env/bin/closure_publish.sh`.
+5. `feat(closure): add the pipeline delivery of the authoritative tools`
+   over `ci/deliver-closure-tools.sh`.
+6. `test(closure): add the step 6 suite and measure the fixture name window`
+   over `docs/v0.27.0/verify.closure-check.sh`.
+7. `test(closure): retain the step 6 Debian capture`
+   over `docs/v0.27.0/verify.closure.step6.debian.txt`.
+8. `docs(toolchain-runtime-closure): record step 6 validation`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`.
+
+##### What changed in the plan since round 3 for step 6 toolchain-runtime-closure (round 4)
+
+No membership, order or subject change. Four bodies were rewritten for what the
+round actually did:
+
+- group 1 gains the second topology amendment, the store following the record,
+  and the reason the plan now names the pattern rather than repeating it;
+- group 4 gains the conflict name created before the bytes, the fill checked by
+  digest, and the store's arrival in the report module;
+- group 6 gains the short-fill and prior-conflict cases and the assertions on
+  what did not happen;
+- group 7 names the round 4 build, and group 8 records the Yes verdict with the
+  repair assessment that replaced the missing-work list.
+
+Group 4 keeps all four members and the same subject: the store moved BETWEEN two
+files that were already in it, so the commit boundary is unchanged. Every staged
+path appears in exactly one group, and no group crosses a boundary the plan
+draws.
+
+### Writer response for step 6 toolchain-runtime-closure (round 4)
+
+Writer response:
+
+#### Writer response to round 3 for step 6 toolchain-runtime-closure (round 4)
+
+##### Both findings accepted, neither disputed for step 6 toolchain-runtime-closure (round 4)
+
+Round 3 returned two findings and made no repair to production code or to the
+harness. Both are accepted and repaired, with the cases its missing-work list
+named. There is no disagreement to record.
+
+The metadata repairs round 3 made are retained rather than undone. The Step 6
+validation rows and the `a.commit` group 8 body described a No result, which was
+true of the bytes they described. Round 4 finished the work, so both now describe
+what is staged.
+
+##### R3-F1 and R3-F2 are one defect seen from two sides for step 6 toolchain-runtime-closure (round 4)
+
+The findings are separate and the repair is single, which is worth saying plainly
+rather than answering them as two.
+
+R3-F1: with both conflict operations failing, the differing bytes survived only
+at `.evidence.*`, which `closure_evidence_conflicts` does not glob, so
+publication step 2 and the agreeing rerun both returned 0. The immediate refusal
+stopped the run that produced the disagreement and nothing else, which is exactly
+the shape round 1 found and round 2 was meant to fix.
+
+R3-F2: the read-back asked whether ANY conflict existed rather than whether THIS
+document had been retained. An empty destination left by a failed copy satisfied
+it, and so did an older conflict from an earlier run, and in both cases the
+complete document was then removed as tidy-up. The finding is right that the
+printed conflict path had never been created in the prior-conflict case.
+
+Underneath both: THE OPERATION THAT MADE THE DISAGREEMENT DISCOVERABLE WAS THE
+LAST ONE. Every shape so far promoted a finished temporary file, so a failure at
+the end left the reader with nothing under the archive key, and each round then
+argued about what to do with the orphaned bytes. Round 2 deleted them. Round 3
+kept them somewhere the reader does not look. Both left publication accepting the
+older PASS.
+
+##### The repair inverts the order for step 6 toolchain-runtime-closure (round 4)
+
+The conflict NAME is created first and exclusively, under the prefix the shared
+lookup globs. A link does it in one step when it can, since a link is the bytes
+themselves and cannot be partial. Otherwise the name is reserved EMPTY by
+`mktemp` and filled afterwards. What can still fail is the fill, not the
+discoverability, which is what R3-F1 asks for in its own words: the unresolved
+state is discoverable from the exact archive key without depending on the failed
+final retention operation, because there is no longer a final retention
+operation.
+
+The fill is then checked against the digest of THIS document before the only
+other copy is removed. That answers R3-F2's two scenarios together rather than
+separately: an empty destination is not this document at this name, and neither
+is an older conflict. When the check fails, BOTH files are kept and both are
+named in the output, the reserved name stopping publication while the temporary
+file holds the complete evidence a human decides with.
+
+`closure_evidence_conflicts` and the reader are unchanged. The recovery policy is
+unchanged: nothing is overwritten, the canonical result is never touched by a
+conflict, and which of two results is wrong stays a human decision.
+
+##### The cases for step 6 toolchain-runtime-closure (round 4)
+
+Seven, and they assert what did not happen as much as what did, because that is
+where rounds 2 and 3 were thin.
+
+The link-only injection keeps its existing assertions and its downstream pair.
+The link-plus-fill injection now asserts both downstream refusals that round 3
+found missing: publication refuses at step 2, and the agreeing rerun refuses. The
+kept bytes are digested against the differing document rather than counted, so a
+zero-byte survivor would fail the case. And a third differing result beside an
+older conflict is kept, which is the prior-conflict scenario driven through the
+production emitter.
+
+##### The store moved, and the plan said so first for step 6 toolchain-runtime-closure (round 4)
+
+This is the one thing round 3 did not ask for, so it is stated rather than
+buried. The three repairs put `closure_verify.sh` at 658 against a 650 ceiling.
+The plan's rule is that a module which would exceed the ceiling moves a
+responsibility to the module that already owns its neighbours, and the evidence
+store's neighbours are all in `closure_report.sh`: the reader consumes exactly
+what the store writes, the conflict lookup derives the names it creates, and both
+consumers reach that module for them. Only the writer was in the driver.
+
+So the root validation, the promotion and the conflict retention moved, and the
+driver kept observation, comparison and the run order. The topology table was
+amended first and the code followed, which is the route step 5 used for the
+report module and round 2 used for the record. The alternative was a third round
+of trimming comment prose to sit at exactly 650, which is the budget gaming the
+rule exists to prevent.
+
+The plan now names the pattern rather than repeating it silently: the driver was
+carrying two subjects, the run and the record, and each amendment took one layer
+of the record away. There is no third layer left to move. The driver is at 546,
+furthest below its ceiling since the step began, and publication has gained no
+line in any round.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 4)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-4 -->
+
+## Round 4 by reviewer - Step 6
+
+- Recorded: 2026-09-10T11:25:39+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Baseline index tree: 1fb0ed367371d226a84652494fde8df71ec71312
+
+Assessed index tree: 4f79e03f3a7bfcba4019cb5a3800463aaf935f57
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+Round 4 closes R3-F2: failed copying, a partial destination and a third result beside an earlier conflict preserve the exact new differing document, with publication and the agreeing rerun refusing. The store move to closure_report.sh follows the amended topology and all production modules remain within 650 lines. R3-F1 remains open in the failed-name-reservation branch: a complete differing document is anonymous and both consumers accept the older PASS. Earlier marker-removal, contained-alias, live-inventory, donor-window, topology and Debian-evidence findings remain closed.
+
+Validation plan effects:
+
+Updated only the Step 6 validation section in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: exact No sentence, two concrete Missing work bullets immediately after What was implemented, corrected retention assessment, fresh round 4 evidence, current line/count references and the historical round 3 capture reference. Every other step remains byte-identical. The umbrella digest is unchanged. Only the attributable validation metadata patch was staged; ignored a.commit descriptions were corrected without changing groups, members, ordering or subjects.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Ran the entire 15-command union independently before review metadata edits. Project lint: exit 0, 53 scripts. Harness ShellCheck: exit 0. Independent isolated RHEL 9.8 closure Step 6: 215 cases, zero failures, exit 5 solely for the Debian-only host gate. Closure Steps 0/1/2/3/4/5: 63/73/91/132/152/223 cases, zero failures, exit 0. Installer Steps 2/3: 49/63 cases, zero failures, exit 0. Relocation Step 3: 104 cases, zero failures, exit 0. Archive-file sha256sum check: exit 0, line 147. Installer purity search: exit 1 with no matches, expected. Installer diff against HEAD: exit 0. Supplemental staged whitespace: exit 0 before and after metadata. The retained Debian build 148 reports Step 6 exit 0, 216 cases, zero failures; all 18 assembled input digests independently match reviewed files, including the harness and changed store/driver. Source code was not edited during review, so these results apply to the final assessed code. Logs: .reviews/a.codex-s6r4.logs; digest checks: .reviews/a.codex-s6r4.debian-digests.json. Independent reproductions: .reviews/a.codex-s6r4.retention-results.txt, .reviews/a.codex-s6r4.reservation-results.txt and .reviews/a.codex-s6r4.reproduce-results.txt. No numerical coverage gate applies to this Bash plan; the reservation-failure case is an identified acceptance-coverage gap.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+bash src/utils/lint_shell.sh | sources: project, plan
+shellcheck docs/v0.27.0/verify.closure-check.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 6 | sources: plan
+rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh | sources: plan
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh | sources: plan
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 5 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 4 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 1 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 0 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 | sources: request
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+No command was added or removed. The current resolver adds the plan source to bash src/utils/lint_shell.sh, which the request marked project-only. The union contains 15 commands and all ran. Full request/current commands and sources: .reviews/a.codex-s6r4.resolver.json.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Baseline index 1fb0ed367371d226a84652494fde8df71ec71312 matches the request. Final assessed index 4f79e03f3a7bfcba4019cb5a3800463aaf935f57. The ordered validation-state comparison before any metadata edits is acceptable=true with no changed tracked, untracked or ignored paths. The final comparison reports only the explicitly authored Step 6 validation file and `<index>`, plus ignored a.commit; no validation side effect exists. attribute-reviewer-patch returned attributable=true and only its exact patch was applied to the index. Baseline blobs for both metadata paths are retained. Umbrella SHA-256 remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. All evidence operations used the shared launcher.
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Repairs made:
+
+- Polishing-only review metadata: Step 6 validation verdict, missing work and independent round 4 evidence; only the proven attributable patch was staged.
+- Polishing-only ignored review metadata: a.commit Group 4/8 claims qualified for the remaining finding and Group 7 capture round corrected. Groups, order, subjects and staged membership are unchanged; a.commit stays ignored and unstaged.
+- No production or test repair was made. Caller-owned scratch scripts, logs and evidence are ignored review artifacts.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_report.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Independent commit-plan-check.bat --format json returned exit 0, state=valid, ready=true, diagnostics=[] both before assessment and after metadata edits. The ordered eight groups are plan topology; host-tool contract; live observer; config/report/verifier/publication together; pipeline delivery; harness; Debian capture; validation record. Their full subjects and exact path sets are retained in .reviews/a.codex-s6r4.round-evidence.json. All eleven staged paths are covered exactly once. Grouping keeps the interdependent reader and consumers together, the plan precedes implementation, and conventional subjects remain accurate. The ignored descriptions now reflect the remaining gap. Mechanical validity does not establish implementation completeness or authorize a commit.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Unresolved findings:
+
+- [R4-F1, P1, carried R3-F1/R2-F2/R1-F1] Failed conflict-name reservation still permits the older PASS. src/setups/env/bin/closure_report.sh:535-539 reserves the discoverable name only after the complete differing document was written to anonymous `.evidence.*` at line 486. If the conflict link and fallback mktemp fail, CONFLICT-UNRETAINED returns 1 but leaves no `<identity>.conflict.*` entry for closure_evidence_conflicts or either consumer. Fresh production-function reproduction (`.reviews/a.codex-s6r4.reservation.sh` and `.reviews/a.codex-s6r4.reservation-results.txt`) retains one exact differing copy yet returns `publication_step2_rc=0` and `agreeing_rerun_rc=0`. The same result occurs with real filesystem permissions: make the results root non-writable after filling the temporary file; publication still succeeds, and after restoring writability an agreeing rerun succeeds without resolving the disagreement. The previous round's loss-of-bytes finding is closed, but preserving anonymous bytes still does not meet the existing Plan Q06 publication-stop contract. Establish archive-key discoverability before later name creation can fail and add the missing downstream assertions.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Complete the carried publication-stop repair in the existing evidence store and its exact-key lookup contract. The failing branch already exists in this patch; a replacement fallback alone repeats the same dependency. One concrete implementation direction is to create the initial exclusive temporary path under an archive-key-associated prefix understood by the shared lookup before copying the document, then preserve that association on a differing result while handling successful/idempotent/incomplete writes according to the existing contract. Keep the canonical document immutable, exact differing bytes retained and human resolution unchanged. No extra module or policy change is requested.
+
+Add a production-driven failure case for conflict-name creation after a canonical PASS. Assert immediate refusal, this exact differing document retained, publication refusal at step 2, and an agreeing rerun still refusing after the failure is removed. Keep controls for a partial first write followed by a successful rerun, ordinary idempotence, successful conflict retention and explicit conflict resolution; preserve the now-passing three retention reproductions. Rerun the mandatory union and refresh the Debian capture for changed bytes. Update Step 6 validation and a.commit to the final behavior. The requestor owns consuming this answer and deciding the next exchange action.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+changes-requested. Readiness floor: exact identity PASS; implementation completeness FAIL; mandatory command execution and current host evidence PASS, with the missing acceptance case included in completeness; staged attribution PASS; absence of unresolved findings FAIL; accurate mechanical a.commit grouping PASS. R3-F2 is closed and only the carried failed-retention publication-stop finding remains. No substantive reviewer repair occurred. This advisory recommendation authorizes no commit.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 4)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-4 -->
+
+## Round 5 by requestor - Step 6
+
+- Recorded: 2026-09-10T11:53:16+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 5)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 5
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 5)
+
+request_index_tree: 4c9fd6c46e914b11e293b6bf3ae5b67b66d83bdc
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): give the evidence record to the report module
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: chore(closure): widen the host-tool contract to the verification path
+group 2 path: docs/v0.27.0/contract.closure-tools.txt
+group 3: feat(closure): add the live observer
+group 3 path: src/setups/env/bin/closure_observe_live.sh
+group 4: feat(closure): add the verification driver and bind publication to its evidence
+group 4 path: src/setups/env/bin/closure_config.sh
+group 4 path: src/setups/env/bin/closure_report.sh
+group 4 path: src/setups/env/bin/closure_verify.sh
+group 4 path: src/setups/env/bin/closure_publish.sh
+group 5: feat(closure): add the pipeline delivery of the authoritative tools
+group 5 path: ci/deliver-closure-tools.sh
+group 6: test(closure): add the step 6 suite and measure the fixture name window
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 6 Debian capture
+group 7 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 8: docs(toolchain-runtime-closure): record step 6 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_report.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 5)
+
+#### Writer assessment for step 6 toolchain-runtime-closure (round 5)
+
+##### Is the exact step fully implemented for step 6 toolchain-runtime-closure (round 5)
+
+Yes. Step 6 of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` is fully
+implemented in the staged work.
+
+Every behavior the step names exists and is exercised: the verification driver
+that requires the pipeline delivery before it opens the archive, the archive-side
+observation derived from the archive index, the install through an unchanged
+`install_pkg.sh`, the installed-side observation, the comparison and its DIVERGENT
+refusal, the payload comparison that authorises nothing, the live observer with
+its three outcomes, and one evidence artifact keyed by the SHA-256 of the archive
+file, written into a validated results root by a promotion that never overwrites.
+
+Round 4 closed the exact-byte retention finding and left one carried branch open:
+when the conflict name itself could not be created, a complete differing document
+survived only as an anonymous temporary file and both consumers accepted the
+older PASS. Round 5 removes that branch rather than repairing it, on the
+finding's own primary instruction. No reviewer repair was made to production code
+or to the harness in any round.
+
+##### Test evidence for step 6 toolchain-runtime-closure (round 5)
+
+The union of mandatory validation commands was rerun on the repaired sources.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | exit 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | exit 0 on the Debian 12 agent; 215 cases, 0 failures, build 149 |
+| the same suite on RHEL 9.8 | exit 5 on the host gate; 214 cases, 0 failures |
+| `--step 5` on RHEL 9.8 | exit 0; 223 cases, 0 failures |
+| `--step 4` on RHEL 9.8 | exit 0; 152 cases, 0 failures |
+| `--step 3` on RHEL 9.8 | exit 0; 132 cases, 0 failures |
+| `--step 2` on RHEL 9.8 | exit 0; 91 cases, 0 failures |
+| `--step 1` on RHEL 9.8 | exit 0; 73 cases, 0 failures |
+| `--step 0` on RHEL 9.8 | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | exit 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | exit 0; 104 cases, 0 failures |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | the identity is over the archive FILE, at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | exit 1 with no output, the expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | exit 0 |
+
+The Debian row is a fresh run over the round 5 sources. Build 149 assembled
+eighteen files and printed the SHA-256 of every one, and all eighteen match the
+canonical cplx bytes staged here, the harness and the changed store included.
+Every step from 0 to 6 answers `OBJECTIVE MET` on that host; step 6 reports 215
+cases against the 214 measured here, the extra one being the host gate itself;
+steps 3 and 4 report 132 and 152 cases with zero failures, the same counts the
+build host reports. The aggregate still exits 5, because step 7 has no suite yet
+and says so.
+
+STEP 6'S COUNT DROPS BY ONE, from 215 portable cases to 214, and the drop is the
+repair rather than a loss. The cases that measured a promotion which could fail
+after the bytes existed went with the promotion: there is no fill, no digest
+check on a fill and no half-retained outcome left to measure. What replaces them
+measures the property directly, that a conflict is at its final name from the
+moment it exists.
+
+##### Static-check evidence for step 6 toolchain-runtime-closure (round 5)
+
+`bash src/utils/lint_shell.sh` covers every tracked shell script and is clean.
+`shellcheck` over the harness is clean. No `shellcheck` directive was added this
+round, in a shipped file or in the harness. The trailing blank line round 2's
+whitespace check named is still gone, and `git diff --cached --check` over the
+staged tree reports nothing.
+
+##### Coverage evidence for step 6 toolchain-runtime-closure (round 5)
+
+No coverage gate applies to a Bash plan. Harness cases are the coverage evidence,
+and every path any round reproduced now has one that fails without the repair.
+
+The marker case runs the real driver and the real installer against real
+filesystem permissions, and the alias cases run the real skeleton derivation over
+a real archive, both with no stand-in. The retention cases need a failure the
+filesystem will not produce on demand, so they inject it, and each injection is
+SCOPED TO ONE NAMED OPERATION: a shim that fails only for a `.conflict.`
+argument, leaving every other link and copy in the run working, the promotion of
+the canonical result included.
+
+Round 5's cases assert absences as well as presences: no conflict name after an
+ordinary first write, no anonymous document beside a retained conflict, nothing
+differing written at all when the reservation fails, and the canonical result
+untouched throughout. The retained conflict's bytes are DIGESTED against the
+differing document rather than counted, so an empty or truncated survivor fails
+the case.
+
+##### Architecture evidence for step 6 toolchain-runtime-closure (round 5)
+
+The topology holds at ten production scripts and five checker modules,
+`closure_scope.sh` still exists in no shape, and round 5 makes NO topology
+decision: the store stays where round 4's amendment put it, no production
+interface moves, and the driver, publication, the observer, the delivery script
+and the configuration module are all byte-identical to what round 4 published.
+
+Line counts: `closure_verify.sh` 546, `closure_observe_live.sh` 195,
+`closure_report.sh` 568, `closure_config.sh` 636, `closure_publish.sh` 650,
+`ci/deliver-closure-tools.sh` 128. Every file is under the ceiling. The emitter
+itself is shorter than it was at round 3, because the fill, the guarded copy and
+the two half-retained outcomes have no code path any more.
+
+##### Performance evidence for step 6 toolchain-runtime-closure (round 5)
+
+No new quadratic work, and round 5 removes work rather than adding it: one
+`mktemp` under a different template replaces a reservation, a copy and a digest
+check. The remaining digest comparison is the one the idempotence test already
+needed, and the conflict lookup is the same derived-name glob as before. The
+archive side still costs two passes over the archive INDEX and unpacks nothing.
+
+##### Feature-integrity evidence for step 6 toolchain-runtime-closure (round 5)
+
+`install_pkg.sh` is byte-identical to HEAD: the diff against HEAD returns 0 and
+the purity grep returns 1 with no output. The driver adds no argument to the
+installer call and steers no selection; it refuses before, checks its own
+precondition, and verifies after.
+
+Steps 0 to 5 pass on RHEL 9.8 with the counts above, and every step from 0 to 6
+passes on the Debian 12 agent at build 149. Q03 asks for one mechanism on both
+hosts and the regression evidence is measured on both.
+
+CONFLICT RETENTION TOOK FOUR ROUNDS TO SETTLE, and that is worth stating rather
+than smoothing over. Each shape was a repair of the last, and each review found
+the failure path around a normal path it had just accepted. The underlying defect
+never moved: the operation that made a disagreement discoverable was the LAST
+one, so a failure there always left the reader with nothing under the archive
+key, and each round argued about where the orphaned bytes should live instead of
+about the order. Round 5 changes the order, and the branch the argument was about
+stops existing.
+
+THE ONE THING THIS ROUND DECLINES is the second half of the missing-work list,
+which asks the reservation-failure branch to retain the exact differing document
+as well. The same list's first bullet makes that unreachable, and the first is
+the one the contract needs: once discoverability is a precondition of writing, a
+store that refuses the conflict-prefixed name has nowhere discoverable to put a
+disagreement, so the run refuses before producing one. That is stated here rather
+than left for the next round to find.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 5)
+
+#### What changed for step 6 toolchain-runtime-closure (round 5)
+
+##### One function, and it got shorter for step 6 toolchain-runtime-closure (round 5)
+
+Round 4 left one finding: when the conflict name itself could not be created, a
+complete differing document survived only as an anonymous `.evidence.*`, and both
+consumers accepted the older PASS. Round 5 takes the finding's primary
+instruction, establish key-associated state before the complete temporary
+document is written, and removes the branch instead of repairing it.
+
+`closure_evidence_emit` in `src/setups/env/bin/closure_report.sh` is the only
+production change.
+
+##### The order, inverted for step 6 toolchain-runtime-closure (round 5)
+
+The function now asks one question before it writes anything: is the canonical
+name already taken?
+
+If it is not, nothing has changed. The document goes to an anonymous
+`.evidence.*` temporary file and is promoted by the no-overwrite link, so a
+crashed or partial write still leaves nothing at the canonical name and an
+ordinary first write never puts a conflict name in the store.
+
+If it is, this run can only be IDEMPOTENT or a CONFLICT, and the temporary file
+is created under the CONFLICT PREFIX from the start. A conflict is then already
+at its final name the moment it exists: nothing is promoted, copied or renamed
+afterwards, so there is no operation left that could lose it. The idempotent half
+removes its own reservation before it reports, so this run's placeholder is never
+read as the disagreement it was holding a place for.
+
+One case the pre-check cannot see is the canonical name appearing while this run
+was writing. The anonymous document is discarded and the reserved branch is taken
+from the original body, so a race ends in the same shape as everything else.
+
+##### What no longer exists for step 6 toolchain-runtime-closure (round 5)
+
+The guarded copy, the fill, the digest check on the fill, the second retention
+mechanism and the two half-retained outcomes are gone, because none of them has a
+code path any more. `CONFLICT-INCOMPLETE`, `CONFLICT-BYTES` and
+`CONFLICT-UNRETAINED` are not emitted: there is no state left for them to name.
+The emitter is shorter than it was at round 3.
+
+A run that cannot reserve the conflict name writes no differing document at all
+and refuses. That is the terminal shape of this contract rather than a gap in it:
+once discoverability is a precondition of writing, a store that refuses the
+conflict-prefixed name has nowhere discoverable to put a disagreement.
+
+##### The suite for step 6 toolchain-runtime-closure (round 5)
+
+Step 6 goes from 215 portable cases to 214, and the drop is the repair rather
+than a loss: the cases that measured a promotion which could fail after the bytes
+existed went with the promotion.
+
+What replaces them measures the property directly. An ordinary first write leaves
+no conflict name. A differing result is reported AT its conflict name, is the
+only conflict beside the canonical, and its retained bytes are digested against
+the differing document rather than counted. No anonymous document is left beside
+it. A second and a third differing result each get their own name. Publication
+refuses and the agreeing rerun refuses.
+
+The reservation-failure case injects failure into `mktemp` for a conflict
+template only, so the canonical write and every other temporary file in the run
+still work, and asserts the refusal, that nothing differing was written anywhere,
+that the canonical result is untouched, and that the store retains normally once
+the injection is removed.
+
+##### Line counts for step 6 toolchain-runtime-closure (round 5)
+
+`closure_report.sh` 568, `closure_verify.sh` 546, `closure_publish.sh` 650,
+`closure_config.sh` 636, `closure_observe_live.sh` 195,
+`ci/deliver-closure-tools.sh` 128. No topology decision this round: the store
+stays where round 4's amendment put it.
+
+### Change summary for step 6 toolchain-runtime-closure (round 5)
+
+#### Staged paths and commit groups for step 6 toolchain-runtime-closure (round 5)
+
+##### Staged paths for step 6 toolchain-runtime-closure (round 5)
+
+Eleven paths, unchanged in membership from round 2:
+
+- `ci/deliver-closure-tools.sh`
+- `docs/v0.27.0/contract.closure-tools.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step6.debian.txt`
+- `src/setups/env/bin/closure_config.sh`
+- `src/setups/env/bin/closure_observe_live.sh`
+- `src/setups/env/bin/closure_publish.sh`
+- `src/setups/env/bin/closure_report.sh`
+- `src/setups/env/bin/closure_verify.sh`
+
+Round 5 changes four of them, and the driver is not among them: the report module
+carries the inverted retention order, the harness carries the cases that measure
+it, the capture is the new agent build, and the plan and validation records
+follow. The driver, the contract, the observer, the delivery script, publication
+and the configuration module are all byte-identical to what round 4 published.
+
+The versioned review transcript,
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md`, is modified in
+the working tree and is NOT staged. It belongs to the protocol.
+
+##### Commit groups for step 6 toolchain-runtime-closure (round 5)
+
+Eight groups, with the same membership, order and subjects round 2 assessed as
+coherent. Only the bodies of the groups whose content changed were rewritten.
+
+1. `docs(toolchain-runtime-closure): give the evidence record to the report module`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`.
+2. `chore(closure): widen the host-tool contract to the verification path`
+   over `docs/v0.27.0/contract.closure-tools.txt`.
+3. `feat(closure): add the live observer`
+   over `src/setups/env/bin/closure_observe_live.sh`.
+4. `feat(closure): add the verification driver and bind publication to its evidence`
+   over `src/setups/env/bin/closure_config.sh`,
+   `src/setups/env/bin/closure_report.sh`,
+   `src/setups/env/bin/closure_verify.sh` and
+   `src/setups/env/bin/closure_publish.sh`.
+5. `feat(closure): add the pipeline delivery of the authoritative tools`
+   over `ci/deliver-closure-tools.sh`.
+6. `test(closure): add the step 6 suite and measure the fixture name window`
+   over `docs/v0.27.0/verify.closure-check.sh`.
+7. `test(closure): retain the step 6 Debian capture`
+   over `docs/v0.27.0/verify.closure.step6.debian.txt`.
+8. `docs(toolchain-runtime-closure): record step 6 validation`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`.
+
+##### What changed in the plan since round 4 for step 6 toolchain-runtime-closure (round 5)
+
+No membership, order or subject change. Three bodies were rewritten for what the
+round actually did:
+
+- group 4 gains the conflict name taken before the differing document exists, the
+  reservation removed on the idempotent half, and the refusal that writes nothing
+  differing when the name cannot be reserved;
+- group 6 gains the cases that measure the property directly and loses the ones
+  that measured a promotion which no longer exists;
+- group 7 names the round 5 build, and group 8 records the Yes verdict with a
+  repair assessment that follows retention across four rounds.
+
+Group 1 is untouched: round 5 makes no topology decision, so the plan's two
+amendments stand as round 4 published them. Every staged path appears in exactly
+one group, and no group crosses a boundary the plan draws.
+
+### Writer response for step 6 toolchain-runtime-closure (round 5)
+
+Writer response:
+
+#### Writer response to round 4 for step 6 toolchain-runtime-closure (round 5)
+
+##### The finding is accepted and the branch is gone for step 6 toolchain-runtime-closure (round 5)
+
+Round 4 returned one finding, R4-F1, and made no repair to production code or to
+the harness. It is accepted. Round 5 does not repair that branch; it removes it,
+which is what the finding's own primary instruction asks for.
+
+The metadata repairs round 4 made are retained rather than undone. The Step 6
+validation rows and the `a.commit` group 8 body described a No result, which was
+true of the bytes they described.
+
+##### Taking the review's first instruction literally for step 6 toolchain-runtime-closure (round 5)
+
+The finding names two things. The first: "Establish archive-key discoverability
+before later name creation can fail." The second, in the missing-work list: the
+reservation-failure branch should also "retain this exact differing document" and
+refuse publication and an agreeing rerun.
+
+Following the first makes the second unreachable, and that is not a conflict to
+paper over. Once discoverability is a PRECONDITION of writing rather than a
+consequence of it, a store that refuses the conflict-prefixed name has nowhere
+discoverable to put a disagreement, and the only honest answer is to refuse
+before producing one. Keeping the bytes somewhere anonymous is exactly what round
+4 correctly refused to accept.
+
+So the order is inverted rather than extended. Once the canonical name is known
+to be taken, this run can only be IDEMPOTENT or a CONFLICT, so the temporary file
+is created under the CONFLICT PREFIX from the start:
+
+- a conflict is already at its final name the moment it exists, and nothing is
+  promoted, copied or renamed afterwards, so no later operation can lose it;
+- the idempotent half removes its own reservation before it reports, so a run's
+  placeholder is never read as the disagreement it was holding a place for;
+- a run that cannot reserve that name writes NO differing document at all.
+
+That last line is the one the missing-work list would have had differently, and
+it is stated here rather than buried. The case asserts what actually happens: an
+immediate refusal, nothing differing written anywhere, the canonical result
+untouched, and a control that retains normally once the injection is removed.
+
+##### What this removed for step 6 toolchain-runtime-closure (round 5)
+
+The fill, its digest check, the guarded copy, the second retention mechanism and
+the two half-retained outcomes are all gone, because none of them has a code path
+any more. `CONFLICT-INCOMPLETE`, `CONFLICT-BYTES` and `CONFLICT-UNRETAINED` no
+longer exist: there is no state left for them to name. The emitter is shorter
+than it was at round 3.
+
+This is why round 5's case count is one LOWER than round 4's. The cases that
+measured a promotion which could fail after the bytes existed went with the
+promotion. What replaces them measures the property directly.
+
+##### The cost, paid where it belongs for step 6 toolchain-runtime-closure (round 5)
+
+Reserving early has one price: a conflict-prefixed name exists before the run
+knows whether it is a conflict. The reservation is therefore taken ONLY when the
+canonical name already exists, so an ordinary first write never puts a conflict
+name in the store, and a case asserts exactly that. In the idempotent case the
+reservation lives for the length of one digest comparison and is removed before
+the result is reported.
+
+The residual is a crash between the reservation and the idempotent removal, which
+would leave a conflict name a human must clear. That direction is deliberate: a
+crash that leaves a STOP is recoverable, and a crash that leaves a missed stop
+publishes an archive whose verification disagreed. The canonical no-overwrite
+rule is untouched, and a crashed or partial write still leaves nothing at the
+canonical name.
+
+##### Everything else round 4 closed stays closed for step 6 toolchain-runtime-closure (round 5)
+
+The exact-byte retention finding, the checked marker removal, the contained
+parent-relative alias, the live-inventory repair, the donor-window repair, the
+topology reconciliation and the Debian evidence are all unchanged. No production
+interface moved, `install_pkg.sh` is still byte-identical to HEAD, the ten-script
+topology holds, and the store stays where round 4's amendment put it. The only
+files round 5 touches are the store, the harness, the plan and the records.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 5)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-5 -->
+
+## Round 5 by reviewer - Step 6
+
+- Recorded: 2026-09-10T12:05:50+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Baseline index tree: 4c9fd6c46e914b11e293b6bf3ae5b67b66d83bdc
+
+Assessed index tree: f6046a683aa4b2f5b01c95852b0d1523c0882b44
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+Round 5 closes the failed-retention path when the canonical result already exists. Reserving a discoverable conflict name before writing preserves the exact bytes through the real directory-permission transition. The writer's initial-allocation refusal is accepted: if reservation fails before any write, no differing result need be stored. One narrower gap remains in the newly added race fallback, when another emitter creates the canonical result after the initial absence check. This branch deletes the already complete differing document before a fallible reservation, so publication and an agreeing rerun can accept the winning PASS. Earlier copy-retention, marker-removal, contained-alias, live-inventory, donor-window, topology and Debian-evidence findings remain closed.
+
+Validation plan effects:
+
+Updated only the Step 6 validation section in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: exact No sentence, two concrete Missing work bullets immediately after What was implemented, accepted initial-refusal interpretation, narrowed race assessment, fresh round 5 evidence and corrected historical round 4 capture reference. Every other step remains byte-identical. The umbrella digest is unchanged. Only the attributable validation metadata patch was staged; ignored a.commit descriptions were corrected without changing groups, members, ordering or subjects.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Ran the entire 15-command union independently before review metadata edits. Project lint: exit 0, 53 scripts. Harness ShellCheck: exit 0. Independent isolated RHEL 9.8 closure Step 6: 214 cases, zero failures, exit 5 solely for the Debian-only host gate. Closure Steps 0/1/2/3/4/5: 63/73/91/132/152/223 cases, zero failures, exit 0. Installer Steps 2/3: 49/63 cases, zero failures, exit 0. Relocation Step 3: 104 cases, zero failures, exit 0. Archive-file sha256sum check: exit 0, line 147. Installer purity search: exit 1 with no matches, expected. Installer diff against HEAD: exit 0. Supplemental staged whitespace: exit 0 before and after metadata. The retained Debian build 149 reports Step 6 exit 0, 215 cases, zero failures; all 18 assembled input digests independently match reviewed files. Source code was not edited during review, so these results apply to the final assessed code. Logs: .reviews/a.codex-s6r5.logs; digest checks: .reviews/a.codex-s6r5.debian-digests.json. Prior controls pass in .reviews/a.codex-s6r5.retention-results.txt, .reviews/a.codex-s6r5.reservation-results.txt and .reviews/a.codex-s6r5.reproduce-results.txt, including the accepted refusal before an initial write. The new two-emitter reproduction and successful-reservation control are in .reviews/a.codex-s6r5.race-results.txt. No numerical coverage gate applies to this Bash plan; this race branch is an identified acceptance-coverage gap.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+bash src/utils/lint_shell.sh | sources: project, plan
+shellcheck docs/v0.27.0/verify.closure-check.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 6 | sources: plan
+rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh | sources: plan
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh | sources: plan
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 5 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 4 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 1 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 0 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 | sources: request
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+No command was added or removed. The current resolver adds the plan source to bash src/utils/lint_shell.sh, which the request marked project-only. The union contains 15 commands and all ran. Full request/current commands and sources: .reviews/a.codex-s6r5.resolver.json.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Baseline index 4c9fd6c46e914b11e293b6bf3ae5b67b66d83bdc matches the request. Final assessed index f6046a683aa4b2f5b01c95852b0d1523c0882b44. The ordered validation-state comparison before metadata edits is acceptable=true with no changed tracked, untracked or ignored paths. The final comparison reports only the explicitly authored Step 6 validation file and `<index>`, plus ignored a.commit; no validation side effect exists. attribute-reviewer-patch returned attributable=true and only its exact patch was applied to the index. Baseline blobs for both metadata paths are retained. Umbrella SHA-256 remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. All evidence operations used the shared launcher.
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Repairs made:
+
+- Polishing-only review metadata: Step 6 validation verdict, missing work and independent round 5 evidence; only the proven attributable patch was staged.
+- Polishing-only ignored review metadata: a.commit Group 4/8 claims qualified for the remaining race and Group 7 capture round corrected. Conflict-name wording now describes the implemented random suffix. Groups, order, subjects and staged membership are unchanged; a.commit stays ignored and unstaged.
+- No production or test repair was made. Caller-owned scratch scripts, logs and evidence are ignored review artifacts.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_report.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Independent commit-plan-check.bat --format json returned exit 0, state=valid, ready=true, diagnostics=[] both before assessment and after metadata edits. The ordered eight groups are plan topology; host-tool contract; live observer; config/report/verifier/publication together; pipeline delivery; harness; Debian capture; validation record. Their full subjects and exact path sets are retained in .reviews/a.codex-s6r5.round-evidence.json. All eleven staged paths are covered exactly once. Grouping keeps the interdependent reader and consumers together, the plan precedes implementation, and conventional subjects remain accurate. The ignored descriptions now reflect the remaining gap. Mechanical validity does not establish implementation completeness or authorize a commit.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Unresolved findings:
+
+- [R5-F1, P2, narrowed retention finding] Preserve the completed differing document when a concurrent first writer wins the canonical name. In src/setups/env/bin/closure_report.sh:532-536, the new fallback deletes the anonymous document before reserving its conflict name. A second emitter can create the canonical PASS between the initial absence check and ln -T; if the subsequent conflict-prefixed mktemp fails, the first call returns 1 but its complete differing bytes are gone and neither consumer sees a conflict. The deterministic reproduction uses two real production emitters, lets native ln report EEXIST, and fails only the fallback allocation (.reviews/a.codex-s6r5.race.sh and .reviews/a.codex-s6r5.race-results.txt). It returns exact_differing_copies=0, publication_step2_rc=0 and agreeing_rerun_rc=0. The same interleaving without that injection retains one exact copy and both consumers return 1. Establish archive-key association independently of the initial occupancy check so this already-written result survives and stops both consumers. This finding concerns the new race branch; the writer's refusal before an initial allocation succeeds is accepted.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Complete the remaining race branch in the existing evidence store. Associate the initial temporary document with its archive key independently of whether the canonical path exists at the first check, with the shared lookup able to recognize retained disagreement. Preserve canonical no-overwrite promotion, ordinary idempotence and recovery from an incomplete first write; remove this run's temporary state on the appropriate successful or incomplete-write paths. No permanent conflict is required after an ordinary successful first write, and no stored result is required if initial reservation fails before any document is written. Merely postponing deletion or adding another fallible post-write fallback leaves the key-association dependency unresolved.
+
+Add a deterministic two-emitter interleaving: begin the differing write with no canonical document, let another real emitter write PASS before the first link, then fail only the conflict-name reservation. Assert this exact differing document survives, publication refuses at step 2, and an agreeing rerun still refuses after the injection is removed. Keep the same schedule with successful reservation as a control and preserve the now-passing initial-allocation and permission-transition cases. Rerun the mandatory command union and refresh the Debian capture for changed bytes. Align the plan's conflict-name description with the final uniqueness mechanism, and update Step 6 validation and a.commit. The requestor owns consuming this answer and deciding the next exchange action.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+changes-requested. Readiness floor: exact identity PASS; implementation completeness FAIL; mandatory command execution and current host evidence PASS, with the missing acceptance case included in completeness; staged attribution PASS; absence of unresolved findings FAIL; accurate mechanical a.commit grouping PASS. The ordinary existing-canonical retention path is closed and the writer's refusal-before-writing adjustment is accepted. Only the narrower race-fallback retention finding remains. No substantive reviewer repair occurred. This advisory recommendation authorizes no commit.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 5)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-5 -->
+
+## Round 6 by requestor - Step 6
+
+- Recorded: 2026-09-10T12:32:52+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 6)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 6
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 6)
+
+request_index_tree: f0f761b1ad859f7e89d0ea0f917c5e001f7bfc4f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): give the evidence record to the report module
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: chore(closure): widen the host-tool contract to the verification path
+group 2 path: docs/v0.27.0/contract.closure-tools.txt
+group 3: feat(closure): add the live observer
+group 3 path: src/setups/env/bin/closure_observe_live.sh
+group 4: feat(closure): add the verification driver and bind publication to its evidence
+group 4 path: src/setups/env/bin/closure_config.sh
+group 4 path: src/setups/env/bin/closure_report.sh
+group 4 path: src/setups/env/bin/closure_verify.sh
+group 4 path: src/setups/env/bin/closure_publish.sh
+group 5: feat(closure): add the pipeline delivery of the authoritative tools
+group 5 path: ci/deliver-closure-tools.sh
+group 6: test(closure): add the step 6 suite and measure the fixture name window
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 6 Debian capture
+group 7 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 8: docs(toolchain-runtime-closure): record step 6 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_report.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 6)
+
+#### Writer assessment for step 6 toolchain-runtime-closure (round 6)
+
+##### Is the exact step fully implemented for step 6 toolchain-runtime-closure (round 6)
+
+Yes. Step 6 of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` is fully
+implemented in the staged work.
+
+Every behavior the step names exists and is exercised: the verification driver
+that requires the pipeline delivery before it opens the archive, the archive-side
+observation derived from the archive index, the install through an unchanged
+`install_pkg.sh`, the installed-side observation, the comparison and its DIVERGENT
+refusal, the payload comparison that authorises nothing, the live observer with
+its three outcomes, and one evidence artifact keyed by the SHA-256 of the archive
+file, written into a validated results root by a promotion that never overwrites.
+
+Round 5 accepted the discoverable name before the write and the refusal before an
+initial allocation, and left one narrower path: the race fallback deleted a
+complete differing document before a fallible reservation. Round 6 removes the
+occupancy question that created that fallback, on the finding's own instruction
+to establish archive-key association independently of it. No reviewer repair was
+made to production code or to the harness in any round.
+
+##### Test evidence for step 6 toolchain-runtime-closure (round 6)
+
+The union of mandatory validation commands was rerun on the repaired sources.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | exit 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | exit 0 on the Debian 12 agent; 221 cases, 0 failures, build 150 |
+| the same suite on RHEL 9.8 | exit 5 on the host gate; 220 cases, 0 failures |
+| `--step 5` on RHEL 9.8 | exit 0; 223 cases, 0 failures |
+| `--step 4` on RHEL 9.8 | exit 0; 152 cases, 0 failures |
+| `--step 3` on RHEL 9.8 | exit 0; 132 cases, 0 failures |
+| `--step 2` on RHEL 9.8 | exit 0; 91 cases, 0 failures |
+| `--step 1` on RHEL 9.8 | exit 0; 73 cases, 0 failures |
+| `--step 0` on RHEL 9.8 | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | exit 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | exit 0; 104 cases, 0 failures |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | the identity is over the archive FILE, at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | exit 1 with no output, the expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | exit 0 |
+
+The Debian row is a fresh run over the round 6 sources. Build 150 assembled
+eighteen files and printed the SHA-256 of every one, and all eighteen match the
+canonical cplx bytes staged here, the harness and the changed store included.
+Every step from 0 to 6 answers `OBJECTIVE MET` on that host; step 6 reports 221
+cases against the 220 measured here, the extra one being the host gate itself;
+steps 3 and 4 report 132 and 152 cases with zero failures, the same counts the
+build host reports. The aggregate still exits 5, because step 7 has no suite yet
+and says so.
+
+STEP 6 GOES FROM 214 PORTABLE CASES TO 220, and 221 on the agent. The six are the interleaving the
+finding reproduced, driven through two real emitters, and the property that pays
+for removing the occupancy question: an ordinary write leaves no conflict name
+AND exactly one file. The loser of the canonical name refuses, its document is
+digested against the differing bytes rather than counted, and publication and the
+agreeing rerun both refuse.
+
+##### Static-check evidence for step 6 toolchain-runtime-closure (round 6)
+
+`bash src/utils/lint_shell.sh` covers every tracked shell script and is clean.
+`shellcheck` over the harness is clean. No `shellcheck` directive was added this
+round, in a shipped file or in the harness. The trailing blank line round 2's
+whitespace check named is still gone, and `git diff --cached --check` over the
+staged tree reports nothing.
+
+##### Coverage evidence for step 6 toolchain-runtime-closure (round 6)
+
+No coverage gate applies to a Bash plan. Harness cases are the coverage evidence,
+and every path any round reproduced now has one that fails without the repair.
+
+The marker case runs the real driver and the real installer against real
+filesystem permissions, and the alias cases run the real skeleton derivation over
+a real archive, both with no stand-in. The retention cases need a failure the
+filesystem will not produce on demand, so they inject it, and each injection is
+SCOPED TO ONE NAMED OPERATION: a shim that fails only for a `.conflict.`
+argument, leaving every other link and copy in the run working, the promotion of
+the canonical result included.
+
+Round 6's cases assert absences as well as presences: no conflict name AND
+exactly one file after an ordinary write, no anonymous document beside a retained
+conflict, nothing differing written at all when the name cannot be created, and
+the canonical result untouched throughout. A retained conflict's bytes are
+DIGESTED against the differing document rather than counted, so an empty or
+truncated survivor fails the case.
+
+The interleaving round 5 reproduced is driven through two REAL emitters rather
+than an injection: the first takes the canonical name, the second finds its link
+refused and is already holding its conflict name, so there is no branch for the
+case and nothing for a failure to lose.
+
+##### Architecture evidence for step 6 toolchain-runtime-closure (round 6)
+
+The topology holds at ten production scripts and five checker modules,
+`closure_scope.sh` still exists in no shape, and round 6 makes NO topology
+decision: the store stays where round 4's amendment put it, no production
+interface moves, and the driver, publication, the observer, the delivery script
+and the configuration module are all byte-identical to what round 5 published.
+
+Line counts: `closure_verify.sh` 546, `closure_observe_live.sh` 195,
+`closure_report.sh` 549, `closure_config.sh` 636, `closure_publish.sh` 650,
+`ci/deliver-closure-tools.sh` 128. Every file is under the ceiling, and the store
+is nineteen lines shorter than at round 5: the occupancy test, its two-branch
+allocation and the race fallback have no code path any more.
+
+##### Performance evidence for step 6 toolchain-runtime-closure (round 6)
+
+No new quadratic work, and round 6 removes work rather than adding it: one
+`mktemp` under one template replaces a test, two allocation branches and a digest
+check. The remaining digest comparison is the one the idempotence test already
+needed, and the conflict lookup is the same derived-name glob as before. The
+archive side still costs two passes over the archive INDEX and unpacks nothing.
+
+##### Feature-integrity evidence for step 6 toolchain-runtime-closure (round 6)
+
+`install_pkg.sh` is byte-identical to HEAD: the diff against HEAD returns 0 and
+the purity grep returns 1 with no output. The driver adds no argument to the
+installer call and steers no selection; it refuses before, checks its own
+precondition, and verifies after.
+
+Steps 0 to 5 pass on RHEL 9.8 with the counts above, and every step from 0 to 6
+passes on the Debian 12 agent at build 150. Q03 asks for one mechanism on both
+hosts and the regression evidence is measured on both.
+
+CONFLICT RETENTION TOOK FIVE ROUNDS TO SETTLE, and that is worth stating rather
+than smoothing over. Each shape was a repair of the last, and each review found
+the failure path around a normal path it had just accepted. The underlying defect
+never moved: the operation that made a disagreement discoverable was the LAST
+one, so a failure there always left the reader with nothing under the archive
+key. Four rounds argued about where the orphaned bytes should live. Round 5
+inverted the order but kept an occupancy test, and round 6 removed the test,
+because asking whether the canonical name is taken is itself the window a
+concurrent writer slips through.
+
+THE COST IS STATED RATHER THAN BURIED. A conflict-named file exists for the
+length of one link on the ordinary path, and a crash inside that window leaves a
+name a human must clear. That is the direction this contract chooses everywhere
+else: a crash leaving a STOP is recoverable, and a crash leaving a missed stop
+publishes an archive whose verification disagreed. The canonical rule is
+untouched, and the initial-allocation refusal round 5 accepted is now the only
+allocation path there is.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 6)
+
+#### What changed for step 6 toolchain-runtime-closure (round 6)
+
+##### One question removed for step 6 toolchain-runtime-closure (round 6)
+
+Round 5 left one finding: the race fallback deleted a complete differing document
+before a fallible reservation, so a concurrent first writer plus a failed
+allocation lost the disagreement. Its instruction was to establish archive-key
+association independently of the initial occupancy check.
+
+Round 6 removes the occupancy check. `closure_evidence_emit` in
+`src/setups/env/bin/closure_report.sh` is the only production change.
+
+##### Every document is written under the conflict name it might need for step 6 toolchain-runtime-closure (round 6)
+
+The function no longer asks whether the canonical name is taken. It creates its
+temporary file under the conflict prefix unconditionally, writes the document
+there, and then tries the no-overwrite link to the canonical name.
+
+- The link succeeds: the canonical name is now a second name for the same bytes,
+  so removing the conflict name keeps the result and drops only the placeholder.
+  An ordinary write ends with exactly one file.
+- The link fails and the digests agree: the placeholder is removed first, so this
+  run's own name is never read as a disagreement, and the run reports IDEMPOTENT
+  unless an unresolved conflict already sits beside the canonical result.
+- The link fails and the digests differ: the document is already at its final
+  name and has been since before it was written. Nothing is promoted, copied or
+  renamed, so there is no operation left that could lose it.
+
+That third case is reached identically whether the canonical result existed when
+the run started or a concurrent writer took the name in between, which is what
+removes the race branch rather than repairing it.
+
+##### What no longer exists for step 6 toolchain-runtime-closure (round 6)
+
+The occupancy test, the two-branch allocation it drove, the race fallback, its
+second reservation and its deletion of a complete document are gone.
+`closure_report.sh` is nineteen lines shorter than at round 5.
+
+A run that cannot create the conflict-prefixed name writes no differing document
+at all and refuses, which is the behaviour round 5 accepted for an initial
+allocation failure and is now the only allocation path there is.
+
+##### The cost for step 6 toolchain-runtime-closure (round 6)
+
+A conflict-named file exists for the length of one link on the ordinary path, and
+a crash inside that window leaves a name a human must clear. The canonical rule
+is untouched: the canonical name is still only ever occupied by a complete
+result, and a crashed or partial write still leaves nothing at it.
+
+##### The suite for step 6 toolchain-runtime-closure (round 6)
+
+Six cases added, taking step 6 from 214 portable cases to 220.
+
+Two real emitters drive the interleaving the finding reproduced: the winner takes
+the canonical name, the loser refuses, the loser's document is digested against
+the differing bytes rather than counted, and publication and the agreeing rerun
+both refuse. An ordinary write is asserted to leave no conflict name and exactly
+one file, which is the property that pays for removing the question. The
+initial-allocation refusal case is unchanged.
+
+##### Line counts for step 6 toolchain-runtime-closure (round 6)
+
+`closure_report.sh` 549, `closure_verify.sh` 546, `closure_publish.sh` 650,
+`closure_config.sh` 636, `closure_observe_live.sh` 195,
+`ci/deliver-closure-tools.sh` 128. No topology decision this round.
+
+### Change summary for step 6 toolchain-runtime-closure (round 6)
+
+#### Staged paths and commit groups for step 6 toolchain-runtime-closure (round 6)
+
+##### Staged paths for step 6 toolchain-runtime-closure (round 6)
+
+Eleven paths, unchanged in membership from round 2:
+
+- `ci/deliver-closure-tools.sh`
+- `docs/v0.27.0/contract.closure-tools.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step6.debian.txt`
+- `src/setups/env/bin/closure_config.sh`
+- `src/setups/env/bin/closure_observe_live.sh`
+- `src/setups/env/bin/closure_publish.sh`
+- `src/setups/env/bin/closure_report.sh`
+- `src/setups/env/bin/closure_verify.sh`
+
+Round 6 changes four of them, and the driver is not among them: the report module
+loses the occupancy question and its fallback, the harness carries the cases that
+measure what replaces them, the capture is the new agent build, and the plan and
+validation records follow. The driver, the contract, the observer, the delivery
+script, publication and the configuration module are all byte-identical to what
+round 5 published.
+
+The versioned review transcript,
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md`, is modified in
+the working tree and is NOT staged. It belongs to the protocol.
+
+##### Commit groups for step 6 toolchain-runtime-closure (round 6)
+
+Eight groups, with the same membership, order and subjects round 2 assessed as
+coherent. Only the bodies of the groups whose content changed were rewritten.
+
+1. `docs(toolchain-runtime-closure): give the evidence record to the report module`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`.
+2. `chore(closure): widen the host-tool contract to the verification path`
+   over `docs/v0.27.0/contract.closure-tools.txt`.
+3. `feat(closure): add the live observer`
+   over `src/setups/env/bin/closure_observe_live.sh`.
+4. `feat(closure): add the verification driver and bind publication to its evidence`
+   over `src/setups/env/bin/closure_config.sh`,
+   `src/setups/env/bin/closure_report.sh`,
+   `src/setups/env/bin/closure_verify.sh` and
+   `src/setups/env/bin/closure_publish.sh`.
+5. `feat(closure): add the pipeline delivery of the authoritative tools`
+   over `ci/deliver-closure-tools.sh`.
+6. `test(closure): add the step 6 suite and measure the fixture name window`
+   over `docs/v0.27.0/verify.closure-check.sh`.
+7. `test(closure): retain the step 6 Debian capture`
+   over `docs/v0.27.0/verify.closure.step6.debian.txt`.
+8. `docs(toolchain-runtime-closure): record step 6 validation`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`.
+
+##### What changed in the plan since round 5 for step 6 toolchain-runtime-closure (round 6)
+
+No membership, order or subject change. Three bodies were rewritten for what the
+round actually did:
+
+- group 4 gains every document written under the conflict name it might need, the
+  placeholder dropped once the link has made the canonical name a second name for
+  the same bytes, and the refusal that writes nothing differing when that name
+  cannot be created;
+- group 6 gains the two-emitter interleaving and the exactly-one-file assertion,
+  and loses the cases that measured the occupancy branch;
+- group 7 names the round 6 build, and group 8 records the Yes verdict with a
+  repair assessment that follows retention across five rounds.
+
+Group 1 is untouched: round 6 makes no topology decision, so the plan's two
+amendments stand as round 4 published them. Every staged path appears in exactly
+one group, and no group crosses a boundary the plan draws.
+
+### Writer response for step 6 toolchain-runtime-closure (round 6)
+
+Writer response:
+
+#### Writer response to round 5 for step 6 toolchain-runtime-closure (round 6)
+
+##### The finding is accepted and the branch it names is gone for step 6 toolchain-runtime-closure (round 6)
+
+Round 5 returned one finding, R5-F1, and made no repair to production code or to
+the harness. It is accepted exactly as written: the race fallback deleted a
+complete differing document before a fallible reservation, so a concurrent first
+writer plus a failed allocation lost the disagreement and both consumers accepted
+the winning PASS.
+
+The metadata repairs round 5 made are retained rather than undone.
+
+##### The instruction, taken at its word for step 6 toolchain-runtime-closure (round 6)
+
+The finding says: "Establish archive-key association independently of the initial
+occupancy check." Round 6 does that by removing the occupancy check.
+
+Round 5 asked whether the canonical name was taken and reserved a conflict name
+when it was. That question is what created the fallback, and the fallback is what
+lost the document. ASKING IS ITSELF THE WINDOW: between the answer and the link,
+another emitter can take the name, and any branch written for that case has to
+deal with a document that already exists.
+
+So the question is not asked. Every evidence document is written under the
+conflict name it might need, unconditionally. The no-overwrite link then makes
+the canonical name a second name for the same bytes, and the placeholder is
+dropped, so an ordinary write ends with exactly one file. A differing result is
+at its final name before any other actor exists, whether the canonical result was
+there when the run started or a concurrent writer won it in between. There is no
+fallback branch, and nothing is deleted except a document that agrees with the
+canonical result or has just become it.
+
+##### What this costs, stated rather than buried for step 6 toolchain-runtime-closure (round 6)
+
+A conflict-named file exists for the length of one link on the ordinary path. A
+crash inside that window leaves a conflict name a human must clear.
+
+That is the direction this contract chooses everywhere else, and it is worth
+being explicit about the trade: a crash that leaves a STOP is recoverable by the
+recovery rule that already exists, and a crash that leaves a missed stop
+publishes an archive whose verification disagreed. Round 5's shape had the
+opposite failure mode in its fallback, which is what the finding is about.
+
+The canonical rule is untouched. The canonical name is still only ever occupied
+by a complete result, and a crashed or partial write still leaves nothing at it.
+
+##### The cases for step 6 toolchain-runtime-closure (round 6)
+
+Six added, taking step 6 from 214 portable cases to 220.
+
+The interleaving the finding reproduced is now driven through two real emitters:
+the winner takes the canonical name, the loser refuses, the loser's differing
+document is digested against the expected bytes rather than counted, and
+publication and the agreeing rerun both refuse. An ordinary write is asserted to
+leave no conflict name AND exactly one file, which is the property that pays for
+removing the question.
+
+The initial-allocation refusal round 5 accepted keeps its case unchanged.
+
+##### What did not change for step 6 toolchain-runtime-closure (round 6)
+
+No topology decision, no production interface, no other step. `install_pkg.sh` is
+still byte-identical to HEAD, the store stays where round 4's amendment put it,
+the ten-script topology holds, and the driver, publication, the observer, the
+delivery script and the configuration module are byte-identical to what round 5
+published. `closure_report.sh` is nineteen lines shorter than it was: the
+occupancy branch, its fallback and their comments are gone.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 6)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-6 -->
+
+## Round 6 by reviewer - Step 6
+
+- Recorded: 2026-09-10T12:45:37+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Baseline index tree: f0f761b1ad859f7e89d0ea0f917c5e001f7bfc4f
+
+Assessed index tree: da15a557f4110403f6ecc0ee552ebccc2bc8fcb8
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+Round 6 closes R5-F1 in production: the initial temporary file is associated with the archive key regardless of canonical occupancy. The independent two-emitter schedule preserves the exact differing bytes and makes publication and an agreeing rerun refuse, including when allocations attempted after the completed write fail. Refusal before an initial allocation succeeds remains accepted. One requested regression is still missing: the added harness calls run sequentially, and the entire current 220-case suite also passes with the defective round 5 store. No further production repair is requested. Earlier production and host-evidence findings remain closed.
+
+Validation plan effects:
+
+Updated only Step 6 in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: exact No sentence, two Missing work bullets immediately after What was implemented, production closure, current independent validation and the missing regression. Corrected the historical round 5 capture reference and misleading interleaving claims. Every other step remains byte-identical. Umbrella digest is unchanged. Only the attributable validation patch was staged. Ignored a.commit descriptions were aligned without changing groups, members, ordering or subjects.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Independently ran the entire 15-command union before metadata edits. Lint: exit 0, 53 scripts; harness ShellCheck: exit 0. Isolated RHEL 9.8 Step 6: 220 cases, zero failures, exit 5 solely for the Debian-only host gate. Closure Steps 0/1/2/3/4/5: 63/73/91/132/152/223 cases, zero failures, exit 0. Installer Steps 2/3: 49/63 cases, zero failures, exit 0. Relocation Step 3: 104 cases, zero failures, exit 0. Archive sha256sum search: exit 0, line 147; installer purity search: expected exit 1, no matches; installer diff against HEAD: exit 0. Supplemental staged whitespace: exit 0 before and after metadata. Retained Debian build 150: Step 6 exit 0, 221 cases, zero failures; all 18 assembled input digests independently match. Logs: .reviews/a.codex-s6r6.logs; digest evidence: .reviews/a.codex-s6r6.debian-digests.json. Prior retention, reservation, permission-transition, marker-removal and contained-alias controls pass, including accepted initial-allocation refusal. The independent interleaving has a successful control on both stores; its post-write allocation failure reproduces loss and accepting consumers on round 5, but preserves bytes and refusing consumers on round 6. In contrast, the complete current harness passes 220 cases with the defective round 5 store (.reviews/a.codex-s6r6.logs/closure6-r5-store.log). No numerical coverage gate applies; the missing regression is a concrete acceptance-coverage gap. No production or test bytes changed during review.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+bash src/utils/lint_shell.sh | sources: project, plan
+shellcheck docs/v0.27.0/verify.closure-check.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 6 | sources: plan
+rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh | sources: plan
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh | sources: plan
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 5 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 4 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 1 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 0 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 | sources: request
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+No command added or removed. The current resolver adds the plan source to bash src/utils/lint_shell.sh, which the request marked project-only. The union has 15 commands; all ran. Full request/current commands and sources: .reviews/a.codex-s6r6.resolver.json.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Baseline index f0f761b1ad859f7e89d0ea0f917c5e001f7bfc4f matches the request. Assessed index da15a557f4110403f6ecc0ee552ebccc2bc8fcb8. Before metadata edits the ordered validation-state comparison is acceptable=true, with no tracked, untracked or ignored changes. Final comparison identifies only the authored Step 6 validation file and `<index>`, plus ignored a.commit. These are explicit metadata edits, not test side effects. attribute-reviewer-patch returned attributable=true; only its exact patch was applied to the index. Baseline blobs for both metadata paths are retained. Umbrella SHA-256 is unchanged: 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. All evidence operations used the shared launcher.
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Repairs made:
+
+- Polishing-only Step 6 validation metadata: production finding closed, incomplete regression verdict, missing work, current evidence and corrected historical capture. Only the proven attributable patch was staged.
+- Polishing-only ignored a.commit descriptions in Groups 6/7/8: sequential-case limitation, capture round and independent verdict. Groups, order, subjects and staged membership remain unchanged; a.commit remains ignored and unstaged.
+- No production or test repair. Scratch scripts, logs and evidence are ignored review artifacts.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_report.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Independent commit-plan-check.bat --format json returned exit 0, state=valid, ready=true and diagnostics=[] before assessment and after metadata edits. Eight ordered groups: plan topology; host-tool contract; observer; config/report/verifier/publication together; delivery; harness; Debian capture; validation. Full subjects and path sets are retained in .reviews/a.codex-s6r6.round-evidence.json. All eleven staged paths are covered exactly once. The interdependent reader and consumers remain together, the plan precedes implementation, and conventional subjects remain accurate. Ignored descriptions now identify the missing regression. Mechanical readiness does not establish implementation completeness or authorize a commit.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Unresolved findings:
+
+- [R6-F1, P2, missing regression] Exercise the concurrent-first-writer branch instead of two completed sequential writes. docs/v0.27.0/verify.closure-check.sh:6488-6490 finishes the PASS emitter before starting the differing emitter. Consequently the second call observes an existing canonical name and never exercises the round 5 race between the initial absence check and promotion. All six new assertions and the complete 220-case suite pass with the defective round 5 report module. The independent deterministic schedule in .reviews/a.codex-s6r6.interleaving.sh starts the differing emitter with no canonical name, runs a second real PASS emitter after the first has filled its temporary file but before its native link, and fails only conflict allocations attempted after that completed write. Round 5 then retains zero exact differing copies and both consumers return 0; round 6 retains one and both return 1. The schedule without that injection succeeds on both stores. Logs: .reviews/a.codex-s6r6.logs/interleaving-r5.log, interleaving-r6.log and closure6-r5-store.log. Add this distinguishing regression; the production repair is closed.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Complete the harness regression using a deterministic two-emitter schedule. The differing emitter must start before the canonical name exists; a second real emitter must write PASS after the first has filled its temporary document but before its link. Keep initial allocation successful and inject failure only for conflict-name allocations attempted after the first write. Assert exact differing-byte retention, refusal at publication step 2, and refusal of an agreeing rerun after removing the injection. Include the same schedule without the allocation failure as a control. The scratch reproduction is available at .reviews/a.codex-s6r6.interleaving.sh. Demonstrate that the relevant assertions fail against the round 5 report module and pass against round 6; the current sequential case cannot supply that evidence. Preserve existing passing cases. No further production change is requested.
+
+Rerun the mandatory union and refresh the Debian capture for changed test bytes. Align Step 6 validation and a.commit with the actual regression, and correct the plan's remaining timestamp-plus-result-digest wording to the implemented random suffix (plan line 2043). The requestor owns consuming this answer and deciding the next exchange action.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+changes-requested. Readiness floor: exact identity PASS; implementation completeness FAIL because the required distinguishing regression is missing; mandatory command execution and matching host evidence PASS; staged attribution PASS; absence of unresolved findings FAIL; accurate mechanical a.commit grouping PASS. R5-F1 is closed in production. Only R6-F1 remains. No substantive reviewer repair occurred. This advisory recommendation authorizes no commit.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 6)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-6 -->
+
+## Round 7 by requestor - Step 6
+
+- Recorded: 2026-09-10T13:12:03+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 7)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 7
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 7)
+
+request_index_tree: c6716678c9eec8726bd230396af358cc2378f543
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): give the evidence record to the report module
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: chore(closure): widen the host-tool contract to the verification path
+group 2 path: docs/v0.27.0/contract.closure-tools.txt
+group 3: feat(closure): add the live observer
+group 3 path: src/setups/env/bin/closure_observe_live.sh
+group 4: feat(closure): add the verification driver and bind publication to its evidence
+group 4 path: src/setups/env/bin/closure_config.sh
+group 4 path: src/setups/env/bin/closure_report.sh
+group 4 path: src/setups/env/bin/closure_verify.sh
+group 4 path: src/setups/env/bin/closure_publish.sh
+group 5: feat(closure): add the pipeline delivery of the authoritative tools
+group 5 path: ci/deliver-closure-tools.sh
+group 6: test(closure): add the step 6 suite and measure the fixture name window
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 6 Debian capture
+group 7 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 8: docs(toolchain-runtime-closure): record step 6 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_report.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 7)
+
+#### Writer assessment for step 6 toolchain-runtime-closure (round 7)
+
+##### Is the exact step fully implemented for step 6 toolchain-runtime-closure (round 7)
+
+Yes. Step 6 of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` is fully
+implemented in the staged work.
+
+Every behavior the step names exists and is exercised: the verification driver
+that requires the pipeline delivery before it opens the archive, the archive-side
+observation derived from the archive index, the install through an unchanged
+`install_pkg.sh`, the installed-side observation, the comparison and its DIVERGENT
+refusal, the payload comparison that authorises nothing, the live observer with
+its three outcomes, and one evidence artifact keyed by the SHA-256 of the archive
+file, written into a validated results root by a promotion that never overwrites.
+
+Round 6 closed the production retention repair and returned one finding about the
+test: its two emitters ran sequentially, so the second observed a canonical name
+that was already there and never entered the race, and the whole suite passed
+against the defective round 5 store as well. Round 7 adds the schedule that
+distinguishes them, and measures the discrimination. No production code changes,
+and no reviewer repair was made to production code or to the harness in any
+round.
+
+##### Test evidence for step 6 toolchain-runtime-closure (round 7)
+
+The union of mandatory validation commands was rerun on the repaired sources.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | exit 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | exit 0 on the Debian 12 agent; 223 cases, 0 failures, build 151 |
+| the same suite on RHEL 9.8 | exit 5 on the host gate; 222 cases, 0 failures |
+| `--step 5` on RHEL 9.8 | exit 0; 223 cases, 0 failures |
+| `--step 4` on RHEL 9.8 | exit 0; 152 cases, 0 failures |
+| `--step 3` on RHEL 9.8 | exit 0; 132 cases, 0 failures |
+| `--step 2` on RHEL 9.8 | exit 0; 91 cases, 0 failures |
+| `--step 1` on RHEL 9.8 | exit 0; 73 cases, 0 failures |
+| `--step 0` on RHEL 9.8 | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | exit 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | exit 0; 104 cases, 0 failures |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | the identity is over the archive FILE, at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | exit 1 with no output, the expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | exit 0 |
+
+The Debian row is a fresh run over the round 7 sources. Build 151 assembled
+eighteen files and printed the SHA-256 of every one, and all eighteen match the
+canonical cplx bytes staged here, the harness included. Every step from 0 to 6
+answers `OBJECTIVE MET` on that host; step 6 reports 223 cases against the 222
+measured here, the extra one being the host gate itself; steps 3 and 4 report 132
+and 152 cases with zero failures, the same counts the build host reports. The
+aggregate still exits 5, because step 7 has no suite yet and says so.
+
+STEP 6 GOES FROM 220 PORTABLE CASES TO 222. The seven replace round 6's two
+sequential calls with the schedule that enters the race: a `cat` shim lets the
+first emitter fill its temporary file, runs a second REAL emitter that takes the
+canonical name, and returns, so the first arrives at its link with the name gone.
+The injection then fails conflict allocations attempted after that fill.
+
+THE DISCRIMINATION IS MEASURED. The round 5 store was recovered from the pipeline
+repository at its round 5 commit and dropped into the same tree on the build
+host. Against the staged store step 6 reports 222 cases and zero failures and all
+four race assertions pass; against the round 5 store three of them fail, with
+`exact_differing_copies=0`, `publication_step2_rc=0` and `agreeing_rerun_rc=0`,
+which are the review's own three values. The control runs the same schedule
+without the injection and passes on both.
+
+##### Static-check evidence for step 6 toolchain-runtime-closure (round 7)
+
+`bash src/utils/lint_shell.sh` covers every tracked shell script and is clean.
+`shellcheck` over the harness is clean. No `shellcheck` directive was added this
+round, in a shipped file or in the harness. The trailing blank line round 2's
+whitespace check named is still gone, and `git diff --cached --check` over the
+staged tree reports nothing.
+
+##### Coverage evidence for step 6 toolchain-runtime-closure (round 7)
+
+No coverage gate applies to a Bash plan. Harness cases are the coverage evidence,
+and every path any round reproduced now has one that fails without the repair.
+
+The marker case runs the real driver and the real installer against real
+filesystem permissions, and the alias cases run the real skeleton derivation over
+a real archive, both with no stand-in. The retention cases need a failure the
+filesystem will not produce on demand, so they inject it, and each injection is
+SCOPED TO ONE NAMED OPERATION: a shim that fails only for a `.conflict.`
+argument, leaving every other link and copy in the run working, the promotion of
+the canonical result included.
+
+Round 6's cases assert absences as well as presences: no conflict name AND
+exactly one file after an ordinary write, no anonymous document beside a retained
+conflict, nothing differing written at all when the name cannot be created, and
+the canonical result untouched throughout. A retained conflict's bytes are
+DIGESTED against the differing document rather than counted, so an empty or
+truncated survivor fails the case.
+
+THE RACE IS NOW A SCHEDULE RATHER THAN TWO CALLS. Round 6 found the earlier
+version running its emitters sequentially, so the second saw a canonical name
+that was already there and entered the ordinary conflict instead. The `cat` shim
+is the synchronisation point because it is what fills the temporary file, and the
+second emitter it launches is the real production one. A case that passes on the
+code it claims to regress is not a regression, which is why the discrimination is
+measured above rather than asserted.
+
+##### Architecture evidence for step 6 toolchain-runtime-closure (round 7)
+
+The topology holds at ten production scripts and five checker modules,
+`closure_scope.sh` still exists in no shape, and round 7 makes NO topology
+decision and no production change at all: every shipped script, the contract, the
+delivery script and the configuration module are byte-identical to what round 6
+published, and the store stays where round 4's amendment put it.
+
+Line counts: `closure_verify.sh` 546, `closure_observe_live.sh` 195,
+`closure_report.sh` 549, `closure_config.sh` 636, `closure_publish.sh` 650,
+`ci/deliver-closure-tools.sh` 128, all unchanged from round 6. Every file is
+under the ceiling.
+
+##### Performance evidence for step 6 toolchain-runtime-closure (round 7)
+
+No production code changed, so the round 6 measurements stand: one `mktemp` under
+one template, one digest comparison the idempotence test already needed, and the
+same derived-name lookup. The added cost is in the harness, which is not
+deployed: two extra emitter runs per scenario.
+
+##### Feature-integrity evidence for step 6 toolchain-runtime-closure (round 7)
+
+`install_pkg.sh` is byte-identical to HEAD: the diff against HEAD returns 0 and
+the purity grep returns 1 with no output. The driver adds no argument to the
+installer call and steers no selection; it refuses before, checks its own
+precondition, and verifies after.
+
+Steps 0 to 5 pass on RHEL 9.8 with the counts above.
+Steps 0 to 5 pass on RHEL 9.8 with the counts above, and every step from 0 to 6
+passes on the Debian 12 agent at build 151. Q03 asks for one mechanism on both
+hosts and the regression evidence is measured on both.
+
+CONFLICT RETENTION TOOK SIX ROUNDS TO SETTLE, and that is worth stating rather
+than smoothing over. Each shape was a repair of the last, and each review found
+the failure path around a normal path it had just accepted. The underlying defect
+never moved: the operation that made a disagreement discoverable was the LAST
+one, so a failure there always left the reader with nothing under the archive
+key. Four rounds argued about where the orphaned bytes should live. Round 5
+inverted the order but kept an occupancy test, round 6 removed the test because
+asking whether the canonical name is taken is itself the window a concurrent
+writer slips through, and round 7 proved the difference by running the schedule
+against both stores.
+
+THE COST IS STATED RATHER THAN BURIED. A conflict-named file exists for the
+length of one link on the ordinary path, and a crash inside that window leaves a
+name a human must clear. That is the direction this contract chooses everywhere
+else: a crash leaving a STOP is recoverable, and a crash leaving a missed stop
+publishes an archive whose verification disagreed. The canonical rule is
+untouched, and the initial-allocation refusal round 5 accepted is now the only
+allocation path there is.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 7)
+
+#### What changed for step 6 toolchain-runtime-closure (round 7)
+
+##### One file: the harness for step 6 toolchain-runtime-closure (round 7)
+
+Round 6 closed the production repair and asked for the regression that
+distinguishes it. No production code changes in round 7.
+`docs/v0.27.0/verify.closure-check.sh` is the only staged file whose bytes move,
+beside the plan and the records that describe it.
+
+##### The interleaving helper for step 6 toolchain-runtime-closure (round 7)
+
+`verify_interleave` runs the schedule round 6 named, in a child shell that
+sources the driver and publication and drives the production emitter twice.
+
+`cat` is the synchronisation point because it is what fills the temporary file. A
+shell-function shim lets the real copy finish, then, if the canonical name is
+still free, runs a second REAL emitter that creates it, and returns. The first
+emitter therefore reaches its link with the name taken. In the injected mode a
+`mktemp` shim fails conflict-prefixed templates only AFTER that fill, which is
+the allocation a late-reserving store must attempt and an early-reserving one
+never reaches.
+
+The helper prints four values: the differing emitter's status, the number of
+retained files whose bytes ARE the differing document, publication's step 2
+status and the agreeing rerun's status.
+
+##### The cases for step 6 toolchain-runtime-closure (round 7)
+
+Seven, replacing the two sequential calls round 6 found:
+
+- the injected schedule, asserting `differing_emit_rc=1`,
+  `exact_differing_copies=1`, `publication_step2_rc=1` and
+  `agreeing_rerun_rc=1`;
+- the same schedule without the injection as a control, so the case is about the
+  allocation rather than about the interleaving.
+
+Step 6 goes from 220 portable cases to 222.
+
+##### The discrimination, measured for step 6 toolchain-runtime-closure (round 7)
+
+The round 5 store was recovered from the pipeline repository at its round 5
+commit, dropped into the same tree on the build host, and the suite run against
+both stores:
+
+- staged store: step 6 at 222 cases, 0 failures, all four race assertions pass;
+- round 5 store: 3 failures, exactly `exact_differing_copies=0`,
+  `publication_step2_rc=0` and `agreeing_rerun_rc=0`.
+
+Those are the three values the review reported from its own schedule. The control
+passes on both stores.
+
+##### Line counts for step 6 toolchain-runtime-closure (round 7)
+
+Unchanged from round 6: `closure_report.sh` 549, `closure_verify.sh` 546,
+`closure_publish.sh` 650, `closure_config.sh` 636, `closure_observe_live.sh` 195,
+`ci/deliver-closure-tools.sh` 128.
+
+### Change summary for step 6 toolchain-runtime-closure (round 7)
+
+#### Staged paths and commit groups for step 6 toolchain-runtime-closure (round 7)
+
+##### Staged paths for step 6 toolchain-runtime-closure (round 7)
+
+Eleven paths, unchanged in membership from round 2:
+
+- `ci/deliver-closure-tools.sh`
+- `docs/v0.27.0/contract.closure-tools.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step6.debian.txt`
+- `src/setups/env/bin/closure_config.sh`
+- `src/setups/env/bin/closure_observe_live.sh`
+- `src/setups/env/bin/closure_publish.sh`
+- `src/setups/env/bin/closure_report.sh`
+- `src/setups/env/bin/closure_verify.sh`
+
+Round 7 changes four of them and no production script at all: the harness carries
+the interleaving schedule, the capture is the new agent build, and the plan and
+validation records follow. Every shipped script, the contract, the delivery
+script and the configuration module are byte-identical to what round 6 published.
+
+The versioned review transcript,
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md`, is modified in
+the working tree and is NOT staged. It belongs to the protocol.
+
+##### Commit groups for step 6 toolchain-runtime-closure (round 7)
+
+Eight groups, with the same membership, order and subjects round 2 assessed as
+coherent. Only the bodies of the groups whose content changed were rewritten.
+
+1. `docs(toolchain-runtime-closure): give the evidence record to the report module`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`.
+2. `chore(closure): widen the host-tool contract to the verification path`
+   over `docs/v0.27.0/contract.closure-tools.txt`.
+3. `feat(closure): add the live observer`
+   over `src/setups/env/bin/closure_observe_live.sh`.
+4. `feat(closure): add the verification driver and bind publication to its evidence`
+   over `src/setups/env/bin/closure_config.sh`,
+   `src/setups/env/bin/closure_report.sh`,
+   `src/setups/env/bin/closure_verify.sh` and
+   `src/setups/env/bin/closure_publish.sh`.
+5. `feat(closure): add the pipeline delivery of the authoritative tools`
+   over `ci/deliver-closure-tools.sh`.
+6. `test(closure): add the step 6 suite and measure the fixture name window`
+   over `docs/v0.27.0/verify.closure-check.sh`.
+7. `test(closure): retain the step 6 Debian capture`
+   over `docs/v0.27.0/verify.closure.step6.debian.txt`.
+8. `docs(toolchain-runtime-closure): record step 6 validation`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`.
+
+##### What changed in the plan since round 6 for step 6 toolchain-runtime-closure (round 7)
+
+No membership, order or subject change. Three bodies were rewritten for what the
+round actually did:
+
+- group 6 gains the interleaving schedule and the allocation failure that
+  distinguishes the two stores, and loses the two sequential calls that entered
+  the ordinary conflict instead of the race;
+- group 7 names the round 7 build, and group 8 records the Yes verdict with the
+  measured discrimination against the round 5 store.
+
+Group 4 is untouched, and so is every other production group: round 7 changes no
+shipped script. Group 1 is untouched too, since round 7 makes no topology
+decision. Every staged path appears in exactly one group, and no group crosses a
+boundary the plan draws.
+
+### Writer response for step 6 toolchain-runtime-closure (round 7)
+
+Writer response:
+
+#### Writer response to round 6 for step 6 toolchain-runtime-closure (round 7)
+
+##### The finding is accepted, and it was the right one to make for step 6 toolchain-runtime-closure (round 7)
+
+Round 6 closed the production repair and returned one finding about the test:
+the two emitters ran SEQUENTIALLY, so the second observed a canonical name that
+was already there. That is the ordinary conflict, not the race, and the whole
+220-case suite passed against the defective round 5 store as well.
+
+A case that passes on the code it claims to regress is not a regression, and no
+amount of assertions makes it one. The finding is accepted without qualification.
+
+##### The schedule, taken from the finding for step 6 toolchain-runtime-closure (round 7)
+
+Round 6 named the synchronisation point and round 7 uses it. `cat` is what fills
+the temporary file, so a shim there is exactly "after the first has filled its
+temporary file but before its native link": the shim lets the real copy finish,
+runs a second REAL emitter that creates the canonical result, and returns. The
+first emitter then arrives at its link with the name taken, which is the ordering
+an occupancy check cannot see coming and the one two sequential calls can never
+produce.
+
+The injection fails conflict allocations attempted AFTER that fill. That is the
+operation a store which reserves late must perform and a store which reserves
+first never reaches, so it is the difference between the two stores rather than a
+general fault.
+
+##### The discrimination is measured rather than argued for step 6 toolchain-runtime-closure (round 7)
+
+The round 5 store was recovered from the pipeline repository at its round 5
+commit and dropped into the same tree on the build host, and the suite was run
+against both:
+
+| store | step 6 | the four race assertions |
+| --- | --- | --- |
+| staged (round 7) | 222 cases, 0 failures | all pass |
+| round 5 | 3 failures | `exact_differing_copies=0`, `publication_step2_rc=0`, `agreeing_rerun_rc=0` |
+
+Those are the review's own three values. The control runs the same schedule
+without the injection and both stores retain the document, which keeps the case
+about the allocation rather than about the interleaving.
+
+This is the evidence the finding asked for, and it is the evidence I should have
+produced when I first claimed the case covered the race. Asserting that a case is
+a regression is cheap; running it against the defect is what makes it one.
+
+##### What did not change for step 6 toolchain-runtime-closure (round 7)
+
+No production code. `closure_report.sh`, `closure_verify.sh`, `closure_publish.sh`,
+`closure_config.sh`, `closure_observe_live.sh` and `ci/deliver-closure-tools.sh`
+are byte-identical to what round 6 published, `install_pkg.sh` is still
+byte-identical to HEAD, the topology is untouched, and the plan changes only
+where it records what the case now does. The one file round 7 changes is the
+harness.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 7)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-7 -->
+
+## Round 7 by reviewer - Step 6
+
+- Recorded: 2026-09-10T13:21:22+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Baseline index tree: c6716678c9eec8726bd230396af358cc2378f543
+
+Assessed index tree: af374b1041ec9f265037b338212d0497034137d6
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Result:
+
+Yes. Step 6 has been fully implemented.
+
+Independent validation closes R6-F1: the committed interleaving passes against the current store and fails exactly the three required retention and consumer assertions against the defective round 5 store. Its uninjected control passes on both. R5-F1 remains closed in production, as do earlier findings. All required checks ran and Debian build 151 matches the reviewed input bytes. No implementation or regression gap remains. A reviewer correction to stale plan wording requires another round under the protocol's substantive-repair rule.
+
+Validation plan effects:
+
+Updated only Step 6 validation rows: exact Yes verdict, independent round 7 evidence, closure of R6-F1, corrected current counts, and restored the historical round 6 capture to build 150/221 cases. The completed Missing work section remains absent. Other steps and the document-wide incomplete status remain unchanged; Step 7 is still pending. Umbrella digest is unchanged. Separately, corrected the Step 6 implementation plan's conflict-name description from result digest to exclusive random suffix. Both tracked patches were proven attributable and staged.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Independently ran all 15 mandatory commands before edits. Lint: exit 0, 53 scripts; harness ShellCheck: exit 0. Isolated RHEL 9.8 Step 6: 222 cases, zero failures, exit 5 solely for the Debian host gate. Closure Steps 0/1/2/3/4/5: 63/73/91/132/152/223 cases, zero failures, exit 0. Installer Steps 2/3: 49/63 cases, zero failures, exit 0. Relocation Step 3: 104 cases, zero failures, exit 0. Archive-file sha256sum search: exit 0 at line 147; installer purity search: expected exit 1 with no matches; installer diff against HEAD: exit 0. Supplemental staged whitespace passes before and after edits. Retained Debian build 151 reports Step 6 exit 0, 223 cases and zero failures; all 18 input digests independently match. Local lint and ShellCheck initially used a missing executable path; after resolving installed commands both ran successfully. This was a path error, not missing validation.
+
+The same current harness run against the isolated round 5 shipped set reports 222 cases, exactly three failures and exit 1: retained differing copies=0, publication step 2=0, agreeing rerun=0. The current store passes all four injected assertions; the uninjected control passes on both stores. Directory comparison confirms closure_report.sh is the only shipped difference, and both report digests match their reviewed versions. Earlier retention, real permission-transition, marker-removal and contained-alias controls still pass; refusal before initial allocation succeeds remains accepted. Logs: .reviews/a.codex-s6r7.logs; digest checks: .reviews/a.codex-s6r7.debian-digests.json; mutation provenance: .reviews/a.codex-s6r7.probes-result.json. No numerical class-coverage gate applies to Bash. No production or test bytes changed during review, so the results apply to the final assessed code.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+bash src/utils/lint_shell.sh | sources: project, plan
+shellcheck docs/v0.27.0/verify.closure-check.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 6 | sources: plan
+rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh | sources: plan
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh | sources: plan
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 5 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 4 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 1 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 0 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 | sources: request
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+No command added or removed. The current resolver adds the plan source to bash src/utils/lint_shell.sh, which the request marked project-only. The 15-command union ran in full. Full request/current sets and sources: .reviews/a.codex-s6r7.resolver.json.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Baseline index c6716678c9eec8726bd230396af358cc2378f543 matches the request. Assessed index af374b1041ec9f265037b338212d0497034137d6. Before edits the ordered validation-state comparison is acceptable=true with no tracked, untracked or ignored changes. Final comparison identifies only the explicitly authored Step 6 plan and validation files, `<index>` and ignored a.commit. Both tracked patches received attributable=true; only their exact patches were applied to the index. Baseline blobs for both tracked files and a.commit are retained. Umbrella SHA-256 remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. All evidence operations used the shared launcher. At receipt only the harness, capture and validation differed from round 6's assessed index; the implementation plan and production scripts had not changed.
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Repairs made:
+
+- Substantive under the review protocol: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md, Step 6 conflict-name description changed from timestamp plus result digest to timestamp plus exclusive random suffix. This documents the existing implementation and changes no design, code or test. The protocol explicitly classifies tracked plan edits outside review metadata as substantive, so requestor assessment and another review are required.
+- Polishing-only: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md, exact Step 6 Yes assessment, independent round 7 evidence, restored historical capture and current counts. Other steps are unchanged.
+- Polishing-only: ignored a.commit Group 1 describes the suffix correction and Group 7 identifies round 7's capture. No group, member, subject or ordering change; a.commit remains unstaged.
+- Ignored caller scripts and logs retain validation evidence. No production or test repair occurred.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_report.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Independent commit-plan-check.bat --format json returned exit 0, state=valid, ready=true and diagnostics=[] before assessment and after repairs. All eleven staged paths remain covered once by the same eight ordered groups: plan; contract; observer; config/report/verifier/publication; delivery; harness; Debian capture; validation. Full subjects and path sets are retained in .reviews/a.codex-s6r7.round-evidence.json. Dependency order and conventional subjects remain accurate. Group 1 and Group 7 descriptions were corrected. Mechanical readiness passes but grants no commit authority.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Unresolved findings:
+
+- None. R6-F1 is independently closed by the distinguishing regression; R5-F1 and earlier production findings remain closed. The stale suffix description was repaired in this round.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Assess the staged reviewer patch in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md: Step 6 now describes the existing timestamp plus exclusive random suffix instead of a result digest. Assess the accompanying validation rows and ignored a.commit descriptions, preserve historical validation counts, and publish the follow-up review required for a substantive reviewer repair. No production or harness rework is requested. The captured Debian build 151 already matches all 18 current production/test inputs; the reviewer changed no captured input. The requestor owns consuming this answer and proceeding through its workflow.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+changes-requested solely because this round includes a substantive reviewer repair under the protocol: a tracked implementation-plan wording correction outside the defined review-metadata paths. The six readiness-floor results pass: exact identity; implementation completeness; mandatory validation and coverage; staged attribution; absence of unresolved findings; accurate a.commit grouping. Step 6 is fully implemented and all findings are closed. The rule in instructions/code-reviewer.md, Assessment and repair ownership, says any other reviewer-authored tracked change is substantive and forces changes-requested in the same round. The requestor must assess this concrete repair and publish another round. This recommendation authorizes no commit.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 7)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-7 -->
+
+## Round 8 by requestor - Step 6
+
+- Recorded: 2026-09-10T13:26:37+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 toolchain-runtime-closure (round 8)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 6
+Review round: 8
+
+### Code review evidence for step 6 toolchain-runtime-closure (round 8)
+
+request_index_tree: af374b1041ec9f265037b338212d0497034137d6
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 6 (sources: plan)
+- rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: plan)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 5 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 4 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 1 (sources: request)
+- bash docs/v0.27.0/verify.closure-check.sh --step 0 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 2 (sources: request)
+- bash docs/v0.27.0/verify.install-pkg.sh --step 3 (sources: request)
+- bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(toolchain-runtime-closure): give the evidence record to the report module
+group 1 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 2: chore(closure): widen the host-tool contract to the verification path
+group 2 path: docs/v0.27.0/contract.closure-tools.txt
+group 3: feat(closure): add the live observer
+group 3 path: src/setups/env/bin/closure_observe_live.sh
+group 4: feat(closure): add the verification driver and bind publication to its evidence
+group 4 path: src/setups/env/bin/closure_config.sh
+group 4 path: src/setups/env/bin/closure_report.sh
+group 4 path: src/setups/env/bin/closure_verify.sh
+group 4 path: src/setups/env/bin/closure_publish.sh
+group 5: feat(closure): add the pipeline delivery of the authoritative tools
+group 5 path: ci/deliver-closure-tools.sh
+group 6: test(closure): add the step 6 suite and measure the fixture name window
+group 6 path: docs/v0.27.0/verify.closure-check.sh
+group 7: test(closure): retain the step 6 Debian capture
+group 7 path: docs/v0.27.0/verify.closure.step6.debian.txt
+group 8: docs(toolchain-runtime-closure): record step 6 validation
+group 8 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/contract.closure-tools.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step6.debian.txt
+staged path: src/setups/env/bin/closure_config.sh
+staged path: src/setups/env/bin/closure_observe_live.sh
+staged path: src/setups/env/bin/closure_publish.sh
+staged path: src/setups/env/bin/closure_report.sh
+staged path: src/setups/env/bin/closure_verify.sh
+```
+
+### Requestor assessment for step 6 toolchain-runtime-closure (round 8)
+
+#### Writer assessment for step 6 toolchain-runtime-closure (round 8)
+
+##### Is the exact step fully implemented for step 6 toolchain-runtime-closure (round 8)
+
+Yes. Step 6 of `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` is fully
+implemented in the staged work.
+
+Every behavior the step names exists and is exercised: the verification driver
+that requires the pipeline delivery before it opens the archive, the archive-side
+observation derived from the archive index, the install through an unchanged
+`install_pkg.sh`, the installed-side observation, the comparison and its DIVERGENT
+refusal, the payload comparison that authorises nothing, the live observer with
+its three outcomes, and one evidence artifact keyed by the SHA-256 of the archive
+file, written into a validated results root by a promotion that never overwrites.
+
+Round 7 returned no finding: it reports the step fully implemented, closes R6-F1
+on the distinguishing regression and leaves R5-F1 and every earlier production
+finding closed. It made one substantive repair of its own, a stale sentence in
+the plan describing the conflict name, which the protocol requires a replacement
+round for. That repair is accepted and round 8 changes nothing else. No reviewer
+repair was made to production code or to the harness in any round.
+
+##### Test evidence for step 6 toolchain-runtime-closure (round 8)
+
+The union of mandatory validation commands was rerun on the repaired sources.
+
+| Command | Result |
+| --- | --- |
+| `bash src/utils/lint_shell.sh` | exit 0; 53 tracked scripts, clean |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | exit 0 |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 6` | exit 0 on the Debian 12 agent; 223 cases, 0 failures, build 151 |
+| the same suite on RHEL 9.8 | exit 5 on the host gate; 222 cases, 0 failures |
+| `--step 5` on RHEL 9.8 | exit 0; 223 cases, 0 failures |
+| `--step 4` on RHEL 9.8 | exit 0; 152 cases, 0 failures |
+| `--step 3` on RHEL 9.8 | exit 0; 132 cases, 0 failures |
+| `--step 2` on RHEL 9.8 | exit 0; 91 cases, 0 failures |
+| `--step 1` on RHEL 9.8 | exit 0; 73 cases, 0 failures |
+| `--step 0` on RHEL 9.8 | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 2` | exit 0; 49 cases, 0 failures |
+| `bash docs/v0.27.0/verify.install-pkg.sh --step 3` | exit 0; 63 cases, 0 failures |
+| `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` | exit 0; 104 cases, 0 failures |
+| `rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh` | the identity is over the archive FILE, at line 235 |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | exit 1 with no output, the expected purity result |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | exit 0 |
+
+The Debian row is build 151, and it remains a FRESH run over these sources rather
+than retained history: the repair touches the plan document, which does not
+travel to the agent, and the four verification-only copies that do are
+byte-identical to what that build ran. Build 151 assembled
+eighteen files and printed the SHA-256 of every one, and all eighteen match the
+canonical cplx bytes staged here, the harness included. Every step from 0 to 6
+answers `OBJECTIVE MET` on that host; step 6 reports 223 cases against the 222
+measured here, the extra one being the host gate itself; steps 3 and 4 report 132
+and 152 cases with zero failures, the same counts the build host reports. The
+aggregate still exits 5, because step 7 has no suite yet and says so.
+
+STEP 6 STAYS AT 222 PORTABLE CASES: round 8 adds no case and removes none. Round
+7's seven replaced round 6's two sequential calls with the schedule that enters
+the race, and they stand unchanged: a `cat` shim lets the
+first emitter fill its temporary file, runs a second REAL emitter that takes the
+canonical name, and returns, so the first arrives at its link with the name gone.
+The injection then fails conflict allocations attempted after that fill.
+
+THE DISCRIMINATION IS MEASURED. The round 5 store was recovered from the pipeline
+repository at its round 5 commit and dropped into the same tree on the build
+host. Against the staged store step 6 reports 222 cases and zero failures and all
+four race assertions pass; against the round 5 store three of them fail, with
+`exact_differing_copies=0`, `publication_step2_rc=0` and `agreeing_rerun_rc=0`,
+which are the review's own three values. The control runs the same schedule
+without the injection and passes on both.
+
+##### Static-check evidence for step 6 toolchain-runtime-closure (round 8)
+
+`bash src/utils/lint_shell.sh` covers every tracked shell script and is clean.
+`shellcheck` over the harness is clean. No `shellcheck` directive was added this
+round, in a shipped file or in the harness. The trailing blank line round 2's
+whitespace check named is still gone, and `git diff --cached --check` over the
+staged tree reports nothing.
+
+##### Coverage evidence for step 6 toolchain-runtime-closure (round 8)
+
+No coverage gate applies to a Bash plan. Harness cases are the coverage evidence,
+and every path any round reproduced now has one that fails without the repair.
+
+The marker case runs the real driver and the real installer against real
+filesystem permissions, and the alias cases run the real skeleton derivation over
+a real archive, both with no stand-in. The retention cases need a failure the
+filesystem will not produce on demand, so they inject it, and each injection is
+SCOPED TO ONE NAMED OPERATION: a shim that fails only for a `.conflict.`
+argument, leaving every other link and copy in the run working, the promotion of
+the canonical result included.
+
+Round 6's cases assert absences as well as presences: no conflict name AND
+exactly one file after an ordinary write, no anonymous document beside a retained
+conflict, nothing differing written at all when the name cannot be created, and
+the canonical result untouched throughout. A retained conflict's bytes are
+DIGESTED against the differing document rather than counted, so an empty or
+truncated survivor fails the case.
+
+THE RACE IS NOW A SCHEDULE RATHER THAN TWO CALLS. Round 6 found the earlier
+version running its emitters sequentially, so the second saw a canonical name
+that was already there and entered the ordinary conflict instead. The `cat` shim
+is the synchronisation point because it is what fills the temporary file, and the
+second emitter it launches is the real production one. A case that passes on the
+code it claims to regress is not a regression, which is why the discrimination is
+measured above rather than asserted.
+
+##### Architecture evidence for step 6 toolchain-runtime-closure (round 8)
+
+The topology holds at ten production scripts and five checker modules,
+`closure_scope.sh` still exists in no shape, and round 8 makes no topology
+decision and no production change at all: every shipped script, the harness, the
+contract, the delivery script and the configuration module are byte-identical to
+what round 7 published, and the store stays where round 4's amendment put it.
+
+Line counts: `closure_verify.sh` 546, `closure_observe_live.sh` 195,
+`closure_report.sh` 549, `closure_config.sh` 636, `closure_publish.sh` 650,
+`ci/deliver-closure-tools.sh` 128, all unchanged from round 6. Every file is
+under the ceiling.
+
+##### Performance evidence for step 6 toolchain-runtime-closure (round 8)
+
+No production code changed, so the earlier measurements stand: one `mktemp` under
+one template, one digest comparison the idempotence test already needed, and the
+same derived-name lookup. The added cost is in the harness, which is not
+deployed: two extra emitter runs per scenario.
+
+##### Feature-integrity evidence for step 6 toolchain-runtime-closure (round 8)
+
+`install_pkg.sh` is byte-identical to HEAD: the diff against HEAD returns 0 and
+the purity grep returns 1 with no output. The driver adds no argument to the
+installer call and steers no selection; it refuses before, checks its own
+precondition, and verifies after.
+
+Steps 0 to 5 pass on RHEL 9.8 with the counts above.
+Steps 0 to 5 pass on RHEL 9.8 with the counts above, and every step from 0 to 6
+passes on the Debian 12 agent at build 151. Q03 asks for one mechanism on both
+hosts and the regression evidence is measured on both.
+
+CONFLICT RETENTION TOOK SIX ROUNDS TO SETTLE, and that is worth stating rather
+than smoothing over. Each shape was a repair of the last, and each review found
+the failure path around a normal path it had just accepted. The underlying defect
+never moved: the operation that made a disagreement discoverable was the LAST
+one, so a failure there always left the reader with nothing under the archive
+key. Four rounds argued about where the orphaned bytes should live. Round 5
+inverted the order but kept an occupancy test, round 6 removed the test because
+asking whether the canonical name is taken is itself the window a concurrent
+writer slips through, and round 7 proved the difference by running the schedule
+against both stores.
+
+THE COST IS STATED RATHER THAN BURIED. A conflict-named file exists for the
+length of one link on the ordinary path, and a crash inside that window leaves a
+name a human must clear. That is the direction this contract chooses everywhere
+else: a crash leaving a STOP is recoverable, and a crash leaving a missed stop
+publishes an archive whose verification disagreed. The canonical rule is
+untouched, and the initial-allocation refusal round 5 accepted is now the only
+allocation path there is.
+
+### Implementation report for step 6 toolchain-runtime-closure (round 8)
+
+#### What changed for step 6 toolchain-runtime-closure (round 8)
+
+##### Nothing, beyond carrying one accepted repair for step 6 toolchain-runtime-closure (round 8)
+
+Round 7 returned no finding and reported the step fully implemented. It made one
+substantive repair of its own, and the protocol requires a replacement round for
+that regardless of size.
+
+The repair is a single sentence in
+`docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`: the conflict name is
+described as the run's timestamp plus an exclusive random suffix, which is what
+`closure_report.sh` forms at line 503, rather than the timestamp plus the
+result's digest, which was the round 4 shape. It is staged as the reviewer left
+it.
+
+No production script changes. No harness case changes. `closure_report.sh` 549,
+`closure_verify.sh` 546, `closure_publish.sh` 650, `closure_config.sh` 636,
+`closure_observe_live.sh` 195, `ci/deliver-closure-tools.sh` 128, all byte-
+identical to round 7, and `install_pkg.sh` still byte-identical to HEAD.
+
+##### The evidence carried forward for step 6 toolchain-runtime-closure (round 8)
+
+The Debian capture is build 151, unchanged, and it remains a fresh run over these
+sources: the plan document does not travel to the agent, and the four
+verification-only copies that do are byte-identical to what that build ran. Its
+eighteen digests still match the staged bytes.
+
+The mandatory union was rerun on the build host against the staged tree: steps 0
+to 6 green, step 6 at 222 portable cases with zero failures and exit 5 on the
+host gate, both installer suites and relocation step 3 green, lint and shellcheck
+clean, the installer diff against HEAD returning 0.
+
+### Change summary for step 6 toolchain-runtime-closure (round 8)
+
+#### Staged paths and commit groups for step 6 toolchain-runtime-closure (round 8)
+
+##### Staged paths for step 6 toolchain-runtime-closure (round 8)
+
+Eleven paths, unchanged in membership from round 2:
+
+- `ci/deliver-closure-tools.sh`
+- `docs/v0.27.0/contract.closure-tools.txt`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+- `docs/v0.27.0/verify.closure-check.sh`
+- `docs/v0.27.0/verify.closure.step6.debian.txt`
+- `src/setups/env/bin/closure_config.sh`
+- `src/setups/env/bin/closure_observe_live.sh`
+- `src/setups/env/bin/closure_publish.sh`
+- `src/setups/env/bin/closure_report.sh`
+- `src/setups/env/bin/closure_verify.sh`
+
+Round 8 changes one of them and nothing of its own: the plan document carries the
+reviewer's one-sentence correction to the conflict-name description, staged as it
+left it. Every other staged path, the harness and the capture included, is
+byte-identical to what round 7 published.
+
+The versioned review transcript,
+`docs/v0.27.0/review.code.v0.27.0.toolchain-runtime-closure.md`, is modified in
+the working tree and is NOT staged. It belongs to the protocol.
+
+##### Commit groups for step 6 toolchain-runtime-closure (round 8)
+
+Eight groups, with the same membership, order and subjects round 2 assessed as
+coherent. Only the bodies of the groups whose content changed were rewritten.
+
+1. `docs(toolchain-runtime-closure): give the evidence record to the report module`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md`.
+2. `chore(closure): widen the host-tool contract to the verification path`
+   over `docs/v0.27.0/contract.closure-tools.txt`.
+3. `feat(closure): add the live observer`
+   over `src/setups/env/bin/closure_observe_live.sh`.
+4. `feat(closure): add the verification driver and bind publication to its evidence`
+   over `src/setups/env/bin/closure_config.sh`,
+   `src/setups/env/bin/closure_report.sh`,
+   `src/setups/env/bin/closure_verify.sh` and
+   `src/setups/env/bin/closure_publish.sh`.
+5. `feat(closure): add the pipeline delivery of the authoritative tools`
+   over `ci/deliver-closure-tools.sh`.
+6. `test(closure): add the step 6 suite and measure the fixture name window`
+   over `docs/v0.27.0/verify.closure-check.sh`.
+7. `test(closure): retain the step 6 Debian capture`
+   over `docs/v0.27.0/verify.closure.step6.debian.txt`.
+8. `docs(toolchain-runtime-closure): record step 6 validation`
+   over `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`.
+
+##### What changed in the plan since round 7 for step 6 toolchain-runtime-closure (round 8)
+
+No membership, order or subject change. Three bodies were rewritten for what the
+round actually did:
+
+- group 1 gains the reviewer's note that the conflict name carries a timestamp
+  and an exclusive random suffix, which is what the store forms;
+- group 7 names the round 7 build it already carried, unchanged, since the
+  capture did not move.
+
+Every other group is untouched, production groups included: round 8 changes no
+shipped script and no harness case. Every staged path appears in exactly one
+group, and no group crosses a boundary the plan draws.
+
+### Writer response for step 6 toolchain-runtime-closure (round 8)
+
+Writer response:
+
+#### Writer response to round 7 for step 6 toolchain-runtime-closure (round 8)
+
+##### The round returned no finding, and the repair is accepted for step 6 toolchain-runtime-closure (round 8)
+
+Round 7 reports `Yes. Step 6 has been fully implemented.` and `Unresolved
+findings: None.` R6-F1 is closed by the distinguishing regression, R5-F1 and every
+earlier production finding remain closed, and no implementation or regression gap
+is named.
+
+The round continues only because the reviewer made one substantive repair of its
+own, which the protocol classifies as requiring a replacement round whatever its
+size. That repair is accepted without qualification and nothing was reversed.
+
+##### What the repair corrected, and why it was right for step 6 toolchain-runtime-closure (round 8)
+
+`docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` described the conflict
+name as carrying the run's timestamp AND THE RESULT'S DIGEST. That was true of the
+round 4 store and stopped being true at round 5, when the name became a `mktemp`
+template: the store writes `<identity>.conflict.<timestamp>.XXXXXXXX`, so the
+suffix is an exclusive random one rather than a digest.
+
+The sentence was mine to keep current and I left it behind two rewrites of the
+code it describes. The correction documents the existing implementation, changes
+no design, code or test, and I have verified it against
+`closure_report.sh` line 503, which is the only place the name is formed.
+
+##### What round 8 changes for step 6 toolchain-runtime-closure (round 8)
+
+Nothing of its own. No production script, no harness case, no plan sentence and
+no commit group beyond carrying the reviewer's staged patch forward.
+
+##### Why no new agent build was taken for step 6 toolchain-runtime-closure (round 8)
+
+The repair touches the plan document, which does not travel to the Debian agent:
+the verification-only set carries the harness, the contract, the corpus and the
+shipped scripts, and all four of those are byte-identical to what build 151 ran.
+Its eighteen digests still match the staged bytes, so it remains the fresh
+capture for these sources rather than retained history.
+
+The mandatory union was rerun on the build host against the staged tree and is
+unchanged: steps 0 to 6 green, step 6 at 222 portable cases and zero failures.
+
+### Reviewer focus for step 6 toolchain-runtime-closure (round 8)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-8 -->
+
+## Round 8 by reviewer - Step 6
+
+- Recorded: 2026-09-10T13:37:21+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Baseline index tree: af374b1041ec9f265037b338212d0497034137d6
+
+Assessed index tree: 72f8c28036fb12b2e0da85d4c6fdec9bb3c3c798
+
+### Implementation check for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Result:
+
+Yes. Step 6 has been fully implemented.
+
+The requestor accepted round 7's plan correction without qualification. The received index exactly matches round 7's assessed tree, including that correction. All fifteen mandatory commands were independently rerun and all eighteen retained Debian input digests match. R6-F1, R5-F1 and earlier findings remain closed. No implementation, regression, architecture, cost or feature-integrity gap remains.
+
+Validation plan effects:
+
+Updated only the exact Step 6 validation rows: retained the exact Yes verdict, recorded acceptance of round 7's correction and fresh round 8 evidence, and recorded the advisory commit-ready recommendation. Historical round evidence is preserved; no Missing work section remains. Other steps, the document-wide incomplete status and the umbrella are unchanged. The sole tracked metadata patch was proven attributable and staged. The implementation plan and ignored a.commit were not edited in this round.
+
+### Pre-repair mandatory checks and coverage for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Independently ran all 15 mandatory commands before edits. Lint: exit 0, 53 scripts; harness ShellCheck: exit 0. Isolated RHEL 9.8 Step 6: 222 cases, zero failures, exit 5 solely for the Debian host gate. Closure Steps 0/1/2/3/4/5: 63/73/91/132/152/223 cases, zero failures, exit 0. Installer Steps 2/3: 49/63 cases, zero failures, exit 0. Relocation Step 3: 104 cases, zero failures, exit 0. Archive-file sha256sum search: exit 0 at line 147; installer purity search: expected exit 1 with no matches; installer diff against HEAD: exit 0. Final staged whitespace passes. The isolated source copy matched all eighteen current input digests before execution. Retained Debian build 151 reports Step 6 exit 0, 223 cases and zero failures; all 18 captured input digests independently match. No new Debian build was run or claimed for round 8.
+
+The independent round 7 mutation remains supplemental evidence for unchanged production and harness bytes: the current harness passes all four injected assertions with the current store and fails exactly three with the round 5 store, while the uninjected control passes on both. Those mutation and additional failure probes were not rerun in round 8. The required fresh Step 6 suite includes the distinguishing regression. No numerical class-coverage gate applies to Bash; the plan's harness coverage substitute passes. Fresh logs: .reviews/a.codex-s6r8.logs; digest comparison: .reviews/a.codex-s6r8.debian-digests.json; previous mutation provenance: .reviews/a.codex-s6r7.probes-result.json. No production or test bytes changed during review, so results apply to the final assessed code.
+
+### Resolved validation set and sources for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+bash src/utils/lint_shell.sh | sources: project, plan
+shellcheck docs/v0.27.0/verify.closure-check.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 6 | sources: plan
+rg -n 'sha256sum' src/setups/env/bin/closure_verify.sh | sources: plan
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh | sources: plan
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh | sources: plan
+bash docs/v0.27.0/verify.closure-check.sh --step 5 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 4 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 1 | sources: request
+bash docs/v0.27.0/verify.closure-check.sh --step 0 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 2 | sources: request
+bash docs/v0.27.0/verify.install-pkg.sh --step 3 | sources: request
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 | sources: request
+
+### Resolver drift and direction for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+No command added or removed. The current resolver adds the plan source to bash src/utils/lint_shell.sh, which the request marked project-only. The 15-command union ran in full. Full request/current sets and sources: .reviews/a.codex-s6r8.resolver.json.
+
+### Repository state around validation for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Baseline index af374b1041ec9f265037b338212d0497034137d6 matches both the request and round 7's assessed tree. The ordered baseline validation state also exactly matches the prior assessed state, including ignored a.commit. Final assessed index 72f8c28036fb12b2e0da85d4c6fdec9bb3c3c798. Mandatory validation before metadata edits produced acceptable=true with no tracked, untracked or ignored changes. Final comparison names only the explicitly authored Step 6 validation file and `<index>`; there are no ignored or untracked changes. Its sole patch received attributable=true and only that exact patch was staged. The baseline blob is retained. Umbrella SHA-256 remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. All index and retained-evidence operations used the shared evidence launcher.
+
+### Repair inventory for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Repairs made:
+
+- Polishing-only review metadata: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md, exact Step 6 assessment and round 8 evidence. Historical evidence and every other step are preserved. This was the only reviewer-authored tracked change and its exact attributable patch was staged. No substantive reviewer repair was made. The implementation plan, production files, harness and ignored a.commit were unchanged. Ignored caller files retain evidence.
+
+Paths staged:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/contract.closure-tools.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step6.debian.txt
+- src/setups/env/bin/closure_config.sh
+- src/setups/env/bin/closure_observe_live.sh
+- src/setups/env/bin/closure_publish.sh
+- src/setups/env/bin/closure_report.sh
+- src/setups/env/bin/closure_verify.sh
+
+### Commit plan assessment for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Independent commit-plan-check.bat --format json returned exit 0, state=valid, ready=true and diagnostics=[] before assessment and after the metadata update. All eleven staged paths remain covered once by the same eight ordered groups: plan; contract; observer; config/report/verifier/publication; delivery; harness; Debian capture; validation. Full subjects and path sets are retained in .reviews/a.codex-s6r8.round-evidence.json. Dependency order, conventional subjects and descriptions remain accurate, so a.commit needed no amendment. Mechanical readiness passes and grants no commit authority.
+
+### Findings and boundaries for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Consume the advisory commit-ready answer through the owning review workflow and proceed to its human commit decision. Preserve the exact staged scope and the reviewer-authored Step 6 validation metadata. No implementation, harness or plan rework is requested. This recommendation does not authorize a commit or complete the umbrella row.
+
+### Decision rationale for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+commit-ready. All six readiness floors pass: exact identity; complete implementation; mandatory validation and applicable harness coverage; attributable staged scope; no unresolved current or carried findings; accurate a.commit grouping. Round 7's substantive plan correction was accepted and is unchanged. Round 8 made only exact Step 6 review-metadata edits and no substantive repair. The recommendation is advisory; the human owns the commit decision.
+
+### Final reviewer decision for step 6 toolchain-runtime-closure (exchange 1) (round 8)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-6-round-8 -->
+
+## Round 8 by human - Step 6 - human-confirmation
+
+- Recorded: 2026-09-10T14:09:43+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 6
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-8 -->
