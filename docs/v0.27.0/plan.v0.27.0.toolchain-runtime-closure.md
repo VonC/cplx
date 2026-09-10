@@ -236,7 +236,7 @@ script but the five checker modules again, staged into the archive.
 | `closure_check.sh` | build account, and the Debian job | the DEPLOYED cplx tree on the build account; the pipeline workspace on the Debian job | present in cplx for packaging; delivered to the Debian workspace by the pipeline at the resolved cplx commit |
 | `closure_config.sh` | the same | the same | the same, sourced by `closure_check.sh` |
 | `closure_elf.sh` | the same | the same | the same, sourced by `closure_check.sh` |
-| `closure_report.sh` | the same | the same | the same, sourced by `closure_check.sh` |
+| `closure_report.sh` | the same | the same | the same, sourced by `closure_check.sh`, and since Step 6 by `closure_verify.sh` and `closure_publish.sh` for the evidence record alone |
 | `closure_rules.sh` | the same | the same | the same, sourced by `closure_check.sh` |
 | `closure_verify.sh` | the Debian job | the pipeline workspace, OUTSIDE the candidate archive | delivered by the pipeline at the resolved cplx commit, before the archive is opened |
 | `closure_observe_live.sh` | the foreign host | the same | the same, invoked by `closure_verify.sh` |
@@ -283,7 +283,7 @@ creates it and nothing else, and the step that owns a responsibility fills it:
 | `closure_check.sh` | the entry point, the run order, the scope derivation and classification, and the exit code | Step 1 | Steps 1 and 5 |
 | `closure_config.sh` | the grammar parser, the digest, the envelope check and the cplx-side resolution | Step 1 | Step 2 |
 | `closure_elf.sh` | the object reader and the provider index, with no verdict of its own | Step 1 | Step 3 |
-| `closure_report.sh` | THE REPORT ALONE: the summary block, the partial verdict, the refusal lines and the closing lines, with no verdict and no exit code of its own | Step 5 | Step 5 |
+| `closure_report.sh` | HOW A RUN'S OUTCOME IS WRITTEN AND WHERE THE MACHINE FORM IS KEPT: the summary block, the partial verdict, the refusal lines and the closing lines a person reads; the `CPLX-CLOSURE-EVIDENCE/1` record document with its single reader that a second program reads; and the STORE that record occupies, with its root validation, its no-overwrite promotion and its conflict names. No verdict and no exit code of its own | Step 5 | Steps 5 and 6 |
 | `closure_rules.sh` | ALL FOUR INVARIANTS, the derived membership half included, the waiver outcomes and the UNDETERMINED producer | Step 1 | Steps 3, 4 and 5 |
 
 THE FIFTH MODULE IS AN AMENDMENT, AND IT IS RECORDED AS ONE. Steps 3 and 4
@@ -312,6 +312,47 @@ follow. Membership is an invariant, so it lands where the other three do, and
 Step 3 fills two modules rather than one: the reader in `closure_elf.sh` and the
 derived membership half in `closure_rules.sh`. `closure_check.sh` gains the call
 and nothing else.
+
+THE EVIDENCE RECORD IS THE SECOND AMENDMENT, AND ROUND 1 OF THE STEP 6 REVIEW IS
+WHY IT IS RECORDED HERE. Q10 fixes three grammars and the module table gives
+grammars to `closure_config.sh`, which entered Step 6 at 636 lines against a 650
+ceiling with the evidence table measured at 164. Step 6 wrote that table into
+`closure_verify.sh` instead and had `closure_publish.sh` source the DRIVER to
+obtain `closure_evidence_parse`, which the review found stale against this table
+rather than wrong in itself: the code and the contract disagreed, and the
+contract is what a later implementer reads.
+
+The rule decides it. A module that would exceed the ceiling moves a
+responsibility to the module that already owns its neighbours, and the evidence
+document HAS such a module: it is the same run outcome the report writes, in a
+machine grammar rather than a human one, over the same counters and downstream of
+the same producers. So the record, its grammar table and its one reader belong to
+`closure_report.sh`, publication and the driver both source that module, and no
+shipped script sources the driver at all. The move is the permitted route taken
+in the permitted order: this table changes first, and the code follows it.
+
+WHAT THE MOVE IS NOT is a licence to place a responsibility wherever a count
+allows. The report module was chosen because it owns the neighbour, not because
+it had room, and a module with room and no neighbourhood claim would still be the
+wrong answer.
+
+THE STORE FOLLOWED THE RECORD, AND ROUND 3 OF THE STEP 6 REVIEW IS WHEN. Its
+three repairs to the emitter put `closure_verify.sh` over the ceiling again, and
+the rule answers the same way it did for the record. The store's neighbours are
+all in the report module already: `closure_evidence_parse` reads exactly what the
+store writes, `closure_evidence_conflicts` derives the names the store creates,
+and BOTH consumers of the store, the publication gate and the driver's own
+read-back, reach that module for them. Only the writer was in the driver, which
+made the occupancy rule the one part of the record contract a reader could not
+find beside the contract.
+
+So the root validation, the no-overwrite promotion and the conflict retention
+move, and the driver keeps observation, comparison and the run order. It still
+decides what a run returns: the store answers whether a document was retained,
+and nothing more. THIS IS THE SECOND TIME the ceiling has moved a responsibility
+out of that file, and the pattern is worth naming rather than repeating silently:
+the driver was carrying two subjects, the run and the record, and each amendment
+has taken one layer of the record away. There is no third layer left to move.
 
 `closure_scope.sh` does not exist in any shape: scope derivation stays in
 `closure_check.sh`, which is where the run order that consumes it lives, and
@@ -1826,16 +1867,33 @@ No perf gates are affected.
 
 ### Step 6 complexity impact
 
-One `tar -t` over the archive for the pre-install observation, one install, one
-walk of the installed tree. The archive-side observation reads the table of
-contents rather than extracting, so the pre-install half costs one pass over the
-archive index and no unpacking.
+Two `tar -t` passes over the archive for the pre-install observation, one
+install, one walk of the installed tree. The archive-side observation reads the
+table of contents rather than extracting, so the pre-install half costs two
+passes over the archive INDEX and no unpacking. The second pass is the verbose
+index, and round 1 of the review is why it is a cost worth paying: a symlinked
+directory is listed by name with no trailing slash, so the plain index cannot
+distinguish a DIRECTORY ALIAS from a file and the skeleton silently dropped one
+the committed declaration names. The link records exist only in the verbose
+listing.
 
 ### Step 6 feature preservation
 
 The install itself is unchanged: `closure_verify.sh` calls `install_pkg.sh` as
 any operator would and adds no argument to it. The installer-untouched grep
 applies here as everywhere.
+
+WHICH IS EXACTLY WHY THE SELECTION IS CHECKED AND NOT STEERED. The installer is
+asked for a TARGET and not for a file: it keeps the newest `<target>.*.tar.gz`
+across the prefix, its package directory, HOME and HOME/pkgs, and it skips an
+archive whose done marker exists. Round 1 of the review reproduced a competing
+future-dated archive being installed while the driver recorded the candidate's
+identity, which makes the post-install observation belong to bytes nothing
+digested. The frozen interface offers no argument that selects a file, so the
+driver refuses a competitor newer than its copy BEFORE the call, removes the
+marker for its own candidate so a rerun really installs, and requires that
+marker to exist AFTER the call. Three checks around an unchanged invocation, and
+no new argument to it.
 
 ## Step 6 implementation
 
@@ -1851,6 +1909,11 @@ applies here as everywhere.
 - `src/setups/env/bin/closure_verify.sh` also carries the payload comparison,
   which reads the archive's embedded `tools/bin/` copies and reports whether
   they are byte-identical to the authoritative ones.
+- `src/setups/env/bin/closure_report.sh` (existing, to be updated): it receives
+  the `CPLX-CLOSURE-EVIDENCE/1` grammar, `closure_evidence_parse` and the
+  conflict-name derivation, by the topology table's second amendment.
+- `src/setups/env/bin/closure_publish.sh` (existing, to be updated): step 2
+  sources the report module rather than the driver, and gains no line.
 - `docs/v0.27.0/verify.closure-check.sh` (existing, to be updated).
 - `docs/v0.27.0/verify.closure.step6.debian.txt` (new, capture).
 
@@ -1895,6 +1958,25 @@ Three occupancy cases: a rerun after an incomplete first attempt succeeds; a
 byte-identical completed result is idempotent; and a DIFFERENT result is
 retained under a timestamped conflict name and stops publication.
 
+Nine cases the round 1 review added, and every one of them drives the real
+producer or the real archive rather than a fixture standing in for it:
+
+- the conflict STAYS a stop: the agreeing rerun after one refuses, a second
+  differing result retained beside the first inside the same second, and the
+  canonical file unchanged under both;
+- the same conflict refuses PUBLICATION at step 2, with the emitter creating it
+  and publication meeting it, and a control that publishes past step 2 once the
+  conflict is removed;
+- a REAL archive carrying a directory alias reconstructs it, resolves it as the
+  installed tree does, and compares equal to the tree it was made from, with a
+  broken alias still DIVERGENT;
+- an empty mapping table and an unreadable one are both inconclusive, with a
+  control where one usable inventory beside one unusable is conclusive on the
+  usable one;
+- a competing newer archive refuses before the install, a stale done marker does
+  not skip it, and an installer that returns success without processing this
+  candidate refuses after it.
+
 ### Step 6 behavior
 
 - `closure_verify_preinstall`: the declared-shape observation derived from the
@@ -1902,8 +1984,14 @@ retained under a timestamped conflict name and stops publication.
   carries rather than what the build account had.
 - `closure_verify_installed`: the same observation over the installed tree.
 - `closure_verify_compare`: DIVERGENT entries with the side each was seen on.
-- `closure_observe_live.sh`: one named process, refusing an empty inventory.
-- `closure_verify_emit`: the one artifact, written into an explicitly supplied
+- `closure_observe_live.sh`: one named process, refusing an inventory nobody
+  could take. An EMPTY mapping table is one of those, and round 1 of the review
+  found it reading as a clean result: a matched process whose `maps` is readable
+  and empty is what an exited or zombie process leaves, and the collection ran in
+  a process substitution whose failure the loop could not observe either. Only a
+  collection that succeeded and yielded at least one object counts towards the
+  inventory.
+- `closure_evidence_emit`: the one artifact, written into an explicitly supplied
   RESULTS ROOT under a filename derived from the archive identity alone, and
   never derived from where the archive sits. The root is validated before any
   write: it must be a real directory, not a symlink, owned by the running user
@@ -1938,10 +2026,46 @@ retained under a timestamped conflict name and stops publication.
   comparison outcome, and `unexpected` one record per finding with the side it
   was seen on. `closure_evidence_parse` is the only reader of that contract, and
   Step 5's publication consumer uses that same reader.
-- `closure_evidence_parse`: the shared reader. Publication opens the exact keyed
+- `closure_evidence_parse`: the shared reader, and it lives in
+  `closure_report.sh` with the grammar it reads, for the reason the topology
+  table's second amendment records. Publication opens the exact keyed
   path and nothing else: it never scans the results root, and it never derives a
   location from the archive path, because either would reintroduce the
   co-location binding Design Area 7 refuses.
+- THE CONFLICT IS PART OF WHAT THE READER ANSWERS, which round 1 of the review
+  found missing on both sides. A retained conflict was stopping only the run that
+  created it: publication opened the keyed path, found a valid PASS and proceeded
+  past step 2 while a DIVERGENT result for the same identity sat beside it, and a
+  later rerun that agreed with the canonical file reported IDEMPOTENT and
+  returned zero. Agreeing with one of two answers does not decide which is wrong.
+  So the reader refuses a record beside which a differing result is retained, the
+  emitter refuses the agreeing rerun, and the conflict name carries the run's
+  timestamp AND an exclusive random suffix so two differing results inside one
+  second are both kept rather than the second being dropped by a name collision. The
+  conflict names are DERIVED from the keyed path, which is a lookup and not the
+  scan of the root the rule above forbids.
+- EVERY EVIDENCE DOCUMENT IS WRITTEN UNDER THE CONFLICT NAME IT MIGHT NEED, which
+  five review rounds arrived at one failure at a time. While the store PROMOTED a
+  finished temporary file, the operation that made a disagreement discoverable
+  was the LAST one, so a failure there left the reader seeing nothing under the
+  archive key: one shape deleted the bytes as tidy-up, one kept them under a name
+  the lookup does not read, one kept them whole and anonymous, and the last asked
+  whether the canonical name was taken and lost the answer to a concurrent
+  writer. ASKING THAT QUESTION IS ITSELF THE WINDOW, so it is not asked. The
+  document is created under the conflict prefix unconditionally; the no-overwrite
+  link then makes the canonical name a second name for the same bytes and the
+  placeholder is dropped, so an ordinary write ends with exactly one file. A
+  differing result is therefore already at its final name before any other actor
+  exists, whether the canonical result was there first or a concurrent writer won
+  it in between, and no later operation can lose it. A run that cannot create
+  that name writes no differing document at all, which is a refusal with nothing
+  left to be invisible.
+- THE COST IS A CONFLICT NAME THAT EXISTS FOR THE LENGTH OF ONE LINK on the
+  ordinary path, and a crash inside that window leaves a name a human must clear.
+  That direction is deliberate: a crash leaving a STOP is recoverable, and a
+  crash leaving a missed stop publishes an archive whose verification disagreed.
+  The canonical rule is untouched, since the canonical name is still only ever
+  occupied by a complete result.
 
 ### Step 6 completion criteria
 
@@ -1962,12 +2086,30 @@ retained under a timestamped conflict name and stops publication.
   deployment ceiling 650; expected 200 to 280 lines (advisory).
 - `src/setups/env/bin/closure_observe_live.sh`: 0; expected 80 to 120 lines
   (advisory).
+- `src/setups/env/bin/closure_report.sh`: before 196; below-550 safe; deployment
+  ceiling 650; expected plus 330 to 380 lines (advisory), almost all of it the
+  evidence record and its store MOVED rather than written. Rounds 1 and 3 of the
+  review are where this row comes from: each round of repairs put
+  `closure_verify.sh` over the ceiling, and the rule moves a responsibility
+  rather than trimming prose to fit.
+- `src/setups/env/bin/closure_publish.sh`: 649 and AT the ceiling. It gains no
+  line: the round 2 change replaces which module it sources, and the conflict
+  stop it needs is inside the shared reader rather than beside its call.
 
 ### Step 6 split guidance
 
 Keep the live observer in its own file from the start rather than splitting it
 out later: it is the only component that runs on the foreign host alone, and a
 separate file is what lets the static half be read without it.
+
+THE TWO MOVES ARE THE OTHER HALF OF THIS GUIDANCE, and each is a MOVE and not a
+sixth module. Nothing here creates a script: the topology is ten, the eleventh
+row is the payload copies, and a step that finds itself full moves a
+responsibility to the module that owns its neighbours. The evidence record went
+to `closure_report.sh` at round 2, and its STORE followed at round 3 when the
+next set of repairs filled the driver again. The driver was carrying two
+subjects, the run and the record, and the two amendments took the record away a
+layer at a time.
 
 ### Step 6 workflow timing readiness
 
@@ -2149,11 +2291,11 @@ rejected alternative.
 | Q03 | `readelf` only, pinned to `LC_ALL=C`, with an absent, non-zero or unparsable reader typed UNDETERMINED and the aggregate non-passing | Step 3 behavior, `closure_read_failed`; the host matrix | C2, a second `od` reader with no rule for which answer wins; C3, `od` only, the largest body of Bash in the effort written for a host nobody has; C4, pushing the dependency into another umbrella item this plan does not own |
 | Q04 | Two files at the fixed archive path `tools/closure/`, staged from the DEPLOYED cplx tree and verified against the committed envelope, byte-verified before the tar, persisting on success and removed on refusal | Step 2 files and behavior; Step 5 staging | D2, one file with a header excluded from the digest, which reintroduces the normalisation Design Area 3 refuses; D3, `tools/etc/`, a directory that does not exist and says less; D4, `--add`, which ships the bundle outside the folder it describes |
 | Q05 | An explicit `--closure-gate` flag as the only entrance, with the paired refusals that the flag with another target refuses and `tools` without the flag refuses | Step 5 behavior, test-first list and files-involved; `pkg_tools.sh` line 18 | E1, gating every target, which drives a consuming project to fork; E2, triggering on the bundle's presence, which lets a deletion switch the gate off; E4, an environment opt-in, which is not a gate |
-| Q06 | An explicitly supplied results root keyed by archive identity, complete-only occupancy through no-overwrite promotion, byte-identical results idempotent, a differing result retained under a conflict name and stopping publication | Step 6 behavior, `closure_verify_emit` | F2, one appended file, a scan rather than a lookup with interleaved writers; F3, beside the archive, the co-location the design refuses as a binding; F4, deferring to item 7 while Step 5 implements the consumer here |
+| Q06 | An explicitly supplied results root keyed by archive identity, complete-only occupancy through no-overwrite promotion, byte-identical results idempotent, a differing result retained under a conflict name and stopping publication | Step 6 behavior, `closure_evidence_emit` | F2, one appended file, a scan rather than a lookup with interleaved writers; F3, beside the archive, the co-location the design refuses as a binding; F4, deferring to item 7 while Step 5 implements the consumer here |
 | Q07 | Mutate donor objects found on the host, after validating the donor's ELF class and section shape and asserting the mutated semantic result | Step 0 fixture corpus; Steps 3 and 4 cases | G2, hand-built hex nobody will review; G3, a compiler as a harness prerequisite on both hosts; G4, committed binary fixtures, which both earlier items refused |
 | Q08 | Keep the order: Step 5 is a consumer-contract test against a fixture, Step 6 the producer assertion, both using one schema and one parser | Steps 5 and 6 test-first lists | H2, verification first, which makes the Debian agent a prerequisite for the packaging gate the issue centres on; H3, a separate publication step, which splits the waiver refusal from the waiver contract |
 | Q09 | An operator prerequisite: inspect the exact `tools/old` target, move it recoverably out of `$HOME/tools`, re-run the observed scope, record the action and the retained location | Step 7 acceptance | J2, declaring the root, which widens the contract to fit the defect and lets a floor member satisfy on the build account while absent from the archive; J3, an implementation step removing it, a recursive delete on the workflow's own authority; J4, leaving the choice to whoever runs the acceptance |
-| Q10 | Three literal grammars sharing one lexical shape, `CPLX-CLOSURE/1`, `CPLX-CLOSURE-ENVELOPE/1` and `CPLX-CLOSURE-EVIDENCE/1`, with exact lexical domains, decode before domain validation, a derived verdict truth table, and canonical evidence bytes | Step 2 behavior, `closure_config_parse`; Step 6 emit and `closure_evidence_parse` | K2, reusing the host-tools columns, a delimiter rather than a schema; K3, JSON, whose parser would be the largest new component and is used by nothing else here; K4, INI, which has no agreed rule for the repeated keys these documents must settle |
+| Q10 | Three literal grammars sharing one lexical shape, `CPLX-CLOSURE/1`, `CPLX-CLOSURE-ENVELOPE/1` and `CPLX-CLOSURE-EVIDENCE/1`, with exact lexical domains, decode before domain validation, a derived verdict truth table, and canonical evidence bytes. The first two live with the lexer in `closure_config.sh`; the third lives with the run outcome it records, in `closure_report.sh`, by the topology table's second amendment | Step 2 behavior, `closure_config_parse`; Step 6 emit and `closure_evidence_parse` | K2, reusing the host-tools columns, a delimiter rather than a schema; K3, JSON, whose parser would be the largest new component and is used by nothing else here; K4, INI, which has no agreed rule for the repeated keys these documents must settle |
 | Q11 | A descriptor-bound transactional callback: exclusive staging, hash the completed copy, no-overwrite promotion, then invoke a constrained uploader with the open descriptor under a begin, write, abort, commit adapter ABI that commits only after the digest matches | Step 5 behavior and its seventeen handoff cases | L1, exclusive staging with a returned pathname, which reopens the time-of-check gap; L2, re-hashing before upload, which narrows the window rather than closing it; L4, item 7 owning descriptor stability, kept as item 7's prerequisite rather than this item's fallback; L5, leaving enforcement entirely to item 7 |
 | Q12 | Only pipeline-delivered workspace copies produce evidence. Embedded copies are compared byte for byte as a payload property and are never executed for evidence, including when identical | Delivered script topology; Step 6 behavior and its authority cases | M2, executing the embedded copy, which makes the archive certify itself with no bootstrap; M3, executing it after an out-of-band digest comparison, which moves the problem to whatever performs the comparison; M4, shipping no copies, which removes a real operator use |
 | Q13 | The unreferenced finding is TWO HALVES, amended 2026-09-07 after the step 3 code review found this plan disagreeing with itself: its Step 3 behavior line specified the edge computation while its Step 3 expected outcome quoted the design's conjunction, and no step scheduled the declared entry-point input the conjunction needs. Step 3 owns the EDGE half and reports it as `UNREFERENCED-BY-EDGE`; Step 4 owns the entry-point half, the `CPLX-CLOSURE/1` record that declares the set, and the combined result | Step 3 expected outcome and behavior; Step 4 fix intent and expected outcome; design Q13 | N1, leaving the two lines contradicting each other, which is what the review found; N2, deriving entry points from `PT_INTERP` or a permission bit, the heuristic Design Area 2 refuses for the subject rule and refuses again here; N3, letting Step 3 report the edge half AS the design's finding, which names a shipped executable as an object nothing can load |
