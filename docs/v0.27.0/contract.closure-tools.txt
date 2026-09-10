@@ -1,11 +1,16 @@
 # CPLX closure host-tool contract, v0.27.0
 #
-# The commands the NINE production scripts of the toolchain-runtime-closure
-# effort may depend on the HOST to supply: the checker and its three modules,
-# the verification driver, the live observer, the publication gate, the D10
-# reader and the pipeline delivery script. This file is the allowlist half of
-# the host-tool rule for those scripts, exactly as
-# `contract.host-tools.txt` is for `install_pkg.sh`.
+# The commands the TEN production scripts of the toolchain-runtime-closure effort
+# may depend on the HOST to supply: the checker and its FOUR modules, the
+# verification driver, the live observer, the publication gate, the D10 reader
+# and the pipeline delivery script. This file is the allowlist half of the
+# host-tool rule for those scripts, exactly as `contract.host-tools.txt` is for
+# `install_pkg.sh`.
+#
+# THE COUNT WAS NINE AND THE MODULES WERE THREE until Step 5 declared the report
+# module and made the topology five modules and ten scripts. Step 6 corrects the
+# sentence here rather than leaving a header that counts a set this file already
+# covers.
 #
 # THIS IS NOT THE INSTALLER'S CONTRACT AND MUST NEVER BECOME IT. The checker
 # never runs during an install, so its tools are its own; `readelf`,
@@ -20,6 +25,14 @@
 # `verify.closure-check.sh` extracts every command-position word from every
 # shipped script and fails on any word absent from this file. Step 5 added two,
 # `bash` and `mkdir`, both for the publication re-check.
+#
+# STEP 6 ADDED NO ROW, and that is worth recording because it created three
+# scripts. The verification driver, the live observer and the pipeline delivery
+# script between them read a table of contents, extract two named members, digest
+# files, walk one tree, link a result without overwriting it and resolve blobs
+# from a commit, and every one of those is a command an earlier step already
+# declared. What Step 6 did instead is WIDEN the `why` column of seven rows, so a
+# reader can tell which callers a tool now has rather than inferring it.
 #
 # WHAT THE ADAPTER ABI IS NOT. `upload_begin`, `upload_write`, `upload_abort` and
 # `upload_commit` are NOT here, and their absence is deliberate rather than an
@@ -95,17 +108,17 @@ launcher|-execdir|find||
 #
 # name|form|resolver|runs-argument|why
 bash|direct|-|yes|re-run the static checker over a candidate as a CHILD PROCESS, so the verdict is one publication could not have produced
-cat|direct|-|no|read one bundle part whole, so the digest domain is the bytes on disk
+cat|direct|-|no|read one bundle part whole for the digest domain, and copy an evidence document into the exclusive file it is promoted from
 chmod|direct|-|no|make a staged copy readable, and a promoted entry executable
-cp|direct|-|no|stage the configuration bundle and the payload checker modules
-find|direct|-|yes|the single tree walk that collects every per-object fact
-git|direct|-|no|resolve the authoritative configuration from a cplx commit and path
-ln|direct|-|no|promote a completed staging copy without overwriting an existing one
+cp|direct|-|no|stage the configuration bundle and the payload checker modules, and place a candidate where the installer discovers it
+find|direct|-|yes|the single tree walk that collects every per-object fact, and the permission predicate on a staging or results root that stat would only print
+git|direct|-|no|resolve the authoritative configuration, and the authoritative scripts the pipeline delivers, from a cplx commit and path
+ln|direct|-|no|promote a completed staging copy or a completed evidence document without overwriting an existing one
 mkdir|direct|-|no|create the work and policy directories a publication re-check is driven from
 mkfifo|direct|-|no|the descriptor handed to the constrained uploader under the begin, write, abort, commit ABI
-mktemp|direct|-|no|the exclusive staging directory publication writes into before it promotes
+mktemp|direct|-|no|the exclusive staging directory publication promotes from, the verification work directory, and the evidence file promoted into the results root
 readelf|direct|-|no|read dynamic entries and version needs, one invocation per shipped ELF
 rm|direct|-|no|remove a staged copy when the run refuses, so a refusal leaves nothing behind
 sha256sum|direct|-|no|content digests: duplicate candidates, the configuration document, the closed archive
-tar|direct|-|no|read the candidate archive before it is installed, for the pre-install observation
+tar|direct|-|no|read the candidate archive before it is installed, for the pre-install observation over its plain and verbose indexes, its configuration bundle and its payload copies
 tee|direct|-|no|write the evidence document and its retained copy in one pass
