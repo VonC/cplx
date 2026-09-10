@@ -30,7 +30,7 @@
 #
 # Usage:
 #   bash verify.closure-check.sh [--step N] [--contract PATH] [--corpus PATH]
-#                                [--shipped-dir PATH]
+#                                [--shipped-dir PATH] [--ci-dir PATH]
 #
 # With no --step the harness runs EVERY step, each in a fresh process, and
 # aggregates. That is not a convenience: the capability gate resolves tools, and
@@ -104,6 +104,7 @@ STEP=""
 CONTRACT_ARG=""
 CORPUS_ARG=""
 SHIPPED_DIR_ARG=""
+CI_DIR_ARG=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -117,6 +118,12 @@ while [ "$#" -gt 0 ]; do
         # none, so this resolves to a directory holding no `closure_*.sh` and the
         # mechanical assertion reports zero subjects rather than inventing one.
         --shipped-dir) SHIPPED_DIR_ARG="${2:-}"; shift 2 ;;
+        # Where the PIPELINE half lives, which is one script and is not under the
+        # shipped directory: it is the bootstrap that PLACES that directory, so
+        # it travels with the pipeline rather than with what it delivers. It is
+        # namable for the same reason the two inputs above are: the Debian job
+        # runs this harness from a workspace whose layout is the pipeline's.
+        --ci-dir) CI_DIR_ARG="${2:-}"; shift 2 ;;
         -h|--help) sed -n '4,77p' "$0"; exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
@@ -138,6 +145,11 @@ here=$(cd "$_dir" && pwd) || { echo "cannot resolve the harness directory" >&2; 
 CONTRACT="${CONTRACT_ARG:-$here/contract.closure-tools.txt}"
 CORPUS="${CORPUS_ARG:-$here/fixtures.closure-corpus.txt}"
 SHIPPED_DIR="${SHIPPED_DIR_ARG:-$here/../../src/setups/env/bin}"
+# The pipeline half, which is one script and does not live under the shipped
+# directory: it is the bootstrap that PLACES that directory, so it travels with
+# the pipeline rather than with what it delivers, and a workspace that lays the
+# two out differently names it rather than being guessed at.
+CI_DIR="${CI_DIR_ARG:-$here/../../ci}"
 
 [ -f "$CONTRACT" ] || { echo "contract not found: $CONTRACT" >&2; exit 2; }
 [ -f "$CORPUS" ]   || { echo "corpus not found: $CORPUS" >&2; exit 2; }
@@ -421,7 +433,11 @@ step_tools() {
         # rather than leave a mandatory invariant resting on an unprobed tool.
         4) printf 'readelf sha256sum assoc' ;;
         5) printf 'readelf assoc %s' "$(oneline "$(contract_entry_names)")" ;;
-        6) printf 'readelf sha256sum assoc' ;;
+        # Step 6 drives the verification driver, the delivery script and the live
+        # observer, so its declared set is the whole contract for the same reason
+        # step 5's is: a step that executes a shipped script measures every tool
+        # that script may reach.
+        6) printf 'readelf assoc %s' "$(oneline "$(contract_entry_names)")" ;;
         7) printf 'readelf sha256sum assoc' ;;
     esac
 }
@@ -452,7 +468,7 @@ step_filled_by() {
 
 step_suite_exists() {
     case "$1" in
-        0|1|2|3|4|5) return 0 ;;
+        0|1|2|3|4|5|6) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -473,7 +489,7 @@ SHIPPED_SCRIPTS=(
     "$SHIPPED_DIR/closure_observe_live.sh"
     "$SHIPPED_DIR/closure_publish.sh"
     "$SHIPPED_DIR/closure_d10.sh"
-    "$here/../../ci/deliver-closure-tools.sh"
+    "$CI_DIR/deliver-closure-tools.sh"
 )
 
 # The shipped scripts' own vocabulary: shell keywords and builtins. The two other
@@ -536,9 +552,15 @@ shipped_function_names() {
 # quietly widen to a script that never sources it, and a file never exempts
 # itself twice.
 #
-# The candidate set is the installer plus the five checker modules, which is the
-# whole of what a shipped script here may source. Widening it later means adding
-# a source relationship the topology does not have.
+# The candidate set is the installer and the five checker modules, and step 6
+# widens it by NOTHING. Round 2 of its review moved the evidence record to
+# `closure_report.sh`, which is already one of the five, so the two source
+# relationships the step adds, the driver and publication both taking the reader
+# from that module, are covered by a set that was already there. The driver
+# itself is deliberately absent: no shipped script sources it, and listing it
+# would grant its function names to any file that merely NAMES it, such as the
+# delivery script's own manifest. An exemption earned by a list accepts a call to
+# a function nobody defines, which is the hole this rule exists to close.
 shipped_sourced_functions() {
     local file="$1" other module
     for other in "$SHIPPED_DIR/install_pkg.sh" "${CLOSURE_MODULES[@]}"; do
@@ -1326,6 +1348,26 @@ config_call() {
     CONFIG_RC=$?
 }
 
+# The same call, through the module that owns the CPLX-SIDE RESOLUTION since step
+# 6. `closure_config_authority_check` moved to `closure_publish.sh` when the
+# grammar module needed the room, because publication is the only party that can
+# resolve a path at a commit: packaging and the Debian agent both run where there
+# is no checkout. The six cases below therefore source the file that owns the
+# function now, and sourcing it also brings in the grammar module it sources.
+authority_call() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    CONFIG_OUT=$("${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        fn="$2"
+        shift 2
+        declare -F "$fn" >/dev/null 2>&1 || exit 92
+        "$fn" "$@"
+    ' _ "$SHIPPED_DIR/closure_publish.sh" "$@" 2>&1)
+    CONFIG_RC=$?
+}
+
 # The parsed model, printed from the module's own globals rather than through a
 # dump function the production code would carry for the tests alone. What a case
 # asserts is what a later step will read.
@@ -1675,7 +1717,7 @@ step2_suite() {
             "$(printf '%s' "$commit" | grep -qE '^[0-9a-f]{40}$' && echo yes || echo no)"
         cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
         step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" "$commit"
-        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        authority_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/honest-bundle-accepted" "0" "$CONFIG_RC"
         chk "step2/authority/verdict-names-the-commit" "yes" \
             "$(printf '%s' "$CONFIG_OUT" | grep -q "^AUTHORITATIVE|$d1|$commit" && echo yes || echo no)"
@@ -1691,7 +1733,7 @@ step2_suite() {
         step2_write_envelope "$bundle/closure-envelope.txt" "$d2" "cfg/closure-config.txt" "$commit"
         config_call closure_envelope_check "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/paired-edit/agent-ACCEPTS" "0" "$CONFIG_RC"
-        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        authority_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/paired-edit/packaging-REFUSES" "1" "$CONFIG_RC"
         chk "step2/authority/paired-edit/refusal-names-both" "yes" \
             "$(printf '%s' "$CONFIG_OUT" | grep -q "authority|the embedded document hashes to $d2 and cplx holds $d1" && echo yes || echo no)"
@@ -1708,7 +1750,7 @@ step2_suite() {
         step2_write_envelope "$bundle/closure-envelope.txt" "$d2" "cfg/closure-config.txt" "$commit"
         config_call closure_envelope_check "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/authentic-swap/agent-ACCEPTS" "0" "$CONFIG_RC"
-        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        authority_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/authentic-swap/packaging-REFUSES" "1" "$CONFIG_RC"
         note "step2/authority/authentic-swap/publication-REFUSES" \
              "pending: publication resolves the digest itself rather than reading the archive's; Step 5 asserts it"
@@ -1716,7 +1758,7 @@ step2_suite() {
         # A commit that does not hold that configuration at that path.
         cp -- "$dir/valid.txt" "$bundle/closure-config.txt"
         step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/not-there.txt" "$commit"
-        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        authority_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/path-absent-at-that-commit" "1" "$CONFIG_RC"
         chk "step2/authority/path-absent-names-it" "yes" \
             "$(printf '%s' "$CONFIG_OUT" | grep -q "source|$commit holds no blob at cfg/not-there.txt" && echo yes || echo no)"
@@ -1726,14 +1768,14 @@ step2_suite() {
         # lexical check alone cannot answer.
         d2=$(git -C "$repo" rev-parse HEAD:cfg/closure-config.txt 2>/dev/null)
         step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" "$d2"
-        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        authority_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/40-hex-that-is-a-blob" "1" "$CONFIG_RC"
         chk "step2/authority/40-hex-blob-names-the-type" "yes" \
             "$(printf '%s' "$CONFIG_OUT" | grep -q "names a blob in $repo rather than a commit" && echo yes || echo no)"
         # And a branch name, which the envelope domain refuses before the
         # resolution is ever reached: packaging cannot PRODUCE such a bundle.
         step2_write_envelope "$bundle/closure-envelope.txt" "$d1" "cfg/closure-config.txt" "develop"
-        config_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
+        authority_call closure_config_authority_check "$repo" "$bundle/closure-config.txt" "$bundle/closure-envelope.txt"
         chk "step2/authority/branch-refused-before-resolution" "1" "$CONFIG_RC"
         chk "step2/authority/branch-refusal-is-lexical" "yes" \
             "$(printf '%s' "$CONFIG_OUT" | grep -q 'domain|commit: develop' && echo yes || echo no)"
@@ -1951,10 +1993,87 @@ elf_poke_str() {
     printf '%s\0' "$3" | "$FIXTURE_DD" of="$1" bs=1 seek="$2" conv=notrunc status=none 2>/dev/null
 }
 
-# The four 64-byte name slots in the reserved tail of `.dynstr`, as a dynstr-
-# relative offset. Slot 0 is the one a single-mutation row uses; the other three
-# exist for the rows a later step fills.
-elf_name_slot() { printf '%s' "$(( $1 - 256 + $2 * 64 ))"; }
+# --- the name slots, which are MEASURED and were once assumed -----------------
+#
+# THE ENGINE USED TO TAKE THE LAST 256 BYTES OF `.dynstr` AS RESERVED, and round
+# 1 of the step 6 review is what that cost. A reserved tail is a property of a
+# DONOR and not of the format. On the Debian agent's donor the referenced
+# dynamic strings sit exactly there, so a fixture name written over them left
+# the donor's OWN entries pointing into the middle of it and `readelf` reported
+# needs such as `.1` and `so.1`: fifteen step 3 cases and ten step 4 cases failed
+# on that agent while every one of them passed on the build host, against the
+# same harness bytes. A cross-distribution failure with one cause.
+#
+# WHAT IS ACTUALLY FREE is everything the checker cannot read. `.dynstr` holds
+# the dynamic SYMBOL names as well as the names dynamic entries and version
+# records point at, and nothing in this effort reads a symbol name. So the window
+# is chosen by measuring the referenced strings and taking the first run between
+# them that is wide enough, and a donor with no such run is not a donor.
+FIXTURE_SLOT_COUNT=4
+FIXTURE_SLOT_SIZE=64
+
+# Every name a dynamic entry or a version record points at, which is the whole
+# set of `.dynstr` content this effort's readers can reach.
+elf_referenced_names() {
+    LC_ALL=C "$FIXTURE_READELF" -d -- "$1" 2>/dev/null \
+      | grep -E '\((NEEDED|SONAME|RPATH|RUNPATH)\)' | sed -e 's/^.*\[//' -e 's/\].*$//'
+    LC_ALL=C "$FIXTURE_READELF" -V -W -- "$1" 2>/dev/null \
+      | sed -n -e 's/.*Name: \([^ ][^ ]*\).*/\1/p' -e 's/.*File: \([^ ][^ ]*\).*/\1/p'
+}
+
+# The dynstr-relative offset of the first run of unreferenced bytes wide enough
+# to hold every slot, or nothing. The table is walked as the NUL-delimited
+# records it is, so each stored string's own offset is the sum of what came
+# before it, and a reference into the MIDDLE of a stored string is covered by
+# testing the whole string for the referenced name as a suffix.
+elf_slot_base() {
+    local file="$1" ds_off="" ds_size="" names="" s="" len=0 pos=0 start=1
+    local need=0 hit=0 n=""
+    read -r ds_off ds_size <<< "$(elf_section "$file" .dynstr)"
+    if [ -z "${ds_size:-}" ]; then return 1; fi
+    names=$(elf_referenced_names "$file" | grep -v '^$' | sort -u)
+    if [ -z "$names" ]; then return 1; fi
+    need=$(( FIXTURE_SLOT_COUNT * FIXTURE_SLOT_SIZE ))
+    while IFS= read -r -d '' s; do
+        len=${#s}
+        hit=0
+        if [ -n "$s" ]; then
+            while IFS= read -r n; do
+                case "$s" in *"$n") hit=1; break ;; esac
+            done <<< "$names"
+        fi
+        if [ "$hit" -eq 1 ]; then
+            start=$(( pos + len + 1 ))
+        elif [ $(( pos + len + 1 - start )) -ge "$need" ]; then
+            printf '%s' "$start"
+            return 0
+        fi
+        pos=$(( pos + len + 1 ))
+    done < <("$FIXTURE_DD" if="$file" bs=1 skip="$ds_off" count="$ds_size" status=none 2>/dev/null)
+    return 1
+}
+
+# One span of a file, digested, so a case can say which bytes a mutation left
+# alone. A count of zero or less digests nothing and prints the empty answer for
+# both sides, which is the right result for a window that reaches an edge.
+dynstr_span_digest() {
+    local file="$1" off="$2" count="$3" out=""
+    if [ "$count" -le 0 ]; then printf 'empty'; return 0; fi
+    out=$("$FIXTURE_DD" if="$file" bs=1 skip="$off" count="$count" status=none 2>/dev/null \
+          | sha256sum 2>/dev/null)
+    printf '%s' "${out%% *}"
+}
+
+# One slot of that window, as a dynstr-relative offset. Slot 0 is the one a
+# single-mutation row uses; the other three exist for the rows a later step
+# fills. It is computed on a PRISTINE copy of the donor, before the first poke,
+# which is why every caller reads it before it writes.
+elf_name_slot() {
+    local base=""
+    base=$(elf_slot_base "$1") || return 1
+    if [ -z "$base" ]; then return 1; fi
+    printf '%s' "$(( base + $2 * FIXTURE_SLOT_SIZE ))"
+}
 
 # --- donor validation, against the corpus rows and nothing else ---------------
 donor_valid_shared() {
@@ -1978,6 +2097,11 @@ donor_valid_shared() {
     # build a coherence fixture at all.
     [ "$(elf_verneed_nodes "$f")" -ge 1 ] || return 1
     elf_verdef_second "$f" >/dev/null 2>&1 || return 1
+    # AND THE NAME SLOTS HAVE TO EXIST, which round 1 of the step 6 review turned
+    # from an assumption into a requirement: a donor whose `.dynstr` has no run
+    # of unreferenced bytes wide enough cannot carry a fixture name without
+    # overwriting a string its own dynamic entries point at.
+    elf_slot_base "$f" >/dev/null 2>&1 || return 1
     return 0
 }
 
@@ -1989,6 +2113,9 @@ donor_valid_program() {
     phdr=$(LC_ALL=C "$FIXTURE_READELF" -l -W -- "$f" 2>/dev/null) || return 1
     printf '%s\n' "$phdr" | grep -q 'INTERP' || return 1
     printf '%s\n' "$phdr" | grep -q 'DYNAMIC' || return 1
+    # The same measured requirement as the shared donor: the rows that add a need
+    # to a PROGRAM write a name into its string table too.
+    elf_slot_base "$f" >/dev/null 2>&1 || return 1
     return 0
 }
 
@@ -2066,7 +2193,7 @@ elf_set_string_entry() {
     read -r ds_off ds_size <<< "$(elf_section "$file" .dynstr)"
     read -r dy_off dy_size <<< "$(elf_section "$file" .dynamic)"
     if [ -z "${ds_size:-}" ] || [ -z "${dy_size:-}" ]; then return 1; fi
-    slot=$(elf_name_slot "$ds_size" 0)
+    slot=$(elf_name_slot "$file" 0) || return 1
     elf_poke_str "$file" $(( ds_off + slot )) "$value"
     idx=$(elf_dyn_slot "$file" "$tag") || return 1
     elf_poke_u64 "$file" $(( dy_off + idx * 16 + 8 )) "$slot"
@@ -2077,7 +2204,7 @@ elf_add_needed() {
     read -r ds_off ds_size <<< "$(elf_section "$file" .dynstr)"
     read -r dy_off dy_size <<< "$(elf_section "$file" .dynamic)"
     if [ -z "${ds_size:-}" ] || [ -z "${dy_size:-}" ]; then return 1; fi
-    slot=$(elf_name_slot "$ds_size" 0)
+    slot=$(elf_name_slot "$file" 0) || return 1
     elf_poke_str "$file" $(( ds_off + slot )) "$value"
     idx=$(elf_dyn_slot "$file" NULL) || return 1
     elf_poke_u64 "$file" $(( dy_off + idx * 16 )) 1
@@ -2233,8 +2360,8 @@ elf_set_verneed() {
     if [ -z "${ds_size:-}" ] || [ -z "${vr_size:-}" ] || [ -z "${dy_size:-}" ]; then return 1; fi
     off=$(elf_verneed_offsets "$DONOR_SHARED") || return 1
     read -r vn aux <<< "$off"
-    slot1=$(elf_name_slot "$ds_size" 1)
-    slot2=$(elf_name_slot "$ds_size" 2)
+    slot1=$(elf_name_slot "$file" 1) || return 1
+    slot2=$(elf_name_slot "$file" 2) || return 1
     elf_poke_str "$file" $(( ds_off + slot1 )) "$provider"
     elf_poke_str "$file" $(( ds_off + slot2 )) "$node"
     elf_poke_u32 "$file" $(( vr_off + vn + 4 )) "$slot1"
@@ -2258,7 +2385,7 @@ elf_set_verdef() {
     read -r vd_off vd_size <<< "$(elf_section "$file" .gnu.version_d)"
     if [ -z "${ds_size:-}" ] || [ -z "${vd_size:-}" ]; then return 1; fi
     ent=$(elf_verdef_second "$DONOR_SHARED") || return 1
-    slot=$(elf_name_slot "$ds_size" 1)
+    slot=$(elf_name_slot "$file" 1) || return 1
     elf_poke_str "$file" $(( ds_off + slot )) "$node"
     elf_poke_u32 "$file" $(( vd_off + ent + 20 )) "$slot"
     elf_set_version_count "$file" .gnu.version_d 2
@@ -2524,7 +2651,7 @@ fixture_plant() {
                 printf 'no-sections'
                 return
             fi
-            slot=$(elf_name_slot "$ds_size" 0)
+            slot=$(elf_name_slot "$target" 0) || { printf 'no-name-slot'; return; }
             elf_poke_str "$target" $(( ds_off + slot )) "$operand"
             if [ "$verb" = "needed-add" ]; then
                 # The terminator becomes the added need, and the spare slot behind
@@ -2839,6 +2966,7 @@ step3_suite() {
     local id result planted_files planted_elf edges shared_needs program_needs
     local alias_ok=no small large dir_tree
     local paths line
+    local donor_names donor_soname fixture_names slot_base ds_off ds_size
 
     mkdir -p -- "$dir" "$stubs" || { fail "step3/scratch" "cannot create the scratch directory"; return; }
 
@@ -2898,6 +3026,59 @@ step3_suite() {
     # invented names, so a fixture that lists one was mutated rather than found.
     chk "step3/fixture/control/donor-is-clean" "" \
         "$(oneline "$(elf_needed_names "$DONOR_SHARED" | grep -E 'libcplx' || true)")"
+
+    # --- the name slots, and the collateral a fixture must not cause -----------
+    #
+    # THIS PAIR IS THE DEBIAN REGRESSION. The engine took the last 256 bytes of
+    # `.dynstr` as reserved, which is true of the build host's donor and false of
+    # the agent's: there the referenced dynamic strings sit exactly there, so the
+    # write left the donor's own entries pointing into the MIDDLE of the fixture
+    # name and `readelf` reported needs such as `.1` and `so.1`. Fifteen step 3
+    # cases and ten step 4 cases failed on that agent against harness bytes that
+    # passed here, and nothing in the suite was measuring the cause.
+    chk "step3/fixture/the-donor-has-a-measured-name-window" "yes" \
+        "$( elf_slot_base "$DONOR_SHARED" >/dev/null 2>&1 && echo yes || echo no )"
+    mkdir -p -- "$tree/slots" || true
+    fixture_copy_donor "$DONOR_SHARED" "$tree/slots/probe.so.1"
+    donor_names=$(elf_needed_names "$DONOR_SHARED" | grep -v '^$' | sort -u)
+    donor_soname=$(elf_soname "$DONOR_SHARED")
+    elf_add_needed "$tree/slots/probe.so.1" libcplxslotprobe.so.1
+    fixture_names=$(elf_needed_names "$tree/slots/probe.so.1" | grep -v '^$' | sort -u)
+    # THE ADDED NAME IS THE WHOLE DIFFERENCE. Every other need the donor carried
+    # reads back unchanged, which is the property the reserved-tail assumption
+    # was breaking on one distribution and only on one.
+    chk "step3/fixture/the-added-need-is-listed" "yes" \
+        "$(printf '%s\n' "$fixture_names" | grep -Fxq 'libcplxslotprobe.so.1' && echo yes || echo no)"
+    chk "step3/fixture/no-other-need-was-changed" "" \
+        "$(oneline "$(printf '%s\n' "$fixture_names" | grep -Fxv libcplxslotprobe.so.1 \
+              | grep -Fxv -f <(printf '%s\n' "$donor_names") || true)")"
+    chk "step3/fixture/every-donor-need-survives" "" \
+        "$(oneline "$(printf '%s\n' "$donor_names" \
+              | grep -Fxv -f <(printf '%s\n' "$fixture_names") || true)")"
+    chk "step3/fixture/the-soname-survives" "$donor_soname" \
+        "$(elf_soname "$tree/slots/probe.so.1")"
+    # AND THE STRING TABLE OUTSIDE THE WINDOW IS BYTE-IDENTICAL, which is the
+    # assertion that covers what a name comparison cannot see. The version
+    # records step 4's coherence cases turn on index this same table, and a poke
+    # that moved a byte outside the measured window would leave them pointing at
+    # something else. A poke moves no byte, so the two halves either side of the
+    # window are the donor's own.
+    slot_base=$(elf_slot_base "$DONOR_SHARED") || slot_base=""
+    read -r ds_off ds_size <<< "$(elf_section "$DONOR_SHARED" .dynstr)"
+    chk "step3/fixture/the-window-was-measured" "yes" \
+        "$( [ -n "$slot_base" ] && echo yes || echo no )"
+    if [ -n "$slot_base" ]; then
+        chk "step3/fixture/the-table-before-the-window-is-untouched" \
+            "$(dynstr_span_digest "$DONOR_SHARED" "$ds_off" "$slot_base")" \
+            "$(dynstr_span_digest "$tree/slots/probe.so.1" "$ds_off" "$slot_base")"
+        chk "step3/fixture/the-table-after-the-window-is-untouched" \
+            "$(dynstr_span_digest "$DONOR_SHARED" \
+                "$(( ds_off + slot_base + FIXTURE_SLOT_COUNT * FIXTURE_SLOT_SIZE ))" \
+                "$(( ds_size - slot_base - FIXTURE_SLOT_COUNT * FIXTURE_SLOT_SIZE ))")" \
+            "$(dynstr_span_digest "$tree/slots/probe.so.1" \
+                "$(( ds_off + slot_base + FIXTURE_SLOT_COUNT * FIXTURE_SLOT_SIZE ))" \
+                "$(( ds_size - slot_base - FIXTURE_SLOT_COUNT * FIXTURE_SLOT_SIZE ))")"
+    fi
 
     for id in subject-lib-dynload-unresolved subject-site-packages-need \
               subject-unreferenced-sound subject-second-libssl \
@@ -5316,7 +5497,7 @@ step5_suite() {
         # here because verification is step 6's subject, not this step's.
         id=$(sha256sum -- "$archive" | cut -d' ' -f1)
         cfg=$(config_digest "$cplxrepo/src/setups/env/closure/closure-config.txt")
-        { printf 'state|passing\n'; printf 'configuration|%s\n' "$cfg"; } > "$root/results/$id"
+        evidence_document "$root/results/$id" "$id" "$cfg"
         out=$(bash "$publish" --archive "$archive" --commit "$commit" \
             --repo "$cplxrepo" --results "$root/results" \
             --staging-root "$root/staging" 2>&1); rc=$?
@@ -5376,7 +5557,7 @@ step5_suite() {
     tar -czf "$root/candidate.tar.gz" -C "$root/tree" tools 2>/dev/null
     id=$(sha256sum -- "$root/candidate.tar.gz" | cut -d' ' -f1)
     cfg=$(config_digest "$cleanrepo/src/setups/env/closure/closure-config.txt")
-    { printf 'state|passing\n'; printf 'configuration|%s\n' "$cfg"; } > "$root/results/$id"
+    evidence_document "$root/results/$id" "$id" "$cfg"
     stub="$dir/stub.success"
     rm -rf -- "$stub"
     mkdir -p -- "$stub" || true
@@ -5398,6 +5579,1351 @@ step5_suite() {
         "$(sha256sum < "$stub/public/object" 2>/dev/null | cut -d' ' -f1)"
 }
 # ============================================================== the run, one step ===
+
+# ============================================================== the step 6 suite ===
+# THE FOREIGN-HOST HALF. Step 5 left publication's step 2 reading a record this
+# harness wrote; step 6 supplies the producer, so the same gate is now driven by
+# evidence a real run emitted rather than by a fixture that agreed with it.
+#
+# THE SUITE RUNS ANYWHERE AND ONLY THE DEBIAN AGENT ANSWERS IT. `step_host` gates
+# step 6 to debian-12, so a run elsewhere records every case it can and still
+# reports UNANSWERED with exit 5: the cases below are portable, and the OBLIGATION
+# is not.
+
+# The evidence document as a fixture, which is what publication's step 2 needs and
+# what several cases below mutate one record of. It is the SMALLEST document the
+# shared reader accepts, and its verdict is derived here the same way the reader
+# derives it, so a fixture cannot assert a verdict its own records deny.
+evidence_document() {
+    local out="$1" id="$2" cfg="$3" post="${4:-present}" verdict=PASS
+    if [ "$post" != "present" ]; then verdict=DIVERGENT; fi
+    { printf 'CPLX-CLOSURE-EVIDENCE/1\n'
+      printf 'archive|%s\n' "$id"
+      printf 'config|%s\n' "$cfg"
+      printf 'pre|%s|%s\n' 'tools/python/root/lib' present
+      printf 'post|%s|%s\n' 'tools/python/root/lib' "$post"
+      printf 'verdict|%s\n' "$verdict"; } > "$out"
+}
+
+# One call into the verification module, sourced rather than executed, which is
+# the seam its main boundary exists for. The reader and the emitter are both
+# driven this way so a case measures the function it names and not a whole run.
+verify_call() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    VERIFY_OUT=$("${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        fn="$2"
+        shift 2
+        declare -F "$fn" >/dev/null 2>&1 || exit 92
+        "$fn" "$@"
+    ' _ "$SHIPPED_DIR/closure_verify.sh" "$@" 2>&1)
+    VERIFY_RC=$?
+}
+
+# The parsed model, printed from the module's own globals for the same reason the
+# configuration suite prints them: what a case asserts is what publication reads.
+verify_model() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        closure_evidence_parse "$2" >/dev/null 2>&1 || exit 93
+        printf "%s|%s|%s\n" "$CLOSURE_EVI_ARCHIVE" "$CLOSURE_EVI_CONFIG" "$CLOSURE_EVI_VERDICT"
+    ' _ "$SHIPPED_DIR/closure_verify.sh" "$1" 2>/dev/null
+}
+
+# A fixture cplx checkout holding the eight authoritative scripts and the
+# committed declaration, which is what the delivery script resolves from and what
+# publication resolves its policy from. Prints the commit.
+step6_make_repo() {
+    local repo="$1" src="$2" name=""
+    mkdir -p -- "$repo/src/setups/env/bin" "$repo/src/setups/env/closure" || return 1
+    for name in "${CLOSURE_MODULES[@]}" closure_verify.sh closure_observe_live.sh \
+                install_pkg.sh pkg.sh pkg_tools.sh; do
+        cp -- "$src/$name" "$repo/src/setups/env/bin/$name" || return 1
+    done
+    cp -- "$src/../closure/closure-config.txt" \
+        "$repo/src/setups/env/closure/closure-config.txt" || return 1
+    cp -- "$src/../closure/closure-envelope.txt" \
+        "$repo/src/setups/env/closure/closure-envelope.txt" || return 1
+    ( cd "$repo" || exit 1
+      git init -q . >/dev/null 2>&1 || exit 1
+      git config user.email harness@example.invalid
+      git config user.name harness
+      git add -A >/dev/null 2>&1
+      git commit -q -m 'the reviewed tools' >/dev/null 2>&1 ) || return 1
+    git -C "$repo" rev-parse HEAD 2>/dev/null
+}
+
+# ONE PUBLICATION, ONE FRESH STAGING ROOT, and the reason is a property of the
+# gate rather than tidiness. Publication promotes the candidate to a
+# digest-derived name with a link that FAILS IF THE NAME EXISTS, which is its
+# no-overwrite guarantee; a staging root reused across cases therefore makes the
+# second publication of one archive refuse at STEP 0, and every case after it
+# would be measuring that refusal instead of its own.
+step6_publish() {
+    local publish="$1" archive="$2" commit="$3" repo="$4" results="$5" stage="$6"
+    rm -rf -- "$stage"
+    mkdir -p -- "$stage" || return 1
+    chmod 700 "$stage"
+    bash "$publish" --archive "$archive" --commit "$commit" --repo "$repo" \
+        --results "$results" --staging-root "$stage" 2>&1
+}
+
+# A process filesystem of the shape the observer reads: one numbered directory
+# carrying `comm`, `cmdline` and `maps`. Planting it is what lets the
+# empty-inventory refusal be asserted without arranging a process that must not
+# exist, which is not something a test can arrange.
+step6_plant_proc() {
+    local root="$1" pid="$2" comm="$3" argv0="$4"
+    shift 4
+    local mapping=""
+    mkdir -p -- "$root/$pid" || return 1
+    printf '%s\n' "$comm" > "$root/$pid/comm"
+    printf '%s\0-c\0pass\0' "$argv0" > "$root/$pid/cmdline"
+    : > "$root/$pid/maps"
+    for mapping in "$@"; do
+        printf '55d0-55e0 r-xp 00000000 08:01 1 %s\n' "$mapping" >> "$root/$pid/maps"
+    done
+    printf '7ffd-7ffe rw-p 00000000 00:00 0 [stack]\n' >> "$root/$pid/maps"
+    printf '7ffe-7fff r--p 00000000 00:00 0 \n' >> "$root/$pid/maps"
+    return 0
+}
+
+# The declared root specifications, read from a configuration document by the
+# module that owns the grammar. The comparison cases below measure both sides
+# against the COMMITTED declaration rather than against a list this suite wrote,
+# so a declaration change moves the fixture with it.
+config_specs() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        closure_config_parse "$2" >/dev/null 2>&1 || exit 93
+        closure_config_root_specs
+    ' _ "$SHIPPED_DIR/closure_config.sh" "$1" 2>/dev/null
+}
+
+# One side of the comparison, through the driver's own function and the checker's
+# own derivations. The child sources both, which is what `closure_verify_load`
+# does in a real run: a side computed any other way would be this suite's
+# arithmetic rather than the production answer.
+verify_side() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        # shellcheck disable=SC1090
+        source "$2" >/dev/null 2>&1 || exit 92
+        shift 2
+        closure_verify_side "$@"
+    ' _ "$SHIPPED_DIR/closure_verify.sh" "$SHIPPED_DIR/closure_check.sh" "$@" 2>/dev/null
+}
+
+verify_verdict() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        closure_verify_verdict "$2" "$3"
+    ' _ "$SHIPPED_DIR/closure_verify.sh" "$1" "$2" 2>/dev/null
+}
+
+# TWO EMITTERS, INTERLEAVED AT THE ONE POINT THAT MATTERS, and the schedule is
+# the whole case rather than scenery. Round 6 of the step 6 review found the
+# earlier attempt running them SEQUENTIALLY: the second call then saw a canonical
+# name that was already there, which is the ordinary conflict and not the race.
+# The race is a run that starts with NO canonical name and finds one when it
+# links, and only a run that reaches its link late can be in it.
+#
+# The synchronisation point is `cat`, because that is what fills the temporary
+# file: the shim lets the real copy finish, then runs a second REAL emitter to
+# create the canonical result, and returns. The first emitter therefore arrives
+# at its link with the name taken, exactly as a concurrent writer would leave it.
+# The `mktemp` shim then fails conflict allocations attempted AFTER that write,
+# which is the operation a store that reserves late must perform and a store that
+# reserves first never reaches. That difference is what makes this a regression
+# rather than a description.
+#
+# Prints four lines: the differing emitter's status, the number of retained files
+# whose bytes ARE the differing document, and the two consumer statuses.
+verify_interleave() {
+    # shellcheck disable=SC2016  # the shims are the CHILD shell's own text
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        # shellcheck disable=SC1090
+        source "$2" >/dev/null 2>&1 || exit 92
+        root="$3"; identity="$4"; pass="$5"; divergent="$6"; mode="$7"
+        CLOSURE_PUBLISH_IDENTITY="$identity"
+        CLOSURE_PUBLISH_CONFIG_DIGEST="$8"
+        after_write=no
+        cat() {
+            command cat "$@" || return $?
+            after_write=yes
+            if [ ! -e "$root/$identity" ]; then
+                ( unset -f cat mktemp; closure_evidence_emit "$root" "$identity" "$pass" ) >&2
+            fi
+        }
+        if [ "$mode" = inject ]; then
+            mktemp() {
+                case "${*: -1}" in
+                    *.conflict.*) if [ "$after_write" = yes ]; then return 1; fi ;;
+                esac
+                command mktemp "$@"
+            }
+        fi
+        closure_evidence_emit "$root" "$identity" "$divergent" >/dev/null 2>&1
+        printf "differing_emit_rc=%s\n" "$?"
+        unset -f cat mktemp
+        retained=0
+        while IFS= read -r path; do
+            if [ "$(sha256sum -- "$path" | sed -e "s/ .*$//")" \
+               = "$(sha256sum -- "$divergent" | sed -e "s/ .*$//")" ]; then
+                retained=$((retained + 1))
+            fi
+        done < <(find "$root" -maxdepth 1 -type f)
+        printf "exact_differing_copies=%s\n" "$retained"
+        closure_publish_step2 unused "$root" >/dev/null 2>&1
+        printf "publication_step2_rc=%s\n" "$?"
+        closure_evidence_emit "$root" "$identity" "$pass" >/dev/null 2>&1
+        printf "agreeing_rerun_rc=%s\n" "$?"
+    ' _ "$SHIPPED_DIR/closure_verify.sh" "$SHIPPED_DIR/closure_publish.sh" "$@" 2>/dev/null
+}
+
+verify_payload() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        closure_verify_payload "$2" "$3" "$4"
+    ' _ "$SHIPPED_DIR/closure_verify.sh" "$1" "$2" "$3" 2>/dev/null
+}
+
+step6_suite() {
+    local dir="$SCRATCH/step6"
+    local src="$SHIPPED_DIR"
+    local verify="$SHIPPED_DIR/closure_verify.sh"
+    local observe="$SHIPPED_DIR/closure_observe_live.sh"
+    local deliver="$CI_DIR/deliver-closure-tools.sh"
+    local publish="$SHIPPED_DIR/closure_publish.sh"
+    local repo="" commit="" id="" cfg="" out="" rc=0 root="" ws="" name=""
+    local d1="" d2="" blob=""
+    local step6_specs=() side_a="" side_b="" side_c=""
+    local e2e_out="" e2e_rc=0 e2e_pub=""
+
+    rm -rf -- "$dir"
+    mkdir -p -- "$dir" || return
+
+    # --- the third grammar table ------------------------------------------------
+    #
+    # THE READER IS THE CONTRACT, and these cases are the contract's own tests. A
+    # document publication accepts is one this reader accepted, so every refusal
+    # below is a refusal publication inherits without a line of its own.
+    section "step 6 evidence grammar: a machine writes it, so it refuses what a person would leave"
+    cfg=$(config_digest "$src/../closure/closure-config.txt")
+    id=$(printf 'a candidate archive\n' | sha256sum); id="${id%% *}"
+
+    evidence_document "$dir/good.txt" "$id" "$cfg"
+    verify_call closure_evidence_parse "$dir/good.txt"
+    chk "step6/grammar/well-formed-parses" "0" "$VERIFY_RC"
+    chk "step6/grammar/model-carries-both-identities-and-the-verdict" "$id|$cfg|PASS" \
+        "$(verify_model "$dir/good.txt")"
+
+    # A DOCUMENT THAT ASSERTS WHAT ITS RECORDS DENY. This is the case the derived
+    # verdict exists for: an emitter cannot claim PASS over a divergent pair, and
+    # publication never has to check the pair itself.
+    evidence_document "$dir/lie.txt" "$id" "$cfg" absent
+    sed -e 's/^verdict|DIVERGENT$/verdict|PASS/' "$dir/lie.txt" > "$dir/lie2.txt"
+    verify_call closure_evidence_parse "$dir/lie2.txt"
+    chk "step6/grammar/asserted-pass-over-a-divergence-refuses" "1" "$VERIFY_RC"
+    chk "step6/grammar/refusal-names-the-derivation" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'asserts PASS and its own records derive DIVERGENT' && echo yes || echo no)"
+    # And the honest DIVERGENT document parses, so the refusal above is about the
+    # contradiction rather than about divergence being unrepresentable.
+    verify_call closure_evidence_parse "$dir/lie.txt"
+    chk "step6/grammar/honest-divergence-parses" "0" "$VERIFY_RC"
+
+    # AN UNEXPECTED RECORD ALSO FORCES A NON-PASS, which is the second half of the
+    # derivation and the one a pair-only comparison would have missed.
+    evidence_document "$dir/unexp.txt" "$id" "$cfg"
+    printf 'unexpected|%s|%s\n' post 'tools/old/py3.13' >> "$dir/unexp.txt"
+    verify_call closure_evidence_parse "$dir/unexp.txt"
+    chk "step6/grammar/unexpected-under-a-pass-refuses" "1" "$VERIFY_RC"
+    sed -e 's/^verdict|PASS$/verdict|DIVERGENT/' "$dir/unexp.txt" > "$dir/unexp2.txt"
+    verify_call closure_evidence_parse "$dir/unexp2.txt"
+    chk "step6/grammar/unexpected-under-a-divergent-parses" "0" "$VERIFY_RC"
+
+    # THE TWO LINES THE OTHER GRAMMARS IGNORE. A person edits a configuration and
+    # an envelope; only a machine writes this one, and one observation must have
+    # exactly one byte sequence.
+    { printf 'CPLX-CLOSURE-EVIDENCE/1\n'; printf '\n'; } > "$dir/blank.txt"
+    sed -e '1d' "$dir/good.txt" >> "$dir/blank.txt"
+    verify_call closure_evidence_parse "$dir/blank.txt"
+    chk "step6/grammar/blank-line-refuses" "1" "$VERIFY_RC"
+    chk "step6/grammar/blank-line-says-why" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'leaves no blank line' && echo yes || echo no)"
+    { printf 'CPLX-CLOSURE-EVIDENCE/1\n'; printf '# edited by hand\n'; } > "$dir/comment.txt"
+    sed -e '1d' "$dir/good.txt" >> "$dir/comment.txt"
+    verify_call closure_evidence_parse "$dir/comment.txt"
+    chk "step6/grammar/comment-refuses" "1" "$VERIFY_RC"
+    chk "step6/grammar/comment-says-why" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'leaves no comment' && echo yes || echo no)"
+
+    # THE FIXED ORDER. Reordered records parse to the same model and are not the
+    # same bytes, which is the whole of what canonical means for this document.
+    { sed -n '1,3p' "$dir/good.txt"
+      sed -n '5p' "$dir/good.txt"
+      sed -n '4p' "$dir/good.txt"
+      sed -n '6p' "$dir/good.txt"; } > "$dir/reordered.txt"
+    verify_call closure_evidence_parse "$dir/reordered.txt"
+    chk "step6/grammar/reordered-records-refuse" "1" "$VERIFY_RC"
+    chk "step6/grammar/reordered-names-the-order" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'cannot follow' && echo yes || echo no)"
+
+    # The shared lexical shape, inherited rather than reimplemented: an unknown
+    # token, a wrong field count and an out-of-domain value each refuse.
+    evidence_document "$dir/unknown.txt" "$id" "$cfg"
+    printf 'observation|%s\n' 'tools/python/root/lib' >> "$dir/unknown.txt"
+    verify_call closure_evidence_parse "$dir/unknown.txt"
+    chk "step6/grammar/unknown-record-refuses" "1" "$VERIFY_RC"
+    chk "step6/grammar/unknown-record-names-the-token" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'unknown-record|observation' && echo yes || echo no)"
+    sed -e 's@^pre|tools/python/root/lib|present$@pre|tools/python/root/lib@' \
+        "$dir/good.txt" > "$dir/short.txt"
+    verify_call closure_evidence_parse "$dir/short.txt"
+    chk "step6/grammar/wrong-field-count-refuses" "1" "$VERIFY_RC"
+    sed -e 's@|present$@|maybe@' "$dir/good.txt" > "$dir/domain.txt"
+    verify_call closure_evidence_parse "$dir/domain.txt"
+    chk "step6/grammar/presence-domain-refuses" "1" "$VERIFY_RC"
+    chk "step6/grammar/presence-domain-names-it" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'domain|presence: maybe' && echo yes || echo no)"
+    sed -e 's/^verdict|PASS$/verdict|MAYBE/' "$dir/good.txt" > "$dir/verdictdomain.txt"
+    verify_call closure_evidence_parse "$dir/verdictdomain.txt"
+    chk "step6/grammar/verdict-domain-refuses" "1" "$VERIFY_RC"
+    evidence_document "$dir/side.txt" "$id" "$cfg"
+    sed -e 's/^verdict|PASS$/verdict|DIVERGENT/' "$dir/side.txt" > "$dir/side2.txt"
+    printf 'unexpected|%s|%s\n' during 'tools/old/py3.13' >> "$dir/side2.txt"
+    verify_call closure_evidence_parse "$dir/side2.txt"
+    chk "step6/grammar/side-domain-refuses" "1" "$VERIFY_RC"
+
+    # CARDINALITY AND PAIRING, the two shapes a well-formed record set can still
+    # take and be no description of one comparison.
+    evidence_document "$dir/twice.txt" "$id" "$cfg"
+    sed -e "2a archive|$id" "$dir/twice.txt" > "$dir/twice2.txt"
+    verify_call closure_evidence_parse "$dir/twice2.txt"
+    chk "step6/grammar/two-archive-records-refuse" "1" "$VERIFY_RC"
+    sed -e '/^verdict|/d' "$dir/good.txt" > "$dir/noverdict.txt"
+    verify_call closure_evidence_parse "$dir/noverdict.txt"
+    chk "step6/grammar/no-verdict-refuses" "1" "$VERIFY_RC"
+    sed -e '/^post|/d' "$dir/good.txt" > "$dir/nopost.txt"
+    verify_call closure_evidence_parse "$dir/nopost.txt"
+    chk "step6/grammar/unpaired-sides-refuse" "1" "$VERIFY_RC"
+    chk "step6/grammar/unpaired-names-the-counts" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q '1 pre records and 0 post records' && echo yes || echo no)"
+    sed -e '1d' "$dir/good.txt" > "$dir/noversion.txt"
+    verify_call closure_evidence_parse "$dir/noversion.txt"
+    chk "step6/grammar/missing-version-line-refuses" "1" "$VERIFY_RC"
+
+    # --- the pipeline delivery --------------------------------------------------
+    #
+    # THE BOOTSTRAP CANNOT BE DELIVERED BY WHAT IT DELIVERS, so this script runs
+    # from the cplx checkout the pipeline already has and reads nothing from the
+    # candidate. Its refusals are what stop a job running a mixture of two commits.
+    section "step 6 delivery: the authoritative copies, or none of them"
+    repo="$dir/repo"
+    commit=$(step6_make_repo "$repo" "$src")
+    if [ -z "$commit" ]; then
+        fail "step6/delivery/fixture" "cannot build the fixture repository at $repo"
+    else
+        ws="$dir/ws"
+        out=$(bash "$deliver" --repo "$repo" --commit "$commit" --into "$ws" 2>&1); rc=$?
+        chk "step6/delivery/complete-delivery-succeeds" "0" "$rc"
+        chk "step6/delivery/every-name-is-present" "8" \
+            "$(find "$ws" -maxdepth 1 -type f -name '*.sh' 2>/dev/null | grep -c . || true)"
+        chk "step6/delivery/verdict-names-the-commit" "yes" \
+            "$(printf '%s' "$out" | grep -q "^DELIVERY|COMPLETE|$commit" && echo yes || echo no)"
+        # THE DELIVERED BYTES ARE THE COMMIT'S BYTES, which is the property the
+        # whole authority argument rests on and the one a manifest alone does not
+        # give: a manifest of what was written proves nothing about where it came
+        # from.
+        blob=$(git -C "$repo" cat-file blob "$commit:src/setups/env/bin/closure_check.sh" | sha256sum)
+        chk "step6/delivery/bytes-are-the-commits" "${blob%% *}" \
+            "$(sha256sum -- "$ws/closure_check.sh" | sed -e 's/ .*$//')"
+
+        # A REFERENCE WHOSE CONTENT CAN CHANGE is refused before a byte is
+        # written, so two jobs claiming one delivery cannot run different bytes.
+        rm -rf -- "$dir/ws-branch"
+        out=$(bash "$deliver" --repo "$repo" --commit master --into "$dir/ws-branch" 2>&1); rc=$?
+        chk "step6/delivery/a-branch-refuses" "1" "$rc"
+        chk "step6/delivery/a-branch-writes-nothing" "" \
+            "$(oneline "$(find "$dir/ws-branch" -type f 2>/dev/null)")"
+        d1=$(git -C "$repo" rev-parse "$commit:src/setups/env/bin/closure_check.sh" 2>/dev/null)
+        rm -rf -- "$dir/ws-blob"
+        out=$(bash "$deliver" --repo "$repo" --commit "$d1" --into "$dir/ws-blob" 2>&1); rc=$?
+        chk "step6/delivery/a-40-hex-blob-refuses" "1" "$rc"
+        chk "step6/delivery/blob-refusal-names-the-type" "yes" \
+            "$(printf '%s' "$out" | grep -q 'names a blob' && echo yes || echo no)"
+
+        # A PARTIAL DELIVERY IS NOT A DELIVERY. The workspace is complete or empty
+        # and never a mixture, because a job that found four of eight would run
+        # them and produce evidence under two commits.
+        ( cd "$repo" && git rm -q src/setups/env/bin/closure_elf.sh >/dev/null 2>&1 \
+          && git commit -q -m 'drop one' >/dev/null 2>&1 ) || true
+        d2=$(git -C "$repo" rev-parse HEAD 2>/dev/null)
+        rm -rf -- "$dir/ws-partial"
+        out=$(bash "$deliver" --repo "$repo" --commit "$d2" --into "$dir/ws-partial" 2>&1); rc=$?
+        chk "step6/delivery/a-missing-blob-refuses" "1" "$rc"
+        chk "step6/delivery/a-missing-blob-names-it" "yes" \
+            "$(printf '%s' "$out" | grep -q 'holds no blob at src/setups/env/bin/closure_elf.sh' && echo yes || echo no)"
+        # THE ASSERTION THAT MAKES THIS CASE ITS OWN: two names were written
+        # before the failure and neither survives it.
+        chk "step6/delivery/a-missing-blob-withdraws-what-it-wrote" "" \
+            "$(oneline "$(find "$dir/ws-partial" -type f 2>/dev/null)")"
+        ( cd "$repo" && git revert -q --no-edit HEAD >/dev/null 2>&1 ) || true
+    fi
+    rm -rf -- "$dir/nonrepo"; mkdir -p -- "$dir/nonrepo"
+    out=$(bash "$deliver" --repo "$dir/nonrepo" --commit "$commit" --into "$dir/ws-none" 2>&1); rc=$?
+    chk "step6/delivery/a-non-checkout-refuses" "1" "$rc"
+    chk "step6/delivery/non-checkout-says-there-is-no-other-source" "yes" \
+        "$(printf '%s' "$out" | grep -q 'no other source' && echo yes || echo no)"
+
+    # --- the live observer ------------------------------------------------------
+    #
+    # THE HALF NO STATIC READ CAN ANSWER, and the one develop#20 got wrong: a
+    # trace that inventoried nothing reported "no host library loaded", which is
+    # true of an empty observation and reads as a pass.
+    section "step 6 live observer: an empty inventory is not a pass"
+    root="$dir/proc-clean"
+    step6_plant_proc "$root" 4242 python3 /opt/tools/python/current/bin/python3 \
+        /opt/tools/python/root/lib/libc.so.6 /opt/tools/python/current/bin/python3
+    out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/clean-inventory-is-conclusive" "0" "$rc"
+    chk "step6/live/it-names-the-process-it-inventoried" "yes" \
+        "$(printf '%s' "$out" | grep -q '^PROCESS|4242|python3' && echo yes || echo no)"
+    chk "step6/live/shipped-objects-are-classified" "2" \
+        "$(printf '%s' "$out" | grep -c '|shipped$' || true)"
+    chk "step6/live/pseudo-and-anonymous-mappings-are-not-objects" "0" \
+        "$(printf '%s' "$out" | grep -c 'OBJECT|4242|\[' || true)"
+
+    root="$dir/proc-host"
+    step6_plant_proc "$root" 77 python3 /opt/tools/python/current/bin/python3 \
+        /opt/tools/python/root/lib/libc.so.6 /usr/lib/x86_64-linux-gnu/libssl.so.3
+    out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/a-host-object-refuses" "1" "$rc"
+    chk "step6/live/the-refusal-counts-them" "yes" \
+        "$(printf '%s' "$out" | grep -q 'map 1 object(s) from outside /opt' && echo yes || echo no)"
+
+    # THE PREFIX TEST IS A PREFIX TEST. A host path that merely contains the
+    # prefix as text is a host path, and reading it as shipped would hide exactly
+    # the fallback this observation exists to find.
+    root="$dir/proc-lookalike"
+    step6_plant_proc "$root" 78 python3 /opt/tools/python/current/bin/python3 \
+        /var/backup/opt/tools/python/root/lib/libc.so.6
+    out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/a-lookalike-path-is-a-host-object" "1" "$rc"
+
+    # THE REFUSAL THIS FILE EXISTS FOR, and it has its own exit code so a caller
+    # cannot read it as either outcome.
+    root="$dir/proc-empty"
+    step6_plant_proc "$root" 79 bash /bin/bash /lib/x86_64-linux-gnu/libc.so.6
+    out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/an-empty-inventory-is-inconclusive" "4" "$rc"
+    chk "step6/live/it-is-neither-a-pass-nor-a-refusal" "yes" \
+        "$(printf '%s' "$out" | grep -q '^LIVE|INCONCLUSIVE|' && echo yes || echo no)"
+    chk "step6/live/it-never-says-nothing-was-found" "yes" \
+        "$(printf '%s' "$out" | grep -q 'CONCLUSIVE|0 process' && echo no || echo yes)"
+
+    # AN EMPTY MAPPING TABLE IS NOT AN INVENTORY, and round 1 of this review
+    # reproduced it reading as a clean one. A matched process whose `maps` is
+    # readable and EMPTY is what an exited or zombie process leaves: it mapped
+    # nothing observable, which is not the claim "it mapped no host object", and
+    # the two must not share an exit code.
+    root="$dir/proc-emptymaps"
+    step6_plant_proc "$root" 81 python3 /opt/tools/python/current/bin/python3
+    : > "$root/81/maps"
+    out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/an-empty-mapping-table-is-inconclusive" "4" "$rc"
+    chk "step6/live/an-empty-mapping-table-is-never-conclusive" "no" \
+        "$(printf '%s' "$out" | grep -q '^LIVE|CONCLUSIVE|' && echo yes || echo no)"
+    chk "step6/live/the-unusable-process-is-named" "yes" \
+        "$(printf '%s' "$out" | grep -q '^UNUSABLE|81|' && echo yes || echo no)"
+
+    # A READ THAT FAILS IS NOT AN EMPTY READING EITHER, which is the second half
+    # of the same finding: the collection ran in a process substitution whose
+    # completion this loop could not observe, so a mapping table that disappeared
+    # under the read ended the loop exactly as a full inventory did.
+    root="$dir/proc-unreadable"
+    step6_plant_proc "$root" 82 python3 /opt/tools/python/current/bin/python3 \
+        /opt/tools/python/root/lib/libc.so.6
+    rm -f -- "$root/82/maps"
+    mkdir -p -- "$root/82/maps"
+    out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/an-unreadable-mapping-table-is-inconclusive" "4" "$rc"
+    chk "step6/live/the-failed-collection-is-named" "yes" \
+        "$(printf '%s' "$out" | grep -q '^UNUSABLE|82|' && echo yes || echo no)"
+
+    # THE COUNT IS OF USABLE INVENTORIES, and the control says so from the other
+    # side: one readable process beside one empty one is ONE inventory, and the
+    # run is conclusive on the strength of the one that could be read.
+    root="$dir/proc-mixed"
+    step6_plant_proc "$root" 83 python3 /opt/tools/python/current/bin/python3 \
+        /opt/tools/python/root/lib/libc.so.6
+    step6_plant_proc "$root" 84 python3 /opt/tools/python/current/bin/python3
+    : > "$root/84/maps"
+    out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/control/one-usable-inventory-is-conclusive" "0" "$rc"
+    chk "step6/live/control/the-count-excludes-the-unusable-one" "yes" \
+        "$(printf '%s' "$out" | grep -q '^LIVE|CONCLUSIVE|1 process' && echo yes || echo no)"
+
+    # `comm` IS TRUNCATED BY THE KERNEL at fifteen characters, so a longer name is
+    # findable only through argv[0] and a reader with one source would miss it.
+    root="$dir/proc-long"
+    step6_plant_proc "$root" 80 'closure-verifi' /opt/tools/bin/closure-verification-driver \
+        /opt/tools/python/root/lib/libc.so.6
+    out=$(bash "$observe" --process closure-verification-driver --prefix /opt --proc "$root" 2>&1); rc=$?
+    chk "step6/live/a-truncated-comm-is-found-through-argv0" "0" "$rc"
+
+    # --- the results root, and what may occupy a canonical name -----------------
+    #
+    # THE ROOT IS VALIDATED BEFORE ANY WRITE, and each failure is a refusal rather
+    # than a warning: a result written into a directory another account can
+    # replace is not evidence about anything.
+    section "step 6 evidence storage: validated before a byte, and never overwritten"
+    root="$dir/store"
+    mkdir -p -- "$root/real" "$root/loose" "$root/other" || true
+    chmod 0755 "$root/real"
+    chmod 0775 "$root/loose"
+    chmod 0757 "$root/other"
+    ln -s -- "$root/real" "$root/link" 2>/dev/null
+    printf 'not a directory\n' > "$root/file"
+    evidence_document "$dir/store-body.txt" "$id" "$cfg"
+
+    verify_call closure_evidence_emit "$root/link" "$id" "$dir/store-body.txt"
+    chk "step6/storage/a-symlink-root-refuses" "1" "$VERIFY_RC"
+    chk "step6/storage/symlink-refusal-is-about-the-symlink" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'is a symlink' && echo yes || echo no)"
+    # AND IT WROTE NOTHING THROUGH THE LINK, which is the half the exit status
+    # does not carry: a refusal that had already created the file would have
+    # placed evidence exactly where the symlink pointed.
+    chk "step6/storage/a-symlink-root-writes-nothing" "" \
+        "$(oneline "$(find "$root/real" -type f 2>/dev/null)")"
+    verify_call closure_evidence_emit "$root/file" "$id" "$dir/store-body.txt"
+    chk "step6/storage/a-file-root-refuses" "1" "$VERIFY_RC"
+    verify_call closure_evidence_emit "$root/loose" "$id" "$dir/store-body.txt"
+    chk "step6/storage/a-group-writable-root-refuses" "1" "$VERIFY_RC"
+    chk "step6/storage/group-writable-refusal-says-why" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'writable by group or other' && echo yes || echo no)"
+    verify_call closure_evidence_emit "$root/other" "$id" "$dir/store-body.txt"
+    chk "step6/storage/an-other-writable-root-refuses" "1" "$VERIFY_RC"
+    verify_call closure_evidence_emit "$root/absent" "$id" "$dir/store-body.txt"
+    chk "step6/storage/an-absent-root-refuses" "1" "$VERIFY_RC"
+
+    # THE HAPPY PATH, and the bytes at the canonical name are the bytes handed in.
+    verify_call closure_evidence_emit "$root/real" "$id" "$dir/store-body.txt"
+    chk "step6/storage/a-good-root-writes-the-canonical-name" "0" "$VERIFY_RC"
+    chk "step6/storage/it-says-what-it-wrote" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q "^EVIDENCE|WRITTEN|$root/real/$id\$" && echo yes || echo no)"
+    chk "step6/storage/the-stored-bytes-are-the-document" \
+        "$(sha256sum -- "$dir/store-body.txt" | sed -e 's/ .*$//')" \
+        "$(sha256sum -- "$root/real/$id" 2>/dev/null | sed -e 's/ .*$//')"
+    # NO TEMPORARY SURVIVES A SUCCESS, so a results root never accumulates the
+    # half-written files the promotion exists to keep out of the canonical name.
+    chk "step6/storage/no-temporary-is-left-behind" "" \
+        "$(oneline "$(find "$root/real" -maxdepth 1 -name '.evidence.*' 2>/dev/null)")"
+
+    # THREE OUTCOMES WHEN THE NAME IS TAKEN, and only the first two are success.
+    verify_call closure_evidence_emit "$root/real" "$id" "$dir/store-body.txt"
+    chk "step6/storage/an-identical-rerun-is-idempotent" "0" "$VERIFY_RC"
+    chk "step6/storage/idempotent-says-so" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q '^EVIDENCE|IDEMPOTENT|' && echo yes || echo no)"
+    evidence_document "$dir/store-other.txt" "$id" "$cfg" absent
+    verify_call closure_evidence_emit "$root/real" "$id" "$dir/store-other.txt"
+    chk "step6/storage/a-different-result-refuses" "1" "$VERIFY_RC"
+    chk "step6/storage/it-is-retained-under-a-conflict-name" "1" \
+        "$(find "$root/real" -maxdepth 1 -name "$id.conflict.*" 2>/dev/null | grep -c . || true)"
+    # AND THE CANONICAL FILE IS UNTOUCHED, which is what "nothing is ever silently
+    # overwritten" means and what the exit status alone would not say.
+    chk "step6/storage/the-canonical-file-is-unchanged" \
+        "$(sha256sum -- "$dir/store-body.txt" | sed -e 's/ .*$//')" \
+        "$(sha256sum -- "$root/real/$id" 2>/dev/null | sed -e 's/ .*$//')"
+    chk "step6/storage/the-conflict-stops-the-run" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'which one is wrong is a human decision' && echo yes || echo no)"
+
+    # AND IT KEEPS STOPPING, which is the half round 1 of this review found
+    # missing. The retained conflict is UNRESOLVED evidence, so the very next run
+    # that agrees with the canonical file is not entitled to the idempotent zero:
+    # agreeing with one of two answers does not decide which of them is wrong.
+    verify_call closure_evidence_emit "$root/real" "$id" "$dir/store-body.txt"
+    chk "step6/storage/an-agreeing-rerun-under-a-conflict-refuses" "1" "$VERIFY_RC"
+    chk "step6/storage/the-agreeing-rerun-is-not-idempotent" "no" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q '^EVIDENCE|IDEMPOTENT|' && echo yes || echo no)"
+    chk "step6/storage/the-agreeing-rerun-says-what-is-unresolved" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q 'a rerun that agrees with one of the two' && echo yes || echo no)"
+
+    # A SECOND DIFFERING RESULT IS RETAINED BESIDE THE FIRST, and this is the case
+    # a timestamp alone loses: both conflicts are produced inside the same second
+    # here, so a name carrying only that second would have made the second `ln`
+    # fail and DROPPED the evidence the recovery rule exists to keep.
+    evidence_document "$dir/store-third.txt" "$id" \
+        "$(printf 'a third policy\n' | sha256sum | sed -e 's/ .*$//')"
+    verify_call closure_evidence_emit "$root/real" "$id" "$dir/store-third.txt"
+    chk "step6/storage/a-second-different-result-also-refuses" "1" "$VERIFY_RC"
+    chk "step6/storage/both-conflicts-are-retained" "2" \
+        "$(find "$root/real" -maxdepth 1 -name "$id.conflict.*" 2>/dev/null | grep -c . || true)"
+    chk "step6/storage/the-second-conflict-is-reported-at-its-name" "yes" \
+        "$(printf '%s' "$VERIFY_OUT" | grep -q "^EVIDENCE|CONFLICT|$root/real/$id.conflict." && echo yes || echo no)"
+    # THE CANONICAL FILE IS STILL THE FIRST RESULT after both conflicts, which is
+    # what "nothing is ever silently overwritten" means across more than one.
+    chk "step6/storage/the-canonical-file-survives-both" \
+        "$(sha256sum -- "$dir/store-body.txt" | sed -e 's/ .*$//')" \
+        "$(sha256sum -- "$root/real/$id" 2>/dev/null | sed -e 's/ .*$//')"
+
+    # THE SHARED READER REFUSES THE SAME STATE, which is what carries the stop
+    # into publication: the reader is the one gate both consumers pass through, so
+    # a record with a conflict beside it is not evidence to either of them.
+    chk "step6/storage/the-reader-refuses-a-conflicted-record" "" \
+        "$(verify_model "$root/real/$id")"
+
+    # A PARTIAL WRITE LEAVES NOTHING AT THE CANONICAL NAME, and the rerun after it
+    # SUCCEEDS. The second half is the point: a no-overwrite rule on its own would
+    # have let one transient failure make an archive unverifiable forever.
+    mkdir -p -- "$root/partial" || true
+    chmod 0755 "$root/partial"
+    d2=$(printf 'a second candidate\n' | sha256sum); d2="${d2%% *}"
+    verify_call closure_evidence_emit "$root/partial" "$d2" "$dir/no-such-body.txt"
+    chk "step6/storage/an-unreadable-body-refuses" "1" "$VERIFY_RC"
+    chk "step6/storage/a-partial-write-leaves-no-canonical-name" "no" \
+        "$( [ -e "$root/partial/$d2" ] && echo yes || echo no )"
+    verify_call closure_evidence_emit "$root/partial" "$d2" "$dir/store-body.txt"
+    chk "step6/storage/a-rerun-after-a-partial-write-succeeds" "0" "$VERIFY_RC"
+
+    # --- the driver, and the ordering the bootstrap rests on --------------------
+    section "step 6 driver: the delivery comes first, and there is no fallback"
+    root="$dir/drive"
+    mkdir -p -- "$root/results" "$root/empty-ws" || true
+    chmod 0755 "$root/results"
+    # AN ABSENT DELIVERY REFUSES BEFORE THE ARCHIVE IS OPENED, and the archive
+    # named here DOES NOT EXIST: a run that opened it first would refuse for that
+    # reason instead, so the refusal text is what proves the order.
+    out=$(bash "$verify" --archive "$root/no-such-archive.tar.gz" --prefix "$root/prefix" \
+        --results "$root/results" --tools "$root/empty-ws" --target tools 2>&1); rc=$?
+    chk "step6/driver/an-absent-delivery-refuses" "1" "$rc"
+    chk "step6/driver/it-names-what-the-pipeline-did-not-deliver" "yes" \
+        "$(printf '%s' "$out" | grep -q 'the pipeline delivered no closure_check.sh' && echo yes || echo no)"
+    chk "step6/driver/it-refuses-before-it-opens-the-archive" "yes" \
+        "$(printf '%s' "$out" | grep -q 'cannot be read' && echo no || echo yes)"
+    chk "step6/driver/it-offers-no-fallback-to-the-candidate" "yes" \
+        "$(printf '%s' "$out" | grep -q 'no copy inside the candidate may stand in' && echo yes || echo no)"
+
+    # WITH THE DELIVERY PRESENT, an unreadable archive refuses and names THAT
+    # input. The pair is the ordering assertion: the same run, two inputs, and
+    # which one is reported says which was read first.
+    if [ -d "$dir/ws" ]; then
+        out=$(bash "$verify" --archive "$root/no-such-archive.tar.gz" --prefix "$root/prefix" \
+            --results "$root/results" --tools "$dir/ws" --target tools 2>&1); rc=$?
+        chk "step6/driver/an-unreadable-archive-refuses" "1" "$rc"
+        chk "step6/driver/it-names-the-missing-archive" "yes" \
+            "$(printf '%s' "$out" | grep -q 'cannot be read' && echo yes || echo no)"
+        chk "step6/driver/the-delivery-was-reported-present-first" "yes" \
+            "$(printf '%s' "$out" | grep -q '^DELIVERY|PRESENT|' && echo yes || echo no)"
+    else
+        fail "step6/driver/delivery-fixture" "the delivery fixture at $dir/ws was not built"
+    fi
+
+    # --- the comparison, both directions ----------------------------------------
+    #
+    # THE TWO DIVERGENCES DIFFER ONLY IN WHICH SIDE IS MISSING, and both must be
+    # present: a build-account claim would have passed the second, which is the
+    # whole reason the build side is derived from the archive.
+    section "step 6 comparison: a directory on one side only, in both directions"
+    root="$dir/compare"
+    mkdir -p -- "$root/in-archive/tools/python/root/lib" || true
+    mkdir -p -- "$root/in-archive/tools/python/current/lib" || true
+    mkdir -p -- "$root/in-archive/tools/git/root/lib" || true
+    mkdir -p -- "$root/installed/tools/python/root/lib" || true
+    mkdir -p -- "$root/installed/tools/python/current/lib" || true
+    # The declared shape both sides are measured against, from the committed
+    # declaration rather than from a list this suite invented.
+    step6_specs=()
+    while IFS= read -r name; do
+        if [ -n "$name" ]; then step6_specs+=("$name"); fi
+    done < <(config_specs "$src/../closure/closure-config.txt")
+
+    if [ "${#step6_specs[@]}" -eq 0 ]; then
+        fail "step6/compare/specs" "the committed declaration yielded no root specification"
+    else
+        side_a=$(verify_side "$root/in-archive" "$src/install_pkg.sh" "${step6_specs[@]}")
+        side_b=$(verify_side "$root/installed" "$src/install_pkg.sh" "${step6_specs[@]}")
+        chk "step6/compare/the-archive-side-sees-the-directory" "yes" \
+            "$(printf '%s' "$side_a" | grep -q '^presence|tools/git/root/lib|present$' && echo yes || echo no)"
+        chk "step6/compare/the-installed-side-does-not" "yes" \
+            "$(printf '%s' "$side_b" | grep -q '^presence|tools/git/root/lib|absent$' && echo yes || echo no)"
+        chk "step6/compare/present-in-the-archive-and-absent-installed-is-DIVERGENT" "DIVERGENT" \
+            "$(verify_verdict "$side_a" "$side_b")"
+        # THE OTHER DIRECTION, which a transported packaging claim would have
+        # reported as present on both sides.
+        chk "step6/compare/present-installed-and-absent-in-the-archive-is-DIVERGENT" "DIVERGENT" \
+            "$(verify_verdict "$side_b" "$side_a")"
+        # AND THE CONTROL: one side against itself is a PASS, so DIVERGENT above
+        # is about the difference rather than about the comparison always failing.
+        chk "step6/compare/one-side-against-itself-passes" "PASS" \
+            "$(verify_verdict "$side_a" "$side_a")"
+        # AN UNEXPECTED ROOT FORCES DIVERGENT TOO, which is the second input to
+        # the derivation and the one a pair-only comparison would have missed.
+        mkdir -p -- "$root/installed/tools/old/py3.13/lib" || true
+        side_c=$(verify_side "$root/installed" "$src/install_pkg.sh" "${step6_specs[@]}")
+        chk "step6/compare/an-undeclared-root-is-unexpected" "yes" \
+            "$(printf '%s' "$side_c" | grep -q '^unexpected|tools/old/py3.13/lib$' && echo yes || echo no)"
+        chk "step6/compare/an-unexpected-finding-is-DIVERGENT" "DIVERGENT" \
+            "$(verify_verdict "$side_c" "$side_c")"
+
+        # THE ARCHIVE SIDE, FROM A REAL ARCHIVE, and round 1 of this review found
+        # why two hand-made directory trees could not have caught it.
+        # `tools/python/current` is a SYMLINKED DIRECTORY, which `tar -t` lists by
+        # name with no trailing slash, so the pass that turns entries into
+        # directories contributed its PARENT and dropped the alias. The installed
+        # tree resolves `current/lib`; the skeleton reported it absent; and an
+        # archive whose committed declaration names that alias was DIVERGENT for a
+        # difference that is not there.
+        root="$dir/alias"
+        rm -rf -- "$root"
+        # THE ALIAS TARGET IS A DECLARED ROOT, and it has to be: an undeclared
+        # directory is an unexpected finding on both sides and would make the
+        # comparison DIVERGENT for a reason that has nothing to do with the
+        # alias. The name comes from the committed declaration.
+        mkdir -p -- "$root/tree/tools/python/python-3.13.9/lib" \
+            "$root/tree/tools/python/root/lib" "$root/tree/tools/git/root/lib" \
+            "$root/work" || true
+        ln -s -- python-3.13.9 "$root/tree/tools/python/current"
+        tar -czf "$root/archive.tar.gz" -C "$root/tree" tools 2>/dev/null
+        verify_call closure_verify_skeleton "$root/archive.tar.gz" "$root/work"
+        chk "step6/compare/the-skeleton-is-derived-from-a-real-archive" "0" "$VERIFY_RC"
+        chk "step6/compare/the-directory-alias-is-reconstructed" "yes" \
+            "$( [ -L "$root/work/tree/tools/python/current" ] && echo yes || echo no )"
+        chk "step6/compare/the-alias-resolves-as-it-does-installed" "yes" \
+            "$( [ -d "$root/work/tree/tools/python/current/lib" ] && echo yes || echo no )"
+        # AND THE COMPARISON THAT MATTERS: the skeleton against the tree the
+        # archive was made from, through the SAME derivation both sides use. A
+        # supported archive compares equal to itself, which is the property the
+        # missing alias was breaking.
+        side_a=$(verify_side "$root/work/tree" "$src/install_pkg.sh" "${step6_specs[@]}")
+        side_b=$(verify_side "$root/tree" "$src/install_pkg.sh" "${step6_specs[@]}")
+        chk "step6/compare/the-alias-is-present-on-the-archive-side" "yes" \
+            "$(printf '%s' "$side_a" | grep -q '^presence|tools/python/current/lib|present$' && echo yes || echo no)"
+        chk "step6/compare/a-supported-alias-is-not-a-divergence" "PASS" \
+            "$(verify_verdict "$side_a" "$side_b")"
+        # TWO SPELLINGS OF ONE DIRECTORY MUST NOT BE TWO VERDICTS, which round 2
+        # of this review found them to be. The archive-side test refused every
+        # target holding `..`, so the ordinary `../python/python-3.13.9` spelling
+        # of the same alias was dropped from the skeleton while the installed tree
+        # resolved it, and a supported archive read DIVERGENT. What matters is
+        # CONTAINMENT, so the link's own depth is counted and the target walked
+        # from there.
+        rm -rf -- "$root/rel"
+        mkdir -p -- "$root/rel/tree/tools/python/python-3.13.9/lib" \
+            "$root/rel/tree/tools/python/root/lib" "$root/rel/tree/tools/git/root/lib" \
+            "$root/rel/work" || true
+        ln -s -- ../python/python-3.13.9 "$root/rel/tree/tools/python/current"
+        tar -czf "$root/rel/archive.tar.gz" -C "$root/rel/tree" tools 2>/dev/null
+        verify_call closure_verify_skeleton "$root/rel/archive.tar.gz" "$root/rel/work"
+        chk "step6/compare/a-parent-relative-alias-is-reconstructed" "yes" \
+            "$( [ -L "$root/rel/work/tree/tools/python/current" ] && echo yes || echo no )"
+        chk "step6/compare/a-parent-relative-alias-resolves" "yes" \
+            "$( [ -d "$root/rel/work/tree/tools/python/current/lib" ] && echo yes || echo no )"
+        side_c=$(verify_side "$root/rel/work/tree" "$src/install_pkg.sh" "${step6_specs[@]}")
+        chk "step6/compare/the-two-spellings-observe-alike" \
+            "$(oneline "$(printf '%s' "$side_a" | grep '^presence|' || true)")" \
+            "$(oneline "$(printf '%s' "$side_c" | grep '^presence|' || true)")"
+        chk "step6/compare/a-parent-relative-alias-is-not-a-divergence" "PASS" \
+            "$(verify_verdict "$side_c" \
+                "$(verify_side "$root/rel/tree" "$src/install_pkg.sh" "${step6_specs[@]}")")"
+        # THE CONTAINMENT CONTROL: a target that leaves the archive is refused,
+        # so the repair is about resolving `..` rather than about permitting it.
+        verify_call closure_verify_contained tools/python/current ../../../etc
+        chk "step6/compare/control/an-escaping-target-is-refused" "1" "$VERIFY_RC"
+        verify_call closure_verify_contained tools/python/current /etc/passwd
+        chk "step6/compare/control/an-absolute-target-is-refused" "1" "$VERIFY_RC"
+        verify_call closure_verify_contained tools/python/current ../python/python-3.13.9
+        chk "step6/compare/control/a-contained-target-is-accepted" "0" "$VERIFY_RC"
+
+        # THE CONTROL, so the alias handling cannot pass by accepting everything:
+        # the same archive against a tree where the alias TARGET was removed is
+        # still DIVERGENT, because the difference is then real.
+        rm -rf -- "$root/tree/tools/python/python-3.13.9"
+        side_c=$(verify_side "$root/tree" "$src/install_pkg.sh" "${step6_specs[@]}")
+        chk "step6/compare/control/a-broken-alias-is-still-DIVERGENT" "DIVERGENT" \
+            "$(verify_verdict "$side_a" "$side_c")"
+    fi
+
+    # --- publication, driven by a producer rather than by a fixture -------------
+    #
+    # STEP 5 ASSERTED THIS GATE AGAINST A RECORD THIS HARNESS WROTE. Here the same
+    # gate reads a document the shared reader accepts, so the two failures Design
+    # Area 7 says fall out of the identity binding are asserted against evidence
+    # rather than against an agreement between two halves of one test.
+    section "step 6 publication: the identity binding, against a real evidence document"
+    root="$dir/pub"
+    mkdir -p -- "$root/staging" "$root/results" "$root/tree/tools/closure" || true
+    chmod 700 "$root/staging"
+    chmod 0755 "$root/results"
+    if [ -z "$commit" ]; then
+        fail "step6/publication/fixture" "no fixture commit to publish against"
+    else
+        cp -- "$src/../closure/closure-config.txt" "$root/tree/tools/closure/closure-config.txt"
+        step2_write_envelope "$root/tree/tools/closure/closure-envelope.txt" \
+            "$(config_digest "$root/tree/tools/closure/closure-config.txt")" \
+            "src/setups/env/closure/closure-config.txt" "$commit"
+        tar -czf "$root/a.tar.gz" -C "$root/tree" tools 2>/dev/null
+        printf 'a second archive\n' > "$root/tree/tools/marker.txt"
+        tar -czf "$root/b.tar.gz" -C "$root/tree" tools 2>/dev/null
+        d1=$(sha256sum -- "$root/a.tar.gz" | sed -e 's/ .*$//')
+        d2=$(sha256sum -- "$root/b.tar.gz" | sed -e 's/ .*$//')
+        cfg=$(config_digest "$repo/src/setups/env/closure/closure-config.txt")
+        evidence_document "$root/results/$d1" "$d1" "$cfg"
+
+        # A VALID PASSING RESULT FOR ARCHIVE A, SUPPLIED WITH ARCHIVE B. The
+        # result is well formed and describes the wrong bytes, which publication
+        # can tell because it computes the identity itself.
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results" "$root/stage1"); rc=$?
+        chk "step6/publication/a-result-for-another-archive-refuses" "1" "$rc"
+        chk "step6/publication/it-refuses-at-step-2" "yes" \
+            "$(printf '%s' "$out" | grep -q 'REFUSED at step 2' && echo yes || echo no)"
+        chk "step6/publication/it-names-the-identity-it-computed" "yes" \
+            "$(printf '%s' "$out" | grep -q "keyed to archive identity $d2" && echo yes || echo no)"
+
+        # THE SAME REFUSAL FROM THE OTHER DIRECTION: the archive is modified after
+        # verification, so it hashes to a value no result names. One rule, two
+        # failures, which is what Design Area 7 says falls out of the binding.
+        #
+        # THE MODIFICATION KEEPS THE ARCHIVE VALID. Appending bytes to the file
+        # would have made it unreadable, and publication would then refuse at
+        # step 1 for that reason while this case claimed to measure step 2. So
+        # the file at the same path is REPLACED by a well-formed archive with
+        # different content, which is what "modified after verification" means to
+        # anyone who would do it.
+        printf 'a third revision\n' > "$root/tree/tools/revision.txt"
+        tar -czf "$root/a.tar.gz" -C "$root/tree" tools 2>/dev/null
+        out=$(step6_publish "$publish" "$root/a.tar.gz" "$commit" "$repo" \
+            "$root/results" "$root/stage2"); rc=$?
+        chk "step6/publication/an-archive-modified-after-verification-refuses" "1" "$rc"
+        chk "step6/publication/the-modified-archive-refuses-at-step-2" "yes" \
+            "$(printf '%s' "$out" | grep -q 'REFUSED at step 2' && echo yes || echo no)"
+
+        # A DOCUMENT KEYED TO THE RIGHT ARCHIVE UNDER THE WRONG POLICY is refused
+        # too, and this is the third row of the table rather than a repetition:
+        # the comparison was taken under a declaration publication did not resolve.
+        rm -rf -- "$root/results2"; mkdir -p -- "$root/results2"; chmod 0755 "$root/results2"
+        evidence_document "$root/results2/$d2" "$d2" \
+            "0000000000000000000000000000000000000000000000000000000000000000"
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results2" "$root/stage3"); rc=$?
+        chk "step6/publication/a-result-under-another-policy-refuses" "1" "$rc"
+        chk "step6/publication/the-policy-refusal-names-both-digests" "yes" \
+            "$(printf '%s' "$out" | grep -q 'taken under configuration' && echo yes || echo no)"
+
+        # A DIVERGENT RESULT KEYED TO THE EXACT ARCHIVE is refused as well, which
+        # is what makes step 2 a check on the VERDICT and not only on the key.
+        rm -rf -- "$root/results3"; mkdir -p -- "$root/results3"; chmod 0755 "$root/results3"
+        evidence_document "$root/results3/$d2" "$d2" "$cfg" absent
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results3" "$root/stage4"); rc=$?
+        chk "step6/publication/a-divergent-result-refuses" "1" "$rc"
+        chk "step6/publication/the-divergent-refusal-names-the-verdict" "yes" \
+            "$(printf '%s' "$out" | grep -q "is 'DIVERGENT' rather than PASS" && echo yes || echo no)"
+
+        # AND THE ONE THAT PROCEEDS. A present, passing result keyed to the exact
+        # archive under the exact policy takes publication PAST step 2, which is
+        # the only property step 2 asserts. It then refuses at step 3 or 4 on this
+        # fixture, and asserting THAT is what says step 2 was satisfied rather
+        # than skipped.
+        rm -rf -- "$root/results4"; mkdir -p -- "$root/results4"; chmod 0755 "$root/results4"
+        evidence_document "$root/results4/$d2" "$d2" "$cfg"
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results4" "$root/stage5"); rc=$?
+        chk "step6/publication/a-matching-result-passes-step-2" "yes" \
+            "$(printf '%s' "$out" | grep -q 'REFUSED at step 2' && echo no || echo yes)"
+        chk "step6/publication/it-reaches-a-later-step" "yes" \
+            "$(printf '%s' "$out" | grep -qE 'REFUSED at step (3|4)' && echo yes || echo no)"
+
+        # THE CONFLICT STOPS PUBLICATION, AND IT IS THE PRODUCER THAT CREATES IT.
+        # Round 1 of this review reproduced the whole path in the other order: a
+        # valid PASS was published past step 2 while a DIVERGENT result for the
+        # same identity was retained beside it, because step 2 opened the keyed
+        # path and asked nothing about what the emitter had left next to it. The
+        # case drives the REAL emitter for both documents rather than planting a
+        # conflict file, so what publication meets is what a run produces.
+        rm -rf -- "$root/results5"; mkdir -p -- "$root/results5"; chmod 0755 "$root/results5"
+        evidence_document "$root/pass.txt" "$d2" "$cfg"
+        evidence_document "$root/divergent.txt" "$d2" "$cfg" absent
+        verify_call closure_evidence_emit "$root/results5" "$d2" "$root/pass.txt"
+        chk "step6/publication/the-producer-writes-the-passing-result" "0" "$VERIFY_RC"
+        verify_call closure_evidence_emit "$root/results5" "$d2" "$root/divergent.txt"
+        chk "step6/publication/the-producer-retains-the-conflict" "1" "$VERIFY_RC"
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results5" "$root/stage6"); rc=$?
+        chk "step6/publication/a-retained-conflict-refuses" "1" "$rc"
+        chk "step6/publication/the-conflict-refusal-is-at-step-2" "yes" \
+            "$(printf '%s' "$out" | grep -q 'REFUSED at step 2' && echo yes || echo no)"
+        chk "step6/publication/the-conflict-refusal-names-the-human-decision" "yes" \
+            "$(printf '%s' "$out" | grep -q 'which of the two is wrong is a human decision' && echo yes || echo no)"
+
+        # AND THE RERUN AFTER IT STILL DOES NOT PUBLISH. An identical verification
+        # rerun writes no new document and returns non-zero, so nothing has
+        # changed on disk and the second publication attempt refuses for the same
+        # reason: only a human removing one of the two results resolves this.
+        verify_call closure_evidence_emit "$root/results5" "$d2" "$root/pass.txt"
+        chk "step6/publication/the-rerun-before-it-refuses-too" "1" "$VERIFY_RC"
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results5" "$root/stage7"); rc=$?
+        chk "step6/publication/the-rerun-does-not-unblock-publication" "1" "$rc"
+
+        # THE DISAGREEMENT IS AT ITS FINAL NAME BEFORE IT EXISTS, which is what
+        # four review rounds converged on. While the conflict name was created
+        # LAST, some operation could always fail after a differing document
+        # existed, and the reader then saw nothing under the archive key. So the
+        # temporary file is reserved under the conflict prefix as soon as the
+        # canonical name is known to be taken, and a conflict is never promoted,
+        # copied or renamed afterwards.
+        rm -rf -- "$root/results6" "$root/shim"
+        mkdir -p -- "$root/results6" "$root/shim" || true
+        chmod 0755 "$root/results6"
+        evidence_document "$root/pass6.txt" "$d2" "$cfg"
+        evidence_document "$root/divergent6.txt" "$d2" "$cfg" absent
+        verify_call closure_evidence_emit "$root/results6" "$d2" "$root/pass6.txt"
+        chk "step6/publication/the-canonical-result-is-written-first" "0" "$VERIFY_RC"
+        # AND IT LEAVES NO CONFLICT NAME BEHIND. Every document is written under
+        # the conflict name it MIGHT need, because asking whether the canonical
+        # name is taken is itself the window a concurrent writer slips through.
+        # The placeholder is dropped once the link has made the canonical name a
+        # second name for the same bytes, so an ordinary write ends with exactly
+        # one file.
+        chk "step6/publication/a-first-write-leaves-no-conflict" "0" \
+            "$(find "$root/results6" -maxdepth 1 -name "$d2.conflict.*" 2>/dev/null | grep -c . || true)"
+        chk "step6/publication/a-first-write-leaves-one-result" "1" \
+            "$(find "$root/results6" -maxdepth 1 -type f 2>/dev/null | grep -c . || true)"
+        verify_call closure_evidence_emit "$root/results6" "$d2" "$root/divergent6.txt"
+        chk "step6/publication/a-differing-result-refuses" "1" "$VERIFY_RC"
+        chk "step6/publication/it-is-reported-at-its-conflict-name" "yes" \
+            "$(printf '%s' "$VERIFY_OUT" | grep -q "^EVIDENCE|CONFLICT|$root/results6/$d2.conflict." && echo yes || echo no)"
+        chk "step6/publication/exactly-one-conflict-is-beside-it" "1" \
+            "$(find "$root/results6" -maxdepth 1 -name "$d2.conflict.*" 2>/dev/null | grep -c . || true)"
+        # THE RETAINED BYTES ARE THE DIFFERING DOCUMENT, digested rather than
+        # counted, so an empty or truncated survivor fails this case.
+        chk "step6/publication/the-conflict-holds-the-differing-document" \
+            "$(sha256sum -- "$root/divergent6.txt" | sed -e 's/ .*$//')" \
+            "$(sha256sum -- "$(find "$root/results6" -maxdepth 1 -name "$d2.conflict.*" 2>/dev/null | sed -n 1p)" 2>/dev/null | sed -e 's/ .*$//')"
+        chk "step6/publication/no-anonymous-document-is-left" "0" \
+            "$(find "$root/results6" -maxdepth 1 -name '.evidence.*' 2>/dev/null | grep -c . || true)"
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results6" "$root/stage9"); rc=$?
+        chk "step6/publication/the-retained-conflict-stops-publication-here-too" "1" "$rc"
+        verify_call closure_evidence_emit "$root/results6" "$d2" "$root/pass6.txt"
+        chk "step6/publication/and-the-agreeing-rerun-refuses" "1" "$VERIFY_RC"
+
+        # A THIRD DIFFERING RESULT GETS ITS OWN NAME, which is the prior-conflict
+        # case: an earlier run's conflict cannot stand in for this one, because
+        # this one reserved a name of its own before it wrote a byte.
+        evidence_document "$root/third6.txt" "$d2" \
+            "$(printf 'a third policy for the store\n' | sha256sum | sed -e 's/ .*$//')"
+        verify_call closure_evidence_emit "$root/results6" "$d2" "$root/third6.txt"
+        chk "step6/publication/a-third-result-refuses-too" "1" "$VERIFY_RC"
+        chk "step6/publication/both-conflicts-are-kept" "2" \
+            "$(find "$root/results6" -maxdepth 1 -name "$d2.conflict.*" 2>/dev/null | grep -c . || true)"
+
+        # A CONCURRENT FIRST WRITER TAKES THE CANONICAL NAME WHILE THIS RUN IS
+        # WRITING, which is the ordering an occupancy check cannot see coming and
+        # the one the round 5 store had a fallback for. Two REAL emitters are
+        # interleaved at the point that decides it, the fill of the temporary
+        # file, and the injection fails conflict allocations attempted AFTER that
+        # fill: a store that reserves late must make one there and a store that
+        # reserved first never does. Round 6 of the review is why this is a
+        # schedule rather than two sequential calls, which observe an existing
+        # canonical name and never enter the race at all.
+        rm -rf -- "$root/results8"; mkdir -p -- "$root/results8"; chmod 0700 "$root/results8"
+        out=$(verify_interleave "$root/results8" "$d2" "$root/pass6.txt" \
+            "$root/divergent6.txt" inject "$cfg")
+        chk "step6/publication/the-race-loser-refuses" "differing_emit_rc=1" \
+            "$(printf '%s' "$out" | grep '^differing_emit_rc=' || true)"
+        chk "step6/publication/the-race-loser-keeps-its-document" "exact_differing_copies=1" \
+            "$(printf '%s' "$out" | grep '^exact_differing_copies=' || true)"
+        chk "step6/publication/the-race-loser-stops-publication" "publication_step2_rc=1" \
+            "$(printf '%s' "$out" | grep '^publication_step2_rc=' || true)"
+        chk "step6/publication/the-race-loser-stops-the-agreeing-rerun" "agreeing_rerun_rc=1" \
+            "$(printf '%s' "$out" | grep '^agreeing_rerun_rc=' || true)"
+
+        # THE SAME SCHEDULE WITHOUT THE INJECTION, which is the control that
+        # keeps the case about the allocation rather than about the interleaving:
+        # the loser still refuses and still stops both consumers.
+        rm -rf -- "$root/results9"; mkdir -p -- "$root/results9"; chmod 0700 "$root/results9"
+        out=$(verify_interleave "$root/results9" "$d2" "$root/pass6.txt" \
+            "$root/divergent6.txt" control "$cfg")
+        chk "step6/publication/control/the-race-loser-refuses" "differing_emit_rc=1" \
+            "$(printf '%s' "$out" | grep '^differing_emit_rc=' || true)"
+        chk "step6/publication/control/it-keeps-its-document" "exact_differing_copies=1" \
+            "$(printf '%s' "$out" | grep '^exact_differing_copies=' || true)"
+        chk "step6/publication/control/both-consumers-refuse" "1 1" \
+            "$(printf '%s %s' \
+                "$(printf '%s' "$out" | sed -n 's/^publication_step2_rc=//p')" \
+                "$(printf '%s' "$out" | sed -n 's/^agreeing_rerun_rc=//p')")"
+
+        # A RESERVATION THAT CANNOT BE MADE WRITES NO DIFFERING DOCUMENT AT ALL,
+        # which is what closes the last shape of this finding rather than
+        # arguing about where orphaned bytes should live. The injection fails
+        # `mktemp` for a conflict template only, so the canonical write and
+        # every other temporary file in the run still work. The run refuses, and
+        # the store holds exactly what it held before: no anonymous document, no
+        # conflict name, and the canonical result untouched.
+        # shellcheck disable=SC2016  # the guard is the SHIM script's own text
+        { printf '#!/bin/bash\n'
+          printf 'for a in "$@"; do case "$a" in *.conflict.*) exit 1 ;; esac; done\n'
+          printf 'exec %s "$@"\n' "$(type -P mktemp)"; } > "$root/shim/mktemp"
+        chmod 0755 "$root/shim/mktemp"
+        rm -rf -- "$root/results7"; mkdir -p -- "$root/results7"; chmod 0755 "$root/results7"
+        verify_call closure_evidence_emit "$root/results7" "$d2" "$root/pass6.txt"
+        chk "step6/publication/the-second-store-has-its-canonical-result" "0" "$VERIFY_RC"
+        # shellcheck disable=SC2031  # the CHILD shell is where this PATH belongs
+        PATH="$root/shim:$PATH" verify_call closure_evidence_emit "$root/results7" "$d2" \
+            "$root/divergent6.txt"
+        chk "step6/publication/an-unreservable-conflict-refuses" "1" "$VERIFY_RC"
+        chk "step6/publication/nothing-differing-was-written" "0" \
+            "$(find "$root/results7" -maxdepth 1 \( -name '.evidence.*' -o -name "$d2.conflict.*" \) 2>/dev/null | grep -c . || true)"
+        chk "step6/publication/the-canonical-result-is-untouched" \
+            "$(sha256sum -- "$root/pass6.txt" | sed -e 's/ .*$//')" \
+            "$(sha256sum -- "$root/results7/$d2" 2>/dev/null | sed -e 's/ .*$//')"
+        # AND THE STORE STILL WORKS ONCE THE INJECTION IS GONE, so the refusal
+        # above is about the reservation and not about the fixture.
+        verify_call closure_evidence_emit "$root/results7" "$d2" "$root/divergent6.txt"
+        chk "step6/publication/control/the-unblocked-retry-retains-it" "1" "$VERIFY_RC"
+        chk "step6/publication/control/and-then-publication-stops" "1" \
+            "$(find "$root/results7" -maxdepth 1 -name "$d2.conflict.*" 2>/dev/null | grep -c . || true)"
+
+        # THE CONTROL, and it is the one that makes the gate more than a name
+        # test: with the conflict REMOVED, the same canonical result publishes
+        # past step 2 exactly as it did before. The stop is the unresolved pair,
+        # not the suffix.
+        find "$root/results5" -maxdepth 1 -name "$d2.conflict.*" -delete 2>/dev/null
+        out=$(step6_publish "$publish" "$root/b.tar.gz" "$commit" "$repo" \
+            "$root/results5" "$root/stage8"); rc=$?
+        chk "step6/publication/control/a-resolved-conflict-passes-step-2" "yes" \
+            "$(printf '%s' "$out" | grep -q 'REFUSED at step 2' && echo no || echo yes)"
+    fi
+
+    # --- the payload comparison, and the archive that never gets to judge itself -
+    #
+    # Q12 IS CATEGORICAL. The embedded copies are compared and REPORTED, and never
+    # executed to produce evidence, including when they are byte-identical:
+    # equality makes two files equivalent and does not make a candidate-supplied
+    # script an independent judge.
+    section "step 6 payload: compared, reported, and never executed"
+    root="$dir/payload"
+    rm -rf -- "$root"
+    mkdir -p -- "$root/archive/tools/bin" "$root/archive/tools/closure" || true
+    for name in "${CLOSURE_MODULES[@]}"; do
+        cp -- "$src/$name" "$root/archive/tools/bin/$name"
+    done
+    cp -- "$src/../closure/closure-config.txt" "$root/archive/tools/closure/closure-config.txt"
+    cp -- "$src/../closure/closure-envelope.txt" "$root/archive/tools/closure/closure-envelope.txt"
+    tar -czf "$root/identical.tar.gz" -C "$root/archive" tools 2>/dev/null
+    if [ -d "$dir/ws" ]; then
+        out=$(verify_payload "$root/identical.tar.gz" "$dir/ws" "$root/scratch1")
+        chk "step6/payload/identical-copies-are-reported-identical" "5" \
+            "$(printf '%s' "$out" | grep -c '|identical$' || true)"
+        chk "step6/payload/no-difference-is-summarised" "yes" \
+            "$(printf '%s' "$out" | grep -q '^PAYLOAD|SUMMARY|0$' && echo yes || echo no)"
+
+        # A COPY THAT DIFFERS is a payload property and not a refusal: the run
+        # still produces its evidence, from the WORKSPACE copy.
+        printf '\n# an edit nobody reviewed\n' >> "$root/archive/tools/bin/closure_rules.sh"
+        tar -czf "$root/different.tar.gz" -C "$root/archive" tools 2>/dev/null
+        out=$(verify_payload "$root/different.tar.gz" "$dir/ws" "$root/scratch2")
+        chk "step6/payload/an-edited-copy-is-reported-different" "yes" \
+            "$(printf '%s' "$out" | grep -q '^PAYLOAD|closure_rules.sh|differs$' && echo yes || echo no)"
+        chk "step6/payload/the-others-are-still-identical" "4" \
+            "$(printf '%s' "$out" | grep -c '|identical$' || true)"
+        chk "step6/payload/the-difference-is-summarised" "yes" \
+            "$(printf '%s' "$out" | grep -q '^PAYLOAD|SUMMARY|1$' && echo yes || echo no)"
+
+        # AN ABSENT COPY is reported rather than assumed, so an archive that ships
+        # no payload is distinguishable from one whose payload agrees.
+        rm -f -- "$root/archive/tools/bin/closure_elf.sh"
+        tar -czf "$root/absent.tar.gz" -C "$root/archive" tools 2>/dev/null
+        out=$(verify_payload "$root/absent.tar.gz" "$dir/ws" "$root/scratch3")
+        chk "step6/payload/an-absent-copy-is-reported-absent" "yes" \
+            "$(printf '%s' "$out" | grep -q '^PAYLOAD|closure_elf.sh|absent$' && echo yes || echo no)"
+
+        # THE ORACLE FOR "NEVER EXECUTED", and it is the only one that can fail
+        # for the right reason. An embedded copy that would leave a mark if it
+        # ran is planted, the comparison is performed, and the mark is asked for:
+        # a comparison that quietly executed what it compared would leave it.
+        rm -rf -- "$root/archive/tools/bin"; mkdir -p -- "$root/archive/tools/bin"
+        for name in "${CLOSURE_MODULES[@]}"; do
+            printf '#!/bin/bash\nprintf x > %s\n' "$root/EXECUTED" > "$root/archive/tools/bin/$name"
+        done
+        tar -czf "$root/marked.tar.gz" -C "$root/archive" tools 2>/dev/null
+        out=$(verify_payload "$root/marked.tar.gz" "$dir/ws" "$root/scratch4")
+        chk "step6/payload/a-planted-copy-is-reported-different" "5" \
+            "$(printf '%s' "$out" | grep -c '|differs$' || true)"
+        chk "step6/payload/and-it-was-never-executed" "no" \
+            "$( [ -e "$root/EXECUTED" ] && echo yes || echo no )"
+    else
+        fail "step6/payload/delivery-fixture" "the delivery fixture at $dir/ws was not built"
+    fi
+
+    # --- the whole driver, once, over an archive the gate produced --------------
+    #
+    # EVERY CASE ABOVE DRIVES ONE HALF. This one runs the file the Debian job runs,
+    # over an archive packaging actually made, into a prefix the installer
+    # actually fills, and it is the only case that can say the halves compose.
+    section "step 6 end to end: one archive, two observations, one artifact"
+    root="$dir/e2e"
+    rm -rf -- "$root"
+    mkdir -p -- "$root/home" "$root/prefix" "$root/results" || true
+    chmod 0755 "$root/results"
+    if ! step5_make_tree "$root/home"; then
+        fail "step6/e2e/fixture" "cannot build the payload tree at $root/home"
+    elif ! step5_make_deployed_tree "$root/home/cplx" "$src"; then
+        fail "step6/e2e/deployed" "cannot deploy the checker beside the payload"
+    else
+        rm -f -- "$root/home/tools/python/root/lib/libsqlite3.so.0"
+        rm -rf -- "$root/home/tools/closure"
+        # THE DEPLOYED ENVELOPE NAMES THE FIXTURE COMMIT, so the publication
+        # cases below can resolve the declaration this archive carries. The
+        # committed envelope names a cplx commit this suite has no checkout of,
+        # and publication would refuse at STEP 1 for that reason while a case
+        # claiming to measure step 2 read the refusal as its own.
+        step2_write_envelope "$root/home/cplx/closure/closure-envelope.txt" \
+            "$(config_digest "$root/home/cplx/closure/closure-config.txt")" \
+            "src/setups/env/closure/closure-config.txt" "$commit"
+        HOME="$root/home" bash "$root/home/cplx/bin/pkg.sh" tools --closure-gate \
+            > "$root/pkg.log" 2>&1
+        out=$(find "$root/home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | sort | tail -1)
+        if [ -z "$out" ]; then
+            fail "step6/e2e/archive-exists" "the gate produced no archive to verify"
+        elif [ ! -d "$dir/ws" ]; then
+            fail "step6/e2e/delivery" "the delivery fixture at $dir/ws was not built"
+        else
+            id=$(sha256sum -- "$out" | sed -e 's/ .*$//')
+            # HOME IS THE FIXTURE'S, and it is not tidiness. The installer
+            # discovers `<target>.*.tar.gz` across the prefix, its package
+            # directory, HOME and HOME/pkgs, so a run that inherited the real
+            # account's HOME would be asking a question about whatever archives
+            # that account happens to hold.
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix" \
+                --results "$root/results" --tools "$dir/ws" --target tools 2>&1)
+            e2e_rc=$?
+            chk "step6/e2e/the-delivery-is-reported-present" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^DELIVERY|PRESENT|' && echo yes || echo no)"
+            chk "step6/e2e/the-identity-is-the-archive-file" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q "^ARCHIVE|$out|$id\$" && echo yes || echo no)"
+            chk "step6/e2e/an-artifact-was-written" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^EVIDENCE|WRITTEN|' && echo yes || echo no)"
+            chk "step6/e2e/it-is-keyed-by-the-identity" "yes" \
+                "$( [ -f "$root/results/$id" ] && echo yes || echo no )"
+            # THE ARTIFACT SATISFIES ITS OWN CONTRACT, read back by the shared
+            # reader rather than by this suite: a producer whose output its own
+            # parser refuses is the defect this asserts against.
+            verify_call closure_evidence_parse "$root/results/$id"
+            chk "step6/e2e/the-artifact-parses" "0" "$VERIFY_RC"
+            chk "step6/e2e/it-names-this-archive-and-nothing-else" "yes" \
+                "$(verify_model "$root/results/$id" | grep -q "^$id|" && echo yes || echo no)"
+            # NO PROCESS WAS NAMED, so the live half is INCONCLUSIVE and the RUN
+            # is not a pass. That is the develop#20 rule applied to the driver:
+            # a reading nobody took never counts toward a green.
+            chk "step6/e2e/an-unnamed-process-is-inconclusive" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^LIVE|INCONCLUSIVE|' && echo yes || echo no)"
+            chk "step6/e2e/an-inconclusive-live-half-is-not-a-pass" "yes" \
+                "$( [ "$e2e_rc" -ne 0 ] && echo yes || echo no )"
+            # THE COMPARISON PASSES, which is this case's own subject: the
+            # skeleton the archive describes and the tree the installer produced
+            # carry the same declared candidate directories.
+            chk "step6/e2e/the-comparison-passes" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^COMPARISON|PASS$' && echo yes || echo no)"
+            # AND THE STATIC HALF REFUSES, which is a property of this FIXTURE
+            # rather than a gap. The tree above has its waived floor member
+            # removed so the archive is the one step 5 publishes against, and a
+            # checker that passed over it would be the finding. Asserting the
+            # refusal is what stops this case reading a green from a half it
+            # never looked at.
+            chk "step6/e2e/the-static-half-refuses-on-this-fixture" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^STATIC|REFUSED$' && echo yes || echo no)"
+            chk "step6/e2e/the-payload-copies-agree" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^PAYLOAD|SUMMARY|0$' && echo yes || echo no)"
+            # A SECOND RUN OVER THE SAME ARCHIVE IS IDEMPOTENT, which is the
+            # occupancy rule reached through the driver rather than through the
+            # emitter alone.
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix" \
+                --results "$root/results" --tools "$dir/ws" --target tools 2>&1)
+            chk "step6/e2e/a-second-run-is-idempotent" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^EVIDENCE|IDEMPOTENT|' && echo yes || echo no)"
+
+            # --- the archive the installer actually installed --------------------
+            #
+            # THE INSTALLER IS ASKED FOR A TARGET AND NOT FOR A FILE, and round 1
+            # of this review measured what that costs. It keeps the NEWEST
+            # `<target>.*.tar.gz` across the prefix, its package directory, HOME
+            # and HOME/pkgs, so a competing future-dated archive is installed
+            # instead of the copy this run placed, and the post-install
+            # observation then belongs to bytes nothing here digested. The
+            # installer's interface is frozen and no argument selects a file, so
+            # the driver checks the selection on both sides of the call.
+            printf 'a competing candidate\n' > "$root/home/tools/competitor.txt"
+            mkdir -p -- "$root/home/pkgs" "$root/results-sel" || true
+            chmod 0755 "$root/results-sel"
+            tar -czf "$root/home/pkgs/tools.2099-01-01_000000.tar.gz" \
+                -C "$root/home" tools 2>/dev/null
+            touch -d '2099-01-01 00:00:00' \
+                "$root/home/pkgs/tools.2099-01-01_000000.tar.gz" 2>/dev/null
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix-sel" \
+                --results "$root/results-sel" --tools "$dir/ws" --target tools 2>&1)
+            e2e_rc=$?
+            chk "step6/e2e/a-competing-newer-archive-refuses" "1" "$e2e_rc"
+            chk "step6/e2e/it-names-the-archive-that-would-win" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q 'which is newer than the candidate' && echo yes || echo no)"
+            chk "step6/e2e/it-refuses-before-it-installs-anything" "no" \
+                "$( [ -d "$root/prefix-sel/tools" ] && echo yes || echo no )"
+            chk "step6/e2e/no-result-is-emitted-for-an-unselected-candidate" "no" \
+                "$( [ -e "$root/results-sel/$id" ] && echo yes || echo no )"
+
+            # THE CONTROL: with the competitor removed the same run installs and
+            # compares, so the refusal above is about the competing archive and
+            # not about the fresh prefix.
+            rm -f -- "$root/home/pkgs/tools.2099-01-01_000000.tar.gz"
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix-sel" \
+                --results "$root/results-sel" --tools "$dir/ws" --target tools 2>&1)
+            chk "step6/e2e/control/the-candidate-alone-installs" "yes" \
+                "$( [ -d "$root/prefix-sel/tools" ] && echo yes || echo no )"
+            chk "step6/e2e/control/the-comparison-is-reached" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^COMPARISON|PASS$' && echo yes || echo no)"
+
+            # A RERUN MUST REALLY INSTALL, which the done marker was quietly
+            # deciding. The installer SKIPS an archive whose marker exists and
+            # exits 0 without unpacking, so the observation taken afterwards
+            # describes whatever tree was already there. The marker is planted
+            # under a FRESH prefix, where a skipped install leaves no tree at all.
+            mkdir -p -- "$root/prefix-marker/pkgs" "$root/results-marker" || true
+            chmod 0755 "$root/results-marker"
+            : > "$root/prefix-marker/pkgs/tools.verify-${id:0:12}.done"
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix-marker" \
+                --results "$root/results-marker" --tools "$dir/ws" --target tools 2>&1)
+            chk "step6/e2e/a-stale-done-marker-does-not-skip-the-install" "yes" \
+                "$( [ -d "$root/prefix-marker/tools" ] && echo yes || echo no )"
+            chk "step6/e2e/the-comparison-is-taken-over-a-real-install" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^COMPARISON|PASS$' && echo yes || echo no)"
+
+            # AND A REMOVAL THAT FAILED IS NOT A REMOVAL, which round 2 of this
+            # review reproduced with real filesystem permissions and the real
+            # installer. A package directory that refuses the unlink still lets
+            # the candidate file be OVERWRITTEN, so the copy succeeds, the stale
+            # marker survives, the installer skips, and the check after the call
+            # then reads that same stale marker as proof of an install this run
+            # never made. The tree left behind is the older one, and the run was
+            # emitting a PASS artifact keyed to the candidate over it.
+            rm -rf -- "$root/prefix-stale"
+            mkdir -p -- "$root/prefix-stale/pkgs" "$root/prefix-stale/tools/stale" \
+                "$root/results-stale" || true
+            chmod 0755 "$root/results-stale"
+            cp -- "$out" "$root/prefix-stale/pkgs/tools.verify-${id:0:12}.tar.gz"
+            : > "$root/prefix-stale/pkgs/tools.verify-${id:0:12}.done"
+            chmod 0555 "$root/prefix-stale/pkgs"
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix-stale" \
+                --results "$root/results-stale" --tools "$dir/ws" --target tools 2>&1)
+            e2e_rc=$?
+            chmod 0755 "$root/prefix-stale/pkgs"
+            chk "step6/e2e/an-unremovable-stale-marker-refuses" "1" "$e2e_rc"
+            chk "step6/e2e/the-refusal-names-the-marker-it-could-not-remove" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q 'could not be removed' && echo yes || echo no)"
+            chk "step6/e2e/no-comparison-is-reported-over-a-skipped-install" "no" \
+                "$(printf '%s' "$e2e_out" | grep -q '^COMPARISON|' && echo yes || echo no)"
+            chk "step6/e2e/no-artifact-is-emitted-over-a-skipped-install" "no" \
+                "$( [ -e "$root/results-stale/$id" ] && echo yes || echo no )"
+            chk "step6/e2e/the-older-tree-was-left-alone" "yes" \
+                "$( [ -d "$root/prefix-stale/tools/stale" ] && echo yes || echo no )"
+            # THE CONTROL CHANGES ONE THING, the directory's writability, so the
+            # refusal above is about the removal and not about the fixture.
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix-stale" \
+                --results "$root/results-stale" --tools "$dir/ws" --target tools 2>&1)
+            chk "step6/e2e/control/a-writable-package-directory-installs" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q '^COMPARISON|PASS$' && echo yes || echo no)"
+            chk "step6/e2e/control/and-then-the-artifact-is-written" "yes" \
+                "$( [ -e "$root/results-stale/$id" ] && echo yes || echo no )"
+
+            # AND THE GATE ON THE OTHER SIDE OF THE CALL, which the pre-check
+            # cannot reach on its own: an installer that returns success without
+            # having processed this candidate leaves no marker for it, and the
+            # driver refuses rather than observing a tree it cannot attribute.
+            # The stand-in SOURCES the real installer, so the scope derivation on
+            # both sides is still the installer's own `build_elf_rpath`; only the
+            # execution path is replaced, because a tie in modification time or a
+            # race is the only way the real one reaches this state and neither is
+            # something a case can arrange.
+            rm -rf -- "$root/ws-shim"
+            mkdir -p -- "$root/ws-shim" "$root/results-shim" || true
+            chmod 0755 "$root/results-shim"
+            cp -- "$dir/ws"/* "$root/ws-shim/" 2>/dev/null
+            { printf '#!/bin/bash\n'
+              printf '# shellcheck source=/dev/null\n'
+              printf 'source "%s" || exit 1\n' "$dir/ws/install_pkg.sh"
+              # shellcheck disable=SC2016  # the guard is the CHILD script's
+              printf 'if [ "${BASH_SOURCE[0]}" != "$0" ]; then return 0; fi\n'
+              printf 'mkdir -p -- "%s/tools"\n' "$root/prefix-shim"
+              printf 'exit 0\n'; } > "$root/ws-shim/install_pkg.sh"
+            chmod 0755 "$root/ws-shim/install_pkg.sh"
+            e2e_out=$(HOME="$root/home" bash "$verify" --archive "$out" --prefix "$root/prefix-shim" \
+                --results "$root/results-shim" --tools "$root/ws-shim" --target tools 2>&1)
+            e2e_rc=$?
+            chk "step6/e2e/an-installer-that-installed-something-else-refuses" "1" "$e2e_rc"
+            chk "step6/e2e/the-refusal-names-the-missing-marker" "yes" \
+                "$(printf '%s' "$e2e_out" | grep -q 'installed some other tools archive' && echo yes || echo no)"
+            chk "step6/e2e/no-artifact-is-emitted-for-an-unattributable-tree" "no" \
+                "$( [ -e "$root/results-shim/$id" ] && echo yes || echo no )"
+
+            # PUBLICATION, DRIVEN BY THE ARTIFACT THIS RUN EMITTED. Every other
+            # publication case in this suite hands the gate a document the
+            # harness wrote, which is the shape step 5 already had and the shape
+            # step 6 exists to replace. This is the pair that closes the loop:
+            # one side WROTE the result and the other READS it, and neither was
+            # built to agree with the other.
+            #
+            # THE ASSERTION IS THAT STEP 2 IS PASSED, not that publication
+            # succeeds. This archive is a validation artifact by construction,
+            # its waived floor member having been removed above, so the run
+            # refuses later. Reading a green here would be reading the wrong
+            # thing; reading WHICH STEP refused is what says step 2 was
+            # satisfied rather than skipped.
+            e2e_pub=$(step6_publish "$publish" "$out" "$commit" "$repo" \
+                "$root/results" "$root/stage-produced")
+            chk "step6/e2e/a-produced-artifact-passes-step-2" "yes" \
+                "$(printf '%s' "$e2e_pub" | grep -q 'REFUSED at step 2' && echo no || echo yes)"
+            chk "step6/e2e/publication-then-reaches-a-later-step" "yes" \
+                "$(printf '%s' "$e2e_pub" | grep -qE 'REFUSED at step (3|4)' && echo yes || echo no)"
+
+            # AND THE SAME ARTIFACT WITH A DIFFERENT ARCHIVE IS REFUSED, which is
+            # the identity binding read from the other side: the result names
+            # these bytes and publication computes those. Archive B carries the
+            # same bundle, so its refusal at STEP 2 rather than at step 1 is what
+            # proves the declaration resolved and the IDENTITY is what failed.
+            printf 'a second candidate\n' > "$root/home/tools/marker.txt"
+            tar -czf "$root/other.tar.gz" -C "$root/home" tools 2>/dev/null
+            e2e_pub=$(step6_publish "$publish" "$root/other.tar.gz" "$commit" "$repo" \
+                "$root/results" "$root/stage-other")
+            chk "step6/e2e/another-archive-is-not-described-by-it" "yes" \
+                "$(printf '%s' "$e2e_pub" | grep -q 'REFUSED at step 2' && echo yes || echo no)"
+            chk "step6/e2e/the-refusal-names-the-computed-identity" "yes" \
+                "$(printf '%s' "$e2e_pub" | grep -q "keyed to archive identity $(sha256sum -- "$root/other.tar.gz" | sed -e 's/ .*$//')" && echo yes || echo no)"
+        fi
+    fi
+}
+
 run_one_step() {
     local step="$1" tool state host sha sha_state k
 
@@ -5465,6 +6991,7 @@ run_one_step() {
             3) step3_suite ;;
             4) step4_suite ;;
             5) step5_suite ;;
+            6) step6_suite ;;
         esac
     else
         section "step $step suite"
@@ -5534,7 +7061,8 @@ run_every_step() {
     printf '=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===\n'
     for n in 0 1 2 3 4 5 6 7; do
         "${BASH:-bash}" "$0" --step "$n" --contract "$CONTRACT" --corpus "$CORPUS" \
-            --shipped-dir "$SHIPPED_DIR" > "$SCRATCH/step$n.out" 2>&1
+            --shipped-dir "$SHIPPED_DIR" --ci-dir "$CI_DIR" \
+            > "$SCRATCH/step$n.out" 2>&1
         rc=$?
         line=$(sed -n '$p' "$SCRATCH/step$n.out")
         printf '  step %s  exit %s  %s\n' "$n" "$rc" "$line"
