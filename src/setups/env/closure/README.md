@@ -11,11 +11,22 @@ implementation cannot get the domain wrong by reading the code instead.
 | `closure-config.txt` | the five declarations, one document | yes, and nothing else is |
 | the identity envelope | the document's digest, and the cplx commit that holds it | no, so the digest never covers itself |
 
-The envelope is NOT committed here, and cannot be: it names the commit SHA that
-holds the document, a value that does not exist until that commit does.
-Packaging produces it from the exact commit it is about to name and stages the
-pair at `tools/closure/` inside the archive, as `closure-config.txt` and
-`closure-envelope.txt`.
+The envelope IS committed here, as `closure-envelope.txt`, and step 5 of the
+v0.27.0 effort is where that changed. An earlier version of this paragraph had
+packaging produce it from the commit it was about to name, which assumed a cplx
+checkout on the machine that runs `pkg.sh`. There is none: cplx reaches that
+account as copied scripts, and `pkg.sh` has never known anything about Git. So
+the envelope is written in the repository when the declaration changes, travels
+to the build account the way every other cplx file travels, and packaging stages
+the pair at `tools/closure/` inside the archive after verifying with
+`sha256sum` that the two agree. The commit the `source` line names is a RECORD
+of which reviewed version the declaration is: it is printed on the build
+account and resolved only where cplx exists.
+
+The maintenance rule is one line, and the harness holds it: **when the
+declaration changes, the envelope is regenerated in the same commit.** A
+declaration edited without its envelope is a failing case rather than an archive
+that ships a receipt for bytes it does not carry.
 
 ## The digest domain
 
@@ -74,7 +85,7 @@ reason the envelope names a commit:
 
 | Party | Has cplx | Checks | Refuses on |
 | --- | --- | --- | --- |
-| packaging | yes | the document it embeds is byte-identical to the source at the commit it names | mismatch, or a source that is not a committed state |
+| packaging | no, see above | the committed envelope's digest is the committed declaration's digest, and both are staged whole | a bundle part that is absent, empty, or whose digest disagrees with its envelope |
 | verification, the Debian agent | no | the embedded document hashes to the digest its envelope names | absent, substituted or corrupted configuration |
 | publication | yes | the archive's envelope digest equals the digest of the configuration publication resolved ITSELF | any difference, and any active waiver |
 

@@ -30,6 +30,7 @@ Background and reasoning: why cplx is built the way it is.
 - 🌉 [Checkpoints and resume](explanation/checkpoints-and-resume.md)
 - 📦 [The build order](explanation/the-build-order.md)
 - 📦 [Why binaries remember the build home](explanation/why-binaries-remember-the-build-home.md)
+- 📦 [Why the archive declares its own scope](explanation/why-the-archive-declares-its-own-scope.md)
 
 ## 🎓 Tutorials
 
@@ -68,4 +69,5 @@ Exact, dry descriptions of commands, formats and conventions.
 - 🛠️ [Directory layout](reference/directory-layout.md)
 - 🌉 [steps.md format](reference/steps-file-format.md)
 - 📦 [Packaging and relocation tools](reference/relocation-tools.md)
+- 📦 [Runtime closure checker](reference/toolchain-runtime-closure.md)
 - 🛠️ [Exit codes](reference/exit-codes.md)
