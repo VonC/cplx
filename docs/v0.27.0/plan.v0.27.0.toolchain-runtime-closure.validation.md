@@ -2761,20 +2761,56 @@ rather than on one, which is what the earlier record could not say.
 
 ---
 
-## Step 7. The D10 interface, acceptance and documentation
+## Step 7. The D10 interface, its controls and documentation
 
 ### Analysis of Step 7 implementation state
 
-Not started. Step 7 is not implemented because the D10 evidence shape and policy
-do not exist, no acceptance run has been taken on either host, and the project
-documentation says nothing about the checker or its configuration.
+Yes. Step 7 has been fully implemented.
+
+Q14 SPLIT THIS STEP. Step 7 owns the D10 interface, its negative controls and
+its documentation. The real-payload acceptance is Step 8, gated on umbrella
+items 6 and 7. The acceptance is unchanged and nothing in it is relaxed: it
+moved, because the payload it judges is produced by two items this one cannot
+reach. Every round record below that reports No was written against the earlier
+scope and is retained as history rather than restated as the current verdict.
+
+The D10 module, suite and documentation are implemented. Round 5 closed the
+mixed-PID false pass, the known-child timeout leak, the missing provider
+inventory and the obsolete helper finding. Round 6 removed the external-process
+option, which could never supply the required OWNED record, and left an
+ownership scan that read a path out of the child's arguments; round 7 replaces
+it. Ownership of a launched process is now the PROCESS GROUP the launch leads
+and an ENVIRONMENT NONCE the launch carries, neither of which a wrapper can fail
+to pass on, and the unmarked-child leak the reviewer reproduced is closed
+against the reviewer's own reproduction. Public evidence uses labelled neutral
+substitutions.
+
+The Debian capture carried thirteen unsubstituted identifiers into the commit
+gate, which the repository's own pre-commit rules refused on 2026-09-12. They
+are substituted now, from the configured shared and project-local rule files
+rather than by hand, so the capture reads `company` and `my-project` like every
+other retained document here. Nothing else in the file moved: the case counts,
+the exit codes, the harness digest and both acceptance halves are the run's own
+and are unaltered. The gate caught what nine review rounds had read past, which
+is the argument for having the rule enforced by a hook rather than by attention.
+
+The exact staged harness is `fa9a914f`. Independent RHEL execution reports
+134 cases, zero failures and exit 5 for step 7; the aggregate passes steps 0
+through 5 and returns 5. Debian build 163 identifies the same harness and
+reports 128 cases with zero failures. The exit of 5 is the two acceptance halves
+reporting unanswered, which is Step 8's result to change rather than a failing
+case of this step.
+
+The operator prerequisite remains discharged under
+`decision.operator-old-root.rhel.md`.
 
 ### Goal for Step 7
 
 Implement the D10 evidence shape and the policy that consumes it, with the
 consumer set bound to this design's subject rule, the lowest satisfying candidate
-as the result and the convergence rule on re-read. Run the acceptance on both
-hosts, and add the reference and explanation pages.
+as the result and the convergence rule on re-read. Add one negative control per
+independently refusable invariant, and add the reference and explanation pages.
+Running the acceptance against the real payload is Step 8 under Q14.
 
 ### Step 7 improvement expectations
 
@@ -2783,37 +2819,722 @@ hosts, and add the reference and explanation pages.
 - All three non-convergent shapes fail as separate cases: a higher second
   result, a lower one, and neither satisfying.
 - A consumer set of zero is reported inconclusive, never as satisfaction.
-- The packaging check passes on the build account, with every refusal named and
-  the `tools/old/py3.13` repair recorded rather than treated as a check failure.
-- The packaged archive resolves with no host fallback on Debian 12, from a
-  listing over the whole scope and a live trace naming the venv process.
-- The unmodified archive passes rule 1, and one negative control exists per
-  independently refusable invariant.
-- Clearing `tools/old/py3.13` is an OPERATOR PREREQUISITE, recorded with the
-  inspected target and the retained location of the recoverable move. A case
-  asserts that no script in this effort removes a directory on a live account,
-  so an unauthorized automated deletion is a failure rather than a shortcut.
+- One negative control exists per independently refusable invariant, and each
+  refuses for its own reason rather than for a shared one.
+- Only the two named acceptance halves may remain unanswered. Every D10
+  evidence and negative-control case must complete, and zero failures with
+  exit 5 alone cannot establish that result. The final payload is Step 8's.
+- Clearing `tools/old/py3.13` is an OPERATOR PREREQUISITE. The explicit
+  operator decision records deletion, its inspected target and manifest digest;
+  it does not record a recoverable move. Step 1's unexpected-root preservation
+  controls assert that the checker leaves the refused root and member intact,
+  and the aggregate reruns them. No script gains authority to delete a live root.
 
 ### What was implemented for Step 7
 
-_(empty — no check has taken place yet.)_.
+- **`src/setups/env/bin/closure_d10.sh`, the tenth production script**: 524
+  lines, the D10 interface in the three functions the plan's behavior section
+  names. `closure_d10_evidence` takes the four-field reading; `closure_d10_policy`
+  returns the lowest satisfying candidate, `NEITHER`, or `INCONCLUSIVE`;
+  `closure_d10_converge` applies the re-read rule and names higher, lower and
+  neither separately. It sources `closure_elf.sh` alone, so it reaches `readelf`
+  and `sha256sum` through the reader rather than directly and the enumerated
+  host-tool contract gains no row.
+- **The two scopes stay apart inside the reading**: the archive is walked, every
+  field the archive answers is taken while the reader's subject list still holds
+  the archive alone, and only then are the candidate trees read.
+  `closure_d10_snapshot` records the shipped providers by SONAME and digest
+  before any candidate file enters that list. Round 1 initializes the reader
+  again for every evidence call so earlier archive paths and digest caches
+  cannot contaminate the next reading.
+- **The reading generation is recomputed, never declared**: it is derived by
+  comparing the shipped `libstdc++` and `libgcc_s` bytes against the candidate
+  capability bytes, and a tree matching neither entry answers `unknown`, which
+  always owes a re-read. There is no option that names it.
+- **Three inconclusive shapes rather than one**: a zero consumer set, a candidate
+  whose providers could not be read, and a reading declaring no candidate at all.
+  The second is the mirror of the first: scoring an unmeasured generation as not
+  satisfying would demote it for being unmeasurable.
+- **Incomplete archive observations are inconclusive too**: Round 1 propagates
+  unread-object and failed-walk state into the D10 policy. Convergence settles
+  only when both tokens name the same declared candidate; equal `NEITHER`,
+  `INCONCLUSIVE` or undeclared tokens fail.
+- **Capture identity**: `step7_capture_answers` copies the other host's capture
+  into harness scratch, hashes that snapshot and inspects those same bytes.
+  Passing and refusing captures both record their digest. This identifies the
+  consulted capture; archive identity and real foreign-host verification still
+  belong to Step 8's acceptance integration.
+- **`docs/v0.27.0/verify.closure-check.sh`, the step 7 suite**: the nine rows of
+  the design's D10 table over planted models, each plant asserted before it is
+  judged, plus an evidence half over real ELF fixtures that proves a real reading
+  produces the same model. The `both` host gate is now answerable: each host
+  takes its own half live and requires the other's retained capture, so no run is
+  answered by evidence it produced itself. `--captures` names where that capture
+  lives, because the Debian job runs from a pipeline workspace.
+- **Step 0's absent-suite control, retired**: it measured the first step whose
+  suite did not exist, and step 7 wrote the last one. The half that never needed
+  an unfilled step survives over step 3, and a new case asserts the baseline is
+  empty rather than assuming it.
+- **`wiki/reference/toolchain-runtime-closure.md` and
+  `wiki/explanation/why-the-archive-declares-its-own-scope.md`**: the checker,
+  its ten scripts, the record shapes, the four invariants, the waiver contract,
+  the evidence record, the publication order and the D10 policy; and the
+  reasoning that keeps a declared shape apart from an observed one and a
+  self-describing archive apart from an authoritative one. Both are listed in
+  `wiki/README.md` under their Diataxis categories.
+- **`src/setups/env/closure/README.md`**: two claims corrected against the tree.
+  It still said the envelope is not committed and is produced by packaging from
+  a commit, which Step 5 changed when it found the build account has no cplx
+  checkout. The new reference page would otherwise contradict a shipped project
+  document.
+- **`docs/v0.27.0/decision.operator-old-root.rhel.md`, the operator record**: the
+  plan makes clearing the superseded root an operator prerequisite and requires a
+  deletion taken instead of a move to be recorded explicitly BEFORE the
+  acceptance runs. The repository owner chose deletion; this file is that record,
+  written and committed first, and it carries the not-live confirmation, the
+  manifest digest of the 3658 removed files, and the digests of the three
+  re-downloadable artifacts that went with them. No script in this effort removed
+  anything.
+- **Historical round 1 submitted validation evidence**: `bash src/utils/lint_shell.sh`
+  clean over 54 tracked scripts. Installer purity and the HEAD-relative untouched
+  check both hold.
+  RHEL 9.8 build account, harness `5427b095`, run AFTER the operator deletion:
+  step 7 reports 73 cases and 0 failures, and the every-step aggregate reports
+  OBJECTIVE MET for steps 0 through 5 with step 6 correctly unanswered as the
+  agent's half, retained as `verify.closure.step7.rhel.txt`. The deletion's
+  measured effect matched the prediction on all five counters: undeclared
+  directories 2 to 0, unresolvable `DT_NEEDED` 30 to 21, families 2 to 2,
+  UNDETERMINED 14 to 12, subjects 703 to 674. Debian 12 agent: no case fails
+  anywhere in the run, steps 0 through 6 all report OBJECTIVE MET and the
+  aggregate returns 5 rather than 1, retained as
+  `verify.closure.step7.debian.txt`.
+- **Two defects in this step's own work were found by running it on the second
+  host, and both are repaired and recorded in place**. Build 152: the two-host
+  gate grepped the other capture for `OBJECTIVE MET for step 7`, and a retained
+  capture carries this harness's own diagnostic text, which names that string, so
+  the run matched its own instructions and recorded the RHEL half as answered
+  over a run that was unanswered. The same version also deadlocked the pair by
+  construction. Build 153: retiring step 0's control moved its surviving half
+  onto a step whose suite RUNS, and the child was not given the parent's
+  `--shipped-dir`, so on the agent it failed on missing modules instead of
+  refusing on the missing tool. Both passed on the build host, which is what the
+  two-host requirement exists for.
+- **The round 6 lifecycle changes, in `verify.closure-check.sh`**. Round 6
+  attributed a launched process by the PATH in its command line, and round 7
+  replaced that: a venv entry point is a SHELL WRAPPER that starts the real
+  interpreter by its ABSOLUTE CANDIDATE PATH, so the child's arguments name the
+  candidate and never the venv, and a wrapper's path is not inherited by its
+  child. The consequence was worse than an unreaped survivor: the helper
+  answered that the venv process had exited before anything could be observed
+  while a CANDIDATE-MAPPED child of its own launch was running and unowned.
+  Ownership is now taken from the LAUNCH by two independent properties of it.
+  The launch is made with job control on, so the launched process becomes a
+  PROCESS GROUP LEADER whose group id is its own pid; every descendant inherits
+  that id across `exec`, across the parent's exit and across reparenting to PID
+  1, and nothing else on the machine can be in it. The launch also carries an
+  ENVIRONMENT NONCE, which `exec` preserves and which a child that leaves the
+  group by calling `setsid` still holds. Discovery, the deadline and the reap
+  sweep all run over those two rules; the helper's own shell and PID 1 are
+  never owned. The operator-named mode is REMOVED rather than repaired: it
+  returned no OWNED record, so it failed the three ownership assertions
+  wherever it was used, and its public claims went with it.
+- **The two controls carry no marker of their own**, which is what round 6
+  found wrong with the previous one. The UNMARKED WRAPPER CHILD plants the
+  reviewer's own shape: the entry point starts a copied binary under the
+  candidate by absolute path, records its pid and exits, and because that child
+  maps the candidate the helper must OWN it, name it on the `OWNED` record,
+  reach a typed verdict and reap it. The EARLY EXIT plants a survivor OUTSIDE
+  the candidate, started by absolute path from the suite's own scratch, so the
+  helper must refuse and must still sweep it. Both record their own survivor,
+  so a plant that launched nothing fails the run rather than passing quietly,
+  and the second spends the whole deadline.
+- **The ownership was defeated three ways before it was trusted**, in copies of
+  the RHEL subset. With `step7_owned_processes` returning nothing: 134 cases and
+  5 failures, the unmarked child unowned, both survivors alive and the real-tree
+  success path failing with them. With the process-group rule removed and only
+  the nonce left: 134 cases and no failure. With the nonce rule removed and only
+  the process group left: 134 cases and no failure. Each rule is therefore
+  sufficient on this host and the pair is redundant. The reviewer's own
+  reproduction rerun against these bytes reports `OWNED|<pid>|real-interpret`
+  for the pid the plant recorded, an `OBJECT` inventory of that pid, a typed
+  `LIVE|REFUSED` verdict and `survived_helper_cleanup=no`.
+
+### Independent reviewer validation for Step 7 (round 1)
+
+The repaired harness is `7bf1ba49e3726a964cf6e6cff62671acfecba0a7f93ba99d8a33c0246880e379`.
+The reviewer ran it from an isolated copy on RHEL 9.8, with the real build prefix
+read only for acceptance. Step 7 reports 87 cases, 0 failures and exit 5 because
+both acceptance halves remain unanswered. The aggregate reports steps 0 through
+5 OBJECTIVE MET, Step 6 exit 5 for the Debian host requirement, Step 7 exit 5 for
+acceptance, and aggregate exit 5. Raw reviewer results are retained in ignored
+`.reviews/a.reviewer.step7.rhel-step7.txt` and
+`.reviews/a.reviewer.step7.rhel-all.txt`.
+
+Independent reproductions before and after the repair confirm that a second
+empty archive no longer reuses a consumer, unread archive objects no longer
+permit selection, and equal failure or undeclared tokens no longer settle
+convergence. The CLI also preserves failure for `NEITHER` twice. The harness
+adds these controls, a failed traversal control and capture digest controls.
+
+`bash src/utils/lint_shell.sh` passes over 54 tracked scripts, and
+`shellcheck docs/v0.27.0/verify.closure-check.sh` passes. The wiki lookup finds
+both pages and their index entries. Installer purity has no matches, and the
+HEAD-relative installer comparison is empty. Request/current resolver drift adds
+the harness ShellCheck and wiki lookup commands; all seven union commands ran.
+Validation-state comparisons before and after both test phases show no tracked
+or untracked side effects. The umbrella digest is unchanged.
+
+No fresh Debian run of the repaired scripts was available to this reviewer.
+The retained Debian capture is evidence for the submitted bytes only; its earlier
+steps 0 through 6 pass cannot establish the repaired harness or real-archive
+acceptance. There is no configured numeric coverage gate or measured percentage.
+
+### Independent reviewer validation for Step 7 (round 2)
+
+The submitted harness `b28d0061` independently reports 89 cases, 0 failures and
+exit 5 on RHEL. A focused reproduction then demonstrated that a wrong archive
+digest records an assertion failure while still emitting `debian-half PASS`.
+The other host's capture reader consumes that marker, so the overall failure
+count did not protect the two-host gate. The repair requires every assertion in
+the acceptance branch to pass before emitting the half-pass marker.
+
+Six report models exercise the real branch without requiring the unavailable
+production archive: a valid report, wrong identity, static-only success, empty
+trace, host object and failed negative control. Each checks both the half-pass
+marker and the branch's failure count. These are decision regression controls,
+not evidence that a real archive or process was observed.
+
+The final harness is
+`fb065021ba0305c8d9a7d22406b378364d59400575cb3ad941b7e004c5ba3fd7`.
+The independent RHEL run reports 101 cases, 0 failures and exit 5. The aggregate
+reports steps 0 through 5 OBJECTIVE MET, Step 6 exit 5 for its Debian host
+requirement, Step 7 exit 5 for incomplete acceptance, and aggregate exit 5.
+Raw results are retained in ignored `.reviews/a.reviewer.step7.r2.rhel-step7.txt`
+and `.reviews/a.reviewer.step7.r2.rhel-all.txt`. The real build-tree rule 1
+summary is 74 names, 26 multi-candidate and 0 refused; this is not an observation
+of a packaged archive.
+
+All seven resolved mandatory commands ran, with no request/current resolver
+drift. Shell lint passes over 54 tracked scripts, harness ShellCheck passes,
+the wiki lookup finds both pages and their index entries, installer purity has
+no matches, and the HEAD-relative installer comparison is empty. Validation
+snapshots before and after the original and repaired test phases show no tracked
+or untracked side effects. The umbrella digest remains unchanged.
+
+The requestor's retained Debian build 156 capture identifies the submitted
+`b28d0061` harness, passes steps 0 through 6 and leaves Step 7 unanswered because
+no packaged archive is available. No fresh Debian run of the round 2 reviewer
+repair was available; neither that capture nor the new report models establish
+real-archive acceptance. There is no numeric coverage gate or measured percentage.
+
+### Independent reviewer validation for Step 7 (round 3)
+
+The submitted harness `b0875e40` independently reports 101 cases, 0 failures
+and exit 5 on RHEL. Focused checks exercised the new helpers directly: the scope
+helper returned two directories as one colon-separated line, and its boundary
+filter accepted an outside directory appended after a valid prefix. The reviewer
+repaired splitting, literal prefix boundaries and observation-status checking.
+One real-helper fixture plus six branch checks cover splitting, mixed inside and
+outside paths, a sibling prefix and a failed observation.
+
+The final harness is
+`8b6bc7172e9af05cc1d83e5be221f3d08d9f49937041cc45ff5effc9617fca88`.
+The independent RHEL run reports 108 cases, 0 failures and exit 5. The aggregate
+reports steps 0 through 5 OBJECTIVE MET, Step 6 exit 5 for its Debian host
+requirement, Step 7 exit 5 for incomplete acceptance, and aggregate exit 5.
+Raw results are retained in ignored `.reviews/a.reviewer.step7.r3.rhel-step7.txt`
+and `.reviews/a.reviewer.step7.r3.rhel-all.txt`. The build-tree rule 1 result
+remains 74 names, 26 multi-candidate and 0 refused; no packaged archive was
+observed.
+
+A direct live-helper check against the available project Python entry point
+returned `LIVE|INCONCLUSIVE` and exit 4 after the full 15-second wait. That entry
+point is a shell wrapper that starts Python as a child, so `exec -a` does not
+preserve the requested name for the observer or identify the actual Python PID
+for cleanup. A direct interpreter check reports `sys.prefix == sys.base_prefix`:
+this launch does not establish the required venv. The readiness test also uses
+`-s` on `/proc/<pid>/maps`, whose reported size is zero on Linux even when reading
+it returns mappings. These process-lifecycle defects remain writer work.
+
+All seven resolved mandatory commands ran, with no request/current resolver
+drift. Shell lint passes over 54 tracked scripts, final harness ShellCheck
+passes, wiki references are present, installer purity has no matches and the
+HEAD-relative installer comparison is empty. Validation snapshots around both
+test phases show no tracked or untracked side effects. All ten production
+scripts retain the round 2 line counts; the maximum remains 650 lines. There is
+no numeric coverage gate or measured percentage.
+
+The retained Debian build 157 capture identifies submitted `b0875e40`, reports
+99 Step 7 cases with no failures, passes steps 0 through 6 and leaves Step 7
+unanswered because no packaged archive is available. It does not validate the
+reviewer's final scope repair or the real archive/process path. The umbrella
+digest remains unchanged after the implementation-check No result.
+
+### Independent reviewer validation for Step 7 (round 4)
+
+- The request and independently captured index both identify
+  `ab5398de856fdde4fcc322a7a60d8d62e4b86ea1`. The current resolver accepts
+  the embedded seven-command set with no command or source-label drift.
+- Shell lint passes over 54 tracked scripts; the harness ShellCheck passes.
+  Wiki discovery passes. The installer-purity search has no match (expected
+  exit 1), and the HEAD-relative installer diff is empty (exit 0).
+- Native RHEL execution of the immutable staged snapshot reports 115 cases,
+  zero failures and exit 5 for step 7, using harness SHA-256
+  `69ebb85bb45c7b30199e9f85f5b68f090955d9dde8b202aab4f45d56d1c82220`.
+  The real tree still reports 21 unresolved needs and two family refusals.
+- The first aggregate lacked the build account's Git in PATH; its step 2/5
+  unanswered results and step 6 fixture failures were environment failures.
+  Adding the already installed tools Git clears the focused step 6 failures.
+  The configured aggregate result is recorded with the answer.
+- The real wrapper timeout probe returns inconclusive while its owned
+  sleeping child remains alive. The reviewer terminated only that probe child
+  after recording the result. The mixed-process branch probe returns
+  `BRANCH_FAILURES|0` and the Debian-half PASS with unusable owned-PID maps.
+  These probes exercise the submitted helper/decision functions without
+  changing the tracked harness.
+- Debian build 158's retained capture identifies the same harness, reports
+  109 step 7 cases with zero failures and an unanswered archive acceptance.
+  Independent fresh Debian execution is unavailable in this reviewer session;
+  delivering another build requires the separate owning CI workflow.
+- No implementation repair is made in this round. Only the exact step 7
+  validation rows are revised; the earlier step rows and umbrella stay intact.
+  The independent commit-plan checker is mechanically ready with six groups
+  and no diagnostics, but the stale group 6 body and the remaining readiness
+  failures prevent a commit-ready recommendation.
+
+### Independent reviewer validation for Step 7 (round 5)
+
+- Request identity and independently captured index agree at
+  `8e8eccd07857b5671476337644a7836a848c95f2`. The current resolver parses
+  the embedded seven commands with no command or source-label drift.
+- Shell lint passes over 54 scripts, harness ShellCheck and wiki discovery
+  pass, the installer-purity search has no matches (expected exit 1), and
+  the installer HEAD diff is empty (exit 0).
+- Native RHEL execution uses the immutable staged snapshot and the already
+  installed tools Git. Harness SHA-256 is
+  `06be3391ab183899f5e90f41b9a8ff856ccf756b90fdf435e731fa70ebbc3403`.
+  Step 7 reports 126 cases, zero failures and exit 5. The aggregate returns
+  5, with steps 0 through 5 at exit 0, step 6 awaiting Debian, and step 7
+  awaiting closed-payload acceptance.
+- Independent branch controls reject the unusable owned PID, an owned host
+  object, absent providers and malformed providers; the good model passes.
+  The real provider helper enumerates a two-directory fixture and reports
+  `PROVIDER|libexample.so|2`. The missing-inventory finding is closed.
+- The actual live helper's timeout probe returns 1 and leaves no live child.
+  Its early-wrapper-exit probe returns 1 with a child still live; the reviewer
+  stops only that probe's child afterward. The suite's direct reap control
+  does not cover discovery being skipped after an early wrapper exit.
+- A conclusive external-process report without OWNED, matching the real
+  observer's output contract under `started=no`, fails three owned-PID
+  assertions. The existing good model hides this by always emitting OWNED.
+- Submitted Debian build 161 identifies the same harness, reports zero
+  failures and leaves acceptance unanswered. No independent fresh Debian
+  run is available in this reviewer session; delivery belongs to the separate
+  owning CI workflow.
+- All newly added top-level functions have callers or executable test
+  references. `step7_live_process` and its override are absent. Shipped
+  script counts remain 617, 636, 524, 607, 195, 650, 549, 622, 546 and 392
+  for the checker, config, D10, ELF, observer, publication, report, rules,
+  verifier and packaging scripts respectively; the 650 ceiling holds.
+- The known private host/account identifiers are absent from the staged set.
+  Public evidence labels its substitutions. The settled trim and sqlite
+  decisions remain recorded; stale group 4/6 descriptions need refreshing.
+- The shared validation-state comparison after testing is unchanged and
+  acceptable. The independent commit-plan checker is valid and ready with six
+  ordered groups, eleven paths and no diagnostics. Reviewer changes are
+  confined to these Step 7 validation rows; no implementation is repaired.
+
+### Independent reviewer validation for Step 7 (round 6)
+
+- Request identity and the independently captured index agree at
+  `771bc6e4a9f1888997f109651aa5766ea3ade5c4`. The current shared resolver
+  returns the same seven commands and source labels; there is no drift.
+- Shell lint passes over 54 scripts, harness ShellCheck and wiki discovery
+  pass, the installer-purity search has no matches (expected exit 1), and
+  the installer HEAD diff is empty (exit 0).
+- Native RHEL 9.8 execution uses an isolated immutable staged snapshot and the
+  installed tools Git. Harness SHA-256 is
+  `5c19e33dfa12c1985d4239677182bd296226cabe22683f474cf2a729bbefc2ad`.
+  Step 7 reports 130 cases, zero failures and exit 5. The aggregate returns 5:
+  steps 0 through 5 pass, step 6 requires Debian, and step 7 lacks closed-payload
+  acceptance. Captures are retained in
+  `.reviews/a.codex-step7-r6.rhel-step7.txt` and
+  `.reviews/a.codex-step7-r6.rhel-aggregate.txt`.
+- The independent actual-helper probe creates a venv wrapper that starts a
+  copied candidate binary by its absolute path and exits. The plant records
+  the child's PID. The helper returns 1, while that PID still maps the
+  candidate and remains live; the venv scan is empty. The reviewer terminates
+  only the recorded probe child and verifies cleanup. The reproduction and
+  output are `.reviews/a.codex-step7-r6.unmarked-child.sh` and
+  `.reviews/a.codex-step7-r6.unmarked-child.txt`. This demonstrates the remaining
+  ownership defect without changing the staged harness.
+- `CPLX_ACCEPTANCE_PROCESS` and `step7_live_process` are absent from the harness
+  and its public reference. The external-mode finding is closed.
+- Submitted Debian build 162 names the same harness, reports 124 Step 7 cases
+  with zero failures, and leaves acceptance unanswered. The retained RHEL
+  capture digest agrees. No independent fresh Debian execution is claimed.
+- The D10 module and the coverage/caller assessment below remain applicable.
+  No numeric coverage claim is made for this Bash project. The new early-exit
+  control covers the explicitly marked child, leaving the ordinary wrapper
+  child above untested by the committed suite.
+- The shared before/after validation-state comparison is acceptable and
+  unchanged. The umbrella digest is unchanged. The independent commit-plan
+  checker reports valid and ready, six ordered groups, eleven paths and no
+  diagnostics. Reviewer changes update Step 7 assessment text and the matching
+  group 6 description in `a.commit`; no implementation repair is made.
+
+### Independent reviewer validation for Step 7 (round 7)
+
+- Request identity and the independently captured index agree at
+  `73f77fad0b5fc206c92897b35f00ade975955742`. The current shared resolver
+  returns the same seven commands and source labels; there is no drift.
+- Shell lint passes over 54 scripts, harness ShellCheck and wiki discovery
+  pass, the installer-purity search has no matches (expected exit 1), and
+  the installer HEAD diff is empty (exit 0).
+- Native RHEL 9.8 execution uses an isolated immutable staged snapshot and the
+  installed tools Git. Harness SHA-256 is
+  `fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1`.
+  Step 7 reports 134 cases, zero failures and exit 5. The aggregate returns 5:
+  steps 0 through 5 pass, step 6 requires Debian, and step 7 lacks closed-payload
+  acceptance. The real tree has 21 unresolved names and two family-generation
+  refusals. Captures are retained in
+  `.reviews/a.codex-step7-r7.rhel-step7.txt` and
+  `.reviews/a.codex-step7-r7.rhel-aggregate.txt`.
+- The independent actual-helper probe repeats the round 6 wrapper shape:
+  a venv wrapper starts a copied candidate binary by absolute path and exits.
+  The helper owns and inventories the recorded child PID, returns the expected
+  typed refusal for its host mappings, and reaps it before returning.
+  `survived_helper_cleanup=no` closes the round 6 lifecycle finding.
+  The reproduction and output are `.reviews/a.codex-step7-r7.unmarked-child.sh`
+  and `.reviews/a.codex-step7-r7.unmarked-child.txt`. The committed suite now
+  covers both an unmarked candidate child and an unmarked outside survivor.
+- Submitted Debian build 163 names the same harness, reports 128 Step 7 cases
+  with zero failures, and leaves acceptance unanswered. Its retained RHEL
+  capture digest agrees. No independent fresh Debian execution is claimed.
+- The shared before/after validation-state comparison is acceptable and
+  unchanged. The umbrella digest is unchanged. The independent commit-plan
+  checker reports valid and ready, six ordered groups, eleven paths and no
+  diagnostics. Reviewer edits are confined to these Step 7 assessment rows;
+  no implementation repair is made. The verdict remains **No** because the
+  real payload and archive acceptance obligations above remain unmet.
+
+### Independent reviewer validation for Step 7 (round 8)
+
+- Request identity and the independent index capture agree at
+  `00fcf115f85ae75087f8b1f38432959139a6e2d1`. Only the implementation plan and
+  validation plan differ from round 7's assessed tree. Q14 moves all four
+  outstanding acceptance obligations to Step 8 and preserves the real packaged
+  archive, whole-provider inventory, attributed venv trace, rule 1 positive
+  control and both passing captures. The prerequisites remain umbrella items
+  6 and 7; the full Debian harness must still return 0 at Step 8.
+- The current resolver returns the same seven commands and source labels.
+  Lint passes over 54 scripts, harness ShellCheck and wiki discovery pass,
+  installer purity has no matches (expected exit 1), and the installer HEAD
+  diff is empty (exit 0). All commands were independently rerun.
+- A fresh native RHEL 9.8 run from the isolated staged snapshot reports
+  134 cases, zero failures and exit 5 with harness SHA-256
+  `fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1`.
+  Only the two acceptance halves are unanswered; no owned D10 evidence is
+  missing. The aggregate passes steps 0 through 5 and returns 5 for Step 6's
+  Debian host gate and Step 7's deferred acceptance. Logs are retained at
+  `.reviews/a.codex-step7-r8.rhel-step7.txt` and
+  `.reviews/a.codex-step7-r8.rhel-aggregate.txt`.
+- Submitted Debian build 163 remains applicable to the unchanged harness:
+  128 cases, zero failures, acceptance unanswered, and the same retained RHEL
+  capture digest. No fresh independent Debian execution is claimed.
+- An isolated copy overriding only `fixture_resolve_tools` to fail reports
+  112 cases, zero failures and exit 5, while also leaving `the step 7 evidence
+  half` unanswered. This skips 22 owned evidence checks without failing a case.
+  The reviewer repairs Step 7's completion criterion to allow only the two
+  named acceptance halves unanswered. Evidence is retained in
+  `.reviews/a.codex-step7-r8.unanswered-d10.sh` and
+  `.reviews/a.codex-step7-r8.unanswered-d10.txt`; the staged harness is unchanged.
+- No new architecture, cost, coverage or feature-integrity defect was found.
+  The prior function-reference and ten-script line-budget assessments still
+  apply to identical executable bytes. The existing Step 1 root-preservation
+  controls cover the no-automatic-deletion obligation.
+- Mandatory validation changed no tracked, untracked or ignored review paths
+  before reviewer edits. The umbrella remains unchanged. The independent
+  commit-plan checker reports valid and ready, seven ordered groups, twelve
+  paths and no diagnostics. Only the attributable Step 7 criterion repair and
+  these Step 7 validation rows are staged; earlier round records are retained.
+- The scoped implementation verdict is Yes. The disposition is changes-requested
+  because the plan edit is a substantive reviewer repair and the new Step 8
+  text incorrectly describes the recorded deletion as a recoverable move.
+  That correction belongs to the writer: reviewer mode does not edit Step 8.
+
+### Independent reviewer validation for Step 7 (round 9)
+
+- Request identity and the independently captured index agree at
+  `94a940448942dcb4413563b94c6f823c5fef4907`. The only changes since round 8's
+  assessed tree correct Step 8's operator-prerequisite prose and Q09 reference.
+  Every round 8 Step 7 repair is retained verbatim. R8-F1 is closed: only the
+  two named acceptance halves may remain unanswered.
+- R8-F2 is closed. The restored operator contract matches the dated record
+  after whitespace and Markdown emphasis normalization, including the default
+  move, the prohibition on automated deletion and the explicit prior-decision
+  exception. Step 8 accurately names the deletion of 2026-09-11, the owner,
+  inspected target, not-live confirmation and manifest. Keeping the dated
+  decision unchanged is appropriate; Step 8 and Q09 explain its former Step 7
+  numbering. No further operator action is needed for this correction.
+- All seven resolved commands were independently rerun; sources and command
+  membership have no drift. Lint passes for 54 scripts, harness ShellCheck and
+  wiki discovery pass, installer purity has no matches (expected exit 1),
+  and the installer HEAD diff is empty (exit 0).
+- Fresh native RHEL 9.8 execution from the isolated staged snapshot reports
+  134 cases, zero failures and exit 5 with only the two permitted acceptance
+  halves unanswered. Harness SHA-256 remains
+  `fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1`.
+  The aggregate passes Steps 0 through 5 and returns 5 for Step 6's Debian
+  host requirement and Step 7's deferred acceptance. Logs are retained in
+  `.reviews/a.codex-step7-r9.rhel-step7.txt` and
+  `.reviews/a.codex-step7-r9.rhel-aggregate.txt`.
+- Retained Debian build 163 reports 128 cases, zero failures and exactly the
+  two permitted unanswered halves over the same harness. Its RHEL capture
+  digest agrees. No fresh independent Debian execution is claimed. Round 8's
+  missing-evidence mutation remains applicable supplemental evidence and was
+  not repeated against unchanged executable bytes.
+- Validation changes no review paths before metadata edits; the umbrella digest
+  is unchanged. The independent commit-plan checker reports valid and ready,
+  seven groups, twelve staged paths and no diagnostics. This round stages only
+  this attributable Step 7 validation record. All earlier reviewer records and
+  other steps remain unchanged; no substantive repair is made.
+- The existing architecture, cost, function-reference coverage and line-budget
+  assessments remain applicable. No current or carried Step 7 finding remains.
+  Step 7 is complete under Q14; Step 8's real-payload acceptance remains pending
+  on umbrella items 6 and 7 without relaxation. The recommendation is
+  commit-ready, advisory and subject to the human commit decision.
 
 ### New types or classes introduced for Step 7
 
-_(empty — no check has taken place yet.)_.
+cplx is a Bash project and carries no classes. The step introduces one production
+script and its functions.
+
+- `src/setups/env/bin/closure_d10.sh`: the tenth production script of the
+  delivered topology, in cplx only, consumed by umbrella item 7. Thirteen
+  functions, three of them the interface the plan names.
+- `closure_d10_evidence`: the four-field reading, with the consumer set bound to
+  this design's subject rule.
+- `closure_d10_policy`: the lowest satisfying candidate, or the failure, with
+  zero spare nodes allowed.
+- `closure_d10_converge`: the re-read comparison, failing on higher, lower and
+  neither.
+- `closure_d10_snapshot`, `closure_d10_capability`, `closure_d10_reading_generation`:
+  the three halves of the reading that keep the archive scope and the candidate
+  scope apart and recompute the generation from bytes.
+- `step7_suite`, `d10_run`, `d10_plant`, `d10_model`, `step7_provider`,
+  `step7_consumer`, `step7_reading_field`, `step7_control_exists`,
+  `step7_capture_answers`, `step7_real_prefix`, `step_two_host_halves`: the
+  harness support the step 7 cases are written against.
 
 ### Architecture check for Step 7
 
-_(empty — no check has taken place yet.)_.
+- **The delivered script topology**: `closure_d10.sh` is the tenth row of the
+  fixed table, in cplx only, and the suite asserts both properties that make it
+  that rather than describing them: no shipped script sources it, and `pkg.sh`
+  does not stage it. A module the checker could source would sit inside the trust
+  boundary, and this one decides a packaging question rather than a closure one.
+- **The module boundary**: it sources `closure_elf.sh` and nothing else. The
+  invariants, the grammar and the report answer questions D10 does not ask, and
+  sourcing them would give this file a verdict it must not have. It owns no
+  invariant and produces no closure verdict.
+- **The host-tool contract**: it reaches `readelf` and `sha256sum` only through
+  the reader module, asserted by a case over its own text, so the enumerated
+  contract gains no row for this step. The namespace prefixes are held as data
+  rather than as `case` patterns for the same rule: a bare `GLIBCXX_*` pattern
+  sits in command position to the mechanical assertion.
+- **No fourth grammar**: Q10 fixes three literal grammars and this plan owns no
+  decision to add one, so the D10 reading stays a model in memory plus a printed
+  report, and convergence crosses the rebuild boundary as two result tokens.
+- **Split or maintainability note**: `closure_d10.sh` is 524 lines, inside the
+  below-550 safe band, against an advisory estimate of 120 to 180. The variance
+  is real and recorded: the advisory counted the three interface functions, and
+  the delivered module also carries the snapshot, the namespace table, the
+  reading printer, the undefined-node reporter, the ordering lookup, the reset
+  and a CLI. The review adds initialization and incomplete-reading guards without
+  adding a module or changing the topology. No shipped script is
+  above the 650 ceiling; `closure_publish.sh` sits at exactly 650 and this step
+  adds no line to it.
+- **All ten production-script line counts, independently measured in round 7**:
+  `closure_check.sh` 617; `closure_config.sh` 636; `closure_d10.sh` 524;
+  `closure_elf.sh` 607; `closure_observe_live.sh` 195; `closure_publish.sh` 650;
+  `closure_report.sh` 549; `closure_rules.sh` 622; `closure_verify.sh` 546;
+  `pkg.sh` 392. None exceeds the 650-line ceiling.
+
+No, there is nothing that needs to be addressed: cplx carries no DDD-Hexagonal
+layering, and the topology and module boundaries this effort substitutes for it
+are asserted by cases rather than described.
 
 ### Cost and structure check for Step 7
 
-_(empty — no check has taken place yet.)_.
+- **No new `O(n^2)` or `O(n log n)` path**: the policy is a set membership test
+  per required node per candidate, two candidates over a deduplicated node set,
+  so it is linear in the requirement set and independent of the archive size.
+  The requirement set is deduplicated as it is built, through an associative
+  membership test, so several consumers demanding one node cost one entry.
+- **No additional walk**: the reading uses the one `find` `closure_elf.sh`
+  already owns and the per-object `readelf` each subject already had. Both halves
+  of the consumer question come out of that single invocation, and the candidate
+  reads are two files per generation, four in total, rather than a tree.
+- **The undefined-node report is bounded by the requirement set**, not by the
+  archive: it walks the required nodes once per candidate and prints only those
+  no entry defines.
+- **Plan-bound alignment**: the plan's complexity note for this step says the
+  evidence costs no additional walk because the consumer set is filtered from
+  records the Step 3 walk already collected. That is what the implementation
+  does.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Harness case check for Step 7
 
-_(empty — no check has taken place yet.)_.
+cplx carries no `tests/` tree and no coverage gate, so the unit-test coverage
+question is answered by the harness case set, as every earlier step of this
+effort answers it. There is no measured percentage to report and none is
+claimed.
+
+- **`closure_d10_policy`**: exercised over eight planted models covering all
+  three results and all three inconclusive shapes, plus a control that the
+  refusal is about an empty consumer set and not an empty requirement set, and a
+  control that the NEITHER report names only the undefined node.
+- **`closure_d10_converge`**: exercised over the settled case and all three
+  non-convergent shapes as separate cases, plus a control that the pass carries
+  no "no third iteration" language. Round 1 adds equal failure and undeclared
+  token cases, and a CLI case where `NEITHER` twice must preserve failure.
+- **`closure_d10_evidence`**: the submitted cases ran over real ELF fixtures on
+  both hosts; round 2's submitted captures also cover the round 1 reviewer
+  additions. The subject rule,
+  the required-node extraction, the
+  recomputed reading generation and the end-to-end policy over that reading are
+  each a case, with a control that a candidate whose bytes are not the archive's
+  leaves the generation `unknown`. Round 1 adds a second empty reading in the
+  same process, an unreadable ELF beside a readable consumer, and a traversal
+  that prints readable subjects before returning failure.
+- **`step7_capture_answers`**: passing and refusing captures are exercised, with
+  the exact inspected digest asserted before and after replacing the input.
+- **`step7_debian_half`**: round 2 adds 12 report-model checks over six outcomes,
+  including a positive control and a failed acceptance assertion with verifier
+  exit 0. They ran independently on RHEL. The real archive/process path and a
+  fresh Debian run remain required acceptance evidence.
+- **`closure_d10_main`**: exercised through the end-to-end case that runs the
+  reading and the policy over the fixture tree.
+- **Symbols not exercised by a case**: `closure_d10_requires`,
+  `closure_d10_in_scope`, `closure_d10_snapshot`, `closure_d10_capability`,
+  `closure_d10_reading_generation`, `closure_d10_satisfies`,
+  `closure_d10_undefined`, `closure_d10_position` and `closure_d10_reset` carry
+  no case of their own, and every one of them is reached from the four above:
+  the evidence half calls the first five, the policy calls the next two, and
+  convergence calls the eighth. No top-level symbol of the file is unreferenced.
+- **The step 0 control the step retired**: its surviving half keeps two cases and
+  gains a third asserting the red baseline is empty, so the retirement removes a
+  control whose subject is gone rather than a check.
+
+No, there is no unit-tested class below 100% that needs completing for Step 7.
+No, no newly staged top-level function is unreferenced. The obsolete helper
+and its override are removed. Mixed-process controls now reject the defeating
+shape. The actual-helper controls cover an unmarked wrapper child mapping the
+candidate and an unmarked outside survivor that maps no candidate object. They
+assert the recorded plants exist and are reaped; the independent wrapper probe
+also passes. The external-process mode is removed and needs no option-path
+control. No coverage percentage is claimed for this Bash harness.
 
 ### Feature integrity for Step 7
 
-_(empty — no check has taken place yet.)_.
+- **Existing feature behavior**: earlier production scripts are unchanged. `install_pkg.sh` is
+  byte-identical to HEAD, asserted by the exit-status-driven check rather than by
+  a stat, and the purity grep prints nothing. `pkg.sh`, the checker and its five
+  modules, the verification driver, the live observer and the publication gate
+  are untouched by this step.
+- **Reporting or diagnostics**: extended, never reduced. The step 7 acceptance
+  prints every refusal the checker produced, including the scope half that is
+  reported as an UNEXPECTED observation rather than as a REFUSED invariant, so a
+  reader of the capture sees the undeclared directories by name rather than only
+  a count.
+- **Compatibility or rollout note**: the harness gains one optional input,
+  `--captures`, which defaults to the harness's own directory and is required by
+  step 7 alone. Every earlier step's invocation is unchanged, and the RHEL
+  aggregate confirms steps 0 through 5 still report OBJECTIVE MET.
+
+No, no existing feature or reporting capability appears impaired.
+
+## Step 8. The real-payload acceptance
+
+### Analysis of Step 8 implementation state
+
+No. Step 8 has NOT been started, and it cannot start yet.
+
+Q14 created this step on 2026-09-12 out of the acceptance obligations Step 7
+could not discharge from inside its own boundary. Nothing in it is implemented.
+Nothing in it is relaxed either: the obligations are the ones Step 7 carried,
+moved rather than reduced.
+
+### Goal for Step 8
+
+Run the D10 acceptance against the real packaged archive on both hosts, and
+retain passing captures that name the host, the date and the archive identity.
+
+### Step 8 improvement expectations
+
+- The packaging check passes on the build account over the real tree, with every
+  refusal named and the `tools/old/py3.13` repair recorded rather than treated
+  as a check failure. That prerequisite is already discharged by the explicit
+  operator decision of 2026-09-11, which records DELETION as the authorized
+  exception to the plan's default move and identifies what went by manifest
+  digest. No step of this effort repeats or extends any live-account action.
+- The packaged archive resolves with no host fallback on Debian 12, from a
+  listing over the whole scope and a live trace naming the venv process.
+- The unmodified archive passes rule 1 over its 20 multi-candidate names.
+- `bash docs/v0.27.0/verify.closure-check.sh` returns 0 on the Debian agent.
+
+### What was implemented for Step 8
+
+Nothing. The step has not started, and its two prerequisites are open.
+
+### Missing work for Step 8
+
+- **Apply the confirmed production payload trim under umbrella item 7**.
+  Stop promoting build-only tools and their exclusive dependencies. The
+  retained copy measurement removes 83 entries, saves 194M and reduces 21
+  unresolved needs, two family refusals and 12 undetermined results to zero.
+- **Restore sqlite and retire its waiver under umbrella item 6**.
+  The measured trimmed copy still returns 3 because
+  `python-sqlite-support` remains active. This acceptance requires exit 0.
+- **Produce and verify the packaged archive after the owning changes**.
+  Record the real build-account gate, the unmodified archive's rule 1 positive
+  control over its 20 multi-candidate names, and the Debian whole-provider
+  inventory plus the attributed candidate-venv trace. The copy measurement
+  and modelled branch controls do not establish those results.
+- **Retake passing acceptance captures from the final code and payload**.
+  Retain both hosts, dates, harness and archive identities and passing halves.
+  A green suite over the current payload is not an archive pass, and a trim-copy
+  measurement is not a packaged archive.
+
+### New types or classes introduced for Step 8
+
+None. cplx is a Bash project and carries no classes, and this step adds no
+production script and no function.
+
+### Architecture check for Step 8
+
+None applicable until the step runs. It adds no module and changes no topology,
+so the ten-script topology and the 650-line ceiling are untouched by it.
+
+### Cost and structure check for Step 8
+
+No production line is added. The cost of the step is two acceptance runs and the
+captures they retain.
+
+### Harness case check for Step 8
+
+No new case. The cases are the ones Step 7 delivered, run against the real
+packaged archive rather than against a fixture. No coverage percentage is
+claimed for this Bash harness.
+
+### Feature integrity for Step 8
+
+- **Existing feature behavior**: unchanged. This step executes existing scripts
+  and retains the captures they produce.
+- **Reporting or diagnostics**: unchanged, beyond those captures.
+- **Compatibility or rollout note**: none. The step adds no input and no flag.
+
+No, no existing feature or reporting capability appears impaired.
