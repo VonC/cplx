@@ -1,0 +1,145 @@
+Measurement: what the archive refuses once build-only payload stops shipping
+Host: RHEL 9.8 (Plow), the build account deploy-account
+Taken: 2026-09-11, by hand over ssh
+Method: a HARDLINK copy of the live tree under $HOME, trimmed, then judged by the
+        v0.27.0 closure checker. The live tree is never modified: deleting a
+        hardlink removes a name, not the file, and the live tree was re-measured
+        at the same size afterwards to prove it.
+Names: infrastructure identifiers are substituted for the neutral vocabulary this
+        repository already uses in its retained evidence, so the account reads
+        `deploy-account` and the machine is named by its role. Observations,
+        counts and digests are the run's own and are not altered.
+
+===== WHY THIS MEASUREMENT EXISTS =====
+
+Step 7's acceptance was blocked by 21 DT_NEEDED names that resolve nowhere and
+two declared families over their permitted generation count. The question nobody
+had measured was whether those names belong to the RUNTIME payload or to BUILD
+TOOLING that has no business travelling to a machine that only runs the
+application.
+
+The answer decides the size of the repair. Adding five libraries to the archive
+is one job; not shipping the tools that demand them is a different and smaller
+one.
+
+===== WHAT THE REFUSALS WERE ABOUT =====
+
+Every one of the nine refusing subjects is a compiler or binary-inspection tool:
+
+  cc1, lto1, lto-dump          GCC internals
+  as, objdump, readelf         binutils
+  libmpc.so.3.2.1              GCC arithmetic helper
+  libdebuginfod-0.192.so       elfutils debug-info client
+  gresource                    glib resource tool
+
+The five names they cannot resolve are libmpfr.so.6, libopcodes-2.35.2-63.el9.so,
+libdebuginfod.so.1, libelf.so.1 and libjson-c.so.5.
+
+NO PYTHON RUNTIME COMPONENT IS AMONG THEM. A search over the refusal set for the
+interpreter, any cpython extension module, anything under lib-dynload or
+site-packages, libpython, or the git binary returns nothing. The application and
+its tests do not reach any of this.
+
+THE FAMILY ROWS ARE THE SAME POPULATION. Every consumer of libbfd or libopcodes
+is binutils: addr2line, size, ar, nm, as, c++filt, objcopy, objdump, ld.bfd,
+ranlib, gprof, strings, strip, and libctf. Nothing else in the archive links
+them.
+
+===== THE TRIM, DERIVED RATHER THAN LISTED =====
+
+83 entries, selected by rule and not by hand:
+
+  a) the GCC internals trees, */root/usr/libexec/gcc
+  b) every ELF under */root/usr/bin or */root/usr/lib64 linking libbfd or
+     libopcodes
+  c) the binutils libraries themselves, libbfd*, libopcodes*, libctf*
+  d) the compiler drivers and GCC helpers: gcc, cc, c++, g++, cpp, gcov*,
+     cc1, cc1plus, lto1, lto-dump, libmpc, libmpfr, libdebuginfod-*, gresource,
+     readelf, elfedit
+
+The dynamic loader and the C library are excluded from selection by name, so
+ld-linux, ld-2.*, libc, libm, libpthread and libdl cannot be trimmed by
+accident.
+
+===== THE RESULT =====
+
+                              before trim     after trim
+  exit code                   1               3
+  unexpected directories      0               0
+  unresolvable DT_NEEDED      21              0
+  declared families refused   2               0
+  UNDETERMINED results        12              0
+  coherence needs answered    5041 of 5053    4444 of 4444
+  ELF subjects                674             597
+  duplicate lookup names      74              63
+  multi-candidate names       26              20
+  rule 1 refusals             0               0
+  size                        1489M           1295M, 194M saved
+
+NOTHING NEW BROKE, AND THE GATE IS WHAT SAYS SO. A trim that removed something
+the runtime needed would show up immediately as a fresh unresolvable name; the
+count went to zero and stayed there. The coherence question is now answered for
+every need rather than for all but twelve, because the twelve unanswerable ones
+were version needs against providers that were never going to resolve.
+
+RULE 1 STILL HAS A SUBJECT. 20 lookup names keep more than one candidate path
+after the trim and none is refused, so the positive control that proves the rule
+does not over-refuse is intact on the smaller tree.
+
+===== WHAT IS LEFT, AND IT IS ONE THING =====
+
+  CLOSURE VALIDATION ARTIFACT: 1 active waiver(s) carried this run, so the
+  archive it gates is not publishable
+
+Exit 3 means nothing refused and an accepted exception carried the run. That
+exception is the sqlite waiver: libsqlite3.so.0 is declared in the floor,
+absent from the payload, and carried by waiver python-sqlite-support. Confirmed
+on the live interpreter:
+
+  import sqlite3 -> ModuleNotFoundError: No module named '_sqlite3'
+
+That is umbrella item 6's work and this trim does not touch it. Exit 3 is not a
+pass, by design: a run carried by an exception is not a closed archive, and the
+step 7 acceptance requires exit 0.
+
+===== WHAT THIS MEANS FOR THE PLAN =====
+
+Two things remain between here and a green acceptance, and they are now both
+small and both owned:
+
+  item 7  stop promoting build-only payload into the shipped tree, which this
+          measurement shows closes 21 names, 2 family rows and 12 UNDETERMINED
+          results at once
+  item 6  restore sqlite in the Python payload and retire the waiver
+
+Neither is item 4's. Item 4's checker is correct as it stands: it refuses a tree
+that carries binaries whose libraries do not resolve, which is exactly what it
+was built to do. The repair is the payload, not the rule.
+
+THE COMPILER IS NOT NEEDED ON THE TARGET. The build account keeps its own
+toolchain under $HOME/cplx/tools/*/root/usr/bin, separate from the shipped tree,
+so trimming the promoted copy does not affect the build. Python dependencies are
+installed from wheels rather than compiled, on Linux as on Windows, so no
+compiler is required where the application and its tests run.
+
+===== ADDENDUM, SAME DAY: WHAT THE LIVE HELPER OBSERVED ON THE DEPLOYED TREE =====
+
+Step 7's live helper was exercised end to end against the RHEL deployed tree as
+its candidate prefix, which is not the packaged archive and does not stand in
+for it. It created a venv from the shipped interpreter, launched a process,
+found and owned it, had the observer inventory that exact pid, and reaped it.
+
+The verdict over the UNTRIMMED deployed tree was:
+
+  LIVE|REFUSED|1 process(es) named python3 map 3 object(s) from outside
+  /home/deploy-account
+
+That is a real observation and it is recorded rather than tidied away: the
+interpreter of the current deployed tree maps three objects the prefix does not
+contain. It is a separate question from the 21 unresolved names, which are
+static `DT_NEEDED` records, and it belongs to the same owner: whatever the
+rebuild ships has to satisfy the live reading as well as the static one.
+
+It also demonstrates the property the acceptance is built on. A live trace is
+capable of refusing a tree that the static half would otherwise let through, and
+on this tree it did.
