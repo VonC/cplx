@@ -2128,9 +2128,11 @@ No perf gates are affected.
 - The D10 policy is decided and its interface is designed, but nothing
   implements either, so the umbrella's item 7 has no contract to produce
   evidence against.
-- No acceptance run exists. The issue requires a positive result on the
-  distribution the defect exists on, plus one negative control per independent
-  invariant, and a gate nobody has seen fail is a gate nobody has seen.
+- No negative control exists for the invariants this design adds, and a gate
+  nobody has seen fail is a gate nobody has seen.
+- The issue also requires a positive result on the distribution the defect
+  exists on. That result needs the final payload, which umbrella items 6 and 7
+  own, so Q14 gives it to Step 8 rather than to this step.
 - The project documentation says nothing about the checker, the configuration or
   the waiver contract.
 
@@ -2139,9 +2141,6 @@ No perf gates are affected.
 - Implement the D10 evidence shape and the policy that consumes it: requirements
   from the archive, capabilities from both candidate generations, the lowest
   satisfying candidate, and the convergence rule on re-read.
-- Run the acceptance: the packaging check on the build account, and the archive
-  resolving with no host fallback on Debian 12, reported from a listing over the
-  whole scope and a live trace naming the process it inventoried.
 - Add the wiki and reference documentation for the checker and its
   configuration.
 
@@ -2152,15 +2151,18 @@ No perf gates are affected.
 - A second reading returning anything other than the same candidate fails as
   non-convergent, in all three shapes.
 - A consumer set of zero is reported inconclusive and never as satisfaction.
-- The acceptance captures exist for both hosts, and the unmodified archive
-  passes rule 1, which is the positive control.
+- One negative control exists per independently refusable invariant, and each
+  refuses for its own reason rather than for a shared one.
+- The suite reports both acceptance halves as unanswered rather than as passing,
+  because the payload they judge is not this step's to produce.
 
 ### Step 7 framings
 
 - Design link: Design Area 6, all three subsections, Design Area 5, `Controls,
   one per independently refusable invariant`, and decision Q08.
 - Execution checklist reference: the shared checklist above.
-- Host: both. The policy cases are host-independent; the acceptance is not.
+- Host: both, and every case this step owns is host-independent. The acceptance
+  that is not is Step 8's under Q14.
 
 ### Step 7 complexity impact
 
@@ -2170,9 +2172,9 @@ collected, so the evidence costs no additional walk.
 
 ### Step 7 feature preservation
 
-This is the last step that adds production code, so it is where the whole
-surface is re-read against the issue's acceptance rather than against its own
-step. Every earlier step suite runs again in the same cycle.
+This is the last step that adds production code, so every earlier step suite
+runs again in the same cycle and the whole surface is re-read rather than this
+step alone. The re-read against the issue's acceptance is Step 8.
 
 ## Step 7 implementation
 
@@ -2194,28 +2196,19 @@ non-convergent rows are separate cases rather than one, because they fail for
 three different reasons and a single case would assert only the one it happened
 to plant.
 
-Acceptance cases beside them, larger than the per-step suites:
+Control cases beside them:
 
-- the packaging check passes on the build account over the real tree, with every
-  refusal it produces named. `tools/old/py3.13` is expected to refuse until the
-  root leaves the loader scope, and clearing it is an OPERATOR PREREQUISITE
-  rather than a step of this implementation. The order is fixed: an operator
-  lists the exact directory on the build account, confirms it is the superseded
-  interpreter root and not a live one, MOVES it out of `$HOME/tools` to a
-  retained location on the same account, and re-runs the observed scope to
-  confirm the root is gone. No script in this effort removes it, no step deletes
-  a directory on a live account on its own authority, and the acceptance records
-  the operator action and its retained location. If the operator instead decides
-  on deletion, that decision is recorded explicitly before the acceptance runs;
-- the packaged archive resolves with no host fallback on Debian 12, reported
-  from a listing over the whole scope AND a live trace naming the venv process;
-- the unmodified archive passes rule 1 over its 20 multi-candidate names, which
-  is the positive control that a rule 1 refusing too much would fail and nothing
-  else would catch;
 - one negative control per independently refusable invariant, which is the
   issue's nine plus the four this design adds: an unexpected directory or root,
   a divergent presence comparison, a configuration digest publication did not
-  resolve, and a coherence answer that survives a rule 1 refusal.
+  resolve, and a coherence answer that survives a rule 1 refusal;
+- a case asserting that no script in this effort removes a directory on a live
+  account, so an unauthorized automated deletion is a failure rather than a
+  shortcut.
+
+The real-payload acceptance cases are Step 8's under Q14. This step's suite
+reports both acceptance halves unanswered until that step runs them against the
+archive umbrella items 6 and 7 produce.
 
 ### Step 7 behavior
 
@@ -2229,10 +2222,15 @@ Acceptance cases beside them, larger than the per-step suites:
 
 ### Step 7 completion criteria
 
-- `bash docs/v0.27.0/verify.closure-check.sh` green end to end on the Debian
-  agent, and green for every host-independent step on RHEL.
+- `bash docs/v0.27.0/verify.closure-check.sh --step 7` reports zero failing
+  cases on both hosts, with every D10 evidence and negative-control case
+  completed. Only `the debian half of the step 7 acceptance` and
+  `the rhel half of the step 7 acceptance` may be reported unanswered; any other
+  unanswered capability or evidence obligation leaves this step incomplete.
+  Exit 5 and zero failures alone do not establish completion.
 - `bash src/utils/lint_shell.sh` green.
-- Both acceptance captures retained, each naming the host and the date.
+- Captures retained from both hosts, each naming the host and the date, as the
+  baseline Step 8 retakes against the final payload.
 - `rg -n 'toolchain-runtime-closure|closure_check' wiki/` finds the reference
   and explanation pages.
 - The installer-purity and installer-untouched greps both hold.
@@ -2258,6 +2256,136 @@ boundary invented here.
 
 ### Step 7 time-gated status
 
+No perf gates are affected. Every case this step owns is a correctness case
+rather than a timing one.
+
+## Step 8 analysis and intent
+
+### Step 8 issues
+
+- The D10 gate exists and its controls pass, but no qualifying packaged archive
+  has ever reached it. A gate nobody has seen answer is a gate nobody has seen.
+- The payload the gate must judge is not the one the repository ships today. The
+  retained measurement removes 83 build-only entries and 194M, and takes 21
+  unresolved needs, two family refusals and 12 undetermined results to zero, but
+  it measures a copy rather than a packaged archive.
+- `python-sqlite-support` is still active as a waiver, so even the measured
+  trimmed copy returns 3 where this acceptance requires 0.
+
+### Step 8 fix intent
+
+- Run the acceptance once the owning umbrella items have produced the final
+  payload: the packaging check on the build account over the real tree, and the
+  archive resolving with no host fallback on Debian 12, reported from a listing
+  over the whole scope and a live trace naming the process it inventoried.
+- Record the real build-account gate, the unmodified archive's rule 1 positive
+  control over its 20 multi-candidate names, and the Debian whole-provider
+  inventory with its attributed candidate-venv trace.
+- Retake both captures from the final code and payload, each naming the host,
+  the date and the archive identity.
+
+### Step 8 expected outcome
+
+- The acceptance captures exist for both hosts and both halves are answered.
+- The unmodified archive passes rule 1 over its 20 multi-candidate names, which
+  is the positive control that a rule 1 refusing too much would fail and nothing
+  else would catch.
+- `bash docs/v0.27.0/verify.closure-check.sh` returns 0 on the Debian agent.
+
+### Step 8 framings
+
+- Design link: Design Area 6, all three subsections, Design Area 5, `Controls,
+  one per independently refusable invariant`, and decisions Q09 and Q14.
+- Execution checklist reference: the shared checklist above.
+- Host: both, and neither half is host-independent.
+
+### Step 8 complexity impact
+
+None. This step adds no production code and no harness case. It runs the gate
+Step 7 delivered against a payload two other umbrella items produce.
+
+### Step 8 feature preservation
+
+This is where the whole surface is re-read against the issue's acceptance rather
+than against its own step. Every earlier step suite runs again in the same cycle.
+
+## Step 8 implementation
+
+### Step 8 prerequisites
+
+Both are umbrella items rather than steps of this plan, and neither can be
+satisfied from inside this item:
+
+- umbrella item 6, `python-sqlite-support`, restores sqlite and retires its
+  waiver, without which this acceptance cannot return 0;
+- umbrella item 7, `tools-archive-rebuild`, applies the confirmed payload trim
+  and packages the result, without which the gate judges a payload this effort
+  has already measured as failing.
+
+Nothing in this step may substitute a trim-copy measurement for a packaged
+archive, and nothing in it may relax the acceptance to fit the payload.
+
+### Step 8 files involved
+
+- `docs/v0.27.0/verify.closure.step7.rhel.txt` (existing, to be retaken).
+- `docs/v0.27.0/verify.closure.step7.debian.txt` (existing, to be retaken).
+
+### Step 8 test first
+
+No new case. The cases are the ones Step 7 delivered, run against the real
+packaged archive rather than against a fixture:
+
+- the packaging check passes on the build account over the real tree, with every
+  refusal it produces named. Clearing `tools/old/py3.13` is an OPERATOR
+  PREREQUISITE under Q09 rather than a step of this implementation, and the
+  order is fixed: an operator lists the exact directory on the build account,
+  confirms it is the superseded interpreter root and not a live one, MOVES it
+  out of `$HOME/tools` to a retained location on the same account, and re-runs
+  the observed scope to confirm the root is gone. No script in this effort
+  removes it, no step deletes a directory on a live account on its own
+  authority, and the acceptance records the operator action and its retained
+  location. If the operator instead decides on deletion, that decision is
+  recorded explicitly before the acceptance runs;
+- the prerequisite is already discharged, and by that exception rather than by
+  the default. `docs/v0.27.0/decision.operator-old-root.rhel.md` records
+  DELETION, decided by the repository owner on 2026-09-11 and committed before
+  the re-run. It carries the not-live confirmation, the inspected target, and a
+  4195-line manifest identified by SHA-256 and retained on the host, which is
+  what makes a deleted tree auditable in place of a retained one. That record
+  cites this contract under its pre-Q14 Step 7 numbering, which is where the
+  acceptance lived on the day it was written;
+- the packaged archive resolves with no host fallback on Debian 12, reported
+  from a listing over the whole scope AND a live trace naming the venv process;
+- the unmodified archive passes rule 1 over its 20 multi-candidate names.
+
+### Step 8 behavior
+
+No behavior is added. This step produces evidence.
+
+### Step 8 completion criteria
+
+- `bash docs/v0.27.0/verify.closure-check.sh` returns 0 on the Debian agent, and
+  returns 0 for every host-independent step on RHEL.
+- Both acceptance captures retained and passing, each naming the host, the date
+  and the archive identity.
+- `bash src/utils/lint_shell.sh` green.
+
+## Step 8 addendums
+
+### Step 8 line budget checkpoint
+
+None. This step adds no production line.
+
+### Step 8 split guidance
+
+None. This step adds no script.
+
+### Step 8 workflow timing readiness
+
+`bash src/utils/lint_shell.sh && bash docs/v0.27.0/verify.closure-check.sh`
+
+### Step 8 time-gated status
+
 No perf gates are affected. The acceptance is the last gate, and it is a
 correctness gate rather than a timing one.
 
@@ -2265,9 +2393,9 @@ correctness gate rather than a timing one.
 
 The twelve questions the plan review settled across eight rounds, closed on
 2026-09-04 and recorded in
-[the review transcript](review.plan.v0.27.0.toolchain-runtime-closure.md), and a
-thirteenth added on 2026-09-07. Each row is the decision, where the plan applies
-it, and what was rejected with the reason.
+[the review transcript](review.plan.v0.27.0.toolchain-runtime-closure.md), a
+thirteenth added on 2026-09-07 and a fourteenth on 2026-09-12. Each row is the
+decision, where the plan applies it, and what was rejected with the reason.
 
 Q13 IS AN AMENDMENT AND NOT A ROUND, recorded here rather than folded into the
 twelve because a decision table that changes silently is worth less than the
@@ -2276,6 +2404,15 @@ lines that disagreed about what step 3 owes, and neither the writer nor the
 reviewer could choose between them; the amendment is recorded in
 [the code review transcript](review.code.v0.27.0.toolchain-runtime-closure.md)
 and in design Q13, which it follows.
+
+Q14 IS ALSO AN AMENDMENT AND NOT A ROUND, recorded on 2026-09-12. The step 7
+code review carried one acceptance finding unchanged through seven rounds and
+named its owner every time: the payload the gate judges belongs to umbrella
+items 6 and 7, both sequenced after this item. Step 7 could therefore never
+reach commit-ready inside its own boundary, which is an ordering fault in the
+plan rather than a defect in the implementation under review. The amendment
+splits the step rather than the finding, and is recorded in
+[the code review transcript](review.code.v0.27.0.toolchain-runtime-closure.md).
 
 FIVE OF THESE ROWS EXIST BECAUSE A ROUND REFUSED AN EARLIER ANSWER, and the
 refused shapes are named rather than dropped: an archive that supplied its own
@@ -2294,8 +2431,9 @@ rejected alternative.
 | Q06 | An explicitly supplied results root keyed by archive identity, complete-only occupancy through no-overwrite promotion, byte-identical results idempotent, a differing result retained under a conflict name and stopping publication | Step 6 behavior, `closure_evidence_emit` | F2, one appended file, a scan rather than a lookup with interleaved writers; F3, beside the archive, the co-location the design refuses as a binding; F4, deferring to item 7 while Step 5 implements the consumer here |
 | Q07 | Mutate donor objects found on the host, after validating the donor's ELF class and section shape and asserting the mutated semantic result | Step 0 fixture corpus; Steps 3 and 4 cases | G2, hand-built hex nobody will review; G3, a compiler as a harness prerequisite on both hosts; G4, committed binary fixtures, which both earlier items refused |
 | Q08 | Keep the order: Step 5 is a consumer-contract test against a fixture, Step 6 the producer assertion, both using one schema and one parser | Steps 5 and 6 test-first lists | H2, verification first, which makes the Debian agent a prerequisite for the packaging gate the issue centres on; H3, a separate publication step, which splits the waiver refusal from the waiver contract |
-| Q09 | An operator prerequisite: inspect the exact `tools/old` target, move it recoverably out of `$HOME/tools`, re-run the observed scope, record the action and the retained location | Step 7 acceptance | J2, declaring the root, which widens the contract to fit the defect and lets a floor member satisfy on the build account while absent from the archive; J3, an implementation step removing it, a recursive delete on the workflow's own authority; J4, leaving the choice to whoever runs the acceptance |
+| Q09 | An operator prerequisite: inspect the exact `tools/old` target, move it recoverably out of `$HOME/tools`, re-run the observed scope, record the action and the retained location, with an explicitly recorded decision required before the acceptance runs if the operator chooses deletion instead. That exception is the one taken, on 2026-09-11 | Step 8 acceptance, and Step 7's until Q14 moved it | J2, declaring the root, which widens the contract to fit the defect and lets a floor member satisfy on the build account while absent from the archive; J3, an implementation step removing it, a recursive delete on the workflow's own authority; J4, leaving the choice to whoever runs the acceptance |
 | Q10 | Three literal grammars sharing one lexical shape, `CPLX-CLOSURE/1`, `CPLX-CLOSURE-ENVELOPE/1` and `CPLX-CLOSURE-EVIDENCE/1`, with exact lexical domains, decode before domain validation, a derived verdict truth table, and canonical evidence bytes. The first two live with the lexer in `closure_config.sh`; the third lives with the run outcome it records, in `closure_report.sh`, by the topology table's second amendment | Step 2 behavior, `closure_config_parse`; Step 6 emit and `closure_evidence_parse` | K2, reusing the host-tools columns, a delimiter rather than a schema; K3, JSON, whose parser would be the largest new component and is used by nothing else here; K4, INI, which has no agreed rule for the repeated keys these documents must settle |
 | Q11 | A descriptor-bound transactional callback: exclusive staging, hash the completed copy, no-overwrite promotion, then invoke a constrained uploader with the open descriptor under a begin, write, abort, commit adapter ABI that commits only after the digest matches | Step 5 behavior and its seventeen handoff cases | L1, exclusive staging with a returned pathname, which reopens the time-of-check gap; L2, re-hashing before upload, which narrows the window rather than closing it; L4, item 7 owning descriptor stability, kept as item 7's prerequisite rather than this item's fallback; L5, leaving enforcement entirely to item 7 |
 | Q12 | Only pipeline-delivered workspace copies produce evidence. Embedded copies are compared byte for byte as a payload property and are never executed for evidence, including when identical | Delivered script topology; Step 6 behavior and its authority cases | M2, executing the embedded copy, which makes the archive certify itself with no bootstrap; M3, executing it after an out-of-band digest comparison, which moves the problem to whatever performs the comparison; M4, shipping no copies, which removes a real operator use |
 | Q13 | The unreferenced finding is TWO HALVES, amended 2026-09-07 after the step 3 code review found this plan disagreeing with itself: its Step 3 behavior line specified the edge computation while its Step 3 expected outcome quoted the design's conjunction, and no step scheduled the declared entry-point input the conjunction needs. Step 3 owns the EDGE half and reports it as `UNREFERENCED-BY-EDGE`; Step 4 owns the entry-point half, the `CPLX-CLOSURE/1` record that declares the set, and the combined result | Step 3 expected outcome and behavior; Step 4 fix intent and expected outcome; design Q13 | N1, leaving the two lines contradicting each other, which is what the review found; N2, deriving entry points from `PT_INTERP` or a permission bit, the heuristic Design Area 2 refuses for the subject rule and refuses again here; N3, letting Step 3 report the edge half AS the design's finding, which names a shipped executable as an object nothing can load |
+| Q14 | The real-payload acceptance is STEP 8 and not step 7, amended 2026-09-12 after the step 7 code review carried the same acceptance finding through seven rounds. Step 7 owns the D10 interface, its negative controls and its documentation, all of which its suite proves today against fixtures on either host. Step 8 owns the packaging check over the real tree, the Debian whole-provider inventory with its attributed venv trace, and the unmodified archive's rule 1 positive control, and it is gated on umbrella items 6 and 7 delivering the final payload. The acceptance itself is unchanged: it moves, and nothing in it is relaxed | Step 7 issues, fix intent, expected outcome, framings, test-first list, feature preservation and completion criteria; the whole of Step 8 | P1, leaving the acceptance in step 7, which asks item 4 to prove a result only items 6 and 7 can produce and inverts the umbrella order the effort already fixed; P2, dropping the acceptance from the plan, which gives up the issue's requirement for a positive result on the distribution the defect exists on and leaves a gate nobody has seen answer; P3, reordering the umbrella so items 6 and 7 precede item 4, which strands a delivered and reviewed checker uncommitted while two larger items run; P4, accepting the trim-copy measurement in place of a packaged archive, which is the substitution the step 7 review refused |
