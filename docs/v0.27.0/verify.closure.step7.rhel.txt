@@ -1,0 +1,652 @@
+Harness: docs/v0.27.0/verify.closure-check.sh --step 7, then the same file with
+         no --step for every step in one aggregate. Both run from a copy of the
+         repository subset under /tmp on the build host, with the tools git on
+         PATH, exactly as the step 5 capture was taken.
+Target: RHEL 9.8 (Plow), the build account, bash 5.1.8(1)-release
+        readelf: GNU readelf version 2.35.2-72.el9
+        sha256sum: coreutils 8.32
+        git: 2.52.0, from the tools tree
+Names: infrastructure identifiers are substituted for the neutral vocabulary this
+       repository already uses in its retained evidence. Observations, counts and
+       digests are the run's own and are not altered.
+Captured: 2026-09-11, by hand, over ssh, AFTER the operator action recorded in
+          decision.operator-old-root.rhel.md. The subset's four declared inputs
+          are digested in the run itself and match the local files.
+Purpose: Step 7 of the toolchain-runtime-closure plan, the RHEL half of the
+         two-host acceptance, plus the D10 interface, which is host-independent
+         and answered here as well as on the agent. Its companion is the Debian
+         capture, verify.closure.step7.debian.txt.
+
+===== WHAT THIS CAPTURE ESTABLISHES, AND WHAT IT LEAVES OPEN =====
+
+THE D10 INTERFACE IS ANSWERED IN FULL, and its evidence half is answered over
+         real ELF objects rather than over a planted model. The nine rows of the
+         design's D10 table pass, and beside them a reading taken from a real
+         tree finds an extension module NO ENTRY POINT REACHES in the consumer
+         set, derives the reading generation from bytes rather than from an
+         argument, and returns the lowest satisfying candidate. The control that
+         gives that last part meaning is here too: a candidate whose bytes are
+         not the archive's leaves the generation `unknown`.
+
+EVERY HOST-INDEPENDENT STEP IS GREEN ON THIS HOST. Steps 0 through 5 report
+         OBJECTIVE MET, step 6 reports UNANSWERED because it is the Debian
+         agent's half, and no case fails anywhere in the aggregate. That is the
+         plan's completion criterion for this host, met.
+
+STEP 0'S ABSENT-SUITE CONTROL IS RETIRED HERE, which is the first run where it
+         could be. It measured the first step whose suite did not exist yet, and
+         step 7 wrote the last one, so its subject is gone; the harness said so
+         where the subject was derived. The half that never needed an unfilled
+         step survives over step 3, and a new case asserts the baseline is
+         empty rather than assuming it.
+
+THE OPERATOR PREREQUISITE IS DISCHARGED, AND THIS CAPTURE IS THE RE-RUN AFTER
+         IT. The observed loader scope held two undeclared directories,
+         /home/deploy-account/tools/old/py3.13/lib and .../lib64, a superseded Python
+         venv thirteen months stale that no profile, symlink or running process
+         referenced. The operator decided on DELETION rather than the move the
+         plan names as its default, and that decision is recorded, with its
+         manifest digest and the digests of the three re-downloadable artifacts
+         that went with it, in decision.operator-old-root.rhel.md, written and
+         committed BEFORE this run. No script in this effort removed it.
+
+         The effect is exactly what was predicted before the action, which is
+         worth recording because a prediction that missed would say the model of
+         the scope was wrong:
+
+           undeclared directories   2  ->  0, and the SCOPE refusal class is gone
+           unresolvable DT_NEEDED  30  -> 21
+           declared families        2  ->  2, unchanged
+           UNDETERMINED coherence  14  -> 12
+           ELF subjects           703  -> 674
+
+AND THE ACCEPTANCE IS STILL UNANSWERED, NOW ON ONE CAUSE RATHER THAN TWO. The
+         checker still refuses over this account's real tree, which is the gate
+         working rather than the harness failing, and the run names all of it:
+         21 DT_NEEDED names resolving nowhere, and 2 declared families over
+         their permitted generation count. The refusal message no longer carries
+         the operator branch at all, which is how this capture shows the
+         prerequisite was discharged rather than merely asserting it.
+
+         WHAT IS LEFT IS THE PAYLOAD, AND NO OPERATOR ACTION REACHES IT. Compiler
+         and binutils internals under both tool roots, `cc1`, `lto1`, `lto-dump`,
+         `as`, `objdump`, `readelf`, `gresource` and `libdebuginfod-0.192.so`,
+         demand `libmpfr.so.6`, `libelf.so.1`, `libjson-c.so.5`,
+         `libdebuginfod.so.1` and `libopcodes-2.35.2-63.el9.so`, and the archive
+         ships none of them. `libbfd` and `libopcodes` each carry generations
+         63.el9 and 66.el9 where the declaration permits one, which is the rule 2
+         fixture the issue names by hand. Closing either is the rebuild umbrella
+         item 7 owns.
+
+         That is the gate doing the job this effort built it for. It has now been
+         seen to refuse a real tree for real reasons; it has not yet been seen to
+         pass, and separating an unanswered obligation from a green is what keeps
+         the difference legible.
+
+AND TWO DEFECTS IN THIS STEP'S OWN WORK WERE FOUND BY THE SECOND HOST, both
+         repaired before this capture and recorded in the functions themselves.
+         Debian build 152: the two-host gate grepped the other capture for
+         `OBJECTIVE MET for step 7`, and a retained capture carries this
+         harness's own diagnostic text, which names that string, so a run matched
+         its own instructions and recorded the RHEL half as answered over a run
+         that was unanswered. The same version deadlocked the pair by
+         construction. Debian build 153: retiring step 0's control moved its
+         surviving half onto a step whose suite RUNS, and the child was not given
+         the parent's `--shipped-dir`, so on the agent it failed on missing
+         modules instead of refusing on the missing tool. Both passed on this
+         host, which is what the two-host requirement exists for.
+ROUND 1 OF THE STEP 7 CODE REVIEW REPAIRED FOUR THINGS BEFORE THIS CAPTURE, and
+         the capture is retaken from the repaired bytes rather than carrying the
+         pre-review harness the earlier version identified. Three were defects in
+         `closure_d10.sh` that the reviewer reproduced independently:
+
+           a second reading in one process reused the first one's reader model,
+           so an empty archive could answer with the previous archive's subjects;
+
+           an incomplete walk or an unread object did not reach the policy, so a
+           partially measured archive could still select a candidate;
+
+           convergence settled whenever the two results matched as TEXT, so
+           NEITHER twice and INCONCLUSIVE twice reported SETTLED. Two failures
+           agreeing is not convergence, and the settled branch now requires a
+           declared candidate.
+
+         The fourth was the gap the earlier capture recorded and deferred: the
+         two-host gate now hashes the capture snapshot it inspects and reports
+         that digest for a passing and for a refusing capture alike.
+
+AND THE ACCEPTANCE'S DEBIAN HALF WAS THE REVIEW'S P1 FINDING, repaired here. The
+         previous branch ran the same static check whichever host it was on and
+         marked the half passed when the checker succeeded over an installed
+         prefix. That answers the RHEL question. It does not answer the foreign
+         host's, which is that the PACKAGED ARCHIVE resolves, reported from a
+         listing over the whole scope AND a live trace naming the venv process,
+         so a statically closed prefix could have passed without the archive
+         being read at all. The Debian half now drives the authoritative
+         `closure_verify.sh` over a real archive, recomputes the identity rather
+         than reading the one printed, and asserts the static listing, the two
+         observations and a conclusive live trace naming its process. Three
+         controls sit at that branch's own level: a run with no live reading, an
+         empty trace, and a planted host-mapped object must each fail to pass.
+
+THE REAL ARCHIVE'S RULE 1 RESULT IS NOW EVIDENCED, which the fixture inventory
+         could not do. Step 4's positive control plants twenty names and proves
+         the rule does not over-refuse on a shape this harness built; the issue
+         asks for the same property over the tree that ships. This run reports
+         74 names, 26 multi-candidate, 0 refused, and the assertion names both
+         numbers, because zero refusals over zero multi-candidate names would be
+         a vacuous pass.
+
+ROUND 2 OF THE REVIEW FOUND THE DEBIAN HALF UNREACHABLE BY CONSTRUCTION, and
+         round 3 is where that is repaired. The branch passed the process NAME
+         into `closure_verify.sh`, which installs and observes in ONE call, so
+         at observation time no process from the candidate had been started. A
+         name alone selects nothing; any host process answering to it maps its
+         libraries from outside the candidate and is refused, correctly. The
+         conclusive answer the branch asserted could never occur.
+
+         The live half is now taken by this branch, after the driver installs:
+         the candidate's OWN interpreter is started under a unique argv0, so the
+         inventory is provably about this installation rather than about
+         whatever else on the agent answers to `python3`, and the observer is
+         called directly against the candidate prefix. An operator-named
+         alternative stood beside it for two rounds; round 5 removed it, and the
+         paragraph on round 5 below says why.
+
+         The same round found the branch retaining summary verdicts where the
+         issue asks for the observations. `STATIC|PASS` is a verdict about a
+         listing and is not the listing, and a summary repeating the name it was
+         asked for is not a trace. Both are now retained: the observed loader
+         scope of the installed candidate one directory per line, with every
+         directory required to fall under the candidate prefix, and the
+         observer's own PROCESS, OBJECT and HOSTS records, with the trace
+         required to carry a PROCESS record bearing a pid.
+
+         THE DRIVER'S EXIT CODE IS NO LONGER THE GATE, and that follows from the
+         repair rather than weakening it. The driver returns non-zero whenever
+         ITS live reading was not conclusive, and that reading is now always
+         inconclusive by design, because the process this acceptance inventories
+         cannot exist until after the driver has installed. The half passes on
+         this branch's own assertions: the archive identity recomputed, the
+         static and comparison records, the retained scope listing, a conclusive
+         trace over an attributed process, and no failed control.
+
+ROUND 3 OF THE REVIEW FOUND THE LIVE HALF STILL NOT REAL, and round 4 is where it
+         became so. Three findings, all correct:
+
+         THE PROJECT PYTHON ENTRY POINT IS A SHELL WRAPPER, so renaming it with
+         `exec -a` never reached the interpreter, the observer missed the process
+         and a kill aimed at the wrapper could leave its child running. The
+         helper no longer depends on a name it chose: it creates a real VENV from
+         the candidate interpreter, launches it, and identifies the process by
+         PID OWNERSHIP. The acceptance then requires the trace to carry THAT pid,
+         so a conclusive reading of somebody else's `python3` cannot be mistaken
+         for this one.
+
+         THE READINESS TEST COULD NEVER FIRE. Linux reports `/proc/<pid>/maps`
+         with size zero even while its contents are readable, so `[ -s ]` was
+         false forever: every launch waited out all 150 intervals and an
+         already-exited process waited them out too, with its diagnostics
+         discarded. Readiness is now read from the CONTENT of the mapping table,
+         the loop ends on an exited launch, and the launch log is retained and
+         reported in the refusal.
+
+         THE RETAINED LISTING WAS DIRECTORY NAMES ONLY. That is a scope boundary
+         and not the provider listing the design asks for.
+
+AND THE HELPER WAS RUN FOR REAL RATHER THAN MODELLED, which round 3 asked for by
+         name. Round 4 gave it two such cases, a prefix with no interpreter that
+         must give the typed INCONCLUSIVE and, on a host with a deployed tree,
+         the whole machinery end to end; round 5 added a third, below. On this
+         host it ran, and on the round 4 run that end-to-end case immediately
+         exposed a defect in the round 4 code itself: the helper assumed the
+         wrapper always spawns a child, while the deployed venv entry point
+         resolves straight to the binary and has none. It timed out on a process
+         that was already mapping the candidate. The loop now owns whichever of
+         the two shapes it finds.
+
+         The end-to-end run over the deployed tree returned:
+
+           OWNED|3038527|python3
+           LIVE|REFUSED|1 process(es) named python3 map 3 object(s) from outside
+           /home/deploy-account
+
+         That is a REAL observation about the current deployed tree and it is kept
+         rather than tidied away. It is not the packaged archive and does not
+         stand in for it; what it establishes is that the machinery works and
+         that a live trace can refuse a tree the static half would pass.
+
+THE BUILD-ONLY PAYLOAD DECISION WAS TAKEN AND MEASURED on 2026-09-11, and it is
+         recorded in measurements.build-only-payload.rhel.txt. A library that only
+         a BUILD TOOL requires is not a runtime requirement of an archive whose
+         hosts run the application and its tests and never build tools. Measured
+         over a hardlink copy: trimming 83 build-only entries takes the checker
+         from 21 unresolvable names, 2 refused families and 12 UNDETERMINED
+         results to zero of each, saves 194M, and leaves rule 1 exercised over 20
+         multi-candidate names with no new refusal anywhere. What remains is exit
+         3 and the sqlite waiver, which is umbrella item 6's.
+
+ROUND 4 OF THE REVIEW FOUND SIX THINGS AND ALL SIX ARE CLOSED HERE. Three were
+         defects a model could not have shown.
+
+         THE OWNED PID WAS NAMED AND NOTHING ELSE WAS BOUND TO IT. The branch
+         required a PROCESS record for the process it launched and then accepted
+         an OBJECT record for ANY pid, so a reading where the owned process was
+         UNUSABLE and a DIFFERENT process supplied the objects and the zero-host
+         result PASSED. The real observer emits exactly that shape, since
+         PROCESS is printed before the collection is attempted. The owned pid
+         must now carry objects, must not be the unusable one, and must be the
+         pid the zero-host result is stated for. The reviewer's defeating shape
+         is kept as the `unusable-owner` model, with `owner-maps-host` beside it.
+
+         THE REFUSAL PATHS LEAKED A CHILD. A wrapper's child outlives the
+         wrapper, and the timeout and early-exit paths killed only the launched
+         pid. Reaping is now one function both paths call, and an executable
+         control plants a wrapper with a child, reaps it, and requires both to
+         be gone.
+
+         THE LISTING WAS BOUNDARIES, NOT PROVIDERS. `STATIC|PASS` beside a few
+         directory names says nothing about what those directories hold, so an
+         archive shipping an empty scope would have satisfied it. The branch now
+         enumerates the scope through the checker's OWN provider index and
+         retains one record per lookup name. An inventory that could not be
+         taken blocks the half rather than reading as a scope holding none,
+         which needed its own flag because an unanswered obligation raises no
+         failure.
+
+         The other three were an abandoned helper removed with its dead
+         override, a commit description that still presented a settled decision
+         as an open alternative, and the sanitization below.
+
+INFRASTRUCTURE IDENTIFIERS ARE SUBSTITUTED IN THIS RETAINED EVIDENCE, which
+         round 4 raised and which this repository already had a rule for: no
+         committed document carries the account name, and the step 5 capture
+         records the substitution as the repository's own. The run's
+         observations, counts and digests are its own and are not altered.
+
+AND BUILD 159 FOUND A RACE IN THE CONTROL ROUND 4 ASKED FOR, which is why this
+         capture is the second of the round. The reap control tested for the
+         child's disappearance the instant after the kill. A kill is a request
+         and not an event: the target stays visible in `/proc` until it has
+         exited and been reaped, and a child whose parent was also killed is
+         reparented and cleaned up asynchronously. This host won that race and
+         the agent did not, so the control passed here and failed there.
+
+         Reaping now waits for the child to be gone, bounded, so "reaped" means
+         gone rather than signalled. The same agent run also filled its capture
+         with `/proc/<pid>/status: No such file or directory` for pids that
+         exited during the parent scan; a process that disappeared has no parent
+         to report, which is a return rather than a message, so readability is
+         tested before the redirect.
+
+ROUND 5 OF THE REVIEW FOUND THE ROUND 4 REPAIR INCOMPLETE, and this capture is
+         the round 5 run. The two findings that changed code were both about the
+         same thing: a process this harness started and could no longer name.
+
+         THE EARLY-EXIT PATH STILL LEAKED. Round 4 made reaping one function and
+         gave it the child it had discovered, which is exactly the case that
+         cannot arise here: a launch that exits BEFORE discovery reparents its
+         child to PID 1, and a `PPid` scan can never attribute it again. The
+         helper could therefore refuse with an interpreter of its own still
+         running and no name left for it. Ownership is now the PATH the process
+         was launched from, read from its own command line, which survives the
+         reparenting that broke parentage; the discovery loop establishes
+         ownership BEFORE it tests liveness, and the reap sweeps every process
+         of the venv whether or not it was ever discovered.
+
+         THE OPERATOR-NAMED MODE COULD NOT PASS. It returned the observer's
+         output with no OWNED record, and round 4's repair had made the
+         acceptance require the owned pid in three separate assertions, so the
+         mode failed all three wherever it was used. A mode that cannot produce
+         a passing half is not an alternative, and it is removed rather than
+         repaired: the branch has one way to take the live half, which is to
+         start a process it owns.
+
+AND THE CONTROL ROUND 4 ASKED FOR DID NOT REACH THE PATH IT WAS ABOUT, which the
+         reviewer named and which this capture answers. The reap control hands
+         `step7_reap` a child it has ALREADY discovered, so it exercises the
+         reaping and not the losing. The new control drives
+         `step7_candidate_live_evidence` ITSELF over a planted candidate whose
+         venv entry point backgrounds a sleeper and returns at once, so the
+         helper creates the venv, launches it, loses the launched process, and
+         has to recover a survivor it never held.
+
+         THE CONTROL RECORDS ITS OWN SURVIVOR so it cannot pass vacuously. The
+         planted entry point writes the pid it backgrounded; a plant that
+         launched nothing fails the run rather than passing quietly. That pid
+         sleeps for a minute and the helper takes about fifteen seconds, so
+         finding it gone afterwards means something killed it, and the only
+         mechanism that could is the sweep over the venv path.
+
+         THE CONTROL WAS DEFEATED ON PURPOSE BEFORE IT WAS TRUSTED. With the
+         sweep disabled in a copy of this subset, the run reports 130 cases and
+         2 failures, `the-survivor-was-reaped want [no] got [yes]` and
+         `nothing-of-the-venv-is-left want [] got [2822881]`. With the sweep in
+         place it reports 130 cases and no failure. The same control also spends
+         the helper's whole deadline, so the bounded wait is exercised here as
+         well and ends in a typed answer rather than in a hang.
+
+         BOTH THE MECHANISM AND THE CONTROL WERE REPLACED AT ROUND 6, which is
+         the next section. The sweep over the venv path only ever found a child
+         whose arguments happened to carry that path, and this control's plant
+         was supplying exactly that.
+
+ROUND 6 FOUND THE ROUND 5 OWNERSHIP RULE READING THE WRONG THING, and this
+         capture is the round 6 run. The rule attributed a process by the PATH
+         in its command line, and the reviewer's reproduction showed what that
+         misses: a venv entry point is a SHELL WRAPPER that starts the real
+         interpreter by its ABSOLUTE CANDIDATE PATH, so the child's arguments
+         name the candidate and never the venv. A wrapper's path is not
+         inherited by its child.
+
+         The consequence was worse than a leak. The helper answered "the venv
+         process exited before anything of it could be observed" while a
+         CANDIDATE-MAPPED child of its own launch was running and unowned: a
+         missed success, not only an unreaped survivor. The committed control
+         hid it, because its plant supplied the marker the rule needed.
+
+         OWNERSHIP IS NOW TAKEN FROM THE LAUNCH AND FROM NOTHING ELSE, by two
+         independent properties of it.
+
+         THE PROCESS GROUP. The launch is made with job control on, so the
+         launched process becomes a group leader and its group id IS its pid.
+         Every descendant inherits it, across `exec`, across the parent's exit
+         and across reparenting to PID 1, because a process group outlives the
+         process that created it. Nothing else on the machine can be in it.
+
+         THE ENVIRONMENT NONCE. The launch carries a variable no other process
+         has, `exec` preserves the environment, and a child that leaves the
+         group by calling `setsid` still carries it.
+
+         Neither depends on an argument, which is the assumption round 6
+         destroyed. The helper's own shell and PID 1 are never owned.
+
+THE CONTROLS ARE NOW UNMARKED, which is the point the reviewer made about the
+         previous one. Two plants, neither putting the venv anywhere the child
+         can carry it:
+
+         THE UNMARKED WRAPPER CHILD, the reviewer's shape. The entry point
+         starts a copied binary under the candidate by absolute path, records
+         its pid and exits. It maps the candidate, so the helper must OWN it,
+         name it on the `OWNED` record, reach a typed verdict and reap it. The
+         run below does all four against the pid the plant recorded.
+
+         THE EARLY EXIT, with a survivor OUTSIDE the candidate started by
+         absolute path from this suite's own scratch. It maps nothing under the
+         candidate, so the helper must refuse and must still sweep it.
+
+         Both record their own survivor, so a plant that launched nothing fails
+         the run rather than passing quietly, and the second spends the whole
+         deadline, so the bounded wait is exercised as well.
+
+THE OWNERSHIP WAS DEFEATED THREE WAYS BEFORE IT WAS TRUSTED, in copies of this
+         subset on this host:
+
+           with `step7_owned_processes` returning nothing, 134 cases and 5
+           failures: the unmarked child is not owned, both survivors stay, and
+           the real-tree success path fails with them;
+
+           with the process-group rule removed and only the nonce left, 134
+           cases and no failure;
+
+           with the nonce rule removed and only the process group left, 134
+           cases and no failure.
+
+         The two rules are therefore each sufficient here and the pair is
+         redundant, which is what the third and second runs establish and what
+         the first one makes non-vacuous.
+
+         The reviewer's own reproduction was rerun against these bytes. It now
+         reports `OWNED|<pid>|real-interprete` for the pid the plant recorded,
+         an `OBJECT` inventory of that pid, a typed `LIVE|REFUSED` verdict, and
+         `survived_helper_cleanup=no`.
+
+===== BEGIN CPLX-CLOSURE-RHEL-STEP7 =====
+--- environment
+GNU readelf version 2.35.2-72.el9
+sha256sum (GNU coreutils) 8.32
+git version 2.52.0
+GNU bash, version 5.1.8(1)-release (x86_64-redhat-linux-gnu)
+2026-09-11T22:32Z
+--- input digests
+fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1  docs/v0.27.0/verify.closure-check.sh
+33e972d20528aecf19583e80c8628495dfe31afb40f1efbe92b109b2bcb8e37e  docs/v0.27.0/contract.closure-tools.txt
+74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472  docs/v0.27.0/fixtures.closure-corpus.txt
+a2bfc14e64c17c77b6e8a97233a2e579487aa20d347b96702e8affc4de4211d0  src/setups/env/bin/closure_d10.sh
+--- verify.closure-check.sh --step 7
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 7 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /bin/sed
+  preflight/grep                                 PASS  /bin/grep
+  preflight/sort                                 PASS  /bin/sort
+  preflight/uniq                                 PASS  /bin/uniq
+  preflight/mkdir                                PASS  /bin/mkdir
+  preflight/rm                                   PASS  /bin/rm
+  preflight/chmod                                PASS  /bin/chmod
+
+== host gate: both
+  host/identity                                  NOTE  rhel 9.8
+  host/both                                      PASS  rhel 9.8 answers the rhel half
+
+== capability gate: readelf sha256sum assoc
+  capability/readelf/in-domain                   PASS  yes
+  capability/readelf                             NOTE  supported: /bin/readelf answered -d -V over /bin/bash
+  capability/sha256sum/in-domain                 PASS  yes
+  capability/sha256sum                           NOTE  supported: /bin/sha256sum digested the empty input correctly
+  capability/assoc/in-domain                     PASS  yes
+  capability/assoc                               NOTE  supported: bash 5.1.8(1)-release, an associative assignment read back its own value
+
+== step 7 topology: the tenth script, in cplx only
+  step7/topology/d10-exists                      PASS  yes
+  step7/topology/no-shipped-script-sources-it    PASS
+  step7/topology/it-is-not-staged-into-the-archive PASS
+  step7/topology/it-calls-no-host-tool-directly  PASS
+
+== step 7 D10 policy: the lowest satisfying candidate, zero spare nodes
+  step7/policy/plant/gcc-11-satisfies            PASS  gcc-11|3|3|gcc-11 gcc-12
+  step7/policy/gcc-11-satisfies/rc               PASS  0
+  step7/policy/gcc-11-satisfies/returns-the-lowest PASS  D10 POLICY: gcc-11
+  step7/policy/gcc-11-satisfies/asks-no-re-read  PASS  no
+  step7/policy/plant/only-gcc-12-satisfies       PASS  gcc-11|3|1|gcc-11 gcc-12
+  step7/policy/only-gcc-12-satisfies/rc          PASS  0
+  step7/policy/only-gcc-12-satisfies/returns-gcc-12 PASS  D10 POLICY: gcc-12
+  step7/policy/only-gcc-12-satisfies/asks-a-re-read PASS  yes
+  step7/policy/plant/read-under-gcc-12           PASS  gcc-12|2|1|gcc-11 gcc-12
+  step7/policy/read-under-gcc-12/returns-gcc-11  PASS  D10 POLICY: gcc-11
+  step7/policy/read-under-gcc-12/asks-a-re-read  PASS  yes
+  step7/policy/plant/neither-defines-a-node      PASS  gcc-11|2|2|gcc-11 gcc-12
+  step7/policy/neither-defines-a-node/rc         PASS  1
+  step7/policy/neither-defines-a-node/returns-neither PASS  D10 POLICY: NEITHER
+  step7/policy/neither-defines-a-node/names-it   PASS  yes
+  step7/policy/neither-defines-a-node/control/names-only-it PASS  no
+  step7/policy/neither-defines-a-node/says-packaging-fails PASS  yes
+  step7/policy/plant/zero-consumers              PASS  gcc-11|0|0|gcc-11 gcc-12
+  step7/policy/zero-consumers/rc                 PASS  5
+  step7/policy/zero-consumers/is-inconclusive    PASS  D10 POLICY: INCONCLUSIVE
+  step7/policy/zero-consumers/says-why           PASS  yes
+  step7/policy/zero-consumers/control/one-consumer-answers PASS  0
+  step7/policy/unreadable-candidate/rc           PASS  5
+  step7/policy/unreadable-candidate/is-inconclusive PASS  D10 POLICY: INCONCLUSIVE
+  step7/policy/unreadable-candidate/does-not-demote PASS  yes
+  step7/policy/no-candidate/rc                   PASS  5
+  step7/policy/no-candidate/says-why             PASS  yes
+
+== step 7 D10 convergence: the second evaluation must return the same candidate
+  step7/converge/same-candidate/rc               PASS  0
+  step7/converge/same-candidate/settles          PASS  D10 CONVERGENCE: SETTLED at gcc-12
+  step7/converge/same-candidate/control/no-iteration-language PASS  no
+  step7/converge/higher/rc                       PASS  1
+  step7/converge/higher/is-non-convergent        PASS  D10 CONVERGENCE: NON-CONVERGENT
+  step7/converge/higher/names-the-direction      PASS  yes
+  step7/converge/higher/no-third-iteration       PASS  yes
+  step7/converge/lower/rc                        PASS  1
+  step7/converge/lower/names-the-direction       PASS  yes
+  step7/converge/neither/rc                      PASS  1
+  step7/converge/neither/names-the-reason        PASS  yes
+  step7/converge/equal-NEITHER/refuses           PASS  1
+  step7/converge/equal-INCONCLUSIVE/refuses      PASS  1
+  step7/converge/equal-undeclared/refuses        PASS  1
+
+== step 7 D10 evidence: the consumer set is the subject set, and the generation is recomputed
+  step7/fixture/tools                            NOTE  /bin/readelf, /bin/dd
+  step7/fixture/donor-found                      PASS  yes
+  step7/fixture/donor                            NOTE  /usr/lib64/libz.so.1
+  step7/evidence/plant/shipped-libstdc++         PASS  yes
+  step7/evidence/plant/shipped-libgcc_s          PASS  libgcc_s.so.1
+  step7/evidence/plant/consumer-demands-the-node PASS  yes
+  step7/evidence/plant/consumer-needs-the-library PASS  yes
+  step7/evidence/plant/gcc-12-defines-a-higher-node PASS  yes
+  step7/evidence/reading-is-taken                PASS  0
+  step7/evidence/the-unreached-module-is-a-consumer PASS  1 of 3 shipped objects
+  step7/evidence/required-nodes                  PASS  1
+  step7/evidence/the-required-node-is-named      PASS  yes
+  step7/evidence/generation-is-recomputed        PASS  gcc-11
+  step7/evidence/policy-over-a-real-reading/rc   PASS  0
+  step7/evidence/policy-over-a-real-reading/returns-gcc-11 PASS  yes
+  step7/evidence/policy-over-a-real-reading/asks-no-re-read PASS  no
+  step7/evidence/second-empty-reading/is-inconclusive PASS  5
+  step7/evidence/second-empty-reading/has-no-stale-subjects PASS  yes
+  step7/evidence/unread-object/is-inconclusive   PASS  5
+  step7/evidence/unread-object/names-incomplete-archive PASS  yes
+  step7/evidence/incomplete-walk/is-inconclusive PASS  5
+  step7/evidence/incomplete-walk/names-incomplete-archive PASS  yes
+  step7/evidence/control/mixed-bytes-are-unknown PASS  unknown
+  step7/evidence/neither-twice/preserves-cli-failure PASS  1
+
+== step 7 acceptance: the positive control, the inventory, and the two halves
+  step7/capture/passing-half-is-accepted         PASS  0
+  step7/capture/records-the-bytes-inspected      PASS  yes
+  step7/capture/refusing-half-is-refused         PASS  1
+  step7/capture/refusal-records-the-replacement-bytes PASS  yes
+  step7/acceptance/scope-listing-separates-directories PASS  identical: 2 line(s), 149 bytes
+  step7/live-helper/no-interpreter-is-inconclusive PASS  yes
+  step7/live-helper/reap/the-fixture-has-a-child PASS  yes
+  step7/live-helper/reap/the-child-is-gone       PASS  no
+  step7/live-helper/reap/the-wrapper-is-gone     PASS  no
+  step7/live-helper/unmarked-child/the-plant-left-a-child PASS  yes
+  step7/live-helper/unmarked-child/the-wrapper-starts-a-candidate-path PASS  yes
+  step7/live-helper/unmarked-child/is-owned-by-the-helper PASS  yes
+  step7/live-helper/unmarked-child/reaches-a-typed-verdict PASS  yes
+  step7/live-helper/unmarked-child/the-child-was-reaped PASS  no
+  step7/live-helper/early-exit/is-inconclusive   PASS  yes
+  step7/live-helper/early-exit/the-plant-left-a-survivor PASS  yes
+  step7/live-helper/early-exit/the-survivor-was-reaped PASS  no
+  step7/live-helper/owned                        NOTE  OWNED|3038527|python3
+  step7/live-helper/verdict                      NOTE  LIVE|REFUSED|1 process(es) named python3 map 3 object(s) from outside /home/deploy-account
+  step7/live-helper/it-launched-and-owned-an-interpreter PASS  yes
+  step7/live-helper/the-observer-inventoried-that-pid PASS  yes
+  step7/live-helper/it-reached-a-typed-verdict   PASS  yes
+  step7/live-helper/the-owned-child-was-reaped   PASS  no
+  step7/acceptance-branch/good/half-marker       PASS  yes
+  step7/acceptance-branch/good/assertions-clean  PASS  yes
+  step7/acceptance-branch/bad-identity/half-marker PASS  no
+  step7/acceptance-branch/bad-identity/assertions-clean PASS  no
+  step7/acceptance-branch/static-only/half-marker PASS  no
+  step7/acceptance-branch/static-only/assertions-clean PASS  no
+  step7/acceptance-branch/empty-trace/half-marker PASS  no
+  step7/acceptance-branch/empty-trace/assertions-clean PASS  no
+  step7/acceptance-branch/host-object/half-marker PASS  no
+  step7/acceptance-branch/host-object/assertions-clean PASS  no
+  step7/acceptance-branch/bad-control/half-marker PASS  no
+  step7/acceptance-branch/bad-control/assertions-clean PASS  no
+  step7/acceptance-branch/mixed-scope/half-marker PASS  no
+  step7/acceptance-branch/mixed-scope/assertions-clean PASS  no
+  step7/acceptance-branch/sibling-scope/half-marker PASS  no
+  step7/acceptance-branch/sibling-scope/assertions-clean PASS  no
+  step7/acceptance-branch/failed-scope/half-marker PASS  no
+  step7/acceptance-branch/failed-scope/assertions-clean PASS  no
+  step7/acceptance-branch/unowned-trace/half-marker PASS  no
+  step7/acceptance-branch/unowned-trace/assertions-clean PASS  no
+  step7/acceptance-branch/unusable-owner/half-marker PASS  no
+  step7/acceptance-branch/unusable-owner/assertions-clean PASS  no
+  step7/acceptance-branch/owner-maps-host/half-marker PASS  no
+  step7/acceptance-branch/owner-maps-host/assertions-clean PASS  no
+  step7/acceptance-branch/no-providers/half-marker PASS  no
+  step7/acceptance-branch/no-providers/assertions-clean PASS  yes
+  step7/acceptance-branch/malformed-providers/half-marker PASS  no
+  step7/acceptance-branch/malformed-providers/assertions-clean PASS  no
+  step7/acceptance/positive-control-exists       PASS  yes
+  step7/acceptance/positive-control-counts-the-names PASS  yes
+  step7/acceptance/positive-control-name-count   PASS  20
+  step7/acceptance/thirteen-invariants-declared  PASS  13
+  step7/acceptance/every-invariant-has-a-control PASS
+  step7/acceptance/this-host                     NOTE  rhel live, debian from /tmp/cplx-step7/docs/v0.27.0/verify.closure.step7.debian.txt
+  step7/acceptance/real-prefix                   NOTE  /home/deploy-account
+  step7/acceptance/checker-exit                  NOTE  1
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/lto-dump|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/as|libopcodes-2.35.2-63.el9.so|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/objdump|libopcodes-2.35.2-63.el9.so|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/objdump|libdebuginfod.so.1|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/libdebuginfod-0.192.so|libelf.so.1|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/libdebuginfod-0.192.so|libjson-c.so.5|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/readelf|libdebuginfod.so.1|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/bin/gresource|libelf.so.1|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/lib64/libmpc.so.3.2.1|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/libexec/gcc/x86_64-redhat-linux/11/cc1|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/git/root/usr/libexec/gcc/x86_64-redhat-linux/11/lto1|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/bin/as|libopcodes-2.35.2-63.el9.so|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/bin/objdump|libopcodes-2.35.2-63.el9.so|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/bin/objdump|libdebuginfod.so.1|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/bin/libdebuginfod-0.192.so|libelf.so.1|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/bin/libdebuginfod-0.192.so|libjson-c.so.5|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/bin/lto-dump|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/bin/readelf|libdebuginfod.so.1|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/lib64/libmpc.so.3.2.1|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/libexec/gcc/x86_64-redhat-linux/11/cc1|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  REFUSED|derived|/home/deploy-account/tools/python/root/usr/libexec/gcc/x86_64-redhat-linux/11/lto1|libmpfr.so.6|no provider directory in the observed loader scope holds a file of that name
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/git/root/usr/bin/objdump|the version need ELFUTILS_0.178 names libdebuginfod.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/git/root/usr/bin/libdebuginfod-0.192.so|the version need ELFUTILS_1.5 names libelf.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/git/root/usr/bin/libdebuginfod-0.192.so|the version need ELFUTILS_1.0 names libelf.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/git/root/usr/bin/libdebuginfod-0.192.so|the version need JSONC_0.14 names libjson-c.so.5, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/git/root/usr/bin/readelf|the version need ELFUTILS_0.178 names libdebuginfod.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/git/root/usr/bin/gresource|the version need ELFUTILS_1.5 names libelf.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/git/root/usr/bin/gresource|the version need ELFUTILS_1.0 names libelf.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/python/root/usr/bin/objdump|the version need ELFUTILS_0.178 names libdebuginfod.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/python/root/usr/bin/libdebuginfod-0.192.so|the version need ELFUTILS_1.5 names libelf.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/python/root/usr/bin/libdebuginfod-0.192.so|the version need ELFUTILS_1.0 names libelf.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/python/root/usr/bin/libdebuginfod-0.192.so|the version need JSONC_0.14 names libjson-c.so.5, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  UNDETERMINED|coherence|/home/deploy-account/tools/python/root/usr/bin/readelf|the version need ELFUTILS_0.178 names libdebuginfod.so.1, which resolves nowhere in the observed loader scope
+  step7/acceptance/refusal                       NOTE  REFUSED|families|binutils-bfd|1|2|libbfd-2.35.2-63.el9.so,libbfd-2.35.2-66.el9.so
+  step7/acceptance/refusal                       NOTE  REFUSED|families|binutils-opcodes|1|2|libopcodes-2.35.2-63.el9.so,libopcodes-2.35.2-66.el9.so
+  step7/acceptance/refusal                       NOTE  CLOSURE MEMBERSHIP REFUSED: DT_NEEDED names resolving nowhere in the observed loader scope: 21
+  step7/acceptance/refusal                       NOTE  CLOSURE FAMILY REFUSED: declared families over their permitted generation count: 2
+  step7/acceptance/real-duplicates               NOTE  74 names, 26 multi-candidate, 0 refused
+  step7/acceptance/real-archive-rule-1-refuses-nothing PASS  yes
+  step7/acceptance/real-archive-multi-candidate-names PASS  yes
+
+== verdict
+  step        7
+  cases       134
+  failures    0
+  host        rhel 9.8
+  bash        5.1.8(1)-release
+  contract    /tmp/cplx-step7/docs/v0.27.0/contract.closure-tools.txt
+  corpus      /tmp/cplx-step7/docs/v0.27.0/fixtures.closure-corpus.txt
+  shipped-dir /tmp/cplx-step7/docs/v0.27.0/../../src/setups/env/bin
+  harness      fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1
+  contract-sha 33e972d20528aecf19583e80c8628495dfe31afb40f1efbe92b109b2bcb8e37e
+  corpus-sha   74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472
+  capability   readelf=supported
+  capability   sha256sum=supported
+  capability   assoc=supported
+  unanswered  the debian half of the step 7 acceptance, the rhel half of the step 7 acceptance
+
+OBJECTIVE NOT MET for step 7: unanswered: the debian half of the step 7 acceptance, the rhel half of the step 7 acceptance
+  no capture at /tmp/cplx-step7/docs/v0.27.0/verify.closure.step7.debian.txt that names debian, carries a date and shows step7/acceptance/debian-half passing; run this step on that host and retain its output there
+  the payload itself is not closed: the refusals above are names the archive would carry and not resolve, which is the rebuild umbrella item 7 owns rather than anything an operator can move
+result: step7-exit=5
+--- verify.closure-check.sh, every step
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===
+  step 0  exit 0  OBJECTIVE MET for step 0
+  step 1  exit 0  OBJECTIVE MET for step 1
+  step 2  exit 0  OBJECTIVE MET for step 2
+  step 3  exit 0  OBJECTIVE MET for step 3
+  step 4  exit 0  OBJECTIVE MET for step 4
+  step 5  exit 0  OBJECTIVE MET for step 5
+  step 6  exit 5    this host is [rhel 9.8]; run this step on the Debian 12 agent through ci/Jenkinsfile.diagnostics
+  step 7  exit 5    the payload itself is not closed: the refusals above are names the archive would carry and not resolve, which is the rebuild umbrella item 7 owns rather than anything an operator can move
+
+=== aggregate: exit 5
+result: all-exit=5
+===== END CPLX-CLOSURE-RHEL-STEP7 =====
