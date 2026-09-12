@@ -25,12 +25,23 @@
 # WALK of the tree and not a closure from the entry points, so a lib-dynload
 # module no edge reaches is still examined and still refuses; and it MEASURES the
 # cost rule from a run rather than from the source text, one walk and one index
-# construction with the index built first. Steps 4 to 7 are still the red
-# baseline, and each refusal names the step that will fill it.
+# construction with the index built first.
+#
+# EVERY STEP HAS A SUITE SINCE STEP 7, and the red baseline is gone. Step 4 fills
+# the floor, coherence, the two rules and aggregation; step 5 the waivers, the
+# packaging gate and the publication boundary; step 6 the foreign-host half, the
+# evidence grammar and its store. Step 7 is the last, and it is the only one that
+# NO SINGLE HOST ANSWERS: its D10 interface cases run anywhere, and its
+# acceptance is one half taken live on the machine that can take it and the other
+# half required as the retained capture of the machine that took it. That is what
+# `both` means in the host matrix, and it is why `--captures` exists: a run is
+# green where one half was observed here and the other was observed elsewhere and
+# kept, and never where a machine claims a result it cannot see.
 #
 # Usage:
 #   bash verify.closure-check.sh [--step N] [--contract PATH] [--corpus PATH]
 #                                [--shipped-dir PATH] [--ci-dir PATH]
+#                                [--captures PATH]
 #
 # With no --step the harness runs EVERY step, each in a fresh process, and
 # aggregates. That is not a convenience: the capability gate resolves tools, and
@@ -105,6 +116,7 @@ CONTRACT_ARG=""
 CORPUS_ARG=""
 SHIPPED_DIR_ARG=""
 CI_DIR_ARG=""
+CAPTURES_ARG=""
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -124,7 +136,15 @@ while [ "$#" -gt 0 ]; do
         # namable for the same reason the two inputs above are: the Debian job
         # runs this harness from a workspace whose layout is the pipeline's.
         --ci-dir) CI_DIR_ARG="${2:-}"; shift 2 ;;
-        -h|--help) sed -n '4,77p' "$0"; exit 0 ;;
+        # WHERE THE RETAINED CAPTURES LIVE, which step 7 reads and no earlier
+        # step does. The two-host acceptance is answered by one host running its
+        # own half and by the OTHER host's capture being present, so that
+        # directory is an input to the run rather than a place the run writes.
+        # It is namable for the same reason the four above are: the Debian job
+        # runs this harness from a pipeline workspace, and the RHEL capture
+        # travels there as a delivered file rather than beside a checkout.
+        --captures) CAPTURES_ARG="${2:-}"; shift 2 ;;
+        -h|--help) sed -n '4,85p' "$0"; exit 0 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -150,6 +170,12 @@ SHIPPED_DIR="${SHIPPED_DIR_ARG:-$here/../../src/setups/env/bin}"
 # the pipeline rather than with what it delivers, and a workspace that lays the
 # two out differently names it rather than being guessed at.
 CI_DIR="${CI_DIR_ARG:-$here/../../ci}"
+# The retained host captures of this effort, defaulting to the harness's own
+# directory because that is where every earlier one was retained. Step 7 READS
+# the capture of the host it is not running on, and nothing here ever writes one:
+# a harness that could produce the evidence it also requires would be certifying
+# itself, which is the property the topology table protects one level up.
+CAPTURES="${CAPTURES_ARG:-$here}"
 
 [ -f "$CONTRACT" ] || { echo "contract not found: $CONTRACT" >&2; exit 2; }
 [ -f "$CORPUS" ]   || { echo "corpus not found: $CORPUS" >&2; exit 2; }
@@ -468,7 +494,32 @@ step_filled_by() {
 
 step_suite_exists() {
     case "$1" in
-        0|1|2|3|4|5|6) return 0 ;;
+        0|1|2|3|4|5|6|7) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# WHICH HALF OF THE TWO-HOST ACCEPTANCE THIS MACHINE ANSWERS, and which half it
+# therefore owes a retained capture for. It prints the pair `<mine> <theirs>` and
+# refuses on a host that is neither.
+#
+# THIS IS WHAT MAKES `both` ANSWERABLE WITHOUT MAKING IT CHEAP. "No single host
+# answers this step" is true and it is not the same as "no run can answer it":
+# each host takes its own half LIVE and requires the other half as EVIDENCE
+# somebody else took, which is the only shape that can be green anywhere without
+# one machine claiming a result it cannot observe. The order falls out of it and
+# matches the plan's completion criteria exactly: the build host runs first and
+# is unanswered for want of the Debian capture, the agent runs second with that
+# capture beside it and is the run that can be green end to end.
+#
+# IT IS NEVER SELF-SATISFYING. The capture a host requires is the OTHER host's,
+# so no run is answered by evidence it produced itself, and a capture retained
+# from a run that never happened is exactly what the freshness assertion below
+# is for.
+step_two_host_halves() {
+    case "$HOST_ID:$HOST_VERSION" in
+        rhel:9*) printf 'rhel debian' ;;
+        debian:12*) printf 'debian rhel' ;;
         *) return 1 ;;
     esac
 }
@@ -689,54 +740,80 @@ step0_first_unfilled() {
     printf ''
 }
 
-# THE REFUSAL PATH, over the step the line above names. Two children of this same
-# file: one under a PATH stripped to the harness's own tools, which must refuse on
-# the missing `readelf`, and one under the host's real PATH, which must refuse on
-# the ABSENT SUITE instead. The pair is the point: a harness that printed the
-# missing-tool sentence unconditionally would satisfy the first alone.
+# THE REFUSAL PATH, HALF OF IT RETIRED AT STEP 7, AND THE RETIREMENT IS RECORDED
+# RATHER THAN QUIET. It used to run two children over the FIRST UNFILLED STEP:
+# one under a PATH stripped to the harness's own tools, refusing on the missing
+# `readelf`, and one under the host's real PATH, refusing on the ABSENT SUITE
+# instead. Step 7 wrote the last suite, so the second half has no subject left,
+# and the derivation above said exactly that where the subject came from.
+#
+# A CONTROL WHOSE SHAPE NO LONGER EXISTS IS RETIRED, NOT KEPT GREEN OVER A
+# SUBSTITUTE. Inventing an unfilled step to preserve the case would measure the
+# fixture rather than the harness, and leaving it reporting UNANSWERED for the
+# rest of this effort's life would file a finished baseline as an open question.
+#
+# WHAT SURVIVES IS THE HALF THAT NEVER NEEDED AN UNFILLED STEP. A step declaring
+# `readelf` refuses on the tool under the stripped PATH, and the SAME step on the
+# real PATH must not name a missing readelf: it reaches its suite and answers for
+# its own reasons. That pair is what stopped the first case being satisfied by
+# any refusal, and it is untouched by the baseline going away. The subject is
+# step 3, chosen because `readelf` is the first tool it declares and its suite
+# has existed since the step that wrote it.
+STEP0_REFUSAL_SUBJECT=3
+
 step0_refusal_path() {
-    local shim="$1" out rc found unfilled
+    local shim="$1" out rc found
 
-    unfilled=$(step0_first_unfilled)
-    if [ -z "$unfilled" ]; then
-        note "step0/refusal/subject" "every suite exists, so nothing can carry the absent-suite half"
-        unanswered "the step 0 refusal path" \
-          "  every step now has a suite, so this control has no subject left; retire it with the red baseline it measures"
-        return 0
-    fi
-    note "step0/refusal/subject" "step $unfilled, the first whose suite does not exist yet"
+    # THE BASELINE IS GONE, ASSERTED RATHER THAN ASSUMED. The derivation that
+    # used to choose this control's subject now answers "nothing", and that
+    # answer is the finished state of the plan: a step reachable from the
+    # dispatch and not from `step_suite_exists` would print here.
+    chk "step0/refusal/every-step-has-a-suite" "" "$(step0_first_unfilled)"
+    note "step0/refusal/subject" "step $STEP0_REFUSAL_SUBJECT, which declares readelf among its tools"
 
-    out=$(PATH="$shim" "${BASH:-bash}" "$0" --step "$unfilled" --contract "$CONTRACT" --corpus "$CORPUS" 2>&1)
+    # BOTH CHILDREN GET THIS RUN'S OWN INPUTS, and the shipped directory is the
+    # one that matters. The retired version of this control ran over a step with
+    # NO SUITE, so a child that could not find the shipped tree still refused for
+    # the reason being measured; a subject whose suite exists RUNS, and a run
+    # against a shipped directory that does not resolve fails on the missing
+    # modules instead of refusing on the missing tool. Debian build 153 is where
+    # that was observed: the agent lays the tree out under the pipeline's own
+    # paths, the default resolved to nothing, and the child returned 1 rather
+    # than 5. The parent already knows where everything is, so it says so.
+    out=$(PATH="$shim" "${BASH:-bash}" "$0" --step "$STEP0_REFUSAL_SUBJECT" \
+        --contract "$CONTRACT" --corpus "$CORPUS" \
+        --shipped-dir "$SHIPPED_DIR" --ci-dir "$CI_DIR" 2>&1)
     rc=$?
     chk "step0/refusal/missing-tool-exit-code" "5" "$rc"
     if printf '%s' "$out" | grep -q 'readelf is not on PATH here'; then found=yes; else found=no; fi
     chk "step0/refusal/names-the-missing-command" "yes" "$found"
 
     # The control that stops the case above being satisfied by any refusal: the
-    # SAME step, on this host's real PATH, must refuse for a DIFFERENT reason and
-    # must not name a missing readelf.
+    # SAME step, on this host's real PATH, must not name a missing readelf.
     #
-    # IT ONLY MEANS ANYTHING WHERE THE HOST SUPPLIES `readelf`. On a host where
-    # readelf is unavailable anyway, both children refuse for the same reason and
-    # a pass would say nothing about the shim, so the control is not run and the
-    # obligation is reported unanswered rather than recorded green. The authoring
-    # host is that case: Windows carries no readelf, and an earlier revision of
-    # this control FAILED there for exactly this reason, which is how the
-    # distinction came to be measured rather than assumed.
-    out=$("${BASH:-bash}" "$0" --step "$unfilled" --contract "$CONTRACT" --corpus "$CORPUS" 2>&1)
-    rc=$?
-    chk "step0/refusal/suite-absent-exit-code" "5" "$rc"
+    # IT ONLY MEANS ANYTHING WHERE THE HOST SUPPLIES `readelf`. Where readelf is
+    # unavailable anyway both children refuse alike and a pass would say nothing
+    # about the shim, so the control is not run and the obligation is reported
+    # unanswered rather than recorded green. The authoring host is that case:
+    # Windows carries no readelf, and an earlier revision of this control FAILED
+    # there for exactly that reason, which is how the distinction came to be
+    # measured instead of assumed.
     if [ "$(capability_state readelf)" != "supported" ]; then
         note "step0/refusal/two-refusals-are-distinct" \
              "not run: readelf is $(capability_state readelf) here, so both children refuse alike"
-        unanswered "the distinctness of the two step $unfilled refusals" \
-          "  re-run on a host that supplies readelf, where the shimmed child refuses on the tool and the real-PATH child refuses on the absent suite"
+        unanswered "the distinctness of the two step $STEP0_REFUSAL_SUBJECT refusals" \
+          "  re-run on a host that supplies readelf, where the shimmed child refuses on the tool and the real-PATH child reaches its suite"
         return 0
     fi
+    out=$("${BASH:-bash}" "$0" --step "$STEP0_REFUSAL_SUBJECT" \
+        --contract "$CONTRACT" --corpus "$CORPUS" \
+        --shipped-dir "$SHIPPED_DIR" --ci-dir "$CI_DIR" 2>&1)
     if printf '%s' "$out" | grep -q 'readelf is not on PATH here'; then found=yes; else found=no; fi
     chk "step0/refusal/two-refusals-are-distinct" "no" "$found"
-    if printf '%s' "$out" | grep -q "no suite exists for step $unfilled yet"; then found=yes; else found=no; fi
-    chk "step0/refusal/suite-absent-names-the-step" "yes" "$found"
+    # AND IT REACHED THE SUITE, which is what says the shimmed child was stopped
+    # by the shim and not by something both children would have hit.
+    if printf '%s' "$out" | grep -q "step $STEP0_REFUSAL_SUBJECT topology"; then found=yes; else found=no; fi
+    chk "step0/refusal/the-real-path-child-reaches-its-suite" "yes" "$found"
 }
 
 # =============================================================== the step 0 suite ===
@@ -2121,7 +2198,7 @@ donor_valid_program() {
 
 # The first candidate that validates, over the two library layouts this effort's
 # hosts use. It is bounded on purpose: a host with no valid donor must refuse in
-# a moment rather than walk its whole filesystem looking for one.
+# a moment rather than walk its whole filesystem looking for one. cSpell: disable
 donor_find_shared() {
     local c tried=0
     for c in /usr/lib64/libz.so.1 /usr/lib64/libbz2.so.1 /usr/lib64/liblzma.so.5 \
@@ -6924,8 +7001,1650 @@ step6_suite() {
     fi
 }
 
+
+# ============================================================== the step 7 suite ===
+# THE LAST STEP THAT ADDS PRODUCTION CODE, and the one where the surface is read
+# against the ISSUE'S ACCEPTANCE rather than against its own step. It has two
+# halves answering to different things:
+#
+#   THE D10 INTERFACE, which is host-independent. The policy is a comparison over
+#   two capability entries and a required-node set, so its nine cases are asked
+#   anywhere, and its evidence half is asked over planted ELF fixtures the same
+#   way steps 3 and 4 ask theirs.
+#
+#   THE ACCEPTANCE, which is not. A positive result on the distribution the
+#   defect exists on, plus the packaging run on the build account, and neither
+#   host can take the other's half. `step_host` gates this step to `both` and the
+#   host gate resolves which half THIS machine answers; the suite then requires
+#   the other half as a RETAINED CAPTURE, so a run is green only where one half
+#   was taken live and the other was taken by somebody else and kept.
+#
+# WHY THE POLICY CASES PLANT A MODEL RATHER THAN A TOOLCHAIN. The nine rows of
+# the design's D10 table are about a comparison between two CAPABILITY ENTRIES,
+# and asking them from real GCC 11 and GCC 12 installations would make the case
+# set depend on which toolsets a host happens to carry: the row that needs a node
+# NEITHER generation defines could then never be asked at all, since that is not
+# a shape a real pair of libraries takes. So the model is planted, every plant is
+# asserted before it is judged, and the EVIDENCE half beside them is what proves
+# a real reading produces the same model.
+
+# One call into the D10 module over a planted model, sourced rather than
+# executed, which is the seam its main boundary exists for. The plant is a
+# snippet of assignments run in the same child shell, so a case measures the
+# function it names over a shape it created in the same process.
+d10_run() {
+    local plant="$1" fn="$2"
+    shift 2
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    D10_OUT=$("${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        eval "$2" || exit 94
+        fn="$3"
+        shift 3
+        declare -F "$fn" >/dev/null 2>&1 || exit 92
+        "$fn" "$@"
+    ' _ "$SHIPPED_DIR/closure_d10.sh" "$plant" "$fn" "$@" 2>&1)
+    D10_RC=$?
+}
+
+# The planted model, written as the assignments the module's own reset leaves
+# behind. `required` and `defines` are space-separated keys of exactly the shape
+# the module stores them in, so a case that plants a key the module would never
+# produce is visible in the case rather than buried in a builder.
+d10_plant() {
+    local reading="$1" consumers="$2" required="$3" defines="$4" key i=0
+    printf 'closure_d10_reset;'
+    printf 'CLOSURE_D10_READING=%s;' "$reading"
+    printf 'CLOSURE_D10_CANDIDATES=(gcc-11 gcc-12);'
+    while [ "$i" -lt "$consumers" ]; do
+        printf 'CLOSURE_D10_CONSUMERS+=(consumer-%s.so);' "$i"
+        i=$((i + 1))
+    done
+    for key in $required; do
+        printf 'CLOSURE_D10_SEEN["%s"]=1;CLOSURE_D10_REQUIRED+=("%s");' "$key" "$key"
+    done
+    for key in $defines; do
+        printf 'CLOSURE_D10_DEFINES["%s"]=1;' "$key"
+    done
+}
+
+# The planted model read back from the module's own globals, so a case asserts
+# its plant took before it judges the answer. A case that reported a shape it
+# never created is the one failure a policy suite cannot catch from its verdict,
+# because a wrong model still produces a plausible-looking result.
+#
+# IT PRINTS FROM THE HARNESS AND NOT FROM THE MODULE. A production file does not
+# grow a function whose only caller is a test, so the four fields are read here
+# through the same sourcing seam every other case uses.
+d10_model() {
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        eval "$2" || exit 94
+        printf "%s|%s|%s|%s" "$CLOSURE_D10_READING" \
+            "${#CLOSURE_D10_CONSUMERS[@]}" "${#CLOSURE_D10_REQUIRED[@]}" \
+            "${CLOSURE_D10_CANDIDATES[*]}"
+    ' _ "$SHIPPED_DIR/closure_d10.sh" "$1" 2>/dev/null
+}
+
+# The two candidate directories and the archive tree the EVIDENCE half is read
+# from. Each provider is a donor copy carrying exactly the records its role
+# needs: a soname in name slot 0 so the archive-side lookup finds it, and one
+# version DEFINITION in slot 1. A consumer carries a version NEED in slots 1 and
+# 2, with the matching DT_NEEDED the setter adds, so the two roles never collide
+# over a slot and no file is given both.
+step7_provider() {
+    local path="$1" soname="$2" node="$3"
+    mkdir -p -- "${path%/*}" || return 1
+    fixture_copy_donor "$DONOR_SHARED" "$path" || return 1
+    elf_set_string_entry "$path" SONAME "$soname" || return 1
+    elf_set_verdef "$path" "$node" || return 1
+}
+
+step7_consumer() {
+    local path="$1" provider="$2" node="$3"
+    mkdir -p -- "${path%/*}" || return 1
+    fixture_copy_donor "$DONOR_SHARED" "$path" || return 1
+    elf_set_verneed "$path" "$provider" "$node" || return 1
+}
+
+# One field of the PRINTED reading, taken from the reading itself rather than
+# from the module's globals: what a person reads in a retained capture and what a
+# case asserts have to be the same text, or the capture is a second rendering
+# nobody checked.
+step7_reading_field() {
+    printf '%s\n' "$1" | grep -E "^  $2 " | sed -e "s/^  $2  *//" -e 's/[[:space:]]*$//'
+}
+
+# THE NEGATIVE-CONTROL INVENTORY: the issue's nine independently refusable
+# invariants plus the four this design adds, each paired with the case name that
+# refuses it. The waiver row names two cases, because the issue's fixture for it
+# is "an unknown waiver, AND a stale one" and one of them would leave the other
+# unasserted.
+#
+# THEY ARE LOOKED UP IN THIS HARNESS'S OWN TEXT rather than restated, so the
+# obligation survives its own suites: a control renamed or deleted in step 3, 4,
+# 5 or 6 is a finding HERE, which is what a per-invariant obligation has to mean
+# once the controls belong to somebody else's step.
+STEP7_CONTROLS=(
+    "declared floor|step4/floor/absent-member-named"
+    "floor location|step4/floor/location-member-named"
+    "derived closure|step3/membership/names-subject-and-name"
+    "provider version need|step4/coherence/refusal-names-subject-need-and-provider"
+    "no host fallback|step6/live/a-host-object-refuses"
+    "duplicate provider, rule 1|step4/duplicates/refusal-names-name-and-both-paths"
+    "declared family generation, rule 2|step4/families/refusal-names-both-generations"
+    "waiver contract|step5/waiver/unknown-is-named step5/waiver/stale-is-named"
+    "trace conclusiveness|step6/live/an-empty-inventory-is-inconclusive"
+    "an unexpected directory or root|step1/unexpected-root/named"
+    "a divergent presence comparison|step6/publication/a-divergent-result-refuses"
+    "a configuration digest publication did not resolve|step5/publication/changed-config-refuses"
+    "a coherence answer surviving a rule 1 refusal|step4/duplicates/coherence-still-answers"
+)
+
+# The case name a control claims, looked up in this file AS A QUOTED CASE NAME.
+# The quotes are what keep the inventory from satisfying itself: an entry above
+# writes `"<invariant>|<case>"`, so the case name there is never preceded by a
+# quote of its own and never matches this pattern.
+step7_control_exists() {
+    local name="$1"
+    grep -qF "\"$name\"" "$0"
+}
+
+# The retained capture of the OTHER host, and what makes it evidence rather than
+# a file with the right name. It names its host, it carries a date, and it shows
+# THAT HOST'S OWN HALF PASSING: a capture of a run that refused is a record of a
+# refusal, and reading it as the other half being answered is the "unavailable is
+# not negative" mistake taken in reverse.
+#
+# IT ASKS FOR THE HALF AND NOT FOR THE STEP, and that distinction is the whole
+# reason this function exists rather than a grep for the verdict line. Requiring
+# the other capture to report the STEP met deadlocks the pair by construction:
+# whichever host runs first is unanswered for want of the second capture, so its
+# own capture never carries that line, so the second host rejects it and is
+# unanswered too, and no order of runs ever escapes. Asking for the half that
+# host could actually take is both weaker and correct, and it is what makes the
+# plan's own completion criteria reachable: the build host answers its half and
+# stays unanswered on the pair, the agent then answers its half with that capture
+# beside it and is green end to end.
+#
+# AND THE FIRST VERSION OF THIS GATE PASSED ON A CAPTURE THAT PROVED NOTHING,
+# WHICH IS MEASURED RATHER THAN FEARED. It grepped the capture for the sentence
+# `OBJECTIVE MET for step 7`, and a retained capture CONTAINS THIS HARNESS'S OWN
+# DIAGNOSTIC TEXT: the unanswered message below names the string it is looking
+# for, the capture records that message, and the next run matched its own
+# instructions. Debian build 152 is where that PASS was observed, over a RHEL
+# capture whose step 7 was unanswered.
+#
+# So the pattern is a CASE RESULT LINE and not prose: a name, whitespace, then
+# the literal uppercase PASS this file prints for a case and nothing else does.
+# The diagnostic below deliberately says "passing" in lower case for the same
+# reason, so a capture carrying the instruction cannot satisfy the instruction.
+step7_capture_answers() {
+    local path="$1" host="$2" snapshot sha digest rc=1
+    [ -f "$path" ] || return 1
+    sha=$(type -P sha256sum) || return 1
+    snapshot=$(mktemp "$SCRATCH/step7-capture.XXXXXX") || return 1
+    # Hash and inspect the same retained bytes, even if the source path is
+    # replaced between checks. Record refused captures as well as passing ones.
+    if ! cp -- "$path" "$snapshot" || ! digest=$("$sha" < "$snapshot"); then
+        rm -f -- "$snapshot"
+        return 1
+    fi
+    note "step7/acceptance/$host-capture-sha256" "${digest%% *} from $path"
+    if grep -qi "^Target: .*$host" "$snapshot" \
+       && grep -qE '^Captured: .*[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' "$snapshot" \
+       && grep -qE "step7/acceptance/$host-half +PASS" "$snapshot"; then
+        rc=0
+    fi
+    rm -f -- "$snapshot"
+    return "$rc"
+}
+
+# The prefix this account really packages or installs under, which is the
+# acceptance's subject and is NEVER a fixture. It is RESOLVED rather than
+# assumed: an account with no such tree is a host that cannot answer its own
+# half, and saying so is the difference between an acceptance and a rehearsal.
+step7_real_prefix() {
+    local candidate
+    for candidate in "${CPLX_ACCEPTANCE_PREFIX:-}" "${HOME:-}"; do
+        [ -n "$candidate" ] || continue
+        if [ -d "$candidate/tools" ]; then printf '%s' "$candidate"; return 0; fi
+    done
+    return 1
+}
+
+# THE REAL PACKAGED ARCHIVE, which is the Debian half's subject and is a
+# different thing from the tree the RHEL half judges. `pkg.sh` writes
+# `<folder>.<timestamp>.tar.gz` under `~/pkgs/` and keeps `<folder>.latest.tar.gz`
+# pointing at the newest, so the latest link is what an acceptance names. An
+# account with none has no artifact to verify, and that is the honest answer
+# rather than a fixture stood in for one.
+step7_real_archive() {
+    local candidate
+    for candidate in "${CPLX_ACCEPTANCE_ARCHIVE:-}" "${HOME:-}/pkgs/tools.latest.tar.gz"; do
+        case "$candidate" in ''|'/pkgs/tools.latest.tar.gz') continue ;; esac
+        if [ -r "$candidate" ]; then printf '%s' "$candidate"; return 0; fi
+    done
+    return 1
+}
+
+# THERE IS NO PROCESS-NAME HELPER ANY MORE, and its absence is the point rather
+# driver is the AUTHORITATIVE one delivered beside this harness and never a copy
+# out of the candidate, which is the whole of what the topology's trust boundary
+# means here.
+step7_verify_archive() {
+    local archive="$1" root="$2" process="$3" proc="${4:-/proc}"
+    rm -rf -- "$root"
+    mkdir -p -- "$root/prefix" "$root/results" || return 1
+    "${BASH:-bash}" "$SHIPPED_DIR/closure_verify.sh" --archive "$archive" \
+        --prefix "$root/prefix" --results "$root/results" \
+        --tools "$SHIPPED_DIR" --target tools \
+        --process "$process" --proc "$proc" 2>&1
+}
+
+# The interpreter INSIDE the candidate installation, which is the only one whose
+# mapped objects can be under the candidate prefix. A host interpreter maps its
+# own libraries from outside and the observer refuses it, correctly.
+step7_candidate_interpreter() {
+    local prefix="$1" candidate
+    for candidate in "$prefix"/tools/python/current/bin/python3 \
+                     "$prefix"/tools/python/root/usr/bin/python3 \
+                     "$prefix"/tools/python/current/bin/python; do
+        if [ -x "$candidate" ]; then printf '%s' "$candidate"; return 0; fi
+    done
+    return 1
+}
+
+# THE LIVE HALF, TAKEN AGAINST A PROCESS THIS BRANCH CREATED FROM THE CANDIDATE,
+# and round 2 of the step 7 review is why it exists at all. The branch used to
+# pass the process NAME into `closure_verify.sh`, which installs and observes in
+# ONE call: at observation time no process from the candidate had been started,
+# so the conclusive answer was unreachable by construction. A name alone selects
+# nothing, and any host process answering to it maps its libraries from outside
+# the candidate and is refused, which is the observer being right.
+#
+# THE ATTRIBUTION IS THE ARGV0 AND NOT THE COMMAND NAME. Several interpreters
+# called `python3` may run on an agent, and the observer matches `comm` OR the
+# basename of `argv0`. Launching the candidate's own interpreter under a unique
+# argv0 is what makes the inventory provably about THIS installation rather than
+# about whatever else answers to the same name.
+#
+# THERE IS NO OPERATOR-NAMED ALTERNATIVE ANY MORE. Round 5 removed it: it
+# returned the observer output with no OWNED record, so the acceptance failed
+# three assertions on it and the mode could never produce a passing half.
+#
+# It prints the observer's WHOLE output, the `PROCESS`, `OBJECT`, `HOSTS` and
+# `LIVE` records alike, because round 2 also found the branch retaining summary
+# verdicts where the issue asks for the trace itself.
+# The parent of one process, read from `/proc/<pid>/status` rather than from
+# `stat`, whose second field is a command name that may itself contain spaces
+# and brackets and would shift every field after it.
+# THE READABILITY TEST COMES FIRST, and it is not decoration. Scanning `/proc`
+# races every process that exits during the scan, and a redirect from a file
+# that vanished prints the shell's own diagnostic no matter what the compound
+# command redirects: the Debian agent filled its capture with
+# `/proc/<pid>/status: No such file or directory` for pids that had simply gone.
+# A process that disappeared has no parent to report, which is a `return 1` and
+# not a message.
+step7_parent_of() {
+    local key value
+    [ -r "/proc/$1/status" ] || return 1
+    while IFS=: read -r key value; do
+        if [ "$key" = "PPid" ]; then printf '%s' "${value//[[:space:]]/}"; return 0; fi
+    done < "/proc/$1/status" 2>/dev/null
+    return 1
+}
+
+# IS THIS PID STILL A RUNNING PROCESS, as opposed to absent or a zombie. The
+# distinction is not pedantry here and the Debian agent is what established it.
+#
+# A killed orphan is reparented to PID 1 and stays in `/proc` as a ZOMBIE until
+# something reaps it. In a container whose PID 1 is the job's own command rather
+# than an init that reaps, nothing ever does, so a directory test waits forever
+# for a disappearance that will not happen. The build host, with a real init,
+# reaped within milliseconds and passed the same test.
+#
+# A zombie holds no memory, maps nothing and runs nothing. For the only question
+# this harness asks, whether it leaked a live process, a zombie is gone.
+step7_process_live() {
+    local key value state=""
+    [ -n "${1:-}" ] || return 1
+    [ -r "/proc/$1/status" ] || return 1
+    while IFS=: read -r key value; do
+        if [ "$key" = "State" ]; then state="${value//[[:space:]]/}"; break; fi
+    done < "/proc/$1/status" 2>/dev/null
+    case "$state" in Z*) return 1 ;; esac
+    return 0
+}
+
+# ONE FIELD OF `/proc/<pid>/stat`, READ WITHOUT A TOOL. The `comm` field is
+# parenthesised and may itself contain spaces and a closing parenthesis, so the
+# split is on the LAST `) ` in the line; nothing after `comm` can contain that
+# sequence. Field 1 of the remainder is the state, 2 is the parent and 3 is the
+# process group.
+step7_stat_field() {
+    local pid="$1" index="$2" line rest
+    [ -r "/proc/$pid/stat" ] || return 1
+    read -r line < "/proc/$pid/stat" || return 1
+    rest="${line##*') '}"
+    [ "$rest" != "$line" ] || return 1
+    # shellcheck disable=SC2206  # the remainder is fixed-format numeric fields
+    local -a fields=($rest)
+    printf '%s' "${fields[$((index - 1))]:-}"
+}
+
+# EVERY PROCESS THIS HELPER LAUNCHED, FOUND BY THE LAUNCH ITSELF rather than by
+# anything about the path it was launched from. ROUND 6 IS WHY THE MECHANISM
+# CHANGED AGAIN, and the reviewer's reproduction is the whole argument: a venv
+# entry point is a SHELL WRAPPER that runs the real interpreter by its ABSOLUTE
+# CANDIDATE PATH, so the child's command line carries the candidate and never
+# the venv, and a scan over the venv path found nothing while a candidate-mapped
+# child of this helper's own launch was still running. A wrapper's path is not
+# inherited by its child; two other things are.
+#
+# THE PROCESS GROUP IS THE PRIMARY RULE. The launch is made with job control on,
+# so the launched process becomes a group leader and its group id IS its pid.
+# Every descendant inherits that group id, across `exec`, across the parent's
+# exit and across reparenting to PID 1, because a process group outlives the
+# process that created it. Nothing else on the machine can be in it: the id is
+# a pid this helper has just been given.
+#
+# THE ENVIRONMENT NONCE IS THE SECOND RULE, and it exists because the first one
+# has one escape: a child that calls `setsid` or `setpgid` leaves the group. The
+# launch carries a variable no other process has, `exec` preserves the
+# environment, and `/proc/<pid>/environ` is readable for this account's own
+# processes. A child that leaves the group still carries it.
+#
+# Both are properties of the LAUNCH. Neither depends on a path appearing in an
+# argument, which is the assumption round 6 destroyed. The helper's own shell
+# and PID 1 are never owned, whatever they report.
+step7_owned_processes() {
+    local pgid="$1" nonce="${2:-}" entry pid
+    [ -n "$pgid" ] || return 0
+    for entry in /proc/[0-9]*; do
+        pid="${entry##*/}"
+        [ "$pid" = "$$" ] && continue
+        [ "$pid" = "1" ] && continue
+        if [ "$(step7_stat_field "$pid" 3 2>/dev/null)" = "$pgid" ]; then
+            printf '%s\n' "$pid"
+            continue
+        fi
+        [ -n "$nonce" ] || continue
+        [ -r "$entry/environ" ] || continue
+        if grep -qzxF "CPLX_STEP7_OWNER=$nonce" "$entry/environ" 2>/dev/null; then
+            printf '%s\n' "$pid"
+        fi
+    done
+}
+
+# WAIT FOR A PID TO STOP BEING A RUNNING PROCESS, bounded. A kill is a request
+# and not an event, so the target stays listed until it has exited, and this
+# waits for that rather than assuming it.
+step7_await_gone() {
+    local pid="$1" i=0
+    [ -n "$pid" ] || return 0
+    while [ "$i" -lt 100 ]; do
+        step7_process_live "$pid" || return 0
+        i=$((i + 1))
+        sleep 0.05
+    done
+    return 1
+}
+
+# The interpreter process the wrapper actually launched. ROUND 3 OF THE REVIEW
+# FOUND WHY THIS IS NEEDED: the project entry point is a SHELL WRAPPER that runs
+# the real binary as a CHILD, so `exec -a` renames the wrapper and the name never
+# reaches the interpreter, the observer misses the process, and a kill aimed at
+# the wrapper leaves its child running.
+step7_child_interpreter() {
+    local parent="$1" entry pid
+    for entry in /proc/[0-9]*; do
+        pid="${entry##*/}"
+        if [ "$(step7_parent_of "$pid")" = "$parent" ]; then printf '%s' "$pid"; return 0; fi
+    done
+    return 1
+}
+
+# WHETHER A PROCESS HAS MAPPED ANYTHING FROM THE CANDIDATE YET, read from the
+# CONTENT of its mapping table. Round 3 found the previous test unable to
+# succeed at all: Linux reports `/proc/<pid>/maps` with size zero even while its
+# contents are readable, so `[ -s ]` was false forever and every launch waited
+# out the whole deadline.
+step7_maps_candidate() {
+    local pid="$1" prefix="$2" line
+    while IFS= read -r line; do
+        case "$line" in *" $prefix"/*) return 0 ;; esac
+    done < "/proc/$pid/maps" 2>/dev/null
+    return 1
+}
+
+# THE LIVE HALF, TAKEN AGAINST A REAL VENV PROCESS OF THE CANDIDATE, with the
+# attribution carried by PID OWNERSHIP rather than by a name this harness hopes
+# is unique. Round 3 established both halves of that: the wrapper loses a
+# renamed argv0, and selecting a process by NAME can match one nobody here
+# started.
+
+#
+# So the branch creates a venv from the candidate interpreter, launches a
+# process through the VENV entry point, finds the interpreter child the wrapper
+# spawned, waits until that child has mapped something from the candidate, and
+# observes. The caller is given the owned pid on a `OWNED|` line so it can
+# require that the trace inventoried THAT process and not another answering to
+# the same name.
+#
+# CLEANUP IS OF THE OWNED CHILD FIRST AND THE WRAPPER SECOND, because killing a
+# wrapper does not reap what it launched.
+step7_candidate_live_evidence() {
+    local prefix="$1" root="${2:-$SCRATCH/step7/venv}"
+    local interp="" pid="" child="" out="" rc=0 i=0 log="" comm="" owner=""
+    local nonce=""
+    if ! interp=$(step7_candidate_interpreter "$prefix"); then
+        printf 'LIVE|INCONCLUSIVE|no interpreter inside the candidate installation at %s, so no venv process could be started from it\n' "$prefix"
+        return 1
+    fi
+    rm -rf -- "$root"
+    mkdir -p -- "${root%/*}" || true
+    log="${root}.log"
+    if ! "$interp" -m venv "$root" > "$log" 2>&1; then
+        printf 'LIVE|INCONCLUSIVE|the candidate interpreter could not create a venv at %s; launch diagnostics: %s\n' \
+            "$root" "$(oneline "$(tail -3 "$log" 2>/dev/null)")"
+        return 1
+    fi
+    if [ ! -x "$root/bin/python3" ]; then
+        printf 'LIVE|INCONCLUSIVE|the venv at %s carries no python3 entry point\n' "$root"
+        return 1
+    fi
+    # THE LAUNCH IS WHAT OWNERSHIP IS TAKEN FROM, so the launch is made to carry
+    # two marks that survive everything the wrapper can do. `set -m` makes the
+    # launched process a PROCESS GROUP LEADER, so its group id is its own pid
+    # and every descendant inherits it; the nonce goes into the ENVIRONMENT,
+    # which `exec` preserves and which a child that leaves the group still has.
+    # Job control is turned off again immediately: it is needed for the
+    # `setpgid` the shell performs at fork and for nothing else here.
+    nonce="cplx-step7-$$-${RANDOM}-${RANDOM}"
+    set -m
+    CPLX_STEP7_OWNER="$nonce" "$root/bin/python3" -c 'import time; time.sleep(300)' > "$log" 2>&1 &
+    pid=$!
+    set +m
+    # THE OWNED PROCESS IS WHICHEVER OF THE TWO SHAPES THIS ENTRY POINT TAKES,
+    # and measuring it beat assuming it. The project entry point is a shell
+    # wrapper, so the interpreter can be a CHILD of what was launched; a venv
+    # entry point that resolves straight to the binary IS the interpreter, with
+    # no child at all. The RHEL deployed tree turned out to be the second shape,
+    # and an earlier version of this loop required the first and timed out on a
+    # process that was already mapping the candidate.
+    #
+    # OWNERSHIP IS ESTABLISHED BEFORE LIVENESS IS TESTED, and round 5 is why the
+    # order is stated rather than incidental. The previous loop asked whether
+    # the launched process was still alive FIRST, so a wrapper that exited
+    # before its child had been discovered left `child` empty, and the child was
+    # by then beyond any `PPid` scan's reach.
+    #
+    # THE SEARCH IS OVER THE LAUNCH AND NOT OVER A PATH, and round 6 is why: a
+    # venv wrapper starts the real interpreter by its ABSOLUTE CANDIDATE PATH,
+    # so the child's command line carries the candidate and never the venv, and
+    # a scan over the venv path missed a candidate-mapped child of this very
+    # launch. The launched pid and any descendant are both candidates now, and
+    # neither depends on the wrapper still being there to be asked.
+    while [ "$i" -lt 150 ]; do
+        if [ -z "$child" ]; then
+            for owner in $(step7_owned_processes "$pid" "$nonce"); do
+                if step7_maps_candidate "$owner" "$prefix"; then child="$owner"; break; fi
+            done
+        fi
+        [ -n "$child" ] && break
+        # The deadline ends when nothing this helper launched is running any
+        # more, not merely when the launched pid has gone: a wrapper may exit
+        # the instant its child is up, and that child is the subject.
+        if ! step7_process_live "$pid" && [ -z "$(step7_owned_processes "$pid" "$nonce")" ]; then
+            break
+        fi
+        i=$((i + 1))
+        sleep 0.1
+    done
+    # EVERY EXIT FROM HERE REAPS WHAT THIS HELPER STARTED, and round 4 found the
+    # two paths that did not. A wrapper's child outlives the wrapper, so a
+    # refusal that killed only the launched pid left an interpreter running for
+    # the rest of the suite; and an early wrapper exit can still have left a
+    # child behind. `step7_reap` is the one place that decides it, so a later
+    # exit added here cannot forget.
+    # THE LAUNCHED PROCESS GOING AWAY IS ONLY A REFUSAL WHEN NOTHING IT STARTED
+    # SURVIVED IT. A wrapper that exits the instant its child is up has done its
+    # job, and the child is the subject; refusing on the wrapper alone would have
+    # thrown away the very process the acceptance is about.
+    if [ -z "$child" ] && ! step7_process_live "$pid"; then
+        printf 'LIVE|INCONCLUSIVE|the venv process exited before anything of it could be observed; launch diagnostics: %s\n' \
+            "$(oneline "$(tail -3 "$log" 2>/dev/null)")"
+        step7_reap "$pid" "$child" "$pid" "$nonce"
+        return 1
+    fi
+    if [ -z "$child" ] || ! step7_maps_candidate "$child" "$prefix"; then
+        printf 'LIVE|INCONCLUSIVE|no process this launch started had mapped anything under %s within the deadline; launch diagnostics: %s\n' \
+            "$prefix" "$(oneline "$(tail -3 "$log" 2>/dev/null)")"
+        step7_reap "$pid" "$child" "$pid" "$nonce"
+        return 1
+    fi
+    # The name the observer is asked for is the one the OWNED child actually
+    # carries, read from it rather than assumed.
+    comm=""
+    if [ -r "/proc/$child/comm" ]; then read -r comm < "/proc/$child/comm" || comm=""; fi
+    printf 'OWNED|%s|%s\n' "$child" "${comm:-unknown}"
+    out=$("${BASH:-bash}" "$SHIPPED_DIR/closure_observe_live.sh" \
+        --process "${comm:-unknown}" --prefix "$prefix" 2>&1)
+    rc=$?
+    step7_reap "$pid" "$child" "$pid" "$nonce"
+    printf '%s\n' "$out"
+    return "$rc"
+}
+
+# THE ONE PLACE THIS HELPER GIVES BACK WHAT IT TOOK. The owned child goes first
+# and the launched process second, because killing a wrapper does not reap what
+# it launched; where the two are the same pid the second kill is a no-op, which
+# is correct rather than a special case, and an empty child is simply skipped.
+# `wait` is only ever called on the pid this shell actually started, since it is
+# the only one it can reap.
+step7_reap() {
+    local pid="$1" child="${2:-}" pgid="${3:-}" nonce="${4:-}" p rc=0
+    local survivors=""
+    if [ -n "$child" ] && [ "$child" != "$pid" ]; then kill "$child" 2>/dev/null; fi
+    if [ -n "$pid" ]; then
+        kill "$pid" 2>/dev/null
+        wait "$pid" 2>/dev/null
+    fi
+    # AND EVERY REMAINING PROCESS OF THE LAUNCH, whether or not this helper ever
+    # discovered it. Round 5 found the gap: a wrapper that exits before
+    # discovery leaves a child no `PPid` scan can attribute. Round 6 found that
+    # closing it over the VENV PATH closed it only for a child whose arguments
+    # happened to carry that path, which an ordinary wrapper's child does not.
+    # The sweep is now over the process group and the environment nonce, which
+    # are properties of the launch itself.
+    if [ -n "$pgid" ]; then
+        survivors=$(step7_owned_processes "$pgid" "$nonce")
+        for p in $survivors; do kill "$p" 2>/dev/null; done
+    fi
+    # REAPED MEANS GONE, not signalled. `wait` settles only the pid this shell
+    # started; a reparented child is cleaned up by init on its own schedule, and
+    # where nothing reaps, a zombie counts as gone.
+    if [ -n "$child" ] && [ "$child" != "$pid" ]; then
+        step7_await_gone "$child" || rc=1
+    fi
+    for p in $survivors; do
+        step7_await_gone "$p" || rc=1
+    done
+    return "$rc"
+}
+
+# THE LISTING OVER THE WHOLE SCOPE, retained rather than summarised. `STATIC|PASS`
+# is a verdict about a listing and is not the listing, which round 2 found the
+# branch substituting for it. This is the observed loader scope of the installed
+# candidate, derived by the installer's own `build_elf_rpath` through the
+# checker's seam, one directory per line.
+step7_scope_listing() {
+    local scope=""
+    scope=$(observed_scope "$1" "$SHIPPED_DIR/install_pkg.sh") || return 1
+    printf '%s\n' "$scope" | sed -e 's/:/\n/g'
+}
+
+# THE LISTING OVER THE WHOLE PROVIDER SET, which is what the design asks for and
+# what a directory list is not. Round 4 found the branch retaining scope
+# BOUNDARIES and calling them the listing: `STATIC|PASS` beside a handful of
+# directory names says nothing about which providers those directories hold, so
+# an archive shipping an empty scope would have satisfied it.
+#
+# This enumerates the scope through the checker's OWN provider index, the same
+# one the membership invariant resolves against, and prints one
+# `PROVIDER|<name>|<paths>` record per lookup name. The index is built once for
+# the whole scope rather than once per name, so the listing costs one
+# enumeration and not one per provider.
+#
+# IT FAILS RATHER THAN PRINTING NOTHING when the index could not be built or
+# came back empty, because an inventory nobody could take must not read as a
+# scope that holds no providers.
+step7_provider_listing() {
+    local dirs=""
+    dirs=$(step7_scope_listing "$1") || return 1
+    [ -n "$dirs" ] || return 1
+    # shellcheck disable=SC2016  # the script is the CHILD shell's and expands there
+    "${BASH:-bash}" -c '
+        set -u
+        # shellcheck disable=SC1090
+        source "$1" >/dev/null 2>&1 || exit 91
+        declare -F closure_provider_index >/dev/null 2>&1 || exit 92
+        closure_provider_index "$2"
+        if [ "${#CLOSURE_PROVIDER_PATHS[@]}" -eq 0 ]; then exit 93; fi
+        for name in "${!CLOSURE_PROVIDER_PATHS[@]}"; do
+            printf "PROVIDER|%s|%s\n" "$name" \
+                "$(printf "%s" "${CLOSURE_PROVIDER_PATHS[$name]}" | grep -c .)"
+        done
+    ' _ "$SHIPPED_DIR/closure_check.sh" "$dirs" 2>/dev/null
+}
+
+# THE DEBIAN HALF OF THE ACCEPTANCE, which is the archive question and not the
+# tree question. The issue fixes three things it must report and this branch
+# asserts all three: the PACKAGED ARCHIVE resolves, reported from a listing over
+# the whole scope AND a live trace that names the venv process it inventoried.
+#
+# IT DRIVES THE AUTHORITATIVE VERIFIER rather than repeating it. `closure_verify.sh`
+# already computes the archive identity, takes the pre-install and installed
+# observations, compares them, runs the static checker over the installed tree
+# and invokes the live observer; re-implementing any of that here would make the
+# acceptance measure a second implementation. The copy it drives is the one
+# delivered beside this harness, never one out of the candidate, which is the
+# trust boundary the topology draws.
+#
+# THE IDENTITY IS RECOMPUTED AND NOT READ. The driver prints the identity it
+# derived; this branch digests the same file itself and requires the two to
+# agree, for the reason publication computes rather than reads one.
+step7_debian_half() {
+    local archive="" root="$SCRATCH/step7/accept" process="" out="" rc=0
+    local identity="" reported="" proc="$SCRATCH/step7/proc-empty"
+    local failures_before="$failures" listing="" live="" lrc=0 owned=""
+    local listing_rc=0 outside="" providers="" providers_taken=yes
+
+    # THIS BRANCH OWNS THE PROCESS, ALWAYS, and round 5 removed the alternative
+    # rather than repairing it. An operator-named process selected a mode that
+    # returned the observer's output with no OWNED record, while the acceptance
+    # requires OWNED and that pid's PROCESS, OBJECT and HOSTS records: an
+    # otherwise conclusive external reading failed three assertions and the mode
+    # could never produce a passing half.
+    #
+    # Repairing it would have meant proving a named process is a process of THIS
+    # candidate, which is attribution by measurement and is exactly what starting
+    # the venv already does. Keeping it would have meant accepting a trace by
+    # process name alone, which rounds 3 and 4 established as the defect. So the
+    # mode is gone, with the public claims that described it.
+    # The name below is the DRIVER's, for the three controls that plant a
+    # process filesystem and drive `closure_verify.sh` over it. The acceptance's
+    # own live reading is taken separately, against a process this branch starts
+    # and owns by pid, and it needs no name from here.
+    process=python3
+    note "step7/acceptance/live-process" "started from the candidate venv by this branch, owned by pid"
+    if ! archive=$(step7_real_archive); then
+        unanswered "the debian half of the step 7 acceptance" \
+          "  no packaged archive on this account; packaging must produce one first, then set CPLX_ACCEPTANCE_ARCHIVE to it, or place it at \$HOME/pkgs/tools.latest.tar.gz, and run this step again here. The archive is the subject: a run pointed at an installed prefix instead would answer the build host's question on the wrong machine"
+        return
+    fi
+    note "step7/acceptance/real-archive" "$archive"
+
+    out=$(step7_verify_archive "$archive" "$root" "$process")
+    rc=$?
+    note "step7/acceptance/verify-exit" "$rc"
+    while IFS= read -r line; do
+        [ -z "$line" ] || note "step7/acceptance/verify" "$line"
+    done <<< "$(printf '%s\n' "$out" \
+        | grep -E '^(ARCHIVE|DELIVERY|STATIC|LIVE|COMPARISON|PAYLOAD\|SUMMARY|VERIFICATION REFUSED)' || true)"
+
+    # THE IDENTITY, RECOMPUTED HERE AND REQUIRED TO AGREE.
+    identity=$(sha256sum -- "$archive" 2>/dev/null | sed -e 's/ .*$//')
+    reported=$(printf '%s\n' "$out" | grep -m1 '^ARCHIVE|' | sed -e 's/^.*|//')
+    chk "step7/acceptance/archive-identity-is-recomputed" "$identity" "$reported"
+
+    # THE THREE REPORTS THE ISSUE ASKS FOR, each asserted on its own.
+    chk "step7/acceptance/the-static-listing-passes" "yes" \
+        "$(printf '%s' "$out" | grep -q '^STATIC|PASS' && echo yes || echo no)"
+    chk "step7/acceptance/the-two-observations-agree" "yes" \
+        "$(printf '%s' "$out" | grep -q '^COMPARISON|PASS' && echo yes || echo no)"
+    # THE WHOLE-SCOPE LISTING, RETAINED AS A LISTING. The driver's `STATIC|PASS`
+    # is a verdict about one; this is the observed loader scope of the installed
+    # candidate, one directory per line, and every directory must fall under the
+    # candidate prefix, because a scope reaching outside it is the host fallback
+    # this acceptance exists to refuse.
+    listing=$(step7_scope_listing "$root/prefix")
+    listing_rc=$?
+    chk "step7/acceptance/the-scope-listing-was-observed" "0" "$listing_rc"
+    chk "step7/acceptance/the-scope-listing-is-not-empty" "yes" \
+        "$( [ -n "$listing" ] && echo yes || echo no )"
+    note "step7/acceptance/scope-directories" "$(list_size "$listing") directory(ies)"
+    while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        note "step7/acceptance/scope" "$line"
+        case "$line" in
+            "$root/prefix/"*) ;;
+            *) outside+="$line"$'\n' ;;
+        esac
+    done <<< "$listing"
+    chk "step7/acceptance/every-scope-directory-is-inside-the-candidate" "" \
+        "$(oneline "$outside")"
+
+    # AND THE PROVIDERS THOSE DIRECTORIES HOLD, which is the listing the design
+    # asks for and which round 4 found missing. The boundaries above say where
+    # the loader may look; this says what it would FIND there, one record per
+    # lookup name, taken through the checker's own provider index so the
+    # acceptance and the membership invariant read the same inventory.
+    providers=$(step7_provider_listing "$root/prefix") || providers=""
+    if [ -z "$providers" ]; then
+        # AN UNTAKEN LISTING BLOCKS THE HALF, and it has to be tracked rather
+        # than left to the failure count: `unanswered` records an obligation and
+        # raises no failure, so without this flag a scope whose inventory could
+        # not be taken passed the half on an empty answer. That is the same
+        # shape as every other empty observation this acceptance refuses.
+        providers_taken=no
+        unanswered "the whole-provider listing for the debian half" \
+          "  the provider index over the candidate could not be built or returned no lookup name, so the listing this acceptance owes was not taken. An inventory nobody could take is not a scope that holds no providers"
+    else
+        note "step7/acceptance/providers" "$(list_size "$providers") lookup name(s) over the whole scope"
+        while IFS= read -r line; do
+            [ -z "$line" ] || note "step7/acceptance/provider" "$line"
+        done <<< "$providers"
+        chk "step7/acceptance/every-provider-record-is-well-formed" "" \
+            "$(oneline "$(printf '%s\n' "$providers" | grep -v '^$' | grep -vE '^PROVIDER\|[^|]+\|[0-9]+$' || true)")"
+    fi
+
+    # THE LIVE TRACE, TAKEN AGAINST A PROCESS STARTED FROM THE CANDIDATE and
+    # retained as the trace rather than as its verdict.
+    live=$(step7_candidate_live_evidence "$root/prefix" "$root/venv")
+    lrc=$?
+    note "step7/acceptance/live-exit" "$lrc"
+    while IFS= read -r line; do
+        [ -z "$line" ] || note "step7/acceptance/live" "$line"
+    done <<< "$(printf '%s\n' "$live" \
+        | grep -E '^(PROCESS|OBJECT|HOSTS|UNUSABLE|LIVE)\|' || true)"
+    chk "step7/acceptance/the-live-trace-is-conclusive" "yes" \
+        "$(printf '%s' "$live" | grep -q '^LIVE|CONCLUSIVE' && echo yes || echo no)"
+    # IT NAMES THE PROCESS IT INVENTORIED, by a PROCESS record carrying a pid,
+    # and not only by repeating the name it was asked for. A summary naming the
+    # wanted name proves nothing about what was found.
+    chk "step7/acceptance/the-trace-names-the-process-it-inventoried" "yes" \
+        "$(printf '%s' "$live" | grep -qE '^PROCESS\|[0-9]+\|' && echo yes || echo no)"
+    # AND EVERY PART OF THE READING IS ABOUT THE PROCESS THIS BRANCH OWNS.
+    #
+    # ROUND 4 OF THE REVIEW FOUND WHY THAT SENTENCE HAS TO COVER MORE THAN THE
+    # PROCESS RECORD. The previous version required `PROCESS` for the owned pid
+    # and then accepted an `OBJECT` record for ANY pid, so a reading where the
+    # owned process was UNUSABLE and a DIFFERENT process supplied the usable
+    # objects and the zero-host result passed. The observer emits exactly that
+    # shape: `PROCESS` is printed before the collection is attempted, and an
+    # unreadable one becomes `UNUSABLE` after it. A conclusive verdict earned by
+    # somebody else's process is the same substitution this acceptance refuses
+    # everywhere else, one level down.
+    #
+    # So the owned pid must be named, must carry objects, must NOT be the
+    # unusable one, and must be the pid the zero-host result is stated for. The
+    # OWNED record itself is retained in the trace above, so a reader of the
+    # capture can check the binding rather than trust it.
+    owned=$(printf '%s\n' "$live" | grep -m1 '^OWNED|' | cut -d'|' -f2)
+    note "step7/acceptance/live-owned" "$(oneline "$(printf '%s\n' "$live" | grep -m1 '^OWNED|')")"
+    chk "step7/acceptance/the-trace-inventoried-the-owned-process" "yes" \
+        "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^PROCESS\|$owned\|" && echo yes || echo no )"
+    chk "step7/acceptance/the-owned-process-carries-objects" "yes" \
+        "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^OBJECT\|$owned\|" && echo yes || echo no )"
+    chk "step7/acceptance/the-owned-process-is-not-unusable" "no" \
+        "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^UNUSABLE\|$owned\|" && echo yes || echo no )"
+    chk "step7/acceptance/the-owned-process-maps-no-host-object" "yes" \
+        "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^HOSTS\|$owned\|0$" && echo yes || echo no )"
+    chk "step7/acceptance/the-trace-inventoried-objects" "yes" \
+        "$(printf '%s' "$live" | grep -qE '^OBJECT\|[0-9]+\|' && echo yes || echo no)"
+
+    # --- the controls this branch owes, at this branch's own level ------------
+    #
+    # Step 6 proves each of these against the driver over a fixture archive.
+    # They are asked AGAIN here because the finding they answer is about THIS
+    # branch: it used to pass on a static success alone, so a control that lives
+    # only one suite away does not stop that from happening again.
+
+    # A STATIC SUCCESS ALONE MUST NOT PASS. The same archive with no live
+    # reading taken leaves the run inconclusive, so the live half is load
+    # bearing rather than decorative.
+    out=$(step7_verify_archive "$archive" "$root-nolive" "" )
+    chk "step7/acceptance/control/no-live-reading-is-not-a-pass" "yes" \
+        "$(printf '%s' "$out" | grep -q '^LIVE|INCONCLUSIVE' && echo yes || echo no)"
+
+    # AN EMPTY TRACE MUST NOT PASS. A process filesystem holding nothing the
+    # name matches inventories nothing, and nothing observed is never "no host
+    # library loaded".
+    rm -rf -- "$proc"; mkdir -p -- "$proc"
+    out=$(step7_verify_archive "$archive" "$root-empty" "$process" "$proc")
+    chk "step7/acceptance/control/an-empty-trace-is-not-a-pass" "yes" \
+        "$(printf '%s' "$out" | grep -q '^LIVE|INCONCLUSIVE' && echo yes || echo no)"
+
+    # A HOST-LOADED OBJECT MUST REFUSE. Planted rather than arranged, because a
+    # real process mapping a host library is not something a test may create on
+    # the machine it runs on.
+    rm -rf -- "$proc"
+    step7_plant_host_proc "$proc" "$process"
+    out=$(step7_verify_archive "$archive" "$root-host" "$process" "$proc")
+    chk "step7/acceptance/control/a-host-object-refuses" "yes" \
+        "$(printf '%s' "$out" | grep -q '^LIVE|REFUSED' && echo yes || echo no)"
+
+    # THE DECISION IS THIS BRANCH'S OWN ASSERTIONS AND NO LONGER THE DRIVER'S
+    # EXIT CODE, and the change follows from taking the live half here. The
+    # driver returns non-zero whenever ITS live reading was not conclusive, and
+    # from round 3 that reading is always inconclusive by design: the process
+    # this acceptance inventories is started AFTER the driver has installed,
+    # which is the only order in which a process from the candidate can exist.
+    # Keeping the old gate would make the half unpassable for the same reason
+    # the old branch made it unreachable.
+    #
+    # So the half passes when the driver's ARCHIVE, STATIC and COMPARISON
+    # records answered, this branch's live trace was conclusive over a process it
+    # attributed to the candidate, the scope listing was taken, and no assertion
+    # or control above failed. Every one of those is a `chk` already counted, so
+    # the comparison below is over the failure count rather than over a second
+    # reading of the same evidence.
+    if [ "$failures" -eq "$failures_before" ] && [ "$lrc" -eq 0 ] \
+       && [ "$providers_taken" = yes ]; then
+        cases=$((cases + 1))
+        pass "step7/acceptance/debian-half" "the packaged archive resolves with no host fallback"
+        return
+    fi
+    unanswered "the debian half of the step 7 acceptance" \
+      "  an acceptance assertion or control above failed, or the live observation returned $lrc over a process this branch attributed to the candidate; the lines above name which observation did not answer. The driver's own exit status is deliberately not the gate here, because its live reading is taken before any candidate process exists"
+}
+
+# A process filesystem whose one process maps an object from OUTSIDE the
+# installed prefix, which is the shape the live half must refuse. It reuses step
+# 6's planter so the two suites cannot drift on what a process looks like.
+step7_plant_host_proc() {
+    local root="$1" name="$2"
+    mkdir -p -- "$root" || return 1
+    step6_plant_proc "$root" 4242 "$name" "/usr/bin/$name" \
+        "/lib/x86_64-linux-gnu/libc.so.6"
+}
+
+# Exercise the acceptance decision without requiring a packaged production tree.
+# Only the verifier report is planted; the real branch and its assertions run.
+# The caller's command substitution contains overrides and observations.
+step7_debian_branch_probe() {
+    local scenario="$1" failures=0 cases=0
+    local probe_archive="$SCRATCH/step7/branch-archive" digest=""
+    printf 'acceptance decision fixture\n' > "$probe_archive"
+    digest=$(sha256sum < "$probe_archive"); digest="${digest%% *}"
+    step7_real_archive() { printf '%s' "$probe_archive"; }
+    # THE THREE HELPERS ROUND 3 ADDED ARE STUBBED HERE TOO, for the reason this
+    # probe exists at all: it drives the branch's DECISION over a modelled
+    # report, and a decision input the model does not supply would send the
+    # probe looking for a real installation. The live evidence is modelled in
+    # the shape the observer emits, records and verdict alike, so the scenarios
+    # still separate a conclusive trace from an empty one and from a refused
+    # one.
+    step7_scope_listing() {
+        case "$scenario" in
+            sibling-scope) printf '%s/prefix-other/lib\n' "$SCRATCH/step7/accept"; return 0 ;;
+        esac
+        printf '%s/prefix/tools/python/root/lib\n' "$SCRATCH/step7/accept"
+        if [ "$scenario" = mixed-scope ]; then printf '/usr/lib64\n'; fi
+        if [ "$scenario" = failed-scope ]; then return 1; fi
+        return 0
+    }
+    # THE PROVIDER INVENTORY, modelled in the shape the index emits. The
+    # `no-providers` scenario is what the round 4 finding is about: a scope whose
+    # inventory could not be taken must be reported as untaken rather than read
+    # as a scope that holds no providers.
+    step7_provider_listing() {
+        case "$scenario" in
+            no-providers) return 1 ;;
+            malformed-providers) printf 'PROVIDER|libz.so.1\n'; return 0 ;;
+        esac
+        printf 'PROVIDER|libz.so.1|1\nPROVIDER|libpython3.13.so.1.0|1\n'
+        return 0
+    }
+    step7_candidate_live_evidence() {
+        case "$scenario" in
+            static-only) printf 'LIVE|INCONCLUSIVE|no process\n'; return 1 ;;
+            empty-trace) printf 'LIVE|INCONCLUSIVE|empty trace\n'; return 1 ;;
+            host-object)
+                printf 'OWNED|4242|python3\n'
+                printf 'PROCESS|4242|python3\nOBJECT|4242|/lib/libc.so.6|host\nHOSTS|4242|1\n'
+                printf 'LIVE|REFUSED|host object\n'; return 1 ;;
+            # A CONCLUSIVE TRACE OF SOMEBODY ELSE'S PROCESS. The observer
+            # inventoried a process answering to the name and it is not the one
+            # this branch launched, which on an agent running several
+            # interpreters is the likely shape rather than the unlucky one.
+            unowned-trace)
+                printf 'OWNED|4242|python3\n'
+                printf 'PROCESS|9999|python3\nOBJECT|9999|%s/prefix/tools/python/root/lib/libpython3.so|shipped\n' \
+                    "$SCRATCH/step7/accept"
+                printf 'HOSTS|9999|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+                return 0 ;;
+            # THE SHAPE ROUND 4 BUILT TO DEFEAT THE PREVIOUS ASSERTIONS, kept as
+            # a model because it is the one the real observer can actually emit:
+            # the owned process is NAMED and then turns out to be UNUSABLE, and a
+            # different process supplies the objects and the zero-host result.
+            # A branch that asked only for `PROCESS` of the owned pid and an
+            # `OBJECT` of any pid passed this.
+            unusable-owner)
+                printf 'OWNED|4242|python3\n'
+                printf 'PROCESS|4242|python3\nUNUSABLE|4242|its mapped objects could not be read\n'
+                printf 'PROCESS|9999|python3\nOBJECT|9999|%s/prefix/tools/python/root/lib/libpython3.so|shipped\n' \
+                    "$SCRATCH/step7/accept"
+                printf 'HOSTS|9999|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+                return 0 ;;
+            # THE OWNED PROCESS INVENTORIED, AND MAPPING A HOST OBJECT. The
+            # verdict line is conclusive for the run as a whole; the owned pid's
+            # own host count is not zero, and that is what must decide it.
+            owner-maps-host)
+                printf 'OWNED|4242|python3\n'
+                printf 'PROCESS|4242|python3\nOBJECT|4242|/lib/libc.so.6|host\nHOSTS|4242|1\n'
+                printf 'LIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+                return 0 ;;
+        esac
+        printf 'OWNED|4242|python3\n'
+        printf 'PROCESS|4242|python3\nOBJECT|4242|%s/prefix/tools/python/root/lib/libpython3.so|shipped\n' \
+            "$SCRATCH/step7/accept"
+        printf 'HOSTS|4242|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+        return 0
+    }
+    step7_verify_archive() {
+        case "$2" in
+            *-nolive)
+                if [ "$scenario" = bad-control ]; then
+                    printf 'LIVE|CONCLUSIVE|unexpected control pass\n'; return 0
+                fi
+                printf 'LIVE|INCONCLUSIVE|no process\n'; return 1 ;;
+            *-empty) printf 'LIVE|INCONCLUSIVE|empty trace\n'; return 1 ;;
+            *-host) printf 'LIVE|REFUSED|host object\n'; return 1 ;;
+        esac
+        if [ "$scenario" = bad-identity ]; then
+            printf 'ARCHIVE|fixture|wrong-digest\n'
+        else
+            printf 'ARCHIVE|fixture|%s\n' "$digest"
+        fi
+        printf 'STATIC|PASS\nCOMPARISON|PASS\n'
+        case "$scenario" in
+            static-only) return 0 ;;
+            empty-trace) printf 'LIVE|INCONCLUSIVE|no process\n'; return 1 ;;
+            host-object) printf 'LIVE|REFUSED|host object\n'; return 1 ;;
+        esac
+        printf 'LIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+        return 0
+    }
+    step7_debian_half
+    printf 'BRANCH_FAILURES|%s\n' "$failures"
+}
+
+step7_suite() {
+    local dir="$SCRATCH/step7"
+    local d10="$SHIPPED_DIR/closure_d10.sh"
+    local checker="$SHIPPED_DIR/closure_check.sh"
+    local bundle="$SHIPPED_DIR/../closure"
+    local tree="" cand11="" cand12="" plant="" reading="" out="" rc=0
+    local halves="" mine="" theirs="" capture="" prefix="" name="" entry=""
+    local missing="" line="" reason="" multi="" rpid="" rchild="" i=0 clean=""
+
+    rm -rf -- "$dir"
+    mkdir -p -- "$dir" || { fail "step7/scratch" "cannot create the scratch directory"; return; }
+    tree="$dir/archive"
+    cand11="$dir/cand/gcc-11"
+    cand12="$dir/cand/gcc-12"
+
+    # --- the topology, one row later than step 5's ---------------------------
+    #
+    # `closure_d10.sh` is the tenth production script and the second that lives
+    # in cplx only. The two properties that make it that are ASSERTED rather than
+    # described: it is not staged into an archive, and no shipped script sources
+    # it. A module the checker could source would be a module inside the trust
+    # boundary, and this one decides a packaging question rather than a closure
+    # one.
+    section "step 7 topology: the tenth script, in cplx only"
+    chk "step7/topology/d10-exists" "yes" "$( [ -f "$d10" ] && echo yes || echo no )"
+    chk "step7/topology/no-shipped-script-sources-it" "" \
+        "$(oneline "$(grep -l 'closure_d10' "$SHIPPED_DIR"/closure_check.sh \
+            "$SHIPPED_DIR"/closure_config.sh "$SHIPPED_DIR"/closure_elf.sh \
+            "$SHIPPED_DIR"/closure_report.sh "$SHIPPED_DIR"/closure_rules.sh \
+            "$SHIPPED_DIR"/closure_verify.sh "$SHIPPED_DIR"/closure_publish.sh \
+            "$SHIPPED_DIR"/closure_observe_live.sh 2>/dev/null || true)")"
+    chk "step7/topology/it-is-not-staged-into-the-archive" "" \
+        "$(oneline "$(grep -n 'closure_d10' "$SHIPPED_DIR/pkg.sh" 2>/dev/null || true)")"
+    # It reaches its two host tools THROUGH the reader module, which is why the
+    # enumerated contract gains no row for this step. The assertion is over its
+    # own text, because that is where a direct call would appear.
+    chk "step7/topology/it-calls-no-host-tool-directly" "" \
+        "$(oneline "$(sed -e 's/#.*$//' "$d10" \
+            | grep -oE '(^|[|;&]|\$\()[[:space:]]*(readelf|sha256sum|find|tar)[[:space:]]' || true)")"
+
+    # --- the D10 policy: the design's nine rows ------------------------------
+    section "step 7 D10 policy: the lowest satisfying candidate, zero spare nodes"
+
+    # ROW 1. The GCC 11 entry defines every required node, so the policy returns
+    # GCC 11, and no spare node is required of it.
+    plant=$(d10_plant gcc-11 3 \
+        "libstdc++.so.6|GLIBCXX_3.4.29 libstdc++.so.6|CXXABI_1.3.13 libgcc_s.so.1|GCC_3.0" \
+        "gcc-11|libstdc++.so.6|GLIBCXX_3.4.29 gcc-11|libstdc++.so.6|CXXABI_1.3.13 gcc-11|libgcc_s.so.1|GCC_3.0 gcc-12|libstdc++.so.6|GLIBCXX_3.4.29 gcc-12|libstdc++.so.6|CXXABI_1.3.13 gcc-12|libgcc_s.so.1|GCC_3.0")
+    chk "step7/policy/plant/gcc-11-satisfies" "gcc-11|3|3|gcc-11 gcc-12" "$(d10_model "$plant")"
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/gcc-11-satisfies/rc" "0" "$D10_RC"
+    chk "step7/policy/gcc-11-satisfies/returns-the-lowest" "D10 POLICY: gcc-11" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    chk "step7/policy/gcc-11-satisfies/asks-no-re-read" "no" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'RE-READ REQUIRED' && echo yes || echo no)"
+
+    # ROW 2. It does not, and the GCC 12 entry does. The reading was taken under
+    # GCC 11, so the returned candidate differs from it and a re-read is owed.
+    plant=$(d10_plant gcc-11 3 \
+        "libstdc++.so.6|GLIBCXX_3.4.30" \
+        "gcc-11|libstdc++.so.6|GLIBCXX_3.4.29 gcc-12|libstdc++.so.6|GLIBCXX_3.4.30")
+    chk "step7/policy/plant/only-gcc-12-satisfies" "gcc-11|3|1|gcc-11 gcc-12" "$(d10_model "$plant")"
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/only-gcc-12-satisfies/rc" "0" "$D10_RC"
+    chk "step7/policy/only-gcc-12-satisfies/returns-gcc-12" "D10 POLICY: gcc-12" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    chk "step7/policy/only-gcc-12-satisfies/asks-a-re-read" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'RE-READ REQUIRED: the reading was taken under gcc-11' && echo yes || echo no)"
+
+    # ROW 7. THE RESULT FOLLOWS THE CANDIDATE CAPABILITIES AND NEVER THE SHIPPED
+    # GENERATION. The reading was taken under GCC 12 and GCC 11 satisfies, so the
+    # answer is GCC 11: an earlier version of this policy scored the archive by
+    # the bytes it already carried, which answers a different question.
+    plant=$(d10_plant gcc-12 2 \
+        "libstdc++.so.6|GLIBCXX_3.4.29" \
+        "gcc-11|libstdc++.so.6|GLIBCXX_3.4.29 gcc-12|libstdc++.so.6|GLIBCXX_3.4.29")
+    chk "step7/policy/plant/read-under-gcc-12" "gcc-12|2|1|gcc-11 gcc-12" "$(d10_model "$plant")"
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/read-under-gcc-12/returns-gcc-11" "D10 POLICY: gcc-11" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    chk "step7/policy/read-under-gcc-12/asks-a-re-read" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'RE-READ REQUIRED: the reading was taken under gcc-12' && echo yes || echo no)"
+
+    # ROW 8. A required node neither capability entry defines. This is the third
+    # result an earlier reading of D10 left out, and it is a FAILURE rather than
+    # the closer generation.
+    plant=$(d10_plant gcc-11 2 \
+        "libstdc++.so.6|GLIBCXX_3.4.29 libstdc++.so.6|GLIBCXX_3.4.31" \
+        "gcc-11|libstdc++.so.6|GLIBCXX_3.4.29 gcc-12|libstdc++.so.6|GLIBCXX_3.4.29 gcc-12|libstdc++.so.6|GLIBCXX_3.4.30")
+    chk "step7/policy/plant/neither-defines-a-node" "gcc-11|2|2|gcc-11 gcc-12" "$(d10_model "$plant")"
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/neither-defines-a-node/rc" "1" "$D10_RC"
+    chk "step7/policy/neither-defines-a-node/returns-neither" "D10 POLICY: NEITHER" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    # AND IT NAMES THE NODE, which is what makes a NEITHER actionable. Beside it
+    # the control that gives the naming its meaning: the node that IS defined
+    # must not also be reported as undefined.
+    chk "step7/policy/neither-defines-a-node/names-it" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'no candidate generation defines libstdc++.so.6|GLIBCXX_3.4.31' && echo yes || echo no)"
+    chk "step7/policy/neither-defines-a-node/control/names-only-it" "no" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'defines libstdc++.so.6|GLIBCXX_3.4.29' && echo yes || echo no)"
+    chk "step7/policy/neither-defines-a-node/says-packaging-fails" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'packaging FAILS' && echo yes || echo no)"
+
+    # ROW 9. A consumer set of zero in an archive that ships a libstdc++. It is
+    # reported INCONCLUSIVE and never as a satisfied condition, which is the same
+    # refusal the live trace makes of an inventory that found nothing.
+    #
+    # THE ORDER IS THE POINT. Every candidate satisfies an empty requirement set
+    # vacuously, so a policy asking the satisfaction question first would return
+    # the lowest generation out of an empty observation and be indistinguishable
+    # from a real pass.
+    plant=$(d10_plant gcc-11 0 "" \
+        "gcc-11|libstdc++.so.6|GLIBCXX_3.4.29 gcc-12|libstdc++.so.6|GLIBCXX_3.4.30")
+    chk "step7/policy/plant/zero-consumers" "gcc-11|0|0|gcc-11 gcc-12" "$(d10_model "$plant")"
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/zero-consumers/rc" "5" "$D10_RC"
+    chk "step7/policy/zero-consumers/is-inconclusive" "D10 POLICY: INCONCLUSIVE" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    chk "step7/policy/zero-consumers/says-why" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'empty observation and never a satisfied condition' && echo yes || echo no)"
+    # THE CONTROL FOR IT, and it is what makes the case above mean something: the
+    # same capability entries with ONE consumer and no required node do not
+    # report inconclusive. The refusal is about an empty CONSUMER set and not
+    # about an empty requirement set.
+    plant=$(d10_plant gcc-11 1 "" \
+        "gcc-11|libstdc++.so.6|GLIBCXX_3.4.29 gcc-12|libstdc++.so.6|GLIBCXX_3.4.30")
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/zero-consumers/control/one-consumer-answers" "0" "$D10_RC"
+
+    # AN UNREADABLE CAPABILITY ENTRY IS INCONCLUSIVE AND NEVER UNSATISFYING,
+    # which is the mirror of the row above: scoring an unmeasured generation as
+    # not satisfying demotes it for being unmeasurable, and the lowest satisfying
+    # candidate would then depend on which trees happened to be readable.
+    # The plant already ends in its own separator, so the two assignments follow
+    # it directly: an added one would close an empty statement and the eval
+    # refuses that before the module is ever reached.
+    plant="$(d10_plant gcc-11 2 "libstdc++.so.6|GLIBCXX_3.4.29" \
+        "gcc-12|libstdc++.so.6|GLIBCXX_3.4.29")CLOSURE_D10_UNREAD=1;CLOSURE_D10_REASON=planted"
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/unreadable-candidate/rc" "5" "$D10_RC"
+    chk "step7/policy/unreadable-candidate/is-inconclusive" "D10 POLICY: INCONCLUSIVE" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    chk "step7/policy/unreadable-candidate/does-not-demote" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'an unmeasured generation is not an unsatisfying one' && echo yes || echo no)"
+
+    # NO CANDIDATE AT ALL is the third inconclusive shape: a reading declaring
+    # nothing to choose between has not answered the question either.
+    plant='closure_d10_reset;CLOSURE_D10_READING=gcc-11;CLOSURE_D10_CONSUMERS+=(a.so)'
+    d10_run "$plant" closure_d10_policy
+    chk "step7/policy/no-candidate/rc" "5" "$D10_RC"
+    chk "step7/policy/no-candidate/says-why" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'nothing to choose between' && echo yes || echo no)"
+
+    # --- the re-read rule: rows 3 to 6 ---------------------------------------
+    section "step 7 D10 convergence: the second evaluation must return the same candidate"
+    plant=$(d10_plant gcc-12 1 "" "")
+
+    # ROW 3. The second reading returns GCC 12 again, which is the convergence
+    # the re-read exists to establish.
+    d10_run "$plant" closure_d10_converge gcc-12 gcc-12
+    chk "step7/converge/same-candidate/rc" "0" "$D10_RC"
+    chk "step7/converge/same-candidate/settles" "D10 CONVERGENCE: SETTLED at gcc-12" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    # A SETTLED RESULT OFFERS NO FURTHER READING, which is the other half of "no
+    # third iteration": the sentence belongs to the failure and not to the pass.
+    chk "step7/converge/same-candidate/control/no-iteration-language" "no" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'no third iteration' && echo yes || echo no)"
+
+    # ROW 4. A HIGHER second result: the requirement set grew with the
+    # generation.
+    d10_run "$plant" closure_d10_converge gcc-11 gcc-12
+    chk "step7/converge/higher/rc" "1" "$D10_RC"
+    chk "step7/converge/higher/is-non-convergent" "D10 CONVERGENCE: NON-CONVERGENT" \
+        "$(printf '%s\n' "$D10_OUT" | sed -n '1p')"
+    chk "step7/converge/higher/names-the-direction" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'the HIGHER candidate gcc-12 where the first returned gcc-11' && echo yes || echo no)"
+    chk "step7/converge/higher/no-third-iteration" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'there is no third iteration' && echo yes || echo no)"
+
+    # ROW 5. A LOWER second result: the first reading overstated what the archive
+    # needs. It is a separate case from the row above because it fails for a
+    # different reason, and one case would assert only the direction it planted.
+    d10_run "$plant" closure_d10_converge gcc-12 gcc-11
+    chk "step7/converge/lower/rc" "1" "$D10_RC"
+    chk "step7/converge/lower/names-the-direction" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'the LOWER candidate gcc-11 where the first returned gcc-12' && echo yes || echo no)"
+
+    # ROW 6. NEITHER satisfies on the second reading: the rebuild moved the
+    # requirements out of range.
+    d10_run "$plant" closure_d10_converge gcc-12 NEITHER
+    chk "step7/converge/neither/rc" "1" "$D10_RC"
+    chk "step7/converge/neither/names-the-reason" "yes" \
+        "$(printf '%s' "$D10_OUT" | grep -q 'satisfies NEITHER candidate, so the rebuild moved the requirements out of range' && echo yes || echo no)"
+
+    # Equality is convergence only for a candidate, never for two failures or
+    # two labels absent from the reading's capability entries.
+    for name in NEITHER INCONCLUSIVE undeclared; do
+        d10_run "$plant" closure_d10_converge "$name" "$name"
+        chk "step7/converge/equal-$name/refuses" "1" "$D10_RC"
+    done
+
+    # --- the evidence half, over real objects --------------------------------
+    #
+    # The rows above ask the policy about a model. This asks whether a real
+    # reading produces that model, which is the only thing binding the two ends
+    # of the interface together.
+    section "step 7 D10 evidence: the consumer set is the subject set, and the generation is recomputed"
+    # THE ENGINE IS RESOLVED BEFORE A DONOR IS LOOKED FOR, in that order and for
+    # the reason step 3 established: a host with no `readelf` cannot validate a
+    # donor either, and reporting the donor as the missing thing would name the
+    # second symptom rather than the first input.
+    DONOR_SHARED=""
+    if ! fixture_resolve_tools; then
+        unanswered "the step 7 evidence half" \
+          "  readelf and dd must both resolve here; run this step on the RHEL 9.8 build host and on the Debian 12 agent"
+    else
+        note "step7/fixture/tools" "$FIXTURE_READELF, $FIXTURE_DD"
+        DONOR_SHARED=$(donor_find_shared) || DONOR_SHARED=""
+        chk "step7/fixture/donor-found" "yes" \
+            "$( [ -n "$DONOR_SHARED" ] && echo yes || echo no )"
+        if [ -z "$DONOR_SHARED" ]; then
+            unanswered "the step 7 evidence half" \
+              "  no ELF donor on this host validates against the corpus rows; run this step on the RHEL 9.8 build host and on the Debian 12 agent"
+        fi
+    fi
+    if [ -n "$DONOR_SHARED" ]; then
+        note "step7/fixture/donor" "$DONOR_SHARED"
+        # The archive: two providers, and a consumer NO ENTRY POINT REACHES. The
+        # last part is the whole reason the consumer set is bound to this
+        # design's subject rule. A reading that walked from the entry points
+        # would not see this file, and would answer the compiler question about
+        # the rest of the archive while reporting it as the archive's answer.
+        step7_provider "$tree/tools/gcc/lib/libstdc++.so.6.0.29" libstdc++.so.6 GLIBCXX_3.4.29
+        chk "step7/evidence/plant/shipped-libstdc++" "yes" \
+            "$(elf_verdef_defines "$tree/tools/gcc/lib/libstdc++.so.6.0.29" GLIBCXX_3.4.29 && echo yes || echo no)"
+        step7_provider "$tree/tools/gcc/lib/libgcc_s.so.1.1" libgcc_s.so.1 GCC_3.0
+        chk "step7/evidence/plant/shipped-libgcc_s" "libgcc_s.so.1" \
+            "$(elf_soname "$tree/tools/gcc/lib/libgcc_s.so.1.1")"
+        step7_consumer "$tree/tools/python/lib/lib-dynload/_unreached.so" \
+            libstdc++.so.6 GLIBCXX_3.4.29
+        chk "step7/evidence/plant/consumer-demands-the-node" "yes" \
+            "$(elf_verneed_demands "$tree/tools/python/lib/lib-dynload/_unreached.so" \
+                libstdc++.so.6 GLIBCXX_3.4.29 && echo yes || echo no)"
+        chk "step7/evidence/plant/consumer-needs-the-library" "yes" \
+            "$(elf_needed_names "$tree/tools/python/lib/lib-dynload/_unreached.so" \
+                | grep -Fxq libstdc++.so.6 && echo yes || echo no)"
+
+        # THE GCC 11 CANDIDATE IS THE ARCHIVE'S OWN PROVIDERS, byte for byte, so
+        # the reading generation must resolve to it. They are COPIES of the
+        # shipped files rather than second mutations of the donor: recomputation
+        # compares bytes, and two files built by the same mutations are not
+        # guaranteed to be the same bytes.
+        mkdir -p -- "$cand11" "$cand12"
+        cp -- "$tree/tools/gcc/lib/libstdc++.so.6.0.29" "$cand11/libstdc++.so.6"
+        cp -- "$tree/tools/gcc/lib/libgcc_s.so.1.1" "$cand11/libgcc_s.so.1"
+        step7_provider "$cand12/libstdc++.so.6" libstdc++.so.6 GLIBCXX_3.4.30
+        step7_provider "$cand12/libgcc_s.so.1" libgcc_s.so.1 GCC_3.0
+        chk "step7/evidence/plant/gcc-12-defines-a-higher-node" "yes" \
+            "$(elf_verdef_defines "$cand12/libstdc++.so.6" GLIBCXX_3.4.30 && echo yes || echo no)"
+
+        d10_run "" closure_d10_evidence "$tree" "gcc-11=$cand11" "gcc-12=$cand12"
+        reading="$D10_OUT"
+        chk "step7/evidence/reading-is-taken" "0" "$D10_RC"
+        chk "step7/evidence/the-unreached-module-is-a-consumer" "1 of 3 shipped objects" \
+            "$(step7_reading_field "$reading" consumers)"
+        chk "step7/evidence/required-nodes" "1" \
+            "$(step7_reading_field "$reading" 'required nodes')"
+        chk "step7/evidence/the-required-node-is-named" "yes" \
+            "$(printf '%s' "$reading" | grep -q 'require libstdc++.so.6|GLIBCXX_3.4.29' && echo yes || echo no)"
+        # THE READING GENERATION IS RECOMPUTED. The GCC 11 entry is the shipped
+        # bytes, so the derivation resolves to it with nothing having declared
+        # it.
+        chk "step7/evidence/generation-is-recomputed" "gcc-11" \
+            "$(step7_reading_field "$reading" 'reading generation')"
+        # AND THE POLICY OVER THAT REAL READING RETURNS THE LOWEST SATISFYING
+        # CANDIDATE, which is the two ends of the interface meeting: no model was
+        # planted for this one.
+        d10_run "" closure_d10_main --root "$tree" \
+            --candidate "gcc-11=$cand11" --candidate "gcc-12=$cand12"
+        chk "step7/evidence/policy-over-a-real-reading/rc" "0" "$D10_RC"
+        chk "step7/evidence/policy-over-a-real-reading/returns-gcc-11" "yes" \
+            "$(printf '%s' "$D10_OUT" | grep -q '^D10 POLICY: gcc-11$' && echo yes || echo no)"
+        chk "step7/evidence/policy-over-a-real-reading/asks-no-re-read" "no" \
+            "$(printf '%s' "$D10_OUT" | grep -q 'RE-READ REQUIRED' && echo yes || echo no)"
+
+        # A second call in one shell must observe only the new archive. The
+        # first call is required to pass, so an initialization failure cannot
+        # stand in for the empty second observation.
+        mkdir -p -- "$dir/empty"
+        # shellcheck disable=SC2016  # expanded by d10_run's child shell
+        plant='review_two_readings() {
+            closure_d10_main --root "$1" --candidate "$3" --candidate "$4" || return 93
+            closure_d10_main --root "$2" --candidate "$3" --candidate "$4"
+        }'
+        d10_run "$plant" review_two_readings "$tree" "$dir/empty" \
+            "gcc-11=$cand11" "gcc-12=$cand12"
+        chk "step7/evidence/second-empty-reading/is-inconclusive" "5" "$D10_RC"
+        chk "step7/evidence/second-empty-reading/has-no-stale-subjects" "yes" \
+            "$(printf '%s' "$D10_OUT" | grep -q 'consumers *0 of 0 shipped objects' && echo yes || echo no)"
+
+        # A readable consumer beside an unreadable ELF is a partial observation,
+        # not evidence that the readable consumer is the whole requirement set.
+        printf '\177ELFbroken' > "$tree/broken.so"
+        d10_run "" closure_d10_main --root "$tree" \
+            --candidate "gcc-11=$cand11" --candidate "gcc-12=$cand12"
+        chk "step7/evidence/unread-object/is-inconclusive" "5" "$D10_RC"
+        chk "step7/evidence/unread-object/names-incomplete-archive" "yes" \
+            "$(printf '%s' "$D10_OUT" | grep -q 'archive reading is incomplete: 1 unread object' && echo yes || echo no)"
+        rm -f -- "$tree/broken.so"
+
+        # Even a find that prints all subjects and then fails cannot certify
+        # that the traversal was complete. Keep real find's output for the
+        # positive consumer, and change only its completion status.
+        mkdir -p -- "$dir/failed-find"
+        { printf '#!/bin/bash\n'; printf '%q "$@"\nexit 1\n' "$(type -P find)"; } \
+            > "$dir/failed-find/find"
+        chmod +x "$dir/failed-find/find"
+        # shellcheck disable=SC2016  # PATH changes only in the child shell
+        plant='review_failed_walk() { PATH="$1:$PATH"; shift; closure_d10_main "$@"; }'
+        d10_run "$plant" review_failed_walk "$dir/failed-find" --root "$tree" \
+            --candidate "gcc-11=$cand11" --candidate "gcc-12=$cand12"
+        chk "step7/evidence/incomplete-walk/is-inconclusive" "5" "$D10_RC"
+        chk "step7/evidence/incomplete-walk/names-incomplete-archive" "yes" \
+            "$(printf '%s' "$D10_OUT" | grep -q 'archive reading is incomplete: 0 unread object' && echo yes || echo no)"
+
+        # THE CONTROL FOR THE RECOMPUTATION: a candidate whose bytes are NOT the
+        # archive's leaves the reading generation unknown, and an unknown one
+        # always owes a re-read. A derivation that took a label from an argument
+        # rather than from bytes would answer gcc-11 here too.
+        cp -- "$cand12/libstdc++.so.6" "$cand11/libstdc++.so.6"
+        d10_run "" closure_d10_evidence "$tree" "gcc-11=$cand11" "gcc-12=$cand12"
+        chk "step7/evidence/control/mixed-bytes-are-unknown" "unknown" \
+            "$(step7_reading_field "$D10_OUT" 'reading generation')"
+        # Neither candidate now defines the consumer's node. Supplying a prior
+        # NEITHER must preserve failure rather than turn equal tokens into 0.
+        d10_run "" closure_d10_main --root "$tree" \
+            --candidate "gcc-11=$cand11" --candidate "gcc-12=$cand12" --previous NEITHER
+        chk "step7/evidence/neither-twice/preserves-cli-failure" "1" "$D10_RC"
+    fi
+
+    # --- the acceptance -------------------------------------------------------
+    section "step 7 acceptance: the positive control, the inventory, and the two halves"
+
+    printf 'Target: debian\nCaptured: 2026-09-11\nstep7/acceptance/debian-half PASS\n' \
+        > "$dir/capture-input.txt"
+    out=$(step7_capture_answers "$dir/capture-input.txt" debian)
+    rc=$?
+    chk "step7/capture/passing-half-is-accepted" "0" "$rc"
+    reading=$(sha256sum < "$dir/capture-input.txt")
+    chk "step7/capture/records-the-bytes-inspected" "yes" \
+        "$(printf '%s' "$out" | grep -Fq "${reading%% *}" && echo yes || echo no)"
+    printf 'Target: debian\nCaptured: 2026-09-11\nstep7/acceptance/debian-half FAIL\n' \
+        > "$dir/capture-input.txt"
+    out=$(step7_capture_answers "$dir/capture-input.txt" debian)
+    rc=$?
+    chk "step7/capture/refusing-half-is-refused" "1" "$rc"
+    reading=$(sha256sum < "$dir/capture-input.txt")
+    chk "step7/capture/refusal-records-the-replacement-bytes" "yes" \
+        "$(printf '%s' "$out" | grep -Fq "${reading%% *}" && echo yes || echo no)"
+
+    # Read the real helper's colon-joined source over two actual directories.
+    # The branch models below already supply lines, so they cannot catch a
+    # missing conversion at the observed_scope seam.
+    tree="$dir/scope-listing"
+    mkdir -p "$tree/tools/python/root/lib64" "$tree/tools/python/root/lib"
+    chk_list "step7/acceptance/scope-listing-separates-directories" \
+        "$tree/tools/python/root/lib64"$'\n'"$tree/tools/python/root/lib" \
+        "$(step7_scope_listing "$tree")"
+
+    # THE REAL HELPER, EXERCISED RATHER THAN MODELLED. Round 3 asked for this by
+    # name: the report models below drive the branch's DECISION, and a decision
+    # driven entirely over stubs says nothing about whether a venv is created,
+    # whether the wrapper's interpreter child is found, or whether its mappings
+    # are ever read. Both cases here call `step7_candidate_live_evidence` itself.
+    #
+    # THE REFUSAL PATH RUNS ANYWHERE. A prefix with no interpreter must produce
+    # the typed INCONCLUSIVE rather than an empty answer or a whole deadline.
+    mkdir -p -- "$dir/noint/tools"
+    live=$(step7_candidate_live_evidence "$dir/noint" "$dir/noint-venv")
+    chk "step7/live-helper/no-interpreter-is-inconclusive" "yes" \
+        "$(printf '%s' "$live" | grep -q '^LIVE|INCONCLUSIVE|no interpreter inside the candidate' && echo yes || echo no)"
+
+    # THE WRAPPER TIMEOUT PATH, EXERCISED RATHER THAN REASONED ABOUT. Round 4
+    # found the refusal paths killing only the launched process while a child
+    # they had already identified kept running. The direct-interpreter case
+    # cannot cover it, because there the two pids are the same. This plants the
+    # shape the project entry point actually has: a wrapper that outlives its
+    # own launch and a child that never maps the candidate, so the deadline is
+    # reached with a child to reap.
+    mkdir -p -- "$dir/reap"
+    { printf '#!/bin/bash\n'; printf 'sleep 30 &\n'; printf 'wait\n'; } > "$dir/reap/wrapper.sh"
+    chmod +x "$dir/reap/wrapper.sh"
+    "$dir/reap/wrapper.sh" >/dev/null 2>&1 &
+    rpid=$!
+    rchild=""
+    i=0
+    while [ "$i" -lt 50 ]; do
+        rchild=$(step7_child_interpreter "$rpid") || rchild=""
+        [ -n "$rchild" ] && break
+        i=$((i + 1)); sleep 0.1
+    done
+    chk "step7/live-helper/reap/the-fixture-has-a-child" "yes" \
+        "$( [ -n "$rchild" ] && echo yes || echo no )"
+    step7_reap "$rpid" "$rchild"
+    chk "step7/live-helper/reap/the-child-is-gone" "no" \
+        "$( [ -n "$rchild" ] && step7_process_live "$rchild" && echo yes || echo no )"
+    chk "step7/live-helper/reap/the-wrapper-is-gone" "no" \
+        "$( step7_process_live "$rpid" && echo yes || echo no )"
+    # THE UNMARKED WRAPPER CHILD, WHICH IS THE SHAPE THE PROJECT ACTUALLY
+    # SHIPS. Round 6 found the round 5 ownership rule reading a path out of the
+    # child's ARGUMENTS, and a venv entry point puts none there: it starts the
+    # real interpreter by its ABSOLUTE CANDIDATE PATH, so the child's command
+    # line names the candidate and never the venv. The reviewer's reproduction
+    # is planted here in the same shape, and it is not a refusal case: the
+    # child maps the candidate, so a helper that owns its own launch must FIND
+    # it, name it on the `OWNED` record and reach a typed verdict. Before the
+    # repair this exact plant answered "the venv process exited before anything
+    # of it could be observed" while that child was still running.
+    mkdir -p -- "$dir/unmarked/tools/python/current/bin"
+    cp -- "$(command -v sleep)" "$dir/unmarked/tools/python/current/bin/real-interpreter"
+    cat > "$dir/unmarked/tools/python/current/bin/python3" <<'UNMARKED'
+#!/bin/bash
+[ "${1:-}" = "-m" ] && [ "${2:-}" = "venv" ] && [ -n "${3:-}" ] || exit 1
+real="${0%/*}/real-interpreter"
+mkdir -p -- "$3/bin" || exit 1
+cat > "$3/bin/python3" <<WRAPPER
+#!/bin/bash
+"$real" 60 > /dev/null 2>&1 &
+echo \$! > "$3/started.pid"
+exit 0
+WRAPPER
+chmod +x "$3/bin/python3" || exit 1
+exit 0
+UNMARKED
+    chmod +x "$dir/unmarked/tools/python/current/bin/python3"
+    live=$(step7_candidate_live_evidence "$dir/unmarked" "$dir/unmarked-venv")
+    rpid=$(cat "$dir/unmarked-venv/started.pid" 2>/dev/null) || rpid=""
+    chk "step7/live-helper/unmarked-child/the-plant-left-a-child" "yes" \
+        "$( [ -n "$rpid" ] && echo yes || echo no )"
+    # The shape is asserted rather than described: the entry point the plant
+    # wrote starts the CANDIDATE path, so the child carries no venv marker of
+    # any kind and only the launch can identify it.
+    chk "step7/live-helper/unmarked-child/the-wrapper-starts-a-candidate-path" "yes" \
+        "$( grep -Fq "\"$dir/unmarked/tools/python/current/bin/real-interpreter\" 60" \
+             "$dir/unmarked-venv/bin/python3" && echo yes || echo no )"
+    chk "step7/live-helper/unmarked-child/is-owned-by-the-helper" "yes" \
+        "$(printf '%s' "$live" | grep -Fq "OWNED|${rpid:-none}|" && echo yes || echo no)"
+    chk "step7/live-helper/unmarked-child/reaches-a-typed-verdict" "yes" \
+        "$(printf '%s' "$live" | grep -qE '^LIVE\|(PASS|REFUSED|INCONCLUSIVE)\|' && echo yes || echo no)"
+    chk "step7/live-helper/unmarked-child/the-child-was-reaped" "no" \
+        "$( [ -n "$rpid" ] && step7_process_live "$rpid" && echo yes || echo no )"
+
+    # THE EARLY-EXIT PATH, THROUGH THE ACTUAL HELPER. Round 5 found the reap
+    # control above unable to reach it: it hands `step7_reap` a child it has
+    # ALREADY discovered, while the defect was a launch that exits BEFORE
+    # discovery, leaving a live process the helper can no longer name. Nothing
+    # here is stubbed: the plant is a candidate interpreter, and
+    # `step7_candidate_live_evidence` itself creates the venv, launches it,
+    # loses the launched process and has to recover.
+    #
+    # THE SURVIVOR IS OUTSIDE THE CANDIDATE and, like the case above, carries no
+    # venv marker: it is a copy of a host tool under this suite's own scratch,
+    # started by absolute path. It maps nothing under the candidate, so no
+    # observation is possible and the helper must refuse; nothing but the
+    # process group and the environment nonce can find it afterwards.
+    #
+    # THE CONTROL RECORDS ITS OWN SURVIVOR so it cannot pass vacuously. A plant
+    # that launched nothing fails the run rather than passing quietly. That pid
+    # sleeps for a minute and the helper takes about fifteen seconds, so finding
+    # it gone afterwards means something killed it.
+    #
+    # IT ALSO SPENDS THE HELPER'S WHOLE DEADLINE, so the bounded wait is
+    # exercised here as well and ends in a typed answer rather than in a hang.
+    mkdir -p -- "$dir/earlyexit/tools/python/current/bin" "$dir/earlyexit-tool"
+    cp -- "$(command -v sleep)" "$dir/earlyexit-tool/sleeper"
+    printf '%s\n' "$dir/earlyexit-tool/sleeper" \
+        > "$dir/earlyexit/tools/python/current/bin/sleeper.path"
+    cat > "$dir/earlyexit/tools/python/current/bin/python3" <<'EARLYEXIT'
+#!/bin/bash
+[ "${1:-}" = "-m" ] && [ "${2:-}" = "venv" ] && [ -n "${3:-}" ] || exit 1
+read -r sleeper < "${0%/*}/sleeper.path" || exit 1
+mkdir -p -- "$3/bin" || exit 1
+cat > "$3/bin/python3" <<WRAPPER
+#!/bin/bash
+"$sleeper" 60 > /dev/null 2>&1 &
+echo \$! > "$3/started.pid"
+exit 0
+WRAPPER
+chmod +x "$3/bin/python3" || exit 1
+exit 0
+EARLYEXIT
+    chmod +x "$dir/earlyexit/tools/python/current/bin/python3"
+    live=$(step7_candidate_live_evidence "$dir/earlyexit" "$dir/earlyexit-venv")
+    rpid=$(cat "$dir/earlyexit-venv/started.pid" 2>/dev/null) || rpid=""
+    chk "step7/live-helper/early-exit/is-inconclusive" "yes" \
+        "$(printf '%s' "$live" | grep -q '^LIVE|INCONCLUSIVE|' && echo yes || echo no)"
+    chk "step7/live-helper/early-exit/the-plant-left-a-survivor" "yes" \
+        "$( [ -n "$rpid" ] && echo yes || echo no )"
+    chk "step7/live-helper/early-exit/the-survivor-was-reaped" "no" \
+        "$( [ -n "$rpid" ] && step7_process_live "$rpid" && echo yes || echo no )"
+
+    # THE SUCCESS PATH RUNS WHERE A DEPLOYED TREE EXISTS, over that tree as the
+    # candidate prefix. It is NOT the packaged archive and does not stand in for
+    # it; what it establishes is that the helper's own machinery works end to
+    # end: a venv is created from the shipped interpreter, the wrapper's child is
+    # found, its mappings are read, the observer inventories THAT pid, and the
+    # child is reaped. Without it the helper would reach a real archive never
+    # having run once.
+    if live=$(step7_real_prefix) && step7_candidate_interpreter "$live" >/dev/null 2>&1; then
+        live=$(step7_candidate_live_evidence "$live" "$dir/realvenv")
+        owned=$(printf '%s\n' "$live" | grep -m1 '^OWNED|' | cut -d'|' -f2)
+        note "step7/live-helper/owned" "$(oneline "$(printf '%s\n' "$live" | grep -m1 '^OWNED|')")"
+        note "step7/live-helper/verdict" "$(oneline "$(printf '%s\n' "$live" | grep -m1 '^LIVE|')")"
+        chk "step7/live-helper/it-launched-and-owned-an-interpreter" "yes" \
+            "$( [ -n "$owned" ] && echo yes || echo no )"
+        chk "step7/live-helper/the-observer-inventoried-that-pid" "yes" \
+            "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^PROCESS\|$owned\|" && echo yes || echo no )"
+        chk "step7/live-helper/it-reached-a-typed-verdict" "yes" \
+            "$(printf '%s' "$live" | grep -qE '^LIVE\|(CONCLUSIVE|REFUSED|INCONCLUSIVE)\|' && echo yes || echo no)"
+        chk "step7/live-helper/the-owned-child-was-reaped" "no" \
+            "$( [ -n "$owned" ] && step7_process_live "$owned" && echo yes || echo no )"
+    else
+        note "step7/live-helper/success-path" "no deployed tree with a candidate interpreter here, so the helper's success path was not exercised"
+    fi
+
+    # These branch controls run on both hosts even when no real archive exists.
+    for name in good bad-identity static-only empty-trace host-object bad-control \
+        mixed-scope sibling-scope failed-scope unowned-trace unusable-owner \
+        owner-maps-host no-providers malformed-providers; do
+        out=$(step7_debian_branch_probe "$name")
+        # THE TWO EXPECTATIONS ARE NOT ALWAYS THE SAME, and separating them is
+        # the point rather than a convenience. A scenario can be refused by a
+        # failed ASSERTION or by an UNANSWERED OBLIGATION, and those are
+        # different states this effort keeps apart everywhere else. Only `good`
+        # passes the half; `no-providers` refuses it with every assertion still
+        # clean, because an inventory nobody could take raises an obligation
+        # rather than a finding; every other scenario refuses it by failing an
+        # assertion that names what was wrong.
+        case "$name" in
+            good)         entry=yes; clean=yes ;;
+            no-providers) entry=no;  clean=yes ;;
+            *)            entry=no;  clean=no ;;
+        esac
+        chk "step7/acceptance-branch/$name/half-marker" "$entry" \
+            "$(printf '%s' "$out" | grep -qE 'step7/acceptance/debian-half +PASS' && echo yes || echo no)"
+        chk "step7/acceptance-branch/$name/assertions-clean" "$clean" \
+            "$(printf '%s' "$out" | grep -q '^BRANCH_FAILURES|0$' && echo yes || echo no)"
+    done
+
+    # THE POSITIVE CONTROL, which is a control rather than a formality: 20 of the
+    # 54 needed names have more than one candidate path in the scope and all 20
+    # resolve to one file, so a rule 1 that refused the same-file case would
+    # refuse the current archive twenty times over. Step 4 plants that shape and
+    # asserts it; the acceptance asserts the CASE EXISTS and that it is asked
+    # over twenty names, because re-planting it here would measure a second
+    # fixture rather than the one the gate is judged on.
+    chk "step7/acceptance/positive-control-exists" "yes" \
+        "$(step7_control_exists "step4/duplicates/positive-control-accepted" && echo yes || echo no)"
+    chk "step7/acceptance/positive-control-counts-the-names" "yes" \
+        "$(step7_control_exists "step4/duplicates/positive-control-counts" && echo yes || echo no)"
+    chk "step7/acceptance/positive-control-name-count" "20" "$FIXTURE_MULTI_NAMES"
+
+    # ONE NEGATIVE CONTROL PER INDEPENDENTLY REFUSABLE INVARIANT: the issue's
+    # nine plus the four this design adds. The inventory is checked against this
+    # harness's own text rather than asserted, so a control renamed or deleted in
+    # an earlier suite is a finding here.
+    missing=""
+    for entry in "${STEP7_CONTROLS[@]}"; do
+        for name in ${entry#*|}; do
+            if ! step7_control_exists "$name"; then
+                missing="${missing:+$missing }${entry%%|*}:$name"
+            fi
+        done
+    done
+    chk "step7/acceptance/thirteen-invariants-declared" "13" "${#STEP7_CONTROLS[@]}"
+    chk "step7/acceptance/every-invariant-has-a-control" "" "$(oneline "$missing")"
+
+    # THE TWO HALVES. This host takes its own live and requires the other's
+    # capture. The host gate already resolved which is which, so a machine that
+    # is neither never reaches here with a half to take.
+    if ! halves=$(step_two_host_halves); then
+        note "step7/acceptance/halves" "this host answers neither half"
+        return
+    fi
+    mine="${halves%% *}"
+    theirs="${halves##* }"
+    capture="$CAPTURES/verify.closure.step7.$theirs.txt"
+    note "step7/acceptance/this-host" "$mine live, $theirs from $capture"
+
+    if step7_capture_answers "$capture" "$theirs"; then
+        cases=$((cases + 1))
+        pass "step7/acceptance/$theirs-capture" "retained, and its own half passed there"
+    else
+        unanswered "the $theirs half of the step 7 acceptance" \
+          "  no capture at $capture that names $theirs, carries a date and shows step7/acceptance/$theirs-half passing; run this step on that host and retain its output there"
+    fi
+
+    # THE TWO LIVE HALVES ARE DIFFERENT QUESTIONS, AND ROUND 1 OF THIS STEP'S
+    # REVIEW IS WHY THEY ARE NOW SEPARATE BRANCHES. The previous version ran the
+    # same static check for whichever host it was on and marked the half passed
+    # when the checker succeeded over an installed prefix. That answers the RHEL
+    # question and it does NOT answer the Debian one: the foreign-host criterion
+    # is that the PACKAGED ARCHIVE resolves with no host fallback, reported from
+    # a listing over the whole scope AND a live trace naming the venv process it
+    # inventoried. A statically closed prefix satisfies none of those three, so
+    # the branch could have passed without the archive ever being read.
+    #
+    #   the RHEL half   the packaging check over the real tree this account
+    #                   packages, plus the real archive's own rule 1 result
+    #   the DEBIAN half the authoritative verifier over a real packaged archive:
+    #                   its identity, the two observations, the static check and
+    #                   the live trace, with controls at this branch's own level
+    if [ "$mine" = "debian" ]; then
+        step7_debian_half
+        return
+    fi
+
+    # THE RHEL HALF, over the REAL tree this account packages. A fixture here
+    # would be a rehearsal: the acceptance is a positive result on the
+    # distribution the defect exists on, and the tree is what carries it.
+    if ! prefix=$(step7_real_prefix); then
+        unanswered "the $mine half of the step 7 acceptance" \
+          "  no tools tree under this account; set CPLX_ACCEPTANCE_PREFIX to the prefix holding it and run this step again there"
+        return
+    fi
+    note "step7/acceptance/real-prefix" "$prefix"
+    out=$("${BASH:-bash}" "$checker" --prefix "$prefix" \
+        --installer "$SHIPPED_DIR/install_pkg.sh" --bundle "$bundle" 2>&1)
+    rc=$?
+    note "step7/acceptance/checker-exit" "$rc"
+    # EVERY REFUSAL IT PRODUCES IS NAMED IN THE CAPTURE, whatever the verdict: a
+    # refusal that was counted and not named is a finding nobody can act on. The
+    # SCOPE half is included by name, since an undeclared directory is reported
+    # as an UNEXPECTED observation rather than as a REFUSED invariant, and it is
+    # the one this acceptance most needs a reader to see.
+    while IFS= read -r line; do
+        [ -z "$line" ] || note "step7/acceptance/refusal" "$line"
+    done <<< "$(printf '%s\n' "$out" \
+        | grep -E '^(REFUSED|UNDETERMINED|UNEXPECTED|CLOSURE [A-Z]+ REFUSED)' || true)"
+
+    # RULE 1 OVER THE REAL UNMODIFIED ARCHIVE, which the fixture inventory does
+    # not evidence and cannot. Step 4's positive control plants twenty names and
+    # proves the rule does not over-refuse on a shape this harness built; the
+    # issue asks for the same property over the tree that actually ships, where
+    # the multi-candidate count is whatever the payload happens to carry. The
+    # assertion is therefore on the REFUSAL count with a non-zero multi-candidate
+    # count beside it: zero refusals over zero multi-candidate names would be a
+    # vacuous pass, and naming both numbers is what tells them apart.
+    line=$(printf '%s\n' "$out" | grep -E '^  duplicates ' | sed -e 's/^  duplicates *//')
+    if [ -n "$line" ]; then
+        note "step7/acceptance/real-duplicates" "$line"
+        multi=$(printf '%s' "$line" | sed -e 's/^.*names, *//' -e 's/ multi-candidate.*$//')
+        chk "step7/acceptance/real-archive-rule-1-refuses-nothing" "yes" \
+            "$(case "$line" in *' 0 refused') echo yes ;; *) echo no ;; esac)"
+        chk "step7/acceptance/real-archive-multi-candidate-names" "yes" \
+            "$( [ "${multi:-0}" -gt 0 ] 2>/dev/null && echo yes || echo no )"
+    else
+        unanswered "the real archive's rule 1 result" \
+          "  the checker printed no duplicates summary line over $prefix, so the positive control could not be read from this run"
+    fi
+
+    if [ "$rc" -eq 0 ]; then
+        cases=$((cases + 1)); pass "step7/acceptance/$mine-half" "the checker passes over $prefix"
+        return
+    fi
+    # A REFUSING TREE IS NOT A FAILING HARNESS, and telling the two apart is the
+    # whole of what this branch does. The gate refusing a tree that is genuinely
+    # not closed is the gate WORKING; the acceptance is unanswered until the tree
+    # it judges is repaired, and the repair belongs to whoever owns the cause.
+    # Naming only one cause when several are present would send an operator to
+    # move a directory and leave them believing the rest was clean.
+    reason=""
+    if printf '%s' "$out" | grep -q '^CLOSURE SCOPE REFUSED'; then
+        # THE OPERATOR PREREQUISITE, NAMED RATHER THAN PERFORMED. No script in
+        # this effort removes a directory on a live account on its own authority.
+        reason="an OPERATOR lists each UNEXPECTED directory above on this account, confirms it is a superseded root and not a live one, MOVES it out of the tools tree to a retained location on the same account and records where, then re-runs this step. No script in this effort removes one, and a deletion taken instead of a move is a decision recorded explicitly before the acceptance runs"
+    fi
+    if printf '%s' "$out" | grep -qE '^CLOSURE (MEMBERSHIP|FAMILY|COHERENCE|DUPLICATE|FLOOR) REFUSED'; then
+        reason="${reason:+$reason; AND }the payload itself is not closed: the refusals above are names the archive would carry and not resolve, which is the rebuild umbrella item 7 owns rather than anything an operator can move"
+    fi
+    if [ -z "$reason" ]; then
+        reason="the checker returned $rc and named no refusal class this suite knows; read the capture above"
+    fi
+    unanswered "the $mine half of the step 7 acceptance" "  $reason"
+}
 run_one_step() {
-    local step="$1" tool state host sha sha_state k
+    local step="$1" tool state host sha sha_state k halves
 
     printf '=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step %s ===\n' "$step"
 
@@ -6961,8 +8680,16 @@ run_one_step() {
                      "  this host is [$HOST_ID $HOST_VERSION]; run this step on the Debian 12 agent through ci/Jenkinsfile.diagnostics" ;;
             esac ;;
         both)
-            unanswered "the two-host acceptance of step $step" \
-              "  no single host answers this step; run it on the RHEL 9.8 build host and on the Debian 12 agent, and retain both captures" ;;
+            # ONE HALF LIVE, THE OTHER HALF AS RETAINED EVIDENCE. A host that is
+            # neither of the two cannot take either half and says so; a host that
+            # is one of them passes the gate and its suite is then responsible
+            # for requiring the capture of the other.
+            if halves=$(step_two_host_halves); then
+                cases=$((cases + 1)); pass "host/both" "$HOST_ID $HOST_VERSION answers the ${halves%% *} half"
+            else
+                unanswered "the two-host acceptance of step $step" \
+                  "  this host is [$HOST_ID $HOST_VERSION]; run this step on the RHEL 9.8 build host and on the Debian 12 agent, and retain both captures"
+            fi ;;
     esac
 
     # The declared capabilities are measured for EVERY step, before its suite, so
@@ -6992,6 +8719,7 @@ run_one_step() {
             4) step4_suite ;;
             5) step5_suite ;;
             6) step6_suite ;;
+            7) step7_suite ;;
         esac
     else
         section "step $step suite"
@@ -7061,7 +8789,7 @@ run_every_step() {
     printf '=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===\n'
     for n in 0 1 2 3 4 5 6 7; do
         "${BASH:-bash}" "$0" --step "$n" --contract "$CONTRACT" --corpus "$CORPUS" \
-            --shipped-dir "$SHIPPED_DIR" --ci-dir "$CI_DIR" \
+            --shipped-dir "$SHIPPED_DIR" --ci-dir "$CI_DIR" --captures "$CAPTURES" \
             > "$SCRATCH/step$n.out" 2>&1
         rc=$?
         line=$(sed -n '$p' "$SCRATCH/step$n.out")
