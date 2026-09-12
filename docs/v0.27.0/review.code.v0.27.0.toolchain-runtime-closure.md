@@ -18632,3 +18632,4742 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-8 -->
+
+## Round 1 by requestor - Step 7
+
+- Recorded: 2026-09-11T10:40:50+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 1
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 1)
+
+request_index_tree: 08fd9a8d2acc166c2566ca33ccf83202a832128a
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 host captures
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): record step 7 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 1)
+
+#### Writer assessment of step 7 for step 7 toolchain-runtime-closure (round 1)
+
+Step 7 is the last step that adds production code. Every artifact it owns exists
+and answers, and the step is NOT recorded as fully implemented, because the
+plan's first completion criterion is unmet for a reason outside this step's
+authority. Both statements are evidenced below rather than asserted.
+
+##### Is the exact step implemented for step 7 toolchain-runtime-closure (round 1)
+
+The plan's step 7 behavior section names three functions and they exist with
+those exact responsibilities. The design's D10 table has nine rows and all nine
+are asked. The two wiki pages exist and the completion grep finds them. Both
+acceptance captures are retained.
+
+The unmet criterion is `bash docs/v0.27.0/verify.closure-check.sh` green end to
+end on the Debian agent. Both halves of the acceptance are UNANSWERED: the RHEL
+half because the checker refuses the build account's real tree on 21
+unresolvable `DT_NEEDED` names and 2 declared families over their permitted
+generation count, and the Debian half because no packaged archive exists to
+install, packaging having refused the tree it would tar. Closing either is the
+rebuild umbrella item 7 owns. The validation plan records `No` with that work
+listed.
+
+##### Test evidence for step 7 toolchain-runtime-closure (round 1)
+
+No case fails on either validation host.
+
+RHEL 9.8 build account, harness `5427b095`, run after the operator deletion:
+`--step 7` reports 73 cases and 0 failures; the every-step aggregate reports
+OBJECTIVE MET for steps 0 through 5, step 6 correctly UNANSWERED as the agent's
+half, and step 7 UNANSWERED naming the payload alone. Retained as
+`docs/v0.27.0/verify.closure.step7.rhel.txt`.
+
+Debian 12 agent, build 155: no case fails anywhere in the run, steps 0 through 6
+all report OBJECTIVE MET, and the every-step aggregate returns 5 rather than 1,
+which is the difference between an unanswered obligation and a finding.
+Retained as `docs/v0.27.0/verify.closure.step7.debian.txt`.
+
+Two defects in this step's own work were found by the second host and repaired
+before those captures. Debian build 152: the two-host gate grepped the other
+capture for `OBJECTIVE MET for step 7`, and a retained capture carries this
+harness's own diagnostic text naming that string, so a run matched its own
+instructions and recorded the RHEL half as answered over a run that was
+unanswered; the same version also deadlocked the pair by construction. Debian
+build 153: retiring step 0's absent-suite control moved its surviving half onto
+a step whose suite RUNS, and the child was not given the parent's
+`--shipped-dir`, so on the agent it failed on missing modules instead of
+refusing on the missing tool. Both passed on the build host, which is what the
+two-host requirement exists for.
+
+##### Static-check evidence for step 7 toolchain-runtime-closure (round 1)
+
+`bash src/utils/lint_shell.sh` is clean over 54 tracked scripts, which is this
+repository's mandatory validation floor and its substitute for `check.bat`.
+`shellcheck` is additionally clean on `docs/v0.27.0/verify.closure-check.sh`,
+which the gate excludes because `docs/` holds frozen evidence.
+
+The shared execution checklist's two greps hold. Installer purity,
+`rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh`, prints
+nothing. The untouched-installer check,
+`git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh`, exits 0.
+
+Step 0's mechanical host-tool assertion passes over `closure_d10.sh`, so the
+new script introduces no undeclared command word and the enumerated contract
+gains no row.
+
+##### Coverage evidence for step 7 toolchain-runtime-closure (round 1)
+
+cplx carries no `tests/` tree and no coverage gate, so there is no measured
+percentage and none is claimed. Exercise is established statically and by case.
+Of the module's thirteen functions, four are driven directly by cases
+(`closure_d10_evidence`, `closure_d10_policy`, `closure_d10_converge`,
+`closure_d10_main`) and the remaining nine are reached from those four inside
+the same file. No top-level symbol is unreferenced.
+
+##### Architecture evidence for step 7 toolchain-runtime-closure (round 1)
+
+`closure_d10.sh` is the tenth row of the fixed delivered topology, in cplx only.
+Two cases assert the properties that make it that rather than describing them:
+no shipped script sources it, and `pkg.sh` does not stage it. It sources
+`closure_elf.sh` and nothing else, so it owns no invariant and produces no
+closure verdict, and it reaches `readelf` and `sha256sum` only through that
+module, asserted by a case over its own text.
+
+No fourth grammar was added. Q10 fixes three and this plan owns no decision to
+add one, so the D10 reading stays a model plus a printed report and convergence
+crosses the rebuild boundary as two result tokens.
+
+##### Performance evidence for step 7 toolchain-runtime-closure (round 1)
+
+The policy is a membership test per required node per candidate over a
+deduplicated node set, so it is linear in the requirement set and independent of
+archive size. The reading adds no walk: it uses the one `find` `closure_elf.sh`
+owns and the per-object `readelf` each subject already had, plus two files per
+candidate generation. That matches the plan's own complexity note for this step.
+
+##### Feature integrity evidence for step 7 toolchain-runtime-closure (round 1)
+
+No existing script changed. The installer is byte-identical to HEAD by the
+exit-status check. `pkg.sh`, the checker and its five modules, the verification
+driver, the live observer and the publication gate are untouched. The harness
+gains one optional input, `--captures`, required by step 7 alone, and the RHEL
+aggregate confirms steps 0 through 5 still report OBJECTIVE MET.
+
+##### What the writer asks the reviewer to weigh for step 7 toolchain-runtime-closure (round 1)
+
+Three judgments are the writer's and are offered for challenge rather than
+defended as settled.
+
+First, the `No` verdict. The plan calls clearing the superseded root an
+OPERATOR PREREQUISITE "rather than a step of this implementation", which argues
+the acceptance blockers sit outside step 7 and the verdict could be `Yes`. The
+writer kept `No` because a `Yes` flips the document status and completes the
+umbrella row, asserting the requirement is done while its gate has never been
+seen to pass.
+
+Second, the retirement of step 0's absent-suite control. Its subject was the
+first step whose suite did not exist, and step 7 wrote the last one. The writer
+retired that half rather than inventing an unfilled step to preserve it, kept
+the half that never needed one, and added a case asserting the baseline is
+empty.
+
+Third, the module's size. `closure_d10.sh` is 511 lines against an advisory
+estimate of 120 to 180, inside the below-550 safe band. The variance is recorded
+rather than trimmed: the advisory counted the three interface functions and the
+delivered module also carries the snapshot, the namespace table, the reading
+printer, the undefined-node reporter, the ordering lookup, the reset and a CLI.
+Its comment density, 43 percent, is below the report module's 50 percent.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 1)
+
+#### What step 7 changed for step 7 toolchain-runtime-closure (round 1)
+
+##### The D10 interface, in one new production script for step 7 toolchain-runtime-closure (round 1)
+
+`src/setups/env/bin/closure_d10.sh`, 511 lines, is the tenth script of the
+delivered topology and the second that lives in cplx only. It implements the
+interface Design Area 6 decided and neither the issue nor the umbrella defined.
+
+`closure_d10_evidence <root> <gen>=<dir>...` takes the four-field reading. The
+consumer set is every shipped ELF recording a `DT_NEEDED` on `libstdc++.so.6`,
+taken from the one walk `closure_elf.sh` owns, so a reading cannot miss the
+extension modules an entry-point closure never reaches. The required nodes are
+the `GLIBCXX_` and `CXXABI_` needs those consumers record against `libstdc++`
+and the `GCC_` needs against `libgcc_s`, deduplicated as they are collected.
+The candidate capabilities are read from EACH generation's own providers, so
+the reading can answer about a generation that does not ship.
+
+The order inside that function is the separation, not a preference. The archive
+is walked, everything the archive answers is taken while the reader's subject
+list still holds the archive alone, and only then are the candidate trees read.
+`closure_d10_snapshot` records the shipped providers by SONAME and digest before
+any candidate file can enter that list. Reading a candidate first would append
+files from another tree to the set every count below is stated over.
+
+`closure_d10_reading_generation` derives which generation built the archive by
+comparing the shipped `libstdc++` and `libgcc_s` bytes against the candidate
+capability bytes. Both must match one entry; a mixed build answers `unknown`,
+which always owes a re-read. There is no option that declares it, because a
+declared generation is a claim and this effort recomputes identities.
+
+`closure_d10_policy` returns the lowest candidate defining every required node,
+`NEITHER`, or `INCONCLUSIVE`, at exit 0, 1 and 5. The codes are the checker's
+own vocabulary rather than a new one: 5 already means an input could not be
+obtained everywhere else in this effort. The three inconclusive tests come
+FIRST, and that order is load bearing: every candidate satisfies an empty
+requirement set vacuously, so asking satisfaction first would return the lowest
+generation out of an empty observation.
+
+`closure_d10_converge <first> <second>` applies the re-read rule and names a
+higher, a lower and a neither-satisfying second result separately, because the
+three say three different things about why the evidence is unstable.
+
+##### The step 7 harness suite for step 7 toolchain-runtime-closure (round 1)
+
+`docs/v0.27.0/verify.closure-check.sh` gains `step7_suite` and the machinery it
+needs. The nine D10 rows are asked over planted models, each plant read back and
+asserted before the answer is judged, so a case cannot report a shape it never
+created. Planting rather than installing two GCC toolsets is deliberate: the row
+that needs a node NEITHER generation defines is not a shape a real pair of
+libraries takes.
+
+Beside them the evidence half runs over real ELF fixtures built from the host's
+own donor. It asserts the subject rule by putting a consumer where no entry
+point reaches it, asserts the required-node extraction, asserts the recomputed
+generation, and runs the whole module end to end. Its control is the one that
+gives recomputation meaning: a candidate whose bytes are not the archive's
+leaves the generation `unknown`.
+
+The `both` host gate became answerable. `step_two_host_halves` resolves which
+half this machine takes; the suite takes that half live and requires the other
+as a retained capture, so no run is answered by evidence it produced itself.
+`--captures` names where that capture travels, because the Debian job runs from
+a pipeline workspace rather than beside a checkout.
+
+The acceptance half also carries a mechanical inventory: the issue's nine
+independently refusable invariants plus the four this design adds, each paired
+with the case name that refuses it and each looked up in the harness's own text.
+A control renamed or deleted in an earlier suite is a finding here.
+
+##### Step 0's absent-suite control, retired for step 7 toolchain-runtime-closure (round 1)
+
+That control measured the first step whose suite did not exist yet, and step 7
+wrote the last one. The harness said so where the subject was derived. The half
+that never needed an unfilled step survives over step 3, a new case asserts the
+derivation now answers nothing, and both children are given the parent's own
+inputs after the agent showed why that matters.
+
+##### The operator prerequisite, discharged and recorded for step 7 toolchain-runtime-closure (round 1)
+
+`docs/v0.27.0/decision.operator-old-root.rhel.md` records the repository owner's
+decision to delete rather than move the superseded `tools/old` root, written
+before the re-run as the plan requires. It carries the not-live confirmation,
+the manifest digest of the removed tree, and the digests of the three
+re-downloadable artifacts that went with it. No script in this effort removed
+anything.
+
+The measured effect matched the prediction made before the action on all five
+counters: undeclared directories 2 to 0, unresolvable `DT_NEEDED` 30 to 21,
+families 2 to 2, UNDETERMINED 14 to 12, subjects 703 to 674.
+
+##### The documentation for step 7 toolchain-runtime-closure (round 1)
+
+`wiki/reference/toolchain-runtime-closure.md` describes the ten scripts, the
+command and its exit codes, the two scopes, the four invariants plus the floor,
+the configuration grammar, the waiver contract, the evidence record, the
+publication order and the D10 policy.
+`wiki/explanation/why-the-archive-declares-its-own-scope.md` carries the
+reasoning: why a declared shape and an observed one stay apart, why every
+shipped ELF is a subject, why a self-describing archive cannot vouch for itself,
+and why an empty observation is never a pass. Both are listed in the wiki index.
+
+`src/setups/env/closure/README.md` had two claims the tree contradicts: that the
+envelope is not committed and that packaging produces it from a commit. Step 5
+changed both when it found the build account has no cplx checkout. They are
+corrected, because the new reference page would otherwise contradict a shipped
+project document.
+
+### Change summary for step 7 toolchain-runtime-closure (round 1)
+
+#### Staged paths and commit plan for step 7 for step 7 toolchain-runtime-closure (round 1)
+
+##### The ten staged paths for step 7 toolchain-runtime-closure (round 1)
+
+| Path | State | What it carries |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_d10.sh` | added | the D10 interface, 511 lines, thirteen functions |
+| `docs/v0.27.0/verify.closure-check.sh` | modified | `step7_suite`, the two-host gate, `--captures`, the step 0 retirement |
+| `docs/v0.27.0/decision.operator-old-root.rhel.md` | added | the operator deletion record, written before the re-run |
+| `docs/v0.27.0/verify.closure.step7.rhel.txt` | added | the RHEL capture, 73 cases, 0 failures |
+| `docs/v0.27.0/verify.closure.step7.debian.txt` | added | the Debian capture, build 155, 0 failures |
+| `src/setups/env/closure/README.md` | modified | two stale envelope claims corrected |
+| `wiki/reference/toolchain-runtime-closure.md` | added | the checker reference page |
+| `wiki/explanation/why-the-archive-declares-its-own-scope.md` | added | the explanation page |
+| `wiki/README.md` | modified | both pages listed under their Diataxis categories |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | modified | the step 7 verdict and its work list |
+
+##### The `a.commit` groups for step 7 toolchain-runtime-closure (round 1)
+
+Six groups, least to most dependent. `commit-plan-check.bat --format json`
+returns `state: valid`, `ready: true`, no diagnostics, and every one of the ten
+staged paths is covered.
+
+| # | Subject | Paths |
+| --- | --- | --- |
+| 1 | `feat(closure): add the D10 evidence and policy module` | `closure_d10.sh` |
+| 2 | `test(closure): add the step 7 suite and two-host gate` | `verify.closure-check.sh` |
+| 3 | `docs(closure): record the operator root deletion` | `decision.operator-old-root.rhel.md` |
+| 4 | `test(closure): retain the step 7 host captures` | both step 7 captures |
+| 5 | `docs(closure): document the checker and its scope` | bundle README, both wiki pages, wiki index |
+| 6 | `docs(toolchain-runtime-closure): record step 7 validation` | the validation plan |
+
+The ordering reasoning: the module first, then the suite that tests it, then the
+operator record, which had to exist before the re-run and which the captures
+cite, then the captures that re-run produced, then the pages describing all of
+it, then the validation record last.
+
+Group 6's subject is 56 characters, over the 52-character guidance. The
+readiness checker enforces that exact
+`docs(<topic>): record step <n> validation` marker for the group holding the
+validation plan, and step 6's committed subject used the same 56-character
+form, so the enforced marker was kept over the length guidance. The reviewer
+may reverse that call.
+
+##### Line budget after the change for step 7 toolchain-runtime-closure (round 1)
+
+No shipped script is above the 650-line ceiling. `closure_publish.sh` sits at
+exactly 650 and this step adds no line to it.
+
+| Script | Lines | Band |
+| --- | --- | --- |
+| `closure_check.sh` | 617 | 550 to 650, at risk, unchanged |
+| `closure_config.sh` | 636 | 550 to 650, at risk, unchanged |
+| `closure_d10.sh` | 511 | below 550, safe, new |
+| `closure_elf.sh` | 607 | 550 to 650, at risk, unchanged |
+| `closure_observe_live.sh` | 195 | below 550, unchanged |
+| `closure_publish.sh` | 650 | at the ceiling, unchanged |
+| `closure_report.sh` | 549 | below 550, unchanged |
+| `closure_rules.sh` | 622 | 550 to 650, at risk, unchanged |
+| `closure_verify.sh` | 546 | below 550, unchanged |
+| `ci/deliver-closure-tools.sh` | 128 | below 550, unchanged |
+
+##### What is not staged, and why for step 7 toolchain-runtime-closure (round 1)
+
+The my-project repository carries the pipeline half: refreshed transport copies
+of the harness, the new `closure_d10.sh`, the RHEL capture, and the
+`closureCheck()` stage that runs `--step 7` with `--captures`. Those are three
+commits in that repository, pushed to the cicd remote only, and they are outside
+this plan's staged scope. They are named here because the Debian capture in this
+change set is the artifact those commits produced.
+
+#### Writer response for step 7 toolchain-runtime-closure (round 1)
+
+This is the first round of the step 7 exchange, so there is no earlier reviewer
+feedback on this step to accept or dispute, and there is no disagreement to
+record.
+
+##### Earlier feedback this step carried forward on its own for step 7 toolchain-runtime-closure (round 1)
+
+Findings from the step 5 and step 6 exchanges shaped this step's code before any
+reviewer saw it, and naming them is cheaper than having them found twice.
+
+The round 3 finding that a module set a MEASUREMENT could still change is not a
+topology: `closure_d10.sh` is the tenth row of the fixed table, added by the
+plan rather than by a count, and no sixth checker module was created.
+
+The round 2 finding that a candidate cannot certify itself: `closure_d10.sh`
+lives in cplx only, is not staged into the archive, and no shipped script
+sources it. Two cases assert both halves rather than describing them.
+
+The Q10 decision that three grammars are fixed: this step added no fourth. The
+D10 reading stays a model plus a printed report, and convergence crosses the
+rebuild boundary as two result tokens rather than as a document.
+
+The round 1 finding on the step 6 emitter, that a reader and an emitter must not
+be two interpretations of one file: the D10 module has one reader of its own
+model and the harness asserts the printed reading rather than a second
+rendering.
+
+##### Two defects this step's own work carried, found by the second host for step 7 toolchain-runtime-closure (round 1)
+
+Both were repaired before the retained captures, and both are recorded in the
+functions themselves rather than only in a capture.
+
+Debian build 152 passed the two-host gate on the harness's own instructions. The
+gate grepped the other host's capture for `OBJECTIVE MET for step 7`, and a
+retained capture contains this harness's diagnostic text, which names that
+string. It recorded the RHEL half as answered over a run whose step 7 was
+unanswered. The same version deadlocked the pair by construction, so step 7
+could never have been green on either machine. The gate now matches a case
+result line and the diagnostic beside it says "passing" in lower case, so a
+capture carrying the instruction cannot satisfy the instruction.
+
+Debian build 153 failed a control the build host passed. Retiring step 0's
+absent-suite half moved its surviving half onto step 3, whose suite RUNS, and
+the child was not given the parent's `--shipped-dir`. On the agent the default
+resolved to nothing and the child failed on missing modules instead of refusing
+on the missing tool, returning 1 where 5 was required. Both children now inherit
+the parent's inputs.
+
+##### Three judgments offered for challenge for step 7 toolchain-runtime-closure (round 1)
+
+The writer owns these and does not defend them as settled.
+
+The `No` verdict, where the plan's own "OPERATOR PREREQUISITE rather than a step
+of this implementation" wording argues the acceptance blockers sit outside step
+7 and a `Yes` would be defensible. `No` was kept because a `Yes` flips the
+document status and completes the umbrella row over a gate that has never been
+seen to pass.
+
+The retirement of step 0's absent-suite control rather than its preservation
+over an invented subject.
+
+Group 6's 56-character commit subject, kept because the readiness checker
+enforces that exact marker and step 6 used the same form.
+
+##### One gap recorded rather than closed for step 7 toolchain-runtime-closure (round 1)
+
+Neither capture digests the other capture it read. The two-host gate names the
+path it consulted, and the Debian pipeline digests the shipped tree, the
+contract and the corpus but not the captures directory. It changes nothing while
+both halves refuse, and it matters the moment one passes, since a capture
+claiming to have read a passing result while recording no digest for it is
+co-location standing in for identity. It is carried as a bullet in the
+validation plan's missing work, to land with the retake the rebuild forces,
+because fixing it now would change the harness and put the two retained captures
+out of agreement with the bytes that produced them.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-1 -->
+
+## Round 1 by reviewer - Step 7
+
+- Recorded: 2026-09-11T11:31:27+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Baseline index tree: 08fd9a8d2acc166c2566ca33ccf83202a832128a
+
+Assessed index tree: fad2e67f90b90d965653a909681be23910c15190
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Result:
+
+No. Step 7 has NOT been fully implemented.
+
+The D10 interface, documentation, operator decision and fixture inventory are present. The reviewer repaired three independently reproduced D10 defects and the missing digest of the consulted capture. Real acceptance remains incomplete: the Debian branch has no archive verification/loader observation integration, the build payload is not closed, and neither real acceptance half passes. An external payload dependency does not waive this step's explicit completion criteria.
+
+Architecture and cost review found no additional blocker. closure_d10.sh is 524 lines, above the 120–180 advisory but below the 550 safe-band limit; the functions retain the planned reader/policy boundary. The obsolete absent-suite control is correctly retired now that all suites exist; the surviving missing-tool control still runs. No numeric coverage gate exists. The operator prerequisite is discharged by the supplied decision; no further deletion is requested.
+
+Validation plan effects:
+
+Only the Step 7 section of docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md was updated. Its canonical result remains No. The section records the reviewer fixes and current validation, corrects the missing-work diagnosis to include Debian acceptance integration, distinguishes submitted captures from repaired-code evidence, and requires fresh captures. Earlier steps and the umbrella were not edited. a.commit needed no amendment.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+The pre-repair validation blob is 195a8e70126082b75a2098041abe209539f06985. It already concluded No, but described the remaining work primarily as an external payload dependency and implied that supplying CPLX_ACCEPTANCE_PREFIX would answer Debian acceptance. Static inspection shows that this input only selects a prefix for closure_check.sh. The reviewer corrected that diagnosis within Step 7. Original validation before/after snapshots compare cleanly; the submitted RHEL run had 73 cases and no failures but exit 5.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+The request/current union contains seven commands, retained with source tags in .reviews/a.reviewer.step7.resolver.json.
+
+| Command | Sources | Reviewer result |
+| --- | --- | --- |
+| `bash src/utils/lint_shell.sh` | project, plan | Exit 0; 54 tracked scripts clean after repairs. |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 7` | plan | RHEL 9.8: 87 cases, 0 failures, exit 5; both real acceptance halves unanswered. |
+| `bash docs/v0.27.0/verify.closure-check.sh` | plan | RHEL: steps 0–5 exit 0, Step 6 exit 5 for required Debian host, Step 7 exit 5; aggregate 5. |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | plan | Exit 0 after repairs. |
+| `rg -n 'toolchain-runtime-closure\|closure_check' wiki/` | plan | Exit 0; both pages and index entries found. |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | request | Exit 1 with no matches, the expected installer-purity result. |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | request | Exit 0, empty diff. |
+
+The harness ran from an isolated RHEL copy of the assessed scripts; no production tree was changed. Current harness SHA-256: 7bf1ba49e3726a964cf6e6cff62671acfecba0a7f93ba99d8a33c0246880e379. Raw results: .reviews/a.reviewer.step7.rhel-step7.txt, .reviews/a.reviewer.step7.rhel-all.txt. Separate before/after D10 reproductions are retained in .reviews/a.reviewer.step7.repro-before.txt and .reviews/a.reviewer.step7.repro-after.txt.
+
+A fresh Debian run was unavailable in this reviewer session. The submitted Debian capture has steps 0–6 passing and unanswered Step 7, but predates these repairs. It is not current validation evidence. No numeric coverage threshold or measured coverage percentage is configured.
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Current-minus-request adds two plan commands: shellcheck docs/v0.27.0/verify.closure-check.sh and the wiki reference lookup. Request-minus-current is empty. Both additions ran; no request command was dropped. The resolved source-tagged union is retained in .reviews/a.reviewer.step7.resolver.json.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Baseline index 08fd9a8d2acc166c2566ca33ccf83202a832128a matched the request before assessment. Assessed index is fad2e67f90b90d965653a909681be23910c15190.
+
+Both the original test phase and the final repaired test phase passed code_review_evidence validation-state comparison: acceptable=true, no tracked or untracked side effects. Each phase has its own before/after pair; intentional repairs and final Step 7 metadata edits occurred outside those test comparisons.
+
+Pre-repair blobs were retained before mutation. attribute-reviewer-patch returned attributable=true for each of the three repaired paths. Only the returned patches were applied to the index after git apply --cached --check. The sole remaining unstaged tracked path is the pre-existing protocol transcript; it was not read, edited or staged by the reviewer.
+
+The final umbrella comparison reports changed=false, digest 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7 before and after. Staged membership remains the original ten paths. No commit, push, delivery or operator action was performed.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Repairs made:
+
+- src/setups/env/bin/closure_d10.sh: initialize all reader state for each evidence call; a second empty archive now returns INCONCLUSIVE with zero consumers rather than reusing the first reading.
+- src/setups/env/bin/closure_d10.sh: propagate unread-object and incomplete-walk state so a partially measured archive cannot select a candidate.
+- src/setups/env/bin/closure_d10.sh: settle convergence only for equal declared candidates; equal NEITHER, INCONCLUSIVE or undeclared tokens fail, including CLI NEITHER twice.
+- docs/v0.27.0/verify.closure-check.sh: add ten D10 regression assertions, including failed traversal and a positive donor fixture.
+- docs/v0.27.0/verify.closure-check.sh: hash and inspect the same capture snapshot, report digests for passing and refusing captures, and add four regression assertions.
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: update exact Step 7 metadata and missing work; preserve No.
+
+Paths staged:
+
+- docs/v0.27.0/decision.operator-old-root.rhel.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step7.debian.txt
+- docs/v0.27.0/verify.closure.step7.rhel.txt
+- src/setups/env/bin/closure_d10.sh
+- src/setups/env/closure/README.md
+- wiki/README.md
+- wiki/explanation/why-the-archive-declares-its-own-scope.md
+- wiki/reference/toolchain-runtime-closure.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Independent commit-plan-check.bat --format json ran at entry and again after attributable staging. Final exit 0, state valid, ready true, diagnostics empty. Its complete JSON is retained in .reviews/a.reviewer.step7.commit-plan-final.json; the ten staged paths are listed separately.
+
+The ordered groups remain accurate:
+
+1. feat(closure): add the D10 evidence and policy module — src/setups/env/bin/closure_d10.sh
+2. test(closure): add the step 7 suite and two-host gate — docs/v0.27.0/verify.closure-check.sh
+3. docs(closure): record the operator root deletion — docs/v0.27.0/decision.operator-old-root.rhel.md
+4. test(closure): retain the step 7 host captures — docs/v0.27.0/verify.closure.step7.rhel.txt, docs/v0.27.0/verify.closure.step7.debian.txt
+5. docs(closure): document the checker and its scope — src/setups/env/closure/README.md, wiki/reference/toolchain-runtime-closure.md, wiki/explanation/why-the-archive-declares-its-own-scope.md, wiki/README.md
+6. docs(toolchain-runtime-closure): record step 7 validation — docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+
+Scopes and conventional subjects describe the final implementation and evidence. Review repairs remain within the existing groups. Mechanical readiness does not override incomplete acceptance or authorize a commit.
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Unresolved findings:
+
+- [P1] docs/v0.27.0/verify.closure-check.sh:7639–7654: the live acceptance branch marks the Debian half PASS solely when closure_check.sh succeeds over an installed prefix. It never verifies the actual packaged archive, records its identity, collects a whole-scope loader listing or names a venv process in a live trace. A statically closed prefix can therefore pass without proving the explicit foreign-host acceptance criterion. Integrate the existing authoritative verification/observation path and add branch-level negative controls.
+- [P1] Step 7 acceptance remains unanswered: the independent real RHEL run still reports 21 unresolved DT_NEEDED names and two over-generation families, and no packaged archive has passed Debian acceptance. The synthetic 20-name rule-1 positive control is not evidence over the real unmodified archive. Preserve No until the required artifact and both host results exist.
+- [P2] docs/v0.27.0/verify.closure.step7.rhel.txt and docs/v0.27.0/verify.closure.step7.debian.txt identify pre-review harness 5427b095; the assessed harness is 7bf1ba49. Fresh repaired-code RHEL evidence exists only as ignored reviewer output, and Debian has not rerun these bytes. Regenerate both retained captures from actual executions after the remaining work.
+
+Boundary-crossing work:
+
+- The missing libraries and duplicate binutils generations require the rebuild owned by umbrella item 7; selecting a shipping/rebuild strategy or modifying other requirements is outside this review.
+- Delivering repaired scripts to Debian requires the requestor's authorized delivery workflow. The reviewer did not commit, push or trigger that workflow.
+- The operator deletion prerequisite is already discharged; no further deletion, move or live-root cleanup is needed.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Assess the staged reviewer patches and retain their regression controls. Keep Step 7 at No.
+
+Implement the Debian acceptance branch against a real packaged archive using the existing authoritative workspace verifier and observer. Require artifact identity, a conclusive listing over the declared scope and a live trace identifying the venv process. Add controls proving static success alone, host-loaded objects and empty traces cannot pass. Evidence the real unmodified archive's rule-1 result in addition to the fixture inventory.
+
+Have the owning rebuild work resolve the 21 missing dependency observations and the two excess-generation families; do not reinterpret an external dependency as completed acceptance. Once packaging succeeds, run both actual host halves through the authorized delivery path and regenerate both retained captures without editing outcomes by hand. Rerun the mandatory union and update only supported validation claims. Publish a new exact staged review request; this answer does not authorize a commit.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Disposition: changes-requested.
+
+The six readiness-floor results are: identity PASS (exact plan, step 7, round 1, occurrence 1 and request baseline); implementation completeness FAIL (canonical No); mandatory validation/coverage INCOMPLETE (all union commands executed, but real acceptance and fresh Debian repaired-code evidence are missing; no numeric coverage gate); staged scope and attribution PASS (three attributable repair paths, unchanged ten-path membership and umbrella); unresolved findings FAIL (acceptance integration, payload/artifact and capture evidence); a.commit PASS (independent checker exit 0, accurate ordered groups).
+
+Substantive production and harness repairs independently require changes-requested in this round, even if all other gates were to pass. The result is advisory and grants no commit authority.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-1 -->
+
+## Round 2 by requestor - Step 7
+
+- Recorded: 2026-09-11T12:08:59+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 2
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 2)
+
+request_index_tree: b856559c3433c472d81fb7c4901718002da78196
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 host captures
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): record step 7 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 2)
+
+#### Writer assessment of step 7 at round 2 for step 7 toolchain-runtime-closure (round 2)
+
+Step 7 remains NOT fully implemented, and the writer agrees with round 1 that an
+external payload dependency does not waive this step's explicit completion
+criteria. What changed is that the two findings against this step's OWN code are
+closed, and the evidence now comes from the repaired bytes rather than from the
+pre-review harness round 1 found the captures identifying.
+
+##### What round 1 found in this step's code, and what it is now for step 7 toolchain-runtime-closure (round 2)
+
+All three D10 defects the reviewer reproduced were real and the writer accepts
+the repairs unchanged. None is reversed, so there is no disagreement to record.
+
+The reader-model leak is the one worth naming twice. `closure_d10_evidence`
+reset its own model and not the reader's, so a second reading in one process
+carried the first archive's subjects. The writer's own harness could not see it,
+because each case drove the module in a fresh child shell; the defect needed a
+reader who ran two readings in one process to appear.
+
+The incomplete-walk propagation is this effort's own rule applied to the module
+that was written last. An unread object or a truncated traversal now reaches the
+policy, so a partially measured archive cannot select a candidate.
+
+The convergence repair closes a case the writer's own nine rows did not reach:
+`NEITHER` twice settled because the two results matched as text. Two failures
+agreeing is not convergence, and the settled branch now requires a declared
+candidate.
+
+##### The P1 acceptance finding, closed for step 7 toolchain-runtime-closure (round 2)
+
+The finding was correct and the branch was wrong in the way it said. One
+static check ran for whichever host the run was on, and the Debian half was
+marked passed on its exit status alone. That answers the build host's question;
+the foreign host's is that the PACKAGED ARCHIVE resolves, reported from a
+listing over the whole scope AND a live trace naming the venv process.
+
+The branch is now split by host. The Debian half drives the authoritative
+`closure_verify.sh` over a real archive, RECOMPUTES the archive identity and
+requires it to equal the one the driver printed, and asserts the static listing,
+both presence observations and a conclusive live trace naming its process. Three
+controls sit at that branch's own level rather than one suite away, which is the
+part of the finding that mattered: a control living in step 6 did not stop this
+branch from passing on a static success.
+
+The difference is observable in the refusal text rather than only in the code.
+The Debian run now reports `no packaged archive on this account` where it
+reported `no tools tree under this account`, and says why an installed prefix is
+not a substitute.
+
+##### The real archive's rule 1, evidenced for step 7 toolchain-runtime-closure (round 2)
+
+Round 1 was right that finding the synthetic fixture's case name establishes
+nothing about the artifact. The RHEL half now reads the result from the real
+run: 74 names, 26 multi-candidate, 0 refused. Both numbers are asserted, because
+zero refusals over zero multi-candidate names would be a vacuous pass and only
+naming both tells them apart.
+
+##### Test evidence at round 2 for step 7 toolchain-runtime-closure (round 2)
+
+RHEL 9.8 build account, harness `b28d0061`: `--step 7` reports 89 cases and 0
+failures, up from 73, and the every-step aggregate reports OBJECTIVE MET for
+steps 0 through 5 with step 6 UNANSWERED as the agent's half. Debian 12 agent,
+build 156, running the delivered repaired bytes: no case fails anywhere, steps 0
+through 6 all report OBJECTIVE MET, and the aggregate returns 5 rather than 1.
+Both captures are regenerated from these bytes.
+
+##### Static-check evidence at round 2 for step 7 toolchain-runtime-closure (round 2)
+
+`bash src/utils/lint_shell.sh` clean over 54 tracked scripts. `shellcheck` clean
+on the harness. Installer purity prints nothing and the HEAD-relative untouched
+check exits 0. Step 0's mechanical assertion still passes over `closure_d10.sh`,
+so the repairs introduced no undeclared command word.
+
+##### What remains, and why it is not this step's to close for step 7 toolchain-runtime-closure (round 2)
+
+Both acceptance halves are still UNANSWERED, on one cause: the payload the gate
+judges is not closed. The RHEL run reports 21 unresolvable `DT_NEEDED` names and
+2 declared families over their permitted generation count, all under
+`tools/git/root` and `tools/python/root`. No packaged archive exists because
+packaging refuses that tree, so the Debian half has no artifact to verify.
+Closing either is the rebuild umbrella item 7 owns. The validation plan keeps
+`No` and lists that work.
+
+##### Staged membership for step 7 toolchain-runtime-closure (round 2)
+
+Unchanged at the same ten paths round 1 assessed. The protocol transcript is
+tracked and remains deliberately unstaged, as it was at round 1.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 2)
+
+#### What changed between round 1 and round 2 for step 7 toolchain-runtime-closure (round 2)
+
+##### The three D10 repairs, retained as the reviewer staged them for step 7 toolchain-runtime-closure (round 2)
+
+`src/setups/env/bin/closure_d10.sh` went from 511 to 524 lines. The writer
+accepted all three patches unchanged and reversed none.
+
+Each reading now re-initializes the object reader through its own file rather
+than reaching into its internals. `closure_elf.sh` states that it has no reset
+because the checker's main boundary makes a second run a second process; a
+module that calls it twice in one process cannot inherit that assumption, and
+re-sourcing is the honest way to get a fresh model without adding a reset to a
+module this step does not own.
+
+The walk's own outcome and the unread-object count now reach the D10 model, so a
+reading taken over a tree the walk could not finish is inconclusive rather than
+a candidate selection over a partial measurement.
+
+`closure_d10_converge` settles only when the two results are equal AND the
+settled token is a declared candidate, so `NEITHER` twice and `INCONCLUSIVE`
+twice fall through to the non-convergent branch that names why.
+
+##### The acceptance branch, split by host for step 7 toolchain-runtime-closure (round 2)
+
+`step7_suite`'s single live branch became two, because the two hosts answer two
+different questions and one static check answered only the first.
+
+The RHEL half keeps the packaging check over the real tree and gains the real
+archive's rule 1 evidence, read from the checker's own duplicates summary line.
+
+The Debian half is new. `step7_debian_half` resolves a real packaged archive
+through `step7_real_archive`, which reads `CPLX_ACCEPTANCE_ARCHIVE` or the
+`pkgs/tools.latest.tar.gz` link `pkg.sh` maintains, and refuses with the way to
+answer it when there is none. Given an archive it calls `step7_verify_archive`,
+which drives `closure_verify.sh` from the delivered authoritative directory with
+its own prefix, results and work roots.
+
+It then asserts four things separately:
+
+- the archive identity, RECOMPUTED here with `sha256sum` and required to equal
+  the `ARCHIVE|` line the driver printed, for the reason publication computes an
+  identity rather than reading one;
+- `STATIC|PASS`, the listing over the whole scope;
+- `COMPARISON|PASS`, the two presence observations agreeing;
+- `LIVE|CONCLUSIVE` whose text names the process it inventoried.
+
+Three controls follow, at this branch's own level: a run with no process named
+must leave the live half inconclusive, so a static success alone cannot pass; a
+run over an empty process filesystem must be inconclusive, so an empty trace is
+never "no host library loaded"; and a run against a planted host-mapped process
+must refuse. The planter is step 6's own, so the two suites cannot drift on what
+a process looks like.
+
+##### Two helpers and one default for step 7 toolchain-runtime-closure (round 2)
+
+`step7_real_archive` and `step7_live_process` resolve the archive and the venv
+process name, the second from `CPLX_ACCEPTANCE_PROCESS` with `python3` as the
+default. The process is declared rather than guessed, because a trace that
+inventoried the wrong process is as empty as one that inventoried nothing.
+
+##### The capture digest gap, closed by the reviewer for step 7 toolchain-runtime-closure (round 2)
+
+`step7_capture_answers` now hashes the capture snapshot it inspects and reports
+that digest for a passing and a refusing capture alike, so a run names the bytes
+it read rather than only the path. The writer had recorded this as deferred work
+in round 1; the reviewer closed it and the writer keeps it.
+
+##### Both captures regenerated for step 7 toolchain-runtime-closure (round 2)
+
+`docs/v0.27.0/verify.closure.step7.rhel.txt` and
+`docs/v0.27.0/verify.closure.step7.debian.txt` are retaken from the repaired
+bytes. The RHEL capture comes from harness `b28d0061` at 89 cases and 0
+failures; the Debian capture comes from build 156, which ran the delivered
+repaired scripts, with no failing case anywhere. Their headers record what round
+1 repaired and what the refusal text now says, so a reader of either sees the
+change rather than only its result.
+
+##### The validation plan for step 7 toolchain-runtime-closure (round 2)
+
+The two bullets round 1 raised against this step's own code are removed rather
+than struck through, because their work is done. The payload bullets stay, the
+packaged-archive bullet is rewritten to say the integration is finished and the
+artifact is what is missing, and a paragraph records what closed and with which
+measured numbers. The status line stays `No. Step 7 has NOT been fully
+implemented.`
+
+### Change summary for step 7 toolchain-runtime-closure (round 2)
+
+#### Staged paths and commit plan at round 2 for step 7 toolchain-runtime-closure (round 2)
+
+##### The ten staged paths, unchanged in membership since round 1 for step 7 toolchain-runtime-closure (round 2)
+
+| Path | State | What changed since round 1 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_d10.sh` | added | the three reviewer repairs, retained unchanged; 511 to 524 lines |
+| `docs/v0.27.0/verify.closure-check.sh` | modified | the reviewer's regression assertions and capture digest, plus the split acceptance branch and the real rule 1 evidence |
+| `docs/v0.27.0/decision.operator-old-root.rhel.md` | added | unchanged |
+| `docs/v0.27.0/verify.closure.step7.rhel.txt` | added | regenerated from harness `b28d0061`, 89 cases, 0 failures |
+| `docs/v0.27.0/verify.closure.step7.debian.txt` | added | regenerated from build 156 on the delivered repaired bytes |
+| `src/setups/env/closure/README.md` | modified | unchanged |
+| `wiki/reference/toolchain-runtime-closure.md` | added | unchanged |
+| `wiki/explanation/why-the-archive-declares-its-own-scope.md` | added | unchanged |
+| `wiki/README.md` | modified | unchanged |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | modified | the two closed bullets removed, the remaining work rewritten |
+
+The protocol transcript is tracked and stays deliberately unstaged, as it was at
+round 1. It is committed separately by its own `docs(review)` commit, the way
+earlier steps of this effort recorded their rounds.
+
+##### The `a.commit` groups, unamended for step 7 toolchain-runtime-closure (round 2)
+
+Round 1 assessed the groups as accurate and no repair changed commit
+membership, grouping, order, scope or subject accuracy, so `a.commit` is not
+amended. Every repair landed inside a file its existing group already carries.
+
+| # | Subject | Paths |
+| --- | --- | --- |
+| 1 | `feat(closure): add the D10 evidence and policy module` | `closure_d10.sh` |
+| 2 | `test(closure): add the step 7 suite and two-host gate` | `verify.closure-check.sh` |
+| 3 | `docs(closure): record the operator root deletion` | `decision.operator-old-root.rhel.md` |
+| 4 | `test(closure): retain the step 7 host captures` | both step 7 captures |
+| 5 | `docs(closure): document the checker and its scope` | bundle README, both wiki pages, wiki index |
+| 6 | `docs(toolchain-runtime-closure): record step 7 validation` | the validation plan |
+
+##### Line budget at round 2 for step 7 toolchain-runtime-closure (round 2)
+
+No shipped script is above the 650-line ceiling. `closure_d10.sh` at 524 stays
+inside the below-550 safe band after the repairs. `closure_publish.sh` remains
+at exactly 650 and this step still adds no line to it.
+
+##### The pipeline half, outside this plan's staged scope for step 7 toolchain-runtime-closure (round 2)
+
+The my-project repository carries four commits on its `develop` branch, pushed
+to the cicd remote only: the transport copies of the harness and
+`closure_d10.sh`, the RHEL capture the agent reads for the other half, and the
+`closureCheck()` stage that runs `--step 7` with `--captures`. The most recent
+carries the round 1 repairs, and Debian build 156 is the run of those bytes.
+They are named here because the Debian capture in this change set is what those
+commits produced.
+
+#### Writer response for step 7 toolchain-runtime-closure (round 2)
+
+##### Accepted in full, with no reversal for step 7 toolchain-runtime-closure (round 2)
+
+Every round 1 repair is retained exactly as staged. The writer reversed nothing,
+so there is no disagreement to record under that heading.
+
+The three D10 defects were real and the writer's own suite could not have found
+two of them as written. The reader-model leak needed a caller that takes two
+readings in one process, and every harness case drove the module in a fresh
+child shell. The convergence defect needed a case pairing two equal non-candidate
+tokens, and the nine design rows pair a candidate with a candidate. Both are
+reproduced by the assertions the reviewer added, so the gap in the case set is
+closed as well as the gap in the code.
+
+The incomplete-walk propagation deserves a plainer acknowledgement. This effort
+refuses an empty observation reading as a pass at every level it appears, and
+the module written last did not apply that rule to its own input. The repair is
+the rule, not an addition to it.
+
+##### The P1 finding is accepted and the writer's framing of it was wrong for step 7 toolchain-runtime-closure (round 2)
+
+Round 1's diagnosis corrected the writer's, and the correction is worth stating
+rather than absorbing quietly. The round 1 request described the remaining work
+as an external payload dependency and implied that supplying
+`CPLX_ACCEPTANCE_PREFIX` would answer the Debian half. It would not: that input
+only selects a prefix for the static checker, which cannot produce an archive
+identity, a whole-scope listing or a live trace. The branch is now implemented
+against the authoritative verifier and the validation plan's wording is
+corrected to match.
+
+The writer also accepts that a control living in step 6 did not stop this branch
+from passing on a static success, which is why the three new controls sit at the
+acceptance branch's own level rather than being cited from another suite.
+
+##### The rule 1 point is accepted for step 7 toolchain-runtime-closure (round 2)
+
+Finding step 4's fixture case name establishes nothing about the real artifact.
+The RHEL half now reads the result from the actual run and asserts both numbers,
+74 names with 26 multi-candidate and 0 refused.
+
+##### What the writer asks the reviewer to weigh at round 2 for step 7 toolchain-runtime-closure (round 2)
+
+The Debian half cannot be exercised end to end on this pipeline yet, because no
+packaged archive exists. Its assertions and its three controls are written and
+linted but only the refusal path has executed, at build 156. The writer judged
+that implementing the branch correctly now is better than deferring it until an
+archive exists, so that the retake the rebuild forces runs a branch that has
+already been reviewed. The reviewer may hold that the branch cannot be assessed
+until it has run green once, and that judgment belongs to the reviewer.
+
+The writer also kept two decisions round 1 did not challenge, and names them
+again so silence is not mistaken for agreement: step 0's absent-suite control is
+retired rather than preserved over an invented subject, and group 6's commit
+subject stays at 56 characters because the readiness checker enforces that exact
+marker.
+
+##### One thing the writer did not do for step 7 toolchain-runtime-closure (round 2)
+
+The captures were regenerated, not edited. Neither carries a claim about a half
+it did not take, and both still show the acceptance unanswered. The writer did
+not point the Debian half at an installed prefix to produce a green, which the
+old branch would have accepted and the new one refuses by construction.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-2 -->
+
+## Round 2 by reviewer - Step 7
+
+- Recorded: 2026-09-11T12:31:01+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Baseline index tree: b856559c3433c472d81fb7c4901718002da78196
+
+Assessed index tree: 957f20d1ef9d221a294479fd518c9c9d62131b9d
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Result:
+
+No. Step 7 is not fully implemented. The round 1 D10 repairs are retained and the round 2 archive-verifier integration is useful progress. However, the real venv process is not arranged in the fresh candidate prefix, detailed static/live observations are discarded, and actual packaged-archive acceptance remains unavailable. The reviewer made one substantive harness repair, so this round cannot recommend commit-ready. Only Step 7 validation metadata was updated; the umbrella was checked after the No result and is unchanged.
+
+Validation plan effects:
+
+Updated only the Step 7 section of docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: corrected obsolete static-only wording, distinguished build-tree rule 1 evidence from packaged-archive evidence, recorded independent round 2 runs and missing work, and measured all ten production script line counts. Historical round 1 evidence remains explicitly historical. No umbrella or other step was changed.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Baseline b856559c3433c472d81fb7c4901718002da78196 matches the round 2 request. Before edits, helpers retained the index, validation snapshots, umbrella digest and validation-plan blob; the harness blob was additionally retained before its repair. The submitted harness b28d0061 ran independently on RHEL: 89 cases, 0 failures, exit 5; aggregate steps 0-5 pass, Step 6 host requirement exit 5, Step 7 acceptance exit 5. Lint passed over 54 scripts, harness ShellCheck passed, wiki references were found, installer purity had no matches, and the installer comparison was empty. An isolated wrong-digest reproduction produced an assertion failure AND debian-half PASS, proving the acceptance-marker defect before repair. The retained Debian build 156 capture covers the submitted bytes; no direct reviewer Debian execution was available.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+All seven mandatory request/current union commands ran:
+
+- `bash src/utils/lint_shell.sh` [project, plan]: exit 0, 54 tracked scripts clean.
+- `bash docs/v0.27.0/verify.closure-check.sh --step 7` [plan]: final independent RHEL run 101 cases, 0 failures, exit 5; real acceptance remains unanswered.
+- `bash docs/v0.27.0/verify.closure-check.sh` [plan]: final independent RHEL aggregate steps 0-5 pass, Step 6 exit 5 for Debian host, Step 7 exit 5 for acceptance; aggregate 5.
+- `shellcheck docs/v0.27.0/verify.closure-check.sh` [plan]: exit 0 on final repaired bytes.
+- `rg -n 'toolchain-runtime-closure|closure_check' wiki/` [plan]: exit 0, both pages and index entries found.
+- `rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh` [request]: exit 1 with no matches, the expected purity result.
+- `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` [request]: exit 0, empty.
+
+Final harness SHA-256: fb065021ba0305c8d9a7d22406b378364d59400575cb3ad941b7e004c5ba3fd7. Raw RHEL evidence: .reviews/a.reviewer.step7.r2.rhel-step7.txt and .reviews/a.reviewer.step7.r2.rhel-all.txt. Windows lint/static checks used the configured Git Bash and ShellCheck tools; behavioral suites used an isolated RHEL copy. No fresh Debian run of the repair was available. Exit 5 is missing mandatory acceptance, never a pass. There is no numeric coverage gate or measured percentage. All ten production scripts were measured, maximum 650 lines; D10 is 524, above its 120-180 advisory estimate but within the safe band.
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+No drift: added [], removed []. Requested, current and union are retained in .reviews/a.reviewer.step7.r2.resolver.json. All seven union commands ran; host-specific acceptance remains incomplete.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Original and repaired validation-state comparisons are acceptable, with no tracked or untracked side effects. Before/after artifacts are retained under .reviews/a.reviewer.step7.r2.*. The applicable umbrella digest remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7 after the implementation-check No result. The helper attributed both reviewer patches, and only those patches were staged. Baseline index b856559c3433c472d81fb7c4901718002da78196; assessed index 957f20d1ef9d221a294479fd518c9c9d62131b9d. The only remaining unstaged tracked path is the pre-existing protocol transcript; it was not read as working context or staged. Cached whitespace validation passes.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Repairs made:
+
+- docs/v0.27.0/verify.closure-check.sh: substantive repair; Debian-half PASS now requires verifier success and no new acceptance assertion failures. Added 12 regression checks over a valid report, wrong archive identity, static-only success, empty trace, host object and failed negative control. Helpers proved attribution; exact patch staged.
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: review metadata only; Step 7 remains No, current integration gaps and independent evidence recorded. Helpers proved attribution; exact patch staged.
+
+Paths staged:
+
+- docs/v0.27.0/decision.operator-old-root.rhel.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step7.debian.txt
+- docs/v0.27.0/verify.closure.step7.rhel.txt
+- src/setups/env/bin/closure_d10.sh
+- src/setups/env/closure/README.md
+- wiki/README.md
+- wiki/explanation/why-the-archive-declares-its-own-scope.md
+- wiki/reference/toolchain-runtime-closure.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Independent commit-plan-check.bat --format json returns status 0, state valid, ready true, six accurate groups covering exactly ten staged paths, diagnostics empty. It was rerun after staging reviewer repairs. No a.commit edit was required. This satisfies only the mechanical grouping result, not implementation completeness, mandatory acceptance or permission to commit.
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Unresolved findings:
+
+- [P1] Arrange a real venv process from the fresh candidate installation (docs/v0.27.0/verify.closure-check.sh:7247-7255, 7273-7287). step7_verify_archive deletes/recreates its scratch prefix, then the verifier installs and observes in one call. Neither starts a process from that installation. CPLX_ACCEPTANCE_PROCESS only supplies a name: an existing process from another prefix maps outside this candidate and is refused; no process is inconclusive. A closed archive alone does not finish this implementation. Define process setup after installation, before observation, with lifetime/cleanup and candidate attribution, then exercise it on Debian.
+- [P1] Retain actual listing and live-trace evidence (docs/v0.27.0/verify.closure-check.sh:7290-7310; src/setups/env/bin/closure_verify.sh:499-535). The driver redirects checker/observer output into temporary files, exposes summary STATIC/LIVE verdicts, then removes the detailed output. The harness retains those summaries only. STATIC|PASS is not the required whole-scope listing, and a process-name summary is not a retained PROCESS/OBJECT inventory. Preserve and identify the actual observations without substituting a planted report for real acceptance.
+- [P1] Real packaged-archive acceptance remains unanswered. RHEL still refuses 21 DT_NEEDED names and two over-generation families; Debian build 156 reports no packaged archive. The 74-name/26-multi-candidate/0-refused rule 1 result is measured on the build tree, not the unmodified packaged archive required by Step 7. Obtain the owning rebuild's closed payload and record actual archive checks plus both host halves before marking Step 7 complete.
+- [P2] Refresh evidence for the final repair and complete integration. Submitted RHEL/Debian captures identify b28d0061; final reviewer harness is fb065021. The added 12 report-model checks pass independently on RHEL but do not establish the real archive/process path or a fresh Debian run. Re-capture both hosts from final bytes, retaining consulted capture identity and actual archive identity.
+
+Boundary-crossing work:
+
+- The payload rebuild belongs to the owning umbrella item; this reviewer did not rebuild, package, delete live files, start delivery jobs or complete umbrella rows.
+- Process lifecycle and detailed-observation integration remain writer work; any change to closure_verify.sh or closure_observe_live.sh crosses into Step 6 and requires its owning-step workflow. Neither file was changed by this review.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Keep and review the staged acceptance-marker repair. Complete the real-process lifecycle and retain the actual static listing and live process/object trace for the candidate archive; do not describe the branch as waiting only on an artifact while setup is absent. Add an executable positive integration check and the required refusal controls without replacing real acceptance with the report models. Coordinate any required Step 6 changes through their owner. Once the owning rebuild closes the payload, package it and run both hosts, including the actual unmodified-archive rule 1 observation. Refresh both captures for final bytes, update only accurate Step 7 metadata, retain the grouping, and request another exact staged review. Keep Step 7 No while these requirements remain unanswered. No commit is authorized by this assessment.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Changes requested. Identity and staged-scope attribution pass, the umbrella boundary is intact and a.commit is mechanically valid. Implementation completeness, mandatory two-host acceptance and absence of unresolved findings do not pass. A substantive reviewer repair independently forces another review round. The independent RHEL 101/0 result demonstrates regression checks passing; its exit 5 explicitly preserves incomplete acceptance. No Human guidance block was present.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-2 -->
+
+## Round 3 by requestor - Step 7
+
+- Recorded: 2026-09-11T13:10:42+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 3
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 3)
+
+request_index_tree: 66b09cc1f2b124d67311936544248c0c83060c25
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 host captures
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): record step 7 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 3)
+
+#### Writer assessment of step 7 at round 3 for step 7 toolchain-runtime-closure (round 3)
+
+Step 7 remains NOT fully implemented, and the writer agrees with rounds 1 and 2
+that an external payload dependency does not waive this step's completion
+criteria. The two round 2 findings against this step's OWN code are closed. The
+third is not closable here and the writer says so rather than arguing it.
+
+##### The round 2 lead finding was correct, and the writer verified it in the code for step 7 toolchain-runtime-closure (round 3)
+
+The Debian half could not have passed by construction, and the writer confirmed
+the mechanism rather than accepting the report. `step7_verify_archive` recreates
+its scratch prefix and `closure_verify.sh` installs and observes in ONE call, so
+at observation time no process from the candidate existed. The only reachable
+live outcomes were INCONCLUSIVE, with nothing answering the name, and REFUSED,
+with a host process answering it and mapping its libraries from outside the
+candidate. The conclusive branch the writer asserted was unreachable.
+
+The writer also accepts the framing correction: describing the branch as waiting
+only on an artifact was wrong while the process setup was absent.
+
+##### What the branch does now for step 7 toolchain-runtime-closure (round 3)
+
+The live half is taken by the branch after the driver installs. The candidate's
+OWN interpreter is started under a unique argv0, waited for until its mappings
+are readable, observed through `closure_observe_live.sh` against the candidate
+prefix, and killed. The unique argv0 is the attribution the finding asked for:
+the observer matches `comm` or the basename of `argv0`, and several interpreters
+on an agent answer to `python3`. An operator naming a process through
+`CPLX_ACCEPTANCE_PROCESS` is observed instead and none is started.
+
+The observations are retained rather than summarised. The observed loader scope
+of the installed candidate is kept one directory per line, with every directory
+required to fall under the candidate prefix, and the observer's own `PROCESS`,
+`OBJECT` and `HOSTS` records are kept, with the trace required to carry a
+`PROCESS` record bearing a pid rather than a summary repeating the name it was
+asked for.
+
+The driver's exit status is no longer this branch's gate. That follows from the
+repair: the driver returns non-zero whenever ITS live reading was not
+conclusive, and that reading is now always inconclusive by design, because the
+process cannot exist until after the install. Keeping the old gate would have
+made the half unpassable for the mirror of the reason it was unreachable.
+
+##### The step 6 boundary was not crossed for step 7 toolchain-runtime-closure (round 3)
+
+Round 2 said changing `closure_verify.sh` or `closure_observe_live.sh` requires
+their owning step's workflow. Neither file is changed. The branch calls the
+observer directly alongside the driver, which stays inside step 7's own files.
+
+##### Test evidence at round 3 for step 7 toolchain-runtime-closure (round 3)
+
+RHEL 9.8, harness `b0875e40`: `--step 7` reports 101 cases and 0 failures, and
+the every-step aggregate reports OBJECTIVE MET for steps 0 through 5. Debian 12,
+build 157 on the delivered bytes: no case fails anywhere, steps 0 through 6 all
+report OBJECTIVE MET, and the aggregate returns 5 rather than 1. Both captures
+are regenerated from these bytes. `bash src/utils/lint_shell.sh` clean over 54
+tracked scripts, `shellcheck` clean on the harness, installer purity silent and
+the untouched check at exit 0.
+
+The reviewer's twelve report-model probes still separate a conclusive trace, an
+empty one, a refused one, a wrong archive identity and a failed control, now
+over the three helpers round 3 added as well.
+
+##### What the writer cannot close, stated plainly for step 7 toolchain-runtime-closure (round 3)
+
+The real path's SUCCESS branch has not executed, and this round does not claim
+it has. There is no packaged archive on either host, because packaging refuses
+the tree it would tar: 21 unresolvable `DT_NEEDED` names and two declared
+families over their permitted generation count, all under `tools/git/root` and
+`tools/python/root`. That is the rebuild umbrella item 7 owns. The 74 names, 26
+multi-candidate and 0 refused rule 1 result is the BUILD TREE's and the writer
+accepts round 2's point that it is not the packaged archive's.
+
+Step 7 stays `No`, and the validation plan lists that work.
+
+##### Staged membership for step 7 toolchain-runtime-closure (round 3)
+
+Unchanged at the same ten paths rounds 1 and 2 assessed. The protocol transcript
+is tracked and remains deliberately unstaged.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 3)
+
+#### What changed between round 2 and round 3 for step 7 toolchain-runtime-closure (round 3)
+
+##### The process lifecycle, which is the round 2 lead finding for step 7 toolchain-runtime-closure (round 3)
+
+Three helpers were added to `docs/v0.27.0/verify.closure-check.sh`.
+
+`step7_candidate_interpreter <prefix>` resolves the interpreter INSIDE the
+candidate installation, trying `tools/python/current/bin/python3`, the root
+variant and `python`. It is the only interpreter whose mapped objects can fall
+under the candidate prefix; a host one maps its own libraries from outside and
+the observer refuses it, correctly.
+
+`step7_candidate_live_evidence <prefix> <name> <started>` takes the live half.
+When the branch owns the process it starts that interpreter through
+`bash -c 'exec -a "$1" "$2" ...'`, so `argv0` carries a name unique to this run,
+waits up to 150 bounded tries until `/proc/<pid>/maps` is readable and non-empty,
+runs `closure_observe_live.sh --process <name> --prefix <prefix>`, kills the
+process and reaps it. It prints the observer's WHOLE output: the `PROCESS`,
+`OBJECT`, `HOSTS`, `UNUSABLE` and `LIVE` records alike. When an operator named a
+process it observes that one and starts nothing.
+
+`step7_scope_listing <prefix>` returns the observed loader scope of the
+installed candidate, through the harness's existing `observed_scope` seam, which
+calls the checker's own derivation over the installer's `build_elf_rpath`.
+
+##### How the branch uses them for step 7 toolchain-runtime-closure (round 3)
+
+`step7_debian_half` decides who owns the process first: `CPLX_ACCEPTANCE_PROCESS`
+means one is already running and is the subject, otherwise the branch names its
+own `cplx-accept-<pid>` and starts it.
+
+It then drives the verifier for the archive identity, the static record and the
+comparison record, and asserts those three as before, with the identity
+recomputed here and required to equal the one printed.
+
+It retains the scope listing, asserts it is not empty, notes each directory, and
+asserts that NO directory falls outside the candidate prefix, because a scope
+reaching outside it is the host fallback this acceptance exists to refuse.
+
+It then takes the live evidence, notes every retained record, and asserts three
+separate things: the trace is conclusive, it carries a `PROCESS` record bearing
+a pid, and it carries an `OBJECT` record. The second is the point of the
+finding: a summary naming the process it was ASKED for proves nothing about what
+was FOUND.
+
+##### The decision for step 7 toolchain-runtime-closure (round 3)
+
+The half passes when no assertion or control above failed AND the live
+observation returned 0. The driver's exit status is deliberately not the gate,
+because its own live reading is now always inconclusive by design: the process
+this acceptance inventories cannot exist until after the driver has installed.
+The refusal text says that in place rather than leaving a later reader to
+wonder why a non-zero driver did not block.
+
+##### The reviewer's probe, extended rather than bypassed for step 7 toolchain-runtime-closure (round 3)
+
+`step7_debian_branch_probe` drives the branch's decision over a modelled report.
+Round 3 adds stubs for the three new helpers to it, modelling the live evidence
+in the shape the observer emits, records and verdict alike. Its six scenarios
+still separate: only `good` marks the half PASS with clean assertions, and
+`bad-identity`, `static-only`, `empty-trace`, `host-object` and `bad-control`
+each refuse.
+
+##### What was deliberately not changed for step 7 toolchain-runtime-closure (round 3)
+
+`closure_verify.sh` and `closure_observe_live.sh` are untouched. Round 2 said
+changing either crosses into step 6's ownership, so the branch calls the
+observer directly alongside the driver instead of altering the driver to retain
+what it discards.
+
+##### Both captures for step 7 toolchain-runtime-closure (round 3)
+
+Regenerated from these bytes. The RHEL capture comes from harness `b0875e40` at
+101 cases and 0 failures; the Debian capture comes from build 157 with no
+failing case anywhere. Both headers record what round 2 found, what round 3
+repaired, and, in the Debian capture, exactly which paths the run did and did
+not exercise.
+
+### Change summary for step 7 toolchain-runtime-closure (round 3)
+
+#### Staged paths and commit plan at round 3 for step 7 toolchain-runtime-closure (round 3)
+
+##### The ten staged paths, unchanged in membership since round 1 for step 7 toolchain-runtime-closure (round 3)
+
+| Path | State | What changed since round 2 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_d10.sh` | added | unchanged at 524 lines |
+| `docs/v0.27.0/verify.closure-check.sh` | modified | the three live-evidence helpers, the retained listing and trace, the moved decision, and the probe stubs |
+| `docs/v0.27.0/decision.operator-old-root.rhel.md` | added | unchanged |
+| `docs/v0.27.0/verify.closure.step7.rhel.txt` | added | regenerated from harness `b0875e40`, 101 cases, 0 failures |
+| `docs/v0.27.0/verify.closure.step7.debian.txt` | added | regenerated from build 157, 0 failures |
+| `src/setups/env/closure/README.md` | modified | unchanged |
+| `wiki/reference/toolchain-runtime-closure.md` | added | unchanged |
+| `wiki/explanation/why-the-archive-declares-its-own-scope.md` | added | unchanged |
+| `wiki/README.md` | modified | unchanged |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | modified | the two closed round 2 bullets removed, the repair recorded |
+
+The protocol transcript is tracked and stays deliberately unstaged, as at rounds
+1 and 2.
+
+##### The `a.commit` groups, unamended for step 7 toolchain-runtime-closure (round 3)
+
+No round 3 change alters commit membership, grouping, order, scope or subject
+accuracy: every edit landed inside a file its existing group already carries, so
+`a.commit` is not amended.
+
+| # | Subject | Paths |
+| --- | --- | --- |
+| 1 | `feat(closure): add the D10 evidence and policy module` | `closure_d10.sh` |
+| 2 | `test(closure): add the step 7 suite and two-host gate` | `verify.closure-check.sh` |
+| 3 | `docs(closure): record the operator root deletion` | `decision.operator-old-root.rhel.md` |
+| 4 | `test(closure): retain the step 7 host captures` | both step 7 captures |
+| 5 | `docs(closure): document the checker and its scope` | bundle README, both wiki pages, wiki index |
+| 6 | `docs(toolchain-runtime-closure): record step 7 validation` | the validation plan |
+
+##### Line budget at round 3 for step 7 toolchain-runtime-closure (round 3)
+
+No shipped script is above the 650-line ceiling and none changed in round 3.
+`closure_d10.sh` stays at 524, inside the below-550 safe band.
+`closure_publish.sh` remains at exactly 650 with no line added by this step.
+
+##### The pipeline half, outside this plan's staged scope for step 7 toolchain-runtime-closure (round 3)
+
+The my-project repository now carries five commits on `develop`, pushed to the
+cicd remote only. The most recent carries the round 2 acceptance repair, and
+Debian build 157 is the run of those bytes.
+
+#### Writer response for step 7 toolchain-runtime-closure (round 3)
+
+##### Accepted in full, with no reversal for step 7 toolchain-runtime-closure (round 3)
+
+Both round 2 repairs are retained exactly as staged: the acceptance-marker gate
+in the harness and the Step 7 metadata correction in the validation plan. The
+writer reversed nothing, so there is no disagreement to record.
+
+##### The lead finding was verified rather than taken on trust for step 7 toolchain-runtime-closure (round 3)
+
+The writer read the code path before accepting it. `step7_verify_archive`
+recreates its scratch prefix, `closure_verify.sh` installs and observes in one
+call, and nothing between those two events starts a process from the
+installation. The conclusive live outcome the branch asserted was therefore
+unreachable, exactly as reported. It is a worse defect than a missing assertion:
+the branch claimed to test a property it could not observe.
+
+##### A framing correction the writer accepts for step 7 toolchain-runtime-closure (round 3)
+
+Round 1's request described the remaining work as an external payload
+dependency and implied `CPLX_ACCEPTANCE_PREFIX` would answer the Debian half.
+Round 2 corrected that and round 2's own instruction adds the sharper point: the
+writer must not describe the branch as waiting only on an artifact while the
+setup is absent. The round 3 wording says what is implemented and what has not
+executed, separately.
+
+##### What the writer asks the reviewer to weigh at round 3 for step 7 toolchain-runtime-closure (round 3)
+
+The real path's success branch has still not executed, because no packaged
+archive exists on either host. The writer implemented the branch anyway rather
+than deferring it, so that the retake the rebuild forces runs code that has
+already been reviewed. The reviewer may hold that a branch cannot be assessed
+until it has run green once over a real artifact. That judgment is the
+reviewer's, and the writer will not argue it: the assessment records what
+executed and what did not rather than inviting the gap to be read as covered.
+
+One consequence is worth naming. The twelve report-model probes cover the
+branch's decision, and they are models. They prove the decision logic separates
+a conclusive trace from an empty one, a refused one, a wrong identity and a
+failed control. They do not prove the candidate's interpreter starts, that its
+argv0 reaches `/proc`, or that its mapped objects fall under the prefix. Those
+are properties of a real installation and only a real archive can settle them.
+
+##### Two standing decisions, named again so silence is not read as agreement for step 7 toolchain-runtime-closure (round 3)
+
+Step 0's absent-suite control is retired rather than preserved over an invented
+subject, and group 6's commit subject stays at 56 characters because the
+readiness checker enforces that exact marker. Neither round has challenged
+either, and the writer is not treating that as approval.
+
+##### One thing the writer did not do for step 7 toolchain-runtime-closure (round 3)
+
+No capture was edited to claim a half it did not take, and the Debian half was
+not pointed at an installed prefix to manufacture a green. The branch now
+refuses that by construction: an installed prefix is not an archive, and the
+refusal text says so.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-3 -->
+
+## Round 3 by reviewer - Step 7
+
+- Recorded: 2026-09-11T13:28:27+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Baseline index tree: 66b09cc1f2b124d67311936544248c0c83060c25
+
+Assessed index tree: 2ab3067316ee0e0b1b68caa5c425b532b7f74b2f
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Result:
+
+No. Step 7 is not fully implemented. Earlier D10 and acceptance-marker repairs are retained. Round 3 retains actual live records and attempts process setup, but the Python wrapper loses the requested process name, the launcher does not create a venv, readiness relies on proc-file size, and directory names do not provide the required whole-provider listing. Real packaged-archive acceptance is still missing. A substantive reviewer scope repair independently requires changes-requested. Only Step 7 validation rows were updated; the umbrella digest was checked after No and is unchanged.
+
+Validation plan effects:
+
+Updated only the Step 7 section: corrected obsolete round 2 and premature round 3 completion claims, recorded focused reproductions and independent final validation, and restored concrete missing work for process lifecycle and provider listing. Historical evidence is identified by round. No other step or umbrella row was changed.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Baseline 66b09cc1f2b124d67311936544248c0c83060c25 matches the round 3 request. Before edits, the helpers retained index, validation state, umbrella digest, and blobs for the harness, validation plan and a.commit. Submitted harness b0875e40 independently reports RHEL 101 cases, 0 failures, exit 5; aggregate steps 0-5 pass, Step 6 host requirement exit 5, Step 7 acceptance exit 5. All other union commands also ran with their expected results. Focused checks demonstrate colon-joined scope output, an outside path missed by the prefix filter, actual Python-wrapper observation returning LIVE INCONCLUSIVE after 15 seconds, a non-venv interpreter, and proc mappings whose reported size is zero despite readable contents. The retained Debian build 157 capture covers submitted bytes only.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+All seven mandatory request/current union commands ran:
+
+- `bash src/utils/lint_shell.sh` [project, plan]: exit 0, 54 tracked scripts clean.
+- `bash docs/v0.27.0/verify.closure-check.sh --step 7` [plan]: final independent RHEL run 108 cases, 0 failures, exit 5; real acceptance remains unanswered.
+- `bash docs/v0.27.0/verify.closure-check.sh` [plan]: final independent RHEL aggregate steps 0-5 pass, Step 6 exit 5 for Debian host, Step 7 exit 5 for acceptance; aggregate 5.
+- `shellcheck docs/v0.27.0/verify.closure-check.sh` [plan]: exit 0 on final repaired bytes.
+- `rg -n 'toolchain-runtime-closure|closure_check' wiki/` [plan]: exit 0, both pages and index entries found.
+- `rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh` [request]: exit 1 with no matches, the expected purity result.
+- `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` [request]: exit 0, empty.
+
+Final harness SHA-256: 8b6bc7172e9af05cc1d83e5be221f3d08d9f49937041cc45ff5effc9617fca88. Raw final RHEL evidence: .reviews/a.reviewer.step7.r3.rhel-step7.txt and .reviews/a.reviewer.step7.r3.rhel-all.txt. Behavioral suites ran in an isolated RHEL copy; local static checks used configured Git Bash and ShellCheck. Debian build 157 records 99 cases, no failures, steps 0-6 pass and Step 7 unanswered for b0875e40; no fresh Debian execution of the repair is available. Exit 5 is missing mandatory acceptance, never a pass. No numeric coverage gate or measured percentage exists. The ten production scripts retain the measured round 2 counts, maximum 650 lines; D10 remains 524, above its advisory estimate but within the safe band.
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+No drift: added [], removed []. Requested, current and union are retained in .reviews/a.reviewer.step7.r3.resolver.json. All seven union commands ran; mandatory two-host acceptance remains incomplete.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Original and repaired validation-state comparisons are acceptable, with no tracked or untracked side effects. Before/after artifacts are retained under .reviews/a.reviewer.step7.r3.*. The applicable umbrella digest remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7 after No. Helpers proved attribution for the harness, Step 7 metadata and a.commit corrections; only the exact two tracked repair patches were staged. a.commit remains ignored. Baseline index 66b09cc1f2b124d67311936544248c0c83060c25; assessed index 2ab3067316ee0e0b1b68caa5c425b532b7f74b2f. The only remaining unstaged tracked path is the pre-existing protocol transcript, which was not read as working context or staged. Cached whitespace validation passes.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Repairs made:
+
+- docs/v0.27.0/verify.closure-check.sh: substantive repair; split observed_scope's colon-delimited output, check observation success and validate each directory against a literal prefix boundary. Added one real-helper splitting case and six branch checks for mixed outside scope, sibling prefix and failed observation. Attributable exact patch staged.
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: review metadata only; Step 7 remains No, premature completion claims corrected, reproductions and final independent evidence recorded. Attributable exact patch staged.
+- a.commit: ignored review metadata only; corrected stale case/build numbers, capture-digest claims and incomplete-work description. Subjects, six groups and membership unchanged; not added to the index.
+
+Paths staged:
+
+- docs/v0.27.0/decision.operator-old-root.rhel.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step7.debian.txt
+- docs/v0.27.0/verify.closure.step7.rhel.txt
+- src/setups/env/bin/closure_d10.sh
+- src/setups/env/closure/README.md
+- wiki/README.md
+- wiki/explanation/why-the-archive-declares-its-own-scope.md
+- wiki/reference/toolchain-runtime-closure.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Independent commit-plan-check.bat --format json rerun after staging returns status 0, state valid, ready true, six groups covering exactly ten staged paths, diagnostics empty. Reviewer corrected stale body facts in ignored a.commit without changing group subjects or membership. This satisfies only mechanical grouping, not implementation completeness, mandatory acceptance or authorization to commit.
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Unresolved findings:
+
+- [P1] Complete the real candidate venv lifecycle (docs/v0.27.0/verify.closure-check.sh:7260-7325; src/install/env/python/bin/python:100-104). The preferred project Python entry point is a shell wrapper. exec -a does not preserve the requested unique argv0 through its shebang and child launch; the observer therefore misses the real Python process, and kill/wait targets the wrapper rather than necessarily cleaning up its child. A direct helper run on the available project entry point returned LIVE INCONCLUSIVE, exit 4. The interpreter also reported sys.prefix == sys.base_prefix; the helper creates no venv. Arrange and observe an actual candidate venv process with reliable attribution and owned-child cleanup, then test the real helper rather than overriding it in report models.
+- [P2] Use actual process readiness and early-exit diagnostics (docs/v0.27.0/verify.closure-check.sh:7312-7317). Linux proc maps reports size zero even while its contents are readable. The -s test cannot become true, so every successful launch waits all 150 intervals; exited wrappers also wait out the deadline with diagnostics redirected away. Read/validate mappings for the intended Python process, stop on early exit and retain actionable launch diagnostics as part of the lifecycle repair.
+- [P1] Retain a listing of the actual whole provider set (docs/v0.27.0/verify.closure-check.sh:7327-7335, 7394-7415; docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md:643). The scope repair makes directory boundaries trustworthy, but the retained records contain directory names only, without their provider files. STATIC PASS plus a directory list does not establish the required provider listing. Retain actual member/provider observations across all scope directories and bind that evidence to the archive. Round 3's retention of actual PROCESS/OBJECT/HOSTS records does resolve the previous dropped-live-record issue.
+- [P1] Real packaged-archive acceptance remains unanswered. RHEL still refuses 21 DT_NEEDED names and two over-generation families; Debian build 157 has no packaged archive. The 74-name/26-multi-candidate/0-refused rule 1 result is measured on the build tree, not the required unmodified packaged archive. Obtain the owning rebuild's closed payload, then record actual archive checks and both host halves before marking Step 7 complete.
+- [P2] Refresh both host captures for final bytes and complete integration. Submitted captures identify b0875e40; the final reviewer harness is 8b6bc717. Its 108/0 RHEL result validates regression checks but remains exit 5 and does not establish a real archive/venv or fresh Debian execution. Re-capture final bytes on both hosts with actual archive identity and consulted capture identity.
+
+Boundary-crossing work:
+
+- The payload rebuild belongs to the owning umbrella item. This reviewer did not rebuild, package, delete live files, start delivery jobs or complete umbrella rows.
+- Process lifecycle and actual provider-listing integration remain writer work. Any necessary production verifier, observer or Python-wrapper change crosses this Step 7 review's boundary and must use its owning workflow. This review changed none of those files.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Review and retain the staged scope repair. Complete the real candidate venv lifecycle, including wrapper-aware attribution, actual readiness, early-exit diagnostics and child cleanup. Retain the actual whole-provider listing alongside the already retained live records. Add executable positive/refusal integration checks for the real helpers; report-model substitutions cannot prove these behaviors. Coordinate any changes outside Step 7 through their owner. Once the owning rebuild closes the payload, package it and run both host halves, including rule 1 over the actual unmodified archive. Refresh both captures for final bytes, update accurate Step 7 metadata, preserve grouping, and request another exact staged review. Keep Step 7 No while requirements remain unanswered. This assessment authorizes no commit.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Changes requested. Exact identity, attributable staged scope, umbrella boundary and mechanical a.commit grouping pass. Complete implementation, mandatory two-host acceptance and absence of unresolved findings do not pass. A substantive reviewer scope repair independently forces another round. The RHEL 108/0 result passes regression checks while exit 5 explicitly preserves missing acceptance. No Human guidance block was present.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 3)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-3 -->
+
+## Round 4 by requestor - Step 7
+
+- Recorded: 2026-09-11T18:07:23+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 4)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 4
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 4)
+
+request_index_tree: ab5398de856fdde4fcc322a7a60d8d62e4b86ea1
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 evidence and the trim measurement
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 4 path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): record step 7 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 4)
+
+#### Writer assessment of step 7 at round 4 for step 7 toolchain-runtime-closure (round 4)
+
+Step 7 remains NOT fully implemented. Round 3's three findings against this
+step's own code are closed, the fourth is unchanged and unclosable here, and a
+DECISION was taken on the payload that changes what "unclosable" costs.
+
+##### Round 3 was right on all three code findings, and one was verified the hard way for step 7 toolchain-runtime-closure (round 4)
+
+THE WRAPPER LOSES A RENAMED ARGV0. The project entry point is a shell wrapper,
+so `exec -a` renamed the wrapper and the name never reached the interpreter. The
+helper no longer depends on a name it chose: it creates a real venv from the
+candidate, launches it, and identifies the process by PID OWNERSHIP. The
+acceptance requires the trace to carry THAT pid, so a conclusive reading of some
+other `python3` cannot be mistaken for the candidate's. A new report-model
+scenario, `unowned-trace`, plants exactly that shape and requires the branch to
+refuse it.
+
+THE READINESS TEST COULD NEVER FIRE. Linux reports `/proc/<pid>/maps` with size
+zero even while readable, so `[ -s ]` was false forever: every launch waited out
+all 150 intervals, and an already-exited process waited them out too with its
+diagnostics discarded. Readiness is now read from the mapping CONTENT, the loop
+ends on an early exit, and the launch log is retained and quoted in the refusal.
+
+THE RETAINED LISTING WAS DIRECTORY NAMES ONLY. Addressed with the scope
+repair retained from the reviewer's round 3 patch.
+
+##### The helper was run for real, and that immediately found a fourth defect for step 7 toolchain-runtime-closure (round 4)
+
+Round 3 asked for the real helper to be exercised rather than overridden in the
+report models. Two cases now call it directly. The refusal path runs anywhere; the
+success path runs where a deployed tree exists, over that tree as the candidate
+prefix.
+
+Running it on RHEL exposed a defect in the round 4 repair itself. The helper
+assumed the wrapper always spawns a child; the deployed venv entry point resolves
+straight to the binary and has none, so the helper timed out on a process that
+was already mapping the candidate. The loop now owns whichever of the two shapes
+it finds. That is exactly what the reviewer's instruction was for, and it would
+not have been found by a model.
+
+The end-to-end run returned:
+
+```txt
+OWNED|2212843|python3
+LIVE|REFUSED|1 process(es) named python3 map 3 object(s) from outside
+/home/deploy-account
+```
+
+That is a REAL observation about the current deployed tree, kept rather than
+tidied away. It is not the packaged archive and does not stand in for it; what it
+establishes is that the machinery works end to end and that a live trace can
+refuse a tree the static half would pass.
+
+##### The payload decision, taken and measured for step 7 toolchain-runtime-closure (round 4)
+
+The repository owner decided the principle on 2026-09-11: a library that only a
+BUILD TOOL requires is not a runtime requirement of an archive whose hosts run
+the application and its tests and never build tools. Python dependencies install
+from wheels rather than compiling, on Linux as on Windows.
+
+[measurements.build-only-payload.rhel.txt](measurements.build-only-payload.rhel.txt)
+measures it over a hardlink copy of the live tree, so the live tree is never
+modified and was re-measured unchanged afterwards. Trimming 83 build-only
+entries, selected by rule rather than by hand:
+
+```txt
+unresolvable DT_NEEDED     21 -> 0
+declared families refused   2 -> 0
+UNDETERMINED results       12 -> 0
+coherence answered      5041/5053 -> 4444/4444
+rule 1 refusals             0 -> 0, still over 20 multi-candidate names
+exit code                   1 -> 3
+size                     1489M -> 1295M
+```
+
+NOTHING NEW BROKE AND THE GATE IS WHAT SAYS SO: a trim that removed something the
+runtime needed would surface at once as a fresh unresolvable name.
+
+THE DECISION WAS IMPLEMENTED AS A PAYLOAD TRIM AND NOT AS A CHECKER EXEMPTION,
+deliberately. Teaching the checker to ignore build-only subjects would add the
+kind of heuristic blind spot this design already refuses, and would weaken the
+one instrument that found the defect. The checker is correct as it stands.
+
+##### What remains, unchanged in substance for step 7 toolchain-runtime-closure (round 4)
+
+Real packaged-archive acceptance is still unanswered, and this step cannot answer
+it. After the trim the checker returns 3 rather than 1: nothing refuses, and one
+accepted exception carries the run. That exception is the sqlite waiver, and
+exit 3 is deliberately not a pass. So two owners remain: item 7 for the trim,
+item 6 for sqlite. The validation plan records both with the measured numbers.
+
+##### Test evidence at round 4 for step 7 toolchain-runtime-closure (round 4)
+
+RHEL 9.8, harness `69ebb85b`: `--step 7` reports 115 cases and 0 failures, up
+from 101, and the every-step aggregate reports OBJECTIVE MET for steps 0 through
+5. Debian 12, build 158 on the delivered bytes: no case fails anywhere, steps 0
+through 6 all report OBJECTIVE MET, aggregate 5. Lint clean over 54 scripts,
+shellcheck clean, installer purity silent, untouched check at exit 0.
+
+##### Staged membership for step 7 toolchain-runtime-closure (round 4)
+
+ELEVEN paths, one more than the ten earlier rounds assessed:
+`docs/v0.27.0/measurements.build-only-payload.rhel.txt` is new. `a.commit` is
+amended for it, group 4 now carries the three evidence files and its subject
+says so, and the independent checker returns valid and ready over all eleven.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 4)
+
+#### What changed between round 3 and round 4 for step 7 toolchain-runtime-closure (round 4)
+
+##### The live half, rebuilt around a real venv and pid ownership for step 7 toolchain-runtime-closure (round 4)
+
+`step7_candidate_live_evidence` no longer renames anything. It creates a venv
+from the candidate interpreter with `-m venv`, launches
+`<venv>/bin/python3 -c 'import time; time.sleep(300)'`, and then identifies the
+process to observe by measurement rather than by assumption.
+
+Three helpers support it. `step7_parent_of` reads `PPid` from
+`/proc/<pid>/status` rather than from `stat`, whose second field is a command
+name that can contain spaces and brackets and would shift every field after it.
+`step7_child_interpreter` finds the interpreter a wrapper spawned.
+`step7_maps_candidate` answers whether a process has mapped anything under the
+candidate prefix, by reading the mapping table's CONTENT.
+
+THE OWNED PROCESS IS WHICHEVER SHAPE THE ENTRY POINT TAKES. The project entry
+point is a shell wrapper, so the interpreter can be a CHILD of what was
+launched; a venv entry point resolving straight to the binary IS the
+interpreter, with no child at all. The loop tries the launched pid first, then a
+child, and owns the first that maps the candidate.
+
+The helper prints `OWNED|<pid>|<comm>` and the branch requires the observer's
+trace to carry that pid. It asks the observer for the name the owned process
+actually carries, read from `/proc/<pid>/comm`, rather than one this harness
+chose.
+
+Cleanup kills the owned child first and the launched process second, because
+killing a wrapper does not reap what it launched; where the two are the same pid
+the second kill is a no-op, which is correct rather than a special case.
+
+##### Readiness, and the diagnostics that were being thrown away for step 7 toolchain-runtime-closure (round 4)
+
+The old test was `[ -r maps ] && [ -s maps ]`. Linux reports that file with size
+zero even while its contents are readable, so the second half could never be
+true: every launch waited the full 150 intervals, and a process that had already
+exited waited them out as well with its output redirected to `/dev/null`.
+
+Readiness now comes from `step7_maps_candidate`, the loop ends as soon as the
+launched process is gone, and the launch output goes to a retained log whose
+tail is quoted in every refusal the helper prints.
+
+##### Two cases that run the helper itself for step 7 toolchain-runtime-closure (round 4)
+
+Round 3 asked for the real helper rather than an override. `step7/live-helper/*`
+calls it directly. The refusal path runs anywhere: a prefix with no interpreter
+must give the typed INCONCLUSIVE. The success path runs where a deployed tree
+exists, over that tree as the candidate prefix, and asserts that the helper
+launched and owned an interpreter, that the observer inventoried THAT pid, that
+a typed verdict was reached, and that the owned child was reaped.
+
+That second case found a defect in this very round's repair on its first run,
+which is recorded in the RHEL capture rather than quietly fixed.
+
+##### One more report model for step 7 toolchain-runtime-closure (round 4)
+
+`unowned-trace` plants a conclusive trace of a process the branch does not own,
+which is the likely shape on an agent running several interpreters rather than
+the unlucky one. The branch must refuse it. The probe now stubs the three round 3
+helpers and emits `OWNED|` in every scenario, so the models exercise the
+ownership assertion too.
+
+##### The payload decision and its measurement for step 7 toolchain-runtime-closure (round 4)
+
+`docs/v0.27.0/measurements.build-only-payload.rhel.txt` is new. It records the
+decision, the method, the derivation of the trim set, the before and after
+counters, what is left, and an addendum with the live helper's end-to-end result
+over the deployed tree.
+
+The method matters as much as the numbers: the copy is made with hardlinks, so
+deleting from it removes a name and never a file, and the live tree was
+re-measured at the same size afterwards to prove it. The trim set is derived by
+rule, not listed by hand, and the dynamic loader and C library are excluded from
+selection by name so they cannot be trimmed by accident.
+
+##### The validation plan for step 7 toolchain-runtime-closure (round 4)
+
+The Step 7 section records the decision as the resolution for the two payload
+rows, with the measured effect, and adds the sqlite waiver as its own bullet
+since exit 3 is not a pass. The status line stays `No. Step 7 has NOT been fully
+implemented.`
+
+##### `a.commit` for step 7 toolchain-runtime-closure (round 4)
+
+Amended, for the first time in this exchange. Group 4 now carries the two
+captures and the measurement, and its subject changes from
+`retain the step 7 host captures` to
+`retain the step 7 evidence and the trim measurement` because the group's scope
+genuinely changed. No other group moved and no path changed group.
+
+### Change summary for step 7 toolchain-runtime-closure (round 4)
+
+#### Staged paths and commit plan at round 4 for step 7 toolchain-runtime-closure (round 4)
+
+##### Eleven staged paths, one more than earlier rounds for step 7 toolchain-runtime-closure (round 4)
+
+| Path | State | Changed since round 3 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_d10.sh` | added | unchanged at 524 lines |
+| `docs/v0.27.0/verify.closure-check.sh` | modified | the venv lifecycle, pid ownership, the readiness repair, two real-helper cases and the `unowned-trace` model |
+| `docs/v0.27.0/decision.operator-old-root.rhel.md` | added | unchanged |
+| `docs/v0.27.0/measurements.build-only-payload.rhel.txt` | **added, new** | the build-only decision and its measurement |
+| `docs/v0.27.0/verify.closure.step7.rhel.txt` | added | regenerated, harness `69ebb85b`, 115 cases, 0 failures |
+| `docs/v0.27.0/verify.closure.step7.debian.txt` | added | regenerated from build 158, 0 failures |
+| `src/setups/env/closure/README.md` | modified | unchanged |
+| `wiki/reference/toolchain-runtime-closure.md` | added | unchanged |
+| `wiki/explanation/why-the-archive-declares-its-own-scope.md` | added | unchanged |
+| `wiki/README.md` | modified | unchanged |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | modified | the decision recorded, the closed round 3 bullets removed |
+
+The protocol transcript stays deliberately unstaged, as in every earlier round.
+
+##### `a.commit`, amended for step 7 toolchain-runtime-closure (round 4)
+
+| # | Subject | Paths |
+| --- | --- | --- |
+| 1 | `feat(closure): add the D10 evidence and policy module` | `closure_d10.sh` |
+| 2 | `test(closure): add the step 7 suite and two-host gate` | `verify.closure-check.sh` |
+| 3 | `docs(closure): record the operator root deletion` | `decision.operator-old-root.rhel.md` |
+| 4 | `test(closure): retain the step 7 evidence and the trim measurement` | both captures and the measurement |
+| 5 | `docs(closure): document the checker and its scope` | bundle README, both wiki pages, wiki index |
+| 6 | `docs(toolchain-runtime-closure): record step 7 validation` | the validation plan |
+
+Group 4 is the only change: it gains the measurement and its subject widens to
+match, because a group carrying three evidence files under a subject naming two
+captures would be inaccurate. Independent
+`commit-plan-check.bat --format json` returns `state: valid`, `ready: true`, no
+diagnostics, over all eleven paths.
+
+##### Line budget at round 4 for step 7 toolchain-runtime-closure (round 4)
+
+No shipped script is above the 650-line ceiling and none changed this round.
+`closure_d10.sh` stays at 524, inside the below-550 band. `closure_publish.sh`
+remains at exactly 650 with no line added by this step.
+
+##### The pipeline half, outside this plan's staged scope for step 7 toolchain-runtime-closure (round 4)
+
+The my-project repository carries a further commit on `develop`, pushed to the
+cicd remote only, delivering the round 3 repair. Debian build 158 is the run of
+those bytes.
+
+#### Writer response for step 7 toolchain-runtime-closure (round 4)
+
+##### Accepted in full, with no reversal for step 7 toolchain-runtime-closure (round 4)
+
+Both round 3 repairs are retained as staged: the acceptance-marker scope repair
+in the harness and the Step 7 metadata correction in the validation plan. The
+writer reversed nothing, so there is no disagreement to record.
+
+##### The three code findings were correct and two were instructive for step 7 toolchain-runtime-closure (round 4)
+
+The wrapper finding is the second time this exchange has caught the branch
+claiming a property it could not observe. Round 2 found the live reading taken
+before any candidate process existed; round 3 found the process, once started,
+carrying a name the wrapper had discarded. Both had the same shape: the branch
+asserted a conclusive trace that no execution could produce. The repair changes
+the basis from a name to PID OWNERSHIP, which is a fact the branch establishes
+rather than a coincidence it hopes for.
+
+The readiness finding is the sharper one, because it was invisible from a green
+run. `[ -s /proc/<pid>/maps ]` can never be true, so the wait always ran to its
+deadline and an early exit was indistinguishable from a slow start with its
+diagnostics discarded. The writer accepts that a test that cannot succeed is
+worse than a missing test: it looks like coverage.
+
+##### The instruction to run the real helper is the one that paid for step 7 toolchain-runtime-closure (round 4)
+
+Round 3 asked for the helper to be exercised rather than overridden in the report
+models. Its first real run found a defect in the round 4 repair itself: the
+helper assumed the wrapper always spawns a child, and the deployed venv entry
+point has none. A model would have agreed with the code and said nothing. That
+result is recorded in the RHEL capture rather than folded away, because the
+instruction earning a finding on its first execution is evidence about the
+instruction.
+
+##### A decision was taken between rounds, and the writer states its shape for step 7 toolchain-runtime-closure (round 4)
+
+The repository owner settled the payload question: a library that only a build
+tool requires is not a runtime requirement of an archive whose hosts run the
+application and its tests and never build tools.
+
+The writer implemented that as a PAYLOAD TRIM and not as a checker exemption,
+and offers the reasoning for challenge. Teaching the checker to ignore
+build-only subjects would introduce the class of heuristic blind spot this
+design already refuses for family detection, and it would weaken the instrument
+that found the defect. The checker is correct as it stands; what is wrong is
+that the archive carries tools it does not need. The measurement is evidence for
+the decision, not a change of scope: no production file changed for it, and the
+trim itself belongs to umbrella item 7.
+
+##### What the writer asks the reviewer to weigh at round 4 for step 7 toolchain-runtime-closure (round 4)
+
+The success path of the acceptance still has not run over a packaged archive,
+and the writer does not claim otherwise. What changed is that the helper's own
+machinery has now run end to end once, on the RHEL deployed tree, with a real
+venv, a real owned pid, a real observer inventory and a reaped child. The
+reviewer may still hold that the branch cannot be assessed until it has run
+green over a real artifact, and that judgment remains the reviewer's.
+
+The writer also notes the staged membership changed for the first time, from ten
+paths to eleven, and that `a.commit` is amended for it rather than left to
+describe a group it no longer matches.
+
+##### Two standing decisions, named again for step 7 toolchain-runtime-closure (round 4)
+
+Step 0's absent-suite control stays retired rather than preserved over an
+invented subject, and group 6's commit subject stays at 56 characters because
+the readiness checker enforces that exact marker. No round has challenged
+either, and the writer does not read that silence as agreement.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 4)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-4 -->
+
+## Round 4 by reviewer - Step 7
+
+- Recorded: 2026-09-11T19:39:16+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Baseline index tree: ab5398de856fdde4fcc322a7a60d8d62e4b86ea1
+
+Assessed index tree: 1f14be11a339ad4765093fd0c4b6f0a63a23500a
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Result:
+
+No. Step 7 has NOT been fully implemented.
+
+Round 4 fixes venv creation, proc-maps readiness and basic owned-PID attribution. It does not yet bind usable objects to that PID, clean up children on timeout, or retain the whole provider inventory. Production payload work and successful two-host archive acceptance also remain outstanding.
+
+D10's thirteen functions remain internally or directly exercised and its reader/policy boundary is intact. No new architecture or performance blocker was found. There are no unit-test classes or configured percentage gate in this Bash project; no percentage is claimed. The harness's step7_live_process helper is now unreferenced, and its helper controls omit the two reproduced failures. Existing production scripts and installer behavior remain unchanged.
+
+Validation plan effects:
+
+Updated only the reviewed step 7 rows in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. The status sentence is exactly "No. Step 7 has NOT been fully implemented." The concrete missing-work section now immediately follows "What was implemented", acknowledges closed round 3 findings, records the round 4 reproductions, and preserves the confirmed payload-trim decision. The earlier step rows and document-level status are unchanged. The umbrella digest is unchanged; no umbrella row was completed.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+| Command | Sources | Independent result |
+| --- | --- | --- |
+| `bash src/utils/lint_shell.sh` | project, plan | Exit 0; 54 tracked scripts clean |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 7` | plan | Native RHEL: exit 5, 115 cases, zero failures, acceptance unanswered |
+| `bash docs/v0.27.0/verify.closure-check.sh` | plan | Configured native RHEL: exit 5; steps 0–5 pass, step 6 awaits Debian, step 7 awaits acceptance |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | plan | Exit 0 |
+| `rg -n 'toolchain-runtime-closure\|closure_check' wiki/` | plan | Exit 0; reference, explanation and index found |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | request | Exit 1 with no matches, as the purity criterion requires |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | request | Exit 0, empty |
+
+The native snapshot carries the submitted harness SHA-256
+`69ebb85bb45c7b30199e9f85f5b68f090955d9dde8b202aab4f45d56d1c82220`.
+The first aggregate ran without the existing tools Git in PATH and returned 1:
+steps 2/5 were unanswered and step 6 had seven fixture failures. Adding that
+installed Git, as the submitted RHEL capture documents, clears those failures:
+focused step 6 exits 5 with its Debian obligation, and the configured aggregate
+has no case failure. This was an environment correction, not a source repair.
+
+The submitted Debian build 158 capture has the same harness, 109 step 7 cases,
+zero failures, and aggregate exit 5 because no packaged archive is available.
+It is supporting submitted evidence. A fresh independent Debian execution is
+unavailable without the owning CI delivery workflow; no commit or push was made.
+
+Two additional native reproductions exercise the submitted functions. A branch
+input with an unusable owned PID and usable objects from another PID reports
+`BRANCH_FAILURES|0` and the Debian-half PASS. A real wrapper that starts a
+sleeping child but never maps the candidate reports inconclusive, exit 1, with
+the owned child still alive. The reviewer then terminated that probe child.
+The local ignored reproduction is `.reviews/a.r4-resumed.probes.sh`; raw native
+run evidence is retained under `.reviews/a.r4-resumed.rhel-*`.
+
+No production code changed after these runs. The exact step 7 validation edit
+also passes staged whitespace checking.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+| Command | Sources | Independent result |
+| --- | --- | --- |
+| `bash src/utils/lint_shell.sh` | project, plan | Exit 0; 54 tracked scripts clean |
+| `bash docs/v0.27.0/verify.closure-check.sh --step 7` | plan | Native RHEL: exit 5, 115 cases, zero failures, acceptance unanswered |
+| `bash docs/v0.27.0/verify.closure-check.sh` | plan | Configured native RHEL: exit 5; steps 0–5 pass, step 6 awaits Debian, step 7 awaits acceptance |
+| `shellcheck docs/v0.27.0/verify.closure-check.sh` | plan | Exit 0 |
+| `rg -n 'toolchain-runtime-closure\|closure_check' wiki/` | plan | Exit 0; reference, explanation and index found |
+| `rg -n 'readelf\|sha256sum\|tar -t' src/setups/env/bin/install_pkg.sh` | request | Exit 1 with no matches, as the purity criterion requires |
+| `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` | request | Exit 0, empty |
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+The request's embedded validation set parses through the current ResolvedValidationCommand/ResolvedValidationSet contract. The current project declaration, plan commands and request additions resolve to the same seven commands with the same source labels and order. Added commands: none. Removed commands: none. Source-label drift: none. The full union ran; unavailable fresh Debian acceptance remains missing evidence.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Baseline request/index tree: ab5398de856fdde4fcc322a7a60d8d62e4b86ea1.
+Assessed tree after attributable metadata staging: 1f14be11a339ad4765093fd0c4b6f0a63a23500a.
+
+The ordered validation state covers all eleven staged step paths, including the exact validation plan. A capture after validation and before editing matched the original path digests and index. The final comparison reports acceptable=false with tracked_paths equal to the step 7 validation plan and `<index>`; no ignored or untracked path difference is reported. These two differences are the permitted reviewed-step metadata patch and its staging effect, proved against the pre-repair blob. No implementation or validation-command side effect was staged or reverted.
+
+The umbrella comparison is applicable and changed=false: both digests are 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. The protocol transcript's separate unstaged state was left untouched.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Repairs made:
+
+- Metadata only: update the exact step 7 validation assessment and missing-work rows, then stage the patch returned by attribute-reviewer-patch after git apply --cached --check. No substantive implementation repair.
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+The independent checker ran before assessment and again after metadata staging. Both runs return exit 0, state=valid, ready=true, with no diagnostics. All eleven staged paths belong to the reviewed step. The six ordered groups are:
+
+1. feat(closure): add the D10 evidence and policy module: src/setups/env/bin/closure_d10.sh.
+
+2. test(closure): add the step 7 suite and two-host gate: docs/v0.27.0/verify.closure-check.sh.
+
+3. docs(closure): record the operator root deletion: docs/v0.27.0/decision.operator-old-root.rhel.md.
+
+4. test(closure): retain the step 7 evidence and the trim measurement: docs/v0.27.0/verify.closure.step7.rhel.txt, docs/v0.27.0/verify.closure.step7.debian.txt, docs/v0.27.0/measurements.build-only-payload.rhel.txt.
+
+5. docs(closure): document the checker and its scope: src/setups/env/closure/README.md, wiki/reference/toolchain-runtime-closure.md, wiki/explanation/why-the-archive-declares-its-own-scope.md, wiki/README.md.
+
+6. docs(toolchain-runtime-closure): record step 7 validation: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md.
+
+Membership, ordering and conventional subjects are appropriate. Group 6's body remains inaccurate: its last bullet reopens adding missing build-tool libraries versus trimming the binaries, although the request records the confirmed promotion-trim decision. Refresh that body. Mechanical readiness does not establish the remaining implementation or acceptance floor, and it authorizes no commit. The reviewer did not amend a.commit.
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Unresolved findings:
+
+- [P1] Bind object usability to the owned PID (docs/v0.27.0/verify.closure-check.sh:7529). The branch accepts PROCESS for the owned PID but OBJECT for any PID. The real observer can emit PROCESS before UNUSABLE, then conclude from another usable process. A native branch probe with OWNED/PROCESS/UNUSABLE for PID 4242 and shipped objects/HOSTS=0 for PID 9999 reports Debian-half PASS and zero failures. Require usable objects and the zero-host result for the owned PID, reject its UNUSABLE record, and retain OWNED in the public trace.
+- [P2] Clean up wrapper children on readiness failure (docs/v0.27.0/verify.closure-check.sh:7395). The timeout kills and waits for only the launched wrapper although child already identifies a separate owned process. A real wrapper/sleep probe exits inconclusive with its child still running. Apply owned-child cleanup on timeout and early wrapper exit, and add executable controls for those paths; the current direct-interpreter check does not cover them.
+- [P2] Supply the carried whole-provider observation (docs/v0.27.0/verify.closure-check.sh:7425). step7_scope_listing only splits a colon-delimited directory list. It never inventories provider files, so STATIC|PASS plus those names does not provide the plan's listing over the whole provider set. Retain actual provider observations across the complete scope for the same archive identity and test missing/failed observations.
+- [P2] Remove private infrastructure identifiers from public evidence (docs/v0.27.0/measurements.build-only-payload.rhel.txt:2, docs/v0.27.0/decision.operator-old-root.rhel.md:3, and both step 7 captures). The staged content includes concrete host/account and CI workspace names prohibited by the ignored infrastructure-access instructions. Keep raw evidence locally; sanitize public paths using the established neutral vocabulary, label substitutions, and preserve observations and digests.
+- [P2] Remove or exercise the abandoned helper (docs/v0.27.0/verify.closure-check.sh:7239). step7_live_process has no caller; the branch probe only defines an equally unused override. This violates the required unreferenced-symbol check. Remove it and its dead override, or use the intended single process-selection path; update stale argv0/external-process comments accordingly.
+- [P2] Bring the commit description into agreement with the confirmed decision (a.commit, group 6). The final bullet presents adding libraries needed solely by build tools as an open alternative. The request and measurement already select trimming promoted build-only payload. Describe that decision and the separate sqlite work instead.
+
+Boundary-crossing work:
+
+- Umbrella item 7 owns the production promotion/package-list trim. The hardlink-copy measurement is useful evidence but does not apply that change to the shipped production payload. This reviewer does not alter that requirement or reopen its confirmed decision.
+- Umbrella item 6 owns restoring sqlite and retiring python-sqlite-support. The trimmed measurement still exits 3 with the active waiver, so it cannot satisfy the exit-0 archive acceptance.
+- After those owning changes, the workflow must produce the real archive and deliver it to the Debian 12 agent for whole-provider and owned-venv acceptance, then retain qualifying captures from both hosts. Fresh Debian delivery requires the separate CI workflow; no review-side commit or push is authorized here.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Address the mixed-PID false pass, wrapper failure cleanup and whole-provider listing in the step 7 harness, with controls that reproduce each failure before the fix. Remove the unused process helper and correct the related comments. Keep the step 6 observer and verifier boundaries intact.
+
+Sanitize all four staged evidence/decision files using neutral host and workspace labels, preserving raw evidence in ignored local files. Refresh group 6 of a.commit to match the confirmed trim decision and current missing work.
+
+The validation record now distinguishes completed round 4 fixes from remaining work. Keep its No status until the real production payload and two-host archive criteria are met. Coordinate item 7's promotion trim and item 6's sqlite repair through their owning workflow; the operator deletion is already discharged.
+
+Rerun lint, the affected native helper/branch cases, step 7 and the aggregate; retake RHEL and Debian captures for the final bytes and actual archive. Stage only the intended step changes, refresh the independent commit-plan result, and publish the next exact review request through the existing exchange. No commit is authorized by this answer.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Changes requested. The six-part readiness floor is:
+
+| Part | Result |
+| --- | --- |
+| Exact identity | Pass: plan, step 7, round 4, occurrence 1 and baseline tree agree |
+| Implementation complete | Fail: confirmed in-step acceptance defects and missing provider evidence |
+| Mandatory validation and coverage | Incomplete: independent RHEL checks recorded, acceptance unanswered, fresh independent Debian unavailable, an unreferenced harness helper remains |
+| Staged attribution | Pass: only the permitted step 7 validation metadata patch was staged by the reviewer; umbrella unchanged |
+| Unresolved findings | Fail: mixed-PID false pass, child leak, provider inventory and public-evidence defects remain |
+| Commit plan | Mechanically valid and ready; group 6 body needs semantic correction |
+
+No substantive repair was made in this round. The recommendation remains advisory. The request contains no literal Human guidance block.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 4)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-4 -->
+
+## Round 5 by requestor - Step 7
+
+- Recorded: 2026-09-11T21:55:04+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 5)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 5
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 5)
+
+request_index_tree: 8e8eccd07857b5671476337644a7836a848c95f2
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 evidence and the trim measurement
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 4 path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): record step 7 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 5)
+
+#### Writer assessment of step 7 at round 5 for step 7 toolchain-runtime-closure (round 5)
+
+Step 7 remains NOT fully implemented. All six round 4 findings are closed, one
+further defect was found by the agent while closing them, and the two owning
+dependencies are unchanged.
+
+##### The three code findings, and why two needed the second host for step 7 toolchain-runtime-closure (round 5)
+
+THE OWNED PID WAS NAMED AND NOTHING ELSE WAS BOUND TO IT. The branch took a
+`PROCESS` record for the process it launched and then accepted an `OBJECT`
+record for ANY pid, so a reading where the owned process was UNUSABLE and a
+DIFFERENT process supplied the objects and the zero-host result passed. The real
+observer emits that shape, since `PROCESS` is printed before the collection is
+attempted. The owned pid must now be named, carry objects, not be the unusable
+record, and be the pid the zero-host result is stated for. The reviewer's
+defeating shape is kept as the `unusable-owner` model with `owner-maps-host`
+beside it.
+
+THE REFUSAL PATHS LEAKED A WRAPPER'S CHILD. Reaping is now one function every
+exit calls, with an executable control that plants a wrapper carrying a child.
+
+THE LISTING WAS BOUNDARIES, NOT PROVIDERS. The branch enumerates the scope
+through the checker's own provider index and retains one record per lookup name.
+An inventory that could not be taken BLOCKS the half, which needed its own flag:
+`unanswered` raises no failure, so without it a scope whose inventory failed
+passed on an empty answer. `no-providers` and `malformed-providers` model both.
+
+##### The defect the agent found in the repair itself, twice for step 7 toolchain-runtime-closure (round 5)
+
+The reap control passed on the build host and failed on the agent. Two premises
+were wrong, one behind the other.
+
+A KILL MAKES A PROCESS DISAPPEAR. It does not: the target stays listed until it
+has exited AND been reaped. A bounded wait was added.
+
+AN ORPHAN GETS REAPED. Not everywhere. A killed orphan is reparented to PID 1,
+and this agent's PID 1 is the job's own command rather than an init that reaps,
+so the zombie is never collected and the wait could not succeed. Liveness is now
+read from the process STATE: a zombie holds no memory, maps nothing and runs
+nothing, so for the only question this harness asks it is gone.
+
+The same run also filled its capture with `/proc/<pid>/status: No such file or
+directory` for pids that exited during the parent scan. A process that
+disappeared has no parent to report, which is a return rather than a message.
+
+That is the third time in this exchange that an assumption true on the build
+host was false on the agent, on a branch whose subject is exactly that class of
+defect.
+
+##### The three evidence and hygiene findings for step 7 toolchain-runtime-closure (round 5)
+
+Infrastructure identifiers are substituted for the neutral vocabulary this
+repository already uses, and the substitution is labelled in each document. No
+committed document in this repository carried those names, and the step 5
+capture already records the rule, so this was a convention the writer had failed
+to follow rather than a new one. Observations, counts and digests are unaltered.
+
+`step7_live_process` is removed with its dead probe override. The group 6 commit
+body now describes the settled payload decision instead of presenting it as an
+open alternative.
+
+##### Test evidence at round 5 for step 7 toolchain-runtime-closure (round 5)
+
+RHEL 9.8, harness `06be3391`: `--step 7` reports 126 cases and 0 failures, and
+the every-step aggregate reports OBJECTIVE MET for steps 0 through 5. Debian 12,
+build 161 on the delivered bytes: 0 failures anywhere, steps 0 through 6 all
+OBJECTIVE MET, aggregate 5, and no `/proc` diagnostics in the capture. Lint
+clean over 54 scripts, shellcheck clean, installer purity silent, untouched
+check at exit 0. Independent `commit-plan-check` valid and ready over 11 paths.
+
+##### What remains, unchanged and owned elsewhere for step 7 toolchain-runtime-closure (round 5)
+
+Real packaged-archive acceptance is unanswered. The payload trim is umbrella
+item 7's and the measurement sizes it: 83 entries, 21 unresolvable names and 2
+family rows to zero, 194M saved. The sqlite waiver is umbrella item 6's and
+keeps the trimmed tree at exit 3, which is deliberately not a pass. Step 7 stays
+`No`.
+
+##### Staged membership for step 7 toolchain-runtime-closure (round 5)
+
+Eleven paths, unchanged since round 4. `a.commit` is unamended this round: no
+change altered group membership, order, scope or subject accuracy.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 5)
+
+#### What changed between round 4 and round 5 for step 7 toolchain-runtime-closure (round 5)
+
+##### Binding the whole reading to the owned pid for step 7 toolchain-runtime-closure (round 5)
+
+`step7_debian_half` asserted `PROCESS|<owned>` and then `OBJECT|` for any pid.
+It now requires four things of the owned pid separately: it is named, it carries
+an `OBJECT` record, it is NOT the `UNUSABLE` record, and it is the pid the
+`HOSTS|<pid>|0` result is stated for. The `OWNED|` record is retained in the
+public trace so a reader can check the binding rather than trust it.
+
+Two report models carry the shapes: `unusable-owner`, which is the reviewer's
+own defeating case where the owned process is named then reported unusable while
+another supplies the objects, and `owner-maps-host`, where the run's verdict
+line is conclusive while the owned pid's host count is not zero.
+
+##### One reaping path, and what "reaped" means for step 7 toolchain-runtime-closure (round 5)
+
+`step7_reap` is the single place the helper gives back what it took: the owned
+child first, the launched process second, `wait` only on the pid this shell
+started. Every exit from the helper calls it, including the timeout and
+early-exit refusals that previously killed only the launched pid.
+
+`step7_process_live` answers whether a pid is a RUNNING process as opposed to
+absent or a zombie, read from the `State` field. `step7_await_gone` waits,
+bounded, for a pid to stop being live. Every liveness assertion in the suite
+goes through the first of those.
+
+The zombie distinction is the agent's finding rather than a refinement: a killed
+orphan is reparented to PID 1, and where PID 1 does not reap, `/proc/<pid>`
+never disappears. A zombie holds no memory, maps nothing and runs nothing, so
+for the only question this harness asks it is gone.
+
+`step7_parent_of` now tests readability before its redirect, because scanning
+`/proc` races every process that exits during the scan and the shell's own
+diagnostic reaches the capture regardless of what the compound command
+redirects.
+
+##### The whole-provider listing for step 7 toolchain-runtime-closure (round 5)
+
+`step7_provider_listing` enumerates the observed scope through the checker's own
+`closure_provider_index`, the same index the membership invariant resolves
+against, and prints one `PROVIDER|<name>|<paths>` record per lookup name. The
+index is built once for the whole scope, so the listing costs one enumeration
+rather than one per provider. It fails rather than printing nothing when the
+index could not be built or came back empty.
+
+The branch retains every record, asserts they are well formed, and tracks
+whether the listing was taken at all. That flag is load bearing: `unanswered`
+records an obligation without raising a failure, so the half would otherwise
+have passed on an inventory nobody could take.
+
+##### The probe, extended again for step 7 toolchain-runtime-closure (round 5)
+
+`no-providers` and `malformed-providers` join the models. The loop's two
+expectations are now separate, because a scenario can be refused by a failed
+ASSERTION or by an UNANSWERED OBLIGATION and this effort keeps those apart
+everywhere else: only `good` passes the half, `no-providers` refuses it with
+every assertion clean, and every other scenario refuses it by failing an
+assertion that names what was wrong.
+
+##### The executable control for the wrapper path for step 7 toolchain-runtime-closure (round 5)
+
+A fixture plants the shape the project entry point actually has, a wrapper that
+outlives its own launch with a child that never maps the candidate, waits for
+the child to appear, reaps through `step7_reap`, and requires both to be gone.
+The direct-interpreter case cannot cover it, because there the two pids are the
+same.
+
+##### Removals and evidence for step 7 toolchain-runtime-closure (round 5)
+
+`step7_live_process` is gone with its dead probe override, and the comment in
+its place records why: pid ownership replaced name selection, so a helper that
+supplied a name had no caller left. `CPLX_ACCEPTANCE_PROCESS` still means
+something and is read where it is used.
+
+Both captures and the two evidence documents are sanitized to the repository's
+neutral vocabulary with the substitution labelled, and both captures are
+regenerated from the final bytes: RHEL harness `06be3391` at 126 cases and 0
+failures, Debian build 161 with 0 failures and no `/proc` diagnostics.
+
+`a.commit` group 6's final bullet now records the settled payload decision and
+the separate sqlite work rather than offering the decision as open.
+
+### Change summary for step 7 toolchain-runtime-closure (round 5)
+
+#### Staged paths and commit plan at round 5 for step 7 toolchain-runtime-closure (round 5)
+
+##### Eleven staged paths, unchanged in membership since round 4 for step 7 toolchain-runtime-closure (round 5)
+
+| Path | State | Changed since round 4 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_d10.sh` | added | unchanged at 524 lines |
+| `docs/v0.27.0/verify.closure-check.sh` | modified | owned-pid binding, one reaping path, liveness by process state, the provider listing and its blocking flag, four new models, the wrapper control, the helper removal |
+| `docs/v0.27.0/decision.operator-old-root.rhel.md` | added | sanitized, substitution labelled |
+| `docs/v0.27.0/measurements.build-only-payload.rhel.txt` | added | sanitized, substitution labelled |
+| `docs/v0.27.0/verify.closure.step7.rhel.txt` | added | regenerated, harness `06be3391`, 126 cases, 0 failures, sanitized |
+| `docs/v0.27.0/verify.closure.step7.debian.txt` | added | regenerated from build 161, 0 failures, no `/proc` diagnostics, sanitized |
+| `src/setups/env/closure/README.md` | modified | unchanged |
+| `wiki/reference/toolchain-runtime-closure.md` | added | unchanged |
+| `wiki/explanation/why-the-archive-declares-its-own-scope.md` | added | unchanged |
+| `wiki/README.md` | modified | unchanged |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | modified | the five closed round 4 bullets removed and recorded |
+
+The protocol transcript stays deliberately unstaged, as in every round.
+
+##### `a.commit`, unamended this round for step 7 toolchain-runtime-closure (round 5)
+
+Group 4 was widened at round 4 to carry the measurement beside the two captures.
+Nothing this round changed membership, order, scope or subject accuracy, so the
+plan is untouched. Group 6's BODY changed, which is a wording repair inside an
+existing group and not an amendment to the grouping.
+
+| # | Subject | Paths |
+| --- | --- | --- |
+| 1 | `feat(closure): add the D10 evidence and policy module` | `closure_d10.sh` |
+| 2 | `test(closure): add the step 7 suite and two-host gate` | `verify.closure-check.sh` |
+| 3 | `docs(closure): record the operator root deletion` | `decision.operator-old-root.rhel.md` |
+| 4 | `test(closure): retain the step 7 evidence and the trim measurement` | both captures and the measurement |
+| 5 | `docs(closure): document the checker and its scope` | bundle README, both wiki pages, wiki index |
+| 6 | `docs(toolchain-runtime-closure): record step 7 validation` | the validation plan |
+
+Independent `commit-plan-check.bat --format json` returns `state: valid`,
+`ready: true`, no diagnostics, over all eleven paths.
+
+##### Line budget at round 5 for step 7 toolchain-runtime-closure (round 5)
+
+No shipped script is above the 650-line ceiling and none changed this round.
+`closure_d10.sh` stays at 524, inside the below-550 band. `closure_publish.sh`
+remains at exactly 650 with no line added by this step.
+
+##### The pipeline half, outside this plan's staged scope for step 7 toolchain-runtime-closure (round 5)
+
+Three further commits on the my-project `develop` branch, pushed to the cicd
+remote only: the round 4 acceptance repairs, the reap wait, and the zombie-aware
+liveness. Debian build 161 is the run of the last of those.
+
+#### Writer response for step 7 toolchain-runtime-closure (round 5)
+
+##### Accepted in full, with no reversal for step 7 toolchain-runtime-closure (round 5)
+
+Both round 4 repairs are retained as staged, and the writer reversed nothing, so
+there is no disagreement to record.
+
+##### The lead finding was a hole the writer's own model missed for step 7 toolchain-runtime-closure (round 5)
+
+Round 4 built a reading where the owned process is named and then reported
+UNUSABLE while a different process supplies the objects and the zero-host
+result, and the branch passed it. The writer had added an `unowned-trace` model
+one round earlier and it did not catch this, because it planted a trace with no
+owned record at all rather than one where the owned record is present and
+worthless. The distinction is the finding: naming the pid is not binding the
+reading to it. Both shapes are now modelled.
+
+##### The agent found the rest, and the writer got the fix wrong once for step 7 toolchain-runtime-closure (round 5)
+
+The reap control passed on the build host and failed on the agent, and the first
+repair was still wrong. A bounded wait assumes the target will eventually
+disappear; where PID 1 does not reap, it never does. The second repair changes
+what is being asked rather than how long it waits: a zombie holds no memory,
+maps nothing and runs nothing, so for the only question this harness asks it is
+gone.
+
+The writer records that as a miss rather than a refinement. The first fix was
+reasoned from the build host's behaviour a second time, after that exact mistake
+had already been made once in this exchange.
+
+##### The identifier finding was a rule the writer failed to follow for step 7 toolchain-runtime-closure (round 5)
+
+Round 4 was right and the writer should have caught it unaided. The check is
+cheap and conclusive: no committed document in this repository carries those
+names, and the step 5 capture already records the substitution as the
+repository's own rule. The evidence is sanitized, the substitution is labelled,
+and observations, counts and digests are unaltered.
+
+##### What the writer asks the reviewer to weigh at round 5 for step 7 toolchain-runtime-closure (round 5)
+
+The success path of the real acceptance has still not run over a packaged
+archive, and this round does not claim it has. What has run end to end, on the
+build host, is the helper's own machinery: a venv created from the candidate, an
+owned pid, an observer inventory of that pid, a typed verdict and a reaped
+child. The agent exercises the refusal path and the report models.
+
+The reviewer may hold that the branch cannot be accepted until it has run green
+over a real artifact. That judgment is the reviewer's and the writer does not
+argue it; the assessment records what executed and what did not, separately.
+
+##### Two standing decisions, named again for step 7 toolchain-runtime-closure (round 5)
+
+Step 0's absent-suite control stays retired rather than preserved over an
+invented subject, and group 6's commit subject stays at 56 characters because
+the readiness checker enforces that exact marker. No round has challenged
+either, and the writer does not read that silence as agreement.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 5)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-5 -->
+
+## Round 5 by reviewer - Step 7
+
+- Recorded: 2026-09-11T22:13:19+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Baseline index tree: 8e8eccd07857b5671476337644a7836a848c95f2
+
+Assessed index tree: 22f41cd9dab7c1a30f50471d7c870f1335003824
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Result:
+
+No. Step 7 has NOT been fully implemented.
+
+The D10 module, suite and documentation are implemented, but acceptance remains
+incomplete. Round 5 closes the mixed-PID false pass, the known-child timeout
+leak, the missing provider inventory and the obsolete helper finding. Public
+evidence uses labelled neutral substitutions. An independent early-exit probe
+still leaves a wrapper's child alive when the wrapper exits before discovery,
+and the external-process option cannot supply the required OWNED record.
+
+The exact staged harness is `06be3391`. Independent RHEL execution reports
+126 cases, zero failures and exit 5 for step 7; the aggregate passes steps 0
+through 5 and returns 5. Submitted Debian build 161 identifies the same harness
+and leaves archive acceptance unanswered. Neither result completes acceptance.
+
+The confirmed payload trim belongs to umbrella item 7 and sqlite restoration
+and waiver retirement to item 6. The retained trim measures a copy; no qualifying
+packaged archive has reached this acceptance. The operator prerequisite remains
+discharged under `decision.operator-old-root.rhel.md`.
+
+The mixed-PID, known-child timeout, provider-inventory, obsolete-symbol and infrastructure-identifier findings are closed at the scope tested. The settled trim/sqlite decision is retained. The early-wrapper-exit path remains incomplete, and the advertised external-process path cannot satisfy the new ownership gate. No production repair was made.
+
+Validation plan effects:
+
+Updated and staged only docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md, exact Step 7 rows: refreshed the stale summary, replaced resolved/duplicated missing-work claims, recorded round 5 independent evidence, and corrected the obsolete unreferenced-symbol finding. Earlier steps and the umbrella are unchanged. This is polishing-only review metadata.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+The immutable request tree is 8e8eccd07857b5671476337644a7836a848c95f2. Native RHEL execution used harness SHA-256 06be3391ab183899f5e90f41b9a8ff856ccf756b90fdf435e731fa70ebbc3403 and the existing tools Git on PATH.
+
+- bash src/utils/lint_shell.sh: exit 0, 54 scripts, clean.
+- shellcheck docs/v0.27.0/verify.closure-check.sh: exit 0.
+- Wiki discovery: exit 0; reference and explanation present.
+- Installer purity: no matches, expected exit 1; installer HEAD diff: exit 0.
+- Native RHEL --step 7: exit 5, 126 cases, zero failures; both acceptance halves unanswered.
+- Native RHEL aggregate: exit 5; steps 0 through 5 exit 0, step 6 awaits Debian, step 7 awaits closed-payload acceptance.
+- Independent real-helper timeout probe: exit 1, no live child survives. Early-wrapper-exit probe: exit 1, child survives; reviewer then stopped only that probe child.
+- Independent branch controls: good passes; unusable owned PID fails three assertions, owned host object fails one, absent providers block the half without a failed assertion, malformed provider record fails one. The real provider helper emits PROVIDER|libexample.so|2 for one lookup name in two scope directories.
+- External-process report control: otherwise good observer output without OWNED, matching started=no, fails three ownership assertions.
+- Static symbol inspection finds callers/test references for all newly added functions. All shipped scripts remain at or below 650 lines; D10 remains 524.
+- Submitted Debian build 161 identifies the same harness, reports zero failures and aggregate 5 with acceptance unanswered. This is reviewed supporting evidence, not a fresh independent reviewer run; the latter requires the owning CI delivery workflow.
+- Final staged whitespace check: exit 0. Only metadata changed after these executions; no further production rerun is justified.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+- bash src/utils/lint_shell.sh [sources: project, plan]
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 [sources: plan]
+- bash docs/v0.27.0/verify.closure-check.sh [sources: plan]
+- shellcheck docs/v0.27.0/verify.closure-check.sh [sources: plan]
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ [sources: plan]
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh [sources: request]
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh [sources: request]
+
+The required union contains these seven commands; all were run. Native Linux commands ran against an archived staged snapshot. Missing real-archive/Debian completion evidence is reported, never inferred from model results.
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+The request parses through the current shared resolver. Added commands: none. Removed commands: none. Source-label changes: none. The command union equals the submitted seven-command set.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Shared evidence baseline index: 8e8eccd07857b5671476337644a7836a848c95f2. Post-test state matches baseline exactly: acceptable=true, no tracked/untracked side effects. After the attributed metadata patch, assessed index: 22f41cd9dab7c1a30f50471d7c870f1335003824. The final raw comparison reports acceptable=false only for the Step 7 validation file and `<index>`; these are the expected permitted metadata edit and its staging. All other ten staged path digests match. Shared attribute-reviewer-patch reports attributable=true, and only that exact patch was staged. a.commit has an empty reviewer patch. Umbrella digest remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. The protocol transcript is the sole unstaged path and was not read or edited as working context.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Repairs made:
+
+- Polishing-only: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md — exact Step 7 assessment/evidence metadata, attributable and staged. No implementation or test repair.
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Independent commit-plan-check was run before assessment and after metadata staging. Both results: schema_version=1, state=valid, ready=true, diagnostics=[]; eleven staged paths in six ordered groups. Current ordered groups:
+
+1. feat(closure): add the D10 evidence and policy module: src/setups/env/bin/closure_d10.sh
+2. test(closure): add the step 7 suite and two-host gate: docs/v0.27.0/verify.closure-check.sh
+3. docs(closure): record the operator root deletion: docs/v0.27.0/decision.operator-old-root.rhel.md
+4. test(closure): retain the step 7 evidence and the trim measurement: docs/v0.27.0/verify.closure.step7.rhel.txt, docs/v0.27.0/verify.closure.step7.debian.txt, docs/v0.27.0/measurements.build-only-payload.rhel.txt
+5. docs(closure): document the checker and its scope: src/setups/env/closure/README.md, wiki/reference/toolchain-runtime-closure.md, wiki/explanation/why-the-archive-declares-its-own-scope.md, wiki/README.md
+6. docs(toolchain-runtime-closure): record step 7 validation: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+
+Membership, ordering, scope and conventional subjects remain accurate, so the reviewer leaves a.commit untouched. Descriptive bodies still need refreshing: group 4 says 115 cases/build 158, while round 5 is 126/build 161; group 6 still calls provider inventory incomplete. Its confirmed trim and sqlite wording is correct. Mechanical readiness does not establish complete implementation or accurate prose.
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Unresolved findings:
+
+- P2 — Early wrapper exit still leaks its child (docs/v0.27.0/verify.closure-check.sh:7429 and :7446). The helper checks wrapper liveness before discovering its child. A wrapper that launches a sleeping child then exits can leave child empty when step7_reap runs. The real probe returns 1 with owned-child-survived=yes. The new control at :8243 calls step7_reap directly with an already discovered child and cannot exercise this path. Establish invocation ownership before the parent can disappear and retain actual-helper timeout and early-exit controls.
+- P2 — CPLX_ACCEPTANCE_PROCESS cannot produce a passing half (docs/v0.27.0/verify.closure-check.sh:7396, :7559 and :7671). This option selects started=no; the helper returns closure_observe_live.sh output without OWNED. The acceptance unconditionally requires OWNED plus that PID's PROCESS, OBJECT and HOSTS records. An otherwise conclusive external report therefore fails three assertions. Make the supported mode prove a specific candidate-venv PID or remove the unsupported mode and its public claims; do not reintroduce acceptance by process name alone.
+- P2 — Required real acceptance remains incomplete. The RHEL tree has 21 unresolved names and two family refusals; neither retained half passes. No unmodified packaged archive has supplied rule 1's 20-name positive control and Debian provider/live evidence. Keep Step 7 No until owning payload changes and final host runs answer these requirements.
+- P3 — a.commit descriptions lag the reviewed snapshot: group 4 has round 4 case/build numbers and group 6 still names missing provider inventory. Group membership and subjects are mechanically correct; refresh these bodies before committing.
+
+Boundary-crossing work:
+
+- Umbrella item 7 owns the confirmed production promotion/package-list trim; the measurement of a hardlink copy is supporting evidence, not that production change.
+- Umbrella item 6 owns sqlite restoration and retiring python-sqlite-support; the trimmed copy's exit 3 cannot count as acceptance exit 0.
+- The owning build/CI workflow must package the repaired payload and deliver final bytes to Debian for the real archive positive control, whole-provider inventory, attributed venv trace and retained passing halves. Reviewer mode does not commit, push, alter production payload, or complete umbrella rows.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Retain the reviewer’s exact Step 7 metadata patch and the confirmed round 5 repairs. Fix child ownership across an early wrapper exit and test through step7_candidate_live_evidence rather than only calling step7_reap directly. Resolve the external-process mode consistently with candidate/PID attribution, updating its public claims and adding an option-path control. Refresh group 4/6 commit-body descriptions and the next captures' commentary to match what actually runs.
+
+Then publish the next exact staged request with the refreshed validation set and final-byte evidence. Keep the owning item 7 trim and item 6 sqlite work separate from this reviewed step, and keep Step 7 No until actual packaged-archive acceptance succeeds. A new green fixture run alone cannot close those missing results. Do not weaken the PID checks or interpret an unanswered/waived acceptance as a pass.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Changes requested. Identity and attributable staged scope pass. The commit plan's mechanical grouping passes, but its descriptions lag. Completeness, mandatory acceptance evidence and the absence of unresolved findings fail. All available local checks and independent RHEL suites ran; the native step still returns 5, and independent probes expose two remaining option/lifecycle gaps. This round changes only polishing review metadata, so no substantive-repair flag is claimed. The recommendation does not authorize a commit.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 5)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-5 -->
+
+## Round 6 by requestor - Step 7
+
+- Recorded: 2026-09-11T23:42:51+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 6)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 6
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 6)
+
+request_index_tree: 771bc6e4a9f1888997f109651aa5766ea3ade5c4
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 evidence and the trim measurement
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 4 path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): record step 7 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 6)
+
+#### Assessment for step 7 toolchain-runtime-closure (round 6)
+
+Step 7 remains NOT fully implemented, and this round changes nothing about why.
+Both round 5 code findings are closed, the commit bodies are refreshed, and the
+third finding is the same one that has stood since round 1: the payload the gate
+judges is not closed, and closing it belongs to umbrella items 6 and 7.
+
+#### The two lifecycle findings, and what was actually wrong for step 7 toolchain-runtime-closure (round 6)
+
+##### Ownership had to survive the event that destroyed it for step 7 toolchain-runtime-closure (round 6)
+
+Round 4 made reaping one function and handed it the child it had discovered.
+That is the one shape the defect cannot take. A launch that exits BEFORE its
+child is discovered reparents that child to PID 1, and from that moment no
+`PPid` scan can attribute it: the helper could refuse with an interpreter of its
+own still running and no name left for it.
+
+Ownership is now the PATH the process was launched from, read from its own
+command line. The venv root is unique to the run, so anything whose command line
+carries it is this run's process wherever it has since been reparented. That is
+an attribution marker which survives the very event that broke the previous one.
+Two further changes follow from it: the discovery loop establishes ownership
+BEFORE it tests liveness, and every exit sweeps the whole venv rather than only
+the child the helper happened to hold.
+
+##### A mode that could not pass is not an alternative for step 7 toolchain-runtime-closure (round 6)
+
+`CPLX_ACCEPTANCE_PROCESS` returned the observer's output with no `OWNED` record,
+while round 4's repair made the acceptance require that pid in three separate
+assertions. The finding offered two ways out and the writer took the second: the
+mode is REMOVED, with its public claims, rather than taught to prove a pid it
+never had. The branch now has one way to take the live half, which is to start a
+process it owns. There is consequently no option path left to control, and the
+request says so rather than reporting a control that does not exist.
+
+#### The control the reviewer asked for, and the proof it works for step 7 toolchain-runtime-closure (round 6)
+
+The reviewer's objection to the round 4 control was exact: it calls
+`step7_reap` directly with an already discovered child and cannot exercise the
+early-exit path. The new control drives `step7_candidate_live_evidence` ITSELF
+over a planted candidate interpreter whose `-m venv` writes an entry point that
+backgrounds a sleeper and returns at once. Nothing is stubbed: the helper
+creates the venv, launches it, loses the launched process, and has to recover a
+survivor it never held.
+
+IT RECORDS ITS OWN SURVIVOR, so it cannot pass vacuously. The planted entry
+point writes the pid it backgrounded; a plant that launched nothing fails the
+run instead of passing quietly. That pid sleeps for a minute and the helper
+takes about fifteen seconds, so finding it gone afterwards means something
+killed it, and the only mechanism that could is the sweep over the venv path.
+
+IT WAS DEFEATED ON PURPOSE BEFORE IT WAS TRUSTED. With the sweep disabled in a
+copy of the RHEL subset, the same 130 cases report 2 failures,
+`the-survivor-was-reaped want [no] got [yes]` and
+`nothing-of-the-venv-is-left want [] got [2822881]`. With the sweep in place,
+130 cases and no failure. The same control spends the helper's whole deadline,
+so the bounded wait is exercised here too and ends in a typed answer rather than
+in a hang.
+
+#### Test evidence at round 6 for step 7 toolchain-runtime-closure (round 6)
+
+RHEL 9.8, harness `5c19e33d`: `--step 7` reports 130 cases and 0 failures, and
+the every-step aggregate reports OBJECTIVE MET for steps 0 through 5, step 6
+correctly unanswered as the agent's half, and aggregate exit 5. Debian 12, build
+162 on the delivered bytes: 0 failures anywhere, steps 0 through 6 all OBJECTIVE
+MET, step 7 reporting 124 cases and 0 failures, aggregate 5, and the run
+recording the RHEL capture it read by digest `d485118b`. Lint clean over 54
+tracked scripts, shellcheck clean over the harness, installer purity silent,
+untouched check at exit 0.
+
+#### What remains, unchanged and owned elsewhere for step 7 toolchain-runtime-closure (round 6)
+
+Real packaged-archive acceptance is unanswered and cannot be answered from here.
+The payload trim is umbrella item 7's and the measurement sizes it: 83 entries,
+21 unresolvable names and 2 family rows to zero, 194M saved. The sqlite waiver
+is umbrella item 6's and keeps even the trimmed tree at exit 3, which is
+deliberately not a pass. Step 7 stays `No`.
+
+#### Staged membership for step 7 toolchain-runtime-closure (round 6)
+
+Eleven paths, unchanged in membership since round 4. `a.commit` IS amended this
+round: groups 4 and 6 carried round 4 numbers and a delivered item still listed
+as missing, which the round 5 answer named as its P3.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 6)
+
+#### What changed between round 5 and round 6 for step 7 toolchain-runtime-closure (round 6)
+
+##### Ownership by launch path, in `step7_venv_processes` for step 7 toolchain-runtime-closure (round 6)
+
+A new function enumerates every process whose command line carries the venv
+root, one pid per line. The venv root is created fresh under the harness scratch
+for each call, so a command line carrying it belongs to this run and to no other
+process on the machine. `PPid` is no longer consulted for ownership.
+
+##### The discovery loop, reordered for step 7 toolchain-runtime-closure (round 6)
+
+`step7_candidate_live_evidence` used to ask whether the launched process was
+still alive first and search for a child second, so a wrapper that exited
+immediately left `child` empty with the child already beyond reach. The loop now
+searches the venv's processes first and only then tests the deadline, and the
+deadline itself ends on "nothing of this venv is running" rather than on "the
+launched pid has gone", because a wrapper may legitimately exit the instant its
+child is up and that child is the subject.
+
+The first refusal changed with it: `[ -z "$child" ] && ! step7_process_live
+"$pid"` rather than the liveness test alone, so a live child is never thrown
+away because its parent went first.
+
+##### `step7_reap` sweeps the venv for step 7 toolchain-runtime-closure (round 6)
+
+The function takes the venv root as a third argument and, after killing the
+discovered child and the launched pid, kills every remaining process of that
+venv and waits for each to be gone. Reaping what was discovered is not the same
+as reaping what was launched, and this is the one place that decides it.
+
+##### The operator-named mode is removed for step 7 toolchain-runtime-closure (round 6)
+
+`CPLX_ACCEPTANCE_PROCESS` is gone: the branch no longer reads it, the helper
+signature lost the `want` and `started` parameters it existed for, all three
+call sites were updated, and no reference to the name remains anywhere in the
+harness. The dead `${comm:-$want}` fallback at the observer call went with it;
+the observer is now asked for `${comm:-unknown}`, which is the same name the
+`OWNED` record prints, so the trace and the record cannot disagree.
+
+The two driver-level controls that needed a process name keep one locally. They
+model the branch's decision over planted reports and never start anything.
+
+##### The early-exit control, through the actual helper for step 7 toolchain-runtime-closure (round 6)
+
+Four cases after the reap control:
+
+- `early-exit/is-inconclusive`, the typed refusal naming the exited venv process;
+- `early-exit/the-plant-left-a-survivor`, the non-vacuity proof;
+- `early-exit/the-survivor-was-reaped`, the recorded pid gone afterwards;
+- `early-exit/nothing-of-the-venv-is-left`, the scan empty.
+
+The plant is a candidate interpreter that answers `-m venv <root>` by writing an
+entry point which backgrounds `( exec -a "<root>/bin/vsleeper" sleep 60 ) &`,
+records `$!`, and exits 0. `exec -a` gives the survivor an `argv0` under the
+venv root, which is what makes it findable by launch path and NOT by parentage,
+and the subshell is replaced rather than forked twice, so the control leaves no
+stray `sleep` of its own behind.
+
+##### The retained RHEL capture for step 7 toolchain-runtime-closure (round 6)
+
+Regenerated from the same bytes, and three prose corrections went with it: the
+sentence describing the operator-named mode as available is replaced, the
+round 4 paragraph that said "two cases call it directly" now says what round 4
+gave and what round 5 added, and the quoted `OWNED|` pid is this run's rather
+than the previous run's. A round 5 section records the two findings, the new
+control and the deliberate defeat.
+
+##### `a.commit` for step 7 toolchain-runtime-closure (round 6)
+
+Group 2's `What` gained four bullets for the ownership repair. Group 4 carries
+130 cases and build 162 rather than 115 and build 158, and records the
+control's deliberate defeat. Group 6 no longer lists the provider inventory as
+missing and records the two lifecycle findings round 5 closed.
+
+##### The validation record for step 7 toolchain-runtime-closure (round 6)
+
+The step 7 verdict summary, the implemented list and the missing-work list are
+refreshed against this round. The reviewer's own round 5 metadata patch is
+retained unchanged; the two closed items moved out of missing work and into
+what was implemented, with the numbers this round measured.
+
+### Change summary for step 7 toolchain-runtime-closure (round 6)
+
+#### Staged paths for step 7 toolchain-runtime-closure (round 6)
+
+Eleven paths, unchanged in membership since round 4. Two changed content this
+round; `a.commit` changed beside them and is not staged.
+
+- `docs/v0.27.0/verify.closure-check.sh`, the ownership repair, the mode removal
+  and the four new early-exit cases
+- `docs/v0.27.0/verify.closure.step7.rhel.txt`, retaken over the repaired bytes:
+  130 cases, no failure, plus the round 5 section and three prose corrections
+- `docs/v0.27.0/verify.closure.step7.debian.txt`, retaken from build 162's
+  archived artifact: no failure anywhere, steps 0 to 6 met, aggregate 5
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`, the
+  refreshed verdict, the round 6 implemented entry and the shortened missing
+  work list, over the reviewer's retained round 5 metadata patch
+- `src/setups/env/bin/closure_d10.sh`, unchanged since round 1
+- `docs/v0.27.0/decision.operator-old-root.rhel.md`, unchanged
+- `docs/v0.27.0/measurements.build-only-payload.rhel.txt`, unchanged
+- `src/setups/env/closure/README.md`, `wiki/reference/toolchain-runtime-closure.md`,
+  `wiki/explanation/why-the-archive-declares-its-own-scope.md`, `wiki/README.md`,
+  unchanged
+
+The review transcript is not staged: it grows with every round of this exchange,
+so it belongs to the residual pass of an authorized commit rather than to a
+group fixed now.
+
+#### `a.commit`, amended this round for step 7 toolchain-runtime-closure (round 6)
+
+Group membership, order, scope and subjects are untouched. Three bodies changed:
+
+- group 2 gained four bullets for the ownership repair and the mode removal
+- group 4 now says 130 cases and build 162 rather than 115 and build 158, and
+  records the early-exit control's deliberate defeat
+- group 6 no longer lists the provider inventory as missing work and records
+  the two lifecycle findings round 5 closed
+
+That was the round 5 answer's P3, stated as a precondition of committing.
+
+#### Changes in the other repository, already landed for step 7 toolchain-runtime-closure (round 6)
+
+Not staged here and not part of this commit plan. The Debian half of the
+acceptance is taken by a pipeline this plan owns the diagnostics of:
+
+- `00c68682` `ci(closure): carry the step 7 round 5 ownership repair`
+
+Pushed to `develop` on the cicd remote as a clean fast-forward from `db763c4d`,
+and run as build 162. It carries two transport copies: the harness
+`5c19e33d` and the RHEL capture `d485118b`, which the agent read as the other
+half and recorded by digest.
+
+#### What a reader should check first for step 7 toolchain-runtime-closure (round 6)
+
+The early-exit control at `docs/v0.27.0/verify.closure-check.sh:8320`, and
+whether its non-vacuity proof is sound: the plant records the pid it
+backgrounded, and the assertion is that the pid is gone after the helper
+returned. The deliberate-defeat run is offered as the independent evidence that
+the control can fail.
+
+### Writer response for step 7 toolchain-runtime-closure (round 6)
+
+Writer response:
+
+#### Response to the round 5 answer for step 7 toolchain-runtime-closure (round 6)
+
+Accepted in full. No disagreement is recorded, and the reviewer's staged step 7
+validation metadata patch is retained unchanged.
+
+##### The lead finding was a hole the writer's own control was shaped to miss for step 7 toolchain-runtime-closure (round 6)
+
+The reviewer named it exactly: the round 4 control "calls `step7_reap` directly
+with an already discovered child and cannot exercise this path". That is right,
+and it is the second time in this exchange that a control was written around the
+repair instead of around the defect. The repair had made reaping one function,
+so the control tested the function; the defect was never in the function, it was
+in arriving there with nothing to pass it.
+
+The new control therefore starts where the defect starts, at
+`step7_candidate_live_evidence`, and the plant is the shape that destroys
+attribution rather than a shape that preserves it. It also records the survivor
+it leaves, because a control for a leak that cannot tell "nothing leaked" from
+"nothing was started" proves nothing, and it was run against a deliberately
+broken sweep before it was trusted.
+
+##### The second finding was resolved by removal, which the finding allowed for step 7 toolchain-runtime-closure (round 6)
+
+The reviewer offered two resolutions for `CPLX_ACCEPTANCE_PROCESS` and the
+writer took the removal. A mode whose output cannot satisfy three assertions the
+same branch makes unconditionally was never an alternative path; it was an
+unreachable one that read as a supported feature. Removing it is smaller than
+teaching it to prove a pid it does not have, and it cannot drift back into
+acceptance by process name.
+
+One instruction is consequently not followed as literally written: "adding an
+option-path control" has no subject once the option is gone. There is no control
+for a removed mode, and the request says that plainly rather than presenting the
+driver-level controls as if they covered it.
+
+##### The third finding is unchanged and is not the writer's to close for step 7 toolchain-runtime-closure (round 6)
+
+Real packaged-archive acceptance stays unanswered. The RHEL tree still carries
+21 unresolved names and two family refusals, neither retained half passes, and
+no unmodified packaged archive has supplied rule 1's positive control or the
+Debian provider and live evidence. Step 7 stays `No`, and the request does not
+present a green suite over the current payload as progress toward that.
+
+##### The fourth finding was a discipline failure and is closed for step 7 toolchain-runtime-closure (round 6)
+
+Groups 4 and 6 described a snapshot two rounds old. They are refreshed against
+this round's own numbers, and group 2 gained the bullets for the code that
+changed under it.
+
+##### What the writer asks the reviewer to weigh for step 7 toolchain-runtime-closure (round 6)
+
+Whether the early-exit control's non-vacuity proof is the right one. It infers
+"the sweep killed it" from a recorded pid that slept for sixty seconds being
+absent after a fifteen-second helper. The alternative, observing the survivor
+alive DURING the helper's deadline, is not available to a synchronous caller
+without a second process, and the deliberate-defeat run is offered as the
+stronger evidence in its place.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 6)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-6 -->
+
+## Round 6 by reviewer - Step 7
+
+- Recorded: 2026-09-12T00:15:13+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Baseline index tree: 771bc6e4a9f1888997f109651aa5766ea3ade5c4
+
+Assessed index tree: 98e4a86de9246d2464a8e29c0f0be5da2daa1b10
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Result:
+
+No. Step 7 has NOT been fully implemented. The D10 evidence/policy/convergence module, provider listing and documentation are present. Removal of the unusable external-process mode closes that finding. The replacement ownership scan still misses an ordinary wrapper child without a venv path in its arguments, and both real-archive acceptance halves remain unanswered. The assessed plan is docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md, Step 7; umbrella docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md; round 6, occurrence 1. No Human guidance block was supplied.
+
+Validation plan effects:
+
+Updated only Step 7 in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: retained No, corrected the ownership-complete claim, added the unmarked-child missing work and independent round 6 evidence, and removed obsolete coverage claims about the deleted external mode. Historical round sections remain intact. The reviewer patch is attributable and staged. The protected umbrella digest is unchanged.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+All seven mandatory commands ran before reviewer edits. The request-time index was 771bc6e4a9f1888997f109651aa5766ea3ade5c4.
+
+- bash src/utils/lint_shell.sh: exit 0, 54 tracked scripts clean.
+- bash docs/v0.27.0/verify.closure-check.sh --step 7: native RHEL 9.8, 130 cases, zero failures, exit 5 because acceptance is unanswered.
+- bash docs/v0.27.0/verify.closure-check.sh: native RHEL 9.8, steps 0 through 5 exit 0, step 6 requires Debian, step 7 requires closed-payload acceptance, aggregate exit 5.
+- shellcheck docs/v0.27.0/verify.closure-check.sh: exit 0.
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/: exit 0, reference, explanation and navigation found.
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh: expected exit 1, no purity violations.
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh: exit 0, empty.
+
+The native run used an isolated archive of the received index and the installed tools Git; harness SHA-256 5c19e33dfa12c1985d4239677182bd296226cabe22683f474cf2a729bbefc2ad. Logs: .reviews/a.codex-step7-r6.rhel-step7.txt and .reviews/a.codex-step7-r6.rhel-aggregate.txt.
+The independent actual-helper probe returned 1 with a recorded child still mapping the candidate and still live, while the venv scan was empty. The reviewer killed only this probe's recorded child and verified cleanup. Reproduction/output: .reviews/a.codex-step7-r6.unmarked-child.sh and .reviews/a.codex-step7-r6.unmarked-child.txt.
+Submitted Debian build 162 identifies the same harness, reports 124 Step 7 cases without failures and aggregate 5. Its RHEL input digest matches the staged capture. This is retained writer evidence; no fresh independent Debian run is claimed. This Bash project has no applicable numeric class-coverage gate; the D10 caller/behavior assessment is retained, with the uncovered wrapper case identified explicitly. The reviewer changed assessment metadata only, so no broad execution was repeated after those edits; patch and whitespace checks pass.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+{
+  "commands": [
+    {
+      "command": "bash src/utils/lint_shell.sh",
+      "sources": [
+        "project",
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh --step 7",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "bash docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "shellcheck docs/v0.27.0/verify.closure-check.sh",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'toolchain-runtime-closure|closure_check' wiki/",
+      "sources": [
+        "plan"
+      ]
+    },
+    {
+      "command": "rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "request"
+      ]
+    },
+    {
+      "command": "git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh",
+      "sources": [
+        "request"
+      ]
+    }
+  ]
+}
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+None. The current shared resolver was executed using .review-validation plus the current Step 7 and request additions. Its commands and source labels exactly equal the seven embedded request commands. Their union is unchanged.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Shared validation-state capture and compare over the same ordered twelve paths returned acceptable=true, tracked_paths=[], untracked_paths=[], ignored_paths=[]; the index stayed 771bc6e4a9f1888997f109651aa5766ea3ade5c4 throughout validation. Outputs were confined to ignored .reviews files and isolated remote scratch. After the attributable metadata patch, assessed index is 98e4a86de9246d2464a8e29c0f0be5da2daa1b10. The only new staged delta is the Step 7 validation-plan assessment. a.commit remains ignored workflow metadata. The pre-existing unstaged versioned transcript remains unstaged and was not read as review context. Protected umbrella SHA-256 is unchanged at 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Repairs made:
+
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: attributable Step 7 assessment and missing-work correction, staged from the evidence tool's exact patch.
+- a.commit: attributable group 6 description correction; provider inventory is delivered, unmarked-child ownership remains incomplete. Ignored workflow metadata, not force-staged.
+- No substantive implementation repair.
+
+Paths staged:
+
+- docs/v0.27.0/decision.operator-old-root.rhel.md
+- docs/v0.27.0/measurements.build-only-payload.rhel.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step7.debian.txt
+- docs/v0.27.0/verify.closure.step7.rhel.txt
+- src/setups/env/bin/closure_d10.sh
+- src/setups/env/closure/README.md
+- wiki/README.md
+- wiki/explanation/why-the-archive-declares-its-own-scope.md
+- wiki/reference/toolchain-runtime-closure.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Independent commit-plan-check ran before assessment and after the reviewer patch, each at exit 0 with state=valid, ready=true, six ordered groups, eleven staged paths and no diagnostics. Grouping and conventional subjects match the staged implementation. Group 6's stale scope description was corrected; group membership and order are unchanged. Mechanical commit-plan readiness does not make this incomplete step commit-ready.
+
+Final checker output:
+
+```json
+{
+  "schema_version": 1,
+  "state": "valid",
+  "ready": true,
+  "staged_paths": [
+    "docs/v0.27.0/decision.operator-old-root.rhel.md",
+    "docs/v0.27.0/measurements.build-only-payload.rhel.txt",
+    "docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md",
+    "docs/v0.27.0/verify.closure-check.sh",
+    "docs/v0.27.0/verify.closure.step7.debian.txt",
+    "docs/v0.27.0/verify.closure.step7.rhel.txt",
+    "src/setups/env/bin/closure_d10.sh",
+    "src/setups/env/closure/README.md",
+    "wiki/README.md",
+    "wiki/explanation/why-the-archive-declares-its-own-scope.md",
+    "wiki/reference/toolchain-runtime-closure.md"
+  ],
+  "groups": [
+    {
+      "position": 1,
+      "subject": "feat(closure): add the D10 evidence and policy module",
+      "paths": [
+        "src/setups/env/bin/closure_d10.sh"
+      ]
+    },
+    {
+      "position": 2,
+      "subject": "test(closure): add the step 7 suite and two-host gate",
+      "paths": [
+        "docs/v0.27.0/verify.closure-check.sh"
+      ]
+    },
+    {
+      "position": 3,
+      "subject": "docs(closure): record the operator root deletion",
+      "paths": [
+        "docs/v0.27.0/decision.operator-old-root.rhel.md"
+      ]
+    },
+    {
+      "position": 4,
+      "subject": "test(closure): retain the step 7 evidence and the trim measurement",
+      "paths": [
+        "docs/v0.27.0/verify.closure.step7.rhel.txt",
+        "docs/v0.27.0/verify.closure.step7.debian.txt",
+        "docs/v0.27.0/measurements.build-only-payload.rhel.txt"
+      ]
+    },
+    {
+      "position": 5,
+      "subject": "docs(closure): document the checker and its scope",
+      "paths": [
+        "src/setups/env/closure/README.md",
+        "wiki/reference/toolchain-runtime-closure.md",
+        "wiki/explanation/why-the-archive-declares-its-own-scope.md",
+        "wiki/README.md"
+      ]
+    },
+    {
+      "position": 6,
+      "subject": "docs(toolchain-runtime-closure): record step 7 validation",
+      "paths": [
+        "docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md"
+      ]
+    }
+  ],
+  "diagnostics": []
+}
+```
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Unresolved findings:
+
+- [P2] Establish child ownership independently of venv command-line arguments (docs/v0.27.0/verify.closure-check.sh:7335, discovery at 7406 and cleanup at 7504). A planted venv wrapper starts a candidate-mapped binary by its absolute candidate path, records its PID and exits. The actual helper returns LIVE|INCONCLUSIVE with exit 1, but the recorded child remains live; step7_venv_processes returns empty. A wrapper's path is not inherited in its child's argv. The committed early-exit plant at line 8349 supplies exec -a "$root/bin/vsleeper", so its green result covers only that artificial marker. The independent reproduction leaves no process behind after reviewer cleanup. Repair the ownership mechanism and exercise an ordinary wrapper child without the marker; preserve direct-binary, success, timeout and early-exit behavior.
+- [P2] Complete the real packaged-archive acceptance before marking Step 7 complete (docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md:2927 and plan Step 7 acceptance). RHEL still observes 21 unresolved needs and two family refusals; both submitted host captures and the independent aggregate exit 5. A trimmed-copy measurement and passing model controls do not prove the final archive, Debian whole-provider inventory or attributed candidate-venv trace. Payload trim is owned by umbrella item 7, sqlite restoration/waiver retirement by item 6; fresh acceptance must follow those owning changes.
+
+Boundary-crossing work:
+
+- The ownership repair needs a reliable launch/descendant ownership mechanism; replacing argv inference is not an unambiguous metadata repair, so it is returned to the writer with a concrete reproduction.
+- Production payload promotion changes belong to umbrella item 7, and sqlite restoration/waiver retirement to item 6. No payload, installer, step 6 verifier, live observer or umbrella edits were made.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Consume the staged Step 7 assessment and the ignored a.commit amendment. Reproduce the unmarked-child leak using the retained script against the same staged harness. Make the launched child's identity survive a normal wrapper invocation and early parent exit; add a non-vacuous actual-helper control that records and checks that child without supplying an artificial venv argv marker. Re-run relevant native lifecycle checks and the mandatory suite on the changed bytes. Keep the external option removed. Keep Step 7 at No while its archive acceptance remains unanswered; coordinate the already-owned item 6/7 prerequisites through the requestor workflow, then retain passing final-archive evidence on both hosts. Refresh a.commit and submit another exact staged round. No commit authorization is given.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Changes requested. Readiness floor: identity PASS (exact plan/step/round and received index); completeness FAIL (ownership defect and real acceptance incomplete); validation/coverage INCOMPLETE (mandatory runs executed but aggregate exit 5, with a reproduced uncovered defect); staged attribution PASS (only recorded reviewer metadata patch staged, no validation side effects); unresolved findings FAIL (the two findings above); a.commit PASS (independent checker valid/ready and stale group 6 description corrected). No substantive repair was made. The evidence does not support a commit-ready recommendation.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 6)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-6 -->
+
+## Round 7 by requestor - Step 7
+
+- Recorded: 2026-09-12T01:00:13+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 7)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 7
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 7)
+
+request_index_tree: 73f77fad0b5fc206c92897b35f00ade975955742
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 evidence and the trim measurement
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 4 path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): record step 7 validation
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 7)
+
+#### Assessment for step 7 toolchain-runtime-closure (round 7)
+
+Step 7 remains NOT fully implemented. Round 6's ownership finding is closed
+against the reviewer's own reproduction, and the second finding is the one that
+has stood since round 1: the payload the gate judges is not closed, and closing
+it belongs to umbrella items 6 and 7.
+
+#### The finding was right, and it was worse than it was reported for step 7 toolchain-runtime-closure (round 7)
+
+The reviewer's objection was that ownership read a PATH out of the child's
+arguments, and that a venv entry point puts none there: it starts the real
+interpreter by its ABSOLUTE CANDIDATE PATH, so the child's command line names
+the candidate and never the venv. A wrapper's path is not inherited by its
+child.
+
+The consequence is not only an unreaped survivor. In the reviewer's own plant
+the child MAPS THE CANDIDATE, so the helper should have owned it, named it and
+observed it; instead it answered "the venv process exited before anything of it
+could be observed" while that process was running. That is a missed SUCCESS
+path, and the committed control could not see it because its plant supplied the
+very marker the rule needed.
+
+#### Ownership is now taken from the launch, by two independent properties for step 7 toolchain-runtime-closure (round 7)
+
+THE PROCESS GROUP. The launch is made with job control on, so the launched
+process becomes a group leader and its group id IS its pid. Every descendant
+inherits it, across `exec`, across the parent's exit and across reparenting to
+PID 1, because a process group outlives the process that created it. Nothing
+else on the machine can be in it: the id is a pid this helper was just given.
+
+THE ENVIRONMENT NONCE. The launch carries a variable no other process has,
+`exec` preserves the environment, and a child that leaves the group by calling
+`setsid` still carries it.
+
+Discovery, the deadline and the reap sweep all run over those two rules. The
+helper's own shell and PID 1 are never owned, and if job control ever failed to
+place the launch in its own group the group rule simply matches nothing, which
+fails safe rather than sweeping this shell's own group.
+
+#### The controls carry no marker of their own for step 7 toolchain-runtime-closure (round 7)
+
+THE UNMARKED WRAPPER CHILD is the reviewer's shape: the entry point starts a
+copied binary under the candidate by absolute path, records its pid and exits.
+Because that child maps the candidate the helper must OWN it, name it on the
+`OWNED` record, reach a typed verdict and reap it, and the control asserts all
+four against the pid the plant recorded.
+
+THE EARLY EXIT plants a survivor OUTSIDE the candidate, started by absolute
+path from the suite's own scratch, so the helper must refuse and must still
+sweep it. It spends the whole deadline, so the bounded wait is exercised too.
+
+Both record their own survivor, so a plant that launched nothing fails the run
+rather than passing quietly.
+
+#### The ownership was defeated three ways before it was trusted for step 7 toolchain-runtime-closure (round 7)
+
+In copies of the RHEL subset, on that host:
+
+- `step7_owned_processes` returning nothing: 134 cases, 5 failures. The
+  unmarked child is not owned, both survivors stay, and the real-tree success
+  path fails with them.
+- the process-group rule removed, nonce only: 134 cases, no failure.
+- the nonce rule removed, process group only: 134 cases, no failure.
+
+Each rule is sufficient on this host and the pair is redundant. The first run
+is what makes the other two meaningful.
+
+The reviewer's retained reproduction was rerun against these bytes. It reports
+`OWNED|<pid>|real-interprete` for the pid the plant recorded, an `OBJECT`
+inventory of that pid, a typed `LIVE|REFUSED` verdict, and
+`survived_helper_cleanup=no`.
+
+#### Test evidence at round 7 for step 7 toolchain-runtime-closure (round 7)
+
+RHEL 9.8, harness `fa9a914f`: `--step 7` reports 134 cases and 0 failures, and
+the every-step aggregate reports OBJECTIVE MET for steps 0 through 5, step 6
+correctly unanswered as the agent's half, and aggregate exit 5. Debian 12,
+build 163 on the delivered bytes: 0 failures anywhere, steps 0 through 6 all
+OBJECTIVE MET, step 7 reporting 128 cases and 0 failures, aggregate 5, and the
+run recording the RHEL capture it read by digest `2938af8d`. Lint clean over 54 tracked
+scripts, shellcheck clean over the harness, installer purity silent, untouched
+check at exit 0. No stray process of any plant survives either host's run.
+
+#### What remains, unchanged and owned elsewhere for step 7 toolchain-runtime-closure (round 7)
+
+Real packaged-archive acceptance is unanswered and cannot be answered from
+here. The payload trim is umbrella item 7's and the measurement sizes it: 83
+entries, 21 unresolvable names and 2 family rows to zero, 194M saved. The
+sqlite waiver is umbrella item 6's and keeps even the trimmed tree at exit 3,
+which is deliberately not a pass. Step 7 stays `No`.
+
+#### Staged membership for step 7 toolchain-runtime-closure (round 7)
+
+Eleven paths, unchanged in membership since round 4. The reviewer's round 6
+validation patch is retained and extended rather than replaced, and `a.commit`
+carries this round's numbers in groups 2, 4 and 6.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 7)
+
+#### What changed between round 6 and round 7 for step 7 toolchain-runtime-closure (round 7)
+
+##### `step7_stat_field`, one field of `/proc/<pid>/stat` without a tool for step 7 toolchain-runtime-closure (round 7)
+
+The `comm` field is parenthesised and may itself contain spaces and a closing
+parenthesis, so the split is on the LAST `) ` in the line; nothing after `comm`
+can contain that sequence. Field 1 of the remainder is the state, 2 the parent
+and 3 the process group. No new host tool is reached for.
+
+##### `step7_owned_processes` replaces `step7_venv_processes` for step 7 toolchain-runtime-closure (round 7)
+
+Ownership is the union of two rules, and each is a property of the LAUNCH
+rather than of anything the wrapper passes on.
+
+The PROCESS GROUP is the primary rule. `set -m` is enabled around the launch,
+so the shell performs the `setpgid` at fork and the launched process becomes a
+group leader whose group id is its own pid. Every descendant inherits it across
+`exec`, across the parent's exit and across reparenting, and no other process
+on the machine can hold it.
+
+The ENVIRONMENT NONCE is the second rule, and it exists because the first one
+has exactly one escape: a child that calls `setsid` or `setpgid` leaves the
+group. `exec` preserves the environment, `/proc/<pid>/environ` is readable for
+this account's own processes, and the nonce is unique to the call.
+
+The helper's own shell and PID 1 are skipped unconditionally. If job control
+ever failed to place the launch in its own group, the group rule matches
+nothing and the sweep does nothing, which is the safe direction.
+
+##### The launch carries both marks for step 7 toolchain-runtime-closure (round 7)
+
+```txt
+nonce="cplx-step7-$$-${RANDOM}-${RANDOM}"
+set -m
+CPLX_STEP7_OWNER="$nonce" "$root/bin/python3" -c '...' > "$log" 2>&1 &
+pid=$!
+set +m
+```
+
+Job control is turned off again immediately: it is needed for the `setpgid` and
+for nothing else here.
+
+##### Discovery, the deadline and the reap all moved to it for step 7 toolchain-runtime-closure (round 7)
+
+The discovery loop searches owned processes and takes the first that maps the
+candidate. The deadline ends when the launched pid is gone AND nothing of the
+launch remains, rather than on the launched pid alone. `step7_reap` takes the
+group id and the nonce as its third and fourth arguments and sweeps over both
+rules, then waits for each survivor to be gone.
+
+The second refusal message changed with the mechanism: "no process this launch
+started had mapped anything under `<prefix>`" rather than "no process of the venv
+at `<root>`", because the venv root is no longer what identifies them.
+
+##### Two unmarked controls, in place of the marked one for step 7 toolchain-runtime-closure (round 7)
+
+`step7/live-helper/unmarked-child/*`, five cases: the plant left a child; the
+generated entry point starts the CANDIDATE path, which is asserted rather than
+described; the helper owns exactly the pid the plant recorded; it reaches a
+typed verdict; and the child is gone afterwards.
+
+`step7/live-helper/early-exit/*`, three cases: the typed refusal, the recorded
+survivor, and that survivor gone afterwards. Its sleeper is a copy of the host
+`sleep` under the suite's own scratch, started by absolute path, so it carries
+no venv marker and maps nothing under the candidate.
+
+Neither plant uses `exec -a`. The step 7 case count moves from 130 to 134.
+
+##### The retained captures for step 7 toolchain-runtime-closure (round 7)
+
+Both retaken over the repaired bytes, with a round 6 section in each recording
+the finding, the mechanism, the two controls and the three defeat runs. The
+round 5 section in the RHEL capture now ends by pointing at its own replacement,
+so a reader does not take a superseded mechanism for the current one, and the
+quoted `OWNED|` pid is this run's.
+
+##### `a.commit` for step 7 toolchain-runtime-closure (round 7)
+
+Group 2's ownership bullets are rewritten for the launch-based rule and the two
+unmarked plants. Group 4 carries 134 cases and the three defeat runs. Group 6,
+which the reviewer amended, keeps its correction and now records the lifecycle
+as implemented, with the mechanism named.
+
+##### The validation record for step 7 toolchain-runtime-closure (round 7)
+
+The reviewer's round 6 Step 7 patch is retained. The verdict summary, the
+implemented entry and the missing-work list are brought to this round: the
+unmarked-child entry leaves missing work, and the remaining four entries are
+the payload ones, which are owned elsewhere.
+
+### Change summary for step 7 toolchain-runtime-closure (round 7)
+
+#### Staged paths for step 7 toolchain-runtime-closure (round 7)
+
+Eleven paths, unchanged in membership since round 4. Three changed content this
+round; `a.commit` changed beside them and is not staged.
+
+- `docs/v0.27.0/verify.closure-check.sh`, launch-based ownership, the reap
+  sweep that follows it, and the two unmarked controls
+- `docs/v0.27.0/verify.closure.step7.rhel.txt`, retaken over the repaired
+  bytes: 134 cases, no failure, plus the round 6 section and the three defeat
+  runs
+- `docs/v0.27.0/verify.closure.step7.debian.txt`, retaken from build 163's
+  archived artifact
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`, the
+  reviewer's round 6 patch retained, with the verdict, the implemented entry
+  and the missing-work list brought to this round
+- `src/setups/env/bin/closure_d10.sh`, unchanged since round 1
+- `docs/v0.27.0/decision.operator-old-root.rhel.md`, unchanged
+- `docs/v0.27.0/measurements.build-only-payload.rhel.txt`, unchanged
+- `src/setups/env/closure/README.md`, `wiki/reference/toolchain-runtime-closure.md`,
+  `wiki/explanation/why-the-archive-declares-its-own-scope.md`, `wiki/README.md`,
+  unchanged
+
+The review transcript is not staged: it grows with every round of this exchange,
+so it belongs to the residual pass of an authorized commit rather than to a
+group fixed now.
+
+#### `a.commit`, amended this round for step 7 toolchain-runtime-closure (round 7)
+
+Group membership, order, scope and subjects are untouched. Three bodies moved:
+
+- group 2's ownership bullets now describe the launch-based rule and the two
+  unmarked plants
+- group 4 carries 134 cases and the three defeat runs in place of the round 5
+  numbers
+- group 6 keeps the reviewer's correction and records the lifecycle as
+  implemented, naming the mechanism
+
+#### Changes in the other repository, already landed for step 7 toolchain-runtime-closure (round 7)
+
+Not staged here and not part of this commit plan:
+
+- `80398e7e` `ci(closure): own a launched process by its launch`
+
+Pushed to `develop` on the cicd remote as a clean fast-forward from `00c68682`,
+and run as build 163. It carries the harness `fa9a914f` and the RHEL
+capture, which the agent reads as the other half and records by digest.
+
+#### What a reader should check first for step 7 toolchain-runtime-closure (round 7)
+
+`step7_owned_processes` and the launch it is paired with, and then whether the
+two controls can fail. The three defeat runs are the answer offered for the
+second question; the reviewer's own reproduction, rerun, is the answer offered
+for the first.
+
+### Writer response for step 7 toolchain-runtime-closure (round 7)
+
+Writer response:
+
+#### Response to the round 6 answer for step 7 toolchain-runtime-closure (round 7)
+
+Accepted in full. No disagreement is recorded. The reviewer's staged Step 7
+validation patch and its `a.commit` group 6 correction are both retained; this
+round extends them rather than replacing them.
+
+##### The finding was correct and the reproduction is why it is closed for step 7 toolchain-runtime-closure (round 7)
+
+The reviewer did not just name the defect, it shipped the shape that proves it:
+a wrapper that starts a candidate binary by absolute path, records the pid and
+exits. That script was rerun against the repaired bytes and is quoted in the
+request. Having the defeating case in hand is what let the repair be checked
+rather than argued.
+
+It is also the third time in this exchange that a control was built around the
+repair instead of around the defect. Round 5's control supplied the very marker
+round 5's rule needed, so it could only ever agree with it. The two controls in
+this round supply no marker at all, and one of them is the reviewer's own
+shape.
+
+##### What the finding cost, stated plainly for step 7 toolchain-runtime-closure (round 7)
+
+It was not only a leak. In that plant the child maps the candidate, so a helper
+that owned its launch would have observed it and produced a conclusive reading.
+The old rule turned a success into "the venv process exited before anything of
+it could be observed" while the process was running. The request says so rather
+than reporting the repair as a tidy-up.
+
+##### Why the mechanism is two rules and not one for step 7 toolchain-runtime-closure (round 7)
+
+A process group is the right primary answer: it is created by the launch, it is
+inherited by every descendant, and it outlives the process that made it. Its
+one escape is a child that calls `setsid`. The environment nonce covers exactly
+that escape and nothing else, and it has its own escape, a child that scrubs
+its environment. Neither escape is reachable by an ordinary venv wrapper, and
+the pair costs one extra `/proc` read per unmatched pid.
+
+The redundancy is measured rather than asserted: with either rule alone the
+suite is green, and with neither it fails five cases.
+
+##### The second finding is unchanged and is not the writer's to close for step 7 toolchain-runtime-closure (round 7)
+
+Real packaged-archive acceptance stays unanswered. The RHEL tree still carries
+21 unresolved names and two family refusals, and neither retained half passes.
+Step 7 stays `No`, and nothing in this round is offered as progress toward that
+row.
+
+##### What the writer asks the reviewer to weigh for step 7 toolchain-runtime-closure (round 7)
+
+Whether `set -m` is acceptable in this harness. It is enabled for exactly one
+statement and disabled immediately after, and its only purpose is the `setpgid`
+the shell performs at fork. The alternative that avoids it is `setsid`, which
+would add a row to the enumerated host-tool contract for a job a shell option
+already does.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 7)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-7 -->
+
+## Round 7 by reviewer - Step 7
+
+- Recorded: 2026-09-12T13:18:56+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Baseline index tree: 73f77fad0b5fc206c92897b35f00ade975955742
+
+Assessed index tree: fc2332169f33e196e6aae9f04c7e90d4b7360ee1
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Result:
+
+No. Step 7 has NOT been fully implemented.
+
+The round 6 process-ownership defect is closed. The independent actual-helper reproduction starts a copied candidate binary by absolute path from a venv wrapper and lets the wrapper exit. The helper now attributes and inventories that exact recorded child, returns the expected typed refusal for its host mappings, and reaps it. The committed suite also covers the unmarked candidate child and the unmarked outside survivor. No additional implementation defect was found in this round.
+
+Using Bash monitor mode only around the asynchronous launch is acceptable for the required native Bash environments. The resulting launch process group plus inherited ownership nonce addresses the ordinary wrapper behavior reproduced here, and the local reproduction and native RHEL suite exercise it. Adding setsid is not required to close this finding. This conclusion concerns the tested launch contract, not arbitrary descendants that deliberately discard both ownership signals.
+
+The D10 module's evidence scope, lowest-candidate policy, reset/incomplete-reading behavior and convergence checks remain consistent with the plan. Its 13 functions have callers, directly or through exercised entry points. No new architecture, complexity, or feature-regression finding was identified. All ten production scripts remain at or below 650 lines; closure_d10.sh is 524. This Bash repository defines no numeric coverage gate, and no coverage percentage is claimed.
+
+The remaining completion obligations are unchanged: production payload closure, sqlite waiver retirement, real packaged-archive acceptance on Debian with whole-provider inventory and attributed venv live evidence, and final passing captures from both hosts. Fixture cases and correct refusals cannot satisfy these positive acceptance requirements.
+
+Validation plan effects:
+
+Updated only Step 7 rows in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. Added the round 7 independent validation record, corrected stale coverage text about the unmarked wrapper child, and refreshed the independently checked script line-count attribution. Preserved the exact No verdict and existing missing-work list. The shared pre-repair blob and attribution operation identify this metadata-only patch; git apply --cached --check succeeded before staging that patch. No other reviewed step or umbrella row changed.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+All runtime and static checks ran against the submitted implementation before the reviewer metadata update. Native runtime checks used an immutable archive of request index tree 73f77fad0b5fc206c92897b35f00ade975955742 on RHEL 9.8, with the installed tools Git.
+
+- Shell lint: exit 0, 54 tracked shell scripts.
+- Harness ShellCheck: exit 0.
+- Wiki discovery: exit 0, reference/explanation/index links found.
+- Installer purity search: expected exit 1, no matches.
+- Installer diff against HEAD: exit 0, no changes.
+- Step 7: 134 cases, zero failures, exit 5. The real payload still has 21 unresolved names and two family-generation refusals.
+- Aggregate: exit 5. Steps 0-5 report OBJECTIVE MET; step 6 requires Debian; step 7 lacks closed-payload acceptance.
+- Independent actual-helper probe: expected LIVE|REFUSED and helper exit 1 for the donor's host mappings; the recorded child is inventoried and survived_helper_cleanup=no. The reproduction driver exits 0.
+- Submitted Debian build 163: the same harness SHA-256, 128 Step 7 cases and zero failures, with acceptance unanswered. The retained RHEL capture SHA-256 agrees. This is inspected writer evidence; no new independent Debian execution is claimed.
+
+Harness SHA-256: fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1.
+Independent captures: .reviews/a.codex-step7-r7.rhel-step7.txt, .reviews/a.codex-step7-r7.rhel-aggregate.txt, .reviews/a.codex-step7-r7.unmarked-child.txt.
+After the metadata-only edit, git diff --cached --check and the commit-plan checker pass. The runtime implementation bytes did not change, so the runtime suite was not repeated.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+- `bash src/utils/lint_shell.sh` — sources: project, plan
+- `bash docs/v0.27.0/verify.closure-check.sh --step 7` — sources: plan
+- `bash docs/v0.27.0/verify.closure-check.sh` — sources: plan
+- `shellcheck docs/v0.27.0/verify.closure-check.sh` — sources: plan
+- `rg -n 'toolchain-runtime-closure|closure_check' wiki/` — sources: plan
+- `rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh` — sources: request
+- `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` — sources: request
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+None. The current shared resolver returns the same seven commands and source labels as the request envelope. The full union was executed.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+The shared validation-state comparison reports acceptable=true, with no changed tracked, untracked or ignored paths in the ordered 11-path scope. Baseline and post-validation index trees both equal 73f77fad0b5fc206c92897b35f00ade975955742. The installer checks also confirm no production installer change. The remote snapshot and local captures are isolated/ignored evidence.
+
+After the reviewer implementation-check, the shared umbrella comparison reports changed=false (before and after SHA-256 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7). The only reviewer tracked delta is the attributable Step 7 validation metadata patch. It was staged without importing the pre-existing unstaged transcript edit. The assessed index is fc2332169f33e196e6aae9f04c7e90d4b7360ee1. No tracked validation side effect or pre-existing unstaged overlap was staged or reverted.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Repairs made:
+
+- Review metadata only: updated and staged the attributable Step 7 assessment rows in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. No substantive implementation repair.
+
+Paths staged:
+
+- docs/v0.27.0/decision.operator-old-root.rhel.md
+- docs/v0.27.0/measurements.build-only-payload.rhel.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step7.debian.txt
+- docs/v0.27.0/verify.closure.step7.rhel.txt
+- src/setups/env/bin/closure_d10.sh
+- src/setups/env/closure/README.md
+- wiki/README.md
+- wiki/explanation/why-the-archive-declares-its-own-scope.md
+- wiki/reference/toolchain-runtime-closure.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+The independent shared checker returned exit 0, state=valid, ready=true, six ordered groups, eleven staged paths and no diagnostics, both before assessment and after the metadata patch. Ordered subjects:
+
+1. feat(closure): add the D10 evidence and policy module
+2. test(closure): add the step 7 suite and two-host gate
+3. docs(closure): record the operator root deletion
+4. test(closure): retain the step 7 evidence and the trim measurement
+5. docs(closure): document the checker and its scope
+6. docs(toolchain-runtime-closure): record step 7 validation
+
+The groups cover the production D10 module, harness, operator decision, captures/trim measurement, documentation and validation record in a coherent order. Subjects and bodies describe their staged scope, including the unresolved acceptance. No a.commit amendment was needed. Mechanical readiness is satisfied; it does not establish Step 7 completeness or authorize a commit.
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Unresolved findings:
+
+- [P1, carried] Step 7 positive acceptance remains unmet: the native RHEL gate still reports 21 unresolved payload names and two family-generation refusals, and the real packaged archive has no passing Debian whole-provider inventory plus owned candidate-venv live result. See docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md, Missing work for Step 7; docs/v0.27.0/verify.closure.step7.rhel.txt; docs/v0.27.0/verify.closure.step7.debian.txt. The zero-failure harness results and successful cleanup repair do not close this completion finding.
+
+Boundary-crossing work:
+
+- Production payload promotion/package-list changes belong to umbrella item 7; sqlite restoration and waiver retirement belong to umbrella item 6. The reviewed Step 7 cannot implement those owning changes or alter the approved positive acceptance criteria. No boundary-crossing edit was made.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Retain the corrected lifecycle implementation and controls; the round 6 leak finding is closed. Keep Step 7 recorded as No with its missing-work list.
+
+Handle the confirmed payload trim and sqlite waiver retirement through their owning umbrella work. Do not add unrelated production changes to this reviewed step or substitute the trim-copy measurement for a packaged-archive pass.
+
+Once that work produces the final payload, package it and obtain passing RHEL and Debian acceptance, including the actual archive identity, real rule 1 evidence, whole-provider inventory and attributed venv process evidence. Retain fresh matching captures and submit the resulting exact staged snapshot for review. Repeating this unchanged snapshot cannot remove the carried acceptance blocker.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Disposition: changes-requested.
+
+The six readiness results are: exact identity passes; complete implementation fails because Step 7 acceptance is unmet; mandatory validation/coverage is incomplete because the native commands return objective-not-met and final archive acceptance is absent; staged attribution passes; absence of unresolved findings fails on the carried acceptance obligation; accurate a.commit grouping passes.
+
+No substantive repair was made. The process-lifecycle implementation now satisfies the reproduced case, but the completeness and acceptance floor still prevents commit-ready. This is an advisory review answer only and authorizes no commit.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-7 -->
+
+## Round 7 by human - Step 7 - escalation
+
+- Recorded: 2026-09-12T13:24:40+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: escalation
+
+### Automation stop after the round 7 answer for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+The requestor consumed the round 7 `changes-requested` answer and stops the
+automatic exchange here rather than publishing a round 8 request.
+
+The reviewer's metadata-only repair is accepted in full: the staged Step 7
+assessment rows in `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md`
+now carry the round 7 independent validation record, the corrected coverage text
+for the unmarked wrapper child, and the line-count attribution refreshed to
+round 7. The writer records no disagreement with any part of that answer,
+including the carried P1 acceptance finding and the verdict of No.
+
+### Reason automation cannot advance step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Every remaining obligation on the reviewer's missing-work list is owned by a
+different umbrella item, and the reviewer states that resubmitting the unchanged
+snapshot cannot remove the carried blocker:
+
+- the production payload trim (removing the 21 unresolved names and the two
+  family-generation refusals) belongs to umbrella item 7,
+  `tools-archive-rebuild`;
+- restoring sqlite and retiring its waiver belongs to umbrella item 6,
+  `python-sqlite-support`;
+- the packaged-archive acceptance on both hosts, and the fresh passing captures
+  taken from it, can only follow those two changes.
+
+The reviewer's own writer instructions direct that work out of this step:
+"Handle the confirmed payload trim and sqlite waiver retirement through their
+owning umbrella work. Do not add unrelated production changes to this reviewed
+step."
+
+This is an ordering inversion rather than an implementation defect. The umbrella
+status table sequences `toolchain-runtime-closure` at order 4, ahead of
+`python-sqlite-support` at 6 and `tools-archive-rebuild` at 7, while plan Step 7
+claims the archive acceptance as its own expected outcome ("The acceptance
+captures exist for both hosts, and the unmodified archive passes rule 1, which
+is the positive control"). Step 7 therefore cannot reach `commit-ready` inside
+its declared boundary, and no writer-owned correction available to this round
+changes that.
+
+### Implementation state retained at the stop for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+The round 6 process-ownership defect is closed and independently reproduced
+against the repaired bytes; `survived_helper_cleanup=no`. The eleven staged
+paths are unchanged, the independent commit-plan checker reports valid and ready
+over six ordered groups, and no `a.commit` amendment was required. Shell lint,
+harness ShellCheck, wiki discovery and the installer purity and HEAD checks all
+pass. The native Step 7 suite reports 134 cases with zero failures and exit 5,
+the exit reflecting the unanswered acceptance rather than a failing case.
+
+### Human decision requested for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+The human owns the resolution. The two coherent directions are to pause this
+exchange until umbrella items 6 and 7 produce the final payload and its passing
+archive acceptance, then submit that snapshot as a fresh round; or to re-scope
+plan Step 7 so the archive acceptance moves to its owning umbrella item, which
+amends the plan and the approved acceptance criteria and is a specification
+decision rather than a code-review one.
+
+No commit is authorized by this stop, and the staged work is left intact.
+
+<!-- review-entry-id: escalation-round-7 -->
+
+## Round 8 by human - Step 7 - human-resolution
+
+- Recorded: 2026-09-12T13:50:06+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: human-resolution
+
+### Escalation resolved by the Q14 step split for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+The human resolved the round 7 escalation by choosing the step split over the
+two alternatives the stop record named. The decision is recorded as Q14 in the
+implementation plan, as an amendment rather than a round, following the Q13
+precedent this effort already set.
+
+Step 7 now owns the D10 interface, its negative controls and its documentation.
+Step 8 owns the real-payload acceptance: the packaging check on the build
+account over the real tree, the Debian whole-provider inventory with its
+attributed candidate-venv trace, and the unmodified archive's rule 1 positive
+control. Step 8 is gated on umbrella item 6, `python-sqlite-support`, and
+umbrella item 7, `tools-archive-rebuild`.
+
+Nothing in the acceptance is relaxed and no obligation is dropped. The four
+items the reviewer listed as missing work for Step 7 are carried into Step 8
+unchanged in substance, and Step 8 refuses in its own text the substitution the
+round 7 answer refused: a trim-copy measurement is not a packaged archive.
+
+### Reviewed work changed by the resolution for step 7 toolchain-runtime-closure (exchange 1) (round 7)
+
+Two tracked documents changed, and both are staged:
+
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` gains the Q14 row and
+  its amendment note, loses the acceptance from Step 7's issues, fix intent,
+  expected outcome, framings, test-first list, feature preservation and
+  completion criteria, and gains the whole of Step 8 in the section shape every
+  other step uses;
+- `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` records
+  Step 7 as fully implemented under the amended scope, retains every earlier
+  round record as written, and adds the Step 8 section carrying the four
+  obligations as that step's missing work.
+
+No shell byte changed. `docs/v0.27.0/verify.closure-check.sh` still hashes to
+`fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1`, the exact
+harness the reviewer executed natively in round 7, so that round's RHEL and
+Debian runtime evidence carries over rather than being re-claimed.
+
+`a.commit` is amended: the plan amendment becomes group 6 so it commits before
+the validation record that depends on it, and the validation record becomes
+group 7 with a subject and body matching the amended verdict. The independent
+shared checker reports state valid, ready true, seven ordered groups, twelve
+staged paths and no diagnostics.
+
+Shell lint passes over 54 tracked scripts, harness ShellCheck passes, wiki
+discovery finds both pages and their index entries, the installer purity search
+has no matches, and the installer HEAD comparison is empty.
+
+<!-- review-entry-id: human-resolution-round-8 -->
+
+## Round 8 by requestor - Step 7
+
+- Recorded: 2026-09-12T13:52:54+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 8)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 8
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 8)
+
+request_index_tree: 00fcf115f85ae75087f8b1f38432959139a6e2d1
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 evidence and the trim measurement
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 4 path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): split the acceptance into step 8 under Q14
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 7: docs(toolchain-runtime-closure): record step 7 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 8)
+
+#### Writer assessment of step 7 at round 8 for step 7 toolchain-runtime-closure (round 8)
+
+Step 7 is now fully implemented, under the scope decision Q14 fixed on
+2026-09-12. No implementation byte changed this round. What changed is the plan:
+the acceptance this step could not reach moved to a new Step 8, unrelaxed.
+
+##### Why round 8 amends the plan rather than the code for step 7 toolchain-runtime-closure (round 8)
+
+Round 7 closed the last implementation finding. The reviewer reproduced the
+round 6 wrapper leak against the repaired bytes, saw the recorded child
+attributed, inventoried, refused and reaped with `survived_helper_cleanup=no`,
+and found no further implementation, architecture, complexity or regression
+defect.
+
+It then carried the one remaining finding forward, as rounds 1 through 6 had,
+and named its owner each time: the payload the gate judges is produced by
+umbrella item 7, `tools-archive-rebuild`, and the waiver that holds the trimmed
+tree at exit 3 is retired by umbrella item 6, `python-sqlite-support`.
+
+Both items sit AFTER this one in the umbrella order. Step 7 was therefore asked
+to prove a result only two later items can produce, which no repair inside its
+boundary could ever satisfy. The round 7 answer says so directly: repeating the
+unchanged snapshot cannot remove the carried blocker.
+
+That is an ordering fault in the plan rather than a defect in the reviewed code.
+The exchange was escalated at round 7 for a human decision, and the human chose
+the split over dropping the acceptance and over reordering the umbrella.
+
+##### What Q14 decides for step 7 toolchain-runtime-closure (round 8)
+
+Step 7 owns the D10 interface, its negative controls and its documentation, all
+of which its suite proves today against fixtures on either host. Step 8 owns the
+packaging check over the real tree, the Debian whole-provider inventory with its
+attributed candidate-venv trace, and the unmodified archive's rule 1 positive
+control, and is gated on umbrella items 6 and 7.
+
+NOTHING IN THE ACCEPTANCE IS RELAXED. The four obligations the round 7 answer
+listed as missing work are carried into Step 8 unchanged in substance, and
+Step 8 refuses in its own text the substitution that answer refused: a trim-copy
+measurement is not a packaged archive, and a green suite over the current
+payload is not an archive pass.
+
+Q14 is recorded as an AMENDMENT AND NOT A ROUND, following the Q13 precedent
+this plan already set for a decision a code review forced.
+
+##### Test evidence at round 8 for step 7 toolchain-runtime-closure (round 8)
+
+No shell byte changed, so round 7's native evidence stands rather than being
+re-claimed as fresh. `docs/v0.27.0/verify.closure-check.sh` still hashes to
+`fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1`, the exact
+harness the reviewer executed natively in round 7: 134 cases and 0 failures on
+RHEL 9.8, aggregate OBJECTIVE MET for steps 0 through 5, and Debian build 163
+reporting 128 cases and 0 failures over that same digest.
+
+Re-run this round against the amended tree: lint clean over 54 tracked scripts,
+shellcheck clean on the harness, wiki discovery finds both pages and their index
+entries, installer purity silent at exit 1, installer-untouched check at exit 0.
+Independent `commit-plan-check` returns state valid and ready true over twelve
+paths and seven groups with no diagnostics, and `git diff --cached --check` is
+clean.
+
+The suite still exits 5. Under Q14 that exit is the two acceptance halves
+reporting unanswered, which is Step 8's result to change, and not a failing case
+of this step. Zero cases fail.
+
+##### Architecture, cost and feature integrity for step 7 toolchain-runtime-closure (round 8)
+
+No module is added and no topology changes. The ten production scripts are
+untouched at their round 7 counts, all at or below 650, with `closure_d10.sh` at
+524 and `closure_publish.sh` at exactly 650. No production line is added by this
+round at all. This Bash repository declares no numeric coverage gate and no
+percentage is claimed. No existing feature or reporting capability is impaired,
+because no executable changed.
+
+##### What Step 8 now carries for step 7 toolchain-runtime-closure (round 8)
+
+Real packaged-archive acceptance, unanswered and recorded as not started with
+both prerequisites open. The payload trim is umbrella item 7's and the retained
+measurement sizes it: 83 entries, 21 unresolvable names and 2 family rows to
+zero, 194M saved. The sqlite waiver is umbrella item 6's and keeps the trimmed
+tree at exit 3, which is deliberately not a pass.
+
+##### Staged membership for step 7 toolchain-runtime-closure (round 8)
+
+Twelve paths. `a.commit` IS amended this round, because membership and order
+changed: the plan amendment enters as group 6 so it commits before the
+validation record that depends on it, and the validation record becomes group 7
+with a subject and body matching the amended verdict.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 8)
+
+#### What changed for step 7 toolchain-runtime-closure (round 8)
+
+No implementation file changed. Two tracked plan documents did, and both are
+staged. `a.commit` is amended alongside them and stays ignored.
+
+##### `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` for step 7 toolchain-runtime-closure (round 8)
+
+- Q14 is added to the decision table with the four alternatives it refuses and
+  the reason each is worse, and an amendment note beside Q13's records why a
+  decision a code review forced is written here rather than folded into the
+  earlier rounds.
+- Step 7's issues, fix intent, expected outcome, framings, test-first list,
+  feature preservation and completion criteria lose the real-payload acceptance
+  and keep the negative-control obligations that were always the step's own. The
+  operator-prerequisite prose travels with the acceptance it belongs to.
+- Step 8 is added in the section shape every other step uses: analysis and
+  intent, implementation, addendums. It names its two umbrella prerequisites,
+  restates the acceptance cases unchanged, and states in its own text that a
+  trim-copy measurement is not a packaged archive and that nothing in the step
+  may relax the acceptance to fit the payload.
+- Step 7's completion criterion now reads `--step 7` with zero failing cases and
+  both acceptance halves reported unanswered, rather than the whole harness
+  green end to end, because the half that is not green is no longer this step's.
+
+##### `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` for step 7 toolchain-runtime-closure (round 8)
+
+- Step 7's section is retitled to what it owns, and its verdict becomes Yes
+  under the amended scope. The scope change is stated in the first paragraph of
+  the analysis, so the verdict cannot be read as a silent reversal of six rounds
+  of No.
+- Every earlier round record is retained exactly as written, including the six
+  that report No and the reviewer's own round 7 record. They were written
+  against the earlier scope and stand as history.
+- The four missing-work items move to a new Step 8 section, unchanged in
+  substance, where the step is recorded as not started with both prerequisites
+  open.
+- Step 8 carries the same subsection set every other step carries, so a reader
+  walking the document end to end meets a uniform shape.
+
+##### `a.commit` for step 7 toolchain-runtime-closure (round 8)
+
+The plan amendment becomes group 6 and the validation record becomes group 7.
+The order matters: a validation record that says Yes under Q14, committed before
+the plan that defines Q14, would leave an incoherent intermediate commit. Group
+7's body is rewritten to match the amended verdict and to say that the remaining
+work moved rather than closed.
+
+### Change summary for step 7 toolchain-runtime-closure (round 8)
+
+#### Staged paths and commit plan at round 8 for step 7 toolchain-runtime-closure (round 8)
+
+##### Twelve staged paths, one added since round 7 for step 7 toolchain-runtime-closure (round 8)
+
+| Path | State | Changed since round 7 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_d10.sh` | added | unchanged at 524 lines |
+| `docs/v0.27.0/verify.closure-check.sh` | modified | unchanged, digest still `fa9a914f` |
+| `docs/v0.27.0/decision.operator-old-root.rhel.md` | added | unchanged |
+| `docs/v0.27.0/measurements.build-only-payload.rhel.txt` | added | unchanged |
+| `docs/v0.27.0/verify.closure.step7.rhel.txt` | added | unchanged |
+| `docs/v0.27.0/verify.closure.step7.debian.txt` | added | unchanged |
+| `src/setups/env/closure/README.md` | modified | unchanged |
+| `wiki/reference/toolchain-runtime-closure.md` | added | unchanged |
+| `wiki/explanation/why-the-archive-declares-its-own-scope.md` | added | unchanged |
+| `wiki/README.md` | modified | unchanged |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` | modified | NEW THIS ROUND: Q14, step 7 narrowed, step 8 added |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | modified | verdict under the amended scope, step 8 section, round records retained |
+
+The protocol transcript stays deliberately unstaged, as in every round.
+
+##### `a.commit`, amended this round for step 7 toolchain-runtime-closure (round 8)
+
+Membership and order both changed, so the plan is amended rather than reworded.
+The implementation plan enters as its own group, placed before the validation
+record that depends on it.
+
+| # | Subject | Paths |
+| --- | --- | --- |
+| 1 | `feat(closure): add the D10 evidence and policy module` | `closure_d10.sh` |
+| 2 | `test(closure): add the step 7 suite and two-host gate` | `verify.closure-check.sh` |
+| 3 | `docs(closure): record the operator root deletion` | `decision.operator-old-root.rhel.md` |
+| 4 | `test(closure): retain the step 7 evidence and the trim measurement` | both captures and the measurement |
+| 5 | `docs(closure): document the checker and its scope` | bundle README, both wiki pages, wiki index |
+| 6 | `docs(toolchain-runtime-closure): split the acceptance into step 8 under Q14` | the implementation plan |
+| 7 | `docs(toolchain-runtime-closure): record step 7 validation` | the validation plan |
+
+Independent `commit-plan-check.bat --format json` returns `state: valid`,
+`ready: true`, no diagnostics, over all twelve paths and seven groups.
+
+##### Line budget at round 8 for step 7 toolchain-runtime-closure (round 8)
+
+No production line is added by this round. No shipped script is above the
+650-line ceiling and none changed since round 7. `closure_d10.sh` stays at 524,
+inside the below-550 band, and `closure_publish.sh` remains at exactly 650.
+
+##### The pipeline half, outside this plan's staged scope for step 7 toolchain-runtime-closure (round 8)
+
+Unchanged since round 7. Debian build 163 remains the last run of the delivered
+bytes, and it identifies the same harness digest this round submits.
+
+#### Writer response for step 7 toolchain-runtime-closure (round 8)
+
+##### The round 7 answer is accepted in full, with no reversal for step 7 toolchain-runtime-closure (round 8)
+
+The reviewer's metadata-only repair is retained exactly as staged. Its round 7
+validation record, its correction of the stale coverage text about the unmarked
+wrapper child, and its re-attribution of the script line counts from round 2 to
+round 7 are all kept. The writer reversed nothing, so there is no disagreement
+to record.
+
+The carried P1 acceptance finding is also accepted. The writer does not claim it
+is closed, and this round does not claim a packaged-archive pass.
+
+##### What the writer changed instead, and why that is not evasion for step 7 toolchain-runtime-closure (round 8)
+
+The finding is accepted AND the step is submitted as complete, which only makes
+sense because the boundary moved. The reviewer named the owner of the remaining
+work in every round: umbrella items 6 and 7. Both are sequenced after this item.
+A finding whose only possible fix lives in a later item is not a defect this
+step can repair; it is a plan that asked the wrong step for the result.
+
+The writer did not decide that alone. The exchange was escalated at round 7 with
+an authored reason, a human chose the split over two named alternatives, and the
+decision is recorded as Q14 with the alternatives it refuses.
+
+The writer explicitly did NOT take the cheaper route. Dropping the acceptance
+would have converged this step in one round and given up the issue's requirement
+for a positive result on the distribution the defect exists on. Q14 records that
+as refused alternative P2.
+
+##### What the reviewer should test hardest for step 7 toolchain-runtime-closure (round 8)
+
+Whether the split actually preserves the acceptance. The claim is that all four
+missing-work obligations moved into Step 8 unchanged in substance and that
+nothing was quietly weakened on the way. The specific things worth checking:
+
+- that Step 8's test-first list still requires the real tree, the whole-provider
+  inventory, the attributed venv trace and the rule 1 positive control over all
+  20 multi-candidate names;
+- that Step 8's completion criteria require exit 0 on the Debian agent rather
+  than the exit 5 this step now accepts;
+- that Step 7's narrowed completion criteria do not accidentally license a
+  failing case, as opposed to the two unanswered halves;
+- that the validation document's Yes is scoped and dated rather than a blanket
+  reversal, and that the six earlier No records survive unedited.
+
+##### The exit code is the one place this could hide a regression for step 7 toolchain-runtime-closure (round 8)
+
+Step 7 previously wanted the whole harness green and got exit 5. It now wants
+zero failing cases and accepts exit 5. Those differ only if something can fail
+without producing a failing case. The writer's reading is that the harness
+reports acceptance halves as unanswered rather than as failures, so the two are
+distinct, but this is the assertion most worth an independent check rather than
+the writer's word.
+
+##### Standing decisions, named again for step 7 toolchain-runtime-closure (round 8)
+
+Step 0's absent-suite control stays retired rather than preserved over an
+invented subject, and group 7's commit subject keeps the length the readiness
+checker enforces. Group 6's new subject was written to the same marker. No round
+has challenged the first two, and the writer does not read that silence as
+agreement.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 8)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-8 -->
+
+## Round 8 by reviewer - Step 7
+
+- Recorded: 2026-09-12T14:09:10+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+Baseline index tree: 00fcf115f85ae75087f8b1f38432959139a6e2d1
+
+Assessed index tree: 52fcd0f96aa97286d870cfe58efa57b922652c3a
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+Result:
+
+Yes. Step 7 has been fully implemented.
+
+This is the narrowed Q14 scope: D10 evidence/policy/convergence, negative controls and documentation. The four previous acceptance obligations are preserved in Step 8, with real-tree packaging, the unmodified archive's rule 1 positive control over all 20 multi-candidate names, Debian whole-provider inventory and attributed owned-venv trace, both passing captures and full Debian exit 0. Umbrella items 6 and 7 remain prerequisites. The prior payload finding is transferred under the recorded human decision, not closed as an archive pass.
+
+Executable bytes are identical to round 7. Fresh native RHEL evidence completes the owned D10 cases. Submitted Debian build 163 covers the same harness; no new Debian run is claimed. Architecture, linear policy cost, function-reference coverage and ten-script line budgets remain sound. No numerical coverage percentage applies. Existing Step 1 unexpected-root controls assert the checker preserves the refused directory and member; the aggregate reran that suite.
+
+The scoped implementation is complete, but this review is changes-requested because it repairs the plan's completion gate and returns a factual defect in the newly staged Step 8 prose.
+
+Validation plan effects:
+
+Updated only Step 7 rows in docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md: exact Yes sentence required by the template, removal of its empty Missing work section, the permitted unanswered set, the actual operator-deletion record, the Step 8 acceptance reference, and independent round 8 evidence. All seven earlier reviewer records remain byte-identical after newline normalization; all other step sections are unchanged. No umbrella row or document-wide completion state changed.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+All seven mandatory commands were independently rerun on the received tree before reviewer edits. Lint passes for 54 tracked scripts; harness ShellCheck, wiki discovery and installer-untouched checks pass. Installer purity is silent at expected exit 1.
+
+Native RHEL 9.8 isolated snapshot: harness SHA-256 fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1; Step 7 has 134 cases, zero failures, exit 5, with exactly the Debian and RHEL acceptance halves unanswered. Aggregate: Steps 0-5 exit 0; Step 6 requires Debian; Step 7 lacks final-payload acceptance; aggregate exit 5. Under Q14 these results satisfy Step 7's scoped obligations; they do not establish Step 8 acceptance. The real tree still reports 21 unresolved names and two family-generation refusals.
+
+Submitted Debian build 163 has 128 cases, zero failures and the same harness digest. Its retained RHEL capture digest agrees. This is retained evidence, not an independent fresh Debian run.
+
+The supplemental native mutation overrides only fixture_resolve_tools to fail in an isolated harness copy. It has 112 cases, zero failures and exit 5, with the D10 evidence half additionally unanswered. Thus 22 owned checks can be skipped without a failing case. The repaired criterion rejects this output, while accepting the actual staged harness's output. Logs and mutant are .reviews/a.codex-step7-r8.rhel-step7.txt, .reviews/a.codex-step7-r8.rhel-aggregate.txt, .reviews/a.codex-step7-r8.unanswered-d10.txt and .reviews/a.codex-step7-r8.unanswered-d10.sh.
+
+After documentation-only edits, staged whitespace, attribution, exact-step/history preservation and the independent commit-plan checker pass. Executable suites were not repeated because their bytes did not change.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+bash src/utils/lint_shell.sh [sources: project, plan]
+bash docs/v0.27.0/verify.closure-check.sh --step 7 [sources: plan]
+bash docs/v0.27.0/verify.closure-check.sh [sources: plan]
+shellcheck docs/v0.27.0/verify.closure-check.sh [sources: plan]
+rg -n 'toolchain-runtime-closure|closure_check' wiki/ [sources: plan]
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh [sources: request]
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh [sources: request]
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+None. The request and current resolver return the same seven commands and the same source labels; their union adds nothing.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+Request and baseline index tree: 00fcf115f85ae75087f8b1f38432959139a6e2d1. Assessed index tree: 52fcd0f96aa97286d870cfe58efa57b922652c3a.
+
+The ordered validation set contains all 12 staged paths plus install_pkg.sh. The before/after-tests comparison is acceptable with no tracked, untracked or ignored path changes. After deliberate reviewer repairs, comparison reports only the plan, validation plan and index: these changes are separately attributable to the two recorded pre-repair blobs and were staged only through their exact proven patches. They are not validation side effects. No other staged membership changed.
+
+The umbrella digest remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. The pre-existing unstaged transcript remains unstaged. Both plan sections outside the Step 7 completion criterion and all validation sections outside Step 7 are unchanged by the reviewer. Shared evidence, ignored logs and independent record checks are retained under .reviews/a.codex-step7-r8.*.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+Repairs made:
+
+- R8-F1 [P2, repaired and staged]: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md:2225. Zero failures plus exit 5 did not explicitly exclude missing owned evidence. A fixture-tool failure leaves the D10 evidence half unanswered and skips 22 checks while producing the same status. The Step 7 criterion now permits only the two named acceptance halves unanswered and requires owned D10/evidence/control work complete. This tracked plan repair is substantive under the review protocol.
+- Metadata only: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. Corrected Step 7's exact verdict/template shape, the scope and operator descriptions, and added independent round 8 evidence; removed its empty missing-work section. Other steps and earlier records are unchanged.
+- a.commit: unchanged; its seven groups, membership, order and subjects still describe the staged work.
+
+Paths staged:
+
+- docs/v0.27.0/decision.operator-old-root.rhel.md
+- docs/v0.27.0/measurements.build-only-payload.rhel.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step7.debian.txt
+- docs/v0.27.0/verify.closure.step7.rhel.txt
+- src/setups/env/bin/closure_d10.sh
+- src/setups/env/closure/README.md
+- wiki/README.md
+- wiki/explanation/why-the-archive-declares-its-own-scope.md
+- wiki/reference/toolchain-runtime-closure.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+The shared commit-plan checker was run independently before assessment and again after staging reviewer patches. Both runs return exit 0, state valid, ready true, with seven ordered groups, 12 staged paths and no diagnostics. The plan amendment precedes its dependent validation record. Membership, grouping and subjects are accurate. This mechanical result does not authorize a commit.
+
+1. feat(closure): add the D10 evidence and policy module — src/setups/env/bin/closure_d10.sh
+2. test(closure): add the step 7 suite and two-host gate — docs/v0.27.0/verify.closure-check.sh
+3. docs(closure): record the operator root deletion — docs/v0.27.0/decision.operator-old-root.rhel.md
+4. test(closure): retain the step 7 evidence and the trim measurement — docs/v0.27.0/verify.closure.step7.rhel.txt, docs/v0.27.0/verify.closure.step7.debian.txt, docs/v0.27.0/measurements.build-only-payload.rhel.txt
+5. docs(closure): document the checker and its scope — src/setups/env/closure/README.md, wiki/reference/toolchain-runtime-closure.md, wiki/explanation/why-the-archive-declares-its-own-scope.md, wiki/README.md
+6. docs(toolchain-runtime-closure): split the acceptance into step 8 under Q14 — docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+7. docs(toolchain-runtime-closure): record step 7 validation — docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+Unresolved findings:
+
+- R8-F2 [P2]: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md:2338-2342 says the discharged operator prerequisite is recorded with the retained location of a recoverable move. The cited decision.operator-old-root.rhel.md:5 explicitly says DELETION, and records an inspected target and manifest, not a retained tree. The amendment also removes the prior explicit deletion exception while Q09 still points to Step 7 acceptance. Restore an accurate account of the authorized deletion exception and point the acceptance cross-reference to Step 8. Do not invent a recoverable location or repeat any live-account action. This is a documentation correction in the current staged amendment, not a new payload defect.
+
+Boundary-crossing work:
+
+- R8-F2 changes Step 8/Q09, beyond this reviewer's exact Step 7 repair boundary; returned to the writer without editing it. It is already in the staged plan and can be corrected from the existing operator record without a new product decision.
+- Step 8's real packaged-archive acceptance remains pending on umbrella items 6 and 7 under Q14. Those payload changes and final captures are outside this round; they are not grounds to undo the authorized Step 7 scope split.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+Review the staged R8-F1 completion-criterion repair and the Step 7 validation metadata. Keep the explicit two-item unanswered allowance; a generic zero-failure/exit-5 rule is insufficient.
+Correct R8-F2 in the new Step 8 operator-prerequisite sentence and Q09 cross-reference using the existing explicit deletion decision. Preserve the default move rule and the recorded authorized exception accurately; perform no new account cleanup.
+Retain the four real-payload obligations in Step 8 with both prerequisites and the unchanged exit-0/capture requirements. This round requires no production repair or new Debian run solely for these documentation corrections.
+Keep the current a.commit grouping unless the writer's staged changes require an amendment, then publish the next exact review request through the requestor workflow. Do not treat this answer or the mechanical ready result as commit authorization.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+changes-requested. Six readiness-floor results: identity PASS; scoped implementation completeness PASS; mandatory validation and coverage PASS within Q14 with the stated retained Debian evidence; staged attribution PASS; unresolved current findings FAIL for R8-F2; a.commit PASS. R8-F1 is also a substantive tracked reviewer repair, which independently requires another round.
+
+The prior code defect remains closed. The carried positive acceptance obligation is preserved in Step 8 by the human scope decision, not silently waived. The remaining writer action is the factual operator-record correction and assessment of this round's staged repair.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 8)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-8 -->
+
+## Round 9 by requestor - Step 7
+
+- Recorded: 2026-09-12T14:17:21+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 toolchain-runtime-closure (round 9)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+Implementation step: 7
+Review round: 9
+
+### Code review evidence for step 7 toolchain-runtime-closure (round 9)
+
+request_index_tree: 94a940448942dcb4413563b94c6f823c5fef4907
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project, plan)
+- bash docs/v0.27.0/verify.closure-check.sh --step 7 (sources: plan)
+- bash docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- shellcheck docs/v0.27.0/verify.closure-check.sh (sources: plan)
+- rg -n 'toolchain-runtime-closure|closure_check' wiki/ (sources: plan)
+- rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh (sources: request)
+- git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): add the D10 evidence and policy module
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(closure): add the step 7 suite and two-host gate
+group 2 path: docs/v0.27.0/verify.closure-check.sh
+group 3: docs(closure): record the operator root deletion
+group 3 path: docs/v0.27.0/decision.operator-old-root.rhel.md
+group 4: test(closure): retain the step 7 evidence and the trim measurement
+group 4 path: docs/v0.27.0/verify.closure.step7.rhel.txt
+group 4 path: docs/v0.27.0/verify.closure.step7.debian.txt
+group 4 path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+group 5: docs(closure): document the checker and its scope
+group 5 path: src/setups/env/closure/README.md
+group 5 path: wiki/reference/toolchain-runtime-closure.md
+group 5 path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+group 5 path: wiki/README.md
+group 6: docs(toolchain-runtime-closure): split the acceptance into step 8 under Q14
+group 6 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+group 7: docs(toolchain-runtime-closure): record step 7 validation
+group 7 path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/decision.operator-old-root.rhel.md
+staged path: docs/v0.27.0/measurements.build-only-payload.rhel.txt
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+staged path: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+staged path: docs/v0.27.0/verify.closure-check.sh
+staged path: docs/v0.27.0/verify.closure.step7.debian.txt
+staged path: docs/v0.27.0/verify.closure.step7.rhel.txt
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/closure/README.md
+staged path: wiki/README.md
+staged path: wiki/explanation/why-the-archive-declares-its-own-scope.md
+staged path: wiki/reference/toolchain-runtime-closure.md
+```
+
+### Requestor assessment for step 7 toolchain-runtime-closure (round 9)
+
+#### Writer assessment of step 7 at round 9 for step 7 toolchain-runtime-closure (round 9)
+
+Step 7 remains fully implemented under the Q14 scope. Round 8 returned one
+finding to the writer and staged one repair of its own. Both are addressed here,
+and no production byte changed again this round.
+
+##### R8-F1 is accepted, and the writer was wrong in the way it predicted for step 7 toolchain-runtime-closure (round 9)
+
+Round 8's request asked the reviewer to check one thing hardest: whether the
+narrowed completion criterion could license a failure that produces no failing
+case. It could. The reviewer built the proof rather than arguing it: an isolated
+copy overriding only `fixture_resolve_tools` to fail reports 112 cases, zero
+failures and exit 5, leaving the D10 evidence half unanswered and skipping 22
+owned checks, and the writer's criterion accepted that output.
+
+The repaired criterion is retained exactly as staged. It names the only two
+halves that may be unanswered, requires every D10 evidence and negative-control
+case to complete, and states that exit 5 with zero failures alone establishes
+nothing. The writer records this as a miss: the round 8 request named the risk
+and then shipped the weak criterion anyway, instead of writing the criterion
+that excluded it.
+
+##### R8-F2 is accepted and corrected for step 7 toolchain-runtime-closure (round 9)
+
+The writer's new Step 8 text said the operator prerequisite was recorded with
+the retained location of a recoverable move. The record says the opposite:
+`decision.operator-old-root.rhel.md` records DELETION, taken on 2026-09-11 as
+the explicit exception the plan's contract allows, with a manifest digest in
+place of a retained tree.
+
+The error came from carrying the default-rule wording across when the acceptance
+moved, without re-reading the record it cited. Worse, the move dropped the
+contract text that the decision record itself quotes, orphaning that quote.
+
+The correction restores the full operator contract in Step 8: the default MOVE
+order, the prohibition on any script or step deleting on its own authority, and
+the explicit exception clause. It then states plainly that the exception is the
+route actually taken, names the deletion, the date, the not-live confirmation
+and the manifest digest, and notes that the record cites the contract under its
+pre-Q14 Step 7 numbering. Q09's cross-reference now points at Step 8 acceptance
+and names Step 7 as where it lived until Q14, and Q09's decision cell now
+carries the exception clause it always had in the contract.
+
+No live-account action was taken, repeated or extended, and no retained location
+was invented.
+
+##### Test evidence at round 9 for step 7 toolchain-runtime-closure (round 9)
+
+No shell byte changed in round 8 or round 9. `verify.closure-check.sh` still
+hashes to `fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1`,
+the digest the reviewer executed natively in both rounds: 134 cases, zero
+failures, exit 5 on RHEL 9.8 with only the two named acceptance halves
+unanswered, and Debian build 163 at 128 cases and zero failures over the same
+digest.
+
+Re-run this round against the corrected tree: lint clean over 54 tracked
+scripts, shellcheck clean on the harness, wiki discovery finds both pages and
+their index entries, installer purity silent at exit 1, installer-untouched at
+exit 0, staged whitespace clean, and independent `commit-plan-check` valid and
+ready over twelve paths and seven groups with no diagnostics.
+
+##### Architecture, cost and feature integrity for step 7 toolchain-runtime-closure (round 9)
+
+Unchanged, and unchanged for the same reason: no executable byte moved. Ten
+production scripts at their round 7 counts, all at or below 650,
+`closure_d10.sh` at 524 and `closure_publish.sh` at exactly 650. No coverage
+percentage is claimed for this Bash harness. No feature or reporting capability
+is impaired.
+
+##### Staged membership for step 7 toolchain-runtime-closure (round 9)
+
+Twelve paths, unchanged in membership since round 8. `a.commit` is NOT amended
+this round: both corrections land inside paths their groups already carry, and
+group membership, order, scope and subject accuracy all still describe the
+staged work. The reviewer reached the same conclusion in round 8 and nothing
+since has changed it.
+
+##### What Step 8 still carries for step 7 toolchain-runtime-closure (round 9)
+
+Real packaged-archive acceptance, unanswered and recorded as not started with
+both prerequisites open: the payload trim under umbrella item 7, sized by the
+retained measurement at 83 entries, 21 unresolvable names and 2 family rows to
+zero and 194M saved, and the sqlite waiver retirement under umbrella item 6,
+which holds the trimmed tree at exit 3.
+
+### Implementation report for step 7 toolchain-runtime-closure (round 9)
+
+#### What changed for step 7 toolchain-runtime-closure (round 9)
+
+No implementation file changed. One tracked plan document carries the writer's
+correction, one more carries a writer refinement, and the reviewer's own round 8
+repairs are retained as staged.
+
+##### `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` for step 7 toolchain-runtime-closure (round 9)
+
+- Step 8's operator-prerequisite bullet is replaced. It now restores the full
+  contract: the operator lists the exact directory, confirms it is superseded
+  and not live, MOVES it out of `$HOME/tools` to a retained location, and
+  re-runs the observed scope; no script in this effort removes it and no step
+  deletes on its own authority; and an operator who decides on deletion instead
+  must have that decision recorded explicitly before the acceptance runs.
+- A second bullet states which route was taken. It names DELETION, the date
+  2026-09-11, the repository owner as the decider, the not-live confirmation,
+  the inspected target and the 4195-line manifest identified by SHA-256 and
+  retained on the host, and it says the manifest is what makes a deleted tree
+  auditable in place of a retained one. It also notes that the decision record
+  cites this contract under its pre-Q14 Step 7 numbering.
+- Q09's application column now reads Step 8 acceptance, naming Step 7 as where
+  it applied until Q14 moved it, and Q09's decision cell gains the explicit
+  deletion-exception clause the contract always carried, with the note that the
+  exception is the route taken.
+- Step 7's completion criterion is the reviewer's R8-F1 text, retained exactly
+  as staged and not reworded.
+
+##### `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` for step 7 toolchain-runtime-closure (round 9)
+
+- Step 8's first improvement expectation now names the discharged prerequisite
+  precisely: the explicit operator decision of 2026-09-11 recording DELETION as
+  the authorized exception to the default move, identifying what went by
+  manifest digest, and no step of this effort repeating or extending any
+  live-account action.
+- Every round 8 reviewer edit is retained: the exact Yes sentence, the corrected
+  Step 7 expectations, the removal of the emptied missing-work section, the
+  Step 8 acceptance reference, and the round 8 independent validation record.
+
+##### `docs/v0.27.0/decision.operator-old-root.rhel.md` for step 7 toolchain-runtime-closure (round 9)
+
+Deliberately unchanged. It is a dated record of what an operator did on
+2026-09-11, and it is not rewritten to match a plan amended a day later. Its
+reference to Step 7 was accurate when written, which is why the plan now says so
+rather than the record being edited to say Step 8.
+
+##### `a.commit` for step 7 toolchain-runtime-closure (round 9)
+
+Unchanged. Both corrections land inside paths their groups already carry, and
+nothing altered membership, order, scope or subject accuracy.
+
+### Change summary for step 7 toolchain-runtime-closure (round 9)
+
+#### Staged paths and commit plan at round 9 for step 7 toolchain-runtime-closure (round 9)
+
+##### Twelve staged paths, unchanged in membership since round 8 for step 7 toolchain-runtime-closure (round 9)
+
+| Path | State | Changed since round 8 |
+| --- | --- | --- |
+| `src/setups/env/bin/closure_d10.sh` | added | unchanged at 524 lines |
+| `docs/v0.27.0/verify.closure-check.sh` | modified | unchanged, digest still `fa9a914f` |
+| `docs/v0.27.0/decision.operator-old-root.rhel.md` | added | unchanged, and deliberately so |
+| `docs/v0.27.0/measurements.build-only-payload.rhel.txt` | added | unchanged |
+| `docs/v0.27.0/verify.closure.step7.rhel.txt` | added | unchanged |
+| `docs/v0.27.0/verify.closure.step7.debian.txt` | added | unchanged |
+| `src/setups/env/closure/README.md` | modified | unchanged |
+| `wiki/reference/toolchain-runtime-closure.md` | added | unchanged |
+| `wiki/explanation/why-the-archive-declares-its-own-scope.md` | added | unchanged |
+| `wiki/README.md` | modified | unchanged |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md` | modified | R8-F2 corrected in Step 8 and Q09; the reviewer's R8-F1 criterion retained verbatim |
+| `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` | modified | Step 8 operator expectation sharpened; every round 8 reviewer edit retained |
+
+The protocol transcript stays deliberately unstaged, as in every round.
+
+##### `a.commit`, unamended this round for step 7 toolchain-runtime-closure (round 9)
+
+Nothing changed membership, order, scope or subject accuracy. Both corrections
+land inside paths their groups already carry.
+
+| # | Subject | Paths |
+| --- | --- | --- |
+| 1 | `feat(closure): add the D10 evidence and policy module` | `closure_d10.sh` |
+| 2 | `test(closure): add the step 7 suite and two-host gate` | `verify.closure-check.sh` |
+| 3 | `docs(closure): record the operator root deletion` | `decision.operator-old-root.rhel.md` |
+| 4 | `test(closure): retain the step 7 evidence and the trim measurement` | both captures and the measurement |
+| 5 | `docs(closure): document the checker and its scope` | bundle README, both wiki pages, wiki index |
+| 6 | `docs(toolchain-runtime-closure): split the acceptance into step 8 under Q14` | the implementation plan |
+| 7 | `docs(toolchain-runtime-closure): record step 7 validation` | the validation plan |
+
+Independent `commit-plan-check.bat --format json` returns `state: valid`,
+`ready: true`, no diagnostics, over all twelve paths and seven groups.
+
+##### Line budget at round 9 for step 7 toolchain-runtime-closure (round 9)
+
+No production line is added by this round, as in round 8. No shipped script is
+above the 650-line ceiling and none changed since round 7. `closure_d10.sh`
+stays at 524 and `closure_publish.sh` remains at exactly 650.
+
+##### The pipeline half, outside this plan's staged scope for step 7 toolchain-runtime-closure (round 9)
+
+Unchanged since round 7. Debian build 163 remains the last run of the delivered
+bytes and identifies the same harness digest this round submits.
+
+#### Writer response for step 7 toolchain-runtime-closure (round 9)
+
+##### Both round 8 items accepted, nothing reversed for step 7 toolchain-runtime-closure (round 9)
+
+The reviewer's R8-F1 completion-criterion repair is retained exactly as staged,
+not reworded. Its Step 7 validation metadata is retained in full, including the
+removal of the missing-work section the writer had emptied rather than deleted.
+R8-F2 is accepted as stated and corrected. There is no disagreement to record.
+
+##### On R8-F1, the writer names the miss rather than the near-miss for step 7 toolchain-runtime-closure (round 9)
+
+The round 8 request told the reviewer that the exit-code narrowing was the one
+place a regression could hide, and asked for an independent check. That was the
+right instinct and the wrong response to it. Having identified a criterion that
+might admit a silent skip, the writer submitted it anyway and delegated the
+check, instead of writing a criterion that could not admit one.
+
+The reviewer did not settle it by argument. It built an isolated copy that fails
+only `fixture_resolve_tools`, showed 112 cases and zero failures at exit 5 with
+22 owned checks skipped, and confirmed the repaired criterion rejects that
+output while accepting the real harness's. That is the standard this exchange
+has held throughout, and the writer notes it did not meet it here.
+
+##### On R8-F2, the failure mode is worth naming because it generalizes for step 7 toolchain-runtime-closure (round 9)
+
+Moving text between steps carried a default-rule sentence into a place where the
+exception applied, and the writer did not re-read the cited record before
+restating what it contained. The record says DELETION in its third line.
+
+The correction therefore restores the whole contract rather than patching the
+one wrong clause: the default move, the prohibition on scripts and steps acting
+on their own authority, and the exception. Without the contract text the plan
+also orphaned the block that `decision.operator-old-root.rhel.md` quotes from
+it, which the writer had not noticed either.
+
+##### One judgment the writer made, offered for the reviewer to overturn for step 7 toolchain-runtime-closure (round 9)
+
+`decision.operator-old-root.rhel.md` is left unchanged, and its opening still
+attributes the prerequisite to Step 7. The writer judged that a dated record of
+a live-account action should not be rewritten to match a plan amended the day
+after, so the plan carries the reconciliation instead: Step 8 states that the
+record cites the contract under its pre-Q14 numbering, and Q09 names both
+locations.
+
+The reviewer may hold that a cross-reference which no longer resolves is worse
+than an edited record. The writer does not argue it either way and will take the
+reviewer's direction.
+
+##### What the reviewer should test hardest this round for step 7 toolchain-runtime-closure (round 9)
+
+Whether the restored contract is faithful to the original rather than a
+paraphrase that drifts, and whether Step 8 now describes the deletion exactly as
+the record does: the date, the decider, the not-live confirmation, the inspected
+target, and the manifest digest standing in for a retained tree. The writer got
+this wrong once by restating a record from memory rather than reading it.
+
+##### Standing decisions, named again for step 7 toolchain-runtime-closure (round 9)
+
+Step 0's absent-suite control stays retired rather than preserved over an
+invented subject, and the group subjects keep the length the readiness checker
+enforces. No round has challenged either, and the writer does not read that
+silence as agreement.
+
+### Reviewer focus for step 7 toolchain-runtime-closure (round 9)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-9 -->
+
+## Round 9 by reviewer - Step 7
+
+- Recorded: 2026-09-12T14:28:52+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+Baseline index tree: 94a940448942dcb4413563b94c6f823c5fef4907
+
+Assessed index tree: 671ae863832ac67adc72f91627c1da81e9087e66
+
+### Implementation check for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+Result:
+
+Yes. Step 7 has been fully implemented.
+
+The reviewed scope is Q14's D10 interface, negative controls and documentation. The four real-payload acceptance obligations remain in Step 8, gated on umbrella items 6 and 7, with the full Debian exit-0 requirement and both passing final-archive captures unchanged. This is not a packaged-archive pass.
+
+R8-F1 is closed: the writer retained the precise two-item unanswered allowance verbatim. R8-F2 is closed: Step 8 restores the complete operator contract and explicitly identifies the authorized deletion exception taken on 2026-09-11; Q09 points to Step 8 and explains its former numbering. Independent normalized comparison shows that the restored contract matches the dated record. The date, decider, not-live confirmation, inspected target and manifest description agree with that record.
+
+The writer's decision to leave the dated operator record unchanged is appropriate. Its historical Step 7 reference is reconciled explicitly in Step 8/Q09 and does not need rewriting.
+
+No executable changed since round 7. Fresh native evidence and the matching retained Debian capture satisfy the scoped criterion. No architecture, cost, function-reference coverage, line-budget or feature-integrity defect remains. The established Bash topology and all thirteen D10 function references remain accounted for; no numerical coverage percentage applies.
+
+Validation plan effects:
+
+Added only the independent round 9 record within Step 7 of docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md. The exact Yes verdict and all prior records remain unchanged. A comparison after removing just this inserted section reproduces the received validation document exactly. No other step, implementation-plan text, umbrella row or document-wide status changed.
+
+### Pre-repair mandatory checks and coverage for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+All seven mandatory commands were independently rerun before metadata edits. Shell lint passes for 54 tracked scripts. Harness ShellCheck, wiki discovery and installer-untouched checks pass; installer purity is silent at expected exit 1. Staged whitespace passes.
+
+Native RHEL 9.8 execution uses an isolated immutable snapshot of request tree 94a940448942dcb4413563b94c6f823c5fef4907. Harness SHA-256 is fa9a914f06564cf2b3c789b67a811d2057a24749896afc8ab3355f09d5ebb2d1. Step 7 reports 134 cases, zero failures and exit 5 with exactly the two permitted acceptance halves unanswered. All owned D10 evidence is completed. The aggregate passes Steps 0-5 and returns 5 for Step 6's Debian host requirement and Step 7's final-payload acceptance. The real payload still has 21 unresolved names and two family-generation refusals; these remain Step 8 prerequisite work under Q14.
+
+Retained Debian build 163 has the same harness, 128 Step 7 cases, zero failures and exactly the two permitted unanswered halves. The consulted RHEL capture digest agrees with the staged capture. No independent fresh Debian execution is claimed.
+
+Fresh logs: .reviews/a.codex-step7-r9.rhel-step7.txt and .reviews/a.codex-step7-r9.rhel-aggregate.txt. Round 8's native missing-evidence mutation remains applicable supplemental evidence for the unchanged harness and retained criterion; it was not repeated. Contract/history checks are .reviews/a.codex-step7-r9.check-records.py and .reviews/a.codex-step7-r9.check-final.py.
+
+After the sole metadata addition, exact attribution, staged whitespace, record preservation and the independent commit-plan checker pass. No substantive repair requires a repeat of executable suites.
+
+### Resolved validation set and sources for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+bash src/utils/lint_shell.sh [sources: project, plan]
+bash docs/v0.27.0/verify.closure-check.sh --step 7 [sources: plan]
+bash docs/v0.27.0/verify.closure-check.sh [sources: plan]
+shellcheck docs/v0.27.0/verify.closure-check.sh [sources: plan]
+rg -n 'toolchain-runtime-closure|closure_check' wiki/ [sources: plan]
+rg -n 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh [sources: request]
+git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh [sources: request]
+
+### Resolver drift and direction for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+None. The request and current resolver return the same seven commands and source labels; their union is unchanged.
+
+### Repository state around validation for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+Baseline/request index: 94a940448942dcb4413563b94c6f823c5fef4907. Assessed index: 671ae863832ac67adc72f91627c1da81e9087e66.
+
+The before/after-tests comparison over the same 13 review paths is acceptable: no tracked, untracked or ignored path changes. The final comparison reports only the deliberate Step 7 validation-record addition and its index update. Its patch is cleanly attributable to the recorded pre-repair blob and was staged alone. There is no unaccounted validation side effect.
+
+The umbrella digest remains 8b2201e29d8245dada303acad990864e8c12d46358bc0394742c605030308bb7. All 12 staged members remain the same; the pre-existing protocol transcript remains unstaged. No other writer work was staged or reverted. Shared evidence is retained under .reviews/a.codex-step7-r9.*.
+
+### Repair inventory for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+Repairs made:
+
+- Metadata only: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md, 42 inserted lines comprising the independent Step 7 round 9 validation record. The shared launcher proves its patch attributable and only that patch is staged.
+- No substantive repair. No production, harness, implementation-plan or a.commit change was made by the reviewer.
+
+Paths staged:
+
+- docs/v0.27.0/decision.operator-old-root.rhel.md
+- docs/v0.27.0/measurements.build-only-payload.rhel.txt
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+- docs/v0.27.0/verify.closure-check.sh
+- docs/v0.27.0/verify.closure.step7.debian.txt
+- docs/v0.27.0/verify.closure.step7.rhel.txt
+- src/setups/env/bin/closure_d10.sh
+- src/setups/env/closure/README.md
+- wiki/README.md
+- wiki/explanation/why-the-archive-declares-its-own-scope.md
+- wiki/reference/toolchain-runtime-closure.md
+
+### Commit plan assessment for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+The independent checker ran before assessment and again after the metadata patch. Both results are exit 0, state valid, ready true, seven ordered groups, twelve staged paths and no diagnostics. Membership, scope and conventional subjects remain accurate; the Q14 plan amendment precedes the validation record relying on it. a.commit remains unchanged.
+
+1. feat(closure): add the D10 evidence and policy module; paths: src/setups/env/bin/closure_d10.sh
+2. test(closure): add the step 7 suite and two-host gate; paths: docs/v0.27.0/verify.closure-check.sh
+3. docs(closure): record the operator root deletion; paths: docs/v0.27.0/decision.operator-old-root.rhel.md
+4. test(closure): retain the step 7 evidence and the trim measurement; paths: docs/v0.27.0/verify.closure.step7.rhel.txt, docs/v0.27.0/verify.closure.step7.debian.txt, docs/v0.27.0/measurements.build-only-payload.rhel.txt
+5. docs(closure): document the checker and its scope; paths: src/setups/env/closure/README.md, wiki/reference/toolchain-runtime-closure.md, wiki/explanation/why-the-archive-declares-its-own-scope.md, wiki/README.md
+6. docs(toolchain-runtime-closure): split the acceptance into step 8 under Q14; paths: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+7. docs(toolchain-runtime-closure): record step 7 validation; paths: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md
+
+### Findings and boundaries for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+Consume this advisory commit-ready answer through the requestor workflow and retain the Step 7 validation record. No repair or replacement review round is requested. Keep the current a.commit grouping.
+
+The human owns the convergence-gate commit choice. This recommendation does not authorize a commit, complete the umbrella, or satisfy Step 8's final packaged-archive acceptance.
+
+### Decision rationale for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+commit-ready. All six readiness-floor results pass: exact identity, complete Q14-scoped Step 7 implementation, mandatory validation and coverage with the stated host/evidence limits, attributable staged scope, absence of current/carried Step 7 findings, and accurate a.commit grouping. The reviewer made only permitted validation metadata changes in round 9.
+
+The recommendation applies to assessed tree 671ae863832ac67adc72f91627c1da81e9087e66. Step 8 remains incomplete; the human decision to move the acceptance did not relax it. Commit authorization remains with the human in the owning workflow.
+
+### Final reviewer decision for step 7 toolchain-runtime-closure (exchange 1) (round 9)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-7-round-9 -->
+
+## Round 9 by human - Step 7 - human-confirmation
+
+- Recorded: 2026-09-12T15:38:16+02:00
+- Exchange: code/code/v0.27.0/toolchain-runtime-closure
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 7
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-9 -->
