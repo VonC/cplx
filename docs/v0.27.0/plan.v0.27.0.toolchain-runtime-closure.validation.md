@@ -1,22 +1,13 @@
 # v0.27.0 toolchain-runtime-closure implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
-This document tracks the implementation of
-[plan.v0.27.0.toolchain-runtime-closure.md](plan.v0.27.0.toolchain-runtime-closure.md)
-step by step. Steps 0 to 3 are implemented and checked: the harness, its
-host-tool contract, its fixture corpus and the retained captures exist, the four
-checker modules of the fixed topology exist with `closure_check.sh` answering the
-scope question, the configuration bundle is committed with the one parser, the
-digest, the agent's consistency check and the cplx-side resolution that make it
-authoritative rather than merely self-describing, and the object reader now walks
-the tree once, treats every shipped ELF as a subject and refuses every
-`DT_NEEDED` name that resolves nowhere in the observed loader scope, reporting
-separately the subjects no edge resolves to. There is still no floor check, no
-coherence rule, no duplicate-provider or family rule, no declared entry-point
-set and no packaging gate, so steps 4 to 7 are at their initial state and their
-check sections hold their placeholder. The document verdict above stays No until every
-step is checked.
+This document records implementation and validation of all nine plan steps,
+0 through 8. The checker, packaging and verification boundaries are implemented.
+The final same-candidate RHEL and Debian evidence completes Step 8 under the
+active sqlite waiver permitted by plan Q15. The [acceptance record](acceptance.closure.step8.md)
+collects the exact source and archive identities, host results and temporary
+transport cleanup. Release publication remains subject to the ordinary gate.
 
 > Initial-skeleton note: the skeleton was written by the `write-plans` skill
 > before any implementation check, and it still governs every step no check has
@@ -3461,80 +3452,164 @@ No, no existing feature or reporting capability appears impaired.
 
 ### Analysis of Step 8 implementation state
 
-No. Step 8 has NOT been started, and it cannot start yet.
+Yes. Step 8 has been fully implemented.
 
-Q14 created this step on 2026-09-12 out of the acceptance obligations Step 7
-could not discharge from inside its own boundary. Nothing in it is implemented.
-Nothing in it is relaxed either: the obligations are the ones Step 7 carried,
-moved rather than reduced.
+The final trimmed archive is the same identified subject on RHEL 9.8 and
+Debian 12. Packaging succeeds under Q15's sole sqlite waiver; the Debian
+acceptance supplies the installed whole-provider inventory, an attributed
+application-venv trace with zero in-scope host fallbacks, and effective negative controls.
+The owning requirement records Q12 loader preparation and the human's Q13
+Option B transport decision. Final evidence, identities, timings and cleanup
+are collected in [the Step 8 acceptance record](acceptance.closure.step8.md).
+This is the writer's implementation assessment submitted for round 4 review.
 
 ### Goal for Step 8
 
-Run the D10 acceptance against the real packaged archive on both hosts, and
-retain passing captures that name the host, the date and the archive identity.
+Produce and assess a trimmed validation candidate without changing live build
+tools, preserving the packaging interface and retaining the required RHEL and
+Debian observations.
 
 ### Step 8 improvement expectations
 
-- The packaging check passes on the build account over the real tree, with every
-  refusal named and the `tools/old/py3.13` repair recorded rather than treated
-  as a check failure. That prerequisite is already discharged by the explicit
-  operator decision of 2026-09-11, which records DELETION as the authorized
-  exception to the plan's default move and identifies what went by manifest
-  digest. No step of this effort repeats or extends any live-account action.
-- The packaged archive resolves with no host fallback on Debian 12, from a
-  listing over the whole scope and a live trace naming the venv process.
-- The unmodified archive passes rule 1 over its 20 multi-candidate names.
-- `bash docs/v0.27.0/verify.closure-check.sh` returns 0 on the Debian agent.
+- Gate and tar inspect the same staged subject tree.
+- Packaging preserves output/latest/history and caller-HOME extension inputs.
+- Failed creation preserves previous archives and removes incomplete output.
+- The real archive and installed payload meet the agreed acceptance contract.
+- The bounded validation transfer follows the owning requirement.
 
 ### What was implemented for Step 8
 
-Nothing. The step has not started, and its two prerequisites are open.
+- An owned hardlink mirror receives the measured trim. Source-boundary and
+  directory-symlink refusals protect live tools, and gate write targets are
+  detached before mutation. pkg.sh uses --source-root only for the subject;
+  caller HOME still owns output, history, environment and --add inputs.
+- The round 3 reviewer's argument-boundary, private temporary output,
+  no-overwrite promotion and same-second deduplication repairs are retained.
+  Failed creation preserves previous archives/latest and removes partial output.
+- Q12 loader preparation checks all lookup paths before replacing only
+  byte-identical secondary regular copies with relative aliases. Different,
+  broken or escaping candidates refuse. All five lookup aliases still execute
+  after installation; the source loader digests remain unchanged.
+- The three echos copies guard the unset FROM_UNIX read.
+- The verifier retains its complete static report and raw checker status.
+  Its strict static verdict is unchanged; live scope excludes Dynatrace generally.
+  The acceptance applies Q15 explicitly and rejects every other report shape.
+- RHEL acceptance extracts the selected archive. Debian installs it once,
+  selects the contained relocated Python ELF directly and creates a fresh
+  application venv with symlink entry points and no pip. It checks canonical
+  runtime prefix and base-interpreter ancestry before observing only its owned
+  PID. Empty and host-object controls drive the authoritative live observer
+  directly over the same installation. The incomplete stand-in archive is gone.
+  Selection controls reject shell wrappers and ELF links escaping the candidate.
+  The consuming CI runs an early live probe against its provisioned prefix;
+  the authoritative Step 7 acceptance still installs and observes its own prefix.
+  The observer excludes recognized Dynatrace monitoring generally under the
+  owner's amended scope. Raw HOSTS and separate EXCLUDED counts remain visible;
+  zero FALLBACKS is required for the owned PID. New observer controls reject
+  other external libraries and monitoring-only inventories. No namespace or
+  preload changes are required, and the same scope applies to release checks.
 
-### Missing work for Step 8
-
-- **Apply the confirmed production payload trim under umbrella item 7**.
-  Stop promoting build-only tools and their exclusive dependencies. The
-  retained copy measurement removes 83 entries, saves 194M and reduces 21
-  unresolved needs, two family refusals and 12 undetermined results to zero.
-- **Restore sqlite and retire its waiver under umbrella item 6**.
-  The measured trimmed copy still returns 3 because
-  `python-sqlite-support` remains active. This acceptance requires exit 0.
-- **Produce and verify the packaged archive after the owning changes**.
-  Record the real build-account gate, the unmodified archive's rule 1 positive
-  control over its 20 multi-candidate names, and the Debian whole-provider
-  inventory plus the attributed candidate-venv trace. The copy measurement
-  and modelled branch controls do not establish those results.
-- **Retake passing acceptance captures from the final code and payload**.
-  Retain both hosts, dates, harness and archive identities and passing halves.
-  A green suite over the current payload is not an archive pass, and a trim-copy
-  measurement is not a packaged archive.
+- Step 6 retains reinstall, completion-marker and corruption controls.
+  Counterpart captures must identify the same archive.
+- The consuming CI transport checks one exact snapshot name and SHA-256 before
+  extraction, requires publication off and preserves the ordinary release pin.
+  The temporary pin and exact asset are removed after retaining acceptance.
+- The final captures replace historical claims with the tested source hashes,
+  full reports, loader inventories and paired-host observations.
 
 ### New types or classes introduced for Step 8
 
-None. cplx is a Bash project and carries no classes, and this step adds no
-production script and no function.
+No class is introduced. The wrapper's seven functions are pkg_tools_fatal,
+pkg_tools_is_protected, pkg_tools_links_binutils, pkg_tools_trim_stage,
+pkg_tools_build_stage, pkg_tools_unlink_gate_targets and
+pkg_tools_canonicalize_loader. pkg_cleanup is referenced by the EXIT trap.
+The harness's new packaging-preservation and loader-alias cases are called by
+Step 5. step7_q15_accepts and step7_observe_control are called by the real
+acceptance and its controls. The removed control-archive helper has no caller.
+closure_live_dynatrace is called by the authoritative live observer to classify
+the owner-excluded monitoring modules; it introduces no external command.
 
 ### Architecture check for Step 8
 
-None applicable until the step runs. It adds no module and changes no topology,
-so the ten-script topology and the 650-line ceiling are untouched by it.
+The wrapper owns packaging preparation; pkg.sh owns archive creation and
+promotion. The installer remains unchanged. Acceptance consumes the
+authoritative verifier and live observer, and preserves the strict static
+release gate for waived artifacts. The fresh venv is inside the verifier's
+installation, with effective runtime identity checked before observation.
+No production module is introduced and production files remain below the
+650-line ceiling. DDD class-layer constraints do not apply to these Bash tools.
 
-### Cost and structure check for Step 8
+No, there is nothing that needs to be addressed in the Step 8 architecture.
 
-No production line is added. The cost of the step is two acceptance runs and the
-captures they retain.
+### Performance check for Step 8
+
+The mirror shares file content through hardlinks while allocating metadata.
+Trim work remains linear in visited paths. Loader preparation enumerates
+loader paths once, checks each against the selected bytes, then creates
+relative aliases. It introduces no quadratic provider lookup or installer walk.
+The acceptance performs one real verifier installation; the two live negative
+controls reuse that installed prefix without repackaging or reinstalling it.
+CI runs each closure harness step once, retaining full output and elapsed time.
+The acceptance record gives measured packaging, install and host-run timings;
+no numeric speedup is claimed against the earlier unreachable controls.
+
+No, there is no Step 8 performance issue that needs to be addressed.
 
 ### Harness case check for Step 8
 
-No new case. The cases are the ones Step 7 delivered, run against the real
-packaged archive rather than against a fixture. No coverage percentage is
-claimed for this Bash harness.
+The final same-source results and exact commands are retained in
+[RHEL](acceptance.closure.step8.rhel.txt) and
+[Debian](acceptance.closure.step8.debian.txt), with packaging and path-complete
+loader evidence linked from [the acceptance record](acceptance.closure.step8.md).
+The RHEL harness passes Steps 0-5; Step 6 has zero failed cases and requires its
+Debian-only real integration path. Debian consumes the original RHEL capture
+and passes every step, including both Step 7 halves and the aggregate. The
+[closing RHEL Step 7 capture](acceptance.closure.step8.rhel-closing.txt) then
+consumes the corrected retained Debian bytes and passes 149 cases with zero
+failures, exit 0 in 109 seconds, using the same candidate and all 19 matching
+source identities. The Debian correction adds its existing timestamp as the
+required Captured header and normalizes line endings; no measured line changes.
+The original RHEL capture remains byte-identical to the one Debian consumed.
+RHEL Step 6's expected host-only exit 5 is not a passing aggregate command.
+
+The final lint reports 54 scripts clean. Focused Bash syntax and ShellCheck
+checks pass over packaging, the verifier, harness and CI transport scripts.
+The installer/per-tool identity check is empty; the installer-purity search
+finds no readelf, sha256sum or tar-listing addition. This Bash project's
+declared review validation command is its shell lint. A separately attempted
+ghog day finds no pytest project and does not provide test or coverage evidence.
+
+Earlier relocation diagnostics still compare against the old archive's fixed
+inventory and report removed build-only libraries and a removed a.out. These
+are retained explicitly in the final acceptance record. Jenkins build 170
+subsequently completed with SUCCESS; the required closure acceptance has its
+own complete passing capture.
+
+### Unit test coverage check for Step 8
+
+No numeric unit-coverage gate or Python unit-tested class applies to this Bash
+project. Integration case counts are not percentages. Packaging cases cover
+source isolation, argument boundaries, extension inputs, latest preservation,
+failed creation, timestamp collisions and loader refusal shapes. Acceptance
+cases cover Q15 report interpretation, owned-process attribution and cleanup,
+unusable or mixed traces, missing providers and stale/different captures.
+Every added top-level function is referenced by its production caller or the
+harness; the old stand-in helper is removed.
+
+No, there is no unit-tested class below 100% that needs completing.
+No, no added top-level symbol is unreferenced.
 
 ### Feature integrity for Step 8
 
-- **Existing feature behavior**: unchanged. This step executes existing scripts
-  and retains the captures they produce.
-- **Reporting or diagnostics**: unchanged, beyond those captures.
-- **Compatibility or rollout note**: none. The step adds no input and no flag.
+The preserved packaging interface, output/latest/history, caller extensions
+and source isolation are exercised on both hosts. Rule 1 remains strict over
+all 20 multi-candidate lookup names. The source has 296 PT_INTERP programs;
+the archive and installation have 245, of which 162 relocate and 83 retain
+their system interpreter. The path-complete record keeps those helper entries
+visible rather than claiming that every ELF is a supported entry point.
+Candidate Python and Git execute; Debian's owned application-venv process maps
+no in-scope host object, with Dynatrace exclusions visible. The full checker report and provider listing are retained.
+The installer, build package lists, release pin and strict static publication
+policy are unchanged. The approved live monitoring exclusion applies generally.
 
-No, no existing feature or reporting capability appears impaired.
+No, no existing feature or reporting capability appears impaired by Step 8.
