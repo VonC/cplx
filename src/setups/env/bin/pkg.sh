@@ -37,15 +37,32 @@ fi
 # in order, so a consuming project can inject its own exclusion rules
 # without forking this script (my-project does: see its
 # tools/pkg_pdfs.sh overlay).
-PKG_USAGE="Usage: $0 <folder_name> [--closure-gate] [--add <item>]... [-- <tar args...>]"
+PKG_USAGE="Usage: $0 <folder_name> [--closure-gate] [--source-root <dir>] [--add <item>]... [-- <tar args...>]"
 TARGET_FOLDER=""
 EXTRA_ITEMS=()
 EXTRA_TAR_PARAMS=()
 CLOSURE_GATE=0
+# WHERE THE PACKAGED TREE IS READ FROM, which is NOT where the run writes, reads
+# its history or resolves its extra items. Those stay anchored at $HOME, because
+# they are this command's public interface: the path it prints, the `latest`
+# pointer it maintains, the digests it compares against and the `--add` inputs a
+# caller names are all the caller's, not the source tree's. Only the subject
+# moves. Defaulting to $HOME makes an unflagged run byte-identical to before.
+PKG_SOURCE_ROOT="$HOME"
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --closure-gate)
             CLOSURE_GATE=1
+            ;;
+        --source-root)
+            if [ -z "$2" ]; then
+                fatal "--source-root requires a directory argument. $PKG_USAGE" 1
+            fi
+            if [ ! -d "$2" ]; then
+                fatal "--source-root names no directory: $2. $PKG_USAGE" 1
+            fi
+            PKG_SOURCE_ROOT="$2"
+            shift
             ;;
         --add)
             if [ -z "$2" ]; then
@@ -123,6 +140,10 @@ SHA_PATH="${PKG_DIR}/${SHA_NAME}"
 # 2. Create the Archive (Deterministic + Exclude)
 # Prepare items to archive
 ITEMS_TO_ARCHIVE=("$TARGET_FOLDER")
+# The caller's own items, which are read from $HOME even when the subject tree is
+# read from elsewhere. `tar` takes a second `-C`, so both roots are honoured in
+# one archive and an `--add` path keeps meaning what the caller meant by it.
+HOME_ITEMS=()
 
 # If TARGET_FOLDER is "tools", also ship the home-level env files when
 # they exist, so the target account gets a working session after install.
@@ -132,7 +153,7 @@ if [ "$TARGET_FOLDER" == "tools" ]; then
     for extra_env_file in .env .env_; do
         if [ -e "$HOME/$extra_env_file" ]; then
             task "Target is 'tools', adding $extra_env_file to archive list"
-            ITEMS_TO_ARCHIVE+=("$extra_env_file")
+            HOME_ITEMS+=("$extra_env_file")
         fi
     done
 fi
@@ -142,7 +163,7 @@ fi
 # caller's --no-wildcards-match-slash toggles keep their relative order).
 for extra_item in "${EXTRA_ITEMS[@]}"; do
     task "Adding requested extra item to archive list: $extra_item"
-    ITEMS_TO_ARCHIVE+=("$extra_item")
+    HOME_ITEMS+=("$extra_item")
 done
 if [ "${#EXTRA_TAR_PARAMS[@]}" -gt 0 ]; then
     task "Applying ${#EXTRA_TAR_PARAMS[@]} caller-provided tar argument(s)"
@@ -229,22 +250,36 @@ closure_gate_run() {
     if [ -z "$root" ]; then
         fatal "closure gate: the cplx tree above $CLOSURE_SELF_DIR could not be resolved." 3
     fi
+    # THE SOURCE AND THE DESTINATION MUST DIFFER, and this is asked FIRST. This
+    # script exists both in the deployed cplx tree and again inside the tools tree
+    # it packages, so a gated run started from the copy INSIDE the payload would
+    # read its declaration out of a payload it is packaging. That is not a
+    # misconfiguration to warn about: it is a run certifying its own output.
+    #
+    # It is asked before the declaration exists, because it is a question about
+    # WHERE THIS SCRIPT IS and not about what happens to be deployed beside it.
+    # Asking it second made the refusal depend on a previous run having left a
+    # declaration in the payload: remove that leftover and the same defective
+    # invocation came back with "no declaration here", which sends an operator to
+    # deploy one rather than to stop running from inside the payload.
+    #
+    # BOTH DESTINATIONS COUNT. `--source-root` can point the write somewhere other
+    # than the caller's home, so a payload copy is refused whether it would write
+    # into the source root's tree or into the caller's own.
+    for target in "$PKG_SOURCE_ROOT/$TARGET_FOLDER" "$HOME/$TARGET_FOLDER"; do
+        target=$(cd -- "$target" 2>/dev/null && pwd -P) || continue
+        if [ "$root" = "$target" ]; then
+            fatal "closure gate: this pkg.sh lives inside '$TARGET_FOLDER', so its source is its own destination; run the gated packaging from the deployed cplx tree." 3
+        fi
+    done
+
     srcdir="$root/closure"
     if [ ! -d "$srcdir" ]; then
         fatal "closure gate: no closure declaration is deployed at $srcdir, and the gate does not run without one." 3
     fi
 
-    stage="$HOME/$TARGET_FOLDER/closure"
-    bindir="$HOME/$TARGET_FOLDER/bin"
-    # THE SOURCE AND THE DESTINATION MUST DIFFER. This script exists both in the
-    # deployed cplx tree and again inside the tools tree it packages, so a gated
-    # run started from the copy INSIDE the payload would read its declaration
-    # out of the directory it is about to write. That is not a misconfiguration
-    # to warn about: it is a run certifying its own output, so it refuses.
-    target=$(cd -- "$HOME/$TARGET_FOLDER" 2>/dev/null && pwd -P) || target="$HOME/$TARGET_FOLDER"
-    if [ "$root" = "$target" ]; then
-        fatal "closure gate: this pkg.sh lives inside '$TARGET_FOLDER', so its source is its own destination; run the gated packaging from the deployed cplx tree." 3
-    fi
+    stage="$PKG_SOURCE_ROOT/$TARGET_FOLDER/closure"
+    bindir="$PKG_SOURCE_ROOT/$TARGET_FOLDER/bin"
 
     # THE ENVELOPE IS VERIFIED, NOT WRITTEN. It is committed beside the
     # declaration and travels with it; this account digests the document and
@@ -296,7 +331,7 @@ closure_gate_run() {
     fi
 
     task "Closure gate: checking the tree the archive would carry"
-    bash "$CLOSURE_SELF_DIR/closure_check.sh" --prefix "$HOME" \
+    bash "$CLOSURE_SELF_DIR/closure_check.sh" --prefix "$PKG_SOURCE_ROOT" \
         --installer "$CLOSURE_SELF_DIR/install_pkg.sh" \
         --bundle "$stage" || rc=$?
     case "$rc" in
@@ -325,22 +360,42 @@ closure_gate_unstage() {
 }
 
 CLOSURE_STAGED=()
+TAR_PARTIAL=""
+pkg_cleanup() {
+    local rc=$?
+    if [ -n "$TAR_PARTIAL" ]; then rm -f -- "$TAR_PARTIAL"; fi
+    if [ "$rc" -ne 0 ] && [ "$CLOSURE_GATE" -eq 1 ]; then
+        closure_gate_unstage
+    fi
+}
+trap pkg_cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 if [ "$CLOSURE_GATE" -eq 1 ]; then
     # Include source, write and verification failures, all of which may exit
     # through fatal before the checker is reached. Register destinations before
     # writing them so even a partially written module is removed.
-    trap 'if [ "$?" -ne 0 ]; then closure_gate_unstage; fi' EXIT
     closure_gate_run
 fi
 # ====================================================
 
+# Own a private temporary file on the destination filesystem. EXIT removes only
+# this invocation's file, including failures during compression or hashing.
+# Compare the digest before promotion: replacing a same-second archive and then
+# deleting it as a duplicate would leave latest pointing at a missing file.
+TAR_PARTIAL=$(mktemp "${TAR_PATH}.XXXXXXXX.partial") \
+    || fatal "Failed to create a private archive candidate." 2
 task "Creating candidate archive..."
-if ! tar --sort=name "${EXCLUDE_PARAMS[@]}" -C "$HOME" -cf - "${ITEMS_TO_ARCHIVE[@]}" | gzip -n > "$TAR_PATH"; then
+if ! tar --sort=name "${EXCLUDE_PARAMS[@]}" \
+        -C "$PKG_SOURCE_ROOT" "${ITEMS_TO_ARCHIVE[@]}" \
+        ${HOME_ITEMS[0]+-C "$HOME"} ${HOME_ITEMS[0]+"${HOME_ITEMS[@]}"} \
+        -cf - | gzip -n > "$TAR_PARTIAL"; then
     fatal "Failed to create archive." 2
 fi
 
 # 3. Compute SHA1
-NEW_SHA1=$(sha1sum "$TAR_PATH" | awk '{print $1}')
+NEW_SHA1=$(sha1sum "$TAR_PARTIAL" | awk '{print $1}') \
+    || fatal "Failed to digest the archive candidate." 2
 info "Computed SHA1: $NEW_SHA1"
 
 # 4. Find the most recent SHA1 file
@@ -368,8 +423,7 @@ fi
 # 5. Final Logic
 if [ "$IS_DUPLICATE" -eq 1 ]; then
     # -- DUPLICATE DETECTED --
-    # 1. Delete the new, redundant tarball
-    rm "$TAR_PATH"
+    # 1. EXIT removes the private duplicate, preserving the existing archive.
 
     # 2. Print the filename of the *previous* archive
     EXISTING_TAR="${LAST_SHA_FILE%.sha1}.tar.gz"
@@ -378,6 +432,12 @@ if [ "$IS_DUPLICATE" -eq 1 ]; then
 
 else
     # -- NEW CONTENT DETECTED --
+    # Atomically claim an unused final name without replacing another run's
+    # archive. Both names are on the same filesystem; EXIT unlinks the temporary
+    # name. A timestamp collision fails with existing archives/latest intact.
+    if ! ln -T -- "$TAR_PARTIAL" "$TAR_PATH"; then
+        fatal "Archive name already exists or cannot be created: $TAR_PATH; retry with a new timestamp." 2
+    fi
     # 1. Save the new SHA1 to a file
     echo "$NEW_SHA1" > "$SHA_PATH"
 
