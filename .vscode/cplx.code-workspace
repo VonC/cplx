@@ -34,6 +34,9 @@
 			"activityBar.activeBorder": "#15202b",
 			"activityBarTop.activeBorder": "#15202b"
 		},
-		"peacock.color": "#92d284"
+		"peacock.color": "#92d284",
+		"cSpell.words": [
+			"tvzf"
+		]
 	}
 }
