@@ -322,12 +322,9 @@ the SSH GIT_LOGIN identified user.
 
 Add an SSH wrapper which will set:
 
-- `GIT_LOGIN` (from the `.ssh/authorized_keys` forced command parameter of
-`./tools/git/bin/sshwrapper.sh`)
-- `GIT_AUTHOR_NAME` and `GIT_AUTHOR_EMAIL`
-  (from `./tools/git/bin/sshgitwrapper.local`)
-- `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL`
-(in `./tools/git/bin/sshwrapper.sh`, after sourcing `sshgitwrapper.local`)
+- `GIT_LOGIN` (from the `.ssh/authorized_keys` forced command parameter of `./tools/git/bin/sshwrapper.sh`)
+- `GIT_AUTHOR_NAME` and `GIT_AUTHOR_EMAIL` (from `./tools/git/bin/sshgitwrapper.local`)
+- `GIT_COMMITTER_NAME` and `GIT_COMMITTER_EMAIL` (in `./tools/git/bin/sshwrapper.sh`, after sourcing `sshgitwrapper.local`)
 
 An sshe cplxgit will work, with a local PC `~/.ssh/config` of:
 

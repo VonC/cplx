@@ -85,7 +85,6 @@ The passes, in order:
 | ELF fix | `PT_INTERP` → the deployed `ld-linux-x86-64.so.2`, and the search path → the deployed library directories (python's root first), written as **`DT_RPATH`** | the rpath axis selects by population, not by the value it finds; the interpreter axis still rewrites only values containing `/home/`; skipped with a warning when patchelf is absent |
 | convenience bin | `<prefix>/bin`: `echos`, `compare_file.sh` and `pkg` (the shipped dispatcher) links, `pkg_tools` and `install_pkg` wrappers | only for sources present in the tree |
 
-
 ### What the ELF pass writes, and to which objects
 
 The tag written is **`DT_RPATH`**, not `DT_RUNPATH`. The difference is not
@@ -123,6 +122,7 @@ same object:
 - any object with no dynamic section, reported `not dynamically linked`;
 - the interpreter of any object whose interpreter is already correct or is a
   system path, reported `unchanged`.
+
 `patchelf` lookup order: `<prefix>/tools/bin/patchelf`,
 `~/tools/bin/patchelf`, then `PATH`. The dynamic linker is taken from
 `<prefix>/tools/python/root/lib64/`, falling back to a `find` under

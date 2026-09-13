@@ -1,0 +1,51 @@
+Harness: docs/v0.27.0/verify.wrapper-accept.sh, item 3 python-wrapper-foreign-distro
+Invoked: bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity
+Target: the authoring host, bash 5.3.9(1)-release, inside the cplx work tree
+Captured: 2026-09-04, by hand, for the step 0 feature-preservation obligation
+Status: exit 0
+Purpose: identity mode reads cplx history through git and runs in this repository by its own header; no validation host carries a cplx checkout with history, so this is the only host that can answer it
+
+Sensitive-content note: the deployment account name is replaced by
+         `deploy-account` under this repository own replacement rule.
+         Nothing else in the run below is edited.
+
+===== the run =====
+
+== acceptance prerequisite preflight
+  preflight/sha256sum                            PASS  /usr/bin/sha256sum
+  preflight/cp                                   PASS  /usr/bin/cp
+  preflight/rm                                   PASS  /usr/bin/rm
+  preflight/readlink                             PASS  /usr/bin/readlink
+  preflight/od                                   PASS  /usr/bin/od
+  preflight/head                                 PASS  /usr/bin/head
+  preflight/git                                  PASS  /mingw64/bin/git
+
+== step 5 identity: the manifest against the canonical harness
+  identity/manifest/path                         NOTE  /c/Users/vonc/git/cplx/docs/v0.27.0/verify.wrapper-scope.manifest.txt
+  identity/manifest/freeze-commit                NOTE  233b549d1bfa96b0e0e2cf7e9d31c996cf132389
+  identity/manifest/harness-path                 NOTE  docs/v0.27.0/verify.wrapper-scope.sh
+  identity/manifest/harness-at-freeze-commit     PASS  fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
+  identity/control/mutated-manifest-refused      PASS  refused on [MANIFEST], as designed
+  identity/harness/canonical-file-is-still-frozen PASS  fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
+
+== step 5 identity: both wrappers against the commits they came from
+  identity/control-wrapper/at-named-commit       PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  identity/control-wrapper/retained-copy         PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  identity/fixed-wrapper/at-named-commit         PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  identity/fixed-wrapper/live-file               PASS  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  identity/control/wrong-control-bytes-refused   PASS  refused on [PROVENANCE], as designed
+
+== step 5 identity: the retained capture, before it is accepted
+  identity/capture/none-supplied                 NOTE  no --capture given, so nothing was admitted as evidence by this run
+
+== verdict
+  mode        identity
+  cases       15
+  failures    0
+  accept-script-sha256 ccea6ea4fb7fcbc773a1ad1af7b2c0c2967866bad88b51581af95af5c4c7cb33
+  fixed-wrapper-sha256 7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  control-wrapper-sha256 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  harness-sha256 fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
+  bash        5.3.9(1)-release
+
+OBJECTIVE MET for step 5 (identity)

@@ -1,0 +1,103 @@
+Harness: docs/v0.27.0/verify.wrapper-scope.sh, item 3 python-wrapper-foreign-distro
+Invoked: bash docs/v0.27.0/verify.wrapper-scope.sh --step 2
+Target: RHEL 9.8 (Plow), bash 5.1.8(1)-release
+Captured: 2026-09-04, by hand, for the step 0 feature-preservation obligation
+Status: exit 0
+Purpose: step 2 is the last any-host step of the frozen harness; its step 0 measures the PRE-CHANGE wrapper and cannot match the fixed one by construction
+
+Sensitive-content note: the deployment account name is replaced by
+         `deploy-account` under this repository own replacement rule.
+         Nothing else in the run below is edited.
+
+===== the run =====
+
+== harness prerequisite preflight
+  preflight/readlink                           PASS  /bin/readlink
+  preflight/mv                                 PASS  /bin/mv
+  preflight/ln                                 PASS  /bin/ln
+  preflight/cp                                 PASS  /bin/cp
+  preflight/sed                                PASS  /bin/sed
+  preflight/grep                               PASS  /bin/grep
+  preflight/sha256sum                          PASS  /bin/sha256sum
+
+== step 0 shim coverage: the helper list against the wrapper
+  step0/coverage/no-unshimmed-command          PASS
+  step0/coverage/no-dead-shim-entry            PASS
+
+== step 0 host gate: can this host reproduce the symlink surgery
+  step0/host/symlink-capable                   PASS  yes
+
+== step 2 structure: one shared guard, three checked calls
+  step2/source/guard-definitions               PASS  1
+  step2/source/checked-calls                   PASS  3
+  step2/source/unguarded-readlink-calls        PASS  2
+
+== step 2 the baseline: the same failure against the pre-change wrapper
+  step2/baseline/retained-present              PASS  yes
+  step2/baseline/retained-is-the-step0-subject PASS  88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  step2/baseline/fixture                       PASS  planted and asserted
+  step2/baseline/injection-observed            PASS  1
+  step2/baseline/exit-status-is-a-silent-zero  PASS  0
+  step2/baseline/python3_target-derived-from-empty PASS  _bin
+  step2/baseline/interpreter-never-reached     PASS  0
+  step2/baseline/mutations-after-injection-present PASS  yes
+  step2/baseline/mutations                     NOTE  6 mv/ln/cp/sed calls followed the failed readlink
+
+== step 2 site 1: the relink read, on a fresh tree
+  step2/site1/fixture                          PASS  planted and asserted
+  step2/site1/injection-observed               PASS  1
+  step2/site1/injected-call-is-this-site       PASS  yes
+  step2/site1/exit-status-non-zero             PASS  yes
+  step2/site1/message-names-helper-site-and-path PASS  yes
+  step2/site1/no-mutation-after-injection      PASS  0
+  step2/site1/tree-unmodified                  PASS  yes
+
+== step 2 site 2: the target read, on an already-converted tree
+  step2/site2/fixture                          PASS  planted and asserted
+  step2/site2/first-call-accepted              PASS  0
+  step2/site2/first-call-relinked              PASS  ../../bin/python
+  step2/site2/injection-observed               PASS  1
+  step2/site2/injected-call-is-this-site       PASS  yes
+  step2/site2/exit-status-non-zero             PASS  yes
+  step2/site2/message-names-helper-site-and-path PASS  yes
+  step2/site2/no-mutation-after-injection      PASS  0
+  step2/site2/tree-unmodified                  PASS  yes
+
+== step 2 site 3: the venv read, after the interpreter has run
+  step2/site3/fixture                          PASS  planted and asserted
+  step2/site3/target                           PASS  planted and asserted
+  step2/site3/first-call-accepted              PASS  0
+  step2/site3/injection-observed               PASS  1
+  step2/site3/injected-call-is-this-site       PASS  yes
+  step2/site3/exit-status-non-zero             PASS  yes
+  step2/site3/message-names-helper-site-and-path PASS  yes
+  step2/site3/no-mutation-after-injection      PASS  0
+  step2/site3/tree-unmodified                  PASS  yes
+
+== step 2 the legitimate run, which must still be accepted
+  step2/legitimate/fixture                     PASS  planted and asserted
+  step2/legitimate/exit-status                 PASS  0
+  step2/legitimate/no-injection                PASS  0
+  step2/legitimate/surgery-performed           PASS  ../../bin/python
+  step2/legitimate/interpreter-called          PASS  1
+  step2/legitimate/no-empty-derived-path       PASS  no
+
+== step 2 identities: what this step asserts rather than assumes
+  step2/setenv-unchanged-since-step0           PASS  355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  step2/wrapper-sha256                         NOTE  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  step2/wrapper-lines                          NOTE  131
+
+== verdict
+  step        2
+  cases       53
+  failures    0
+  wrapper     /tmp/cplx-step0/src/install/env/python/bin/python
+  setenv      /tmp/cplx-step0/src/install/env/python/bin/setenv
+  retained    /tmp/cplx-step0/docs/v0.27.0/wrapper.pre-change.verification-only
+  harness     fab864eeecef6286f773a3d96f77e1a991de9cba8dea0e75bfac7318adf9e608
+  wrapper-sha  7213dfe03d0870ca1111a44a50145b9a39e987afe409893688d48e8925616c58
+  setenv-sha   355bbec5cc5c1dfe7cf28c9b1bba0568acbe19c5b5662b97bbc5b549a8e5089d
+  retained-sha 88c4e0d22207b387b6b0d24542ba5301164e01f6cc698c02945722493b7f5706
+  bash        5.1.8(1)-release
+
+OBJECTIVE MET for step 2

@@ -1,0 +1,310 @@
+# CPLX closure fixture corpus, v0.27.0
+#
+# The committed TEXT from which `verify.closure-check.sh` generates the ELF
+# objects and the tree shapes its cases need, into its own scratch directory.
+# Nothing binary enters this repository, and nothing here is executed: a row is
+# a specification, and the harness is what turns it into a file.
+#
+# WHY THE OBJECTS ARE MUTATED DONORS (plan decision Q07). An ELF with a real
+# dynamic section cannot be conjured from text, and the three alternatives were
+# each refused with a reason: hand-built hex nobody will review, a compiler as a
+# harness prerequisite on both hosts, and committed binary fixtures, which the
+# two earlier items of this collection already refused. So the harness FINDS a
+# donor on the host it runs on, VALIDATES its ELF class and section shape against
+# the `donor` rows below, copies it, applies the row's mutation, and ASSERTS the
+# mutated semantic result before any case is allowed to use it. A donor that
+# fails validation, or a mutation whose asserted result is not observed, is a
+# harness failure and never a smaller run.
+#
+# THE COUNT ROW IS THE POINT OF THE FILE BEING PARSED AT ALL. A corpus that lost
+# its tail would otherwise produce a shorter, greener run: fewer fixtures, fewer
+# cases, and a verdict that reads exactly like a complete one. The harness reads
+# `count`, counts the `spec` rows, and refuses on the difference, so a truncated
+# corpus is a failure rather than a smaller run.
+#
+# Row types, each with its own fixed arity, all columns required:
+#
+#   count|<n>
+#     the number of `spec` rows this file declares.
+#
+#   donor|<selector>|<elf-type>|<required-parts>|<why>
+#     what the harness must find on the host before it may build the objects of
+#     that selector. `required-parts` is a comma separated list of the program
+#     header or dynamic entries the donor has to carry.
+#
+#   spec|<id>|<kind>|<donor>|<placement>|<mutation>|<assert>
+#     id           the name a case cites, unique across the file
+#     kind         object, an ELF derived from a donor; tree, a directory or a
+#                  plain file shape with no ELF content
+#     donor        the donor selector, or `-` for a tree
+#     placement    the path, relative to the prepared prefix, the fixture is
+#                  generated at
+#     mutation     the transformation applied to the donor, or the shape planted
+#                  for a tree, as `<verb>` or `<verb>:<operand>`
+#     assert       the semantic result the harness must OBSERVE on the generated
+#                  fixture before any case may use it. This column is why a
+#                  mutation that silently did nothing cannot be mistaken for one
+#                  that worked.
+#
+# HOW A MUTATION REACHES A REAL DYNAMIC SECTION, added by Step 3 when the engine
+# behind these rows was written. Nothing here rebuilds an ELF: the donor's own
+# `.dynstr` carries the names and its own `.dynamic` carries the entries, and a
+# mutation only moves what is already there.
+#
+#   the name slots      the LAST 256 BYTES of the donor's `.dynstr`, taken as four
+#                       64-byte slots. A mutation writes its name into a slot and
+#                       repoints a dynamic entry at that offset, so no fixture
+#                       name is limited by the length of the string it replaces.
+#                       The bytes it overwrites are symbol names, which nothing in
+#                       this effort reads: the checker reads dynamic entries and
+#                       version records, and both keep their own strings.
+#   the spare slot      the linker pads `.dynamic` past its terminating DT_NULL.
+#                       `needed-add` turns the FIRST DT_NULL into a real DT_NEEDED
+#                       entry and leaves the next spare slot as the terminator, so
+#                       the need is ADDED rather than substituted for another.
+#
+# Both shapes are donor requirements rather than assumptions, which is why the
+# `shared` row names them: a donor that cannot supply either is refused before a
+# fixture is generated from it, and the harness reports UNANSWERED rather than
+# building an object whose mutation could not take.
+#
+# The names inside the fixtures are deliberately `cplx`-prefixed inventions
+# rather than real library names, except where a case is about a real one:
+# `libssl.so.3` appears because the design's subject rule turns on a second copy
+# of it under `root/usr/bin`, and the `libcplxbfd` pair stands in for the
+# measured `libbfd-2.35.2-63` and `-66` generations without pinning a version
+# this corpus would then have to track.
+#
+# Steps 3 and 4 extend this file as their cases need. A row is added here and
+# reviewed before the case that consumes it exists, which is the same order the
+# host-tool contract follows. STEP 3 ADDED THREE AT SUBMISSION, and each exists
+# because a case would otherwise have proved something narrower than it claims:
+#
+#   provider-donor-need     one text provider per DT_NEEDED name the validated
+#                           donors carry, planted into a provider directory. A
+#                           donor keeps its own needs, so without this row every
+#                           generated subject would refuse on the donor's `libc`
+#                           and the planted defect would be one refusal among
+#                           several rather than the only one.
+#   provider-first-libssl   the FIRST `libssl.so.3`, in a provider directory. The
+#                           subject rule is about a SECOND copy, and with no first
+#                           copy the index would hold no such name at all, which
+#                           satisfies "absent from the index" for the wrong reason.
+#   subject-need-provider   a real object at the name `subject-site-packages-need`
+#                           depends on. It is the ONE subject in the step 3 tree a
+#                           DT_NEEDED edge reaches, so the unreferenced finding has
+#                           a negative control instead of naming every subject.
+#
+#
+# ROUND 1 OF THE STEP 3 CODE REVIEW ADDED TWO MORE, and both exist because a
+# reproduced false-green path had no fixture:
+#
+#   reader-needed-value-unreadable   a DT_NEEDED entry whose string offset falls
+#                                    outside the string table. A supported reader
+#                                    exits 0 and prints the raw value with NO
+#                                    brackets, so a parser matching only the
+#                                    bracketed shape drops the entry and the
+#                                    object resolves nothing and refuses nothing.
+#                                    `needed-offset-corrupt` is the verb, and it
+#                                    repoints the first DT_NEEDED value rather
+#                                    than touching the string table.
+#   subject-libssl-consumer          an object that NAMES `libssl.so.3`, without
+#                                    which the second copy under `root/usr/bin`
+#                                    is unreferenced for want of any consumer at
+#                                    all, and a reachability map keyed by name
+#                                    rather than by resolved path passes.
+#
+# ROUND 2 ADDED THREE, for the ordinary shape the round 1 repair still got wrong:
+# a soname symlink and its differently named target, `libz.so.1 -> libz.so.1.2.11`
+# in the wild. `provider-alias-target` is the real file, `provider-alias-link` is
+# the soname beside it, and `subject-alias-consumer` names the soname. Without
+# the three, a reachability rule that resolves an alias by NAME rather than by
+# file identity reports a normally loaded library as unreferenced, and no case
+# says so.
+#
+# ROUND 4 ADDED FOUR, for the shape a whole-path lookup cannot resolve: a
+# SYMLINKED DIRECTORY. `tools/python/current -> version` is the alias layout this
+# effort already reads, and the observed scope then holds `current/lib` while the
+# walk, which does not follow a symlinked directory, records the object under
+# `version/lib`. `dir-alias-target` is the real file, `dir-alias-soname` the
+# soname beside it, `dir-alias-directory` the directory link, and
+# `dir-alias-consumer` the object that names the soname. All four are needed
+# together: the directory link has to be applied before the name inside it means
+# anything, and without the consumer no edge selects the path at all.
+#
+# ROUND 5 ADDED THREE, all of them link chains a resolver must follow the way the
+# kernel does. Each row builds its whole shape, and each asserts with `-ef` that
+# the HOST reaches the same file, so the fixture states the right answer rather
+# than the harness assuming it:
+#
+#   chain-relative-parent   a link whose target climbs out of its own directory
+#                           and comes back down through an alias directory,
+#                           `../../version/lib/x` under `current -> version`. The
+#                           components INSIDE a target have to be resolved too.
+#   chain-through-updir     a target that goes up through a link directory,
+#                           `../linkdir/../lib/x`. `..` applies to the directory
+#                           the resolution actually reached, so reducing it
+#                           before the link is expanded lands somewhere else.
+#   chain-nine-links        nine valid links ending at one real library, which a
+#                           supported host resolves. A bound tighter than the
+#                           kernel's would refuse a tree that works.
+#
+# ROUND 3 ADDED ONE, and it is a COST fixture rather than a semantic one.
+# `alias-scaling-population` replicates the alias shape above at a size the
+# harness chooses, so the cost of resolving aliases can be MEASURED at two
+# populations instead of argued about. A rule that compares file identities pair
+# by pair grows with the product of the links and the subjects; one that reads
+# where each link points grows with the population. Only a run at two sizes tells
+# them apart, and nothing in this schema caps the number of aliased libraries.
+#
+# STEP 4 ADDED NINE AND REVISED THREE, for the four invariants it fills. The three
+# revised rows were written at step 3 as forward declarations, before the engine
+# that would have to build them existed, and each was pointed at the wrong record:
+#
+#   coherence-need-undefined         was `verneed-add`, which named a node and no
+#   coherence-resolution-leaves-      DT_NEEDED entry, so the object demanded a
+#   archive                          version node from a library it did not need.
+#   coherence-provider-defines       The verb is now `verneed-set`, which repoints
+#                                    the donor's own version need at a provider
+#                                    and a node AND adds the matching DT_NEEDED,
+#                                    which is the shape a real consumer has. The
+#                                    provider's own verb is `verdef-set`, renaming
+#                                    the donor's second version definition, since
+#                                    an ELF cannot gain a definition section from
+#                                    text either.
+#
+# The nine added rows each exist because a case would otherwise prove less than it
+# claims:
+#
+#   coherence-need-defined      the POSITIVE CONTROL for coherence. Without it a
+#                               refusal could come from a rule that refuses every
+#                               need, and no case would say so.
+#   coherence-need-unresolved   a version need whose provider name resolves
+#                               nowhere, which is the aggregation table's first
+#                               row: the name is the derived half's refusal and
+#                               the need is UNDETERMINED.
+#   provider-escapes-archive    a provider directory entry that is a symlink onto
+#                               a file OUTSIDE the prefix, which is the only shape
+#                               that makes coherence's fourth condition, the
+#                               resolution staying inside the archive, observable.
+#   duplicate-consumer-need     rule 1 examines LOOKUP NAMES, which are the names
+#   subject-identical-consumer  the edges record. Two files sharing a basename
+#                               that nothing needs are not a lookup name at all,
+#                               so without these consumers both duplicate rows
+#                               would be examined by nothing and pass. The first
+#                               of the two also DEMANDS a version node from the
+#                               duplicated name, which is what makes the round 2
+#                               correction observable: rule 1 refuses the name and
+#                               coherence still answers, against the first
+#                               candidate in scope order.
+#   duplicate-first-defines     that first candidate, carrying the node the
+#                               consumer demands. It is planted OVER the differing
+#                               copy, so the two paths still hold different content
+#                               and the case still has rule 1 to refuse.
+#   entry-point-cycle           two links naming each other, declared as an
+#                               entry-point location. Nothing resolves through
+#                               them, so the run carries an UNDETERMINED and no
+#                               refusal at all, which is the one aggregation row a
+#                               tree with a real defect in it cannot produce.
+#   scope-unexpected-toolsubdir an undeclared immediate subdirectory carrying a
+#                               `lib`, so the installer's own loop puts it in the
+#                               observed scope. It is the aggregation row where a
+#                               refusal on one axis must not stop the others from
+#                               being computed and reported.
+#   floor-member-present        the location half of the floor: the same member
+#   floor-member-elsewhere      under `tools/python` and under `tools/git`, so the
+#                               refusal is shown to be about the LOCATION and not
+#                               about the member being missing.
+#   multi-candidate-population  the POSITIVE CONTROL rule 1 needs, twenty lookup
+#                               names each with several candidate paths resolving
+#                               to one file, which is the measured archive's own
+#                               shape. A rule 1 that over-refused would fail here
+#                               and nowhere else.
+#   entry-point-program         a shipped program under a declared entry-point
+#                               location and reached by no edge. With the location
+#                               declared it must NOT be reported by the combined
+#                               unreferenced finding, and with the declaration
+#                               removed it must be, which is the pair that shows
+#                               the declaration is read.
+#
+# ROUND 1 OF THE STEP 4 CODE REVIEW ADDED SIX, and all six exist because the
+# reviewer refused this requestor's proposed coherence exception. Every recorded
+# version need must get a result, so the three shapes a selected provider can take
+# besides "an object that defines the node" each need a control:
+#
+#   coherence-provider-not-an-elf    a file the walk positively identified as NOT
+#   coherence-need-non-object        an object, and a consumer demanding a node
+#                                    from it. A known non-object defines nothing,
+#                                    which is a fact and therefore a refusal.
+#   coherence-provider-no-definitions a real ELF carrying no version definition at
+#   coherence-need-no-definitions    all, and a consumer demanding a node from it.
+#                                    Without this row an empty definition set and
+#                                    a missing node would share one case.
+#   coherence-provider-unreadable    an object whose reading could not be taken,
+#   coherence-need-unreadable        and a consumer demanding a node from it. That
+#                                    one is an UNDETERMINED rather than a refusal,
+#                                    and the pair is what keeps the two apart.
+#
+# A row whose placement repeats another row's is not a conflict: each step's suite
+# prepares its OWN tree from the rows its cases cite, so two steps may generate
+# different objects at one path without ever meeting.
+#
+count|53
+#
+# donor|selector|elf-type|required-parts|why
+donor|shared|ET_DYN|PT_DYNAMIC,DT_SONAME,DT_NEEDED,dynstr-tail-256,dynamic-spare-slot,verneed-1,verdef-2|a shared object with a dynamic section, a soname and at least one need, so a mutation has something to change; the last 256 bytes of its .dynstr are the four name slots a mutation writes into, and one spare DT_NULL slot is where an added need goes; STEP 4 ADDS the two version sections, one version need whose provider and node a mutation repoints and at least two version definitions whose second entry a mutation renames, because coherence cannot be given a subject that records no version record at all
+donor|program|ET_DYN,ET_EXEC|PT_INTERP,PT_DYNAMIC|a program carrying an interpreter, so the entry-point half of the subject rule has a real subject
+# spec|id|kind|donor|placement|mutation|assert
+spec|subject-lib-dynload-unresolved|object|shared|tools/python/current/lib/python3.13/lib-dynload/_cplxprobe.cpython-313-x86_64-linux-gnu.so|needed-add:libcplxabsent.so.1|dt-needed-lists:libcplxabsent.so.1
+spec|subject-site-packages-need|object|shared|tools/python/current/lib/python3.13/site-packages/_cplxwheel.so|needed-add:libcplxprovider.so.1|dt-needed-lists:libcplxprovider.so.1
+spec|subject-unreferenced-sound|object|shared|tools/git/current/lib/libcplxorphan.so.1|soname-set:libcplxorphan.so.1|dt-soname-is:libcplxorphan.so.1
+spec|subject-second-libssl|object|shared|tools/python/root/usr/bin/libssl.so.3|soname-set:libssl.so.3|dt-soname-is:libssl.so.3
+spec|subject-program-entry-point|object|program|tools/python/current/bin/cplxprobe3.13_bin|interp-keep|pt-interp-present
+spec|reader-unreadable-object|object|shared|tools/git/current/lib/libcplxunreadable.so.1|mode-set:000|read-refused
+spec|reader-not-an-elf|tree|-|tools/git/current/lib/libcplxnotanelf.so.1|plant-text|magic-is-not-elf
+spec|provider-donor-need|tree|-|tools/python/root/usr/lib64|plant-donor-need|donor-need-resolvable
+spec|provider-first-libssl|object|shared|tools/python/root/usr/lib64/libssl.so.3|soname-set:libssl.so.3|dt-soname-is:libssl.so.3
+spec|subject-need-provider|object|shared|tools/python/root/usr/lib64/libcplxprovider.so.1|soname-set:libcplxprovider.so.1|dt-soname-is:libcplxprovider.so.1
+spec|reader-needed-value-unreadable|object|shared|tools/git/current/lib/libcplxbadneed.so.1|needed-offset-corrupt|dt-needed-value-unreadable
+spec|subject-libssl-consumer|object|shared|tools/python/current/lib/libcplxsslconsumer.so.1|needed-add:libssl.so.3|dt-needed-lists:libssl.so.3
+spec|provider-alias-target|object|shared|tools/python/root/usr/lib64/libcplxalias.so.1.2.3|soname-set:libcplxalias.so.1|dt-soname-is:libcplxalias.so.1
+spec|provider-alias-link|tree|-|tools/python/root/usr/lib64/libcplxalias.so.1|symlink-to:tools/python/root/usr/lib64/libcplxalias.so.1.2.3|symlink-resolves
+spec|subject-alias-consumer|object|shared|tools/python/current/lib/libcplxaliasconsumer.so.1|needed-add:libcplxalias.so.1|dt-needed-lists:libcplxalias.so.1
+spec|alias-scaling-population|object|shared|tools/git/current/lib|plant-alias-pairs|alias-pairs-present
+spec|dir-alias-target|object|shared|tools/python/version/lib/libcplxdir.so.1.2.3|soname-set:libcplxdir.so.1|dt-soname-is:libcplxdir.so.1
+spec|dir-alias-consumer|object|shared|tools/python/version/lib/libcplxdiruser.so.1|needed-add:libcplxdir.so.1|dt-needed-lists:libcplxdir.so.1
+spec|dir-alias-soname|tree|-|tools/python/version/lib/libcplxdir.so.1|symlink-to:tools/python/version/lib/libcplxdir.so.1.2.3|symlink-resolves
+spec|dir-alias-directory|tree|-|tools/python/current|symlink-to:tools/python/version|symlink-resolves
+spec|chain-relative-parent|object|shared|tools/python/root/usr/lib64|plant-chain-relative|chain-resolves
+spec|chain-through-updir|object|shared|tools/python/current/lib|plant-chain-updir|chain-resolves
+spec|chain-nine-links|object|shared|tools/python/current/lib|plant-chain-deep|chain-resolves
+spec|provider-duplicate-different|object|shared|tools/python/current/lib/libcplxdup.so.1|content-differ:tools/git/current/lib/libcplxdup.so.1|two-paths-differ
+spec|provider-duplicate-identical|object|shared|tools/python/current/lib/libcplxsame.so.1|content-copy:tools/python/root/usr/lib64/libcplxsame.so.1|two-paths-identical
+spec|duplicate-first-defines|object|shared|tools/python/current/lib/libcplxdup.so.1|verdef-set:CPLX_2.0|dt-verdef-defines:CPLX_2.0
+spec|duplicate-consumer-need|object|shared|tools/python/current/lib/libcplxdupuser.so.1|verneed-set:libcplxdup.so.1:CPLX_2.0|dt-verneed-demands:libcplxdup.so.1:CPLX_2.0
+spec|subject-identical-consumer|object|shared|tools/python/current/lib/libcplxsameuser.so.1|needed-add:libcplxsame.so.1|dt-needed-lists:libcplxsame.so.1
+spec|coherence-provider-defines|object|shared|tools/python/current/lib/libcplxprovider.so.1|verdef-set:CPLX_1.0|dt-verdef-defines:CPLX_1.0
+spec|coherence-need-defined|object|shared|tools/python/current/lib/libcplxok.so.1|verneed-set:libcplxprovider.so.1:CPLX_1.0|dt-verneed-demands:libcplxprovider.so.1:CPLX_1.0
+spec|coherence-need-undefined|object|shared|tools/python/current/lib/libcplxconsumer.so.1|verneed-set:libcplxprovider.so.1:CPLX_9.9|dt-verneed-demands:libcplxprovider.so.1:CPLX_9.9
+spec|coherence-need-unresolved|object|shared|tools/python/current/lib/libcplxlost.so.1|verneed-set:libcplxnoprovider.so.1:CPLX_1.0|dt-verneed-demands:libcplxnoprovider.so.1:CPLX_1.0
+spec|coherence-resolution-leaves-archive|object|shared|tools/python/current/lib/libcplxescape.so.1|verneed-set:libcplxhostonly.so.1:CPLX_1.0|dt-verneed-demands:libcplxhostonly.so.1:CPLX_1.0
+spec|provider-escapes-archive|tree|-|tools/python/current/lib/libcplxhostonly.so.1|symlink-to-donor|symlink-leaves-archive
+spec|coherence-provider-not-an-elf|tree|-|tools/python/current/lib/libcplxtext.so.1|plant-text|magic-is-not-elf
+spec|coherence-need-non-object|object|shared|tools/python/current/lib/libcplxtextuser.so.1|verneed-set:libcplxtext.so.1:CPLX_1.0|dt-verneed-demands:libcplxtext.so.1:CPLX_1.0
+spec|coherence-provider-no-definitions|object|shared|tools/python/current/lib/libcplxbare.so.1|soname-set:libcplxbare.so.1|dt-soname-is:libcplxbare.so.1
+spec|coherence-need-no-definitions|object|shared|tools/python/current/lib/libcplxbareuser.so.1|verneed-set:libcplxbare.so.1:CPLX_1.0|dt-verneed-demands:libcplxbare.so.1:CPLX_1.0
+spec|coherence-provider-unreadable|object|shared|tools/python/current/lib/libcplxsealed.so.1|mode-set:000|read-refused
+spec|coherence-need-unreadable|object|shared|tools/python/current/lib/libcplxsealeduser.so.1|verneed-set:libcplxsealed.so.1:CPLX_1.0|dt-verneed-demands:libcplxsealed.so.1:CPLX_1.0
+spec|family-two-generations|object|shared|tools/git/current/lib/libcplxbfd-1.1.so|soname-set:libcplxbfd-1.1.so|dt-soname-is:libcplxbfd-1.1.so
+spec|family-two-generations-peer|object|shared|tools/git/root/usr/lib64/libcplxbfd-1.2.so|soname-set:libcplxbfd-1.2.so|dt-soname-is:libcplxbfd-1.2.so
+spec|floor-member-absent|tree|-|tools/python/current/lib|omit:libcplxfloor.so.1|named-file-absent
+spec|floor-member-present|tree|-|tools/python/current/lib/libcplxsql.so.0|plant-text|file-present
+spec|floor-member-elsewhere|tree|-|tools/git/current/lib/libcplxsql.so.0|plant-text|file-present
+spec|multi-candidate-population|object|shared|tools/python/version/lib|plant-multi-candidates|multi-candidates-present
+spec|entry-point-program|object|program|tools/python/version/bin/cplxentry|interp-keep|pt-interp-present
+spec|entry-point-cycle|tree|-|tools/python/loop/a|symlink-cycle:tools/python/loop/b|symlink-cycle-present
+spec|scope-unexpected-toolsubdir|tree|-|tools/python/cplxextra/lib|plant-directory|directory-present
+spec|scope-declared-absent|tree|-|tools/git/root/lib64|omit-directory|directory-absent
+spec|scope-unexpected-subdir|tree|-|tools/python/current/cplxunexpected|plant-directory|directory-present
+spec|scope-unexpected-root|tree|-|tools/old/py3.13/lib|plant-directory|directory-present
+spec|scope-alias-one-file|tree|-|tools/python/current|symlink-to:tools/python/python-3.13.9|symlink-resolves

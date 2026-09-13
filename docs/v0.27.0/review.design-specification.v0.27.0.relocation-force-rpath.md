@@ -313,7 +313,9 @@ References checked for the patchelf conclusion:
 
 ### Requested changes for design-specification relocation-force-rpath round 1
 
-Requested changes: 1. Make the `od` observation a specified, fail-closed interface, including the
+Requested changes:
+
+1. Make the `od` observation a specified, fail-closed interface, including the
    supported ELF domain, bounds/termination checks, and simultaneous or
    duplicate `DT_RPATH`/`DT_RUNPATH` handling.
 2. Replace lazy case-driven header observation with eager structural
@@ -746,7 +748,9 @@ References checked:
 
 ### Requested changes for design-specification relocation-force-rpath round 2
 
-Requested changes: 1. Split structural and axis-local observation status so the normalized tuple
+Requested changes:
+
+1. Split structural and axis-local observation status so the normalized tuple
    can implement the Q03 fault matrix.
 2. Specify Q04's literal record grammar, concrete path encoding, run status and
    skip reason, and preserve classifier case separately from final disposition.
@@ -1148,7 +1152,9 @@ References checked:
 
 ### Requested changes for design-specification relocation-force-rpath round 3
 
-Requested changes: 1. Define probe status on structural failure and reserve `skipped` for the two
+Requested changes:
+
+1. Define probe status on structural failure and reserve `skipped` for the two
    positively established inapplicable cases.
 2. Replace Q04's space-ambiguous placeholder grammar with closed wire enums and
    explicit trailer fields, state/reason pairs and raw-byte path encoding.

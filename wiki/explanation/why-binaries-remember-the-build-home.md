@@ -110,6 +110,7 @@ time, to the directory of the binary being loaded) plus
 letting `LD_LIBRARY_PATH` take precedence again) would make library
 lookup relocatable for any prefix, forever. It is fiddly with the
 current layout, though:
+
 - binaries sit at several depths (`<tool>/current/bin`,
   `root/usr/bin`), so no single `LDFLAGS` value fits all of them;
 - some rpaths are cross-tool (python's `_ssl` module points into the
