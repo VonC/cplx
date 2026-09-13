@@ -63,9 +63,8 @@ set "project_path=C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WIN
 set "project_path=%GH%\bin;%GH%\cmd;%GH%\usr\bin;%GH%\mingw64\bin;%GH%\mingw64\libexec\git-core;%project_path%"
 if exist "%USERPROFILE%\go\bin" ( set "project_path=%USERPROFILE%\go\bin;%project_path%" )
 if exist "%HOME%\bin\senv.bat" ( set "project_path=%HOME%\bin;%project_path%" )
-rem shellcheck is the lint gate this project substitutes for check.bat, so it
-rem belongs on the project PATH rather than behind an alias: reached by name,
-rem one permission rule covers it and every caller spells it the same way.
+rem Both check.bat and direct Bash validation use ShellCheck through lint_shell.sh.
+rem Put the executable on the project PATH so both entry points can resolve it.
 if exist "%PRGS%\shellchecks\current\shellcheck.exe" ( set "project_path=%PRGS%\shellchecks\current;%project_path%" )
 set "PATH=%project_path%"
 if exist "%PRJ_DIR%\senv.local.bat" (
