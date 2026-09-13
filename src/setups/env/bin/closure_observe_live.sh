@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # closure_observe_live.sh -- the live observer of the v0.27.0 runtime-closure
-# effort, created by Step 6. It runs on the FOREIGN HOST ALONE, because a process
+# effort, created by Step 6. Acceptance runs it on the FOREIGN HOST, because a process
 # is the only thing that can demonstrate the absence of a host fallback, and no
 # static read of any tree can answer that question.
 #
@@ -28,6 +28,10 @@
 # an rpath into the tree and a shipped interpreter, so a resolved
 # `/usr/lib/x86_64-linux-gnu/...` is the fallback this effort exists to detect.
 # Kernel pseudo-mappings and anonymous regions carry no path and are not objects.
+# Dynatrace OneAgent monitoring is outside runtime-closure scope by the owner's
+# decision. Keep its mappings and raw host count visible, but exclude recognized
+# agent libraries from FALLBACKS. This policy applies on every host, without a
+# version/digest pin or changing monitoring. Other external objects still refuse.
 #
 # THE PROCESS FILESYSTEM IS AN ARGUMENT, defaulting to /proc. A live reading on
 # the agent takes the default; the harness plants a directory of the same shape,
@@ -43,7 +47,7 @@ set -u
 CLOSURE_LIVE_USAGE="Usage: closure_observe_live.sh --process NAME --prefix DIR [--proc DIR]"
 
 # The three outcomes, stated once. 0 is the only conclusive pass; 1 is a
-# conclusive refusal, which is a host object in a live inventory; 4 is
+# conclusive refusal, which is an in-scope host object in a live inventory; 4 is
 # INCONCLUSIVE and is neither, which is the distinction develop#20 did not have.
 CLOSURE_LIVE_OK=0
 CLOSURE_LIVE_HOST=1
@@ -72,6 +76,23 @@ closure_live_matches() {
     return 1
 }
 
+# Recognize the vendor library family only in its installation tree or standard
+# system-library aliases. A matching substring, arbitrary directory, or ordinary
+# library under the agent directory is insufficient. The kernel may retain the
+# deleted suffix during an agent upgrade; preserve it in the emitted OBJECT.
+closure_live_dynatrace() {
+    local path="${1% (deleted)}" name=""
+    case "$path" in */../*|*/./*|*//*) return 1 ;; esac
+    name="${path##*/}"
+    case "$name" in liboneagent?*.so) ;; *) return 1 ;; esac
+    case "${path%/*}" in
+        /opt/dynatrace/oneagent/*|/usr/lib|/usr/lib64|/lib|/lib64|\
+        /usr/lib/x86_64-linux-gnu|/lib/x86_64-linux-gnu|\
+        /usr/lib/aarch64-linux-gnu|/lib/aarch64-linux-gnu) return 0 ;;
+    esac
+    return 1
+}
+
 # The mapped objects of one process, one typed line each, deduplicated, followed
 # by that process's host count. A mapping has no path when it is anonymous and a
 # bracketed pseudo-name when the kernel supplies one; neither is an object this
@@ -90,6 +111,7 @@ closure_live_matches() {
 # an exit code.
 closure_live_objects() {
     local dir="$1" pid="$2" prefix="$3" path="" kind="" hosts=0 objects=0
+    local excluded=0 fallbacks=0
     # The five leading fields of a maps record are named and never read. They are
     # there to REACH the sixth: a path may contain spaces, and only `read` with
     # one variable per leading field leaves the remainder whole. Splitting the
@@ -111,18 +133,30 @@ closure_live_objects() {
         case "$path" in
             "$prefix"/*) kind=shipped ;;
         esac
-        if [ "$kind" = "host" ]; then hosts=$((hosts + 1)); fi
-        objects=$((objects + 1))
+        if [ "$kind" = "host" ]; then
+            hosts=$((hosts + 1))
+            if closure_live_dynatrace "$path"; then
+                kind='excluded-dynatrace'
+                excluded=$((excluded + 1))
+            else
+                fallbacks=$((fallbacks + 1))
+            fi
+        fi
+        # Monitoring alone cannot establish a usable application inventory.
+        if [ "$kind" != excluded-dynatrace ]; then objects=$((objects + 1)); fi
         printf 'OBJECT|%s|%s|%s\n' "$pid" "$path" "$kind"
     done < "$dir/maps" || return 1
-    if [ "$objects" -eq 0 ]; then return 1; fi
     printf 'HOSTS|%s|%s\n' "$pid" "$hosts"
+    printf 'EXCLUDED|%s|%s|%s\n' "$pid" dynatrace "$excluded"
+    printf 'FALLBACKS|%s|%s\n' "$pid" "$fallbacks"
+    if [ "$objects" -eq 0 ]; then return 1; fi
     return 0
 }
 
 closure_live_main() {
     local want="" prefix="" proc="/proc"
     local pid="" entry="" comm="" inventoried=0 hosts=0 line="" collected=""
+    local fallbacks=0 excluded=0
 
     while [ "$#" -gt 0 ]; do
         case "$1" in
@@ -153,8 +187,9 @@ closure_live_main() {
         # process nobody could read leaves the run inconclusive rather than
         # clean.
         if ! collected=$(closure_live_objects "$entry" "$pid" "$prefix"); then
+            [ -z "$collected" ] || printf '%s\n' "$collected"
             printf 'UNUSABLE|%s|%s\n' "$pid" \
-                "its mapped objects could not be read, so no inventory was taken for it"
+                "no usable non-monitoring object inventory could be collected"
             continue
         fi
         inventoried=$((inventoried + 1))
@@ -162,6 +197,8 @@ closure_live_main() {
             printf '%s\n' "$line"
             case "$line" in
                 'HOSTS|'*) hosts=$((hosts + "${line##*|}")) ;;
+                'EXCLUDED|'*) excluded=$((excluded + "${line##*|}")) ;;
+                'FALLBACKS|'*) fallbacks=$((fallbacks + "${line##*|}")) ;;
             esac
         done <<< "$collected"
     done
@@ -174,13 +211,13 @@ closure_live_main() {
             "no usable inventory was collected for a process named $want, so nothing was observed"
         return "$CLOSURE_LIVE_INCONCLUSIVE"
     fi
-    if [ "$hosts" -ne 0 ]; then
+    if [ "$fallbacks" -ne 0 ]; then
         printf 'LIVE|%s|%s\n' REFUSED \
-            "$inventoried process(es) named $want map $hosts object(s) from outside $prefix"
+            "$inventoried process(es) named $want map $fallbacks object(s) from outside $prefix in runtime-closure scope; $excluded Dynatrace object(s) excluded; $hosts external object(s) total"
         return "$CLOSURE_LIVE_HOST"
     fi
     printf 'LIVE|%s|%s\n' CONCLUSIVE \
-        "$inventoried process(es) named $want map no object from outside $prefix"
+        "$inventoried process(es) named $want map no in-scope object from outside $prefix; $excluded Dynatrace object(s) excluded; $hosts external object(s) total"
     return "$CLOSURE_LIVE_OK"
 }
 

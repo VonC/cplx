@@ -498,11 +498,17 @@ closure_verify_main() {
     # refusal or an inconclusive trace is not a verified archive.
     bash "$tools/closure_check.sh" --prefix "$prefix" \
         --installer "$tools/install_pkg.sh" --bundle "$prefix/$CLOSURE_BUNDLE_DIR" \
-        > "$work/check.out" 2>&1 || rc=1
-    if [ "$rc" -eq 0 ]; then
+        > "$work/check.out" 2>&1
+    local static_rc=$? static_line
+    printf '%s|%s\n' STATIC-EXIT "$static_rc"
+    while IFS= read -r static_line; do
+        printf '%s|%s\n' STATIC-REPORT "$static_line"
+    done < "$work/check.out"
+    if [ "$static_rc" -eq 0 ]; then
         printf 'STATIC|%s\n' PASS
     else
         printf 'STATIC|%s\n' REFUSED
+        rc=1
     fi
     if [ -n "$process" ]; then
         bash "$tools/closure_observe_live.sh" --process "$process" --prefix "$prefix" \
