@@ -437,7 +437,6 @@ committed envelope's digest is the committed declaration's digest, so a
 declaration edited without its envelope is a failing case rather than an archive
 that ships a receipt for bytes it does not carry.
 
-
 ## Shared execution command checklist for all v0.27.0 toolchain-runtime-closure steps
 
 Apply this for every numbered step, substituting the step's own paths.
@@ -2265,75 +2264,160 @@ rather than a timing one.
 
 - The D10 gate exists and its controls pass, but no qualifying packaged archive
   has ever reached it. A gate nobody has seen answer is a gate nobody has seen.
-- The payload the gate must judge is not the one the repository ships today. The
-  retained measurement removes 83 build-only entries and 194M, and takes 21
-  unresolved needs, two family refusals and 12 undetermined results to zero, but
-  it measures a copy rather than a packaged archive.
-- `python-sqlite-support` is still active as a waiver, so even the measured
-  trimmed copy returns 3 where this acceptance requires 0.
+- The archive still promotes build-only payload, so the gate refuses the real
+  tree on 21 unresolvable names and two families over their permitted generation
+  count. The retained measurement derives the trim by rule, removes 83 entries
+  and 194M, and takes those counters and the twelve undetermined results to
+  zero, but it measures a hardlink copy rather than a packaged archive.
+- This step carried an exit-0 bar the issue never states, corrected by Q15. The
+  bar was unreachable by construction: exit 0 requires no active exception, the
+  sqlite waiver stays active until umbrella item 6 retires it, and the issue
+  puts producing that payload outside this item.
 
 ### Step 8 fix intent
 
-- Run the acceptance once the owning umbrella items have produced the final
-  payload: the packaging check on the build account over the real tree, and the
-  archive resolving with no host fallback on Debian 12, reported from a listing
-  over the whole scope and a live trace naming the process it inventoried.
+- Apply the measured build-only trim to the archive's promotion list, so the
+  gate judges a tree carrying what the runtime needs and nothing a build tool
+  alone required.
+- Repackage the current tree, recompiling nothing, and run the acceptance: the
+  packaging check on the build account, and the archive resolving with no host
+  fallback on Debian 12, reported from a listing over the whole scope and a live
+  trace naming the process it inventoried.
 - Record the real build-account gate, the unmodified archive's rule 1 positive
   control over its 20 multi-candidate names, and the Debian whole-provider
   inventory with its attributed candidate-venv trace.
-- Retake both captures from the final code and payload, each naming the host,
-  the date and the archive identity.
+- Retake both captures from the trimmed payload, each naming the host, the date
+  and the archive identity.
 
 ### Step 8 expected outcome
 
-- The acceptance captures exist for both hosts and both halves are answered.
+- Both acceptance captures exist and both halves are answered. The Debian
+  archive-resolution half is THIS STEP'S, as the issue writes it. An earlier
+  amendment tried to move it to umbrella item 7 on the grounds that no route
+  existed to that host which did not cross the publication boundary; the round 2
+  code review refused it twice, and it is withdrawn. A route that does not
+  publish an actively waived artifact, or an explicit owning-requirement
+  decision about what publication covers, is the way to this half. Absence of a
+  route is evidence about transport and never about resolution. Requirement
+  Q13 now authorizes Option B: one digest-pinned CI snapshot for validation,
+  with release and deployment publication still refused.
 - The unmodified archive passes rule 1 over its 20 multi-candidate names, which
   is the positive control that a rule 1 refusing too much would fail and nothing
   else would catch.
-- `bash docs/v0.27.0/verify.closure-check.sh` returns 0 on the Debian agent.
+- The closure checker invoked by gated packaging returns 3 on the build account, with zero refusals, zero
+  undetermined results, zero unexpected roots, and the sqlite waiver as the only
+  active exception. The packaging command itself returns 0 when it successfully
+  creates that validation artifact. CHECKER EXIT 3 IS THIS ITEM'S PASS: the issue says the archive this
+  item produces IS a validation artifact, and a validation artifact is precisely
+  a run an accepted exception carried. Exit 0 arrives with umbrella item 6.
+- Every packaging run prints the active waiver. Requirement Q13 permits its
+  bounded CI transport only; release and deployment publication remain refused.
 
 ### Step 8 framings
 
 - Design link: Design Area 6, all three subsections, Design Area 5, `Controls,
-  one per independently refusable invariant`, and decisions Q09 and Q14.
+  one per independently refusable invariant`, and decisions Q09, Q14 and Q15.
 - Execution checklist reference: the shared checklist above.
 - Host: both, and neither half is host-independent.
 
 ### Step 8 complexity impact
 
-None. This step adds no production code and no harness case. It runs the gate
-Step 7 delivered against a payload two other umbrella items produce.
+The packaging front end adds seven shell functions, a hardlink mirror, four
+bounded tree scans and a dynamic-section read per candidate for rule (b).
+Its work is linear in the visited entries and dynamic-section bytes, before
+the existing checker and archive creation. Hardlinks share file contents but
+still require directory entries and staging metadata. No quadratic search or
+new production module is introduced. Loader preparation adds one inventory and
+one byte comparison per distinct loader copy, followed by relative alias creation.
 
 ### Step 8 feature preservation
 
 This is where the whole surface is re-read against the issue's acceptance rather
 than against its own step. Every earlier step suite runs again in the same cycle.
 
+The trim is the one change here that could impair a feature, and the gate is
+what proves it did not: a trim removing something the runtime needed appears
+immediately as a fresh unresolvable name, and the measured count went to zero
+and stayed there. The loader and the C library are excluded from selection by
+name, so `ld-linux`, `ld-2.*`, `libc`, `libm`, `libpthread` and `libdl` cannot
+be trimmed by accident.
+
 ## Step 8 implementation
 
 ### Step 8 prerequisites
 
-Both are umbrella items rather than steps of this plan, and neither can be
-satisfied from inside this item:
+None outside this item, which is what Q15 corrected. Neither umbrella item gates
+this step:
 
-- umbrella item 6, `python-sqlite-support`, restores sqlite and retires its
-  waiver, without which this acceptance cannot return 0;
-- umbrella item 7, `tools-archive-rebuild`, applies the confirmed payload trim
-  and packages the result, without which the gate judges a payload this effort
-  has already measured as failing.
+- umbrella item 6, `python-sqlite-support`, retires the sqlite waiver and moves
+  this acceptance from exit 3 to exit 0. Until then the waiver is active BY
+  DESIGN and the artifact is a validation artifact, which is the state this item
+  is required to reach rather than a failure it must avoid;
+- umbrella item 7, `tools-archive-rebuild`, owns the payload REFRESH and the
+  interpreter rebuild, both of which recompile. The trim this step applies
+  recompiles nothing: it changes what the repack promotes, which is inside this
+  item's declared scope of repackaging the current tree.
 
 Nothing in this step may substitute a trim-copy measurement for a packaged
-archive, and nothing in it may relax the acceptance to fit the payload.
+archive, and nothing in it may relax the acceptance to fit the payload. The trim
+stays derived by the measurement's four rules rather than listed by hand.
 
 ### Step 8 files involved
 
-- `docs/v0.27.0/verify.closure.step7.rhel.txt` (existing, to be retaken).
-- `docs/v0.27.0/verify.closure.step7.debian.txt` (existing, to be retaken).
+- `src/setups/env/bin/pkg_tools.sh` (existing, to carry the trim), the one
+  in-scope caller and the line where the closure gate is already switched on.
+- `src/echos/echos`, `src/echos/echoslog` and `src/install/env/git/bin/echos`
+  (existing, one guarded read each). THE GATE COULD NOT RUN OUTSIDE AN
+  INTERACTIVE SHELL, and this step found it by being the first to try. The
+  checker runs `set -u`; its installer probe sources `install_pkg.sh`, which
+  sources `echos`, whose line 12 reads a bare `${FROM_UNIX}`. That variable is
+  set by a developer's terminal and by nothing in this repository, so in any
+  non-interactive shell the read is unbound, the probe exits 1, and the scope
+  comes back UNDETERMINED with the run refused at status 5. The guard is
+  `${FROM_UNIX:-}`, which changes nothing when the variable is set. This is the
+  effort's own defect class, an assumption true on one shell and false on
+  another. The refusal is MEASURED ON RHEL, which is the only host that packages;
+  whether the deployed-archive path could reach the same read on another host is
+  not claimed here, because it was not measured.
+- `src/setups/env/bin/closure_verify.sh`, retaining the full static report and
+  checker status alongside its existing strict verification verdict.
+- `docs/v0.27.0/verify.closure-check.sh`, binding the two halves to one archive,
+  interpreting Q15 explicitly, and observing the owned application-venv PID.
+- `docs/v0.27.0/acceptance.closure.step8.rhel.txt` and
+  `docs/v0.27.0/acceptance.closure.step8.debian.txt`, the final same-candidate
+  acceptance and source identities. The earlier Step 7 captures remain
+  historical; the final RHEL capture is transported under the harness's
+  expected Step 7 input basename for the Debian run.
+- `docs/v0.27.0/acceptance.closure.step8.packaging.txt`,
+  `docs/v0.27.0/acceptance.closure.step8.loaders.txt` and
+  `docs/v0.27.0/acceptance.closure.step8.md`, retaining the complete packaging
+  gate, path-complete loader evidence and final acceptance assessment.
+
+TWO SEAMS ARE EXPLICITLY NOT THE TRIM'S HOME, and naming them here costs less
+than discovering it twice:
+
+- the per-tool package lists under `src/setups/pkgs/<tool>/`. They read as the
+  natural place to stop promoting `binutils`, `gcc`, `cpp` and `libmpc`, and
+  they are not: the same list populates the sandbox the tool is BUILT in, so
+  removing the compiler from git's list removes the compiler that compiles git;
+- `src/setups/env/rsync_exclude.txt`. It feeds the `$HOME` mirror that
+  `rsync.sh` writes into `$HOME/tools/`, which is a different tree from the one
+  `pkg.sh` archives.
+
+### Step 8 packaging coupling
+
+The closure gate runs AT PACKAGING TIME, from the same `pkg_tools.sh` call that
+writes the archive. The gate and the tar must therefore judge and ship THE SAME
+SET: a trim applied to the tar alone leaves the gate refusing a tree nobody
+ships, and a trim applied to the gate alone ships payload nothing judged. The
+step is not done until one definition feeds both.
 
 ### Step 8 test first
 
-No new case. The cases are the ones Step 7 delivered, run against the real
-packaged archive rather than against a fixture:
+Run the Step 7 acceptance against the real packaged archive. Add controls for
+the Step 8 repairs: identical loader aliases, differing bytes, broken and
+escaping loader paths, live-source preservation, exact Q15 waiver handling,
+and rejection of a capture carrying another archive identity. The acceptance is:
 
 - the packaging check passes on the build account over the real tree, with every
   refusal it produces named. Clearing `tools/old/py3.13` is an OPERATOR
@@ -2354,27 +2438,121 @@ packaged archive rather than against a fixture:
   what makes a deleted tree auditable in place of a retained one. That record
   cites this contract under its pre-Q14 Step 7 numbering, which is where the
   acceptance lived on the day it was written;
-- the packaged archive resolves with no host fallback on Debian 12, reported
+- the packaged archive resolves with no in-scope host fallback on Debian 12, reported
   from a listing over the whole scope AND a live trace naming the venv process;
 - the unmodified archive passes rule 1 over its 20 multi-candidate names.
 
 ### Step 8 behavior
 
-No behavior is added. This step produces evidence.
+No new script. The step changes what the repack promotes, and produces the
+evidence the issue's acceptance asks for.
+
+THE TRIM IS STAGED, NOT EXCLUDED, and the reason is the coupling above. The gate
+runs `closure_check.sh --prefix "$HOME"` over the LIVE tree while `tar` writes
+`$HOME/tools` with its own exclusions, so a trim expressed as tar arguments
+alone would leave the gate judging a tree nobody ships. The step instead
+packages from a staged tree:
+
+- hardlink-copy `$HOME/tools` into an invocation-owned staging prefix. Unlinking
+  a staged hardlink preserves the live file, but writing through it does not.
+  Refuse directory symlinks at staging write boundaries and detach every gate
+  write target before invoking the gate. Refuse a packaging source inside the
+  payload before changing HOME;
+- apply the trim to the staging copy by the four derivation rules;
+- apply requirement Q12 loader preparation: retain the installer-selected
+  canonical bytes, preflight every loader lookup path and replace only
+  byte-identical other regular copies with relative aliases. Broken, escaping
+  or differing candidates refuse before replacement;
+- run the gate against the staging prefix rather than `$HOME`;
+- archive the staging tree, retaining failed output only in the private stage.
+
+The live `$HOME/tools` is never modified, so the build account keeps every
+compiler and binutils component it builds with, and the gate and the archive
+read the one tree.
+
+The four rules stay the measurement's, applied rather than transcribed: the GCC
+internals trees under `*/root/usr/libexec/gcc`; every ELF under `*/root/usr/bin`
+or `*/root/usr/lib64` linking `libbfd` or `libopcodes`; the binutils libraries
+`libbfd*`, `libopcodes*` and `libctf*`; and the compiler drivers and GCC helpers
+`gcc`, `cc`, `c++`, `g++`, `cpp`, `gcov*`, `cc1`, `cc1plus`, `lto1`, `lto-dump`,
+`libmpc`, `libmpfr`, `libdebuginfod-*`, `gresource`, `readelf` and `elfedit`.
+The dynamic loader and the C library are excluded from selection BY NAME, so
+`ld-linux`, `ld-2.*`, `libc`, `libm`, `libpthread` and `libdl` cannot be trimmed
+by accident.
+
+### Step 8 acceptance and validation transport wiring
+
+The RHEL acceptance extracts the explicitly selected final archive into its
+private scratch prefix and retains the full checker report. It does not judge
+the untrimmed build account. Q15 accepts status 0, or status 3 solely for the
+one active sqlite waiver, with zero refusal, unexpected and undetermined results.
+
+The Debian acceptance installs the archive once through the authoritative
+verifier. Missing-live evidence uses that first observation. Empty and host
+trace controls call the authoritative observer directly over that installed
+prefix with independent process inputs. Step 6 retains reinstall, completion
+marker and corruption coverage. CI runs each harness step once with full output.
+
+The acceptance creates an application venv under `prefix/pdfs/closure-acceptance`,
+using the relocated candidate ELF's venv API without pip, with symlink entry
+points. Selection requires an executable ELF that resolves inside the candidate's
+Python tree. It bypasses the shipped wrapper, matching the consuming CI's direct
+ELF provisioning path. Wrapper refusal and escaping-ELF controls cover selection.
+Creation and observation use `LC_ALL=C`, so mapped locale data does not add a
+host dependency to this bounded process. The process it
+launches proves its canonical venv prefix, base prefix and base executable;
+both base paths must be inside the same installed candidate. Only that owned
+PID is exposed to the observer. Exit 0 from venv creation alone is insufficient.
+Each half records the archive SHA-256 and rejects a counterpart capture carrying
+another identity.
+
+The authoritative `closure_observe_live.sh` applies the owner's general
+Dynatrace exclusion defined in Design Area 5. Keep every `OBJECT`, the raw
+`HOSTS` count, the `EXCLUDED|pid|dynatrace|count` record and the remaining
+`FALLBACKS` count. The live acceptance requires zero `FALLBACKS` for the owned
+PID, with usable non-monitoring objects. This same observer defines release
+verification scope; no temporary CI-only exception is introduced.
+Add controls for version-independent agent paths and system aliases, retained
+raw host counts, duplicate mappings, deleted agent mappings, monitoring-only
+inconclusiveness, lookalike paths and additional host runtime libraries.
+The CI diagnostic runs in the ordinary agent environment without namespace
+isolation or preload changes and records `LIVE-POLICY|dynatrace-excluded`.
+An early probe of the provisioned candidate must pass before the full suite
+installs its own authoritative acceptance prefix.
+
+Requirement Q13 permits a temporary CI validation pin containing one snapshot
+version, exact asset basename and SHA-256. The ordinary release pin stays
+unchanged. CI requires publication mode off and verifies the digest before
+extraction and installation. Retain both host captures, then remove the temporary
+pin and its snapshot asset. This transport does not call or weaken the release
+publication gate and does not defer Debian acceptance to another umbrella item.
 
 ### Step 8 completion criteria
 
-- `bash docs/v0.27.0/verify.closure-check.sh` returns 0 on the Debian agent, and
-  returns 0 for every host-independent step on RHEL.
-- Both acceptance captures retained and passing, each naming the host, the date
+- The closure checker invoked by gated packaging returns 3 on the build account,
+  carried only by the sqlite waiver, with zero refusals and zero undetermined
+  results. Successful creation of that validation artifact returns 0 from the
+  packaging command; this is distinct from the checker's status.
+- The RHEL acceptance capture is retained and passing, naming the host, the date
   and the archive identity.
+- The Debian acceptance capture is retained for the same identified candidate,
+  with the whole-scope provider listing and an attributed venv process trace
+  showing no in-scope host fallback, as required by this step's test-first list.
+- Rule 1 is exercised and not refused over the archive's multi-candidate names,
+  which is the positive control the issue asks for.
 - `bash src/utils/lint_shell.sh` green.
+- `git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh` stays empty:
+  the trim reaches the packaging front end, never the installer.
+- The per-tool package lists under `src/setups/pkgs/` are unchanged, so the
+  build sandbox keeps every compiler and binutils component it builds with.
 
 ## Step 8 addendums
 
 ### Step 8 line budget checkpoint
 
-None. This step adds no production line.
+`src/setups/env/bin/pkg_tools.sh` grows from 24 lines and remains below the
+650-line ceiling. The three named `echos` copies each change one guarded read.
+No production module is added.
 
 ### Step 8 split guidance
 
@@ -2394,8 +2572,12 @@ correctness gate rather than a timing one.
 The twelve questions the plan review settled across eight rounds, closed on
 2026-09-04 and recorded in
 [the review transcript](review.plan.v0.27.0.toolchain-runtime-closure.md), a
-thirteenth added on 2026-09-07 and a fourteenth on 2026-09-12. Each row is the
-decision, where the plan applies it, and what was rejected with the reason.
+thirteenth added on 2026-09-07, and a fourteenth and fifteenth on 2026-09-12. A
+sixteenth was written the same day and WITHDRAWN on 2026-09-13: it moved the
+Debian half of the acceptance to umbrella item 7, and the code review refused it
+twice, because absence of a transfer route is evidence about transport and never
+about resolution. Each row is the decision, where the plan applies it, and what
+was rejected with the reason.
 
 Q13 IS AN AMENDMENT AND NOT A ROUND, recorded here rather than folded into the
 twelve because a decision table that changes silently is worth less than the
@@ -2413,6 +2595,18 @@ reach commit-ready inside its own boundary, which is an ordering fault in the
 plan rather than a defect in the implementation under review. The amendment
 splits the step rather than the finding, and is recorded in
 [the code review transcript](review.code.v0.27.0.toolchain-runtime-closure.md).
+
+Q15 CORRECTS Q14 RATHER THAN REPLACING IT, recorded the same day. Q14 moved the
+acceptance to Step 8 and left it gated on two later umbrella items, on the
+strength of a bar the issue never states: that the checker must return 0. It
+cannot. Exit 0 requires no active exception, the sqlite waiver is active until
+umbrella item 6 retires it, and the issue puts producing that payload outside
+this item while calling the archive this item produces a VALIDATION ARTIFACT,
+which is exactly a run an exception carried. The exit-0 reading makes the
+issue's acceptance self-contradictory and the exit-3 reading makes it coherent,
+so the bar was wrong rather than the acceptance unreachable. With the bar
+corrected, only the build-only trim stood between this item and a passing
+acceptance, and that trim recompiles nothing.
 
 FIVE OF THESE ROWS EXIST BECAUSE A ROUND REFUSED AN EARLIER ANSWER, and the
 refused shapes are named rather than dropped: an archive that supplied its own
@@ -2437,3 +2631,4 @@ rejected alternative.
 | Q12 | Only pipeline-delivered workspace copies produce evidence. Embedded copies are compared byte for byte as a payload property and are never executed for evidence, including when identical | Delivered script topology; Step 6 behavior and its authority cases | M2, executing the embedded copy, which makes the archive certify itself with no bootstrap; M3, executing it after an out-of-band digest comparison, which moves the problem to whatever performs the comparison; M4, shipping no copies, which removes a real operator use |
 | Q13 | The unreferenced finding is TWO HALVES, amended 2026-09-07 after the step 3 code review found this plan disagreeing with itself: its Step 3 behavior line specified the edge computation while its Step 3 expected outcome quoted the design's conjunction, and no step scheduled the declared entry-point input the conjunction needs. Step 3 owns the EDGE half and reports it as `UNREFERENCED-BY-EDGE`; Step 4 owns the entry-point half, the `CPLX-CLOSURE/1` record that declares the set, and the combined result | Step 3 expected outcome and behavior; Step 4 fix intent and expected outcome; design Q13 | N1, leaving the two lines contradicting each other, which is what the review found; N2, deriving entry points from `PT_INTERP` or a permission bit, the heuristic Design Area 2 refuses for the subject rule and refuses again here; N3, letting Step 3 report the edge half AS the design's finding, which names a shipped executable as an object nothing can load |
 | Q14 | The real-payload acceptance is STEP 8 and not step 7, amended 2026-09-12 after the step 7 code review carried the same acceptance finding through seven rounds. Step 7 owns the D10 interface, its negative controls and its documentation, all of which its suite proves today against fixtures on either host. Step 8 owns the packaging check over the real tree, the Debian whole-provider inventory with its attributed venv trace, and the unmodified archive's rule 1 positive control, and it is gated on umbrella items 6 and 7 delivering the final payload. The acceptance itself is unchanged: it moves, and nothing in it is relaxed | Step 7 issues, fix intent, expected outcome, framings, test-first list, feature preservation and completion criteria; the whole of Step 8 | P1, leaving the acceptance in step 7, which asks item 4 to prove a result only items 6 and 7 can produce and inverts the umbrella order the effort already fixed; P2, dropping the acceptance from the plan, which gives up the issue's requirement for a positive result on the distribution the defect exists on and leaves a gate nobody has seen answer; P3, reordering the umbrella so items 6 and 7 precede item 4, which strands a delivered and reviewed checker uncommitted while two larger items run; P4, accepting the trim-copy measurement in place of a packaged archive, which is the substitution the step 7 review refused |
+| Q15 | The acceptance bar is EXIT 3 CARRIED ONLY BY THE SQLITE WAIVER, with zero refusals and zero undetermined results, and NOT exit 0; and the measured build-only trim belongs to THIS item rather than to umbrella item 7, amended 2026-09-12. The issue names no exit code, calls the archive this item produces a validation artifact, and puts producing the sqlite payload in umbrella item 6, so exit 0 imported a later item's completion into this one and made the acceptance unreachable by construction. The trim recompiles nothing and changes only what the repack promotes, which is inside this item's declared scope of repackaging the current tree; item 7 keeps the payload refresh and the interpreter rebuild, which do recompile | Step 8 issues, fix intent, expected outcome, prerequisites, files involved, behavior and completion criteria | R1, keeping exit 0, which requires umbrella item 6 and contradicts the issue's own non-scope and its waiver contract; R2, leaving the trim to umbrella item 7, which strands this item behind an integration item that owns recompiles this trim does not need, on the strength of a decision-record line written under the exit-0 misreading; R3, moving the positive acceptance into item 7's validation matrix and closing this item without it, which lets the item close having never seen its own gate answer positively; R4, relaxing the acceptance to whatever the current payload returns, which is the substitution every round of the step 7 review refused |

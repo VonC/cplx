@@ -442,6 +442,18 @@ evaluated against that selected file, and rule 1 refuses beside it. The two
 results are independent, which Design Area 5 states as a rule because round 2
 found the previous revision suppressing one with the other.
 
+### Packaging preparation for loader identity
+
+Requirement Q12 adds a packaging preparation before the checker: preserve the
+installer-selected loader and replace only byte-identical regular copies of
+`ld-linux-x86-64.so.2` with relative aliases to it. Existing aliases remain.
+Preparation checks all candidates before writing any, refuses broken or
+escaping paths, and works only in the owned stage. The installer therefore sees
+one loader identity at every preserved name and its existing identity exclusion
+protects the bytes. This does not change either duplicate-provider checking or
+the installer. Step 8 retains source, archive and installation inventories plus
+explicit loader invocation and runtime checks.
+
 ### Declared family generations, in terms nothing in the file can supply
 
 Two objects with different SONAMEs may be two generations of one family, and no
@@ -583,6 +595,12 @@ refuses.
 
 ### The publication re-check, in a fixed order
 
+Requirement Q13 permits a separate CI transport operation for the sqlite-waived
+Step 8 validation candidate. It uses a digest-pinned temporary snapshot, requires
+the full Q15 RHEL report, disables application publication, leaves the release
+pin intact and removes the temporary transport after evidence retention. The
+five-step release publication operation below has no validation bypass.
+
 Publication does not read a marker, and it does not trust the archive's copy of
 anything. Over the exact archive it is about to publish, in this order:
 
@@ -629,8 +647,9 @@ above.
 
 THE STATIC CHECKER RUNS IN BOTH CONTEXTS, and answers all four invariants in
 each: on the build account over the tree being packaged, and on the Debian agent
-over the installed tree. THE LIVE OBSERVER RUNS ONLY ON THE FOREIGN HOST,
-because a process is the only thing that can demonstrate no host fallback.
+over the installed tree. ACCEPTANCE REQUIRES THE LIVE OBSERVER ON THE FOREIGN
+HOST, because only a process demonstrates runtime fallback behavior there.
+The same observer can also run on build and deployment hosts.
 VERIFICATION COMBINES their typed results into one verdict, and is also the
 first actor able to compare the two scope observations.
 
@@ -644,6 +663,25 @@ A LISTING over the whole provider set, and a LIVE TRACE that names the process
 it inventoried. The second requirement is not ceremony: a trace that inventoried
 nothing once reported "no host library loaded", a true sentence about an empty
 observation that reads as a pass.
+
+Dynatrace OneAgent monitoring is outside runtime-closure scope on every host,
+including release verification, by the owner's decision. The authoritative
+live observer recognizes `liboneagent?*.so` vendor modules in subdirectories of
+`/opt/dynatrace/oneagent/` and in standard `/lib`, `/lib64`, `/usr/lib`,
+`/usr/lib64` and x86-64/AArch64 GNU system-library directories. It rejects
+lookalike roots, dot traversal and ordinary libraries in the vendor directory.
+The recognition is independent of the agent version, digest or proof of its
+injection mechanism. The kernel's ` (deleted)` suffix is retained in the trace
+and does not invalidate recognition during an agent upgrade.
+
+Each mapped object remains visible. External OneAgent objects are classified
+`excluded-dynatrace`; `HOSTS` remains the raw external count, `EXCLUDED` records
+the Dynatrace count, and `FALLBACKS` records external objects still in scope.
+A conclusive live pass requires a usable non-monitoring inventory and zero
+`FALLBACKS`, and its summary explicitly reports the exclusions. Monitoring
+alone is inconclusive. Ordinary external runtime libraries still refuse even
+beside an excluded agent. No namespace or preload configuration change is
+required. The static checker continues to judge the complete candidate scope.
 
 ### Aggregation follows data availability, not the presence of another refusal
 

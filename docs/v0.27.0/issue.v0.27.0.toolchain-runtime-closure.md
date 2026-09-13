@@ -192,6 +192,43 @@ aliases such as `libBrokenLocale.so` beside `libBrokenLocale.so.1` counted as
 competing providers. They are not candidates for any lookup. The corrected count
 is recorded because the wrong one was published.
 
+### Preserving loader identity through installation
+
+Step 8 repairs the packaging payload before the unchanged installer reads it.
+The installer-selected `ld-linux-x86-64.so.2` is the canonical loader. Other
+regular files with that exact lookup name may become relative symlinks to it
+only after their SHA-256 digests agree. Every existing loader pathname and
+alias must still resolve inside the tools tree. A differing, missing, broken
+or escaping loader refuses preparation; this rule never deletes a loader path,
+chooses between different loader bytes, or waives rule 1.
+
+The source tree remains untouched. The archive and installed tree must retain
+the aliases, and each alias must execute the canonical loader successfully.
+Evidence inventories every PT_INTERP and explicit loader reference, accounts
+for host interpreter paths separately, and exercises candidate Python, Git and
+the application venv. Zero PT_INTERP references alone never proves an alias
+unnecessary. Acceptance still requires strict installed duplicate-provider
+checking and the Debian trace with no in-scope host fallback.
+
+Retained helper programs with system PT_INTERP values are reported by path;
+they are not a zero-reference claim or grounds to delete loader aliases. This
+packaging amendment leaves interpreter rewriting to the unchanged installer.
+The executed Python, Git and application-venv entry points must use the
+candidate, with effective venv base-prefix and base-executable identities
+resolved through symlinks and wrappers. The required Debian live observation
+of the application-venv process must contain no host runtime dependency in
+scope. By the owner's decision, Dynatrace OneAgent monitoring is excluded
+from runtime-closure verification wherever it is injected: build, CI and
+deployment environments. This is a general exclusion, without a version or
+digest pin, an injection-provenance prerequisite, or namespace isolation.
+Recognized OneAgent libraries remain visible as excluded monitoring objects;
+the raw external-object count remains visible too. All other external objects,
+including host libc, loader, libpython, libm and libgcc, still refuse. Neither
+an empty inventory nor monitoring alone is conclusive. This definition of
+runtime-closure scope also applies to release verification; it is not a
+temporary item 4 waiver. Static provider rules and the existing Q15 sqlite
+waiver are unaffected.
+
 ### Rule 2, declared: cross-SONAME generations of one family
 
 Two objects with DIFFERENT SONAMEs may still be two generations of one logical
@@ -302,7 +339,8 @@ payload it enforces arrives. It is not a mute.
   performed. A waiver excusing a
   member that is now present is dead, and saying so needs nothing new.
 - An artifact produced while ANY waiver is active is a VALIDATION ARTIFACT and
-  cannot cross the publication boundary. This is what makes the gate mean
+  cannot cross the release or deployment publication boundary. The bounded CI
+  transport exception below is its only permitted upload. This makes the gate mean
   "unpublishable while incomplete" rather than merely "reported".
 - Every active waiver is printed by every packaging run.
 
@@ -311,6 +349,24 @@ The one initial waiver:
 | Member | Owning requirement | Removal condition |
 | --- | --- | --- |
 | `libsqlite3.so.0` | `python-sqlite-support`, umbrella item 6 | a file named `libsqlite3.so.0` is present under `tools/python` in the scope, which is the floor entry's own location test |
+
+### Validation transport for Step 8
+
+The human selected Option B: the candidate may be uploaded to the CI snapshots
+repository solely to deliver these exact bytes to the Debian acceptance job.
+This is transport of a validation artifact, not a release or deployment.
+The exception requires the one valid, non-stale sqlite waiver, zero refusals,
+zero undetermined results and zero unexpected roots in the complete RHEL report.
+The transport records the archive SHA-256 and exact snapshot asset identity;
+the Debian job checks that digest before installing anything.
+
+The job must run with application publication disabled and must refuse any
+release or deployment path for a validation pin. The release tools pin stays
+at its previous value; a separate validation pin selects the snapshot only for
+this acceptance run. Remove that pin and the uploaded validation asset after
+retaining the evidence. The release publication checker remains unchanged and
+continues to refuse every active waiver. Item 6 owns sqlite and item 7 owns the
+release rebuild and deployment publication.
 
 ## The libssl caveat, now measured rather than carried
 
@@ -479,7 +535,7 @@ representative failure would leave most branches unasserted.
 
 ## Requirement clarifications for the runtime closure
 
-Eleven questions were opened and settled across four specification review
+The original eleven questions were opened and settled across four specification review
 rounds. Each row names the question, the decision, where it lives in this
 document, and what was rejected. The options weighed, their pros and cons, and
 the acceptance reason for each answer are preserved in commit `6c8d6ed`,
@@ -488,16 +544,18 @@ recorded immediately before this table replaced them.
 | Question | Decision | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
 | Q01 | Completeness is TWO independent halves: the derived `DT_NEEDED` closure AND a declared floor of ten SONAMEs, each with a required location, declared once for the archive's single scope | "Confirmed rules", "The declared floor" | A1, derived only, which cannot see a member dropped from payload and consumers together, the `libsqlite3.so.0` shape; A2, declared only, which goes stale and misses a new demand |
-| Q02 | The check GATES packaging, with a bounded waiver contract: one member per waiver, unknown and stale waivers fail, and any artifact produced under an active waiver is validation-only and cannot be published | "The waiver contract" | B1, an unconditional gate, which makes the declared umbrella order unlandable; B2, a report, the decorative-gate shape this collection exists to remove |
-| Q03 | `libsqlite3.so.0` is declared on the floor NOW and waived, with `python-sqlite-support` named as remover and `tools-archive-rebuild` refusing publication while any waiver is active | "The waiver contract", umbrella items 6 and 7 | C1, enforcing immediately, which fails packaging across two requirements; C2, enforcing later, which hands the rule to a requirement that does not exist yet |
+| Q02 | The check GATES packaging, with one member per waiver and unknown and stale waivers refused. Active waivers forbid release and deployment publication; Q13 permits only bounded CI validation transport | "The waiver contract", Q13 | B1, an unconditional gate; B2, a report without a gate |
+| Q03 | `libsqlite3.so.0` is declared on the floor NOW and waived, with `python-sqlite-support` named as remover and `tools-archive-rebuild` refusing release or deployment publication while any waiver is active | "The waiver contract", umbrella items 6 and 7, Q13 | C1, enforcing immediately, which fails packaging across two requirements; C2, enforcing later, which hands the rule to a requirement that does not exist yet |
 | Q04 | Acceptance is a positive Debian no-host-fallback run PLUS one negative control per independent invariant, nine of them | "Acceptance for the runtime closure" | D1, the build account alone, which cannot see the defect; D2, both hosts with no controls, which leaves every gate unasserted |
 | Q05 | Two separate rules, both refusing and neither pruning: rule 1 automatic over lookup candidates, rule 2 over a declared family list | "Duplicate providers, and the cross-SONAME family" | E1, two named families only, which leaves the next one silent; E2, detect without stopping, which Q02 already rejected |
 | Q06 | The post-RPATH OpenSSL re-probe is performed INSIDE this requirement, as a precondition to writing the rules, not carried as a caveat | "The libssl caveat, now measured rather than carried" | F1, out of scope, leaving an unresolved reading in the requirement about coherence; F3, as an acceptance case, which would block this requirement on an outcome it does not control |
-| Q07 | Validation only: the repackaged current tree is never published, the known `GLIBC_2.35` divergence is recorded as owed to item 7, and publication is refused mechanically while a waiver is active | "What this issue does NOT cover", "The waiver contract" | G1, validation only with the divergence merely noted, which leaves nothing preventing delivery; G2, republishing, which takes work item 7 owns |
+| Q07 | Validation only: the repackaged current tree cannot become a release or deployment artifact. Q13 permits its bounded CI transport; the release rebuild stays with item 7 | "What this issue does NOT cover", "The waiver contract", Q13 | G1, a merely noted restriction; G2, release republication |
 | Q08 | D10 is DECIDED as a conditional policy: measure every shipped consumer of `libstdc++.so.6`, compare `GLIBCXX_` and `CXXABI_` against the shipped libstdc++ and `GCC_` against `libgcc_s`, ship GCC 11 only if all are satisfied, zero spare nodes allowed, and FAIL if neither generation satisfies | "The D10 decision, settled as a conditional policy", umbrella row D10 | H1, keeping GCC 11 unconditionally, which drops the trigger the umbrella asked this requirement to carry; H2, shipping GCC 12 unconditionally, which adds a payload to a requirement that needs no recompile |
 | Q09 | Version-node coherence is PROVIDER-AWARE: each need is resolved to the shipped object the scope selects for its recorded `DT_NEEDED`, that object must define the node, and no step may fall back to the host | "The provider-aware coherence rule" | J1, libc only, which is false for `GLIBCXX_`, `CXXABI_` and `OPENSSL_`; J2, a namespace-to-family table, which is silently wrong for the first namespace nobody listed |
 | Q10 | Two identities, each from a source that can supply it: provider identity is the exact `DT_NEEDED` lookup name with content-digest comparison, and cross-SONAME kinship is a committed declaration | "Duplicate providers, and the cross-SONAME family", "The initial declared-family list" | K1, a hard-coded known-family list, which hard-codes what the declaration should carry; K2, a filename stem, wrong in both directions on the measured evidence |
 | Q11 | One negative fixture per independent invariant | "Acceptance for the runtime closure" | L1, one representative failure, which leaves most branches unasserted; L3, exhaustive mutation of every shipped library, which turns acceptance into an implementation test |
+| Q12 | Preserve every loader path using relative aliases to the installer-selected loader only when all source bytes agree; refuse differing bytes and validate aliases, runtime references and installed rule 1 | "Preserving loader identity through installation"; Step 8 closure instruction, 2026-09-13 | Deleting a loader on PT_INTERP counts alone; weakening duplicate checks; changing installer classification |
+| Q13 | Option B, selected by the human: bounded snapshot transport for one digest-pinned validation candidate, publication disabled, release pin unchanged, temporary transport removed after evidence retention | "Validation transport for Step 8"; Step 8 closure instruction, 2026-09-13 | Deferring Debian acceptance; allowing release or deployment publication under a waiver |
 
 ### What the four rounds kept finding
 
