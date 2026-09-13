@@ -2198,7 +2198,7 @@ donor_valid_program() {
 
 # The first candidate that validates, over the two library layouts this effort's
 # hosts use. It is bounded on purpose: a host with no valid donor must refuse in
-# a moment rather than walk its whole filesystem looking for one. cSpell: disable
+# a moment rather than walk its whole filesystem looking for one.
 donor_find_shared() {
     local c tried=0
     for c in /usr/lib64/libz.so.1 /usr/lib64/libbz2.so.1 /usr/lib64/liblzma.so.5 \
@@ -4292,6 +4292,112 @@ step5_make_tree() {
     return 0
 }
 
+# Exercise packaging ownership with a controlled checker verdict. The main gate
+# cases below still run the real checker; these cases isolate filesystem effects.
+step5_packaging_preservation() {
+    local dir="$1" repo="$1/deploy" home="$1/home" stub="$1/stubs"
+    local out="" rc=0 before="" stages="" arg=""
+    step5_make_deployed_tree "$repo" "$SHIPPED_DIR" || return 1
+    step5_make_tree "$home" || return 1
+    mkdir -p -- "$stub" "$home/tools/root/usr/bin" || return 1
+    printf '#!/bin/bash\nexit 0\n' > "$repo/bin/closure_check.sh"
+    printf '#!/bin/bash\nprintf "2026-09-13_120000\\n"\n' > "$stub/date"
+    chmod +x "$stub/date"
+    printf 'compiler fixture\n' > "$home/tools/root/usr/bin/gcc"
+    printf 'extension fixture\n' > "$home/extra.txt"
+
+    out=$(HOME="$home" PATH="$stub:$PATH" bash "$repo/bin/pkg_tools.sh" \
+        --add extra.txt -- --mtime=2026-01-01 2>&1); rc=$?
+    chk "step5/packaging/first-run" "0" "$rc"
+    chk "step5/packaging/reported-archive-exists" "yes" \
+        "$( [ -f "$(printf '%s\n' "$out" | tail -1)" ] && echo yes || echo no )"
+    chk "step5/packaging/add-reads-original-home" "extension fixture" \
+        "$(tar -xOzf "$home/pkgs/tools.latest.tar.gz" extra.txt 2>/dev/null)"
+    chk "step5/packaging/compiler-is-trimmed" "no" \
+        "$(tar -tzf "$home/pkgs/tools.latest.tar.gz" | grep -qx 'tools/root/usr/bin/gcc' && echo yes || echo no)"
+    before=$(sha256sum < "$home/pkgs/tools.latest.tar.gz")
+
+    out=$(HOME="$home" PATH="$stub:$PATH" bash "$repo/bin/pkg_tools.sh" \
+        --add extra.txt -- --mtime=2026-01-01 2>&1); rc=$?
+    chk "step5/packaging/same-second-duplicate-succeeds" "0" "$rc"
+    chk "step5/packaging/same-second-duplicate-preserves-latest" "$before" \
+        "$(sha256sum < "$home/pkgs/tools.latest.tar.gz" 2>/dev/null)"
+    chk "step5/packaging/duplicate-keeps-one-archive" "1" \
+        "$(find "$home/pkgs" -maxdepth 1 -name '*.tar.gz' -type f | wc -l)"
+
+    printf 'changed extension\n' > "$home/extra.txt"
+    out=$(HOME="$home" PATH="$stub:$PATH" bash "$repo/bin/pkg_tools.sh" \
+        --add extra.txt -- --mtime=2026-01-01 2>&1); rc=$?
+    chk "step5/packaging/occupied-name-refuses-new-content" "2" "$rc"
+    chk "step5/packaging/occupied-name-preserves-latest" "$before" \
+        "$(sha256sum < "$home/pkgs/tools.latest.tar.gz" 2>/dev/null)"
+    out=$(HOME="$home" bash "$repo/bin/pkg_tools.sh" --add missing.txt 2>&1); rc=$?
+    chk "step5/packaging/tar-failure-refuses" "2" "$rc"
+    chk "step5/packaging/tar-failure-preserves-latest" "$before" \
+        "$(sha256sum < "$home/pkgs/tools.latest.tar.gz" 2>/dev/null)"
+    chk "step5/packaging/failures-leave-no-partial" "0" \
+        "$(find "$home/pkgs" -name '*.partial' -type f | wc -l)"
+
+    stages=$(find "$home" -maxdepth 1 -name '.cplx-pkgstage.*' | wc -l)
+    for arg in --source-root "--source-root=$home"; do
+        out=$(HOME="$home" bash "$repo/bin/pkg_tools.sh" "$arg" "$home" 2>&1); rc=$?
+        chk "step5/packaging/override-$arg-refuses" "3" "$rc"
+    done
+    chk "step5/packaging/override-creates-no-stage" "$stages" \
+        "$(find "$home" -maxdepth 1 -name '.cplx-pkgstage.*' | wc -l)"
+    chk "step5/packaging/override-leaves-live-gate-absent" "yes" \
+        "$( [ ! -e "$home/tools/closure" ] && echo yes || echo no )"
+
+    # After --, this token is a tar exclusion pattern, not a pkg.sh option.
+    out=$(HOME="$home" bash "$repo/bin/pkg_tools.sh" -- --exclude --source-root 2>&1); rc=$?
+    chk "step5/packaging/literal-tar-pattern-is-preserved" "0" "$rc"
+}
+
+step5_loader_aliases() {
+    local dir="$1" home="$1/home" repo="$1/deployed" mode out rc before after
+    mkdir -p -- "$repo/bin" "$home/tools/python/root/usr/lib64" \
+        "$home/tools/git/root/usr/lib64" "$home/tools/git/root/lib64" || return 1
+    cp -- "$SHIPPED_DIR/pkg_tools.sh" "$SHIPPED_DIR/install_pkg.sh" "$repo/bin/" || return 1
+    # Inspect the stage at the packaging boundary. No tar or static gate is
+    # needed to test whether preparation preserves identity and source bytes.
+    cat > "$repo/bin/pkg.sh" <<'LOADER_STAGE_PROBE'
+#!/bin/bash
+stage="$4"
+canonical="$stage/tools/python/root/usr/lib64/ld-linux-x86-64.so.2"
+other="$stage/tools/git/root/usr/lib64/ld-linux-x86-64.so.2"
+[ -L "$other" ] && [ "$canonical" -ef "$other" ] || exit 91
+case "$(readlink "$other")" in /*) exit 92 ;; esac
+[ "$canonical" -ef "$stage/tools/git/root/lib64/ld-linux-x86-64.so.2" ] || exit 93
+printf 'LOADER-STAGE|preserved\n'
+LOADER_STAGE_PROBE
+    for mode in identical different broken escaping; do
+        printf 'canonical loader bytes\n' > "$home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2"
+        rm -f -- "$home/tools/git/root/usr/lib64/ld-linux-x86-64.so.2"
+        cp -- "$home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2" \
+            "$home/tools/git/root/usr/lib64/ld-linux-x86-64.so.2"
+        ln -sfn ../usr/lib64/ld-linux-x86-64.so.2 "$home/tools/git/root/lib64/ld-linux-x86-64.so.2"
+        case "$mode" in
+            different) printf 'other bytes\n' > "$home/tools/git/root/usr/lib64/ld-linux-x86-64.so.2" ;;
+            broken) rm -f -- "$home/tools/git/root/usr/lib64/ld-linux-x86-64.so.2" ;;
+            escaping)
+                printf 'canonical loader bytes\n' > "$dir/outside-loader"
+                ln -sfn "$dir/outside-loader" "$home/tools/git/root/usr/lib64/ld-linux-x86-64.so.2" ;;
+        esac
+        before=$(sha256sum "$home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2")
+        out=$(HOME="$home" bash "$repo/bin/pkg_tools.sh" 2>&1); rc=$?
+        if [ "$mode" = identical ]; then
+            chk "step5/loader/$mode/preserves-relative-aliases" "0" "$rc"
+            chk "step5/loader/$mode/reaches-package" yes "$(printf '%s' "$out" | grep -q '^LOADER-STAGE|preserved$' && echo yes || echo no)"
+            chk "step5/loader/$mode/live-copy-stays-regular" no "$( [ -L "$home/tools/git/root/usr/lib64/ld-linux-x86-64.so.2" ] && echo yes || echo no )"
+        else
+            chk "step5/loader/$mode/refuses" "3" "$rc"
+            chk "step5/loader/$mode/never-reaches-package" no "$(printf '%s' "$out" | grep -q '^LOADER-STAGE|' && echo yes || echo no)"
+        fi
+        after=$(sha256sum "$home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2")
+        chk "step5/loader/$mode/live-canonical-unchanged" "$before" "$after"
+    done
+}
+
 step5_suite() {
     local dir="$SCRATCH/step5"
     local src="$SHIPPED_DIR"
@@ -4302,6 +4408,11 @@ step5_suite() {
     local before="" archive="" id="" cfg="" tool="" tp="" cleanrepo="" cleancommit="" module="" hashdigest=""
 
     mkdir -p -- "$dir" || { fail "step5/scratch" "cannot create the scratch directory"; return; }
+
+    step5_packaging_preservation "$dir/packaging-preservation" \
+        || fail "step5/packaging/fixture" "cannot plant the packaging fixtures"
+    step5_loader_aliases "$dir/loader-aliases" \
+        || fail "step5/loader/fixture" "cannot plant loader identity controls"
 
     # --- the amended topology --------------------------------------------------
     section "step 5 topology: the fifth module, and what it is not allowed to own"
@@ -4410,14 +4521,28 @@ step5_suite() {
         "$(printf '%s' "$out" | grep -q 'VALIDATION ARTIFACT' && echo yes || echo no)"
     chk "step5/gate/archive-exists" "1" \
         "$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | grep -c . || true)"
-    # THE STAGED FILES PERSIST ON A RUN THAT PRODUCED AN ARCHIVE, which is what
-    # puts them inside it.
-    chk "step5/gate/declaration-staged" "yes" \
-        "$( [ -f "$home/tools/closure/closure-config.txt" ] && echo yes || echo no )"
-    chk "step5/gate/envelope-staged" "yes" \
-        "$( [ -f "$home/tools/closure/closure-envelope.txt" ] && echo yes || echo no )"
-    chk "step5/gate/five-payload-modules-staged" "5" \
-        "$(find "$home/tools/bin" -maxdepth 1 -name 'closure_*.sh' -type f 2>/dev/null | grep -c . || true)"
+    # THE STAGED FILES TRAVEL IN THE ARCHIVE, which is the contract. An earlier
+    # form of these three read them from `$home/tools` instead, which was the same
+    # answer only while the gate staged into the very tree it packaged. It no
+    # longer does: `pkg_tools.sh` packages from a trimmed mirror, so the payload
+    # copies reach the archive and the live tree is left alone. Reading the
+    # archive asserts what the contract says and survives that change; reading the
+    # live tree asserted a side effect and did not. The listing is taken once.
+    archive=$(find "$home/pkgs" -name 'tools.*.tar.gz' -type f 2>/dev/null | head -1)
+    toc=""
+    [ -n "$archive" ] && toc=$(tar -tzf "$archive" 2>/dev/null)
+    chk "step5/gate/declaration-in-the-archive" "yes" \
+        "$(printf '%s\n' "$toc" | grep -qx 'tools/closure/closure-config.txt' && echo yes || echo no)"
+    chk "step5/gate/envelope-in-the-archive" "yes" \
+        "$(printf '%s\n' "$toc" | grep -qx 'tools/closure/closure-envelope.txt' && echo yes || echo no)"
+    chk "step5/gate/five-payload-modules-in-the-archive" "5" \
+        "$(printf '%s\n' "$toc" | grep -cE '^tools/bin/closure_[a-z0-9_]+\.sh$' || true)"
+    # AND THE LIVE TREE IS NOT WRITTEN, which is the other half of the same
+    # change and would otherwise go unasserted. A gate that reached the account's
+    # own tools tree would be indistinguishable, from the archive alone, from one
+    # that did not.
+    chk "step5/gate/the-live-tree-keeps-no-gate-files" "yes" \
+        "$( [ ! -e "$home/tools/closure" ] && echo yes || echo no )"
 
     # SOURCE AND DESTINATION MUST DIFFER. `pkg.sh` now exists inside the payload
     # too, and a gated run from that copy would read its declaration out of the
@@ -6108,6 +6233,47 @@ step6_suite() {
     out=$(bash "$observe" --process python3 --prefix /opt --proc "$root" 2>&1); rc=$?
     chk "step6/live/a-lookalike-path-is-a-host-object" "1" "$rc"
 
+    # The owner excludes Dynatrace monitoring on every host, independently of
+    # its installed version. The raw external count and each mapping survive;
+    # only recognized monitoring is removed from the fallback verdict.
+    local agent_path="" host_path=""
+    root="$dir/proc-monitoring"
+    for agent_path in \
+        /opt/dynatrace/oneagent/agent/bin/1.343/linux-x86-64/liboneagentproc.so \
+        /opt/dynatrace/oneagent/agent/bin/next/linux-x86-64/liboneagentaudit.so \
+        /usr/lib64/liboneagentproc.so /lib64/liboneagentproc.so \
+        /usr/lib/x86_64-linux-gnu/liboneagentaudit.so \
+        '/opt/dynatrace/oneagent/agent/bin/old/linux-x86-64/liboneagentproc.so (deleted)'; do
+        step6_plant_proc "$root" 85 python3 /srv/candidate/bin/python3 \
+            /srv/candidate/bin/python3 "$agent_path" "$agent_path"
+        out=$(bash "$observe" --process python3 --prefix /srv/candidate --proc "$root" 2>&1); rc=$?
+        chk "step6/live/dynatrace/recognized-monitoring-is-excluded" "0" "$rc"
+        chk "step6/live/dynatrace/mapping-remains-visible" "yes" \
+            "$(printf '%s\n' "$out" | grep -Fqx "OBJECT|85|$agent_path|excluded-dynatrace" && echo yes || echo no)"
+        chk "step6/live/dynatrace/raw-host-count-is-not-hidden" "yes" \
+            "$(printf '%s\n' "$out" | grep -qx 'HOSTS|85|1' && echo yes || echo no)"
+        chk "step6/live/dynatrace/exclusion-is-counted-once" "yes" \
+            "$(printf '%s\n' "$out" | grep -qx 'EXCLUDED|85|dynatrace|1' && echo yes || echo no)"
+        chk "step6/live/dynatrace/no-in-scope-fallback" "yes" \
+            "$(printf '%s\n' "$out" | grep -qx 'FALLBACKS|85|0' && echo yes || echo no)"
+    done
+    for host_path in /lib64/libc.so.6 /lib64/ld-linux-x86-64.so.2 \
+        /usr/lib/libpython3.13.so /usr/lib64/libm.so.6 /lib64/libgcc_s.so.1 \
+        /tmp/liboneagentproc.so /opt/dynatrace/oneagent/agent/libc.so.6 \
+        /opt/dynatrace/oneagent/../other/liboneagentproc.so \
+        /opt/dynatrace/oneagent-lookalike/agent/liboneagentproc.so; do
+        step6_plant_proc "$root" 85 python3 /srv/candidate/bin/python3 \
+            /srv/candidate/bin/python3 /usr/lib64/liboneagentproc.so "$host_path"
+        out=$(bash "$observe" --process python3 --prefix /srv/candidate --proc "$root" 2>&1); rc=$?
+        chk "step6/live/dynatrace/another-host-object-still-refuses" "1" "$rc"
+        chk "step6/live/dynatrace/refused-object-remains-visible" "yes" \
+            "$(printf '%s\n' "$out" | grep -Fqx "OBJECT|85|$host_path|host" && echo yes || echo no)"
+    done
+    step6_plant_proc "$root" 85 python3 /srv/candidate/bin/python3 \
+        /usr/lib64/liboneagentproc.so
+    out=$(bash "$observe" --process python3 --prefix /srv/candidate --proc "$root" 2>&1); rc=$?
+    chk "step6/live/dynatrace/monitoring-alone-is-inconclusive" "4" "$rc"
+
     # THE REFUSAL THIS FILE EXISTS FOR, and it has its own exit code so a caller
     # cannot read it as either outcome.
     root="$dir/proc-empty"
@@ -7185,7 +7351,7 @@ step7_control_exists() {
 # The diagnostic below deliberately says "passing" in lower case for the same
 # reason, so a capture carrying the instruction cannot satisfy the instruction.
 step7_capture_answers() {
-    local path="$1" host="$2" snapshot sha digest rc=1
+    local path="$1" host="$2" expected="${3:-}" snapshot sha digest rc=1
     [ -f "$path" ] || return 1
     sha=$(type -P sha256sum) || return 1
     snapshot=$(mktemp "$SCRATCH/step7-capture.XXXXXX") || return 1
@@ -7198,7 +7364,8 @@ step7_capture_answers() {
     note "step7/acceptance/$host-capture-sha256" "${digest%% *} from $path"
     if grep -qi "^Target: .*$host" "$snapshot" \
        && grep -qE '^Captured: .*[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' "$snapshot" \
-       && grep -qE "step7/acceptance/$host-half +PASS" "$snapshot"; then
+       && grep -qE "step7/acceptance/$host-half +PASS" "$snapshot" \
+       && { [ -z "$expected" ] || grep -qE "^  step7/acceptance/candidate-sha256 +NOTE  $expected$" "$snapshot"; }; then
         rc=0
     fi
     rm -f -- "$snapshot"
@@ -7226,6 +7393,11 @@ step7_real_prefix() {
 # rather than a fixture stood in for one.
 step7_real_archive() {
     local candidate
+    if [ -n "${CPLX_ACCEPTANCE_ARCHIVE:-}" ]; then
+        [ -r "$CPLX_ACCEPTANCE_ARCHIVE" ] || return 1
+        printf '%s' "$CPLX_ACCEPTANCE_ARCHIVE"
+        return 0
+    fi
     for candidate in "${CPLX_ACCEPTANCE_ARCHIVE:-}" "${HOME:-}/pkgs/tools.latest.tar.gz"; do
         case "$candidate" in ''|'/pkgs/tools.latest.tar.gz') continue ;; esac
         if [ -r "$candidate" ]; then printf '%s' "$candidate"; return 0; fi
@@ -7237,6 +7409,15 @@ step7_real_archive() {
 # driver is the AUTHORITATIVE one delivered beside this harness and never a copy
 # out of the candidate, which is the whole of what the topology's trust boundary
 # means here.
+
+# Live controls call the authoritative observer over the same installed
+# candidate with isolated process inputs. They do not invoke installation.
+# Step 6 retains the independent reinstall, marker and corruption controls.
+step7_observe_control() {
+    "${BASH:-bash}" "$SHIPPED_DIR/closure_observe_live.sh" \
+        --prefix "$1" --process "$2" --proc "$3" 2>&1
+}
+
 step7_verify_archive() {
     local archive="$1" root="$2" process="$3" proc="${4:-/proc}"
     rm -rf -- "$root"
@@ -7247,11 +7428,49 @@ step7_verify_archive() {
         --process "$process" --proc "$proc" 2>&1
 }
 
+# Q15 accepts only a fully determined report with no refusal. Exit 3 is
+# permitted solely for the one active sqlite waiver; it never certifies release.
+step7_q15_accepts() {
+    local rc="$1" report="$2" waived
+    case "$rc" in 0|3) ;; *) return 1 ;; esac
+    printf '%s\n' "$report" | grep -qE '^  unexpected +0$' || return 1
+    printf '%s\n' "$report" | grep -qE '^  undetermined +0$' || return 1
+    printf '%s\n' "$report" | grep -qE '^  refused +0 unresolvable DT_NEEDED$' || return 1
+    if printf '%s\n' "$report" | grep -qE '^(REFUSED|UNDETERMINED|UNEXPECTED)\||[1-9][0-9]* refused'; then
+        return 1
+    fi
+    waived=$(printf '%s\n' "$report" | grep '^WAIVED|' || true)
+    if [ "$rc" -eq 0 ]; then [ -z "$waived" ]; return; fi
+    [ "$(printf '%s\n' "$waived" | wc -l)" -eq 1 ] || return 1
+    case "$waived" in 'WAIVED|waiver|libsqlite3.so.0|python-sqlite-support|active:'*) ;; *) return 1 ;; esac
+    printf '%s\n' "$report" | grep -qE '^  waivers +1 declared, 1 active, 0 refused$'
+}
+
 # The interpreter INSIDE the candidate installation, which is the only one whose
 # mapped objects can be under the candidate prefix. A host interpreter maps its
 # own libraries from outside and the observer refuses it, correctly.
 step7_candidate_interpreter() {
-    local prefix="$1" candidate
+    local prefix="$1" elf_only="${2:-no}" candidate resolved magic python_root
+    python_root=$(readlink -f -- "$prefix/tools/python") || return 1
+    # The application provisions its venv with the relocated ELF directly.
+    # The shipped shell wrapper bootstraps links with host helpers and cannot
+    # be used on Debian while it exports the bundled glibc search path.
+    for candidate in "$prefix"/tools/python/current/bin/python3*_bin \
+                     "$prefix"/tools/python/current/bin/python3 \
+                     "$prefix"/tools/python/root/usr/bin/python3; do
+        [ -f "$candidate" ] || continue
+        [ -x "$candidate" ] || continue
+        resolved=$(readlink -f -- "$candidate") || continue
+        case "$resolved" in "$python_root"/*) ;; *) continue ;; esac
+        magic=""
+        IFS= read -r -N 4 magic < "$resolved" || continue
+        [ "$magic" = $'\177ELF' ] || continue
+        printf '%s' "$resolved"
+        return 0
+    done
+    [ "$elf_only" = yes ] && return 1
+    # Wrapper-shaped fixtures still exercise descendant ownership and cleanup;
+    # real archive acceptance requires the ELF branch above.
     for candidate in "$prefix"/tools/python/current/bin/python3 \
                      "$prefix"/tools/python/root/usr/bin/python3 \
                      "$prefix"/tools/python/current/bin/python; do
@@ -7442,22 +7661,41 @@ step7_maps_candidate() {
 step7_candidate_live_evidence() {
     local prefix="$1" root="${2:-$SCRATCH/step7/venv}"
     local interp="" pid="" child="" out="" rc=0 i=0 log="" comm="" owner=""
-    local nonce=""
-    if ! interp=$(step7_candidate_interpreter "$prefix"); then
+    local nonce="" proc="" binding="${3:-no}" program='import time; time.sleep(300)'
+    if ! interp=$(step7_candidate_interpreter "$prefix" "$binding"); then
         printf 'LIVE|INCONCLUSIVE|no interpreter inside the candidate installation at %s, so no venv process could be started from it\n' "$prefix"
         return 1
     fi
     rm -rf -- "$root"
-    mkdir -p -- "${root%/*}" || true
+    mkdir -p -- "${root%/*}" || return 1
     log="${root}.log"
-    if ! "$interp" -m venv "$root" > "$log" 2>&1; then
+    # Use the candidate ELF's venv API, without running the shipped wrapper or
+    # its entry-point rewriting post-hook. This creates ordinary links to the
+    # candidate ELF, as the consuming application's venv does. No pip is needed
+    # by this process, and no candidate-supplied helper judges the live result.
+    if ! env -u VIRTUAL_ENV LC_ALL=C "$interp" -c \
+        'import sys, venv; venv.EnvBuilder(with_pip=False, symlinks=True).create(sys.argv[1])' \
+        "$root" > "$log" 2>&1; then
         printf 'LIVE|INCONCLUSIVE|the candidate interpreter could not create a venv at %s; launch diagnostics: %s\n' \
             "$root" "$(oneline "$(tail -3 "$log" 2>/dev/null)")"
         return 1
     fi
     if [ ! -x "$root/bin/python3" ]; then
-        printf 'LIVE|INCONCLUSIVE|the venv at %s carries no python3 entry point\n' "$root"
+        printf 'LIVE|INCONCLUSIVE|the venv at %s carries no python3 entry point; launch diagnostics: %s\n' \
+            "$root" "$(oneline "$(tail -3 "$log" 2>/dev/null)")"
         return 1
+    fi
+    if [ "$binding" = yes ]; then
+        program='import os, sys, time
+real = os.path.realpath
+venv, candidate = map(real, sys.argv[1:3])
+base = real(sys.base_prefix)
+exe = real(getattr(sys, "_base_executable", ""))
+assert real(sys.prefix) == venv, "application venv prefix mismatch"
+assert base.startswith(candidate + "/tools/"), "base prefix outside candidate"
+assert exe.startswith(candidate + "/tools/"), "base executable outside candidate"
+print("VENV|" + venv + "|" + base + "|" + exe, flush=True)
+time.sleep(300)'
     fi
     # THE LAUNCH IS WHAT OWNERSHIP IS TAKEN FROM, so the launch is made to carry
     # two marks that survive everything the wrapper can do. `set -m` makes the
@@ -7468,7 +7706,7 @@ step7_candidate_live_evidence() {
     # `setpgid` the shell performs at fork and for nothing else here.
     nonce="cplx-step7-$$-${RANDOM}-${RANDOM}"
     set -m
-    CPLX_STEP7_OWNER="$nonce" "$root/bin/python3" -c 'import time; time.sleep(300)' > "$log" 2>&1 &
+    LC_ALL=C CPLX_STEP7_OWNER="$nonce" "$root/bin/python3" -c "$program" "$root" "$prefix" > "$log" 2>&1 &
     pid=$!
     set +m
     # THE OWNED PROCESS IS WHICHEVER OF THE TWO SHAPES THIS ENTRY POINT TAKES,
@@ -7529,15 +7767,36 @@ step7_candidate_live_evidence() {
         step7_reap "$pid" "$child" "$pid" "$nonce"
         return 1
     fi
+    if [ "$binding" = yes ]; then
+        i=0
+        while [ "$i" -lt 50 ] && ! grep -q '^VENV|' "$log"; do
+            step7_process_live "$child" || break
+            i=$((i + 1)); sleep 0.1
+        done
+        if ! grep '^VENV|' "$log"; then
+            printf 'LIVE|INCONCLUSIVE|application venv ancestry was not proved: %s\n' "$(oneline "$(tail -3 "$log")")"
+            step7_reap "$pid" "$child" "$pid" "$nonce"
+            return 1
+        fi
+    fi
     # The name the observer is asked for is the one the OWNED child actually
     # carries, read from it rather than assumed.
     comm=""
     if [ -r "/proc/$child/comm" ]; then read -r comm < "/proc/$child/comm" || comm=""; fi
     printf 'OWNED|%s|%s\n' "$child" "${comm:-unknown}"
+    # Restrict the observer's process view to this launch's owned PID. Another
+    # interpreter with the same comm cannot supply or contaminate its trace.
+    if ! proc=$(mktemp -d "${root}.proc.XXXXXXXX") \
+        || ! ln -s -- "/proc/$child" "$proc/$child"; then
+        step7_reap "$pid" "$child" "$pid" "$nonce"
+        printf 'LIVE|INCONCLUSIVE|could not isolate the owned process inventory\n'
+        return 1
+    fi
     out=$("${BASH:-bash}" "$SHIPPED_DIR/closure_observe_live.sh" \
-        --process "${comm:-unknown}" --prefix "$prefix" 2>&1)
+        --process "${comm:-unknown}" --prefix "$prefix" --proc "$proc" 2>&1)
     rc=$?
     step7_reap "$pid" "$child" "$pid" "$nonce"
+    rm -rf -- "$proc"
     printf '%s\n' "$out"
     return "$rc"
 }
@@ -7645,6 +7904,7 @@ step7_debian_half() {
     local identity="" reported="" proc="$SCRATCH/step7/proc-empty"
     local failures_before="$failures" listing="" live="" lrc=0 owned=""
     local listing_rc=0 outside="" providers="" providers_taken=yes
+    local static_observation="" static_report="" static_rc=""
 
     # THIS BRANCH OWNS THE PROCESS, ALWAYS, and round 5 removed the alternative
     # rather than repairing it. An operator-named process selected a mode that
@@ -7671,8 +7931,9 @@ step7_debian_half() {
     fi
     note "step7/acceptance/real-archive" "$archive"
 
-    out=$(step7_verify_archive "$archive" "$root" "$process")
+    out=$(step7_verify_archive "$archive" "$root" "")
     rc=$?
+    static_observation="$out"
     note "step7/acceptance/verify-exit" "$rc"
     while IFS= read -r line; do
         [ -z "$line" ] || note "step7/acceptance/verify" "$line"
@@ -7681,12 +7942,18 @@ step7_debian_half() {
 
     # THE IDENTITY, RECOMPUTED HERE AND REQUIRED TO AGREE.
     identity=$(sha256sum -- "$archive" 2>/dev/null | sed -e 's/ .*$//')
+    note "step7/acceptance/candidate-sha256" "$identity"
     reported=$(printf '%s\n' "$out" | grep -m1 '^ARCHIVE|' | sed -e 's/^.*|//')
     chk "step7/acceptance/archive-identity-is-recomputed" "$identity" "$reported"
 
     # THE THREE REPORTS THE ISSUE ASKS FOR, each asserted on its own.
+    static_rc=$(printf '%s\n' "$out" | sed -n 's/^STATIC-EXIT|//p')
+    static_report=$(printf '%s\n' "$out" | sed -n 's/^STATIC-REPORT|//p')
     chk "step7/acceptance/the-static-listing-passes" "yes" \
-        "$(printf '%s' "$out" | grep -q '^STATIC|PASS' && echo yes || echo no)"
+        "$(step7_q15_accepts "$static_rc" "$static_report" && echo yes || echo no)"
+    while IFS= read -r line; do
+        [ -z "$line" ] || note "step7/acceptance/static-report" "$line"
+    done <<< "$static_report"
     chk "step7/acceptance/the-two-observations-agree" "yes" \
         "$(printf '%s' "$out" | grep -q '^COMPARISON|PASS' && echo yes || echo no)"
     # THE WHOLE-SCOPE LISTING, RETAINED AS A LISTING. The driver's `STATIC|PASS`
@@ -7737,13 +8004,13 @@ step7_debian_half() {
 
     # THE LIVE TRACE, TAKEN AGAINST A PROCESS STARTED FROM THE CANDIDATE and
     # retained as the trace rather than as its verdict.
-    live=$(step7_candidate_live_evidence "$root/prefix" "$root/venv")
+    live=$(step7_candidate_live_evidence "$root/prefix" "$root/prefix/pdfs/closure-acceptance/venvs/python" yes)
     lrc=$?
     note "step7/acceptance/live-exit" "$lrc"
     while IFS= read -r line; do
         [ -z "$line" ] || note "step7/acceptance/live" "$line"
     done <<< "$(printf '%s\n' "$live" \
-        | grep -E '^(PROCESS|OBJECT|HOSTS|UNUSABLE|LIVE)\|' || true)"
+        | grep -E '^(VENV|PROCESS|OBJECT|HOSTS|EXCLUDED|FALLBACKS|UNUSABLE|LIVE)\|' || true)"
     chk "step7/acceptance/the-live-trace-is-conclusive" "yes" \
         "$(printf '%s' "$live" | grep -q '^LIVE|CONCLUSIVE' && echo yes || echo no)"
     # IT NAMES THE PROCESS IT INVENTORIED, by a PROCESS record carrying a pid,
@@ -7775,8 +8042,8 @@ step7_debian_half() {
         "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^OBJECT\|$owned\|" && echo yes || echo no )"
     chk "step7/acceptance/the-owned-process-is-not-unusable" "no" \
         "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^UNUSABLE\|$owned\|" && echo yes || echo no )"
-    chk "step7/acceptance/the-owned-process-maps-no-host-object" "yes" \
-        "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^HOSTS\|$owned\|0$" && echo yes || echo no )"
+    chk "step7/acceptance/the-owned-process-maps-no-in-scope-host-object" "yes" \
+        "$( [ -n "$owned" ] && printf '%s' "$live" | grep -qE "^FALLBACKS\|$owned\|0$" && echo yes || echo no )"
     chk "step7/acceptance/the-trace-inventoried-objects" "yes" \
         "$(printf '%s' "$live" | grep -qE '^OBJECT\|[0-9]+\|' && echo yes || echo no)"
 
@@ -7790,7 +8057,7 @@ step7_debian_half() {
     # A STATIC SUCCESS ALONE MUST NOT PASS. The same archive with no live
     # reading taken leaves the run inconclusive, so the live half is load
     # bearing rather than decorative.
-    out=$(step7_verify_archive "$archive" "$root-nolive" "" )
+    out="$static_observation"
     chk "step7/acceptance/control/no-live-reading-is-not-a-pass" "yes" \
         "$(printf '%s' "$out" | grep -q '^LIVE|INCONCLUSIVE' && echo yes || echo no)"
 
@@ -7798,7 +8065,9 @@ step7_debian_half() {
     # name matches inventories nothing, and nothing observed is never "no host
     # library loaded".
     rm -rf -- "$proc"; mkdir -p -- "$proc"
-    out=$(step7_verify_archive "$archive" "$root-empty" "$process" "$proc")
+    out=$(step7_observe_control "$root/prefix" "$process" "$proc")
+    rc=$?
+    chk "step7/acceptance/control/empty-trace-exit" "4" "$rc"
     chk "step7/acceptance/control/an-empty-trace-is-not-a-pass" "yes" \
         "$(printf '%s' "$out" | grep -q '^LIVE|INCONCLUSIVE' && echo yes || echo no)"
 
@@ -7807,7 +8076,9 @@ step7_debian_half() {
     # the machine it runs on.
     rm -rf -- "$proc"
     step7_plant_host_proc "$proc" "$process"
-    out=$(step7_verify_archive "$archive" "$root-host" "$process" "$proc")
+    out=$(step7_observe_control "$root/prefix" "$process" "$proc")
+    rc=$?
+    chk "step7/acceptance/control/host-object-exit" "1" "$rc"
     chk "step7/acceptance/control/a-host-object-refuses" "yes" \
         "$(printf '%s' "$out" | grep -q '^LIVE|REFUSED' && echo yes || echo no)"
 
@@ -7889,7 +8160,7 @@ step7_debian_branch_probe() {
             empty-trace) printf 'LIVE|INCONCLUSIVE|empty trace\n'; return 1 ;;
             host-object)
                 printf 'OWNED|4242|python3\n'
-                printf 'PROCESS|4242|python3\nOBJECT|4242|/lib/libc.so.6|host\nHOSTS|4242|1\n'
+                printf 'PROCESS|4242|python3\nOBJECT|4242|/lib/libc.so.6|host\nHOSTS|4242|1\nFALLBACKS|4242|1\n'
                 printf 'LIVE|REFUSED|host object\n'; return 1 ;;
             # A CONCLUSIVE TRACE OF SOMEBODY ELSE'S PROCESS. The observer
             # inventoried a process answering to the name and it is not the one
@@ -7899,7 +8170,7 @@ step7_debian_branch_probe() {
                 printf 'OWNED|4242|python3\n'
                 printf 'PROCESS|9999|python3\nOBJECT|9999|%s/prefix/tools/python/root/lib/libpython3.so|shipped\n' \
                     "$SCRATCH/step7/accept"
-                printf 'HOSTS|9999|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+                printf 'HOSTS|9999|0\nFALLBACKS|9999|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
                 return 0 ;;
             # THE SHAPE ROUND 4 BUILT TO DEFEAT THE PREVIOUS ASSERTIONS, kept as
             # a model because it is the one the real observer can actually emit:
@@ -7912,21 +8183,21 @@ step7_debian_branch_probe() {
                 printf 'PROCESS|4242|python3\nUNUSABLE|4242|its mapped objects could not be read\n'
                 printf 'PROCESS|9999|python3\nOBJECT|9999|%s/prefix/tools/python/root/lib/libpython3.so|shipped\n' \
                     "$SCRATCH/step7/accept"
-                printf 'HOSTS|9999|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+                printf 'HOSTS|9999|0\nFALLBACKS|9999|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
                 return 0 ;;
             # THE OWNED PROCESS INVENTORIED, AND MAPPING A HOST OBJECT. The
             # verdict line is conclusive for the run as a whole; the owned pid's
             # own host count is not zero, and that is what must decide it.
             owner-maps-host)
                 printf 'OWNED|4242|python3\n'
-                printf 'PROCESS|4242|python3\nOBJECT|4242|/lib/libc.so.6|host\nHOSTS|4242|1\n'
+                printf 'PROCESS|4242|python3\nOBJECT|4242|/lib/libc.so.6|host\nHOSTS|4242|1\nFALLBACKS|4242|1\n'
                 printf 'LIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
                 return 0 ;;
         esac
         printf 'OWNED|4242|python3\n'
         printf 'PROCESS|4242|python3\nOBJECT|4242|%s/prefix/tools/python/root/lib/libpython3.so|shipped\n' \
             "$SCRATCH/step7/accept"
-        printf 'HOSTS|4242|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+        printf 'HOSTS|4242|0\nFALLBACKS|4242|0\nLIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
         return 0
     }
     step7_verify_archive() {
@@ -7944,13 +8215,19 @@ step7_debian_branch_probe() {
         else
             printf 'ARCHIVE|fixture|%s\n' "$digest"
         fi
-        printf 'STATIC|PASS\nCOMPARISON|PASS\n'
+        printf 'STATIC|PASS\nCOMPARISON|PASS\nSTATIC-EXIT|0\n'
+        printf 'STATIC-REPORT|  unexpected   0\nSTATIC-REPORT|  undetermined 0\n'
+        printf 'STATIC-REPORT|  refused      0 unresolvable DT_NEEDED\n'
         case "$scenario" in
             static-only) return 0 ;;
             empty-trace) printf 'LIVE|INCONCLUSIVE|no process\n'; return 1 ;;
             host-object) printf 'LIVE|REFUSED|host object\n'; return 1 ;;
         esac
-        printf 'LIVE|CONCLUSIVE|1 process(es) named python3 map no host object\n'
+        if [ "$scenario" = bad-control ]; then
+            printf 'LIVE|CONCLUSIVE|unexpected control pass\n'
+        else
+            printf 'LIVE|INCONCLUSIVE|no process requested\n'
+        fi
         return 0
     }
     step7_debian_half
@@ -8301,11 +8578,26 @@ step7_suite() {
     # --- the acceptance -------------------------------------------------------
     section "step 7 acceptance: the positive control, the inventory, and the two halves"
 
+    local q15_clean=$'  unexpected 0\n  undetermined 0\n  refused 0 unresolvable DT_NEEDED'
+    local q15_waived="$q15_clean"$'\n  waivers 1 declared, 1 active, 0 refused\nWAIVED|waiver|libsqlite3.so.0|python-sqlite-support|active: absent'
+    chk "step7/q15/clean-is-accepted" yes "$(step7_q15_accepts 0 "$q15_clean" && echo yes || echo no)"
+    chk "step7/q15/sole-sqlite-waiver-is-accepted" yes "$(step7_q15_accepts 3 "$q15_waived" && echo yes || echo no)"
+    chk "step7/q15/missing-report-refuses" no "$(step7_q15_accepts 3 '' && echo yes || echo no)"
+    chk "step7/q15/other-waiver-refuses" no "$(step7_q15_accepts 3 "${q15_waived//libsqlite3.so.0/libother.so.0}" && echo yes || echo no)"
+    chk "step7/q15/stale-waiver-refuses" no "$(step7_q15_accepts 3 "$q15_waived"$'\nREFUSED|waiver|stale' && echo yes || echo no)"
+    chk "step7/q15/undetermined-refuses" no "$(step7_q15_accepts 3 "$q15_waived"$'\nUNDETERMINED|object|broken' && echo yes || echo no)"
+    chk "step7/q15/duplicate-refusal-refuses" no "$(step7_q15_accepts 3 "$q15_waived"$'\n  duplicates 1 refused' && echo yes || echo no)"
+
     printf 'Target: debian\nCaptured: 2026-09-11\nstep7/acceptance/debian-half PASS\n' \
         > "$dir/capture-input.txt"
     out=$(step7_capture_answers "$dir/capture-input.txt" debian)
     rc=$?
     chk "step7/capture/passing-half-is-accepted" "0" "$rc"
+    chk "step7/capture/missing-archive-identity-refuses" no "$(step7_capture_answers "$dir/capture-input.txt" debian abc >/dev/null && echo yes || echo no)"
+    printf '  step7/acceptance/candidate-sha256 NOTE  abc\n' >> "$dir/capture-input.txt"
+    chk "step7/capture/same-archive-is-accepted" yes "$(step7_capture_answers "$dir/capture-input.txt" debian abc >/dev/null && echo yes || echo no)"
+    chk "step7/capture/different-archive-refuses" no "$(step7_capture_answers "$dir/capture-input.txt" debian def >/dev/null && echo yes || echo no)"
+    out=$(step7_capture_answers "$dir/capture-input.txt" debian)
     reading=$(sha256sum < "$dir/capture-input.txt")
     chk "step7/capture/records-the-bytes-inspected" "yes" \
         "$(printf '%s' "$out" | grep -Fq "${reading%% *}" && echo yes || echo no)"
@@ -8339,6 +8631,23 @@ step7_suite() {
     live=$(step7_candidate_live_evidence "$dir/noint" "$dir/noint-venv")
     chk "step7/live-helper/no-interpreter-is-inconclusive" "yes" \
         "$(printf '%s' "$live" | grep -q '^LIVE|INCONCLUSIVE|no interpreter inside the candidate' && echo yes || echo no)"
+
+    # A real acceptance must bypass a broken wrapper and refuse a raw-binary
+    # link that escapes the selected installation.
+    tree="$dir/interpreter-selection"
+    mkdir -p "$tree/tools/python/current/bin"
+    printf '#!/bin/sh\nexit 99\n' > "$tree/tools/python/current/bin/python3"
+    chmod +x "$tree/tools/python/current/bin/python3"
+    chk "step7/live-helper/selection/refuses-wrapper-for-real-acceptance" "no" \
+        "$(step7_candidate_interpreter "$tree" yes >/dev/null && echo yes || echo no)"
+    cp -- "$(command -v sleep)" "$tree/tools/python/current/bin/python3.13_bin"
+    chk "step7/live-helper/selection/chooses-contained-elf-before-wrapper" \
+        "$(readlink -f "$tree/tools/python/current/bin/python3.13_bin")" \
+        "$(step7_candidate_interpreter "$tree" yes)"
+    rm -- "$tree/tools/python/current/bin/python3.13_bin"
+    ln -s -- "$(command -v sleep)" "$tree/tools/python/current/bin/python3.13_bin"
+    chk "step7/live-helper/selection/refuses-escaping-elf" "no" \
+        "$(step7_candidate_interpreter "$tree" yes >/dev/null && echo yes || echo no)"
 
     # THE WRAPPER TIMEOUT PATH, EXERCISED RATHER THAN REASONED ABOUT. Round 4
     # found the refusal paths killing only the launched process while a child
@@ -8380,9 +8689,10 @@ step7_suite() {
     cp -- "$(command -v sleep)" "$dir/unmarked/tools/python/current/bin/real-interpreter"
     cat > "$dir/unmarked/tools/python/current/bin/python3" <<'UNMARKED'
 #!/bin/bash
-[ "${1:-}" = "-m" ] && [ "${2:-}" = "venv" ] && [ -n "${3:-}" ] || exit 1
+[ "${1:-}" = "-c" ] && [ -n "${3:-}" ] || exit 1
 real="${0%/*}/real-interpreter"
 mkdir -p -- "$3/bin" || exit 1
+set -- "$1" "$2" "$(cd -- "$3" && pwd -P)"
 cat > "$3/bin/python3" <<WRAPPER
 #!/bin/bash
 "$real" 60 > /dev/null 2>&1 &
@@ -8437,9 +8747,10 @@ UNMARKED
         > "$dir/earlyexit/tools/python/current/bin/sleeper.path"
     cat > "$dir/earlyexit/tools/python/current/bin/python3" <<'EARLYEXIT'
 #!/bin/bash
-[ "${1:-}" = "-m" ] && [ "${2:-}" = "venv" ] && [ -n "${3:-}" ] || exit 1
+[ "${1:-}" = "-c" ] && [ -n "${3:-}" ] || exit 1
 read -r sleeper < "${0%/*}/sleeper.path" || exit 1
 mkdir -p -- "$3/bin" || exit 1
+set -- "$1" "$2" "$(cd -- "$3" && pwd -P)"
 cat > "$3/bin/python3" <<WRAPPER
 #!/bin/bash
 "$sleeper" 60 > /dev/null 2>&1 &
@@ -8547,7 +8858,11 @@ EARLYEXIT
     capture="$CAPTURES/verify.closure.step7.$theirs.txt"
     note "step7/acceptance/this-host" "$mine live, $theirs from $capture"
 
-    if step7_capture_answers "$capture" "$theirs"; then
+    local acceptance_archive="" acceptance_identity=""
+    if acceptance_archive=$(step7_real_archive); then
+        acceptance_identity=$(sha256sum -- "$acceptance_archive" | sed -e 's/ .*$//')
+    fi
+    if [ -n "$acceptance_identity" ] && step7_capture_answers "$capture" "$theirs" "$acceptance_identity"; then
         cases=$((cases + 1))
         pass "step7/acceptance/$theirs-capture" "retained, and its own half passed there"
     else
@@ -8578,11 +8893,18 @@ EARLYEXIT
     # THE RHEL HALF, over the REAL tree this account packages. A fixture here
     # would be a rehearsal: the acceptance is a positive result on the
     # distribution the defect exists on, and the tree is what carries it.
-    if ! prefix=$(step7_real_prefix); then
+    if [ -z "$acceptance_archive" ]; then
         unanswered "the $mine half of the step 7 acceptance" \
-          "  no tools tree under this account; set CPLX_ACCEPTANCE_PREFIX to the prefix holding it and run this step again there"
+          "  no candidate archive is available; set CPLX_ACCEPTANCE_ARCHIVE to the final packaged bytes"
         return
     fi
+    prefix="$SCRATCH/step7/rhel-candidate"
+    mkdir -p -- "$prefix" || return 1
+    if ! tar -xzf "$acceptance_archive" -C "$prefix"; then
+        unanswered "the $mine half of the step 7 acceptance" "  the candidate archive could not be extracted"
+        return
+    fi
+    note "step7/acceptance/candidate-sha256" "$acceptance_identity"
     note "step7/acceptance/real-prefix" "$prefix"
     out=$("${BASH:-bash}" "$checker" --prefix "$prefix" \
         --installer "$SHIPPED_DIR/install_pkg.sh" --bundle "$bundle" 2>&1)
@@ -8595,8 +8917,7 @@ EARLYEXIT
     # the one this acceptance most needs a reader to see.
     while IFS= read -r line; do
         [ -z "$line" ] || note "step7/acceptance/refusal" "$line"
-    done <<< "$(printf '%s\n' "$out" \
-        | grep -E '^(REFUSED|UNDETERMINED|UNEXPECTED|CLOSURE [A-Z]+ REFUSED)' || true)"
+    done <<< "$out"
 
     # RULE 1 OVER THE REAL UNMODIFIED ARCHIVE, which the fixture inventory does
     # not evidence and cannot. Step 4's positive control plants twenty names and
@@ -8619,8 +8940,8 @@ EARLYEXIT
           "  the checker printed no duplicates summary line over $prefix, so the positive control could not be read from this run"
     fi
 
-    if [ "$rc" -eq 0 ]; then
-        cases=$((cases + 1)); pass "step7/acceptance/$mine-half" "the checker passes over $prefix"
+    if step7_q15_accepts "$rc" "$out"; then
+        cases=$((cases + 1)); pass "step7/acceptance/$mine-half" "the candidate satisfies Q15 over $prefix"
         return
     fi
     # A REFUSING TREE IS NOT A FAILING HARNESS, and telling the two apart is the
