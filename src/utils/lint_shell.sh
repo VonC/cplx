@@ -2,9 +2,9 @@
 #
 # The project's shell lint gate.
 #
-# cplx substitutes shellcheck for the `check.bat` a Python project would carry,
-# and this script is the one command that runs it. It is what `.review-validation`
-# declares as the repository's mandatory validation floor, so it has to hold for
+# This script runs ShellCheck for both the Windows `check.bat` entry point
+# used by `ghog check` and the direct Bash command in `.review-validation`.
+# It is the repository's mandatory validation floor, so it has to hold for
 # every review rather than for one effort.
 #
 # Scope: every tracked `*.sh` outside `docs/`.
