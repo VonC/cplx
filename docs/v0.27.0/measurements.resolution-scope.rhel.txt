@@ -1,0 +1,584 @@
+Probe: what the archive's ONE resolution scope contains, and whether its
+       duplicate providers are the same file. Asked for by round 2 of the
+       specification review of issue.v0.27.0.toolchain-runtime-closure.md
+Target: RHEL 9.8, the live deployment install of the published archive
+Captured: 2026-09-03, by hand over ssh
+
+WHY THIS WAS TAKEN. Round 2 of the issue asserted one resolution scope per tool
+       root, and classified two measured shapes from that assumption. Round 2 of
+       the review read the installer instead: `build_elf_rpath` accumulates
+       EVERY tool root into one ordered list, dedupes it, and the relocation
+       pass applies that single value to every ELF. The directories it adds are
+       root/usr/lib64, root/usr/lib, root/lib64, root/lib per tool root plus
+       each version directory's lib and lib64. It never adds root/usr/bin.
+
+       Both classifications the issue drew were therefore wrong, and wrong the
+       same way: they read directory layout instead of the search list. This
+       probe reads the search list.
+
+WHAT IT OVERTURNS, precisely:
+
+  - "libcrypto.so.3 once per tool root is not a collision, different scopes"
+    was wrong about the reason. There is ONE scope and both copies are in it.
+    It is not a fault because it is the SAME FILE, which is a different rule.
+  - "libssl.so.3 twice per tool root is a collision" was wrong outright. One of
+    the two copies is under root/usr/bin, which is not a provider directory in
+    the scope at all.
+
+WHAT IT ESTABLISHES FOR THE RULE. 95 SONAMEs are offered more than once in the
+       one scope, and every one of the 95 is the same file reachable from
+       several directories. A refusal rule keyed on "same SONAME twice" would
+       refuse this archive 95 times over, all of them false. The rule has to be
+       two DIFFERENT files, compared by content digest, offering one SONAME.
+
+       The genuinely different case is cross-SONAME: libbfd-2.35.2-63.el9.so and
+       libbfd-2.35.2-66.el9.so sit in the same scope under two SONAMEs. ELF
+       carries no universal logical-family identifier, so nothing in the file
+       says those two are one family. That relationship must be declared.
+
+cSpell: disable
+
+===== BEGIN CPLX-SCOPE-PROBE =====
+date            2026-09-03T06:16:42Z
+host            rhel 9.8
+tools root      /home/deploy-account/tools
+
+== the provider directories build_elf_rpath composes, in its order
+   (python first, then every other tool root; root/usr/bin is NOT among them)
+   1  /home/deploy-account/tools/python/root/usr/lib64
+   2  /home/deploy-account/tools/python/root/usr/lib
+   3  /home/deploy-account/tools/python/root/lib64
+   4  /home/deploy-account/tools/python/current/lib
+   5  /home/deploy-account/tools/python/python-3.13.9/lib
+   6  /home/deploy-account/tools/git/root/usr/lib64
+   7  /home/deploy-account/tools/git/root/usr/lib
+   8  /home/deploy-account/tools/git/root/lib64
+   9  /home/deploy-account/tools/old/py3.13/lib
+  10  /home/deploy-account/tools/old/py3.13/lib64
+  scope directories: 10
+
+== every SONAME offered more than once IN THAT SCOPE, with the file digest
+  SONAME ld-linux-x86-64.so.2
+    ld-linux-x86-64.so.2	133206056560962a	/home/deploy-account/tools/python/root/usr/lib64/ld-linux-x86-64.so.2
+    ld-linux-x86-64.so.2	133206056560962a	/home/deploy-account/tools/python/root/lib64/ld-linux-x86-64.so.2
+    ld-linux-x86-64.so.2	133206056560962a	/home/deploy-account/tools/git/root/usr/lib64/ld-linux-x86-64.so.2
+    ld-linux-x86-64.so.2	133206056560962a	/home/deploy-account/tools/git/root/lib64/ld-linux-x86-64.so.2
+    -> SAME FILE offered from more than one directory
+  SONAME libBrokenLocale.so.1
+    libBrokenLocale.so.1	758c5e192ed15154	/home/deploy-account/tools/python/root/usr/lib64/libBrokenLocale.so
+    libBrokenLocale.so.1	758c5e192ed15154	/home/deploy-account/tools/python/root/usr/lib64/libBrokenLocale.so.1
+    libBrokenLocale.so.1	758c5e192ed15154	/home/deploy-account/tools/python/root/lib64/libBrokenLocale.so.1
+    libBrokenLocale.so.1	758c5e192ed15154	/home/deploy-account/tools/git/root/usr/lib64/libBrokenLocale.so
+    libBrokenLocale.so.1	758c5e192ed15154	/home/deploy-account/tools/git/root/usr/lib64/libBrokenLocale.so.1
+    libBrokenLocale.so.1	758c5e192ed15154	/home/deploy-account/tools/git/root/lib64/libBrokenLocale.so.1
+    -> SAME FILE offered from more than one directory
+  SONAME libSegFault.so
+    libSegFault.so	61939746f0f1ab22	/home/deploy-account/tools/python/root/usr/lib64/libSegFault.so
+    libSegFault.so	61939746f0f1ab22	/home/deploy-account/tools/python/root/lib64/libSegFault.so
+    libSegFault.so	61939746f0f1ab22	/home/deploy-account/tools/git/root/usr/lib64/libSegFault.so
+    libSegFault.so	61939746f0f1ab22	/home/deploy-account/tools/git/root/lib64/libSegFault.so
+    -> SAME FILE offered from more than one directory
+  SONAME libanl.so.1
+    libanl.so.1	a355e4a2a80e7615	/home/deploy-account/tools/python/root/usr/lib64/libanl.so
+    libanl.so.1	a355e4a2a80e7615	/home/deploy-account/tools/python/root/usr/lib64/libanl.so.1
+    libanl.so.1	a355e4a2a80e7615	/home/deploy-account/tools/python/root/lib64/libanl.so.1
+    libanl.so.1	a355e4a2a80e7615	/home/deploy-account/tools/git/root/usr/lib64/libanl.so
+    libanl.so.1	a355e4a2a80e7615	/home/deploy-account/tools/git/root/usr/lib64/libanl.so.1
+    libanl.so.1	a355e4a2a80e7615	/home/deploy-account/tools/git/root/lib64/libanl.so.1
+    -> SAME FILE offered from more than one directory
+  SONAME libassuan.so.0
+    libassuan.so.0	2802ab456d7ce973	/home/deploy-account/tools/git/root/usr/lib64/libassuan.so.0
+    libassuan.so.0	2802ab456d7ce973	/home/deploy-account/tools/git/root/usr/lib64/libassuan.so.0.8.5
+    -> SAME FILE offered from more than one directory
+  SONAME libbfd-2.35.2-63.el9.so
+    libbfd-2.35.2-63.el9.so	7dfe9e9aeaf95675	/home/deploy-account/tools/python/root/usr/lib64/libbfd-2.35.2-63.el9.so
+    libbfd-2.35.2-63.el9.so	7dfe9e9aeaf95675	/home/deploy-account/tools/git/root/usr/lib64/libbfd-2.35.2-63.el9.so
+    -> SAME FILE offered from more than one directory
+  SONAME libbfd-2.35.2-66.el9.so
+    libbfd-2.35.2-66.el9.so	fa9b11abc70dd4dd	/home/deploy-account/tools/python/root/usr/lib64/libbfd-2.35.2-66.el9.so
+    libbfd-2.35.2-66.el9.so	fa9b11abc70dd4dd	/home/deploy-account/tools/git/root/usr/lib64/libbfd-2.35.2-66.el9.so
+    -> SAME FILE offered from more than one directory
+  SONAME libblkid.so.1
+    libblkid.so.1	cced98d63ab6db38	/home/deploy-account/tools/git/root/usr/lib64/libblkid.so.1
+    libblkid.so.1	cced98d63ab6db38	/home/deploy-account/tools/git/root/usr/lib64/libblkid.so.1.1.0
+    -> SAME FILE offered from more than one directory
+  SONAME libbrotlicommon.so.1
+    libbrotlicommon.so.1	24c3c480c220907e	/home/deploy-account/tools/git/root/usr/lib64/libbrotlicommon.so.1
+    libbrotlicommon.so.1	24c3c480c220907e	/home/deploy-account/tools/git/root/usr/lib64/libbrotlicommon.so.1.0.9
+    -> SAME FILE offered from more than one directory
+  SONAME libbrotlidec.so.1
+    libbrotlidec.so.1	11aaeb4bad251e2b	/home/deploy-account/tools/git/root/usr/lib64/libbrotlidec.so.1
+    libbrotlidec.so.1	11aaeb4bad251e2b	/home/deploy-account/tools/git/root/usr/lib64/libbrotlidec.so.1.0.9
+    -> SAME FILE offered from more than one directory
+  SONAME libbz2.so.1
+    libbz2.so.1	0be7c010debc1bc5	/home/deploy-account/tools/python/root/usr/lib64/libbz2.so
+    libbz2.so.1	0be7c010debc1bc5	/home/deploy-account/tools/python/root/usr/lib64/libbz2.so.1
+    libbz2.so.1	0be7c010debc1bc5	/home/deploy-account/tools/python/root/usr/lib64/libbz2.so.1.0.8
+    libbz2.so.1	0be7c010debc1bc5	/home/deploy-account/tools/git/root/usr/lib64/libbz2.so.1
+    libbz2.so.1	0be7c010debc1bc5	/home/deploy-account/tools/git/root/usr/lib64/libbz2.so.1.0.8
+    -> SAME FILE offered from more than one directory
+  SONAME libc.so.6
+    libc.so.6	9b20b5f06de53dcf	/home/deploy-account/tools/python/root/usr/lib64/libc.so.6
+    libc.so.6	9b20b5f06de53dcf	/home/deploy-account/tools/python/root/lib64/libc.so.6
+    libc.so.6	9b20b5f06de53dcf	/home/deploy-account/tools/git/root/usr/lib64/libc.so.6
+    libc.so.6	9b20b5f06de53dcf	/home/deploy-account/tools/git/root/lib64/libc.so.6
+    -> SAME FILE offered from more than one directory
+  SONAME libc_malloc_debug.so.0
+    libc_malloc_debug.so.0	037ac04afe857b94	/home/deploy-account/tools/python/root/usr/lib64/libc_malloc_debug.so.0
+    libc_malloc_debug.so.0	037ac04afe857b94	/home/deploy-account/tools/python/root/lib64/libc_malloc_debug.so.0
+    libc_malloc_debug.so.0	037ac04afe857b94	/home/deploy-account/tools/git/root/usr/lib64/libc_malloc_debug.so.0
+    libc_malloc_debug.so.0	037ac04afe857b94	/home/deploy-account/tools/git/root/lib64/libc_malloc_debug.so.0
+    -> SAME FILE offered from more than one directory
+  SONAME libcom_err.so.2
+    libcom_err.so.2	9212ddc8be0a6c87	/home/deploy-account/tools/git/root/usr/lib64/libcom_err.so
+    libcom_err.so.2	9212ddc8be0a6c87	/home/deploy-account/tools/git/root/usr/lib64/libcom_err.so.2
+    libcom_err.so.2	9212ddc8be0a6c87	/home/deploy-account/tools/git/root/usr/lib64/libcom_err.so.2.1
+    -> SAME FILE offered from more than one directory
+  SONAME libcrypt.so.2
+    libcrypt.so.2	67847e804cdd224f	/home/deploy-account/tools/git/root/usr/lib64/libcrypt.so
+    libcrypt.so.2	67847e804cdd224f	/home/deploy-account/tools/git/root/usr/lib64/libcrypt.so.2
+    libcrypt.so.2	67847e804cdd224f	/home/deploy-account/tools/git/root/usr/lib64/libcrypt.so.2.0.0
+    -> SAME FILE offered from more than one directory
+  SONAME libcrypto.so.3
+    libcrypto.so.3	a85eb0d361d4a233	/home/deploy-account/tools/python/root/usr/lib64/libcrypto.so
+    libcrypto.so.3	a85eb0d361d4a233	/home/deploy-account/tools/python/root/usr/lib64/libcrypto.so.3
+    libcrypto.so.3	a85eb0d361d4a233	/home/deploy-account/tools/python/root/usr/lib64/libcrypto.so.3.5.1
+    libcrypto.so.3	a85eb0d361d4a233	/home/deploy-account/tools/git/root/usr/lib64/libcrypto.so
+    libcrypto.so.3	a85eb0d361d4a233	/home/deploy-account/tools/git/root/usr/lib64/libcrypto.so.3
+    libcrypto.so.3	a85eb0d361d4a233	/home/deploy-account/tools/git/root/usr/lib64/libcrypto.so.3.5.1
+    -> SAME FILE offered from more than one directory
+  SONAME libctf-nobfd.so.0
+    libctf-nobfd.so.0	5f5dbc21f19142a1	/home/deploy-account/tools/python/root/usr/lib64/libctf-nobfd.so
+    libctf-nobfd.so.0	5f5dbc21f19142a1	/home/deploy-account/tools/python/root/usr/lib64/libctf-nobfd.so.0
+    libctf-nobfd.so.0	5f5dbc21f19142a1	/home/deploy-account/tools/python/root/usr/lib64/libctf-nobfd.so.0.0.0
+    libctf-nobfd.so.0	5f5dbc21f19142a1	/home/deploy-account/tools/git/root/usr/lib64/libctf-nobfd.so
+    libctf-nobfd.so.0	5f5dbc21f19142a1	/home/deploy-account/tools/git/root/usr/lib64/libctf-nobfd.so.0
+    libctf-nobfd.so.0	5f5dbc21f19142a1	/home/deploy-account/tools/git/root/usr/lib64/libctf-nobfd.so.0.0.0
+    -> SAME FILE offered from more than one directory
+  SONAME libctf.so.0
+    libctf.so.0	5f0415b413b310b9	/home/deploy-account/tools/python/root/usr/lib64/libctf.so
+    libctf.so.0	5f0415b413b310b9	/home/deploy-account/tools/python/root/usr/lib64/libctf.so.0
+    libctf.so.0	5f0415b413b310b9	/home/deploy-account/tools/python/root/usr/lib64/libctf.so.0.0.0
+    libctf.so.0	5f0415b413b310b9	/home/deploy-account/tools/git/root/usr/lib64/libctf.so
+    libctf.so.0	5f0415b413b310b9	/home/deploy-account/tools/git/root/usr/lib64/libctf.so.0
+    libctf.so.0	5f0415b413b310b9	/home/deploy-account/tools/git/root/usr/lib64/libctf.so.0.0.0
+    -> SAME FILE offered from more than one directory
+  SONAME libcurl.so.4
+    libcurl.so.4	bf1d9b8e890ee190	/home/deploy-account/tools/git/root/usr/lib64/libcurl.so
+    libcurl.so.4	bf1d9b8e890ee190	/home/deploy-account/tools/git/root/usr/lib64/libcurl.so.4
+    libcurl.so.4	bf1d9b8e890ee190	/home/deploy-account/tools/git/root/usr/lib64/libcurl.so.4.7.0
+    -> SAME FILE offered from more than one directory
+  SONAME libdl.so.2
+    libdl.so.2	121722743c35a3f3	/home/deploy-account/tools/python/root/usr/lib64/libdl.so.2
+    libdl.so.2	121722743c35a3f3	/home/deploy-account/tools/python/root/lib64/libdl.so.2
+    libdl.so.2	121722743c35a3f3	/home/deploy-account/tools/git/root/usr/lib64/libdl.so.2
+    libdl.so.2	121722743c35a3f3	/home/deploy-account/tools/git/root/lib64/libdl.so.2
+    -> SAME FILE offered from more than one directory
+  SONAME libevent-2.1.so.7
+    libevent-2.1.so.7	bb9471ece95b9eed	/home/deploy-account/tools/git/root/usr/lib64/libevent-2.1.so.7
+    libevent-2.1.so.7	bb9471ece95b9eed	/home/deploy-account/tools/git/root/usr/lib64/libevent-2.1.so.7.0.1
+    -> SAME FILE offered from more than one directory
+  SONAME libexpat.so.1
+    libexpat.so.1	269dfa2baa7f780a	/home/deploy-account/tools/git/root/usr/lib64/libexpat.so
+    libexpat.so.1	269dfa2baa7f780a	/home/deploy-account/tools/git/root/usr/lib64/libexpat.so.1
+    libexpat.so.1	269dfa2baa7f780a	/home/deploy-account/tools/git/root/usr/lib64/libexpat.so.1.8.10
+    -> SAME FILE offered from more than one directory
+  SONAME libexslt.so.0
+    libexslt.so.0	d5c3082b5431a087	/home/deploy-account/tools/python/root/usr/lib64/libexslt.so.0
+    libexslt.so.0	d5c3082b5431a087	/home/deploy-account/tools/python/root/usr/lib64/libexslt.so.0.8.20
+    libexslt.so.0	d5c3082b5431a087	/home/deploy-account/tools/git/root/usr/lib64/libexslt.so.0
+    libexslt.so.0	d5c3082b5431a087	/home/deploy-account/tools/git/root/usr/lib64/libexslt.so.0.8.20
+    -> SAME FILE offered from more than one directory
+  SONAME libffi.so.8
+    libffi.so.8	c575bec3faae030f	/home/deploy-account/tools/python/root/usr/lib64/libffi.so
+    libffi.so.8	c575bec3faae030f	/home/deploy-account/tools/python/root/usr/lib64/libffi.so.8
+    libffi.so.8	c575bec3faae030f	/home/deploy-account/tools/python/root/usr/lib64/libffi.so.8.1.0
+    libffi.so.8	c575bec3faae030f	/home/deploy-account/tools/git/root/usr/lib64/libffi.so.8
+    libffi.so.8	c575bec3faae030f	/home/deploy-account/tools/git/root/usr/lib64/libffi.so.8.1.0
+    -> SAME FILE offered from more than one directory
+  SONAME libform.so.6
+    libform.so.6	1673770eac500d65	/home/deploy-account/tools/python/root/usr/lib64/libform.so
+    libform.so.6	1673770eac500d65	/home/deploy-account/tools/python/root/usr/lib64/libform.so.6
+    libform.so.6	1673770eac500d65	/home/deploy-account/tools/python/root/usr/lib64/libform.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libformw.so.6
+    libformw.so.6	87c9ef6c4fc50533	/home/deploy-account/tools/python/root/usr/lib64/libformw.so
+    libformw.so.6	87c9ef6c4fc50533	/home/deploy-account/tools/python/root/usr/lib64/libformw.so.6
+    libformw.so.6	87c9ef6c4fc50533	/home/deploy-account/tools/python/root/usr/lib64/libformw.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libgcc_s.so.1
+    libgcc_s.so.1	c84d6527fdc5a248	/home/deploy-account/tools/python/root/lib64/libgcc_s-11-20240719.so.1
+    libgcc_s.so.1	c84d6527fdc5a248	/home/deploy-account/tools/python/root/lib64/libgcc_s.so.1
+    libgcc_s.so.1	c84d6527fdc5a248	/home/deploy-account/tools/git/root/lib64/libgcc_s-11-20240719.so.1
+    libgcc_s.so.1	c84d6527fdc5a248	/home/deploy-account/tools/git/root/lib64/libgcc_s.so.1
+    -> SAME FILE offered from more than one directory
+  SONAME libgcrypt.so.20
+    libgcrypt.so.20	ad3532c2f6a3bb7b	/home/deploy-account/tools/python/root/usr/lib64/libgcrypt.so
+    libgcrypt.so.20	ad3532c2f6a3bb7b	/home/deploy-account/tools/python/root/usr/lib64/libgcrypt.so.20
+    libgcrypt.so.20	ad3532c2f6a3bb7b	/home/deploy-account/tools/python/root/usr/lib64/libgcrypt.so.20.4.0
+    libgcrypt.so.20	ad3532c2f6a3bb7b	/home/deploy-account/tools/git/root/usr/lib64/libgcrypt.so
+    libgcrypt.so.20	ad3532c2f6a3bb7b	/home/deploy-account/tools/git/root/usr/lib64/libgcrypt.so.20
+    libgcrypt.so.20	ad3532c2f6a3bb7b	/home/deploy-account/tools/git/root/usr/lib64/libgcrypt.so.20.4.0
+    -> SAME FILE offered from more than one directory
+  SONAME libgdbm.so.6
+    libgdbm.so.6	bdc7274699add513	/home/deploy-account/tools/python/root/usr/lib64/libgdbm.so
+    libgdbm.so.6	bdc7274699add513	/home/deploy-account/tools/python/root/usr/lib64/libgdbm.so.6
+    libgdbm.so.6	bdc7274699add513	/home/deploy-account/tools/python/root/usr/lib64/libgdbm.so.6.0.0
+    -> SAME FILE offered from more than one directory
+  SONAME libgdbm_compat.so.4
+    libgdbm_compat.so.4	0b6e593bcda737cc	/home/deploy-account/tools/python/root/usr/lib64/libgdbm_compat.so
+    libgdbm_compat.so.4	0b6e593bcda737cc	/home/deploy-account/tools/python/root/usr/lib64/libgdbm_compat.so.4
+    libgdbm_compat.so.4	0b6e593bcda737cc	/home/deploy-account/tools/python/root/usr/lib64/libgdbm_compat.so.4.0.0
+    -> SAME FILE offered from more than one directory
+  SONAME libgio-2.0.so.0
+    libgio-2.0.so.0	90848abb52a6b70e	/home/deploy-account/tools/git/root/usr/lib64/libgio-2.0.so
+    libgio-2.0.so.0	90848abb52a6b70e	/home/deploy-account/tools/git/root/usr/lib64/libgio-2.0.so.0
+    libgio-2.0.so.0	90848abb52a6b70e	/home/deploy-account/tools/git/root/usr/lib64/libgio-2.0.so.0.6800.4
+    -> SAME FILE offered from more than one directory
+  SONAME libglib-2.0.so.0
+    libglib-2.0.so.0	97de9cfb05b1ca5e	/home/deploy-account/tools/git/root/usr/lib64/libglib-2.0.so
+    libglib-2.0.so.0	97de9cfb05b1ca5e	/home/deploy-account/tools/git/root/usr/lib64/libglib-2.0.so.0
+    libglib-2.0.so.0	97de9cfb05b1ca5e	/home/deploy-account/tools/git/root/usr/lib64/libglib-2.0.so.0.6800.4
+    -> SAME FILE offered from more than one directory
+  SONAME libgmodule-2.0.so.0
+    libgmodule-2.0.so.0	1d10ec7834b944d5	/home/deploy-account/tools/git/root/usr/lib64/libgmodule-2.0.so
+    libgmodule-2.0.so.0	1d10ec7834b944d5	/home/deploy-account/tools/git/root/usr/lib64/libgmodule-2.0.so.0
+    libgmodule-2.0.so.0	1d10ec7834b944d5	/home/deploy-account/tools/git/root/usr/lib64/libgmodule-2.0.so.0.6800.4
+    -> SAME FILE offered from more than one directory
+  SONAME libgmp.so.10
+    libgmp.so.10	b9d1265de01c92a6	/home/deploy-account/tools/python/root/usr/lib64/libgmp.so.10
+    libgmp.so.10	b9d1265de01c92a6	/home/deploy-account/tools/python/root/usr/lib64/libgmp.so.10.4.0
+    libgmp.so.10	b9d1265de01c92a6	/home/deploy-account/tools/git/root/usr/lib64/libgmp.so.10
+    libgmp.so.10	b9d1265de01c92a6	/home/deploy-account/tools/git/root/usr/lib64/libgmp.so.10.4.0
+    -> SAME FILE offered from more than one directory
+  SONAME libgnutls.so.30
+    libgnutls.so.30	018b65336c0b4b26	/home/deploy-account/tools/python/root/usr/lib64/libgnutls.so.30
+    libgnutls.so.30	018b65336c0b4b26	/home/deploy-account/tools/python/root/usr/lib64/libgnutls.so.30.37.1
+    -> SAME FILE offered from more than one directory
+  SONAME libgobject-2.0.so.0
+    libgobject-2.0.so.0	a57906ceea451a18	/home/deploy-account/tools/git/root/usr/lib64/libgobject-2.0.so
+    libgobject-2.0.so.0	a57906ceea451a18	/home/deploy-account/tools/git/root/usr/lib64/libgobject-2.0.so.0
+    libgobject-2.0.so.0	a57906ceea451a18	/home/deploy-account/tools/git/root/usr/lib64/libgobject-2.0.so.0.6800.4
+    -> SAME FILE offered from more than one directory
+  SONAME libgpg-error.so.0
+    libgpg-error.so.0	7c35a31059853094	/home/deploy-account/tools/python/root/usr/lib64/libgpg-error.so
+    libgpg-error.so.0	7c35a31059853094	/home/deploy-account/tools/python/root/usr/lib64/libgpg-error.so.0
+    libgpg-error.so.0	7c35a31059853094	/home/deploy-account/tools/python/root/usr/lib64/libgpg-error.so.0.32.0
+    libgpg-error.so.0	7c35a31059853094	/home/deploy-account/tools/git/root/usr/lib64/libgpg-error.so
+    libgpg-error.so.0	7c35a31059853094	/home/deploy-account/tools/git/root/usr/lib64/libgpg-error.so.0
+    libgpg-error.so.0	7c35a31059853094	/home/deploy-account/tools/git/root/usr/lib64/libgpg-error.so.0.32.0
+    -> SAME FILE offered from more than one directory
+  SONAME libgssapi_krb5.so.2
+    libgssapi_krb5.so.2	82e569d3d5a8b53e	/home/deploy-account/tools/git/root/usr/lib64/libgssapi_krb5.so.2
+    libgssapi_krb5.so.2	82e569d3d5a8b53e	/home/deploy-account/tools/git/root/usr/lib64/libgssapi_krb5.so.2.2
+    -> SAME FILE offered from more than one directory
+  SONAME libgthread-2.0.so.0
+    libgthread-2.0.so.0	12b6b4312e4d3ae6	/home/deploy-account/tools/git/root/usr/lib64/libgthread-2.0.so
+    libgthread-2.0.so.0	12b6b4312e4d3ae6	/home/deploy-account/tools/git/root/usr/lib64/libgthread-2.0.so.0
+    libgthread-2.0.so.0	12b6b4312e4d3ae6	/home/deploy-account/tools/git/root/usr/lib64/libgthread-2.0.so.0.6800.4
+    -> SAME FILE offered from more than one directory
+  SONAME libhistory.so.8
+    libhistory.so.8	1624092f4c9c1b6d	/home/deploy-account/tools/python/root/usr/lib64/libhistory.so
+    libhistory.so.8	1624092f4c9c1b6d	/home/deploy-account/tools/python/root/usr/lib64/libhistory.so.8
+    libhistory.so.8	1624092f4c9c1b6d	/home/deploy-account/tools/python/root/usr/lib64/libhistory.so.8.1
+    -> SAME FILE offered from more than one directory
+  SONAME libhogweed.so.6
+    libhogweed.so.6	14f31299ff681777	/home/deploy-account/tools/python/root/usr/lib64/libhogweed.so.6
+    libhogweed.so.6	14f31299ff681777	/home/deploy-account/tools/python/root/usr/lib64/libhogweed.so.6.10
+    -> SAME FILE offered from more than one directory
+  SONAME libidn2.so.0
+    libidn2.so.0	dc245bad13edbcd5	/home/deploy-account/tools/python/root/usr/lib64/libidn2.so.0
+    libidn2.so.0	dc245bad13edbcd5	/home/deploy-account/tools/python/root/usr/lib64/libidn2.so.0.3.7
+    libidn2.so.0	dc245bad13edbcd5	/home/deploy-account/tools/git/root/usr/lib64/libidn2.so.0
+    libidn2.so.0	dc245bad13edbcd5	/home/deploy-account/tools/git/root/usr/lib64/libidn2.so.0.3.7
+    -> SAME FILE offered from more than one directory
+  SONAME libk5crypto.so.3
+    libk5crypto.so.3	188823b6e7bdf0ea	/home/deploy-account/tools/git/root/usr/lib64/libk5crypto.so.3
+    libk5crypto.so.3	188823b6e7bdf0ea	/home/deploy-account/tools/git/root/usr/lib64/libk5crypto.so.3.1
+    -> SAME FILE offered from more than one directory
+  SONAME libkeyutils.so.1
+    libkeyutils.so.1	b0aaec55115d2ab9	/home/deploy-account/tools/git/root/usr/lib64/libkeyutils.so.1
+    libkeyutils.so.1	b0aaec55115d2ab9	/home/deploy-account/tools/git/root/usr/lib64/libkeyutils.so.1.10
+    -> SAME FILE offered from more than one directory
+  SONAME libkrb5.so.3
+    libkrb5.so.3	68b134bf28e83fff	/home/deploy-account/tools/git/root/usr/lib64/libkrb5.so.3
+    libkrb5.so.3	68b134bf28e83fff	/home/deploy-account/tools/git/root/usr/lib64/libkrb5.so.3.3
+    -> SAME FILE offered from more than one directory
+  SONAME libkrb5support.so.0
+    libkrb5support.so.0	2878776878909e50	/home/deploy-account/tools/git/root/usr/lib64/libkrb5support.so.0
+    libkrb5support.so.0	2878776878909e50	/home/deploy-account/tools/git/root/usr/lib64/libkrb5support.so.0.1
+    -> SAME FILE offered from more than one directory
+  SONAME liblber.so.2
+    liblber.so.2	cd4dbbf1476eb6dc	/home/deploy-account/tools/git/root/usr/lib64/liblber.so.2
+    liblber.so.2	cd4dbbf1476eb6dc	/home/deploy-account/tools/git/root/usr/lib64/liblber.so.2.0.200
+    -> SAME FILE offered from more than one directory
+  SONAME libldap.so.2
+    libldap.so.2	52306b17c10badd3	/home/deploy-account/tools/git/root/usr/lib64/libldap.so.2
+    libldap.so.2	52306b17c10badd3	/home/deploy-account/tools/git/root/usr/lib64/libldap_r.so.2.0.200
+    -> SAME FILE offered from more than one directory
+  SONAME libltdl.so.7
+    libltdl.so.7	0109357682ea87d4	/home/deploy-account/tools/python/root/usr/lib64/libltdl.so.7
+    libltdl.so.7	0109357682ea87d4	/home/deploy-account/tools/python/root/usr/lib64/libltdl.so.7.3.1
+    -> SAME FILE offered from more than one directory
+  SONAME liblzma.so.5
+    liblzma.so.5	16125c779c2442c5	/home/deploy-account/tools/python/root/usr/lib64/liblzma.so
+    liblzma.so.5	16125c779c2442c5	/home/deploy-account/tools/python/root/usr/lib64/liblzma.so.5
+    liblzma.so.5	16125c779c2442c5	/home/deploy-account/tools/python/root/usr/lib64/liblzma.so.5.2.5
+    liblzma.so.5	16125c779c2442c5	/home/deploy-account/tools/git/root/usr/lib64/liblzma.so.5
+    liblzma.so.5	16125c779c2442c5	/home/deploy-account/tools/git/root/usr/lib64/liblzma.so.5.2.5
+    -> SAME FILE offered from more than one directory
+  SONAME libm.so.6
+    libm.so.6	cf439f5cff3923d0	/home/deploy-account/tools/python/root/usr/lib64/libm.so.6
+    libm.so.6	cf439f5cff3923d0	/home/deploy-account/tools/python/root/lib64/libm.so.6
+    libm.so.6	cf439f5cff3923d0	/home/deploy-account/tools/git/root/usr/lib64/libm.so.6
+    libm.so.6	cf439f5cff3923d0	/home/deploy-account/tools/git/root/lib64/libm.so.6
+    -> SAME FILE offered from more than one directory
+  SONAME libmemusage.so
+    libmemusage.so	970728d1581ff15b	/home/deploy-account/tools/python/root/usr/lib64/libmemusage.so
+    libmemusage.so	970728d1581ff15b	/home/deploy-account/tools/python/root/lib64/libmemusage.so
+    libmemusage.so	970728d1581ff15b	/home/deploy-account/tools/git/root/usr/lib64/libmemusage.so
+    libmemusage.so	970728d1581ff15b	/home/deploy-account/tools/git/root/lib64/libmemusage.so
+    -> SAME FILE offered from more than one directory
+  SONAME libmenu.so.6
+    libmenu.so.6	40c6c6bb12cd1994	/home/deploy-account/tools/python/root/usr/lib64/libmenu.so
+    libmenu.so.6	40c6c6bb12cd1994	/home/deploy-account/tools/python/root/usr/lib64/libmenu.so.6
+    libmenu.so.6	40c6c6bb12cd1994	/home/deploy-account/tools/python/root/usr/lib64/libmenu.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libmenuw.so.6
+    libmenuw.so.6	5b851135a1a47c57	/home/deploy-account/tools/python/root/usr/lib64/libmenuw.so
+    libmenuw.so.6	5b851135a1a47c57	/home/deploy-account/tools/python/root/usr/lib64/libmenuw.so.6
+    libmenuw.so.6	5b851135a1a47c57	/home/deploy-account/tools/python/root/usr/lib64/libmenuw.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libmount.so.1
+    libmount.so.1	7b81c8c9169422ad	/home/deploy-account/tools/git/root/usr/lib64/libmount.so.1
+    libmount.so.1	7b81c8c9169422ad	/home/deploy-account/tools/git/root/usr/lib64/libmount.so.1.1.0
+    -> SAME FILE offered from more than one directory
+  SONAME libmpc.so.3
+    libmpc.so.3	dff128b03df28b63	/home/deploy-account/tools/python/root/usr/lib64/libmpc.so.3
+    libmpc.so.3	dff128b03df28b63	/home/deploy-account/tools/python/root/usr/lib64/libmpc.so.3.2.1
+    libmpc.so.3	dff128b03df28b63	/home/deploy-account/tools/git/root/usr/lib64/libmpc.so.3
+    libmpc.so.3	dff128b03df28b63	/home/deploy-account/tools/git/root/usr/lib64/libmpc.so.3.2.1
+    -> SAME FILE offered from more than one directory
+  SONAME libmvec.so.1
+    libmvec.so.1	10376296b82a341c	/home/deploy-account/tools/python/root/usr/lib64/libmvec.so
+    libmvec.so.1	10376296b82a341c	/home/deploy-account/tools/python/root/usr/lib64/libmvec.so.1
+    libmvec.so.1	10376296b82a341c	/home/deploy-account/tools/python/root/lib64/libmvec.so.1
+    libmvec.so.1	10376296b82a341c	/home/deploy-account/tools/git/root/usr/lib64/libmvec.so
+    libmvec.so.1	10376296b82a341c	/home/deploy-account/tools/git/root/usr/lib64/libmvec.so.1
+    libmvec.so.1	10376296b82a341c	/home/deploy-account/tools/git/root/lib64/libmvec.so.1
+    -> SAME FILE offered from more than one directory
+  SONAME libncurses.so.6
+    libncurses.so.6	30ab92d046085308	/home/deploy-account/tools/python/root/usr/lib64/libncurses.so.6
+    libncurses.so.6	30ab92d046085308	/home/deploy-account/tools/python/root/usr/lib64/libncurses.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libncursesw.so.6
+    libncursesw.so.6	c83a04b99ee93a6d	/home/deploy-account/tools/python/root/usr/lib64/libncursesw.so.6
+    libncursesw.so.6	c83a04b99ee93a6d	/home/deploy-account/tools/python/root/usr/lib64/libncursesw.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libnettle.so.8
+    libnettle.so.8	d39fc751ef9f42ed	/home/deploy-account/tools/python/root/usr/lib64/libnettle.so.8
+    libnettle.so.8	d39fc751ef9f42ed	/home/deploy-account/tools/python/root/usr/lib64/libnettle.so.8.10
+    -> SAME FILE offered from more than one directory
+  SONAME libnghttp2.so.14
+    libnghttp2.so.14	04be3e1e30dc7218	/home/deploy-account/tools/git/root/usr/lib64/libnghttp2.so.14
+    libnghttp2.so.14	04be3e1e30dc7218	/home/deploy-account/tools/git/root/usr/lib64/libnghttp2.so.14.20.1
+    -> SAME FILE offered from more than one directory
+  SONAME libnss_compat.so.2
+    libnss_compat.so.2	b5fb8d85aac36174	/home/deploy-account/tools/python/root/usr/lib64/libnss_compat.so.2
+    libnss_compat.so.2	b5fb8d85aac36174	/home/deploy-account/tools/python/root/lib64/libnss_compat.so.2
+    libnss_compat.so.2	b5fb8d85aac36174	/home/deploy-account/tools/git/root/usr/lib64/libnss_compat.so.2
+    libnss_compat.so.2	b5fb8d85aac36174	/home/deploy-account/tools/git/root/lib64/libnss_compat.so.2
+    -> SAME FILE offered from more than one directory
+  SONAME libnss_dns.so.2
+    libnss_dns.so.2	47073c9a97c43fb8	/home/deploy-account/tools/python/root/usr/lib64/libnss_dns.so.2
+    libnss_dns.so.2	47073c9a97c43fb8	/home/deploy-account/tools/python/root/lib64/libnss_dns.so.2
+    libnss_dns.so.2	47073c9a97c43fb8	/home/deploy-account/tools/git/root/usr/lib64/libnss_dns.so.2
+    libnss_dns.so.2	47073c9a97c43fb8	/home/deploy-account/tools/git/root/lib64/libnss_dns.so.2
+    -> SAME FILE offered from more than one directory
+  SONAME libnss_files.so.2
+    libnss_files.so.2	3740b194852aed41	/home/deploy-account/tools/python/root/usr/lib64/libnss_files.so.2
+    libnss_files.so.2	3740b194852aed41	/home/deploy-account/tools/python/root/lib64/libnss_files.so.2
+    libnss_files.so.2	3740b194852aed41	/home/deploy-account/tools/git/root/usr/lib64/libnss_files.so.2
+    libnss_files.so.2	3740b194852aed41	/home/deploy-account/tools/git/root/lib64/libnss_files.so.2
+    -> SAME FILE offered from more than one directory
+  SONAME libopcodes-2.35.2-66.el9.so
+    libopcodes-2.35.2-66.el9.so	e37887441106d7f2	/home/deploy-account/tools/python/root/usr/lib64/libopcodes-2.35.2-66.el9.so
+    libopcodes-2.35.2-66.el9.so	e37887441106d7f2	/home/deploy-account/tools/git/root/usr/lib64/libopcodes-2.35.2-66.el9.so
+    -> SAME FILE offered from more than one directory
+  SONAME libp11-kit.so.0
+    libp11-kit.so.0	9eec2de830181327	/home/deploy-account/tools/python/root/usr/lib64/libp11-kit.so
+    libp11-kit.so.0	9eec2de830181327	/home/deploy-account/tools/python/root/usr/lib64/libp11-kit.so.0
+    libp11-kit.so.0	9eec2de830181327	/home/deploy-account/tools/python/root/usr/lib64/libp11-kit.so.0.3.1
+    libp11-kit.so.0	9eec2de830181327	/home/deploy-account/tools/python/root/usr/lib64/p11-kit-proxy.so
+    -> SAME FILE offered from more than one directory
+  SONAME libp11.so.3
+    libp11.so.3	16b9e53a90a09c52	/home/deploy-account/tools/python/root/usr/lib64/libp11.so.3
+    libp11.so.3	16b9e53a90a09c52	/home/deploy-account/tools/python/root/usr/lib64/libp11.so.3.4.3
+    -> SAME FILE offered from more than one directory
+  SONAME libpanel.so.6
+    libpanel.so.6	9ab9af6b096f7087	/home/deploy-account/tools/python/root/usr/lib64/libpanel.so
+    libpanel.so.6	9ab9af6b096f7087	/home/deploy-account/tools/python/root/usr/lib64/libpanel.so.6
+    libpanel.so.6	9ab9af6b096f7087	/home/deploy-account/tools/python/root/usr/lib64/libpanel.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libpanelw.so.6
+    libpanelw.so.6	eb526e319a38d6fb	/home/deploy-account/tools/python/root/usr/lib64/libpanelw.so
+    libpanelw.so.6	eb526e319a38d6fb	/home/deploy-account/tools/python/root/usr/lib64/libpanelw.so.6
+    libpanelw.so.6	eb526e319a38d6fb	/home/deploy-account/tools/python/root/usr/lib64/libpanelw.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libpcprofile.so
+    libpcprofile.so	c36630fa540a88ab	/home/deploy-account/tools/python/root/usr/lib64/libpcprofile.so
+    libpcprofile.so	c36630fa540a88ab	/home/deploy-account/tools/python/root/lib64/libpcprofile.so
+    libpcprofile.so	c36630fa540a88ab	/home/deploy-account/tools/git/root/usr/lib64/libpcprofile.so
+    libpcprofile.so	c36630fa540a88ab	/home/deploy-account/tools/git/root/lib64/libpcprofile.so
+    -> SAME FILE offered from more than one directory
+  SONAME libpcre.so.1
+    libpcre.so.1	853849dc5e7393ec	/home/deploy-account/tools/git/root/usr/lib64/libpcre.so.1
+    libpcre.so.1	853849dc5e7393ec	/home/deploy-account/tools/git/root/usr/lib64/libpcre.so.1.2.12
+    -> SAME FILE offered from more than one directory
+  SONAME libpcre2-8.so.0
+    libpcre2-8.so.0	9a7c5324aa19b789	/home/deploy-account/tools/git/root/usr/lib64/libpcre2-8.so.0
+    libpcre2-8.so.0	9a7c5324aa19b789	/home/deploy-account/tools/git/root/usr/lib64/libpcre2-8.so.0.11.0
+    -> SAME FILE offered from more than one directory
+  SONAME libpsl.so.5
+    libpsl.so.5	3d2a80d6bcb7dd9a	/home/deploy-account/tools/git/root/usr/lib64/libpsl.so.5
+    libpsl.so.5	3d2a80d6bcb7dd9a	/home/deploy-account/tools/git/root/usr/lib64/libpsl.so.5.3.3
+    -> SAME FILE offered from more than one directory
+  SONAME libpthread.so.0
+    libpthread.so.0	526f795ba452ee5a	/home/deploy-account/tools/python/root/usr/lib64/libpthread.so.0
+    libpthread.so.0	526f795ba452ee5a	/home/deploy-account/tools/python/root/lib64/libpthread.so.0
+    libpthread.so.0	526f795ba452ee5a	/home/deploy-account/tools/git/root/usr/lib64/libpthread.so.0
+    libpthread.so.0	526f795ba452ee5a	/home/deploy-account/tools/git/root/lib64/libpthread.so.0
+    -> SAME FILE offered from more than one directory
+  SONAME libpython3.13.so.1.0
+    libpython3.13.so.1.0	c1d022cbe02a596b	/home/deploy-account/tools/python/current/lib/libpython3.13.so
+    libpython3.13.so.1.0	c1d022cbe02a596b	/home/deploy-account/tools/python/current/lib/libpython3.13.so.1.0
+    libpython3.13.so.1.0	c1d022cbe02a596b	/home/deploy-account/tools/python/python-3.13.9/lib/libpython3.13.so
+    libpython3.13.so.1.0	c1d022cbe02a596b	/home/deploy-account/tools/python/python-3.13.9/lib/libpython3.13.so.1.0
+    -> SAME FILE offered from more than one directory
+  SONAME libpython3.so
+    libpython3.so	3e54aea5ea963b2d	/home/deploy-account/tools/python/current/lib/libpython3.so
+    libpython3.so	3e54aea5ea963b2d	/home/deploy-account/tools/python/python-3.13.9/lib/libpython3.so
+    -> SAME FILE offered from more than one directory
+  SONAME libreadline.so.8
+    libreadline.so.8	cd005d15fd3c6546	/home/deploy-account/tools/python/root/usr/lib64/libreadline.so
+    libreadline.so.8	cd005d15fd3c6546	/home/deploy-account/tools/python/root/usr/lib64/libreadline.so.8
+    libreadline.so.8	cd005d15fd3c6546	/home/deploy-account/tools/python/root/usr/lib64/libreadline.so.8.1
+    -> SAME FILE offered from more than one directory
+  SONAME libresolv.so.2
+    libresolv.so.2	080601539a733079	/home/deploy-account/tools/python/root/usr/lib64/libresolv.so
+    libresolv.so.2	080601539a733079	/home/deploy-account/tools/python/root/usr/lib64/libresolv.so.2
+    libresolv.so.2	080601539a733079	/home/deploy-account/tools/python/root/lib64/libresolv.so.2
+    libresolv.so.2	080601539a733079	/home/deploy-account/tools/git/root/usr/lib64/libresolv.so
+    libresolv.so.2	080601539a733079	/home/deploy-account/tools/git/root/usr/lib64/libresolv.so.2
+    libresolv.so.2	080601539a733079	/home/deploy-account/tools/git/root/lib64/libresolv.so.2
+    -> SAME FILE offered from more than one directory
+  SONAME librt.so.1
+    librt.so.1	725694ed6b23abe5	/home/deploy-account/tools/python/root/usr/lib64/librt.so.1
+    librt.so.1	725694ed6b23abe5	/home/deploy-account/tools/python/root/lib64/librt.so.1
+    librt.so.1	725694ed6b23abe5	/home/deploy-account/tools/git/root/usr/lib64/librt.so.1
+    librt.so.1	725694ed6b23abe5	/home/deploy-account/tools/git/root/lib64/librt.so.1
+    -> SAME FILE offered from more than one directory
+  SONAME libsasl2.so.3
+    libsasl2.so.3	0eb67aea149186cd	/home/deploy-account/tools/git/root/usr/lib64/libsasl2.so.3
+    libsasl2.so.3	0eb67aea149186cd	/home/deploy-account/tools/git/root/usr/lib64/libsasl2.so.3.0.0
+    -> SAME FILE offered from more than one directory
+  SONAME libsecret-1.so.0
+    libsecret-1.so.0	d025417bc09feb49	/home/deploy-account/tools/git/root/usr/lib64/libsecret-1.so.0
+    libsecret-1.so.0	d025417bc09feb49	/home/deploy-account/tools/git/root/usr/lib64/libsecret-1.so.0.0.0
+    -> SAME FILE offered from more than one directory
+  SONAME libssh.so.4
+    libssh.so.4	7ca5d83493ae1776	/home/deploy-account/tools/git/root/usr/lib64/libssh.so.4
+    libssh.so.4	7ca5d83493ae1776	/home/deploy-account/tools/git/root/usr/lib64/libssh.so.4.9.4
+    -> SAME FILE offered from more than one directory
+  SONAME libssl.so.3
+    libssl.so.3	0c9d7449db55a132	/home/deploy-account/tools/python/root/usr/lib64/libssl.so
+    libssl.so.3	0c9d7449db55a132	/home/deploy-account/tools/python/root/usr/lib64/libssl.so.3
+    libssl.so.3	0c9d7449db55a132	/home/deploy-account/tools/python/root/usr/lib64/libssl.so.3.5.1
+    libssl.so.3	0c9d7449db55a132	/home/deploy-account/tools/git/root/usr/lib64/libssl.so
+    libssl.so.3	0c9d7449db55a132	/home/deploy-account/tools/git/root/usr/lib64/libssl.so.3
+    libssl.so.3	0c9d7449db55a132	/home/deploy-account/tools/git/root/usr/lib64/libssl.so.3.5.1
+    -> SAME FILE offered from more than one directory
+  SONAME libstdc++.so.6
+    libstdc++.so.6	b05516f8498be332	/home/deploy-account/tools/python/root/usr/lib64/libstdc++.so.6
+    libstdc++.so.6	b05516f8498be332	/home/deploy-account/tools/python/root/usr/lib64/libstdc++.so.6.0.29
+    -> SAME FILE offered from more than one directory
+  SONAME libtasn1.so.6
+    libtasn1.so.6	f1e7a272c3ebc006	/home/deploy-account/tools/python/root/usr/lib64/libtasn1.so.6
+    libtasn1.so.6	f1e7a272c3ebc006	/home/deploy-account/tools/python/root/usr/lib64/libtasn1.so.6.6.0
+    -> SAME FILE offered from more than one directory
+  SONAME libthread_db.so.1
+    libthread_db.so.1	a727a8525aacde02	/home/deploy-account/tools/python/root/usr/lib64/libthread_db.so
+    libthread_db.so.1	a727a8525aacde02	/home/deploy-account/tools/python/root/usr/lib64/libthread_db.so.1
+    libthread_db.so.1	a727a8525aacde02	/home/deploy-account/tools/python/root/lib64/libthread_db.so.1
+    libthread_db.so.1	a727a8525aacde02	/home/deploy-account/tools/git/root/usr/lib64/libthread_db.so
+    libthread_db.so.1	a727a8525aacde02	/home/deploy-account/tools/git/root/usr/lib64/libthread_db.so.1
+    libthread_db.so.1	a727a8525aacde02	/home/deploy-account/tools/git/root/lib64/libthread_db.so.1
+    -> SAME FILE offered from more than one directory
+  SONAME libtic.so.6
+    libtic.so.6	bb9c8b289455a84a	/home/deploy-account/tools/python/root/usr/lib64/libtic.so
+    libtic.so.6	bb9c8b289455a84a	/home/deploy-account/tools/python/root/usr/lib64/libtic.so.6
+    libtic.so.6	bb9c8b289455a84a	/home/deploy-account/tools/python/root/usr/lib64/libtic.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libtinfo.so.6
+    libtinfo.so.6	2a56af250aa89671	/home/deploy-account/tools/python/root/usr/lib64/libtinfo.so
+    libtinfo.so.6	2a56af250aa89671	/home/deploy-account/tools/python/root/usr/lib64/libtinfo.so.6
+    libtinfo.so.6	2a56af250aa89671	/home/deploy-account/tools/python/root/usr/lib64/libtinfo.so.6.2
+    -> SAME FILE offered from more than one directory
+  SONAME libunistring.so.2
+    libunistring.so.2	70b4c4050c4319fb	/home/deploy-account/tools/python/root/usr/lib64/libunistring.so.2
+    libunistring.so.2	70b4c4050c4319fb	/home/deploy-account/tools/python/root/usr/lib64/libunistring.so.2.1.0
+    libunistring.so.2	70b4c4050c4319fb	/home/deploy-account/tools/git/root/usr/lib64/libunistring.so.2
+    libunistring.so.2	70b4c4050c4319fb	/home/deploy-account/tools/git/root/usr/lib64/libunistring.so.2.1.0
+    -> SAME FILE offered from more than one directory
+  SONAME libutil.so.1
+    libutil.so.1	edd1db767cd88969	/home/deploy-account/tools/python/root/usr/lib64/libutil.so.1
+    libutil.so.1	edd1db767cd88969	/home/deploy-account/tools/python/root/lib64/libutil.so.1
+    libutil.so.1	edd1db767cd88969	/home/deploy-account/tools/git/root/usr/lib64/libutil.so.1
+    libutil.so.1	edd1db767cd88969	/home/deploy-account/tools/git/root/lib64/libutil.so.1
+    -> SAME FILE offered from more than one directory
+  SONAME libuuid.so.1
+    libuuid.so.1	529d3f74689adfa4	/home/deploy-account/tools/python/root/usr/lib64/libuuid.so
+    libuuid.so.1	529d3f74689adfa4	/home/deploy-account/tools/python/root/usr/lib64/libuuid.so.1
+    libuuid.so.1	529d3f74689adfa4	/home/deploy-account/tools/python/root/usr/lib64/libuuid.so.1.3.0
+    -> SAME FILE offered from more than one directory
+  SONAME libxml2.so.2
+    libxml2.so.2	ee78c0d632f81adf	/home/deploy-account/tools/python/root/usr/lib64/libxml2.so
+    libxml2.so.2	ee78c0d632f81adf	/home/deploy-account/tools/python/root/usr/lib64/libxml2.so.2
+    libxml2.so.2	ee78c0d632f81adf	/home/deploy-account/tools/python/root/usr/lib64/libxml2.so.2.9.13
+    libxml2.so.2	ee78c0d632f81adf	/home/deploy-account/tools/git/root/usr/lib64/libxml2.so.2
+    libxml2.so.2	ee78c0d632f81adf	/home/deploy-account/tools/git/root/usr/lib64/libxml2.so.2.9.13
+    -> SAME FILE offered from more than one directory
+  SONAME libxslt.so.1
+    libxslt.so.1	0109b9073926a870	/home/deploy-account/tools/python/root/usr/lib64/libxslt.so.1
+    libxslt.so.1	0109b9073926a870	/home/deploy-account/tools/python/root/usr/lib64/libxslt.so.1.1.34
+    libxslt.so.1	0109b9073926a870	/home/deploy-account/tools/git/root/usr/lib64/libxslt.so.1
+    libxslt.so.1	0109b9073926a870	/home/deploy-account/tools/git/root/usr/lib64/libxslt.so.1.1.34
+    -> SAME FILE offered from more than one directory
+  SONAME libz.so.1
+    libz.so.1	fae9fde931c0df13	/home/deploy-account/tools/python/root/usr/lib64/libz.so
+    libz.so.1	fae9fde931c0df13	/home/deploy-account/tools/python/root/usr/lib64/libz.so.1
+    libz.so.1	fae9fde931c0df13	/home/deploy-account/tools/python/root/usr/lib64/libz.so.1.2.11
+    libz.so.1	fae9fde931c0df13	/home/deploy-account/tools/git/root/usr/lib64/libz.so
+    libz.so.1	fae9fde931c0df13	/home/deploy-account/tools/git/root/usr/lib64/libz.so.1
+    libz.so.1	fae9fde931c0df13	/home/deploy-account/tools/git/root/usr/lib64/libz.so.1.2.11
+    -> SAME FILE offered from more than one directory
+  SONAME libzstd.so.1
+    libzstd.so.1	dc1ccdc94eea8896	/home/deploy-account/tools/python/root/usr/lib64/libzstd.so.1
+    libzstd.so.1	dc1ccdc94eea8896	/home/deploy-account/tools/python/root/usr/lib64/libzstd.so.1.5.5
+    libzstd.so.1	dc1ccdc94eea8896	/home/deploy-account/tools/git/root/usr/lib64/libzstd.so.1
+    libzstd.so.1	dc1ccdc94eea8896	/home/deploy-account/tools/git/root/usr/lib64/libzstd.so.1.5.5
+    -> SAME FILE offered from more than one directory
+
+== is root/usr/bin a provider directory in that scope
+  NO. Objects under root/usr/bin are not reachable through the rpath,
+  so a second copy of a SONAME there is not a duplicate provider.
+
+== the cross-SONAME case: one logical family, two SONAMEs, in the scope
+   (this is what ELF cannot classify on its own and a declaration must)
+  libbfd-2.35.2-63.el9.so  /home/deploy-account/tools/python/root/usr/lib64/libbfd-2.35.2-63.el9.so
+  libbfd-2.35.2-66.el9.so  /home/deploy-account/tools/python/root/usr/lib64/libbfd-2.35.2-66.el9.so
+  libopcodes-2.35.2-66.el9.so  /home/deploy-account/tools/python/root/usr/lib64/libopcodes-2.35.2-66.el9.so
+  libbfd-2.35.2-63.el9.so  /home/deploy-account/tools/git/root/usr/lib64/libbfd-2.35.2-63.el9.so
+  libbfd-2.35.2-66.el9.so  /home/deploy-account/tools/git/root/usr/lib64/libbfd-2.35.2-66.el9.so
+  libopcodes-2.35.2-66.el9.so  /home/deploy-account/tools/git/root/usr/lib64/libopcodes-2.35.2-66.el9.so
+===== END CPLX-SCOPE-PROBE =====

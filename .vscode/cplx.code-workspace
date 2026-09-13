@@ -30,8 +30,13 @@
 			"activityBarTop.inactiveForeground": "#15202b99",
 			"commandCenter.foreground": "#15202b",
 			"statusBar.debuggingBackground": "#92d284",
-			"statusBar.debuggingForeground": "#15202b"
+			"statusBar.debuggingForeground": "#15202b",
+			"activityBar.activeBorder": "#15202b",
+			"activityBarTop.activeBorder": "#15202b"
 		},
-		"peacock.color": "#92d284"
+		"peacock.color": "#92d284",
+		"cSpell.words": [
+			"tvzf"
+		]
 	}
 }

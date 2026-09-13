@@ -2362,6 +2362,7 @@ This is where preservation is proved rather than asserted.
   what an acceptance step is for, and leaving a measured defect unfixed to
   protect a scope line would be the wrong trade. The fix is one exclusion beside
   the loader rule.
+
 ### Step 6 test first
 
 Acceptance cases larger than the per-step ones: a full relocation of the

@@ -1,10 +1,9 @@
 # Mandatory validation commands for this repository.
 #
-# cplx is a Bash project. It carries no pyproject.toml, no tests/ tree, no
-# check.bat and no GROUNDHOG.md, so the built-in `ghog day` default walks a
-# check step that skips and a pytest step that exits 5. Since the resolver has
-# no removal operation, inheriting that default made a complete validation floor
-# unreachable here whatever the work proved.
+# cplx is a Bash project. Its Windows check.bat runs the shell lint gate for
+# `ghog check`. There is no pyproject.toml, tests/ tree or GROUNDHOG.md, so the
+# pytest part of the built-in `ghog day` default remains inapplicable here.
+# Declare the direct Bash gate so reviews can run it on Windows or Linux.
 #
 # What belongs in this file is what every review of this repository must prove,
 # for as long as the repository exists. It is NOT the place for one effort's
@@ -12,9 +11,8 @@
 # they retire when the effort does. A version-scoped command declared here would
 # outlive its own plan and bind reviews that have nothing to do with it.
 #
-# So the floor is the lint gate, and only the lint gate. It is what this project
-# substitutes for the check.bat a Python project would carry, and it keeps the
-# property the built-in default protects: one command runs the gate over
+# So the floor is the lint gate, and only the lint gate. Both entry points keep
+# the property the built-in default protects: one command runs the gate over
 # everything it covers and stops non-green at the first finding.
 #
 # These are mandatory for this repository. Plan and request additions are added

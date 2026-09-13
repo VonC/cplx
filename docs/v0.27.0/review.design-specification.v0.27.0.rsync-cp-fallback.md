@@ -1642,7 +1642,9 @@ be scoped to separate runs of the current installer without that new behavior.
 
 ### Convergence evidence for design-specification rsync-cp-fallback round 2
 
-Covered wording: - Use this distinction wherever the 592-path set is introduced: "The unchanged
+Covered wording:
+
+- Use this distinction wherever the 592-path set is introduced: "The unchanged
   same-engine control defines the run-variant set: paths whose mtimes differ
   between two fresh rsync installs. In the retained measurement that set is the
   same 592 paths whose mtimes differ between the engines. Independent inspection

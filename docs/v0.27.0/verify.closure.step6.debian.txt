@@ -1,0 +1,652 @@
+Harness: docs/v0.27.0/verify.closure-check.sh --step 6, preceded by --step 0 and
+         followed by the same file with no --step, then --step 3 and --step 4
+         again for their case output. All run by ci/Jenkinsfile.diagnostics
+         closureCheck() over the verification-only copies the pipeline carries.
+Target: Debian GNU/Linux 12 (bookworm), the Jenkins CI agent, build 151
+        bash 5.2.15(1)-release
+        readelf: GNU readelf (GNU Binutils for Debian) 2.40
+        sha256sum: sha256sum (GNU coreutils) 9.1
+Captured: 2026-09-10T11:00Z, from the archived a.evidence artifact of build 151
+Purpose: Step 6 of the toolchain-runtime-closure plan, the FOREIGN-HOST HALF of
+         the verification. The harness gates this step to debian-12 and reports
+         it UNANSWERED with exit 5 anywhere else, so this agent is the only host
+         that can answer it and a green from the build host is not available to
+         be mistaken for this one. Its companion is the RHEL capture of every
+         other step, verify.closure.step5.rhel.txt.
+
+WHY THIS CAPTURE COMES FROM THE ARTIFACT AND NOT FROM THE CONSOLE. The probe
+         runs inside a `parallel` with nine other branches and Jenkins
+         interleaves their console lines, so a console slice between the BEGIN
+         and END markers carries other branches' cases inside it. The probe tees
+         its own output to a.evidence/verify-closure-check.debian.txt, the post
+         block archives it, and that file is what is retained here.
+
+WHAT THE DIGESTS PROVE, AND WHERE. The agent holds no cplx credentials, so the
+         harness, the contract, the corpus AND the whole shipped set travel to it
+         as verification-only copies. Step 6 is why the shipped set travels at
+         all: its suite drives the verification driver, the live observer and the
+         pipeline delivery script, and a run against an empty directory would
+         report the step unanswered, which was the honest answer while nothing
+         was shipped and would now be a gap dressed as a refusal. The run prints
+         the SHA-256 of every assembled file, and the comparison against the
+         canonical cplx files is made on the cplx side, which is the only side
+         that has them. ALL EIGHTEEN MATCHED at this build:
+
+           77d10f8ff6892594efb259e7391bc8eee766ec41e6048a5e00bc4884975be09c
+             docs/v0.27.0/verify.closure-check.sh
+           33e972d20528aecf19583e80c8628495dfe31afb40f1efbe92b109b2bcb8e37e
+             docs/v0.27.0/contract.closure-tools.txt
+           74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472
+             docs/v0.27.0/fixtures.closure-corpus.txt
+           9413bad5fb0e1bb426fe4cdb56c9ff8ebc7960417f4223614f3b04ab0e1dafa9
+             src/setups/env/bin/closure_check.sh
+           61155c4c1e7545727f830cfc09795e41c019c3bcfb1a73ab192a9a42584b2474
+             src/setups/env/bin/closure_config.sh
+           dfcfffa12557001dd3a6ceca9b5b0324a3649c0845ced327fc5c1252f80aae29
+             src/setups/env/bin/closure_elf.sh
+           84ac6d2b3eb13987093264b6208c1d019bc2e8865f38bc1769b73eecc14709db
+             src/setups/env/bin/closure_observe_live.sh
+           ccab32e980b68759cd307a6180e7de4d46423739c28d823c4242d91d78d6e101
+             src/setups/env/bin/closure_publish.sh
+           db5b50784c13124332fad643c6437ad01cdd9ddf7075a5200eac2978795dab2f
+             src/setups/env/bin/closure_report.sh
+           5b931983166c47d969d14b96d0d39fe4e04bf76d1766a14e39a8301c35a6fb65
+             src/setups/env/bin/closure_rules.sh
+           d40556a0a17b91948bfde22b91db8dc8820eb3818f52c03835a2d49a7e4d5f81
+             src/setups/env/bin/closure_verify.sh
+           6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
+             src/setups/env/bin/install_pkg.sh
+           3c139ca26e47f451f39c71d1013dc8c258f35dd5a53b55e9fe3ee5231280a0c7
+             src/setups/env/bin/pkg
+           8ef91c24267b97c4546eed97f95a4bc60c2c3ae6f41d49dbadad0da304935b22
+             src/setups/env/bin/pkg.sh
+           8f5435bcb244da60afaeebc44ddabbf9a0079a07afc97ae8c3a34fbd8721eb9d
+             src/setups/env/bin/pkg_tools.sh
+           6be16df7265ec882ae6c8adad283e5758308eec2f602d69b9c8278cdad739cac
+             ci/deliver-closure-tools.sh
+           d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1
+             src/setups/env/closure/closure-config.txt
+           0c203280c48e5eee64fa74f6b1c6781e8be9a82cc202d1b40c728cf4e1aa87b9
+             src/setups/env/closure/closure-envelope.txt
+
+WHAT STEP 6 ANSWERED HERE: 223 cases, 0 failures. The RHEL run of the same
+         suite reports 222, and the one extra case is the host gate itself, which
+         PASSES here and is the unanswered obligation there. Every declared
+         capability is `supported` on this agent, `git` included, which step 6
+         needs and no earlier step declared.
+
+         The end-to-end case is the one only this file can carry: an archive the
+         packaging gate produced, read for its pre-install observation, installed
+         through install_pkg.sh, observed again, compared to PASS, and one
+         evidence artifact written under the SHA-256 of the archive file and read
+         back by its own grammar. The second run over the same archive is
+         IDEMPOTENT, which is the occupancy rule reached through the driver.
+
+         AND PUBLICATION IS DRIVEN BY THAT ARTIFACT, which is what step 6 adds
+         over step 5 on that gate: step 5 asserted it against a document the
+         harness wrote, and here one side WROTE the result and the other READS
+         it. The produced artifact takes publication past step 2 and the run
+         refuses later, this archive being a validation artifact by
+         construction; a second archive the same artifact does not describe is
+         refused AT step 2, naming the identity publication computed itself.
+
+STEPS 3 AND 4 PASS ON THIS HOST NOW, AND THE PREVIOUS CAPTURE IS WHY THAT
+         SENTENCE IS WORTH WRITING. Build 143 recorded 15 failures in step 3 and
+         10 in step 4 against bytes that were green on the RHEL build host, and
+         left the cause open. The cause was in the HARNESS and in no shipped
+         script: its fixture engine wrote the names it plants into the last 256
+         bytes of a donor's `.dynstr`, calling that tail reserved.
+
+         IT IS RESERVED ON NEITHER HOST. That region is where a donor's own
+         NEEDED, SONAME and version strings sit. On the build host's donor the
+         first of them starts 28 bytes past that offset, so a nineteen-byte
+         fixture name fitted in front of it by luck. On this host's donor it does
+         not, so the write landed on the donor's own strings and its entries then
+         resolved to the TAIL of the fixture name, which is exactly the `.1`,
+         `so.1` and `1` build 143 recorded. The step 4 counts are the same cause
+         seen through the version records, which index the same table.
+
+         THE WINDOW IS MEASURED NOW, per donor, as the first run of bytes no
+         dynamic entry and no version record points at, and a donor without one
+         is refused rather than used. Five cases assert the collateral a mutation
+         must not cause, including that the string table is byte-identical either
+         side of the window. Q03 requires one mechanism on both hosts, and the
+         steps that carry it answer the same way on both.
+
+Host note: the distribution reads `debian 12` from /etc/os-release while the
+         kernel string is el9, because this agent is a container sharing the
+         RHEL host kernel. Every Debian capture in this directory carries the
+         same pair, and it is the reason the harness host gate reads
+         /etc/os-release and never `uname`.
+
+Sensitive-content note: the agent workspace path is replaced by `$WORKSPACE`,
+         the assembled tool directory by `<delivered>` and the harness scratch
+         root by `<scratch>`. Nothing else in the run below is edited.
+
+===== the archived probe output, build 151 =====
+===== BEGIN CPLX-CLOSURE-DEBIAN =====
+date            2026-09-10T11:00:20Z
+build           151
+distribution    debian 12
+kernel          5.14.0-687.41.1.el9_8.x86_64   # the RHEL host kernel: the container shares it
+bash            5.2.15(1)-release
+readelf         GNU readelf (GNU Binutils for Debian) 2.40
+sha256sum       sha256sum (GNU coreutils) 9.1
+
+== the three copies that travelled, by digest
+   the run below prints the same three values from inside the
+   harness; the cplx side compares them against the canonical
+   files, which is the only place that comparison has authority
+  77d10f8ff6892594efb259e7391bc8eee766ec41e6048a5e00bc4884975be09c  closure_check_verify.verification-only.sh
+  33e972d20528aecf19583e80c8628495dfe31afb40f1efbe92b109b2bcb8e37e  closure_tools_contract.verification-only.txt
+  74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472  closure_corpus.verification-only.txt
+
+
+== the shipped tree that was assembled, by digest
+   one line per transport copy under the basename the harness
+   resolves; the cplx side compares these against the canonical
+   files, which is the only place that comparison has authority
+  9413bad5fb0e1bb426fe4cdb56c9ff8ebc7960417f4223614f3b04ab0e1dafa9  closure_check.sh
+  61155c4c1e7545727f830cfc09795e41c019c3bcfb1a73ab192a9a42584b2474  closure_config.sh
+  dfcfffa12557001dd3a6ceca9b5b0324a3649c0845ced327fc5c1252f80aae29  closure_elf.sh
+  84ac6d2b3eb13987093264b6208c1d019bc2e8865f38bc1769b73eecc14709db  closure_observe_live.sh
+  ccab32e980b68759cd307a6180e7de4d46423739c28d823c4242d91d78d6e101  closure_publish.sh
+  db5b50784c13124332fad643c6437ad01cdd9ddf7075a5200eac2978795dab2f  closure_report.sh
+  5b931983166c47d969d14b96d0d39fe4e04bf76d1766a14e39a8301c35a6fb65  closure_rules.sh
+  d40556a0a17b91948bfde22b91db8dc8820eb3818f52c03835a2d49a7e4d5f81  closure_verify.sh
+  6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625  install_pkg.sh
+  3c139ca26e47f451f39c71d1013dc8c258f35dd5a53b55e9fe3ee5231280a0c7  pkg
+  8ef91c24267b97c4546eed97f95a4bc60c2c3ae6f41d49dbadad0da304935b22  pkg.sh
+  8f5435bcb244da60afaeebc44ddabbf9a0079a07afc97ae8c3a34fbd8721eb9d  pkg_tools.sh
+  6be16df7265ec882ae6c8adad283e5758308eec2f602d69b9c8278cdad739cac  deliver-closure-tools.sh
+  d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1  closure-config.txt
+  0c203280c48e5eee64fa74f6b1c6781e8be9a82cc202d1b40c728cf4e1aa87b9  closure-envelope.txt
+
+== step 0, the instrument itself
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 0 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /usr/bin/sed
+  preflight/grep                                 PASS  /usr/bin/grep
+  preflight/sort                                 PASS  /usr/bin/sort
+  preflight/uniq                                 PASS  /usr/bin/uniq
+  preflight/mkdir                                PASS  /usr/bin/mkdir
+  preflight/rm                                   PASS  /usr/bin/rm
+  preflight/chmod                                PASS  /usr/bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  debian 12
+  host/any-linux                                 PASS  debian 12
+
+== step 0 gate controls: unavailable is not unsupported
+  step0/gate/shim-planted                        PASS
+  step0/gate/readelf-unavailable                 PASS  unavailable
+  step0/gate/readelf-unsupported                 PASS  unsupported
+  step0/gate/sha256sum-unavailable               PASS  unavailable
+  step0/gate/sha256sum-unsupported               PASS  unsupported
+  step0/gate/assoc-unavailable-without-bash      PASS  unavailable
+
+== step 0 capability gate: readelf, sha256sum, declare -A
+  step0/capability/readelf/in-domain             PASS  yes
+  step0/capability/readelf                       NOTE  supported: /usr/bin/readelf answered -d -V over /usr/bin/bash
+  step0/capability/sha256sum/in-domain           PASS  yes
+  step0/capability/sha256sum                     NOTE  supported: /usr/bin/sha256sum digested the empty input correctly
+  step0/capability/assoc/in-domain               PASS  yes
+  step0/capability/assoc                         NOTE  supported: bash 5.2.15(1)-release, an associative assignment read back its own value
+
+== step 0 refusal path: a step whose declared tool is missing
+  step0/refusal/subject                          NOTE  step 7, the first whose suite does not exist yet
+  step0/refusal/missing-tool-exit-code           PASS  5
+  step0/refusal/names-the-missing-command        PASS  yes
+  step0/refusal/suite-absent-exit-code           PASS  5
+  step0/refusal/two-refusals-are-distinct        PASS  no
+  step0/refusal/suite-absent-names-the-step      PASS  yes
+
+== step 0 red baseline: every later step declares, and the unfilled refuse
+  step0/declared/step1/tools-not-empty           PASS  yes
+  step0/declared/step1/host-not-empty            PASS  yes
+  step0/declared/step1/has-a-suite               NOTE  filled by step 1, the declared candidate shape and the observed loader scope; judged by --step 1
+  step0/declared/step2/tools-not-empty           PASS  yes
+  step0/declared/step2/host-not-empty            PASS  yes
+  step0/declared/step2/has-a-suite               NOTE  filled by step 2, the configuration bundle and its authority; judged by --step 2
+  step0/declared/step3/tools-not-empty           PASS  yes
+  step0/declared/step3/host-not-empty            PASS  yes
+  step0/declared/step3/has-a-suite               NOTE  filled by step 3, the static subject set and the derived membership half; judged by --step 3
+  step0/declared/step4/tools-not-empty           PASS  yes
+  step0/declared/step4/host-not-empty            PASS  yes
+  step0/declared/step4/has-a-suite               NOTE  filled by step 4, the floor, coherence, rule 1, rule 2 and aggregation; judged by --step 4
+  step0/declared/step5/tools-not-empty           PASS  yes
+  step0/declared/step5/host-not-empty            PASS  yes
+  step0/declared/step5/has-a-suite               NOTE  filled by step 5, waivers, the packaging gate and the publication boundary; judged by --step 5
+  step0/declared/step6/tools-not-empty           PASS  yes
+  step0/declared/step6/host-not-empty            PASS  yes
+  step0/declared/step6/has-a-suite               NOTE  filled by step 6, the foreign-host half of the verification; judged by --step 6
+  step0/declared/step7/tools-not-empty           PASS  yes
+  step0/declared/step7/host-not-empty            PASS  yes
+  step0/declared/step7/refuses                   PASS  5
+  step0/declared/step7/says-why                  PASS  yes
+
+== step 0 contract: the checker's own allowlist
+  step0/contract/entry-row-shape                 PASS
+  step0/contract/launcher-row-shape              PASS
+  step0/contract/yes-owns-a-launcher             PASS
+  step0/contract/enumerated-set                  PASS  bash cat chmod cp find git ln mkdir mkfifo mktemp readelf rm sha256sum tar tee
+  step0/contract/control/short-row-refused       PASS  awk|direct|-|no
+  step0/contract/control/yes-without-launcher-refused PASS  awk
+
+== step 0 mechanical assertion: proved before it has a subject
+  step0/mechanical/clean-script-has-no-finding   PASS
+  step0/mechanical/undeclared-command-is-named   PASS  awk
+  step0/mechanical/closure_check.sh              PASS
+  step0/mechanical/closure_config.sh             PASS
+  step0/mechanical/closure_elf.sh                PASS
+  step0/mechanical/closure_report.sh             PASS
+  step0/mechanical/closure_rules.sh              PASS
+  step0/mechanical/closure_verify.sh             PASS
+  step0/mechanical/closure_observe_live.sh       PASS
+  step0/mechanical/closure_publish.sh            PASS
+  step0/mechanical/deliver-closure-tools.sh      PASS
+  step0/mechanical/topology-is-ten               PASS  10
+  step0/mechanical/shipped-present               NOTE  9 of 10
+  step0/mechanical/shipped-absent                NOTE  closure_d10.sh
+
+== step 0 corpus: a truncated file is a failure, not a smaller run
+  step0/corpus/declares-a-count                  PASS  yes
+  step0/corpus/count-matches-rows                PASS  53
+  step0/corpus/spec-row-shape                    PASS
+  step0/corpus/ids-are-unique                    PASS
+  step0/corpus/donors-are-declared               PASS
+  step0/corpus/control/truncated-refused         PASS  53/52
+  step0/corpus/control/short-row-refused         PASS  spec|short-row|object|shared|tools/x|needed-add:libx.so.1
+
+== verdict
+  step        0
+  cases       63
+  failures    0
+  host        debian 12
+  bash        5.2.15(1)-release
+  contract    $WORKSPACE/tools/closure_tools_contract.verification-only.txt
+  corpus      $WORKSPACE/tools/closure_corpus.verification-only.txt
+  shipped-dir <delivered>/bin
+  harness      77d10f8ff6892594efb259e7391bc8eee766ec41e6048a5e00bc4884975be09c
+  contract-sha 33e972d20528aecf19583e80c8628495dfe31afb40f1efbe92b109b2bcb8e37e
+  corpus-sha   74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472
+  capability   readelf=supported
+  capability   sha256sum=supported
+  capability   assoc=supported
+
+OBJECTIVE MET for step 0
+result: step0-exit=0
+
+== STEP 6, the step this agent is the only host for
+   the foreign distribution is the whole point: every other
+   step answers on the build host too, and this one does not
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 6 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /usr/bin/sed
+  preflight/grep                                 PASS  /usr/bin/grep
+  preflight/sort                                 PASS  /usr/bin/sort
+  preflight/uniq                                 PASS  /usr/bin/uniq
+  preflight/mkdir                                PASS  /usr/bin/mkdir
+  preflight/rm                                   PASS  /usr/bin/rm
+  preflight/chmod                                PASS  /usr/bin/chmod
+
+== host gate: debian-12
+  host/identity                                  NOTE  debian 12
+  host/debian-12                                 PASS  debian 12
+
+== capability gate: readelf assoc bash cat chmod cp find git ln mkdir mkfifo mktemp readelf rm sha256sum tar tee
+  capability/readelf/in-domain                   PASS  yes
+  capability/readelf                             NOTE  supported: /usr/bin/readelf answered -d -V over /usr/bin/bash
+  capability/assoc/in-domain                     PASS  yes
+  capability/assoc                               NOTE  supported: bash 5.2.15(1)-release, an associative assignment read back its own value
+  capability/bash/in-domain                      PASS  yes
+  capability/bash                                NOTE  supported: /usr/bin/bash resolved and is executable (resolution only, no semantic probe)
+  capability/cat/in-domain                       PASS  yes
+  capability/cat                                 NOTE  supported: /usr/bin/cat resolved and is executable (resolution only, no semantic probe)
+  capability/chmod/in-domain                     PASS  yes
+  capability/chmod                               NOTE  supported: /usr/bin/chmod resolved and is executable (resolution only, no semantic probe)
+  capability/cp/in-domain                        PASS  yes
+  capability/cp                                  NOTE  supported: /usr/bin/cp resolved and is executable (resolution only, no semantic probe)
+  capability/find/in-domain                      PASS  yes
+  capability/find                                NOTE  supported: /usr/bin/find resolved and is executable (resolution only, no semantic probe)
+  capability/git/in-domain                       PASS  yes
+  capability/git                                 NOTE  supported: /usr/bin/git resolved and is executable (resolution only, no semantic probe)
+  capability/ln/in-domain                        PASS  yes
+  capability/ln                                  NOTE  supported: /usr/bin/ln resolved and is executable (resolution only, no semantic probe)
+  capability/mkdir/in-domain                     PASS  yes
+  capability/mkdir                               NOTE  supported: /usr/bin/mkdir resolved and is executable (resolution only, no semantic probe)
+  capability/mkfifo/in-domain                    PASS  yes
+  capability/mkfifo                              NOTE  supported: /usr/bin/mkfifo resolved and is executable (resolution only, no semantic probe)
+  capability/mktemp/in-domain                    PASS  yes
+  capability/mktemp                              NOTE  supported: /usr/bin/mktemp resolved and is executable (resolution only, no semantic probe)
+  capability/readelf/in-domain                   PASS  yes
+  capability/readelf                             NOTE  supported: /usr/bin/readelf answered -d -V over /usr/bin/bash
+  capability/rm/in-domain                        PASS  yes
+  capability/rm                                  NOTE  supported: /usr/bin/rm resolved and is executable (resolution only, no semantic probe)
+  capability/sha256sum/in-domain                 PASS  yes
+  capability/sha256sum                           NOTE  supported: /usr/bin/sha256sum digested the empty input correctly
+  capability/tar/in-domain                       PASS  yes
+  capability/tar                                 NOTE  supported: /usr/bin/tar resolved and is executable (resolution only, no semantic probe)
+  capability/tee/in-domain                       PASS  yes
+  capability/tee                                 NOTE  supported: /usr/bin/tee resolved and is executable (resolution only, no semantic probe)
+
+== step 6 evidence grammar: a machine writes it, so it refuses what a person would leave
+  step6/grammar/well-formed-parses               PASS  0
+  step6/grammar/model-carries-both-identities-and-the-verdict PASS  b34920ccb35962bd4b043f55053e5f222dee494e524c2d453eaf9b549bd97926|d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1|PASS
+  step6/grammar/asserted-pass-over-a-divergence-refuses PASS  1
+  step6/grammar/refusal-names-the-derivation     PASS  yes
+  step6/grammar/honest-divergence-parses         PASS  0
+  step6/grammar/unexpected-under-a-pass-refuses  PASS  1
+  step6/grammar/unexpected-under-a-divergent-parses PASS  0
+  step6/grammar/blank-line-refuses               PASS  1
+  step6/grammar/blank-line-says-why              PASS  yes
+  step6/grammar/comment-refuses                  PASS  1
+  step6/grammar/comment-says-why                 PASS  yes
+  step6/grammar/reordered-records-refuse         PASS  1
+  step6/grammar/reordered-names-the-order        PASS  yes
+  step6/grammar/unknown-record-refuses           PASS  1
+  step6/grammar/unknown-record-names-the-token   PASS  yes
+  step6/grammar/wrong-field-count-refuses        PASS  1
+  step6/grammar/presence-domain-refuses          PASS  1
+  step6/grammar/presence-domain-names-it         PASS  yes
+  step6/grammar/verdict-domain-refuses           PASS  1
+  step6/grammar/side-domain-refuses              PASS  1
+  step6/grammar/two-archive-records-refuse       PASS  1
+  step6/grammar/no-verdict-refuses               PASS  1
+  step6/grammar/unpaired-sides-refuse            PASS  1
+  step6/grammar/unpaired-names-the-counts        PASS  yes
+  step6/grammar/missing-version-line-refuses     PASS  1
+
+== step 6 delivery: the authoritative copies, or none of them
+  step6/delivery/complete-delivery-succeeds      PASS  0
+  step6/delivery/every-name-is-present           PASS  8
+  step6/delivery/verdict-names-the-commit        PASS  yes
+  step6/delivery/bytes-are-the-commits           PASS  9413bad5fb0e1bb426fe4cdb56c9ff8ebc7960417f4223614f3b04ab0e1dafa9
+  step6/delivery/a-branch-refuses                PASS  1
+  step6/delivery/a-branch-writes-nothing         PASS
+  step6/delivery/a-40-hex-blob-refuses           PASS  1
+  step6/delivery/blob-refusal-names-the-type     PASS  yes
+  step6/delivery/a-missing-blob-refuses          PASS  1
+  step6/delivery/a-missing-blob-names-it         PASS  yes
+  step6/delivery/a-missing-blob-withdraws-what-it-wrote PASS
+  step6/delivery/a-non-checkout-refuses          PASS  1
+  step6/delivery/non-checkout-says-there-is-no-other-source PASS  yes
+
+== step 6 live observer: an empty inventory is not a pass
+  step6/live/clean-inventory-is-conclusive       PASS  0
+  step6/live/it-names-the-process-it-inventoried PASS  yes
+  step6/live/shipped-objects-are-classified      PASS  2
+  step6/live/pseudo-and-anonymous-mappings-are-not-objects PASS  0
+  step6/live/a-host-object-refuses               PASS  1
+  step6/live/the-refusal-counts-them             PASS  yes
+  step6/live/a-lookalike-path-is-a-host-object   PASS  1
+  step6/live/an-empty-inventory-is-inconclusive  PASS  4
+  step6/live/it-is-neither-a-pass-nor-a-refusal  PASS  yes
+  step6/live/it-never-says-nothing-was-found     PASS  yes
+  step6/live/an-empty-mapping-table-is-inconclusive PASS  4
+  step6/live/an-empty-mapping-table-is-never-conclusive PASS  no
+  step6/live/the-unusable-process-is-named       PASS  yes
+  step6/live/an-unreadable-mapping-table-is-inconclusive PASS  4
+  step6/live/the-failed-collection-is-named      PASS  yes
+  step6/live/control/one-usable-inventory-is-conclusive PASS  0
+  step6/live/control/the-count-excludes-the-unusable-one PASS  yes
+  step6/live/a-truncated-comm-is-found-through-argv0 PASS  0
+
+== step 6 evidence storage: validated before a byte, and never overwritten
+  step6/storage/a-symlink-root-refuses           PASS  1
+  step6/storage/symlink-refusal-is-about-the-symlink PASS  yes
+  step6/storage/a-symlink-root-writes-nothing    PASS
+  step6/storage/a-file-root-refuses              PASS  1
+  step6/storage/a-group-writable-root-refuses    PASS  1
+  step6/storage/group-writable-refusal-says-why  PASS  yes
+  step6/storage/an-other-writable-root-refuses   PASS  1
+  step6/storage/an-absent-root-refuses           PASS  1
+  step6/storage/a-good-root-writes-the-canonical-name PASS  0
+  step6/storage/it-says-what-it-wrote            PASS  yes
+  step6/storage/the-stored-bytes-are-the-document PASS  61ee76d2922e2c0e2a08a1bf5d0c69b4ea3f246c76523e31a1f536e1c2a008c5
+  step6/storage/no-temporary-is-left-behind      PASS
+  step6/storage/an-identical-rerun-is-idempotent PASS  0
+  step6/storage/idempotent-says-so               PASS  yes
+  step6/storage/a-different-result-refuses       PASS  1
+  step6/storage/it-is-retained-under-a-conflict-name PASS  1
+  step6/storage/the-canonical-file-is-unchanged  PASS  61ee76d2922e2c0e2a08a1bf5d0c69b4ea3f246c76523e31a1f536e1c2a008c5
+  step6/storage/the-conflict-stops-the-run       PASS  yes
+  step6/storage/an-agreeing-rerun-under-a-conflict-refuses PASS  1
+  step6/storage/the-agreeing-rerun-is-not-idempotent PASS  no
+  step6/storage/the-agreeing-rerun-says-what-is-unresolved PASS  yes
+  step6/storage/a-second-different-result-also-refuses PASS  1
+  step6/storage/both-conflicts-are-retained      PASS  2
+  step6/storage/the-second-conflict-is-reported-at-its-name PASS  yes
+  step6/storage/the-canonical-file-survives-both PASS  61ee76d2922e2c0e2a08a1bf5d0c69b4ea3f246c76523e31a1f536e1c2a008c5
+  step6/storage/the-reader-refuses-a-conflicted-record PASS
+  step6/storage/an-unreadable-body-refuses       PASS  1
+  step6/storage/a-partial-write-leaves-no-canonical-name PASS  no
+  step6/storage/a-rerun-after-a-partial-write-succeeds PASS  0
+
+== step 6 driver: the delivery comes first, and there is no fallback
+  step6/driver/an-absent-delivery-refuses        PASS  1
+  step6/driver/it-names-what-the-pipeline-did-not-deliver PASS  yes
+  step6/driver/it-refuses-before-it-opens-the-archive PASS  yes
+  step6/driver/it-offers-no-fallback-to-the-candidate PASS  yes
+  step6/driver/an-unreadable-archive-refuses     PASS  1
+  step6/driver/it-names-the-missing-archive      PASS  yes
+  step6/driver/the-delivery-was-reported-present-first PASS  yes
+
+== step 6 comparison: a directory on one side only, in both directions
+  step6/compare/the-archive-side-sees-the-directory PASS  yes
+  step6/compare/the-installed-side-does-not      PASS  yes
+  step6/compare/present-in-the-archive-and-absent-installed-is-DIVERGENT PASS  DIVERGENT
+  step6/compare/present-installed-and-absent-in-the-archive-is-DIVERGENT PASS  DIVERGENT
+  step6/compare/one-side-against-itself-passes   PASS  PASS
+  step6/compare/an-undeclared-root-is-unexpected PASS  yes
+  step6/compare/an-unexpected-finding-is-DIVERGENT PASS  DIVERGENT
+  step6/compare/the-skeleton-is-derived-from-a-real-archive PASS  0
+  step6/compare/the-directory-alias-is-reconstructed PASS  yes
+  step6/compare/the-alias-resolves-as-it-does-installed PASS  yes
+  step6/compare/the-alias-is-present-on-the-archive-side PASS  yes
+  step6/compare/a-supported-alias-is-not-a-divergence PASS  PASS
+  step6/compare/a-parent-relative-alias-is-reconstructed PASS  yes
+  step6/compare/a-parent-relative-alias-resolves PASS  yes
+  step6/compare/the-two-spellings-observe-alike  PASS  presence|tools/python/root/usr/lib64|absent presence|tools/python/root/usr/lib|absent presence|tools/python/root/lib64|absent presence|tools/python/root/lib|present presence|tools/python/current/lib|present presence|tools/python/current/lib64|absent presence|tools/python/python-3.13.9/lib|present presence|tools/python/python-3.13.9/lib64|absent presence|tools/git/root/usr/lib64|absent presence|tools/git/root/usr/lib|absent presence|tools/git/root/lib64|absent presence|tools/git/root/lib|present
+  step6/compare/a-parent-relative-alias-is-not-a-divergence PASS  PASS
+  step6/compare/control/an-escaping-target-is-refused PASS  1
+  step6/compare/control/an-absolute-target-is-refused PASS  1
+  step6/compare/control/a-contained-target-is-accepted PASS  0
+  step6/compare/control/a-broken-alias-is-still-DIVERGENT PASS  DIVERGENT
+
+== step 6 publication: the identity binding, against a real evidence document
+  step6/publication/a-result-for-another-archive-refuses PASS  1
+  step6/publication/it-refuses-at-step-2         PASS  yes
+  step6/publication/it-names-the-identity-it-computed PASS  yes
+  step6/publication/an-archive-modified-after-verification-refuses PASS  1
+  step6/publication/the-modified-archive-refuses-at-step-2 PASS  yes
+  step6/publication/a-result-under-another-policy-refuses PASS  1
+  step6/publication/the-policy-refusal-names-both-digests PASS  yes
+  step6/publication/a-divergent-result-refuses   PASS  1
+  step6/publication/the-divergent-refusal-names-the-verdict PASS  yes
+  step6/publication/a-matching-result-passes-step-2 PASS  yes
+  step6/publication/it-reaches-a-later-step      PASS  yes
+  step6/publication/the-producer-writes-the-passing-result PASS  0
+  step6/publication/the-producer-retains-the-conflict PASS  1
+  step6/publication/a-retained-conflict-refuses  PASS  1
+  step6/publication/the-conflict-refusal-is-at-step-2 PASS  yes
+  step6/publication/the-conflict-refusal-names-the-human-decision PASS  yes
+  step6/publication/the-rerun-before-it-refuses-too PASS  1
+  step6/publication/the-rerun-does-not-unblock-publication PASS  1
+  step6/publication/the-canonical-result-is-written-first PASS  0
+  step6/publication/a-first-write-leaves-no-conflict PASS  0
+  step6/publication/a-first-write-leaves-one-result PASS  1
+  step6/publication/a-differing-result-refuses   PASS  1
+  step6/publication/it-is-reported-at-its-conflict-name PASS  yes
+  step6/publication/exactly-one-conflict-is-beside-it PASS  1
+  step6/publication/the-conflict-holds-the-differing-document PASS  f4cb34e75faf5cc4dff39a37a1d42e22136c80a58dd65910b4f7dd925f2f6137
+  step6/publication/no-anonymous-document-is-left PASS  0
+  step6/publication/the-retained-conflict-stops-publication-here-too PASS  1
+  step6/publication/and-the-agreeing-rerun-refuses PASS  1
+  step6/publication/a-third-result-refuses-too   PASS  1
+  step6/publication/both-conflicts-are-kept      PASS  2
+  step6/publication/the-race-loser-refuses       PASS  differing_emit_rc=1
+  step6/publication/the-race-loser-keeps-its-document PASS  exact_differing_copies=1
+  step6/publication/the-race-loser-stops-publication PASS  publication_step2_rc=1
+  step6/publication/the-race-loser-stops-the-agreeing-rerun PASS  agreeing_rerun_rc=1
+  step6/publication/control/the-race-loser-refuses PASS  differing_emit_rc=1
+  step6/publication/control/it-keeps-its-document PASS  exact_differing_copies=1
+  step6/publication/control/both-consumers-refuse PASS  1 1
+  step6/publication/the-second-store-has-its-canonical-result PASS  0
+  step6/publication/an-unreservable-conflict-refuses PASS  1
+  step6/publication/nothing-differing-was-written PASS  0
+  step6/publication/the-canonical-result-is-untouched PASS  ac1b0925f31c584353617abe360dbd8577d3a3f0b0a68df78cb9c59d54bed767
+  step6/publication/control/the-unblocked-retry-retains-it PASS  1
+  step6/publication/control/and-then-publication-stops PASS  1
+  step6/publication/control/a-resolved-conflict-passes-step-2 PASS  yes
+
+== step 6 payload: compared, reported, and never executed
+  step6/payload/identical-copies-are-reported-identical PASS  5
+  step6/payload/no-difference-is-summarised      PASS  yes
+  step6/payload/an-edited-copy-is-reported-different PASS  yes
+  step6/payload/the-others-are-still-identical   PASS  4
+  step6/payload/the-difference-is-summarised     PASS  yes
+  step6/payload/an-absent-copy-is-reported-absent PASS  yes
+  step6/payload/a-planted-copy-is-reported-different PASS  5
+  step6/payload/and-it-was-never-executed        PASS  no
+
+== step 6 end to end: one archive, two observations, one artifact
+  step6/e2e/the-delivery-is-reported-present     PASS  yes
+  step6/e2e/the-identity-is-the-archive-file     PASS  yes
+  step6/e2e/an-artifact-was-written              PASS  yes
+  step6/e2e/it-is-keyed-by-the-identity          PASS  yes
+  step6/e2e/the-artifact-parses                  PASS  0
+  step6/e2e/it-names-this-archive-and-nothing-else PASS  yes
+  step6/e2e/an-unnamed-process-is-inconclusive   PASS  yes
+  step6/e2e/an-inconclusive-live-half-is-not-a-pass PASS  yes
+  step6/e2e/the-comparison-passes                PASS  yes
+  step6/e2e/the-static-half-refuses-on-this-fixture PASS  yes
+  step6/e2e/the-payload-copies-agree             PASS  yes
+  step6/e2e/a-second-run-is-idempotent           PASS  yes
+  step6/e2e/a-competing-newer-archive-refuses    PASS  1
+  step6/e2e/it-names-the-archive-that-would-win  PASS  yes
+  step6/e2e/it-refuses-before-it-installs-anything PASS  no
+  step6/e2e/no-result-is-emitted-for-an-unselected-candidate PASS  no
+  step6/e2e/control/the-candidate-alone-installs PASS  yes
+  step6/e2e/control/the-comparison-is-reached    PASS  yes
+  step6/e2e/a-stale-done-marker-does-not-skip-the-install PASS  yes
+  step6/e2e/the-comparison-is-taken-over-a-real-install PASS  yes
+  step6/e2e/an-unremovable-stale-marker-refuses  PASS  1
+  step6/e2e/the-refusal-names-the-marker-it-could-not-remove PASS  yes
+  step6/e2e/no-comparison-is-reported-over-a-skipped-install PASS  no
+  step6/e2e/no-artifact-is-emitted-over-a-skipped-install PASS  no
+  step6/e2e/the-older-tree-was-left-alone        PASS  yes
+  step6/e2e/control/a-writable-package-directory-installs PASS  yes
+  step6/e2e/control/and-then-the-artifact-is-written PASS  yes
+  step6/e2e/an-installer-that-installed-something-else-refuses PASS  1
+  step6/e2e/the-refusal-names-the-missing-marker PASS  yes
+  step6/e2e/no-artifact-is-emitted-for-an-unattributable-tree PASS  no
+  step6/e2e/a-produced-artifact-passes-step-2    PASS  yes
+  step6/e2e/publication-then-reaches-a-later-step PASS  yes
+  step6/e2e/another-archive-is-not-described-by-it PASS  yes
+  step6/e2e/the-refusal-names-the-computed-identity PASS  yes
+
+== verdict
+  step        6
+  cases       223
+  failures    0
+  host        debian 12
+  bash        5.2.15(1)-release
+  contract    $WORKSPACE/tools/closure_tools_contract.verification-only.txt
+  corpus      $WORKSPACE/tools/closure_corpus.verification-only.txt
+  shipped-dir <delivered>/bin
+  harness      77d10f8ff6892594efb259e7391bc8eee766ec41e6048a5e00bc4884975be09c
+  contract-sha 33e972d20528aecf19583e80c8628495dfe31afb40f1efbe92b109b2bcb8e37e
+  corpus-sha   74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472
+  capability   readelf=supported
+  capability   assoc=supported
+  capability   bash=supported
+  capability   cat=supported
+  capability   chmod=supported
+  capability   cp=supported
+  capability   find=supported
+  capability   git=supported
+  capability   ln=supported
+  capability   mkdir=supported
+  capability   mkfifo=supported
+  capability   mktemp=supported
+  capability   readelf=supported
+  capability   rm=supported
+  capability   sha256sum=supported
+  capability   tar=supported
+  capability   tee=supported
+
+OBJECTIVE MET for step 6
+result: step6-exit=0
+
+== every step, each in a fresh process
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===
+  step 0  exit 0  OBJECTIVE MET for step 0
+  step 1  exit 0  OBJECTIVE MET for step 1
+  step 2  exit 0  OBJECTIVE MET for step 2
+  step 3  exit 0  OBJECTIVE MET for step 3
+  step 4  exit 0  OBJECTIVE MET for step 4
+  step 5  exit 0  OBJECTIVE MET for step 5
+  step 6  exit 0  OBJECTIVE MET for step 6
+  step 7  exit 5    no suite exists for step 7 yet; it is written by step 7, the acceptance on both hosts
+
+=== aggregate: exit 5
+result: all-exit=5
+
+== steps 3 and 4 with their case output
+   the aggregate above reports a COUNT, and a count is not a
+   finding. Both steps are green on the RHEL build host with
+   these same bytes, so whatever they answer here is about this
+   distribution and has to be readable rather than tallied
+== harness prerequisite preflight
+== host gate: any-linux
+== capability gate: readelf assoc
+== step 3 topology: the reader and the rules module have a body
+== step 3 fixtures: donors validated, every mutation asserted
+== step 3 subjects: every shipped ELF, none excluded
+== step 3 membership: an unresolvable need, named with its subject
+== step 3 unreferenced: reported, and still accepted
+== step 3 cost: the alias resolution, measured as it grows
+== step 3 aliases: a symlinked directory in the selected path
+== step 3 providers: shipped is not the same as resolvable
+== step 3 cost: one walk, one index, built before the first read
+== step 3 reader: an input that could not be obtained
+== step 3 reader: a dynamic record whose value cannot be read
+== step 3 walk: a traversal that could not be taken
+== step 3 reader: a reader that could not be reached
+== step 3 reader: the locale pin, shown by a translating reader
+== verdict
+  step        3
+  cases       132
+  failures    0
+OBJECTIVE MET for step 3
+result: step3-detail-done
+== harness prerequisite preflight
+== host gate: any-linux
+== capability gate: readelf sha256sum assoc
+== step 4 topology: the invariants live where the boundary puts them
+== step 4 grammar: the entry-point record, and its four refusals
+== step 4 fixtures: donors validated, every mutation asserted
+== step 4 floor: the declared half, and its location column
+== step 4 aggregation: an unexpected directory suppresses nothing
+== step 4 coherence: the provider the object names
+== step 4 coherence: a known non-object, and an object defining nothing
+== step 4 coherence: a provider whose reading could not be taken
+== step 4 coherence: a resolution that leaves the archive
+== step 4 duplicates: one file from several directories is one provider
+== step 4 duplicates: two candidates, different content
+== step 4 duplicates: the positive control, twenty names over one file
+== step 4 families: declared generations, and the declared blind spot
+== step 4 entry points: the half a declaration supplies
+== step 4 aggregation: a version need with no provider file to read
+== step 4 aggregation: an UNDETERMINED and no refusal is not a pass
+== step 4 verdict: partial, and it names what a run answered
+== verdict
+  step        4
+  cases       152
+  failures    0
+OBJECTIVE MET for step 4
+result: step4-detail-done
+===== END CPLX-CLOSURE-DEBIAN =====

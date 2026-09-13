@@ -1,0 +1,3 @@
+CPLX-CLOSURE-ENVELOPE/1
+digest|d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1
+source|src/setups/env/closure/closure-config.txt|089f2149cac867e9472a4575d25727cbc0db6c51
