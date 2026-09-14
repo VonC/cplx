@@ -1429,3 +1429,402 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 3
+
+- Recorded: 2026-09-14T19:51:52+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 architecture-minor-fallback (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+Implementation step: 3
+Review round: 1
+
+### Code review evidence for step 3 architecture-minor-fallback (round 1)
+
+request_index_tree: 245887f6e97f83a366f3a3a38004cd3bc8b92f26
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.architecture-fallback.sh --step 3 (sources: plan)
+- cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(packages): scope progress and forward resets
+group 1 path: src/setups/package_progress.sh
+group 1 path: src/setups/setup_packages.sh
+group 1 path: src/setups/setup.bat
+group 1 path: src/setups/pkgs/.gitignore
+group 1 path: docs/v0.27.0/verify.architecture-progress.sh
+group 1 path: docs/v0.27.0/verify.architecture-launcher.cmd
+group 1 path: docs/v0.27.0/verify.architecture-fallback.sh
+group 1 path: docs/v0.27.0/verify.architecture-index.sh
+group 1 path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+group 2: docs(architecture-minor-fallback): record step 3 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+staged path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/verify.architecture-fallback.sh
+staged path: docs/v0.27.0/verify.architecture-index.sh
+staged path: docs/v0.27.0/verify.architecture-launcher.cmd
+staged path: docs/v0.27.0/verify.architecture-progress.sh
+staged path: src/setups/package_progress.sh
+staged path: src/setups/pkgs/.gitignore
+staged path: src/setups/setup.bat
+staged path: src/setups/setup_packages.sh
+```
+
+### Requestor assessment for step 3 architecture-minor-fallback (round 1)
+
+Step 3 is fully implemented. The validation plan records the exact Yes verdict,
+file counts, function reachability, linear progress preparation and retained
+setup behavior. No architecture, performance or feature-integrity gap remains
+in this step. This Bash/CMD project has no applicable Python coverage percentage.
+
+Final writer checks on 14 September 2026:
+
+- Windows cumulative Step 3: exit 0, 433 seconds, 25 fixture groups and live
+  metadata/status/cache preservation passed. This includes the tracked-shell
+  lint floor and explicit new-script syntax/ShellCheck checks.
+- Native RHEL 9.8 copied-root cumulative Step 3: exit 0, 20 seconds, 24 applicable
+  fixture groups and preservation passed, using Bash 5.1.8 and ShellCheck 0.10.0.
+- Real CMD launcher gate: exit 0 for eleven cases, including literal percent,
+  exclamation and caret characters, dollar/backtick text, regex metacharacters,
+  spaces, reset entry forwarding and Bash/step-helper exit 119 boundaries.
+- `git diff --check` passed. The root commit-plan checker reports ready with
+  all ten staged paths assigned to two groups.
+
+The final interruption fixtures cover both missing state on first selection
+and discarded state after an identity change. Failed publication preserves
+prior bytes and does not report durable completion. Step 4 live dependency
+acceptance, curated cleanup and wiki updates remain pending.
+
+### Implementation report for step 3 architecture-minor-fallback (round 1)
+
+The new progress helper owns normalized active-entry loading, literal four-line
+record parsing, identity/membership checks and atomic sibling publication.
+Main setup validates its complete argv before progress mutation, pins the
+selected list, synchronizes one in-memory snapshot and records each successful
+entry. First selections and restarts publish an empty record before package IO.
+Valid stored cursors preserve the first matching cursor/repeat resume-after
+rule. Explicit resets validate their normalized entry first; invalid resets
+return 117 without synchronization or progress changes. Write failures return
+116. Direct package requests neither read nor write full-list progress.
+
+CMD consumes its public arguments with `shift`, disables delayed expansion for
+literal input and invokes Bash directly with explicit options. It preserves
+generic step repeat/reset and the `sdpl` index route, never forwards reset entry
+text to the step helper, and maps Bash/helper failures to outer exit 119.
+
+Eight progress fixture groups and eleven actual CMD cases cover the settled
+contracts. The cumulative runner includes the new helper/suite. The retained
+index fixture's selected-list assertion now checks the record's final field;
+the plan inventory explicitly records that small compatibility update.
+
+### Change summary for step 3 architecture-minor-fallback (round 1)
+
+The staged paths are:
+
+- `src/setups/package_progress.sh`
+- `src/setups/setup_packages.sh`
+- `src/setups/setup.bat`
+- `src/setups/pkgs/.gitignore`
+- `docs/v0.27.0/verify.architecture-progress.sh`
+- `docs/v0.27.0/verify.architecture-launcher.cmd`
+- `docs/v0.27.0/verify.architecture-fallback.sh`
+- `docs/v0.27.0/verify.architecture-index.sh`
+- `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md`
+- `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md`
+
+Root `a.commit` is formatted and mechanically ready:
+
+1. `feat(packages): scope progress and forward resets`: the nine behavior,
+  fixture and plan-inventory paths.
+2. `docs(architecture-minor-fallback): record step 3 validation`: the validation
+  plan only, following the implementation as the required trailing group.
+
+The umbrella remains pending because Step 4 is not implemented. No curated list,
+operator-local property, generated package index or adjacent application tree
+is part of this change.
+
+### Writer response for step 3 architecture-minor-fallback (round 1)
+
+Writer response:
+
+This is the first review round for Step 3. Steps 1 and 2 and their review records
+are committed. There is no earlier Step 3 reviewer feedback or disagreement.
+
+The writer's final contract pass added first-selection empty-record persistence,
+a corresponding interruption fixture and normalized CRLF reset input before
+the final green gates. The scope remains package progress and CMD forwarding;
+the RHEL dependency acceptance and curated cleanup belong to Step 4. Jenkins
+continues to consume tools and package/publish only the application, with no
+compilation or tools publication introduced by this step.
+
+### Reviewer focus for step 3 architecture-minor-fallback (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-1 -->
+
+## Round 1 by reviewer - Step 3
+
+- Recorded: 2026-09-14T20:07:03+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Baseline index tree: 245887f6e97f83a366f3a3a38004cd3bc8b92f26
+
+Assessed index tree: 876c11a4e3a2f8d2106ecfbdcc6a7c1f3dfa99fd
+
+### Implementation check for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 3 has been fully implemented.
+
+Step 3 implements design Q05 to Q07 as planned.
+
+#### What was verified for step 3 for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+- **Progress record.** `package_progress_read` accepts exactly the four-line
+  `cplx-package-progress-v1` record: CR tolerated per line, no NUL, no extra or
+  missing fields, never evaluated. `package_progress_write` publishes through an
+  owned `.cplx-progress-*` sibling with `mv -fT`, returns 116 on failure, and
+  removes the candidate. The ignore rule covers leftovers.
+- **Restart rules.** `package_progress_prepare`:
+  - writes a durable empty record for a first selection, a legacy or malformed
+    record, a changed architecture or list, or a stale cursor, before any
+    package IO;
+  - otherwise resumes after the first match of the cursor or
+    `CPLX_SP_REPEAT`;
+  - lets repeat have no effect with an empty or discarded cursor.
+
+  Membership and iteration use one normalized snapshot of active entries, so a
+  list edited mid-run cannot change the order. This is proven by
+  `progress_single_snapshot`.
+- **Explicit reset.** The entry is validated against that snapshot (a trailing
+  CR is stripped) before any write. An unknown entry exits 117, names the
+  selected list and leaves the record byte-identical. A valid entry resumes
+  after that entry, which is the consolidated design's wording for explicit
+  intent. `--reset-list` with `--package`, and `--after-entry` without reset,
+  fail with 117 before any mutation. Direct packages never open the progress
+  path, even when it is a directory.
+- **Setup flow.** `main` validates the whole argv before any IO. Progress is
+  published after each successful package, and a publication failure exits 116
+  without claiming completion.
+- **CMD launcher.** `setup.bat` runs with delayed expansion disabled, consumes
+  `packages`, `p_<name>`, `reset` and its entry through `shift`, and calls Bash
+  with explicit argv (`--package`, `--reset-list`, `--after-entry`), never raw
+  `%*`. The step helper receives only a generic step name, including `sdpl`'s
+  `download_packages_list`. Bash and helper failures reach exit 119.
+
+#### Real-environment checks beyond the fixtures for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+The CMD harness uses recording endpoints and a fixture `senv.bat`, so I ran two
+checks against the real environment:
+
+- `bash.exe <Windows path>\src\setups\setup_packages.sh --bogus`, through the
+  real `senv.bat`, resolved Git's `bash.exe` first on PATH. The real script
+  sourced its helpers from the Windows-form path and stopped with
+  `FATAL [117] Unknown package setup argument: '--bogus'` before any IO; the
+  tree was unchanged.
+- The new `if errorlevel 1 exit /b 119` after `call senv.bat` cannot fire
+  spuriously. With a prior ERRORLEVEL of 7, the real `senv.bat` returned 0 both
+  with its guard set and cleared.
+
+#### Architecture check by the reviewer for step 3 for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Parsing, validation and publication live in `package_progress.sh`; main owns
+argv validation, synchronization and logging; CMD only translates its public
+interface. No helper has source-time side effects or a network or remote
+dependency. The plan edit only records the one-line index-fixture adaptation in
+the Step 3 inventory and changes no design. No, there is no architecture issue
+that needs to be addressed.
+
+#### Performance check by the reviewer for step 3 for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Entries are read once. Membership validation and resume search are each one
+linear pass, and each successful package writes one small record. There is no
+sort and no metadata re-enumeration. No, there is no performance issue that
+needs to be addressed.
+
+#### Coverage check by the reviewer for step 3 for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+There is no measured coverage gate in this Bash and CMD repository. All four
+progress helpers are reached from main, and all eight progress groups and eleven
+CMD cases are registered and executed. No unit-tested class is below 100%, and
+no top-level symbol is unreferenced.
+
+Validation plan effects:
+
+One reviewer edit is confined to the Step 3 feature-integrity rows of
+`docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md`. A new
+paragraph before "No existing supported feature is impaired by Step 3" documents
+that the launcher interface is now closed.
+
+- **Accepted forms:** no argument, one step name, `packages`,
+  `packages <step>`, `packages p_<name>` or `packages reset [entry]`.
+- **Extra arguments:** exit 119 before any step helper or setup work.
+- **Previous behavior:** the old launcher silently ignored extra words; it
+  repeated only the first step and passed the rest to `setup.sh`, which never
+  reads them.
+- **Also affected:** `build.bat` forwards its non-release parameters through the
+  same interface.
+
+The record previously claimed no impairment without mentioning this tightening.
+The edit was recorded as a pre-repair blob, attributed cleanly and staged. It is
+review metadata and polishing only.
+
+### Pre-repair mandatory checks and coverage for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+All resolved commands ran on the received index tree
+`245887f6e97f83a366f3a3a38004cd3bc8b92f26`. The later reviewer edit changed only
+validation-record prose, so these results apply unchanged to the assessed tree.
+
+- `bash src/utils/lint_shell.sh`, through the guard-clearing `senv.bat` form:
+  `lint_shell: 57 tracked scripts`, `lint_shell: clean`, exit 0.
+- `bash docs/v0.27.0/verify.architecture-fallback.sh --step 3`: 8 metadata,
+  9 index (including the real Windows held destination) and 8 progress groups
+  passed. Both preservation checks passed.
+  `Architecture gate: exit=0 elapsed=498s`, exit 0.
+- `cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd`: all 11 cases
+  passed (reset, after, direct, conflict, repeat, reset_step, sdpl, literal,
+  literal_after, bash_failure, helper_failure), exit 0.
+
+`git diff --cached --check` was clean before and after the reviewer edit. The
+two real-environment checks in the implementation check (the Windows-path
+invocation and the `senv.bat` ERRORLEVEL reset) left the tree unchanged.
+
+### Resolved validation set and sources for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `bash docs/v0.27.0/verify.architecture-fallback.sh --step 3` (source: plan Step 3)
+- `cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd` (source: plan Steps 3 and 4)
+
+### Resolver drift and direction for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+No drift. The set equals `.review-validation` plus the plan's Step 3 runner
+command and its required Windows launcher command. The writer's native RHEL run
+is recorded evidence outside the mandatory set, and the reviewer did not repeat
+it.
+
+### Repository state around validation for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+- **Index trees:** request-time and reviewer-entry trees are
+  `245887f6e97f83a366f3a3a38004cd3bc8b92f26`. The assessed tree after the staged
+  reviewer edit is `876c11a4e3a2f8d2106ecfbdcc6a7c1f3dfa99fd`.
+- **Umbrella digest:** unchanged
+  (`7e4bdb1e929a7ffbbcf650c1b60287934760f0469ef8599ebde54fab15a16294`).
+- **Validation state:** the comparison over the ten staged Step 3 paths reports
+  tracked differences only in
+  `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md` and the
+  index. Both are the reviewer's Step 3 feature-integrity paragraph and its
+  staging, which is permitted review metadata. There are no validation side
+  effects; the runner's and launcher's preservation checks passed.
+- **Unstaged tracked change:** the protocol transcript, which was neither read
+  nor staged.
+
+### Repair inventory for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Repairs made:
+
+- docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md (polishing-only review metadata): Step 3 feature-integrity paragraph documents the closed launcher interface and extra-argument exit 119
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+
+### Commit plan assessment for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+`commit-plan-check.bat --format json` was run independently before and after the
+reviewer edit. Both times it returned status 0, `state: valid`, `ready: true`
+and no diagnostics, with ten staged paths in two groups:
+
+1. `feat(packages): scope progress and forward resets`: the progress helper,
+   setup script, launcher, package ignore file, progress, launcher, runner and
+   index fixtures, and the plan inventory note;
+2. `docs(architecture-minor-fallback): record step 3 validation`: the validation
+   record, last.
+
+The reviewer edit stays in group 2's path. Membership, order and subjects remain
+accurate, and `a.commit` was not amended. The status 0 proves only mechanical
+grouping.
+
+### Findings and boundaries for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+No change is requested for Step 3.
+
+1. Review the staged reviewer paragraph in the Step 3 feature-integrity section
+   of the validation record. It documents that `setup.bat` now rejects extra
+   arguments with 119, where they used to be silently ignored.
+2. Present this advisory commit-ready recommendation at the human commit gate,
+   and include the review transcript through the residual continuation.
+3. When Step 4 updates `wiki/reference/commands.md`, mention the closed launcher
+   interface there too.
+
+### Decision rationale for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Decision: commit-ready (advisory).
+
+The readiness floor passes:
+
+- exact identity;
+- Step 3 complete against the plan and the consolidated design;
+- all three mandatory commands passing, including 25 cumulative groups and 11
+  real CMD cases, plus two real-environment checks the fixtures cannot provide;
+- attributable staged scope;
+- no unresolved or boundary-crossing findings;
+- an accurate `a.commit`.
+
+The only reviewer edit is polishing-only review metadata in the Step 3
+validation rows; it closes a documentation gap about the stricter launcher
+arguments. No code, test, acceptance or grouping change was made. The
+recommendation does not authorize a commit.
+
+### Final reviewer decision for step 3 architecture-minor-fallback (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-3-round-1 -->
+
+## Round 1 by human - Step 3 - human-confirmation
+
+- Recorded: 2026-09-14T20:11:28+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
