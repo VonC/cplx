@@ -1,9 +1,9 @@
 # v0.27.0 architecture minor fallback implementation tracking and validation
 
-No, it is not implemented
+No, it is not implemented.
 
 Track the four steps in [the implementation plan](plan.v0.27.0.architecture-minor-fallback.md).
-This initial skeleton records no implementation or executed acceptance result.
+Step 1 is implemented and verified. Steps 2-4 and real-host acceptance remain pending.
 
 ## File-based IO cost clarification for architecture fallback implementation
 
@@ -24,7 +24,11 @@ There is no new elapsed-time threshold or Python coverage requirement.
 
 ### Analysis of Step 1 implementation state
 
-Not started. Step 1 is not implemented because the selector, adapters and Bash verification seam have not been implemented.
+Yes. Step 1 has been fully implemented.
+
+The pure selector, list and active-mirror adapters, source-safe main guard and
+isolated cumulative Bash gate satisfy the Step 1 matrix. Ordinary package setup
+retains its existing exact-only flow until Step 2 connects the new helpers.
 
 ### Goal for Step 1
 
@@ -38,27 +42,118 @@ Provide exact-first, integer-minor selection through one pure selector and per-k
 
 ### What was implemented for Step 1
 
-_(empty — no check has taken place yet.)_.
+- [Metadata helper](../../src/setups/package_metadata.sh): exact lookup before
+  parsing, normalized integer comparison, whole-machine boundaries, highest
+  lower/lowest higher selection and original source identity. Equal candidate
+  numeric minors use literal-key C ordering for deterministic ties. An equal
+  numeric minor to the request remains excluded from fallback. Mirror names
+  follow the existing reader's canonical addressing: a dotted version spelling
+  cannot become an exact definition or shadow the underscore property name.
+- [Setup entry point](../../src/setups/setup_packages.sh): source the helper and
+  guard `main` with `BASH_SOURCE`; existing execution and comments are preserved.
+- [Cumulative runner](verify.architecture-fallback.sh) and
+  [metadata matrix](verify.architecture-metadata.sh): copied setup/utils/echos
+  fixtures, denied SSH/SCP/curl calls, per-case processes and live-tree
+  preservation on normal and unsuccessful exits. Future unfinished step gates
+  explicitly fail. The runner keeps `.review-validation` unchanged and executes
+  its tracked ShellCheck floor before explicit syntax/lint checks and fixtures.
+- **Executed evidence, 2026-09-14, Windows CMD and configured Git Bash**:
+  `cmd /d /v:on /c "set NO_MORE_SENV_cplx=& call <NUL senv.bat && !GH!\bin\bash.exe docs/v0.27.0/verify.architecture-fallback.sh --step 1"`
+  exited 0 in 35 seconds on the reviewer-repaired tree. All eight case groups
+  passed, as did the 55-script
+  mandatory lint floor, explicit effort checks and real-tree preservation.
+  The [round 1 reviewer](review.code.v0.27.0.architecture-minor-fallback.md)
+  ran both resolved commands before and after its canonical-property repair;
+  the writer inspected and accepted the staged patch and its two added cases.
+  The writer's preceding gate passed in 34 seconds, including a whitespace-only
+  fixture representation correction found before publication.
+  Before production edits, the same fixture entry failed because the helper
+  was absent; the failure-exit preservation check passed in that run too.
+- **Static verification**: the planned `package_metadata_|BASH_SOURCE` search,
+  `git diff --check` and changed-file inspection passed. Only the four Step 1
+  code/test paths and this validation record changed. Tests were not rerun as
+  part of this separate implementation check.
+
+Physical lines were recounted before production editing and after validation:
+
+| File | Before | After | Advisory estimate |
+| --- | --- | --- | --- |
+| `src/setups/setup_packages.sh` | 569 | 575 | Existing main |
+| `src/setups/package_metadata.sh` | 0 | 201 | 260 |
+| `verify.architecture-fallback.sh` | 0 | 139 | 200 |
+| `verify.architecture-metadata.sh` | 0 | 212 | 260 |
+
+The new files are below their advisory estimates. No Python line ceiling applies.
 
 ### New types or classes introduced for Step 1
 
-_(empty — no check has taken place yet.)_.
+No classes were introduced. `package_metadata_select` operates on caller-owned
+indexed inventories and returns an associative result plus indexed diagnostics.
+`package_metadata_list` and `package_metadata_mirror` own the filesystem and
+active-properties boundaries; the mirror adapter also returns ordered URLs.
+Number parsing/comparison, trimming, reading and substitution reporting remain
+small helpers inside the same file. Runner utilities and the eight metadata
+case functions provide the verification seam.
 
 ### Architecture check for Step 1
 
-_(empty — no check has taken place yet.)_.
+The selector contains policy and Bash variable operations only. Adapters own
+reads and successful substitution logging; the single read function permits
+permission-independent failure injection. No selector calls setup, remote
+commands, property writers or progress handling. Data never passes through
+evaluated property text or diagnostic stdout. The main entry point imports
+the helper without running setup when sourced.
+
+No, there is no architecture issue that needs to be addressed for Step 1.
 
 ### Performance check for Step 1
 
-_(empty — no check has taken place yet.)_.
+Selection scans the candidate inventory at most twice, with no candidate sort.
+Integer comparison uses normalized digit lengths and C-order comparison, so
+leading zeroes do not invoke octal arithmetic and large integers do not overflow.
+The list adapter enumerates only its tool directory when exact input is absent
+and reads only the selected file. Mirror parsing reads active properties once
+and retains first definitions in an associative table. The call-count case
+proved one properties read followed by one selected-list read.
+
+The repaired-tree gate took 35 seconds; no arbitrary timing threshold applies.
+The runner batches metadata hashing and inventories cache paths/sizes/timestamps
+without hashing cached RPM contents. No new quadratic or sorting operation was
+added to the selector. No, there is no performance issue that needs addressing.
 
 ### Unit test coverage check for Step 1
 
-_(empty — no check has taken place yet.)_.
+This Bash repository has no Python class coverage gate. The approved plan uses
+a named behavioral matrix, not a claimed line-coverage percentage:
+
+| Case group | Verified behavior |
+| --- | --- |
+| `metadata_exact_and_lists` | Empty/comment-only exact authority, malformed exact identity, retained requested/source identity, substitution log, exclusion of indexes and other tools |
+| `metadata_order_permutations` | All six candidate permutations for three requests (18 checks), 10-versus-9 ordering, deterministic numeric ties and clean selector stdout |
+| `metadata_boundaries` | Distribution, major and whole-machine exclusions; major-only exact and fallback boundaries; equal leading-zero spelling excluded; large integer ordering and failure diagnostics |
+| `metadata_mirrors` | First definition only, empty first exact absent, trimmed ordered URLs, CRLF, literal unevaluated values, active file only, major-only property, stale-output clearing, dotted-name shadowing excluded and dotted-only exact absent |
+| `metadata_read_failures` | Injected unreadability for a present exact list and active properties, plus invalid present list directory; no fallback conceals either failure |
+| `metadata_bounded_reads` | One active properties read and one selected-list read |
+| `metadata_source_guard` | Copied main/helper sourcing without persistent changes or network calls; resolved main path stays in the fixture |
+| `metadata_fatal_exit` | Actual legacy fatal exit 87 in a subprocess, followed by live-tree preservation comparison |
+
+All new production and harness top-level functions have test or internal
+callers. No unit-tested Python class needs completing, because none is involved.
+No, there are no unreferenced top-level symbols in the new files.
 
 ### Feature integrity for Step 1
 
-_(empty — no check has taken place yet.)_.
+Empty exact lists remain authoritative; damaged present inputs fail; invalid
+nonempty mirror text remains available for the ordinary download failure path.
+List and mirror results are independent, and selected identities never replace
+the detected architecture. The existing package flow changes only at its source
+guard and helper import in this step.
+
+Live setup metadata, Git status (including ignored paths), and cache inventory
+matched before and after the gate, including its deliberately fatal fixture.
+No Jenkins, RHEL host, compilation or packaging action was needed for this
+isolated step. Native Linux and actual CMD launcher acceptance remain assigned
+to the later plan steps; this record makes no claim that those ran.
 
 ## Step 2: Carry selections through exact-index generation and use
 
