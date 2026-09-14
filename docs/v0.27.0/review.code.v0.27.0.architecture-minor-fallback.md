@@ -688,3 +688,744 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 2
+
+- Recorded: 2026-09-14T18:07:55+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 architecture-minor-fallback (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+Implementation step: 2
+Review round: 1
+
+### Code review evidence for step 2 architecture-minor-fallback (round 1)
+
+request_index_tree: 78c032ad4731715049cf5e5a0c7d7feb0eb8f68c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.architecture-fallback.sh --step 2 (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(packages): publish guarded exact indexes
+group 1 path: src/setups/package_metadata.sh
+group 1 path: src/setups/package_index.sh
+group 1 path: src/setups/setup_packages.sh
+group 1 path: src/setups/pkgs/.gitignore
+group 1 path: docs/v0.27.0/verify.architecture-fallback.sh
+group 1 path: docs/v0.27.0/verify.architecture-index.sh
+group 2: docs(architecture-minor-fallback): record step 2 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/verify.architecture-fallback.sh
+staged path: docs/v0.27.0/verify.architecture-index.sh
+staged path: src/setups/package_index.sh
+staged path: src/setups/package_metadata.sh
+staged path: src/setups/pkgs/.gitignore
+staged path: src/setups/setup_packages.sh
+```
+
+### Requestor assessment for step 2 architecture-minor-fallback (round 1)
+
+Yes. Step 2 has been fully implemented.
+
+The invocation pins detected architecture, exact index identity, selected list
+and first-resolved ordered mirror URLs. Ordinary and direct-package flows guard
+the exact index independently of completion status. Generation validates a
+unique sibling candidate before replacement and records completion afterward.
+Cache hits and usable indexes remain independent of mirror configuration.
+
+The cumulative gate passed on Windows CMD/Git Bash (215 seconds, 17 groups)
+and native RHEL Bash (20 seconds, 16 applicable groups). Windows exercised a
+real held destination, preserved old bytes on replacement failure, then
+successfully retried after release. The final native run explicitly labels that
+Windows-only case separately required. Mandatory tracked-shell ShellCheck,
+explicit effort syntax/lint checks and live metadata/status/cache preservation
+passed. The final fixture reporting clarification occurred after the Windows
+run; review validation will exercise the exact final staged tree.
+
+The index fixtures cover 48 guard combinations, ten generation/completion
+failure boundaries, retry exhaustion, lookup failure, lazy mirror failure,
+built-package bypass, cached/offline operation and selected-list copy identity.
+The approved plan substitutes this Bash gate for Python/ghog coverage. There
+is no Python class coverage claim. All new top-level functions have callers.
+
+Architecture and performance evidence: orchestration shrinks from 575 to 442
+lines; metadata, index and index-fixture files are 223, 150 and 296 lines.
+All stay within advisory limits. Mirrors resolve once per invocation and a
+served refresh is reused across packages. The recorded validation details the
+commands, timing, boundaries and remaining Step 3/4 work.
+
+Native validation used an isolated temporary source copy and pinned temporary
+ShellCheck. It made no live setup changes and performed no compilation,
+application packaging, Jenkins run or publication.
+
+### Implementation report for step 2 architecture-minor-fallback (round 1)
+
+Step 2 carries Step 1 metadata selection through exact-index production and
+consumption. The main shell now owns one context and URL array. It resolves the
+ordinary list once, retains its original source for synchronization and remote
+dependencies.list copying, and retains a relative identity for Step 3 progress.
+
+The new package_index.sh contains index availability, existing extraction and
+aggregation policy, and checked publication. It creates isolated scratch and
+candidate siblings, checks fetch and every extraction pipeline component,
+checks final nonempty output, replaces through mv -fT, and cleans only owned
+scratch. Failure preserves an existing index until successful replacement;
+completion follows replacement. Missing/empty indexes regenerate even with a
+completion marker. Reload and force-reload regenerate once per invocation.
+
+Direct lookup uses the same guard, except the existing built-package form.
+Lookup no longer creates an empty placeholder. Cached archives need no mirror
+resolution, while actual downloads reuse pinned URLs and retry in their
+existing order. Remote preparation copies the selected fallback list itself.
+
+The cumulative runner adds dedicated index fixtures, including actual
+orchestration and download paths with bounded fake network output. Windows
+uses a real file handle to deny destination replacement, then retries after
+release. Scoped progress and reset remain Step 3; curated cleanup and live
+acceptance remain Step 4.
+
+### Change summary for step 2 architecture-minor-fallback (round 1)
+
+Seven staged paths form two prepared root a.commit groups:
+
+1. feat(packages): publish guarded exact indexes
+   - src/setups/package_metadata.sh
+   - src/setups/package_index.sh
+   - src/setups/setup_packages.sh
+   - src/setups/pkgs/.gitignore
+   - docs/v0.27.0/verify.architecture-fallback.sh
+   - docs/v0.27.0/verify.architecture-index.sh
+2. docs(architecture-minor-fallback): record step 2 validation
+   - docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+
+wac formatting and commit-plan-check passed with all seven paths assigned and
+no diagnostics. The long validation subject is the required pw step marker.
+The versioned review transcript is an owning-continuation residual after
+authorization, as for Step 1. No Step 2 commit is authorized yet.
+
+### Writer response for step 2 architecture-minor-fallback (round 1)
+
+Writer response:
+
+This is the first implementation review of Step 2. There is no earlier Step 2
+feedback or disagreement. Step 1 review and its authorized commit lifecycle
+are complete. The current request contains only Step 2 and its cumulative gate.
+
+Preserve the approved platform roles: RHEL packages and deploys tools; Debian
+Jenkins consumes tools, tests application sources, and packages/publishes the
+application only. This step's validation uses isolated fixtures and no gcc or
+build workflow. Public review prose must retain generic application names.
+
+### Reviewer focus for step 2 architecture-minor-fallback (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-1 -->
+
+## Round 1 by reviewer - Step 2
+
+- Recorded: 2026-09-14T18:19:04+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+Baseline index tree: 78c032ad4731715049cf5e5a0c7d7feb0eb8f68c
+
+Assessed index tree: 78c032ad4731715049cf5e5a0c7d7feb0eb8f68c
+
+### Implementation check for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+Result:
+
+No. Step 2 has NOT been fully implemented.
+
+The context, guard, publication and consumer wiring are correct and well
+tested. Two points break the plan's instruction to extract generation
+"retaining the established HTML extraction and aggregation rules" without
+impairing existing behavior, and one behavior change is not recorded.
+
+#### What was verified for step 2 for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+- **Invocation context.** `package_metadata_context` keys the exact index to the
+  detected architecture. The ordinary list is selected once, before any mirror
+  work. `sync_packages` and `setup_remote_install` consume
+  `package_context[list_source]`, so synchronization and `dependencies.list`
+  use the same fallback file (`index_selected_list_copy`).
+- **Guard.** `package_index_available` ignores the completion marker. It
+  regenerates on a missing or empty index or either reload flag, once per
+  invocation, on both the ordinary and the direct path. The built `_` form
+  bypasses the index and mirrors. This is proven by the 48-cell matrix and
+  `index_direct_built_and_empty`.
+- **Mirrors.** `package_metadata_pin_mirrors` resolves lazily and pins the
+  selected URLs in the current shell, so generation and every download reuse
+  one read, and cached or offline runs never read properties
+  (`index_pinned_mirrors_and_cache`).
+- **Publication.** Generation runs in a subshell with mktemp-owned
+  `.cplx-index-*` scratch and a candidate cleaned by an EXIT trap. It checks
+  every pipeline component through `PIPESTATUS`, requires a nonempty candidate,
+  and replaces with `mv -fT`. It records completion only afterwards; a
+  completion failure exits 6 with the new index kept. Ten injected failures
+  keep the old bytes, and a real Windows handle without delete sharing yields
+  115 and then recovers.
+- **Lookup.** `find_package_in_arch` no longer creates a placeholder index; it
+  fails with 201 on a missing or empty index.
+
+#### Missing work for step 2 for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+- **Soft skip of an empty listing lost.** The removed `process_packages_url`
+  logged `Failed to extract URLs ...` and returned 0 when no pipeline matched a
+  listing, so the other mirror URLs still produced the index.
+  `package_index_listing` now returns 111 ("No package URLs extracted"), and the
+  whole generation stops. Executed evidence: with two URLs, one serving
+  `alpha-1.x86_64.rpm` and one a valid 50-line page without package links, the
+  `HEAD` code returned 0, warned about the empty URL and published `alpha-1`,
+  while the staged code returned fatal 111 with no index. Either restore the
+  warn-and-skip for the case where every pipeline ran without a command error
+  but matched nothing, keeping hard failures for fetch errors, short pages,
+  grep status 2 and an empty final candidate (112), or record the stricter rule
+  as a deliberate, justified change in this step's record. The restoration is
+  the reading that keeps the established rules.
+- **Generation reporting removed.** The old path reported the URL list, each
+  URL's package count, the final unique package count and the saved index. A
+  successful staged generation prints nothing: an executed run produced empty
+  output with rc 0. The run output no longer shows which mirror property
+  generated the detected-key index, or how large the published index is.
+  Restore concise messages on the generation path only (not on every per-package
+  guard reuse): the mirror source and URL count before generating, and the
+  published path with its package count after publication. Keep them on the
+  existing `task`/`ok` channel, not on data stdout.
+- **Download URL normalization change not recorded.** `download_package` replaced
+  `url="${url//\/\//\/}"`, which collapsed every double slash and so also
+  rewrote `https://` into `https:/`, with a single trailing-slash strip on the
+  mirror prefix. This is likely an improvement, but the validation record should
+  state it, since it changes the exact URLs requested.
+
+#### Architecture check by the reviewer for step 2 for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+Responsibilities are well separated. Metadata owns selection and pinning, the
+index helper owns listing and publication IO, and main owns synchronization and
+remote orchestration. The subshells return only statuses and files, never
+context. Yes, there is something that needs to be addressed: the generation
+reporting regression listed above sits in this boundary.
+
+#### Performance check for step 2 by the reviewer for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+The guard costs one stat per package. Listing, aggregation and sorting keep
+their previous cost, mirrors resolve once per invocation, and the selector
+stays linear. No, there is no performance issue that needs to be addressed.
+
+#### Coverage check for step 2 by the reviewer for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+There is no measured coverage gate in this Bash repository. Every new top-level
+function (`package_index_available`, `aggregate`, `extract`, `listing`,
+`write_candidate`, `generate`, the trap callback, `package_metadata_context`,
+`pin_mirrors`, `resolve_package_mirrors`) is referenced and exercised. No fixture
+covers a listing that matches nothing next to a productive listing, which is the
+case the first missing item concerns. No unit-tested class is below 100%, and no
+top-level symbol is unreferenced.
+
+Validation plan effects:
+
+The reviewer made no edit to the validation plan. The staged Step 2 record reads
+"Yes. Step 2 has been fully implemented." and its feature-integrity section does
+not mention the empty-listing hard failure, the removed generation reporting, or
+the download URL normalization change. The writer owns updating it with the
+resolution of the missing work.
+
+### Pre-repair mandatory checks and coverage for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+No repair was made, so this is the only run. Both commands ran on the received
+index tree `78c032ad4731715049cf5e5a0c7d7feb0eb8f68c`, which is the final staged
+tree (the requestor noted a fixture reporting edit after its own Windows run),
+through
+`cmd /d /v:on /c "set NO_MORE_SENV_cplx=& call <NUL senv.bat >NUL && !GH!\bin\bash.exe <command>"`:
+
+- `bash src/utils/lint_shell.sh`: `lint_shell: 56 tracked scripts`,
+  `lint_shell: clean`, exit 0.
+- `bash docs/v0.27.0/verify.architecture-fallback.sh --step 2`: 8 metadata and
+  9 index groups passed, including `index_windows_held_destination` with a real
+  PowerShell handle. Both preservation checks passed.
+  `Architecture gate: exit=0 elapsed=213s`, exit 0.
+
+`git diff --cached --check` was clean. Two further executed comparisons, on
+scratch copies outside the repository, support the findings: `HEAD` against
+the staged generation on an empty listing, and the staged generation's output
+on success.
+
+### Resolved validation set and sources for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `bash docs/v0.27.0/verify.architecture-fallback.sh --step 2` (source: plan Step 2)
+
+### Resolver drift and direction for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+No drift. `.review-validation` still declares only the lint floor, and the plan's
+Step 2 ready command is the `--step 2` runner invocation. The plan's native Linux
+portability run is recorded by the writer, which ran it on RHEL 9.8 in a
+temporary checkout. It is not part of the resolved mandatory set, and the
+reviewer did not repeat it.
+
+### Repository state around validation for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+- **Index trees:** request-time, reviewer-entry and assessed trees are all
+  `78c032ad4731715049cf5e5a0c7d7feb0eb8f68c`.
+- **Umbrella digest:** unchanged
+  (`7e4bdb1e929a7ffbbcf650c1b60287934760f0469ef8599ebde54fab15a16294`).
+- **Validation state:** the comparison over the seven staged Step 2 paths
+  reports `acceptable: true` with no differences, and the runner's live-tree
+  comparison passed.
+- **Unstaged tracked change:** the protocol transcript
+  `docs/v0.27.0/review.code.v0.27.0.architecture-minor-fallback.md` was already
+  modified and unstaged before assessment; it was neither read nor staged.
+
+### Repair inventory for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+`commit-plan-check.bat --format json` was run independently and returned status
+0, `state: valid`, `ready: true` and no diagnostics. Seven staged paths fall into
+two groups:
+
+1. `feat(packages): publish guarded exact indexes`: metadata, index helper,
+   setup script, package ignore file and both verification scripts;
+2. `docs(architecture-minor-fallback): record step 2 validation`: the validation
+   record, last.
+
+Membership, order and subjects match the staged work, and `a.commit` was not
+amended. Group 2's "Mark Step 2 complete" bullet will need to follow the outcome
+of the missing work. The status 0 proves only mechanical grouping.
+
+### Findings and boundaries for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+Unresolved findings:
+
+- package_index_listing turns a listing whose pipelines match nothing into fatal 111 for the whole generation, where the established process_packages_url warned and skipped that URL (executed: HEAD rc 0 with index, staged rc 111 without index)
+- Successful index generation prints nothing (executed: empty output, rc 0); the mirror source, per-URL and final package counts and published path are no longer reported
+- The download URL normalization change (no double-slash collapse, scheme kept, one trailing slash stripped) is not recorded in the Step 2 validation record
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+1. In `src/setups/package_index.sh`, restore the established soft skip. When
+   every extraction pipeline ran without a component error (no status above 1)
+   but matched nothing, emit a warning naming the URL and return success with
+   no per-URL output, so the other URLs still contribute. Keep the current hard
+   failures for a failed fetch, a page under 50 lines, a grep component error,
+   and an empty final candidate (112). If you prefer the stricter rule, record
+   it in the Step 2 record as a deliberate change with its rationale instead,
+   since the plan asked to retain the established rules.
+2. Add a fixture in `verify.architecture-index.sh` with one productive and one
+   empty-but-valid listing, asserting the chosen behavior: a published index from
+   the productive URL plus a warning, or the documented failure.
+3. In `download_packages_list`, report generation only, not per-package guard
+   reuse. Before generating, name the pinned mirror source and URL count; after
+   publication, name the index path and its package count. Use the existing
+   `task`/`ok` logging.
+4. Record the download URL normalization change in the Step 2 record. Then
+   re-run the Step 2 gate on Windows (and natively, per the plan), update the
+   record and `a.commit` group 2 accordingly, and publish round 2.
+
+### Decision rationale for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+Decision: changes-requested.
+
+Identity, mandatory validation, staged attribution and commit grouping pass, and
+the core Step 2 design is correct. The implementation-check result is No,
+because generation no longer retains the established skip of an empty listing,
+and successful generation lost its operator reporting, both confirmed by
+execution. A third behavior change is unrecorded. Those are unresolved findings,
+so the readiness floor is incomplete. No reviewer repair was made; the soft-skip
+choice belongs to the writer.
+
+### Final reviewer decision for step 2 architecture-minor-fallback (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-2-round-1 -->
+
+## Round 2 by requestor - Step 2
+
+- Recorded: 2026-09-14T18:28:05+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 architecture-minor-fallback (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+Implementation step: 2
+Review round: 2
+
+### Code review evidence for step 2 architecture-minor-fallback (round 2)
+
+request_index_tree: 0994cb5434057afac4f70a1f6fd00a33a2fe3384
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.architecture-fallback.sh --step 2 (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(packages): publish guarded exact indexes
+group 1 path: src/setups/package_metadata.sh
+group 1 path: src/setups/package_index.sh
+group 1 path: src/setups/setup_packages.sh
+group 1 path: src/setups/pkgs/.gitignore
+group 1 path: docs/v0.27.0/verify.architecture-fallback.sh
+group 1 path: docs/v0.27.0/verify.architecture-index.sh
+group 2: docs(architecture-minor-fallback): record step 2 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/verify.architecture-fallback.sh
+staged path: docs/v0.27.0/verify.architecture-index.sh
+staged path: src/setups/package_index.sh
+staged path: src/setups/package_metadata.sh
+staged path: src/setups/pkgs/.gitignore
+staged path: src/setups/setup_packages.sh
+```
+
+### Requestor assessment for step 2 architecture-minor-fallback (round 2)
+
+Yes. Step 2 has been fully implemented.
+
+The invocation pins detected architecture, exact index identity, selected list
+and first-resolved ordered mirror URLs. Ordinary and direct-package flows guard
+the exact index independently of completion status. Generation validates a
+unique sibling candidate before replacement and records completion afterward.
+Cache hits and usable indexes remain independent of mirror configuration.
+
+The cumulative gate passed on Windows CMD/Git Bash (228 seconds, 17 groups)
+and native RHEL Bash (17 seconds, 16 applicable groups). Windows exercised a
+real held destination, preserved old bytes on replacement failure, then
+successfully retried after release. The final native run explicitly labels that
+Windows-only case separately required. Mandatory tracked-shell ShellCheck,
+explicit effort syntax/lint checks and live metadata/status/cache preservation
+passed. Both runs exercised the repaired code and expanded fixtures for this
+round. The added regression first failed with 111 on the previous implementation.
+
+The index fixtures cover 48 guard combinations, twelve generation/completion
+failure boundaries, retry exhaustion, lookup failure, lazy mirror failure,
+built-package bypass, cached/offline operation and selected-list copy identity.
+The approved plan substitutes this Bash gate for Python/ghog coverage. There
+is no Python class coverage claim. All new top-level functions have callers.
+
+Architecture and performance evidence: orchestration shrinks from 575 to 444
+lines; metadata, index and index-fixture files are 223, 152 and 310 lines.
+All stay within advisory limits. Mirrors resolve once per invocation and a
+served refresh is reused across packages. The recorded validation details the
+commands, timing, boundaries and remaining Step 3/4 work.
+
+Native validation used an isolated temporary source copy and pinned temporary
+ShellCheck. It made no live setup changes and performed no compilation,
+application packaging, Jenkins run or publication.
+
+All round 1 findings are addressed. Valid empty listings warn and skip;
+productive peers still publish, while all-empty listings fail with 112.
+Generation reports its mirror property, URL count, published path and package
+count through task/ok only when it generates. The validation record explicitly
+documents the preserved URL scheme and single trailing-slash join.
+
+### Implementation report for step 2 architecture-minor-fallback (round 2)
+
+Step 2 carries Step 1 metadata selection through exact-index production and
+consumption. The main shell now owns one context and URL array. It resolves the
+ordinary list once, retains its original source for synchronization and remote
+dependencies.list copying, and retains a relative identity for Step 3 progress.
+
+The new package_index.sh contains index availability, existing extraction and
+aggregation policy, and checked publication. It creates isolated scratch and
+candidate siblings, checks fetch and every extraction pipeline component,
+checks final nonempty output, replaces through mv -fT, and cleans only owned
+scratch. Failure preserves an existing index until successful replacement;
+completion follows replacement. Missing/empty indexes regenerate even with a
+completion marker. Reload and force-reload regenerate once per invocation.
+
+Direct lookup uses the same guard, except the existing built-package form.
+Lookup no longer creates an empty placeholder. Cached archives need no mirror
+resolution, while actual downloads reuse pinned URLs and retry in their
+existing order. Remote preparation copies the selected fallback list itself.
+
+The cumulative runner adds dedicated index fixtures, including actual
+orchestration and download paths with bounded fake network output. Windows
+uses a real file handle to deny destination replacement, then retries after
+release. Scoped progress and reset remain Step 3; curated cleanup and live
+acceptance remain Step 4.
+
+Round 1 repairs restore the established warn-and-skip when all extraction
+pipelines run without errors but match no packages. The generator only adds
+per-URL files that exist; all-empty input fails with 112. Fetch failure, short
+pages and component errors still fail. Main reports selected mirror property
+and URL count before generation and published path/count after replacement.
+The publication fixture now mixes productive and empty listings, captures the
+warning and both reports, and checks silent guard reuse. Failure fixtures add
+short and all-empty listing cases. URL joining is documented in the record.
+
+### Change summary for step 2 architecture-minor-fallback (round 2)
+
+Seven staged paths form two prepared root a.commit groups:
+
+1. feat(packages): publish guarded exact indexes
+   - src/setups/package_metadata.sh
+   - src/setups/package_index.sh
+   - src/setups/setup_packages.sh
+   - src/setups/pkgs/.gitignore
+   - docs/v0.27.0/verify.architecture-fallback.sh
+   - docs/v0.27.0/verify.architecture-index.sh
+2. docs(architecture-minor-fallback): record step 2 validation
+   - docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+
+wac formatting and commit-plan-check passed with all seven paths assigned and
+no diagnostics. The long validation subject is the required pw step marker.
+The versioned review transcript is an owning-continuation residual after
+authorization, as for Step 1. No Step 2 commit is authorized yet.
+
+Round 1 repairs changed the index helper, setup orchestration, index fixture
+and validation record. Root a.commit retains its seven-path membership, group
+order and subjects; its bodies now record empty-listing/reporting repairs and
+twelve failure cases. The reviewer made no edits to accept or reverse.
+
+### Writer response for step 2 architecture-minor-fallback (round 2)
+
+Writer response:
+
+All three Step 2 round 1 findings are accepted, with no disagreement. The
+writer restored warn-and-skip for valid empty listings and generation-only
+task/ok reports, added mixed-listing/reporting and all-empty/short-page
+regressions, and documented the download URL joining improvement.
+
+The new mixed-listing fixture failed before the repair (111, 113 seconds) and
+the complete repaired suite passed on Windows (228 seconds) and native Linux
+(17 seconds). Live-tree preservation passed throughout. Step 2 is fully
+implemented after these repairs; its validation record and a.commit bodies
+were updated, with unchanged path membership and commit boundaries.
+
+The reviewer made no repairs. All new staged changes are writer-owned,
+substantive code/test/evidence changes and require this replacement round.
+
+Preserve the approved platform roles: RHEL packages and deploys tools; Debian
+Jenkins consumes tools, tests application sources, and packages/publishes the
+application only. This step's validation uses isolated fixtures and no gcc or
+build workflow. Public review prose must retain generic application names.
+
+### Reviewer focus for step 2 architecture-minor-fallback (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-2 -->
+
+## Round 2 by reviewer - Step 2
+
+- Recorded: 2026-09-14T18:35:44+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+Baseline index tree: 0994cb5434057afac4f70a1f6fd00a33a2fe3384
+
+Assessed index tree: 0994cb5434057afac4f70a1f6fd00a33a2fe3384
+
+### Implementation check for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+Result:
+
+Yes. Step 2 has been fully implemented.
+
+The round 1 missing work is resolved. The rest of Step 2 is unchanged from the
+tree I verified in round 1: context, guard, lazy pinned mirrors, owned sibling
+publication with `mv -fT`, completion after publication, read-only lookup, and
+selected-list copy.
+
+#### Resolution of the round 1 findings for step 2 for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+- **Empty listing.** `package_index_listing` now warns
+  (`Warning: No package URLs extracted from listing: <url>; skipping`) and
+  returns 0 without output when every pipeline ran without a component error but
+  matched nothing. `package_index_generate` aggregates only the per-URL files
+  that exist, so an all-empty set still fails with 112. Fetch failure, a page
+  under 50 lines and grep status 2 keep their hard failures. I re-ran my round 1
+  probe on scratch copies. With one productive and one empty URL: rc 0, the
+  warning, and `alpha-1.x86_64.rpm` published, matching the old code's outcome.
+  With two empty URLs: both warnings, then fatal 112 and no index, the same
+  final outcome as the old code.
+- **Reporting.** `download_packages_list` emits `task` with the index path,
+  pinned mirror property and URL count before generating, and `ok` with the
+  published path and package count after publication. Guard reuse stays silent,
+  which the new assertions in `index_generation_publication` prove.
+- **URL joining.** The feature-integrity section now records the one-trailing-
+  slash join and the preserved `https://` scheme.
+
+#### Architecture check by the reviewer for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+Selection, index IO and orchestration stay separate. The warning is emitted by
+the index helper on stderr, independent of the setup logger, and reports use the
+existing `task`/`ok` channel in main. No, there is no architecture issue that
+needs to be addressed.
+
+#### Performance check by the reviewer for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+The repairs add one file-existence test per URL and one `wc -l` after
+publication. Guard reuse, one mirror resolution per invocation and the preserved
+aggregation cost are unchanged. No, there is no performance issue that needs to
+be addressed.
+
+#### Coverage check by the reviewer for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+There is no measured coverage gate in this Bash repository. All new top-level
+functions remain referenced and exercised. The regression that round 1 found
+uncovered now has fixtures: productive plus empty listings, a short listing and
+all-empty listings. No unit-tested class is below 100%, and no top-level symbol
+is unreferenced.
+
+Validation plan effects:
+
+The reviewer made no validation-plan edit. The writer's staged Step 2 record now
+documents the restored empty-listing skip, the generation reporting, the URL
+joining change, the regression fixture that first failed with 111, the
+post-review Windows (228 s) and native RHEL (17 s) runs, and recounted sizes
+(444, 152 and 310 lines). It matches the staged code.
+
+### Pre-repair mandatory checks and coverage for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+No repair was made, so this is the final run. Both commands ran on index tree
+`0994cb5434057afac4f70a1f6fd00a33a2fe3384` through
+`cmd /d /v:on /c "set NO_MORE_SENV_cplx=& call <NUL senv.bat >NUL && !GH!\bin\bash.exe <command>"`:
+
+- `bash src/utils/lint_shell.sh`: `lint_shell: 56 tracked scripts`,
+  `lint_shell: clean`, exit 0.
+- `bash docs/v0.27.0/verify.architecture-fallback.sh --step 2`: 8 metadata and
+  9 index groups passed, including the real Windows held-destination case. Both
+  preservation checks passed. `Architecture gate: exit=0 elapsed=242s`, exit 0.
+
+`git diff --cached --check` was clean. A scratch-copy probe outside the
+repository confirmed the empty-listing and reporting behavior described in the
+implementation check.
+
+### Resolved validation set and sources for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `bash docs/v0.27.0/verify.architecture-fallback.sh --step 2` (source: plan Step 2)
+
+### Resolver drift and direction for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+No drift: the request's set still equals `.review-validation` plus the plan's Step 2 runner command.
+
+### Repository state around validation for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+- **Index trees:** request-time, reviewer-entry and assessed trees are all
+  `0994cb5434057afac4f70a1f6fd00a33a2fe3384`.
+- **Umbrella digest:** unchanged
+  (`7e4bdb1e929a7ffbbcf650c1b60287934760f0469ef8599ebde54fab15a16294`).
+- **Validation state:** the comparison over the seven staged Step 2 paths
+  reports `acceptable: true` with no differences, and the runner's live-tree
+  comparison passed.
+- **Change since the round 1 tree:** limited to `package_index.sh`,
+  `setup_packages.sh`, `verify.architecture-index.sh` and the validation record.
+- **Unstaged tracked change:** the protocol transcript, which was neither read
+  nor staged.
+
+### Repair inventory for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+`commit-plan-check.bat --format json` was run independently and returned status
+0, `state: valid`, `ready: true` and no diagnostics, with the same seven paths
+in two groups: `feat(packages): publish guarded exact indexes`, then
+`docs(architecture-minor-fallback): record step 2 validation`, last. Group 2's
+body now records the twelve injected failures and the review repairs, which
+matches the staged record. `a.commit` is accurate and was not amended. The status
+0 proves only mechanical grouping.
+
+### Findings and boundaries for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+No further change is requested for Step 2. Present this advisory commit-ready
+recommendation at the human commit gate, then include the review transcript
+through the residual continuation, as for Step 1.
+
+### Decision rationale for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+Decision: commit-ready (advisory).
+
+All six readiness-floor results pass:
+
+- exact identity and an unchanged index tree;
+- Step 2 complete, with the three round 1 findings resolved and independently
+  re-probed;
+- both mandatory commands passing on the final tree, including the real Windows
+  held-destination case;
+- no reviewer repair and no validation side effect;
+- no unresolved or boundary-crossing findings;
+- an independently checked, accurate `a.commit`.
+
+The recommendation does not authorize a commit.
+
+### Final reviewer decision for step 2 architecture-minor-fallback (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-2-round-2 -->
+
+## Round 2 by human - Step 2 - human-confirmation
+
+- Recorded: 2026-09-14T19:18:26+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
