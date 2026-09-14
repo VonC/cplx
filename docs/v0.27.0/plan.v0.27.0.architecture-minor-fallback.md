@@ -22,6 +22,24 @@ and runs tests, then packages and publishes only the application to Nexus.
 Item 4's runtime-closure protection stays downstream; SQLite integration belongs
 to item 6 and final tools rebuilding/platform delivery to item 7.
 
+## Implementation decisions
+
+All eight plan answers are approved: Q01-Q06 and Q08 use A; Q07 uses B.
+There are no remaining implementation questions. Approval of Q08 extends the
+requirement's curated correction set from one dependency name to three; the
+required Python/Git acceptance scope and design behavior remain settled.
+
+| Question | Decision and reason | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | A: use three focused metadata, index and progress helpers to keep responsibilities and step ownership separate. | Physical-line inventory; Steps 1-3 | One combined helper mixes state and IO responsibilities and grows another large file. |
+| Q02 | A: use a fixed four-line literal record with CRLF read normalization and strict validation, avoiding evaluation and escaping machinery. | Concrete helper and persistence interfaces; Step 3 | A tab-separated escaped record adds parser cases without a needed field capability. |
+| Q03 | A: forward `--reset-list` and optional `--after-entry` once through parsed arguments. | Concrete helper and persistence interfaces; Step 3 | Separate reset-operation spellings add redundant mutual-exclusion rules. |
+| Q04 | A: use focused Bash suites with a cumulative runner and a separate real CMD harness; copied fixture roots, process boundaries and preservation checks protect operator state. | Shared execution checklist and ready commands; Steps 1-4 | One growing Bash harness obscures per-step regression ownership. |
+| Q05 | A: require held-destination Windows checks in Step 2 and actual CMD checks in Step 3, then repeat in Step 4. Deny delete sharing and prove replacement failed. | Steps 2-4 | Deferring Windows evidence can leave platform defects hidden in completed steps. |
+| Q06 | A: use a controlled checkout with copied configuration/cache and labeled copied or synthetic legacy state; record origins and environment identity. | Step 4 rollout and acceptance evidence | Temporarily mutating operator files risks leaving them changed after interruption. |
+| Q07 | B: generate a fresh detected-key index and complete Python/Git setup in an isolated remote sibling target, with bootstrap/path/profile checks, served-file omissions, reuse and live-tree preservation evidence. | Step 4 rollout and bootstrap | The held-index live target cannot complete Git setup with the observed unavailable RPM; refreshing live roots changes later work's inputs. |
+| Q08 | A: correct `libcom_err,` and `libxslti` to `libcom_err` and `libxslt` in both Git lists before direct equality, acceptance and redundant-list removal. | Step 4 file inventory and rollout; requirement Q10 | Correcting only 9.6 needs a special normalized comparison and leaves the exact override broken before cleanup. |
+
 ## Confirmed code and test-tree facts for this plan
 
 The authoring boundary is Windows CMD launching Git Bash; RHEL operations run
@@ -42,7 +60,7 @@ the intended names `libcom_err` and `libxslt` each have one exact index match.
 The reviewer also found that the indexed `unzip-6.0-59.el9.x86_64.rpm` was not
 served by any configured mirror. These are inspection-time observations to
 recheck during implementation. A held-index, no-extraction host run therefore
-cannot establish AC7. Proposed Q07 B uses a separate remote target and fresh
+cannot establish AC7. Approved Q07 B uses a separate remote target and fresh
 index, while Q08 A makes both Git corrections explicit before equivalence
 checking. AC7 continues to require real Python and Git setup.
 
@@ -472,7 +490,7 @@ Files involved:
 
 - `src/setups/pkgs/python/python_rhel_9.6_x86_64.txt` (existing, to be updated).
 - `src/setups/pkgs/python/python_rhel_9.8_x86_64.txt` (existing, to be removed after acceptance).
-- `src/setups/pkgs/git/git_rhel_9.6_x86_64.txt` (existing, to be updated under proposed Q08 A).
+- `src/setups/pkgs/git/git_rhel_9.6_x86_64.txt` (existing, to be updated under approved Q08 A).
 - `src/setups/pkgs/git/git_rhel_9.8_x86_64.txt` (existing, to receive matching corrections, then be removed after acceptance).
 - `src/setups/setup.tpl.properties` (existing, to be updated).
 - `docs/v0.27.0/verify.architecture-fallback.sh` (existing after Step 1, to be updated).
@@ -498,9 +516,9 @@ minor retry.
 
 Execute rollout in this order:
 
-1. Correct `zlib-dev` to `zlib-devel` in the retained 9.6 Python list. Under proposed Q08 A, correct `libcom_err,` to `libcom_err` and `libxslti` to `libxslt` in both 9.6 and 9.8 Git lists. Record each intended name's unique index match and the exact two-line paired changes. Prove corrected Python and Git 9.6/9.8 equivalence and tracked mirror-value equivalence before any removal. Do not normalize these names at runtime or hide other lookup failures.
+1. Correct `zlib-dev` to `zlib-devel` in the retained 9.6 Python list. Under approved Q08 A, correct `libcom_err,` to `libcom_err` and `libxslti` to `libxslt` in both 9.6 and 9.8 Git lists. Record each intended name's unique index match and the exact two-line paired changes. Prove corrected Python and Git 9.6/9.8 equivalence and tracked mirror-value equivalence before any removal. Do not normalize these names at runtime or hide other lookup failures.
 2. Prepare a controlled authoring checkout/configuration for real RHEL 9.8 dependency setup using the implemented scripts and retained curated inputs. Exclude exact 9.8 curated lists and the exact active 9.8 mirror key there. Copy active properties and relevant local RPM cache entries; clear copied step completion and both reload flags. Set the copied `cplx_path` to a unique, absent sibling directory on the same RHEL host, outside the live cplx tree, as specified below. Preserve the actual detected architecture. Record revision, configuration origins and digests; template values alone are not runtime configuration. Copy the Python legacy marker; for Git explicitly create a synthetic legacy final-entry marker in the controlled checkout, since no original exists. Label copied versus synthetic evidence.
-3. Bootstrap the separate remote target under proposed Q07 B using the manifest below. Remove the copied 9.8 generated index only from the controlled checkout, retain its committed original in the authoring tree, and invoke the package index-generation entry point with selected 9.6 mirrors. Record nonempty publication under the detected 9.8 filename. Preflight every corrected Python/Git expression against this fresh index for ordinary resolution, then prove each selected RPM is cached or currently downloadable. Preserve ordinary missing/ambiguous/unavailable errors as blockers; no cross-minor index substitution or manual RPM injection.
+3. Bootstrap the separate remote target under approved Q07 B using the manifest below. Remove the copied 9.8 generated index only from the controlled checkout, retain its committed original in the authoring tree, and invoke the package index-generation entry point with selected 9.6 mirrors. Record nonempty publication under the detected 9.8 filename. Preflight every corrected Python/Git expression against this fresh index for ordinary resolution, then prove each selected RPM is cached or currently downloadable. Preserve ordinary missing/ambiguous/unavailable errors as blockers; no cross-minor index substitution or manual RPM injection.
 4. Run ordinary setup for Python and Git through CMD/Git Bash to the isolated RHEL target, starting from the recorded legacy markers. Record selected list/property, generated 9.8 index identity, restart and every successful active-entry synchronization, then actual remote installation completion. Per tool, omit one cache seed entry whose indexed filename a HEAD request confirms is currently served by a selected mirror; if no original cached entry qualifies, obtain one through the ordinary downloader in the controlled tree before the measured run. Retain other matching cached entries to prove reuse. New extraction is permitted only beneath the isolated target. Compare live-target staging/installed-flag inventories before and after and require them unchanged. Include the three corrected names, a valid same-identity resume control and isolated installed-state reuse on a second invocation. Run the controlled checkout's setup from a CMD process that clears that checkout's own `NO_MORE_SENV_` guard, and confirm that derived values such as `project_dir_unix` name the controlled checkout. Before and after each host pass, record the authoring tree's `git status --porcelain --ignored -- src/setups` and its `pkgs/*/last` bytes, and require them unchanged.
 5. After controlled acceptance passes, remove only the tracked redundant Python/Git 9.8 lists and 9.8 mirror property, and revise its per-minor-copy comment. Preserve both generated index snapshots in the authoring tree and operator properties. Repeat setup from a controlled copy of the resulting curated tree, using the same isolated target and generated index, reseeding labeled legacy progress and one currently served cache omission per tool. Prove synchronization, lazy mirror fallback, cache/staged reuse and installation completion; repeat the live-target preservation comparison. Retain final successful evidence.
 6. Update the listed wiki pages for selection ordering, separate detected/selected identities, per-kind absence, exact-index refresh despite completion, atomic progress/restart, and reset-after-entry. Use `sp reset <entry>` or `s packages reset <entry>`; correct the current singular `package` example and the claim of resuming at/reprocessing the supplied entry.
@@ -566,235 +584,3 @@ controlled/final RHEL runs. Record fixture versus network/remote durations
 separately so mirror latency is not confused with selector IO.
 Time-gated status: no elapsed-time gate or compiler check; actual setup
 completion and preservation controls are mandatory.
-
-## Open questions for the v0.27.0 architecture minor fallback implementation plan
-
-These proposed implementation answers do not reopen the approved requirement or design.
-
-### Q01: Helper file allocation
-
-Should the three approved responsibilities live in three focused helpers or one combined helper beside setup_packages.sh?
-
-#### BBQ for Q01
-
-A cook can keep separate drawers for ingredient labels, preparation tools and order tickets. In this picture: the drawers are the metadata, index and progress helper files; the cook is setup_packages.sh.
-
-#### Options for Q01
-
-- Option A: Create package_metadata.sh, package_index.sh and package_progress.sh.
-  - Pro: Keeps extraction and tests aligned with the four implementation steps.
-  - Con: Adds three fixed source files and requires clear shared-context ownership.
-- Option B: Put the same approved responsibilities in one package_setup_helpers.sh.
-  - Pro: Uses one additional source statement and fewer files.
-  - Con: Mixes unrelated state and IO code and creates another large helper.
-
-#### Recommended option for Q01
-
-Option A. Use the three inventoried helpers. Their fixed source cost is small and the split removes generation and progress code from the 569-line main script.
-
-#### Answer to Q01: option A
-
-Proposed answer: A. Use the three inventoried helpers. Their fixed source cost is small and the split removes generation and progress code from the 569-line main script.
-
-### Q02: Literal progress record syntax
-
-Which literal representation should implement the approved single versioned record with architecture, selected list and cursor?
-
-#### BBQ for Q02
-
-A delivery ticket can use four labeled lines or one tightly packed row. In this picture: the ticket is the atomic progress file, its labels are the version and identity/cursor fields, and the reader is the Bash parser.
-
-#### Options for Q02
-
-- Option A: Use the four-line, fixed-prefix LF record specified in the plan, with CRLF read normalization.
-  - Pro: Easy to inspect and reject malformed records without evaluation or escaping machinery.
-  - Con: Requires exact field/line-count checks and forbids embedded newlines.
-- Option B: Use one versioned tab-separated line with explicit escaping for field separators.
-  - Pro: Compact and potentially extensible for arbitrary field text.
-  - Con: Adds an escaping/unescaping implementation and more malformed-input cases.
-
-#### Recommended option for Q02
-
-Option A. Use the fixed four-line representation. Curated list paths and active entries already have line-oriented identities, and literal parsing keeps recovery checks small.
-
-#### Answer to Q02: option A
-
-Proposed answer: A. Use the fixed four-line representation. Curated list paths and active entries already have line-oriented identities, and literal parsing keeps recovery checks small.
-
-### Q03: Explicit reset argument spelling
-
-Which concrete argument form should CMD use for the design-approved reset intent after consuming operator input?
-
-#### BBQ for Q03
-
-A dispatcher can send a restart instruction and an optional stop name, or two differently named restart instructions. In this picture: the dispatcher is CMD, the receiver is Bash and the stop name is the reset-after entry.
-
-#### Options for Q03
-
-- Option A: Forward --reset-list, optionally followed by --after-entry <entry>, alongside parsed package arguments only.
-  - Pro: Makes the reset intent explicit and lets Bash reject invalid combinations uniformly.
-  - Con: Needs a validation rule for --after-entry without --reset-list.
-- Option B: Forward --reset-list for an empty reset and --reset-after <entry> for a reset cursor.
-  - Pro: Each valid reset form is represented by one option.
-  - Con: Introduces two reset operation spellings and an extra mutual-exclusion check.
-
-#### Recommended option for Q03
-
-Option A. Use --reset-list with optional --after-entry as specified. Both shells can test a single reset-intent flag; raw unshifted arguments never accompany the parsed package request.
-
-#### Answer to Q03: option A
-
-Proposed answer: A. Use --reset-list with optional --after-entry as specified. Both shells can test a single reset-intent flag; raw unshifted arguments never accompany the parsed package request.
-
-### Q04: Bash verification file organization
-
-Should the new cumulative fixture runner source focused metadata/index/progress suites, or contain all cases itself?
-
-#### BBQ for Q04
-
-A test workshop can use one checklist with separate stations, or one long checklist at a single bench. In this picture: the checklist is the cumulative runner and the stations are the focused Bash case files.
-
-#### Options for Q04
-
-- Option A: Use the runner plus three focused Bash case scripts and a separate actual CMD fixture harness.
-  - Pro: Keeps each step's regression ownership readable and avoids extending the large closed closure harness.
-  - Con: Requires shared fixture utilities and clear source-only test suite conventions.
-- Option B: Keep all Bash cases and utilities in one new versioned harness, with the CMD harness still separate.
-  - Pro: Simplifies locating the complete fixture suite.
-  - Con: Risks rapid growth and makes later step-specific changes harder to review.
-
-#### Recommended option for Q04
-
-Option A. Use the focused suites and cumulative runner. No Python test package is needed; mandatory repository lint plus explicit effort lint and behavioral cases form the gate.
-
-#### Answer to Q04: option A
-
-Proposed answer: A. Use the focused suites and cumulative runner. No Python test package is needed; mandatory repository lint plus explicit effort lint and behavioral cases form the gate. Copy the required setup/utils/echos files into each fixture layout, never link them, and run cases in subshells because fatal exits. Recording network stubs reject undeclared calls and local outputs outside that root. Compare real-tree status and setup state bytes before/after even on failure; use cache inventory and stub output-path assertions instead of hashing or copying the real RPM cache for unit tests.
-
-### Q05: Windows validation timing
-
-Should the Windows held-destination check and actual launcher fixtures be required in their owning steps, or collected only in final acceptance?
-
-#### BBQ for Q05
-
-A bridge inspection can test each joint when installed or wait until the complete bridge opens. In this picture: the joints are index replacement and CMD forwarding, their installation stages are Steps 2 and 3, and bridge opening is Step 4.
-
-#### Options for Q05
-
-- Option A: Require the held-open destination check in Step 2 and actual CMD/Git Bash forwarding checks in Step 3; repeat both in Step 4.
-  - Pro: Finds platform-specific defects before later code depends on them.
-  - Con: Needs Windows fixture support during implementation rather than only at rollout.
-- Option B: Run native Linux fixtures in intermediate steps and defer both Windows checks to Step 4.
-  - Pro: Allows earlier work to proceed with a Linux-only execution environment.
-  - Con: Can mark intermediate slices done while their authoring-platform behavior is still unproven.
-
-#### Recommended option for Q05
-
-Option A. Require Windows checks in the owning steps. Native Linux cannot prove Windows rename failure behavior or CMD argument consumption, and this working environment already supplies Windows.
-
-#### Answer to Q05: option A
-
-Proposed answer: A. Require Windows checks in the owning steps. Native Linux cannot prove Windows rename failure behavior or CMD argument consumption, and this working environment already supplies Windows. Hold the destination without delete sharing using a PowerShell File.Open read/read handle and assert that replacement actually fails before testing preservation and recovery.
-
-### Q06: Controlled RHEL acceptance workspace
-
-How should implementation stage the approved pre-removal demonstration while excluding exact 9.8 inputs and preserving operator configuration?
-
-#### BBQ for Q06
-
-A rehearsal can use a separate stage or rearrange the live stage and put everything back. In this picture: the rehearsal is fallback acceptance, the stage is the local authoring checkout/configuration, and the props are curated lists and active mirror keys.
-
-#### Options for Q06
-
-- Option A: Use a controlled authoring checkout/configuration with only retained curated inputs, then remove proven duplicates in the working tree and repeat final-tree acceptance.
-  - Pro: Keeps operator properties and existing indexes outside cleanup and makes the absence of exact overrides auditable.
-  - Con: Requires recording which script revision and configuration the controlled run used.
-- Option B: Temporarily back up and remove exact curated/configuration entries in the current authoring tree, test, restore, then perform approved removals.
-  - Pro: Uses one checkout and fewer copied fixture files.
-  - Con: Interruption can leave the operator's working configuration temporarily altered and complicates evidence ownership.
-
-#### Recommended option for Q06
-
-Option A. Use the controlled checkout/configuration and record its revision and inputs. Preflight every active expression and leave Step 4 incomplete if ordinary package/data failures prevent the required full Python/Git setup.
-
-#### Answer to Q06: option A
-
-Proposed answer: A. Use the controlled checkout/configuration and record its revision and inputs. Seed ignored active properties, legacy progress and relevant local RPMs by copy, with origins and digests. Preflight every active expression and leave Step 4 incomplete if ordinary package/data failures prevent the required full Python/Git setup. Controlled per-tool cache omissions exercise lazy mirror fallback while other seeded entries prove reuse.
-
-### Q07: Remote target and index used for RHEL acceptance
-
-Which remote target and index should both host acceptance passes use, given
-the stale held-index Git RPM and AC7's required Python and Git setup?
-
-#### BBQ for Q07
-
-A rehearsal can use the existing kitchen with its prepared ingredients, a
-second kitchen, or replace the live kitchen's ingredients as it runs.
-In this picture: the kitchen is the remote cplx target, ingredients are RPM
-versions, the recipe is the generated index, and the rehearsal is host acceptance.
-
-#### Options for Q07
-
-- Option A: Use the live target with the committed 9.8 index held and require already-installed/staged versions.
-  - Pro: Limits changes to the existing target.
-  - Con: The observed unavailable Git RPM makes full AC7 acceptance unreachable under these controls.
-- Option B: Bootstrap a separate remote cplx target and generate a fresh detected-key index in the controlled authoring checkout.
-  - Pro: Exercises generation, Python/Git synchronization and extraction on real RHEL while preserving the live target.
-  - Con: Requires the documented bootstrap manifest, path checks and additional remote storage.
-- Option C: Use the live target and allow index regeneration and new package extraction.
-  - Pro: Exercises generation and installation together in the existing directory.
-  - Con: Refreshes existing dependency roots ahead of later umbrella work.
-
-#### Recommended option for Q07
-
-Option B. Use the documented existing environment/bootstrap materials in a
-unique remote sibling target, allow extraction only there and preserve the
-live-target inventories. Generate the index through the implemented resolver,
-then preflight all corrected active entries. Choose cache omissions only after
-a HEAD check proves the indexed filename is currently served by a selected
-mirror. Keep both Python and Git mandatory; unavailable packages remain
-ordinary setup blockers, not reasons to narrow AC7.
-
-#### Answer to Q07: option B
-
-Proposed answer: B. Use the isolated target and fresh index with the bootstrap,
-containment, served-file, reuse and preservation checks in Step 4. Both host
-passes must complete Python and Git setup. The previous A answer was only a
-proposal; requirement and design approvals are unchanged.
-
-### Q08: Paired Git list corrections before equivalence checking
-
-Which curated files should receive the two evidenced Git dependency-name
-corrections before the approved equivalence check and 9.8 removal?
-
-#### BBQ for Q08
-
-Two copies of a shopping list contain the same misspelled ingredients.
-In this picture: the copies are the 9.6 and 9.8 Git lists, spelling corrections
-are the two dependency names, and comparing the copies is the cleanup gate.
-
-#### Options for Q08
-
-- Option A: Correct libcom_err, to libcom_err and libxslti to libxslt in both Git lists, prove equality, then remove the redundant 9.8 list after acceptance.
-  - Pro: Leaves a correct retained input and an exact, reviewable equivalence proof before removal.
-  - Con: Adds two explicit corrections in the retained list and matching temporary edits to the list being removed.
-- Option B: Correct only the retained 9.6 list and account for the two known differences in a normalized comparison.
-  - Pro: Avoids temporary edits to the list being removed.
-  - Con: Replaces simple byte equality with a special comparison and leaves the exact override broken before removal.
-
-#### Recommended option for Q08
-
-Option A. Apply the same two evidenced corrections to both lists, record each
-intended name's unique index match and prove direct equality. This is an
-explicit addition to Step 4's file edits, subject to the plan's human approval;
-it adds no dependency or runtime normalization and preserves the approved
-Python/Git acceptance scope and correction-before-removal ordering.
-
-#### Answer to Q08: option A
-
-Proposed answer: A. Correct both copies before comparison and acceptance, then
-remove only the proven redundant 9.8 copy. Record the two Git corrections
-alongside the already-approved Python correction. Do not implement these
-changes during specification review.
-This extends the requirement's Q10 curated correction from one entry to three;
-approving this plan is where that extension is decided.

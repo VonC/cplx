@@ -133,8 +133,10 @@ definitions from generated snapshots.
   keys such as `centos_8_x86_64`, but permit minor fallback only between numeric
   major.minor versions. Major-only and major.minor keys are not mutual fallback
   candidates. Distribution and machine must match as whole components.
-9. Correct `zlib-dev` to `zlib-devel` in the 9.6
-  Python list, then remove the now-identical 9.8 Python and Git lists and the
+9. Correct `zlib-dev` to `zlib-devel` in the 9.6 Python list. The approved
+  plan Q08 extends this correction set to `libcom_err,` to `libcom_err` and
+  `libxslti` to `libxslt` in both the 9.6 and 9.8 Git lists. Then remove
+  the now-identical 9.8 Python and Git lists and the
   9.8 mirror key from the tracked template. Generated indexes and operators'
   ignored local properties are outside that removal. Retain differing exact
   definitions and support adding them later. Confirm equivalence and demonstrate
@@ -269,5 +271,5 @@ to start the design.
 | Q07 | A: remove only proven equivalent curated definitions after accepted setup is demonstrated; preserve distinct overrides, generated indexes and ignored operator properties. | [Selection](#architecture-selection-after-consolidation-of-d9), AC7 | Removing every 9.8 artifact would discard corrections and distinct generated data. |
 | Q08 | A: record missing RHEL 9 new-tool seeds as a separate pre-existing gap; keep the detected-key local cache and unkeyed remote staging directory. | [Scope boundary](#relationship-to-runtime-closure-and-the-following-umbrella-items) | Adding seed support expands the focused existing-tool operation into a separate feature. |
 | Q09 | A: preserve ordinary package errors and ordered URL retries, with final failure fatal; a retrieval failure never selects another minor. | [Selection](#architecture-selection-after-consolidation-of-d9) | Trying more distant metadata after failure hides defects and makes selection depend on transient network conditions. |
-| Q10 | A: correct the 9.6 Python list to `zlib-devel`, then remove equivalent 9.8 Python/Git lists and the tracked 9.8 mirror key; retain indexes. This makes real-host fallback executable. | [Selection](#architecture-selection-after-consolidation-of-d9), AC1, AC7 | Keeping only 9.8 would make the current host exact-only; retaining every list leaves duplicates and the 9.6 typo. |
+| Q10 | A: correct the 9.6 Python list to `zlib-devel`; approved plan Q08 also corrects `libcom_err,` and `libxslti` to `libcom_err` and `libxslt` in both Git lists. Prove equality and accepted setup before removing equivalent 9.8 Python/Git lists and the tracked 9.8 mirror key; retain indexes. This makes real-host fallback executable. | [Selection](#architecture-selection-after-consolidation-of-d9), AC1, AC7; plan Step 4 | Keeping only 9.8 would make the current host exact-only; retaining every list leaves duplicates and the dependency-name typos. |
 | Q11 | A: resume only for the same selected list file and detected key; changed or legacy unkeyed state restarts and reports it. Download and copy reuse remain available for selected packages. | [Selection](#architecture-selection-after-consolidation-of-d9), AC7, AC12 | Requiring manual resets or deferring the problem can suppress synchronization and invalidate real-host evidence. |
