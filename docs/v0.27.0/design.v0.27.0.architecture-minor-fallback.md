@@ -9,8 +9,9 @@ Umbrella: [debian-agent-tools](draft.v0.27.0.debian-agent-tools.md), item 5 and 
 
 The requirement is consolidated in `a5a974f`. Its eleven clarifications fix the
 selection policy, index identity, cleanup boundary and synchronization behavior.
-This design describes the proposed structure for those rules. Its architectural
-choices require design review; requirement decisions are not reopened.
+This design records the architecture approved after design review round 2.
+All seven answers were confirmed as option A, including the covered cursor,
+repeat and reset clarifications. Requirement decisions remain the fixed inputs.
 
 RHEL is the tools/dependency preparation, packaging and deployment environment.
 It packages both tools and the private application. Jenkins Debian consumes
@@ -80,7 +81,7 @@ retrieval never starts another minor selection.
 
 ## Resolver structure and result contract
 
-The proposed architecture has one pure selection policy with two adapters:
+The architecture has one pure selection policy with two adapters:
 per-tool list inventory and active mirror-property inventory. Adapters apply
 their metadata kind's presence rule and return candidates with original source
 identities. The selector ranks eligible candidates without copying, touching,
@@ -121,7 +122,7 @@ presence rule, even when a later duplicate has a value.
 
 ## Invocation context for consistent metadata consumption
 
-The proposed context is owned by the current Bash invocation. It holds the
+The context is owned by the current Bash invocation. It holds the
 detected key, selected list identity when needed, exact index path, resolved
 mirror identity/value when needed, and whether explicit refresh has been served.
 Consumers receive those selections instead of reconstructing exact names.
@@ -141,7 +142,7 @@ refresh is requested, as the requirement explicitly permits.
 
 ## Index lifecycle and checkpoint authority
 
-The proposed availability guard checks the exact file and both reload flags
+The availability guard checks the exact file and both reload flags
 before consulting completion information. A nonempty exact file may be reused
 without refresh, even if the completion marker is absent. A missing or empty
 exact file, or either reload flag, requires generation despite a done marker.
@@ -173,7 +174,7 @@ prevents a generated index for another minor from being selected.
 
 ## Synchronization progress and reset compatibility
 
-The proposed progress record is one versioned, literal-data record at the
+The progress record is one versioned, literal-data record at the
 existing ignored `pkgs/<tool>/last` location. Its fields are a format version,
 the detected key, the selected repository-relative list path and the last
 successfully synchronized active entry. The representation is parsed as data,
@@ -206,7 +207,7 @@ Direct single-package requests neither consume nor advance full-list progress.
 A reset intent combined with a direct package request is rejected before any
 progress change.
 
-The current CMD reset command must stop writing a bare cursor. The proposed
+The current CMD reset command must stop writing a bare cursor. The approved
 interface restores the operator-facing reset/reset-after-entry commands while
 forwarding explicit reset intent to Bash. CMD consumes the reset entry and never
 passes it to the step repeat/reset helper. The forwarded intent uses an explicit
@@ -264,247 +265,17 @@ of re-processing it. Existing exact overrides remain supported.
 These are design acceptance cases, not executed validation. The implementation
 plan will assign affected files, narrow checks, host evidence and rollout order.
 
-## Open questions for the v0.27.0 architecture-minor-fallback design
-
-### Q01: Where should the selection policy live?
-
-Lists and mirror properties use different source formats but must apply the same
-approved eligibility and ordering rules. The index has a separate lifecycle.
-
-#### BBQ for Q01
-
-Two counters can use one queue policy without selling the same products. In this
-picture: the counters are list/property adapters and the queue policy is the
-shared architecture selector.
-
-#### Options for Q01
-
-- Option A: Use one pure selector with list and property adapters and typed results.
-  - Pro: Keeps eligibility and ordering consistent and selection free of side effects.
-  - Con: Introduces an internal interface between discovery and setup consumers.
-- Option B: Keep independent selection logic beside each existing consumer.
-  - Pro: Requires fewer shared abstractions.
-  - Con: Duplicates boundary and ordering rules and risks divergent behavior.
-
-#### Recommended option for Q01
-
-Option A. Share only the common policy; preserve per-kind presence rules and
-original source identities in adapters. Index generation remains outside it.
-
-#### Answer to Q01: option A
-
-Option A is proposed because the same confirmed policy must govern both curated
-metadata kinds while their absence semantics stay different. The mirror adapter
-enumerates each key once and keeps the first definition's trimmed value, matching
-the definition current consumers read. Later duplicates do not extend or replace
-it; an empty first value makes the candidate absent under the approved rule.
-
-### Q02: How should consumers retain resolved inputs?
-
-Synchronization and remote list copy must agree on the selected list. Index
-generation and corresponding downloads must use the same mirror resolution.
-
-#### BBQ for Q02
-
-Keep the selected recipe and supplier address for the current shopping trip.
-In this picture: the recipe is the list path, the address is the mirror value,
-and the trip is one package-setup invocation.
-
-#### Options for Q02
-
-- Option A: Retain an invocation context, resolving mirrors lazily when first required.
-  - Pro: Preserves pairing and cached offline reuse without repeatedly reading properties.
-  - Con: Consumers must accept selected inputs instead of reconstructing exact names.
-- Option B: Resolve again at each consumer and reject any identity/value mismatch.
-  - Pro: Each consumer observes the current configuration directly.
-  - Con: Requires extra comparison and can abort after work when configuration changes.
-
-#### Recommended option for Q02
-
-Option A. The context holds detected identity separately, retains the list path,
-and pins mirror identity/value for the rest of the invocation after first use.
-It does not claim to snapshot mutable list contents or solve concurrent writers.
-
-#### Answer to Q02: option A
-
-Option A is proposed because carrying selections directly satisfies the pairing
-contract and keeps mirror access unnecessary when all required artifacts are cached.
-
-### Q03: How should a generated index become visible?
-
-The current generator truncates the destination before completing aggregation.
-A failed refresh should fail the invocation without leaving a partial index that
-a later run mistakes for a usable exact snapshot.
-
-#### BBQ for Q03
-
-Finish a replacement catalogue before putting it on the shelf. In this picture:
-the catalogue is the generated index and the shelf is its detected-key pathname.
-
-#### Options for Q03
-
-- Option A: Generate a temporary sibling and atomically replace the exact index after success.
-  - Pro: Preserves a prior valid index on failure and avoids exposing partial assembly.
-  - Con: Requires invocation-owned scratch space and a publication step.
-- Option B: Generate in place, with a durable in-progress marker checked by every reader.
-  - Pro: Uses the destination directly without a final replacement.
-  - Con: Adds persistent recovery state and requires every reader to honor it.
-
-#### Recommended option for Q03
-
-Option A. Publish only a nonempty successfully assembled index, then mark
-completion. A failed explicit refresh still fails that invocation; retaining the
-previous file does not authorize immediate recovery with it.
-
-#### Answer to Q03: option A
-
-Option A is proposed because same-filesystem replacement protects later reads
-without a second durable index-validity protocol. The temporary sibling has an
-ignored name and is removed on assembly or publication failure. A failed
-replacement, including an open destination on Windows, keeps the prior index and
-fails the invocation.
-
-### Q04: What should own index availability versus step completion?
-
-The existing Markdown done marker is not architecture-specific. Both reload
-flags and missing or empty exact indexes must override it, including direct setup.
-
-#### BBQ for Q04
-
-Check that today's catalogue is on the shelf even if an old checklist says done.
-In this picture: the catalogue is the exact index and the checklist is the
-download_packages_list completion marker.
-
-#### Options for Q04
-
-- Option A: Make exact-file availability and reload intent authoritative; retain the marker as completion reporting.
-  - Pro: Satisfies the requirement without changing the shared step-state model.
-  - Con: The marker alone cannot establish index availability.
-- Option B: Add per-architecture completion records, while still checking exact files and reload intent.
-  - Pro: Makes recorded completion explicitly architecture-aware.
-  - Con: Adds redundant state and migration beyond what availability needs.
-
-#### Recommended option for Q04
-
-Option A. One availability guard serves ordinary and normal direct-package
-lookup. Serve explicit refresh once per invocation, and record completion only
-after successful publication. No cross-minor snapshot can satisfy that guard.
-
-#### Answer to Q04: option A
-
-Option A is proposed because filesystem availability already supplies the
-required identity-specific evidence, while the existing marker can remain useful.
-Failure to record completion after publication fails the invocation; the valid
-published index can still satisfy a later availability check.
-
-### Q05: How should synchronization identity and cursor be stored?
-
-The selected list and detected key must accompany the last successful entry.
-Legacy one-line markers cannot establish either identity and must restart.
-
-#### BBQ for Q05
-
-Keep the bookmark and the recipe edition together. In this picture: the bookmark
-is the last completed entry and the edition is the selected list plus detected key.
-
-#### Options for Q05
-
-- Option A: Replace the ignored last marker with one versioned data record, written atomically.
-  - Pro: Identity and cursor form one recoverable unit, avoiding mismatched sidecars.
-  - Con: Existing direct writers must use the new owner, and legacy records restart.
-- Option B: Retain the one-line cursor and add a separate identity sidecar with mismatch recovery.
-  - Pro: Keeps the cursor readable in its current shape.
-  - Con: Needs a protocol for partial updates across two files and direct legacy writes.
-
-#### Recommended option for Q05
-
-Option A. Store format version, detected key, selected repository-relative list
-path and last successful active entry as literal data. Missing state starts;
-legacy, malformed or mismatched state restarts with a diagnostic. Matching
-state keeps ordinary resume behavior, without hashing list contents.
-
-#### Answer to Q05: option A
-
-Option A is proposed because an atomic record makes crash behavior simple:
-the last entry may repeat, using existing package download and copy reuse.
-An explicit `CPLX_SP_REPEAT` applies only while a valid recorded cursor is being
-sought. With an empty cursor, including after an identity or stale-cursor restart,
-it has no effect. Q07 covers a cursor that no longer names an active entry.
-Starting a new selection or restarting after an identity or stale-cursor mismatch
-writes a valid empty-cursor record so interruption cannot restore discarded state.
-
-### Q06: Who should write progress for explicit reset commands?
-
-The Windows launcher writes a CRLF cursor against LF lists, preventing an entry
-match. It also passes that entry to the step helper, where an entry matching no
-step causes fatal 10 and launcher exit 119. Adding identity would make its bare
-writes legacy state too. Bash already receives the raw, unshifted `%*` words.
-
-#### BBQ for Q06
-
-Ask the person holding the recipe to move its bookmark. In this picture: that
-person is Bash after list resolution, and moving the bookmark is CMD's reset intent.
-
-#### Options for Q06
-
-- Option A: Keep the operator-facing commands and forward reset intent to Bash, which writes scoped progress after list selection.
-  - Pro: Restores reset semantics with one owner of selection and progress format.
-  - Con: Extends the CMD-to-Bash argument contract.
-- Option B: Teach CMD to resolve the selected list and write the versioned record itself.
-  - Pro: Retains reset writes at the current launcher location.
-  - Con: Duplicates policy and record serialization across different shells.
-
-#### Recommended option for Q06
-
-Option A. Explicit reset-after-entry is current operator intent and can create
-a cursor for the selected identities; an old unkeyed marker cannot. Direct
-single-package requests do not consume or advance full-list progress.
-
-#### Answer to Q06: option A
-
-Option A is proposed because Bash already owns architecture resolution and can
-apply reset intent without copying that policy into CMD. CMD consumes the entry
-without passing it to the step helper. Explicit forwarded intent is distinct from
-the raw `%*` words. Bash uses synchronization's active-entry parsing and line-ending
-normalization to compare the requested entry. Q07 governs an unknown entry.
-A reset intent combined with a direct package request is rejected before any
-progress change.
-
-### Q07: What happens when a cursor matches no active entry?
-
-The current loop skips entries until a cursor matches and can report completion
-without synchronizing anything. A record bound to path and key, without content
-hashing, still needs to handle an entry removed or renamed in the same list.
-An explicit reset-after-entry can also contain a mistyped entry.
-
-#### BBQ for Q07
-
-A saved shopping bookmark may name an ingredient removed from the recipe; a new
-instruction can also mistype that ingredient. In this picture: the bookmark is
-stored progress, the recipe is the selected list, and the new instruction is an
-explicit reset-after-entry command.
-
-#### Options for Q07
-
-- Option A: Restart for an absent stored cursor; fail for an unknown explicit reset entry.
-  - Pro: Recovers stale progress automatically while reporting operator mistakes before synchronization.
-  - Con: Requires distinguishing stored progress from fresh reset intent.
-- Option B: Fail in both cases with a diagnostic before synchronization.
-  - Pro: Uses one rule without automatically changing the resume position.
-  - Con: A list edit requires manual recovery before setup can proceed.
-- Option C: Restart in both cases with a diagnostic before synchronization.
-  - Pro: Uses one recovery rule and always processes the selected list.
-  - Con: A mistyped explicit entry starts more work than the operator requested.
-
-#### Recommended option for Q07
-
-Option A. Decide before processing the first entry. Stored progress whose cursor
-is absent cannot establish a resume position, so restart and report why. An
-unknown explicit entry fails with a diagnostic naming the selected list, leaving
-progress unchanged. A valid explicit entry resumes after that entry.
-
-#### Answer to Q07: option A
-
-Option A is proposed because stale automatic state should recover without a
-manual prerequisite, while fresh operator input should not be reinterpreted.
-Neither case may silently skip synchronization and report completion.
+## Design decisions
+
+All decisions below were approved for consolidation after review round 2.
+No further design question is needed before implementation planning.
+
+| Question | Decision and reason | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | A: One pure selector with list and mirror adapters keeps ordering consistent while retaining per-kind absence rules. Each mirror key uses its first definition only; an empty first value is absent. | [Resolver contract](#resolver-structure-and-result-contract) | Independent consumer selectors duplicate policy and risk divergence. |
+| Q02 | A: Carry selected inputs in one invocation context and resolve mirrors lazily, preserving pairing and cached offline reuse. | [Invocation context](#invocation-context-for-consistent-metadata-consumption) | Resolving at each consumer adds comparison and can abort after configuration edits. |
+| Q03 | A: Assemble a nonempty index in an ignored temporary sibling, then replace the exact file. Assembly or replacement failure preserves the old file but fails the invocation. | [Index lifecycle](#index-lifecycle-and-checkpoint-authority) | In-place generation with a durable marker requires a second validity protocol honored by every reader. |
+| Q04 | A: Exact-file availability and either reload flag govern index preparation; step completion remains reporting. Completion-record failure is fatal after valid publication. | [Checkpoint authority](#index-lifecycle-and-checkpoint-authority) | Per-architecture completion records add redundant state and migration. |
+| Q05 | A: One atomic versioned data record carries list path, detected key and cursor. Restarts write an empty cursor durably; repeat intent applies only while seeking a valid cursor. | [Synchronization progress](#synchronization-progress-and-reset-compatibility) | A cursor plus identity sidecar needs partial-update recovery across two files. |
+| Q06 | A: CMD consumes reset input and forwards distinct intent to Bash, which validates normalized entries and writes scoped progress. Reject reset with a direct package request before progress changes. | [Reset compatibility](#synchronization-progress-and-reset-compatibility) | CMD selection and record writes duplicate policy and serialization across shells. |
+| Q07 | A: Restart automatically for a stored cursor absent from the selected list; fail an unknown explicit reset entry before synchronization, preserving progress. | [Cursor validation](#synchronization-progress-and-reset-compatibility) | Failing both cases requires manual recovery after list edits; restarting both cases reinterprets mistyped operator input. |
