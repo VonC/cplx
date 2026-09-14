@@ -10,10 +10,11 @@ if [[ $# != 2 || $1 != --step || ! $2 =~ ^[1-4]$ ]]; then
     echo 'Usage: verify.architecture-fallback.sh --step 1..4' >&2
     exit 2
 fi
-if [[ $2 != 1 ]]; then
+if (( $2 > 2 )); then
     echo "Step $2 verification is not implemented yet" >&2
     exit 2
 fi
+VERIFY_STEP=$2
 START_SECONDS=$SECONDS
 VERIFY_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/cplx-architecture.XXXXXXXX")
 export VERIFY_ROOT
@@ -73,6 +74,9 @@ architecture_fixture() {
     if [[ -f $REPO_ROOT/src/setups/package_metadata.sh ]]; then
         cp "$REPO_ROOT/src/setups/package_metadata.sh" "$target/src/setups/"
     fi
+    if [[ -f $REPO_ROOT/src/setups/package_index.sh ]]; then
+        cp "$REPO_ROOT/src/setups/package_index.sh" "$target/src/setups/"
+    fi
     cp "$REPO_ROOT/src/utils/"{properties,steps}.sh "$target/src/utils/"
     cp "$REPO_ROOT/src/echos/echos" "$target/src/echos/"
     printf 'architecture=rhel_9.8_x86_64\n' > "$target/src/setups/setup.properties"
@@ -130,6 +134,12 @@ scripts=(docs/v0.27.0/verify.architecture-fallback.sh
 if [[ -f src/setups/package_metadata.sh ]]; then
     scripts+=(src/setups/package_metadata.sh)
 fi
+if (( VERIFY_STEP >= 2 )); then
+    scripts+=(docs/v0.27.0/verify.architecture-index.sh)
+    if [[ -f src/setups/package_index.sh ]]; then
+        scripts+=(src/setups/package_index.sh)
+    fi
+fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
 shellcheck "${scripts[@]}"
 # Checked explicitly above; the Windows ShellCheck binary cannot resolve the
@@ -137,3 +147,8 @@ shellcheck "${scripts[@]}"
 # shellcheck disable=SC1091
 source "$VERIFY_DIR/verify.architecture-metadata.sh"
 architecture_metadata_suite
+if (( VERIFY_STEP >= 2 )); then
+    # shellcheck disable=SC1091
+    source "$VERIFY_DIR/verify.architecture-index.sh"
+    architecture_index_suite
+fi
