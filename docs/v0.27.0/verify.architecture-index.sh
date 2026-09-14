@@ -254,7 +254,7 @@ index_selected_list_copy() {
     install_packages() { setup_remote_install full_install; }
     main
     architecture_assert_equal "$(< copied.path)" "$SETUP_PKGS_DIR/pkgs/python/python_rhel_9.6_x86_64.txt" 'copy selected source'
-    architecture_assert_equal "$(< "$SETUP_PKGS_DIR/pkgs/python/last")" _selected 'synchronize selected source'
+    architecture_assert_equal "$(tail -n 1 "$SETUP_PKGS_DIR/pkgs/python/last")" last=_selected 'synchronize selected source'
 }
 
 index_windows_held_destination() {

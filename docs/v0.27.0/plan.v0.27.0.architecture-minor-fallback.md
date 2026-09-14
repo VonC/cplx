@@ -420,6 +420,8 @@ Files involved:
 - `docs/v0.27.0/verify.architecture-progress.sh` (new, to be created).
 - `docs/v0.27.0/verify.architecture-launcher.cmd` (new, to be created).
 - `docs/v0.27.0/verify.architecture-fallback.sh` (existing after Step 1, to be updated).
+- `docs/v0.27.0/verify.architecture-index.sh` (existing after Step 2: adapt the
+  selected-list synchronization assertion to the versioned progress record).
 
 Tests first: same identity resumes after an active cursor; changed list/key,
 legacy/malformed record and stale cursor restart from the first active entry;
@@ -464,7 +466,8 @@ and classify remaining matches rather than forbidding all logging of arguments.
 
 Line-budget checkpoint: CMD baseline 100; main and ignore use Step 2 actual
 counts; new progress and progress/launcher harnesses baseline 0; runner uses
-Step 2 count. Python bands/650-line ceiling: inapplicable. Advisory estimates
+Step 2 count. The retained index fixture has 310 lines before and after its
+progress assertion update. Python bands/650-line ceiling: inapplicable. Advisory estimates
 remain in the inventory. Extract progress parsing/validation/publication into
 its helper and keep command orchestration in main/CMD.
 
