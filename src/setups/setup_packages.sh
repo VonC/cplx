@@ -15,9 +15,29 @@ source "${SETUP_PKGS_DIR}/../utils/steps.sh"
 source "${SETUP_PKGS_DIR}/package_metadata.sh"
 # shellcheck disable=SC1091
 source "${SETUP_PKGS_DIR}/package_index.sh"
+# shellcheck disable=SC1091
+source "${SETUP_PKGS_DIR}/package_progress.sh"
 # SRC_DIR="$( cd "$( dirname "${SETUP_PKGS_DIR}" )" && pwd )"
 
 main() {
+    local direct_package='' reset_list=0 after_entry='' after_set=0
+    # Validate the complete interface before touching progress or syncing packages.
+    while (( $# )); do
+        case $1 in
+            --package)
+                [[ -z $direct_package && -n ${2:-} && $2 != --* ]] || fatal 'Missing or duplicate --package value' 117
+                direct_package=$2; shift 2;;
+            --reset-list)
+                [[ $reset_list == 0 ]] || fatal 'Duplicate --reset-list' 117
+                reset_list=1; shift;;
+            --after-entry)
+                [[ $after_set == 0 && -n ${2:-} && $2 != --* ]] || fatal 'Missing or duplicate --after-entry value' 117
+                after_entry=$2; after_set=1; shift 2;;
+            *) fatal "Unknown package setup argument: '$1'" 117;;
+        esac
+    done
+    [[ $after_set == 0 || $reset_list == 1 ]] || fatal '--after-entry requires --reset-list' 117
+    [[ -z $direct_package || $reset_list == 0 ]] || fatal '--reset-list cannot be combined with --package' 117
     steps_file="${SETUP_PKGS_DIR}/steps.md"
     properties_file="${SETUP_PKGS_DIR}/setup.properties"
 
@@ -37,11 +57,11 @@ main() {
     rm -f "${SETUP_PKGS_DIR}/pkgs.log"
 
     # Check if a specific package name was provided
-    if [[ "${1:-}" == "--package" && -n "${2:-}" ]]; then
+    if [[ -n $direct_package ]]; then
         # Direct package sync requested
-        info "Direct package sync requested for package: '$2'"
-        sync_package "${architecture}" "$2"
-        install_package "$2"
+        info "Direct package sync requested for package: '$direct_package'"
+        sync_package "${architecture}" "$direct_package"
+        install_package "$direct_package"
     else
         # Regular flow
         if ! package_metadata_list "$SETUP_PKGS_DIR/pkgs" "$CPLX_TOOL" "$architecture" list_selection diagnostics; then
@@ -50,7 +70,7 @@ main() {
         package_context[list_source]=${list_selection[source]}
         package_context[list_path]="src/setups/pkgs/$CPLX_TOOL/${list_selection[source]##*/}"
         download_packages_list "${architecture}"
-        sync_packages "${architecture}"
+        sync_packages "${architecture}" "$reset_list" "$after_entry"
         install_packages
     fi
 }
@@ -86,66 +106,44 @@ sync_packages() {
     local arch="$1"
     local pkgs_tool_dir="${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}"
     local packages_for_tools="${package_context[list_source]}"
-    if [[ ! -e "${packages_for_tools}" ]]; then
-        fatal "File '${packages_for_tools}' not found" 9
+    local line status index
+    local -a entries=() comments=()
+    local -A progress=()
+    if ! package_progress_entries "$packages_for_tools" entries comments; then
+        fatal "Cannot read selected package list '${packages_for_tools}'" 9
     fi
     ok "Processing File '${packages_for_tools}'"
-
-    last_value=""
-    if [ -f "${pkgs_tool_dir}/last" ]; then
-        last_value=$(cat "${pkgs_tool_dir}/last")
+    for line in "${comments[@]}"; do info "Skipping commented line: '${line}'"; done
+    if package_progress_prepare "$pkgs_tool_dir/last" "$arch" "${package_context[list_path]}" \
+        entries "${2:-0}" "${3:-}" "${CPLX_SP_REPEAT:-}" progress; then
+        if [[ -n ${progress[reason]} ]]; then
+            info "Restarting '${package_context[list_path]}' at first active entry: ${progress[reason]}"
+        fi
+        if [[ -n ${progress[resume]} ]]; then
+            ok "Resuming processing after line: '${progress[resume]}'"
+        fi
+    else
+        status=$?
+        if [[ $status == 117 ]]; then
+            fatal "Reset entry '${3:-}' is not active in selected list '${package_context[list_path]}'" "$status"
+        fi
+        fatal "Cannot publish progress for selected list '${package_context[list_path]}'" "$status"
     fi
-
-    process=0
-    # If last_value is empty, start processing immediately.
-    [ -z "$last_value" ] && process=1
-
     if ! get_property cplx_path; then
         fatal "cplx_path not found in file '${properties_file}'" 101
     fi
-
-    # Before the while loop, initialize the array (if not already declared)
-    skipped=()
-
-    # Open the file on file descriptor 8
-    exec 8<"${packages_for_tools}"
-    while IFS= read -r line <&8 || [ -n "$line" ]; do
-        # Trim leading spaces for checking
-        trimmed_line="${line#"${line%%[![:space:]]*}"}"
-        if [[ "$trimmed_line" == \#* ]]; then
-            info "Skipping commented line: '${trimmed_line}'"
-            continue
-        fi
-        if [[ "${line}" == "" ]]; then continue; fi
-        # If we have not yet reached the last processed value, check for it.
-        if [ "$process" -eq 0 ]; then
-            if [[ "$line" == "$last_value" || "$line" == "${CPLX_SP_REPEAT}" ]]; then
-                ok "Resuming processing after line: '${line}'"
-                process=1
-                # Clear the array if needed.
-                skipped=()
-            else
-                # Instead of displaying, store the line in the array.
-                skipped+=("$line")
-            fi
-            continue
-        fi
-
-        # Process the line (actual processing logic goes here)
+    for ((index=progress[start]; index<${#entries[@]}; index++)); do
+        line=${entries[index]}
         task "Must process line: '${line}'"
         if ! sync_package "${arch}" "${line}"; then
             fatal "Failed to process line: '${line}'" 10
-        else
-            ok "Line '${line}' processed successfully in '${packages_for_tools}'"
-            # Update the 'last' file with the current processed value.
-            echo "${line}" >"${pkgs_tool_dir}/last"
         fi
-        process=1
-
+        if ! package_progress_write "$pkgs_tool_dir/last" "$arch" "${package_context[list_path]}" "$line"; then
+            fatal "Cannot publish progress after line '${line}' in '${packages_for_tools}'" 116
+        fi
+        ok "Line '${line}' processed successfully in '${packages_for_tools}'"
     done
-    # Close file descriptor 8.
-    exec 8<&-
-    if [ "$process" -eq 0 ]; then
+    if (( ${#entries[@]} > 0 && progress[start] == ${#entries[@]} )); then
         warning "All lines have already been processed."
     else
         ok "All lines have been processed."

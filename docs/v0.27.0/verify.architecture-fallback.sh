@@ -10,7 +10,7 @@ if [[ $# != 2 || $1 != --step || ! $2 =~ ^[1-4]$ ]]; then
     echo 'Usage: verify.architecture-fallback.sh --step 1..4' >&2
     exit 2
 fi
-if (( $2 > 2 )); then
+if (( $2 > 3 )); then
     echo "Step $2 verification is not implemented yet" >&2
     exit 2
 fi
@@ -77,6 +77,9 @@ architecture_fixture() {
     if [[ -f $REPO_ROOT/src/setups/package_index.sh ]]; then
         cp "$REPO_ROOT/src/setups/package_index.sh" "$target/src/setups/"
     fi
+    if [[ -f $REPO_ROOT/src/setups/package_progress.sh ]]; then
+        cp "$REPO_ROOT/src/setups/package_progress.sh" "$target/src/setups/"
+    fi
     cp "$REPO_ROOT/src/utils/"{properties,steps}.sh "$target/src/utils/"
     cp "$REPO_ROOT/src/echos/echos" "$target/src/echos/"
     printf 'architecture=rhel_9.8_x86_64\n' > "$target/src/setups/setup.properties"
@@ -140,6 +143,12 @@ if (( VERIFY_STEP >= 2 )); then
         scripts+=(src/setups/package_index.sh)
     fi
 fi
+if (( VERIFY_STEP >= 3 )); then
+    scripts+=(docs/v0.27.0/verify.architecture-progress.sh)
+    if [[ -f src/setups/package_progress.sh ]]; then
+        scripts+=(src/setups/package_progress.sh)
+    fi
+fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
 shellcheck "${scripts[@]}"
 # Checked explicitly above; the Windows ShellCheck binary cannot resolve the
@@ -151,4 +160,9 @@ if (( VERIFY_STEP >= 2 )); then
     # shellcheck disable=SC1091
     source "$VERIFY_DIR/verify.architecture-index.sh"
     architecture_index_suite
+fi
+if (( VERIFY_STEP >= 3 )); then
+    # shellcheck disable=SC1091
+    source "$VERIFY_DIR/verify.architecture-progress.sh"
+    architecture_progress_suite
 fi
