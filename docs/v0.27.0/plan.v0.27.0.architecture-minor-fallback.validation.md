@@ -159,7 +159,13 @@ to the later plan steps; this record makes no claim that those ran.
 
 ### Analysis of Step 2 implementation state
 
-Not started. Step 2 is not implemented because the invocation context, availability guard and safe publication have not been implemented.
+Yes. Step 2 has been fully implemented.
+
+The invocation retains its selected list and lazy mirror value, guards the
+detected-key index independently of completion, and publishes only a complete
+nonempty candidate. The cumulative gate passed on Windows Git Bash and native
+Linux. Windows also proved that a handle denying delete sharing blocks
+replacement while preserving old bytes, followed by successful recovery.
 
 ### Goal for Step 2
 
@@ -173,27 +179,141 @@ Propagate selected inputs through synchronization, generation, downloading and r
 
 ### What was implemented for Step 2
 
-_(empty — no check has taken place yet.)_.
+| File | Completed change | Physical lines before / after |
+| --- | --- | --- |
+| `src/setups/setup_packages.sh` | Current-shell context; selected-list synchronization and copy; ordinary/direct index guard; read-only lookup; pinned download URLs and generation reporting | 575 / 444 |
+| `src/setups/package_metadata.sh` | Context initialization, lazy mirror pinning and individual URL whitespace normalization | 201 / 223 |
+| `src/setups/package_index.sh` | Exact availability, checked extraction/aggregation, owned sibling scratch/candidate and replacement | 0 / 152 |
+| `src/setups/pkgs/.gitignore` | Bounded `.cplx-index-*` crash-leftover exclusion | 2 / 3 |
+| `docs/v0.27.0/verify.architecture-fallback.sh` | Cumulative Step 2 dispatch, copied helper and explicit effort checks | 139 / 154 |
+| `docs/v0.27.0/verify.architecture-index.sh` | Guard matrix, consumer wiring, failure injection, empty-listing/reporting regression and actual Windows handle fixture | 0 / 310 |
+
+Availability checks the exact nonempty file and both reload flags before any
+completion information. Generation succeeds once per invocation; a completion
+marker cannot conceal a missing/empty index or requested refresh. Failed refresh
+never proceeds using the old index during that invocation. Completion is written
+only after publication; completion failure leaves the valid new index available
+to a later invocation but fails the current one.
+
+The extraction patterns keep their first-success order, including single-quoted
+href support. Per-listing and final aggregation retain last-entry-per-prefix
+selection and sorted output. Every pipeline component is checked, including an
+early grep error followed by a later no-match status. Scratch cleanup owns only
+the unique paths created for that generation.
+
+Round 1 review identified an unintended hard failure for a valid listing with
+no package links. Restored behavior warns with that URL and skips its absent
+output, allowing other URLs to contribute. All-empty listings still fail at
+the final index boundary with 112. Fetch failure, a page under 50 lines and
+extraction component errors retain their hard failures. Generation reports the
+pinned mirror property and URL count through `task`, then the published index
+path and package count through `ok`; guard reuse emits neither message.
 
 ### New types or classes introduced for Step 2
 
-_(empty — no check has taken place yet.)_.
+No classes or Python modules were introduced. `package_metadata_context` creates
+a caller-owned associative array for detected identity, exact index, selected
+list identities, mirror identity/value and refresh state. The ordered URL array
+is caller-owned. `package_metadata_pin_mirrors` updates that context in the
+current shell, so lazy state survives generation and repeated package downloads.
+
+The index helper exposes availability, extraction, aggregation, candidate-write
+and generation functions. Only generation and listing IO use subshells; their
+results are files/statuses and they do not own invocation metadata state.
 
 ### Architecture check for Step 2
 
-_(empty — no check has taken place yet.)_.
+Selection policy remains independent of setup IO. Metadata adapters own
+inventory reads and mirror pinning; the index adapter owns listing and
+publication IO; main owns synchronization, completion and remote orchestration.
+There is no dependency from the selector back into network or setup operations.
+All new helper entry points are referenced by orchestration or another helper,
+and the cleanup callback is reached through the generation EXIT trap.
+
+The main script shrank by 131 lines through responsibility extraction. All new
+and extended Bash helpers/fixtures remain below their plan advisory estimates;
+the Python line ceiling is inapplicable. No architecture issue needs fixing.
 
 ### Performance check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The 48-cell guard matrix checks absent/empty/nonempty index, present/absent
+completion, neither/either/both refresh flags and ordinary/direct flow. Two
+successive package synchronizations in each cell prove one generation and one
+required mirror resolution, or neither for reusable indexes without refresh.
+Another fixture counts one active-property read across generation and multiple
+downloads, including after the fixture properties change.
+
+Selection remains linear; the index aggregation/sorting cost is preserved.
+No per-package inventory scan, content snapshot or whole-cache hashing was added.
+The post-review Windows gate completed in 228 seconds. Native Linux completed
+in 17 seconds with its separately required Windows check clearly labeled. These are
+observations, with no elapsed-time threshold. No performance issue needs fixing.
 
 ### Unit test coverage check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The approved Bash adaptation applies. There is no Python class coverage gate
+or claimed line-coverage percentage. Static inspection finds every new top-level
+helper referenced, including the trap callback; the behavioral matrix exercises
+the index and consumer boundaries.
+
+| Fixture group | Evidence |
+| --- | --- |
+| `index_guard_matrix` | All 48 availability/completion/flags/route combinations; one refresh per invocation |
+| `index_direct_built_and_empty` | Direct built package bypasses index/mirrors; empty ordinary list still prepares an index |
+| `index_lookup_read_only` | Missing lookup fails without creating a placeholder |
+| `index_generation_publication` | Detected-key publication, independent mirror fallback, productive plus empty listing with warning, established extraction/aggregation, cleanup and generation-only reporting |
+| `index_generation_failures` | Twelve injected fetch, short listing, all-empty listings, extraction, masked extraction, aggregation, final aggregation, empty output, sibling creation/write, rename and completion failures; later reuse |
+| `index_pinned_mirrors_and_cache` | One mirror read, ordered retries, edited properties remain unobserved in the invocation, offline cache/index reuse |
+| `index_terminal_downloads` | Direct main with actual download/retry functions, bounded output paths, terminal retrieval/lookup failures, no second minor, lazy absent-mirror failure |
+| `index_selected_list_copy` | Synchronization and remote `dependencies.list` use the same fallback path |
+| `index_windows_held_destination` | Actual separate PowerShell handle denies delete sharing; publication returns 115, old bytes remain and released-handle retry succeeds |
+
+Windows command: `cmd /d /v:on /c "set NO_MORE_SENV_cplx=& call <NUL senv.bat && !GH!\bin\bash.exe docs/v0.27.0/verify.architecture-fallback.sh --step 2"`.
+It returned 0 with all eight metadata and nine index fixture groups passing.
+The tracked-script floor covered 56 scripts, with the effort fixtures also
+checked explicitly. The pre-review run covered 55 scripts before staging the
+new helper; the reviewer independently verified all 56 and the final staged
+Windows gate in 213 seconds before requesting the repairs recorded here.
+
+Native Linux command: `bash docs/v0.27.0/verify.architecture-fallback.sh --step 2`
+in an isolated temporary checkout made from committed source plus the six
+Step 2 paths. Environment: Linux 5.14.0 on RHEL 9.8 x86_64, Bash 5.1.8,
+deployed Git wrapper and an isolated official ShellCheck 0.10.0 binary. It
+returned 0, with 56 staged scripts passing lint, 16 applicable fixture groups
+passing, and an explicit separately required Windows check message. The
+temporary remote checkout and validator were removed on exit.
+
+Before implementation, the new gate failed because `package_metadata_context`
+did not exist, while preservation checks still passed. The expanded Windows
+run and both post-review runs passed preservation. `git diff --check` is clean.
+No unit-tested class needs completing; no new top-level helper is unreferenced.
+
+The review regression fixture was added before its repair and failed with 111
+at `index_generation_publication` after 113 seconds; live-tree preservation
+still passed. Its assertions also cover warning identity, property/URL count,
+published path/package count and silence on a second guard call.
 
 ### Feature integrity for Step 2
 
-_(empty — no check has taken place yet.)_.
+Detected architecture, exact index naming, local RPM cache paths, remote staging
+and installation entry points remain intact. List and mirror selection stay
+independent. Direct built packages bypass indexes and mirrors; ordinary empty
+lists retain index preparation. Lookup, fetch and completion failures remain
+unsuccessful and actionable. Failed generation leaves prior index bytes intact;
+successful publication followed by completion failure retains the new index.
+
+Download URL joining deliberately removes only one trailing slash from the
+mirror prefix before adding the package name. The previous global double-slash
+collapse also changed `https://` to `https:/`; preserving the scheme gives the
+configured URL its intended meaning. Ordered retry fixtures exercise the
+resulting `https://` URLs. Empty-listing skip behavior and successful generation
+reporting were restored after review as described above.
+
+Real setup metadata, ignored files, logs, indexes and RPM inventory were unchanged
+by the Windows gate. Linux ran only copied fixtures in a temporary checkout.
+No live RHEL package setup, Jenkins job, compilation or packaging ran. Scoped
+progress and actual CMD reset tests remain Step 3; curated cleanup and real
+Python/Git setup acceptance remain Step 4. The umbrella item remains pending.
 
 ## Step 3: Persist scoped progress and repair CMD reset forwarding
 
