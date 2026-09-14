@@ -1,4 +1,6 @@
 #!/bin/bash
+# Package setup entry point. Sourcing exposes functions for isolated metadata
+# verification; normal execution retains the existing setup flow.
 # shellcheck source-path=SCRIPTDIR
 
 SETUP_PKGS_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
@@ -8,6 +10,8 @@ source "${SETUP_PKGS_DIR}/../echos/echos"
 # shellcheck disable=SC1091
 source "${SETUP_PKGS_DIR}/../utils/properties.sh"
 source "${SETUP_PKGS_DIR}/../utils/steps.sh"
+# shellcheck disable=SC1091
+source "${SETUP_PKGS_DIR}/package_metadata.sh"
 # SRC_DIR="$( cd "$( dirname "${SETUP_PKGS_DIR}" )" && pwd )"
 
 main() {
@@ -566,4 +570,6 @@ install_packages() {
     process_install_result
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi
