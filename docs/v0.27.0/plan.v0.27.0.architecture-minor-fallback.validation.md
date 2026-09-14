@@ -3,7 +3,7 @@
 No, it is not implemented.
 
 Track the four steps in [the implementation plan](plan.v0.27.0.architecture-minor-fallback.md).
-Step 1 is implemented and verified. Steps 2-4 and real-host acceptance remain pending.
+Steps 1-3 are implemented and verified. Step 4 and real-host dependency acceptance remain pending.
 
 ## File-based IO cost clarification for architecture fallback implementation
 
@@ -319,7 +319,13 @@ Python/Git setup acceptance remain Step 4. The umbrella item remains pending.
 
 ### Analysis of Step 3 implementation state
 
-Not started. Step 3 is not implemented because the scoped record and launcher reset interface have not been implemented.
+Yes. Step 3 has been fully implemented.
+
+Progress now belongs to the detected key and selected list. A discarded cursor
+is replaced before package synchronization, while valid cursors retain the
+approved resume-after behavior. CMD forwards explicit reset intent once and
+preserves literal expressions. The cumulative Windows and native Linux gates,
+real CMD fixtures and live-tree preservation checks passed on 14 September 2026.
 
 ### Goal for Step 3
 
@@ -333,27 +339,150 @@ Bind durable resume state to detected key and selected list, and forward reset i
 
 ### What was implemented for Step 3
 
-_(empty — no check has taken place yet.)_.
+- **Scoped data and atomic publication**: `src/setups/package_progress.sh`
+  reads the exact four-line `cplx-package-progress-v1` record, removes one
+  terminal CR per line and rejects unknown versions, missing/extra fields,
+  unterminated records, embedded separators and NUL data. It never sources or
+  evaluates progress. Checked writes use owned `.cplx-progress-*` siblings and
+  atomic replacement; failures return 116 and remove the owned candidate.
+- **One list snapshot**: `src/setups/setup_packages.sh` loads normalized active
+  entries once, preserving package text and existing blank/comment handling.
+  Identity and cursor membership use that same array before iteration.
+  Legacy, malformed, changed-identity and stale records restart and report why.
+  First selections and restarts publish an empty cursor before package IO.
+- **Resume and reset**: a valid cursor resumes after the first cursor or repeat
+  match. Empty or discarded cursors ignore repeat. Explicit reset validates
+  the normalized entry first, then publishes its cursor; an invalid entry names
+  the selected list, returns 117 and preserves progress without synchronization.
+  Reset without an entry starts at the beginning. Missing option values,
+  reset/direct combinations and after-entry without reset fail before progress
+  changes. Direct packages leave list progress untouched.
+- **CMD boundary**: `src/setups/setup.bat` consumes package/reset arguments with
+  `shift`, calls Bash with explicit argv and keeps delayed expansion disabled
+  for literal input. It no longer deletes or echoes a marker or forwards raw
+  `%*`. Generic repeat, `r_<step>` and the `sdpl` package-index route still call
+  the step helper. Bash and step-helper failures reach launcher exit 119.
+- **Fixtures and inventory**: `verify.architecture-progress.sh` adds eight
+  copied-root groups; `verify.architecture-launcher.cmd` runs eleven real CMD
+  cases against copied endpoints and fixture logging/environment setup.
+  `verify.architecture-fallback.sh` includes Step 3, and the retained index
+  fixture checks the new record's final field. The plan names that additional
+  assertion update. `src/setups/pkgs/.gitignore` covers progress scratch names.
+
+| File | Before | After |
+| --- | --- | --- |
+| `src/setups/package_progress.sh` | 0 | 112 |
+| `src/setups/setup_packages.sh` | 444 | 442 |
+| `src/setups/setup.bat` | 100 | 121 |
+| `src/setups/pkgs/.gitignore` | 3 | 4 |
+| `docs/v0.27.0/verify.architecture-progress.sh` | 0 | 304 |
+| `docs/v0.27.0/verify.architecture-launcher.cmd` | 0 | 72 |
+| `docs/v0.27.0/verify.architecture-fallback.sh` | 154 | 168 |
+| `docs/v0.27.0/verify.architecture-index.sh` | 310 | 310 |
+
+The new helper and fixture files stay within the plan's advisory estimates.
+Python line bands and the 650-line Python ceiling are inapplicable.
 
 ### New types or classes introduced for Step 3
 
-_(empty — no check has taken place yet.)_.
+No production classes were introduced. `package_progress_entries` reads active
+entries and comment diagnostics; `package_progress_read` parses literal data;
+`package_progress_write` owns complete-record publication; and
+`package_progress_prepare` checks identity/membership and returns the start
+position, restart reason and resume entry through an associative array.
+The CMD fixture adapter prepares recording endpoints and checks the actual
+driver process's argv; it does not implement the production argument parser.
 
 ### Architecture check for Step 3
 
-_(empty — no check has taken place yet.)_.
+Progress parsing, validation and persistence live in the dedicated Bash helper.
+Main setup owns argument validation, selected metadata, synchronization and
+logging. CMD translates its public interface to explicit Bash arguments and
+delegates selection/state ownership to Bash. The helper has no setup side
+effects when sourced and does not depend on network or remote installation.
+This script-based project has no DDD class layers; the relevant adapter
+boundaries and existing metadata/index responsibilities remain intact.
+
+No, there is nothing that needs to be addressed for Step 3 architecture.
 
 ### Performance check for Step 3
 
-_(empty — no check has taken place yet.)_.
+Active entries are read once into memory. Membership validation and finding the
+first resume match each scan at most the selected list once, for O(n) total
+progress preparation and O(n) storage. Iteration uses that snapshot, including
+when the on-disk list changes during synchronization. Each successful package
+publishes one four-field record, without metadata enumeration or mirror
+resolution inside the new progress logic. Existing package lookup, download
+and remote-copy costs are unchanged. No new quadratic or sorting path exists.
+
+No, there is no performance issue that needs to be addressed for Step 3.
 
 ### Unit test coverage check for Step 3
 
-_(empty — no check has taken place yet.)_.
+This project has no Python class coverage gate. `.review-validation` defines
+the tracked-shell ShellCheck floor; the plan adds executable Bash fixtures and
+the actual CMD gate. These integration checks do not establish a coverage
+percentage. Static inspection finds all four progress helpers reached from
+main or another helper. Every fixture group is registered in its suite, and
+the launcher fixture adapter is reached by the executable CMD gate.
+
+Writer evidence, reused by this implementation check without rerunning tests:
+
+- Final Windows cumulative gate: the plan's guard-cleared `senv.bat` command
+  with Git Bash and `verify.architecture-fallback.sh --step 3` returned 0 in
+  433 seconds; 25 groups passed, including the Windows held-destination check.
+  The mandatory tracked-shell floor and explicit new-helper/fixture syntax and
+  ShellCheck checks passed. Live metadata/status/cache preservation passed.
+- Final native RHEL 9.8 copied-root gate: Bash 5.1.8 and ShellCheck 0.10.0 ran
+  `bash docs/v0.27.0/verify.architecture-fallback.sh --step 3`, returning 0 in
+  20 seconds with all 24 applicable groups and preservation passing. Windows
+  checks were reported separately, not counted as native passes. This used an
+  owned temporary source tree, not live dependency setup.
+- `cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd` returned 0 for all
+  eleven cases: reset, reset-after, direct, invalid direct/reset, generic
+  repeat, generic reset, `sdpl`, two literal-expression paths, Bash failure and
+  helper failure. Literal inputs include spaces, regex metacharacters,
+  exclamation/percent signs, ampersands, carets, dollar text and backticks.
+- Recovery checks interrupt before the first package after both a first
+  selection and an identity restart. The durable record has an empty cursor;
+  restoring the old architecture still cannot recover the discarded cursor.
+  Create/write/rename failures preserve prior bytes; a successful package with
+  failed progress publication is repeated on the next invocation.
+- The remaining matrix covers CRLF records/lists/reset input, an unterminated
+  last list entry, empty/comment lists, duplicate/final cursors, all relative
+  repeat positions, shell-looking data, invalid reset preservation, direct
+  isolation and a selected list edited after its snapshot was loaded.
+
+No, there is no unit-tested class below 100% that needs completing for Step 3.
+No, there is no unreferenced top-level symbol in the Step 3 production/helper
+or verification code outside a coverage gate.
 
 ### Feature integrity for Step 3
 
-_(empty — no check has taken place yet.)_.
+The cumulative gate retains Steps 1 and 2, including selected-list copying,
+the exact-index guard matrix, pinned mirrors and cached/offline reuse.
+Comment, resume, per-entry and completion reporting remains, with explicit
+restart and progress-publication diagnostics added. A completed entry is
+reported only after its record is published. The final-entry cursor reports
+that all entries were already processed.
+
+The planned `rg` inspection found no raw `%*` forwarding or marker writes in
+CMD. Remaining `last` matches describe the record, URL retry order or remote
+exit status; reset and step-helper matches implement the explicit interface.
+Raw argument logging was removed alongside shell re-parsing to keep literal
+expressions intact; Bash still reports direct packages and progress outcomes.
+The fixtures do not initialize real package setup or launch a log viewer.
+
+The launcher interface is now closed. It accepts no argument, one step name,
+`packages`, `packages <step>`, `packages p_<name>` or `packages reset [entry]`.
+Any further argument exits 119 before any step helper or setup work. The
+previous launcher silently ignored extra words: it repeated only the first
+step and passed the rest to `setup.sh`, which never reads them. `build.bat`
+forwards its non-release parameters through this same interface.
+
+No existing supported feature is impaired by Step 3. Step 4's real dependency
+acceptance, curated cleanup and wiki work remain pending, so the umbrella row
+and document-level implementation status remain incomplete.
 
 ## Step 4: Demonstrate RHEL fallback, clean curated metadata and document it
 
