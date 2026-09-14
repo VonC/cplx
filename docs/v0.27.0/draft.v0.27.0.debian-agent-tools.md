@@ -4,7 +4,7 @@
 - Draft role: umbrella
 
 Source of every finding referenced here:
-`../../my-project/docs/jenkins_build.md` (the PDFS Jenkins build discovery,
+`../../my-project/docs/jenkins_build.md` (the application Jenkins build discovery,
 builds develop#2 through develop#19 on 2026-08-06 and 2026-08-07) and
 the cplx sources named per item. The Qn identifiers below are the open questions of that
 document; this draft turns its "durable fix, in cplx" notes into one
@@ -346,7 +346,7 @@ met a foreign distribution.
 
 Acceptance for this item: `python3 -c 'import sqlite3'` passes on the
 build account, on a Debian 12 container after relocation, and on the
-RHEL target after deployment. Downstream this restores the PDFS
+RHEL target after deployment. Downstream this restores the application
 coverage gate and pytest-testmon (their interims are listed in the
 cleanup section).
 
@@ -439,8 +439,9 @@ $VERSION_ID $(uname -m)`) and writes it back into the properties, so on
 the 9.8 build account the key is `rhel_9.8_x86_64`. Every
 distribution-specific artifact is named after it, with no fallback:
 `setup_packages.sh` builds the per-tool list name as
-`${CPLX_TOOL}_${architecture}.txt` and fatals 902 when the file is
-missing, the package index is `packages_<arch>.txt`, and the mirror URLs
+`${CPLX_TOOL}_${architecture}.txt`; a missing list fails synchronization
+with fatal 9 before the later remote-copy check that can fail with fatal 902.
+The package index is `packages_<arch>.txt`, and the mirror URLs
 live under an `<arch>_pkgs_url` property. The repository carried
 `centos_8`, `rhel_7.9` and `rhel_9.6` variants only, so the next package
 run would have failed before reading the sqlite lines added for the
@@ -453,14 +454,24 @@ Two halves, both needed:
    `rhel_9_8_x86_64_pkgs_url` property (same rolling 9-stream mirrors),
    and regenerate the index with `sdpl`. Done on 2026-08-07 in this
    cycle, since the rebuild cannot proceed without it.
-2. **Stop the churn**, by teaching cplx to fall back on the closest
-   minor of the same major when no file matches the exact key, saying
-   so in its output. The exact key stays authoritative when a file
-   exists, so a genuinely divergent distribution can still have its
-   own list, and a server upgraded from 9.8 to 9.9 stops needing a copy
-   pass. This is requirement 5 of the collection; once it lands the
-   duplicated `rhel_9.8` copies can be deleted in favour of one file
-   per major.
+2. **Stop the churn**, through the D9 refinement approved on 14 September
+   2026 in [requirement 5](feature-request.v0.27.0.architecture-minor-fallback.md).
+   Curated lists and mirrors resolve independently: exact first, then highest
+   lower minor, otherwise lowest higher minor, within the same distribution,
+   major and complete machine architecture. Each substitution is reported.
+   Generated indexes stay under the detected key: a missing or zero-length
+   index and either explicit reload flag require generation despite earlier
+   completion state. Generation and corresponding downloads use the same
+   resolved mirrors. Synchronization resumes only for the same selected list
+   and detected key; changed or legacy state restarts and reports it.
+
+Correct the retained 9.6 Python list to `zlib-devel`, then confirm equivalence
+and accepted setup before removing the redundant 9.8 Python/Git lists and
+tracked mirror key. Generated indexes and operator-local properties remain
+outside cleanup. Distinct exact overrides are retained, and generated indexes
+may exist for each minor. Commit `18c251d` records why an older generated
+snapshot cannot stand in for the detected server's index. Item 5 implementation
+is pending; these are confirmed requirements, not completed code changes.
 
 The mechanism, the recovery and the inventory of everything the key
 names are documented in the wiki
@@ -490,7 +501,7 @@ existing prefix:
 
 Detect `rsync` once (`command -v`), log which engine runs, and prefer
 rsync whenever present so the build account path stays byte-identical.
-This item removes the shim from the PDFS pipeline; asking the CICD
+This item removes the shim from the application pipeline; asking the CICD
 team to add rsync and procps to the agent image remains a parallel
 track and does not block this draft.
 
@@ -673,7 +684,7 @@ The pin travels in the my-project repo, not in a Jenkins job parameter
 (none is configurable there): `tools/tools.version` holds the one
 version line and the Jenkinsfile reads it at pipeline start. Packaging
 stays version-less on purpose: the Maven coordinate is a publication
-concern, so `pkg_tools` keeps the same timestamp naming as `pkg_pdfs`
+concern, so `pkg_tools` keeps the application's timestamp naming convention
 (the installer discovery and the pipeline fetch only need the
 `tools.*.tar.gz` shape), and the version appears exactly twice:
 
@@ -765,7 +776,7 @@ the correction below.
 | D7 | sqlite provenance for the python build | (a) copy from the server's `/usr`; (b) `sqlite-devel` and `sqlite-libs` payloads extracted into the python sandbox from the per-tool list; (c) sqlite rebuilt from source as a cplx tool | (b): (a) is impossible (the server has no header and no linker symlink), (b) is one list line in the same class as zlib and libffi, (c) only for a newer sqlite or independence from the RHEL patch cycle |
 | D6 | cplx release carrying this effort | (a) fold into the current 0.26.0 cycle; (b) dedicated next cycle | (b): v0.26.0 shipped on 2026-08-06, this effort opens the v0.27.0 cycle |
 | D10 | C++ runtime generation shipped in the root | (a) keep the GCC 11 `libstdc++.so.6.0.29` the platform provides, inheriting a one-node margin (`GLIBCXX_3.4.29` against an agent at `3.4.30`); (b) ship the GCC 12 generation, sourced from a toolset payload, so the archive absorbs a wheel set that moves past that node | DECIDED inside requirement 4 as a CONDITIONAL POLICY, by the round 1 specification review of `issue.v0.27.0.toolchain-runtime-closure.md`. The consumer set is every shipped ELF recording a `DT_NEEDED` on `libstdc++.so.6`, measured once the final wheel and dependency set is fixed. The comparison covers `GLIBCXX_` and `CXXABI_` against what the shipped `libstdc++` defines, since libstdc++ provides both namespaces, while `libgcc_s` is checked separately against its own `GCC_` needs. Ship (a) if and only if every one of those is satisfied; otherwise ship (b) and re-run every closure check of requirement 4 against the new root; if NEITHER generation satisfies them, packaging FAILS rather than taking the closer one. ZERO SPARE NODES IS ALLOWED: the threshold is satisfaction, not headroom, so "the margin is gone" is explicitly NOT the switch condition, being ambiguous between zero headroom and an unsupported node. Requirement 7 supplies the measurement; requirement 4 owns the rule |
-| D9 | Architecture key across server minors | (a) copy the file set at every minor upgrade; (b) key on the major only; (c) exact match first, then the closest minor of the same major, logged | decided: (a) now to unblock the rebuild, then (c) as requirement 5. (b) is rejected: it would lose the ability to describe a distribution whose minor really diverges |
+| D9 | Architecture key across server minors | (a) copy the file set at every minor upgrade; (b) key on the major only; (c) exact curated definitions first, then eligible minor fallback, logged | decided: (a) was the temporary recovery; (c) is refined by [requirement 5](feature-request.v0.27.0.architecture-minor-fallback.md), consolidated on 2026-09-14. Prefer the highest lower minor, otherwise the lowest higher minor, within the same distribution, major and complete machine. Lists and mirrors resolve independently; indexes are generated for the detected key and never reused across minors. Either reload flag, or a missing or zero-length exact index, requires generation despite completion state. Resume progress applies only to the same selected list and detected key; changed or legacy state restarts. Correct 9.6 Python to `zlib-devel` before removing equivalent 9.8 curated definitions; retain indexes and operator-local properties. (b) remains rejected because exact divergent overrides must remain possible. |
 
 ## List of feature-requests and issues to create
 
@@ -775,7 +786,7 @@ the correction below.
 | 2 | Issue | Relocate with RPATH so wheels resolve inside the prefix | `relocation-force-rpath` | completed | `docs/v0.27.0/issue.v0.27.0.relocation-force-rpath.md` | `docs/v0.27.0/plan.v0.27.0.relocation-force-rpath.validation.md` |
 | 3 | Issue | Keep the python wrapper working on a foreign distribution | `python-wrapper-foreign-distro` | completed | `docs/v0.27.0/issue.v0.27.0.python-wrapper-foreign-distro.md` | `docs/v0.27.0/plan.v0.27.0.python-wrapper-foreign-distro.validation.md` |
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | completed | `docs/v0.27.0/issue.v0.27.0.toolchain-runtime-closure.md` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
-| 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | pending | - | - |
+| 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | pending | `docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md` | - |
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | pending | - | - |
 | 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | pending | - | - |
 
@@ -1018,28 +1029,37 @@ independent.
 Type: Feature-request. Slug: `architecture-minor-fallback`. Regroups
 work item 5 and decision D9.
 
-Every distribution-specific artifact is named after the architecture
-key, which `setup.sh` recomputes from the server and which carries the
-minor version. A minor upgrade therefore invalidates the whole file set
-at once, with a fatal 902 as the only warning, although RHEL 9 minors
-share package names and the mirrors cplx scrapes for them are rolling
-9-stream directories that ignore minors entirely. The 9.8 copies made
-on 2026-08-07 unblocked the rebuild; this item removes the need to
-repeat them.
+The server's minor upgrade changes the detected architecture and invalidates
+exact-name metadata lookups. Missing lists fail synchronization with fatal 9
+before the later copy check's fatal 902. The 9.8 copies made on 2026-08-07
+unblocked preparation; this item removes the need to repeat that copying.
 
-The rule (D9): resolve the exact key first, so a genuinely divergent
-distribution keeps its own list; when no file matches, select the
-closest available minor of the same major and same machine, and log
-which file was chosen so the substitution is never silent. It applies
-to the three lookups that carry the key, the per-tool list, the package
-index and the `<arch>_pkgs_url` property. Acceptance: with only
-`rhel_9.6` files present, a server reporting `rhel_9.8_x86_64` resolves
-them and says so, while a `rhel_9.8` file, when present, still wins.
+The [consolidated requirement](feature-request.v0.27.0.architecture-minor-fallback.md)
+refines D9: exact curated definitions win, otherwise choose the highest lower
+minor, or the lowest higher minor when no lower one exists. Distribution,
+major and complete machine must match. Lists and mirrors resolve independently
+and report their selections. Indexes never fall back: missing or zero-length
+indexes and either reload flag require generation for the detected key despite
+completion state, using the same mirrors as corresponding downloads.
 
-Fifth because the sqlite item that follows cannot be validated until
-the architecture resolves on the 9.8 build account, and because the
-copies that unblock it today are the churn this removes. Once it lands,
-the duplicated `rhel_9.8` lists can go, leaving one file per major.
+Resume progress is valid only for the same selected list file and detected
+key. Changed selections, changed keys and legacy progress restart from the
+first active entry and report it, preserving package download and copy reuse.
+
+Acceptance uses the real RHEL 9.8 host with retained pre-upgrade progress, the
+corrected 9.6 Python list (`zlib-devel`), the 9.6 Git list and mirror definition,
+and no overriding local 9.8 mirror key. It must report fallback and restart,
+synchronize every active dependency and generate/use its 9.8 index. Only
+equivalent curated 9.8 definitions are removed after evidence; generated
+indexes, distinct overrides and operator-local properties remain.
+
+Item 4 already checks the tools runtime payload during packaging; item 5
+selects upstream dependency inputs. RHEL prepares/packages tools and the
+private application and deploys their archives. Jenkins Debian consumes
+existing tools, checks the application out from source, runs tests and
+packages/publishes only the application to Nexus, without compilation.
+Item 6 owns SQLite integration and item 7 owns the final tools refresh,
+rebuild, validation and release. New-tool RHEL 9 seeds remain a separate gap.
 
 Depends on: nothing technically; placed here because item 6 needs a
 resolving key.
