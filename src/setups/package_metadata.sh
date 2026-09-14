@@ -4,7 +4,9 @@
 # list ROOT TOOL REQUEST RESULT DIAGNOSTICS
 # mirror ACTIVE_PROPERTIES REQUEST RESULT DIAGNOSTICS URLS
 # RESULT is associative; other arrays are indexed. Names beginning _pm_ are
-# reserved for implementation locals. No source-time IO or consumer setup runs.
+# reserved for implementation locals. Invocation contexts pin lazy mirror reads
+# and keep detected-key index paths separate from selected curated metadata.
+# No source-time IO or consumer setup runs.
 # Nameref outputs/inventories are used indirectly by the calling functions.
 # shellcheck disable=SC2034
 
@@ -197,5 +199,25 @@ package_metadata_mirror() {
     _pm_mirror_diagnostics+=("${_pm_absent[@]}")
     _pm_mirror_result['value']=${_pm_values[${_pm_mirror_result[source]}]}
     IFS=, read -r -a _pm_urls <<< "${_pm_mirror_result[value]}"
+    for _pm_property in "${!_pm_urls[@]}"; do
+        package_metadata_trim "${_pm_urls[_pm_property]}" '_pm_urls[_pm_property]'
+    done
     package_metadata_report "$3"
+}
+
+package_metadata_context() {
+    local -n _pm_context=$3
+    _pm_context=([detected_key]="$1" [index_path]="$2/pkgs/packages_$1.txt"
+        [mirror_ready]=0 [refresh_served]=0)
+}
+
+package_metadata_pin_mirrors() {
+    local -n _pm_pinned=$2
+    [[ ${_pm_pinned[mirror_ready]} != 1 ]] || return 0
+    local -A _pm_selection=()
+    package_metadata_mirror "$1" "${_pm_pinned[detected_key]}" _pm_selection "$4" "$3" || return 1
+    _pm_pinned['mirror_key']=${_pm_selection[selected_key]}
+    _pm_pinned['mirror_source']=${_pm_selection[source]}
+    _pm_pinned['mirror_value']=${_pm_selection[value]}
+    _pm_pinned['mirror_ready']=1
 }
