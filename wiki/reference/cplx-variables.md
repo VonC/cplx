@@ -33,8 +33,8 @@ One `if "%CPLX_TOOL%"=="<tool>"` block per tool:
 | Variable | Effect |
 | --- | --- |
 | `CPLX_INSTALL_COPY_ONLY` | `install.bat` stops after copying the scripts (`ic`) |
-| `CPLX_RELOAD_PACKAGES` / `CPLX_FORCE_RELOAD_PACKAGES` | refresh / rebuild the package index (`sdpl`) |
-| `CPLX_SP_REPEAT` | re-process a given package during `sync_packages` |
+| `CPLX_RELOAD_PACKAGES` / `CPLX_FORCE_RELOAD_PACKAGES` | either requests one detected-index refresh per invocation despite a done marker (`sdpl` sets the force flag) |
+| `CPLX_SP_REPEAT` | with a valid nonempty list cursor, resume after the first active entry matching the cursor or this value; ineffective with empty/restarted progress |
 
 ## Properties (files, shared by both machines)
 
@@ -44,6 +44,13 @@ One `if "%CPLX_TOOL%"=="<tool>"` block per tool:
 (remote working folder, parsed from the `#<alias>_cd` SSH-config
 comment), `architecture` (detected, e.g. `rhel_9.6_x86_64`), and
 `<architecture>_pkgs_url` mirror lists.
+
+The detected `architecture` continues to name the generated index and RPM
+cache. Curated lists and active mirror properties are selected independently:
+exact, highest lower minor, then lowest higher minor of the same distribution,
+major and machine. A missing/empty detected index is regenerated even without
+reload flags. Selected mirrors are resolved lazily and fixed for the invocation;
+the template is not merged into an existing active properties file.
 
 `src\setups\env\cplx.properties` (template `.tpl`): the subset shipped to
 the server: `services`, `CPLX_ARCH_EXT`, `CPLX_CHECK_PREFIX`,
