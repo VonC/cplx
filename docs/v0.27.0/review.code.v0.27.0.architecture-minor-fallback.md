@@ -1828,3 +1828,1081 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-1 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-09-15T09:35:26+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 architecture-minor-fallback (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+Implementation step: 4
+Review round: 1
+
+### Code review evidence for step 4 architecture-minor-fallback (round 1)
+
+request_index_tree: 1d75ff540a2313dd7e4d44be94beef543a04b172
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- cmd /d /c .reviews\a.step4.windows-gate.cmd (sources: plan)
+- cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd (sources: plan)
+- cmd /d /c a.architecture-acceptance\native-final.cmd (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(packages): complete RHEL fallback setup
+group 1 path: docs/v0.27.0/verify.architecture-fallback.sh
+group 1 path: src/setups/env/bin/packages_management.sh
+group 1 path: src/setups/pkgs/git/git_rhel_9.6_x86_64.txt
+group 1 path: src/setups/pkgs/git/git_rhel_9.8_x86_64.txt
+group 1 path: src/setups/pkgs/python/python_rhel_9.6_x86_64.txt
+group 1 path: src/setups/pkgs/python/python_rhel_9.8_x86_64.txt
+group 1 path: src/setups/setup.tpl.properties
+group 2: docs(packages): explain minor fallback and resume
+group 2 path: wiki/explanation/checkpoints-and-resume.md
+group 2 path: wiki/explanation/the-architecture-key.md
+group 2 path: wiki/how-to/add-or-fix-a-package-mirror.md
+group 2 path: wiki/how-to/resume-or-repeat-a-step.md
+group 2 path: wiki/how-to/survive-a-server-os-upgrade.md
+group 2 path: wiki/reference/commands.md
+group 2 path: wiki/reference/cplx-variables.md
+group 2 path: wiki/reference/exit-codes.md
+group 2 path: wiki/reference/package-list-formats.md
+group 3: docs(architecture-minor-fallback): record step 4 validation
+group 3 path: docs/v0.27.0/acceptance.architecture-minor-fallback.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/acceptance.architecture-minor-fallback.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/verify.architecture-fallback.sh
+staged path: src/setups/env/bin/packages_management.sh
+staged path: src/setups/pkgs/git/git_rhel_9.6_x86_64.txt
+staged path: src/setups/pkgs/git/git_rhel_9.8_x86_64.txt
+staged path: src/setups/pkgs/python/python_rhel_9.6_x86_64.txt
+staged path: src/setups/pkgs/python/python_rhel_9.8_x86_64.txt
+staged path: src/setups/setup.tpl.properties
+staged path: wiki/explanation/checkpoints-and-resume.md
+staged path: wiki/explanation/the-architecture-key.md
+staged path: wiki/how-to/add-or-fix-a-package-mirror.md
+staged path: wiki/how-to/resume-or-repeat-a-step.md
+staged path: wiki/how-to/survive-a-server-os-upgrade.md
+staged path: wiki/reference/commands.md
+staged path: wiki/reference/cplx-variables.md
+staged path: wiki/reference/exit-codes.md
+staged path: wiki/reference/package-list-formats.md
+```
+
+### Requestor assessment for step 4 architecture-minor-fallback (round 1)
+
+Yes. Step 4 has been fully implemented.
+
+The writer checked the final staged changes against Step 4 and AC1-AC12. The
+validation plan now records Yes for every step, and only the matching umbrella
+row was completed with its requirement and validation paths.
+
+Executed validation on the current behavior and final curated tree:
+
+- Windows cumulative Step 4: exit 0, 1455 seconds, 30 groups and live-tree
+  preservation; a.architecture-acceptance/windows-final.step4.resumed.log.
+- Native RHEL Linux cumulative Step 4: exit 0, 40 seconds, 29 applicable groups
+  and preservation; a.architecture-acceptance/native-final.step4.log.
+- Both cumulative gates passed the 57-script mandatory shell lint floor and
+  explicit effort syntax/ShellCheck checks. No line-coverage percentage is claimed.
+- Actual CMD launcher: exit 0, all 11 cases;
+  a.architecture-acceptance/launcher.step4.log.
+- Controlled Python: 56 entries and real install, 552 seconds; scoped resume
+  processed 3 entries and reused all installed packages, 40 seconds.
+- Controlled amended Git: 50 entries and real install, 233 seconds; scoped
+  resume processed 3 entries and reused all installed packages, 31 seconds.
+- Final Python/Git: 56/50 entries, one served cache omission each, 260/230
+  seconds; lazy mirror fallback and cache/staged/installed reuse passed.
+- Every host pass preserved authoring status/content/cache and live remote
+  inventory. Selected list copies matched their sources. The same fresh
+  detected-key index and isolated target were used after curated cleanup.
+- Markdown headings, fences, local file links, planned source inspection and
+  git diff --check passed. The commit-plan checker reports ready with no diagnostics.
+
+No DDD/adapter boundary issue or new production quadratic/sorting computation
+was found. The Autoconf repair stays in its existing post-install hook. Every
+new fixture helper/case is referenced; the project has no class coverage gate.
+Existing runtime guards, exact overrides, terminal failures and reuse remain.
+The real install failures and their repairs are disclosed in the acceptance
+document and validation plan; neither was hidden by manual RPM/flag injection.
+
+#### Operational validation notes for step 4 architecture-minor-fallback (round 1)
+
+The plan's Bash adaptation applies: .review-validation retains the shell lint
+floor, and no Python/pytest/percentage-coverage gate exists in this repository.
+Run the Windows cumulative command in the configured CMD/Git Bash environment;
+the observed 1455-second duration is normal for its full entry fixtures. Do
+not restart healthy work or stage/edit src/setups while its preservation
+snapshot is active. The actual CMD launcher remains a separate command.
+The Windows command is packaged in .reviews/a.step4.windows-gate.cmd using
+the plan's permitted separate-line CMD form: clear the guard, call <NUL
+senv.bat, then invoke the configured Git Bash with the exact --step 4 gate.
+This avoids transporting nested CMD quotes through the review renderer.
+
+The native counterpart runs bash docs/v0.27.0/verify.architecture-fallback.sh
+--step 4 in an isolated native Linux source copy. The resolved native transport
+command uses the existing ignored a.architecture-acceptance/native-final.cmd
+and its Bash driver. It copies current source, prepares Bash/Git/ShellCheck,
+executes that exact Linux gate, retains logs and removes only its owned
+temporary fixture tree. Inspect those drivers before use. A second Git Bash
+run is not native evidence. The PowerShell coordinator is unnecessary.
+
+The host acceptance procedure is already complete and fully documented in the
+versioned acceptance record. Raw real-host evidence and drivers are retained
+under ignored a.architecture-acceptance/. Keep host/account details out of the
+versioned transcript. Review the recorded controlled/final acceptance; no new
+installation or alteration of live operator state is required by this request.
+
+Assess only Step 4. The completed umbrella row is writer-owned and must remain
+unchanged during reviewer assessment. No commit has been authorized.
+
+### Implementation report for step 4 architecture-minor-fallback (round 1)
+
+Step 4 finishes real RHEL dependency acceptance and curated cleanup after the
+metadata/index/progress implementation from Steps 1-3.
+
+The retained Python list corrects zlib-dev to zlib-devel. Both Git minor lists
+received libcom_err and libxslt corrections before equivalence checking. Actual
+isolated Git installation then exposed two additional blockers: a quoted
+wildcard in post_install_autoconf271 and missing elfutils-libelf before
+glib2-devel. The minimal hook fix and ordinary curated dependency repair were
+tested; both amended Git lists were byte-identical before removal.
+
+Controlled acceptance used copied active configuration/cache, no exact 9.8
+curated definitions, and a fresh 5898-package index for detected 9.8. Full
+preflight covered the amended 106 entries and 81 distinct RPMs. All controlled
+Python/Git legacy and scoped-resume passes succeeded before removing only the
+equivalent Python/Git 9.8 lists and tracked 9.8 mirror property. Final passes
+repeated ordinary setup from the resulting curated tree with newly served
+cache omissions. Generated authoring indexes and operator files were preserved.
+
+The cumulative runner exercises real setup processes with transport stubs,
+full fallback lists, scoped resume, distinct exact overrides, terminal failures
+and the real Autoconf hook. Git Bash fixture roots use long drive paths to keep
+parent/child containment checks consistent. The Autoconf regression failed
+with fatal 152 before the production fix and passed after it.
+
+Nine wiki pages describe independent exact/lower/higher selection, active
+configuration, detected index/cache identity, atomic refresh/progress and
+reset-after-entry. The acceptance record contains sanitized bootstrap commands,
+hashes, actual outcomes and AC1-AC12 mapping. Final validation and the exact
+umbrella row now record completion. Later SQLite/rebuild/release items remain
+separate. No production bootstrap interface was changed.
+
+### Change summary for step 4 architecture-minor-fallback (round 1)
+
+The root a.commit is formatted and mechanically ready. It covers all 19 staged
+paths in three dependency-ordered groups:
+
+1. fix(packages): complete RHEL fallback setup
+   - docs/v0.27.0/verify.architecture-fallback.sh
+   - src/setups/env/bin/packages_management.sh
+   - src/setups/pkgs/git/git_rhel_9.6_x86_64.txt
+   - src/setups/pkgs/git/git_rhel_9.8_x86_64.txt (removed)
+   - src/setups/pkgs/python/python_rhel_9.6_x86_64.txt
+   - src/setups/pkgs/python/python_rhel_9.8_x86_64.txt (removed)
+   - src/setups/setup.tpl.properties
+2. docs(packages): explain minor fallback and resume
+   - wiki/explanation/checkpoints-and-resume.md
+   - wiki/explanation/the-architecture-key.md
+   - wiki/how-to/add-or-fix-a-package-mirror.md
+   - wiki/how-to/resume-or-repeat-a-step.md
+   - wiki/how-to/survive-a-server-os-upgrade.md
+   - wiki/reference/commands.md
+   - wiki/reference/cplx-variables.md
+   - wiki/reference/exit-codes.md
+   - wiki/reference/package-list-formats.md
+3. docs(architecture-minor-fallback): record step 4 validation
+   - docs/v0.27.0/acceptance.architecture-minor-fallback.md
+   - docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+
+The final group keeps acceptance, final validation and the umbrella status
+transition together. No source or operator changes remain unstaged. The
+review transcript publication is protocol-owned and occurs after the request
+captures the staged tree.
+
+### Writer response for step 4 architecture-minor-fallback (round 1)
+
+Writer response:
+
+This is the first review round for Step 4. There is no Step 4 reviewer feedback
+to accept or disagree with yet. Earlier step implementations remain intact.
+The writer requests assessment of the disclosed Autoconf and libelf repairs
+alongside the planned acceptance, cleanup, fixtures and documentation.
+
+### Reviewer focus for step 4 architecture-minor-fallback (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-09-15T10:11:18+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+Baseline index tree: 1d75ff540a2313dd7e4d44be94beef543a04b172
+
+Assessed index tree: de1979b5afe5250e6fba7c1d2e4b4b7919cefa17
+
+### Implementation check for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 4 has been fully implemented.
+
+Every planned Step 4 rollout item is present in the assessed tree, after one
+reviewer documentation repair to two wiki pages the step owns. Two writer
+changes go beyond the approved plan and requirement without a recorded
+decision; they are readiness findings, not missing planned work.
+
+#### What was verified for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+- **Curated corrections and equivalence.** The staged retained lists carry
+  `zlib-devel`, `libcom_err` and `libxslt`. At `HEAD` the Git 9.6 and 9.8 lists
+  were already identical, and the Python 9.8 list already had `zlib-devel`. The
+  staged 9.6 Git and Python blobs (`57694ec`, `b3fd67f`) equal the ignored
+  pre-removal 9.8 copies byte for byte; the Git digest is the recorded
+  `2516c69c...`. The two tracked mirror values were equal at `HEAD`.
+- **Limited cleanup.** Only the two curated 9.8 lists and the tracked 9.8 mirror
+  property are removed. Both generated indexes stay tracked, and no operator
+  file, `last` record or index appears in the staged diff. The planned inspection
+  finds no `9.8`, `zlib-dev`, `reset` or `CPLX_SP_REPEAT` match in the template
+  or the Python list directory.
+- **Entry-point fixtures.** `architecture_entry_fallback`, `_resume`,
+  `_exact_override` and `_terminal_failures` run the real `setup_packages.sh`
+  process with recording `curl`/`ssh`/`scp` stubs that reject undeclared calls
+  and output paths outside the case root. They cover AC1 (no index for either
+  minor, legacy final cursors, every active entry, selected-list copy, generated
+  9.8 identity), a distinct exact override, same-identity resume without
+  listing or download, and terminal lookup/download failures without another
+  minor or installation.
+- **Autoconf hook repair.** The reviewer ran the hook against the `HEAD` and
+  staged blobs in a scratch tree: `HEAD` stops with fatal 152
+  (`cp: cannot stat '.../opt/rh/autoconf271/*'`), the staged hook copies the
+  directory contents. The repair is correct and minimal.
+- **Host acceptance record.** The acceptance document, the validation rows and
+  the retained result files agree: controlled Python 56 entries, controlled Git
+  failed twice (fatal 152, then the `glib2-devel` libelf check), then passed
+  with 50 entries; scoped resume and final-tree passes succeeded with one served
+  omission each and unchanged preservation snapshots. The reviewer did not repeat
+  host installations; the request states none is required.
+- **Operator documentation.** The nine wiki pages match the implemented
+  selection, index guard, progress and reset behavior. The connection-step
+  correction (a done step is skipped, so it must be repeated after an upgrade)
+  matches `validate_the_ssh_connection` in `setup.sh`.
+
+#### Documentation gaps repaired by the reviewer for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+The plan inventory assigns `wiki/reference/exit-codes.md` "new failures and
+launcher boundary" and `wiki/reference/commands.md` the reset command contract.
+The Step 3 review also asked Step 4 to document the closed launcher interface.
+The staged pages had three defects, now repaired and staged:
+
+- The `setup.bat` table still listed fatal 42 for `packages reset`, and the
+  `senv.bat` note said `s packages reset` fatals 42. Step 3 (`a86f221`) removed
+  that CMD check; an unset `CPLX_TOOL` now reaches `setup_packages.sh` fatal 12.
+- The new 111 row sat in the combined `setup.bat` / `setup.sh` /
+  `setup_packages.sh` table, where `setup.sh` already uses 111 for a failed
+  `CPLX_REPEAT_STEP`/`CPLX_RESET_STEP`. The plan requires attribution by script.
+- Neither page described the CMD 119 boundary: `setup.bat` exits 119 after any
+  Bash failure, a failed activation or helper, and for any argument form
+  other than the five it accepts.
+
+#### Architecture check by the reviewer for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+Metadata, index and progress responsibilities keep their Step 1-3 boundaries.
+The fixtures stub only transport. The hook repair stays inside the existing
+remote post-install adapter and adds no dependency on selection.
+
+Two items need addressing. First, the scope findings below: a production edit
+to a file the plan declares read-only, and a curated dependency beyond the
+approved correction set. Second, a pre-existing latent defect outside Step 4 in
+the same hook: its path-rewrite detection pipes `xargs -0 grep` into
+`awk -F :`. When exactly one `auto*` file still holds the old prefix, `grep`
+omits the file name, and the hook fails with fatal 153. The reviewer reproduced
+this with a one-file scratch fixture against the staged hook. The real Autoconf
+package holds several such files, so acceptance is unaffected, and the Step 4
+fixture uses two files. Yes, there is something that needs to be addressed.
+
+#### Performance check by the reviewer for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+No production loop, sort or metadata scan was added. Git synchronizes one more
+ordinary entry. Fixture sorting prepares synthetic listings only. No, there is
+no performance issue that needs to be addressed.
+
+#### Coverage check by the reviewer for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+This Bash/CMD repository has no measured coverage gate; the lint floor covers
+tracked scripts outside `docs/`, and the runner checks the effort scripts
+separately. The helpers `architecture_entry_stage`, `architecture_entry_run`
+and `architecture_refute` are each referenced by the registered
+`architecture_entry_*` cases, all five cases are listed in
+`architecture_entry_suite`, and that suite is dispatched for `--step 4`. All five cases passed on both platforms. No, there is no
+unit-tested class below 100% that needs completing. No, no top-level symbol
+staged outside a coverage gate is unreferenced.
+
+Validation plan effects:
+
+None. The reviewer did not edit
+`docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md`. The
+writer's Step 4 Yes rows and document-level status remain as staged. They do
+not yet mention the reviewer's two wiki repairs or the scope decisions requested
+below; the writer owns that update in the next round.
+
+### Pre-repair mandatory checks and coverage for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+All resolved commands ran on the received index tree
+`1d75ff540a2313dd7e4d44be94beef543a04b172`. The reviewer's later repairs changed
+only two wiki pages, which no gate reads, so these results hold for the assessed
+tree too.
+
+- `bash src/utils/lint_shell.sh`, through the guard-clearing `senv.bat` form:
+  `lint_shell: 57 tracked scripts`, `lint_shell: clean`, exit 0.
+- `cmd /d /c .reviews\a.step4.windows-gate.cmd` (Git Bash): lint floor, then
+  8 metadata, 9 index (including `index_windows_held_destination`), 8 progress
+  and 5 entry groups passed, plus both preservation checks.
+  `Architecture gate: exit=0 elapsed=1428s`, exit 0.
+- `cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd`: all 11 CMD cases
+  passed (reset, after, direct, conflict, repeat, reset_step, sdpl, literal,
+  literal_after, bash_failure, helper_failure), exit 0 in 44 seconds.
+- `cmd /d /c a.architecture-acceptance\native-final.cmd`: on
+  `Linux 5.14.0 el9_8 x86_64`, Bash 5.1.8, Git 2.52.0 and ShellCheck 0.10.0, the
+  lint floor and 29 applicable groups passed. The held-destination and CMD cases
+  were reported as separately required, and both ran on Windows above.
+  `Architecture gate: exit=0 elapsed=41s`, `native-exit=0`, exit 0 in 59 seconds.
+
+Additional reviewer checks:
+
+- `git diff --cached --check` was clean before and after the repairs.
+- The planned `rg` inspection found no matches.
+- Blob comparison proved the retained lists equal the archived 9.8 copies.
+- A scratch-tree run of `post_install_autoconf271` failed at `HEAD` with fatal
+  152 and passed on the staged blob.
+
+No line-coverage percentage applies: the repository has no coverage gate, and
+the evidence is the named case matrix.
+
+### Resolved validation set and sources for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `cmd /d /c .reviews\a.step4.windows-gate.cmd` (source: plan; packages the
+  plan's Windows `verify.architecture-fallback.sh --step 4` command as separate
+  CMD lines: guard clear, `call <NUL senv.bat`, quoted `%GH%\bin\bash.exe`)
+- `cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd` (source: plan
+  Steps 3 and 4)
+- `cmd /d /c a.architecture-acceptance\native-final.cmd` (source: plan;
+  transports the tracked working-tree scripts and effort fixtures to an owned
+  temporary directory on the RHEL 9.8 host and runs
+  `bash docs/v0.27.0/verify.architecture-fallback.sh --step 4` there)
+
+The reviewer inspected both packaged drivers before running them. The native
+driver writes only its three ignored logs locally and removes its remote
+temporary directory on exit.
+
+### Resolver drift and direction for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+No command drift. The current resolver yields `.review-validation`'s
+`bash src/utils/lint_shell.sh` plus the plan's Step 4 commands: the Windows
+cumulative gate, the actual CMD launcher and the native Linux counterpart. The
+request carries the same four obligations. Its Windows and native entries are
+packaged forms of the plan's literal commands (the plan permits the separate-line
+CMD form), so the direction is form only, request versus plan. The union was run.
+
+### Repository state around validation for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+- **Index trees:** the request-time and reviewer-entry trees are both
+  `1d75ff540a2313dd7e4d44be94beef543a04b172`. The assessed tree after the staged
+  reviewer repairs is `de1979b5afe5250e6fba7c1d2e4b4b7919cefa17`.
+- **Umbrella digest:** unchanged
+  (`9806c51b0cf6965389297de3867cd2b8d0f86ea9cfbbf37034f52cb8156b2d8d`). The
+  writer's completed row was neither edited nor reverted.
+- **Validation state:** the comparison covers the 19 staged paths and the three
+  native driver logs.
+  - Tracked differences: only `wiki/reference/commands.md`,
+    `wiki/reference/exit-codes.md` and the index, all from the attributed
+    reviewer repairs and their staging.
+  - Ignored differences: the rewritten `native-final.driver.log` and
+    `native-final.step4.log`, which are acceptable validation artifacts.
+  - No untracked path and no tracked validation side effect. Both cumulative
+    gates also reported the live setup metadata, status and cache inventory
+    preserved.
+- **Unstaged tracked change:** the protocol transcript only. It was neither read
+  as working context nor staged.
+
+### Repair inventory for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+Repairs made:
+
+- wiki/reference/exit-codes.md (substantive documentation repair): replace stale fatal 42 with setup_packages.sh fatal 12 in the table and senv note, attribute 111 to setup.sh and setup_packages.sh separately, add the setup.bat 119 boundary row and explanation
+- wiki/reference/commands.md (substantive documentation repair): document the closed setup.bat argument forms and exit 119 for extra arguments, carried from the Step 3 review
+
+Paths staged:
+
+- wiki/reference/exit-codes.md
+- wiki/reference/commands.md
+
+### Commit plan assessment for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+`commit-plan-check.bat --format json` ran independently on the received tree and
+again after the reviewer repairs. Both runs returned status 0, `state: valid`,
+`ready: true` and no diagnostics, with the same 19 staged paths in three groups:
+
+1. `fix(packages): complete RHEL fallback setup`: runner, installer hook,
+   retained lists, removed 9.8 lists and template;
+2. `docs(packages): explain minor fallback and resume`: the nine wiki pages;
+3. `docs(architecture-minor-fallback): record step 4 validation`: acceptance
+   record, validation plan and umbrella draft.
+
+Both reviewer repairs stay inside group 2's existing paths, so membership,
+order and subjects remain accurate and `a.commit` was not amended. Its group 2
+body does not yet mention the CMD 119 boundary the repair documents. Resolving
+the scope findings will add the plan and requirement to the staged set, and
+`a.commit` must then be regrouped. The status 0 proves only mechanical grouping.
+
+### Findings and boundaries for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+Unresolved findings:
+
+- Unplanned production edit: src/setups/env/bin/packages_management.sh (post_install_autoconf271 wildcard) is staged, but the approved plan inventory declares that file "Read-only remote installation behavior" and Step 4's "Files involved" list does not name it; the repair is correct and disclosed, yet no plan amendment or recorded human decision brings it into Step 4 scope.
+- Curated set beyond the approved decision: elfutils-libelf is added to the Git lists, while requirement item 9 and Q10 and plan Q08 and rollout item 1 define the correction set as exactly three names; widening that set previously required explicit approval (Q08), none is recorded for this fourth change, and the umbrella row is marked completed against a requirement that still names three.
+
+Boundary-crossing work:
+
+- Pre-existing latent defect outside Step 4: post_install_autoconf271 finds files to rewrite with `xargs -0 grep ... | awk -F :`, so when exactly one auto* file still holds /opt/rh/autoconf271, grep prints no file name and the hook fails with fatal 153 (reviewer-reproduced on the staged hook with a one-file fixture); the real package has several such files, so Step 4 acceptance is unaffected. Do not fix it in Step 4; record it as a follow-up.
+
+### Writer instructions for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+1. Put the two scope deviations to the human as an explicit decision, the same
+   way Q08 widened the correction set. Present both repairs as proposed plan
+   answers with their evidence: the fatal 152 reproduction and one-line hook fix,
+   and the `libelf.so.1` requirement of `glib2-devel` with the unique fresh-index
+   match for `elfutils-libelf`.
+2. Once approved, record the decision in the governing documents and stage it:
+   - plan: add a decision row (for example Q09) to "Implementation decisions";
+     change the `packages_management.sh` inventory row from read-only to the
+     Step 4 hook repair; add that file to Step 4 "Files involved"; amend rollout
+     item 1 ("the exact two-line paired changes") to include the
+     `elfutils-libelf` insertion before `glib2-devel`;
+   - requirement: amend item 9 and the Q10 row so the approved curated set names
+     `elfutils-libelf` alongside the three corrected names.
+   If the human rejects either change, stop and escalate rather than committing
+   a completed umbrella row whose requirement disagrees with the tree.
+3. Review the reviewer's staged repairs in `wiki/reference/exit-codes.md` and
+   `wiki/reference/commands.md` (stale fatal 42 replaced by fatal 12, 111
+   attributed per script, `setup.bat` 119 boundary, closed argument forms).
+   Mention them in the Step 4 "What was implemented" rows of the validation plan,
+   and add the CMD 119 boundary to group 2's `What:` bullets in `a.commit`.
+4. Record the latent `post_install_autoconf271` single-file grep defect as a
+   follow-up in the Step 4 architecture check. Do not change the hook for it in
+   this step.
+5. Update `a.commit` for the plan and requirement paths: add them to group 3
+   (or to their own `docs` group ahead of it), rerun
+   `commit-plan-check.bat --format json`, and publish the next round. No source,
+   fixture or host rerun is needed for these documentation changes.
+
+### Decision rationale for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+Decision: changes-requested.
+
+Readiness floor:
+
+- **Exact identity:** passes. The envelope, human-readable identity, plan,
+  step 4, round 1, occurrence 1, umbrella and request-time tree `1d75ff5` agree.
+- **Complete implementation:** passes after the reviewer's documentation
+  repair. Every planned rollout item is present.
+- **Mandatory validation:** all four resolved commands passed (see the
+  pre-repair checks).
+- **Attributable staged scope:** fails. `packages_management.sh` is outside the
+  approved Step 4 file set and declared read-only by the plan, and the
+  `elfutils-libelf` insertion exceeds the approved curated correction set.
+- **Unresolved findings:** two, both needing a human decision that the reviewer
+  cannot make.
+- **`a.commit` accuracy:** mechanically ready and accurate for the current
+  staged set; it needs regrouping once the governing documents are amended.
+
+The two deviations look technically right. The hook fix is a verified one-line
+correction, and the dependency is ordinary and declared by the RPM. Without them
+AC7 could not pass. The project still treats the curated correction set and the
+plan's file boundaries as decisions: widening the set from one name to three
+went through Q08. Committing a completed umbrella row while the requirement and
+plan still describe a narrower change would leave the record wrong.
+
+This round also made substantive reviewer repairs to two wiki pages, and those
+alone rule out commit-ready. The requested follow-up is documentation plus a
+human decision; no code, fixture or host rerun is expected. This answer is
+advisory and does not authorize a commit.
+
+### Final reviewer decision for step 4 architecture-minor-fallback (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-1 -->
+
+## Round 2 by requestor - Step 4
+
+- Recorded: 2026-09-15T10:42:16+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 architecture-minor-fallback (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+Implementation step: 4
+Review round: 2
+
+### Code review evidence for step 4 architecture-minor-fallback (round 2)
+
+request_index_tree: 7545b5c185bd12f21cbc11f6f98c8fe4ec0af7cc
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- cmd /d /c .reviews\a.step4.windows-gate.cmd (sources: plan)
+- cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd (sources: plan)
+- cmd /d /c a.architecture-acceptance\native-final.cmd (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(packages): complete RHEL fallback setup
+group 1 path: docs/v0.27.0/verify.architecture-fallback.sh
+group 1 path: src/setups/env/bin/packages_management.sh
+group 1 path: src/setups/pkgs/git/git_rhel_9.6_x86_64.txt
+group 1 path: src/setups/pkgs/git/git_rhel_9.8_x86_64.txt
+group 1 path: src/setups/pkgs/python/python_rhel_9.6_x86_64.txt
+group 1 path: src/setups/pkgs/python/python_rhel_9.8_x86_64.txt
+group 1 path: src/setups/setup.tpl.properties
+group 2: docs(packages): explain minor fallback and resume
+group 2 path: wiki/explanation/checkpoints-and-resume.md
+group 2 path: wiki/explanation/the-architecture-key.md
+group 2 path: wiki/how-to/add-or-fix-a-package-mirror.md
+group 2 path: wiki/how-to/resume-or-repeat-a-step.md
+group 2 path: wiki/how-to/survive-a-server-os-upgrade.md
+group 2 path: wiki/reference/commands.md
+group 2 path: wiki/reference/cplx-variables.md
+group 2 path: wiki/reference/exit-codes.md
+group 2 path: wiki/reference/package-list-formats.md
+group 3: docs(architecture-minor-fallback): record step 4 validation
+group 3 path: docs/v0.27.0/acceptance.architecture-minor-fallback.md
+group 3 path: docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/acceptance.architecture-minor-fallback.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md
+staged path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+staged path: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+staged path: docs/v0.27.0/verify.architecture-fallback.sh
+staged path: src/setups/env/bin/packages_management.sh
+staged path: src/setups/pkgs/git/git_rhel_9.6_x86_64.txt
+staged path: src/setups/pkgs/git/git_rhel_9.8_x86_64.txt
+staged path: src/setups/pkgs/python/python_rhel_9.6_x86_64.txt
+staged path: src/setups/pkgs/python/python_rhel_9.8_x86_64.txt
+staged path: src/setups/setup.tpl.properties
+staged path: wiki/explanation/checkpoints-and-resume.md
+staged path: wiki/explanation/the-architecture-key.md
+staged path: wiki/how-to/add-or-fix-a-package-mirror.md
+staged path: wiki/how-to/resume-or-repeat-a-step.md
+staged path: wiki/how-to/survive-a-server-os-upgrade.md
+staged path: wiki/reference/commands.md
+staged path: wiki/reference/cplx-variables.md
+staged path: wiki/reference/exit-codes.md
+staged path: wiki/reference/package-list-formats.md
+```
+
+### Requestor assessment for step 4 architecture-minor-fallback (round 2)
+
+Yes. Step 4 has been fully implemented.
+
+Round 1 independently confirmed implementation and all four mandatory gates:
+57-script lint, 30 Windows groups in 1428 seconds, 11 CMD cases in 44 seconds
+and 29 native groups in 41 seconds. Its changes-requested recommendation
+identified governing-document scope drift and corrected two wiki references.
+The writer retained those repairs, aligned the plan/requirement with the
+acceptance-blocking fixes and recorded the single-file Autoconf follow-up.
+Round 2 changes documentation only; the response explains the narrow
+disagreement with requesting additional human scope approval.
+
+The writer checked the final staged changes against Step 4 and AC1-AC12. The
+validation plan now records Yes for every step, and only the matching umbrella
+row was completed with its requirement and validation paths.
+
+Executed validation on the current behavior and final curated tree:
+
+- Windows cumulative Step 4: exit 0, 1455 seconds, 30 groups and live-tree
+  preservation; a.architecture-acceptance/windows-final.step4.resumed.log.
+- Native RHEL Linux cumulative Step 4: exit 0, 40 seconds, 29 applicable groups
+  and preservation. The reviewer's later 41-second run replaced
+  a.architecture-acceptance/native-final.step4.log with its passing evidence.
+- Both cumulative gates passed the 57-script mandatory shell lint floor and
+  explicit effort syntax/ShellCheck checks. No line-coverage percentage is claimed.
+- Actual CMD launcher: exit 0, all 11 cases;
+  a.architecture-acceptance/launcher.step4.log.
+- Controlled Python: 56 entries and real install, 552 seconds; scoped resume
+  processed 3 entries and reused all installed packages, 40 seconds.
+- Controlled amended Git: 50 entries and real install, 233 seconds; scoped
+  resume processed 3 entries and reused all installed packages, 31 seconds.
+- Final Python/Git: 56/50 entries, one served cache omission each, 260/230
+  seconds; lazy mirror fallback and cache/staged/installed reuse passed.
+- Every host pass preserved authoring status/content/cache and live remote
+  inventory. Selected list copies matched their sources. The same fresh
+  detected-key index and isolated target were used after curated cleanup.
+- Markdown headings, fences, local file links, planned source inspection and
+  git diff --check passed. The commit-plan checker reports ready with no diagnostics.
+
+No DDD/adapter boundary issue or new production quadratic/sorting computation
+was found. The Autoconf repair stays in its existing post-install hook. Every
+new fixture helper/case is referenced; the project has no class coverage gate.
+Existing runtime guards, exact overrides, terminal failures and reuse remain.
+The real install failures and their repairs are disclosed in the acceptance
+document and validation plan; neither was hidden by manual RPM/flag injection.
+
+#### Operational validation notes for step 4 architecture-minor-fallback (round 2)
+
+The plan's Bash adaptation applies: .review-validation retains the shell lint
+floor, and no Python/pytest/percentage-coverage gate exists in this repository.
+Run the Windows cumulative command in the configured CMD/Git Bash environment;
+the observed 1455-second duration is normal for its full entry fixtures. Do
+not restart healthy work or stage/edit src/setups while its preservation
+snapshot is active. The actual CMD launcher remains a separate command.
+The Windows command is packaged in .reviews/a.step4.windows-gate.cmd using
+the plan's permitted separate-line CMD form: clear the guard, call <NUL
+senv.bat, then invoke the configured Git Bash with the exact --step 4 gate.
+This avoids transporting nested CMD quotes through the review renderer.
+
+The native counterpart runs bash docs/v0.27.0/verify.architecture-fallback.sh
+--step 4 in an isolated native Linux source copy. The resolved native transport
+command uses the existing ignored a.architecture-acceptance/native-final.cmd
+and its Bash driver. It copies current source, prepares Bash/Git/ShellCheck,
+executes that exact Linux gate, retains logs and removes only its owned
+temporary fixture tree. Inspect those drivers before use. A second Git Bash
+run is not native evidence. The PowerShell coordinator is unnecessary.
+
+The host acceptance procedure is already complete and fully documented in the
+versioned acceptance record. Raw real-host evidence and drivers are retained
+under ignored a.architecture-acceptance/. Keep host/account details out of the
+versioned transcript. Review the recorded controlled/final acceptance; no new
+installation or alteration of live operator state is required by this request.
+
+Assess only Step 4. The completed umbrella row is writer-owned and must remain
+unchanged during reviewer assessment. No commit has been authorized.
+
+### Implementation report for step 4 architecture-minor-fallback (round 2)
+
+Step 4 finishes real RHEL dependency acceptance and curated cleanup after the
+metadata/index/progress implementation from Steps 1-3.
+
+The retained Python list corrects zlib-dev to zlib-devel. Both Git minor lists
+received libcom_err and libxslt corrections before equivalence checking. Actual
+isolated Git installation then exposed two additional blockers: a quoted
+wildcard in post_install_autoconf271 and missing elfutils-libelf before
+glib2-devel. The minimal hook fix and ordinary curated dependency repair were
+tested; both amended Git lists were byte-identical before removal.
+
+Controlled acceptance used copied active configuration/cache, no exact 9.8
+curated definitions, and a fresh 5898-package index for detected 9.8. Full
+preflight covered the amended 106 entries and 81 distinct RPMs. All controlled
+Python/Git legacy and scoped-resume passes succeeded before removing only the
+equivalent Python/Git 9.8 lists and tracked 9.8 mirror property. Final passes
+repeated ordinary setup from the resulting curated tree with newly served
+cache omissions. Generated authoring indexes and operator files were preserved.
+
+The cumulative runner exercises real setup processes with transport stubs,
+full fallback lists, scoped resume, distinct exact overrides, terminal failures
+and the real Autoconf hook. Git Bash fixture roots use long drive paths to keep
+parent/child containment checks consistent. The Autoconf regression failed
+with fatal 152 before the production fix and passed after it.
+
+Nine wiki pages describe independent exact/lower/higher selection, active
+configuration, detected index/cache identity, atomic refresh/progress and
+reset-after-entry. The acceptance record contains sanitized bootstrap commands,
+hashes, actual outcomes and AC1-AC12 mapping. Final validation and the exact
+umbrella row now record completion. Later SQLite/rebuild/release items remain
+separate. No production bootstrap interface was changed.
+
+Round 2 reconciles plan implementation amendment Q09, the installer inventory,
+Step 4 file list/rollout and requirement item 9/Q10 with the two minimal repairs
+needed for the existing real-install acceptance requirement. The amendment is
+a writer decision and claims no additional human approval. Reviewer corrections
+to commands.md and exit-codes.md are retained. Validation records independent
+passing checks and the separate single-file Autoconf path-rewrite follow-up.
+
+### Change summary for step 4 architecture-minor-fallback (round 2)
+
+The root a.commit is formatted and mechanically ready. It covers all 21 staged
+paths in three dependency-ordered groups:
+
+1. fix(packages): complete RHEL fallback setup
+   - docs/v0.27.0/verify.architecture-fallback.sh
+   - src/setups/env/bin/packages_management.sh
+   - src/setups/pkgs/git/git_rhel_9.6_x86_64.txt
+   - src/setups/pkgs/git/git_rhel_9.8_x86_64.txt (removed)
+   - src/setups/pkgs/python/python_rhel_9.6_x86_64.txt
+   - src/setups/pkgs/python/python_rhel_9.8_x86_64.txt (removed)
+   - src/setups/setup.tpl.properties
+2. docs(packages): explain minor fallback and resume
+   - wiki/explanation/checkpoints-and-resume.md
+   - wiki/explanation/the-architecture-key.md
+   - wiki/how-to/add-or-fix-a-package-mirror.md
+   - wiki/how-to/resume-or-repeat-a-step.md
+   - wiki/how-to/survive-a-server-os-upgrade.md
+   - wiki/reference/commands.md
+   - wiki/reference/cplx-variables.md
+   - wiki/reference/exit-codes.md
+   - wiki/reference/package-list-formats.md
+3. docs(architecture-minor-fallback): record step 4 validation
+   - docs/v0.27.0/acceptance.architecture-minor-fallback.md
+   - docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md
+   - docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+   - docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+
+The final group keeps acceptance, governing-document reconciliation, final
+validation and the umbrella status transition together. No source or operator
+changes remain unstaged. The
+review transcript publication is protocol-owned and occurs after the request
+captures the staged tree.
+
+### Writer response for step 4 architecture-minor-fallback (round 2)
+
+Writer response:
+
+#### Round 1 response for step 4 architecture-minor-fallback (round 2)
+
+Accepted the reviewer's implementation assessment and all technical findings.
+
+- Retained the two staged wiki repairs without reversal after checking their
+  statements against setup.bat and setup_packages.sh: closed CMD argument forms,
+  exit 119, the unset-tool fatal 12 and script-specific fatal 111 attribution.
+- Reconciled the governing plan and requirement. Plan Q09 is explicitly a writer
+  implementation amendment, documenting the one-line Autoconf wildcard-copy
+  repair and paired elfutils-libelf insertion needed for existing AC7.
+  The installer inventory, Step 4 file list, regression description and rollout
+  now match the implementation. Requirement item 9/Q10 include the dependency.
+- Updated Step 4 validation with the independent results, accepted wiki repairs
+  and the pre-existing single-file Autoconf path-rewrite follow-up. No additional
+  hook repair is included in this round.
+- Added the plan and requirement to a.commit group 3. The source, fixtures,
+  curated data, host acceptance record and completed umbrella row are unchanged
+  from the reviewed tree.
+
+##### Explicit disagreement: additional scope approval for step 4 architecture-minor-fallback (round 2)
+
+The writer disagrees only with requiring another human approval before
+documenting these acceptance-blocking repairs. The original instruction to
+implement Step 4 authorizes the necessary, minimal fixes for its existing AC7.
+The user challenged the redundant approval request. Q09 is recorded as the
+writer's implementation amendment; neither the governing documents nor this
+response claim a new affirmative human approval. No technical reviewer repair
+was reversed, and no commit is authorized by this response.
+
+The four independent review gates passed. This reconciliation changes documents
+only; it does not invalidate those results or require another host installation.
+The replacement request retains the complete mandatory gate commands.
+
+### Reviewer focus for step 4 architecture-minor-fallback (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-2 -->
+
+## Round 2 by reviewer - Step 4
+
+- Recorded: 2026-09-15T11:11:58+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+Baseline index tree: 7545b5c185bd12f21cbc11f6f98c8fe4ec0af7cc
+
+Assessed index tree: 8d87e2c812adb267100136a7ef55b4cda1bc2c65
+
+### Implementation check for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+Result:
+
+Yes. Step 4 has been fully implemented.
+
+Round 2 changes only the plan, the requirement and the validation record; every
+source, fixture, curated list, wiki page, acceptance record and the umbrella row
+are byte-identical to the round 1 assessed tree `de1979b`. The two round 1 scope
+findings are resolved by the governing-document reconciliation, and the round 1
+boundary item is recorded as a follow-up.
+
+#### What was verified in the reconciliation for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+- **Tree delta.** `git diff de1979b 7545b5c` touches exactly
+  `feature-request.v0.27.0.architecture-minor-fallback.md`,
+  `plan.v0.27.0.architecture-minor-fallback.md` and the validation plan.
+- **Plan.** The new Q09 row names both repairs, their evidence (fatal 152, the
+  declared `libelf.so.1` dependency, controlled and final installs) and the
+  rejected alternatives. It labels itself a writer implementation amendment. The
+  `packages_management.sh` inventory row is no longer read-only. Step 4
+  "Files involved" names it. The tests-first text requires the fatal 152
+  reproduction and multiple-file layout. Rollout item 1 no longer says "exact
+  two-line paired changes" and adds the `elfutils-libelf` insertion; item 4 adds
+  the dependency to the host checks.
+- **Requirement.** Item 9 and the Q10 row name `elfutils-libelf` before
+  `glib2-devel` under plan amendment Q09, qualified as a plan question so it
+  does not collide with the requirement's own Q09.
+- **Consistency with the tree.** The staged Git list, hook, fixture and
+  acceptance record match every amended statement. The umbrella row still
+  points to the requirement, which now describes the committed curated set.
+- **Validation record.** The Step 4 rows now cite the reviewer's wiki repairs,
+  the independent round 1 gates, the plan/requirement recounts (595 and 278
+  lines, confirmed) and the 75/119-line wiki pages. The architecture check
+  records the single-file path-rewrite defect as follow-up outside Step 4.
+
+#### Disagreement assessment for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+The writer disagrees with requiring a further human approval and reports that
+the user challenged that request. The reviewer accepts this. Round 1 asked for
+a recorded decision so the governing documents would not contradict the
+committed tree. That is now true, and Q09 is openly labeled a writer amendment
+rather than claimed as an approval. The human still sees Q09 at the commit gate,
+which is where the decision belongs. The reviewer keeps no finding on this
+point.
+
+#### Architecture check by the reviewer for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+Unchanged from round 1: metadata, index and progress boundaries hold, fixtures
+stub only transport, and the hook repair stays inside the existing post-install
+adapter. The remaining item is the recorded single-file path-rewrite follow-up
+outside Step 4, which this step correctly does not change. Yes, there is
+something that needs to be addressed, and it is tracked as follow-up outside
+Step 4.
+
+#### Performance check by the reviewer for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+No computation changed since round 1. No, there is no performance issue that
+needs to be addressed.
+
+#### Coverage check by the reviewer for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+No script or fixture changed. The five `architecture_entry_*` cases stay
+registered and dispatched for `--step 4`, and every helper is referenced. No,
+there is no unit-tested class below 100% that needs completing. No, no top-level
+symbol staged outside a coverage gate is unreferenced.
+
+Validation plan effects:
+
+One reviewer edit is confined to the Step 4 architecture-check rows of
+`docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md`. The
+implementation-check contract requires that section to end with a yes-or-no
+phrase. The writer's "Yes, there is follow-up work" sentence opened a middle
+paragraph, so the section ended on prose. The reviewer appended the closing
+phrase naming the single-file path-rewrite follow-up outside Step 4. The edit
+was recorded as a pre-repair blob, attributed cleanly and staged. It is
+polishing-only review metadata and changes no verdict or evidence.
+
+### Pre-repair mandatory checks and coverage for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+All resolved commands ran again on the received index tree
+`7545b5c185bd12f21cbc11f6f98c8fe4ec0af7cc`. The reviewer's later edit changed
+only validation-record prose, which no gate reads, so these results hold for the
+assessed tree.
+
+- `bash src/utils/lint_shell.sh`, through the guard-clearing `senv.bat` form:
+  `lint_shell: 57 tracked scripts`, `lint_shell: clean`, exit 0.
+- `cmd /d /c .reviews\a.step4.windows-gate.cmd` (Git Bash): lint floor, then
+  8 metadata, 9 index (including `index_windows_held_destination`), 8 progress
+  and 5 entry groups passed, plus both preservation checks.
+  `Architecture gate: exit=0 elapsed=1636s`, exit 0.
+- `cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd`: all 11 CMD cases
+  passed, exit 0 in 41 seconds.
+- `cmd /d /c a.architecture-acceptance\native-final.cmd`: on the RHEL 9.8 host
+  (Bash 5.1.8, Git 2.52.0, ShellCheck 0.10.0), the lint floor and 29 applicable
+  groups passed with preservation. The held-destination and CMD cases were
+  reported as separately required, and both ran on Windows above.
+  `Architecture gate: exit=0 elapsed=40s`, `native-exit=0`, exit 0 in 54 seconds.
+
+Additional reviewer checks: `git diff --cached --check` was clean before and after
+the edit, and the physical line counts recorded for the plan (595), requirement
+(278), `commands.md` (75) and `exit-codes.md` (119) were confirmed. No host
+installation was repeated: no source, list or hook changed since the recorded
+acceptance. No line-coverage percentage applies; the evidence is the named case
+matrix.
+
+### Resolved validation set and sources for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `cmd /d /c .reviews\a.step4.windows-gate.cmd` (source: plan; the plan's
+  Windows `verify.architecture-fallback.sh --step 4` command in its permitted
+  separate-line CMD form)
+- `cmd /d /c docs\v0.27.0\verify.architecture-launcher.cmd` (source: plan
+  Steps 3 and 4)
+- `cmd /d /c a.architecture-acceptance\native-final.cmd` (source: plan; runs
+  `bash docs/v0.27.0/verify.architecture-fallback.sh --step 4` in an owned
+  temporary copy on the RHEL 9.8 host, removed on exit)
+
+Both packaged drivers are unchanged since the reviewer inspected them in
+round 1.
+
+### Resolver drift and direction for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+No command drift. The current resolver yields `.review-validation`'s lint floor
+plus the plan's Step 4 Windows, launcher and native commands. The request
+carries the same four obligations, with the Windows and native entries in
+packaged form, so the direction is form only, request versus plan. The union was
+run again in this round rather than reusing round 1 results.
+
+### Repository state around validation for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+- **Index trees:** the request-time and reviewer-entry trees are both
+  `7545b5c185bd12f21cbc11f6f98c8fe4ec0af7cc`. The assessed tree after the staged
+  reviewer edit is `8d87e2c812adb267100136a7ef55b4cda1bc2c65`.
+- **Umbrella digest:** unchanged
+  (`9806c51b0cf6965389297de3867cd2b8d0f86ea9cfbbf37034f52cb8156b2d8d`).
+- **Validation state:** the comparison covers the 21 staged paths and the three
+  native driver logs.
+  - Tracked differences: only
+    `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md` and
+    the index. Both come from the reviewer's attributed Step 4 architecture-check
+    phrase and its staging, which is permitted review metadata.
+  - Ignored differences: the rewritten `native-final.driver.log` and
+    `native-final.step4.log`, which are acceptable validation artifacts.
+  - No untracked path and no tracked validation side effect. Both cumulative
+    gates reported the live setup inventory preserved.
+- **Unstaged tracked change:** the protocol transcript only, neither read as
+  working context nor staged.
+
+### Repair inventory for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+Repairs made:
+
+- docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md (polishing-only review metadata): append the required closing yes-or-no phrase to the Step 4 architecture check, naming the recorded single-file path-rewrite follow-up
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md
+
+### Commit plan assessment for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+`commit-plan-check.bat --format json` ran independently on the received tree and
+again after the reviewer edit. Both runs returned status 0, `state: valid`,
+`ready: true` and no diagnostics, with 21 staged paths in three groups:
+
+1. `fix(packages): complete RHEL fallback setup`: runner, installer hook,
+   retained lists, removed 9.8 lists and template (7 paths);
+2. `docs(packages): explain minor fallback and resume`: the nine wiki pages;
+   its body now names the CMD 119 boundary, the unset-tool identifier and the
+   per-script fatal attribution from the round 1 repairs;
+3. `docs(architecture-minor-fallback): record step 4 validation`: acceptance
+   record, requirement, plan, validation plan and umbrella draft (5 paths); its
+   body records the Q09 alignment and the follow-up.
+
+The plan and requirement amendments sit with the validation and umbrella
+transition they justify, after the source and wiki groups. The reviewer edit
+stays inside group 3's existing path. Membership, order, subjects and bodies
+match the staged work, so `a.commit` was not amended. The status 0 proves only
+mechanical grouping.
+
+### Findings and boundaries for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+No change is requested for Step 4.
+
+1. Review the reviewer's staged closing phrase at the end of the Step 4
+   architecture check in the validation record.
+2. At the human commit gate, point out that plan Q09 is a writer implementation
+   amendment. It covers the Autoconf wildcard-copy repair and the
+   `elfutils-libelf` dependency, with requirement item 9 and Q10 aligned to it,
+   so the human sees what the commit settles.
+3. Present this advisory commit-ready recommendation at that gate and include
+   the review transcript through the residual continuation.
+4. Carry the single-file `post_install_autoconf271` path-rewrite defect into a
+   later issue, as the validation record states.
+
+### Decision rationale for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+Decision: commit-ready (advisory).
+
+The readiness floor passes:
+
+- **Exact identity:** envelope, human-readable identity, plan, step 4, round 2,
+  occurrence 1, umbrella and request-time tree `7545b5c` agree.
+- **Complete implementation:** every planned rollout item is present, and the
+  governing plan and requirement now describe the committed curated set and
+  installer repair.
+- **Mandatory validation:** all four resolved commands passed again on this
+  round's tree (see the pre-repair checks).
+- **Attributable staged scope:** every staged path is named by Step 4 as
+  amended, or is its validation, requirement or umbrella record.
+- **No unresolved or boundary-crossing findings:** the round 1 scope findings
+  are resolved by Q09, and the round 1 boundary item is recorded as follow-up.
+- **Accurate `a.commit`:** mechanically ready, and its content matches.
+
+The writer's disagreement about a further approval is accepted. The documents
+are consistent, Q09 does not overstate its authority, and the human sees it at
+the commit gate.
+
+The only reviewer edit this round is a polishing-only closing phrase in the
+Step 4 validation rows, which is review metadata. No code, test, acceptance or
+grouping change was made. This recommendation does not authorize a commit.
+
+### Final reviewer decision for step 4 architecture-minor-fallback (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4-round-2 -->
+
+## Round 2 by human - Step 4 - human-confirmation
+
+- Recorded: 2026-09-15T13:36:21+02:00
+- Exchange: code/code/v0.27.0/architecture-minor-fallback
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
