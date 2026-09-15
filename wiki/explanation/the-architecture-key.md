@@ -2,11 +2,10 @@
 
 <img src="../assets/logo-cplx-bridge-transparent.png" alt="" height="90" align="right">
 
-One string decides which package index, which dependency lists and
-which mirrors a build uses. It is computed from the server, not chosen
-by you, and it changes when the server is upgraded. This page explains
-where it comes from, why it carries a minor version, and what that
-costs the day the operating system moves.
+The architecture key identifies the server and its generated package index
+and RPM cache. Curated dependency lists and mirror properties can come from
+another minor release when an exact definition is absent. These selections
+never change the detected key.
 
 ## Where the string comes from
 
@@ -23,63 +22,61 @@ ssh "${SSH_CONFIG_ENTRY}" 'source /etc/os-release; printf "%s_%s_%s" $ID $VERSIO
 `architecture` property, and everything distribution-specific is keyed
 on it from then on.
 
-Two details matter more than they look. The step **recomputes** the
-value on every run and overwrites the stored one: the property is a
-cache of what the server said, never a setting you own. And the key
-carries the **minor** version, because `VERSION_ID` does: `9.8`, not
-`9`.
+When connection validation runs, it recomputes and stores the key. A completed
+connection step can be skipped, so repeat that step after a server upgrade
+before preparing packages. The property records what the server reported;
+it is not an override. The key includes the minor version when `VERSION_ID`
+does, for example `9.8`.
 
-## Why the minor version is in there
+## How curated metadata is selected
 
-Because a distribution's package names and versions are a property of
-its release. Between major releases the differences are large enough
-that a shared list would be fiction: `rhel_7.9` wants `gdbm-devel`
-where `centos_8` wants something else, and the mirror layouts differ
-too. Keying on the exact release is the honest default, and it is what
-lets one cplx checkout serve several servers at once.
+Lists and mirrors are selected independently. Each selection tries the exact
+key first, then the highest available lower minor, then the lowest higher
+minor. Minor numbers are compared numerically: 10 comes after 9. Candidates
+must have the same distribution, major version and complete machine name.
+A major-only key such as `centos_8_x86_64` supports exact selection only.
 
-The cost appears within a major release, where the differences are
-usually nil. RHEL 9.6 and RHEL 9.8 share an ABI, the same glibc line,
-and in practice the same package names; and the mirrors cplx scrapes
-for them are the rolling CentOS 9 Stream directories, which are not
-tied to any minor at all. Two file sets for one reality.
+A present empty or comment-only dependency list is an intentional exact
+definition. A missing list permits fallback; an unreadable present list fails.
+For mirrors, a missing or whitespace-only value permits fallback. Only the
+active `setup.properties` is read, and the first occurrence of a duplicate
+property wins, including an empty first value. A present unreadable properties
+file fails. No eligible definition is an error, not a reason to cross a major
+version or distribution boundary.
 
-## What breaks when the server is upgraded
+For example, a RHEL 9.8 server can select
+`python_rhel_9.6_x86_64.txt` and `rhel_9_6_x86_64_pkgs_url`. A distinct exact
+9.8 list would take precedence without changing mirror selection. Each
+substitution is reported. This reuses curated definitions; package availability
+and suitability still need verification on the target server.
 
-Nothing warns you, because nothing is wrong until the next run. The
-server is upgraded from 9.6 to 9.8 by its administrators, the next `s`
-re-asks the question, and the stored property flips to
-`rhel_9.8_x86_64`. From that moment:
+## What keeps the detected identity
 
-- the per-tool list resolves to `<tool>_rhel_9.8_x86_64.txt`, which
-  does not exist, and the copy step ends the run (fatal 902);
-- the package index `packages_rhel_9.8_x86_64.txt` does not exist
-  either, so nothing could be resolved even if the list were found;
-- the mirror property `rhel_9_8_x86_64_pkgs_url` is absent, so the
-  index cannot be rebuilt until it is added.
+The example still uses `packages_rhel_9.8_x86_64.txt` and the
+`pkgs/rhel_9.8_x86_64/` cache. An index from 9.6 is never substituted. A missing
+or empty detected index is generated before lookup even when the generation
+step is marked done. Either reload flag forces a refresh. Publication replaces
+the index only after a complete nonempty candidate is ready; a failed refresh
+fails that invocation and preserves the previous index bytes.
 
-An existing installed tree keeps working: the failure is in the
-*supply* chain, not in the built binaries. What stops is the ability to
-add a dependency or rebuild a tool, which is exactly when you need it.
+Mirror selection happens when generation or an uncached download needs it.
+The selected value and ordered URLs stay fixed for that invocation. Failure to
+resolve or retrieve an RPM does not trigger another minor selection. The same
+selected dependency file is synchronized and copied as `dependencies.list`.
 
-The recipe out is
-[Survive a server OS upgrade](../how-to/survive-a-server-os-upgrade.md);
-the pieces to recreate are listed in
-[Package list formats](../reference/package-list-formats.md).
+## What changes after a minor upgrade
 
-## Why cplx does not simply drop the minor
+The tool's package cursor records both the detected key and selected list path.
+A changed identity, legacy marker or stale entry restarts from the first active
+entry; downloaded RPMs and remote installed flags remain reusable. New progress
+is published atomically after each successful synchronization.
 
-It could key on the major alone, and lose the ability to describe a
-distribution whose minor genuinely differs. It could ignore the server
-and let you set the property, and lose the guarantee that the lists
-match the machine actually being built on. The direction that keeps
-both properties is a **fallback**: resolve the exact key first, and when
-no file matches, use the closest available minor of the same major,
-saying so out loud. The exact key stays authoritative when it exists,
-so a distribution that really diverges can still get its own list.
-
-Until that lands, an upgrade means copying one file set to the new key,
-which is why this page exists.
+Normally `sp` can therefore prepare dependencies after a minor upgrade without
+duplicating curated files. Add an exact definition when that release needs a
+different list or mirrors. See
+[Survive a server OS upgrade](../how-to/survive-a-server-os-upgrade.md) for the
+operator checks and [Package list formats](../reference/package-list-formats.md)
+for the separate artifacts.
 
 ## 👉 Where to look next
 
