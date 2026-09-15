@@ -24,10 +24,11 @@ to item 6 and final tools rebuilding/platform delivery to item 7.
 
 ## Implementation decisions
 
-All eight plan answers are approved: Q01-Q06 and Q08 use A; Q07 uses B.
-There are no remaining implementation questions. Approval of Q08 extends the
-requirement's curated correction set from one dependency name to three; the
-required Python/Git acceptance scope and design behavior remain settled.
+The eight original plan answers are approved: Q01-Q06 and Q08 use A; Q07 uses B.
+Q08 extends the curated spelling corrections from one name to three. Step 4
+implementation amendment Q09 records the ordinary libelf dependency and minimal
+Autoconf copy repair required by actual Git installation. These repairs satisfy
+the existing AC7 acceptance requirement and preserve metadata design behavior.
 
 | Question | Decision and reason | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
@@ -39,6 +40,7 @@ required Python/Git acceptance scope and design behavior remain settled.
 | Q06 | A: use a controlled checkout with copied configuration/cache and labeled copied or synthetic legacy state; record origins and environment identity. | Step 4 rollout and acceptance evidence | Temporarily mutating operator files risks leaving them changed after interruption. |
 | Q07 | B: generate a fresh detected-key index and complete Python/Git setup in an isolated remote sibling target, with bootstrap/path/profile checks, served-file omissions, reuse and live-tree preservation evidence. | Step 4 rollout and bootstrap | The held-index live target cannot complete Git setup with the observed unavailable RPM; refreshing live roots changes later work's inputs. |
 | Q08 | A: correct `libcom_err,` and `libxslti` to `libcom_err` and `libxslt` in both Git lists before direct equality, acceptance and redundant-list removal. | Step 4 file inventory and rollout; requirement Q10 | Correcting only 9.6 needs a special normalized comparison and leaves the exact override broken before cleanup. |
+| Q09 | A: retain the one-line Autoconf wildcard-copy repair and insert `elfutils-libelf` before `glib2-devel` in both Git lists before equality/removal. Real setup exposed fatal 152, then a declared `libelf.so.1` dependency; the minimal repairs and ordinary controlled/final installs passed. Writer implementation amendment following Step 4 round 1 review. | Step 4 installer inventory, fixtures and rollout; requirement item 9/Q10; [acceptance evidence](acceptance.architecture-minor-fallback.md) | Reverting either repair leaves required AC7 blocked. Manual RPM/flag injection or weakened runtime checks would conceal the failures. The separate single-file path-rewrite defect remains follow-up work. |
 
 ## Confirmed code and test-tree facts for this plan
 
@@ -92,8 +94,8 @@ Counts include blank lines and the final unterminated line, if any, at
 | `src/setups/setup.tpl.properties` | 26 | Step 4: curated mirror cleanup and comment |
 | `src/setups/pkgs/python/python_rhel_9.6_x86_64.txt` | 59 | Step 4: correct retained list |
 | `src/setups/pkgs/python/python_rhel_9.8_x86_64.txt` | 59 | Step 4: prove equivalent, then remove |
-| `src/setups/pkgs/git/git_rhel_9.6_x86_64.txt` | 49 | Step 4: correct two dependency names |
-| `src/setups/pkgs/git/git_rhel_9.8_x86_64.txt` | 49 | Step 4: apply matching corrections, prove equivalent, then remove |
+| `src/setups/pkgs/git/git_rhel_9.6_x86_64.txt` | 49 | Step 4: correct two names and add the libelf dependency |
+| `src/setups/pkgs/git/git_rhel_9.8_x86_64.txt` | 49 | Step 4: apply matching name corrections and libelf dependency, prove equivalent, then remove |
 | `wiki/explanation/the-architecture-key.md` | 93 | Step 4: identity and ordering |
 | `wiki/explanation/checkpoints-and-resume.md` | 56 | Step 4: scoped progress |
 | `wiki/how-to/survive-a-server-os-upgrade.md` | 85 | Step 4: automatic fallback procedure |
@@ -106,7 +108,7 @@ Counts include blank lines and the final unterminated line, if any, at
 | `src/setups/setup.sh` | 434 | Read-only detected-key preservation |
 | `src/utils/properties.sh` | 87 | Read-only active-property compatibility |
 | `src/utils/steps.sh` | 498 | Read-only completion and repeat integration |
-| `src/setups/env/bin/packages_management.sh` | 2068 | Read-only remote installation behavior |
+| `src/setups/env/bin/packages_management.sh` | 2068 | Step 4: minimal Autoconf wildcard-copy repair under Q09; preserve other installer behavior |
 | `src/setups/pkgs/packages_rhel_9.6_x86_64.txt` | 5799 | Existing generated snapshot, outside cleanup |
 | `src/setups/pkgs/packages_rhel_9.8_x86_64.txt` | 5898 | Existing generated snapshot, outside cleanup |
 | `src/utils/lint_shell.sh` | 43 | Existing mandatory gate |
@@ -493,8 +495,9 @@ Files involved:
 
 - `src/setups/pkgs/python/python_rhel_9.6_x86_64.txt` (existing, to be updated).
 - `src/setups/pkgs/python/python_rhel_9.8_x86_64.txt` (existing, to be removed after acceptance).
-- `src/setups/pkgs/git/git_rhel_9.6_x86_64.txt` (existing, to be updated under approved Q08 A).
-- `src/setups/pkgs/git/git_rhel_9.8_x86_64.txt` (existing, to receive matching corrections, then be removed after acceptance).
+- `src/setups/pkgs/git/git_rhel_9.6_x86_64.txt` (existing, to be updated under approved Q08 A and implementation amendment Q09).
+- `src/setups/pkgs/git/git_rhel_9.8_x86_64.txt` (existing, to receive matching corrections and the libelf dependency, then be removed after acceptance).
+- `src/setups/env/bin/packages_management.sh` (existing, minimal `post_install_autoconf271` wildcard-copy repair under Q09 A).
 - `src/setups/setup.tpl.properties` (existing, to be updated).
 - `docs/v0.27.0/verify.architecture-fallback.sh` (existing after Step 1, to be updated).
 - `docs/v0.27.0/acceptance.architecture-minor-fallback.md` (new, to be created).
@@ -515,14 +518,17 @@ generated 9.8 identity, fallback diagnostics and unchanged detected key.
 Add a control with a deliberately distinct exact override, and a same-identity
 second run proving ordinary resume/cache reuse. Preserve a negative case for a
 package lookup/retrieval failure: no successful fallback claim or alternative
-minor retry.
+minor retry. For the Q09 copy repair, reproduce fatal 152 before changing the
+hook, then verify copied support files, path rewriting and repeat invocation
+with a spaced root and the real package's multiple-file layout. The separately
+reported single-file path-rewrite defect stays outside Step 4.
 
 Execute rollout in this order:
 
-1. Correct `zlib-dev` to `zlib-devel` in the retained 9.6 Python list. Under approved Q08 A, correct `libcom_err,` to `libcom_err` and `libxslti` to `libxslt` in both 9.6 and 9.8 Git lists. Record each intended name's unique index match and the exact two-line paired changes. Prove corrected Python and Git 9.6/9.8 equivalence and tracked mirror-value equivalence before any removal. Do not normalize these names at runtime or hide other lookup failures.
+1. Correct `zlib-dev` to `zlib-devel` in the retained 9.6 Python list. Under approved Q08 A, correct `libcom_err,` to `libcom_err` and `libxslti` to `libxslt` in both 9.6 and 9.8 Git lists. Under Q09 A, insert `elfutils-libelf` immediately before `glib2-devel` in both Git lists and repair only the quoted wildcard in `post_install_autoconf271`. Record the three name corrections, the paired dependency insertion and each intended name's unique index match. When a repair follows a controlled-install failure, retain that failure and rerun amended preflight and controlled acceptance before removal. Prove final corrected Python and Git 9.6/9.8 equivalence and tracked mirror-value equivalence before cleanup. Do not normalize names at runtime, weaken runtime checks or hide other failures.
 2. Prepare a controlled authoring checkout/configuration for real RHEL 9.8 dependency setup using the implemented scripts and retained curated inputs. Exclude exact 9.8 curated lists and the exact active 9.8 mirror key there. Copy active properties and relevant local RPM cache entries; clear copied step completion and both reload flags. Set the copied `cplx_path` to a unique, absent sibling directory on the same RHEL host, outside the live cplx tree, as specified below. Preserve the actual detected architecture. Record revision, configuration origins and digests; template values alone are not runtime configuration. Copy the Python legacy marker; for Git explicitly create a synthetic legacy final-entry marker in the controlled checkout, since no original exists. Label copied versus synthetic evidence.
 3. Bootstrap the separate remote target under approved Q07 B using the manifest below. Remove the copied 9.8 generated index only from the controlled checkout, retain its committed original in the authoring tree, and invoke the package index-generation entry point with selected 9.6 mirrors. Record nonempty publication under the detected 9.8 filename. Preflight every corrected Python/Git expression against this fresh index for ordinary resolution, then prove each selected RPM is cached or currently downloadable. Preserve ordinary missing/ambiguous/unavailable errors as blockers; no cross-minor index substitution or manual RPM injection.
-4. Run ordinary setup for Python and Git through CMD/Git Bash to the isolated RHEL target, starting from the recorded legacy markers. Record selected list/property, generated 9.8 index identity, restart and every successful active-entry synchronization, then actual remote installation completion. Per tool, omit one cache seed entry whose indexed filename a HEAD request confirms is currently served by a selected mirror; if no original cached entry qualifies, obtain one through the ordinary downloader in the controlled tree before the measured run. Retain other matching cached entries to prove reuse. New extraction is permitted only beneath the isolated target. Compare live-target staging/installed-flag inventories before and after and require them unchanged. Include the three corrected names, a valid same-identity resume control and isolated installed-state reuse on a second invocation. Run the controlled checkout's setup from a CMD process that clears that checkout's own `NO_MORE_SENV_` guard, and confirm that derived values such as `project_dir_unix` name the controlled checkout. Before and after each host pass, record the authoring tree's `git status --porcelain --ignored -- src/setups` and its `pkgs/*/last` bytes, and require them unchanged.
+4. Run ordinary setup for Python and Git through CMD/Git Bash to the isolated RHEL target, starting from the recorded legacy markers. Record selected list/property, generated 9.8 index identity, restart and every successful active-entry synchronization, then actual remote installation completion. Per tool, omit one cache seed entry whose indexed filename a HEAD request confirms is currently served by a selected mirror; if no original cached entry qualifies, obtain one through the ordinary downloader in the controlled tree before the measured run. Retain other matching cached entries to prove reuse. New extraction is permitted only beneath the isolated target. Compare live-target staging/installed-flag inventories before and after and require them unchanged. Include the three corrected names and the added `elfutils-libelf` dependency, a valid same-identity resume control and isolated installed-state reuse on a second invocation. Run the controlled checkout's setup from a CMD process that clears that checkout's own `NO_MORE_SENV_` guard, and confirm that derived values such as `project_dir_unix` name the controlled checkout. Before and after each host pass, record the authoring tree's `git status --porcelain --ignored -- src/setups` and its `pkgs/*/last` bytes, and require them unchanged.
 5. After controlled acceptance passes, remove only the tracked redundant Python/Git 9.8 lists and 9.8 mirror property, and revise its per-minor-copy comment. Preserve both generated index snapshots in the authoring tree and operator properties. Repeat setup from a controlled copy of the resulting curated tree, using the same isolated target and generated index, reseeding labeled legacy progress and one currently served cache omission per tool. Prove synchronization, lazy mirror fallback, cache/staged reuse and installation completion; repeat the live-target preservation comparison. Retain final successful evidence.
 6. Update the listed wiki pages for selection ordering, separate detected/selected identities, per-kind absence, exact-index refresh despite completion, atomic progress/restart, and reset-after-entry. Use `sp reset <entry>` or `s packages reset <entry>`; correct the current singular `package` example and the claim of resuming at/reprocessing the supplied entry.
 7. Run all four cumulative fixture groups on Git Bash and native Linux, the actual CMD launcher cases, the mandatory lint floor and documentation/diff checks. Record an AC1-AC12 result-to-evidence mapping and the controlled configuration facts with sensitive terms replaced.
