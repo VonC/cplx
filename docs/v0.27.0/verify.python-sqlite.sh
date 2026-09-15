@@ -38,7 +38,7 @@ for harness in "${harnesses[@]}"; do
     shellcheck "$harness"
 done
 
-"$author_python" -B - <<'PY'
+"$author_python" -B - "$step" <<'PY'
 import importlib.util
 from pathlib import Path
 import sqlite3
@@ -49,6 +49,8 @@ import unittest
 print(f"Authoring interpreter: {sys.executable}; {sys.version}", flush=True)
 assert sys.version_info >= (3, 9), "Python 3.9 or later is required"
 files = [Path("src/install/env/python/sqlite_probe.py")]
+if int(sys.argv[1]) >= 2:
+    files.append(Path("docs/v0.27.0/verify.python-sqlite-launcher.py"))
 files.extend(Path("tests/unit/sqlite_probe").rglob("*.py"))
 for path in files:
     compile(path.read_bytes(), str(path), "exec")

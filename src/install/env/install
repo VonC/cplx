@@ -349,6 +349,16 @@ function main() {
         error "main: install failed with '${res_install}'"
         return "${res_install}"
     fi
+    # A tool may validate its installed output, including timestamp reuse.
+    # Failure leaves packaging and the installed-version selector untouched.
+    if declare -F post_install_check >/dev/null; then
+        post_install_check
+        local res_post_install_check=$?
+        if [[ ${res_post_install_check} != 0 ]]; then
+            error "main: post_install_check failed with '${res_post_install_check}'"
+            return "${res_post_install_check}"
+        fi
+    fi
     package
     res_package=$?
     if [[ ${res_package} != 0 ]]; then
