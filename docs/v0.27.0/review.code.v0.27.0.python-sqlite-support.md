@@ -437,7 +437,7 @@ Readiness floor:
 - **Attributable staged scope:** passes. All nine paths are Step 1 files.
 - **Unresolved findings:** two (untested branches, unreachable ambiguity
   branch).
-- __`a.commit` accuracy:__ passes mechanically and in content.
+- **`a.commit` accuracy:** passes mechanically and in content.
 
 The reviewer made no repair. The missing tests are unambiguous, but the
 preferred fix for the unreachable branch changes the probe's
@@ -862,3 +862,441 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 2
+
+- Recorded: 2026-09-15T21:30:48+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 python-sqlite-support (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+Implementation step: 2
+Review round: 1
+
+### Code review evidence for step 2 python-sqlite-support (round 1)
+
+request_index_tree: 5804213c71bcc8b63e6f7a9cb0836c9206abc5ba
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- cmd /d /c a.sqlite-check.cmd (sources: plan)
+- cmd /d /c a.sqlite-step2-linux.cmd (sources: plan)
+- rg -n 'post_install_check|res_install|res_package|current' src/install/env/install (sources: plan)
+- rg -n 'LIBSQLITE3|python_sqlite|required|check_sqlite' src/install/env/python (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(sqlite): check capability before packaging
+group 1 path: src/install/env/python/python_install_functions.sh
+group 1 path: src/install/env/install
+group 1 path: docs/v0.27.0/verify.python-sqlite-build.sh
+group 1 path: docs/v0.27.0/verify.python-sqlite-launcher.py
+group 1 path: docs/v0.27.0/verify.python-sqlite.sh
+group 2: docs(python-sqlite-support): record step 2 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+staged path: docs/v0.27.0/verify.python-sqlite-build.sh
+staged path: docs/v0.27.0/verify.python-sqlite-launcher.py
+staged path: docs/v0.27.0/verify.python-sqlite.sh
+staged path: src/install/env/install
+staged path: src/install/env/python/python_install_functions.sh
+```
+
+### Requestor assessment for step 2 python-sqlite-support (round 1)
+
+Step 2 is fully implemented. The staged validation plan records the exact
+completion sentence, implementation analysis and supporting checks. Steps 3
+and 4 remain incomplete.
+
+Validation on 2026-09-15:
+
+- `cmd /d /c a.sqlite-check.cmd` passed the cumulative Step 2 runner: the
+  57-script Bash lint floor, explicit effort Bash syntax/ShellCheck, Python
+  syntax, 33 probe unit cases (30 pass, three Windows symlink skips), and all
+  four copied CMD launcher cases. Unit execution took 0.634 seconds and
+  0.730 seconds including loading. The unchanged probe's earlier 33-case RHEL
+  pass covers the Windows skips.
+- `cmd /d /c a.sqlite-step2-linux.cmd` passed all 32 native Linux process
+  cases in owned RHEL scratch using `/usr/bin/python3`. The transport only
+  copies verification material and invokes synthetic fixtures. It does not
+  run a real build or source a production profile. Exact production and
+  fixture hashes are in the validation plan; raw output is retained in the
+  ignored `a.sqlite-step2-linux.raw.txt`. Native elapsed time was not measured
+  separately.
+- `git diff --cached --check`, the two Step 2 `rg` inspections and the focused
+  Markdown checker passed. The root commit plan has two groups and passed
+  `commit-plan-check.bat --format json` with no diagnostics.
+
+The declared `.review-validation` Bash floor and approved shared command
+checklist adapt the generic ghog/pytest flow. No Python coverage percentage
+is configured or claimed. The new 93-line Python file is a CMD process
+fixture with no production classes. The existing probe and unit module are
+unchanged. Python policy stays in Python support; the shared driver adds only
+the optional callback. The Makefile scan is linear with fixed keys, and each
+selected build adds one source and one installed probe. No new sorting,
+tree walk, automatic cleanup or compile is introduced.
+
+These fixtures establish caller behavior. Real candidate compilation,
+populated-tree reuse, deployment and Debian acceptance belong to Step 4.
+Its previously recorded home/profile/deployment/Debian prerequisites remain
+unresolved. Step 2 does not claim candidate acceptance.
+
+### Implementation report for step 2 python-sqlite-support (round 1)
+
+Python support now selects `el9.x86_64`, adds scoped `LIBSQLITE3_CFLAGS` and
+`LIBSQLITE3_LIBS`, and executes the existing shared probe after fresh build
+or either reuse branch. It validates the selected source executable,
+configuration files, literal pinned Makefile substitutions, generated module
+directory and configured libpython backing file. The source probe uses
+`-I -S -B` and source-first `LD_LIBRARY_PATH` while retaining inherited library
+entries. The installed probe resolves the requested version's exact binary
+and extension directory.
+
+The generic driver calls optional `post_install_check` only after successful
+install (including timestamp reuse), before package and the final installed
+selector update. Nonzero status and interpreter diagnostics propagate.
+Other families skip the Python gate and generic tools retain their sequence.
+This does not promise rollback of files within an already selected prefix.
+
+The pinned 3.13.15 archive was inspected directly. `sysconfig` writes
+`build/lib.linux-x86_64-3.13`; generated extension links are backed by
+`Modules/`; Linux shared configuration uses the checked literal Makefile
+values and source-first RUNSHARED. Shared setenv rewrites Makefile EXTLIBS
+on ordinary reuse, so staleness uses config.status and pyconfig.h timestamps
+while validating the Makefile values independently. A regression caught and
+now covers the harmless Makefile maintenance case.
+
+The new native process fixture copies the complete driver, shared install
+functions and Python support, replacing setup and external work with synthetic
+commands. Its 32 cases assert exact stage order, rejection paths, package and
+installed selector preservation, explicit reconfigure and generic callback
+behavior. The separate Python fixture runs a copied complete launcher in
+actual Windows CMD, substituting external commands and asserting replacement
+counts before execution. Remote statuses 0, 42, 4 and 199 remain 0, 5, 55 and 5
+at that authoring boundary. Windows is the existing remote launcher platform;
+the runtime targets remain Linux.
+
+### Change summary for step 2 python-sqlite-support (round 1)
+
+The six staged paths are grouped in the formatted root `a.commit`:
+
+1. `feat(sqlite): check capability before packaging`
+   - `src/install/env/python/python_install_functions.sh`
+   - `src/install/env/install`
+   - `docs/v0.27.0/verify.python-sqlite-build.sh`
+   - `docs/v0.27.0/verify.python-sqlite-launcher.py`
+   - `docs/v0.27.0/verify.python-sqlite.sh`
+2. `docs(python-sqlite-support): record step 2 validation`
+   - `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md`
+
+The production Bash support has 169 lines, driver 416, new Bash fixture 269,
+new Python process fixture 93, and cumulative runner 70. All intended paths
+are staged. Step 1 and its earlier review are already committed. The present
+request covers only Step 2; no Step 2 commit is authorized yet.
+
+### Writer response for step 2 python-sqlite-support (round 1)
+
+Writer response:
+
+This is the first review round for Step 2. There is no prior Step 2 feedback
+or disagreement. Step 1's accepted probe behavior is unchanged.
+
+The plan's copied-launcher check is implemented in a separate Python process
+fixture to execute actual CMD and safely substitute every external dependency.
+That additional file remains within Step 2's approved behavior and is included
+in its implementation group and cumulative syntax checks.
+
+The two ignored CMD wrappers are available in this shared workspace and clear
+the project setup guard before running their commands. The cumulative wrapper
+runs the versioned runner with `--step 2` and the explicit llm-shared authoring
+Python. The native wrapper transfers the exact files to owned scratch and runs
+the versioned build fixture with `/usr/bin/python3`. Inspect those wrappers
+before running them; retain private transport details only in ignored files.
+Both platform checks are required because Windows cannot exercise the real
+symlink process cases and Linux cannot exercise actual CMD. No fixture result
+substitutes for Step 4's real candidate acceptance.
+
+### Reviewer focus for step 2 python-sqlite-support (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-1 -->
+
+## Round 1 by reviewer - Step 2
+
+- Recorded: 2026-09-15T21:36:43+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 python-sqlite-support (exchange 1) (round 1)
+
+Baseline index tree: 5804213c71bcc8b63e6f7a9cb0836c9206abc5ba
+
+Assessed index tree: 5804213c71bcc8b63e6f7a9cb0836c9206abc5ba
+
+### Implementation check for step 2 python-sqlite-support (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 2 has been fully implemented.
+
+Scoped configure inputs, the source and installed capability checks and the
+optional driver callback are implemented as the plan describes, and their
+refusal paths are exercised by native Linux and actual Windows CMD fixtures.
+
+#### What was verified for step 2 python-sqlite-support (exchange 1) (round 1)
+
+- **Scope and configure.** `python_sqlite_required` is true only for
+  `CPLX_ARCH_EXT=el9.x86_64`. The configure array appends
+  `LIBSQLITE3_CFLAGS=-I${root}/usr/include` and
+  `LIBSQLITE3_LIBS=-L${root}/usr/lib64 -lsqlite3` only in that case and
+  preserves the existing `LIBMPDEC_*` and OpenSSL flags. The `other-family`
+  fixture proves the variables are absent and neither probe runs.
+- **Source check.** After a fresh `make all` or either reuse branch, the check:
+  - resolves `tool_src` under `tools/python/sources/`;
+  - requires a non-symlink `python`, plus `Makefile`, `pyconfig.h`,
+    `config.status` and `pybuilddir.txt`;
+  - reads only five literal Makefile assignments without evaluating them;
+  - rejects a `pybuilddir.txt` that is missing, placeholder, multi-line,
+    absolute, escaping, for another version, or older than `config.status` or
+    `pyconfig.h`;
+  - resolves the generated directory and `libpython3.13.so` backing inside the
+    source tree.
+
+  It then runs `./python -I -S -B` with the source tree first in
+  `LD_LIBRARY_PATH`, keeping inherited entries. The reviewer checked the pinned
+  `python-src-3.13.15.tar.gz` on the build host read-only:
+  - `Makefile.pre.in` defines `VERSION=`, `abs_builddir=`, `ABIFLAGS=`,
+    `LDVERSION=` and `LDLIBRARY=`;
+  - `configure.ac` sets `LDLIBRARY='libpython$(LDVERSION).so'` and
+    a Linux `RUNSHARED` that prepends the build directory's `pwd` to the
+    inherited `LD_LIBRARY_PATH`;
+  - the build writes a `none` placeholder into `pybuilddir.txt` and
+    `make clean` removes it.
+
+  Those facts match the implementation's literal checks and its placeholder
+  and staleness rules.
+- **Installed check.** `post_install_check` resolves `tool_prefix` to exactly
+  `tools/python/python-<version>` and `bin/python3` to that prefix's
+  `bin/python3.13`, rejecting an old selector or wrapper target (fixture
+  `installed-old-selector`), and passes the exact `lib/python3.13/lib-dynload`
+  boundary. The scratch directory `tools/python/logs` is the one the driver
+  creates for every tool run.
+- **Driver.** `main()` calls `post_install_check` only when defined, after a
+  successful `install()` (including its timestamp skip) and before `package()`.
+  A nonzero status is returned like any other stage, so `package` and the final
+  `current` update never run. Generic tools with no callback keep the exact
+  prior event sequence.
+- **Launcher boundary.** The CMD fixture copies the real `install.bat`,
+  replaces exactly three `scp`, one `ssh`, the editor and the focus command
+  (with count assertions and a guard that no real `scp`, `ssh`, `bash` or
+  `powershell` line remains), and runs actual CMD. Remote statuses 0, 42, 4 and
+  199 become launcher statuses 0, 5, 55 and 5.
+
+#### Architecture check by the reviewer for step 2 python-sqlite-support (exchange 1) (round 1)
+
+Python policy, source-artifact validation and probe invocation stay in the
+Python support file. The shared driver gains only a tool-agnostic optional hook.
+The probe from Step 1 is reused unchanged. Fixtures copy complete scripts,
+replace only setup and external commands, and never source a production
+profile. No, there is nothing that needs to be addressed.
+
+#### Performance check by the reviewer for step 2 python-sqlite-support (exchange 1) (round 1)
+
+A selected build adds two bounded probe invocations. Makefile parsing is one
+linear pass over fixed keys, and path checks resolve named inputs only. No tree
+walk, sort, automatic clean or compile is introduced. No, there is no
+performance issue that needs to be addressed.
+
+#### Coverage check by the reviewer for step 2 python-sqlite-support (exchange 1) (round 1)
+
+No Python class or unit-tested module changes in this step. The production
+change is Bash, exercised by 32 native process cases that cover:
+
+- every refusal branch of `python_check_sqlite`;
+- every callback ordering path;
+- `configure` with and without the scope predicate.
+
+The new Python file is a verification fixture whose two functions run in the
+cumulative Windows gate. There is no Python coverage gate. No, there is no
+unit-tested class below 100% that needs completing. No, no top-level symbol
+staged outside a coverage gate is unreferenced.
+
+Validation plan effects:
+
+None. The reviewer did not edit
+`docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md`. The writer's
+Step 2 rows, including the three recorded material SHA-256 values, match the
+reviewed tree: the reviewer's hashes of the staged blobs and the hashes printed
+by the native run are identical.
+
+### Pre-repair mandatory checks and coverage for step 2 python-sqlite-support (exchange 1) (round 1)
+
+All resolved commands ran on the received index tree
+`5804213c71bcc8b63e6f7a9cb0836c9206abc5ba`; no reviewer repair was made.
+
+- `bash src/utils/lint_shell.sh`, through the guard-clearing `senv.bat` form:
+  `lint_shell: 57 tracked scripts`, `lint_shell: clean`, exit 0.
+- `cmd /d /c a.sqlite-check.cmd` (inspected: `--step 2`, shared authoring
+  Python 3.13.9): lint floor clean, effort Bash and Python syntax checks,
+  `Ran 33 tests`, `OK (skipped=3)`, then
+  `PASS CMD remote=0, launcher exit=0`, `remote=42 ... exit=5`,
+  `remote=4 ... exit=55`, `remote=199 ... exit=5`, and
+  `SQLite cumulative checks passed through step 2`; exit 0.
+- `cmd /d /c a.sqlite-step2-linux.cmd` (inspected first: it tars the driver,
+  shared install functions, Python support and build harness, copies them over
+  SSH and runs them in a fresh `mktemp -d /tmp` directory under
+  `bash --noprofile --norc` with `BASH_ENV` unset): 32 `PASS` lines,
+  `Bash process cases passed: 32`, exit 0. The printed SHA-256 values for
+  `python_install_functions.sh`, `install` and `verify.python-sqlite-build.sh`
+  equal the reviewer's hashes of the staged blobs.
+- `rg -n 'post_install_check|res_install|res_package|current' src/install/env/install`
+  (run through the ripgrep search tool): the callback block at lines 354-359
+  sits between `res_install` (347-350) and `res_package` (363-366). `current`
+  appears only in the source selector (198-199) and the final selector update
+  (406-412) after `main`.
+- `rg -n 'LIBSQLITE3|python_sqlite|required|check_sqlite' src/install/env/python`:
+  the predicate and checker at lines 4 and 10, scoped `LIBSQLITE3_*` at 114-116,
+  and the build and callback calls at 147-148 and 153-154. Remaining matches are
+  the Step 1 probe's own `required` arguments and messages.
+
+Additional reviewer checks:
+
+- `git diff --cached --check` passed.
+- The pinned CPython 3.13.15 tarball on the build host was read with
+  `tar -xzO` and changed nothing.
+- No coverage percentage applies.
+
+### Resolved validation set and sources for step 2 python-sqlite-support (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `cmd /d /c a.sqlite-check.cmd` (source: plan; Windows wrapper for the
+  cumulative `--step 2` runner)
+- `cmd /d /c a.sqlite-step2-linux.cmd` (source: plan; native Linux counterpart
+  running `verify.python-sqlite-build.sh --python /usr/bin/python3` in owned
+  RHEL scratch)
+- `rg -n 'post_install_check|res_install|res_package|current' src/install/env/install`
+  (source: plan Step 2 addendum)
+- `rg -n 'LIBSQLITE3|python_sqlite|required|check_sqlite' src/install/env/python`
+  (source: plan Step 2 addendum)
+
+### Resolver drift and direction for step 2 python-sqlite-support (exchange 1) (round 1)
+
+No drift. The request carries the lint floor, the plan's Windows cumulative
+runner wrapper, its native Linux counterpart (both platforms are needed because
+Windows cannot run the symlink process cases and Linux cannot run actual CMD),
+and the two Step 2 inspections. The `rg` inspections ran through the ripgrep
+search tool because `rg` is not on this PowerShell path; the patterns and
+target paths are identical.
+
+### Repository state around validation for step 2 python-sqlite-support (exchange 1) (round 1)
+
+- **Index trees:** the request-time, reviewer-entry and assessed trees are all
+  `5804213c71bcc8b63e6f7a9cb0836c9206abc5ba` (no reviewer repair).
+- **Umbrella digest:** unchanged
+  (`85440ae0c9c1a64ee082ccb5472a8aca093bf7c5e9ef10e60f9faf39ac1db0ff`).
+- **Validation state:** the comparison over the six staged Step 2 paths reports
+  no tracked, ignored or untracked difference. The wrappers rewrote only their
+  own ignored root artifacts (`a.sqlite-step2-material.tar`,
+  `a.sqlite-step2-linux.raw.txt`).
+- **Remote scratch:** the native transport leaves its tarball and extracted
+  `mktemp` directory under the build host's `/tmp`, while the build harness
+  itself removes its fixture root on success. This is retained diagnostic
+  material outside the repository, not a tracked side effect.
+- **Unstaged tracked change:** the protocol transcript only, neither read as
+  working context nor staged.
+
+### Repair inventory for step 2 python-sqlite-support (exchange 1) (round 1)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 2 python-sqlite-support (exchange 1) (round 1)
+
+`commit-plan-check.bat --format json` ran independently on the received tree and
+returned status 0, `state: valid`, `ready: true` and no diagnostics, with six
+staged paths in two groups:
+
+1. `feat(sqlite): check capability before packaging`: Python support, shared
+   driver, native build harness, CMD launcher fixture and cumulative runner;
+2. `docs(python-sqlite-support): record step 2 validation`: the validation plan.
+
+Membership, order and subjects match the staged work, and `a.commit` was not
+amended. The status 0 proves only mechanical grouping.
+
+### Findings and boundaries for step 2 python-sqlite-support (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 2 python-sqlite-support (exchange 1) (round 1)
+
+No change is requested for Step 2.
+
+1. Present this advisory commit-ready recommendation at the human commit gate,
+   and include the review transcript through the residual continuation.
+2. Optional, outside the reviewed tree: the ignored native transport leaves its
+   tarball and `mktemp` directory in the build host's `/tmp`. Consider removing
+   the owned directory after a successful run in later wrappers.
+3. Step 4 must still prove the literal Makefile, `pybuilddir.txt` and
+   `libpython` checks against the real populated 3.13.15 tree; these fixtures
+   establish caller behavior only.
+
+### Decision rationale for step 2 python-sqlite-support (exchange 1) (round 1)
+
+Decision: commit-ready (advisory).
+
+The readiness floor passes:
+
+- **Exact identity:** envelope, human-readable identity, plan, step 2, round 1,
+  occurrence 1, umbrella and request-time tree `5804213` agree.
+- **Complete implementation:** Step 2 matches the plan, and its literal
+  source-build checks were confirmed against the pinned CPython 3.13.15
+  sources.
+- **Mandatory validation:** all five resolved commands pass, including 32
+  native process cases and 4 actual CMD launcher cases.
+- **Attributable staged scope:** all six paths are Step 2 files.
+- **No unresolved or boundary-crossing findings.**
+- **Accurate `a.commit`:** mechanically ready, and its content matches.
+
+The reviewer made no repair. This recommendation does not authorize a commit.
+
+### Final reviewer decision for step 2 python-sqlite-support (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-2-round-1 -->
+
+## Round 1 by human - Step 2 - human-confirmation
+
+- Recorded: 2026-09-15T22:16:52+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
