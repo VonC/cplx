@@ -23,15 +23,30 @@ in order.
    Fedora archive shards its `Packages/` folder that way. The template
    `setup.tpl.properties` keeps commented alternatives for each distro.
 
+   Use the selected property reported by setup. Selection tries the exact
+   key, highest lower minor, then lowest higher minor of the same distribution,
+   major and machine. Missing or whitespace-only values allow fallback; the
+   first occurrence of a duplicate key wins. Only this active properties file
+   participates: editing the template does not change an existing local file.
+   Dependency-list selection is independent of mirror selection.
+
 2. Rebuild the index from scratch:
 
    ```cmd
    sdpl
    ```
 
-   Each URL is fetched and parsed (three listing formats are recognized);
-   all results are merged keeping the latest version per package into
-   `src\setups\pkgs\packages_<architecture>.txt`.
+   Each URL is fetched and parsed; the established package-name aggregation
+   writes `src\setups\pkgs\packages_<detected-architecture>.txt`. An index
+   from the selected mirror's minor is never substituted. Normal `sp` also
+   generates a missing or empty detected index despite a done marker. Either
+   `CPLX_RELOAD_PACKAGES` or `CPLX_FORCE_RELOAD_PACKAGES` forces a refresh.
+
+   The complete nonempty result replaces the old index atomically. A failed
+   refresh preserves its bytes but fails this invocation; a later run without
+   a refresh request can reuse it. Mirror URLs are selected once when needed
+   and tried in order for an uncached RPM. Retrieval failure is terminal;
+   setup does not select another minor to hide it.
 
 3. Interpret the failures:
 
@@ -39,6 +54,9 @@ in order.
    | --- | --- |
    | fatal 113, "less than 50 lines" | the URL answered an error page, not a listing |
    | fatal 112, empty index | no URL produced anything: wrong path or dead vault |
+   | fatal 111, index processing | listing extraction or aggregation failed |
+   | fatal 114, metadata selection | no eligible nonempty mirror value, or unreadable metadata |
+   | fatal 115, index publication | scratch/candidate creation, writing or atomic replacement failed |
    | `*.rpm._to_delete` files in `pkgs\<arch>\` | download under 9 KB: an HTML page saved as an RPM |
    | HTTP 403 on a vault | Cloudflare; cplx already sends browser-like headers, try another mirror first in the list |
    | fatal 302, several matches | the package short name is ambiguous in the index, make the list entry more precise |

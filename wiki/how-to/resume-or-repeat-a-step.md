@@ -41,14 +41,31 @@ step is skipped on the next run. Two verbs act on the markers:
    set "CPLX_RESET_STEP=copy_the_environment"
    ```
 
-4. For the package pipeline, the checkpoint is not in `steps.md` but in
-   `src\setups\pkgs\<tool>\last` (the last processed package):
+4. Package-list progress lives in `src\setups\pkgs\<tool>\last`. Its
+   versioned record includes the detected architecture, selected list path
+   and last synchronized entry:
 
    ```cmd
    sp reset                    &:: forget the checkpoint, restart the list
-   s package reset zlib-devel  &:: resume exactly at this line
+   s packages reset zlib-devel &:: resume after this active entry
    sp p_zlib-devel             &:: or process one single package
    ```
+
+   `sp reset zlib-devel` is equivalent to the second command. An invalid
+   entry fails without changing the record. A legacy/malformed record,
+   changed architecture or list path, or removed cursor entry restarts at
+   the first active entry, saving an empty record before synchronization.
+   Successful entries are saved atomically. Cached downloads, remote staged
+   packages and installed flags are still reused.
+
+   With a valid nonempty cursor, `CPLX_SP_REPEAT` resumes after the first
+   active entry matching either the cursor or repeat value. It has no effect
+   after a restart or with an empty cursor. A direct `sp p_<pkg>` request
+   leaves list progress unchanged and cannot be combined with reset.
+
+   Index preparation also checks the detected index independently of the
+   done marker: missing or empty output is regenerated, and either reload
+   flag forces a refresh of an existing index.
 
 5. After editing step titles by hand, regenerate the anchors:
 
