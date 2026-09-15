@@ -121,8 +121,12 @@ prerequisites; no candidate or final item 7 acceptance is claimed.
 
 ### Analysis of Step 2 implementation state
 
-Not started. Step 2 is not implemented because scoped configure inputs,
-source/installed checks and the optional driver callback have not been added.
+Yes. Step 2 has been fully implemented.
+
+The selected family now checks source and installed SQLite capability on fresh
+and reused output. The shared driver stops before packaging and installed
+selector advancement on callback failure. Native Linux process fixtures and
+the copied Windows launcher establish ordering and failure propagation.
 
 ### Goal for Step 2
 
@@ -138,27 +142,101 @@ reuse and after install or reuse, before packaging and selector advancement.
 
 ### What was implemented for Step 2
 
-_(empty — no check has taken place yet.)_.
+`python_install_functions.sh` owns the `el9.x86_64` predicate, explicit
+`LIBSQLITE3_*` configure inputs and both calls to the existing shared probe.
+The source check validates the pinned Makefile substitutions, configuration
+outputs, generated module directory and configured shared-library backing.
+It places the canonical source directory first in `LD_LIBRARY_PATH` and uses
+`-I -S -B` to ignore inherited module overrides, skip site hooks and avoid
+bytecode writes. The installed check requires the requested version's
+`bin/python3.13` and passes its exact `lib/python3.13/lib-dynload` boundary.
+Both checks retain interpreter diagnostics and return their nonzero status.
+
+The optional `post_install_check` callback in the shared driver runs after
+successful install, including timestamp reuse, and before package. The
+existing final installed-selector update remains after every successful stage.
+Generic tools without the callback retain their sequence.
+
+The pinned `python-src-3.13.15.tar.gz` was inspected directly, with SHA-256
+`c28d9d213c09b5b5ab2c29812950e12f746999e099b82894231be954b26baed9`.
+Its `patchlevel.h` identifies 3.13.15, `sysconfig/__main__.py` writes the
+generated directory, `Makefile.pre.in` links modules back to `Modules/`, and
+Linux configure sets source-first `RUNSHARED`. Staleness compares
+`config.status` and `pyconfig.h`: shared setup rewrites Makefile `EXTLIBS`
+during ordinary reuse, so Makefile modification time is not a stale-build
+signal. The literal build configuration is still checked independently.
+
+Validation on 2026-09-15:
+
+- `cmd /d /c a.sqlite-check.cmd` ran the cumulative `--step 2` runner under Git Bash 5.3.9 and authoring Python 3.13.9; exit 0. The tracked 57-script lint floor, explicit effort Bash checks and Python syntax checks passed. The unchanged probe suite ran 33 tests: 30 passed, with three host symlink-privilege skips; unit execution took 0.634 seconds, 0.730 seconds including loading.
+- The Windows fixture copied the complete `src/install/install.bat`, substituted dependency commands and ran actual CMD. Remote statuses 0, 42, 4 and 199 produced launcher statuses 0, 5, 55 and 5. The test also checked log-copy and editor-stub ordering.
+- `cmd /d /c a.sqlite-step2-linux.cmd` transferred the exact source and harness bytes to owned RHEL scratch and ran `bash docs/v0.27.0/verify.python-sqlite-build.sh --python /usr/bin/python3`; exit 0, all 32 cases passed. The retained raw result is `a.sqlite-step2-linux.raw.txt`; native fixture elapsed time was not separately measured.
+- Native cases cover fresh compile, both build reuse branches, installed timestamp reuse, each probe failure, absent material, malformed/stale/escaping build directories, configuration mismatch, missing/incorrect executable and library paths, explicit reconfigure order, preceding stage failures, and generic callback presence/success/failure. Every case checks the unrelated sentinel and the installed selector/package result.
+- The first valid test-first run reported missing source and installed probe events. A later fixture exposed the Makefile maintenance false rejection, which was corrected before the final pass. Windows runs the CMD portion; real-symlink Bash process cases require native Linux. The unchanged Step 1 probe's 33-case RHEL result still covers its three Windows-skipped cases.
+- `git diff --check` and both planned `rg` checks passed. No compiler or candidate build was started by these process fixtures.
+
+Final Linux material SHA-256 values:
+
+| File | SHA-256 |
+| --- | --- |
+| `python_install_functions.sh` | `006ff0788dc02903d226f8df6b4f500f106775420da1424206b038e5ac528ad8` |
+| `src/install/env/install` | `def70ac222b11845f6be117974f86e2af4344ac8f5b4a19842b7a74110247d27` |
+| `verify.python-sqlite-build.sh` | `09f071728f8c572feb68fbb7cea0dff0c19742cce3d9e37ce3e0619e2746dc18` |
 
 ### New types or classes introduced for Step 2
 
-_(empty — no check has taken place yet.)_.
+No production class or public type was added. The Bash helpers own Python
+policy and probe invocation. The 93-line Python CMD process fixture is
+verification material, separate from the production probe and unit suite.
 
 ### Architecture check for Step 2
 
-_(empty — no check has taken place yet.)_.
+Python-specific configuration and path validation remain in Python support.
+The shared driver knows only the optional callback and its status. The probe
+retains the common database and provider rules; no host-Python dependency or
+new domain-layer dependency was introduced. Fixtures copy complete scripts
+and use synthetic setup without sourcing production profiles.
+
+Physical lines changed from 51 to 169 for Python Bash support, 406 to 416 for
+the shared driver, and 68 to 70 for the cumulative runner. The new Bash
+harness has 269 lines; the new Python process fixture has 93, below the 550
+review band and 650 ceiling. The production probe remains 274 lines and its
+unit module 393. No architecture or file-size issue needs addressing.
 
 ### Performance check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The selected build adds one source probe and one installed probe. Each retains
+Step 1's fixed database operation and single linear mapping observation.
+Configuration parsing scans the Makefile once with a fixed set of keys;
+path checks resolve named inputs without walking the tool tree. There is no
+new sorting or quadratic work. Source checks do not automatically reconfigure,
+clean or compile. No performance issue needs addressing.
 
 ### Unit test coverage check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The repository's gate measures Bash lint, with no Python coverage percentage.
+Step 2 changes Bash orchestration and adds process fixtures; it adds no
+unit-tested class. Existing probe tests cover generated links backed by
+`Modules/`, installed-extension escapes, library identity mismatch/missing
+observations and provider refusal. The new CMD fixture's `check_launcher`
+entry calls `write_batch`; both functions are exercised by the cumulative
+runner. No unit-tested class introduced by this step needs completion, and
+no new top-level symbol is unreferenced.
 
 ### Feature integrity for Step 2
 
-_(empty — no check has taken place yet.)_.
+Other target families retain the existing configure inputs and skip the
+SQLite gates. Tools without a callback preserve the shared sequence.
+Failures preserve the installed `current` selector and package output;
+source selection still follows the existing driver behavior. The explicit
+reconfigure route remains the only cleanup trigger. This does not promise
+rollback of internal files in an already selected prefix.
+
+The new native and CMD cases use owned copies and command stubs. They prove
+caller contracts, not a compiled 3.13.15 candidate's capability. Step 4 still
+owns the real populated-tree rebuild and three-environment acceptance, with
+the previously recorded environment prerequisites unresolved. Existing
+features and reporting remain intact.
 
 ## Step 3: Bind the candidate layout to its closure declaration
 
