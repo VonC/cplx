@@ -5,7 +5,7 @@
 - Topic: python-sqlite-support
 - Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
 
-## Umbrella revision introducing Python SQLite support
+## User story for Python SQLite support
 
 As the maintainer of the tools archive, I want its Python interpreter to
 include working SQLite support and ship the library it needs, so the same
@@ -52,9 +52,46 @@ tree must carry both that extension and `libsqlite3.so.0`. After relocation,
 `python3 -c 'import sqlite3'` must succeed on Debian 12 and RHEL 9.8 as well as
 on the build account, using the shipped SQLite runtime dependency.
 
+Each accepted interpreter must also create a small file-backed database, write
+and commit data, close it, then reopen it and read the expected data. Run this
+round trip through the toolchain invocation used by operators, including its
+deployed or relocated invocation as applicable.
+
 The build and deployed interpreter must preserve their existing independence
 from host SQLite installations. A successful import that relies on a library
 available only on the host does not satisfy the archive contract.
+
+Retain a conclusive observation after a SQLite operation in the same process
+showing that the loaded `libsqlite3.so.0` resolves under the built, deployed or
+relocated `tools/python` tree. A trace showing no SQLite load is inconclusive.
+Record this provider evidence with the database round trip on every accepted
+environment. Both named distributions have recorded host SQLite copies that
+can hide a resolution gap: `/usr/lib64/libsqlite3.so.0` on RHEL and
+`libsqlite3-0 3.40.1` on the Debian Jenkins agent.
+
+## Target scope and build-success contract for Python SQLite
+
+SQLite is mandatory for the RHEL 9 x86_64 build family and its named Debian 12
+and RHEL 9.8 consumers. Shared Python install changes must preserve other
+targets' configure and build results, including targets whose package lists
+have no SQLite payload. This item does not establish a SQLite guarantee for
+every historical build target.
+
+An in-scope build must refuse successful completion if `_sqlite3` is missing
+from its built `lib-dynload`, or if the built interpreter cannot import
+`sqlite3` against the sandbox payload. Its diagnostic must name the missing
+capability. A later manual acceptance check cannot substitute for this build
+result; the existing library floor does not prove the extension was compiled.
+
+## Existing-tree rebuild behavior for Python SQLite
+
+Support and document an explicit rebuild from the populated Python tree that
+forces both reconfiguration and recompilation while preserving unrelated
+reusable sandbox payloads. The existing workflow skips configuration while
+`config.log` exists, and `build()` skips `make` while a compiled `python`
+exists. The documented path must overcome both conditions and produce a
+verified SQLite-capable interpreter. Automatic capability-triggered rebuild
+detection is outside this item's scope.
 
 ## Confirmed provenance and build constraints for SQLite
 
@@ -141,21 +178,47 @@ Any remaining active waiver continues to prohibit release publication.
 | AC1 | The Python sandbox contains `sqlite3.h`, the `libsqlite3.so` linker symlink and `libsqlite3.so.0` from the selected SQLite RPM payloads. Existing SQLite dependency-list entries are retained. |
 | AC2 | CPython receives the explicit sandbox SQLite configure settings. `checking for stdlib extension module _sqlite3` answers `yes`, and `_sqlite3` is absent from the final necessary-bits-not-found summary. |
 | AC3 | The archive contains the compiled `_sqlite3` extension in Python's `lib-dynload` and `libsqlite3.so.0` under `tools/python/root/usr/lib64`; neither file is supplied solely by the host. |
-| AC4 | `python3 -c 'import sqlite3'` succeeds using the toolchain interpreter on the RHEL build account, on Debian 12 after relocation, and on a RHEL 9.8 target after deployment. |
+| AC4 | On the RHEL build account, Debian 12 after relocation and RHEL 9.8 after deployment, the operator's toolchain invocation imports `sqlite3` and completes a file-backed create/write/commit/close/reopen/read round trip. A conclusive observation after a SQLite operation in the same process identifies the loaded `libsqlite3.so.0` under the applicable `tools/python` tree. A trace showing no SQLite load cannot pass. |
 | AC5 | The existing closure location test finds `libsqlite3.so.0` under `tools/python` in the resolution scope. The satisfied SQLite waiver is removed and its floor entry is retained. |
 | AC6 | The existing packaging contract continues to reject a missing unwaived SQLite floor member, a copy only under `tools/git`, and a stale SQLite waiver after the removal condition is satisfied. |
+| AC7 | An in-scope Python build refuses success with a capability diagnostic when the built `_sqlite3` extension is absent or the built interpreter cannot import `sqlite3` against its sandbox payload. |
+| AC8 | Other targets retain their existing configure and build results, including when their dependency lists have no SQLite payload. |
+| AC9 | The documented explicit rebuild works from the populated tree, forces both reconfiguration and recompilation, preserves unrelated reusable sandbox payloads and produces a verified SQLite-capable interpreter. |
+| AC10 | Item 6 records its non-release candidate's Python version and payload/archive identity on the tracked 3.13.15 pin. Item 7 applies D5's release regression re-check and repeats SQLite acceptance on the final rebuilt archive. |
+| AC11 | Before candidate acceptance, a Debian 12 container host with a working runtime and an archive-copy route is confirmed. Retained evidence identifies the host role, image digest and archive and demonstrates AC4 after relocation in a plain `debian:12` container holding only the candidate archive. Missing environment or Debian evidence prevents item 6 completion. |
+
+## Debian acceptance environment for the unpublished SQLite candidate
+
+Run item 6's Debian acceptance in a plain `debian:12` container holding only
+the identified candidate archive, as permitted by the umbrella. Confirm the
+host's container runtime and copy route for the archive before executing
+acceptance; record the host role, image digest and archive identity with the
+SQLite and provider observations. This requires no release publication or new
+Jenkins-agent credentials.
+
+The environment reference currently identifies only the Jenkins agent as an
+available Debian host, reached through the consuming pipeline. Selection of
+the plain-container acceptance route does not claim another host is already
+available. If the required environment cannot be established, retain that gap
+and leave item 6 incomplete; do not silently defer its Debian acceptance.
+The actual Jenkins integration run remains with item 7.
 
 ## SQLite delivery boundary within the umbrella
 
-Item 6 owns the SQLite integration, the rebuild needed to produce its extension,
-and focused acceptance evidence. Item 7 (`tools-archive-rebuild`) owns the final
-sandbox refresh, release archive rebuild, complete cross-distribution validation
-matrix and release publication. It applies the already decided D5: one rebuild
-serves the Python refresh and SQLite integration, using 3.13.14, or 3.13.15 if
-its pre-rebuild regression re-check is clean; never 3.13.10. The tracked
-`tools/senv.local.tpl` currently pins 3.13.15. Q06 makes explicit the proposed
-narrowing of D5's single-rebuild rule to allow a separate item 6 validation
-candidate; that change remains pending confirmation.
+Item 6 owns the SQLite integration, a separate non-release validation rebuild
+on the tracked 3.13.15 pin, and focused acceptance evidence. Record that
+candidate's Python version and payload/archive identity. This confirmed Q06
+choice qualifies D5's original single-rebuild decision: the extra item 6 build
+establishes the capability before item 7's release rebuild.
+
+Item 7 (`tools-archive-rebuild`) retains the final sandbox refresh, release
+archive rebuild, complete cross-distribution validation matrix and publication.
+It applies D5's existing release-version rule: 3.13.14, or 3.13.15 if its
+pre-rebuild regression re-check is clean; never 3.13.10. The current 3.13.15 pin
+does not prove that re-check was performed. Item 7 repeats SQLite acceptance on
+the final archive, including if the re-check selects 3.13.14 or the payload
+refresh changes its inputs. The approved extra validation rebuild is recorded
+beside D5 in the umbrella.
 
 This cycle retains the Python 3.13 line required by the application's
 `>=3.13, <3.14` constraint. A move to Python 3.14 remains a later-cycle topic.
@@ -167,6 +230,22 @@ After the consuming repository adopts the resulting archive, it can remove
 and Q24 skip guards self-enable once SQLite is available. Those pipeline edits
 and its tools-version pin belong to that repository and the release handoff;
 this requirement makes the necessary interpreter capability available.
+
+## Requirement clarifications
+
+The human confirmed the seven reviewed recommendations after specification
+review round 2. All answers are integrated in this document; no open questions remain
+for the requirement phase.
+
+| Question | Decision and reason | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | A1: Require SQLite for the RHEL 9 x86_64 build family and named consumers, preserving other targets including those without SQLite payloads; this matches the umbrella's scope. | Target scope and build-success contract; AC8 | A2: Guaranteeing every target would add unrelated dependency and acceptance work. |
+| Q02 | B1: Refuse success for missing or unusable SQLite on in-scope builds with a capability diagnostic, preventing the original silent omission. | Target scope and build-success contract; AC7 | B2: Acceptance-only rejection would leave nominally successful builds without the required capability. |
+| Q03 | C2: Require a persistent database round trip through the operator invocation, alongside provider evidence, to establish usable database behavior. | Expected SQLite behavior; AC4 | C1: Import alone does not prove persistence. C3: The consuming application's complete test run belongs to the integration handoff. |
+| Q04 | D2: Require conclusive same-process evidence of the shipped provider after a SQLite operation on every accepted environment; host copies can hide a gap. | Expected SQLite behavior; AC4 | D1: Static closure plus an operation does not directly identify the loaded provider. |
+| Q05 | E1: Document an explicit existing-tree rebuild forcing reconfiguration and recompilation while retaining unrelated payloads, covering the actual upgrade case. | Existing-tree rebuild behavior; AC9 | E2: Automatic capability-triggered rebuilding extends scope. E3: Fresh-tree-only acceptance leaves the existing build account unsupported. |
+| Q06 | F1: Add an identified 3.13.15 validation candidate before item 7's final rebuild, explicitly qualifying D5; this keeps item 6 independently completable at the cost of another rebuild. | SQLite delivery boundary; AC10; umbrella D5 | F2: Moving D5's regression re-check and refresh into item 6 would change item 7's delivery responsibility. |
+| Q07 | G1: Use a plain Debian 12 container after confirming its host runtime and candidate-copy route; retain identities and evidence without release publication. | Debian acceptance environment; AC11 | G2: Non-release delivery to Jenkins requires unestablished access and pipeline work. G3: Deferring Debian acceptance conflicts with item 6's accepted scope. |
 
 ## Code and evidence references for Python SQLite support
 
@@ -188,319 +267,3 @@ this requirement makes the necessary interpreter capability available.
 - [Environment reference](reference.environments.md): build, deployment and
   Debian-agent identities and evidence boundaries.
 - [Why recompile](../../wiki/explanation/why-recompile.md): sandbox build model.
-
-## Open questions for the v0.27.0 Python SQLite feature request
-
-The answer lines below record review recommendations, pending confirmation.
-They do not change the approved draft or settle the requirement by themselves.
-
-### Q01: Which existing Python build targets gain the mandatory SQLite contract?
-
-The requirement names the RHEL 9.8 build and its Debian/RHEL consumers, while
-the Python configure function is shared. Does mandatory SQLite support apply
-only to that build family, or must this item extend the guarantee to every
-existing Python build target?
-
-#### BBQ for Q01
-
-We are equipping one travelling kitchen, but the instruction sheet is shared
-with other kitchens. In this picture: the travelling kitchen is the RHEL 9
-tools build, its destinations are Debian and RHEL, and the shared sheet is
-the Python build workflow used by other targets.
-
-#### Options for Q01
-
-- Option A1: Require SQLite for the RHEL 9 x86_64 build family and its named
-  Debian/RHEL consumers; preserve existing behavior on other build targets.
-  Changes to shared Python install functions must preserve other targets'
-  configure and build results, including when they have no SQLite payload.
-  - pro: Matches the umbrella's measured need and existing prerequisites.
-  - con: Does not establish a SQLite guarantee for every historical target.
-- Option A2: Require SQLite for every currently supported Python build target.
-  - pro: Gives all Python archives one capability contract.
-  - con: Broadens dependency and acceptance work beyond the named environments.
-
-#### Recommended option for Q01 (with arguments for this choice)
-
-Option A1: Keep the acceptance scope tied to the umbrella's RHEL 9 build and
-two consumer distributions. Shared changes must preserve other targets, but
-their SQLite enablement should not become an unstated prerequisite.
-
-#### Answer to Q01: option A1 (with reason why it must be accepted as the answer)
-
-Option A1: This delivers the requested archive capability without extending
-the release obligation to unrelated build environments.
-
-### Q02: Must a build refuse success when SQLite is still unavailable?
-
-AC2 requires a positive configure result, but it does not state the unattended
-build's result if configuration or compilation still omits `_sqlite3`, or the
-built interpreter cannot import it. The library floor alone cannot prove that
-the extension exists. Should this become a required build-success condition,
-or remain an acceptance check performed after a nominally successful build?
-
-#### BBQ for Q02
-
-A kitchen can receive ingredients and still send out an empty dish. In this
-picture: the ingredients are the SQLite development and runtime payloads,
-the dish is the working Python module, and the dispatch decision is the build's
-success result.
-
-#### Options for Q02
-
-- Option B1: Refuse successful completion of a Python build for a target in
-  Q01's scope when `_sqlite3` is missing from the built `lib-dynload`, or when
-  the built interpreter cannot import `sqlite3` against the sandbox payload.
-  The diagnostic names the missing capability. Builds outside Q01's scope
-  retain their current result.
-  - pro: Prevents the original silent omission from returning unnoticed.
-  - con: Makes SQLite mandatory for these builds and requires a target-scoped
-    condition in shared build code.
-- Option B2: Keep the build result unchanged and reject the result only during
-  this item's acceptance or subsequent archive validation.
-  - pro: Preserves current optional-module behavior in the build workflow.
-  - con: A successful build can still deliver a Python lacking this capability.
-
-#### Recommended option for Q02 (with arguments for this choice)
-
-Option B1: The defect originated in an optional module being omitted without
-stopping the build. Once this capability is required for the selected target,
-success should mean that it is available, independent of a later manual review.
-
-#### Answer to Q02: option B1 (with reason why it must be accepted as the answer)
-
-Option B1: An unattended build must distinguish a usable SQLite-enabled
-interpreter from one that merely completed CPython compilation.
-
-### Q03: What functional SQLite behavior must acceptance demonstrate?
-
-AC4 currently requires only `import sqlite3`. That establishes module loading,
-while coverage and pytest-testmon use databases. What minimum behavior must
-the focused acceptance demonstrate on the named environments?
-
-#### BBQ for Q03
-
-Opening the kitchen proves that the door works; serving a meal proves that
-the kitchen works. In this picture: opening the door is importing `sqlite3`,
-preparing the meal is a database operation, and serving it later is reopening
-and reading a committed database.
-
-#### Options for Q03
-
-- Option C1: Retain import-only acceptance.
-  - pro: Matches the original observed failure directly and keeps checks small.
-  - con: Does not demonstrate database operations or persistence.
-- Option C2: Require import plus a small file-backed database round trip:
-  create, write, commit, close, reopen and read the expected data.
-  Use the toolchain interpreter as operators invoke it, including its relocated
-  or deployed invocation, in the same run that records Q04's provider evidence.
-  - pro: Demonstrates the database behavior needed by the motivating tools.
-  - con: Adds a small acceptance case beyond the draft's import command.
-- Option C3: Require the consuming application's full coverage/testmon run
-  before this item can complete.
-  - pro: Demonstrates the motivating end-to-end outcome immediately.
-  - con: Couples completion to another repository and the later release chain.
-
-#### Recommended option for Q03 (with arguments for this choice)
-
-Option C2: A small persistent database round trip establishes usable SQLite
-without transferring the full application integration gate from item 7 and
-the consuming repository into this item.
-
-#### Answer to Q03: option C2 (with reason why it must be accepted as the answer)
-
-Option C2: Acceptance should prove the module's basic database capability,
-while the complete application test walk remains with the integration handoff.
-
-### Q04: What evidence establishes that the interpreter uses shipped SQLite?
-
-AC3 and AC5 establish archive presence, while AC4 establishes a successful
-import. Neither explicitly requires evidence of which `libsqlite3.so.0` the
-interpreter actually loaded. Recorded observations show a host copy on both
-distributions: `/usr/lib64/libsqlite3.so.0` on RHEL and `libsqlite3-0 3.40.1`
-on the Debian Jenkins agent. Either can hide a resolution gap. What observation
-is required to support the archive-autonomy claim on each accepted environment?
-
-#### BBQ for Q04
-
-A kitchen may carry flour yet quietly borrow the neighbour's bag. In this
-picture: the carried bag is the packaged SQLite library, the borrowed bag is
-the host library, and watching which bag is opened is observing the library
-actually loaded by the interpreter.
-
-#### Options for Q04
-
-- Option D1: Accept the existing static closure result together with a
-  successful SQLite operation.
-  - pro: Reuses the current archive checks with little extra evidence.
-  - con: Does not directly identify the provider used by the running process.
-- Option D2: Require conclusive runtime evidence, alongside the existing
-  closure checks, that each accepted environment loads SQLite from the shipped
-  Python tree within the archive's resolution scope.
-  Observe the loaded `libsqlite3.so.0` after a SQLite operation in the same
-  process, showing that it resolves under the built, deployed or relocated
-  `tools/python` tree as applicable. An observation showing no SQLite load is
-  inconclusive and cannot pass acceptance.
-  - pro: Directly verifies independence from host SQLite on both distributions.
-  - con: Requires retaining a provider observation with each acceptance run.
-
-#### Recommended option for Q04 (with arguments for this choice)
-
-Option D2: The umbrella already distinguishes library presence from actual
-runtime resolution. Apply that evidence standard to the newly shipped SQLite
-provider without redefining the existing closure scope or its rules.
-
-#### Answer to Q04: option D2 (with reason why it must be accepted as the answer)
-
-Option D2: A positive operation and its observed shipped provider together
-establish the capability this item promises; archive presence alone cannot.
-
-### Q05: What upgrade behavior is required for an existing Python build tree?
-
-The real starting point is a populated sandbox and an interpreter previously
-built without SQLite. The current workflow skips configuration while
-`config.log` exists, and `build()` skips `make` while a compiled `python`
-exists. Must ordinary reruns automatically upgrade that output, or is an
-explicit documented rebuild sufficient to close this item?
-
-#### BBQ for Q05
-
-Delivering a missing ingredient does not change a meal already cooked. In
-this picture: the ingredient delivery is the SQLite payload update, the cooked
-meal is the existing interpreter, and cooking again is the supported rebuild.
-
-#### Options for Q05
-
-- Option E1: Support and document an explicit rebuild from the existing
-  populated tree that forces both reconfiguration and recompilation,
-  producing a verified SQLite-enabled interpreter while preserving unrelated
-  reusable sandbox payloads.
-  - pro: Covers the actual upgrade case without requiring general automatic
-    build invalidation.
-  - con: Operators must invoke the documented rebuild when changing inputs.
-- Option E2: Require ordinary setup/build reruns to detect the missing
-  capability and upgrade the existing interpreter automatically.
-  - pro: Removes the operator's need to recognize the stale-build condition.
-  - con: Extends this item into the workflow's automatic rebuild behavior.
-- Option E3: Accept only a fresh-tree build and leave existing-tree upgrades
-  unspecified.
-  - pro: Minimizes the supported starting states.
-  - con: Does not establish how the existing build account gains the capability.
-
-#### Recommended option for Q05 (with arguments for this choice)
-
-Option E1: The requirement explicitly calls for a rebuild. Establish that
-the documented path works from the existing tree and preserves unrelated
-reusable state; automatic rebuild detection can remain outside this feature.
-
-#### Answer to Q05: option E1 (with reason why it must be accepted as the answer)
-
-Option E1: This makes the real upgrade supported and reviewable without adding
-an unrelated incremental-build redesign to the SQLite requirement.
-
-### Q06: Which interpreter version and artifact can establish item 6 acceptance?
-
-Item 6 requires a real rebuild and relocated acceptance, while item 7 owns the
-final sandbox refresh and release archive. D5 already decides one rebuild for
-the Python refresh and SQLite integration, on 3.13.14, taking 3.13.15 instead
-if its pre-rebuild regression re-check is clean; never 3.13.10. The tracked
-`tools/senv.local.tpl` already pins 3.13.15, but the pin alone does not record
-that re-check.
-
-May item 6 add a separate validation rebuild, explicitly narrowing D5's
-single-rebuild rule, or should it perform the re-check and combined rebuild
-itself? The patch differs from the current pin only if the re-check selects
-3.13.14; payload refresh can still change the final artifact.
-
-#### BBQ for Q06
-
-A kitchen planned one cooking session for both a new recipe and refreshed
-ingredients. A tasting would add a second session. In this picture: the
-one-session plan is D5, the recipe is SQLite integration, the tasting is
-item 6's validation candidate, and the banquet is item 7's release archive.
-
-#### Options for Q06
-
-- Option F1: Accept an identified non-release candidate on the tracked
-  3.13.15 pin, recording its version and payload identity. This explicitly
-  narrows D5: item 6 adds a validation rebuild, while item 7 performs the
-  release rebuild, applies D5's regression re-check and repeats SQLite
-  acceptance on the final archive.
-  If confirmed, consolidation records this narrowing beside D5 in the umbrella,
-  so its decisions table no longer states a single rebuild without qualification.
-  - pro: Keeps the ordered items independently completable and preserves
-    item 7's ownership of the release rebuild.
-  - con: Requires two rebuilds and final acceptance, including after a
-    re-check selects 3.13.14 or a payload refresh changes the inputs.
-- Option F2: Have item 6 perform D5's pre-rebuild regression re-check and
-  refresh so its rebuild becomes the single combined D5 rebuild.
-  - pro: Honors D5's single-rebuild decision literally.
-  - con: Moves the re-check and refresh timing from item 7, requiring its
-    delivery boundary to change; any later payload refresh needs revalidation.
-
-#### Recommended option for Q06 (with arguments for this choice)
-
-Option F1: A separate candidate lets item 6 establish focused capability
-evidence while item 7 retains the final refresh and release rebuild. This is
-an explicit proposed narrowing of D5's one-rebuild decision, pending human
-confirmation. It neither establishes a clean regression re-check for the
-3.13.15 pin nor substitutes for final archive acceptance.
-
-#### Answer to Q06: option F1 (with reason why it must be accepted as the answer)
-
-Option F1: Accept the cost of a separate validation rebuild so item 6 can
-complete independently, while retaining D5's release-version re-check and all
-final acceptance and publication gates in item 7.
-
-### Q07: Where can the unpublished candidate establish Debian 12 acceptance?
-
-AC4 requires Debian acceptance after relocation within item 6. Q06's proposed
-candidate is unpublished, while the environment reference identifies the
-Jenkins agent as the only Debian host currently in hand, reached through the
-consuming pipeline and without cplx credentials. The umbrella permits a plain
-`debian:12` container holding the archive, but no host for that candidate run
-has been confirmed. Where must item 6 establish its Debian acceptance?
-
-#### BBQ for Q07
-
-A tasting needs a venue before the banquet opens. In this picture: the tasting
-is the unpublished archive candidate, the temporary kitchen is a plain Debian
-container, the banquet kitchen is the Jenkins agent, and delivering ingredients
-is transferring the candidate without publishing a release.
-
-#### Options for Q07
-
-- Option G1: Accept the candidate in a plain `debian:12` container holding only
-  the candidate archive, on a confirmed host able to run it. Record the host
-  role, image digest and archive identity. The Jenkins integration run remains
-  with item 7. Confirm that host and a candidate transfer route before executing
-  acceptance; if unavailable, report the gap rather than defer Debian acceptance
-  silently or mark item 6 complete.
-  - pro: Uses the umbrella's permitted acceptance environment without release
-    publication or new agent credentials.
-  - con: Requires a host with a confirmed container runtime and a confirmed
-    copy route for the candidate archive; this evidence is not a run on the
-    actual Jenkins agent.
-- Option G2: Deliver the candidate to the Jenkins Debian agent through a
-  distinct non-release location, such as staging or a snapshot, and run a
-  diagnostics probe there. Never reuse the immutable release coordinate.
-  - pro: Exercises the actual agent used by the consuming application.
-  - con: Requires a confirmed delivery route and access not established by the
-    current environment reference, plus consuming-pipeline diagnostics work.
-- Option G3: Defer Debian acceptance to item 7 and complete item 6 on RHEL only.
-  - pro: Removes the need to arrange a separate Debian candidate environment.
-  - con: Changes AC4 and the umbrella's item 6 acceptance, postponing the foreign
-    distribution check that exposed earlier archive problems.
-
-#### Recommended option for Q07 (with arguments for this choice)
-
-Option G1: The umbrella already permits a plain Debian 12 container for the
-archive checks. Use that acceptance boundary with an explicitly confirmed host
-and candidate identity, retaining the actual pipeline run in item 7. Selecting
-this option does not assert that the required host is already available.
-
-#### Answer to Q07: option G1 (with reason why it must be accepted as the answer)
-
-Option G1: This retains Debian acceptance within item 6 without requiring a
-release publication. Completion still depends on establishing the environment
-and retaining successful relocated SQLite and provider evidence there.
