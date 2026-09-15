@@ -12,7 +12,7 @@ is a resume.
 | Store | Granularity | Cleared by |
 | --- | --- | --- |
 | `src\setups\steps.md` done markers | pipeline step | `s <step>`, `s r_<step>`, `CPLX_REPEAT_STEP`/`CPLX_RESET_STEP` |
-| `src\setups\pkgs\<tool>\last` | one package in the dependency list | `sp reset`, `s package reset <line>` |
+| `src\setups\pkgs\<tool>\last` | detected architecture, selected list and last synchronized entry | `sp reset`, `s packages reset <entry>` |
 | artifacts on disk (archives, flags, timestamps) | file | deleting the artifact, or the `>` / force switches |
 
 The first is explicit state, the second a cursor, the third is
@@ -42,10 +42,30 @@ This inversion matches the environment: on a flaky corporate network,
 "run it again" must always be the safe move, and destructive freshness
 must be the explicit, deliberate exception.
 
+## Package progress belongs to its selected list
+
+The `last` file is a versioned literal record, never shell code. It resumes
+after the first matching active entry only when its detected architecture and
+selected list path still match. Legacy or malformed records, changed identity
+and entries removed from the list cause a restart. An empty replacement record
+is published before synchronization, so an interrupted restart cannot revive
+the discarded cursor. Every successful entry is then published atomically.
+
+`sp reset` starts at the first active entry. `sp reset zlib-devel` validates
+that entry and resumes **after** it; an invalid entry leaves progress intact.
+`CPLX_SP_REPEAT` only affects a valid nonempty cursor. Direct `sp p_<pkg>`
+requests leave list progress untouched. Downloads, staging and installed flags
+remain reusable through these cursor changes.
+
 ## The failure modes to know
 
-Checkpoints can lie in one direction: a step marked done whose output
-was later deleted or corrupted stays done. The cure is never editing
+General step checkpoints can outlive deleted or corrupted output. Package
+index preparation additionally checks the detected index itself: absent or empty
+output is regenerated despite a done marker. Either `CPLX_RELOAD_PACKAGES` or
+`CPLX_FORCE_RELOAD_PACKAGES` requests a refresh even for a nonempty index.
+A failed refresh preserves the old index but fails the current invocation.
+
+For other stale step checkpoints, the cure is never editing
 markers by hand but using the reset verbs
 ([Resume or repeat a step](../how-to/resume-or-repeat-a-step.md)), which
 also clear the dependent steps that consumed the bad output.

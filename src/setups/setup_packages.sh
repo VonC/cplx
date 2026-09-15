@@ -1,4 +1,7 @@
 #!/bin/bash
+# Package setup pins selected metadata in the current invocation, prepares only
+# the detected-key index, and copies the same list it synchronizes. Sourcing
+# exposes functions for isolated verification without running setup.
 # shellcheck source-path=SCRIPTDIR
 
 SETUP_PKGS_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
@@ -8,9 +11,33 @@ source "${SETUP_PKGS_DIR}/../echos/echos"
 # shellcheck disable=SC1091
 source "${SETUP_PKGS_DIR}/../utils/properties.sh"
 source "${SETUP_PKGS_DIR}/../utils/steps.sh"
+# shellcheck disable=SC1091
+source "${SETUP_PKGS_DIR}/package_metadata.sh"
+# shellcheck disable=SC1091
+source "${SETUP_PKGS_DIR}/package_index.sh"
+# shellcheck disable=SC1091
+source "${SETUP_PKGS_DIR}/package_progress.sh"
 # SRC_DIR="$( cd "$( dirname "${SETUP_PKGS_DIR}" )" && pwd )"
 
 main() {
+    local direct_package='' reset_list=0 after_entry='' after_set=0
+    # Validate the complete interface before touching progress or syncing packages.
+    while (( $# )); do
+        case $1 in
+            --package)
+                [[ -z $direct_package && -n ${2:-} && $2 != --* ]] || fatal 'Missing or duplicate --package value' 117
+                direct_package=$2; shift 2;;
+            --reset-list)
+                [[ $reset_list == 0 ]] || fatal 'Duplicate --reset-list' 117
+                reset_list=1; shift;;
+            --after-entry)
+                [[ $after_set == 0 && -n ${2:-} && $2 != --* ]] || fatal 'Missing or duplicate --after-entry value' 117
+                after_entry=$2; after_set=1; shift 2;;
+            *) fatal "Unknown package setup argument: '$1'" 117;;
+        esac
+    done
+    [[ $after_set == 0 || $reset_list == 1 ]] || fatal '--after-entry requires --reset-list' 117
+    [[ -z $direct_package || $reset_list == 0 ]] || fatal '--reset-list cannot be combined with --package' 117
     steps_file="${SETUP_PKGS_DIR}/steps.md"
     properties_file="${SETUP_PKGS_DIR}/setup.properties"
 
@@ -24,243 +51,99 @@ main() {
     if [[ -z "${CPLX_TOOL}" ]]; then
         fatal "CPLX_TOOL not defined'" 12
     fi
+    local -A package_context=() list_selection=()
+    local -a package_urls=() diagnostics=()
+    package_metadata_context "$architecture" "$SETUP_PKGS_DIR" package_context
     rm -f "${SETUP_PKGS_DIR}/pkgs.log"
 
     # Check if a specific package name was provided
-    if [[ "$1" == "--package" && -n "$2" ]]; then
+    if [[ -n $direct_package ]]; then
         # Direct package sync requested
-        info "Direct package sync requested for package: '$2'"
-        sync_package "${architecture}" "$2"
-        install_package "$2"
+        info "Direct package sync requested for package: '$direct_package'"
+        sync_package "${architecture}" "$direct_package"
+        install_package "$direct_package"
     else
         # Regular flow
+        if ! package_metadata_list "$SETUP_PKGS_DIR/pkgs" "$CPLX_TOOL" "$architecture" list_selection diagnostics; then
+            fatal "Package list metadata for $architecture: ${diagnostics[*]}" 114
+        fi
+        package_context[list_source]=${list_selection[source]}
+        package_context[list_path]="src/setups/pkgs/$CPLX_TOOL/${list_selection[source]##*/}"
         download_packages_list "${architecture}"
-        sync_packages "${architecture}"
+        sync_packages "${architecture}" "$reset_list" "$after_entry"
         install_packages
     fi
 }
 
-download_packages_list() {
-    if step_is_done "download_packages_list"; then
-        if [[ -n "${CPLX_FORCE_RELOAD_PACKAGES}" ]]; then
-            task "Force regeneration of package list (CPLX_FORCE_RELOAD_PACKAGES set)"
-            # Mark step as not done to force regeneration
-            step_undo "download_packages_list"
-        else
-            ok "download_packages_list is already done (CPLX_FORCE_RELOAD_PACKAGES not set)"
-            return 0
-        fi
+resolve_package_mirrors() {
+    local -a diagnostics=()
+    if ! package_metadata_pin_mirrors "$properties_file" package_context package_urls diagnostics; then
+        fatal "Package mirror metadata for ${package_context[detected_key]}: ${diagnostics[*]}" 114
     fi
-    local arch="$1"
-    local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
-    local temp_dir="${SETUP_PKGS_DIR}/pkgs/temp_${arch}"
-
-    if [[ -f "${packages_file}" ]]; then
-        if [[ -z "${CPLX_RELOAD_PACKAGES}" && -z "${CPLX_FORCE_RELOAD_PACKAGES}" ]]; then
-            ok "File '${packages_file}' already downloaded (neither CPLX_RELOAD_PACKAGES nor CPLX_FORCE_RELOAD_PACKAGES set)"
-            return 0
-        fi
-        task "Must refresh/reload File '${packages_file}' (CPLX_RELOAD_PACKAGES or CPLX_FORCE_RELOAD_PACKAGES env var set)"
-    fi
-
-    # Create temp directory for URL results
-    rm -rf "${temp_dir}" 2>/dev/null
-    mkdir -p "${temp_dir}"
-
-    # Get the comma-separated URLs from property
-    pkgs_url_name="${arch/\./_}_pkgs_url"
-    get_property "${pkgs_url_name}"
-    local url_value="${!pkgs_url_name}"
-    info "URL list for arch='${arch}': ${url_value}"
-
-    # Split by comma and process each URL
-    IFS=',' read -ra url_list <<<"$url_value"
-    for i in "${!url_list[@]}"; do
-        # Trim whitespace
-        url=$(echo "${url_list[$i]}" | xargs)
-        info "Processing URL ${i+1}/${#url_list[@]}: '${url}' for arch='${arch}'"
-        process_packages_url "$url" "$arch" "${temp_dir}/url_${i}.txt"
-    done
-
-    # Combine all URL results, remove duplicates, and sort alphabetically
-    info "Combining results from all URLs, removing duplicates, and sorting"
-    true >"${packages_file}" # Empty the target file
-
-    if [ -n "$(ls -A "${temp_dir}" 2>/dev/null)" ]; then
-        # Use awk to process all files, keeping only the latest version of each package
-        # for both the specified architecture and noarch packages
-        cat "${temp_dir}"/*.txt 2>/dev/null | awk -F'-[0-9]' '{
-            if ($0 !~ /^\//) {  # Ignore entries starting with /
-                prefix = $1;     # Extract the common prefix (everything before -[0-9])
-                map[prefix] = $0;  # Store the latest entry for each prefix
-            }
-        }
-        END {
-            # Sort the prefixes alphabetically
-            n = asorti(map, sorted_prefixes);
-            for (i = 1; i <= n; i++) {
-                print map[sorted_prefixes[i]];  # Print the latest entry for each prefix
-            }
-        }' >"${packages_file}"
-
-        # Count the number of packages
-        local pkg_count
-        pkg_count=$(wc -l <"${packages_file}")
-        ok "Final package list contains ${pkg_count} unique packages"
-    else
-        fatal "No packages were found from any of the URLs" 112
-    fi
-
-    # Clean up temp directory
-    rm -rf "${temp_dir}"
-
-    if ! step_done "download_packages_list"; then
-        fatal "Could not mark download_packages_list as done" 6
-    fi
-    ok "All URLs processed and filtered packages saved to '${packages_file}'"
 }
 
-process_packages_url() {
-    local url="$1"
-    local arch="$2"
-    local output_file="$3"
-    local temp_file="${SETUP_PKGS_DIR}/pkgs/url_temp.txt"
-
-    # Fetch the HTML content using curl
-    html_content=$(curl -kLs "$url")
-
-    # Count the number of lines in html_content
-    line_count=$(echo "$html_content" | wc -l)
-    info "HTML content line count: ${line_count} for '${url}'"
-
-    if [ "$line_count" -lt 50 ]; then
-        fatal "HTML content has only ${line_count} lines (<50), skipping URL: ${url}" 113
-    fi
-
-    # Extract URLs from the table rows using grep
-    # Define an array of grep pipelines (as strings) to extract URLs for both arch and noarch
-    grep_pipelines=(
-        'grep -oP '"'"'<tr class="(even|odd)">.*?<a href="\K[^"]+'"'"' | grep -v "^\.\./$" | grep -E "(x86_64|noarch)"'
-        'grep -oP '"'"'<a href="\K[^"]*(x86_64|noarch)[^"]*'"'"' | grep -v "^../$"'
-        'grep -oP '"'"'<a href="\K[^"]+'"'"' | grep -E "(x86_64|noarch)"'
-        # Single-quoted hrefs. Every pipeline above assumes <a href="...">, so a
-        # vault that emits <a href='...'> yields nothing while the fetch itself
-        # succeeds: the run logs "Failed to extract URLs" as a soft warning and
-        # the package silently never reaches the index. That is how gdbm-devel,
-        # carried only by a copr build listing, went missing from the generated
-        # list while gdbm-libs survived through the CentOS mirrors.
-        # \x27 is the quote, written as an escape so it stays out of the shell
-        # quoting rather than needing another '"'"' dance.
-        'grep -oP '"'"'<a href=\x27\K[^\x27]+'"'"' | grep -E "(x86_64|noarch)"'
-    )
-    # Print the size of the grep_pipelines array
-    info "grep_pipelines array size: ${#grep_pipelines[@]}"
-    output=""
-    for pipeline in "${grep_pipelines[@]}"; do
-        # Use eval to run the pipeline on html_content
-        output=$(echo "$html_content" | eval "$pipeline")
-        # shellcheck disable=SC2181
-        if [ $? -eq 0 ] && [ -n "$output" ]; then
-            info "Pipeline '${pipeline}' has succeeded"
-            echo "$output" >"$temp_file"
-            break
-        fi
-    done
-    if [ -z "$output" ]; then
-        warning "Failed to extract URLs from the HTML content for URL: ${url}"
+download_packages_list() {
+    if package_index_available "${package_context[index_path]}" "${package_context[refresh_served]}" \
+        "${CPLX_RELOAD_PACKAGES:-}" "${CPLX_FORCE_RELOAD_PACKAGES:-}"; then
         return 0
     fi
-
-    # Process the URLs to keep only the last entry for each common prefix
-    # but only for this specific URL
-    awk -F'-[0-9]' '{
-        if ($0 !~ /^\//) {  # Ignore entries starting with /
-            prefix = $1;        # Extract the common prefix (everything before -[0-9])
-            map[prefix] = $0;   # Store the latest entry for each prefix
-        }
-    }
-    END {
-        # Sort the prefixes alphabetically
-        n = asorti(map, sorted_prefixes);
-        for (i = 1; i <= n; i++) {
-            print map[sorted_prefixes[i]]; # Print the latest entry for each prefix
-        }
-    }' "$temp_file" >"$output_file"
-
-    # shellcheck disable=SC2181
-    if [[ $? -ne 0 ]]; then
-        fatal "Failed to process the URLs for URL: ${url}" 111
+    resolve_package_mirrors
+    task "Generating index '${package_context[index_path]}' from '${package_context[mirror_source]}' (${#package_urls[@]} URLs)"
+    local status
+    if package_index_generate "${package_context[index_path]}" "${package_context[detected_key]}" package_urls; then
+        package_context[refresh_served]=1
+        ok "Published index '${package_context[index_path]}' ($(wc -l < "${package_context[index_path]}") packages)"
+    else
+        status=$?
+        fatal "Package index generation failed for ${package_context[detected_key]} (${package_context[index_path]})" "$status"
     fi
-
-    local pkg_count
-    pkg_count=$(wc -l <"$output_file")
-    ok "Processed URLs from '${url}' and found ${pkg_count} packages"
+    if ! step_done download_packages_list; then
+        fatal "Could not mark download_packages_list as done" 6
+    fi
 }
 
 sync_packages() {
     local arch="$1"
     local pkgs_tool_dir="${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}"
-    local packages_for_tools="${pkgs_tool_dir}/${CPLX_TOOL}_${arch}.txt"
-    if [[ ! -e "${packages_for_tools}" ]]; then
-        fatal "File '${packages_for_tools}' not found" 9
+    local packages_for_tools="${package_context[list_source]}"
+    local line status index
+    local -a entries=() comments=()
+    local -A progress=()
+    if ! package_progress_entries "$packages_for_tools" entries comments; then
+        fatal "Cannot read selected package list '${packages_for_tools}'" 9
     fi
     ok "Processing File '${packages_for_tools}'"
-
-    last_value=""
-    if [ -f "${pkgs_tool_dir}/last" ]; then
-        last_value=$(cat "${pkgs_tool_dir}/last")
+    for line in "${comments[@]}"; do info "Skipping commented line: '${line}'"; done
+    if package_progress_prepare "$pkgs_tool_dir/last" "$arch" "${package_context[list_path]}" \
+        entries "${2:-0}" "${3:-}" "${CPLX_SP_REPEAT:-}" progress; then
+        if [[ -n ${progress[reason]} ]]; then
+            info "Restarting '${package_context[list_path]}' at first active entry: ${progress[reason]}"
+        fi
+        if [[ -n ${progress[resume]} ]]; then
+            ok "Resuming processing after line: '${progress[resume]}'"
+        fi
+    else
+        status=$?
+        if [[ $status == 117 ]]; then
+            fatal "Reset entry '${3:-}' is not active in selected list '${package_context[list_path]}'" "$status"
+        fi
+        fatal "Cannot publish progress for selected list '${package_context[list_path]}'" "$status"
     fi
-
-    process=0
-    # If last_value is empty, start processing immediately.
-    [ -z "$last_value" ] && process=1
-
     if ! get_property cplx_path; then
         fatal "cplx_path not found in file '${properties_file}'" 101
     fi
-
-    # Before the while loop, initialize the array (if not already declared)
-    skipped=()
-
-    # Open the file on file descriptor 8
-    exec 8<"${packages_for_tools}"
-    while IFS= read -r line <&8 || [ -n "$line" ]; do
-        # Trim leading spaces for checking
-        trimmed_line="${line#"${line%%[![:space:]]*}"}"
-        if [[ "$trimmed_line" == \#* ]]; then
-            info "Skipping commented line: '${trimmed_line}'"
-            continue
-        fi
-        if [[ "${line}" == "" ]]; then continue; fi
-        # If we have not yet reached the last processed value, check for it.
-        if [ "$process" -eq 0 ]; then
-            if [[ "$line" == "$last_value" || "$line" == "${CPLX_SP_REPEAT}" ]]; then
-                ok "Resuming processing after line: '${line}'"
-                process=1
-                # Clear the array if needed.
-                skipped=()
-            else
-                # Instead of displaying, store the line in the array.
-                skipped+=("$line")
-            fi
-            continue
-        fi
-
-        # Process the line (actual processing logic goes here)
+    for ((index=progress[start]; index<${#entries[@]}; index++)); do
+        line=${entries[index]}
         task "Must process line: '${line}'"
         if ! sync_package "${arch}" "${line}"; then
             fatal "Failed to process line: '${line}'" 10
-        else
-            ok "Line '${line}' processed successfully in '${packages_for_tools}'"
-            # Update the 'last' file with the current processed value.
-            echo "${line}" >"${pkgs_tool_dir}/last"
         fi
-        process=1
-
+        if ! package_progress_write "$pkgs_tool_dir/last" "$arch" "${package_context[list_path]}" "$line"; then
+            fatal "Cannot publish progress after line '${line}' in '${packages_for_tools}'" 116
+        fi
+        ok "Line '${line}' processed successfully in '${packages_for_tools}'"
     done
-    # Close file descriptor 8.
-    exec 8<&-
-    if [ "$process" -eq 0 ]; then
+    if (( ${#entries[@]} > 0 && progress[start] == ${#entries[@]} )); then
         warning "All lines have already been processed."
     else
         ok "All lines have been processed."
@@ -282,6 +165,7 @@ sync_package() {
         warning "No need to search built package '${pkg_name}' in a pkg archive list"
         found_pkg="${pkg_name}"
     else
+        download_packages_list "${arch}"
         find_package_in_arch "${arch}" "${pkg_name}" "found_pkg"
     fi
     if [[ -z "${found_pkg}" ]]; then
@@ -302,13 +186,8 @@ find_package_in_arch() {
     local packages_file="${SETUP_PKGS_DIR}/pkgs/packages_${arch}.txt"
     local pkg_res_var_name="$3"
 
-    if [[ ! -e "${packages_file}" ]]; then
-        warning "File '${packages_file}' not found"
-        if ! touch "${packages_file}"; then
-            fatal "Unable to create file '${packages_file}'" 201
-        else
-            ok "Setup Packages file created (empty): '${packages_file}'"
-        fi
+    if [[ ! -f "${packages_file}" || ! -s "${packages_file}" ]]; then
+        fatal "Package index '${packages_file}' is missing or empty; prepare the exact index before lookup" 201
     fi
 
     # Escape any unescaped plus signs
@@ -412,22 +291,12 @@ download_package() {
         return 0
     fi
 
-    # Get URLs from property
-    local pkgs_url_name="${arch/\./_}_pkgs_url"
-    get_property "${pkgs_url_name}"
-    if [[ "${!pkgs_url_name}" == "" ]]; then
-        fatal "Property '${pkgs_url_name}' not found in file '${properties_file}'" 7
-    fi
+    # Resolve once at first network need, retaining the selected ordered value.
+    resolve_package_mirrors
+    local i last_url_index=$((${#package_urls[@]} - 1))
 
-    # Split comma-separated URLs and try each one
-    local url_value="${!pkgs_url_name}"
-    local IFS=','
-    read -ra url_list <<<"$url_value"
-    local last_url_index=$((${#url_list[@]} - 1))
-
-    for i in "${!url_list[@]}"; do
-        local url="${url_list[$i]}/${pkg_name}"
-        url="${url//\/\//\/}" # Replace double slashes with single slash
+    for i in "${!package_urls[@]}"; do
+        local url="${package_urls[$i]%/}/${pkg_name}"
 
         # Replace [l] with the first letter of pkg_name in lowercase
         if [[ "$url" == *"[l]"* ]]; then
@@ -439,15 +308,17 @@ download_package() {
         # Check if this is the last URL to try
         if [[ $i -eq $last_url_index ]]; then
             # Last URL - fatal on failure
-            try_download_package "${arch}" "${pkg_name}" "${url}" 1
-            return 0 # This will only be reached if the download succeeds
+            if try_download_package "${arch}" "${pkg_name}" "${url}" 1; then
+                return 0
+            fi
+            fatal "No URLs worked for downloading package '${pkg_name}'" 3
         else
             # Not the last URL - just error on failure and try the next URL
             if try_download_package "${arch}" "${pkg_name}" "${url}" 0; then
                 return 0 # Download succeeded, exit the loop
             fi
             # If we reach here, the download failed but we'll try the next URL
-            warning "Failed with URL ${i+1}/${#url_list[@]}, trying next mirror..."
+            warning "Failed with URL $((i+1))/${#package_urls[@]}, trying next mirror..."
         fi
     done
 
@@ -498,9 +369,9 @@ setup_remote_install() {
 
     # Copy dependencies list for regular install_packages (not needed for single package install)
     if [[ "$1" != "single_package" ]]; then
-        local dep_list="${CPLX_TOOL}_${architecture}.txt"
+        local dep_list="${package_context[list_source]}"
         task "Must copy '${dep_list}' script to ${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/"
-        if ! scp "${SETUP_PKGS_DIR}/pkgs/${CPLX_TOOL}/${dep_list}" "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list"; then
+        if ! scp "${dep_list}" "${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list"; then
             fatal "Failed to copy '${dep_list}' to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/'" 902
         else
             ok "List '${dep_list}' copied successfully to '${SSH_CONFIG_ENTRY}:${cplx_path}/tools/${CPLX_TOOL}/dependencies.list'"
@@ -566,4 +437,6 @@ install_packages() {
     process_install_result
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi
