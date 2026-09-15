@@ -149,11 +149,13 @@ relevant if the application separately needs that capability.
    library under `tools/python/root/usr/lib64` in the archive. A runtime
    library left only in the build sandbox does not close the gap.
 4. Remove the satisfied SQLite waiver while preserving its declared floor
-   entry and the existing packaging checks.
+   entry and the existing packaging checks. Replace the declared Python
+   3.13.9 subdirectory with the candidate's 3.13.15 subdirectory, retaining
+   `root` and `current` and renewing the matching closure envelope.
 5. Demonstrate the SQLite acceptance on the build account, Debian after
    relocation, and RHEL after deployment, retaining evidence for item 7.
 
-## SQLite waiver contract with the completed runtime-closure item
+## SQLite closure contract with the completed runtime-closure item
 
 The [runtime-closure requirement](issue.v0.27.0.toolchain-runtime-closure.md)
 defines the exact removal condition:
@@ -171,6 +173,21 @@ waiver whose removal condition is already satisfied. The payload condition
 governs removal; a document's completion status is not the packaging signal.
 Any remaining active waiver continues to prohibit release publication.
 
+The human-confirmed design Q06 J1 also corrects the candidate's declared
+version shape: replace `subdir|python|python-3.13.9` with
+`subdir|python|python-3.13.15`, retaining the Python `root` and `current`
+subdirectory declarations. Do not retain the historical version declaration.
+The checker still rejects undeclared immediate directories, including a
+retained `python-3.13.9`; `current` alone does not declare its version target.
+Renew the identity envelope with the declaration under the existing exact-byte
+digest and source-identity contract.
+
+This correction records the entry change required by the
+[closure ownership rule](../../src/setups/env/closure/README.md) before the plan
+relies on it. It preserves the SQLite floor and waiver-removal condition and
+the approved 3.13.15 non-release candidate. Item 7 must align the declaration
+again if its final permitted Python version changes.
+
 ## Acceptance criteria for Python SQLite support in v0.27.0
 
 | ID | Required result |
@@ -179,8 +196,8 @@ Any remaining active waiver continues to prohibit release publication.
 | AC2 | CPython receives the explicit sandbox SQLite configure settings. `checking for stdlib extension module _sqlite3` answers `yes`, and `_sqlite3` is absent from the final necessary-bits-not-found summary. |
 | AC3 | The archive contains the compiled `_sqlite3` extension in Python's `lib-dynload` and `libsqlite3.so.0` under `tools/python/root/usr/lib64`; neither file is supplied solely by the host. |
 | AC4 | On the RHEL build account, Debian 12 after relocation and RHEL 9.8 after deployment, the operator's toolchain invocation imports `sqlite3` and completes a file-backed create/write/commit/close/reopen/read round trip. A conclusive observation after a SQLite operation in the same process identifies the loaded `libsqlite3.so.0` under the applicable `tools/python` tree. A trace showing no SQLite load cannot pass. |
-| AC5 | The existing closure location test finds `libsqlite3.so.0` under `tools/python` in the resolution scope. The satisfied SQLite waiver is removed and its floor entry is retained. |
-| AC6 | The existing packaging contract continues to reject a missing unwaived SQLite floor member, a copy only under `tools/git`, and a stale SQLite waiver after the removal condition is satisfied. |
+| AC5 | The existing closure location test finds `libsqlite3.so.0` under `tools/python` in the resolution scope. The satisfied SQLite waiver is removed and its floor entry is retained. The Python subdirectory declaration replaces `python-3.13.9` with `python-3.13.15`, retains `root` and `current`, and travels with its renewed matching identity envelope. |
+| AC6 | The existing packaging contract continues to reject a missing unwaived SQLite floor member, a copy only under `tools/git`, a stale SQLite waiver after the removal condition is satisfied, and undeclared directories, including a retained `python-3.13.9` under the corrected declaration. |
 | AC7 | An in-scope Python build refuses success with a capability diagnostic when the built `_sqlite3` extension is absent or the built interpreter cannot import `sqlite3` against its sandbox payload. |
 | AC8 | Other targets retain their existing configure and build results, including when their dependency lists have no SQLite payload. |
 | AC9 | The documented explicit rebuild works from the populated tree, forces both reconfiguration and recompilation, preserves unrelated reusable sandbox payloads and produces a verified SQLite-capable interpreter. |
@@ -237,6 +254,11 @@ The human confirmed the seven reviewed recommendations after specification
 review round 2. All answers are integrated in this document; no open questions remain
 for the requirement phase.
 
+Design consolidation adds the matching closure-entry correction authorized by
+the human's confirmation of design Q06 J1. The `Design Q06` row below records
+that cross-document correction separately from requirement Q06's candidate
+and release boundary.
+
 | Question | Decision and reason | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
 | Q01 | A1: Require SQLite for the RHEL 9 x86_64 build family and named consumers, preserving other targets including those without SQLite payloads; this matches the umbrella's scope. | Target scope and build-success contract; AC8 | A2: Guaranteeing every target would add unrelated dependency and acceptance work. |
@@ -246,6 +268,7 @@ for the requirement phase.
 | Q05 | E1: Document an explicit existing-tree rebuild forcing reconfiguration and recompilation while retaining unrelated payloads, covering the actual upgrade case. | Existing-tree rebuild behavior; AC9 | E2: Automatic capability-triggered rebuilding extends scope. E3: Fresh-tree-only acceptance leaves the existing build account unsupported. |
 | Q06 | F1: Add an identified 3.13.15 validation candidate before item 7's final rebuild, explicitly qualifying D5; this keeps item 6 independently completable at the cost of another rebuild. | SQLite delivery boundary; AC10; umbrella D5 | F2: Moving D5's regression re-check and refresh into item 6 would change item 7's delivery responsibility. |
 | Q07 | G1: Use a plain Debian 12 container after confirming its host runtime and candidate-copy route; retain identities and evidence without release publication. | Debian acceptance environment; AC11 | G2: Non-release delivery to Jenkins requires unestablished access and pipeline work. G3: Deferring Debian acceptance conflicts with item 6's accepted scope. |
+| Design Q06 | J1: The candidate's accepted closure shape replaces Python 3.13.9 with 3.13.15, retaining `root`, `current` and the SQLite floor, with a renewed envelope alongside waiver removal. This records the owning requirement's entry change before planning. | SQLite closure contract; gap item 4; AC5, AC6 | J2: Retaining both versions admits an unnecessary historical directory. An unchanged or current-only declaration cannot cover the candidate. |
 
 ## Code and evidence references for Python SQLite support
 
