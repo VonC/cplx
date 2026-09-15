@@ -1,9 +1,10 @@
 # v0.27.0 architecture minor fallback implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
 Track the four steps in [the implementation plan](plan.v0.27.0.architecture-minor-fallback.md).
-Steps 1-3 are implemented and verified. Step 4 and real-host dependency acceptance remain pending.
+All four steps are implemented and verified, including controlled and final-tree
+RHEL Python/Git dependency acceptance, curated cleanup and operator documentation.
 
 ## File-based IO cost clarification for architecture fallback implementation
 
@@ -488,7 +489,20 @@ and document-level implementation status remain incomplete.
 
 ### Analysis of Step 4 implementation state
 
-Not started. Step 4 is not implemented because the controlled RHEL acceptance, curated cleanup and operator documentation changes have not been implemented.
+Yes. Step 4 has been fully implemented.
+
+The complete entry-point fixtures, real controlled and final-tree RHEL installs,
+equivalence proofs, limited curated removals and nine wiki updates satisfy
+AC1-AC12. Both cumulative platform gates and the actual CMD launcher passed.
+Two installation failures exposed during acceptance were repaired and verified
+before cleanup: Autoconf directory copying and Git's missing libelf dependency.
+
+Round 1 independently confirmed implementation and all mandatory gates. Commit
+readiness awaits review of the reconciled documentation. Plan implementation
+amendment Q09 now records both acceptance-blocking repairs, updates the installer
+inventory and rollout, and aligns requirement item 9/Q10 with the libelf addition.
+This writer amendment records the work required by existing AC7; it does not
+represent a new human approval of Q09.
 
 ### Goal for Step 4
 
@@ -503,24 +517,180 @@ Prove actual Python/Git dependency synchronization on RHEL 9.8 before and after 
 
 ### What was implemented for Step 4
 
-_(empty — no check has taken place yet.)_.
+- The retained Python list uses `zlib-devel`. Both Git lists received the
+  paired `libcom_err` and `libxslt` corrections. Corrected list digests and
+  equal tracked mirror values were recorded before any removal.
+- Real Git installation exposed a literal wildcard in
+  `post_install_autoconf271`. The existing hook now quotes the root while
+  expanding directory contents. A focused regression failed with fatal 152
+  before this one-line repair; the repaired fixture and actual direct-package
+  recovery passed. This additional production edit was necessary for the
+  required isolated install and changes no bootstrap or installer interface.
+- Git's subsequent `glib2-devel` check exposed the missing `libelf.so.1`
+  provider. Both Git lists gained ordinary `elfutils-libelf` before
+  `glib2-devel`; the fresh index resolved it uniquely. The amended lists were
+  byte-identical, and full preflight and real Git installation then passed.
+  Runtime checks remain intact; no manually injected RPM or flag change was used.
+- After controlled acceptance, only the redundant Python/Git 9.8 lists and
+  equal tracked 9.8 mirror property were removed. The template comment now
+  describes fallback and distinct exact overrides. Both generated indexes and
+  operator configuration remain untouched.
+- The cumulative runner adds actual setup-process fixtures for full Python/Git
+  fallback, scoped resume, distinct exact overrides, terminal lookup/download
+  failures and the real Autoconf hook. Only transport is stubbed for the entry
+  fixtures. Git Bash fixture roots are normalized to long drive paths so child
+  shells enforce the same containment boundary.
+- Nine wiki pages document independent selection, detected index/cache identity,
+  active-property precedence, refresh/publication, scoped progress and
+  reset-after-entry. The OS-upgrade procedure also requires repeating connection
+  validation when its earlier completion marker would skip detection.
+- Round 1 reviewer repairs correct the package launcher's stale fatal 42 to
+  `setup_packages.sh` fatal 12 for an unset tool, attribute fatal 111 by script,
+  and document the CMD exit 119 boundary and closed argument forms in
+  `wiki/reference/exit-codes.md` and `wiki/reference/commands.md`. The writer
+  checked these repairs against the launcher and Bash entry points and retained
+  both staged pages without reversal.
+- [Acceptance evidence](acceptance.architecture-minor-fallback.md) records the
+  audited bootstrap, configuration origins/digests, fresh 5898-package detected
+  index, all 106 active entries and 81 distinct RPMs, failures and repairs,
+  controlled/final results, preservation comparisons and AC1-AC12 mapping.
+  Raw host identities and bulky logs remain in ignored evidence paths.
+
+Executed evidence on 2026-09-15, reused by this implementation check:
+
+| Required check | Result |
+| --- | --- |
+| Controlled Python legacy setup | 56 entries, real installation, exit 0 in 552 seconds |
+| Controlled Python scoped resume | 3 entries, all 56 installed packages reused, exit 0 in 40 seconds |
+| Controlled amended Git legacy setup | 50 entries, real installation, exit 0 in 233 seconds |
+| Controlled Git scoped resume | 3 entries, all 50 installed packages reused, exit 0 in 31 seconds |
+| Final curated Python legacy setup | 56 entries, 1 download / 55 cached, all staged/installed state reused, exit 0 in 260 seconds |
+| Final curated Git legacy setup | 50 entries, 1 download / 49 cached, all staged/installed state reused, exit 0 in 230 seconds |
+| Final Windows cumulative Step 4 | 30 groups, exit 0 in 1455 seconds |
+| Final native Linux cumulative Step 4 | 29 applicable groups, exit 0 in 40 seconds |
+| Actual Windows CMD launcher | All 11 cases passed, exit 0 |
+
+Every host pass preserved authoring status/content/cache and the live remote
+inventory. Final passes used the same controlled index and isolated target,
+with reseeded labeled legacy markers and newly HEAD-verified cache omissions.
+Both cumulative gates passed the 57-script lint floor, explicit effort syntax
+and ShellCheck checks, and live-tree preservation. Windows also passed the held
+destination check. Commands and individual raw evidence paths are in acceptance.
+The planned `rg` inspection, Markdown headings/fences/local links and
+`git diff --check` passed. No tests were rerun during this separate check.
+
+The round 1 reviewer independently passed the lint floor, all 30 Windows groups
+in 1428 seconds, all 11 CMD cases in 44 seconds, and all 29 native groups in
+41 seconds (59 seconds including transport). The reviewed source and fixtures
+remain unchanged during this documentation reconciliation; those results remain
+applicable. The native driver refreshed its ignored driver and gate logs with
+the reviewer's later run. The 40-second native result above is the earlier
+writer run. No additional source, fixture or host-install rerun is required for
+these documentation changes.
+
+Physical-line recounts, including blank lines:
+
+| File | Before | After |
+| --- | --- | --- |
+| `verify.architecture-fallback.sh` | 168 | 401 |
+| `src/setups/env/bin/packages_management.sh` | 2068 | 2069 |
+| `src/setups/pkgs/python/python_rhel_9.6_x86_64.txt` | 59 | 59 |
+| `src/setups/pkgs/python/python_rhel_9.8_x86_64.txt` | 59 | 0 |
+| `src/setups/pkgs/git/git_rhel_9.6_x86_64.txt` | 49 | 50 |
+| `src/setups/pkgs/git/git_rhel_9.8_x86_64.txt` | 49 | 0 |
+| `src/setups/setup.tpl.properties` | 26 | 24 |
+| `wiki/explanation/the-architecture-key.md` | 93 | 90 |
+| `wiki/explanation/checkpoints-and-resume.md` | 56 | 76 |
+| `wiki/how-to/survive-a-server-os-upgrade.md` | 85 | 77 |
+| `wiki/how-to/resume-or-repeat-a-step.md` | 65 | 82 |
+| `wiki/how-to/add-or-fix-a-package-mirror.md` | 59 | 77 |
+| `wiki/reference/package-list-formats.md` | 101 | 136 |
+| `wiki/reference/cplx-variables.md` | 53 | 60 |
+| `wiki/reference/commands.md` | 63 | 75 |
+| `wiki/reference/exit-codes.md` | 101 | 119 |
+| `acceptance.architecture-minor-fallback.md` | 0 | 304 |
+| `plan.v0.27.0.architecture-minor-fallback.md` | 589 | 595 |
+| `feature-request.v0.27.0.architecture-minor-fallback.md` | 275 | 278 |
+
+The runner and acceptance record exceed advisory estimates because Step 4 adds
+five process/hook cases and audited real-host evidence. Raw logs stay outside
+versioned prose. The Python 650-line ceiling is inapplicable.
 
 ### New types or classes introduced for Step 4
 
-_(empty — no check has taken place yet.)_.
+No production type, class or function was introduced. Test-only
+`architecture_entry_stage`, `architecture_entry_run` and `architecture_refute`
+support the five registered `architecture_entry_*` cases and their suite.
+The existing installer hook retains its signature and caller contract.
 
 ### Architecture check for Step 4
 
-_(empty — no check has taken place yet.)_.
+Selection policy and metadata/index/progress adapters retain their existing
+boundaries. Curated dependency names stay in data files. The Autoconf copy fix
+belongs to the existing remote post-install adapter and adds no dependency back
+into metadata selection. Local entry fixtures replace transport at its existing
+boundary; host acceptance uses the actual downloader, SSH/SCP and installer.
+No domain rule moved into a transport stub or bootstrap interface. The existing
+large installer gains one explanatory line without a new responsibility.
+
+Yes, there is follow-up work outside Step 4: round 1 reproduced a pre-existing
+single-file defect in `post_install_autoconf271`. When the path-rewrite pipeline
+passes only one `auto*` file to `grep`, its output omits the filename;
+`awk -F :` then treats matching content as a path, and the hook fails with
+fatal 153. A future repair must preserve filename identity regardless of input
+count and test both one-file and multiple-file rewrites, including reuse.
+The real accepted package has several files, so this does not invalidate the
+recorded installs. The Step 4 hook change remains limited to wildcard copying;
+no path-rewrite repair is included here.
+
+Step 4's adapter boundaries are sound. Plan implementation amendment Q09
+documents the two acceptance-blocking repairs within their existing adapter
+and curated-data responsibilities.
+
+Yes, there is something that needs to be addressed: the single-file
+`post_install_autoconf271` path-rewrite follow-up above, outside Step 4.
 
 ### Performance check for Step 4
 
-_(empty — no check has taken place yet.)_.
+No new production quadratic or sorting computation was added. Selection and
+progress preparation keep their established linear bounds; index aggregation
+and RPM lookup costs are unchanged. Git processes one additional required
+dependency through the ordinary loop. The copy repair uses the existing copy
+operation. Fixture sorting prepares deterministic synthetic listings only.
+Preservation checks batch metadata hashes and inventory RPM sizes/timestamps
+without hashing the cache contents. Fixture and real-network durations are
+reported separately above; this step defines no elapsed-time gate.
+
+No, there is no performance issue that needs to be addressed for Step 4.
 
 ### Unit test coverage check for Step 4
 
-_(empty — no check has taken place yet.)_.
+This Bash project has no class-based unit-test or percentage coverage gate.
+The mandatory lint source scope is tracked shell scripts outside `docs/`;
+the cumulative runner explicitly checks the effort scripts outside that scope.
+The five new cases are integration/regression fixtures, so their successful
+execution is behavioral evidence, not a 100% line-coverage claim.
+
+Static inspection finds every added top-level fixture helper referenced by a
+case or the suite, and all five cases registered in Step 4 dispatch. The repaired
+production hook is reached by ordinary post-install dispatch and the focused
+test, which checks copying with spaces, support files, rewritten paths and reuse.
+Earlier suites retain ordering permutations, the 48-cell index guard matrix,
+failure injection, interruption recovery and literal progress/argument handling.
+
+No, there is no unit-tested class below 100% that needs completing for Step 4.
+No, there is no unreferenced new top-level symbol outside a coverage gate.
 
 ### Feature integrity for Step 4
 
-_(empty — no check has taken place yet.)_.
+Real setup reports list/mirror fallback and legacy restart, synchronizes every
+active entry, copies the selected list, and completes installation. Valid scoped
+resume and local cache, remote staging and installed-state reuse are retained.
+Missing/ambiguous packages and exhausted downloads remain failures; distinct
+exact overrides remain authoritative. The runtime closure checks that exposed
+the missing dependency remain unchanged. Generated indexes and operator data
+are preserved, and the live target was unchanged across every acceptance pass.
+
+No existing supported feature or reporting capability is impaired by Step 4.
+This completes upstream dependency acceptance; Python SQLite integration and
+the tools rebuild/cross-platform release remain separate umbrella items.
