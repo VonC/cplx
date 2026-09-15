@@ -11,8 +11,9 @@ The archive's historical Python omitted its compiled `_sqlite3` extension.
 SQLite payload entries are already present, but the build does not explicitly
 select them or reject a Python without the required capability. This design
 connects sandbox inputs, build completion, archive closure and executable
-acceptance evidence. The requirement's seven clarifications are confirmed;
-the architectural recommendations below remain subject to design review.
+acceptance evidence. The requirement's seven clarifications and this design's
+six decisions are confirmed. The matching requirement correction records the
+candidate's closure version declaration before planning.
 
 ## Scope of the v0.27.0 SQLite design
 
@@ -75,7 +76,7 @@ when installation was skipped. Neither may accidentally inspect the old
 
 ## Target policy and sandbox selection for SQLite
 
-The recommended policy key is the existing declared build family,
+The policy key is the existing declared build family,
 `CPLX_ARCH_EXT=el9.x86_64`, read through the build's established configuration
 path. Both the configure environment and capability checks use the same
 Python-owned scope decision. Existing presence checks already reject a missing
@@ -102,7 +103,7 @@ must report the `_sqlite3` extension available.
 
 ## Capability checks at Python build completion
 
-The recommended structure keeps SQLite policy with Python's install support.
+The structure keeps SQLite policy with Python's install support.
 The Python build function checks capability after either compilation or reuse.
 An optional tool-owned post-install callback, invoked by the shared driver
 after successful `install()` and before `package()`, checks the installed
@@ -114,8 +115,12 @@ The check requires an importable `_sqlite3` belonging to the expected build or
 installation tree and a usable `sqlite3` module against the sandbox payload.
 The installed check additionally establishes the extension's presence in the
 requested prefix's `lib-dynload`. A host or old-prefix module cannot satisfy
-the check. A common Python probe can express the operation and provider
-observation while callers supply the expected interpreter and allowed roots.
+the check. One shared Python probe performs the database operation and provider
+observation, with explicit stage and independently supplied expected-root inputs.
+Callers select the actual toolchain interpreter, enforce each stage's extension
+location, and retain the environment, invocation and candidate evidence. The
+probe uses that interpreter's standard library and needs no host Python package
+installation; its presence as verification material is a prerequisite.
 
 Both build-stage checks inherit the driver's exported `LD_LIBRARY_PATH` and
 `LD_RUN_PATH`, including the sandbox library directories. Their provider result
@@ -158,7 +163,7 @@ and reads that value. After that operation, the same Python process observes
 its loaded SQLite provider. Probe execution must not add library-path overrides
 that are absent from the operator's normal invocation.
 
-The recommended observer reads `/proc/self/maps`. Linux documents mapped files
+The observer reads `/proc/self/maps`. Linux documents mapped files
 and their paths in the [proc filesystem interface](https://www.kernel.org/doc/html/latest/filesystems/proc.html).
 The probe must connect the mapping to the shipped `libsqlite3.so.0` and its
 resolved backing file, which may have a versioned basename. It collapses
@@ -196,7 +201,7 @@ Remove the SQLite waiver when the floor's existing payload condition is met;
 retain the floor. Follow the closure bundle's existing exact-byte digest and
 source-identity rules when regenerating its envelope in the same change.
 The 3.13.15 candidate has a `python-3.13.15` directory, while the declaration
-currently names `python-3.13.9`. The recommended change replaces that version
+currently names `python-3.13.9`. Replace that version
 record with `subdir|python|python-3.13.15` and retains `root` and `current`.
 The checker compares declared and observed immediate subdirectories, so
 declaring `current` alone would not cover the actual version directory.
@@ -204,11 +209,15 @@ Preserve rejection of undeclared directories, missing or misplaced SQLite,
 and stale SQLite waivers.
 
 The [closure ownership contract](../../src/setups/env/closure/README.md) requires
-the owning requirement to state an entry change. Requirement AC5 currently
-states waiver removal only. This version-record change therefore needs a
-matching requirement amendment before implementation; the design review flags
-that earlier-document correction and does not silently authorize or apply it.
-Q06 compares the declaration shapes, with exact replacement recommended.
+the owning requirement to state an entry change. The requirement's closure
+contract and AC5 now record the exact `subdir|python|python-3.13.9` to
+`subdir|python|python-3.13.15` replacement alongside waiver removal, following
+the human's confirmation of design Q06 J1. Retain `root` and `current`, and
+regenerate the envelope with the changed declaration under its existing
+exact-byte and source-identity rules. A retained `python-3.13.9` directory is
+UNEXPECTED under the new declaration; do not widen the accepted directory set
+to accommodate it. Item 7 must align the declaration with its final permitted
+Python version again if that version changes.
 
 A candidate record ties together the cplx source revision, Python version,
 selected package/payload identities, archive digest and closure bundle identity.
@@ -218,7 +227,7 @@ validation archive, with no release coordinate or publication operation.
 
 ## Isolated assembly and deployment of the SQLite candidate
 
-The recommended assembly boundary is an isolated account home or equivalent
+The assembly boundary is an isolated account home or equivalent
 sibling workspace that owns its `cplx`, `tools`, package outputs and environment
 metadata. Promotion and packaging run within that complete layout. Merely
 repointing one tool directory is insufficient: `rsync.sh` can delete other
@@ -231,9 +240,9 @@ normal installer and operator invocation. Record before/after preservation
 evidence for the actual live build-account and deployment trees. Establish that
 the chosen layout and scripts honor the isolation boundary, including the
 account's login-profile chain, before invoking promotion or deployment.
-If that route cannot be established, acceptance remains
-blocked; it does not fall back to replacing live tools. Q05 retains this choice
-for human confirmation, following the isolated-target precedent in item 5.
+If that route cannot be established, acceptance remains blocked. Live-tool
+replacement is outside this acceptance route, following the isolated-target
+precedent in item 5. The plan supplies the exact setup and preservation commands.
 
 ## Acceptance environments and the item 7 handoff
 
@@ -271,285 +280,23 @@ not establish the later regression re-check or authorize publication.
 | Provider observation is missing or ambiguous | Inconclusive; acceptance cannot pass. | AC4 |
 | SQLite waiver removed but floor library missing or only under Git | Existing closure rejection retained. | AC5, AC6 |
 | SQLite payload present while its waiver remains | Existing stale-waiver rejection retained. | AC6 |
+| Candidate contains `python-3.13.15` with `root` and `current` | Replacement declaration and renewed envelope describe that candidate. | AC5 |
+| Candidate retains an undeclared `python-3.13.9` directory | Existing UNEXPECTED rejection retained. | AC5, AC6 |
+| Assembly or deployment isolation cannot be proven | Acceptance remains blocked, with live-tree preservation evidence required. | AC10 |
 | Candidate identity or Debian environment evidence is absent | Item 6 remains incomplete. | AC10, AC11 |
 | Item 7 refreshes payloads or selects a different permitted patch | Repeat SQLite acceptance on that final archive. | AC10 |
 
-## Open questions for the v0.27.0 Python SQLite design
+## Design decisions for Python SQLite support
 
-These recommendations concern architecture. The requirement's Q01-Q07 remain
-confirmed; the answers below are proposed and await human confirmation.
+The human confirmed the six reviewed recommendations after design review
+round 2. Their answers are integrated below and in the referenced sections;
+no further design question is required before the implementation plan.
 
-### Q01: Which identity should select the SQLite build policy?
-
-The requirement selects the RHEL 9 x86_64 build family and preserves other
-targets. The build already has a declared `CPLX_ARCH_EXT`, while the machine
-also exposes operating-system and CPU information. Configure and validation
-must share one scope decision. Existing presence checks reject missing identity;
-the remaining tradeoff is whether to trust the declared family or introduce a
-second classifier based on the executing host.
-
-#### BBQ for Q01
-
-A kitchen can choose a recipe from the order ticket or inspect the ingredients
-to infer the order. Both cooks must agree before preparation starts.
-In this picture: the ticket is declared build-family metadata, the ingredients
-are detected host information, the recipe is the SQLite policy, and the cooks
-are configure and capability validation.
-
-#### Options for Q01
-
-- Option A1: Use the existing declared family as the policy key.
-  - Pro: Configure and validation share the same identity used by the build.
-  - Con: A wrong operator declaration scopes the build wrongly; existing
-    presence checks cover a missing value, while acceptance must show the
-    actual build host.
-- Option A2: Determine policy from the native host's OS and CPU independently.
-  - Pro: The policy follows the machine executing this native build.
-  - Con: A second classifier can disagree with dependency and archive selection,
-    and must define handling for compatible distributions and aliases.
-
-#### Recommended option for Q01
-
-Option A1: Keep the existing declared family as the common policy key and retain
-the existing missing-value failures. This avoids a competing classifier while
-requiring acceptance evidence to establish the actual supported build context.
-
-#### Answer to Q01: option A1 (pending human confirmation)
-
-Option A1 is proposed because one build-family decision can govern both
-configuration and validation without changing known out-of-scope families.
-Setup and the remote environment already reject a missing identity; acceptance
-records the actual build host instead of claiming the declaration proves it.
-
-### Q02: Where should installed capability validation join the build flow?
-
-The source interpreter and requested installation prefix are separate subjects;
-the shared installer can reuse an older installed prefix. The design needs an
-installed check after installation or reuse and before packaging, with the
-Python-specific policy owned in a clear place.
-
-#### BBQ for Q02
-
-A bakery checks a loaf at the oven and checks the customer's box before it
-leaves. The packing line can call a product-specific inspector or contain the
-bread inspection rules itself.
-In this picture: the loaf is source-build output, the box is the installed
-prefix, the packing line is the shared install driver, and the inspector is
-Python's capability check.
-
-#### Options for Q02
-
-- Option B1: Keep source validation in Python's build support and add an optional
-  tool-owned post-install callback to the shared driver.
-  - Pro: Python owns its policy while the common driver enforces the needed
-    ordering even after install reuse.
-  - Con: The driver gains a callback contract whose failure must propagate.
-- Option B2: Add a Python-specific capability branch directly to the shared
-  driver after installation, alongside the Python-owned source check.
-  - Pro: The required ordering is explicit without introducing a callback.
-  - Con: The shared driver acquires Python-specific policy and dependencies.
-
-#### Recommended option for Q02
-
-Option B1: Use an optional callback after successful installation and before
-packaging, with Python applying the same scoped policy as its source check.
-Tools without the callback retain their current control flow.
-The callback's nonzero result is returned by `main` like any failed stage, so
-`current` is not advanced.
-
-#### Answer to Q02: option B1 (pending human confirmation)
-
-Option B1 is proposed because it checks the actual installed result at the
-required boundary while keeping the shared driver independent of SQLite rules.
-
-### Q03: Which observer should establish the loaded SQLite provider?
-
-The confirmed acceptance rule requires the same Python process to demonstrate
-the shipped provider after a database operation. A static dependency listing
-does not meet it. The observer must identify the actual backing file for
-`libsqlite3.so.0`, which can have a versioned basename, and reject ambiguous
-evidence without introducing library-path overrides.
-
-#### BBQ for Q03
-
-A diner needs to know which supplier's flour reached the loaf, not only which
-suppliers were on the shopping list. They can inspect the baker's current
-ingredient record or interpret the delivery log for that batch.
-In this picture: the loaf is the database operation, flour is the loaded SQLite
-library, the shopping list is static dependency metadata, the current record
-is process mappings, and the delivery log is the loader trace.
-
-#### Options for Q03
-
-- Option C1: Read the process's own mappings and match the shipped library's
-  canonical backing-file identity within the expected Python root.
-  - Pro: Observation runs inside the process that performed SQLite work and
-    needs no additional executable on the supported Linux environments.
-  - Con: Mapping access or ambiguous identity can be inconclusive, and path
-    escaping, deleted files and repeated mappings need precise handling.
-- Option C2: Capture a loader trace for the probe process and interpret its
-  successful library loading events.
-  - Pro: The trace also helps explain loader search and fallback decisions.
-  - Con: The capture must reliably bind trace events to the relevant process
-    and operation and distinguish a searched path from the loaded provider.
-
-#### Recommended option for Q03
-
-Option C1: Use `/proc/self/maps` as the acceptance observer, comparing the
-resolved shipped provider against independently supplied, canonicalized roots.
-Keep loader traces available for diagnosis without a second automatic pass
-rule. Unobservable or ambiguous identity remains inconclusive and cannot pass.
-
-#### Answer to Q03: option C1 (pending human confirmation)
-
-Option C1 is proposed because it ties provider evidence directly to the process
-that completed the required database operation on the supported Linux targets.
-
-### Q04: Should build validation and candidate acceptance share a probe?
-
-Both stages need a functioning SQLite operation and provider identity, but
-source-build, installed-prefix and relocated-archive layouts differ. The design
-must choose whether to share these checks through an explicit caller contract
-or maintain separate validators. The probe must run under the actual selected
-interpreter without relying on a host Python package installation.
-
-#### BBQ for Q04
-
-A workshop and a delivery team can use the same calibrated gauge with different
-fixtures, or each can maintain its own gauge. Fixtures must describe the object
-being checked rather than adjust themselves until a measurement passes.
-In this picture: the gauge is the SQLite probe, fixtures are caller-supplied
-expected roots and layout, the workshop is build validation, and the delivery
-team is relocated candidate acceptance.
-
-#### Options for Q04
-
-- Option D1: Share one Python probe with explicit stage and expected-root inputs;
-  callers own invocation and environment/candidate evidence capture.
-  - Pro: Database and provider pass rules remain consistent across environments.
-  - Con: The interface must distinguish layouts and the probe must be available
-    as verification material wherever acceptance runs. Build-stage callers
-    inherit the driver's library path, so they establish build capability only;
-    runtime-path correctness requires operator-invocation acceptance.
-- Option D2: Maintain separate build guards and a candidate acceptance probe.
-  - Pro: Each validator can be narrowly tailored to its environment.
-  - Con: Repeated operation and provider rules can diverge and need independent
-    maintenance and verification.
-
-#### Recommended option for Q04
-
-Option D1: Share the operation and provider checks through explicit inputs,
-while stage callers enforce their own extension location and record environment
-identity. Use the selected toolchain interpreter and its standard library;
-probe availability is a verification prerequisite, with no host installation
-dependency or additional runtime library-path override.
-
-#### Answer to Q04: option D1 (pending human confirmation)
-
-Option D1 is proposed because one set of pass rules connects build capability
-with acceptance evidence while callers preserve each stage's expected layout
-and operator invocation.
-
-### Q05: Where should the validation candidate be assembled and deployed?
-
-`src/setups/env/bin/pkg_tools.sh` takes its payload from `$HOME/tools` and
-refuses a caller's `--source-root`. Promotion through the adjacent `rsync.sh`
-reads `$HOME/cplx/tools/*/current`, uses `--delete` and deletes other Python
-version directories under `$HOME/tools`. Using the live account layout would
-replace operator-visible tools with the item 6 non-release build. The same
-boundary matters for RHEL deployed acceptance.
-
-#### BBQ for Q05
-
-A restaurant can test a new menu by replacing the dining room's service or by
-setting up a complete practice service in a separate room. Moving only the
-serving plate leaves shared preparation and cleanup areas exposed.
-In this picture: the menu is the candidate toolchain, service is promotion and
-deployment, the dining room is the live account layout, the practice room is
-the isolated layout, and preparation and cleanup areas are package outputs,
-environment files and version-directory deletion targets.
-
-#### Options for Q05
-
-- Option H1: Assemble and deploy in the live build and deployment account trees,
-  with separately preserved restoration material.
-  - Pro: Uses the existing account layout directly.
-  - Con: Replaces live Python before item 7, and promotion deletes previous
-    version directories, so recording their names alone cannot restore them.
-- Option H2: Use an isolated account home or equivalent sibling layout for
-  candidate assembly and an isolated RHEL deployment target.
-  - Pro: Preserves live tools while exercising normal packaging, installation
-    and operator invocation, consistent with item 5's isolation precedent.
-  - Con: Must establish that every relevant path, output and deletion stays
-    within that layout and retain before/after live-tree preservation evidence.
-    Also audit the account's login-profile chain for writes into live trees,
-    as item 5 did before its isolated run; changing the payload home alone
-    does not establish this boundary.
-- Option H3: Add a caller-selected staging-source packaging interface.
-  - Pro: Makes the candidate payload source explicit.
-  - Con: Reopens the deliberate owned-source refusal and expands the packaging
-    contract beyond this Python capability item.
-
-#### Recommended option for Q05
-
-Option H2: Isolate the complete assembly and deployment layouts, including
-metadata and package outputs, while retaining the packager's private-stage
-ownership. Confirm the boundary before running promotion or deployment; an
-unavailable isolated route blocks acceptance instead of falling back to live
-replacement. Exact setup and preservation commands belong in the plan.
-
-#### Answer to Q05: option H2 (pending human confirmation)
-
-Option H2 is proposed because it makes the required non-release candidate
-reviewable without changing operator-visible tools before the release item.
-
-### Q06: How should the closure declaration represent the candidate version?
-
-The candidate's known `python-3.13.15` directory is absent from the current
-declaration, which names `python-3.13.9`. The checker compares declared and
-observed immediate subdirectories: the `current` alias does not declare the
-version directory it points to. Leaving the entry unchanged, or retaining
-`current` alone, cannot cover the candidate under the existing scope contract.
-
-The choice here is the declaration's shape. The closure ownership contract also
-requires a matching statement in the owning requirement before an entry change;
-that earlier-document amendment is flagged as a prerequisite, not performed or
-treated as approved by this design review.
-
-#### BBQ for Q06
-
-A warehouse checks each named storage bay against its approved floor plan.
-When goods move to a newly numbered bay, the plan can replace the old bay or
-approve both. A sign pointing to the active bay does not add it to the plan.
-In this picture: bays are version directories, the floor plan is the closure
-declaration, the sign is `current`, and approval is the owning requirement's
-explicit statement of the declaration change.
-
-#### Options for Q06
-
-- Option J1: Replace the 3.13.9 version record with the candidate's 3.13.15 record,
-  retaining `root` and `current`.
-  - Pro: The declaration describes the candidate's intended version layout
-    without allowing an additional historical version directory.
-  - Con: The requirement must state the change and the envelope must be renewed;
-    later version selection may require another deliberate declaration update.
-    A retained `python-3.13.9` directory becomes UNEXPECTED under the new
-    declaration, so the candidate must match the approved version shape.
-- Option J2: Retain the historical version record and add the candidate record.
-  - Pro: The declared shape can cover either version directory without changing
-    the checker's grammar or comparison rules.
-  - Con: It permits an additional historical directory the candidate does not
-    need, and still requires the requirement statement and envelope renewal.
-
-#### Recommended option for Q06
-
-Option J1: Replace the exact version record and preserve the existing scope
-checks. Record the corresponding requirement correction before implementation
-and regenerate the envelope with the declaration. Item 7 must align its final
-permitted Python version with the declaration again if that version changes.
-
-#### Answer to Q06: option J1 (pending human confirmation)
-
-Option J1 is proposed because it describes the selected candidate without a
-broader accepted directory set. Implementation depends on the matching
-requirement statement; the settled requirement has not been edited in this round.
+| Question | Decision and reason | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | A1: Use the declared `CPLX_ARCH_EXT=el9.x86_64` family for configure and capability checks, retaining existing missing-value failures and recording the actual host in acceptance. One policy key keeps both stages aligned. | Target policy and sandbox selection | A2: A separate native-host classifier could disagree with dependency and archive selection. |
+| Q02 | B1: Keep Python's source check and add an optional tool-owned post-install callback after installation or reuse and before packaging. Propagate failure through `main` before `current` advances. | Capability checks at Python build completion | B2: A Python-specific branch would embed SQLite policy in the shared driver. |
+| Q03 | C1: Observe `/proc/self/maps` in the process that completed the database operation, matching the shipped provider's canonical backing-file identity within independently supplied canonical roots. Ambiguous or unavailable evidence cannot pass. | SQLite provider and database acceptance evidence | C2: Loader traces need extra interpretation and remain diagnostic material only. |
+| Q04 | D1: Share one standard-library Python probe with explicit stage and expected-root inputs. Callers own interpreter selection, extension location and capture; build-environment capability and operator-invocation runtime-path acceptance remain distinct. | Capability checks at Python build completion; SQLite provider and database acceptance evidence; Acceptance environments and the item 7 handoff | D2: Separate validators could diverge on database and provider pass rules. |
+| Q05 | H2: Isolate the complete assembly layout and RHEL deployment target, prove path and login-profile boundaries before use, and retain before/after live-tree evidence. Keep the packager's private source stage. | Isolated assembly and deployment of the SQLite candidate | H1: Live-tree promotion replaces operator tools and deletes historical versions. H3: A caller-source override changes the packaging contract beyond this item. |
+| Q06 | J1: Replace the 3.13.9 declaration with 3.13.15, retaining `root` and `current`, and renew the envelope with the declaration. The owning requirement correction is recorded before planning so the candidate has the exact accepted version shape. | Archive closure and candidate identity; requirement closure contract and AC5 | J2: Keeping both version records admits an unnecessary historical directory. An unchanged or current-only declaration cannot cover the candidate under the existing checker. |
