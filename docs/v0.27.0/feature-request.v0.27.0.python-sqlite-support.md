@@ -248,6 +248,14 @@ and Q24 skip guards self-enable once SQLite is available. Those pipeline edits
 and its tools-version pin belong to that repository and the release handoff;
 this requirement makes the necessary interpreter capability available.
 
+## File-based IO cost clarification for Python SQLite support
+
+SQLite validation uses a bounded temporary file-backed database operation and
+one same-process provider observation. It must not add repeated whole-tool-tree
+scans or automatic cache invalidation to builds. Preserve reusable sandbox and
+unrelated tool payloads, and retain candidate byte-identity checks at transfer
+boundaries. No interactive latency threshold is required by this feature.
+
 ## Requirement clarifications
 
 The human confirmed the seven reviewed recommendations after specification

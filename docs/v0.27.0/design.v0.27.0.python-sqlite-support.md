@@ -202,7 +202,7 @@ retain the floor. Follow the closure bundle's existing exact-byte digest and
 source-identity rules when regenerating its envelope in the same change.
 The 3.13.15 candidate has a `python-3.13.15` directory, while the declaration
 currently names `python-3.13.9`. Replace that version
-record with `subdir|python|python-3.13.15` and retains `root` and `current`.
+record with `subdir|python|python-3.13.15` and retain `root` and `current`.
 The checker compares declared and observed immediate subdirectories, so
 declaring `current` alone would not cover the actual version directory.
 Preserve rejection of undeclared directories, missing or misplaced SQLite,
@@ -285,6 +285,15 @@ not establish the later regression re-check or authorize publication.
 | Assembly or deployment isolation cannot be proven | Acceptance remains blocked, with live-tree preservation evidence required. | AC10 |
 | Candidate identity or Debian environment evidence is absent | Item 6 remains incomplete. | AC10, AC11 |
 | Item 7 refreshes payloads or selects a different permitted patch | Repeat SQLite acceptance on that final archive. | AC10 |
+
+## File-based IO cost clarification for SQLite design
+
+Each probe performs one bounded temporary database operation and reads its
+process mappings once, then compares only the supplied paths and relevant
+provider identities. It does not discover providers by scanning tool trees.
+Reuse the existing build and closure work; retain candidate digest checks at
+transfer boundaries. No additional metadata index or automatic cache purge is
+required by this feature.
 
 ## Design decisions for Python SQLite support
 
