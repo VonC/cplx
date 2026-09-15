@@ -29,6 +29,7 @@
     "plaintext": true
   },
   "cSpell.words": [
+    "ABIFLAGS",
     "apologising",
     "assertable",
     "auditwheel",
@@ -91,6 +92,8 @@
     "insertdict",
     "ionice",
     "judgements",
+    "LDLIBRARY",
+    "LDVERSION",
     "libamb",
     "libanl",
     "libarch",
@@ -157,6 +160,7 @@
     "preflights",
     "procps",
     "pybuilddir",
+    "pyconfig",
     "pydoc",
     "pyprog",
     "reasking",
