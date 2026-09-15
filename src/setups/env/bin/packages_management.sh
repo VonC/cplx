@@ -1022,7 +1022,8 @@ function post_install_autoconf271() {
     fi
     if [[ ! -e "${root}/usr/bin/autoconf" ]]; then
         task "post_install_autoconf271: Must sync (cp) opt/rh/autoconf271 content to '${root}/usr'"
-        if ! cp -a "${root}/opt/rh/autoconf271/*" "${root}/usr"; then
+        # Quote the root but expand the contents of the extracted directory.
+        if ! cp -a "${root}/opt/rh/autoconf271/"* "${root}/usr"; then
             fatal "post_install_autoconf271: Unable to sync (cp) opt/rh/autoconf271 content to '${root}/usr'" 152
         fi
         ok "post_install_autoconf271: opt/rh/autoconf271 content successfully synced (cp'd) content to '${root}/usr'"
