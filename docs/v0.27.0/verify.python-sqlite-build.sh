@@ -99,7 +99,7 @@ set -eu
 echo configure >> "$FIXTURE/events"
 if [[ $FIXTURE_FAMILY == el9.x86_64 ]]; then
     [[ $LIBSQLITE3_CFLAGS == "-I${root}/usr/include" ]] || exit 94
-    [[ $LIBSQLITE3_LIBS == "-L${root}/usr/lib64 -lsqlite3" ]] || exit 95
+    [[ $LIBSQLITE3_LIBS == "-L${root}/usr/lib64 -Wl,--enable-new-dtags -lsqlite3" ]] || exit 95
 else
     [[ ! ${LIBSQLITE3_CFLAGS+x} && ! ${LIBSQLITE3_LIBS+x} ]] || exit 96
 fi
