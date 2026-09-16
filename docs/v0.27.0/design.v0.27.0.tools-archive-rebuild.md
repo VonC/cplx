@@ -210,6 +210,16 @@ provenance requirements. Other outside-prefix runtime providers refuse.
 Empty or monitoring-only inventories do not pass. Retained helper programs
 with system interpreters are reported separately from candidate execution.
 
+## File-based IO cost clarification
+
+Read the selected archive-indexed release record directly; do not scan document
+history or raw-capture directories to discover state. Resolve explicit evidence
+references once per validation phase and reuse the collected identity map.
+Retain required artifact hashing, ELF inventories and gate snapshots; reducing
+IO must not remove byte-identity or completeness checks. Walk each declared
+subject root once per measurement phase, keep provider and consumer inventories
+separate, and stream publication bytes through the existing gate.
+
 ## Candidate and release consumption on the actual Jenkins agent
 
 Candidate mode reuses the existing application's main integration

@@ -396,6 +396,9 @@ Completion: fixture negatives block and pipeline wiring consistently selects
 the intended prefix. Step 6 owns the actual-agent run, final PA9 and platform
 acceptance, batching these against the final archive instead of requiring an
 additional full run of an older archive before Step 5.
+Step 4's transport and selection fixtures reduce the risk of discovering basic
+pipeline wiring defects only during Step 6; live environment defects can still
+first appear in the final native acceptance run.
 
 ### Step 4 addendums
 
@@ -583,125 +586,14 @@ paths. Fixtures, capability proof and documentation alone cannot complete it.
 - Full workflow readiness: Step 6 publication eligibility, real transactional adapter, immutable release coordinate and prior working configuration retained.
 - Time-gated status: record transaction/retrieval/adoption/recovery durations and existing CI timeout results; do not poll healthy long runs merely for status.
 
-## Open questions for the v0.27.0 tools-archive-rebuild implementation plan
+## Implementation decisions for tools-archive-rebuild
 
-### Q01: Record validator implementation
+All four reviewed implementation questions are settled with option A. The
+approved requirement, design and seven-step order remain the basis for execution.
 
-Should Step 2 use a stdlib JSON CLI and unittest mutations for the structured release record? The plan currently describes option A; its numbered steps do not change
-under these implementation choices. The approved requirement and design remain
-settled inputs.
-
-#### BBQ for Q01
-
-Use one recipe card and a cook who checks every required ingredient before serving.
-In this picture: the recipe card is the JSON release record, the cook is the cplx validator, and the ingredients are mandatory evidence cells.
-
-#### Options for Q01
-
-- Option A: Use the planned stdlib JSON CLI, separate publication/completion phases and deterministic view.
-  - Pro: No added dependency; duplicate-key, identity and lifecycle cases are directly unit-testable.
-  - Con: The independently supplied Python interpreter becomes an explicit launcher prerequisite.
-- Option B: Implement the same structured contract with Bash and an external JSON command.
-  - Pro: Fits the surrounding shell entry points.
-  - Con: Adds another executable prerequisite and more awkward state/identity validation tests.
-
-#### Recommended option for Q01
-
-Option A keeps this implementation small and testable while preserving the approved sidecar and gate design.
-
-#### Answer to Q01: option A
-
-Option A should be accepted because duplicate keys, contradictory identities
-and lifecycle states are directly testable with the standard library. Python
-3.9 compatibility lets the independent build-host interpreter run the validator
-without depending on the candidate or installing a new package.
-
-### Q02: Cross-repository fixture ownership
-
-Should new release/agent contract fixtures live in focused cplx harnesses with an explicit application checkout input? The plan currently describes option A; its numbered steps do not change
-under these implementation choices. The approved requirement and design remain
-settled inputs.
-
-#### BBQ for Q02
-
-Keep the joint meal checklist in one kitchen and name the second kitchen supplying the dishes.
-In this picture: the checklist is the cumulative cplx runner, the second kitchen is the application checkout, and the dishes are its adapter/pipeline scripts.
-
-#### Options for Q02
-
-- Option A: Keep focused cplx harnesses and require --app-repo from Step 1.
-  - Pro: One cumulative item 7 verification entry; preserves inherited large harnesses.
-  - Con: Tests require both repositories at recorded revisions.
-- Option B: Put application-facing fixtures in the application repository and invoke its runner from cplx.
-  - Pro: Tests sit next to the scripts they check.
-  - Con: Adds a second harness interface and coordination between two evolving test runners.
-
-#### Recommended option for Q02
-
-Option A makes the planned combined verification reproducible and refuses silent omission of application contracts.
-
-#### Answer to Q02: option A
-
-Option A should be accepted because one cumulative entry verifies both
-repositories at recorded revisions, and an unavailable application checkout
-fails instead of quietly reducing the checked contracts.
-
-### Q03: Schedule the full native acceptance run
-
-Should actual Debian/RHEL qualification be batched in Step 6 against the final archive, after Step 4 fixture and wiring checks? The plan currently describes option A; its numbered steps do not change
-under these implementation choices. The approved requirement and design remain
-settled inputs.
-
-#### BBQ for Q03
-
-Taste the completed meal once all dishes are ready, after checking individual preparation steps.
-In this picture: the completed meal is the final candidate, the tasting is platform acceptance, and preparation checks are Step 4 fixtures.
-
-#### Options for Q03
-
-- Option A: Run Step 4 fixtures/wiring checks, then full real-platform qualification in Step 6.
-  - Pro: Avoids requiring a full older-archive walk before the rebuild; every acceptance cell shares final identities.
-  - Con: Live environment defects may first appear in Step 6.
-- Option B: Add an actual-agent rehearsal to Step 4 before the final build.
-  - Pro: Finds transport and pipeline integration defects earlier.
-  - Con: Requires a separately identified older candidate and extra run; cannot replace final acceptance.
-
-#### Recommended option for Q03
-
-Option A retains the mandatory final native acceptance while limiting duplicate long-running work.
-
-#### Answer to Q03: option A
-
-Option A should be accepted because the real acceptance cells then identify the
-final archive together. Step 4's transport and selection fixtures reduce the
-risk of discovering basic pipeline wiring defects only during Step 6.
-
-### Q04: ABI probe file extraction
-
-Should Step 4 extract the ABI method into app:ci/tools_abi_acceptance.sh and leave a small status-propagating Groovy call? The plan currently describes option A; its numbered steps do not change
-under these implementation choices. The approved requirement and design remain
-settled inputs.
-
-#### BBQ for Q04
-
-Give the food-temperature check its own station so the serving host can report its result reliably.
-In this picture: the checking station is the shell ABI script, the serving host is the Groovy method, and the result is the blocking exit status.
-
-#### Options for Q04
-
-- Option A: Extract the focused shell entry and test it with isolated fixtures.
-  - Pro: Direct testing of whole-scope inventory, monitoring exclusions and inconclusive failures; reduces embedded shell complexity.
-  - Con: Adds one application shell file and a caller interface to maintain.
-- Option B: Expand the existing embedded shell method in ci/Jenkinsfile.diagnostics.
-  - Pro: Fewer application files.
-  - Con: Harder direct fixture execution and further growth in the 1114-line diagnostics file.
-
-#### Recommended option for Q04
-
-Option A follows the probe's distinct responsibility; no artificial Python line limit is applied to Groovy.
-
-#### Answer to Q04: option A
-
-Option A should be accepted because blocking inventory, exclusion and
-inconclusive paths can be executed directly in fixtures before a pipeline run;
-the Groovy caller has only to propagate the tested exit status.
+| Question | Decision | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | Use a stdlib JSON CLI with separate publication/completion phases, a deterministic view and unittest mutations. Support Python 3.9 or later through an explicitly identified independent interpreter, never the candidate. This checks duplicate keys, identities and lifecycle states without a new package dependency. | [Step 2](#step-2-validate-and-bind-the-durable-release-record) | Bash plus an external JSON command adds an executable prerequisite and makes state/identity validation harder to test. |
+| Q02 | Keep focused contract fixtures in cplx and require an explicit application checkout from Step 1. One cumulative runner checks both repositories at recorded revisions; a missing checkout fails instead of silently reducing coverage. | [Shared command checklist](#shared-execution-command-checklist-and-ready-to-run-commands), [Step 1](#step-1-demonstrate-the-real-publication-transaction) and [Step 4](#step-4-wire-candidate-qualification-into-the-main-application-chain) | An application-owned runner called from cplx adds a second harness interface and coordination between evolving runners. |
+| Q03 | Complete fixture/wiring checks in Step 4 and full native Debian/RHEL qualification in Step 6 against the final archive. Shared final identities avoid a mandatory additional full run of an older candidate; Step 4 transport/selection fixtures reduce basic wiring risk before live acceptance. | [Step 4](#step-4-wire-candidate-qualification-into-the-main-application-chain) and [Step 6](#step-6-complete-pre-publication-platform-acceptance) | An actual-agent rehearsal in Step 4 could detect live defects sooner, but needs a separately identified older candidate and cannot replace final acceptance. |
+| Q04 | Extract the ABI probe into `app:ci/tools_abi_acceptance.sh` and leave a small Groovy caller that propagates its status. Direct fixtures cover inventory, monitoring exclusions and inconclusive failures before a pipeline run. | [Step 4](#step-4-wire-candidate-qualification-into-the-main-application-chain) | Expanding the existing embedded method avoids a new file but makes direct testing harder and grows the 1114-line diagnostics file. No Python line limit applies to Groovy. |
