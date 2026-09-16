@@ -123,11 +123,13 @@ echo "probe-$stage" >> "$FIXTURE/events"
 [[ ${args[--expected-provider]} == "$FIXTURE/tools/python/root/usr/lib64/libsqlite3.so.0" ]] || exit 101
 [[ -d ${args[--scratch-dir]} && ${args[--scratch-dir]} == "$FIXTURE/tools/python/"* ]] || exit 102
 if [[ $stage == build ]]; then
+    [[ $LD_PRELOAD == "${args[--expected-libpython]}" ]] || exit 109
     [[ $LD_LIBRARY_PATH == "$FIXTURE/tools/python/sources/3.13.15:"* ]] || exit 103
     [[ $LD_LIBRARY_PATH == *"$root/usr/lib64:$tool_prefix/lib" ]] || exit 104
     [[ ${args[--expected-extension-root]} == "$FIXTURE/tools/python/sources/3.13.15/build/lib.linux-x86_64-3.13" ]] || exit 105
     [[ ${args[--expected-libpython]} == "$FIXTURE/tools/python/sources/3.13.15/libpython3.13.so.1.0" ]] || exit 106
 else
+    [[ ! ${LD_PRELOAD+x} ]] || exit 110
     [[ ${args[--expected-extension-root]} == "$FIXTURE/tools/python/python-3.13.15/lib/python3.13/lib-dynload" ]] || exit 107
     [[ $LD_LIBRARY_PATH == "$root/usr/lib64:$tool_prefix/lib" ]] || exit 108
 fi

@@ -80,8 +80,12 @@ function python_check_sqlite() {
             return 2
         fi
         probe_args+=(--expected-extension-root "$extension_dir" --expected-libpython "$libpython")
-        # CPython RUNSHARED puts the build first; -I ignores inherited Python
+        # DT_RPATH can select an old installed libpython before LD_LIBRARY_PATH.
+        # Preload only this validated source library for the build probe; its
+        # mapped identity is still checked independently. The installed and
+        # operator checks receive no added preload. -I ignores inherited Python
         # module overrides, while -S and -B avoid site hooks and bytecode writes.
+        LD_PRELOAD="$libpython" \
         LD_LIBRARY_PATH="$source_tree${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
             "$executable" -I -S -B "$probe" "${probe_args[@]}"
         status=$?
