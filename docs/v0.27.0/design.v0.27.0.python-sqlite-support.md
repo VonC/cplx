@@ -91,7 +91,7 @@ existing dependency settings:
 
 ```sh
 LIBSQLITE3_CFLAGS=-I${root}/usr/include
-LIBSQLITE3_LIBS=-L${root}/usr/lib64 -lsqlite3
+LIBSQLITE3_LIBS=-L${root}/usr/lib64 -Wl,--enable-new-dtags -lsqlite3
 ```
 
 These dependency variables are part of the documented
@@ -100,6 +100,12 @@ Preserve the shared sysroot and runtime-path construction. No host-library
 fallback, SQLite source build, SQLite CLI requirement or loadable-extension
 feature is added. Configure output remains part of acceptance evidence and
 must report the `_sqlite3` extension available.
+
+The SQLite link uses `DT_RUNPATH` so the normal wrapper's existing library
+search path selects the promoted payload even while the build sandbox remains
+present. Step 4 observed that inherited `DT_RPATH` instead loaded SQLite from
+the build sandbox after promotion. This linker flag applies only to the scoped
+SQLite dependency; no runtime override is added to the operator invocation.
 
 ## Capability checks at Python build completion
 
@@ -124,6 +130,10 @@ installation; its presence as verification material is a prerequisite.
 
 Both build-stage checks inherit the driver's exported `LD_LIBRARY_PATH` and
 `LD_RUN_PATH`, including the sandbox library directories. Their provider result
+is checked independently. The source-stage invocation additionally preloads
+the validated source `libpython` because the executable's `DT_RPATH` can select
+an old installed library before `LD_LIBRARY_PATH`. This command-scoped preload
+does not apply to the installed or operator invocation. The build result
 establishes capability under that build environment only. It cannot establish
 that the extension's runtime paths work after relocation. Only acceptance under
 the operator invocation, without additional library-path overrides, establishes
@@ -171,14 +181,27 @@ multiple mappings of the same file and compares canonical file identity and
 path containment against the expected Python tree. Merely finding the text
 `libsqlite3` or matching an unresolved symlink is insufficient.
 
+Filesystem stat identity can differ from the identity exposed for a mapping,
+as described by the kernel's [OverlayFS inode identity documentation](https://kernel.org/doc/html/latest/filesystems/overlayfs.html).
+The observer holds the independently expected provider open and creates a
+private reference mapping from that read-only descriptor. Its address locates
+the reference in the same single maps snapshot taken after the database round
+trip. The reference binds the descriptor's stat identity to its kernel mapping
+identity; the loaded library must match that mapping identity and the expected
+canonical path. The observer excludes the reference itself from loaded-library
+evidence and closes it after assessment. Build-stage libpython uses the same
+procedure. Missing, replaced, deleted or ambiguous references cannot pass.
+
 The expected Python root is supplied independently by the caller, not inferred
 from whichever provider was loaded. Canonicalize that root as well as the
 provider before comparing containment, allowing a legitimate symlinked
 deployment root without allowing escape from its resolved tree.
 A copy under another tool, an escaped symlink or a host path fails.
-No observed load, unreadable mappings, an absent
-backing file or ambiguous provider identity is inconclusive and prevents a
-pass. Deleted-file mappings cannot serve as evidence of an intact archive.
+No observed load, unreadable mappings, an absent backing file or an unresolved
+provider identity is inconclusive and prevents a pass. A loaded mapping that
+differs from the independently opened provider descriptor is a failure,
+including a competing loaded provider. Deleted-file mappings cannot serve as
+evidence of an intact archive.
 An external loader trace remains a diagnostic aid rather than a second
 automatic observer with different pass rules.
 
@@ -235,6 +258,16 @@ version directories, and packaging also maintains archive and digest outputs
 under its home. The existing packager continues to own its private source
 stage; item 6 does not add a caller-source override.
 
+The 2026-09-16 host inspection establishes how to implement this boundary with
+the existing unprivileged account. A private user/mount namespace presents an
+independent backing directory below the writable account home at the normal
+`/home/<account>` path inside the child. The parent continues to see the live
+home; a separate read-only view supplies the live preservation roots. This
+keeps the installer's existing source anchor and the packager's private stage.
+It requires no new directory under the host's root-owned `/home` and no host-root
+access. The plan specifies the mount and identity checks; the capability fixture
+does not replace full environment auditing or candidate acceptance.
+
 RHEL deployed acceptance likewise uses an isolated deployment target with the
 normal installer and operator invocation. Record before/after preservation
 evidence for the actual live build-account and deployment trees. Establish that
@@ -247,10 +280,10 @@ precedent in item 5. The plan supplies the exact setup and preservation commands
 ## Acceptance environments and the item 7 handoff
 
 The existing [environment reference](reference.environments.md) describes the
-RHEL build/deployment host and the Jenkins agent. Requirement Q07 separately
-approves a plain Debian 12 container for the unpublished candidate, contingent
-on a confirmed runtime host and archive-copy route. Those facilities have not
-been established by this design work.
+RHEL build/deployment host and the Jenkins agent. The owner's 2026-09-16
+clarification, recorded in requirement Q07, selects the existing Debian 12
+Jenkins container for the unpublished candidate. Its verification script
+deploys and probes the same archive compiled on RHEL; publication stays off.
 
 The Debian capture records the host role, image digest, candidate archive
 identity and relocated invocation. The container holds the candidate and
@@ -277,7 +310,8 @@ not establish the later regression re-check or authorize publication.
 | Populated tree is explicitly reconfigured | Reconfigure, cleanup and compilation run; installed capability passes while unrelated payloads remain. | AC9 |
 | Database succeeds using the expected shipped provider | Functional and provider result retained for the named environment. | AC4 |
 | Host provider, another tool's provider or escaped symlink | Failure despite successful database behavior. | AC3, AC4 |
-| Provider observation is missing or ambiguous | Inconclusive; acceptance cannot pass. | AC4 |
+| Provider observation is missing or its identity cannot be resolved | Inconclusive; acceptance cannot pass. | AC4 |
+| Loaded mapping differs from the opened provider descriptor | Failure, including a competing loaded provider. | AC4 |
 | SQLite waiver removed but floor library missing or only under Git | Existing closure rejection retained. | AC5, AC6 |
 | SQLite payload present while its waiver remains | Existing stale-waiver rejection retained. | AC6 |
 | Candidate contains `python-3.13.15` with `root` and `current` | Replacement declaration and renewed envelope describe that candidate. | AC5 |
