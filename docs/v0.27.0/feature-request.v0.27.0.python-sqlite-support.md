@@ -128,6 +128,11 @@ approved draft:
 "LIBSQLITE3_LIBS=-L${root}/usr/lib64 -lsqlite3" \
 ```
 
+The implementation adds `-Wl,--enable-new-dtags` to that scoped link setting.
+The real promotion check established that `_sqlite3` must use `DT_RUNPATH`
+so the existing wrapper can select the shipped library after promotion while
+the original build sandbox still exists. The owning design records this fix.
+
 Setting both variables bypasses CPython 3.13's SQLite pkg-config probe. The
 umbrella warns that its supplied `sqlite3.pc` has `prefix=/usr`; using
 pkg-config without a sysroot can select host library paths. The selected
@@ -202,23 +207,22 @@ again if its final permitted Python version changes.
 | AC8 | Other targets retain their existing configure and build results, including when their dependency lists have no SQLite payload. |
 | AC9 | The documented explicit rebuild works from the populated tree, forces both reconfiguration and recompilation, preserves unrelated reusable sandbox payloads and produces a verified SQLite-capable interpreter. |
 | AC10 | Item 6 records its non-release candidate's Python version and payload/archive identity on the tracked 3.13.15 pin. Item 7 applies D5's release regression re-check and repeats SQLite acceptance on the final rebuilt archive. |
-| AC11 | Before candidate acceptance, a Debian 12 container host with a working runtime and an archive-copy route is confirmed. Retained evidence identifies the host role, image digest and archive and demonstrates AC4 after relocation in a plain `debian:12` container holding only the candidate archive. Missing environment or Debian evidence prevents item 6 completion. |
+| AC11 | Before candidate acceptance, the existing Debian 12 Jenkins container and archive-copy route are confirmed. Retained evidence identifies the host role, actual image digest and archive and demonstrates AC4 after relocation, with only the candidate toolchain and verification material supplied by this test. Missing environment or Debian evidence prevents item 6 completion. |
 
 ## Debian acceptance environment for the unpublished SQLite candidate
 
-Run item 6's Debian acceptance in a plain `debian:12` container holding only
-the identified candidate archive, as permitted by the umbrella. Confirm the
-host's container runtime and copy route for the archive before executing
-acceptance; record the host role, image digest and archive identity with the
-SQLite and provider observations. This requires no release publication or new
-Jenkins-agent credentials.
+The owner's execution clarification on 2026-09-16 selects the existing Debian
+12 Jenkins agent, reached by a script called from the consuming Jenkinsfile
+and an explicitly triggered job. This replaces the earlier separate plain
+`debian:12` route. Compile only on RHEL; Debian deploys and tests the same
+identified archive. Record actual userland, image/container identity, transfer
+digest and normal SQLite/provider observations. Supply no extra SQLite library
+or package installation to make acceptance pass. Use existing access and keep
+release publication disabled.
 
-The environment reference currently identifies only the Jenkins agent as an
-available Debian host, reached through the consuming pipeline. Selection of
-the plain-container acceptance route does not claim another host is already
-available. If the required environment cannot be established, retain that gap
-and leave item 6 incomplete; do not silently defer its Debian acceptance.
-The actual Jenkins integration run remains with item 7.
+If this runtime or its required evidence cannot be established, retain that
+gap and leave item 6 incomplete. The final release archive and full application
+integration acceptance remain with item 7.
 
 ## SQLite delivery boundary within the umbrella
 
@@ -275,7 +279,7 @@ and release boundary.
 | Q04 | D2: Require conclusive same-process evidence of the shipped provider after a SQLite operation on every accepted environment; host copies can hide a gap. | Expected SQLite behavior; AC4 | D1: Static closure plus an operation does not directly identify the loaded provider. |
 | Q05 | E1: Document an explicit existing-tree rebuild forcing reconfiguration and recompilation while retaining unrelated payloads, covering the actual upgrade case. | Existing-tree rebuild behavior; AC9 | E2: Automatic capability-triggered rebuilding extends scope. E3: Fresh-tree-only acceptance leaves the existing build account unsupported. |
 | Q06 | F1: Add an identified 3.13.15 validation candidate before item 7's final rebuild, explicitly qualifying D5; this keeps item 6 independently completable at the cost of another rebuild. | SQLite delivery boundary; AC10; umbrella D5 | F2: Moving D5's regression re-check and refresh into item 6 would change item 7's delivery responsibility. |
-| Q07 | G1: Use a plain Debian 12 container after confirming its host runtime and candidate-copy route; retain identities and evidence without release publication. | Debian acceptance environment; AC11 | G2: Non-release delivery to Jenkins requires unestablished access and pipeline work. G3: Deferring Debian acceptance conflicts with item 6's accepted scope. |
+| Q07 | Updated by the owner on 2026-09-16: use the existing Debian 12 Jenkins container for deployment/runtime testing, with the same RHEL-built archive and retained actual identities. | Debian acceptance environment; AC11 | The earlier plain-container route is superseded by confirmed Jenkins access. Deferring Debian evidence still conflicts with item 6's scope. |
 | Design Q06 | J1: The candidate's accepted closure shape replaces Python 3.13.9 with 3.13.15, retaining `root`, `current` and the SQLite floor, with a renewed envelope alongside waiver removal. This records the owning requirement's entry change before planning. | SQLite closure contract; gap item 4; AC5, AC6 | J2: Retaining both versions admits an unnecessary historical directory. An unchanged or current-only declaration cannot cover the candidate. |
 
 ## Code and evidence references for Python SQLite support

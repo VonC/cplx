@@ -28,7 +28,7 @@ is not satisfied by the item 6 candidate.
 - The build environment exports sandbox `LD_LIBRARY_PATH` and `LD_RUN_PATH`. Passing its probe proves build capability; relocated acceptance must use the normal operator invocation without added overrides.
 - `src/setups/env/.env` sources the incoming home's `.profile`, then sets `HOME` to its own directory. The build launcher receives the isolated account home; `.env` rebinds it to the isolated cplx root inside the build child. Promotion and packaging receive the enclosing account home.
 - `rsync.sh` reads both Git and Python selectors, writes an exclude scratch file, mirrors into `$HOME/tools`, and deletes other version directories. The complete layout must be isolated.
-- The installer rewrites `/home/<one-segment>/cplx/tools/` and `/home/<one-segment>/` anchors. A nested scratch build home leaves an unwanted path segment after relocation. H2 therefore requires an independently writable isolated home directly below `/home`, supplied without administrator operations by this workflow. Its availability is an external prerequisite.
+- The installer rewrites `/home/<one-segment>/cplx/tools/` and `/home/<one-segment>/` anchors. The build must see that layout. Direct use of a nested scratch home leaves an unwanted path segment after relocation. The 2026-09-16 host check established an unprivileged user/mount namespace route: independent backing files remain below the existing account home, while the child alone sees them at the normal `/home/<one-segment>` path. No new host directory under `/home` is required.
 - The closure envelope's source is a real 40-character commit containing the declared path. `closure_config_authority_check()` compares its blob's digest with the carried declaration. An invented SHA or the old declaration's commit cannot certify new bytes.
 - `.review-validation` requires `bash src/utils/lint_shell.sh`. The repository has no `GROUNDHOG.md`, `pyproject.toml` or existing `tests/` tree; its effort harnesses use Bash fixtures.
 
@@ -98,6 +98,11 @@ the supplied extension/provider paths and relevant map entries; do not scan
 whole tool trees to discover a provider. Parse maps in linear time and deduplicate
 mapping identities in a set. Emit one structured result; diagnostic stderr must
 not corrupt it. Remove only that invocation's temporary database directory.
+Hold at most two read-only expected-library descriptors with private one-page
+reference mappings across that snapshot: SQLite and, for the build stage,
+libpython. Locate each reference by address in linear time, exclude it from
+loaded-provider evidence and require the remaining loaded mappings to match.
+Record filesystem and kernel mapping identities separately when they differ.
 
 Build checks run once at each required stage, including reuse, with no extra
 compile or automatic cache purge. Reuse existing closure inventories and
@@ -243,7 +248,9 @@ RHEL build role, availability of the required separate `/home/<one-segment>`
 home with independent cplx/tools trees, login-profile
 chain and digest, closure source-identity procedure, Debian container runtime
 host and archive-copy route. Check the installer's existing anchor handling
-against the exact proposed source paths; nested isolation is already excluded.
+against the source paths visible to the build. A nested backing directory is
+usable only through the verified namespace mapping described in Step 4;
+using its physical nested path as the build home remains excluded.
 If no compatible isolation or Debian
 route exists, record the blocker and leave real acceptance incomplete; local
 probe work may continue. Access details stay in ignored operations notes.
@@ -300,7 +307,9 @@ library precedence and a mismatched or missing mapped `libpython` identity.
 Implement Python helpers `python_sqlite_required` and `python_check_sqlite`.
 Append the two approved `LIBSQLITE3_*` assignments to the configure environment
 only when the predicate matches. Preserve existing configure flags and shared
-runtime paths. After either build branch, validate the current build's
+runtime paths. The scoped SQLite link enables new dynamic tags so its
+`DT_RUNPATH` honors the normal wrapper's promoted library path while the build
+sandbox remains present. After either build branch, validate the current build's
 `pybuilddir.txt`: one relative generated directory under the source tree,
 present and consistent with that build's configuration; reject missing,
 placeholder, escaping or stale records. Pass its exact directory as the
@@ -309,6 +318,10 @@ Do not guess the directory from host Python or accept an arbitrary source file.
 Run `${tool_src}/python` with a command-scoped `LD_LIBRARY_PATH` that puts the
 canonical build directory first and retains inherited entries afterward,
 matching CPython's Linux `RUNSHARED` behavior. Pass the configured build
+library in command-scoped `LD_PRELOAD` as well: the populated RHEL build has
+`DT_RPATH`, which otherwise selects its old installed library before
+`LD_LIBRARY_PATH`. This preload is limited to the build probe and does not
+apply to installed or normal operator checks. Pass the configured build
 `libpython3.13.so` backing identity as `--expected-libpython`; reject an old
 installed library even if the binary starts. Keep
 `${root}/usr/lib64/libsqlite3.so.0` as the expected SQLite provider under
@@ -430,16 +443,30 @@ candidate requires Step 4's populated SQLite tree. No release publication runs.
 Unit and build-environment checks cannot establish relocation or prevent a host
 SQLite library from masking a broken payload. Build one non-release 3.13.15
 candidate, retain its byte identity, and test it on the RHEL build account,
-plain Debian 12 container and isolated RHEL deployment using normal invocations.
+Debian 12 Jenkins container and isolated RHEL deployment using normal invocations.
 The isolation prerequisite established in Step 1 is mandatory before mutation.
 
 ### Step 4 implementation
 
 Files:
 
-- `docs/v0.27.0/acceptance.python-sqlite-support.sh` (new, to be created).
+- `docs/v0.27.0/acceptance.python-sqlite-support.sh` (phase driver).
+- `docs/v0.27.0/acceptance.python-sqlite-capture.sh` (capture and preservation helpers).
+- `docs/v0.27.0/acceptance.python-sqlite-namespace.sh` (isolated build launcher).
+- `docs/v0.27.0/acceptance.python-sqlite-deploy.sh` (shared consumer bootstrap).
+- `docs/v0.27.0/acceptance.python-sqlite-report.sh` (three-role timing report).
+- `docs/v0.27.0/verify.python-sqlite-acceptance.sh` (recording and refusal fixtures).
+- `docs/v0.27.0/verify.python-sqlite-namespace.sh` (native RHEL isolation capability fixture).
 - `docs/v0.27.0/acceptance.python-sqlite-support.md` (existing, to be updated after Step 1).
 - `docs/v0.27.0/verify.python-sqlite.sh` (existing, to be updated after Step 3).
+
+Actual acceptance exposed distinct filesystem and mapped device identities on
+the Debian container's OverlayFS. The shared probe and its existing unit-test
+file therefore also receive the descriptor-binding correction described above.
+Exercise missing, ambiguous, replaced and deleted references, competing loaded
+providers and a reference with no loaded provider. Retain the original refusal
+and diagnostic captures. Bind corrected verification material separately from
+the unchanged compiled candidate revision and archive digest.
 
 Test the capture driver first with recording executables: missing prerequisite,
 wrong HOME, escaping source/destination link, ambiguous candidate archive,
@@ -456,9 +483,29 @@ Use a verified isolated account-home layout containing `cplx/`, `tools/`,
 mutable payload copies. Do not hardlink mutable build or deployment payloads
 to the live tree. Preserve and inspect symlinks; copies must not point back to
 live roots. The packager retains its own existing private stage implementation.
-The build account-home path must be directly below `/home` and already writable
-under the operator's available access. A nested scratch home is unsupported;
-absence of the required home blocks this step under confirmed H2.
+The home visible to build processes must be directly below `/home`. The host's
+`/home` is root-owned and the operator cannot allocate siblings there. Use an
+independent backing directory below the existing writable account home and
+the measured `unshare --user --map-root-user --mount --propagation private`
+route. Namespace UID 0 maps only to the unprivileged SSH account; it grants no
+host-root access. Before the real run, repeat the native namespace fixture.
+
+The build launcher must leave its inherited working directory before mounting,
+expose the original home at a separate read-only view for live manifests, then
+bind the independent backing directory over the normal home inside the child
+namespace. Check device/inode identities and private mount propagation before
+executing any copied control. Keep `.profile` absent in the backing tree and
+launch with a clean environment. Record both physical and namespace paths, UID
+mapping and final parent-namespace preservation. The existing driver receives
+the directly anchored namespace home and explicit read-only live roots. Its
+physical backing path must never become the compiled prefix. A capability
+fixture alone does not establish the full source-chain audit or live manifests.
+
+Compilation, promotion and packaging all use this same isolated view. RHEL
+deployment uses a separate owned target with the ordinary unprivileged account;
+Debian deployment uses Jenkins. No installer anchor or packaging source-root
+contract changes. If the namespace route is unavailable, report the failed
+capability; do not request a root-owned home or substitute live-tree staging.
 
 Bootstrap the copied cplx tree from tracked `src/setups/env/`, `src/utils/`
 to `bin/`, `src/echos/` to `echos/`, and `src/install/env/` to `tools/`, using
@@ -534,7 +581,7 @@ umbrella completion from fixture results or publish a release.
 
 ### Step 4 addendums
 
-- Line budget checkpoint: new Bash driver 0, advisory 360; evidence and runner recount after prior steps. No Python growth is planned. Apply the 650-line policy to any amended probe/tests and extract by responsibility if exceeded.
+- Line budget checkpoint after implementation: phase driver 276 lines (advisory 360), capture helpers 219, namespace launcher 59, consumer bootstrap 63 and report 41. The corrected shared probe is 337 lines and its unit module is 483, both below the 550-line safe band and 650-line ceiling.
 - Execute the shared checklist and `--step 4`, then explicit acceptance phases on confirmed hosts. Inspect `rg -n 'HOME|prefix|expected|sha256|profile' docs/v0.27.0/acceptance.python-sqlite-support.sh` and review expanded paths before mutation.
 - Full workflow timing readiness: record configure, compile, install, promotion, package, transfer, relocation and probe durations once for the accepted candidate. Reuse healthy work and retain the first actionable failure. No timeout xfail or arbitrary duration limit substitutes for acceptance.
 
@@ -542,9 +589,11 @@ umbrella completion from fixture results or publish a release.
 
 The human confirmed the six plan recommendations after specification review
 round 2. Each answer is integrated into the execution instructions above.
-The separate directly anchored home and Debian runtime/copy route remain
-external acceptance prerequisites. The source-evidence commit and merge still
-require the concrete Step 3 authorization described in that step.
+The directly anchored build view and Debian runtime/copy route remain acceptance
+prerequisites. The 2026-09-16 checks establish native unprivileged namespace
+capability and Jenkins access; complete bootstrap and candidate evidence remain
+required. Step 3's source-evidence commit and merge use the separate concrete
+authorization described in that step.
 
 | Question | Decision and rationale | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
