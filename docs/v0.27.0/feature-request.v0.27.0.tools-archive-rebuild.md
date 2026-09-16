@@ -301,6 +301,16 @@ assessment and the reason for each retained result in the release evidence.
 An unchanged archive digest alone cannot carry old ABI or coverage evidence
 forward when the consuming application's wheels or runtime have changed.
 
+## File-based IO cost clarification
+
+Read the selected archive-indexed release record directly; do not scan document
+history or raw-capture directories to discover state. Resolve explicit evidence
+references once per validation phase and reuse the collected identity map.
+Retain required artifact hashing, ELF inventories and gate snapshots; reducing
+IO must not remove byte-identity or completeness checks. Walk each declared
+subject root once per measurement phase, keep provider and consumer inventories
+separate, and stream publication bytes through the existing gate.
+
 ## Release publication and consuming-project adoption
 
 D1 selects the next application release version and publication at release
