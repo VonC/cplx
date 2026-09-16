@@ -9,7 +9,7 @@
 
 | Order | Type | Key title | Slug | Status | Requirement | Validation plan |
 | --- | --- | --- | --- | --- | --- | --- |
-| 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | pending | - | - |
+| 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
 
 Regroups work item 2 (Q24) and decision D7. Depends on umbrella items 4
 (`toolchain-runtime-closure`) and 5 (`architecture-minor-fallback`). Both are
