@@ -116,8 +116,11 @@ function configure() {
         "LIBMPDEC_CFLAGS=-I${root}/include -DCONFIG_64=1 -DANSI=1 -DHAVE_UINT128_T=1" \
         "LIBMPDEC_LIBS=-L${root}/lib -lmpdec -L${root}/lib64 -lm -L${root}/usr/lib/gcc/x86_64-redhat-linux/8 -lgcc_s " )
     if python_sqlite_required; then
+        # The shared build flags emit DT_RPATH. SQLite needs DT_RUNPATH so the
+        # normal wrapper's shipped library path wins after rsync promotion,
+        # while the original sandbox remains available on the build account.
         configure_cmd+=( "LIBSQLITE3_CFLAGS=-I${root}/usr/include"
-            "LIBSQLITE3_LIBS=-L${root}/usr/lib64 -lsqlite3" )
+            "LIBSQLITE3_LIBS=-L${root}/usr/lib64 -Wl,--enable-new-dtags -lsqlite3" )
     fi
     configure_cmd+=( \
         "${tool_src}/configure" \
