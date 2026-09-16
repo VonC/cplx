@@ -23,8 +23,8 @@ the pair at `tools/closure/` inside the archive after verifying with
 of which reviewed version the declaration is: it is printed on the build
 account and resolved only where cplx exists.
 
-The maintenance rule is one line, and the harness holds it: **when the
-declaration changes, the envelope is regenerated in the same commit.** A
+The maintenance rule for delivered bundles is one line, and the harness holds it:
+**when the declaration changes, the envelope is regenerated in the same commit.** A
 declaration edited without its envelope is a failing case rather than an archive
 that ships a receipt for bytes it does not carry.
 
@@ -103,6 +103,74 @@ The floor, the declared family list and the waiver list are established by
 list by design decision Q13 of
 `docs/v0.27.0/design.v0.27.0.toolchain-runtime-closure.md`. A later requirement
 may add, change or remove an entry only by saying so in its own document:
-`python-sqlite-support` removes the sqlite waiver rather than the floor entry,
-and `tools-archive-rebuild` may add an entry if the rebuilt payload introduces
-one.
+`python-sqlite-support` replaces `python-3.13.9` with `python-3.13.15` and
+removes the SQLite waiver while retaining its `tools/python` floor entry,
+`root`, `current`, other entries and root ordering. `tools-archive-rebuild`
+may add an entry if the rebuilt payload introduces one.
+
+## Item 6 declaration identity and maintenance
+
+The owning requirement is
+[Python SQLite support](../../../../docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md),
+AC5. Its approved Step 3 uses a separate source snapshot so the envelope can
+name a real commit without requiring a commit to contain its own hash.
+The human authorized that auxiliary commit and its later retention merge on
+2026-09-16.
+
+| Identity | Value |
+| --- | --- |
+| Source path | `src/setups/env/closure/closure-config.txt` |
+| Source snapshot | `13c80d572ba7bda91728806ad7dc11c53629a506` |
+| Source parent | `3a1d1135a3e627b74d134db24694121e70ea6b14` |
+| Committed declaration SHA-256 | `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa` |
+
+The source snapshot changes only the declaration. It was created on
+`sqlite-source-3.13.15-step3` in a separate clean worktree with the existing
+`pre-commit` and `commit-msg` dispatchers active and the same sensitive-content
+rules. Its retained previous envelope makes this snapshot unsuitable as a
+delivered bundle. The implementation branch pairs the new declaration and
+envelope in the normal reviewed bundle commit.
+
+These commands extract the exact source blob and regenerate the pair from the
+repository root; the digest comes from Git's blob bytes, not a Windows checkout:
+
+```sh
+source_sha=13c80d572ba7bda91728806ad7dc11c53629a506
+path=src/setups/env/closure/closure-config.txt
+git cat-file blob "$source_sha:$path" > a.sqlite-source-committed.txt
+sha256sum a.sqlite-source-committed.txt
+cmp a.sqlite-source-config.txt a.sqlite-source-committed.txt
+cp a.sqlite-source-committed.txt "$path"
+digest=$(sha256sum a.sqlite-source-committed.txt | cut -d ' ' -f 1)
+printf 'CPLX-CLOSURE-ENVELOPE/1\ndigest|%s\nsource|%s|%s\n' \
+    "$digest" "$path" "$source_sha" > src/setups/env/closure/closure-envelope.txt
+```
+
+`a.sqlite-source-config.txt` is the locally approved declaration used for the
+creation-time byte comparison. Subsequent readers can compare the extracted
+blob directly with the tracked declaration instead. To verify consistency and
+authority without publishing anything, run:
+
+```sh
+source src/setups/env/bin/closure_config.sh
+source src/setups/env/bin/closure_publish.sh
+closure_envelope_check src/setups/env/closure/closure-config.txt \
+    src/setups/env/closure/closure-envelope.txt
+closure_config_authority_check "$PWD" src/setups/env/closure/closure-config.txt \
+    src/setups/env/closure/closure-envelope.txt
+```
+
+After the bundle passes review and its grouped commit gate, the authorized
+`git merge -s ours --no-ff` retains the source snapshot as an ancestor while
+preserving the complete reviewed tree. A temporary `pre-merge-commit` calls
+the existing `pre-commit`; Git also runs `commit-msg`. Record identical tree
+IDs, hook traces and successful source resolution and authority checks from
+a fresh single-branch clone before dropping the temporary source ref/worktree.
+The implementation validation record holds the actual merge and clone evidence.
+
+Item 7 must record both its final candidate cplx revision and this separate
+envelope source revision. An all-ancestor traversal can encounter the source
+snapshot with its previous envelope; only the reviewed branch bundle is a
+delivery candidate. Item 7 must renew the pair and repeat final-archive
+acceptance if it changes the permitted Python version or declaration. Step 3's
+static fixtures do not establish dynamic SQLite capability or Step 4 acceptance.
