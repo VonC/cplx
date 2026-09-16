@@ -242,8 +242,14 @@ features and reporting remain intact.
 
 ### Analysis of Step 3 implementation state
 
-Not started. Step 3 is not implemented because the candidate declaration,
-renewed envelope and exact-source/refusal checks have not been delivered.
+Yes. Step 3 has been fully implemented.
+
+The declaration, matching envelope, source snapshot and focused fixtures are
+ready for the normal grouped review gate. The source exists and its exact blob
+passes authority checks. Delivery remains gated on the authorized retention
+merge and fresh-clone proof after the reviewed bundle commits, in the order
+required by the plan. Those post-commit operations have not run yet; this
+implementation verdict does not claim their ancestry or clone evidence.
 
 ### Goal for Step 3
 
@@ -259,27 +265,118 @@ waiver and retain a byte-consistent envelope anchored to real source bytes.
 
 ### What was implemented for Step 3
 
-_(empty — no check has taken place yet.)_.
+The declaration replaces only `python-3.13.9` with `python-3.13.15` and removes
+the SQLite waiver. Python `root` and `current`, the SQLite floor at
+`tools/python`, other floor entries, families, entry points and ordering remain
+unchanged. The three-line envelope names the real source blob and its digest.
+
+The human approved the prepared auxiliary operations on 2026-09-16 with
+"OK, approved, go ahead". The source commit was created in a separate clean
+linked worktree. Its parent is the pinned implementation HEAD, its only changed
+path is `src/setups/env/closure/closure-config.txt`, and its blob matches the
+approved LF UTF-8 bytes, including comments and final newline.
+
+| Source identity | Value |
+| --- | --- |
+| Source commit | `13c80d572ba7bda91728806ad7dc11c53629a506` |
+| Source parent | `3a1d1135a3e627b74d134db24694121e70ea6b14` |
+| Declaration SHA-256 | `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa` |
+| Envelope SHA-256 | `f849a4ce2a4bd53d30297f19708431222b1b1b9168fc32ec599066e9fc38b236` |
+| New fixture SHA-256 | `fa1cbadbe392a4d61921a5973c262ddfab95dab2dad3a7b01e4f26835dd4944d` |
+
+The existing `pre-commit` and `commit-msg` dispatchers ran successfully, with
+their sensitive-content children and the same shared and local replacement
+rules. Their inventories and all four file hashes stayed unchanged. The
+ignored creation and hook evidence is retained in `a.sqlite-source-create.log`,
+`a.sqlite-source-commit.log` and `a.sqlite-source-hooks-before.txt`.
+No temporary merge hook is installed yet. The authorized `pre-merge-commit`
+will call `git hook run pre-commit`, preserving the existing hook chain.
+
+The closure README records the source identity, exact blob extraction and
+envelope regeneration commands, direct consistency/authority checks, ownership
+and item 7 handoff obligations. The new 156-line
+`verify.python-sqlite-closure.sh` exercises candidate scope, retained 3.13.9,
+missing and Git-only SQLite, stale waiver, changed declaration bytes, CRLF,
+changed source blob and valid exact source identity. Its 25 isolated controls
+are followed by two checks of the real repository pair. The existing 70-line
+cumulative runner already invokes and lints this file for `--step 3`, so no
+further runner edit was needed.
+
+Verification on 2026-09-16:
+
+- `cmd /d /c a.sqlite-check.cmd` ran the cumulative runner with `--step 3` and the explicit shared authoring Python 3.13.9. Git Bash 5.3.9 passed the 57-script tracked lint gate, effort Bash syntax and ShellCheck, 33 probe tests with three Linux-only skips, four CMD launcher boundary cases, and all 27 closure checks in 19 seconds. Evidence: `a.sqlite-step3-cumulative-windows.log`.
+- Native RHEL 9.8, Bash 5.1.8 and Git 2.52.0 ran the exact new fixture bytes against the real source commit from a transferred Git bundle. All 27 closure checks passed in under one second. Direct consistency and authority calls resolved the source above without publication. Evidence: `a.sqlite-step3-regressions-linux.log`.
+- Native RHEL also ran all 33 probe unit tests without skips in 0.252 seconds and all 32 Bash build-process cases. The Windows run covers the separate CMD portion. Evidence: `a.sqlite-step3-controls-linux.log`.
+- The unchanged historical `verify.closure-check.sh --step 2` and `--step 5` suites ran once against the new pair with `contract.closure-tools.txt` and `fixtures.closure-corpus.txt`. Step 2 reported 2 failures out of 91 cases: its hardcoded 3.13.9 root and SQLite-waiver assertions. Step 5 reported 15 failures out of 250 reached cases: its gate, waiver and archive expectations require the removed waiver and old version tree. These current-pair runs did not pass; their complete results are in `a.sqlite-step3-legacy2.log` and `a.sqlite-step3-legacy5.log`.
+- To isolate that historical-input dependency, a separate copy of `src/setups/env` received only the declaration and envelope blobs from the pinned parent. Running the same suites with `--shipped-dir <historical-copy>/bin` then passed 91/91 and 254/254 cases in 2 and 8 seconds. All scripts, harness, contract and corpus stayed identical; four downstream archive cases became reachable. These are historical regression controls, not candidate acceptance. Evidence: `a.sqlite-step3-historical2.log`, `a.sqlite-step3-historical5.log` and `a.sqlite-step3-controls-linux.log`.
+
+The historical harness SHA-256 is
+`c36a86ee7f53f0b545fb6f5de4a6fae57e4904d6181f56ea5a5be1acc4970b37`;
+its corpus SHA-256 is
+`74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472`.
+The 9,136-line historical harness was not edited.
+
+After review and grouped commits, require a clean implementation worktree,
+including the now-tracked fixture. Perform the already-authorized
+`git merge -s ours --no-ff` with the temporary composable merge hook, verify
+unchanged tree IDs and hook bytes, and prove source resolution and authority in
+a fresh single-branch clone without fetching the temporary source branch.
+Retain the source ref/worktree until that proof succeeds. Record the actual
+merge SHA, tree ID and clone result here for item 7; all three remain pending.
+No push or publication has run.
 
 ### New types or classes introduced for Step 3
 
-_(empty — no check has taken place yet.)_.
+None. The fixture's `check`, `contains`, `refuses`, `index_providers`,
+`fixture_git` and `write_envelope` helpers are each called by its top-level
+cases. Production checker functions and formats are unchanged.
 
 ### Architecture check for Step 3
 
-_(empty — no check has taken place yet.)_.
+This step changes declarative configuration and documentation, with fixtures
+calling the existing closure functions. It adds no production layer dependency
+or new policy path. No DDD-Hexagonal boundary is changed. The declaration is
+33 lines, envelope 3, README 176 and new fixture 156, below its 220-line target
+and the repository review band. The cumulative runner remains 70 lines.
+No architecture or file-size issue needs addressing.
 
 ### Performance check for Step 3
 
-_(empty — no check has taken place yet.)_.
+No production computation changes. Fixture work has fixed case counts and
+linear scans over the existing declaration/provider inputs; its source Git
+repositories are disposable. There is no new sorting or quadratic algorithm.
+No performance issue needs addressing.
 
 ### Unit test coverage check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The configured repository gate measures Bash lint, not a Python coverage
+percentage. This step changes no unit-tested class. Its new Bash fixture is
+explicitly syntax-checked, linted and executed by the cumulative runner;
+each top-level helper is exercised. All existing 33 probe unit cases passed
+on RHEL, including the three Windows-skipped cases. No unit-tested class
+needs completion, and no new top-level symbol is unreferenced.
 
 ### Feature integrity for Step 3
 
-_(empty — no check has taken place yet.)_.
+The SQLite floor and refusal rules remain intact: missing SQLite and a provider
+only under Git still fail, and a retained 3.13.9 directory is unexpected.
+The isolated historical controls confirm existing waiver and publication
+behavior with their original inputs. The new fixtures certify static names,
+locations and exact source identity; they do not certify a built candidate's
+dynamic capability. Step 4 still owns that acceptance on all three roles.
+
+The historical `verify.closure-check.sh` Step 2 and Step 5 expectations are
+pinned to the previous declaration, so they report the recorded failures on the
+current pair until they are refreshed. That refresh belongs to the harness's
+owning item, item 4, or to item 7 when it renews the pair; this effort must not
+edit that harness. Schedule it there rather than leaving the suites red without
+an owner.
+
+The auxiliary source snapshot retains the previous envelope. It is not a
+delivery bundle, and an all-ancestor traversal can encounter that intermediate
+pair after retention. Item 7 must distinguish this source revision from its
+final candidate cplx revision and retain the later merge/clone evidence. Any
+declaration change requires a renewed pair and final-archive acceptance.
 
 ## Step 4: Prove one candidate on the three required environment roles
 
