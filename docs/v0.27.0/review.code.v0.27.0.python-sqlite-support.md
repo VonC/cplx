@@ -1714,3 +1714,521 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-1 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-09-16T15:35:32+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 python-sqlite-support (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+Implementation step: 4
+Review round: 1
+
+### Code review evidence for step 4 python-sqlite-support (round 1)
+
+request_index_tree: 1e0cd0ab935daefcac9741838fa0b39fadb6aca2
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- cmd /d /c a.sqlite-step4-check.cmd (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(sqlite): capture isolated candidate acceptance
+group 1 path: docs/v0.27.0/acceptance.python-sqlite-capture.sh
+group 1 path: docs/v0.27.0/acceptance.python-sqlite-deploy.sh
+group 1 path: docs/v0.27.0/acceptance.python-sqlite-namespace.sh
+group 1 path: docs/v0.27.0/acceptance.python-sqlite-report.sh
+group 1 path: docs/v0.27.0/acceptance.python-sqlite-support.sh
+group 1 path: docs/v0.27.0/verify.python-sqlite-acceptance.sh
+group 1 path: docs/v0.27.0/verify.python-sqlite-namespace.sh
+group 1 path: docs/v0.27.0/verify.python-sqlite.sh
+group 2: docs(sqlite): describe the verified execution route
+group 2 path: docs/v0.27.0/design.v0.27.0.python-sqlite-support.md
+group 2 path: docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md
+group 2 path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+group 3: docs(python-sqlite-support): record step 4 validation
+group 3 path: docs/v0.27.0/acceptance.python-sqlite-support.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.python-sqlite-support.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+staged path: docs/v0.27.0/acceptance.python-sqlite-capture.sh
+staged path: docs/v0.27.0/acceptance.python-sqlite-deploy.sh
+staged path: docs/v0.27.0/acceptance.python-sqlite-namespace.sh
+staged path: docs/v0.27.0/acceptance.python-sqlite-report.sh
+staged path: docs/v0.27.0/acceptance.python-sqlite-support.md
+staged path: docs/v0.27.0/acceptance.python-sqlite-support.sh
+staged path: docs/v0.27.0/design.v0.27.0.python-sqlite-support.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/draft.v0.27.0.python-sqlite-support.md
+staged path: docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+staged path: docs/v0.27.0/verify.python-sqlite-acceptance.sh
+staged path: docs/v0.27.0/verify.python-sqlite-namespace.sh
+staged path: docs/v0.27.0/verify.python-sqlite.sh
+```
+
+### Requestor assessment for step 4 python-sqlite-support (round 1)
+
+The writer's assessment is that Step 4 is fully implemented. The validation
+plan records the exact Yes status and the umbrella's item 6 is complete.
+
+The same Python 3.13.15 archive passed SQLite persistence and shipped-provider
+checks in the RHEL build account, a separate RHEL deployment and Debian 12
+Jenkins capture 174. Its SHA256 is
+`c9fcb783e10409411d2fd08f3951ec163b1143d7357203fc237afbb71ce24e91`.
+The build revision is `14d4af084c303b4ccaa234b3c9a19e7110d8e1ec`.
+The corrected observer revision is `d42014e2f358cb4b42564150f93625ae83784c73`;
+that observer correction required no candidate rebuild.
+
+Evidence already retained in ignored root artifacts:
+
+- `a.sqlite-step4-descriptor-check.log`: cumulative Git Bash Step 4 exit 0,
+  including 57 production lint targets, acceptance syntax/ShellCheck,
+  42 probe tests (four Linux-only skips), build fixtures, 27 closure checks
+  and 34 acceptance fixtures.
+- `a.sqlite-descriptor-native.log`: all 42 tests pass on RHEL with no skips;
+  native build fixtures report 32 checks and capture fixtures 38 checks.
+- `a.sqlite-final-report.json` and `a.sqlite-final-roles/`: all three roles
+  validated, command exit codes checked, matching archive identities and
+  operator JSON hashes. Report SHA256 is
+  `3da7d4e3658e9a4e7aacf6439ebc24f00e7013510c5b1f0b83f809ff464493b7`.
+- `a.sqlite-debian174/`, `a.sqlite-descriptor-build2/`,
+  `a.sqlite-descriptor-rhel/` and `a.sqlite-descriptor-namespace/`: raw
+  corrected-observer evidence, including all 24 parent preservation exits 0.
+- The acceptance document records archive hashes, source/install/promoted
+  probes, all environment identities and the failed 172/diagnostic 173 runs.
+
+Live content preservation passed. No host-root operation, release publication,
+or Debian compilation was needed. Jenkins capture completed successfully;
+this does not assert that unrelated later Jenkins diagnostics all succeeded.
+
+The repository's mandatory `.review-validation` is Bash lint. The plan's
+cumulative Step 4 runner supplies its Python unittest and Bash fixtures.
+There is no configured project coverage percentage for these scripts; static
+symbol exercise is recorded in the validation plan. No new production class
+or architectural layer was added. Map parsing and preservation scans are
+linear in their inputs, and existing command/report behavior is retained.
+
+Retained caveats are explicit: static archive closure reports PARTIAL and
+26 existing crt.o relocation diagnostics belong to item 7. Final release
+rebuild and full application integration acceptance remain item 7 work.
+
+### Implementation report for step 4 python-sqlite-support (round 1)
+
+Step 4 adds explicit capture phases for preflight, build, assembly, deployment
+and operator probing, plus a combined report. The driver checks owned paths,
+input digests, recorded commands and exits, live content preservation and
+expected provider identities. Refusal fixtures cover malformed/missing
+results, misleading wrapper success, failed commands, boundary escapes and
+live content changes with restored timestamps.
+
+The existing RHEL account cannot create a sibling directory under /home.
+An unprivileged user/mount namespace presents independent backing files at
+the installer's normal home anchor and retains a read-only view of the live
+roots. The parent verifies preservation again after every namespace command.
+The deployment bootstrap remains separate from the build; Debian receives
+the same archive via the existing owner-authorized Jenkins route.
+
+Actual acceptance required already-committed production repairs that are
+part of this step's assessment, beyond the current staged diff:
+
+- `f5c4a21eaafe6c58ca0dd7c094f8ec4af7628167` scopes the validated source
+  libpython preload to the source build check.
+- `14d4af084c303b4ccaa234b3c9a19e7110d8e1ec` uses SQLite DT_RUNPATH so the
+  normal promoted wrapper selects its shipped payload while the build tree
+  remains present.
+- `d42014e2f358cb4b42564150f93625ae83784c73` binds filesystem identity to
+  kernel mapping identity through a held expected-provider descriptor and
+  private mapping, with refusal tests for missing, changed or ambiguous
+  evidence. The reference mapping itself cannot prove a library was loaded.
+
+The consuming project develop branch contains the reusable Jenkins capture script.
+Accepted run 174 used `88f59d8c08b04f95bc235c1d9fe6b473b2125ba2`.
+Cleanup `64a59cb9` removed the temporary validation pin and made candidate
+capture conditional on a pin; publication mode remains off. These commits
+are documented cross-repository evidence, outside this cplx commit batch.
+
+The specifications now reflect the owner's actual environment clarification.
+Both the canonical umbrella row and its topic snapshot link to completed
+validation. Updating the topic snapshot also preserves unambiguous branch
+selection in the workflow launcher when the umbrella changes.
+
+### Change summary for step 4 python-sqlite-support (round 1)
+
+The mechanically validated root `a.commit` covers all 15 staged paths in
+three dependency-ordered groups:
+
+1. `test(sqlite): capture isolated candidate acceptance`
+   - docs/v0.27.0/acceptance.python-sqlite-capture.sh
+   - docs/v0.27.0/acceptance.python-sqlite-deploy.sh
+   - docs/v0.27.0/acceptance.python-sqlite-namespace.sh
+   - docs/v0.27.0/acceptance.python-sqlite-report.sh
+   - docs/v0.27.0/acceptance.python-sqlite-support.sh
+   - docs/v0.27.0/verify.python-sqlite-acceptance.sh
+   - docs/v0.27.0/verify.python-sqlite-namespace.sh
+   - docs/v0.27.0/verify.python-sqlite.sh
+2. `docs(sqlite): describe the verified execution route`
+   - docs/v0.27.0/design.v0.27.0.python-sqlite-support.md
+   - docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md
+   - docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+3. `docs(python-sqlite-support): record step 4 validation`
+   - docs/v0.27.0/acceptance.python-sqlite-support.md
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+   - docs/v0.27.0/draft.v0.27.0.python-sqlite-support.md
+   - docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+
+The final group intentionally trails the behavior and specification groups.
+All code files remain below the approved line budget. Publication may update
+the versioned review transcript; that is handled by the canonical residual
+commit continuation after the reviewed batch.
+
+### Writer response for step 4 python-sqlite-support (round 1)
+
+Writer response:
+
+This is the initial review round for Step 4. There is no preceding Step 4
+reviewer feedback to accept or dispute.
+
+Use the retained actual acceptance evidence and the focused local runner;
+do not repeat the expensive remote build or Jenkins deployment without a
+specific new defect requiring it. `a.sqlite-step4-check.cmd` is the ignored
+Windows wrapper prescribed by the plan: it loads senv and runs the cumulative
+Step 4 script under Git Bash with the independent shared Python interpreter.
+The exact additional validation command is `cmd /d /c a.sqlite-step4-check.cmd`.
+It includes the mandatory Bash lint gate and preserves the intended shell.
+
+### Reviewer focus for step 4 python-sqlite-support (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-09-16T15:46:45+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Baseline index tree: 1e0cd0ab935daefcac9741838fa0b39fadb6aca2
+
+Assessed index tree: 1e0cd0ab935daefcac9741838fa0b39fadb6aca2
+
+### Implementation check for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 4 has been fully implemented.
+
+One identified non-release Python 3.13.15 archive was rebuilt, packaged and
+accepted in all three roles, the governing documents were amended to describe
+the route actually used, and the umbrella item is completed with its validation
+path.
+
+#### What was verified for step 4 python-sqlite-support (exchange 1) (round 1)
+
+- **Gates.** The lint floor is clean, and the cumulative Step 4 runner passes:
+  effort syntax and ShellCheck over nine scripts, 42 probe tests
+  (`OK (skipped=4)`), the four actual CMD launcher cases, 27 closure checks and
+  34 acceptance fixtures, which the runner explicitly labels as not candidate
+  acceptance. The reviewer also ran the probe suite natively on the RHEL host:
+  42 tests, no skips, which covers the Linux-only descriptor paths Windows
+  skips.
+- **Candidate binding.** `a.sqlite-final-roles/{build,rhel,debian}/role.json`
+  each record the same archive digest
+  `c9fcb783e10409411d2fd08f3951ec163b1143d7357203fc237afbb71ce24e91` with
+  `preservation: passed` and a distinct operator-probe digest per environment.
+  `a.sqlite-final-report.json` hashes to the recorded
+  `3da7d4e3658e9a4e7aacf6439ebc24f00e7013510c5b1f0b83f809ff464493b7`.
+- **Operator results, read directly by the reviewer.** Each role's retained
+  `operator.json` reports `database: passed` and `outcome: passed`, and each
+  names a loaded provider under that role's own
+  `tools/python/root/usr/lib64/libsqlite3.so.0.8.6` with the extension under its
+  own `python-3.13.15/lib/python3.13/lib-dynload`. No role resolves a host
+  library. All three report the same interpreter build stamp, which is
+  consistent with one RHEL-compiled archive relocated into three different
+  prefixes: the promoted build tree, a separate deployment directory and the
+  Debian workspace. That is AC4 and requirement Q04 satisfied by observation
+  rather than by assertion.
+- **Driver design.** `acceptance.python-sqlite-support.sh` refuses to default to
+  the login home, requires an audited control inventory whose digest it checks
+  before use, restricts scalar settings to a safe key and value pattern with no
+  evaluation, demands explicit live preservation roots disjoint from the owned
+  home, records full-content manifests before and after, and refuses a rerun of
+  a finalized or failed phase. Only the build role may compile or package. The
+  build phase requires `MODULE__SQLITE3_STATE=yes` and the rebuild trace; the
+  assemble phase refuses any pre-existing candidate archive and records exactly
+  one; deploy and probe re-verify the archive digest around relocation.
+- **Isolation.** `acceptance.python-sqlite-namespace.sh` refuses to run as root,
+  requires an owned canonical `/home/<one-segment>` account home, an owned
+  backing directory below it and a `/var/tmp` control directory, binds the live
+  home read-only for manifests, binds the backing directory over the home only
+  inside the child, and re-checks parent home identity, control hashes and
+  absence of the child mount after every command, overriding the command status
+  on any preservation failure. `verify.python-sqlite-namespace.sh` proves the
+  capability with disposable fixtures, including that the live view rejects a
+  write and the parent sees no leftover mount.
+- **Production repairs relied on by this step**, all already committed:
+  - `f5c4a21` preloads the validated source `libpython` for the build probe
+    only, because the populated build's `DT_RPATH` otherwise selects the old
+    installed library;
+  - `14d4af0` adds `-Wl,--enable-new-dtags` to the scoped SQLite link so the
+    promoted wrapper's path wins while the build sandbox still exists;
+  - `d42014e` binds filesystem identity to kernel mapping identity through a
+    held descriptor and a private one-page reference mapping, excludes that
+    reference from loaded-library evidence, and keeps refusing missing,
+    replaced, deleted, ambiguous and competing providers. Its tests cover the
+    reference-only false positive and the descriptor mismatches.
+- **Specification amendments.** The design records the `DT_RUNPATH` link, the
+  scoped preload, the OverlayFS descriptor observer and the namespace boundary.
+  The requirement's Q07 and AC11 record the owner's 2026-09-16 clarification
+  selecting the existing Debian 12 Jenkins container, and its Q10 section
+  records the new dynamic tags. The plan replaces the "separate home is an
+  external prerequisite" constraint with the measured namespace route and keeps
+  the physical nested path excluded as a build home. This is the governing
+  record the earlier rounds required before such a change could be relied on.
+- **Disclosure.** Jenkins builds 172 and 173 are retained as refusals with their
+  cause, the static closure scope is reported as `PARTIAL` with its counts, and
+  the 26 `crt.o` relocation diagnostics are assigned to item 7.
+
+#### Architecture check by the reviewer for step 4 python-sqlite-support (exchange 1) (round 1)
+
+The acceptance work is verification material: phase driver, capture helpers,
+namespace launcher, consumer bootstrap and report, each with one responsibility.
+Build policy stays in the Python install adapter and mapping observation in the
+standalone probe. The namespace preserves the installer's existing anchor rule
+instead of changing the relocation contract, and packaging keeps its owned
+source stage.
+
+Yes, one point is worth recording rather than fixing: the design describes an
+ambiguous provider as `inconclusive`, while the descriptor-bound observer now
+reports a competing loaded provider as `failed`. Both refuse acceptance and both
+are covered by tests, so this is a classification wording gap, not a defect.
+
+#### Performance check by the reviewer for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Manifests use one traversal with batched hashing, link resolution is batched
+rather than per-entry, and identity comparisons use associative lookups without
+sorting. The probe still performs one bounded database round trip, at most two
+private reference mappings and one maps read. No quadratic or tree-wide hashing
+work was added to production paths. No, there is no performance issue that needs
+to be addressed.
+
+#### Coverage check by the reviewer for step 4 python-sqlite-support (exchange 1) (round 1)
+
+The repository configures no Python coverage gate, so the check is static. The
+42-test unit module exercises the probe's classes and every top-level helper,
+including the new `mapped_reference` and `descriptor_identity` paths, reference
+lifetime, distinct stat and mapping identities, and reference-only evidence.
+Every new Bash helper is reached from a phase, fixture, consumer or report entry
+point, and the 34 acceptance fixtures cover the refusal paths. No, there is no
+unit-tested class below 100% that needs completing. No, no top-level symbol
+staged outside a coverage gate is unreferenced.
+
+Validation plan effects:
+
+None. The reviewer did not edit
+`docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md`. Its Step 4
+rows, the document-level `Yes, it is implemented.` line and the completed
+umbrella row are the writer's own edits, made before this review. The recounted
+line budgets (probe 337, unit module 483, driver 276, capture helpers 219) match
+the rows, and the reviewer's independent runs match the recorded gate results.
+
+### Pre-repair mandatory checks and coverage for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Both resolved commands ran on the received index tree
+`1e0cd0ab935daefcac9741838fa0b39fadb6aca2`; no reviewer repair was made.
+
+- `bash src/utils/lint_shell.sh`, through the guard-clearing `senv.bat` form:
+  `lint_shell: 57 tracked scripts`, `lint_shell: clean`, exit 0.
+- `cmd /d /c a.sqlite-step4-check.cmd` (wrapper inspected first): the lint
+  floor, `bash -n` and ShellCheck over the nine effort scripts, Python syntax,
+  `Ran 42 tests` with `OK (skipped=4)`, the four actual CMD launcher cases,
+  `SQLite closure: 27 checks passed in 27 seconds`,
+  `SQLite acceptance fixture checks passed: 34 (no candidate acceptance)` and
+  `SQLite cumulative checks passed through step 4`; exit 0.
+
+Additional reviewer checks:
+
+- The probe suite ran natively on the RHEL 9.8 build host from the staged index
+  in an owned `/tmp` directory: 42 tests, all OK, no skips, then removed. This
+  covers the four Linux-only cases the Windows run skips, which are exactly the
+  descriptor and mapping paths the corrected observer adds.
+- `git diff --cached --check` passed.
+- `commit-plan-check.bat --format json` returned status 0 with no diagnostics.
+- Recounted line lengths: probe 337, unit module 483, driver 276, capture
+  helpers 219, matching the recorded budget rows.
+- The retained `a.sqlite-final-report.json` hashes to
+  `3da7d4e3658e9a4e7aacf6439ebc24f00e7013510c5b1f0b83f809ff464493b7`, the value
+  the request records, and `a.sqlite-final-roles/` holds the three role
+  directories.
+
+No coverage percentage applies; the repository configures no Python coverage
+gate. The reviewer did not repeat the candidate build, promotion, packaging,
+RHEL deployment or Jenkins run, as the request asks and because no defect
+required it.
+
+### Resolved validation set and sources for step 4 python-sqlite-support (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `cmd /d /c a.sqlite-step4-check.cmd` (source: plan; the ignored Windows
+  wrapper that clears the setup guard, loads `senv.bat` and runs
+  `docs/v0.27.0/verify.python-sqlite.sh --step 4 --python <absolute>` under the
+  configured Git Bash)
+
+### Resolver drift and direction for step 4 python-sqlite-support (exchange 1) (round 1)
+
+No drift. The request carries the project lint floor and the plan's cumulative
+Step 4 runner in its prescribed Windows wrapper form. The plan's native Linux
+counterpart, the three-role host captures and the Jenkins run are recorded
+evidence outside the mandatory set; the reviewer repeated only the probe unit
+suite on RHEL, because the corrected observer's descriptor paths are
+Linux-only and the Windows run skips them.
+
+### Repository state around validation for step 4 python-sqlite-support (exchange 1) (round 1)
+
+- **Index trees:** the request-time, reviewer-entry and assessed trees are all
+  `1e0cd0ab935daefcac9741838fa0b39fadb6aca2` (no reviewer repair).
+- **Umbrella digest:** unchanged
+  (`0218245242f1ccec3561ef41f23322e0c6c2f3a12e69981a8fc1c9698e769fc6`). The
+  staged item 6 completion is the writer's own edit, made before this review.
+- **Validation state:** the comparison over the 15 staged Step 4 paths reports
+  no tracked, ignored or untracked difference. The cumulative gate's fixtures
+  cleaned up their own scratch trees.
+- **Unstaged tracked change:** the protocol transcript only, neither read as
+  working context nor staged.
+- **Reviewer actions on the host:** the probe suite ran from the index in an
+  owned `mktemp -d /tmp` directory on the build host, which was then removed.
+  No candidate build, promotion, packaging, deployment or Jenkins run was
+  repeated.
+
+### Repair inventory for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 4 python-sqlite-support (exchange 1) (round 1)
+
+`commit-plan-check.bat --format json` ran independently on the received tree and
+returned status 0, `state: valid`, `ready: true` and no diagnostics, with 15
+staged paths in three groups:
+
+1. `test(sqlite): capture isolated candidate acceptance`: the five acceptance
+   scripts, the two new fixtures and the cumulative runner;
+2. `docs(sqlite): describe the verified execution route`: design, requirement
+   and plan;
+3. `docs(python-sqlite-support): record step 4 validation`: acceptance record,
+   umbrella draft, topic draft and the validation plan.
+
+The order is right: behavior first, then the specification amendments that
+authorize it, then the records that depend on both. The umbrella row and its
+topic snapshot travel with the validation record they cite. Membership, order
+and subjects match the staged work, and `a.commit` was not amended. The three
+production repairs this step relies on (`f5c4a21`, `14d4af0`, `d42014e`) are
+already committed, so they are outside this batch by construction. The status 0
+proves only mechanical grouping.
+
+### Findings and boundaries for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 python-sqlite-support (exchange 1) (round 1)
+
+No change is requested for Step 4.
+
+1. Present this advisory commit-ready recommendation at the human commit gate,
+   and include the review transcript through the residual continuation.
+2. Keep the disclosed residuals visible when the umbrella moves on: the static
+   closure scope is `PARTIAL`, the 26 `crt.o` relocation diagnostics stay with
+   item 7, and item 7 must repeat the unchanged gate and all three roles on its
+   final rebuilt archive.
+3. Step 3's authorized retention merge and fresh-clone proof remain outstanding
+   if they have not run yet; a fresh clone cannot resolve the closure envelope's
+   source until then.
+4. Optional wording, outside the reviewed step: the design describes an
+   ambiguous provider as inconclusive, while the descriptor-bound observer now
+   reports a competing loaded provider as failed. Both refuse acceptance, and
+   the tests cover both, so this is a classification note rather than a defect.
+
+### Decision rationale for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Decision: commit-ready (advisory).
+
+The readiness floor passes:
+
+- **Exact identity:** envelope, human-readable identity, plan, step 4, round 1,
+  occurrence 1, umbrella and request-time tree `1e0cd0a` agree.
+- **Complete implementation:** the candidate was rebuilt, packaged and accepted
+  in the build, RHEL deployment and Debian Jenkins roles against one archive
+  digest, with preservation passing in each role and AC1-AC11 mapped to
+  evidence or refusal controls.
+- **Mandatory validation:** both resolved commands pass, plus the reviewer's
+  native RHEL probe run covering the Linux-only descriptor paths.
+- **Attributable staged scope:** all 15 paths belong to Step 4, including the
+  specification amendments that authorize the executed route and the umbrella
+  row with its validation path.
+- **No unresolved or boundary-crossing findings.**
+- **Accurate `a.commit`:** mechanically ready, correctly ordered, and its
+  content matches.
+
+Two things carried weight in this decision. First, the route actually used,
+an unprivileged user and mount namespace instead of a separate home, and the
+Jenkins container instead of a plain one, is not a silent deviation: the owner's
+clarification is recorded, and the design, requirement and plan were amended in
+the same batch, which is what earlier rounds of this effort required. Second,
+the acceptance mechanism refuses rather than assumes: the driver demands audited
+controls, explicit live roots and structured probe results, and the corrected
+observer still excludes its own reference mapping from loaded-library evidence.
+
+The residuals are disclosed rather than hidden: the static closure scope is
+`PARTIAL`, 26 `crt.o` diagnostics belong to item 7, and item 7 must repeat the
+gate and all three roles on its final archive. Step 3's retention merge and
+fresh-clone proof remain outstanding separately.
+
+The reviewer made no repair. This recommendation does not authorize a commit,
+and it does not stand in for the human's judgment on completing umbrella item 6.
+
+### Final reviewer decision for step 4 python-sqlite-support (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4-round-1 -->
+
+## Round 1 by human - Step 4 - human-confirmation
+
+- Recorded: 2026-09-16T15:48:29+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
