@@ -93,6 +93,14 @@ select it if clean. Python 3.13.10 is excluded. The tracked 3.13.15 pin and
 item 6's non-release validation are not evidence that this release-time
 re-check has happened.
 
+Retain the checked upstream release and regression sources and the check date
+with the selected version in the release evidence. Select 3.13.15 when no
+known unresolved regression blocks required application or toolchain behavior.
+A relevant regression selects the 3.13.14 baseline; inconclusive evidence
+leaves selection unresolved until reviewed. Either version still owes the
+complete final-archive acceptance. This does not require upstream to have
+no outstanding bugs unrelated to the required behavior.
+
 Set `CPLX_VERSION` explicitly; `CPLX_URL` already contains `[version]`.
 Do not delegate this selection to `python_repository` tag discovery, which
 the umbrella records as selecting 3.14.x. The consuming application requires
@@ -240,9 +248,15 @@ installer and wrapper, without pipeline repair shims or per-wheel patching.
 | PA6 | `uv sync`, then `import pymupdf, pikepdf`, without patching wheels | Required | Required |
 | PA7 | Shipped loader `--list` over toolchain ELFs and venv wheels: no `not found`, missing version node or in-scope host runtime provider | Required | The downstream probe is optional; inherited item 4 closure rules still apply |
 | PA8 | `LD_DEBUG=libs,versions` on venv Python importing the heavy wheels: no in-scope runtime dependency from a host path | Required, with conclusive trace inventory | The downstream probe is optional; inherited item 4 runtime-scope rules still apply |
-| PA9 | Application `pytest` with coverage and testmon active | Required | Optional; Windows development flow covers it |
+| PA9 | Full application acceptance suite with the final archive's interpreter, coverage and testmon active, and the application's existing coverage threshold satisfied | Required | Optional; Windows development flow covers it |
 | PA10 | `deploy_pkgs.sh` end to end, including readiness checks | Not applicable | Required |
 | PA11 | Operator `senv` and `.env` sourcing | Not applicable | Required |
+
+PA9 must show that previously SQLite-guarded suites execute. A successful
+plugin import, a no-tests-selected testmon result or SQLite-availability skips
+do not satisfy acceptance. Unrelated expected skips remain governed by the
+application's existing rules. This qualification does not impose a new cplx
+coverage threshold or prevent later incremental testmon use.
 
 Read the static ABI listing and live trace together. The listing covers the
 whole runtime search path; a root-object sweep alone can overstate host
@@ -258,17 +272,34 @@ scope or target amendment and renewed validation when refreshed evidence
 invalidates that measured scope. A validator may not silently exclude an
 object to obtain zero flags.
 
-A plain `debian:12` container can supply Debian validation. The real Jenkins
-pipeline supplies the final integration run once it can fetch the new tools
-archive. Its first run uses the new pin with application snapshot publication
-disabled. A container result does not claim that this later real-agent run
-has already happened.
+Before immutable tools publication, the existing Debian 12 Jenkins agent must
+pass the candidate integration chain, ABI checks and full PA9 acceptance
+using item 6's established archive-copy validation route, with application
+uploads disabled. That route must still be available and usable at release
+time. Record the actual userland/container identity and transfer digest;
+no extra SQLite payload or host package installation may make the final
+candidate appear self-contained.
 
-Item 6's completed evidence uses the existing Debian 12 Jenkins agent and
-archive-copy route, with actual userland/container identity and transfer
-digest recorded. That established route is available context for this item's
-acceptance; no extra SQLite payload or host package installation may make
-the final candidate appear self-contained.
+A plain `debian:12` container can supply supporting validation, but cannot
+replace that pre-publication Jenkins qualification. After tools publication,
+separately confirm retrieval and use through the new release pin on the real
+agent, still with application snapshot upload disabled. This later run proves
+the published artifact, its download and the startup pin together before
+snapshot uploads resume. Neither run substitutes for the other, and no
+intermediate Maven release is introduced.
+
+## Validity of the final archive acceptance evidence
+
+Associate acceptance with the archive identity, application revision,
+dependency lock, resolved wheel set and observed platform/runtime identities.
+A relevant change makes the affected acceptance results pending until
+reassessed and repeated. Unchanged, demonstrably unaffected results may be
+retained with a recorded reason rather than rerunning unrelated checks.
+
+The maintainer operating this release records the affected-or-unaffected
+assessment and the reason for each retained result in the release evidence.
+An unchanged archive digest alone cannot carry old ABI or coverage evidence
+forward when the consuming application's wheels or runtime have changed.
 
 ## Release publication and consuming-project adoption
 
@@ -297,7 +328,7 @@ parameter or a Jenkinsfile constant.
 The application also reads `tools/publish.mode` at startup. `snapshot`
 enables application upload; any other value runs relocate, provision, package
 and walk without publishing. Raise the tools pin with this switch off for
-the first real-agent run, prove the chain and ABI probes, then restore
+the first post-publication real-agent run, prove the chain and ABI probes, then restore
 `snapshot` after acceptance. A failing walk still skips publication.
 
 The consuming-repository handoff includes:
@@ -316,16 +347,29 @@ The consuming-repository handoff includes:
 These are application-repository edits coordinated with adoption. Their
 location does not make Debian coverage optional in this requirement.
 
+If the published archive fails adoption, keep adoption incomplete and
+application uploads disabled during failure handling. When the new archive
+cannot pass, restore the known working pin and its compatible pipeline
+settings/interims. Confirm that restored configuration before resuming normal
+uploads. This may temporarily restore coverage-disabling settings; it does
+not count as completion of this item.
+
+Preserve the failed coordinate and its evidence. A corrected tools archive
+requires a new eligible release coordinate and renewed acceptance; never
+overwrite the failed release or silently qualify it with replacement bytes.
+
 ## Release acceptance and evidence for tools-archive-rebuild
 
 | ID | Acceptance condition |
 | --- | --- |
-| RA1 | The final payloads are refreshed and coherent; the explicitly selected Python 3.13 version and release-time 3.13.15 regression check are recorded with the final payload/archive identity. |
+| RA1 | The final payloads are refreshed and coherent; the explicitly selected Python 3.13 version, dated upstream sources and conclusive release-time 3.13.15 regression decision are recorded with the final payload/archive identity. |
 | RA2 | The final archive contains `_sqlite3` and its shipped SQLite provider, repeats item 6 acceptance, and passes every item 4 closure check with no active waiver. Its retained source-envelope commit resolves in the publishing checkout; any renewed declaration has the required source identity, retention and clone proof. The separately recorded release commit resolves to the declaration digest carried by the archive. |
 | RA3 | D10 consumer/provider evidence covers the fixed final wheel and dependency set; the selected runtime satisfies all demands or packaging fails. |
-| RA4 | All AR1-AR4 archive-content assertions and all required PA1-PA11 platform cells pass with conclusive static and runtime evidence. |
+| RA4 | All AR1-AR4 archive-content assertions and all required PA1-PA11 platform cells pass with conclusive static and runtime evidence. The existing Jenkins agent passes the candidate integration chain, ABI checks and full PA9 acceptance before immutable publication, with application uploads disabled. |
 | RA5 | Publication uses the next application release coordinate, preserves local timestamp naming and accepted-artifact traceability, and does not overwrite a release. |
-| RA6 | The first consuming-project real-agent run uses the new pin with snapshot upload disabled and proves the chain and ABI probes before snapshot upload is re-enabled. The coordinated pipeline changes restore coverage/testmon and retire the applicable interims. |
+| RA6 | The first post-publication consuming-project real-agent run uses the new pin with snapshot upload disabled and confirms published-artifact retrieval and use, the chain and ABI probes before snapshot upload is re-enabled. The coordinated pipeline changes restore coverage/testmon and retire the applicable interims. |
+| RA7 | Acceptance identifies the archive, application revision, lock, resolved wheels and platform/runtime state; relevant changes repeat affected checks, with the release maintainer recording the assessment and reasons for retaining unaffected evidence. |
+| RA8 | Failed adoption remains incomplete, preserves its coordinate and evidence, and follows the verified prior-configuration recovery rule. A corrected archive requires a new eligible release coordinate and renewed acceptance. |
 
 ## Implementation references and scope boundaries
 
@@ -353,249 +397,15 @@ application's uv requirements pin, and the separate rsync symlink-destination
 follow-up remain outside this item. It does not reopen the completed
 implementation decisions of items 1 to 6.
 
-## Open questions for the v0.27.0 tools archive feature request
+## Requirement clarifications
 
-The answer lines below contain proposed answers for review. They do not
-record human approval or reopen the completed requirements of items 1 to 6.
+The author selected `Consolidate` after independent specification review
+converged in round 2, accepting option A for Q01 to Q05.
 
-### Q01: Evidence for the release-time Python regression decision
-
-D5 requires a fresh regression check before choosing Python 3.13.15, with
-3.13.14 as the baseline. What makes that check conclusive, particularly when
-a report is unresolved or the available information cannot establish whether
-it affects this application's supported use? Item 6's earlier successful
-build cannot answer this release-time question.
-
-#### BBQ for Q01
-
-A replacement grill has cooked one meal successfully, but the chef still
-checks current fault notices before choosing it for the event. An unreadable
-notice does not establish that the grill is sound. In this picture: the
-replacement grill is Python 3.13.15, the earlier meal is item 6's validation,
-the fault notices are current regression evidence, and the event is the
-release rebuild.
-
-#### Options for Q01
-
-- Option A: Record a dated review of upstream release and regression
-  information, retain the checked sources and date with the selected version
-  in the release evidence, explain the relevance of any findings, and select 3.13.15
-  when no known unresolved regression blocks the required application or
-  toolchain behavior. A relevant regression selects the 3.13.14 baseline;
-  inconclusive evidence leaves selection unresolved until reviewed.
-  - pro: Makes "clean" assessable without claiming that a Python release
-    contains no bugs at all.
-  - con: An unresolved report can delay the rebuild.
-- Option B: Fall back to 3.13.14 whenever the check is inconclusive as well
-  as when a relevant regression is confirmed.
-  - pro: Gives the rebuild a deterministic choice despite incomplete
-    information.
-  - con: Converts missing evidence into a release decision and can discard
-    3.13.15 unnecessarily.
-
-#### Recommended option for Q01 (with arguments for this choice)
-
-Option A: Preserve D5's conditional selection and record the reason it is
-satisfied. The review concerns regressions relevant to the required behavior;
-it is not a promise that upstream has no outstanding issue. Either selected
-version still owes the complete final-archive acceptance.
-
-#### Answer to Q01: option A (with reason why it must be accepted as the answer)
-
-Option A: A dated, reasoned decision is needed to distinguish the mandated
-fresh regression check from the earlier 3.13.15 trial. An unknown result must
-not silently become a positive release qualification.
-
-### Q02: What proves Debian tests with coverage and testmon work
-
-PA9 requires pytest with coverage and testmon active, and adoption removes
-the disabling flags. Is plugin availability enough, or must the evidence
-show a substantive application test run that meets the application's current
-coverage gate and actually executes its previously SQLite-guarded suites?
-A warm testmon selection could otherwise produce a successful run without
-exercising the behavior this release is meant to restore.
-
-#### BBQ for Q02
-
-Connecting a thermometer to the grill does not prove that the meal reached
-the required temperature. The cook needs a reading from the meal being
-served. In this picture: the thermometer is the coverage plugin, the meal is
-the required application suite, and the temperature requirement is the
-application's existing coverage gate.
-
-#### Options for Q02
-
-- Option A: Require the application's full acceptance suite on Debian with
-  the final archive's interpreter, coverage and testmon enabled, its existing
-  coverage threshold satisfied,
-  and evidence that SQLite-dependent suites execute. A no-tests-selected
-  result or SQLite-availability skip does not satisfy acceptance; unrelated
-  expected skips remain subject to the application's existing rules.
-  - pro: Establishes the working test and coverage capability requested by
-    the author, without inventing a new numerical threshold.
-  - con: Requires a complete acceptance run even when an incremental run
-    would be faster.
-- Option B: Accept a successful normal incremental run with both plugins
-  enabled and retain their reports, even if testmon selects few or no tests.
-  - pro: Matches ordinary incremental pipeline use and costs less time.
-  - con: Can leave the coverage gate or SQLite-dependent suites unproven.
-
-#### Recommended option for Q02 (with arguments for this choice)
-
-Option A: Qualify the release with substantive evidence of the restored
-capability. Preserve the application's own suite and threshold definitions;
-do not introduce a cplx-specific threshold or prohibit later incremental
-testmon use.
-
-#### Answer to Q02: option A (with reason why it must be accepted as the answer)
-
-Option A: Removing two disabling flags is only successful adoption when
-Debian can actually execute the affected suites and satisfy the existing
-coverage contract with the final archive.
-
-### Q03: Validity of evidence after application or environment changes
-
-The requirement identifies the accepted archive and fixes the wheel set for
-D10, but publication may wait for the next application release. How should
-acceptance be treated if the application revision, dependency lock, resolved
-wheel set or relevant platform/runtime state changes during that wait?
-
-#### BBQ for Q03
-
-A tasting approves a particular menu cooked on particular equipment. If an
-ingredient changes before serving, the earlier tasting does not automatically
-approve the changed dish. In this picture: the menu is the application and
-dependency set, the equipment is the platform/runtime state, the tasting is
-the recorded acceptance, and serving is release publication and adoption.
-
-#### Options for Q03
-
-- Option A: Associate acceptance with the archive identity, application
-  revision, lock and resolved wheel set, and observed platform/runtime
-  identities. A relevant change makes the affected acceptance results
-  pending until reassessed and repeated; unchanged, demonstrably unaffected
-  results can be retained with the reason recorded. The maintainer operating
-  this release records the affected-or-unaffected assessment and the reason
-  for each retained result in the release evidence.
-  - pro: Prevents stale ABI or coverage evidence while avoiding needless
-    repetition of unrelated checks.
-  - con: Requires an explicit assessment of what a change affects.
-- Option B: Keep archive acceptance valid until the archive bytes change,
-  leaving application and environment differences to the final agent run.
-  - pro: Reduces repeated qualification while waiting for the release.
-  - con: Allows immutable publication based on a different wheel or runtime
-    set from the one that will consume it.
-
-#### Recommended option for Q03 (with arguments for this choice)
-
-Option A: The runtime boundary includes the consuming application and its
-wheels, so an archive digest alone cannot establish that old evidence still
-applies. Scope repetition to affected acceptance rather than declaring every
-change a reason to rebuild everything.
-
-#### Answer to Q03: option A (with reason why it must be accepted as the answer)
-
-Option A: The acceptance record must describe the combination actually being
-released and consumed, especially for D10 and Debian coverage. Relevant
-changes cannot silently inherit a pass earned by another combination.
-
-### Q04: Real Jenkins validation before immutable publication
-
-The approved scope permits plain Debian validation before publication and
-requires a real-agent integration run after the release pin can fetch the
-archive. Item 6 also established an existing Jenkins agent route for copying
-and validating an unpublished candidate. Should item 7 require that route
-to prove the full candidate chain before spending an immutable release
-coordinate, while retaining the required release-pin confirmation afterward?
-Neither option introduces an intermediate Maven release or changes D1.
-
-#### BBQ for Q04
-
-A caterer can test the menu in a practice kitchen and discover venue-specific
-problems only after committing the event order, or also rehearse in the venue
-before committing it. In this picture: the practice kitchen is a plain
-Debian container, the venue is the existing Jenkins agent, the rehearsal is
-unpublished-candidate acceptance, and the committed order is the immutable
-tools release coordinate.
-
-#### Options for Q04
-
-- Option A: Require the existing Debian Jenkins agent to pass the candidate
-  integration chain, ABI checks and Q02 acceptance before release publication,
-  using the established validation delivery route with application uploads
-  disabled. After publication, separately confirm retrieval and use through
-  the new release pin before enabling snapshot uploads.
-  - pro: Finds Jenkins-specific coverage and runtime failures before an
-    immutable coordinate is consumed.
-  - con: Needs an agent qualification run before publication as well as the
-    required confirmation afterward; the established validation delivery
-    route must remain available and usable at release time.
-- Option B: Keep plain Debian results sufficient before publication and
-  reserve the full Jenkins acceptance for the first release-pin run.
-  - pro: Follows the minimum sequence already described in the draft.
-  - con: A Jenkins-specific failure can leave the published release unusable
-    and require a later coordinate.
-
-#### Recommended option for Q04 (with arguments for this choice)
-
-Option A: Reuse the route already proven by item 6 to qualify the intended
-consumer before publication. The later release-pin run still establishes
-that the published artifact, its download and the startup pin work together.
-
-#### Answer to Q04: option A (with reason why it must be accepted as the answer)
-
-Option A: The existing validation route makes pre-publication proof on the
-actual agent feasible without an intermediate release. Both the candidate
-qualification and the subsequent published-coordinate confirmation matter.
-If this answer is confirmed, consolidation must reconcile the platform
-acceptance prose: plain-container results remain useful supporting evidence,
-but do not replace the required pre-publication Jenkins qualification; the
-post-publication release-pin run remains required separately.
-
-### Q05: Recovery when the published archive fails adoption
-
-The first release-pin run keeps application snapshot publication disabled,
-but the requirement does not state the expected recovery if that run fails
-after the tools archive has been published. Should the consuming pipeline
-remain on the failing pin while repair is prepared, or return to its last
-working tools configuration? The existing ban on overwriting a release
-continues to apply in either case.
-
-#### BBQ for Q05
-
-If the newly delivered grill fails its venue check, service can return to
-the previous working setup while a replacement is prepared. Replacing the
-label on the failed delivery would hide what happened. In this picture:
-the new grill is the published tools archive, the venue check is the first
-release-pin run, the previous setup is the known working pin and compatible
-interims, and the delivery label is the immutable release coordinate.
-
-#### Options for Q05
-
-- Option A: Keep adoption incomplete and application uploads disabled during
-  failure handling; restore the known working pin and its compatible
-  pipeline settings/interims when the new archive cannot pass. Confirm that
-  restored configuration before resuming normal uploads. Preserve the failed
-  coordinate and evidence; any corrected tools archive requires a new
-  eligible release coordinate and renewed acceptance.
-  - pro: Gives the consuming project an explicit recovery outcome without
-    disguising a failed release or weakening the publication gate.
-  - con: Can temporarily restore the coverage-disabling settings and defer
-    the intended improvement until a later accepted release.
-- Option B: Leave the new pin installed with uploads disabled until its
-  failure is resolved through a later accepted tools release.
-  - pro: Avoids a temporary reversal of the adoption edits.
-  - con: Can block otherwise working application delivery while waiting for
-    the next eligible release.
-
-#### Recommended option for Q05 (with arguments for this choice)
-
-Option A: Preserve a usable application pipeline while keeping the failed
-adoption visible. Restoring its prior behavior does not count as completion
-of item 7, and does not authorize overwriting the failed tools release.
-
-#### Answer to Q05: option A (with reason why it must be accepted as the answer)
-
-Option A: Immutable publication needs a defined recovery outcome. Returning
-to a verified prior configuration protects ongoing delivery while the new
-archive still owes its own successful acceptance and adoption.
+| Question | Decision | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | Keep dated upstream sources with the version decision. Choose 3.13.15 absent a known relevant blocking regression, fall back to 3.13.14 for a relevant regression, and resolve uncertainty before selection. This preserves D5's fresh qualification. | Confirmed interpreter and payload rules; RA1 | Falling back automatically when evidence is inconclusive converts missing information into a release decision. |
+| Q02 | Run the full application acceptance suite on Debian with the final archive's interpreter, coverage and testmon active, the existing coverage threshold met, and SQLite-dependent suites executed. | Platform acceptance; PA9 and RA4 | Plugin availability or an incremental run selecting no tests leaves the restored capability unproven. |
+| Q03 | Bind acceptance to the archive and its consuming application, dependency and runtime identities. The release maintainer records change impact, repeats affected checks and explains retained results. | Validity of the final archive acceptance evidence; RA7 | Treating unchanged archive bytes as sufficient permits stale wheel, ABI or coverage evidence. |
+| Q04 | Require candidate qualification on the existing Jenkins agent before immutable publication, using the available validation route, and separately confirm the published release pin afterward. | Platform acceptance; release publication; RA4 and RA6 | Plain-container qualification alone can expose Jenkins-specific failures only after consuming an immutable coordinate. |
+| Q05 | Keep failed adoption incomplete and uploads off during recovery; restore and verify the known working configuration before normal uploads resume. Preserve the failure and use a new eligible coordinate for a corrected archive. | Release publication and consuming-project adoption; RA8 | Keeping the failing pin indefinitely can block otherwise working application delivery. |
