@@ -6,11 +6,13 @@ the installation/source and sandbox), the exact extension directory, and the
 shipped provider. Build callers also name their configured libpython in the
 source directory. No observation is used to invent an expected root. This
 standalone, standard-library script reads Linux maps once after closing the
-reopened database. Synthetic observations belong only in the unit tests.
+reopened database. Held file descriptors connect filesystem stat identities to
+kernel mappings without treating the private reference as a loaded library.
+Synthetic observations belong only in the unit tests.
 """
 
 import argparse
-from contextlib import closing
+from contextlib import closing, contextmanager, ExitStack
 import importlib
 import json
 import os
@@ -82,6 +84,35 @@ def file_identity(path):
     return {"path": str(resolved), "identity": (major, minor, metadata.st_ino)}
 
 
+@contextmanager
+def mapped_reference(path):
+    """Tie one private reference mapping to a held read-only file descriptor.
+
+    Overlay filesystems can expose a stat identity distinct from the underlying
+    mapping identity. This mapping establishes that relationship independently;
+    it is never counted as proof that the library was loaded by SQLite.
+    """
+    import ctypes
+    import mmap
+
+    resolved = canonical(path)
+    try:
+        with resolved.open('rb') as stream:
+            metadata = os.fstat(stream.fileno())
+            if not stat.S_ISREG(metadata.st_mode):
+                raise ProbeError('regular reference file required', 'inconclusive')
+            major, minor = device_numbers(metadata.st_dev)
+            with mmap.mmap(stream.fileno(), 1, access=mmap.ACCESS_COPY) as mapping:
+                anchor = ctypes.c_char.from_buffer(mapping)
+                try:
+                    yield dict(path=str(resolved), identity=(major, minor, metadata.st_ino),
+                               address=ctypes.addressof(anchor))
+                finally:
+                    del anchor
+    except (OSError, ValueError, BufferError) as error:
+        raise ProbeError(f'provider reference unavailable: {error}', 'inconclusive') from error
+
+
 def parse_maps(content):
     """Parse one snapshot in linear time, retaining unrelated and anonymous rows."""
     records = []
@@ -102,7 +133,7 @@ def parse_maps(content):
             raise ProbeError(f"malformed process mapping: {error}", "inconclusive") from error
         name = fields[5] if len(fields) == 6 else ""
         deleted = name.endswith(" (deleted)")
-        records.append({"path": name[:-10] if deleted else name,
+        records.append({"path": name[:-10] if deleted else name, "start": start, "end": end,
                         "deleted": deleted, "identity": (major, minor, number)})
     if not records:
         raise ProbeError("process mappings are empty", "inconclusive")
@@ -117,12 +148,14 @@ def read_maps():
         raise ProbeError(f"process mappings unavailable: {error}", "inconclusive") from error
 
 
-def mapping_identity(record):
-    """Resolve procfs path spelling and require its current inode to match the map.
+def mapping_identity(record, reference=None):
+    """Resolve procfs spelling and match the file or its held descriptor mapping.
 
     Procfs escapes newlines. Literal backslash sequences can be ambiguous, so
-    try the literal spelling first and accept only a device/inode match. The
-    decoded spelling also supports escaped whitespace from mapping fixtures.
+    try the literal spelling first and accept only a device/inode match. When
+    stat and mapping identities differ, the independently mapped descriptor
+    must bind both identities. The decoded spelling also supports escaped
+    whitespace from mapping fixtures.
     """
     if record["deleted"]:
         raise ProbeError("deleted library mapping", "inconclusive")
@@ -137,14 +170,34 @@ def mapping_identity(record):
             continue
         if observed["identity"] == record["identity"]:
             return observed
+        if (reference is not None and observed['path'] == reference['path']
+                and observed['identity'] == reference['identity']
+                and record['identity'] == reference['mapping_identity']):
+            return observed
     raise failure
 
 
-def match_library(records, expected, root, family):
-    """Require exactly the expected SQLite/libpython backing identity and path."""
+def descriptor_identity(records, wanted, reference):
+    """Resolve the private descriptor mapping once, refusing missing evidence."""
+    if any(reference[key] != wanted[key] for key in ('path', 'identity')):
+        raise ProbeError('named provider changed after descriptor open')
+    matches = [row for row in records if row['start'] <= reference['address'] < row['end']]
+    if len(matches) != 1 or matches[0]['deleted']:
+        raise ProbeError('reference mapping absent or ambiguous', 'inconclusive')
+    row = matches[0]
+    raw = row['path']
+    decoded = re.sub(r'\\(012|011|040|134)', lambda match: chr(int(match[1], 8)), raw)
+    if Path(wanted['path']) not in (Path(raw), Path(decoded)) or row['identity'][2] <= 0:
+        raise ProbeError('reference mapping path or identity differs')
+    return dict(wanted, mapping_identity=row['identity'])
+
+
+def match_library(records, expected, root, family, reference=None):
+    """Require the expected file and loaded mappings, excluding reference mappings."""
     root = directory(root)
     wanted = file_identity(expected)
     require_inside(Path(wanted["path"]), root, f"expected {family}")
+    bound = descriptor_identity(records, wanted, reference) if reference is not None else None
     names = {Path(expected).name, Path(wanted["path"]).name}
     family_prefix = "libsqlite3" if family == "sqlite" else "libpython"
     seen = set()
@@ -152,6 +205,8 @@ def match_library(records, expected, root, family):
     matched = None
     unexpected = None
     for record in records:
+        if reference is not None and record['start'] <= reference['address'] < record['end']:
+            continue
         name = Path(record["path"]).name
         relevant = (name.startswith(family_prefix) or name in names
                     or record["identity"] == wanted["identity"])
@@ -161,7 +216,9 @@ def match_library(records, expected, root, family):
         if key in seen:
             continue
         seen.add(key)
-        observed = mapping_identity(record)
+        observed = mapping_identity(record, bound)
+        if bound is not None and record['identity'] != bound['mapping_identity']:
+            raise ProbeError('loaded mapping differs from opened provider descriptor')
         identities.add(observed["identity"])
         try:
             require_inside(Path(observed["path"]), root, f"mapped {family}")
@@ -178,7 +235,7 @@ def match_library(records, expected, root, family):
         raise unexpected
     if matched is None:
         raise ProbeError(f"expected {family} mapping was not observed", "inconclusive")
-    return matched
+    return dict(matched, mapping_identity=bound['mapping_identity']) if bound else matched
 
 
 def database_roundtrip(sqlite, scratch):
@@ -242,11 +299,17 @@ def assess(args):
         sqlite = importlib.import_module("sqlite3")
         result["database"] = "failed"
         result["database"] = database_roundtrip(sqlite, args.scratch_dir)
-        records = parse_maps(read_maps())
-        result["provider"] = match_library(records, args.expected_provider, python_root, "sqlite")
-        if args.stage == "build":
-            result["libpython"] = match_library(records, args.expected_libpython,
-                                                canonical(args.expected_libpython).parent, "python")
+        with ExitStack() as references:
+            provider = references.enter_context(mapped_reference(args.expected_provider))
+            libpython = (references.enter_context(mapped_reference(args.expected_libpython))
+                         if args.stage == 'build' else None)
+            records = parse_maps(read_maps())
+            result["provider"] = match_library(records, args.expected_provider, python_root,
+                                                "sqlite", provider)
+            if args.stage == "build":
+                result["libpython"] = match_library(records, args.expected_libpython,
+                                                    canonical(args.expected_libpython).parent,
+                                                    "python", libpython)
         result["outcome"] = "passed"
     except ProbeError as error:
         result.update(outcome=error.outcome, error=str(error))

@@ -1,4 +1,4 @@
-"""Exercise persistence and fail-closed provider evidence without Linux dependencies."""
+"""Exercise persistence, descriptor mapping identity and fail-closed evidence."""
 
 import contextlib
 import importlib.util
@@ -25,7 +25,7 @@ DEVICE_NUMBERS = probe.device_numbers
 
 
 class SqliteProbeTests(unittest.TestCase):
-    """Keep fixture identities independent of module observations and test refusals."""
+    """Keep expected identities independent and reject substituted or absent loads."""
 
     def setUp(self):
         self.contexts = contextlib.ExitStack()
@@ -75,12 +75,14 @@ class SqliteProbeTests(unittest.TestCase):
         values.update(changes)
         return types.SimpleNamespace(**values)
 
-    def run_probe(self, args=None, maps=None):
+    def run_probe(self, args=None, maps=None, references=None):
         native = types.SimpleNamespace(__file__=str(self.extension))
         def import_module(name):
             return native if name == "_sqlite3" else sqlite3
         with mock.patch.object(probe.sys, "executable", str(self.executable)), \
                 mock.patch.object(probe.importlib, "import_module", side_effect=import_module), \
+                mock.patch.object(probe, 'mapped_reference', side_effect=lambda path:
+                                  contextlib.nullcontext((references or {}).get(str(path)))), \
                 mock.patch.object(probe, "read_maps", return_value=maps or self.mapping()) as reader:
             result = probe.assess(args or self.args())
         return result, reader
@@ -182,6 +184,92 @@ class SqliteProbeTests(unittest.TestCase):
         with self.assertRaises(probe.ProbeError):
             probe.match_library(records, self.provider, self.root, "sqlite")
 
+    def descriptor_fixture(self, *, loaded=True, kernel_identity=(8, 1, 7123)):
+        """Represent an opened file whose stat and mapped identities differ."""
+        reference = dict(probe.file_identity(self.provider), address=0x3800)
+        record = probe.parse_maps(self.mapping())[0]
+        record.update(identity=kernel_identity, start=0x1000, end=0x2000)
+        private = dict(record, start=0x3000, end=0x4000)
+        records = [record, private] if loaded else [private]
+        return records, reference
+
+    def test_descriptor_mapping_connects_distinct_stat_and_kernel_identities(self):
+        records, reference = self.descriptor_fixture()
+        result = probe.match_library(records, self.provider, self.root, "sqlite", reference)
+        self.assertEqual(result['path'], str(self.provider))
+        self.assertEqual(result['identity'], reference['identity'])
+        self.assertEqual(result['mapping_identity'], (8, 1, 7123))
+
+    def test_assessment_retains_descriptor_and_loaded_identity_in_one_snapshot(self):
+        _, reference = self.descriptor_fixture()
+        maps = (f'1000-2000 r-xp 0 08:01 7123 {self.provider.as_posix()}\n'
+                f'3000-4000 rw-p 0 08:01 7123 {self.provider.as_posix()}\n')
+        result, reader = self.run_probe(maps=maps, references={str(self.provider): reference})
+        self.assertEqual(result['outcome'], 'passed', result)
+        self.assertEqual(result['provider']['mapping_identity'], (8, 1, 7123))
+        reader.assert_called_once_with()
+
+    def test_reference_mapping_alone_never_proves_a_loaded_library(self):
+        records, reference = self.descriptor_fixture(loaded=False)
+        with self.assertRaisesRegex(probe.ProbeError, 'not observed'):
+            probe.match_library(records, self.provider, self.root, "sqlite", reference)
+
+    def test_replaced_mapping_is_refused_even_with_the_expected_path(self):
+        records, reference = self.descriptor_fixture()
+        records[0]['identity'] = (8, 1, 7124)
+        with self.assertRaises(probe.ProbeError):
+            probe.match_library(records, self.provider, self.root, "sqlite", reference)
+
+    def test_missing_ambiguous_or_deleted_reference_mapping_refuses(self):
+        for kind in ('missing', 'ambiguous', 'deleted', 'renamed'):
+            records, reference = self.descriptor_fixture()
+            if kind == 'missing':
+                records.pop()
+            elif kind == 'ambiguous':
+                records.append(dict(records[-1]))
+            elif kind == 'deleted':
+                records[-1]['deleted'] = True
+            else:
+                records[-1]['path'] = str(self.file('other/provider'))
+            with self.subTest(kind=kind), self.assertRaises(probe.ProbeError):
+                probe.match_library(records, self.provider, self.root, "sqlite", reference)
+
+    def test_changed_named_file_after_descriptor_open_refuses(self):
+        records, reference = self.descriptor_fixture()
+        reference['identity'] = (9, 9, 9)
+        with self.assertRaises(probe.ProbeError):
+            probe.match_library(records, self.provider, self.root, "sqlite", reference)
+
+    def test_descriptor_reference_cannot_hide_a_competing_or_deleted_provider(self):
+        for kind in ('host', 'other-tool', 'deleted'):
+            records, reference = self.descriptor_fixture()
+            if kind == 'deleted':
+                records[0]['deleted'] = True
+            else:
+                other = self.file(f'{kind}/libsqlite3.so.0')
+                records.append(probe.parse_maps(self.mapping(other))[0])
+            with self.subTest(kind=kind), self.assertRaises(probe.ProbeError):
+                probe.match_library(records, self.provider, self.root, 'sqlite', reference)
+
+    def test_unmappable_reference_is_inconclusive(self):
+        self.provider.write_bytes(b'')
+        with self.assertRaises(probe.ProbeError) as raised:
+            with probe.mapped_reference(self.provider):
+                self.fail('empty file cannot provide a descriptor mapping')
+        self.assertEqual(raised.exception.outcome, 'inconclusive')
+
+    @unittest.skipUnless(sys.platform == 'linux', 'requires actual Linux mappings')
+    def test_actual_descriptor_mapping_closes_and_does_not_count_as_a_load(self):
+        before = self.provider.read_bytes()
+        with probe.mapped_reference(self.provider) as reference:
+            records = probe.parse_maps(probe.read_maps())
+            # The test interpreter may already have a host SQLite mapped; both
+            # that competing load and an absent load must refuse this fixture.
+            with self.assertRaises(probe.ProbeError):
+                probe.match_library(records, self.provider, self.root, 'sqlite', reference)
+        self.assertEqual(self.provider.read_bytes(), before)
+        self.assertNotIn(str(self.provider), probe.read_maps())
+
     def test_unreadable_backing_file_cannot_pass(self):
         records = probe.parse_maps(self.mapping())
         with mock.patch.object(Path, "open", side_effect=PermissionError("denied")), \
@@ -229,6 +317,8 @@ class SqliteProbeTests(unittest.TestCase):
             events.append("maps")
             return self.mapping()
         with mock.patch.object(probe, "database_roundtrip", side_effect=database), \
+                mock.patch.object(probe, 'mapped_reference', side_effect=lambda path:
+                                  contextlib.nullcontext(None)), \
                 mock.patch.object(probe, "read_maps", side_effect=maps):
             # run_probe owns its maps patch, so use the public assessment directly.
             native = types.SimpleNamespace(__file__=str(self.extension))
