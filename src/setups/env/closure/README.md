@@ -160,13 +160,16 @@ closure_config_authority_check "$PWD" src/setups/env/closure/closure-config.txt 
     src/setups/env/closure/closure-envelope.txt
 ```
 
-After the bundle passes review and its grouped commit gate, the authorized
-`git merge -s ours --no-ff` retains the source snapshot as an ancestor while
-preserving the complete reviewed tree. A temporary `pre-merge-commit` calls
-the existing `pre-commit`; Git also runs `commit-msg`. Record identical tree
-IDs, hook traces and successful source resolution and authority checks from
-a fresh single-branch clone before dropping the temporary source ref/worktree.
-The implementation validation record holds the actual merge and clone evidence.
+After review and the human-authorized grouped commits, the `ours` strategy
+merge `5f8d4d67ca549bb74e3bcbb798124d628c3d0619` retained the source snapshot
+as its second parent. The tree before and after that merge is
+`ac3f0249da80b3afb7387a11a2ae6199da9c4cdd`. A temporary `pre-merge-commit`
+called the existing `pre-commit`; Git also ran `commit-msg`. All original hook
+files stayed unchanged, and the temporary hook was removed after verification.
+A fresh `--no-local --single-branch` clone resolved the source without fetching
+its branch and passed the consistency and authority checks above. The
+[Step 3 validation record](../../../../docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md)
+holds the parent identities and local evidence paths for the merge and clone.
 
 Item 7 must record both its final candidate cplx revision and this separate
 envelope source revision. An all-ancestor traversal can encounter the source

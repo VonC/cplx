@@ -244,12 +244,12 @@ features and reporting remain intact.
 
 Yes. Step 3 has been fully implemented.
 
-The declaration, matching envelope, source snapshot and focused fixtures are
-ready for the normal grouped review gate. The source exists and its exact blob
-passes authority checks. Delivery remains gated on the authorized retention
-merge and fresh-clone proof after the reviewed bundle commits, in the order
-required by the plan. Those post-commit operations have not run yet; this
-implementation verdict does not claim their ancestry or clone evidence.
+The declaration, matching envelope, source snapshot and focused fixtures passed
+review and the human-authorized grouped commit gate. The later authorized
+retention merge preserved the complete reviewed tree. A fresh single-branch
+clone resolves the retained source and passes consistency and authority checks.
+The recorded ancestry and clone evidence completes Step 3's post-commit work;
+Step 4's built-candidate acceptance remains separate.
 
 ### Goal for Step 3
 
@@ -289,8 +289,10 @@ their sensitive-content children and the same shared and local replacement
 rules. Their inventories and all four file hashes stayed unchanged. The
 ignored creation and hook evidence is retained in `a.sqlite-source-create.log`,
 `a.sqlite-source-commit.log` and `a.sqlite-source-hooks-before.txt`.
-No temporary merge hook is installed yet. The authorized `pre-merge-commit`
-will call `git hook run pre-commit`, preserving the existing hook chain.
+The temporary `pre-merge-commit` called `git hook run pre-commit` during the
+retention merge, preserving the existing hook chain. Git also ran `commit-msg`.
+Only that temporary hook was removed after verification; the original hook
+inventory and all four file hashes remained unchanged.
 
 The closure README records the source identity, exact blob extraction and
 envelope regeneration commands, direct consistency/authority checks, ownership
@@ -316,13 +318,37 @@ its corpus SHA-256 is
 `74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472`.
 The 9,136-line historical harness was not edited.
 
-After review and grouped commits, require a clean implementation worktree,
-including the now-tracked fixture. Perform the already-authorized
-`git merge -s ours --no-ff` with the temporary composable merge hook, verify
-unchanged tree IDs and hook bytes, and prove source resolution and authority in
-a fresh single-branch clone without fetching the temporary source branch.
-Retain the source ref/worktree until that proof succeeds. Record the actual
-merge SHA, tree ID and clone result here for item 7; all three remain pending.
+The human selected `Commit` after the independent review. The grouped commits
+are `8335008` (reviewed bundle, including the tracked fixture), `7230fea`
+(validation) and `ced51c4` (review transcript). The sensitive-content hook
+blocked one absolute local path in the transcript; rendering that command path
+relative to the repository allowed the hook to pass without a bypass.
+
+Post-commit retention verification on 2026-09-16:
+
+| Retention identity | Value |
+| --- | --- |
+| Reviewed first parent | `ced51c4600a321295de091fa6d0152018de89904` |
+| Retention merge | `5f8d4d67ca549bb74e3bcbb798124d628c3d0619` |
+| Source second parent | `13c80d572ba7bda91728806ad7dc11c53629a506` |
+| Tree before and after merge | `ac3f0249da80b3afb7387a11a2ae6199da9c4cdd` |
+
+The implementation worktree was clean, including untracked files, before and
+after `git merge -s ours --no-ff`. Its two parents and identical tree IDs were
+verified directly. The trace records the temporary merge hook calling the
+existing `pre-commit` dispatcher, followed by Git's `commit-msg` invocation.
+
+`git clone --no-local --single-branch --branch python-sqlite-support` created
+the fresh `a.sqlite-source-clone` at the merge above. Its sole remote branch
+and fetch refspec name `python-sqlite-support`; no source branch was fetched.
+The source commit exists there as an ancestor, its declaration blob has the
+recorded digest, and direct `closure_envelope_check` and
+`closure_config_authority_check` calls pass. Both original and clone worktrees
+were clean at verification. The source ref/worktree remain retained locally.
+
+Evidence: `a.sqlite-source-merge.log`, `a.sqlite-source-clone.log`,
+`a.sqlite-source-retain-proof.log`, `a.sqlite-retention-evidence.txt` and
+`a.sqlite-retention-hooks-before.txt` / `a.sqlite-retention-hooks-after.txt`.
 No push or publication has run.
 
 ### New types or classes introduced for Step 3
@@ -336,7 +362,7 @@ cases. Production checker functions and formats are unchanged.
 This step changes declarative configuration and documentation, with fixtures
 calling the existing closure functions. It adds no production layer dependency
 or new policy path. No DDD-Hexagonal boundary is changed. The declaration is
-33 lines, envelope 3, README 176 and new fixture 156, below its 220-line target
+33 lines, envelope 3, README 179 and new fixture 156, below its 220-line target
 and the repository review band. The cumulative runner remains 70 lines.
 No architecture or file-size issue needs addressing.
 
@@ -375,7 +401,7 @@ an owner.
 The auxiliary source snapshot retains the previous envelope. It is not a
 delivery bundle, and an all-ancestor traversal can encounter that intermediate
 pair after retention. Item 7 must distinguish this source revision from its
-final candidate cplx revision and retain the later merge/clone evidence. Any
+final candidate cplx revision and retain the recorded merge/clone evidence. Any
 declaration change requires a renewed pair and final-archive acceptance.
 
 ## Step 4: Prove one candidate on the three required environment roles
