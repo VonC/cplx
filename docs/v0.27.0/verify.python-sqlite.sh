@@ -31,7 +31,15 @@ bash src/utils/lint_shell.sh
 harnesses=(docs/v0.27.0/verify.python-sqlite.sh)
 if ((step >= 2)); then harnesses+=(docs/v0.27.0/verify.python-sqlite-build.sh); fi
 if ((step >= 3)); then harnesses+=(docs/v0.27.0/verify.python-sqlite-closure.sh); fi
-if ((step >= 4)); then harnesses+=(docs/v0.27.0/acceptance.python-sqlite-support.sh); fi
+if ((step >= 4)); then
+    harnesses+=(docs/v0.27.0/acceptance.python-sqlite-support.sh
+        docs/v0.27.0/acceptance.python-sqlite-capture.sh
+        docs/v0.27.0/acceptance.python-sqlite-namespace.sh
+        docs/v0.27.0/acceptance.python-sqlite-deploy.sh
+        docs/v0.27.0/acceptance.python-sqlite-report.sh
+        docs/v0.27.0/verify.python-sqlite-acceptance.sh
+        docs/v0.27.0/verify.python-sqlite-namespace.sh)
+fi
 for harness in "${harnesses[@]}"; do
     [[ -f $harness ]] || { echo "step material missing: $harness" >&2; exit 2; }
     bash -n "$harness"
@@ -66,5 +74,5 @@ PY
 
 if ((step >= 2)); then bash docs/v0.27.0/verify.python-sqlite-build.sh --python "$author_python"; fi
 if ((step >= 3)); then bash docs/v0.27.0/verify.python-sqlite-closure.sh; fi
-if ((step >= 4)); then bash docs/v0.27.0/acceptance.python-sqlite-support.sh --check-prerequisites; fi
+if ((step >= 4)); then bash docs/v0.27.0/verify.python-sqlite-acceptance.sh --python "$author_python"; fi
 echo "SQLite cumulative checks passed through step $step"
