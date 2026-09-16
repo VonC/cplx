@@ -1,9 +1,9 @@
 # v0.27.0 Python SQLite support implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
 Track the four steps in the [implementation plan](plan.v0.27.0.python-sqlite-support.md).
-Step 1 is implemented and checked. Steps 2-4 and candidate acceptance remain pending.
+All four steps are implemented and checked. The identified candidate passes all three runtime roles; item 7 retains the final release rebuild and acceptance.
 
 ## File-based IO cost clarification for SQLite validation
 
@@ -408,8 +408,17 @@ declaration change requires a renewed pair and final-archive acceptance.
 
 ### Analysis of Step 4 implementation state
 
-Not started. Step 4 is not implemented because no candidate has been rebuilt,
-packaged or accepted under this plan on the three required environment roles.
+Yes. Step 4 has been fully implemented.
+
+One non-release Python 3.13.15 archive passed the populated RHEL rebuild,
+unchanged packaging gate and normal SQLite operator checks in all three roles:
+the build account, a separate RHEL deployment and Debian 12 Jenkins build 174.
+The candidate SHA-256 is
+`c9fcb783e10409411d2fd08f3951ec163b1143d7357203fc237afbb71ce24e91`.
+Full live-content comparisons pass. The
+[acceptance record](acceptance.python-sqlite-support.md) binds source, payload,
+archive, verification and environment identities, retains diagnosed refusals,
+maps AC1-AC11 and supplies item 7's repeat commands.
 
 ### Goal for Step 4
 
@@ -421,29 +430,126 @@ SQLite provider success for one identified archive, with live-tree preservation.
 - Retain separate build-account, Debian 12 and RHEL deployment evidence.
 - Tie all results to the same candidate and closure/source identities.
 - Record the absent isolated `.profile`, audited inputs and full content manifests.
-- Leave missing prerequisites or environment evidence incomplete.
+- Refuse missing prerequisites, environment identity or structured provider evidence.
 - Give item 7 reproducible commands to repeat on its final refreshed archive.
 
 ### What was implemented for Step 4
 
-_(empty — no check has taken place yet.)_.
+- Added explicit preflight, build, assemble, deploy and probe phases. The driver
+  requires owned canonical roots, audited controls/scalars, independently known
+  expected paths and explicit live preservation roots. It never defaults to the
+  login home. Only the build role may compile or package.
+- Added shared capture helpers for escaping links, external hardlinks, full
+  file-content manifests, archive disambiguation/digests, command timelines,
+  structured probe checks and three-role validation. Failure paths retain
+  diagnostics and compare live state. Recording fixtures exercise refusals and
+  the consumer sequence without using live caches.
+- Added the unprivileged namespace launcher and native capability fixture.
+  The independent backing home appears at the existing directly anchored path
+  only inside the child. The original home has a separate read-only view;
+  parent identity/control checks pass for all 24 retained invocations. Host
+  `/home` remains root-owned and no sibling home allocation is needed.
+- Prepared independent populated Python/Git copies, audited the environment
+  source chain and retained scalar settings, sentinels and cache identities.
+  The actual bootstrap records ACL normalization and shared-runtime alignment
+  on the copies. It preserves live trees and the production packaging rules.
+- Real acceptance exposed two scoped build fixes: source probing preloads the
+  independently validated source libpython (`f5c4a21`), and the SQLite link uses
+  new dynamic tags so the normal promoted wrapper selects its shipped provider
+  (`14d4af0`). The accepted populated rebuild retained `_sqlite3=yes`, cleanup,
+  compilation and source/installed JSON. No operator loader override was added.
+- The candidate gate examined 605 ELF subjects, resolved 1,251 dependency edges
+  and answered 4,518 version needs. All ten floor members, 21 multi-candidate
+  names and both declared families passed with zero active waivers. Its static
+  `PARTIAL` scope remains explicit; runtime results are separate evidence.
+- Added shared consumer bootstrap and timing report scripts. The separate RHEL
+  target and Jenkins use the same archive and unchanged installer. The consuming
+  Jenkins adapter supplies actual Debian userland/image/container identity,
+  digest checks and an early retained artifact, with publication disabled.
+- Debian's initial provider refusal identified different OverlayFS stat and
+  mapping devices. Commit `d42014e` binds a held expected descriptor to a private
+  reference mapping in the single maps snapshot. The actual loaded provider
+  must match that binding; the reference itself is excluded as loaded evidence.
+  Replaced, deleted, missing and competing providers still refuse acceptance.
+- Retested the corrected observer against the actual RHEL source interpreter,
+  installed prefix, promoted wrapper and separate deployment. All pass with
+  unchanged archive bytes and full-content preservation. The verification
+  bundle records its own revision and probe digest separately from the build.
+- Jenkins build 174 passes the corrected normal operator check and preservation
+  for that archive. The combined report validates all three role records and
+  their bound JSON digests. The temporary consuming pin is removed after
+  retention; the reusable adapter runs only when a future validation pin exists.
+- Cumulative Git Bash verification passed: the 57-script lint floor, all effort
+  syntax/ShellCheck checks, 42 probe tests with four platform skips, build
+  fixtures, 27 closure checks and 34 capture fixtures. Native RHEL passed all
+  42 probe tests without skips, 32 build fixtures and 38 capture fixtures,
+  including escaping links and packaging-alias refusals. The actual three-role
+  captures establish candidate acceptance separately from these fixtures.
 
 ### New types or classes introduced for Step 4
 
-_(empty — no check has taken place yet.)_.
+No application type or class was added. New Bash helpers separate orchestration,
+capture, namespace setup, consumer bootstrap and reporting. The shared observer
+adds standard-library descriptor/mapping helpers; its existing exception and
+argument-parser classes retain their responsibilities.
 
 ### Architecture check for Step 4
 
-_(empty — no check has taken place yet.)_.
+Verification calls the existing installer, promotion, packaging and operator
+entry points. Build policy remains in Python's install adapter; Linux mapping
+observation remains in the standalone probe. No business layer gains a technical
+dependency or crosses an application boundary. The namespace preserves the
+existing relocation anchor rather than changing the installer contract.
+
+The driver is 276 lines, capture helpers 219, namespace launcher 59, consumer
+bootstrap 63 and report 41. The shared Python probe is 337 lines and its test
+module 483, below the 550-line safe band and 650-line ceiling. No architecture,
+responsibility or file-size issue needs fixing.
 
 ### Performance check for Step 4
 
-_(empty — no check has taken place yet.)_.
+Manifests, link inventories and comparisons scan linearly and use associative
+lookups without sorting. Hashing is batched; acceptance compares full live
+contents before/after the sequence, including failures. Probe work uses one
+bounded database, at most two private references and one maps read. Identity
+deduplication avoids repeated stat work for duplicate loaded segments. No new
+quadratic or sorting process was identified.
+
+Measured configure/compile/install durations are 52.744/218.914/33.452 seconds;
+the complete populated rebuild takes 322 seconds, promotion one second,
+packaging 122 and separate RHEL relocation 357. The acceptance record and
+three-role report retain Debian, transfer and operator timings too. Healthy
+build output was reused; verification correction did not trigger recompilation.
+No performance issue needs addressing.
 
 ### Unit test coverage check for Step 4
 
-_(empty — no check has taken place yet.)_.
+The configured floor is Bash lint, supplemented by the confirmed cumulative
+effort runner. There is no project Python coverage-percentage gate; this check
+does not infer a percentage from either lint or the 42 passing unit tests.
+Tests remain under `tests/unit/sqlite_probe/test_sqlite_probe/` and load the
+same standalone probe used by acceptance. They exercise descriptor lifetime,
+distinct stat/mapping identities, references that are not actual loads,
+replacement/deletion/ambiguity and the existing database/path/CLI behavior.
+Generated segment permutations retain order-independent identity checks.
+
+Static inspection finds every top-level probe helper and class referenced by
+tests or the module's execution path. Bash helpers are reached from phase,
+consumer, report or fixture entry points; the native namespace fixture and
+actual acceptance exercise the platform-specific launch paths. No class
+behavior requiring additional unit coverage was identified; no top-level
+symbol outside the measured gate is unreferenced.
 
 ### Feature integrity for Step 4
 
-_(empty — no check has taken place yet.)_.
+The cumulative runner retains Steps 1-3 and adds Step 4. Scoped production fixes
+preserve other targets, existing wrapper selection and packaging/closure rules.
+The closure pair and composed Git hooks remain unchanged. Compilation occurs
+only on RHEL; Debian performs deployment/runtime testing with no extra SQLite
+library installation. Every accepted role binds the same archive and passing
+preservation evidence. Diagnosed failures remain separately retained.
+
+All AC1-AC11 criteria map to actual evidence or refusal controls. This completes
+item 6's identified non-release candidate. Item 7 still owns the refreshed
+release payloads, patch-version regression decision and full application matrix,
+and must repeat the unchanged gate and all three roles on its final archive.
