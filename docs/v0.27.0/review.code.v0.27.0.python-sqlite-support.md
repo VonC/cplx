@@ -1300,3 +1300,417 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-1 -->
+
+## Round 1 by requestor - Step 3
+
+- Recorded: 2026-09-16T09:32:09+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 python-sqlite-support (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+Implementation step: 3
+Review round: 1
+
+### Code review evidence for step 3 python-sqlite-support (round 1)
+
+request_index_tree: 41b5f2b5b5c7fd7884b20a85912d5b1e86f56000
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.python-sqlite.sh --step 3 --python ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe (sources: plan; local path rendered relative to the repository)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(closure): bind Python 3.13.15 declaration
+group 1 path: src/setups/env/closure/closure-config.txt
+group 1 path: src/setups/env/closure/closure-envelope.txt
+group 1 path: src/setups/env/closure/README.md
+group 1 path: docs/v0.27.0/verify.python-sqlite-closure.sh
+group 2: docs(python-sqlite-support): record step 3 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+staged path: docs/v0.27.0/verify.python-sqlite-closure.sh
+staged path: src/setups/env/closure/README.md
+staged path: src/setups/env/closure/closure-config.txt
+staged path: src/setups/env/closure/closure-envelope.txt
+```
+
+### Requestor assessment for step 3 python-sqlite-support (round 1)
+
+Step 3 code and fixture implementation is complete and its validation plan
+records Yes. The plan explicitly orders the already-authorized retention merge
+after reviewed bundle commits; that merge and fresh-clone proof remain pending,
+are stated as pending in the validation record, and gate delivery. Please assess
+this distinction explicitly rather than treating the source ref as clone proof.
+
+Git Bash passed the cumulative Step 3 runner: tracked Bash lint, effort syntax
+and ShellCheck, 33 probe tests with three Linux symlink skips, four CMD boundary
+cases, and 27 closure checks. Native RHEL passed all 27 closure checks against
+the real source SHA, all 33 probe tests without skips, and 32 build-process cases.
+The fixture tests exact source authority directly without publication. Markdown
+checks and git diff --cached --check passed. No production function, class,
+grammar, algorithm or architecture boundary changed. The new 156-line Bash
+fixture is explicitly checked outside the tracked lint inventory's docs scope;
+every helper is called and no new unit-tested class needs coverage completion.
+
+Historical suites were run once against the candidate pair. Step 2 has two
+old-version/waiver expectation failures (89/91 pass); Step 5 has 15 old-input
+gate/waiver/archive failures (235/250 reached cases pass). These are recorded
+as failed runs, not reported green. An isolated env copy with only the original
+pair restored from parent 3a1d113 then passes all 91 and 254 cases with identical
+scripts, harness and corpus. The new candidate fixture separately covers the
+new version and waiver-free behavior. Do not edit the 9,136-line old harness
+or interpret the historical controls as dynamic candidate acceptance.
+
+Evidence is in the validation plan and ignored a.sqlite-step3-*.log files named
+there. The historical harness, corpus and new fixture hashes are recorded.
+The configured project gate is .review-validation's Bash lint, as adapted by
+the approved SQLite plan; this repository does not use a ghog/pytest walk.
+
+### Implementation report for step 3 python-sqlite-support (round 1)
+
+The user explicitly approved the prepared auxiliary source commit, retention
+merge and composable merge hook on 2026-09-16. Source commit
+13c80d572ba7bda91728806ad7dc11c53629a506 was created in a clean linked worktree
+with parent 3a1d1135a3e627b74d134db24694121e70ea6b14. Its sole changed file is
+src/setups/env/closure/closure-config.txt. The committed LF UTF-8 blob has SHA-256
+63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa and matches
+the exact approved bytes. Existing pre-commit and commit-msg dispatchers and
+their sensitive-content children ran, using the same local and shared rules.
+Their inventory and hashes are unchanged; no merge hook is installed yet.
+
+The staged pair copies that source blob and records its real source SHA and
+digest in the envelope. Only Python 3.13.9 becomes 3.13.15 and the SQLite waiver
+is removed. The SQLite floor, root/current, all other entries and ordering stay
+unchanged. The closure README records maintenance commands, source identity,
+the later retention merge, non-first-parent old-envelope limitation and item 7
+handoff obligations. Step 4 retains real dynamic candidate acceptance.
+
+The new fixture exercises scope, location and identity refusal rules using
+existing checker functions, then checks the actual repository pair. The Step 2
+cumulative runner already selected and linted this file for --step 3, so the
+runner needs no further edit. Its static provider files are explicitly not ELF
+or dynamic SQLite acceptance evidence.
+
+The eventual merge must preserve the reviewed tree and require a clean worktree.
+The temporary pre-merge-commit will invoke git hook run pre-commit, preserving
+existing dispatchers and every child. Git also runs commit-msg. The prepared
+procedure checks inventory/hashes, source ancestry, tree identity and a fresh
+single-branch clone. Keep source ref/worktree until then. No push is authorized.
+
+### Change summary for step 3 python-sqlite-support (round 1)
+
+The staged request snapshot contains exactly five files in two a.commit groups.
+
+Group 1, feat(closure): bind Python 3.13.15 declaration:
+
+- src/setups/env/closure/closure-config.txt
+- src/setups/env/closure/closure-envelope.txt
+- src/setups/env/closure/README.md
+- docs/v0.27.0/verify.python-sqlite-closure.sh
+
+Group 2, docs(python-sqlite-support): record step 3 validation:
+
+- docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+
+The declaration and envelope remain in one commit. The previously untracked
+fixture is staged with the Step 3 bundle, so the later clean-tree precondition
+will include it. The trailing documentation group records measured evidence
+and clearly pending post-commit proof. Root a.commit is formatted and the
+readiness checker returned valid with no diagnostics. The exchange's appended
+transcript is workflow output, handled by the normal authorized cleanup route.
+
+### Writer response for step 3 python-sqlite-support (round 1)
+
+Writer response:
+
+This is the first review round for Step 3. No earlier Step 3 reviewer feedback
+or repairs have been received. The human's requested hook-composition and
+untracked-fixture clarifications were incorporated before auxiliary approval.
+That approval covers the source commit and later retention operations; the
+normal reviewed grouped commit decision remains separate.
+
+### Reviewer focus for step 3 python-sqlite-support (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-1 -->
+
+## Round 1 by reviewer - Step 3
+
+- Recorded: 2026-09-16T09:38:07+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 python-sqlite-support (exchange 1) (round 1)
+
+Baseline index tree: 41b5f2b5b5c7fd7884b20a85912d5b1e86f56000
+
+Assessed index tree: b3a842934dba2b673676394b1d3849682cd71731
+
+### Implementation check for step 3 python-sqlite-support (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 3 has been fully implemented.
+
+The declaration, envelope, source snapshot, README record and focused fixtures
+match the plan. The retention merge and fresh-clone proof are ordered after the
+reviewed bundle commit by the plan itself, so their absence is sequencing, not
+missing work; the validation record states they are pending.
+
+#### What was verified for step 3 python-sqlite-support (exchange 1) (round 1)
+
+- **Declaration.** The only changes are `subdir|python|python-3.13.9` to
+  `python-3.13.15` and the removal of `waiver|libsqlite3.so.0|python-sqlite-support`.
+  The SQLite floor at `tools/python`, `root`, `current`, every other record,
+  the families, the entry points and the root ordering are untouched.
+- **Source identity, checked independently by the reviewer:**
+  - `13c80d572ba7bda91728806ad7dc11c53629a506` is a commit whose parent is the
+    current branch head `3a1d113`;
+  - `git diff-tree` shows exactly one changed path, the declaration;
+  - its blob hashes to
+    `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa`, equal to
+    the staged declaration's hash and to the envelope's `digest` line, and a
+    byte comparison of the two blobs is identical;
+  - the envelope's `source` line names that commit and the canonical path;
+  - the commit is reachable through the retained branch
+    `sqlite-source-3.13.15-step3` and its linked worktree, and is not yet an
+    ancestor of the branch head, which is exactly the pending merge.
+- **Checker behavior.** The new 156-line fixture runs 25 isolated controls plus
+  two checks of the real repository pair. It covers candidate scope, a retained
+  3.13.9 directory reported as unexpected, missing SQLite, Git-only SQLite, a
+  stale waiver, altered declaration bytes, CRLF, a changed source blob, and
+  valid exact source identity. Its synthetic Git repositories are disposable and
+  its scratch tree is removed on exit. Its empty provider files are labeled as
+  static name and location evidence only.
+- **README.** It records the ownership change (3.13.9 to 3.13.15, waiver removed,
+  floor retained), the source identity table, the exact blob-extraction and
+  envelope-regeneration commands, direct consistency and authority checks, the
+  later merge and clone obligations, and the item 7 handoff. The maintenance
+  rule is now scoped to delivered bundles, which is what makes the source
+  snapshot's retained old envelope legitimate.
+- **Historical suites.** The writer's report matches the recorded logs: the
+  unedited `verify.closure-check.sh` Step 2 and Step 5 suites fail 2 of 91 and
+  15 of 250 reached cases against the new pair, because their expectations pin
+  the old version and the removed waiver, while an isolated copy holding only
+  the previous declaration and envelope passes 91 and 254. These runs are
+  reported as failures, not as green.
+
+#### Architecture check by the reviewer for step 3 python-sqlite-support (exchange 1) (round 1)
+
+The step changes declarative configuration and documentation only. The fixture
+calls existing checker functions and adds no production path, grammar or
+policy. Yes, one item needs addressing, and it is recorded rather than fixed
+here: the historical harness expectations are now stale, and the plan forbids
+editing that harness in this effort. The reviewer added the follow-up ownership
+line to the Step 3 validation rows.
+
+#### Performance check by the reviewer for step 3 python-sqlite-support (exchange 1) (round 1)
+
+No production computation changes. The fixture's case count is fixed and its
+scans are linear over existing inputs. No, there is no performance issue that
+needs to be addressed.
+
+#### Coverage check by the reviewer for step 3 python-sqlite-support (exchange 1) (round 1)
+
+No unit-tested class changes in this step. The new Bash fixture is
+syntax-checked, linted and executed by the cumulative runner, and each of its
+helpers (`check`, `contains`, `refuses`, `index_providers`, `fixture_git`,
+`write_envelope`) is called by its cases. No, there is no unit-tested class
+below 100% that needs completing. No, no top-level symbol staged outside a
+coverage gate is unreferenced.
+
+Validation plan effects:
+
+One reviewer edit is confined to the Step 3 feature-integrity rows of
+`docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md`. The record
+already stated that the historical `verify.closure-check.sh` suites fail on the
+current pair and that the harness was not edited, but it named no owner for
+refreshing those expectations. The added paragraph assigns that refresh to the
+harness's owning item 4, or to item 7 when it renews the pair, and repeats that
+this effort must not edit the harness.
+
+The edit was recorded as a pre-repair blob, attributed cleanly and staged. It is
+polishing-only review metadata: no verdict, evidence value or hash changed.
+
+### Pre-repair mandatory checks and coverage for step 3 python-sqlite-support (exchange 1) (round 1)
+
+Both resolved commands ran on the received index tree
+`41b5f2b5b5c7fd7884b20a85912d5b1e86f56000`. The later reviewer edit changed only
+validation-record prose, so the results hold for the assessed tree.
+
+- `bash src/utils/lint_shell.sh`, through the guard-clearing `senv.bat` form:
+  `lint_shell: 57 tracked scripts`, `lint_shell: clean`, exit 0.
+- `bash docs/v0.27.0/verify.python-sqlite.sh --step 3 --python <shared
+  authoring Python 3.13.9>`, in the same guard-clearing CMD process so the
+  configured Git Bash and ShellCheck are on PATH: the lint floor, effort Bash
+  syntax and ShellCheck, Python syntax, 33 probe tests (`OK (skipped=3)`), the
+  four actual CMD launcher cases, then all 27 closure checks, ending with
+  `SQLite closure: 27 checks passed in 17 seconds` and
+  `SQLite cumulative checks passed through step 3`; exit 0.
+
+The final two closure checks are the ones that matter for this step: `repository
+pair is internally consistent` and `repository source bytes are authoritative`
+run `closure_envelope_check` and `closure_config_authority_check` against the
+real staged pair and the real source commit, with no publication operation.
+
+Additional reviewer checks, all read-only:
+
+- `git cat-file -t`, `git log -1`, `git diff-tree` and two `git cat-file blob`
+  hashes for the source commit, plus a byte comparison with the staged
+  declaration;
+- `git merge-base --is-ancestor` (not yet an ancestor), `git branch --contains`
+  and `git worktree list` for its retention;
+- `commit-plan-check.bat --format json` before and after the repair;
+- `git diff --cached --check`.
+
+No coverage percentage applies.
+
+### Resolved validation set and sources for step 3 python-sqlite-support (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project `.review-validation`)
+- `bash docs/v0.27.0/verify.python-sqlite.sh --step 3 --python <absolute
+  authoring Python>` (source: plan; run inside the guard-clearing `senv.bat`
+  CMD process the plan prescribes for Windows)
+
+### Resolver drift and direction for step 3 python-sqlite-support (exchange 1) (round 1)
+
+No drift. The request carries the project lint floor and the plan's cumulative
+Step 3 runner with an explicit absolute authoring interpreter. Earlier rounds
+expressed that runner through the ignored `a.sqlite-check.cmd` wrapper; this
+request states the same command directly, which the reviewer ran in the
+equivalent guard-clearing CMD process. The native Linux and historical-suite
+runs recorded by the writer are evidence outside the mandatory set, and the
+reviewer did not repeat them.
+
+### Repository state around validation for step 3 python-sqlite-support (exchange 1) (round 1)
+
+- **Index trees:** the request-time and reviewer-entry trees are
+  `41b5f2b5b5c7fd7884b20a85912d5b1e86f56000`. The assessed tree after the staged
+  reviewer edit is `b3a842934dba2b673676394b1d3849682cd71731`.
+- **Umbrella digest:** unchanged
+  (`85440ae0c9c1a64ee082ccb5472a8aca093bf7c5e9ef10e60f9faf39ac1db0ff`).
+- **Validation state:** the comparison over the five staged Step 3 paths reports
+  tracked differences only in
+  `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` and the index,
+  both from the attributed reviewer paragraph and its staging. No untracked
+  path and no validation side effect; the runner's scratch trees were removed by
+  their own traps.
+- **Auxiliary Git objects:** the source commit stays reachable through the
+  retained branch and linked worktree. The reviewer created, moved and deleted
+  no ref, worktree or commit.
+- **Unstaged tracked change:** the protocol transcript only, neither read as
+  working context nor staged.
+
+### Repair inventory for step 3 python-sqlite-support (exchange 1) (round 1)
+
+Repairs made:
+
+- docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md (polishing-only review metadata): name the owner for refreshing the stale historical closure-suite expectations, which the record reported without assigning
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md
+
+### Commit plan assessment for step 3 python-sqlite-support (exchange 1) (round 1)
+
+`commit-plan-check.bat --format json` ran independently on the received tree and
+again after the reviewer edit. Both returned status 0, `state: valid`,
+`ready: true` and no diagnostics, with five staged paths in two groups:
+
+1. `feat(closure): bind Python 3.13.15 declaration`: declaration, envelope,
+   README and the new closure fixture;
+2. `docs(python-sqlite-support): record step 3 validation`: the validation plan.
+
+The declaration and its renewed envelope stay in one commit, which is the
+maintenance rule for delivered bundles. The reviewer edit stays inside group 2's
+existing path. Membership, order and subjects match the staged work, and
+`a.commit` was not amended. The status 0 proves only mechanical grouping.
+
+### Findings and boundaries for step 3 python-sqlite-support (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 3 python-sqlite-support (exchange 1) (round 1)
+
+No change is requested for Step 3.
+
+1. Review the reviewer's staged paragraph in the Step 3 feature-integrity rows,
+   which names item 4 or item 7 as the owner of the stale historical
+   closure-suite expectations.
+2. Present this advisory commit-ready recommendation at the human commit gate,
+   and include the review transcript through the residual continuation.
+3. After the grouped commit, perform the already-authorized
+   `git merge -s ours --no-ff` from a clean worktree, then record in the Step 3
+   rows: the merge SHA, identical before and after tree IDs, the hook trace, and
+   a fresh single-branch clone resolving the source and passing
+   `closure_config_authority_check` without the temporary branch. Keep the
+   source ref and worktree until that proof succeeds. Until then a fresh clone
+   cannot resolve the anchor.
+4. Step 4 still owns dynamic candidate acceptance; these fixtures establish
+   static names, locations and exact source identity only.
+
+### Decision rationale for step 3 python-sqlite-support (exchange 1) (round 1)
+
+Decision: commit-ready (advisory).
+
+The readiness floor passes:
+
+- **Exact identity:** envelope, human-readable identity, plan, step 3, round 1,
+  occurrence 1, umbrella and request-time tree `41b5f2b` agree.
+- **Complete implementation:** the pair, source snapshot, README and fixtures
+  match the plan. The retention merge and clone proof follow the reviewed commit
+  by the plan's own ordering and are recorded as pending.
+- **Mandatory validation:** both resolved commands pass, including the two
+  checks of the real repository pair and its source authority.
+- **Attributable staged scope:** all five paths are Step 3 files.
+- **No unresolved or boundary-crossing findings:** the stale historical
+  expectations are now recorded with an owner, and the plan forbids editing that
+  harness here.
+- **Accurate `a.commit`:** mechanically ready, and its content matches.
+
+The only reviewer edit is polishing-only review metadata in the Step 3
+validation rows. No code, fixture, declaration, envelope or grouping changed.
+This recommendation does not authorize a commit, and it does not stand in for
+the post-commit merge and fresh-clone proof that delivery still requires.
+
+### Final reviewer decision for step 3 python-sqlite-support (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-3-round-1 -->
+
+## Round 1 by human - Step 3 - human-confirmation
+
+- Recorded: 2026-09-16T10:01:17+02:00
+- Exchange: code/code/v0.27.0/python-sqlite-support
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.python-sqlite-support.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
