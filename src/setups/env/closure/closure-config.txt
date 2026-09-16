@@ -9,7 +9,7 @@ root|python
 root|git
 subdir|python|root
 subdir|python|current
-subdir|python|python-3.13.9
+subdir|python|python-3.13.15
 subdir|git|root
 floor|libc.so.6|any
 floor|libpthread.so.0|any
@@ -31,4 +31,3 @@ entrypoint|tools/git/current/bin
 entrypoint|tools/git/current/libexec/git-core
 entrypoint|tools/git/root/usr/bin
 entrypoint|tools/git/root/usr/sbin
-waiver|libsqlite3.so.0|python-sqlite-support
