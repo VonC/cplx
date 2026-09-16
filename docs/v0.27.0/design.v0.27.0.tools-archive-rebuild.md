@@ -14,7 +14,7 @@ connects its acceptance to immutable publication and application adoption.
 The requirement's AR1-AR4, PA1-PA11 and RA1-RA8 remain the acceptance contract.
 Its five consolidated clarifications are settled inputs. This design does not
 reselect the coverage policy, platform matrix, Python selection rule or
-recovery policy. The major interfaces proposed here are a release evidence
+recovery policy. The confirmed interfaces are a release evidence
 record, a candidate input to the existing application flow, wheel inputs to
 the existing D10 policy, and the real publication adapter.
 
@@ -116,7 +116,7 @@ temporary source ref replaces that contract.
 
 ## Release evidence composition and invalidation
 
-The proposed release record is a structured sidecar outside the archive,
+The release record is a structured sidecar outside the archive,
 indexed by its SHA-256. It aggregates references to existing evidence rather
 than changing the closure result grammar or placing evidence inside the bytes
 whose digest it names. A human-readable acceptance view presents the same
@@ -212,7 +212,7 @@ with system interpreters are reported separately from candidate execution.
 
 ## Candidate and release consumption on the actual Jenkins agent
 
-The proposed candidate mode reuses the existing application's main integration
+Candidate mode reuses the existing application's main integration
 chain. A separately identified archive-copy input selects the candidate and
 its digest before provisioning the runtime used by that chain. The same
 selection supplies relocation, dependency synchronization, tests, packaging,
@@ -253,7 +253,7 @@ archive instead of letting a later `latest` selection choose different bytes.
 Record both the publication SHA-1 and the stronger archive SHA-256 association.
 A changed selection invalidates the prior acceptance.
 
-The proposed application-owned adapter connects this entry point to
+The application-owned adapter connects this entry point to
 `closure_publish.sh`. The existing gate retains control of the open descriptor
 and invokes the uploader only after authority, evidence, static closure and
 waiver checks. Its four-operation contract remains:
@@ -314,196 +314,17 @@ configuration; it never replaces bytes under the failed immutable release.
 | The publisher lacks a demonstrated private-stage/atomic-commit adapter | Publication remains blocked; Maven success is not evidence of the missing contract. |
 | Pre-publication Jenkins passes, but release-pin retrieval or adoption fails | Preserve the failed coordinate, keep uploads off during recovery and verify the restored working configuration. |
 
-## Design proposal boundaries for tools-archive-rebuild
+## Design decisions for tools-archive-rebuild
 
-The structured release record, reuse of the main chain for candidate mode,
-wheel-input extension to D10, and application ownership of the transactional
-adapter are proposed design choices for review. Source-authority renewal,
-transaction semantics, platform obligations and release immutability are
-inherited contracts rather than new choices. Actual release evidence, uploader
-capability and candidate results are still to be produced by implementation.
+The four option A answers are confirmed. Source-authority renewal, transaction
+semantics, platform obligations and release immutability remain inherited
+contracts. Actual release evidence, uploader capability and candidate results
+are still to be produced by implementation. No open questions remain before
+implementation planning.
 
-## Open questions for the v0.27.0 tools-archive-rebuild design
-
-### Q01: How should the release compose acceptance evidence?
-
-The existing closure result certifies its own domain and exact archive bytes.
-Item 7 must also associate application, wheel, platform, full-suite and
-adoption evidence. Which interface should assemble that broader release view?
-This chooses the representation and gate boundary, not the settled acceptance
-requirements or the maintainer's responsibility for change assessments.
-
-#### BBQ for Q01
-
-A host can keep the grill's inspection receipt and check a separate checklist
-for the rest of the meal, or use one event register that links each receipt
-to the food batch being served. In this picture: the grill receipt is closure
-evidence, the food batch is the identified archive and consumer inputs, the
-other receipts are platform/application results, and the event register is
-the release evidence record.
-
-#### Options for Q01
-
-- Option A: A structured archive-indexed sidecar with references to original
-  results and a human-readable view, versioned as cplx evidence under this
-  effort's docs directory. A cplx-owned validator checks required statuses,
-  identities and referenced evidence at the application's publication entry
-  before the closure gate, and again for adoption completion.
-  The versioned record follows the same sanitization rule as item 6's
-  acceptance record: environment, container and runtime identities appear as
-  evidence, while account paths, workspace paths and access details remain in
-  the ignored captures it references.
-  - Pro: Makes missing, stale or inconclusive acceptance visible at the gate
-    while preserving existing evidence producers and schemas.
-  - Con: Adds an aggregation interface whose validation must be maintained.
-- Option B: A maintained Markdown acceptance ledger and explicit maintainer
-  sign-off, with the existing machine closure gate unchanged.
-  - Pro: Requires less new automation and fits existing evidence documents.
-  - Con: Completeness and identity consistency rely on repeated manual review
-    across platforms and application revisions.
-
-#### Recommended option for Q01
-
-Option A. Compose references instead of extending closure's domain, and let
-automation check identity/completeness while the maintainer records semantic
-impact decisions. Keep post-publication obligations out of the earlier gate.
-
-#### Answer to Q01: option A
-
-Option A should be accepted because one candidate can have many consuming
-input sets, and explicit result identities prevent an old application pass
-from becoming implicit permission to publish a changed configuration.
-
-### Q02: Where should candidate qualification run the application chain?
-
-Item 6's transport runs SQLite acceptance in an isolated diagnostic prefix.
-The settled requirement now needs the actual Jenkins agent to run the full
-application chain with the candidate before release. Which architecture
-should connect that candidate to application provisioning and tests?
-
-#### BBQ for Q02
-
-Testing a new grill in the corner proves that it lights, but the meal must
-also be cooked on it. The host can connect the new grill to the usual serving
-line or arrange a separate complete rehearsal. In this picture: the corner
-test is the SQLite diagnostic, the new grill is the candidate runtime, the
-serving line is the application integration chain, and the rehearsal is a
-dedicated candidate validation flow on the existing agent.
-
-#### Options for Q02
-
-- Option A: A candidate input mode in the existing main application chain,
-  reusing the archive-copy route and requiring uploads off.
-  - Pro: Exercises the same provisioning, full tests, packaging, walk and ABI
-    gates that adoption will use, with one runtime selection.
-  - Con: Adds an explicitly guarded input mode to the normal pipeline.
-- Option B: A dedicated validation flow on the same agent that composes the
-  shared application stages around the candidate runtime.
-  - Pro: Keeps candidate selection separate from the normal pipeline entry.
-  - Con: Requires another orchestration flow and evidence that its stage
-    composition remains equivalent to the adopted pipeline.
-
-#### Recommended option for Q02
-
-Option A. Extend the existing transport to select the actual main-chain
-runtime, retain explicit digests, and remove the override for the later
-release-pin run. Neither a diagnostic-only pass nor a snapshot coordinate
-substitutes for that candidate execution.
-
-#### Answer to Q02: option A
-
-Option A should be accepted because it directly establishes that the candidate
-interpreter runs the application's full coverage/testmon acceptance and the
-same permanent integration gates used after publication.
-
-### Q03: How should final wheel demands enter the existing D10 policy?
-
-D10 already owns generation selection and bounded convergence. Its current
-public subject input names one root, while this release must also include the
-final resolved wheel ELF consumers. Which boundary should carry those extra
-demands without duplicating the policy or changing archive closure scope?
-
-#### BBQ for Q03
-
-The cook sizes the gas supply for the grill and must now account for a side
-burner. They can read both appliances with the same meter or accept a
-separately prepared consumption sheet. In this picture: gas capacity is
-provider version-node capability, the grill and side burner are archive and
-wheel consumers, the meter is the ELF reader, and the sizing rule is D10.
-
-#### Options for Q03
-
-- Option A: Extend the existing D10 measurement input with identified wheel
-  consumer roots, using its shared ELF reader and unchanged selector on the
-  RHEL build/measuring host. Materialize the Debian agent's exact wheel
-  artifacts there, bind their set to its lock and per-wheel digests, and match
-  measured ELF paths/digests to its installed wheel inventory.
-  - Pro: Keeps one definition of measured needs and one convergence policy;
-    archive and wheel inventories remain separately attributed.
-  - Con: Extends the existing interface and requires artifact transfer or
-    retrieval plus validation against the agent's resolved wheel inputs.
-- Option B: Produce a separate normalized wheel-demand manifest and let D10
-  validate and combine that manifest with its archive reading.
-  - Pro: Separates dependency acquisition from the policy process and permits
-    consumption of a transported measurement.
-  - Con: Adds another evidence grammar and a trust/binding boundary between
-    wheel bytes and externally supplied needs.
-
-#### Recommended option for Q03
-
-Option A. Measure both consumer sets through the existing reader, preserving
-their provenance, and evaluate their union against both candidate generations.
-Use the agent's exact wheel bytes on the measuring host; do not resolve a
-host-specific replacement or accept an unbound transported measurement.
-Do not expand the installed archive declaration merely to include venv wheels.
-
-#### Answer to Q03: option A
-
-Option A should be accepted because it meets the final-wheel requirement with
-one policy and one interpretation of ELF version needs, while keeping provider
-capabilities and archive-versus-wheel consumer identities distinguishable.
-
-### Q04: Who should own the real publication transaction adapter?
-
-The cplx publication gate already defines non-public staging, streamed writes,
-abort and atomic publication. The current application publisher uses a Maven
-pathname upload and has not demonstrated those semantics. Where should the
-adapter connecting the two live? This does not authorize weakening the
-inherited contract or assume that the configured repository supports it.
-
-#### BBQ for Q04
-
-Inspected food stays behind the counter until the server can present the
-approved tray in one handoff. Either the restaurant's serving team or the
-inspection equipment supplier can own that handoff mechanism. In this picture:
-the inspected tray is the checked archive stream, the counter is private
-staging, presentation is atomic publication, the serving team is the
-application publisher, and the equipment supplier is cplx.
-
-#### Options for Q04
-
-- Option A: The application publisher owns its repository-specific adapter;
-  cplx owns and invokes the existing transaction contract. Demonstrate the real
-  backend and adapter capability before the sandbox refresh and rebuild.
-  - Pro: Keeps repository coordinates, credentials and publishing behavior in
-    the application that already owns the Nexus entry point.
-  - Con: Completion depends on coordinated application changes and a proven
-    backend capability outside the cplx checkout.
-- Option B: cplx provides a reusable repository adapter configured by the
-  application publisher, while retaining the same public application entry.
-  - Pro: Centralizes adapter behavior and its verification with the gate.
-  - Con: Introduces repository-specific transport configuration into cplx and
-    still requires proving the same backend transaction capability.
-
-#### Recommended option for Q04
-
-Option A. Preserve the existing ownership boundary and make proof of the real
-adapter contract a release-blocking prerequisite. If the backend cannot meet
-it, resolve the inherited design explicitly; an ordinary upload followed by
-a checksum must not be relabeled as a transaction.
-
-#### Answer to Q04: option A
-
-Option A should be accepted because cplx can retain its checked-byte guarantee
-without taking over application publishing policy. Choosing an owner does not
-claim that the presently missing adapter or its backend capability exists.
+| Question | Decision and reason | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | Use a structured archive-indexed sidecar and acceptance view, versioned as sanitized cplx effort evidence and maintained through adoption or recovery. A cplx validator checks referenced evidence, statuses and identities before the closure gate and checks adoption completeness later. Explicit identities expose stale or missing acceptance while preserving the original evidence formats and maintainer impact judgments. | [Release evidence composition and invalidation](#release-evidence-composition-and-invalidation) | A Markdown-only ledger with manual sign-off leaves completeness and identity consistency to repeated manual checks. |
+| Q02 | Qualify the candidate through the existing main application chain on the actual Jenkins agent, with uploads off and the exact candidate interpreter supplying full coverage/testmon acceptance. Remove candidate mode for the separate release-pin run. Reusing the adopted stages avoids a second orchestration flow and its equivalence burden. | [Candidate and release consumption on the actual Jenkins agent](#candidate-and-release-consumption-on-the-actual-jenkins-agent) | A dedicated validation flow using shared stages still needs proof that its composition matches the adopted pipeline. |
+| Q03 | Extend D10 with identified wheel consumer roots and keep its reader and selector. Measure the Debian agent's exact wheel artifacts on the RHEL measuring host, bound to the lock, per-wheel digests and installed ELF inventory. This keeps one interpretation of required nodes and one convergence policy. | [D10 consumer input and runtime validation](#d10-consumer-input-and-runtime-validation) | A transported normalized wheel-demand manifest adds another grammar and a trust boundary between wheel bytes and reported needs. Host-specific replacement resolution cannot represent the agent's consumers. |
+| Q04 | The application owns the repository-specific transaction adapter; cplx owns and invokes the inherited contract. Prove actual backend and adapter capability before the sandbox refresh and rebuild, and repeat final publication checks. This keeps coordinates, credentials and publishing policy with the application's existing entry point. | [Publication adapter and exact archive binding](#publication-adapter-and-exact-archive-binding) | A cplx-owned repository adapter adds application transport policy to cplx and still needs the same backend proof. Ordinary public upload followed by a checksum cannot replace the inherited transaction. |
