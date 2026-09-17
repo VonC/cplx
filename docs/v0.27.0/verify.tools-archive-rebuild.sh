@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cumulative native Linux checks through release evidence binding in Step 2.
+# Cumulative native Linux checks through exact wheel D10 inputs in Step 3.
 # Explicit app checkout and independent Python 3.9+ are required.
 set -euo pipefail
 step="" python="" app=""
@@ -11,8 +11,8 @@ while [ "$#" -gt 0 ]; do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ "$step" =~ ^[12]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
-    printf 'Required: --step 1|2 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
+[[ "$step" =~ ^[123]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
+    printf 'Required: --step 1|2|3 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
 }
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 cd "$root"
@@ -20,12 +20,20 @@ cd "$root"
 bash src/utils/lint_shell.sh
 scripts=(docs/v0.27.0/verify.tools-archive-rebuild.sh docs/v0.27.0/verify.tools-release-publish.sh
     "$app/tools/tools_release_adapter.sh" "$app/tools/publish_pdf_nexus.sh")
+if [ "$step" -ge 3 ]; then
+    scripts+=(src/setups/env/bin/closure_d10.sh src/setups/env/bin/tools_wheel_inventory.sh
+        docs/v0.27.0/verify.tools-release-d10.sh)
+fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
 shellcheck "${scripts[@]}"
 "$python" -m py_compile "$app/tools/tools_release_http.py" "$app/tools/tools_release_transport.py"
 if [ "$step" -ge 2 ]; then
     "$python" -m py_compile src/setups/env/bin/tools_release_record.py
     "$python" -B -m unittest tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd -v
+fi
+if [ "$step" -ge 3 ]; then
+    "$python" -m py_compile src/setups/env/bin/tools_wheel_inventory.py
+    bash docs/v0.27.0/verify.tools-release-d10.sh --python "$python"
 fi
 bash docs/v0.27.0/verify.tools-release-publish.sh --python "$python" --app-repo "$app"
 # The current declaration deliberately retired the old SQLite waiver. Preserve
