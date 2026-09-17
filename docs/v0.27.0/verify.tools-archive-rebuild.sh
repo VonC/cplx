@@ -1,5 +1,6 @@
 #!/bin/bash
-# Cumulative native Linux checks. Explicit app and independent Python required.
+# Cumulative native Linux checks through release evidence binding in Step 2.
+# Explicit app checkout and independent Python 3.9+ are required.
 set -euo pipefail
 step="" python="" app=""
 while [ "$#" -gt 0 ]; do
@@ -10,17 +11,22 @@ while [ "$#" -gt 0 ]; do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ "$step" = 1 && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
-    printf 'Required: --step 1 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
+[[ "$step" =~ ^[12]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
+    printf 'Required: --step 1|2 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
 }
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 cd "$root"
+"$python" -c 'import sys; print("Independent interpreter:", sys.executable, sys.version); assert sys.version_info >= (3, 9)'
 bash src/utils/lint_shell.sh
 scripts=(docs/v0.27.0/verify.tools-archive-rebuild.sh docs/v0.27.0/verify.tools-release-publish.sh
     "$app/tools/tools_release_adapter.sh" "$app/tools/publish_pdf_nexus.sh")
 for script in "${scripts[@]}"; do bash -n "$script"; done
 shellcheck "${scripts[@]}"
 "$python" -m py_compile "$app/tools/tools_release_http.py" "$app/tools/tools_release_transport.py"
+if [ "$step" -ge 2 ]; then
+    "$python" -m py_compile src/setups/env/bin/tools_release_record.py
+    "$python" -B -m unittest tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd -v
+fi
 bash docs/v0.27.0/verify.tools-release-publish.sh --python "$python" --app-repo "$app"
 # The current declaration deliberately retired the old SQLite waiver. Preserve
 # that floor, then exercise the frozen publication suite with its original pair
