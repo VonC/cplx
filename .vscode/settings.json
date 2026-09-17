@@ -137,6 +137,7 @@
     "nobfd",
     "nofunction",
     "noncanonical",
+    "nonpassing",
     "normalised",
     "normalising",
     "nosource",
