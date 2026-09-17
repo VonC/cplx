@@ -376,8 +376,11 @@ CLOSURE_PUBLISH_COMMIT=""
 # single pass hands bytes over before the digest is known, and a non-zero exit
 # cannot retract a public upload. So the adapter has four operations:
 # `upload_begin` creates an object that IS NOT PUBLICLY VISIBLE and prints its
-# handle, `upload_write` consumes stdin into it, `upload_abort` destroys it
-# leaving nothing public, and `upload_commit` makes it public atomically. THOSE
+# handle, `upload_write` consumes stdin into it, `upload_abort` closes unfinished
+# staging, and `upload_commit` makes it public atomically. A missing commit
+# response requires exact-asset SHA-256 reconciliation before success; status 3
+# retains an unresolved attempt and blocks retry/adoption. Abort after commit
+# intent reconciles without deleting public bytes or claiming absence. THOSE
 # FOUR NAMES ARE THIS EFFORT'S ADAPTER ABI. Umbrella item 7 keeps whatever public
 # API it has and supplies an adapter with these semantics; this plan does not
 # impose its names on item 7's surface, and where an uploader cannot be invoked
@@ -474,19 +477,21 @@ closure_publish_upload() {
     fi
 
     if ! upload_commit "$CLOSURE_PUBLISH_STAGE"; then
-        closure_publish_refuse 4 "the uploader could not commit, so nothing is public"
+        closure_publish_refuse 4 "publication was not confirmed. Retain the attempt and reconcile before retry or adoption"
         return 1
     fi
     # The committed flag FLIPS ONLY AFTER `upload_commit` RETURNS 0, so every
-    # other exit path, a signal and a commit failure included, aborts the stage.
+    # other exit path asks the adapter to abort an unfinished stage or reconcile
+    # commit intent. A missing response can hide an already public release.
     CLOSURE_PUBLISH_COMMITTED=1
     return 0
 }
 
 # FAILURE POSTCONDITIONS ARE STATED, so a caller always knows what exists.
-# `upload_begin` failing leaves nothing staged and nothing public; `upload_abort`
-# succeeding leaves nothing public and no retained stage, and failing leaves a
-# stage that MAY persist, named on stderr, with the run still refusing. IF THE
+# `upload_begin` failing starts no public write; diagnostics may be retained.
+# `upload_abort` succeeding closes an unfinished stage without publishing it.
+# Failing abort retains the named attempt: staging or a public release MAY
+# exist after commit intent, and the run still refuses. IF THE
 # SCRATCH REMOVAL ITSELF FAILS the path is named and the verdict is unchanged:
 # local cleanup is an operator concern and publication does not depend on it.
 closure_publish_cleanup() {
