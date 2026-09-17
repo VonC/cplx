@@ -283,7 +283,12 @@ pending. No existing feature or reporting capability is impaired.
 
 ### Analysis of Step 3 implementation state
 
-Not started. Step 3 is not implemented because wheel inventory transport and additional D10 consumer roots are not implemented.
+Yes. Step 3 has been fully implemented.
+
+Exact retained wheels, lock identity and installed ELF identities now feed the
+existing D10 reader and policy. Native RHEL fixtures prove that additional wheel
+demands change the selection, while incomplete inputs remain inconclusive.
+The cumulative Step 3 command passed with independent Python 3.9.25.
 
 ### Goal for Step 3
 
@@ -295,27 +300,91 @@ Identity mismatches are inconclusive; lowest satisfying generation, zero headroo
 
 ### What was implemented for Step 3
 
-_(empty — no check has taken place yet.)_.
+- `tools_wheel_inventory.sh` requires an explicit independent interpreter.
+  Its stdlib Python helper captures the lock, retained wheel hashes and exact
+  installed ELF set, then verifies those same bytes before materialization into
+  an exclusively created private directory. ZIP traversal, links, duplicate
+  entries, file/directory collisions and inventory mismatches refuse; failure
+  removes only the destination owned by that invocation.
+- `closure_d10.sh` accepts repeatable wheel roots with explicit lock and
+  interpreter inputs. It snapshots archive provider identities first, validates
+  each measured wheel subject against the captured inventory, then combines
+  GLIBCXX/CXXABI and separate GCC requirements. Every consumer carries origin,
+  path and digest; candidate identities and defined nodes are reported.
+- The original selector and bounded convergence functions are unchanged.
+  Archive-only calls retain their original subject rule and report fields;
+  the extended union also includes independent libgcc consumers.
+- `verify.tools-release-d10.sh` exercises 49 native cases, including all planned
+  refusal and convergence outcomes, installed-set equality, safe cleanup,
+  data relocation and deterministic wheel-order permutations. The cumulative
+  runner composes these with the existing publication and SQLite controls.
+- [Retained validation evidence](evidence.tools-archive-rebuild.step3-validation.txt)
+  records exact source identities, invocation counts, line budgets and results.
+  The final cumulative run exited 0 in 49 seconds: 49 D10 cases, 16 record
+  tests, 15 transport tests, 6 publication tests and 254 historical closure
+  Step 5 cases passed, alongside the SQLite controls and shell gates.
 
 ### New types/classes introduced for Step 3
 
-_(empty — no check has taken place yet.)_.
+No classes or runtime dependencies were introduced. The helper is a standalone
+Python 3.9+ CLI with a versioned JSON identity record, not an ABI-demand format.
 
 ### Architecture check for Step 3
 
-_(empty — no check has taken place yet.)_.
+Filesystem, ZIP and JSON handling stay in the inventory adapter. The shared
+ELF reader remains the only interpreter of ABI requirements and capabilities;
+D10 remains the policy owner. Wheel and candidate reads cannot overwrite the
+archive snapshot. No application domain code or production archive topology
+changed. DDD/hexagonal boundaries have no new smell or violation.
+
+Physical lines before/after: D10 524/630; helper Bash 0/11; helper Python 0/258;
+fixture Bash 0/218; cumulative runner 46/54. The only new Python file is below
+the 650-line ceiling. No architecture or file-size issue needs addressing.
 
 ### Performance check for Step 3
 
-_(empty — no check has taken place yet.)_.
+Each explicit root is walked once; each new reader slice is visited once.
+Hash maps deduplicate required nodes and compare subject identities. Wheel
+bytes are streamed with a fixed number of integrity passes; candidate checks
+are linear in the required nodes for the two fixed generations. There is no
+new all-pairs comparison or sort. ZIP ancestor checks are bounded by path depth.
+
+The instrumented union measured two find walks and eight unique readelf calls:
+three archive objects, one wheel object and four candidate providers. D10
+reported 0 seconds at whole-second resolution; no deadline is inferred.
+No performance issue needs addressing.
 
 ### Unit test coverage check for Step 3
 
-_(empty — no check has taken place yet.)_.
+No Python class or existing unit-tested class changed. New tests are native
+integration fixtures and carry no unit coverage target. Deterministic ZIP
+mutations and wheel-order permutations provide generated-case checks without
+a PBT dependency. Every top-level Python helper is referenced by another
+helper or the CLI dispatch; every new Bash function is called by the entry
+path or fixture driver, including the exported instrumentation functions.
+
+The cplx gate measures shell lint, not Python coverage; the app's coverage
+scope is src/pdfss and excludes these tooling files. No percentage is claimed.
+The required fresh ghog day completed with exit 5 after successful lint because
+cplx has no configured pytest environment. The plan explicitly substitutes
+the native cumulative runner, which passed; no pytest gate was added.
+No unit-tested class below 100% needs completing. No top-level symbol outside
+the coverage gate is unreferenced.
 
 ### Feature integrity for Step 3
 
-_(empty — no check has taken place yet.)_.
+Legacy archive-only selection, zero headroom, unread/empty observations and
+equal/lower/higher/neither second readings are covered. Existing publication,
+record and SQLite regression controls passed. An additional frozen closure
+Step 7 attempt passed its D10 policy/evidence assertions but was inconclusive
+in its separate live archive extraction after exhausting scratch space; it is
+not part of the Step 3 cumulative gate or evidence of candidate acceptance.
+The frozen harness and production declarations remain unchanged.
+
+Real Debian wheel capture/wiring belongs to Step 4, and final candidate D10
+and runtime proof to Step 6. No candidate pass was added to the release record;
+Steps 4-7 and the umbrella remain pending. No existing feature or reporting
+capability is impaired.
 
 ## Step 4. Wire candidate qualification into the main application chain
 
