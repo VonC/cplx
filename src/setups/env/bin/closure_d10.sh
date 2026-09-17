@@ -58,6 +58,10 @@
 # item 7. Its host tools are the checker's own and it reaches both of them
 # through `closure_elf.sh` rather than directly, so the enumerated contract
 # gains no row for it.
+#
+# Item 7 adds independently captured wheel roots. Their lock and installed ELF
+# identities are checked before joining the consumer union. Archive provider
+# identity is snapshotted first; wheel providers never change that snapshot.
 
 set -u
 
@@ -74,7 +78,7 @@ if [ -f "$CLOSURE_D10_DIR/closure_elf.sh" ]; then
     source "$CLOSURE_D10_DIR/closure_elf.sh"
 fi
 
-CLOSURE_D10_USAGE="Usage: closure_d10.sh --root DIR --candidate GEN=DIR [--candidate GEN=DIR]... [--previous RESULT]"
+CLOSURE_D10_USAGE="Usage: closure_d10.sh --root DIR --candidate GEN=DIR [--candidate GEN=DIR]... [--previous RESULT] [--wheel-root DIR ... --wheel-lock FILE --wheel-python /absolute/python]"
 
 # The two providers the policy is about, and the namespaces each answers for.
 # They are named once here rather than at each test site, because the pairing is
@@ -105,6 +109,12 @@ CLOSURE_D10_REASON=""
 declare -A CLOSURE_D10_SEEN=()
 declare -A CLOSURE_D10_DEFINES=()
 declare -A CLOSURE_D10_IDENTITY=()
+declare -A CLOSURE_D10_ORIGIN=()
+declare -A CLOSURE_D10_DIGEST=()
+CLOSURE_D10_WHEEL_ROOTS=()
+CLOSURE_D10_WHEEL_LOCK=""
+CLOSURE_D10_WHEEL_PYTHON=""
+CLOSURE_D10_WHEEL_WALKS=0
 
 # THE ARCHIVE'S OWN SIDE, TAKEN BEFORE ANY CANDIDATE IS READ, and held here
 # rather than re-derived later. `closure_elf_read` appends to the reader's
@@ -129,6 +139,9 @@ closure_d10_reset() {
     CLOSURE_D10_DEFINES=()
     CLOSURE_D10_IDENTITY=()
     CLOSURE_D10_SHIPPED=()
+    CLOSURE_D10_ORIGIN=()
+    CLOSURE_D10_DIGEST=()
+    CLOSURE_D10_WHEEL_WALKS=0
 }
 
 # One required node, recorded ONCE and in first-seen order. Several consumers
@@ -260,7 +273,7 @@ closure_d10_reading_generation() {
 # archive. The reading generation comes last because it is the one field derived
 # from BOTH halves.
 closure_d10_evidence() {
-    local root="$1" spec gen dir path need line provider node
+    local root="$1" spec gen dir line provider key
     shift
     closure_d10_reset
 
@@ -274,6 +287,7 @@ closure_d10_evidence() {
         return 5
     fi
     closure_subjects_walk "$root"
+    if [ ! -d "$root" ]; then CLOSURE_ELF_WALK_STATE=missing; fi
     if [ "$CLOSURE_ELF_UNREAD" -ne 0 ] || [ "$CLOSURE_ELF_WALK_STATE" != complete ]; then
         CLOSURE_D10_UNREAD=1
         CLOSURE_D10_REASON="the archive reading is incomplete: $CLOSURE_ELF_UNREAD unread object(s), walk: $CLOSURE_ELF_WALK_STATE"
@@ -283,21 +297,9 @@ closure_d10_evidence() {
     # The consumer set and the requirements it records, in one pass over the
     # subjects the walk already read. Nothing is read from disk here: both halves
     # come out of the single `readelf` invocation each object already had.
-    for path in ${CLOSURE_ELF_PATHS[@]+"${CLOSURE_ELF_PATHS[@]}"}; do
-        need=0
-        while IFS= read -r line; do
-            if [ "$line" = "$CLOSURE_D10_STDCXX" ]; then need=1; fi
-        done <<< "${CLOSURE_ELF_NEEDED[$path]:-}"
-        if [ "$need" -eq 0 ]; then continue; fi
-        CLOSURE_D10_CONSUMERS+=("$path")
-        while IFS= read -r line; do
-            if [ -z "$line" ]; then continue; fi
-            provider="${line%%|*}"
-            node="${line#*|}"
-            if closure_d10_in_scope "$provider" "$node"; then
-                closure_d10_requires "$provider" "$node"
-            fi
-        done <<< "${CLOSURE_ELF_VERNEED[$path]:-}"
+    closure_d10_consumers 0 "${#CLOSURE_ELF_PATHS[@]}" archive
+    for dir in ${CLOSURE_D10_WHEEL_ROOTS[@]+"${CLOSURE_D10_WHEEL_ROOTS[@]}"}; do
+        closure_d10_wheel_root "$dir"
     done
 
     for spec in "$@"; do
@@ -316,9 +318,18 @@ closure_d10_evidence() {
 
     printf 'D10 READING\n'
     printf '  reading generation  %s\n' "$CLOSURE_D10_READING"
-    printf '  consumers           %s of %s shipped objects\n' \
-        "${#CLOSURE_D10_CONSUMERS[@]}" "$CLOSURE_D10_SUBJECTS"
+    if [ "${#CLOSURE_D10_WHEEL_ROOTS[@]}" -eq 0 ]; then
+        printf '  consumers           %s of %s shipped objects\n' \
+            "${#CLOSURE_D10_CONSUMERS[@]}" "$CLOSURE_D10_SUBJECTS"
+    else
+        printf '  consumers           %s; archive objects %s\n' \
+            "${#CLOSURE_D10_CONSUMERS[@]}" "$CLOSURE_D10_SUBJECTS"
+    fi
+    printf '  walks archive=1 wheels=%s\n' "$CLOSURE_D10_WHEEL_WALKS"
     printf '  required nodes      %s\n' "${#CLOSURE_D10_REQUIRED[@]}"
+    for line in ${CLOSURE_D10_CONSUMERS[@]+"${CLOSURE_D10_CONSUMERS[@]}"}; do
+        printf '  consumer %s %s sha256=%s\n' "${CLOSURE_D10_ORIGIN[$line]}" "$line" "${CLOSURE_D10_DIGEST[$line]:-unread}"
+    done
     for gen in ${CLOSURE_D10_CANDIDATES[@]+"${CLOSURE_D10_CANDIDATES[@]}"}; do
         for provider in "$CLOSURE_D10_STDCXX" "$CLOSURE_D10_GCC_S"; do
             printf '  candidate %s %s %s\n' "$gen" "$provider" \
@@ -328,6 +339,89 @@ closure_d10_evidence() {
     for line in ${CLOSURE_D10_REQUIRED[@]+"${CLOSURE_D10_REQUIRED[@]}"}; do
         printf '  require %s\n' "$line"
     done
+    for key in "${!CLOSURE_D10_DEFINES[@]}"; do printf '  defines %s\n' "$key"; done
+}
+
+# Visit only this walk's slice. Later provider reads append to the reader model,
+# but cannot enter the consumer union or alter its already captured provenance.
+closure_d10_consumers() {
+    local first="$1" last="$2" origin="$3" i path need line provider node
+    for ((i=first; i<last; i++)); do
+        path="${CLOSURE_ELF_PATHS[$i]}"
+        need=0
+        while IFS= read -r line; do
+            if [ "$line" = "$CLOSURE_D10_STDCXX" ]; then need=1; fi
+            # The extended union also carries independent unwind consumers.
+            # Archive-only calls retain the inherited libstdc++ subject rule.
+            if [ "${#CLOSURE_D10_WHEEL_ROOTS[@]}" -gt 0 ] && [ "$line" = "$CLOSURE_D10_GCC_S" ]; then need=1; fi
+        done <<< "${CLOSURE_ELF_NEEDED[$path]:-}"
+        if [ "$need" -eq 0 ]; then continue; fi
+        CLOSURE_D10_CONSUMERS+=("$path")
+        CLOSURE_D10_ORIGIN["$path"]="${CLOSURE_D10_ORIGIN[$path]:-$origin}"
+        if closure_elf_digest "$path"; then
+            CLOSURE_D10_DIGEST["$path"]="$CLOSURE_ELF_DIGEST_RESULT"
+        else
+            closure_d10_incomplete "consumer digest unavailable: $path"
+        fi
+        while IFS= read -r line; do
+            if [ -z "$line" ]; then continue; fi
+            provider="${line%%|*}"
+            node="${line#*|}"
+            if closure_d10_in_scope "$provider" "$node"; then
+                closure_d10_requires "$provider" "$node"
+            fi
+        done <<< "${CLOSURE_ELF_VERNEED[$path]:-}"
+    done
+}
+
+closure_d10_incomplete() {
+    CLOSURE_D10_UNREAD=$((CLOSURE_D10_UNREAD + 1))
+    CLOSURE_D10_REASON="${CLOSURE_D10_REASON:+$CLOSURE_D10_REASON; }$1"
+}
+
+# Describe supplies paths and byte identities, never interpreted ABI demands.
+# One closure walk discovers the actual subjects; set equality catches extra,
+# absent and unreadable objects before the ordinary D10 policy can succeed.
+closure_d10_wheel_root() {
+    local root="$1" rows rel sha wheel wheel_sha installed path i first last link
+    local -A expected=() origins=() observed=()
+    rows=$(bash "$CLOSURE_D10_DIR/tools_wheel_inventory.sh" --python "$CLOSURE_D10_WHEEL_PYTHON" \
+        describe --root "$root" --lock "$CLOSURE_D10_WHEEL_LOCK") || {
+        closure_d10_incomplete "wheel inventory unavailable: $root"; return 0;
+    }
+    while IFS=$'\t' read -r rel sha wheel wheel_sha installed; do
+        [ -n "$rel" ] || continue
+        path="$root/subjects/$rel"
+        expected["$path"]="$sha"
+        origins["$path"]="wheel:$wheel wheel-sha256=$wheel_sha installed=$installed"
+    done <<< "$rows"
+    first="${#CLOSURE_ELF_PATHS[@]}"
+    CLOSURE_D10_WHEEL_WALKS=$((CLOSURE_D10_WHEEL_WALKS + 1))
+    # D10 does not resolve links. Keep this map local to the current wheel walk
+    # so rejecting wheel links never rescans all earlier roots' link maps.
+    CLOSURE_LINK_TARGET=()
+    closure_subjects_walk "$root/subjects"
+    last="${#CLOSURE_ELF_PATHS[@]}"
+    if [ ! -d "$root/subjects" ] || [ -L "$root/subjects" ] || \
+       [ "$CLOSURE_ELF_UNREAD" -ne 0 ] || [ "$CLOSURE_ELF_WALK_STATE" != complete ]; then
+        closure_d10_incomplete "wheel subject walk incomplete: $root"
+    fi
+    for link in "${!CLOSURE_LINK_TARGET[@]}"; do
+        if [[ "$link" = "$root/subjects/"* ]]; then closure_d10_incomplete "wheel subject symlink: $link"; fi
+    done
+    for ((i=first; i<last; i++)); do
+        path="${CLOSURE_ELF_PATHS[$i]}"
+        observed["$path"]=1
+        if [ -z "${expected[$path]:-}" ] || ! closure_elf_digest "$path" || \
+           [ "$CLOSURE_ELF_DIGEST_RESULT" != "${expected[$path]}" ]; then
+            closure_d10_incomplete "wheel ELF identity mismatch: $path"
+        fi
+        CLOSURE_D10_ORIGIN["$path"]="${origins[$path]:-wheel:unidentified}"
+    done
+    for path in "${!expected[@]}"; do
+        if [ -z "${observed[$path]:-}" ]; then closure_d10_incomplete "wheel ELF missing: $path"; fi
+    done
+    closure_d10_consumers "$first" "$last" wheel
 }
 
 # -------------------------------------------------------------- the policy ---
@@ -461,14 +555,25 @@ closure_d10_converge() {
 
 # ----------------------------------------------------------------- the run ---
 closure_d10_main() {
-    local root="" previous="" rc=0
+    local root="" previous="" rc=0 started=$SECONDS
     local candidates=()
+    local -A roots=()
+    CLOSURE_D10_WHEEL_ROOTS=()
+    CLOSURE_D10_WHEEL_LOCK=""
+    CLOSURE_D10_WHEEL_PYTHON=""
 
     while [ "$#" -gt 0 ]; do
+        if [ "$#" -lt 2 ]; then printf '%s\n' "$CLOSURE_D10_USAGE" >&2; return 2; fi
         case "$1" in
             --root) root="${2:-}"; shift 2 ;;
             --candidate) candidates+=("${2:-}"); shift 2 ;;
             --previous) previous="${2:-}"; shift 2 ;;
+            --wheel-root)
+                if [ -z "${2:-}" ]; then return 2; fi
+                if [ -z "${roots[$2]:-}" ]; then CLOSURE_D10_WHEEL_ROOTS+=("$2"); roots["$2"]=1; fi
+                shift 2 ;;
+            --wheel-lock) CLOSURE_D10_WHEEL_LOCK="$2"; shift 2 ;;
+            --wheel-python) CLOSURE_D10_WHEEL_PYTHON="$2"; shift 2 ;;
             *) printf '%s\n' "$CLOSURE_D10_USAGE" >&2; return 2 ;;
         esac
     done
@@ -508,6 +613,7 @@ closure_d10_main() {
             rc=$?
         fi
     fi
+    printf 'D10 elapsed=%ss\n' "$((SECONDS-started))"
     return "$rc"
 }
 
