@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cumulative native Linux checks through exact wheel D10 inputs in Step 3.
+# Cumulative native Linux checks through main-chain qualification in Step 4.
 # Explicit app checkout and independent Python 3.9+ are required.
 set -euo pipefail
 step="" python="" app=""
@@ -11,8 +11,8 @@ while [ "$#" -gt 0 ]; do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ "$step" =~ ^[123]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
-    printf 'Required: --step 1|2|3 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
+[[ "$step" =~ ^[1234]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
+    printf 'Required: --step 1|2|3|4 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
 }
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 cd "$root"
@@ -24,8 +24,14 @@ if [ "$step" -ge 3 ]; then
     scripts+=(src/setups/env/bin/closure_d10.sh src/setups/env/bin/tools_wheel_inventory.sh
         docs/v0.27.0/verify.tools-release-d10.sh)
 fi
+if [ "$step" -ge 4 ]; then
+    scripts+=(docs/v0.27.0/verify.tools-release-agent.sh "$app/ci/tools_candidate.sh"
+        "$app/ci/tools_abi_acceptance.sh" "$app/ci/tools_test_acceptance.sh"
+        "$app/ci/tools_agent_identity.sh" "$app/ci/provision_toolchain.sh"
+        "$app/tools/sqlite_candidate_capture.sh")
+fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
-shellcheck "${scripts[@]}"
+shellcheck --external-sources --source-path="$app" "${scripts[@]}"
 "$python" -m py_compile "$app/tools/tools_release_http.py" "$app/tools/tools_release_transport.py"
 if [ "$step" -ge 2 ]; then
     "$python" -m py_compile src/setups/env/bin/tools_release_record.py
@@ -34,6 +40,10 @@ fi
 if [ "$step" -ge 3 ]; then
     "$python" -m py_compile src/setups/env/bin/tools_wheel_inventory.py
     bash docs/v0.27.0/verify.tools-release-d10.sh --python "$python"
+fi
+if [ "$step" -ge 4 ]; then
+    "$python" -m py_compile "$app"/ci/tools_*.py docs/v0.27.0/fixtures.tools-release-agent.py
+    bash docs/v0.27.0/verify.tools-release-agent.sh --python "$python" --app-repo "$app"
 fi
 bash docs/v0.27.0/verify.tools-release-publish.sh --python "$python" --app-repo "$app"
 # The current declaration deliberately retired the old SQLite waiver. Preserve
