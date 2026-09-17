@@ -1,0 +1,455 @@
+Step 2 validation, 2026-09-17
+cplx starting revision: 66de88c2b2d8259fb8b67d161823745e7d0b7685
+app starting revision: 7a2c1c1650a1252e9e73c4dbc9dfe73bcf5d8b87
+Native host: RHEL 9.8, Bash 5.1.8, independent system Python /usr/bin/python3 3.9.25
+Cumulative command: bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 2 --python /usr/bin/python3 --app-repo <app-checkout>
+Cumulative result: exit 0, elapsed 44 seconds
+Application authoring command: ghog.bat day --force --detach (CMD, explicit application PRJ_DIR)
+Fresh status from ghog.bat status: state=done exit=0 ended=2026-09-17T10:33:54+02:00
+Application check 2m 30.4s; affected selection 9.8s; full suite 4m 21.5s (6040 collected).
+Application full: fail=0 warn=3 xfail=8 cov=100 outliers=0 excluded=0 exit=0
+Application coverage source is src/pdfss, not the external release validator or tools scripts.
+Pinned Linux ShellCheck 0.10.0: 6c881ab0698e4e6ea235245f22832860544f17ba386442fe7e9d629f8cbedf87
+Owned LF fixture copies contain the listed sources. No candidate or release was published.
+Process tests use isolated TLS or a spy adapter; source/waiver checks are separately exercised by inherited fixtures.
+Windows unit coverage: independent llm-shared Python 3.13.9, 16 tests, 7.961 seconds, exit 0
+Coverage command: python -B -m coverage run --data-file=a.tools-record.coverage --include=*/tools_release_record.py -m unittest tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd
+Coverage report: tools_release_record.py 276 statements, 0 missing, 100%
+CLI tests assert one record read, one unique capture read, interpreter path/version, timing and digest output.
+Test-first observations: missing validator failed before implementation; contradictory pending publication digests and evidence overwrite tests failed before their fixes.
+Initial native ShellCheck conditions and missing private staging fixture setup were corrected before the final run.
+
+LF source SHA-256 and physical line counts:
+9467be06c5a26cf2e8a67201b27ac2aff98a0e4b35826d756594de8662a315a2 369 src/setups/env/bin/tools_release_record.py
+48e9b627277c37066aa3824b0ef061075552831d89b1d06ec7dbb6d4f8f084b9 670 src/setups/env/bin/closure_publish.sh
+d138209107d2cc019dc48f61524c4c910d26ca3dec2bff9a34c82248a9cdfb4b 1 tests/unit/tools_release_record/__init__.py
+9a9fa0e2e39a2073094044a1fbd8687f4a0ce663380486feec7be75aab41da7c 1 tests/unit/tools_release_record/test_tools_release_record/__init__.py
+921f33492f669c0dc15e69d1f35823af89edf59f2541ef6654e10c62bd3188d5 332 tests/unit/tools_release_record/test_tools_release_record/test_tools_release_record_tdd.py
+ed03507e1eda1c74556cafac903efa3d19cb5e3ee779c6072d5fb1172d46d787 148 tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py
+6672b643892e229a919cde3f5f4cca2b2f378a323e98bbbc5ec5c1038ac93a9b 46 docs/v0.27.0/verify.tools-archive-rebuild.sh
+7203d62c2109dcbe2b85a4361f83e7f0d326e425e8807074d2b9e0c8f8db27cf 20 docs/v0.27.0/verify.tools-release-publish.sh
+a597908dd96affc2730fd35c706f47b6ba2c0195a3bf1ff545235f618ed3a100 336 app:tools/publish_pdf_nexus.sh
+
+Native cumulative output:
+Independent interpreter: /usr/bin/python3 3.9.25 (main, Aug  6 2026, 00:00:00)
+[GCC 11.5.0 20240719 (Red Hat 11.5.0-14)]
+lint_shell: 57 tracked scripts
+lint_shell: clean
+test_archive_and_release_revision_are_exact (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_capture_integrity_retention_and_run_are_required (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_changed_inputs_need_explicit_reasoned_retention (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_cli_entry_render_validation_and_refusal (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_cli_reports_digest_and_local_independent_interpreter (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_completion_requires_confirmed_publication_and_adoption (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_duplicate_keys_and_nonsanitized_records_refuse (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_every_required_cell_rejects_nonpassing_or_missing_results (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_invalid_schema_types_and_unknown_phase_refuse (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_optional_and_inapplicable_cells_can_be_absent (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_publication_does_not_require_future_adoption (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_render_is_deterministic_and_includes_pending_cells (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_renewal_fallback_and_one_d10_rebuild_are_supported (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_required_metadata_mutations_fail_closed (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_unaffected_evidence_keeps_original_run_and_inputs (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+test_wheel_changes_cannot_retain_old_d10_or_abi (tests.unit.tools_release_record.test_tools_release_record.test_tools_release_record_tdd.ReleaseRecordTests) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 3.602s
+
+OK
+test_abort_failure_names_retained_attempt (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_existing_coordinate_is_never_overwritten (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_gate_digest_failure_aborts_before_commit (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_gate_never_claims_absence_after_uncertain_commit (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_gate_resolves_lost_commit_response (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_inconclusive_checks_block_retry_and_support_readonly_recovery (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_interrupted_commit_caller_recovers_without_republication (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_interruption_aborts_unfinished_stage (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_missing_unusable_and_error_replies_require_readback (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_old_tools_entry_refuses_before_external_commands (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_ordinary_publisher_preserves_release_and_snapshot_behaviour (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_partial_remote_write_never_commits (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_private_write_and_abort (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_unreadable_credentials_during_readback_retain_unknown_attempt (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+test_valid_acknowledgement (tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd.TransportTests) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 13.197s
+
+OK
+test_archive_replacement_after_validation_is_refused (tests.unit.tools_release_record.test_tools_release_record.test_release_publication_tdd.ReleasePublicationTests) ... ok
+test_eligible_record_streams_exact_bytes (tests.unit.tools_release_record.test_tools_release_record.test_release_publication_tdd.ReleasePublicationTests) ... ok
+test_empty_validator_output_is_not_eligibility (tests.unit.tools_release_record.test_tools_release_record.test_release_publication_tdd.ReleasePublicationTests) ... ok
+test_missing_failed_and_mismatched_eligibility_never_load_adapter (tests.unit.tools_release_record.test_tools_release_record.test_release_publication_tdd.ReleasePublicationTests) ... ok
+test_omitted_gate_guard_refuses_in_tools_mode (tests.unit.tools_release_record.test_tools_release_record.test_release_publication_tdd.ReleasePublicationTests) ... ok
+test_other_gate_callers_keep_optional_guard_compatibility (tests.unit.tools_release_record.test_tools_release_record.test_release_publication_tdd.ReleasePublicationTests) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 1.200s
+
+OK
+PASS: candidate declaration parses
+PASS: Python candidate and root order
+PASS: SQLite floor remains in Python
+PASS: candidate carries no active waiver
+PASS: installer observes candidate fixture
+PASS: root is present
+PASS: current is present
+PASS: 3.13.15 is present
+PASS: candidate scope has no unexpected directory
+PASS: installer observes retained old version
+PASS: retained 3.13.9 is unexpected
+PASS: complete static floor is accepted
+PASS: missing SQLite is refused
+PASS: Git-only SQLite fixture is indexed
+PASS: Git-only SQLite is refused
+PASS: stale waiver fixture parses
+PASS: present SQLite makes its waiver stale
+PASS: source blob preserves declaration bytes
+CONSISTENT|63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa|INTERNAL CONSISTENCY ONLY: a host with no cplx access cannot tell an authentic bundle from the reviewed one
+PASS: exact fixture pair is internally consistent
+CONSISTENT|63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa|INTERNAL CONSISTENCY ONLY: a host with no cplx access cannot tell an authentic bundle from the reviewed one
+AUTHORITATIVE|63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa|434071cd36f43f36d199e0b24beace84bd62897e
+PASS: exact fixture source is authoritative
+PASS: altered declaration with unchanged envelope refuses
+PASS: CRLF changes the exact digest
+PASS: CRLF with unchanged envelope refuses
+CONSISTENT|63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa|INTERNAL CONSISTENCY ONLY: a host with no cplx access cannot tell an authentic bundle from the reviewed one
+PASS: changed-source pair remains internally consistent
+PASS: changed source blob is refused by authority
+FIXTURES ONLY: repository envelope and real source ancestry remain unchecked.
+SQLite closure: 25 checks passed in 0 seconds
+closure-config.txt: OK
+closure-envelope.txt: OK
+Historical closure input pair, current implementation scripts
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 5 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /bin/sed
+  preflight/grep                                 PASS  /bin/grep
+  preflight/sort                                 PASS  /bin/sort
+  preflight/uniq                                 PASS  /bin/uniq
+  preflight/mkdir                                PASS  /bin/mkdir
+  preflight/rm                                   PASS  /bin/rm
+  preflight/chmod                                PASS  /bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  rhel 9.8
+  host/any-linux                                 PASS  rhel 9.8
+
+== capability gate: readelf assoc bash cat chmod cp find git ln mkdir mkfifo mktemp readelf rm sha256sum tar tee
+  capability/readelf/in-domain                   PASS  yes
+  capability/readelf                             NOTE  supported: /bin/readelf answered -d -V over /bin/bash
+  capability/assoc/in-domain                     PASS  yes
+  capability/assoc                               NOTE  supported: bash 5.1.8(1)-release, an associative assignment read back its own value
+  capability/bash/in-domain                      PASS  yes
+  capability/bash                                NOTE  supported: /bin/bash resolved and is executable (resolution only, no semantic probe)
+  capability/cat/in-domain                       PASS  yes
+  capability/cat                                 NOTE  supported: /bin/cat resolved and is executable (resolution only, no semantic probe)
+  capability/chmod/in-domain                     PASS  yes
+  capability/chmod                               NOTE  supported: /bin/chmod resolved and is executable (resolution only, no semantic probe)
+  capability/cp/in-domain                        PASS  yes
+  capability/cp                                  NOTE  supported: /bin/cp resolved and is executable (resolution only, no semantic probe)
+  capability/find/in-domain                      PASS  yes
+  capability/find                                NOTE  supported: /bin/find resolved and is executable (resolution only, no semantic probe)
+  capability/git/in-domain                       PASS  yes
+  capability/git                                 NOTE  supported: /home/<build-account>/tools/git/current/bin/git resolved and is executable (resolution only, no semantic probe)
+  capability/ln/in-domain                        PASS  yes
+  capability/ln                                  NOTE  supported: /bin/ln resolved and is executable (resolution only, no semantic probe)
+  capability/mkdir/in-domain                     PASS  yes
+  capability/mkdir                               NOTE  supported: /bin/mkdir resolved and is executable (resolution only, no semantic probe)
+  capability/mkfifo/in-domain                    PASS  yes
+  capability/mkfifo                              NOTE  supported: /bin/mkfifo resolved and is executable (resolution only, no semantic probe)
+  capability/mktemp/in-domain                    PASS  yes
+  capability/mktemp                              NOTE  supported: /bin/mktemp resolved and is executable (resolution only, no semantic probe)
+  capability/readelf/in-domain                   PASS  yes
+  capability/readelf                             NOTE  supported: /bin/readelf answered -d -V over /bin/bash
+  capability/rm/in-domain                        PASS  yes
+  capability/rm                                  NOTE  supported: /bin/rm resolved and is executable (resolution only, no semantic probe)
+  capability/sha256sum/in-domain                 PASS  yes
+  capability/sha256sum                           NOTE  supported: /bin/sha256sum digested the empty input correctly
+  capability/tar/in-domain                       PASS  yes
+  capability/tar                                 NOTE  supported: /bin/tar resolved and is executable (resolution only, no semantic probe)
+  capability/tee/in-domain                       PASS  yes
+  capability/tee                                 NOTE  supported: /bin/tee resolved and is executable (resolution only, no semantic probe)
+  step5/packaging/first-run                      PASS  0
+  step5/packaging/reported-archive-exists        PASS  yes
+  step5/packaging/add-reads-original-home        PASS  extension fixture
+  step5/packaging/compiler-is-trimmed            PASS  no
+  step5/packaging/same-second-duplicate-succeeds PASS  0
+  step5/packaging/same-second-duplicate-preserves-latest PASS  7c1d65938c4af527f14c3b0e70a8363fd81a16d83b398815b4081ac6da65faff  -
+  step5/packaging/duplicate-keeps-one-archive    PASS  1
+  step5/packaging/occupied-name-refuses-new-content PASS  2
+  step5/packaging/occupied-name-preserves-latest PASS  7c1d65938c4af527f14c3b0e70a8363fd81a16d83b398815b4081ac6da65faff  -
+  step5/packaging/tar-failure-refuses            PASS  2
+  step5/packaging/tar-failure-preserves-latest   PASS  7c1d65938c4af527f14c3b0e70a8363fd81a16d83b398815b4081ac6da65faff  -
+  step5/packaging/failures-leave-no-partial      PASS  0
+  step5/packaging/override---source-root-refuses PASS  3
+  step5/packaging/override---source-root=/tmp/cplx-closure-check.305862/step5/packaging-preservation/home-refuses PASS  3
+  step5/packaging/override-creates-no-stage      PASS  2
+  step5/packaging/override-leaves-live-gate-absent PASS  yes
+  step5/packaging/literal-tar-pattern-is-preserved PASS  0
+  step5/loader/identical/preserves-relative-aliases PASS  0
+  step5/loader/identical/reaches-package         PASS  yes
+  step5/loader/identical/live-copy-stays-regular PASS  no
+  step5/loader/identical/live-canonical-unchanged PASS  de48ca52de759e7dbfcfbf649d809f1e725bcc9805cecd51ec9ed129d13c405d  /tmp/cplx-closure-check.305862/step5/loader-aliases/home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2
+  step5/loader/different/refuses                 PASS  3
+  step5/loader/different/never-reaches-package   PASS  no
+  step5/loader/different/live-canonical-unchanged PASS  de48ca52de759e7dbfcfbf649d809f1e725bcc9805cecd51ec9ed129d13c405d  /tmp/cplx-closure-check.305862/step5/loader-aliases/home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2
+  step5/loader/broken/refuses                    PASS  3
+  step5/loader/broken/never-reaches-package      PASS  no
+  step5/loader/broken/live-canonical-unchanged   PASS  de48ca52de759e7dbfcfbf649d809f1e725bcc9805cecd51ec9ed129d13c405d  /tmp/cplx-closure-check.305862/step5/loader-aliases/home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2
+  step5/loader/escaping/refuses                  PASS  3
+  step5/loader/escaping/never-reaches-package    PASS  no
+  step5/loader/escaping/live-canonical-unchanged PASS  de48ca52de759e7dbfcfbf649d809f1e725bcc9805cecd51ec9ed129d13c405d  /tmp/cplx-closure-check.305862/step5/loader-aliases/home/tools/python/root/usr/lib64/ld-linux-x86-64.so.2
+
+== step 5 topology: the fifth module, and what it is not allowed to own
+  step5/topology/report-declared-commands        PASS
+  step5/topology/publish-declared-commands       PASS
+  step5/topology/report-decides-no-checker-status PASS
+  step5/topology/entry-point-still-decides-status PASS  yes
+  step5/topology/entry-point-has-no-waiver-path  PASS
+  step5/topology/no-closure_scope.sh             PASS  no
+  step5/envelope/committed-pair-agrees           PASS  d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1
+  step5/envelope/committed-envelope-names-a-source PASS  yes
+
+== step 5 selector: four corners, and two of them refuse
+  step5/selector/fixture-is-not-a-checkout       PASS  no
+  step5/selector/flag-with-other-target-refuses  PASS  1
+  step5/selector/flag-with-other-target-says-why PASS  yes
+  step5/selector/tools-without-flag-refuses      PASS  1
+  step5/selector/tools-without-flag-says-why     PASS  yes
+  step5/selector/tools2-is-not-tools             PASS  yes
+  step5/selector/unrelated-target-unchanged      PASS  0
+  step5/selector/unrelated-target-skips-the-gate PASS  yes
+
+== step 5 gate: staged from the deployed tree, and no repository anywhere
+  step5/gate/dispatcher-reaches-the-gate         PASS  yes
+  step5/gate/active-waiver-still-produces-an-archive PASS  0
+  step5/gate/active-waiver-is-marked             PASS  yes
+  step5/gate/archive-exists                      PASS  1
+  step5/gate/declaration-in-the-archive          PASS  yes
+  step5/gate/envelope-in-the-archive             PASS  yes
+  step5/gate/five-payload-modules-in-the-archive PASS  5
+  step5/gate/the-live-tree-keeps-no-gate-files   PASS  yes
+  step5/gate/inside-the-payload-refuses          PASS  3
+  step5/gate/inside-the-payload-says-why         PASS  yes
+  step5/gate/payload-directory-alias-refuses     PASS  3
+  step5/gate/payload-directory-alias-preserves-source PASS  d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1
+  step5/gate/shared-file-refuses                 PASS  3
+  step5/gate/shared-file-preserves-source        PASS  d1a487b529c3ea1f2a6abac0fda90061f6a5d61a7e4a0d2b52be9f109aeeade1
+  step5/gate/absent-declaration-refuses          PASS  3
+  step5/gate/absent-declaration-does-not-skip    PASS  yes
+  step5/gate/envelope-mismatch-refuses           PASS  3
+  step5/gate/envelope-mismatch-says-both-digests PASS  yes
+  step5/gate/checker-refusal-adds-no-archive     PASS  1
+  step5/gate/checker-refusal-refuses-the-run     PASS  1
+  step5/gate/checker-refusal-names-the-floor     PASS  yes
+  step5/gate/refusal-unstages-the-declaration    PASS  no
+  step5/gate/refusal-unstages-every-module       PASS
+  step5/gate/failed-copy-refuses                 PASS  3
+  step5/gate/failed-copy-unstages                PASS  no
+  step5/gate/empty-staged-bundle-refuses         PASS  3
+  step5/gate/empty-staged-bundle-unstages        PASS  no
+  step5/gate/partial-write-refuses               PASS  3
+  step5/gate/partial-write-adds-no-archive       PASS  1
+  step5/gate/partial-write-unstages-completely   PASS
+  step5/gate/bundle-removed-before-check-refuses PASS  1
+  step5/gate/bundle-removed-names-the-bundle     PASS  yes
+  step5/gate/bundle-removed-adds-no-archive      PASS  1
+  step5/gate/bundle-removed-unstages-completely  PASS
+  step5/gate/bundle-removed-control-passes-the-gate PASS  yes
+
+== step 5 preservation: --add, the passthrough and the SHA1 deduplication
+  step5/preserve/add-and-passthrough-succeed     PASS  0
+  step5/preserve/add-ships-the-extra-item        PASS  yes
+  step5/preserve/passthrough-applied-the-exclusion PASS  yes
+  step5/preserve/duplicate-is-deduplicated       PASS  2
+  step5/preserve/duplicate-says-so               PASS  yes
+  step5/preserve/latest-resolves-to-the-retained-archive PASS  27b45604ecc028cfc5850750f9f471f8dce0e427f67b4ba16d2e00e9e8de86c8
+  step5/promote/mutation-identity-is-not-the-source PASS  yes
+  step5/promote/mutation-identity-describes-the-copy PASS  yes
+
+== step 5 waivers: unknown, stale, and the exception that stands
+  step5/waiver/stale-exit-code                   PASS  1
+  step5/waiver/stale-is-named                    PASS  yes
+  step5/waiver/stale-counts                      PASS  1 declared, 0 active, 1 refused
+  step5/waiver/active-exit-code                  PASS  3
+  step5/waiver/active-is-named                   PASS  yes
+  step5/waiver/active-says-validation-artifact   PASS  yes
+  step5/waiver/active-refuses-no-floor-member    PASS  yes
+  step5/waiver/active-counts                     PASS  1 declared, 1 active, 0 refused
+  step5/waiver/unknown-is-named                  PASS  yes
+  step5/waiver/root-is-unknown-not-special       PASS  yes
+
+== step 5 promotion: the gate refuses to act on a path it was shown
+  step5/promote/first-promotion-succeeds         PASS  0
+  step5/promote/pre-existing-destination-refuses PASS  1
+  step5/promote/pre-existing-says-why            PASS  yes
+  step5/promote/group-writable-root-refuses      PASS  1
+  step5/promote/group-writable-copies-nothing    PASS
+  step5/promote/symlinked-root-refuses           PASS  1
+  step5/promote/directory-destination-refuses    PASS  1
+  step5/promote/directory-destination-untouched  PASS
+  step5/promote/symlink-destination-refuses      PASS  1
+  step5/promote/symlink-target-untouched         PASS
+  step5/promote/permission-query-failure-refuses PASS  1
+  step5/promote/permission-query-failure-reason  PASS  yes
+  step5/publication/repo-commit-is-a-sha         PASS  40
+
+== step 5 handoff: four operations, and nothing public on any failure
+  step5/handoff/commit-succeeds                  PASS  0
+  step5/handoff/one-object-is-public             PASS  1
+  step5/handoff/no-abort-on-success              PASS  0
+  step5/handoff/digest-mismatch-refuses-promptly PASS  1
+  step5/handoff/digest-mismatch-publishes-nothing PASS  0
+  step5/handoff/digest-mismatch-aborts-expected-times PASS  1
+  step5/handoff/digest-mismatch-removes-scratch  PASS
+  step5/handoff/write-failure-refuses-promptly   PASS  1
+  step5/handoff/write-failure-publishes-nothing  PASS  0
+  step5/handoff/write-failure-aborts-expected-times PASS  1
+  step5/handoff/write-failure-removes-scratch    PASS
+  step5/handoff/commit-failure-refuses-promptly  PASS  1
+  step5/handoff/commit-failure-publishes-nothing PASS  0
+  step5/handoff/commit-failure-aborts-expected-times PASS  1
+  step5/handoff/commit-failure-removes-scratch   PASS
+  step5/handoff/begin-failure-refuses-promptly   PASS  1
+  step5/handoff/begin-failure-publishes-nothing  PASS  0
+  step5/handoff/begin-failure-aborts-expected-times PASS  0
+  step5/handoff/begin-failure-removes-scratch    PASS
+  step5/handoff/abort-failure-refuses-promptly   PASS  1
+  step5/handoff/abort-failure-publishes-nothing  PASS  0
+  step5/handoff/abort-failure-aborts-expected-times PASS  1
+  step5/handoff/abort-failure-removes-scratch    PASS
+  step5/handoff/abort-failure-names-the-stage    PASS  yes
+  step5/handoff/writer-never-arrives-refuses-promptly PASS  1
+  step5/handoff/writer-never-arrives-aborts-once PASS  1
+  step5/handoff/writer-never-arrives-removes-scratch PASS
+  step5/handoff/writer-never-arrives-publishes-nothing PASS  0
+  step5/instance/open-descriptor-survives-replacement PASS  28349f0834c1a3ffaa7984100c9338504088739a3330888c390d5f0acf775bb6
+  step5/instance/in-place-write-refuses          PASS  1
+  step5/instance/in-place-write-refused-at-step-0 PASS  yes
+  step5/instance/in-place-write-names-the-change PASS  yes
+  step5/instance/upload-after-replacement-succeeds PASS  0
+  step5/instance/published-bytes-are-the-original PASS  28349f0834c1a3ffaa7984100c9338504088739a3330888c390d5f0acf775bb6
+  step5/instance/the-name-really-was-replaced    PASS  yes
+  step5/handoff/cat-failure-refuses-promptly     PASS  1
+  step5/handoff/cat-failure-aborts-once          PASS  1
+  step5/handoff/cat-failure-removes-scratch      PASS
+  step5/handoff/cat-failure-publishes-nothing    PASS  0
+  step5/handoff/preflight-refuses                PASS  1
+  step5/handoff/preflight-names-the-missing-command PASS  yes
+  step5/handoff/preflight-stages-nothing         PASS  0
+  step5/handoff/preflight-leaves-no-scratch      PASS
+  step5/handoff/preflight-publishes-nothing      PASS  0
+  step5/handoff/chmod-fails-terminates           PASS  yes
+  step5/handoff/chmod-fails-refuses              PASS  1
+  step5/handoff/chmod-fails-publishes-nothing    PASS  0
+  step5/handoff/chmod-fails-stages-as-expected   PASS  0
+  step5/handoff/chmod-fails-aborts-as-expected   PASS  0
+  step5/handoff/chmod-fails-removes-scratch      PASS
+  step5/handoff/mkfifo-fails-terminates          PASS  yes
+  step5/handoff/mkfifo-fails-refuses             PASS  1
+  step5/handoff/mkfifo-fails-publishes-nothing   PASS  0
+  step5/handoff/mkfifo-fails-stages-as-expected  PASS  1
+  step5/handoff/mkfifo-fails-aborts-as-expected  PASS  1
+  step5/handoff/mkfifo-fails-removes-scratch     PASS
+  step5/handoff/hasher-fails-terminates          PASS  yes
+  step5/handoff/hasher-fails-refuses             PASS  1
+  step5/handoff/hasher-fails-publishes-nothing   PASS  0
+  step5/handoff/hasher-fails-stages-as-expected  PASS  1
+  step5/handoff/hasher-fails-aborts-as-expected  PASS  1
+  step5/handoff/hasher-fails-removes-scratch     PASS
+  step5/handoff/empty-digest-terminates          PASS  yes
+  step5/handoff/empty-digest-refuses             PASS  1
+  step5/handoff/empty-digest-publishes-nothing   PASS  0
+  step5/handoff/empty-digest-stages-as-expected  PASS  1
+  step5/handoff/empty-digest-aborts-as-expected  PASS  1
+  step5/handoff/empty-digest-removes-scratch     PASS
+  step5/handoff/empty-digest-names-the-read-back PASS  yes
+  step5/handoff/scratch-removal-failure-keeps-the-verdict PASS  0
+  step5/handoff/scratch-removal-failure-still-published PASS  1
+  step5/handoff/scratch-removal-failure-names-the-path PASS  yes
+  step5/handoff/pathname-terminates              PASS  yes
+  step5/handoff/pathname-refuses                 PASS  1
+  step5/handoff/pathname-publishes-nothing       PASS  0
+  step5/handoff/pathname-stages-once             PASS  1
+  step5/handoff/pathname-aborts-once             PASS  1
+  step5/handoff/pathname-removes-scratch         PASS
+  step5/handoff/pathname-refuses-at-step-4       PASS  yes
+  step5/handoff/descriptor-control-commits       PASS  0
+  step5/handoff/descriptor-control-publishes-the-bytes PASS  258a10a0711a1007e388200246e785724c2ef3ba768407bcb4c7b8cbecee4d2a
+
+== step 5 signals: an interruption, and the cleanup it cannot enter twice
+  step5/signal/stream-reaches-the-stream         PASS  reached
+  step5/signal/stream-terminates                 PASS  yes
+  step5/signal/stream-exits-130                  PASS  130
+  step5/signal/stream-publishes-nothing          PASS  0
+  step5/signal/stream-had-a-stage-to-abort       PASS  1
+  step5/signal/stream-aborts-exactly-once        PASS  1
+  step5/signal/stream-removes-scratch            PASS
+  step5/signal/cleanup-reaches-the-abort         PASS  reached
+  step5/signal/cleanup-terminates                PASS  yes
+  step5/signal/cleanup-refused-before-the-abort  PASS  yes
+  step5/signal/cleanup-aborts-exactly-once       PASS  1
+  step5/signal/cleanup-publishes-nothing         PASS  0
+  step5/signal/cleanup-ended-inside-the-abort    PASS  yes
+  step5/signal/cleanup-keeps-the-scratch-it-died-in PASS  yes
+  step5/signal/cleanup-status                    NOTE  130
+
+== step 5 publication: the order is the assertion, not the set
+  step5/publication/stripped-bundle-refuses      PASS  1
+  step5/publication/stripped-fails-at-step-1     PASS  yes
+  step5/publication/stripped-never-reaches-the-waiver-question PASS  yes
+  step5/publication/no-comparison-refuses        PASS  1
+  step5/publication/no-comparison-fails-at-step-2 PASS  yes
+  step5/publication/step-2-names-the-computed-identity PASS  yes
+  step5/publication/changed-config-refuses       PASS  1
+  step5/publication/changed-config-fails-at-step-1 PASS  yes
+  step5/publication/missing-config-refuses       PASS  1
+  step5/publication/missing-config-fails-at-step-1 PASS  yes
+  step5/publication/no-adapter-refuses-after-checks PASS  1
+  step5/publication/no-adapter-refuses-at-step-4 PASS  yes
+  step5/publication/no-adapter-reached-the-adapter-gate PASS  yes
+  step5/publication/no-adapter-never-reports-success PASS  yes
+
+== step 5 end to end: a gated archive with an active waiver is refused
+  step5/e2e/gated-archive-is-refused             PASS  1
+  step5/e2e/refused-at-the-waiver-step           PASS  yes
+  step5/e2e/refusal-names-the-validation-artifact PASS  yes
+  step5/e2e/no-mode-permits-it                   PASS  yes
+  step5/e2e/clean-publication-succeeds           PASS  0
+  step5/e2e/clean-publication-says-so            PASS  yes
+  step5/e2e/one-object-is-public                 PASS  1
+  step5/e2e/public-bytes-are-the-archive         PASS  216e4ac7d12d2d3038b89639a5843ad6fba0210bfbab1e0f6bd6e7713e95acc6
+
+== verdict
+  step        5
+  cases       254
+  failures    0
+  host        rhel 9.8
+  bash        5.1.8(1)-release
+  contract    <owned-fixture>/cplx/docs/v0.27.0/contract.closure-tools.txt
+  corpus      <owned-fixture>/cplx/docs/v0.27.0/fixtures.closure-corpus.txt
+  shipped-dir <owned-fixture>/bin
+  harness      c36a86ee7f53f0b545fb6f5de4a6fae57e4904d6181f56ea5a5be1acc4970b37
+  contract-sha 33e972d20528aecf19583e80c8628495dfe31afb40f1efbe92b109b2bcb8e37e
+  corpus-sha   74f2259ebbadacca971e6aeafca544efc806605e4dffc29307498a60f8608472
+  capability   readelf=supported
+  capability   assoc=supported
+  capability   bash=supported
+  capability   cat=supported
+  capability   chmod=supported
+  capability   cp=supported
+  capability   find=supported
+  capability   git=supported
+  capability   ln=supported
+  capability   mkdir=supported
+  capability   mkfifo=supported
+  capability   mktemp=supported
+  capability   readelf=supported
+  capability   rm=supported
+  capability   sha256sum=supported
+  capability   tar=supported
+  capability   tee=supported
+
+OBJECTIVE MET for step 5

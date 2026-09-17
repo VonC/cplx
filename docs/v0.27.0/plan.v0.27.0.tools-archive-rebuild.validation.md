@@ -3,7 +3,7 @@
 No, it is not implemented.
 
 Track the seven steps in [the implementation plan](plan.v0.27.0.tools-archive-rebuild.md).
-Step 1 is checked below. Steps 2-7 and final-archive acceptance remain pending.
+Steps 1-2 are checked below. Steps 3-7 and final-archive acceptance remain pending.
 
 ## File-based IO cost clarification
 
@@ -146,7 +146,13 @@ publication and adoption work remains assigned to Steps 2-7.
 
 ### Analysis of Step 2 implementation state
 
-Not started. Step 2 is not implemented because the record validator, tests and publication digest guard are not implemented.
+Yes. Step 2 has been fully implemented.
+
+The archive-indexed sidecar, independent Python validator and application entry
+separate publication eligibility from completion and bind the eligible SHA-256
+to the closure gate's promoted bytes before any uploader load or call. Native
+Python 3.9 fixtures, separate unit coverage and the application authoring walk
+passed. The real candidate remains pending, as required by this step.
 
 ### Goal for Step 2
 
@@ -161,27 +167,117 @@ an independently supplied interpreter, never the candidate being qualified.
 
 ### What was implemented for Step 2
 
-_(empty — no check has taken place yet.)_.
+- `tools_release_record.py` provides explicit publication, completion and render
+  commands with record, archive, evidence-root and release-revision inputs.
+  It rejects duplicate JSON keys, missing required cells, unknown IDs/states,
+  stale or contradictory identities, unsupported interpreter declarations,
+  damaged or unavailable captures and incomplete D10 convergence. Required
+  Debian and RHEL roles, optional RHEL cells and future adoption obligations
+  remain distinct.
+- Captures have retained identities, paths and hashes; each passing result
+  keeps its producing run and original input identities. Exact reasoned
+  assessments can preserve unaffected results, while wheel/lock changes force
+  fresh D10, ABI and relevant application acceptance. The CLI records actual
+  interpreter path/version, timing, read counts and both archive hashes locally,
+  and refuses to overwrite its inputs or retained captures.
+- `closure_publish.sh` checks the optional expected SHA-256 against the promoted
+  identity before adapter loading. The application tools entry makes that guard
+  mandatory, validates the selected release coordinate, and exits through the
+  transaction before Maven lookup, search or POM preflight. Obsolete tools paths
+  were removed; ordinary application publication retains its behavior.
+- The versioned JSON and generated Markdown view index Step 1 preparation
+  captures and retain an unqualified pending template outside `candidates`.
+  Lifecycle checks preserve SHA-1/SHA-256 association, block unresolved retries,
+  and require later publication/adoption evidence for completion.
+- The cumulative Linux runner passed in 44 seconds: shell lint/compilation,
+  16 unit tests (3.602s), 15 existing process tests (13.197s), six new entry
+  tests (1.200s), 25 current SQLite checks and 254 inherited publication cases.
+  The inherited suite uses the same verified historical pair as Step 1.
+- The application forced Groundhog walk finished with `state=done`, exit 0,
+  at 2026-09-17T10:33:54+02:00. Check took 2m 30.4s, affected selection 9.8s,
+  full suite 4m 21.5s; 6040 collected, fail=0, warn=3, xfail=8, cov=100,
+  outliers=0 and excluded=0.
+
+See [the acceptance view](acceptance.tools-archive-rebuild.md),
+[the sidecar](acceptance.tools-archive-rebuild.json) and
+[the Step 2 capture](evidence.tools-archive-rebuild.step2-validation.txt) for
+commands, observations, exact source hashes and limits. These results establish
+the release controls, not actual final-archive qualification or publication.
 
 ### New types/classes introduced for Step 2
 
-_(empty — no check has taken place yet.)_.
+The production CLI uses stdlib mappings and pure validation functions, with no
+new framework or domain class. `ReleaseRecordTests` creates isolated synthetic
+records and finite generated mutations. `ReleasePublicationTests` exercises
+the real Bash entry, promotion and stream with a spy adapter. Both test packages
+include their required markers; the CLI is loaded by path.
 
 ### Architecture check for Step 2
 
-_(empty — no check has taken place yet.)_.
+cplx owns evidence composition and the inherited publication port. The
+application entry supplies explicit identities and its existing backend adapter;
+the validator neither executes the candidate nor imports application domain or
+HTTP code. Pure validation, rendering and the filesystem CLI boundary have
+separate functions. No closure result grammar or authority mechanism changed.
+
+Physical lines are 369 for the validator, 332 for unit tests and 148 for process
+tests, each below 650. Shell sizes are 670 for the closure gate, 336 for the
+application publisher and 46/20 for the cumulative/focused runners; the Python
+ceiling does not apply to Bash. No architecture smell, violation or size issue
+needs addressing.
 
 ### Performance check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The validator reads one explicit JSON record and hashes each resolved indexed
+capture once using a dictionary. It hashes the archive once, computing SHA-1
+and SHA-256 together with bounded 1 MiB buffers. Required-cell lookups use a
+fixed matrix, and input comparisons and rendering are linear in their data.
+There is no directory/history discovery, sorting or all-pairs traversal.
+The inherited gate still performs its required independent promoted/snapshot
+and stream identity checks; those reads are not removed as an IO shortcut.
+
+The CLI captures phase duration and read counts; fixtures assert one record
+read and one unique capture read. Native cumulative time was 44 seconds, with
+unit and process timings above. No new latency threshold or timeout xfail was
+introduced. No performance issue needs addressing.
 
 ### Unit test coverage check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The single-file validator unit suite follows the requested class-file directory
+convention and reaches every top-level production function: tests call
+validation, loading, rendering and the CLI; these call metadata, D10, lifecycle,
+capture, input, hashing and primitive checks. The CLI main guard is exercised
+through `runpy`. The prior independent Windows Python 3.13.9 measurement reports
+276 statements, zero missing, 100% coverage. Its 16 tests also passed on the
+native independent system Python 3.9.25 floor.
+
+Finite generated mutations cover every mandatory matrix cell and nonpassing
+state, metadata removal, stale identities, reasoned retention, capture damage,
+sanitization and lifecycle separation. No new property-testing dependency is
+needed. The six Bash process tests are integration tests, with no class-level
+coverage target; their spy records adapter loading as well as callbacks.
+
+The application Groundhog coverage scope is `src/pdfss`; its 100% result does
+not measure this external CLI or the shell entry. The separate measurement and
+static references above establish their exercise. No existing unit-tested
+Python class changed. No unit-tested class below 100% needs completing. No
+top-level production symbol outside the application coverage gate is unreferenced.
 
 ### Feature integrity for Step 2
 
-_(empty — no check has taken place yet.)_.
+Archive replacement after validation, mismatched eligibility, empty validator
+output and an omitted tools guard all refuse before even sourcing the spy
+adapter. Eligible bytes stream unchanged; non-tools gate callers remain
+compatible without the optional guard. Existing process tests cover ordinary
+fresh, identical, different-byte and snapshot application publication. Full
+inherited controls preserve descriptor, snapshot, stream, authority and waiver
+checks; the current SQLite declaration remains intact.
+
+Publication eligibility permits future adoption cells to remain pending;
+completion requires their passes, published digests and pin/configuration
+revisions. Unresolved publication and actual recovery cannot complete the item.
+The sidecar records no real candidate pass. Steps 3-7 and the umbrella item remain
+pending. No existing feature or reporting capability is impaired.
 
 ## Step 3. Include the agent's exact wheel artifacts in D10
 

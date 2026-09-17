@@ -251,3 +251,460 @@ runner 40. Streaming and hashing are linear in bytes with bounded buffers;
 receipt operations address one coordinate directly. No new sorting or all-pairs
 scan is introduced. Actual release publication and adoption remain pending
 later steps.
+
+## Step 2 release evidence contract
+
+The [versioned sidecar](acceptance.tools-archive-rebuild.json) has no identified
+candidate yet. Its pending template is deliberately outside `candidates`: no
+synthetic digest or fixture pass can qualify a release. Step 1's retained captures
+are indexed under `preparation`; they do not certify a future archive.
+
+Use `src/setups/env/bin/tools_release_record.py` with an explicitly selected,
+independent Python 3.9 or later. `publication` returns one accepted SHA-256;
+`completion` additionally requires confirmed publication and adoption. Both
+refuse incomplete records, unretained or damaged captures and stale identities.
+`render --record <record>` produces the generated section below.
+
+For an identified candidate, copy the template under its actual SHA-256 key and
+fill every record area from retained observations. Capture paths are relative to
+the explicit evidence root; use `versioned` or `retained`, an immutable capture
+identity and its exact byte SHA-256. Retain raw evidence outside ignored scratch
+files. Shared identities use sanitized role labels; account paths and interpreter
+paths belong only in the ignored local invocation capture.
+
+Each result names its producing run, captures and original `inputs`: `archive`,
+`application`, `pipeline`, `lock`, exact filename-to-digest `wheels`, and the full
+`runtime` environment map. The current snapshot is derived from the candidate,
+consumers and environments. To retain an unaffected result after changes, its
+assessment must name `decision: unaffected`, a reason, captures, and the exact
+`previous_inputs` and `current_inputs`. The old result keeps its run and inputs.
+Wheel or lock changes always need fresh D10, ABI and application acceptance.
+
+Required RHEL SQLite results are split into `PA3:rhel-build` and
+`PA3:rhel-deploy`; other RHEL cells use `:rhel`. RHEL PA7-PA9 are optional and
+Debian PA10-PA11 are inapplicable. RA5 and RA8 have separate `:publication` and
+`:adoption` portions; RA6 is completion-only. `backend` retains the actual adapter
+capability proof. Unknown IDs or states refuse. Empty states mean pending.
+
+D10 contains one reading, or the permitted rebuild and second reading. Every
+reading names exact wheel consumers, required nodes and both GCC provider
+identities/capability conclusions. The lowest satisfying generation must match
+the final packaged generation. Authority keeps source commit, declaration digest
+and release revision distinct; a renewal also requires `renewal_proof` captures.
+
+The application entry takes an explicit timestamped archive, `--version`,
+`--release-record`, `--evidence-root`, `--cplx-repo`, `--release-revision`,
+`--closure-results` and `--validator-capture`. Set `TOOLS_RELEASE_PYTHON` to the
+independent interpreter and pass `--with-tools --yes` for an unattended release.
+The validator receives the selected coordinate and stores the interpreter
+path/version, phase time, record/capture read counts and SHA-1/SHA-256 association
+in the local capture. The publisher supplies its accepted SHA-256 to the closure
+gate; `CPLX_TOOLS_RELEASE=1` makes an omitted guard a refusal. The gate compares
+the promoted identity before loading an adapter and retains all inherited
+authority, snapshot, waiver and streamed-byte checks. Ordinary application
+publication retains its existing Maven path.
+
+An unresolved or already recorded publication cannot invoke another upload.
+Completion requires exact published digests and successful adoption with pin and
+configuration revisions; a recovered prior configuration leaves this item
+incomplete. Real release qualification, publication and adoption belong to the
+later plan steps.
+
+## Step 2 validation evidence
+
+The [Step 2 capture](evidence.tools-archive-rebuild.step2-validation.txt) records
+the final LF source hashes and native cumulative run: exit 0 in 44 seconds on
+RHEL 9.8 with independent system Python 3.9.25. Shell lint and compilation passed;
+16 validator tests took 3.602 seconds, 15 inherited adapter/publication tests
+took 13.197 seconds, and six new release-entry tests took 1.200 seconds.
+The 25 current SQLite checks and 254 frozen publication checks also passed.
+The frozen suite retains the historical input pair described in Step 1.
+
+The new entry tests keep promotion, descriptor handling and streaming real,
+while substituting the separately tested closure-content checks. They prove
+archive replacement, ineligible records, empty validation output and a missing
+gate guard cannot even load the spy adapter. Positive cases prove exact-byte
+streaming and compatibility for existing gate callers. Ordinary application
+release and snapshot behavior remains covered by the inherited process tests.
+
+An independent Windows Python 3.13.9 run passed all 16 validator tests and
+measured 100% statement coverage of `tools_release_record.py`: 276 statements,
+zero missing. Finite generated mutations cover every mandatory cell, state and
+metadata area without an additional property-testing dependency. Capture tests
+check integrity, retention, direct read counts and protection from log overwrite.
+RA5's adoption evidence includes the normal-pin retrieval confirmation.
+
+The application's forced `ghog day` walk ended on 2026-09-17 at 10:33:54 +02:00
+with `state=done`, exit 0: check 2m 30.4s, affected selection 9.8s and full suite
+4m 21.5s (6040 collected). The full verdict reports zero failures, three warnings,
+eight expected failures, 100% coverage, zero duration outliers and zero exclusions.
+Its coverage scope is `src/pdfss`; the validator's separately measured coverage
+and native process fixtures establish the tools changes.
+
+Physical Python lines are 369 for the validator, 332 for its unit tests and 148
+for the publication process tests, below the 650-line ceiling. The record is read
+once, explicitly referenced captures are hashed once per resolved path, and the
+archive is hashed with bounded 1 MiB buffers. The fixed acceptance matrix and
+digest maps add no sorting, history scan or all-pairs traversal. No timing gate
+was added. The pending record still certifies no candidate or actual release.
+
+## Generated release record
+
+Source: `acceptance.tools-archive-rebuild.json`.
+
+### Release record identities and retained references
+
+```json
+{
+  "schema_version": 1,
+  "preparation": {
+    "state": "pending",
+    "reason": "Final candidate is not built or qualified; Step 1 capability only",
+    "cplx_revision": "66de88c2b2d8259fb8b67d161823745e7d0b7685",
+    "application_revision": "7a2c1c1650a1252e9e73c4dbc9dfe73bcf5d8b87",
+    "validator": {
+      "identity": "independent-rhel-system-python",
+      "version": "3.9.25",
+      "independent": true
+    },
+    "captures": {
+      "backend-preflight": {
+        "identity": "backend-preflight-20260917",
+        "path": "evidence.tools-archive-rebuild.backend-preflight.txt",
+        "sha256": "a214a297205d8a50438e16de240933370f7bff7c93ea8d1deb47a8c7063c08f1",
+        "retention": "versioned"
+      },
+      "stream-probe": {
+        "identity": "stream-probe-20260917",
+        "path": "evidence.tools-archive-rebuild.stream-probe.json",
+        "sha256": "d7faa04202d0b69f0f0ea36c0dc25be3be2d52af665849a1dc5c5603e4e000b5",
+        "retention": "versioned"
+      },
+      "adapter-http": {
+        "identity": "adapter-http-20260917",
+        "path": "evidence.tools-archive-rebuild.adapter-http-probe.json",
+        "sha256": "1979d008787626659e67a5e5dbe4b8ec0e52e826283cf5e345ff96cad40c435b",
+        "retention": "versioned"
+      },
+      "step1-validation": {
+        "identity": "step1-validation-20260917",
+        "path": "evidence.tools-archive-rebuild.validation.txt",
+        "sha256": "5acd6af885fb9eab2d119b4c6b53b24eac46d739d4f832b3b147029d721bef3c",
+        "retention": "versioned"
+      }
+    }
+  },
+  "candidates": {},
+  "pending_candidate": {
+    "candidate": {
+      "filename": null,
+      "size": null,
+      "sha256": null,
+      "sha1": null,
+      "python": null,
+      "payloads": {},
+      "regression": {
+        "date": null,
+        "decision": null,
+        "sources": []
+      }
+    },
+    "authority": {
+      "source_commit": null,
+      "declaration_sha256": null,
+      "release_revision": null,
+      "renewed": null,
+      "captures": []
+    },
+    "consumers": {
+      "application_revision": null,
+      "pipeline_revision": null,
+      "lock_sha256": null,
+      "wheels": {},
+      "venv_base": null
+    },
+    "environments": {
+      "debian": {
+        "run": null,
+        "os": null,
+        "image": null,
+        "container": null,
+        "runtime": {},
+        "transfer_sha256": null
+      },
+      "rhel-build": {
+        "run": null,
+        "os": null,
+        "image": null,
+        "container": null,
+        "runtime": {},
+        "transfer_sha256": null
+      },
+      "rhel-deploy": {
+        "run": null,
+        "os": null,
+        "image": null,
+        "container": null,
+        "runtime": {},
+        "transfer_sha256": null
+      }
+    },
+    "validator": {
+      "identity": null,
+      "version": null,
+      "independent": true
+    },
+    "captures": {},
+    "results": {
+      "AR1": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "AR2": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "AR3": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "AR4": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA1:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA1:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA2:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA2:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA3:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA4:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA4:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA5:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA5:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA6:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA6:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA7:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA7:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA8:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA8:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA9:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA9:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA10:debian": {
+        "state": "not applicable",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA10:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA11:debian": {
+        "state": "not applicable",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA11:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA3:rhel-build": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA3:rhel-deploy": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA1": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA2": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA3": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA4": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA5:publication": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA7": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA8:publication": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "backend": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA5:adoption": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA6": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA8:adoption": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      }
+    },
+    "d10": {
+      "packaged_generation": null,
+      "selected_generation": null,
+      "readings": []
+    },
+    "assessments": {},
+    "publication": {
+      "coordinate": null,
+      "state": "pending",
+      "sha256": null,
+      "sha1": null,
+      "captures": []
+    },
+    "adoption": {
+      "state": "pending",
+      "recovery": "pending",
+      "captures": [],
+      "pin_revision": null,
+      "configuration_revision": null
+    }
+  }
+}
+```

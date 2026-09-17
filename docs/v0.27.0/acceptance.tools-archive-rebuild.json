@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "preparation": {
+    "state": "pending",
+    "reason": "Final candidate is not built or qualified; Step 1 capability only",
+    "cplx_revision": "66de88c2b2d8259fb8b67d161823745e7d0b7685",
+    "application_revision": "7a2c1c1650a1252e9e73c4dbc9dfe73bcf5d8b87",
+    "validator": {
+      "identity": "independent-rhel-system-python",
+      "version": "3.9.25",
+      "independent": true
+    },
+    "captures": {
+      "backend-preflight": {
+        "identity": "backend-preflight-20260917",
+        "path": "evidence.tools-archive-rebuild.backend-preflight.txt",
+        "sha256": "a214a297205d8a50438e16de240933370f7bff7c93ea8d1deb47a8c7063c08f1",
+        "retention": "versioned"
+      },
+      "stream-probe": {
+        "identity": "stream-probe-20260917",
+        "path": "evidence.tools-archive-rebuild.stream-probe.json",
+        "sha256": "d7faa04202d0b69f0f0ea36c0dc25be3be2d52af665849a1dc5c5603e4e000b5",
+        "retention": "versioned"
+      },
+      "adapter-http": {
+        "identity": "adapter-http-20260917",
+        "path": "evidence.tools-archive-rebuild.adapter-http-probe.json",
+        "sha256": "1979d008787626659e67a5e5dbe4b8ec0e52e826283cf5e345ff96cad40c435b",
+        "retention": "versioned"
+      },
+      "step1-validation": {
+        "identity": "step1-validation-20260917",
+        "path": "evidence.tools-archive-rebuild.validation.txt",
+        "sha256": "5acd6af885fb9eab2d119b4c6b53b24eac46d739d4f832b3b147029d721bef3c",
+        "retention": "versioned"
+      }
+    }
+  },
+  "candidates": {},
+  "pending_candidate": {
+    "candidate": {
+      "filename": null,
+      "size": null,
+      "sha256": null,
+      "sha1": null,
+      "python": null,
+      "payloads": {},
+      "regression": {
+        "date": null,
+        "decision": null,
+        "sources": []
+      }
+    },
+    "authority": {
+      "source_commit": null,
+      "declaration_sha256": null,
+      "release_revision": null,
+      "renewed": null,
+      "captures": []
+    },
+    "consumers": {
+      "application_revision": null,
+      "pipeline_revision": null,
+      "lock_sha256": null,
+      "wheels": {},
+      "venv_base": null
+    },
+    "environments": {
+      "debian": {
+        "run": null,
+        "os": null,
+        "image": null,
+        "container": null,
+        "runtime": {},
+        "transfer_sha256": null
+      },
+      "rhel-build": {
+        "run": null,
+        "os": null,
+        "image": null,
+        "container": null,
+        "runtime": {},
+        "transfer_sha256": null
+      },
+      "rhel-deploy": {
+        "run": null,
+        "os": null,
+        "image": null,
+        "container": null,
+        "runtime": {},
+        "transfer_sha256": null
+      }
+    },
+    "validator": {
+      "identity": null,
+      "version": null,
+      "independent": true
+    },
+    "captures": {},
+    "results": {
+      "AR1": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "AR2": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "AR3": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "AR4": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA1:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA1:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA2:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA2:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA3:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA4:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA4:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA5:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA5:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA6:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA6:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA7:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA7:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA8:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA8:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA9:debian": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA9:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA10:debian": {
+        "state": "not applicable",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA10:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA11:debian": {
+        "state": "not applicable",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA11:rhel": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA3:rhel-build": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "PA3:rhel-deploy": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA1": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA2": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA3": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA4": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA5:publication": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA7": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA8:publication": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "backend": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA5:adoption": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA6": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      },
+      "RA8:adoption": {
+        "state": "pending",
+        "run": null,
+        "captures": [],
+        "inputs": {}
+      }
+    },
+    "d10": {
+      "packaged_generation": null,
+      "selected_generation": null,
+      "readings": []
+    },
+    "assessments": {},
+    "publication": {
+      "coordinate": null,
+      "state": "pending",
+      "sha256": null,
+      "sha1": null,
+      "captures": []
+    },
+    "adoption": {
+      "state": "pending",
+      "recovery": "pending",
+      "captures": [],
+      "pin_revision": null,
+      "configuration_revision": null
+    }
+  }
+}
