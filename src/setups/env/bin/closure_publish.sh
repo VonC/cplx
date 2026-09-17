@@ -9,6 +9,9 @@
 # fact to read, which is the whole of why this file exists beside a gate that
 # already ran: the gate ran on the build account, against the tree it was about
 # to tar, and neither of those is the file being published.
+# Tools releases also bind the promoted identity to the accepted release record
+# with --expected-sha256, before loading any uploader adapter. Other callers keep
+# the existing interface; CPLX_TOOLS_RELEASE=1 makes this guard mandatory.
 #
 # THE FIVE STEPS ARE AN ORDER, NOT A SET, and step 1 is why. A stripped, weakened
 # or swapped configuration fails BEFORE the waiver question is ever asked, so "no
@@ -60,7 +63,7 @@ if [ -f "$CLOSURE_PUBLISH_DIR/closure_report.sh" ]; then
     source "$CLOSURE_PUBLISH_DIR/closure_report.sh"
 fi
 
-CLOSURE_PUBLISH_USAGE="Usage: closure_publish.sh --archive PATH --commit SHA --repo DIR --results DIR [--staging-root DIR] [--adapter FILE]"
+CLOSURE_PUBLISH_USAGE="Usage: closure_publish.sh --archive PATH --commit SHA --repo DIR --results DIR [--staging-root DIR] [--adapter FILE] [--expected-sha256 SHA]"
 
 # ------------------------------------------------------------- the adapter ABI ---
 # THE FOUR OPERATIONS ARE THIS EFFORT'S ADAPTER ABI, and these are their default
@@ -520,10 +523,11 @@ closure_publish_cleanup() {
 # ------------------------------------------------------------ the entry point ---
 closure_publish_main() {
     local archive="" commit="" repo="" results="" adapter="" work="" rc=0 snapshot=""
+    local expected="" expected_supplied=0
 
     while [ "$#" -gt 0 ]; do
         case "$1" in
-            --archive|--commit|--repo|--results|--staging-root|--adapter)
+            --archive|--commit|--repo|--results|--staging-root|--adapter|--expected-sha256)
                 if [ "$#" -lt 2 ]; then
                     printf 'closure_publish: missing operand for %s\n' "$1" >&2
                     printf '%s\n' "$CLOSURE_PUBLISH_USAGE" >&2
@@ -536,6 +540,7 @@ closure_publish_main() {
                     --results) results="$2" ;;
                     --staging-root) CLOSURE_PUBLISH_STAGING="$2" ;;
                     --adapter) adapter="$2" ;;
+                    --expected-sha256) expected="$2"; expected_supplied=1 ;;
                 esac
                 shift 2 ;;
             -h|--help) printf '%s\n' "$CLOSURE_PUBLISH_USAGE"; return 0 ;;
@@ -550,10 +555,20 @@ closure_publish_main() {
         return 2
     fi
     CLOSURE_PUBLISH_COMMIT="$commit"
+    if [ "$expected_supplied" = 1 ] || [ "${CPLX_TOOLS_RELEASE:-0}" = 1 ]; then
+        if ! [[ "$expected" =~ ^[0-9a-f]{64}$ ]]; then
+            closure_publish_refuse 0 "tools release requires an explicit expected SHA-256 from record validation"
+            return 1
+        fi
+    fi
 
     # STEP 0, and it runs over the PROMOTED file rather than the candidate the
     # caller named, because the candidate is a path this gate was merely shown.
     closure_publish_promote "$archive" "$CLOSURE_PUBLISH_STAGING" || return 1
+    if [ -n "$expected" ] && [ "$expected" != "$CLOSURE_PUBLISH_IDENTITY" ]; then
+        closure_publish_refuse 0 "promoted archive differs from the expected release-record SHA-256"
+        return 1
+    fi
 
     # THE DESCRIPTOR IS OPENED HERE, BEFORE THE CHECKS, AND EVERYTHING AFTER
     # BINDS TO IT. An earlier version opened it only for the handoff and let

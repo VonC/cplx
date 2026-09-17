@@ -1,5 +1,5 @@
 #!/bin/bash
-# Process fixtures for the application adapter and inherited publication gate.
+# Process fixtures for the adapter, eligibility entry and inherited publication gate.
 set -euo pipefail
 python="" app=""
 while [ "$#" -gt 0 ]; do
@@ -17,3 +17,4 @@ root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 export TOOLS_TEST_APP="$app"
 cd "$root"
 "$python" -B -m unittest tests.unit.tools_release_transport.test_tools_release_transport.test_tools_release_transport_tdd -v
+"$python" -B -m unittest tests.unit.tools_release_record.test_tools_release_record.test_release_publication_tdd -v
