@@ -1,5 +1,28 @@
 # Design v0.27.0 -- Ship a complete runtime closure in the archive
 
+## Publication response-loss resolution (2026-09-17)
+
+The tools rebuild live probe showed that a commit can become public while its
+response is lost. The user requires the publisher to double-check such an
+attempt. This resolves the later plan's assumption that a failed callback proves
+absence: remote atomic visibility and client acknowledgement are separate facts.
+
+Preserve the open-descriptor stream, independent pre-commit SHA-256 comparison,
+private unfinished stage and immutable destination. Before completing the remote
+request, persist the attempt, exact coordinate and expected digest. Missing or
+unusable commit responses require an immediate independent GET of that asset
+and a SHA-256 comparison over the returned bytes. A match confirms publication.
+No match, absence or unavailable verification leaves the outcome unknown,
+blocks adoption and automatic re-publication, and retains recovery diagnostics.
+Later reconciliation performs the same read-only check without uploading again.
+
+The four adapter signatures stay unchanged. Commit returns 0 only after a valid
+acknowledgement or matching read-back, and 3 for an unresolved outcome. Cleanup
+closes unfinished uploads; after commit intent it reconciles instead of deleting
+the release or claiming absence. These rules supersede the original plan's
+commit-failure postcondition. Implementation and fixtures are owned by
+[tools rebuild Step 1](plan.v0.27.0.tools-archive-rebuild.md#step-1-demonstrate-the-real-publication-transaction).
+
 Reference issue: [issue.v0.27.0.toolchain-runtime-closure.md](issue.v0.27.0.toolchain-runtime-closure.md)
 Reference umbrella: [draft.v0.27.0.debian-agent-tools.md](draft.v0.27.0.debian-agent-tools.md), item 4
 Reference environments: [reference.environments.md](reference.environments.md)

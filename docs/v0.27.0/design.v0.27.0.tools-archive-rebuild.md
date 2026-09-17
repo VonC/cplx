@@ -272,8 +272,34 @@ waiver checks. Its four-operation contract remains:
 | --- | --- |
 | `upload_begin` | Create a private, non-public stage and return its handle. |
 | `upload_write` | Consume the supplied byte stream into that stage without reopening the candidate pathname. |
-| `upload_abort` | Remove the unpublished stage, leaving no public candidate. |
-| `upload_commit` | Make the verified staged object public atomically at the intended immutable coordinate. |
+| `upload_abort` | Close an unfinished request without publishing it. After commit intent, reconcile and retain the receipt; never delete a public release. |
+| `upload_commit` | Publish the verified stream at the immutable coordinate. Return success only with a valid acknowledgement or a matching SHA-256 from independent read-back. |
+
+### Mandatory commit-response check (2026-09-17)
+
+The live probe demonstrated publication despite a lost response. The user
+approved a mandatory check: when the response is missing or unusable, download
+the exact tools asset over authenticated, certificate-verified HTTPS and compare
+its SHA-256 with the stream digest. Do not rely on search indexing, HEAD alone,
+the presence of a POM or a server-provided checksum as proof of byte identity.
+
+Persist commit intent, coordinate, expected digest and attempt identity before
+completing the request. A matching read-back resolves success. If the check
+fails, is unavailable, returns absence or finds different bytes, retain an
+unknown outcome and return status 3. Refuse adoption and automatic upload retry
+for that coordinate. A later reconciliation repeats only the read-back. Absence
+does not prove an in-flight request cannot finish later. Ordinary refusal before
+commit returns nonzero and closes the unfinished request. The four callback
+signatures remain unchanged; the gate must not claim a failed commit is absent.
+
+The selected adapter keeps the HTTP chunked request unfinished during write,
+then sends its terminating chunk only after the gate's digest comparison. It
+retains a protected local journal, not a local copy of the archive. The server's
+immutable release policy remains required, including for concurrent writers.
+Interruption after commit intent follows the same reconciliation rule. A
+confirmed release is never deleted as rollback. The journal is required for
+recovery on the publishing account; losing it requires operator investigation,
+not a fresh upload attempt.
 
 The present Maven pathname upload and its post-upload checksum do not establish
 those semantics. Actual repository/uploader staging and visibility behavior
