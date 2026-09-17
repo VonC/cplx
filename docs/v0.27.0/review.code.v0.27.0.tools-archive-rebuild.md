@@ -1166,3 +1166,573 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-1 -->
+
+## Round 1 by requestor - Step 3
+
+- Recorded: 2026-09-17T15:02:30+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 3
+- Outcome: request
+
+### Review identity for step 3 tools-archive-rebuild (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 3
+Review round: 1
+
+### Code review evidence for step 3 tools-archive-rebuild (round 1)
+
+request_index_tree: 41ab4043949704dc8abd4d395bcc36684939941f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 3 --python /usr/bin/python3 --app-repo /tmp/tools-release-step3.AlZy7J3B/app (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(d10): measure exact wheel consumers
+group 1 path: src/setups/env/bin/tools_wheel_inventory.py
+group 1 path: src/setups/env/bin/tools_wheel_inventory.sh
+group 1 path: src/setups/env/bin/closure_d10.sh
+group 2: test(d10): cover wheel identity and convergence
+group 2 path: docs/v0.27.0/verify.tools-release-d10.sh
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 3: docs(tools-archive-rebuild): record step 3 validation
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step3-validation.txt
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step3-validation.txt
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-d10.sh
+staged path: src/setups/env/bin/closure_d10.sh
+staged path: src/setups/env/bin/tools_wheel_inventory.py
+staged path: src/setups/env/bin/tools_wheel_inventory.sh
+```
+
+### Requestor assessment for step 3 tools-archive-rebuild (round 1)
+
+Yes. Step 3 has been fully implemented.
+
+The final native RHEL cumulative run exited 0 in 49 seconds with independent
+/usr/bin/python3 3.9.25: 49 D10 cases, 16 release-record tests, 15 transport
+tests, 6 publication tests, SQLite controls and 254 historical closure Step 5
+cases passed. Shell syntax, ShellCheck and git diff --check passed. Exact source
+hashes and result excerpts are retained in
+docs/v0.27.0/evidence.tools-archive-rebuild.step3-validation.txt.
+
+The shared ELF reader remains the sole ABI interpreter. The ZIP/identity
+adapter owns capture and safe materialization; D10 owns selection. No new
+class, layer violation, file-size excess or unreferenced top-level symbol was
+found. The sole new Python file is 258 lines, below 650. New integration tests
+do not carry a unit-class coverage target; no Python percentage is claimed.
+The cplx gate is Bash lint, while the app coverage scope excludes these tools.
+
+One instrumented reading used two walks and eight unique readelf calls, with
+three archive objects, one wheel object and four candidate providers. D10
+reported 0 seconds at whole-second resolution. Set/digest lookups and fixed
+candidate passes avoid new sorting or all-pairs scans. Old archive-only
+subjects, reports and selection remain compatible; policy and convergence
+functions are unchanged.
+
+The fresh required ghog day completed with exit 5 after successful lint because
+cplx has no pytest configuration/executable. The plan explicitly assigns its
+native cumulative runner instead. No effort-specific repository gate changed.
+An optional frozen closure Step 7 run passed its D10 controls but exhausted
+scratch space during its separate live archive acceptance. It is not in this
+step's cumulative gate; Step 4 owns live wheel wiring and Step 6 final proof.
+
+Native reproduction uses the owned snapshot at
+/tmp/tools-release-step3.AlZy7J3B/cplx with the explicit sibling app snapshot
+at revision 489bbbde741328ab7953e2338a29952cd1a9f18c. The ignored Windows
+a.tools-step3-rerun.sh transports the current five source/test files and invokes
+the canonical cumulative command there. Its compiler wrapper isolates existing
+GCC libraries from test processes; follow the repository's CMD/senv contract.
+The final raw log is a.tools-step3-native.log. No real candidate is claimed.
+
+### Implementation report for step 3 tools-archive-rebuild (round 1)
+
+The inventory CLI captures exact retained wheel identities together with lock
+digest and installed ELF path/hash equality. Materialization verifies those
+same bytes, rejects unsafe ZIP entries and writes only inside a new owned
+private destination. Failures remove only that invocation's destination.
+No dependency resolver is invoked. The describe phase emits identities, not
+interpreted ABI requirements.
+
+D10 accepts repeatable wheel roots, an explicit lock and an independent Python.
+It snapshots archive provider identities before visiting other trees, matches
+each discovered wheel ELF against the inventory and then adds its required
+nodes to the shared selection input. It records origin/path/digest for each
+consumer and identities/capabilities for every candidate. The extended union
+also includes independent libgcc consumers without changing archive-only scope.
+
+The native harness builds tiny controlled ELF providers/consumers and exercises
+unsafe members, lock/wheel/ELF mismatches, unreadable/empty observations,
+relocation, duplicate demand/root handling, deterministic wheel permutations,
+lowest satisfying generation, zero headroom and all second-reading outcomes.
+The cumulative runner now accepts Step 3 and retains earlier regression gates.
+Only the Step 3 validation rows changed; the umbrella remains pending.
+
+### Change summary for step 3 tools-archive-rebuild (round 1)
+
+The root a.commit passed wac formatting and commit-plan-check with ready=true.
+It contains these groups in dependency order:
+
+1. feat(d10): measure exact wheel consumers
+   - src/setups/env/bin/tools_wheel_inventory.py
+   - src/setups/env/bin/tools_wheel_inventory.sh
+   - src/setups/env/bin/closure_d10.sh
+2. test(d10): cover wheel identity and convergence
+   - docs/v0.27.0/verify.tools-release-d10.sh
+   - docs/v0.27.0/verify.tools-archive-rebuild.sh
+3. docs(tools-archive-rebuild): record step 3 validation
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step3-validation.txt
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+These are all seven staged paths. No application source changes are included.
+
+### Writer response for step 3 tools-archive-rebuild (round 1)
+
+Writer response:
+
+This is the initial Step 3 review request. There is no earlier feedback or
+disagreement for this step. Please assess the exact staged implementation and
+the plan's fixture-only Step 3 scope, retaining the later live acceptance gates.
+
+### Reviewer focus for step 3 tools-archive-rebuild (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3-round-1 -->
+
+## Round 1 by reviewer - Step 3
+
+- Recorded: 2026-09-17T15:17:21+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3
+- Outcome: answer
+
+### Assessed index identity for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+Baseline index tree: 41ab4043949704dc8abd4d395bcc36684939941f
+
+Assessed index tree: 41ab4043949704dc8abd4d395bcc36684939941f
+
+### Implementation check for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 3 has been fully implemented.
+
+The verdict comes from the reviewer's own reading of the plan step, the staged
+diff and its own validation run, not from the writer's assessment.
+
+Implementation against Step 3's named work:
+
+- `src/setups/env/bin/tools_wheel_inventory.py` captures the lock digest, each
+  retained wheel's digest and the exact installed ELF set, then requires set
+  equality in both directions against the walked site-packages root, so an
+  extraneous, absent or changed installed object is refused rather than
+  tolerated. It holds one descriptor across hashing and ZIP reading and
+  re-hashes afterwards, so the bytes measured are the bytes described.
+  Materialization re-verifies the lock, every wheel digest and the same ELF map
+  before publishing, creates its destination exclusively at mode 0700, and on
+  any failure removes only the directory that invocation owns. ZIP safety is
+  enforced independently of the inventory: absolute names, parent traversal,
+  backslash and control characters, duplicate members, file and directory
+  collisions and non-regular entries including symlinks are all refused.
+  `.data/purelib` and `.data/platlib` relocation is modelled, and an ELF
+  anywhere else under `.data` is refused rather than silently ignored.
+- `describe` emits identities only, which is what keeps `closure_elf` the sole
+  interpreter of ABI requirements. The tab-separated contract is unambiguous
+  because control characters, tabs included, are rejected in member names.
+- `src/setups/env/bin/tools_wheel_inventory.sh` is an 11-line wrapper that
+  requires an absolute executable independent interpreter before exec.
+- `src/setups/env/bin/closure_d10.sh` accepts repeatable `--wheel-root` with an
+  explicit lock and interpreter, de-duplicating repeated roots. It snapshots the
+  archive provider identities first and visits each reader slice once, so a
+  later provider or wheel read can neither enter the consumer union nor change
+  provenance already captured: origin is recorded first-seen. Every consumer
+  carries origin, path and digest, and a digest that cannot be read becomes an
+  inconclusive reason rather than a silent gap. Each wheel root is validated
+  against its inventory by set equality in both directions, with symlinks under
+  the measured subject tree refused, before its slice joins the union.
+- Archive-only behavior is preserved exactly: the widened subject rule that also
+  admits independent unwind consumers is conditional on wheel roots being
+  supplied, so a legacy invocation keeps the inherited libstdc++ rule, its
+  report fields and its selection. The selector and bounded convergence
+  functions are untouched.
+- The new argument-loop guard that requires an operand for every option also
+  removes a real hazard in the inherited parser: previously a trailing option
+  with no operand would leave `shift 2` unable to shift, which could spin.
+- `docs/v0.27.0/verify.tools-release-d10.sh` builds real tiny ELF providers and
+  consumers with version scripts and covers the step's whole planned matrix:
+  legacy archive-only invocation, wheel-only demands, duplicate archive and
+  wheel demands, matching, extraneous, missing and changed ELF subjects, corrupt
+  and changed wheels, lock mismatch, five unsafe ZIP mutations exercised through
+  both capture and materialization, unreadable consumer and provider, empty
+  relevant set, mixed providers, zero headroom, neither candidate, all four
+  second-reading outcomes, relocation, duplicate and multiple roots, malformed
+  inventory, occupied destination and deterministic wheel-order permutations.
+  It also pins the measurement cost at the process boundary by counting real
+  `readelf` and `find` calls and asserting they are unique.
+
+Architecture: filesystem, ZIP and JSON handling stay in the inventory adapter;
+the shared ELF reader remains the only ABI interpreter; D10 remains the policy
+owner. No production archive topology or application code changed. Nothing
+needs fixing.
+
+Performance: each explicit root is walked once and each reader slice visited
+once, which the harness verifies rather than asserts: the instrumented union
+recorded two walks and eight unique `readelf` calls for three archive objects,
+one wheel object and four candidate providers. Required nodes and subject
+identities are deduplicated through hash maps, candidate evaluation is linear
+in the required nodes for two fixed generations, and ZIP ancestor checks are
+bounded by path depth. No new sort or all-pairs traversal. No performance issue
+needs addressing.
+
+Unit test coverage: no Python class and no existing unit-tested class changed.
+The new tests are native integration fixtures, so they carry no class-level
+coverage target, and no Python percentage is claimed for them. The project's
+declared floor measures shell lint, not Python coverage, and the application's
+gate measures its own source scope. Every top-level symbol the new Python helper
+defines is referenced: `main` dispatches `capture`, `materialize` and
+`describe`; those reach `load_inventory`, `wheel_members`, `installed_elfs`,
+`elf_map`, `digest`, `stream_digest`, `installed_name`, `safe_path`,
+`hash_value`, `unique_object` and `require`. No unit-tested class below 100%
+needs completing, and no top-level symbol outside the coverage gate is
+unreferenced.
+
+One clarification for the record, because the validation plan mentions it: the
+`ghog day` exit 5 is not a failed gate for this repository. The versioned
+`.review-validation` deliberately declares the shell lint gate as the project
+floor precisely because cplx has no pytest project, so `ghog day` is not part
+of the resolved mandatory set here. The declared floor ran and is clean.
+
+Feature integrity: legacy selection, zero headroom, unread and empty
+observations and all second-reading outcomes are covered and pass; the frozen
+publication, record and SQLite controls still pass; production declarations and
+the frozen harness are unchanged. The separately attempted frozen Step 7 run,
+which was inconclusive after exhausting scratch space, is disclosed and is
+outside this step's gate.
+
+Scope: no real Debian wheel capture, no candidate, no release record pass and no
+publication is claimed. Step 4 owns live wiring and Step 6 the final proof, and
+the umbrella row stays pending.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 3 rows were checked against the template and against this
+reviewer's own verdict, and they needed no correction:
+
+- The status sentence is exactly `Yes. Step 3 has been fully implemented.`,
+  followed by a blank line and a short prose summary.
+- No stale `Missing work for Step 3` section remains, which is correct for a Yes.
+- Goal, improvement expectations, what was implemented, new types and classes,
+  architecture, performance, unit test coverage and feature integrity are all
+  present and filled.
+- Each check section ends with its required explicit phrase, and the coverage
+  section names the measured scopes and adds the second phrase about symbols
+  outside the gate.
+- The document-level line correctly remains `No, it is not implemented.`, since
+  Steps 4 through 7 are pending.
+- Every line count in those rows was recounted and matches, including the
+  before-and-after pair for the D10 module, which reconciles exactly with the
+  staged diff.
+
+No validation-plan path was edited, so no pre-repair blob was recorded and no
+reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+Both resolved mandatory commands were run by the reviewer in this round, before
+any repair could have been made, and both pass.
+
+Project floor: `lint_shell: 58 tracked scripts`, `lint_shell: clean`, exit 0.
+
+Native cumulative runner at `--step 3` with the independent `/usr/bin/python3`:
+`validation exit=0 elapsed=50s`. The reviewer copied the whole remote log back
+rather than trusting the printed tail, and confirmed inside it:
+
+- `Independent interpreter: /usr/bin/python3 3.9.25` at the top.
+- `D10 fixtures: 49 cases passed`.
+- `Measured union: walks=2 readelf=8 (archive=3 wheel=1 candidates=4); D10
+  elapsed=0s`, which is the instrumented proof of the single-walk claim rather
+  than a restatement of it.
+- `Ran 16 tests` then `OK` for the release-record units.
+- `Ran 15 tests` then `OK` for the transport suite.
+- `Ran 6 tests` then `OK` for the publication-entry suite.
+- `SQLite closure: 25 checks passed`.
+- The frozen publication verdict with `failures 0` on RHEL 9.8 and Bash 5.1.8.
+
+Independent identity binding of the evidence to the reviewed bytes:
+
+- All five LF-normalized SHA-256 values recorded in the Step 3 capture were
+  recomputed and all five match.
+- The capture's own recorded digest for its raw local log matches that file.
+- Every recorded line count was recounted and matches: 630, 11, 258, 218 and
+  54. The recorded baseline of 524 for the D10 module was verified against
+  `HEAD` and reconciled with the staged diff, where 126 insertions and 20
+  deletions give exactly 630.
+
+Coverage limits stated rather than assumed: this repository's declared floor is
+shell lint, not a Python coverage gate, and the application's gate measures its
+own source scope, so no percentage is claimed for these files. Exercise of the
+new Python helper was established statically, as recorded in the implementation
+check, and by the 49 native cases.
+
+One honest note about reproducibility rather than about correctness: the
+plan-sourced command names an absolute path inside an ephemeral host snapshot,
+so it is not runnable from the authoring host as declared and will stop being
+runnable anywhere once that scratch directory is cleaned. The evidence for this
+round is real and was produced by running that exact command on the host through
+the disclosed transport; the durability of the declaration is raised in the
+writer instructions.
+
+### Resolved validation set and sources for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+The reviewer ran the union of the request validation set and the current
+resolver set. The union is the same two commands, and both were executed in this
+round.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Re-resolved from the
+  versioned declaration and run through the project environment so the pinned
+  ShellCheck resolved. Result: `lint_shell: 58 tracked scripts`, then
+  `lint_shell: clean`, exit 0. The count moved from 57 to 58 for a documented
+  reason rather than an unexplained one: that gate's scope is every tracked
+  `*.sh` outside `docs/`, so the new `src/` helper joins it while the new
+  `docs/` harness does not, and the harness is instead linted and ShellChecked
+  by the cumulative runner this step extends. The reviewer read the gate to
+  confirm that rather than assuming it.
+- `bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 3 --python
+  /usr/bin/python3 --app-repo <owned-app-snapshot>`, source `plan`. This is a
+  native command against an absolute host snapshot, so it cannot run on the
+  authoring host as written. The reviewer executed exactly that command on the
+  native host through the disclosed ignored transport, which overlays the five
+  current sources onto the snapshot first. Result: `validation exit=0 elapsed=50s`.
+
+Caller evidence retained inside the artifact home, not in versioned notes:
+`a.code-review.s3-native-validation.log` (the full remote validation log) and
+`a.code-review.s3-d10-head.txt` (the baseline used for the line recount).
+
+### Resolver drift and direction for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+No drift in either direction.
+
+Re-resolving the project floor from the versioned `.review-validation` yields
+the same single `project` command the request carries, and the request's one
+`plan` addition parses through the current resolver contract, so the union
+equals both sets. The plan addition changed identity since Step 2, which is
+expected for an effort-scoped addition, and the declaration file itself was
+correctly left alone.
+
+### Repository state around validation for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher rather than from equivalent Git commands.
+
+- Request-time index tree `41ab4043949704dc8abd4d395bcc36684939941f` equals the
+  baseline captured at entry and the live index captured after both validation
+  runs and the implementation check. No drift, so no fresh baseline was needed.
+- Umbrella digest comparison over
+  `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md`: `applicable: true`,
+  `changed: false`, before and after both
+  `0218245242f1ccec3561ef41f23322e0c6c2f3a12e69981a8fc1c9698e769fc6`, the same
+  digest observed in the Step 1 and Step 2 rounds. No umbrella row was completed
+  from reviewer mode.
+- Validation-state comparison over the ordered path set, holding all seven
+  staged step paths and the file named by the project command: `acceptable:
+  true` with empty `tracked_paths`, `untracked_paths` and `ignored_paths`. The
+  native run executes inside an owned host snapshot and left no tracked side
+  effect here to report, stage or revert.
+- Final working-tree state matches entry exactly: the seven staged paths plus
+  one unstaged modification to the versioned review transcript, which is the
+  protocol's own append and is correctly left unstaged by the reviewer. This
+  round produced no reviewer residue of its own, since nothing was compiled or
+  measured locally.
+- Reviewer-authored evidence stayed inside the artifact home as ignored `a.*`
+  files, so none of it became a tracked side effect of this review.
+
+### Repair inventory for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+`a.commit` remains accurate; the reviewer amended nothing.
+
+The mechanical result is an independent
+`commit-plan-check.bat --format json` rerun against the received state rather
+than the value embedded in the request: `state: valid`, `ready: true`, exit 0,
+no diagnostics. Its seven staged paths and three ordered groups match the
+request payload exactly.
+
+- Group 1, `feat(d10): measure exact wheel consumers`: the Python helper, its
+  Bash wrapper and the D10 module. Least dependent and correctly first, since
+  the harness and the recorded evidence both describe this behavior.
+- Group 2, `test(d10): cover wheel identity and convergence`: the new fixture
+  harness and the cumulative runner that composes it.
+- Group 3, `docs(tools-archive-rebuild): record step 3 validation`: the Step 3
+  capture and the validation plan, which record results the first two groups
+  produce.
+
+Ordering is least to most dependent, every staged path appears exactly once,
+and each subject is a conventional single-purpose line whose type matches its
+content: `feat` for the new measurement input, `test` for the fixtures, `docs`
+for the record. Scope matches the step: the one path beyond the plan's explicit
+list is the Python helper beside its named Bash wrapper, which the step's own
+addendum anticipates when it applies the Python ceiling to any Python
+introduced here, and that file is 258 lines.
+
+No application source is staged in this step, which matches the plan: Step 3
+extends measurement input only, and live wheel wiring belongs to Step 4.
+
+### Findings and boundaries for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+No rework is required for Step 3, and nothing in the staged content needs to
+change before the human decides.
+
+One thing improved since the previous round and is worth recording, because a
+review that only names faults teaches nothing: the Step 3 request keeps the
+companion locator out of its authored text, using a snapshot path and an
+explicit revision instead of the private repository name and home path that the
+Step 2 request put into the versioned transcript. The staged Step 3 documents
+are clean of private identifiers as well, which the reviewer verified by
+searching them.
+
+Three observations remain, all in ignored review scratch or in the declaration
+rather than in tracked content, so none forces another round:
+
+- The plan-sourced command is declared as a native command containing an
+  absolute path inside an ephemeral host scratch directory. It therefore cannot
+  be run from the authoring host as declared, and once that directory is cleaned
+  nobody can re-run it, including a later reader of this transcript. Steps 1 and
+  2 had the better shape: declare a self-transporting wrapper in the artifact
+  home and let it own the snapshot, so the declared command stays runnable.
+- The bundle builder, remote driver and overlay tar for this step again sit at
+  the project root rather than in the artifact home beside the wrappers that
+  read them.
+- Two small consistency points inside the new work, neither of which changes a
+  result. The new `defines` reporting loop expands an associative array without
+  the guarded expansion idiom the rest of that module uses for exactly this
+  hazard, which is safe on the Bash 5 versions this effort targets but
+  inconsistent with its neighbours. And several harness assertions are bare
+  test or `grep -q` commands relying on `set -e`, so a failure there exits
+  without naming which assertion failed, unlike the helper that prints a
+  diagnostic.
+
+When the exchange reaches the human gate, the registered choices are "Rework and
+review again" and "Commit". The commit decision belongs to the human, not to
+this reviewer and not to the requestor.
+
+### Decision rationale for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+The recommendation is commit-ready, and it is advisory only: it does not
+authorize a commit.
+
+All six readiness-floor results pass:
+
+1. Identity. The live context, the machine envelope, the human-readable
+   request, the plan, the declared step, the positive round and the
+   request-time index tree agree exactly. Step 3 exists in the named plan with
+   the work this change implements.
+2. Completeness. The inventory adapter, the D10 wheel roots and the native
+   fixtures meet the step's completion boundary: additional wheel demands can
+   change the selected generation, every missing or mismatched input is
+   inconclusive, and archive-only callers keep their behavior.
+3. Validation and coverage. Both resolved commands were run. The lint floor is
+   clean, and the native run passed with the independent 3.9.25 interpreter,
+   with 49 D10 cases, 16 record units, 15 transport tests, 6 entry tests, 25
+   SQLite checks and 254 frozen controls all confirmed inside the full log the
+   reviewer copied back. Coverage limits are stated rather than assumed, and the
+   new helper's exercise was established statically plus by the native cases.
+4. Staged attribution. The reviewer made no repair, so nothing is attributed to
+   it. The tree holds its seven staged paths plus the protocol's own unstaged
+   transcript append, and this round left no reviewer residue.
+5. Unresolved findings. None carried in, none raised as blocking.
+6. `a.commit`. An independent rerun returns `valid` and `ready` with the same
+   groups, ordering and subjects.
+
+No substantive repair was made in this round, so the recommendation is not
+disqualified by the same-round rule.
+
+Several claims were verified by measurement rather than accepted, because this
+step's value is precisely that its inputs are identity-checked:
+
+- All five recorded LF source hashes match, and the capture's recorded digest
+  for its own raw log matches that file.
+- Every recorded line count matches, including the D10 before-and-after pair:
+  the 524 baseline was checked against `HEAD` and reconciles exactly with the
+  staged diff's 126 insertions and 20 deletions to give 630.
+- The single-walk performance claim is not taken on trust: the harness counts
+  real `readelf` and `find` calls at the process boundary and asserts they are
+  unique, and the reviewer confirmed the recorded line `walks=2 readelf=8` in
+  the native log.
+- The lint gate's count moving from 57 to 58 while two shell files were added is
+  fully explained by that gate's documented scope, which excludes `docs/`; the
+  new harness is linted by the cumulative runner instead. The reviewer read the
+  gate to establish this rather than inferring it from the number.
+
+One clarification that belongs in the record: the `ghog day` exit 5 mentioned in
+the validation plan is not a failed gate for this repository. The versioned
+declaration deliberately makes shell lint the project floor because cplx has no
+pytest project, so `ghog day` is not in the resolved mandatory set here, and the
+declared floor ran clean.
+
+Three observations are reported to the writer without being raised as blocking
+findings: the plan-sourced command's dependence on an ephemeral host path, which
+makes the declaration unrunnable later even though this round's evidence is
+real; the review scratch again living at the project root; and two small
+internal consistency points that change no result. None of them affects any
+readiness-floor result, and all three sit in ignored scratch or in the
+declaration rather than in the staged work.
+
+What this answer does not claim: no real Debian wheel capture, no candidate, no
+release-record pass, no publication and no adoption. The separately attempted
+frozen Step 7 run that ran out of scratch space is disclosed by the writer and
+is outside this step's gate. Step 4 owns live wiring, Step 6 the final proof,
+and the umbrella row stays pending.
+
+### Final reviewer decision for step 3 tools-archive-rebuild (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-3-round-1 -->
+
+## Round 1 by human - Step 3 - human-confirmation
+
+- Recorded: 2026-09-17T15:23:15+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
