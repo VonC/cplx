@@ -390,7 +390,23 @@ capability is impaired.
 
 ### Analysis of Step 4 implementation state
 
-Not started. Step 4 is not implemented because candidate main-chain provisioning and restored test/ABI gates are not implemented.
+Yes. Step 4 has been fully implemented.
+
+Review round 2 independently passed every implementation and validation check,
+but the sensitive-content pre-commit checker refused one fixture assertion and
+four earlier review-transcript entries. The fixture now asserts the prefix,
+interpreter version and matching application-directory/name shape without a
+private name. The human approved the prepared four-line transcript correction
+using the repository's configured replacements. The complete staged set now
+passes the sensitive-content check. A fresh cumulative native run passed in
+53 seconds; the companion application index remains identical to round 2.
+The replacement review will assess these final corrections before the commit
+decision.
+
+The main application chain now selects pinned candidate transport, retains
+independent controls and exact wheel artifacts, and blocks on ABI or full-test
+evidence failures. Native fixtures and the application authoring walk passed.
+The plan assigns actual final-archive Jenkins and platform acceptance to Step 6.
 
 ### Goal for Step 4
 
@@ -402,27 +418,129 @@ Coverage and testmon are active at the existing threshold; SQLite suites execute
 
 ### What was implemented for Step 4
 
-_(empty — no check has taken place yet.)_.
+- `app:ci/tools_candidate.sh` shares archive/bundle transport with the SQLite
+  diagnostic. It rejects incomplete or conflicting pins and candidate uploads,
+  verifies both downloads before extraction, and rechecks control revision and
+  bytes before use. The stdlib bundle adapter rejects unsafe members and checks
+  exact manifest coverage. The earlier SQLite bundle format remains supported.
+- The provisioner keeps release-pin selection and adds candidate-copy mode.
+  Ordinary release provisioning explicitly requires `tools/tools.verification`;
+  the pipeline and provisioner preflight reject its absence before venv side
+  effects and name `app:ci/TOOLS-VERIFICATION.md`. That document explains the
+  job owner's independent verifier delivery and bootstrap contract. Relocation
+  rechecks the archive digest, and one raw interpreter and derived venv path
+  feed sync, test and ABI stages. Packaging uses that same prefix. Actual
+  container/image identities are retained without copying Docker credentials.
+- Locked installed wheel identities select the original downloadable artifacts;
+  the Step 3 inventory proves installed ELF equality. Raw artifacts, lock and
+  inventory are retained. Temporary URL-bearing selection data is removed on
+  success or failure. No dependency is selected anew or wheel ELF rewritten.
+- The rsync shim, tools-patch fetch, patch-wheels implementation and Groovy
+  calls were removed. The explicitly permitted raw-Python/UV_PYTHON bypass
+  remains. The existing tracked publication mode was already `off`.
+- The blocking ABI entry calls independent closure policy, inventories tools
+  and venv ELFs, retains loader observations and direct-venv `libs,versions`
+  traces, and rejects unresolved versions, other outside providers, escaped
+  aliases and inconclusive observations. Inherited OneAgent exclusions,
+  virtual-kernel entries and system-interpreter helpers remain visible. A
+  fixture exercises the authorized helper interpreter exception and refuses
+  the same ELF when moved outside `tools/bin`.
+- The test entry uses active coverage and testmon with supported full-selection
+  mode and fresh evidence/state. Hooks check actual plugin configuration,
+  record collection/execution and platform skips, and identify the interpreter.
+  Independent validation requires 100% coverage and full execution of both
+  SQLite-guarded suites. Missing selection, execution or coverage refuses.
+- [Retained evidence](evidence.tools-archive-rebuild.step4-validation.txt)
+  records source hashes, line budgets, commands and limits. Native cumulative
+  validation passed in 53 seconds: 33 agent shell cases plus parser/configuration
+  fixtures, 49 D10 cases, 16 record tests, 15 transport tests, six publication
+  tests, 25 current SQLite controls and 254 historical closure cases. All 20
+  native source inputs match the retained tested snapshot. Added cases invoke
+  the actual provisioner without a release verifier, prove successful release
+  preflight, and keep SQLite diagnostics usable with publication enabled.
+  The application authoring result and timings are recorded in that evidence;
+  its command sets the app checkout explicitly and forces a fresh full walk.
+  It completed with exit 0, 100% coverage and zero failures or duration
+  outliers. The full suite took 4m 54.8s; three warnings and eight expected
+  failures remain reported.
 
 ### New types/classes introduced for Step 4
 
-_(empty — no check has taken place yet.)_.
+`GuardCounts` and `WalkRecord` are TypedDict declarations for pytest evidence,
+not domain classes. The new `ci` package marker supports explicit plugin loading.
+Transport, extraction, identity capture, wheel identification, ABI observation,
+test hooks and evidence validation are separate focused adapters. No runtime
+dependency or application domain type was introduced.
 
 ### Architecture check for Step 4
 
-_(empty — no check has taken place yet.)_.
+Jenkins owns stage order; Bash owns transport and process boundaries; stdlib
+adapters validate filesystem and observation data. The independent cplx closure
+checker retains declaration/family authority. Application business layers do
+not import these CI adapters. The authoring architecture gate passed.
+
+New Python files range from 1 to 187 physical lines; the integration fixture
+has 213. The provisioner shrank from 371 to 297 lines and Groovy diagnostics
+from 1114 to 1000; the Python ceiling does not apply to Groovy or Bash.
+No architecture smell, violation or file-size issue needs addressing.
 
 ### Performance check for Step 4
 
-_(empty — no check has taken place yet.)_.
+Pin and manifest parsing use dictionaries. Wheel identification indexes expanded
+tag identities once and performs direct installed-distribution lookups. Tool
+and venv inventories walk each root once and deduplicate canonical files.
+Hashing streams fixed-size blocks; loader observations and evidence processing
+are linear in their subjects and records. Ancestor checks are bounded by path
+depth. No new all-pairs comparison or sorting was introduced.
+
+Native cumulative and focused durations and the full authoring duration are
+retained. The first forced application walk flagged two integration calls:
+auth lifecycle at 1.24 seconds and PDF activation at 1.03 seconds. Profiling
+identified real router/schema construction and XObject traversal. A module
+fixture prepares the real auth graph; the activation sample now uses exactly
+1000 XObjects, the production threshold. All assertions, real startup and
+I/O remain; the experimental fallback input is unchanged. Focused calls were
+below 0.10 seconds and 0.30 seconds respectively, and both files passed
+`ghog single`. Jenkins keeps its existing timeout. No timing threshold,
+timeout, xfail or duration exclusion was added. No performance issue needs
+addressing.
 
 ### Unit test coverage check for Step 4
 
-_(empty — no check has taken place yet.)_.
+No existing unit-tested application class changed. Two existing integration
+tests received the measured timing repairs above without losing assertions.
+The added cases are
+integration fixtures spanning CI entry points, with no class-level coverage
+target. Generated bundle mutations and permuted provider observations cover
+finite failure cases without adding a PBT dependency. Fixtures exercise
+transport/provision entry points, wheel selection, ABI inventory/parsers,
+plugin configuration and a collection-to-JSON hook roundtrip.
+
+Every new top-level production symbol is referenced by a fixture, adapter or
+CLI entry; TypedDict declarations annotate the record and pytest hooks are
+registered through the explicit plugin. The app's 100% coverage measures
+`src/pdfss`, not `ci` or the cplx fixtures. The cplx gate is the plan's native
+cumulative runner; no artificial pytest project was added. No unit-tested
+class below 100% needs completing. No top-level symbol outside the coverage
+gate is unreferenced.
 
 ### Feature integrity for Step 4
 
-_(empty — no check has taken place yet.)_.
+Release-pin transport and the independent SQLite diagnostic remain available;
+candidate pins require explicit publication suppression and cannot mix with
+legacy or verifier-only pins. Every ordinary release provisioning run now
+supplies independently pinned verifier controls through the documented early
+preflight contract. SQLite-only diagnostics allow publication-enabled mode
+because they do not publish an archive. Existing historical diagnostics keep
+their reporting
+behavior while the adopted ABI gate propagates failure. Artifacts preserve
+raw observations, coverage, skip reasons and wheel identities.
+
+Native regression controls and the application walk passed. Step 6 still owns
+actual Debian/Jenkins and final RHEL acceptance against the Step 5 archive;
+fixture success does not claim those results. The release record and umbrella
+remain pending, and no archive or release pin was published or changed.
+No existing feature or reporting capability is impaired.
 
 ## Step 5. Refresh, rebuild and package the candidate
 

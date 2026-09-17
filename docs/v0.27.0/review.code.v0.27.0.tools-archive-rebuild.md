@@ -1736,3 +1736,2153 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-1 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-09-17T17:53:47+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 tools-archive-rebuild (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 4
+Review round: 1
+
+### Code review evidence for step 4 tools-archive-rebuild (round 1)
+
+request_index_tree: da030eb1cbc0e705a44a3d09da0ffd833fb8b01f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 4 --python /usr/bin/python3 --app-repo ../app (sources: plan)
+- ghog day (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(tools): qualify candidate agent integration
+group 1 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 1 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2: docs(tools-archive-rebuild): record step 4 validation
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 4 tools-archive-rebuild (round 1)
+
+Yes. Step 4 has been fully implemented, at the fixture/wiring completion
+boundary defined by its plan and Q03. The implementation-check result is in
+docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md, Step 4.
+
+Native RHEL 9.8 validation used fresh owned copies of both repositories,
+independent /usr/bin/python3 3.9.25 and pinned ShellCheck 0.10.0. The cumulative
+Step 4 runner passed in 52 seconds with shell lint/syntax, Python compilation,
+27 agent shell cases plus adapter fixtures, 49 D10 cases, 16 record tests,
+15 transport tests, six publication tests, current SQLite controls and
+254 historical closure cases. Two later test-only additions (hook roundtrip
+and legacy SQLite bundle assertions) passed in a final focused run in one
+second, with 29 shell cases. Production sources match the cumulative run.
+
+The application authoring ghog day completed at 2026-09-17T17:42:56+02:00,
+exit 0, with static/type/style/architecture checks passing. Its full walk took
+4m 30.8s: coverage 100%, zero failures, zero duration outliers, three warnings
+and eight expected failures. Coverage measures src/pdfss, not CI adapters.
+Adapter exercise comes from explicit native integration fixtures and static
+references; no adapter coverage percentage is claimed.
+
+Retained source hashes, command results, line counts and raw-log hashes are in
+docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt.
+Local full captures are a.tools-step4-native-full.log,
+a.tools-step4-focused.log and ../my-project/a.ghog.log.
+
+No new application domain type or runtime dependency was introduced. New
+Python adapters are 1-187 physical lines and the Python fixture is 172.
+Responsibilities are divided among transport, bundle validation, wheel
+selection, ABI observation, pytest hooks and evidence validation. Indexing,
+inventory and hashing are linear in their inputs; there is no new all-pairs
+scan or sort. Existing Jenkins timeouts remain unchanged.
+
+Release-pin provisioning and independent SQLite diagnostics remain covered.
+Actual final-archive Jenkins/Debian and native RHEL acceptance are Step 6,
+after Step 5 builds the archive. No publication, release-pin change, final
+candidate pass or umbrella completion is claimed. The raw-Python/UV_PYTHON
+bypass remains as explicitly allowed pending wrapper-to-uv acceptance.
+
+### Implementation report for step 4 tools-archive-rebuild (round 1)
+
+The main application chain now selects complete pinned candidate inputs,
+requires explicit publication off, verifies both archive and independent
+bundle hashes before extraction, and retains the selected identities.
+Conflicting legacy/candidate/verifier inputs fail. Release transport remains
+available; verifier-only pins provide independent controls for release
+acceptance. The legacy SQLite bundle form remains supported through the
+shared transport helper and its existing acceptance checks.
+
+Bundle extraction rejects traversal, links, special files and conflicting
+members before writing. Control revision and manifest bytes are checked
+again before use. Runtime capture retains only the actual executor container
+and image IDs. Relocation rechecks archive bytes, and one resolved raw
+interpreter plus derived venv feeds sync, ABI and tests; packaging uses the
+same prefix.
+
+Installed wheel tags resolve to exact uv.lock artifacts. The raw downloads,
+lock and Step 3 installed-byte inventory are retained. Temporary URL-bearing
+selection data is removed on both success and failure. No wheel ELF is
+rewritten. The rsync shim, tools-patch fetch, patch-wheels implementation and
+Groovy calls are removed.
+
+The blocking ABI entry delegates closure policy to the independent checker,
+inventories toolchain and venv ELFs once, retains loader maps and direct-venv
+LD_DEBUG=libs,versions traces, and rejects unresolved versions, outside
+providers, escaped aliases and inconclusive observations. Inherited OneAgent
+exclusions, virtual-kernel entries, loaders and system-interpreter helpers
+remain visible without added monitoring provenance conditions.
+
+The full-test entry keeps coverage and testmon active, uses supported
+--testmon-noselect with fresh state, records actual plugin configuration and
+interpreter identity, and requires conclusive collected/executed counts,
+100% coverage and full passing execution of both SQLite-guarded suites.
+Existing platform skips remain explicit. Jenkins archives all retained
+evidence and propagates gate failures.
+
+cplx holds the cumulative runner, isolated transport/provisioning fixtures,
+ABI/parser/wheel/plugin/evidence fixtures and the checked validation record.
+The tests refuse missing app checkout input rather than silently skipping it.
+
+### Change summary for step 4 tools-archive-rebuild (round 1)
+
+This step spans two repositories, as the plan explicitly declares.
+The protocol request_index_tree and typed commit-plan result cover cplx.
+The companion application evidence below additionally fixes its reviewed
+index, patch and separate commit plan; it is not part of cplx's Git index.
+
+cplx root: C:/Users/vonc/git/cplx
+Starting HEAD: 863933eeedb21bac5bfa7a662d1a0d25a048a079
+
+cplx staged paths:
+
+- docs/v0.27.0/fixtures.tools-release-agent.py
+- docs/v0.27.0/verify.tools-archive-rebuild.sh
+- docs/v0.27.0/verify.tools-release-agent.sh
+- docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+cplx a.commit groups, in order:
+
+1. test(tools): qualify candidate agent integration (the three fixtures/runners)
+2. docs(tools-archive-rebuild): record step 4 validation (evidence and validation)
+
+Application root: C:/Users/vonc/git/my-project
+Starting HEAD: 489bbbde741328ab7953e2338a29952cd1a9f18c
+Companion index captured with capture_index_tree:
+a10f56c4f17f09bc32296b1726b9235098de64b3
+Retained patch: .reviews/a.step4.app-staged.patch
+Patch SHA-256: 6b3acabd1ced06a489cbcebc6f58a8c443555211f9c83da8f5e643ee57573dd0
+
+Application staged paths:
+
+- Jenkinsfile
+- ci/Jenkinsfile.diagnostics
+- ci/Jenkinsfile.relocation
+- ci/__init__.py
+- ci/provision_toolchain.sh
+- ci/tools_abi_acceptance.sh
+- ci/tools_abi_scan.py
+- ci/tools_agent_identity.sh
+- ci/tools_candidate.sh
+- ci/tools_candidate_bundle.py
+- ci/tools_test_acceptance.sh
+- ci/tools_test_evidence.py
+- ci/tools_test_plugin.py
+- ci/tools_wheel_capture.py
+- tools/sqlite_candidate_capture.sh
+
+Application a.commit has one separate coherent group:
+ci(tools): qualify pinned candidate archives.
+tools/publish.mode was already tracked off and is unchanged.
+
+Both root a.commit files were formatted through wac and passed the canonical
+commit-plan readiness checker with status 0, ready=true, no diagnostics.
+Copies are .reviews/a.step4.cplx-commit-plan.md and
+.reviews/a.step4.app-commit-plan.md. No commits have been made.
+
+Review all listed paths in both repositories. Application repairs, if needed,
+must stay staged in that repository and be identified with an app: prefix in
+the answer, so the writer can assess the companion commit and refresh its
+fixed evidence. Neither repository's commit plan authorizes a commit by itself.
+
+### Writer response for step 4 tools-archive-rebuild (round 1)
+
+Writer response:
+
+This is the first implementation review round for Step 4 in this invocation.
+No earlier Step 4 reviewer feedback or disagreement is being carried forward.
+The user asked to resume implementation of this exact plan step.
+
+The plan's declared cplx validation floor is bash src/utils/lint_shell.sh;
+cplx has no configured pytest/groundhog project. The separate application
+authoring checkout uses ghog day. Keep both obligations and the native
+cumulative Step 4 runner in the validation assessment.
+
+Native commands must run on native Linux against fresh owned copies of cplx
+and the explicit app checkout. Existing ignored transport scripts are
+a.tools-step4-transport.sh and a.tools-step4-native.sh. From the cplx Windows
+root, the established transport command is:
+
+```cmd
+cmd /d /c "set NO_MORE_SENV_cplx=& senv.bat && bash a.tools-step4-transport.sh cumulative"
+```
+
+The native helper prints its owned /var/tmp snapshot path and keeps the full
+validation.log there. It supplies a compiler-only wrapper and an independent
+Python; it does not alter a live installation. Its app checkout is ../app
+relative to that snapshot's cplx directory.
+
+For the app authoring walk, use its Windows launcher from the app root with
+PRJ_DIR explicitly set in the same CMD process because the caller environment
+can still identify cplx. Use the documented detached/status mode for long work:
+
+```cmd
+cmd /d /c "set PRJ_DIR=%USERPROFILE%\git\my-project& %USERPROFILE%\git\llm-shared\bin\ghog.bat day --detach"
+```
+
+Respect the current passing evidence; rerun what the reviewer needs to
+establish its independent validation, and rerun affected checks after repairs.
+The reviewer must not claim actual final archive/agent acceptance for Step 4.
+
+### Reviewer focus for step 4 tools-archive-rebuild (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-09-17T18:27:23+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+Baseline index tree: da030eb1cbc0e705a44a3d09da0ffd833fb8b01f
+
+Assessed index tree: da030eb1cbc0e705a44a3d09da0ffd833fb8b01f
+
+### Implementation check for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+Result:
+
+No. Step 4 has NOT been fully implemented.
+
+Almost all of the step is present and good, and the reviewer's own validation
+runs all pass. The status is No for one reason: the main chain this step is
+supposed to wire cannot complete an ordinary release build in the repository's
+current tracked state, and Step 4's own stated intent is to preserve ordinary
+release-pin provisioning.
+
+What the reviewer verified as implemented and correct:
+
+- The retirements the plan demands are complete. The rsync shim, the
+  tools-patch-2 libstdc++ fetch, the whole `patch-wheels` implementation, its
+  `all` entry and its Groovy caller are gone, and the wiring fixture asserts
+  that none of `patchVenvElves`, `patch-wheels`, `tools-patch`, `RSYNC_SHIM`,
+  `--no-cov` or `no:pytest-testmon` survives anywhere in the three files.
+- The raw-Python bypass is retained with its reason, as the plan allows pending
+  wrapper-to-uv acceptance, and the fragile `find | head -1` interpreter pick is
+  replaced by `tools_python_path`, which now fails on ambiguity instead of
+  silently choosing. `uv sync --locked` replaces `uv sync`.
+- `ci/tools_candidate.sh` validates pins strictly: exact key set and count per
+  format, verifier-only pins refusing archive keys, duplicate keys refused,
+  HTTPS-only URLs with no embedded credentials and no whitespace, digest
+  re-checked after download, and conflicting legacy, candidate and verifier
+  inputs refused. Candidate provisioning requires publication explicitly off.
+- `ci/tools_candidate_bundle.py` checks every member before writing anything:
+  a top-level whitelist of `src` and `acceptance`, refusal of absolute names,
+  traversal, backslashes and control characters, non-regular members including
+  symlinks, duplicates and file/directory collisions, plus manifest coverage
+  that must equal the bundle's regular members exactly and a source revision
+  that must match the pin. The legacy SQLite form stays readable under its own
+  format name and gets a locally written manifest.
+- `ci/tools_abi_scan.py` is a genuine blocking replacement for a probe that
+  ended in `exit 0`. It walks tools and the venv once, canonicalizes aliases and
+  refuses any alias escaping the prefix, refuses outside-prefix providers,
+  unresolved versions, unparsed loader lines, an empty or monitoring-only
+  observation, an empty inventory and a walk with no dynamic subject measured.
+  It verifies the venv interpreter identity against the toolchain base and
+  requires exactly one direct-venv `LD_DEBUG=libs,versions` trace in which both
+  heavy wheels actually initialize. The reviewer checked the removed 118-line
+  probe and confirms the scope is genuinely widened rather than moved.
+- The `system-interpreter-helper` category, which reports a `tools/bin` subject
+  whose interpreter lies outside the prefix instead of refusing it, is not
+  inherited from the old probe as the request states, because that probe never
+  inventoried `tools/bin`. It is nevertheless authorized: the settled design
+  says "Retained helper programs with system interpreters are reported
+  separately from candidate execution", and the requirement says the same.
+- The full-test gate matches the plan closely. `ci/tools_test_plugin.py`
+  refuses a walk unless both plugins are loaded, testmon runs in collect-without-
+  select mode, and no ambient selector is present, and it takes counts from
+  hooks rather than console text. `ci/tools_test_evidence.py` independently
+  refuses a walk whose executed plus setup-skipped count does not equal the
+  collected count, any deselection, inactive plugins, a guarded SQLite suite
+  that did not run to completion, and missing or sub-gate coverage output. The
+  reviewer confirmed the two options the guard cannot set itself,
+  `--cov=src/pdfss` and `--cov-fail-under=100`, do come from the project's own
+  `addopts`, so the guard passes on a real run rather than refusing every run.
+- `ci/tools_wheel_capture.py` resolves installed distributions to exact locked
+  artifacts by name, version, full tag set and build tag, requires exactly one
+  match, and refuses a non-registry install other than the editable first-party
+  project. `ci/tools_agent_identity.sh` records container and image identity
+  without ever printing the inspect response, and refuses when the real image
+  identity is unavailable. URL-bearing selection data is removed on success and
+  failure, and only filename and digest are retained.
+
+#### Missing work for Step 4 for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+- Make an ordinary release build provision again. `do_venv` resolves
+  `tools_verification_path` unconditionally for its wheel-capture block, and
+  `ci/tools_abi_acceptance.sh` does the same for the closure checker, but
+  neither `tools/tools.candidate` nor `tools/tools.verification` exists or is
+  tracked, nothing in the pipeline creates one, and no document states that a
+  verifier pin is now required. The reviewer reproduced the consequence in
+  isolation with only `tools/publish.mode` present: `controls=$(tools_verification_path)`
+  exits 2 and prints "Candidate pin missing", so the unconditional Provision
+  stage, and then the Test stage, fail. Either scope those two dependencies to
+  the modes that genuinely need independent controls, or require a verifier pin
+  explicitly and early with a diagnostic that names it, and then track or
+  document how a release build obtains one. A release build should not fail
+  deep inside venv creation with a message about a candidate pin.
+- Add a fixture that runs `provision_toolchain.sh venv` in release mode without
+  any pin. The current harness covers `select`, `fetch`, `relocate` and
+  `venv-path`, and exercises release mode only through `select` and a
+  verifier-pinned fetch, so no existing case can catch this. Step 4's own
+  purpose includes reducing the risk of discovering basic pipeline wiring
+  defects only during Step 6.
+- Decide and record what the verification-only `sqlite` format should require.
+  Routing it through `tools_candidate_read` now applies the candidate
+  publication-off rule that the removed inline parser never applied, so with
+  `tools/publish.mode` restored to `snapshot`, as Step 7 plans, the SQLite
+  diagnostic stops producing evidence while remaining non-gating and quiet.
+  Either exempt the verification-only format as the verifier format already is,
+  or state the new coupling where an operator will see it.
+- Correct the Step 4 rows of the validation plan once the above is settled:
+  they currently record `Yes. Step 4 has been fully implemented.`
+- Optionally cover the `system-interpreter-helper` branch with a fixture. Every
+  sibling refusal axis has one, and this authorized exception is the only
+  provider-accounting path whose behavior is established solely by a live run.
+
+Architecture: responsibilities are cleanly divided across transport, bundle
+validation, wheel selection, ABI observation, test hooks and evidence
+validation, and no application domain code is touched. The shared ELF reader
+remains the only ABI interpreter. Nothing else needs fixing here.
+
+Performance: indexing, inventories and hashing are linear in their inputs, each
+root is walked once, and no new sort or all-pairs scan appears. Existing Jenkins
+timeouts are unchanged. No performance issue needs addressing.
+
+Unit test coverage: no application class changed, and the new CI adapters sit
+outside the application's measured `src/pdfss` scope, which the documents state
+rather than assume. Their exercise is the native integration fixtures plus
+static reference review. Two gaps are named in the missing work above rather
+than counted as coverage. No unit-tested class below 100% needs completing, and
+no top-level symbol outside the coverage gate is unreferenced.
+
+Feature integrity: candidate transport, bundle refusals, ABI refusals, the test
+gate and the SQLite diagnostic's shared transport are all exercised and pass,
+and the packaged and tested venvs hold the same unmodified wheel bytes. The
+impairment is the release path named above. No publication, release-pin change,
+final candidate pass or umbrella completion is claimed, and the real Jenkins and
+Debian acceptance remains Step 6's work.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, and that was a
+deliberate choice rather than an omission.
+
+Reviewer mode may write the reviewed step's validation rows, and those rows
+count as review metadata rather than a substantive change. The reviewer did not
+use that permission here because this round returns `changes-requested`: the
+writer will rework the step and must then restate its own verdict, so flipping
+the rows now would change the staged index mid-round, require a fresh baseline
+and attribution, and still be overwritten. The correct record is the one the
+writer produces after the rework.
+
+What the writer must correct there is named in the missing-work list: the Step 4
+rows currently record `Yes. Step 4 has been fully implemented.`, which does not
+match this assessment.
+
+The rest of those rows was checked against the template and is otherwise sound:
+the section set is complete, each check section carries its required closing
+phrase, the coverage section names the measured scope and adds the second phrase
+about symbols outside it, and the document-level line correctly remains
+`No, it is not implemented.`
+
+Because no validation-plan path was edited, no pre-repair blob was recorded and
+no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+Every resolved mandatory command was run by the reviewer in this round, before
+any repair could have been made, and all three pass. The finding below is not a
+failing command: it is behavior no command in this set exercises.
+
+Project floor: `lint_shell: 58 tracked scripts`, `lint_shell: clean`, exit 0.
+
+Native cumulative runner at `--step 4` on RHEL 9.8 with the independent
+`/usr/bin/python3` 3.9.25: `validation exit=0 elapsed=51s`. The reviewer copied
+the whole remote log back rather than trusting the printed tail, and confirmed
+inside it:
+
+- `Independent interpreter: /usr/bin/python3 3.9.25` at the top.
+- `Agent shell fixtures: 29 cases passed; parser and wiring fixtures passed`.
+- `PASS hook-evidence-roundtrip` and `PASS hook-platform-skip-evidence`.
+- `D10 fixtures: 49 cases passed`.
+- `Ran 16 tests` / `OK`, `Ran 15 tests` / `OK` and `Ran 6 tests` / `OK`.
+- `SQLite closure: 25 checks passed`.
+- The frozen publication verdict with `failures 0`.
+
+The writer's versioned capture records 27 agent cases for its cumulative run
+plus a separate focused run of one second for two later test-only additions,
+and states that production sources match the cumulative run. That disclosure is
+accurate, and this reviewer's single run over the final tree supersedes it by
+covering everything in one pass at 29 cases.
+
+Application walk: as declared, `ghog day` again returned exit 0 while measuring
+nothing, reporting no changed Python file and `cov=skipped`. This is the third
+consecutive round in which the declared application command cannot produce its
+own evidence, so the reviewer forced a complete walk, alone on the machine to
+keep its duration measurements clean. Result: `fail=0 warn=3 xfail=8 cov=100
+outliers=0 excluded=0 exit=0`, objective reached, reproducing the recorded
+result.
+
+Coverage limits stated rather than assumed: the application gate measures
+`src/pdfss`, so its 100% says nothing about the new CI adapters. Their exercise
+is the native integration fixtures plus static reference review, and the two
+places where that exercise is absent are named as missing work rather than
+counted as coverage.
+
+Independent identity binding of the evidence to the reviewed bytes:
+
+- All 17 LF-normalized SHA-256 values and all 17 line counts recorded in the
+  Step 4 capture were recomputed across both repositories and every one matches.
+  The bookkeeping is accurate; the findings concern behavior, not the record.
+- The companion staged tree recomputed to `a10f56c4f17f09bc32296b1726b9235098de64b3`
+  and its HEAD to the recorded starting revision, both exactly as recorded.
+
+One methodological note, because it changed a conclusion. Reading pytest's
+installed source suggested that the acceptance plugin's
+`config.getoption("no-testmon")` would raise, since option-to-dest keys carry
+their dashes, which would have been a latent crash in the blocking gate. The
+reviewer probed the real behavior with the application's own interpreter,
+pytest 9.1.0 and pytest-testmon 2.2.0 instead of reporting it: `"no-testmon"`
+resolves and `"no_testmon"` is the spelling that raises, because that plugin
+declares a hyphenated dest. The line is correct as written, and the fixture's
+configuration double could not have shown either way.
+
+### Resolved validation set and sources for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+The reviewer ran the union of the request validation set and the current
+resolver set. All three commands were executed in this round and all three pass.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Result:
+  `lint_shell: 58 tracked scripts`, `lint_shell: clean`, exit 0, run through the
+  project environment so the pinned ShellCheck resolved.
+- `bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 4 --python
+  /usr/bin/python3 --app-repo ../app`, source `plan`. Run on the native RHEL
+  host through the disclosed transport, which takes fresh owned copies of both
+  repositories. Result: `validation exit=0 elapsed=51s`. The relative
+  `--app-repo` is an improvement over the previous step's absolute snapshot path.
+- `ghog day`, source `plan`. Run in the application checkout, which is where the
+  writer response and the plan's Step 4 addendum place it. As declared it
+  returned exit 0 while measuring nothing, reporting that no Python file had
+  changed since the last green walk and `cov=skipped`, so the reviewer forced a
+  complete walk and used that as the mandatory evidence.
+
+Caller evidence retained inside the artifact home, not in versioned notes:
+`a.code-review.s4-native-validation.log` (the full remote validation log),
+`a.code-review.s4-app-ghog.log` and `a.code-review.s4-app-ghog-force.log` (the
+declared walk and the forced walk).
+
+Two isolated reproductions supporting the findings were run outside both
+repositories, in the reviewer's scratch area, and changed nothing in either
+tree: one sourcing `ci/tools_candidate.sh` with only `tools/publish.mode`
+present to observe `tools_verification_path`, and one probing real pytest option
+resolution with the application's own interpreter and plugins.
+
+### Resolver drift and direction for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+No drift in either direction, with one ambiguity worth naming.
+
+Re-resolving the project floor from the versioned `.review-validation` yields
+the same single `project` command the request carries, and both `plan`
+additions parse through the current resolver contract, so the union equals both
+sets.
+
+The ambiguity is in the second plan addition rather than in the resolution:
+`ghog day` carries no repository context. Resolved for a cplx review it would
+run in cplx, where the versioned declaration deliberately avoids it because
+this repository has no pytest project, and it exits 5 there. The writer response
+states the intended target is the separate application checkout, and the plan's
+Step 4 addendum says to run the application authoring walk, so the reviewer ran
+it there. A declaration that named its repository would remove the guesswork.
+
+### Repository state around validation for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher rather than from equivalent Git commands.
+
+- Request-time index tree `da030eb1cbc0e705a44a3d09da0ffd833fb8b01f` equals the
+  baseline captured at entry and the live index captured after all three
+  validation runs, both reproductions and the implementation check.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `0218245242f1ccec3561ef41f23322e0c6c2f3a12e69981a8fc1c9698e769fc6`,
+  the same digest seen in every earlier round of this effort. No umbrella row
+  was completed from reviewer mode, and none should be while Steps 4 to 7 are
+  open.
+- Validation-state comparison over the ordered path set, holding all five
+  staged step paths and the file named by the project command: `acceptable:
+  true` with empty `tracked_paths`, `untracked_paths` and `ignored_paths`.
+- Both working trees match their entry state exactly: five staged paths plus the
+  protocol's own unstaged transcript modification here, and the fifteen staged
+  paths in the companion checkout with nothing else. The companion index tree
+  still recomputes to its recorded identity.
+- This round produced no reviewer residue. The native run executes inside an
+  owned host snapshot, and the two reproductions supporting the findings ran in
+  the reviewer's scratch area outside both repositories, one with copies of a
+  single script and a synthetic workspace, the other with a throwaway pytest
+  project. Neither touched a repository file.
+- Reviewer-authored evidence stayed inside the artifact home as ignored `a.*`
+  files, so none of it became a tracked side effect of this review.
+
+### Repair inventory for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+`a.commit` remains accurate for what is staged; the reviewer amended nothing.
+
+The mechanical result is an independent
+`commit-plan-check.bat --format json` rerun against the received state rather
+than the value embedded in the request: `state: valid`, `ready: true`, exit 0,
+no diagnostics. Its five staged paths and two ordered groups match the request
+payload exactly.
+
+- Group 1, `test(tools): qualify candidate agent integration`: the Python
+  fixture module, the agent harness and the cumulative runner.
+- Group 2, `docs(tools-archive-rebuild): record step 4 validation`: the Step 4
+  capture and the validation plan.
+
+Ordering is least to most dependent, every staged path appears once, and each
+subject is a conventional single-purpose line. The companion repository's
+separate plan was checked the same way in its own checkout and is also `valid`
+and `ready`, with its 15 staged paths in one coherent
+`ci(tools): qualify pinned candidate archives` group.
+
+Two notes rather than corrections, since a commit is not authorized by this
+round anyway:
+
+- The eight new application `ci/` helpers are not named in the plan's Step 4
+  file list, but each maps onto a responsibility that list does assign, and the
+  effort's own baseline section allows new Python files up to the repository
+  ceiling of 650 lines. The largest is 187. The reviewer therefore treats them
+  as in scope. The Step 4 line-budget checkpoint's phrase "no Python growth"
+  reads naturally as no existing Python file growing, and a clarifying word in
+  the plan would remove the ambiguity for the next reader.
+- Group 2 will need to be re-recorded after the rework, since it carries the
+  validation rows this answer contradicts.
+
+### Findings and boundaries for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+Unresolved findings:
+
+- app:ci/provision_toolchain.sh `do_venv` and app:ci/tools_abi_acceptance.sh both resolve `tools_verification_path`, which returns 2 with "Candidate pin missing" whenever neither `tools/tools.candidate` nor `tools/tools.verification` exists, so the unconditional Provision and Test stages fail for an ordinary release build in the repository's current tracked state, against Step 4's requirement to preserve ordinary release-pin provisioning.
+- app:ci/tools_candidate.sh `tools_candidate_read` applies the candidate publication-off rule to the verification-only `sqlite` format, which the inline parser it replaces never did, so restoring `tools/publish.mode` to `snapshot` as Step 7 plans would stop the non-gating SQLite diagnostic from producing its evidence.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+Two concrete changes are required, both in the companion repository, plus the
+validation-plan correction. Keep every repair staged in that repository.
+
+1. Restore ordinary release-build provisioning.
+
+   `app:ci/provision_toolchain.sh` `do_venv` resolves `controls=$(tools_verification_path)`
+   unconditionally for its wheel-capture block, and `app:ci/tools_abi_acceptance.sh`
+   resolves the same path for the closure checker. `tools_verification_path`
+   requires either a candidate pin or a verifier pin. Neither
+   `tools/tools.candidate` nor `tools/tools.verification` exists or is tracked,
+   the Jenkinsfile creates neither, and no document states that a verifier pin is
+   now required for every build.
+
+   Reproduction, with only `tools/publish.mode` containing `off` present:
+   `tools_candidate_select` prints `release`, then
+   `controls=$(tools_verification_path)` exits 2 printing `Candidate pin missing`.
+   The `Provision` stage calls `provisionVenv()` with no `when` guard, and the
+   `Test` stage calls `abiContract()` the same way, so both fail.
+
+   Either is acceptable, and the choice is the writer's because it is a policy
+   decision this reviewer will not make:
+
+   - scope both dependencies to the modes that need independent controls, leaving
+     an ordinary release build able to provision without a pin; or
+   - require a verifier pin for every build, refuse early with a diagnostic that
+     names `tools/tools.verification` rather than a candidate pin, and track or
+     document how a release build obtains one.
+
+   Then add a fixture that runs `provision_toolchain.sh venv` in release mode with
+   no pin present. The current harness covers `select`, `fetch`, `relocate` and
+   `venv-path`, and touches release mode only through `select` and a
+   verifier-pinned fetch, so nothing in it can catch this class of defect. This
+   step exists partly to keep basic wiring defects out of Step 6.
+
+2. Settle what the verification-only `sqlite` format requires.
+
+   Routing `app:tools/sqlite_candidate_capture.sh` through
+   `tools_candidate_read ... sqlite` now applies the candidate publication-off rule
+   that the inline parser it replaces never applied. Reproduced: with
+   `tools/publish.mode` set to `snapshot`, that read refuses with "Candidate
+   requires publication explicitly off". Because the diagnostic is non-gating, the
+   effect when Step 7 restores snapshot uploads is that it quietly stops producing
+   SQLite evidence. Either exempt the verification-only format the way the
+   `verification` format already is, or record the new coupling where an operator
+   will see it.
+
+3. Correct the Step 4 validation rows, which currently record
+   `Yes. Step 4 has been fully implemented.`
+
+Optional, and not required for the next round: cover the authorized
+`system-interpreter-helper` branch of `app:ci/tools_abi_scan.py` with a fixture.
+It is the one provider-accounting path whose behavior is established only by a
+live run, while every sibling refusal axis has a fixture. Worth noting for the
+record: that category is authorized by the settled design and requirement, which
+both say retained helper programs with system interpreters are reported
+separately, but it is not inherited from the probe being replaced, since that
+probe never inventoried `tools/bin`. The word "inherited" in the implementation
+report is imprecise, and the next reader of that sentence deserves the accurate
+version.
+
+Standing items from earlier rounds, all in ignored scratch or in the
+declaration rather than in tracked content, so none of them drives this round:
+
+- The declared application command still runs the walk without forcing it, and
+  for the third consecutive round it returned exit 0 while measuring nothing.
+  The recorded numbers are accurate, but only because the writer forced a walk
+  by hand. Adding the forcing flag, or the documented detached mode, would make
+  the declared evidence reproducible by whoever reviews it.
+- `ghog day` is declared with no repository context. Resolved for a cplx review
+  it would run where the versioned declaration deliberately avoids it. Naming
+  the target repository in the declaration would remove the ambiguity.
+- The review transport scripts and their tar again sit at the project root
+  rather than in the artifact home beside the wrappers that read them.
+- The request's authored text again names the companion repository by its
+  private directory name inside an absolute path under the author's home
+  directory, which the protocol appends to the versioned transcript. Step 3
+  avoided this and Step 4 reintroduces it. The repository's installed
+  sensitive-content pre-commit hook blocks a commit whose staged content matches
+  those rules, so this will surface as a blocked commit rather than as leaked
+  history; the transcript entries that already exist remain a human decision.
+  Use the `app:` label in authored request text and keep the real locator in the
+  ignored context file, as Step 1 did.
+
+### Decision rationale for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+The disposition is changes-requested, on one blocking finding and one smaller
+behavioral change in the same file. The readiness floor is recorded as
+incomplete, and the reviewer made no repair, so nothing is attributed to it.
+
+Where the six readiness-floor results stand:
+
+1. Identity. Passes exactly, in both repositories: request index tree
+   `da030eb1cbc0e705a44a3d09da0ffd833fb8b01f` matches the live index at entry
+   and at publication, and the companion tree and HEAD match their recorded
+   identities.
+2. Completeness. Fails. Nearly all of the step is implemented well, but the
+   chain this step wires cannot complete an ordinary release build in the
+   repository's current tracked state, and preserving ordinary release-pin
+   provisioning is part of Step 4's own stated intent.
+3. Validation and coverage. The three resolved commands were run and all pass:
+   the lint floor is clean, the native run passed with 29 agent cases, 49 D10
+   cases, 16 record, 15 transport and 6 publication tests, 25 SQLite checks and
+   254 frozen controls, and a forced application walk reached `cov=100` with no
+   failures or outliers. This result is worth reading precisely: the mandatory
+   set passes, and the finding is behavior that no command in that set
+   exercises. A green validation set is not the same as a working release path.
+4. Staged attribution. Passes. Both trees hold only their staged sets, no
+   pre-existing work was swept in, and this round left no reviewer residue: the
+   two reproductions ran in a scratch area outside both repositories.
+5. Unresolved findings. Two, listed in the findings inventory, each with a
+   concrete writer action.
+6. `a.commit`. Passes mechanically in both repositories, with the note that
+   Group 2 carries validation rows this answer contradicts and will be
+   re-recorded after the rework.
+
+Why the blocking finding is blocking, stated plainly: `do_venv` and the ABI
+acceptance entry both require independently pinned verification controls, no
+such pin exists or is tracked, nothing creates one and nothing documents the new
+requirement. Reproduced in isolation, `controls=$(tools_verification_path)`
+exits 2 with a message about a missing candidate pin, and both the `Provision`
+and `Test` stages call their entry points unconditionally. The fix needs a
+policy choice between scoping the dependency and requiring a pin everywhere,
+which is the writer's to make, so this is returned as feedback rather than
+edited. It is also resolvable in one round, which is what separates it from
+items this reviewer has previously recorded as observations instead of findings.
+
+What the reviewer chased down and did not report, because checking changed the
+answer:
+
+- The ABI gate's `system-interpreter-helper` category looked like an
+  unauthorized softening in the very gate this step makes blocking, and the
+  request calls it inherited when the replaced probe never inventoried
+  `tools/bin`. The settled design and the requirement both specify it, so it is
+  authorized and only the word "inherited" is imprecise.
+- The acceptance plugin's `config.getoption("no-testmon")` looked like a latent
+  crash, since pytest maps option strings to dests with their dashes. Probing
+  the real interpreter and plugins showed that spelling resolves and the
+  underscored one is what raises. Reading alone would have produced a false
+  finding, and the fixture's configuration double could not have settled it
+  either way.
+- The eight new application helpers are unnamed in the step's file list but each
+  maps to a responsibility it assigns, and the effort's baseline section allows
+  new Python files up to 650 lines, the largest here being 187. In scope.
+
+Also verified rather than accepted: all 17 recorded source hashes and all 17
+line counts match across both repositories, so the evidence record itself is
+accurate, and the writer's disclosure that its cumulative capture predates two
+test-only additions is precise.
+
+What this answer does not claim: no final archive, no candidate qualification,
+no Jenkins or Debian acceptance, no publication and no adoption. Those remain
+Step 6's work after Step 5 builds the archive, and this answer authorizes no
+commit in either repository.
+
+### Final reviewer decision for step 4 tools-archive-rebuild (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-1 -->
+
+## Round 2 by requestor - Step 4
+
+- Recorded: 2026-09-17T19:07:40+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 tools-archive-rebuild (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 4
+Review round: 2
+
+### Code review evidence for step 4 tools-archive-rebuild (round 2)
+
+request_index_tree: f21d7c09846f2aad1c9cb2ac79b485a580adba5b
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 4 --python /usr/bin/python3 --app-repo ../app (sources: plan)
+- powershell -ExecutionPolicy Bypass -File .reviews/a.step4.app-walk.ps1 (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(tools): qualify candidate agent integration
+group 1 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 1 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2: docs(tools-archive-rebuild): record step 4 validation
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 2 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 4 tools-archive-rebuild (round 2)
+
+Yes. Step 4 has been fully implemented within the plan's fixture and pipeline
+wiring completion boundary. Final archive production belongs to Step 5 and
+actual Jenkins/Debian and final native candidate acceptance belong to Step 6.
+
+Native validation passed all 33 agent shell cases plus Python ABI, wheel and
+test-evidence fixtures, 49 D10 cases, 16 record cases, 15 transport cases,
+six publication cases, 25 current SQLite controls and 254 historical closure
+cases. The shell lint gate and adapter compilation passed. All 20 current
+native input files match the retained successful source snapshot. See
+docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt for hashes,
+timing, application authoring results and limits.
+
+The forced app-scoped walk finished at 2026-09-17T19:05:35+02:00 with exit 0:
+100% coverage, zero failures and zero duration outliers, three warnings and
+eight expected failures. The full suite took 4m 54.8s. Both repaired files
+also passed ghog single. No real-agent candidate acceptance is inferred.
+
+The new CI adapters remain outside the app coverage source, src/pdfss.
+Every top-level adapter symbol has a fixture, package or CLI reference. No
+unit-tested application class changed, no new domain dependency was added,
+and all new Python files remain below 650 physical lines. Inventory and
+manifest processing remain linear. Integration timing repairs retain every
+assertion and do not alter coverage or duration gates.
+
+Validation execution notes:
+
+- Cplx is a Bash project. Its .review-validation shell lint floor and the
+  plan's native cumulative runner are the applicable gate; cplx has no pytest
+  project. Do not install or invent one to execute the typed ghog day default.
+- The native command is bash docs/v0.27.0/verify.tools-archive-rebuild.sh
+  --step 4 --python /usr/bin/python3 --app-repo ../app. On this Windows
+  checkout, .reviews/a.step4.native-gate.ps1 invokes the retained transport
+  driver, which creates an owned native snapshot with exactly that layout,
+  runs the command and includes bash src/utils/lint_shell.sh. Inspect the
+  driver first. It overlays the current sources and retains fresh logs.
+- .reviews/a.step4.app-walk.ps1 resolves the private application checkout,
+  sets PRJ_DIR explicitly and calls the absolute shared launcher with
+  ghog day --force. This is a real application walk, not cplx or a no-op.
+  Let a healthy execution finish; do not start another walk concurrently.
+- .reviews/a.step4.app-context.json supplies the private app locator. Keep
+  that value in ignored evidence and refer to app: paths in authored output.
+- Review the current staged application paths as companion evidence. The
+  request_index_tree applies only to cplx; the change summary separately
+  captures the application index, patch and root a.commit.
+
+The reviewer made no round 1 changes. The writer accepted all findings,
+repaired them, and refreshed the evidence and grouping. No commit is authorized.
+
+### Implementation report for step 4 tools-archive-rebuild (round 2)
+
+Step 4 wires the main application's candidate and ordinary release provisioning
+to independent verifier controls, one selected prefix, exact wheel capture,
+blocking ABI observations and a full test/coverage acceptance entry. It removes
+the rsync, tools-patch and wheel-mutation interims while retaining the permitted
+raw-Python bypass pending wrapper acceptance. The SQLite diagnostic reuses
+verified transport and remains independently selectable.
+
+The repaired release contract fails at preflight if tools/tools.verification
+is missing. ci/TOOLS-VERIFICATION.md explains how the job owner delivers that
+independent pin. Candidate publication remains suppressed; the SQLite-only
+format accepts the pre-existing publication-enabled diagnostic use case.
+
+Cplx's cumulative native fixtures cover those entry points and negative
+observations, including the authorized helper interpreter exception. Two
+application integration test timing repairs were needed to clear the mandatory
+authoring walk. They change setup/input size and preserve all assertions and
+real integration paths. No application production behavior changed for timing.
+
+Step 6 still owns live Jenkins/Debian and final RHEL candidate acceptance after
+the Step 5 rebuild. No final candidate, publication, release-pin adoption or
+umbrella completion is claimed by this implementation.
+
+### Change summary for step 4 tools-archive-rebuild (round 2)
+
+This step spans cplx and the separate application checkout declared by the
+plan. The protocol's request_index_tree fixes the cplx index only. Resolve
+the companion app root from .reviews/a.step4.app-context.json; keep its private
+locator out of authored review text and the versioned transcript.
+
+Cplx starting HEAD: 863933eeedb21bac5bfa7a662d1a0d25a048a079.
+
+Cplx staged paths:
+
+- docs/v0.27.0/fixtures.tools-release-agent.py
+- docs/v0.27.0/verify.tools-archive-rebuild.sh
+- docs/v0.27.0/verify.tools-release-agent.sh
+- docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+- docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+
+Cplx root a.commit keeps two groups:
+
+1. test(tools): qualify candidate agent integration (the three fixtures/runners).
+2. docs(tools-archive-rebuild): record step 4 validation (evidence, validation
+   and the versioned review record).
+
+App starting HEAD: 489bbbde741328ab7953e2338a29952cd1a9f18c.
+App index captured with capture-index-tree: a130e310e2abc8690abf7766c8a6efd998346e32.
+Retained binary patch: .reviews/a.step4.app-staged.patch.
+Patch SHA-256: a2f05e321c0286fb2b0d55146fd0d69152f877a6f2caf86f3cb86e14e6c1b6de.
+Retained companion commit plan: .reviews/a.step4.app-commit-plan.md.
+
+App staged paths:
+
+- Jenkinsfile
+- ci/Jenkinsfile.diagnostics
+- ci/Jenkinsfile.relocation
+- ci/TOOLS-VERIFICATION.md
+- ci/__init__.py
+- ci/provision_toolchain.sh
+- ci/tools_abi_acceptance.sh
+- ci/tools_abi_scan.py
+- ci/tools_agent_identity.sh
+- ci/tools_candidate.sh
+- ci/tools_candidate_bundle.py
+- ci/tools_test_acceptance.sh
+- ci/tools_test_evidence.py
+- ci/tools_test_plugin.py
+- ci/tools_wheel_capture.py
+- src/pdfss/tests/integration/adapters/inbound/sentinel_service/test_sentinel_auth_lifecycle/test_sentinel_auth_lifecycle_tdd.py
+- src/pdfss/tests/integration/application/handlers/test_pdf_processing_handler_polluted_pdf/_synthetic_polluted_samples.py
+- src/pdfss/tests/integration/application/handlers/test_pdf_processing_handler_polluted_pdf/test_pdf_processing_handler_polluted_pdf_acceptance_tdd.py
+- tools/sqlite_candidate_capture.sh
+
+App root a.commit keeps two groups:
+
+1. test(perf): shorten two integration test calls (the three integration files).
+2. ci(tools): qualify pinned candidate archives (the 16 CI/tool paths).
+
+The existing tools/publish.mode was already off and is unchanged. Assess
+companion repairs in the app index and name them with app: labels. Commit plans
+are prepared for review; no commit has been authorized or executed.
+
+### Writer response for step 4 tools-archive-rebuild (round 2)
+
+Writer response:
+
+All round 1 findings are accepted; there is no disagreement. The reviewer
+reported no staged repairs. The writer made the following corrections:
+
+- Ordinary release provisioning now requires an independent
+  tools/tools.verification pin at the first pipeline/provisioner preflight.
+  The diagnostic names that file and ci/TOOLS-VERIFICATION.md before any venv
+  side effects. The documentation describes ownership, delivery, bootstrap,
+  exact verifier inputs and refusal behavior. A release tag alone is
+  intentionally insufficient for a main build's independent acceptance gates.
+- Added a fixture invoking the actual release-mode provisioner without the
+  verifier. Its diagnostic assertion failed before the repair, then passed.
+  Successful verifier preflight and absence of venv side effects are covered.
+- Exempted the diagnostic-only SQLite pin format from candidate publication
+  suppression, with an enabled-publication fixture. Candidate/main acceptance
+  still requires publication explicitly off.
+- Added the optional authorized system-interpreter-helper case and refusal
+  after the same ELF moves outside tools/bin.
+- Replaced the no-op application walk with an explicitly app-scoped forced
+  walk. Its first full suite had 100% coverage but two timing outliers.
+  Profile-guided test repairs retain every assertion: prepare real auth
+  routes/schema once and use the exact 1000-XObject activation threshold.
+  No duration floor, threshold, timeout, xfail or exclusion was relaxed.
+- Updated Step 4 validation and both commit plans. The application plan has
+  a separate timing-repair group before the CI group. Cplx keeps fixtures
+  before its trailing Step 4 validation/documentation group.
+
+Use the private application locator only from .reviews/a.step4.app-context.json.
+Use app: labels in authored review text and the versioned transcript.
+
+### Reviewer focus for step 4 tools-archive-rebuild (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-2 -->
+
+## Round 2 by reviewer - Step 4
+
+- Recorded: 2026-09-17T19:25:27+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+Baseline index tree: f21d7c09846f2aad1c9cb2ac79b485a580adba5b
+
+Assessed index tree: f21d7c09846f2aad1c9cb2ac79b485a580adba5b
+
+### Implementation check for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+Result:
+
+No. Step 4 has NOT been fully implemented.
+
+Every round 1 finding is genuinely fixed, and the reviewer verified each one by
+running the repaired code rather than by reading the writer's account. The
+status is No for a different reason: the staged set cannot be committed, because
+the repository's own sensitive-content pre-commit hook refuses it.
+
+What the round 2 repairs achieved, each confirmed in the reviewer's own native
+run:
+
+- Release provisioning no longer fails obscurely. `tools_provision_select`
+  refuses release mode without `tools/tools.verification` and names both that
+  file and `ci/TOOLS-VERIFICATION.md`, and it is wired at every entry the
+  finding named: the provisioner's own preamble, `tools_verification_path`, a
+  new `preflight` subcommand, and the Jenkinsfile's first setup stage. The
+  misleading "Candidate pin missing" text is now `Missing <format> pin: <path>`.
+  The fixture the reviewer asked for exists and passes: `release-venv-needs-verifier`
+  runs the actual provisioner's `venv` entry in release mode with no pin and
+  asserts the new diagnostic, alongside `release-preflight-needs-verifier` and
+  the positive `verifier-release-preflight`.
+- `ci/TOOLS-VERIFICATION.md` documents pin ownership, delivery, the exact three
+  keys, bundle contents, refusal behavior, candidate mode and adoption, and is
+  honest that it selects no real artifact. The operational consequence is now
+  explicit rather than accidental: a main build cannot provision until a
+  verifier pin is delivered. That is the writer's legitimate choice between the
+  two options the finding offered, and it is documented and diagnosed.
+- The verification-only `sqlite` format is exempt from the candidate
+  publication-off rule, restoring the diagnostic's inherited behavior, and
+  `sqlite-diagnostic-with-uploads` passes with publication enabled while
+  candidate and main acceptance still require it off.
+- The authorized `system-interpreter-helper` category now has both halves
+  covered: `system-interpreter-helper-accounting` asserts the recorded row for a
+  `tools/bin` helper, and `outside-interpreter-runtime-refused` asserts refusal
+  once the same ELF moves outside `tools/bin`.
+- The declared application command is now app-scoped and forces the walk, so the
+  mandatory evidence is reproducible from the declaration for the first time in
+  four rounds. The reviewer ran it as declared: `fail=0 warn=3 xfail=8 cov=100
+  outliers=0 excluded=0 exit=0`. This round's wrappers are home-local, and the
+  private locator lives in the ignored context file.
+- The two integration timing repairs are legitimate rather than gate-gaming, and
+  the reviewer checked this specifically. The polluted-PDF case now builds the
+  activation input at exactly 1000 XObjects, the real structural threshold, so it
+  tests the boundary rather than a value comfortably above it, with the default
+  still 1100 and the experimental fallback sample unchanged. The auth case moves
+  adapter construction and schema generation into a module-scoped fixture, which
+  is the canonical remedy for a slow call, while the measured call keeps real
+  service startup, real HTTP and every assertion. No duration floor, threshold,
+  timeout, xfail or exclusion was touched: the floor file still reads 1.0, there
+  is no exclusions file, and neither it nor `pyproject.toml` is staged. Suite
+  time fell from 4m 45s to 3m 39s.
+
+#### Missing work for Step 4 for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+- Make the staged set committable. The reviewer ran the repository's own
+  sensitive-content checker against the staged blobs and it reported
+  `Commit blocked` with five locations: four in
+  `docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md` and one in
+  `docs/v0.27.0/verify.tools-release-agent.sh`. Two distinct actions follow.
+- Fix the staged source hit first, because it is entirely the writer's to fix:
+  the `same-venv` assertion writes the private application name twice inside the
+  expected venv path. Derive the expected value from the same source the
+  provisioner derives it from, or assert the path shape without embedding that
+  name, so the harness keeps its meaning without putting the name in versioned
+  content. In fairness this line predates round 2 and the round 1 answer should
+  have caught it.
+- Then decide what to do about the transcript. Adding it to cplx group 2 is what
+  turns four pre-existing transcript lines into a blocked commit. Dropping it
+  from the staged set restores the arrangement rounds 1 through 3 used and makes
+  this commit executable immediately. Sanitizing the entries instead is a human
+  decision, not a writer repair, because neither role may hand-edit a protocol
+  transcript; it needs raising with the human rather than resolving in a round.
+  Whichever path is chosen, the effort will eventually have to commit that
+  document, so the underlying question is worth settling deliberately.
+
+Architecture, performance and feature integrity are unchanged from the round 1
+assessment and remain sound: responsibilities stay divided across transport,
+bundle validation, wheel selection, ABI observation, test hooks and evidence
+validation; the shared ELF reader remains the only ABI interpreter; work is
+linear in its inputs with each root walked once; and the retirements stay
+complete, with the wiring fixture asserting that none of the removed interims
+reappears. Nothing in those dimensions needs fixing.
+
+Unit test coverage: no application class changed. The three staged application
+test files are test-only timing repairs inside the measured scope, and the walk
+still reports 100% with the same warning and expected-failure counts. The new CI
+adapters remain outside that scope, and both coverage gaps the round 1 answer
+named are now closed by fixtures. No unit-tested class below 100% needs
+completing, and no top-level symbol outside the coverage gate is unreferenced.
+
+Scope: no final archive, candidate qualification, publication, release-pin
+adoption or umbrella completion is claimed, and Step 6 still owns the live
+Jenkins and Debian acceptance after Step 5 builds the archive.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, for the same
+deliberate reason as round 1: this round returns `changes-requested`, so the
+writer will restate its own verdict after the rework, and editing staged rows
+now would change the index mid-round for no lasting benefit.
+
+The writer did update those rows as round 1 instructed, and they are otherwise
+sound: the section set is complete, each check section carries its required
+closing phrase, the coverage section names the measured scope and adds the
+second phrase about symbols outside it, and the document-level line correctly
+remains `No, it is not implemented.` with Steps 5 to 7 pending.
+
+What the writer must correct there after this round is the Step 4 status
+sentence, which records `Yes. Step 4 has been fully implemented.` while the
+staged set cannot be committed.
+
+Because no validation-plan path was edited, no pre-repair blob was recorded and
+no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+Every resolved mandatory command was run by the reviewer in this round and all
+three pass. For the first time in this effort the declared set produced its own
+evidence without the reviewer having to work around it.
+
+Project floor: `lint_shell: 58 tracked scripts`, `lint_shell: clean`, exit 0.
+
+Native cumulative runner at `--step 4` on RHEL 9.8 with the independent
+`/usr/bin/python3` 3.9.25: `validation exit=0 elapsed=50s`. The reviewer copied
+the whole remote log back rather than trusting the printed tail, and confirmed
+inside it both the totals and each repair fixture by name:
+
+- `Independent interpreter: /usr/bin/python3 3.9.25`.
+- `PASS release-venv-needs-verifier` and `PASS release-preflight-needs-verifier`,
+  the fixtures that exercise the actual provisioner in release mode with no pin.
+- `PASS verifier-release-preflight` for the positive path.
+- `PASS sqlite-diagnostic-with-uploads` for the publication-enabled exemption.
+- `PASS system-interpreter-helper-accounting` and
+  `PASS outside-interpreter-runtime-refused` for both halves of the authorized
+  helper exception.
+- `Agent shell fixtures: 33 cases passed; parser and wiring fixtures passed`.
+- `D10 fixtures: 49 cases passed`.
+- `Ran 16 tests` / `OK`, `Ran 15 tests` / `OK`, `Ran 6 tests` / `OK`.
+- `SQLite closure: 25 checks passed` and the frozen verdict with `failures 0`.
+
+Application walk, run as declared through the new app-scoped wrapper that forces
+the walk: `fail=0 warn=3 xfail=8 cov=100 outliers=0 excluded=0 exit=0`,
+objective reached, 3m 39.3s. The reviewer ran it alone on the machine, and the
+duration drop from 4m 45s shows the timing repairs did real work rather than
+moving a threshold.
+
+Beyond the mandatory set, the reviewer ran one more check that the mandatory set
+does not cover and that decides this round: the repository's own
+sensitive-content checker against the staged blobs. It reported
+`ERROR: sensitive content found in the pending commit`, five locations, and
+`Commit blocked`. That checker is the same program the installed pre-commit hook
+executes, so this is the commit gate's real answer rather than an inference.
+
+Verification that no gate was relaxed by the timing repairs, since that claim
+deserved independent checking: the duration floor file still reads `1.0`, no
+exclusions file exists, and neither that file nor `pyproject.toml` appears in
+the staged set.
+
+Independent identity binding of the evidence to the reviewed bytes: the recorded
+Step 4 capture now lists 20 files across both repositories. The reviewer
+recomputed the eleven that changed in this round, including the three
+application test files, the new verification document, the provisioner and the
+transport helper, and every hash and line count matches. The companion staged
+tree recomputed to `a130e310e2abc8690abf7766c8a6efd998346e32` and its HEAD to
+the recorded starting revision, both exactly as recorded.
+
+One process note about this round's own rigor. The reviewer captured the index
+baseline and umbrella digest at entry, but took the validation-state baseline
+after the read-only assessment rather than before it. Nothing could have drifted
+in between: no repair was made, and the index identity was verified identical at
+entry, after every validation run and at publication, which the manifest and the
+comparisons record. The earlier rounds of this effort took that capture in the
+prescribed order.
+
+### Resolved validation set and sources for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+The reviewer ran the union of the request validation set and the current
+resolver set. All three commands were executed in this round and all three pass.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Re-resolved from the
+  versioned declaration and run through the project environment so the pinned
+  ShellCheck resolved. Result: 58 tracked scripts, clean, exit 0.
+- `bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 4 --python
+  /usr/bin/python3 --app-repo ../app`, source `plan`. Run on the native RHEL
+  host through `.reviews/a.step4.native-gate.ps1`, which the reviewer inspected
+  first as the request asks. That driver and its transport script are now
+  home-local, and it creates an owned snapshot with exactly the declared layout.
+  Result: `validation exit=0 elapsed=50s`.
+- `powershell -ExecutionPolicy Bypass -File .reviews/a.step4.app-walk.ps1`,
+  source `plan`. This replaces the bare `ghog day` of round 1, and it is the
+  fix to a weakness this reviewer had raised in three consecutive rounds: it
+  resolves the application checkout from the ignored context file, sets the
+  project directory explicitly and forces the walk, so the declared command now
+  measures the tree instead of returning exit 0 on a cached marker. Result:
+  objective reached, `cov=100`, no failures and no outliers.
+
+Caller evidence retained inside the artifact home, not in versioned notes:
+`a.code-review.s4r2-native-validation.log` (the full remote validation log),
+`a.code-review.s4r2-app-walk.log` (the declared walk),
+`a.code-review.s4r2-cplx-plan.json` and `a.code-review.s4r2-app-plan.json` (the
+two independent commit-plan results).
+
+### Resolver drift and direction for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+No drift in either direction, and the round 1 ambiguity is resolved.
+
+Re-resolving the project floor from the versioned `.review-validation` yields
+the same single `project` command the request carries, and both `plan`
+additions parse through the current resolver contract, so the union equals both
+sets.
+
+The second plan addition changed identity since round 1, from a bare `ghog day`
+with no repository context to an explicit app-scoped wrapper in the artifact
+home. That is a deliberate improvement rather than drift: the earlier spelling
+would have resolved against this repository, where the versioned declaration
+deliberately avoids that command because there is no pytest project here. The
+declaration file itself was correctly left alone in both rounds.
+
+### Repository state around validation for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher rather than from equivalent Git commands.
+
+- Request-time index tree `f21d7c09846f2aad1c9cb2ac79b485a580adba5b` equals the
+  baseline captured at entry and the live index captured after all three
+  validation runs, the staged-blob sensitive check and the implementation check.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `0218245242f1ccec3561ef41f23322e0c6c2f3a12e69981a8fc1c9698e769fc6`,
+  the same digest observed in every round of this effort.
+- Validation-state comparison over the ordered path set, holding all six staged
+  step paths and the file named by the project command: `acceptable: true` with
+  empty `tracked_paths`, `untracked_paths` and `ignored_paths`.
+- Both working trees match their entry state: six staged paths here, with the
+  versioned transcript showing as staged and further modified because the
+  protocol appended this round's request after the writer staged it, and
+  nineteen staged paths in the companion checkout with nothing else. The
+  companion index still recomputes to its recorded identity.
+- This round produced no reviewer residue. The native run executes inside an
+  owned host snapshot, the application walk writes only ignored logs in its own
+  repository, and the staged-blob check is read-only.
+- One honest note on ordering: the validation-state baseline for this round was
+  captured after the read-only assessment rather than before it. No repair was
+  made and the index identity was verified identical at entry and at
+  publication, so no drift was possible in the interval, but the prescribed
+  order is before, and earlier rounds followed it.
+- Reviewer-authored evidence stayed inside the artifact home as ignored `a.*`
+  files, so none of it became a tracked side effect of this review.
+
+### Repair inventory for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+`a.commit` is mechanically accurate in both repositories and the reviewer
+amended nothing, but its cplx group 2 cannot execute as staged.
+
+Independent `commit-plan-check.bat --format json` reruns against the received
+state: cplx `state: valid`, `ready: true`, exit 0, no diagnostics, six staged
+paths in two groups; the companion checkout likewise `valid`, `ready`, exit 0,
+nineteen staged paths in two groups.
+
+- cplx group 1, `test(tools): qualify candidate agent integration`: the Python
+  fixture module, the agent harness and the cumulative runner.
+- cplx group 2, `docs(tools-archive-rebuild): record step 4 validation`: the
+  Step 4 capture, the validation plan and, new in this round, the versioned
+  review transcript.
+- Companion group 1, `test(perf): shorten two integration test calls`: the three
+  integration test files. Placing the timing repairs before the CI group is the
+  right order, since the authoring walk must pass for the CI group's evidence.
+- Companion group 2, `ci(tools): qualify pinned candidate archives`: the sixteen
+  CI and tool paths, now including the new verification document.
+
+Ordering is least to most dependent in both plans, membership covers every
+staged path exactly once, and each subject is a conventional single-purpose
+line whose type matches its content.
+
+The mechanical checker and the commit gate are not the same gate, and that is
+the gap this round leaves. Adding the transcript to cplx group 2 is what makes
+the difference: with it staged, the repository's own pre-commit hook refuses the
+commit. `commit-plan-check` does not consult that hook, so `ready: true` and an
+executable commit are two different statements here. Either drop the transcript
+from the staged set, as rounds 1 through 3 of this effort did, or resolve the
+content it carries first.
+
+### Findings and boundaries for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+Unresolved findings:
+
+- The staged set cannot be committed: the repository's installed sensitive-content pre-commit hook refuses it, and the reviewer confirmed this by running that exact checker against the staged blobs, which reported five locations and `Commit blocked`. Four are in the newly staged versioned transcript and one is in staged source at `docs/v0.27.0/verify.tools-release-agent.sh`, whose venv assertion embeds the private application name twice.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+The round 1 findings are closed. Two actions remain, both about making this
+commit executable, and one of them needs the human rather than the writer.
+
+1. Fix the staged source hit, which is the writer's alone.
+
+   `docs/v0.27.0/verify.tools-release-agent.sh` asserts the expected venv path with
+   a literal that contains the private application name twice. The repository's
+   sensitive rules match it, so the hook refuses the commit. Keep the assertion's
+   meaning and drop the literal: derive the expected value from the same input the
+   provisioner derives it from, or assert the path's shape around a name the
+   fixture reads from ignored context. The reviewer did not repair this itself
+   because the harness is staged content and any edit would be a substantive
+   change that cannot finish a round anyway.
+
+   This line predates round 2. The round 1 answer should have reported it, and did
+   not, because that round's sanitization check covered the authored request text
+   and not the staged harness. That is a gap in the earlier review, not a new
+   defect introduced here.
+
+2. Decide what to do about the versioned transcript, which needs the human.
+
+   Adding `docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md` to cplx
+   group 2 is what turns four pre-existing transcript lines into a blocked commit.
+   Those lines came from authored request text in an earlier step and in round 1 of
+   this step, and neither role may hand-edit a protocol transcript, so no writer
+   action removes them.
+
+- The immediate, reversible option is to drop the transcript from the staged set
+  and keep the arrangement rounds 1 through 3 used. This commit then executes,
+  and the question moves to whoever decides about the document.
+- The durable option is a human decision about sanitizing those entries, since
+  the effort must eventually commit that document and the hook will keep
+  refusing it until its content matches the rules.
+
+Raise it as a decision rather than resolving it silently either way.
+
+Then correct the Step 4 status sentence in the validation plan, which currently
+records `Yes. Step 4 has been fully implemented.`
+
+Worth recording as done well, because three rounds of this review kept asking
+for it: the declared application command now forces an app-scoped walk, so its
+evidence is reproducible from the declaration; this round's wrappers and their
+transport script are home-local; and the private locator lives in the ignored
+context file. The two timing repairs also hold up under scrutiny, including the
+choice to test the polluted-PDF gate at its exact threshold rather than above it.
+
+One standing item, unchanged and still not driving a round: the project root
+holds a large accumulation of earlier review scratch from this step's previous
+attempts. This round's own files are placed correctly, so this is cleanup of
+older material rather than a new lapse.
+
+Optional, for a later round rather than this one: the `ghog day` ambiguity is
+gone from the declaration, and the only remaining uncovered behavior the
+reviewer knows of in this step is exercised by live runs that Step 6 owns.
+
+### Decision rationale for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+The disposition is changes-requested, on one finding, and the readiness floor is
+recorded as incomplete. The reviewer made no repair, so nothing is attributed to
+it. This is not a repetition of round 1: every round 1 finding is closed, and
+the reason for another round is different.
+
+Where the six readiness-floor results stand:
+
+1. Identity. Passes exactly in both repositories. The cplx request index tree
+   matches the live index at entry and at publication, and the companion tree
+   and HEAD match their recorded identities.
+2. Completeness. Fails, narrowly and for a reason outside the implementation
+   itself: the staged set cannot be committed.
+3. Validation and coverage. Passes, and this round it passes on the declaration's
+   own terms. All three resolved commands were run: the lint floor is clean, the
+   native run passed with 33 agent cases, 49 D10 cases, 16 record, 15 transport
+   and 6 publication tests, 25 SQLite checks and 254 frozen controls, and the
+   declared application walk forced a real measurement reaching `cov=100` with
+   no failures and no outliers.
+4. Staged attribution. Passes. Both trees hold only their staged sets and this
+   round left no reviewer residue.
+5. Unresolved findings. One, with the actions it needs.
+6. `a.commit`. Mechanically accurate in both repositories, and not executable in
+   cplx as staged.
+
+Why that one finding blocks. A commit-ready recommendation tells the human the
+staged work is ready for the commit they own. Here that commit cannot run: the
+reviewer executed the same program the installed pre-commit hook executes,
+against the staged blobs, and it answered `Commit blocked` with five locations.
+Recommending commit-ready while knowing the commit fails at the gate would be
+recommending an action that cannot succeed. The mechanical checker returns
+`ready: true` because it does not consult that hook, so the two statements have
+come apart, and naming that difference is the useful thing this round can do.
+
+The finding splits into a writer action and a human decision, and the answer
+keeps them separate rather than pretending one covers both. The staged harness
+line is the writer's to fix and is straightforward. The four transcript lines
+came from authored request text in an earlier step and in round 1 of this one;
+neither role may hand-edit a protocol transcript, so the writer's realistic move
+is to unstage that document, while sanitizing it is a human decision the effort
+will have to face because that document must eventually be committed.
+
+An honest correction about this review rather than the work: the staged harness
+line existed in round 1 and the round 1 answer did not report it. That round's
+sanitization check looked at the authored request text and not at the staged
+harness, and steps 1 to 3 had been checked more thoroughly than step 4 was. The
+finding is recorded now, attributed to the earlier gap rather than presented as
+something new in this round.
+
+What the round 2 repairs earned, since a review that only reports faults teaches
+nothing. The release contract now refuses early and names the file and the
+document it needs, wired at four separate entries, with the exact fixture this
+reviewer asked for running the real provisioner. The SQLite exemption restores
+the diagnostic's inherited behavior and is asserted with publication enabled.
+The authorized helper exception now has both its accounting case and its refusal
+case. The declared application command forces an app-scoped walk, closing a
+weakness raised in three consecutive rounds. And the two timing repairs are real
+work, not a relaxed gate: the floor file, exclusions and project configuration
+are untouched and unstaged, the polluted-PDF case now tests its exact structural
+threshold, and the suite time fell from 4m 45s to 3m 39s.
+
+What this answer does not claim: no final archive, no candidate qualification,
+no Jenkins or Debian acceptance, no publication, no adoption and no umbrella
+completion. Those remain Step 6's work after Step 5 builds the archive, and this
+answer authorizes no commit in either repository.
+
+### Final reviewer decision for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-2 -->
+
+## Round 2 by human - Step 4 - escalation
+
+- Recorded: 2026-09-17T19:33:33+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: escalation
+
+### Transcript redaction decision for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+Round 2 independently passed all three mandatory validation commands and
+accepted the earlier implementation repairs. It requested changes because the
+installed sensitive-content checker refused one fixture assertion and four
+older entries in the protocol-owned versioned transcript.
+
+The writer repaired and staged the fixture assertion without a private name.
+The fresh cumulative native Step 4 run passed in 53 seconds, including the
+same-venv check; all 20 native inputs match the retained snapshot. The companion
+application index is unchanged. The current staged sensitive-content check
+reports only the four earlier transcript entries, at lines 1811, 1874, 1890 and
+1961. The validation plan records Step 4 as incomplete while this gate remains.
+
+An ignored proposal applies only configured repository replacements to those
+four lines and passes the sensitive-pattern scan. No direct transcript edit,
+unstaging, rule relaxation, commit or publication has been performed. The
+requestor is stopping automation for the human decision the reviewer requested:
+authorize applying the prepared redactions as an exception to protocol-owned
+transcript editing, then resume the existing review workflow. The retained
+round 2 answer and all implementation evidence remain authoritative.
+
+<!-- review-entry-id: escalation-round-2 -->
+
+## Round 2 by human - Step 4 - human-reclaim
+
+- Recorded: 2026-09-17T19:50:36+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: human-reclaim
+
+### Approved transcript correction for step 4 tools-archive-rebuild (exchange 1) (round 2)
+
+The requestor paused this intact exchange solely for a human decision about
+four sensitive entries in the protocol-owned transcript. The human answered
+"Go ahead" to applying the prepared redactions and resuming review. This
+authorizes the explicit transcript-edit exception and continuation of the
+stopped handoff, not a commit or any change to the sensitive-content rules.
+
+The requestor applied exactly the approved proposal to lines 1811, 1874, 1890
+and 1961, using the configured repository replacements. Source and proposal
+SHA-256 guards bound the action to the reviewed bytes. The original is retained
+under the ignored artifact home. No other transcript text was changed by the
+writer. The round 2 answer remains authoritative, including its requested
+fixture repair, and the fresh native run passed in 53 seconds.
+
+Resume the same exchange and round after this human decision. The requestor
+will verify the complete staged sensitive-content gate, consume the retained
+changes-requested answer with changed-work evidence, and publish round 3 for
+the independently running reviewer. No counterpart session is created or
+contacted, and no commit is authorized by this decision.
+
+<!-- review-entry-id: human-reclaim-round-2 -->
+
+## Round 3 by requestor - Step 4
+
+- Recorded: 2026-09-17T19:57:59+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 tools-archive-rebuild (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 4
+Review round: 3
+
+### Code review evidence for step 4 tools-archive-rebuild (round 3)
+
+request_index_tree: 293180b1662f45d0b486aeb38bfd2bc241ebe047
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 4 --python /usr/bin/python3 --app-repo ../app (sources: plan)
+- powershell -ExecutionPolicy Bypass -File .reviews/a.step4.app-walk.ps1 (sources: plan)
+- powershell -ExecutionPolicy Bypass -File .reviews/a.step4.sensitive-gate.ps1 (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: test(tools): qualify candidate agent integration
+group 1 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 1 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2: docs(tools-archive-rebuild): record step 4 validation
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 2 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 4 tools-archive-rebuild (round 3)
+
+Yes. Step 4 has been fully implemented within the plan's fixture and pipeline
+wiring boundary. Final archive production belongs to Step 5; actual Jenkins,
+Debian and final native candidate acceptance belong to Step 6.
+
+Round 2 independently passed the shell lint floor, cumulative native runner and
+forced application walk, and accepted every earlier implementation repair. Its
+only remaining finding was the staged sensitive-content gate. The writer has
+now repaired the fixture assertion and applied the human-approved four-line
+transcript correction. The complete staged set passes the installed checker.
+No reviewer-authored repair is present and no sensitive rule was relaxed.
+
+The fresh cumulative native rerun after the fixture repair passed in 53 seconds:
+33 agent shell cases plus ABI, wheel, test-evidence and plugin fixtures; 49 D10
+cases; 16 record, 15 transport and six publication tests; 25 current SQLite
+controls and 254 historical closure cases. Shell lint and adapter compilation
+passed. All 20 native source inputs match that tested snapshot. The revised
+same-venv assertion passed and retains its exact prefix, interpreter version
+and matching application-directory/name checks.
+
+The application index was recaptured as
+a130e310e2abc8690abf7766c8a6efd998346e32, identical to round 2. Its independently
+forced round 2 walk passed with fail=0, warn=3, xfail=8, cov=100 and outliers=0
+in 3m 39.3s. The writer's prior forced walk passed in 4m 54.8s, with the same
+counts. No application file changed for this round, so that evidence remains
+applicable; the reviewer must still execute its declared mandatory set.
+
+The CI adapters are outside the app coverage source, src/pdfss. Every top-level
+adapter symbol has a fixture, package or CLI reference. No unit-tested class
+changed, no new domain dependency was added, and new Python files remain below
+650 physical lines. Inventory and manifest processing stay linear. Integration
+timing repairs retain every assertion and all coverage/duration gates.
+
+Validation execution notes:
+
+- Cplx is a Bash project. Its .review-validation shell lint floor and native
+  cumulative runner apply; it has no pytest project.
+- The declared native command is bash docs/v0.27.0/verify.tools-archive-rebuild.sh
+  --step 4 --python /usr/bin/python3 --app-repo ../app. On this Windows checkout,
+  .reviews/a.step4.native-gate.ps1 creates an owned native snapshot with exactly
+  that layout, overlays current sources and runs the command, including lint.
+  Inspect its transport driver first and retain the full remote log.
+- .reviews/a.step4.app-walk.ps1 resolves the private app checkout, sets PRJ_DIR
+  explicitly and invokes the absolute shared launcher with ghog day --force.
+  Let its forced walk finish without a concurrent second execution.
+- The new request addition, .reviews/a.step4.sensitive-gate.ps1, runs the exact
+  installed pre-commit sensitive checker against this Windows checkout's index.
+  Run it locally, where the hook and its configured rules live. Inspect first.
+- .reviews/a.step4.app-context.json holds the private locator. Use app: labels
+  in authored/versioned text. Companion application paths and index identity
+  are separate evidence; request_index_tree identifies cplx only.
+
+Retained details and source hashes are in
+docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt. No commit,
+publication, final candidate qualification or umbrella completion is authorized
+or claimed by the human's transcript correction approval.
+
+### Implementation report for step 4 tools-archive-rebuild (round 3)
+
+Step 4 wires the main application's candidate and ordinary release provisioning
+to independent verifier controls, one selected prefix, exact wheel capture,
+blocking ABI observations and a full test/coverage acceptance entry. It removes
+the rsync, tools-patch and wheel-mutation interims while retaining the permitted
+raw-Python bypass pending wrapper acceptance. The SQLite diagnostic reuses
+verified transport and remains independently selectable.
+
+The repaired release contract fails at preflight if tools/tools.verification
+is missing. ci/TOOLS-VERIFICATION.md explains how the job owner delivers that
+independent pin. Candidate publication remains suppressed; the SQLite-only
+format accepts the pre-existing publication-enabled diagnostic use case.
+
+Cplx's cumulative native fixtures cover those entry points and negative
+observations, including the authorized helper interpreter exception. Two
+application integration test timing repairs were needed to clear the mandatory
+authoring walk. They change setup/input size and preserve all assertions and
+real integration paths. No application production behavior changed for timing.
+
+Step 6 still owns live Jenkins/Debian and final RHEL candidate acceptance after
+the Step 5 rebuild. No final candidate, publication, release-pin adoption or
+umbrella completion is claimed by this implementation.
+
+### Change summary for step 4 tools-archive-rebuild (round 3)
+
+This step spans cplx and the separate application checkout declared by the
+plan. The protocol's request_index_tree fixes the cplx index only. Resolve
+the companion app root from .reviews/a.step4.app-context.json; keep its private
+locator out of authored review text and the versioned transcript.
+
+Cplx starting HEAD: 863933eeedb21bac5bfa7a662d1a0d25a048a079.
+
+Cplx staged paths:
+
+- docs/v0.27.0/fixtures.tools-release-agent.py
+- docs/v0.27.0/verify.tools-archive-rebuild.sh
+- docs/v0.27.0/verify.tools-release-agent.sh
+- docs/v0.27.0/evidence.tools-archive-rebuild.step4-validation.txt
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+- docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+
+Cplx root a.commit keeps two groups:
+
+1. test(tools): qualify candidate agent integration (the three fixtures/runners).
+2. docs(tools-archive-rebuild): record step 4 validation (evidence, validation
+   and the versioned review record).
+
+App starting HEAD: 489bbbde741328ab7953e2338a29952cd1a9f18c.
+App index captured with capture-index-tree: a130e310e2abc8690abf7766c8a6efd998346e32.
+Retained binary patch: .reviews/a.step4.app-staged.patch.
+Patch SHA-256: a2f05e321c0286fb2b0d55146fd0d69152f877a6f2caf86f3cb86e14e6c1b6de.
+Retained companion commit plan: .reviews/a.step4.app-commit-plan.md.
+
+App staged paths:
+
+- Jenkinsfile
+- ci/Jenkinsfile.diagnostics
+- ci/Jenkinsfile.relocation
+- ci/TOOLS-VERIFICATION.md
+- ci/__init__.py
+- ci/provision_toolchain.sh
+- ci/tools_abi_acceptance.sh
+- ci/tools_abi_scan.py
+- ci/tools_agent_identity.sh
+- ci/tools_candidate.sh
+- ci/tools_candidate_bundle.py
+- ci/tools_test_acceptance.sh
+- ci/tools_test_evidence.py
+- ci/tools_test_plugin.py
+- ci/tools_wheel_capture.py
+- src/pdfss/tests/integration/adapters/inbound/sentinel_service/test_sentinel_auth_lifecycle/test_sentinel_auth_lifecycle_tdd.py
+- src/pdfss/tests/integration/application/handlers/test_pdf_processing_handler_polluted_pdf/_synthetic_polluted_samples.py
+- src/pdfss/tests/integration/application/handlers/test_pdf_processing_handler_polluted_pdf/test_pdf_processing_handler_polluted_pdf_acceptance_tdd.py
+- tools/sqlite_candidate_capture.sh
+
+App root a.commit keeps two groups:
+
+1. test(perf): shorten two integration test calls (the three integration files).
+2. ci(tools): qualify pinned candidate archives (the 16 CI/tool paths).
+
+The existing tools/publish.mode was already off and is unchanged. Assess
+companion repairs in the app index and name them with app: labels. Commit plans
+are prepared for review; no commit has been authorized or executed.
+
+### Human guidance and writer response for step 4 tools-archive-rebuild (round 3)
+
+Human guidance:
+
+#### Approved transcript correction for step 4 tools-archive-rebuild (round 3)
+
+The requestor paused this intact exchange solely for a human decision about
+four sensitive entries in the protocol-owned transcript. The human answered
+"Go ahead" to applying the prepared redactions and resuming review. This
+authorizes the explicit transcript-edit exception and continuation of the
+stopped handoff, not a commit or any change to the sensitive-content rules.
+
+The requestor applied exactly the approved proposal to lines 1811, 1874, 1890
+and 1961, using the configured repository replacements. Source and proposal
+SHA-256 guards bound the action to the reviewed bytes. The original is retained
+under the ignored artifact home. No other transcript text was changed by the
+writer. The round 2 answer remains authoritative, including its requested
+fixture repair, and the fresh native run passed in 53 seconds.
+
+Resume the same exchange and round after this human decision. The requestor
+will verify the complete staged sensitive-content gate, consume the retained
+changes-requested answer with changed-work evidence, and publish round 3 for
+the independently running reviewer. No counterpart session is created or
+contacted, and no commit is authorized by this decision.
+
+Writer response:
+
+All round 2 findings are accepted; there is no disagreement. The reviewer made
+no repair. The writer made the following corrections:
+
+- Removed the private name from the same-venv fixture assertion. The check
+  still requires the exact prefix, interpreter version and matching application
+  directory/name. The fresh cumulative native run passed in 53 seconds,
+  including this assertion, all 33 agent cases and the inherited gates.
+- Prepared a proposal applying the configured sensitive replacements to exactly
+  four older transcript lines: 1811, 1874, 1890 and 1961. The human explicitly
+  approved that correction and resuming the stopped handoff. Source and proposal
+  SHA-256 guards verified the approved bytes; the original stays in ignored
+  evidence. The protocol recorded the approval when resuming round 2.
+- Retained the corrected transcript in the staged documentation group. The
+  exact installed pre-commit sensitive checker now passes the complete staged
+  set. No rule, hook, gate, exclusion or commit boundary was weakened.
+- Updated the validation plan and retained evidence to reflect the repaired
+  commit blocker. Both commit plans retain their existing two-group structure.
+  The companion app index is unchanged from round 2.
+
+The user approved redaction and review continuation only. No commit is
+authorized. The independently running reviewer remains the counterpart; the
+requestor did not create, invoke or contact a reviewer session.
+
+### Reviewer focus for step 4 tools-archive-rebuild (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-3 -->
+
+## Round 3 by reviewer - Step 4
+
+- Recorded: 2026-09-17T20:24:52+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+Baseline index tree: 293180b1662f45d0b486aeb38bfd2bc241ebe047
+
+Assessed index tree: 293180b1662f45d0b486aeb38bfd2bc241ebe047
+
+### Implementation check for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+Result:
+
+Yes. Step 4 has been fully implemented.
+
+Both round 2 items are closed, and the reviewer verified each by running the
+repaired artifacts rather than by reading the writer's account.
+
+- The staged sensitive-content gate is clean. The reviewer ran the actual
+  installed hook script against this checkout's index, which is the gate a
+  commit will meet, and it reported `Staged sensitive-content gate: clean` with
+  exit 0. Cross-checked with the same checker module invoked directly, the one
+  that returned five locations and `Commit blocked` in round 2: also exit 0 now.
+- The staged harness hit is repaired, and the replacement is stronger than the
+  literal it removed. Instead of matching a hardcoded path containing the
+  private application name twice, the fixture now checks the exact prefix, the
+  path shape, the pinned `3.13.15` interpreter version, and that the project
+  directory name equals the venv name suffix, which is the invariant the literal
+  encoded. `PASS same-venv` appears in the reviewer's own native log, alongside
+  the neighbouring `one-interpreter` and `ambiguous-interpreter` cases.
+- The four transcript entries were corrected with the repository's own declared
+  replacements rather than an improvised edit: the private application name, the
+  account name and the home path now appear as the generic values those rules
+  define, and one entry uses the `app:` label convention this effort uses
+  elsewhere. The surrounding review sentences are intact, so no review history
+  was rewritten in substance. The reviewer also searched the whole working-tree
+  transcript, including this round's freshly appended request text, and it is
+  clean, so the authoring practice is fixed and not only the past lines.
+- The writer added the staged sensitive check to the declared validation set as a
+  fourth mandatory command, pointing at the installed hook. That turns a check
+  this reviewer had to think of into one the declaration now requires.
+
+One limit worth stating rather than glossing: the request says the transcript
+correction was human-approved. A reviewer cannot verify that approval, and this
+answer does not assert it. What the reviewer can and did verify is the effect,
+that the substitutions follow the repository's declared rules and preserve the
+content. The approval itself is visible to the human at the convergence gate.
+
+Everything assessed in rounds 1 and 2 remains verified and unchanged: the
+retirements are complete and fixture-asserted, the release contract refuses
+early at four entries naming the file and document it needs, the SQLite
+verification-only format is exempt from candidate publication suppression, the
+authorized helper exception has both its accounting and refusal cases, and the
+blocking ABI and full-test gates enforce what the plan specifies.
+
+Architecture: responsibilities stay divided across transport, bundle validation,
+wheel selection, ABI observation, test hooks and evidence validation; the shared
+ELF reader remains the only ABI interpreter; no application domain code is
+touched. Nothing needs fixing.
+
+Performance: work is linear in its inputs with each root walked once, and the
+instrumented measurements are unchanged from earlier rounds. The two integration
+timing repairs remain legitimate: the reviewer re-confirmed that the duration
+floor file still reads 1.0, no exclusions file exists, and neither it nor the
+project configuration is staged. No performance issue needs addressing.
+
+Unit test coverage: no application class changed in this round. The new CI
+adapters remain outside the application's measured `src/pdfss` scope, which the
+documents state rather than assume, and both coverage gaps named in round 1 are
+closed by fixtures. No unit-tested class below 100% needs completing, and no
+top-level symbol outside the coverage gate is unreferenced.
+
+Feature integrity: candidate transport, bundle refusals, ABI refusals, the test
+gate, the SQLite diagnostic and the release preflight are all exercised and
+pass, and ordinary application publication keeps its existing path. Nothing is
+impaired.
+
+Scope: no final archive, candidate qualification, publication, release-pin
+adoption or umbrella completion is claimed. Step 5 builds the archive and Step 6
+owns the live Jenkins, Debian and native acceptance.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 4 rows were checked against the template and against this
+reviewer's own verdict, and they now agree with it, so there was nothing to
+correct:
+
+- The status sentence is exactly `Yes. Step 4 has been fully implemented.`,
+  followed by a blank line and a short prose summary, and this round's
+  assessment reaches the same conclusion.
+- No stale `Missing work for Step 4` section remains, which is correct now that
+  the round 2 finding is closed.
+- Goal, improvement expectations, what was implemented, new types and classes,
+  architecture, performance, unit test coverage and feature integrity are all
+  present and filled, each check section carries its required closing phrase,
+  and the coverage section names the measured scope plus the second phrase about
+  symbols outside it.
+- The document-level line correctly remains `No, it is not implemented.`, since
+  Steps 5 through 7 are pending. Flipping it here would be wrong.
+
+Because no validation-plan path was edited, no pre-repair blob was recorded and
+no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+All four resolved mandatory commands were run by the reviewer in this round.
+Three passed first time; the application walk needed two runs, and both are
+recorded below rather than only the passing one.
+
+Project floor: `lint_shell: 58 tracked scripts`, `lint_shell: clean`, exit 0.
+
+Staged sensitive-content gate, new in this round's declaration: exit 0,
+`Staged sensitive-content gate: clean`. The wrapper runs the installed hook
+script itself, so this is the gate a commit meets rather than an approximation.
+The reviewer also ran the checker module directly, the way it was invoked in
+round 2 when it reported five locations and `Commit blocked`, and it now returns
+exit 0 as well.
+
+Native cumulative runner at `--step 4` on RHEL 9.8 with the independent
+`/usr/bin/python3` 3.9.25: `validation exit=0 elapsed=52s`. The reviewer copied
+the whole remote log back and confirmed inside it:
+
+- `Independent interpreter: /usr/bin/python3 3.9.25`.
+- `PASS one-interpreter`, `PASS same-venv` and `PASS ambiguous-interpreter`,
+  which is the repaired assertion and its neighbours.
+- `Agent shell fixtures: 33 cases passed; parser and wiring fixtures passed`.
+- `D10 fixtures: 49 cases passed`.
+- `Ran 16 tests` / `OK`, `Ran 15 tests` / `OK`, `Ran 6 tests` / `OK`.
+- `SQLite closure: 25 checks passed` and the frozen verdict with `failures 0`.
+
+Application walk, run as declared through the app-scoped wrapper that forces the
+walk, with nothing else running:
+
+- First run: `fail=0 warn=3 xfail=8 cov=100 outliers=2 excluded=0 exit=8`, full
+  suite 6m 47.5s. The two outliers were
+  `test_select_done_candidate_is_stable_under_candidate_permutations` at 1.08s
+  and `test_literal_filter_wrapper_matches_python_re_search` at 1.04s, against a
+  1.00s floor.
+- Second run, same bytes, nothing else running: `fail=0 warn=3 xfail=8 cov=100
+  outliers=0 excluded=0 exit=0`, objective reached, full suite 3m 25.9s.
+
+The reviewer concluded the first result was measurement variance rather than a
+defect, on evidence rather than convenience: the application index recomputed to
+`a130e310e2abc8690abf7766c8a6efd998346e32`, byte-identical to the tree that
+passed round 2 with zero outliers in 3m 39.3s; neither outlier test is staged by
+this step, and both are property-based tests; both exceeded the floor by 4 and 8
+percent while the next call sits at 0.99s; and the failing run took roughly
+twice the wall-clock of the passing runs on a workstation that is also running
+an interactive terminal, a chat client, a browser and other agents. The tool's
+own diagnostic says a call this close to the floor flaps on the next jitter.
+
+The passing run is therefore evidence about the same bytes, not a different
+tree, and the tests involved are outside this step's staged set.
+
+Independent identity binding of the evidence to the reviewed bytes: the Step 4
+capture records the repaired harness as
+`b479cfe14bf1815a32ecea5c908ac8a09cf605dd4c766d49badeb4114b1638ce` at 208 lines
+and explicitly marks that row as superseding its round 2 row, which is accurate
+bookkeeping rather than an ambiguous duplicate. The reviewer recomputed it and
+the unchanged fixture module, and both match. The companion staged tree matches
+its recorded identity and no application file changed in this round.
+
+Coverage limits stated rather than assumed: the application gate measures
+`src/pdfss`, so its 100% says nothing about the CI adapters, whose exercise is
+the native fixtures and static references.
+
+Process note, correcting this reviewer's own round 2 slip: the index baseline,
+umbrella digest and validation-state baseline for this round were all captured
+and the manifest written before any assessment, in the prescribed order.
+
+### Resolved validation set and sources for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+The reviewer ran the union of the request validation set and the current
+resolver set. All four commands were executed in this round and all four pass.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Re-resolved from the
+  versioned declaration and run through the project environment so the pinned
+  ShellCheck resolved. Result: 58 tracked scripts, clean, exit 0.
+- `bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 4 --python
+  /usr/bin/python3 --app-repo ../app`, source `plan`. Run on the native RHEL
+  host through the home-local driver, which the reviewer inspected first as the
+  request asks. Result: `validation exit=0 elapsed=52s`.
+- `powershell -ExecutionPolicy Bypass -File .reviews/a.step4.app-walk.ps1`,
+  source `plan`. App-scoped and forcing the walk. Result: passed on the second
+  run with `cov=100` and no outliers; both runs are recorded in the pre-repair
+  section with the reasoning for treating the first as measurement variance.
+- `powershell -ExecutionPolicy Bypass -File .reviews/a.step4.sensitive-gate.ps1`,
+  source `request`. New in this round, and it is the check this reviewer had to
+  supply itself in round 2, now part of the declaration. It runs the installed
+  hook script against the index. Result: clean, exit 0.
+
+The set has improved steadily across this step: round 1 declared a bare
+`ghog day` with no repository context that measured nothing, and the set now
+names an app-scoped forcing wrapper plus the commit gate that actually decides
+whether staged work can be committed.
+
+Caller evidence retained inside the artifact home, not in versioned notes:
+`a.code-review.s4r3-native-validation.log` (the full remote log),
+`a.code-review.s4r3-app-walk.log` and `a.code-review.s4r3-app-walk2.log` (both
+application runs), and the two independent commit-plan results.
+
+### Resolver drift and direction for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+No drift in either direction.
+
+Re-resolving the project floor from the versioned `.review-validation` yields
+the same single `project` command the request carries, and the three additions
+parse through the current resolver contract, so the union equals both sets.
+
+One addition is new since round 2: the staged sensitive-content gate, labelled
+`request`. Additions cannot subtract from the floor, and this one widens what
+the review must prove rather than narrowing it, which is the direction the
+resolver's no-removal rule protects. The declaration file itself was correctly
+left alone in every round of this step.
+
+### Repository state around validation for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher rather than from equivalent Git commands.
+
+- Request-time index tree `293180b1662f45d0b486aeb38bfd2bc241ebe047` equals the
+  baseline captured at entry and the live index captured after all four
+  validation runs, both application walks and the implementation check.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `0218245242f1ccec3561ef41f23322e0c6c2f3a12e69981a8fc1c9698e769fc6`,
+  the same digest observed in every round of this effort. No umbrella row was
+  completed from reviewer mode, correctly, with Steps 5 to 7 open.
+- Validation-state comparison over the ordered path set, holding all six staged
+  step paths and the file named by the project command: `acceptable: true` with
+  empty `tracked_paths`, `untracked_paths` and `ignored_paths`.
+- Both working trees match their entry state: six staged paths here, with the
+  versioned transcript staged and further modified because the protocol appended
+  this round's request after the writer staged it, and nineteen staged paths in
+  the companion checkout with nothing else. The companion index recomputes to
+  its recorded identity and no application file changed in this round.
+- This round produced no reviewer residue. The native run executes inside an
+  owned host snapshot, the two application walks write only ignored logs in that
+  repository, and both sensitive-content invocations are read-only.
+- Ordering was correct this round: the index baseline, umbrella digest and
+  validation-state baseline were captured and the manifest written before any
+  assessment, which corrects the round 2 sequence where the validation baseline
+  followed the read-only assessment.
+- Reviewer-authored evidence stayed inside the artifact home as ignored `a.*`
+  files, so none of it became a tracked side effect of this review.
+
+### Repair inventory for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+`a.commit` remains accurate in both repositories and is now executable; the
+reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` reruns against the received
+state: cplx `state: valid`, `ready: true`, exit 0, no diagnostics, six staged
+paths in two groups; the companion checkout likewise `valid`, `ready`, exit 0,
+nineteen staged paths in two groups.
+
+- cplx group 1, `test(tools): qualify candidate agent integration`: the fixture
+  module, the agent harness and the cumulative runner.
+- cplx group 2, `docs(tools-archive-rebuild): record step 4 validation`: the
+  Step 4 capture, the validation plan and the versioned review transcript.
+- Companion group 1, `test(perf): shorten two integration test calls`, before
+  the CI group, which is the right order since the authoring walk must pass for
+  the CI group's evidence to exist.
+- Companion group 2, `ci(tools): qualify pinned candidate archives`.
+
+Ordering is least to most dependent in both plans, membership covers every
+staged path exactly once, and each subject is a conventional single-purpose
+line whose type matches its content.
+
+The gap this reviewer reported in round 2 is closed. Keeping the transcript in
+cplx group 2 is now safe, because the content it carries passes the installed
+sensitive-content hook: the reviewer ran that hook against the index and it
+reported clean. Mechanical readiness and an executable commit now agree, which
+is the condition that was missing when `commit-plan-check` alone said ready.
+
+### Findings and boundaries for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+No rework is required for Step 4, and nothing in the staged content needs to
+change before the human decides.
+
+Both round 2 items are closed, and the way they were closed is worth recording:
+the harness assertion was strengthened rather than merely sanitized, the
+transcript correction used the repository's own declared replacements instead of
+an improvised edit, and the staged sensitive gate was added to the declared
+validation set so the next round proves it automatically.
+
+Two items for the human rather than the writer:
+
+- The transcript correction is described as human-approved. This reviewer cannot
+  verify an approval and does not assert one; it verified the effect, that the
+  substitutions match the declared rules and preserve the review content. If
+  that approval is what the human intended, nothing further is needed.
+- The application suite sits very close to its 1.00s duration floor. In this
+  round's first walk two property-based calls measured 1.08s and 1.04s, with the
+  next at 0.99s, and the same class of flap cost this reviewer a re-run in an
+  earlier step as well. Neither test belongs to this step, so it is not Step 4's
+  defect, but on a shared interactive workstation this gate will keep failing at
+  random. The tool's own guidance applies: shorten those calls below the floor
+  with margin, or accept them at their measured time through the documented
+  exclusion, rather than raising the floor.
+
+One standing item, unchanged and not driving a round: the project root still
+holds a large accumulation of earlier review scratch from this step's previous
+attempts. This round's own files are placed correctly in the artifact home, so
+this is cleanup of older material.
+
+When the exchange reaches the human gate, the registered choices are "Rework and
+review again" and "Commit". The commit decision belongs to the human, not to
+this reviewer and not to the requestor.
+
+### Decision rationale for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+The recommendation is commit-ready, and it is advisory only: it does not
+authorize a commit in either repository.
+
+All six readiness-floor results pass:
+
+1. Identity. Exact agreement in both repositories, with the cplx request index
+   tree matching the live index at entry and at publication, and the companion
+   tree and HEAD matching their recorded identities.
+2. Completeness. Step 4's fixture and wiring boundary is met, and the two items
+   that held the previous rounds open are closed and verified by running the
+   repaired artifacts.
+3. Validation and coverage. All four resolved commands were run and pass,
+   including the staged commit gate that this reviewer had to supply itself in
+   round 2 and that the declaration now requires.
+4. Staged attribution. No reviewer repair, so nothing is attributed to it. Both
+   trees hold only their staged sets and this round left no residue.
+5. Unresolved findings. None. The round 2 finding is closed and no new one
+   arose.
+6. `a.commit`. Mechanically valid in both repositories and, unlike round 2, now
+   executable: the installed sensitive-content hook reports the staged set clean.
+
+No substantive repair was made in this round, so the recommendation is not
+disqualified by the same-round rule.
+
+The one judgment call in this round was the application walk, and it is recorded
+rather than smoothed over. Its first run exited 8 on two duration outliers of
+1.08s and 1.04s against a 1.00s floor, in 6m 47s. The reviewer re-ran it once,
+with nothing else running, and it reached its objective with zero outliers in
+3m 25.9s. The failure was treated as measurement variance on evidence, not on
+preference: the application index recomputed byte-identical to the tree that
+passed round 2 with zero outliers in a comparable time, neither outlier test is
+staged by this step, both are property-based, both exceeded the floor by single
+-digit percentages while the next call sits at 0.99s, and the failing run took
+about twice the wall-clock of both passing runs on a workstation that is also
+running a terminal, a chat client, a browser and other agents. The tool itself
+warns that a call this close to the floor flaps on the next jitter. Both runs
+are reported, and the standing fragility is passed to the human as an
+observation about the application suite rather than as a Step 4 defect.
+
+What this reviewer verified rather than accepted, across the three rounds of
+this step: the retirements are complete and fixture-asserted; the release
+preflight refuses early at four entries and its fixture runs the real
+provisioner; the SQLite exemption is asserted with publication enabled; the
+authorized helper exception has both accounting and refusal cases; the test gate
+enforces full selection, active plugins, guarded-suite execution and the 100%
+threshold, with its option spelling confirmed against the real interpreter
+rather than inferred from source; the timing repairs changed inputs and fixture
+scope while every gate file stayed untouched and unstaged; and every recorded
+hash and line count matches across both repositories, with the superseding row
+for the repaired harness marked as such.
+
+One limit this answer deliberately does not claim: the request describes the
+transcript correction as human-approved, and a reviewer cannot verify an
+approval. The effect was verified, that the substitutions follow the
+repository's declared rules and leave the review content intact, and the
+approval itself is the human's to confirm at the gate.
+
+What this answer does not claim: no final archive exists, none was built,
+qualified, published or adopted, and no umbrella row was completed. Step 5 owns
+the rebuild and Step 6 the live Jenkins, Debian and native acceptance.
+
+### Final reviewer decision for step 4 tools-archive-rebuild (exchange 1) (round 3)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4-round-3 -->
+
+## Round 3 by human - Step 4 - human-confirmation
+
+- Recorded: 2026-09-17T20:50:07+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-3 -->
