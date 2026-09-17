@@ -1,0 +1,317 @@
+{
+    "schema":  "tools-backend-diagnostic/1",
+    "captured_date":  "2026-09-17",
+    "verdict":  "incomplete: inherited commit-failure postcondition is not established",
+    "target":  "configured corporate hosted Maven releases backend; private identifiers omitted",
+    "credentials":  "existing Maven release-server entry; identity and secrets omitted",
+    "source_tag":  "release-3.18.0-01",
+    "source_tag_object":  "c8def60197614186fa30a83753bf146395009d54",
+    "payload":  {
+                    "description":  "gzip of an empty 1024-byte tar archive",
+                    "bytes":  29,
+                    "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                },
+    "source_captures":  [
+                            {
+                                "name":  "MavenFacetImpl",
+                                "url":  "https://github.com/sonatype/nexus-public/blob/release-3.18.0-01/plugins/nexus-repository-maven/src/main/java/org/sonatype/nexus/repository/maven/internal/MavenFacetImpl.java",
+                                "sha256":  "372d919a7c156f391a03568ccdc1d601d72319ce04755aecd95a0ff85273e632"
+                            },
+                            {
+                                "name":  "MavenUploadHandler",
+                                "url":  "https://github.com/sonatype/nexus-public/blob/release-3.18.0-01/plugins/nexus-repository-maven/src/main/java/org/sonatype/nexus/repository/maven/MavenUploadHandler.java",
+                                "sha256":  "bcccb6209bcaf692822a1cc494ed719c4d3645902d81c4f2fad60ce51de0d844"
+                            },
+                            {
+                                "name":  "StorageTxImpl",
+                                "url":  "https://github.com/sonatype/nexus-public/blob/release-3.18.0-01/components/nexus-repository/src/main/java/org/sonatype/nexus/repository/storage/StorageTxImpl.java",
+                                "sha256":  "cd446cac3edc3348359bddbffb8b103c00f7b3059a734bb271b37568c524e067"
+                            },
+                            {
+                                "name":  "UploadManagerImpl",
+                                "url":  "https://github.com/sonatype/nexus-public/blob/release-3.18.0-01/components/nexus-repository/src/main/java/org/sonatype/nexus/repository/upload/internal/UploadManagerImpl.java",
+                                "sha256":  "fab12431aaf284d1fa30413d8d864a460a9aaee7c93c46151a9261bc3bc921a9"
+                            }
+                        ],
+    "diagnostics":  [
+                        {
+                            "version":  "probe-20260917-001",
+                            "mode":  "abort",
+                            "invocation_exit":  0,
+                            "source_sha256":  "51cac5fa683d1c65ad9972754c1989c777a088f50bfbcbc432b50ba9d08a94b8",
+                            "observations":  [
+                                                 {
+                                                     "probe":  "before-begin",
+                                                     "utc":  "2026-09-17T05:46:48.8803032Z",
+                                                     "http":  404,
+                                                     "seconds":  0.28992829999999997
+                                                 },
+                                                 {
+                                                     "probe":  "begin-interim",
+                                                     "utc":  "2026-09-17T05:46:49.0737819Z",
+                                                     "http":  100,
+                                                     "seconds":  0.1562636
+                                                 },
+                                                 {
+                                                     "probe":  "after-begin",
+                                                     "utc":  "2026-09-17T05:46:49.0995977Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0247638
+                                                 },
+                                                 {
+                                                     "probe":  "write-without-terminator",
+                                                     "utc":  "2026-09-17T05:46:49.1251253Z",
+                                                     "http":  null,
+                                                     "seconds":  0.0016918,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "after-write",
+                                                     "utc":  "2026-09-17T05:46:49.1556008Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0244973
+                                                 },
+                                                 {
+                                                     "probe":  "abort-connection",
+                                                     "utc":  "2026-09-17T05:46:49.1675425Z",
+                                                     "http":  null,
+                                                     "seconds":  0.0102524
+                                                 },
+                                                 {
+                                                     "probe":  "after-abort",
+                                                     "utc":  "2026-09-17T05:46:49.1934850Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0247352
+                                                 }
+                                             ]
+                        },
+                        {
+                            "version":  "probe-20260917-001",
+                            "mode":  "commit-and-collision",
+                            "invocation_exit":  0,
+                            "source_sha256":  "44feded30ce55145827d132fc98f7372fffeb31dab6420f7a843c55deda5b17f",
+                            "observations":  [
+                                                 {
+                                                     "probe":  "before-begin",
+                                                     "utc":  "2026-09-17T05:48:57.8485531Z",
+                                                     "http":  404,
+                                                     "seconds":  0.1688191
+                                                 },
+                                                 {
+                                                     "probe":  "begin-interim",
+                                                     "utc":  "2026-09-17T05:48:58.0185220Z",
+                                                     "http":  100,
+                                                     "seconds":  0.1230318
+                                                 },
+                                                 {
+                                                     "probe":  "after-begin",
+                                                     "utc":  "2026-09-17T05:48:58.0449705Z",
+                                                     "http":  404,
+                                                     "seconds":  0.025282
+                                                 },
+                                                 {
+                                                     "probe":  "write-without-terminator",
+                                                     "utc":  "2026-09-17T05:48:58.0691196Z",
+                                                     "http":  null,
+                                                     "seconds":  0.0095919,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "after-write",
+                                                     "utc":  "2026-09-17T05:48:58.1001206Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0246958
+                                                 },
+                                                 {
+                                                     "probe":  "commit-final-response",
+                                                     "utc":  "2026-09-17T05:48:58.1460560Z",
+                                                     "http":  201,
+                                                     "seconds":  0.043455099999999997
+                                                 },
+                                                 {
+                                                     "probe":  "after-commit-get",
+                                                     "utc":  "2026-09-17T05:48:58.1889584Z",
+                                                     "http":  200,
+                                                     "seconds":  0.034462599999999996,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "immutable-collision-put",
+                                                     "utc":  "2026-09-17T05:48:58.2639196Z",
+                                                     "http":  400,
+                                                     "seconds":  0.0604455,
+                                                     "bytes":  0,
+                                                     "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                                                 },
+                                                 {
+                                                     "probe":  "after-collision-get",
+                                                     "utc":  "2026-09-17T05:48:58.2916970Z",
+                                                     "http":  200,
+                                                     "seconds":  0.025209199999999998,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "cleanup-ownership-get",
+                                                     "utc":  "2026-09-17T05:48:58.3193295Z",
+                                                     "http":  200,
+                                                     "seconds":  0.025398399999999998,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "cleanup-delete",
+                                                     "utc":  "2026-09-17T05:48:58.3620872Z",
+                                                     "http":  204,
+                                                     "seconds":  0.035882199999999996,
+                                                     "bytes":  0,
+                                                     "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                                                 },
+                                                 {
+                                                     "probe":  "after-cleanup",
+                                                     "utc":  "2026-09-17T05:48:58.3893850Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0248707
+                                                 }
+                                             ]
+                        },
+                        {
+                            "version":  "probe-20260917-002",
+                            "mode":  "lost-commit-response",
+                            "invocation_exit":  0,
+                            "source_sha256":  "7ecc8327d71a95804355c139c0024518f667637d57a5165de7f44ea3f7b2b3b3",
+                            "observations":  [
+                                                 {
+                                                     "probe":  "before-begin",
+                                                     "utc":  "2026-09-17T05:52:27.2192842Z",
+                                                     "http":  404,
+                                                     "seconds":  0.6350006
+                                                 },
+                                                 {
+                                                     "probe":  "begin-interim",
+                                                     "utc":  "2026-09-17T05:52:27.5972813Z",
+                                                     "http":  100,
+                                                     "seconds":  0.1950192
+                                                 },
+                                                 {
+                                                     "probe":  "after-begin",
+                                                     "utc":  "2026-09-17T05:52:27.6582462Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0515869
+                                                 },
+                                                 {
+                                                     "probe":  "write-without-terminator",
+                                                     "utc":  "2026-09-17T05:52:27.7547040Z",
+                                                     "http":  null,
+                                                     "seconds":  0.046211999999999996,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "after-write",
+                                                     "utc":  "2026-09-17T05:52:27.8181718Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0432264
+                                                 },
+                                                 {
+                                                     "probe":  "commit-response-deliberately-lost",
+                                                     "utc":  "2026-09-17T05:52:27.8783267Z",
+                                                     "http":  null,
+                                                     "seconds":  0.0475723,
+                                                     "response_read":  false,
+                                                     "client_outcome":  "unknown"
+                                                 },
+                                                 {
+                                                     "probe":  "after-lost-response-get",
+                                                     "utc":  "2026-09-17T05:52:27.9664289Z",
+                                                     "http":  200,
+                                                     "seconds":  0.0570764,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "cleanup-ownership-get",
+                                                     "utc":  "2026-09-17T05:52:28.0411353Z",
+                                                     "http":  200,
+                                                     "seconds":  0.0441822,
+                                                     "bytes":  29,
+                                                     "sha256":  "e88209825c45ba955b3923b755e433584e58c7c955f413a9a5f62cfb22a2b839"
+                                                 },
+                                                 {
+                                                     "probe":  "cleanup-delete",
+                                                     "utc":  "2026-09-17T05:52:28.1558040Z",
+                                                     "http":  204,
+                                                     "seconds":  0.10577589999999999,
+                                                     "bytes":  0,
+                                                     "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                                                 },
+                                                 {
+                                                     "probe":  "after-cleanup",
+                                                     "utc":  "2026-09-17T05:52:28.2274714Z",
+                                                     "http":  404,
+                                                     "seconds":  0.0631217
+                                                 }
+                                             ]
+                        }
+                    ],
+    "final_cleanup":  [
+                          {
+                              "probe":  "final-tools-head",
+                              "version":  "probe-20260917-001",
+                              "utc":  "2026-09-17T05:57:01.0952034Z",
+                              "http":  404,
+                              "seconds":  0.1944705
+                          },
+                          {
+                              "probe":  "final-pom-head",
+                              "version":  "probe-20260917-001",
+                              "utc":  "2026-09-17T05:57:01.1902919Z",
+                              "http":  404,
+                              "seconds":  0.0390869
+                          },
+                          {
+                              "probe":  "final-version-search",
+                              "version":  "probe-20260917-001",
+                              "utc":  "2026-09-17T05:57:01.2288589Z",
+                              "http":  200,
+                              "seconds":  0.033539,
+                              "asset_count":  0,
+                              "has_continuation":  false
+                          },
+                          {
+                              "probe":  "final-tools-head",
+                              "version":  "probe-20260917-002",
+                              "utc":  "2026-09-17T05:57:01.3042657Z",
+                              "http":  404,
+                              "seconds":  0.0241737
+                          },
+                          {
+                              "probe":  "final-pom-head",
+                              "version":  "probe-20260917-002",
+                              "utc":  "2026-09-17T05:57:01.3311398Z",
+                              "http":  404,
+                              "seconds":  0.0258137
+                          },
+                          {
+                              "probe":  "final-version-search",
+                              "version":  "probe-20260917-002",
+                              "utc":  "2026-09-17T05:57:01.3624564Z",
+                              "http":  200,
+                              "seconds":  0.030126999999999998,
+                              "asset_count":  0,
+                              "has_continuation":  false
+                          }
+                      ],
+    "final_cleanup_invocation_exit":  0,
+    "limits":  [
+                   "Response loss was deliberately injected before the client read final status.",
+                   "Independent read-back was available; read-back outage was not injected.",
+                   "HEAD checks measure configured-account asset visibility, not internal temporary-blob cleanup.",
+                   "No POM was uploaded; final POM HEAD requests returned 404.",
+                   "No concurrent writers, large archive or full adapter exercised.",
+                   "No server-issued durable stage handle observed."
+               ]
+}

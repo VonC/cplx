@@ -3,7 +3,7 @@
 No, it is not implemented.
 
 Track the seven steps in [the implementation plan](plan.v0.27.0.tools-archive-rebuild.md).
-This initial skeleton records no implementation check or runtime acceptance.
+Step 1 is checked below. Steps 2-7 and final-archive acceptance remain pending.
 
 ## File-based IO cost clarification
 
@@ -26,7 +26,13 @@ or Step 0 timeout/xfail gate is specified. Existing CI timeouts remain enforced.
 
 ### Analysis of Step 1 implementation state
 
-Not started. Step 1 is not implemented because the application adapter and actual backend capability proof are not implemented.
+Yes. Step 1 has been fully implemented.
+
+The application adapter implements private stdin streaming, abort and immutable
+commit, with the user-authorized mandatory exact-asset SHA-256 check when the
+commit response is missing or unusable. Live backend probes and native Linux
+process fixtures establish the scoped capability. The acceptance record retains
+the observations, cleanup, exact starting revisions and final source hashes.
 
 ### Goal for Step 1
 
@@ -34,31 +40,107 @@ Implement and prove the inherited private-stage, stdin-stream, abort and atomic-
 
 ### Step 1 improvement expectations
 
-Failures leave no public candidate; ordinary application publication remains intact.
+Pre-commit refusal leaves no public candidate. After commit intent, a missing
+reply requires read-back: matching bytes confirm success; inconclusive checks
+retain uncertainty and block automatic retry/adoption. Ordinary application
+publication remains intact. This reflects the 2026-09-17 owning-design
+resolution rather than the disproved blanket absence guarantee.
 
 ### What was implemented for Step 1
 
-_(empty — no check has taken place yet.)_.
+- `app:tools/tools_release_adapter.sh` implements all four callbacks and a
+  read-only reconciliation command. Separate HTTP and durable-state helpers
+  stream through an unfinished chunked TLS request and journal intent/digest
+  before its terminating chunk. No local archive buffering or production
+  DELETE is used.
+- `closure_publish.sh` retains descriptor-bound hashing and callback order,
+  while reporting an uncertain commit without claiming absence. The old
+  application `--with-tools` path refuses before remote work until Step 2.
+- The owning design/plan and this effort's design/plan record mandatory
+  read-back. Private backend identifiers and credentials remain out of notes.
+- Live probes demonstrated private write, abort/absence, commit visibility,
+  byte identity, immutable collision refusal and lost-response reconciliation.
+  All owned probe assets were removed and absence checked. The implemented
+  HTTP helper also exercised the real service; the full worker/gate ran against
+  isolated TLS on native Linux. These complementary proofs do not claim a live
+  whole-worker run, concurrent-client isolation or large-archive validation.
+- The cumulative runner passed in 33 seconds: shell floor, 15 integration tests
+  (11.244s), 25 current SQLite checks and 254 inherited publication controls.
+  The frozen inherited suite uses its hash-verified historical input pair,
+  following the previous effort's documented method. Production declarations
+  and the frozen harness remain unchanged.
+- The application `ghog day` ended 2026-09-17T08:42:25+02:00 with exit 0,
+  fail=0, warn=3, xfail=8, cov=100, outliers=0 and excluded=0. A small typing
+  and platform cleanup in its existing SQLite mapping diagnostic was necessary
+  for this authoring gate; a native Python 3.9 smoke also passed.
+
+See [acceptance](acceptance.tools-archive-rebuild.md) and the
+[validation capture](evidence.tools-archive-rebuild.validation.txt) for hashes,
+commands, observations and limits. No release build or publication is claimed.
 
 ### New types/classes introduced for Step 1
 
-_(empty — no check has taken place yet.)_.
+- `Target`: immutable endpoint/configuration value with authenticated verified
+  TLS operations and exact downloaded-byte comparison.
+- `Receipt`: typed durable attempt metadata, excluding backend credentials and
+  archive bytes; records phase, digest and authenticated loopback IPC identity.
+- `Repository` and `TransportTests`: isolated TLS failure server and process
+  integration fixtures. Test package markers follow the shared test layout.
 
 ### Architecture check for Step 1
 
-_(empty — no check has taken place yet.)_.
+Repository-specific HTTP and credentials stay in the application adapter; cplx
+continues to own the publication gate and its four-operation port. Durable state
+and transport are separate modules. No application domain layer imports these
+tools or their technical dependencies. Direct CLI imports preserve Python 3.9
+compatibility without importing unrelated application authoring helpers.
+
+Physical lines: HTTP helper 168, transport helper 354, diagnostic 68 and new
+integration test 404. All are below the 650-line Python ceiling. There is no
+DDD-Hexagonal violation, architecture smell or size issue needing correction.
 
 ### Performance check for Step 1
 
-_(empty — no check has taken place yet.)_.
+Upload forwarding and SHA-256 verification are O(n) in artifact bytes with
+bounded 1 MiB buffers. One receipt is addressed directly by coordinate hash;
+there is no archive/history scan, new sort or all-pairs traversal. Maven settings
+are parsed linearly. A response failure adds one exact GET per reconciliation.
+The worker uses bounded network timeouts and bounded idle/lock waits.
+
+Recorded timings: cumulative 33s, focused 11.244s, current SQLite fixtures 1s;
+application check 84.4s, affected 3m 51.6s, full 4m 17.7s. Probe observations
+retain individual timings; no new latency SLO or build benchmark is asserted.
+No performance issue needs addressing.
 
 ### Unit test coverage check for Step 1
 
-_(empty — no check has taken place yet.)_.
+The new unittest file follows the requested directory convention but performs
+process integration across Bash, the worker, TLS and the gate. It is not a
+class-level unit suite and has no unit coverage target. Its finite failure
+matrix needs no additional PBT dependency. No existing unit-tested class was
+changed.
+
+The application coverage source is `src/pdfss`, with its configured exclusions;
+the 100% application result does not measure `tools/`. Static reference review
+finds all added top-level production symbols reached: `main` dispatches
+begin/worker/callback; worker/serve/operate reach stream/commit and receipt/lock
+helpers; recovery reaches Target through target_of; Target.configured reaches
+service_root/coordinate_path; the worker imports write_chunk/finish. Receipt
+is used by annotations. The SQLite diagnostic calls identity from main. Test
+classes are reached by unittest and the HTTP server fixture.
+
+No unit-tested class below 100% needs completing. No top-level symbol outside
+the coverage gate is unreferenced.
 
 ### Feature integrity for Step 1
 
-_(empty — no check has taken place yet.)_.
+Ordinary fresh, identical, different-byte and snapshot application publication
+remains covered. Tools publication deliberately refuses through the old entry
+until Step 2 supplies eligibility evidence. The exact-byte gate and current
+SQLite declaration remain intact; historical controls do not qualify a candidate.
+Unknown outcomes preserve diagnostics and block automatic repeat publication;
+recovery does not delete an already public release. Later build, qualification,
+publication and adoption work remains assigned to Steps 2-7.
 
 ## Step 2. Validate and bind the durable release record
 
