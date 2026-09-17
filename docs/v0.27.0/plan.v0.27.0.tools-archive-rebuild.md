@@ -214,6 +214,30 @@ acceptance view; Step 2 will index their retained captures in the sidecar.
 
 ### Step 1 addendums
 
+The frozen closure Step 5 suite depends on the retired SQLite waiver. Reuse the
+prior SQLite effort's documented historical-control method: retain the exact
+declaration/envelope pair from `3a1d1135a3e627b74d134db24694121e70ea6b14`, verify
+their hashes, and run current scripts in an owned copy through `--shipped-dir`.
+Also run `verify.python-sqlite-closure.sh --fixtures-only` for the current floor.
+Keep historical regression evidence separate from candidate acceptance; do not
+restore a production waiver or rewrite the frozen harness to force a pass.
+
+The user approved mandatory commit-response verification on 2026-09-17.
+Implement the owning-design resolution: persist commit intent and stream digest,
+then read the exact asset and compare SHA-256 whenever the response is missing
+or unusable. A match succeeds; an inconclusive check returns 3 and retains an
+unknown attempt that blocks adoption and automatic upload retry. Recovery is
+read-only reconciliation, including cleanup interrupted after commit intent.
+Add fixtures for lost and malformed replies, committed bytes despite an error,
+unavailable GET, 404 after response loss, mismatched bytes, retry refusal and
+later reconciliation. No search result, HEAD or POM substitutes for this check.
+
+The application adapter may use Python 3.9 stdlib helpers for authenticated TLS,
+streaming, process coordination and durable attempt receipts. Keep transport and
+state responsibilities separate, add no runtime dependencies, and cap each new
+Python file at 650 physical lines. The cplx gate changes in Step 1 only to report
+unresolved outcomes truthfully; Step 2 still owns eligibility-record wiring.
+
 - Line budget checkpoint: existing app publisher 318; all new files 0; no Python mutation, 650-line Python ceiling remains applicable to any added Python.
 - Execute the shared checklist/runner at `--step 1`; search `upload_`, `deploy-file` and POM preflight placement.
 - Full workflow readiness: fixtures can run immediately; real capability needs the actual backend and scoped probe coordinate.
