@@ -1,0 +1,1166 @@
+{
+  "run": "tools-archive-rebuild-step5-20260917-rhel-build",
+  "recorded_utc": "2026-09-17T20:45:07.574169+00:00",
+  "candidate": {
+    "filename": "tools.2026-09-17_222857.tar.gz",
+    "size": 545310257,
+    "sha256": "d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1",
+    "sha1": "ac9927522895ff4541c6c45b1c48954f28e08c97"
+  },
+  "raw_retention": {
+    "identity": "step5-raw-d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1",
+    "archive": {
+      "filename": "step5-raw-captures.tar.gz",
+      "size": 181694148,
+      "sha256": "7a06c17d136b0b6055cba861d4e4f220264ebf12a497a0a8e27e851aafb5d1bf",
+      "sha1": "d8e280b2fefceee744cbbeea56115aeaac510d9b"
+    },
+    "storage": "retained-build-host-evidence"
+  },
+  "probes": {
+    "build": {
+      "raw_sha256": "c46bdfd7f5317cb56fdeb8dc37eb70392968b6fbb487292680fbf9becf064048",
+      "result": {
+        "stage": "build",
+        "python_version": "3.13.15 (main, Sep 17 2026, 22:26:00) [GCC 11.5.0 20240719 (Red Hat 11.5.0-15)]",
+        "executable": "<owned-home>/cplx/tools/python/sources/3.13.15/python",
+        "extension": {
+          "import_path": "<owned-home>/cplx/tools/python/sources/3.13.15/build/lib.linux-x86_64-3.13/_sqlite3.cpython-313-x86_64-linux-gnu.so",
+          "path": "<owned-home>/cplx/tools/python/sources/3.13.15/Modules/_sqlite3.cpython-313-x86_64-linux-gnu.so"
+        },
+        "database": "passed",
+        "provider": {
+          "path": "<owned-home>/cplx/tools/python/root/usr/lib64/libsqlite3.so.0.8.6",
+          "identity": [
+            253,
+            3,
+            1198979821
+          ],
+          "mapping_identity": [
+            253,
+            3,
+            1198979821
+          ]
+        },
+        "outcome": "passed",
+        "libpython": {
+          "path": "<owned-home>/cplx/tools/python/sources/3.13.15/libpython3.13.so",
+          "identity": [
+            253,
+            3,
+            1198944521
+          ],
+          "mapping_identity": [
+            253,
+            3,
+            1198944521
+          ]
+        }
+      },
+      "provider_file": {
+        "filename": "libsqlite3.so.0.8.6",
+        "size": 1357264,
+        "sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff",
+        "sha1": "c6b65b832b99f1e002cf348eb05d55480327eef0"
+      }
+    },
+    "installed": {
+      "raw_sha256": "c3b0793cae317aa73d3fab0d0c866fa3efbb64822ac6ce914b257c1bf75d41a0",
+      "result": {
+        "stage": "installed",
+        "python_version": "3.13.15 (main, Sep 17 2026, 22:26:00) [GCC 11.5.0 20240719 (Red Hat 11.5.0-15)]",
+        "executable": "<owned-home>/cplx/tools/python/python-3.13.15/bin/python3.13",
+        "extension": {
+          "import_path": "<owned-home>/cplx/tools/python/python-3.13.15/lib/python3.13/lib-dynload/_sqlite3.cpython-313-x86_64-linux-gnu.so",
+          "path": "<owned-home>/cplx/tools/python/python-3.13.15/lib/python3.13/lib-dynload/_sqlite3.cpython-313-x86_64-linux-gnu.so"
+        },
+        "database": "passed",
+        "provider": {
+          "path": "<owned-home>/cplx/tools/python/root/usr/lib64/libsqlite3.so.0.8.6",
+          "identity": [
+            253,
+            3,
+            1198979821
+          ],
+          "mapping_identity": [
+            253,
+            3,
+            1198979821
+          ]
+        },
+        "outcome": "passed"
+      },
+      "provider_file": {
+        "filename": "libsqlite3.so.0.8.6",
+        "size": 1357264,
+        "sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff",
+        "sha1": "c6b65b832b99f1e002cf348eb05d55480327eef0"
+      }
+    },
+    "promoted-operator": {
+      "raw_sha256": "e0be6ff6945e57d62241a44b74b52e1bbdcc854efe47493fea993aedf923a87f",
+      "result": {
+        "stage": "operator",
+        "python_version": "3.13.15 (main, Sep 17 2026, 22:26:00) [GCC 11.5.0 20240719 (Red Hat 11.5.0-15)]",
+        "executable": "<owned-home>/tools/python/python-3.13.15/bin/python3.13_bin",
+        "extension": {
+          "import_path": "<owned-home>/tools/python/bin/current/lib/python3.13/lib-dynload/_sqlite3.cpython-313-x86_64-linux-gnu.so",
+          "path": "<owned-home>/tools/python/python-3.13.15/lib/python3.13/lib-dynload/_sqlite3.cpython-313-x86_64-linux-gnu.so"
+        },
+        "database": "passed",
+        "provider": {
+          "path": "<owned-home>/tools/python/root/usr/lib64/libsqlite3.so.0.8.6",
+          "identity": [
+            253,
+            3,
+            1372414908
+          ],
+          "mapping_identity": [
+            253,
+            3,
+            1372414908
+          ]
+        },
+        "outcome": "passed"
+      },
+      "provider_file": {
+        "filename": "libsqlite3.so.0.8.6",
+        "size": 1357264,
+        "sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff",
+        "sha1": "c6b65b832b99f1e002cf348eb05d55480327eef0"
+      }
+    },
+    "operator": {
+      "raw_sha256": "e0be6ff6945e57d62241a44b74b52e1bbdcc854efe47493fea993aedf923a87f",
+      "result": {
+        "stage": "operator",
+        "python_version": "3.13.15 (main, Sep 17 2026, 22:26:00) [GCC 11.5.0 20240719 (Red Hat 11.5.0-15)]",
+        "executable": "<owned-home>/tools/python/python-3.13.15/bin/python3.13_bin",
+        "extension": {
+          "import_path": "<owned-home>/tools/python/bin/current/lib/python3.13/lib-dynload/_sqlite3.cpython-313-x86_64-linux-gnu.so",
+          "path": "<owned-home>/tools/python/python-3.13.15/lib/python3.13/lib-dynload/_sqlite3.cpython-313-x86_64-linux-gnu.so"
+        },
+        "database": "passed",
+        "provider": {
+          "path": "<owned-home>/tools/python/root/usr/lib64/libsqlite3.so.0.8.6",
+          "identity": [
+            253,
+            3,
+            1372414908
+          ],
+          "mapping_identity": [
+            253,
+            3,
+            1372414908
+          ]
+        },
+        "outcome": "passed"
+      },
+      "provider_file": {
+        "filename": "libsqlite3.so.0.8.6",
+        "size": 1357264,
+        "sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff",
+        "sha1": "c6b65b832b99f1e002cf348eb05d55480327eef0"
+      }
+    }
+  },
+  "captures": {
+    "evidence/candidate": {
+      "filename": "candidate",
+      "size": 378,
+      "sha256": "8ef19a16fa232bd30bb6edd681fa8b913405bffd4f9968888b0cc0f27c9e6ace",
+      "sha1": "d89ebe773df91a2c8f0771bda9f5f1b58c37f773"
+    },
+    "evidence/build.command": {
+      "filename": "build.command",
+      "size": 133,
+      "sha256": "87c621f7e216bdf6b948762105db10713d5c50f517dbda86d0ef6974090847fc",
+      "sha1": "a45dba81bacee79fa22258c3be1b0af13123b15c",
+      "command_and_result": "HOME=<owned-home> BASH_ENV=unset bash <owned-home>/cplx/tools/install python 3.13.15 --reconfigure \nexit=0\nelapsed_seconds=315\n"
+    },
+    "evidence/build.timeline": {
+      "filename": "build.timeline",
+      "size": 6561,
+      "sha256": "4100004b7052eefc925833900aa73671f2358d40eeeb8dfdc331b8c8b02a6bd7",
+      "sha1": "5f37e64d666181fcc3b6010492bc2975df16e660"
+    },
+    "evidence/build.full.log": {
+      "filename": "build.full.log",
+      "size": 1794809,
+      "sha256": "26883af51519f36495930bd24b6297c359e015b49bc8d44762ca9333e68c93a2",
+      "sha1": "3e2c23eb4eb582d44c474b01e2002ab99ba0e5ca"
+    },
+    "evidence/build.log": {
+      "filename": "build.log",
+      "size": 5877,
+      "sha256": "8fb69e04b1a840eeda186c0dfc9c31973ead0162d80048ab606b602e1f6ca371",
+      "sha1": "1fb4a89f75d4ac1101c351ba84b3a74a2b922c23"
+    },
+    "evidence/package.command": {
+      "filename": "package.command",
+      "size": 107,
+      "sha256": "7577558dfb2cbe549ae11c5212fd97df6b894062b8710d199d8cb5fcb1490793",
+      "sha1": "386518edf3fa9f7d8a0252a3aafdc9f752d8eddd",
+      "command_and_result": "HOME=<owned-home> BASH_ENV=unset bash <owned-home>/cplx/bin/pkg_tools.sh \nexit=0\nelapsed_seconds=123\n"
+    },
+    "evidence/package.timeline": {
+      "filename": "package.timeline",
+      "size": 148812,
+      "sha256": "f9999648a7cf109370718cc6aab0ca791dc7a923be2f6762e928ea9f0409318e",
+      "sha1": "8a3c007a381323a8dd3238ee97dca232319ed477"
+    },
+    "evidence/package.log": {
+      "filename": "package.log",
+      "size": 134484,
+      "sha256": "3f8dfc02b52c78b850b7b0372b8c36ee38c62802cd292de35582d25afa87c1cc",
+      "sha1": "90ac749e1252aeb21a28d9a99f90cf297a1db444"
+    },
+    "evidence/promotion.command": {
+      "filename": "promotion.command",
+      "size": 101,
+      "sha256": "50d39f9a1b5186234a4778359208089b3bdc96a68f6f080feb2a6ffcdd53c87e",
+      "sha1": "7caad7568f4aedb2af01682332ae666ed7ff6b10",
+      "command_and_result": "HOME=<owned-home> BASH_ENV=unset bash <owned-home>/cplx/bin/rsync.sh \nexit=0\nelapsed_seconds=8\n"
+    },
+    "evidence/promotion.timeline": {
+      "filename": "promotion.timeline",
+      "size": 1472688,
+      "sha256": "f7a80497479ccea47285cb1843420eb8761f4f9dc6e8b8ad3719d95f08fbcf39",
+      "sha1": "060bb0b929dca82942c7554086d9d14386a246f4"
+    },
+    "evidence/promotion-dry-run.command": {
+      "filename": "promotion-dry-run.command",
+      "size": 111,
+      "sha256": "bfbe9a1f34e686a278d37a2257fcc3149171fc618ca680d2458dd1548d2dc5fa",
+      "sha1": "69361b2e9877cf323d891c261fa437e9366c041c",
+      "command_and_result": "HOME=<owned-home> BASH_ENV=unset bash <owned-home>/cplx/bin/rsync.sh --dry-run \nexit=0\nelapsed_seconds=2\n"
+    },
+    "evidence/promotion-dry-run.timeline": {
+      "filename": "promotion-dry-run.timeline",
+      "size": 1472837,
+      "sha256": "84d7d2247993a8daae29f5a520a484b3add8ed40686bdbfc94b205a933c9b7ce",
+      "sha1": "22a45c277223091ba06c19d48bd542b73ef6b217"
+    },
+    "evidence/operator.command": {
+      "filename": "operator.command",
+      "size": 465,
+      "sha256": "44561a1b91d8d16d9a569529e8dccec9386663f8c896989a517ed0fd50c67fc5",
+      "sha1": "146294586c709ac8f51fa0a5a039a0b0dbf9e9ee",
+      "command_and_result": "HOME=<owned-home> BASH_ENV=unset <owned-home>/tools/python/bin/python -I -S -B <owned-home>/cplx/tools/python/sqlite_probe.py --stage operator --expected-python-root <owned-home>/tools/python --expected-extension-root <owned-home>/tools/python/python-3.13.15/lib/python3.13/lib-dynload --expected-provider <owned-home>/tools/python/root/usr/lib64/libsqlite3.so.0 --scratch-dir <owned-home>/acceptance/evidence/scratch \nexit=0\nelapsed_seconds=0\n"
+    },
+    "evidence/operator.timeline": {
+      "filename": "operator.timeline",
+      "size": 694,
+      "sha256": "33fe22dbb490486622609fa29d25f94d948aa5f928af237c2af1be7e96e1cb81",
+      "sha1": "bdd0a7866193a44b9eae5230bd4f462528a8d809"
+    },
+    "evidence/promoted-operator.command": {
+      "filename": "promoted-operator.command",
+      "size": 465,
+      "sha256": "44561a1b91d8d16d9a569529e8dccec9386663f8c896989a517ed0fd50c67fc5",
+      "sha1": "146294586c709ac8f51fa0a5a039a0b0dbf9e9ee",
+      "command_and_result": "HOME=<owned-home> BASH_ENV=unset <owned-home>/tools/python/bin/python -I -S -B <owned-home>/cplx/tools/python/sqlite_probe.py --stage operator --expected-python-root <owned-home>/tools/python --expected-extension-root <owned-home>/tools/python/python-3.13.15/lib/python3.13/lib-dynload --expected-provider <owned-home>/tools/python/root/usr/lib64/libsqlite3.so.0 --scratch-dir <owned-home>/acceptance/evidence/scratch \nexit=0\nelapsed_seconds=0\n"
+    },
+    "evidence/promoted-operator.timeline": {
+      "filename": "promoted-operator.timeline",
+      "size": 694,
+      "sha256": "a87942416c1a626a06a130c03314464b7476f391c6c37897760eb26626e20add",
+      "sha1": "eefbe35deafcb18cf7d97af380b682e977a05410"
+    },
+    "evidence/role.json": {
+      "filename": "role.json",
+      "size": 199,
+      "sha256": "46b9a364136386ea324e03f37fa9eb216be201af8e1ca4885a176b164304beea",
+      "sha1": "0a9ee92efcaad28ffea3a0f6f94976eff9ff9929"
+    },
+    "evidence/live.before": {
+      "filename": "live.before",
+      "size": 37014798,
+      "sha256": "417e4af83fb0a0ba449e7de11a9bc707f68182329914e64f6ce6831fa0d16463",
+      "sha1": "53bebce0626f85666c96b78f944d3e2f173b3e7c"
+    },
+    "evidence/live.after": {
+      "filename": "live.after",
+      "size": 37014798,
+      "sha256": "417e4af83fb0a0ba449e7de11a9bc707f68182329914e64f6ce6831fa0d16463",
+      "sha1": "53bebce0626f85666c96b78f944d3e2f173b3e7c"
+    },
+    "evidence/payloads.before": {
+      "filename": "payloads.before",
+      "size": 13744,
+      "sha256": "9fee499ccb83b0b55698f17b00d3facbec63617bff4382f96e4747a144f3a429",
+      "sha1": "1f70e15f677ebe37c21f72a7a55b518d69d32355"
+    },
+    "evidence/payloads.after": {
+      "filename": "payloads.after",
+      "size": 13744,
+      "sha256": "9fee499ccb83b0b55698f17b00d3facbec63617bff4382f96e4747a144f3a429",
+      "sha1": "1f70e15f677ebe37c21f72a7a55b518d69d32355"
+    },
+    "evidence/sentinels.before": {
+      "filename": "sentinels.before",
+      "size": 882,
+      "sha256": "0d2c91416e666ef089a6efde11913311a51c9f1faf1c0ed4eeff01c6006a18a4",
+      "sha1": "84df9363567144f4041939dfba80701cf601e786"
+    },
+    "evidence/sentinels.after": {
+      "filename": "sentinels.after",
+      "size": 882,
+      "sha256": "0d2c91416e666ef089a6efde11913311a51c9f1faf1c0ed4eeff01c6006a18a4",
+      "sha1": "84df9363567144f4041939dfba80701cf601e786"
+    },
+    "refresh-evidence/refresh.command": {
+      "filename": "refresh.command",
+      "size": 115,
+      "sha256": "89733b265b2dc9608662ded69824636850c222ebcddf157190b578915a540d19",
+      "sha1": "839e03907b31de79f0542d4a1ea21cba86c57293",
+      "command_and_result": "HOME=<owned-home> BASH_ENV=unset bash <owned-home>/acceptance/refresh-command.sh \nexit=0\nelapsed_seconds=163\n"
+    },
+    "refresh-evidence/refresh.timeline": {
+      "filename": "refresh.timeline",
+      "size": 4170811,
+      "sha256": "72766eb33bf43f65e56e56833223e511954fef9d6cffba1065d58cc5cb45fc42",
+      "sha1": "61b974aca87a480838dfd830c812b4b500f9a38a"
+    },
+    "refresh-evidence/refresh.log": {
+      "filename": "refresh.log",
+      "size": 3619741,
+      "sha256": "fc206de1cfcf53e3fd9fa5cf6e2ff79ca2fa0735d83f8443daf2c765b90616d5",
+      "sha1": "6af5b2ff89a05ac8cada400faa7cdd31e9486bd0"
+    },
+    "refresh-evidence/live.before": {
+      "filename": "live.before",
+      "size": 37014798,
+      "sha256": "417e4af83fb0a0ba449e7de11a9bc707f68182329914e64f6ce6831fa0d16463",
+      "sha1": "53bebce0626f85666c96b78f944d3e2f173b3e7c"
+    },
+    "refresh-evidence/live.after": {
+      "filename": "live.after",
+      "size": 37014798,
+      "sha256": "417e4af83fb0a0ba449e7de11a9bc707f68182329914e64f6ce6831fa0d16463",
+      "sha1": "53bebce0626f85666c96b78f944d3e2f173b3e7c"
+    },
+    "archive-checks/relocation.log": {
+      "filename": "relocation.log",
+      "size": 30192,
+      "sha256": "809aeda6be80653b678136b502e690331fc0e1bed8e35f011359d8ca17c4dbb8",
+      "sha1": "ecc1c6fd7eeabc9d4abe04137a46851b3a60a473"
+    },
+    "archive-checks/result": {
+      "filename": "result",
+      "size": 33,
+      "sha256": "190c2b992954a83e02531d7c70b47e41a9d03549b66cfdd3c24c6f3a2d376c84",
+      "sha1": "b062ecf3f7d84c595172cacc04685f62c668b811"
+    }
+  },
+  "refresh": {
+    "prior_completed_rows": 54,
+    "completed_rows": 50,
+    "reused_rows": 56,
+    "git_rebuilt": false,
+    "host_packages_installed": false
+  },
+  "build_conditions": {
+    "python": "3.13.15",
+    "explicit_reconfigure": true,
+    "sqlite_module_state": "yes",
+    "config_log_sha256": "6a6eb2f16a3853c51d5790fd317974dd4cdf9983174afb2f2425ae28365ff137"
+  },
+  "preservation": {
+    "refresh_live": "passed",
+    "build_live": "passed",
+    "payloads": "passed",
+    "git_and_project_sentinels": "passed"
+  },
+  "runtime_alignment": {
+    "paths_checked": 126,
+    "git_paths_aligned": 2,
+    "selection": [
+      {
+        "path": "etc/ld.so.conf",
+        "python_sha256": "239c865e4c0746a01f82b03d38d620853bab2a2ba8e81d6f5606c503e0ea379f",
+        "git_before_sha256": "239c865e4c0746a01f82b03d38d620853bab2a2ba8e81d6f5606c503e0ea379f",
+        "changed": false
+      },
+      {
+        "path": "etc/nsswitch.conf",
+        "python_sha256": "780582abdc12675cf3c66feb5d5c190a9c77591b72ef427b325c8bb78762d8e1",
+        "git_before_sha256": "780582abdc12675cf3c66feb5d5c190a9c77591b72ef427b325c8bb78762d8e1",
+        "changed": false
+      },
+      {
+        "path": "etc/rpc",
+        "python_sha256": "3b24a975dcde688434258566813a83ce256a4c73efd7a8a9c3998327b0b4de68",
+        "git_before_sha256": "3b24a975dcde688434258566813a83ce256a4c73efd7a8a9c3998327b0b4de68",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/audit/sotruss-lib.so",
+        "python_sha256": "120dc7f73a766e954f5b58d644c1927424da1a3517118bfe5d53f48606afe801",
+        "git_before_sha256": "120dc7f73a766e954f5b58d644c1927424da1a3517118bfe5d53f48606afe801",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/CP1252.so",
+        "python_sha256": "0cbefb18891887d230f661c14889ffee56ddf7550e77ec1a7d2d0fb8bf2bb4af",
+        "git_before_sha256": "0cbefb18891887d230f661c14889ffee56ddf7550e77ec1a7d2d0fb8bf2bb4af",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/ISO8859-1.so",
+        "python_sha256": "92562fd932bc740eab7c72807c11102bc9a915b82e4c39a5ef40822cca98de8f",
+        "git_before_sha256": "92562fd932bc740eab7c72807c11102bc9a915b82e4c39a5ef40822cca98de8f",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/ISO8859-15.so",
+        "python_sha256": "7b603dc3c651e27d907b1e98a1155c29cd460913af18aae1912ce26162e1c3be",
+        "git_before_sha256": "7b603dc3c651e27d907b1e98a1155c29cd460913af18aae1912ce26162e1c3be",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UNICODE.so",
+        "python_sha256": "b781f23771e78292b8533c45287bef7da5ff8bc3bad54ca9c3f9478dc35260ab",
+        "git_before_sha256": "b781f23771e78292b8533c45287bef7da5ff8bc3bad54ca9c3f9478dc35260ab",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UTF-16.so",
+        "python_sha256": "1fbfcf18e2fbbb37a7a4fcd1a47c011a2048b59a53d83fbb596da97b8f2c22f1",
+        "git_before_sha256": "1fbfcf18e2fbbb37a7a4fcd1a47c011a2048b59a53d83fbb596da97b8f2c22f1",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UTF-32.so",
+        "python_sha256": "ae9a9f07aaeefed152d218a99f9c4162ac7de6ad13464a21e8f1c787653b80b7",
+        "git_before_sha256": "ae9a9f07aaeefed152d218a99f9c4162ac7de6ad13464a21e8f1c787653b80b7",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UTF-7.so",
+        "python_sha256": "8f6c336ff4c546eccb3950d50cb3bf5e439860eae6ffb8dbbbdb92f154508ba0",
+        "git_before_sha256": "8f6c336ff4c546eccb3950d50cb3bf5e439860eae6ffb8dbbbdb92f154508ba0",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/gconv-modules",
+        "python_sha256": "9976193fd6fb671112a0f10486e50ad3bfb79e9a08429544c820365cdd3bfd35",
+        "git_before_sha256": "9976193fd6fb671112a0f10486e50ad3bfb79e9a08429544c820365cdd3bfd35",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/gconv-modules.cache",
+        "python_sha256": "2467c9e1db4804813951d848911a2a5fe8bf2c74ad1dc2fdc85700d0b7c3b064",
+        "git_before_sha256": "2467c9e1db4804813951d848911a2a5fe8bf2c74ad1dc2fdc85700d0b7c3b064",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/ld-linux-x86-64.so.2",
+        "python_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+        "git_before_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libBrokenLocale.so.1",
+        "python_sha256": "ccff36ba5d2e3d1c76b4863cc079f081768c51b8f1c867a24874ecb9c287dddb",
+        "git_before_sha256": "ccff36ba5d2e3d1c76b4863cc079f081768c51b8f1c867a24874ecb9c287dddb",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libSegFault.so",
+        "python_sha256": "c34cb9017c173c1e1c7d27c4dbb06e0f99c0c750141c729d6e4a6dc151fbfe11",
+        "git_before_sha256": "c34cb9017c173c1e1c7d27c4dbb06e0f99c0c750141c729d6e4a6dc151fbfe11",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libanl.so.1",
+        "python_sha256": "4e772b1c801008f19a59f79a88a8472cb77e18bb2ec70c4ddbab1c02c2899fa0",
+        "git_before_sha256": "4e772b1c801008f19a59f79a88a8472cb77e18bb2ec70c4ddbab1c02c2899fa0",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libc.so.6",
+        "python_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746",
+        "git_before_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libc_malloc_debug.so.0",
+        "python_sha256": "eaddbc2d3b735923ebb079a103440d9b3f226d1bdfe6aff4249a8873872a7dce",
+        "git_before_sha256": "eaddbc2d3b735923ebb079a103440d9b3f226d1bdfe6aff4249a8873872a7dce",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libdl.so.2",
+        "python_sha256": "e79f2c36a3228050061432b564923893a42241fb334b52bd2be88793c3eedce3",
+        "git_before_sha256": "e79f2c36a3228050061432b564923893a42241fb334b52bd2be88793c3eedce3",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libm.so.6",
+        "python_sha256": "f0734a09a0602ccde6b98ea7fbb3c9cfc62b3a4cf4a7b17ccd36d774ca22b8df",
+        "git_before_sha256": "f0734a09a0602ccde6b98ea7fbb3c9cfc62b3a4cf4a7b17ccd36d774ca22b8df",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libmemusage.so",
+        "python_sha256": "92e47a26146c4285235fa529cf8445c122ebb97a3fed9eec6c6c6d8b1bcfe337",
+        "git_before_sha256": "92e47a26146c4285235fa529cf8445c122ebb97a3fed9eec6c6c6d8b1bcfe337",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libmvec.so.1",
+        "python_sha256": "64cb6768d14c91bd6e3e4b284f330005d6bbb3b87ee994f27cf187bb99de81a2",
+        "git_before_sha256": "64cb6768d14c91bd6e3e4b284f330005d6bbb3b87ee994f27cf187bb99de81a2",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libnss_compat.so.2",
+        "python_sha256": "ae31450975f2783b13071652385a80e728f986e64e61aef3513108bff238a625",
+        "git_before_sha256": "ae31450975f2783b13071652385a80e728f986e64e61aef3513108bff238a625",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libnss_dns.so.2",
+        "python_sha256": "9abefe7f2ca7a6b3d38dbec31e227965b2339b9bae5ce04bcf4986d6cec93290",
+        "git_before_sha256": "9abefe7f2ca7a6b3d38dbec31e227965b2339b9bae5ce04bcf4986d6cec93290",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libnss_files.so.2",
+        "python_sha256": "24cb925f05d48c8111909c105cad490928bc5983ce09cdc31f77d3ab2b7877d1",
+        "git_before_sha256": "24cb925f05d48c8111909c105cad490928bc5983ce09cdc31f77d3ab2b7877d1",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libpcprofile.so",
+        "python_sha256": "8af4332d97b1043a16b7fce815e062fc8def7c2acf4e7c210c1a4a30c905b2fe",
+        "git_before_sha256": "8af4332d97b1043a16b7fce815e062fc8def7c2acf4e7c210c1a4a30c905b2fe",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libpthread.so.0",
+        "python_sha256": "ff337ffb3d2cd083f45190c3c0eb7c3156cd8643abe2ef1c941b6a13a415bd07",
+        "git_before_sha256": "ff337ffb3d2cd083f45190c3c0eb7c3156cd8643abe2ef1c941b6a13a415bd07",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libresolv.so.2",
+        "python_sha256": "77d020b5b6c91acd1f996021ab9bda9a6c2e3923216fe462863003e62be6314f",
+        "git_before_sha256": "77d020b5b6c91acd1f996021ab9bda9a6c2e3923216fe462863003e62be6314f",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/librt.so.1",
+        "python_sha256": "23d6ce2d88c5b8d827ecd68654d3f3e21adc42ed6a97801baf56db359c973e5a",
+        "git_before_sha256": "23d6ce2d88c5b8d827ecd68654d3f3e21adc42ed6a97801baf56db359c973e5a",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libthread_db.so.1",
+        "python_sha256": "b70e3c268329a71ce46728247ac35c063da1cc1ee41e4804d7c2f643208c43da",
+        "git_before_sha256": "b70e3c268329a71ce46728247ac35c063da1cc1ee41e4804d7c2f643208c43da",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libutil.so.1",
+        "python_sha256": "eefb387c80183a5dac333d67c9f247f599d70fd19dda5dca3fb2fb15ba56a34b",
+        "git_before_sha256": "eefb387c80183a5dac333d67c9f247f599d70fd19dda5dca3fb2fb15ba56a34b",
+        "changed": false
+      },
+      {
+        "path": "usr/libexec/getconf/POSIX_V6_LP64_OFF64",
+        "python_sha256": "a854a3890436fc3df43af477718ebc05359ca1f07194f38c16d0d49a5c51731c",
+        "git_before_sha256": "a854a3890436fc3df43af477718ebc05359ca1f07194f38c16d0d49a5c51731c",
+        "changed": false
+      },
+      {
+        "path": "usr/libexec/getconf/POSIX_V7_LP64_OFF64",
+        "python_sha256": "a854a3890436fc3df43af477718ebc05359ca1f07194f38c16d0d49a5c51731c",
+        "git_before_sha256": "a854a3890436fc3df43af477718ebc05359ca1f07194f38c16d0d49a5c51731c",
+        "changed": false
+      },
+      {
+        "path": "usr/libexec/getconf/XBS5_LP64_OFF64",
+        "python_sha256": "a854a3890436fc3df43af477718ebc05359ca1f07194f38c16d0d49a5c51731c",
+        "git_before_sha256": "a854a3890436fc3df43af477718ebc05359ca1f07194f38c16d0d49a5c51731c",
+        "changed": false
+      },
+      {
+        "path": "usr/sbin/iconvconfig",
+        "python_sha256": "74d65d2abd6520b4b15b87ed4707b745398c7e6f428540853c4c201da37de788",
+        "git_before_sha256": "74d65d2abd6520b4b15b87ed4707b745398c7e6f428540853c4c201da37de788",
+        "changed": false
+      },
+      {
+        "path": "usr/sbin/ldconfig",
+        "python_sha256": "458ebd6fcee6fb4b963c720b33bf43f691a1e12bebfa474136408c953ac105af",
+        "git_before_sha256": "458ebd6fcee6fb4b963c720b33bf43f691a1e12bebfa474136408c953ac105af",
+        "changed": false
+      },
+      {
+        "path": "usr/share/licenses/glibc/COPYING",
+        "python_sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+        "git_before_sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+        "changed": false
+      },
+      {
+        "path": "usr/share/licenses/glibc/COPYING.LIB",
+        "python_sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+        "git_before_sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+        "changed": false
+      },
+      {
+        "path": "usr/share/licenses/glibc/LICENSES",
+        "python_sha256": "b33d0bd9f685b46853548814893a6135e74430d12f6d94ab3eba42fc591f83bc",
+        "git_before_sha256": "b33d0bd9f685b46853548814893a6135e74430d12f6d94ab3eba42fc591f83bc",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libmpc.so.3.2.1",
+        "python_sha256": "dff128b03df28b63414e9961d1d8ff175ce822323b1db084b0b225c25e5c8a9c",
+        "git_before_sha256": "dff128b03df28b63414e9961d1d8ff175ce822323b1db084b0b225c25e5c8a9c",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libz.so.1.2.11",
+        "python_sha256": "fae9fde931c0df13874fa4cf12cff3047c2570956b496d161fdf4aee7d62b3d7",
+        "git_before_sha256": "fae9fde931c0df13874fa4cf12cff3047c2570956b496d161fdf4aee7d62b3d7",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libz.so.1.2.11.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/.libgmp.so.10.4.0.hmac",
+        "python_sha256": "fd921c4a661f25dee6ec4d8de64d92baf7a61ddd3f33694da12f83b43fd534b9",
+        "git_before_sha256": "fd921c4a661f25dee6ec4d8de64d92baf7a61ddd3f33694da12f83b43fd534b9",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libgmp.so.10.4.0",
+        "python_sha256": "b9d1265de01c92a6565272aa3ffa30034fe3656c73c348fc988a2e65389d6782",
+        "git_before_sha256": "b9d1265de01c92a6565272aa3ffa30034fe3656c73c348fc988a2e65389d6782",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/.libgmp.so.10.4.0.hmac.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libgmp.so.10.4.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libzstd.so.1.5.5",
+        "python_sha256": "dc1ccdc94eea889670d6258a70ae51be922be6a4740eb44eee4f1baf012136b7",
+        "git_before_sha256": "dc1ccdc94eea889670d6258a70ae51be922be6a4740eb44eee4f1baf012136b7",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libzstd.so.1.5.5.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/ld-linux-x86-64.so.2.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libBrokenLocale.so.1.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libSegFault.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libanl.so.1.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libc.so.6.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libc_malloc_debug.so.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libdl.so.2.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libm.so.6.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libmemusage.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libmvec.so.1.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libnss_compat.so.2.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libnss_dns.so.2.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libnss_files.so.2.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libpcprofile.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libpthread.so.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libresolv.so.2.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/librt.so.1.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libthread_db.so.1.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libutil.so.1.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libcrypto.so.3.5.7",
+        "python_sha256": "0599684a6f76b425c95832bd00b2faf5719b32e6319afd6ce8846360d0529d31",
+        "git_before_sha256": "0599684a6f76b425c95832bd00b2faf5719b32e6319afd6ce8846360d0529d31",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libssl.so.3.5.7",
+        "python_sha256": "f587ccb16f966d96e6062c10e9e2f9c0dec3358281f6569eb65988d4a9741725",
+        "git_before_sha256": "f587ccb16f966d96e6062c10e9e2f9c0dec3358281f6569eb65988d4a9741725",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libbfd-2.35.2-72.el9.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libopcodes-2.35.2-72.el9.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libctf-nobfd.so.0.0.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libctf.so.0.0.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libbfd-2.35.2-63.el9.so",
+        "python_sha256": "7dfe9e9aeaf956757b2dd19042bff9295a0b77d82141139e904ca0082d0bce35",
+        "git_before_sha256": "7dfe9e9aeaf956757b2dd19042bff9295a0b77d82141139e904ca0082d0bce35",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libbfd-2.35.2-63.el9.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libbz2.so.1.0.8",
+        "python_sha256": "453327fe4f68bf18f5adc1246bd7b50c32af28c341134ab7c5f7ae7a41e13ee0",
+        "git_before_sha256": "453327fe4f68bf18f5adc1246bd7b50c32af28c341134ab7c5f7ae7a41e13ee0",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libgcrypt.so.20.4.0",
+        "python_sha256": "9f5d2c5f175619f424f0e6aa365c961e64efe087aed2a8184fabcd951dd3da55",
+        "git_before_sha256": "9f5d2c5f175619f424f0e6aa365c961e64efe087aed2a8184fabcd951dd3da55",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libxml2.so.2.9.13",
+        "python_sha256": "f2cffc548d48ce5415c97b7fe4ac7ae117904157d1e97c201cc2861672fc36f2",
+        "git_before_sha256": "7985c47a34541f85c92aa9b68828af102f9de328bb61955c7144e6517fc1e3ab",
+        "changed": true
+      },
+      {
+        "path": "usr/lib64/libexslt.so.0.8.20",
+        "python_sha256": "0b4ddbf67ba96a0a8e8fc7f705d716a9a1000260e9dfeee3533e58ea8cf9edb5",
+        "git_before_sha256": "0b4ddbf67ba96a0a8e8fc7f705d716a9a1000260e9dfeee3533e58ea8cf9edb5",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libxslt.so.1.1.34",
+        "python_sha256": "c9f1aa2dde5468f8e79595bc124c10775334dbc8aa651400b76bf66ada00c5df",
+        "git_before_sha256": "c9f1aa2dde5468f8e79595bc124c10775334dbc8aa651400b76bf66ada00c5df",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libbz2.so.1.0.8.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libffi.so.8.1.0",
+        "python_sha256": "c575bec3faae030f61b7dd26a40480e60e6f0060e2b4d3a6f3cacd6da9fc01ff",
+        "git_before_sha256": "c575bec3faae030f61b7dd26a40480e60e6f0060e2b4d3a6f3cacd6da9fc01ff",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libffi.so.8.1.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libgpg-error.so.0.32.0",
+        "python_sha256": "7c35a3105985309405449a6f609cab1b0971fd65d44d70c4780106c12673ba08",
+        "git_before_sha256": "7c35a3105985309405449a6f609cab1b0971fd65d44d70c4780106c12673ba08",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libgpg-error.so.0.32.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libgcrypt.so.20.4.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libxml2.so.2.9.13.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/liblzma.so.5.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/liblzma.so.5.2.5",
+        "python_sha256": "16125c779c2442c5bc32a3aeded7e6a5e70c9112864eebb5bb061651222a2dda",
+        "git_before_sha256": "16125c779c2442c5bc32a3aeded7e6a5e70c9112864eebb5bb061651222a2dda",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/liblzma.so.5.2.5.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libexslt.so.0.8.20.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libxslt.so.1.1.34.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libbfd-2.35.2-72.el9.so",
+        "python_sha256": "fa99d0491b5200bf47bb7b6e4340c572bc8e1681c44ea9e7b59106af8e6da7b5",
+        "git_before_sha256": "fa99d0491b5200bf47bb7b6e4340c572bc8e1681c44ea9e7b59106af8e6da7b5",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libctf-nobfd.so.0.0.0",
+        "python_sha256": "0d4e4bbed74766b9ccceb3f7b7e82a71dc1c996bda55cdf4d7da9206fe04542f",
+        "git_before_sha256": "0d4e4bbed74766b9ccceb3f7b7e82a71dc1c996bda55cdf4d7da9206fe04542f",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libctf.so.0.0.0",
+        "python_sha256": "42fff8b2b495fc7826e87b29459b583b61ccea79fdbf0d5f44c16d1c4d201be8",
+        "git_before_sha256": "42fff8b2b495fc7826e87b29459b583b61ccea79fdbf0d5f44c16d1c4d201be8",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libopcodes-2.35.2-72.el9.so",
+        "python_sha256": "c2c4e79148dd95299f3b3656a7f397e898498d51e5f1c488270b3eec17eec3d9",
+        "git_before_sha256": "c2c4e79148dd95299f3b3656a7f397e898498d51e5f1c488270b3eec17eec3d9",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libc.so",
+        "python_sha256": "bc8e2fd8ffcf12e2156395df0a2ea6a0a139937ac835cdc1395b525ded29d7bb",
+        "git_before_sha256": "bc8e2fd8ffcf12e2156395df0a2ea6a0a139937ac835cdc1395b525ded29d7bb",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libm.so",
+        "python_sha256": "3909eca9423e2f5b5cb5ed20b1a56f840efea4e94d0f17930f1c4e373179e670",
+        "git_before_sha256": "3909eca9423e2f5b5cb5ed20b1a56f840efea4e94d0f17930f1c4e373179e670",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libidn2.so.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libidn2.so.0.3.7",
+        "python_sha256": "dc245bad13edbcd52b6f654a3de2ddcb017c92590e0b7b473b8a69a3db3a2b9c",
+        "git_before_sha256": "dc245bad13edbcd52b6f654a3de2ddcb017c92590e0b7b473b8a69a3db3a2b9c",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libidn2.so.0.3.7.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libunistring.so.2.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libunistring.so.2.1.0",
+        "python_sha256": "70b4c4050c4319fb109a3cf5745f9a6ab2e5862c6bc809aea0e4cb94c87978ef",
+        "git_before_sha256": "70b4c4050c4319fb109a3cf5745f9a6ab2e5862c6bc809aea0e4cb94c87978ef",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libunistring.so.2.1.0.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/libsqlite3.so.0.8.6",
+        "python_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff",
+        "git_before_sha256": "92f6f0d3f0aee0f02e52abe4e4f55c6f47c60a5fb37e620f2398bffb2d186c33",
+        "changed": true
+      },
+      {
+        "path": "usr/lib64/audit/sotruss-lib.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/afalg.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/capi.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/loader_attic.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/padlock.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/afalg.so",
+        "python_sha256": "b7bd5767dbb66789ac87f8c86023796aadfa5388e091291b573508373392fb9f",
+        "git_before_sha256": "b7bd5767dbb66789ac87f8c86023796aadfa5388e091291b573508373392fb9f",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/capi.so",
+        "python_sha256": "69fbd56967410e52d3c19a2202f5c159884b1e07852065f01599daf60d680487",
+        "git_before_sha256": "69fbd56967410e52d3c19a2202f5c159884b1e07852065f01599daf60d680487",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/loader_attic.so",
+        "python_sha256": "303dfe2c971ee31e564fdda1a082d7c9b8e52e6c76a3dd733dae7fcf7c23daa7",
+        "git_before_sha256": "303dfe2c971ee31e564fdda1a082d7c9b8e52e6c76a3dd733dae7fcf7c23daa7",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/engines-3/padlock.so",
+        "python_sha256": "7abec8bee5e9ec530106919ea823daec8fae1ba2f001eb0ceaa055ae8d7ea2d2",
+        "git_before_sha256": "7abec8bee5e9ec530106919ea823daec8fae1ba2f001eb0ceaa055ae8d7ea2d2",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/CP1252.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/ISO8859-1.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/ISO8859-15.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UNICODE.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UTF-16.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UTF-32.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/gconv/UTF-7.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/ossl-modules/legacy.so",
+        "python_sha256": "b14f25c4940193b1170a5527884a654dddffcff701bdbf0f7c759a3b37414851",
+        "git_before_sha256": "b14f25c4940193b1170a5527884a654dddffcff701bdbf0f7c759a3b37414851",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/ossl-modules/legacy.so.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/fipscheck/libgmp.so.10.4.0.hmac",
+        "python_sha256": "fd921c4a661f25dee6ec4d8de64d92baf7a61ddd3f33694da12f83b43fd534b9",
+        "git_before_sha256": "fd921c4a661f25dee6ec4d8de64d92baf7a61ddd3f33694da12f83b43fd534b9",
+        "changed": false
+      },
+      {
+        "path": "usr/lib64/fipscheck/libgmp.so.10.4.0.hmac.copied",
+        "python_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "changed": false
+      }
+    ],
+    "source": "measured refreshed Python tree bytes; RPM names select paths only"
+  },
+  "archive_assertions": {
+    "AR1": "pass",
+    "AR2": "pass",
+    "AR4": "pass"
+  },
+  "archive_controls": {
+    "tools/closure/closure-config.txt": "63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa",
+    "tools/closure/closure-envelope.txt": "f849a4ce2a4bd53d30297f19708431222b1b1b9168fc32ec599066e9fc38b236",
+    "tools/bin/pkg_tools.sh": "3304b0f299f39e80eb536cd117b36db893b6767a90f4dcfd8706af3ed2448f80"
+  },
+  "oracle_sha256": "f19f9cdc6c856a3697addb705f09e67103f8c9802a44761d6e189b865a9c8db8",
+  "closure_declaration_sha256": "63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa",
+  "source_build_base": "6ed601008162f0527d289758005f7e16cffaf806",
+  "publishing_revision": null,
+  "phase_times": {
+    "refresh-evidence/started": "2026-09-17T20:02:18Z",
+    "refresh-evidence/done": "2026-09-17T20:05:08Z",
+    "evidence/preflight.started": "2026-09-17T20:22:52Z",
+    "evidence/preflight.done": "2026-09-17T20:22:52Z",
+    "evidence/build.started": "2026-09-17T20:22:58Z",
+    "evidence/build.done": "2026-09-17T20:28:15Z",
+    "evidence/assemble.started": "2026-09-17T20:28:29Z",
+    "evidence/assemble.done": "2026-09-17T20:30:51Z",
+    "evidence/probe.started": "2026-09-17T20:31:03Z",
+    "evidence/probe.done": "2026-09-17T20:35:27Z",
+    "archive-checks/started": "2026-09-17T20:35:48Z",
+    "archive-checks/done": "2026-09-17T20:41:53Z"
+  }
+}
