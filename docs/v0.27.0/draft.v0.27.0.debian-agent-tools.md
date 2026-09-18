@@ -777,6 +777,7 @@ the correction below.
 | D6 | cplx release carrying this effort | (a) fold into the current 0.26.0 cycle; (b) dedicated next cycle | (b): v0.26.0 shipped on 2026-08-06, this effort opens the v0.27.0 cycle |
 | D10 | C++ runtime generation shipped in the root | (a) keep the GCC 11 `libstdc++.so.6.0.29` the platform provides, inheriting a one-node margin (`GLIBCXX_3.4.29` against an agent at `3.4.30`); (b) ship the GCC 12 generation, sourced from a toolset payload, so the archive absorbs a wheel set that moves past that node | DECIDED inside requirement 4 as a CONDITIONAL POLICY, by the round 1 specification review of `issue.v0.27.0.toolchain-runtime-closure.md`. The consumer set is every shipped ELF recording a `DT_NEEDED` on `libstdc++.so.6`, measured once the final wheel and dependency set is fixed. The comparison covers `GLIBCXX_` and `CXXABI_` against what the shipped `libstdc++` defines, since libstdc++ provides both namespaces, while `libgcc_s` is checked separately against its own `GCC_` needs. Ship (a) if and only if every one of those is satisfied; otherwise ship (b) and re-run every closure check of requirement 4 against the new root; if NEITHER generation satisfies them, packaging FAILS rather than taking the closer one. ZERO SPARE NODES IS ALLOWED: the threshold is satisfaction, not headroom, so "the margin is gone" is explicitly NOT the switch condition, being ambiguous between zero headroom and an unsupported node. Requirement 7 supplies the measurement; requirement 4 owns the rule |
 | D9 | Architecture key across server minors | (a) copy the file set at every minor upgrade; (b) key on the major only; (c) exact curated definitions first, then eligible minor fallback, logged | decided: (a) was the temporary recovery; (c) is refined by [requirement 5](feature-request.v0.27.0.architecture-minor-fallback.md), consolidated on 2026-09-14. Prefer the highest lower minor, otherwise the lowest higher minor, within the same distribution, major and complete machine. Lists and mirrors resolve independently; indexes are generated for the detected key and never reused across minors. Either reload flag, or a missing or zero-length exact index, requires generation despite completion state. Resume progress applies only to the same selected list and detected key; changed or legacy state restarts. Correct 9.6 Python to `zlib-devel` before removing equivalent 9.8 curated definitions; retain indexes and operator-local properties. (b) remains rejected because exact divergent overrides must remain possible. |
+| D11 | Whether the venv a deployment runs must be the bytes the pipeline tested | (a) byte-identical: keep shipping the venv inside the pdfs archive, or ship the wheel set and sync offline from it; (b) lock-identical: create the venv on the target and `uv sync` it from the project lock | decided: **(b) lock-identical**, on 2026-09-18. The deployed environment is reproduced from the same pinned lock rather than copied from the prefix the pipeline tested, so identities are fixed while bytes are re-materialised. Two consequences follow and both belong to item 8 rather than to a note: drift must be DETECTED rather than assumed, so the deployed site-packages is verified after the sync against the retained wheel identities, reusing the inventory helper item 7 builds for D10; and rollback re-resolves from the previous release's lock instead of restoring copied bytes, so the recovery procedure is rewritten rather than inherited. The deployment also gains two prerequisites it does not have today, `uv` itself and a reachable index, which is why shipping the wheel set beside the archive and syncing offline from it stays open inside (b): it satisfies lock-identical without a network dependency and keeps every artifact digest-pinned |
 
 ## List of feature-requests and issues to create
 
@@ -789,6 +790,7 @@ the correction below.
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | completed | `docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md` | `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md` |
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
 | 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | pending | - | - |
+| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | - | - |
 
 ### Requirement details for the umbrella
 
@@ -1182,12 +1184,95 @@ writing a new one. The deferral retires itself: item 2 asserts the
 ownership register exact in both directions, so once the rebuild
 removes the object, the stale register entry fails until it is dropped.
 
+VENV ARRANGEMENT, SETTLED BY D11 ON 2026-09-18, AND BEARING ON THE TWO
+STEPS THIS ITEM HAS LEFT. This item keeps shipping the venv inside the
+pdfs archive, and its last two steps, pre-publication platform
+acceptance and publication with adoption, are validated on that
+arrangement. Item 8 replaces it. So the evidence those two steps retain
+is scoped to the shipped-venv deployment and must NOT be recorded as a
+durable guarantee that a deployed venv carries the bytes the pipeline
+tested: from item 8 onward that guarantee is lock-identical, not
+byte-identical. Two places where the wording matters. The platform
+acceptance measures the venv through the ABI sweep, the live trace and
+the wheel consumer roots, and what it establishes is that the shipped
+providers resolve a venv built from this lock, which item 8 keeps; it
+does not establish that a deployed venv is a copy. And the recovery
+procedure this item records is inherited by nothing: item 8 rewrites it,
+because restoring a previous release will re-resolve rather than restore
+copied bytes. Nothing in this item's plan changes, and no step is added
+here: item 8 is sequenced after publication precisely so that an
+accepted archive and its adoption evidence are not disturbed by a
+packaging change.
+
 Depends on: items 1 to 6.
+
+#### 8. Create the venv at deployment instead of shipping it
+
+Type: Feature-request. Slug: `deploy-venv-sync`. Regroups decision D11
+and the deployment half of the cleanups this collection unlocks.
+
+The pdfs archive carries the project venv today. `pkg_pdfs.sh` excludes
+result PDFs, `run.env` and the describe cache, and nothing excludes the
+`venvs/` tree, so a deployed prefix holds one measured at 529 MB on the
+RHEL server on 2026-09-18. `deploy_pkgs.sh` then selects the newest
+project venv directory and spends five of its twelve readiness checks on
+it: the venv python is present and executable, its ELF interpreter is
+anchored in the prefix, `import ssl, zlib` answers, the stdlib is
+anchored, and every path-bearing line of `pyvenv.cfg` names the prefix.
+Those five exist because a COPIED venv must be relocated. A venv created
+on the target is anchored by construction, so this item retires a whole
+class of relocation invariant rather than moving it.
+
+This item stops shipping it: the archive excludes the venv tree, and the
+deployment creates the environment when it is absent and runs `uv sync`
+against the project lock. The mechanism is not new and needs no
+invention. The pipeline already does exactly this before it packages, in
+`ci/provision_toolchain.sh`, which is why the collection's acceptance
+matrix already carries the `uv sync` then import row as required on both
+distributions. What changes is WHERE the venv is materialised, not how.
+
+D11 SETTLES WHAT THAT COSTS, and the cost is one sentence: the deployed
+venv is lock-identical rather than byte-identical. The pipeline tests one
+materialisation and the target runs another built from the same pinned
+lock. This item therefore owes a check the shipped-venv arrangement never
+needed, verifying the deployed site-packages after the sync against the
+retained wheel identities. Item 7 already builds the helper that does it,
+for the D10 measurement, and it proves installed ELF bytes equal retained
+wheel bytes, so this is a reuse rather than a new mechanism.
+
+TWO PREREQUISITES THE DEPLOYMENT DOES NOT HAVE TODAY, and the requirement
+owns both. `uv` is in neither archive: the pipeline installs it at
+provision time with the host `pip3` into its own prefix, so a deployment
+must be told where to obtain it. And syncing from the index needs that
+index reachable from a production account whose deployment is two
+tarballs and nothing else. Shipping the wheel set beside the archive and
+syncing offline from it answers both while staying inside D11, keeps
+every artifact digest-pinned, and trades an expanded 529 MB tree for
+compressed wheels.
+
+Rollback has the same shape and is the sharper risk. Restoring a previous
+pdfs archive restores copied bytes today; after this item it re-resolves
+from that release's lock, so a wheel withdrawn from the index or a
+changed `uv` can make a rollback fail at the moment it is needed. The
+offline wheel set answers this too, which is why the two questions are
+one decision.
+
+Acceptance: a deployment with no venv creates and syncs one; a deployment
+that already has one follows an explicit stated rule rather than an
+accident; the post-sync inventory matches the retained wheel identities;
+the five relocation-bound readiness checks are replaced by checks that
+suit a created venv; the heavy wheels import with no per-wheel patching,
+which is the row this collection already requires; and a rollback to the
+previous release is proved on the target rather than argued.
+
+Depends on: item 7. Sequenced after publication so that an accepted
+archive, its platform acceptance and its adoption evidence are not
+disturbed by a packaging change.
 
 ### Out of the collection
 
 The cleanups in the consuming project (raising its `tools/tools.version`
 pin, deleting the `Q26 INTERIM` blocks, restoring the coverage gate,
 dropping the pipeline rsync shim) live in another repository and are
-tracked there; they become possible once item 6 publishes. The move to
+tracked there; they become possible once item 7 publishes. The move to
 Python 3.14 (D8) belongs to a later cycle.
