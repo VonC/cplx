@@ -3886,3 +3886,636 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-3 -->
+
+## Round 1 by requestor - Step 5
+
+- Recorded: 2026-09-17T23:28:01+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 tools-archive-rebuild (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 5
+Review round: 1
+
+### Code review evidence for step 5 tools-archive-rebuild (round 1)
+
+request_index_tree: 4e7c04e71c476c83a5be33af4f0b07eb69810b07
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 5 --python /usr/bin/python3 --app-repo /var/tmp/tools-release-step5.GBXjZi6r/app (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): remove staged compiler probe
+group 1 path: src/setups/env/bin/pkg_tools.sh
+group 1 path: docs/v0.27.0/verify.relocation-rpath.sh
+group 2: test(tools): cover step 5 package boundaries
+group 2 path: docs/v0.27.0/verify.tools-release-package.sh
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 3: docs(tools): retain step 5 candidate evidence
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.python-selection.md
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-inputs.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-validation.txt
+group 3 path: docs/v0.27.0/inventory.tools-archive-rebuild.txt
+group 4: docs(tools-archive-rebuild): record step 5 validation
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.python-selection.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-inputs.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-validation.txt
+staged path: docs/v0.27.0/inventory.tools-archive-rebuild.txt
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/verify.relocation-rpath.sh
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-package.sh
+staged path: src/setups/env/bin/pkg_tools.sh
+```
+
+### Requestor assessment for step 5 tools-archive-rebuild (round 1)
+
+Yes. Step 5 has been fully implemented.
+
+The exact candidate is tools.2026-09-17_222857.tar.gz, 545310257 bytes,
+SHA-256 d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1.
+Step 1 real-backend proof preceded the owned native RHEL refresh/build. Explicit
+Python 3.13.15 selection, SQLite build and same-process file-backed probes,
+private-stage cleanup, preservation checks and declaration authority are
+recorded in the staged evidence. Only AR1/AR2/AR4/RA1 pass in the release record.
+Steps 6 and 7, including actual Jenkins acceptance and publication, remain pending.
+
+Native RHEL cumulative validation passed in 63 seconds at the four source hashes
+in evidence.tools-archive-rebuild.step5-authority.txt. Its full-log SHA-256 is
+0776c10a3fd39a2d7ef31f8c705cb5631d601428c0abc4eb664f5186edd84448. The separate
+actual-candidate inherited archive run passed all 539 cases with no selected
+residual programs. Historical library rows are parser input, not complete
+qualification of the refreshed library inventory.
+
+Fresh resumed verification matched current source hashes, the retained full
+log, record/capture bindings, rendered Markdown and pending cells. Read-only
+native checks rehashed both retained archives and verified their recorded
+SQLite and archive assertions. The raw-capture bundle is 181694148 bytes,
+SHA-256 7a06c17d136b0b6055cba861d4e4f220264ebf12a497a0a8e27e851aafb5d1bf.
+Both authority commits remain ancestors of the build base. git diff --check
+passed. A fresh ghog day passed shell lint and exited 5 at the unconfigured
+pytest environment. The plan explicitly adapts validation to native Bash and
+stdlib suites; it prohibits adding an unconfigured pytest gate.
+
+No production Python type or class was added. The finite package and ownership
+classes have explicit fixtures; no additional PBT dependency is needed. The
+new operations have fixed cost within existing linear packaging passes.
+No architecture, performance, coverage-gate or feature-integrity issue was
+found. No cplx coverage percentage is claimed. The validation plan records this
+scope and keeps the overall effort incomplete.
+
+Reproduction context: the plan command below runs on native RHEL, with an
+independent system Python and the application revision
+ea8363c401c97b4cfae8dfb9d6e9f0b7318d42b0. The existing ignored transport helper
+.reviews/a.step5.transport.sh full creates an isolated native fixture from
+current sources and that application checkout; read its platform/setup contract
+before invoking it from the Windows authoring environment. It does not rebuild
+the candidate. The retained native fixture at /var/tmp/tools-release-step5.GBXjZi6r
+also holds cplx, app, shellcheck-v0.10.0 and compiler entries used by the recorded
+command. Its compiler environment is confined to compiler processes.
+
+The ignored .reviews/a.step5.verify-record.py is a standalone stdlib record check.
+The ignored .reviews/a.step5.resume-retained.sh performs read-only retained
+artifact verification. Their captures and the full log remain in .reviews.
+Do not rerun the costly payload build solely to reproduce fixture validation.
+
+### Implementation report for step 5 tools-archive-rebuild (round 1)
+
+The packager now rejects symlinked tools/python and tools/python/root boundaries
+before copying and again in the private stage. It unlinks precisely the staged
+tools/python/root/a.out before the closure gate and archive operation. A directory
+at that path fails; terminal symlinks and hardlinks are unlinked without modifying
+protected targets. No live-tree deletion is performed.
+
+Only the resolved literal ownership entry was removed from the inherited
+relocation harness. The focused test script exercises seven pathname cases and
+five ownership cases through the original bookkeeping functions. The cumulative
+runner accepts step 5 and runs these plus existing installer, wrapper and SQLite
+acceptance controls.
+
+The existing native build/acceptance workflow refreshed curated inputs, selected
+Python 3.13.15 explicitly, rebuilt SQLite support and packaged the exact candidate.
+Evidence preserves refused attempts and their repairs, actual measured runtime
+bytes, unchanged payload/live/project sentinels, archive identity and source
+authority. Git was reused, with two shared paths aligned from the refreshed
+Python tree. No host packages were installed. The generated acceptance Markdown
+matches the validated JSON sidecar. Step 5 validation is recorded separately.
+
+### Change summary for step 5 tools-archive-rebuild (round 1)
+
+Root a.commit contains four mechanically validated groups for 13 staged paths.
+
+1. fix(tools): remove staged compiler probe
+   - src/setups/env/bin/pkg_tools.sh
+   - docs/v0.27.0/verify.relocation-rpath.sh
+2. test(tools): cover step 5 package boundaries
+   - docs/v0.27.0/verify.tools-release-package.sh
+   - docs/v0.27.0/verify.tools-archive-rebuild.sh
+3. docs(tools): retain step 5 candidate evidence
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+   - docs/v0.27.0/evidence.tools-archive-rebuild.python-selection.md
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-inputs.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-validation.txt
+   - docs/v0.27.0/inventory.tools-archive-rebuild.txt
+4. docs(tools-archive-rebuild): record step 5 validation
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+The generated Python bytecode cache is preserved locally and excluded through
+.git/info/exclude. It is not source or release evidence. No application changes
+are part of this staged request. The protocol owns transcript additions after
+the request snapshot; the authorized commit continuation handles any residual
+tracked changes after the reviewed batch.
+
+### Writer response for step 5 tools-archive-rebuild (round 1)
+
+Writer response:
+
+This is the first review round for Step 5. There is no earlier Step 5 feedback
+to accept or dispute. The requested review concerns the exact staged Step 5
+implementation and evidence, with later acceptance explicitly pending.
+
+### Reviewer focus for step 5 tools-archive-rebuild (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-1 -->
+
+## Round 1 by reviewer - Step 5
+
+- Recorded: 2026-09-17T23:46:37+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+Baseline index tree: 4e7c04e71c476c83a5be33af4f0b07eb69810b07
+
+Assessed index tree: 4e7c04e71c476c83a5be33af4f0b07eb69810b07
+
+### Implementation check for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 5 has been fully implemented.
+
+The verdict rests on the reviewer's own measurements, including hashing the
+candidate archive itself rather than reading its recorded digest.
+
+The candidate is real and is the archive the record names. The reviewer located
+it on the build host and hashed both retained copies, the one inside the
+isolated run root the build used and the retained evidence copy: both are
+`d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1`, and the
+retained copy is exactly 545310257 bytes, matching the record and the request.
+Worth noting for a future reader: the archive is deliberately not in the
+account's ordinary package directory, whose newest entry and `tools.latest`
+symlink still point at a September 13 archive. The build ran in an isolated
+owned namespace with its own home, which is what the plan requires of these
+runs, so the live installation was left alone.
+
+Implementation against Step 5's named work:
+
+- `pkg_tools.sh` unlinks exactly the staged `tools/python/root/a.out` with
+  `rm -f`, not a recursive remove, so a directory at that path fails the run
+  instead of being deleted, and a terminal symlink or hardlink is unlinked
+  without touching the protected provider it names. The symlink boundary checks
+  now cover `tools/python` and `tools/python/root` as well, in both the live
+  pre-check and the staged post-copy check, which is what stops a copied
+  directory symlink from redirecting the cleanup into the live tree. Other
+  `a.out` names stay unadjudicated, as the comment says.
+- The inherited 6,661-line relocation harness changed by one line: the literal
+  `STEP4_ARCHIVE_DEFECTS` register is now empty because the rebuild discharged
+  its only entry. That is exactly the "only literal register updates" boundary
+  the plan draws around that file.
+- `verify.tools-release-package.sh` covers the step's whole planned matrix and
+  proves the properties rather than asserting them. Seven package cases run the
+  real packager over regular, absent, symlink, hardlink, directory, and
+  symlinked `python` and `python/root` boundaries, and every case compares the
+  entire live tree before and after with `diff -r --no-dereference`, so live
+  preservation is verified rather than assumed. The gate stub records the staged
+  prefix and copies the gated tree, and the test then unpacks the produced
+  archive and diffs the two trees, which is the plan's "same trimmed inventory
+  reaches gate and tar" as a byte comparison. It also confirms the probe is
+  already gone when the gate runs, `.env` survives, `gcc` is trimmed, the
+  unrelated `tools/git/root/a.out` survives, the protected providers and loader
+  are byte-identical in the archive, the loader hardlink identity survives, and
+  the staging prefix is removed afterwards.
+- The five register controls drive the actual inherited bookkeeping functions,
+  extracted by name from the production harness rather than reimplemented, with
+  an assertion that each one loaded so a failed extraction fails the test. They
+  cover clean, stale, unowned, owned and replaced, and they treat an unowned
+  residual as an explicit later finding rather than a discharged population.
+- The cumulative runner accepts step 5 and adds the new harness plus the
+  inherited installer, wrapper-scope and SQLite acceptance suites.
+
+Evidence and record, each item checked rather than accepted:
+
+- The generated acceptance Markdown is byte-identical to the validator's own
+  `render` output over the sidecar, 34341 characters, so the human view is
+  derived from the record rather than written beside it.
+- The record keys its single candidate by that candidate's own SHA-256, records
+  Python 3.13.15 with a `clean` dated regression decision, which is the pairing
+  the validator requires, and passes exactly AR1, AR2, AR4 and RA1 with
+  everything else pending or not applicable. Four of thirty required
+  publication cells pass, so this record cannot authorize publication, which is
+  correct with Step 6 unstarted.
+- All six indexed captures verify: the reviewer recomputed each digest from the
+  versioned file, six unique reads, every one `versioned` retention rather than
+  an ignored local path.
+- The four recorded step-5 source hashes match the current files exactly.
+- Both authority commits, the source authority and the retention merge the plan
+  names, are ancestors of the recorded build base, which the reviewer verified
+  with an ancestry check rather than trusting the claim. The declaration digest
+  is unchanged and `renewed=no`, and no closure declaration file is staged, so
+  the conditional renewal was correctly not performed and no digest was edited
+  in place.
+
+Architecture: the change stays in the native packaging adapter; no business
+layer gains build responsibilities; the focused harness owns its fixtures. The
+650-line Python ceiling does not apply to these Bash files. Nothing needs fixing.
+
+Performance: the new unlink and two boundary checks are fixed cost, the existing
+stage copy, closure walk and tar keep their linear passes, and the fixtures use
+a fixed case count with linear tree comparisons. No new sort or quadratic path.
+No performance issue needs addressing.
+
+Unit test coverage: no Python class and no class-focused unit test changed. This
+repository's declared floor is shell lint and its validation entry is the native
+cumulative runner, so no percentage is claimed for these Bash files, and the
+application's gate measures its own scope. Both new top-level test functions are
+invoked by their case loops, their callbacks are invoked by the extracted
+production functions, and the two affected packager functions are exercised by
+the fixtures and by the real candidate build. No unit-tested class below 100%
+needs completing, and no top-level symbol outside the coverage gate is
+unreferenced.
+
+Feature integrity: the real gate still runs against the same trimmed stage that
+is archived, protected bytes and loader aliases survive, the live tree is
+unchanged, and stale and unowned residual reporting still works. The inherited
+installer, wrapper, SQLite, D10, agent, record and publication suites remain
+green in the reviewer's own run.
+
+Scope: no publication, adoption, release-pin change or umbrella completion is
+claimed, and the platform acceptance cells remain pending for Step 6.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 5 rows were checked against the template and against this
+reviewer's own measurements, and they needed no correction:
+
+- The status sentence is exactly `Yes. Step 5 has been fully implemented.`,
+  followed by a blank line and a short prose summary.
+- No stale `Missing work for Step 5` section remains, which is correct for a Yes.
+- Every section the template orders is present and filled, each check section
+  ends with its required explicit phrase, and the coverage section names the
+  measured scopes and adds the second phrase about symbols outside the gate.
+- The document-level line correctly remains `No, it is not implemented.`, with
+  its theme sentence updated to say Steps 1 to 5 are checked and Steps 6 and 7
+  plus final-archive acceptance remain pending.
+- The numbers in those rows are accurate. The reviewer independently confirmed
+  the archive size and digest, the declaration digest and no-renewal state, the
+  reachability of both authority commits from the build base, the six capture
+  bindings, the passing cell set, the rendered Markdown equality and the four
+  source hashes. The recorded 63-second native run matches the reviewer's 64.
+- The rows also state their own limits, which is the part worth crediting: they
+  say the historical library rows are inherited parser input rather than
+  complete refreshed-library qualification, and that the `ghog day` exit 5 is
+  the unconfigured pytest environment rather than a failed gate.
+
+Because no validation-plan path was edited, no pre-repair blob was recorded and
+no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+Both resolved mandatory commands were run by the reviewer in this round, before
+any repair could have been made, and both pass.
+
+Project floor: `lint_shell: 58 tracked scripts`, `lint_shell: clean`, exit 0.
+
+Native cumulative runner at `--step 5` on RHEL 9.8 with the independent
+`/usr/bin/python3` 3.9.25: `validation exit=0 elapsed=64s`, against the writer's
+recorded 63 seconds. The reviewer read the transport driver first as the request
+asks, then copied the whole remote log back and confirmed inside it:
+
+- `Independent interpreter: /usr/bin/python3 3.9.25`.
+- All seven package cases by name: `PASS package/regular`, `absent`, `symlink`,
+  `hardlink`, `directory`, `python-link` and `root-link`.
+- All five register controls by name: `PASS register/clean`, `stale`, `unowned`,
+  `owned` and `replaced`, then
+  `PASS tools-release-package: 7 package cases, 5 register controls`.
+- The inherited suites this step newly wires: the installer harness at step 3
+  with zero failures, and the wrapper-scope harness reporting
+  `OBJECTIVE MET for step 2`.
+- Every earlier step's suite still green: 16 record tests, 49 D10 cases, 33
+  agent shell cases, 15 transport tests, 6 publication tests and 25 SQLite
+  checks.
+- The frozen publication suite with `failures 0` and `OBJECTIVE MET for step 5`.
+
+The reviewer honoured the request not to rebuild the payload. The expensive
+build is not part of the fixture gate, and re-running it would have proved
+nothing the archive's own digest does not already establish.
+
+Beyond the declared set, the reviewer ran the installed staged sensitive-content
+hook, which step 4 round 2 showed can refuse a commit that the mechanical plan
+checker calls ready. It returns exit 0 here, so this staged set is committable
+as well as mechanically valid.
+
+Independent identity binding, which for this step means the archive itself:
+
+- Both retained copies of `tools.2026-09-17_222857.tar.gz` hash to
+  `d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1` and the
+  retained evidence copy is exactly 545310257 bytes. The reviewer located them
+  on the host and hashed the bytes rather than reading the recorded digest.
+- All six indexed capture digests recomputed and matched, all `versioned`.
+- All four recorded step-5 source hashes recomputed and matched.
+- Both authority commits are ancestors of the recorded build base, checked by
+  ancestry rather than accepted, and the declaration digest is unchanged with no
+  renewal and no staged declaration file.
+- The generated acceptance Markdown is byte-identical to the validator's render
+  of the sidecar.
+
+Coverage limits stated rather than assumed: this repository declares shell lint
+as its floor and has no pytest project, so no percentage is claimed for these
+files, and the application's gate measures its own source scope. The `ghog day`
+exit 5 the evidence records is not a failed gate here, because that command is
+not in this repository's resolved set; the declared floor ran clean.
+
+One precision about what a check proved. The reviewer confirmed the record
+cannot authorize publication from its cell census, four of thirty required cells
+passing, rather than from a validator call: the direct call refused earlier, on
+archive identity, because the reviewer passed a stand-in path instead of the
+545 MB archive. The census is the sound basis for that statement.
+
+### Resolved validation set and sources for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+The reviewer ran the union of the request validation set and the current
+resolver set. The union is the same two commands and both pass.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Re-resolved from the
+  versioned declaration and run through the project environment so the pinned
+  ShellCheck resolved. Result: 58 tracked scripts, clean, exit 0.
+- `bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 5 --python
+  /usr/bin/python3 --app-repo <owned-app-snapshot>`, source `plan`. Run on the
+  native RHEL host through the retained home-local transport driver, which the
+  reviewer inspected first: it builds its material from both repositories'
+  committed state, overlays the four current staged sources, and runs that exact
+  command in a fresh owned snapshot. Result: `validation exit=0 elapsed=64s`.
+
+The declared command again embeds an absolute host snapshot path, as it did in
+step 3, so it is not runnable from the authoring host as written and will stop
+being runnable once that directory is cleaned. The home-local driver is what
+makes it reproducible in practice, and naming the driver in the declaration
+rather than the frozen path would close the gap.
+
+Caller evidence retained inside the artifact home, not in versioned notes:
+`a.code-review.s5-native-validation.log` (the full remote log),
+`a.code-review.s5-render.txt` (the render comparison) and
+`a.code-review.s5-plan.json` (the independent commit-plan result).
+
+### Resolver drift and direction for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+No drift in either direction.
+
+Re-resolving the project floor from the versioned `.review-validation` yields
+the same single `project` command the request carries, and the one `plan`
+addition parses through the current resolver contract, so the union equals both
+sets. The addition changed identity since step 4, which is expected for an
+effort-scoped command that now names `--step 5`, and the declaration file itself
+was correctly left alone.
+
+One note rather than a drift finding: step 4's final round had four resolved
+commands, including the application walk and the staged sensitive-content gate.
+Step 5 declares two, which is consistent, since no application file is staged
+here. The reviewer ran the sensitive gate anyway, because step 4 established
+that a mechanically ready plan can still be refused at commit time.
+
+### Repository state around validation for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher rather than from equivalent Git commands.
+
+- Request-time index tree `4e7c04e71c476c83a5be33af4f0b07eb69810b07` equals the
+  baseline captured at entry and the live index captured after both validation
+  runs, the archive verification on the host and the implementation check.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `0218245242f1ccec3561ef41f23322e0c6c2f3a12e69981a8fc1c9698e769fc6`,
+  the same digest observed in every round of this effort. No umbrella row was
+  completed from reviewer mode, correctly, with Steps 6 and 7 open.
+- Validation-state comparison over the ordered path set, holding all 13 staged
+  step paths and the file named by the project command: `acceptable: true` with
+  empty `tracked_paths`, `untracked_paths` and `ignored_paths`.
+- The working tree matches its entry state: 13 staged paths plus the protocol's
+  own unstaged transcript modification, which the reviewer correctly leaves
+  unstaged.
+- This round produced no reviewer residue in either repository. The native run
+  executes inside a fresh owned host snapshot, the archive verification is
+  read-only hashing on the host, and the record and render checks were run with
+  bytecode writing disabled after an earlier step showed that omission creates
+  untracked caches.
+- Ordering was correct: the index baseline, umbrella digest and validation-state
+  baseline were captured and the manifest written before any assessment.
+- Reviewer-authored evidence stayed inside the artifact home as ignored `a.*`
+  files, so none of it became a tracked side effect of this review.
+
+### Repair inventory for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+`a.commit` remains accurate and is executable; the reviewer amended nothing.
+
+The mechanical result is an independent
+`commit-plan-check.bat --format json` rerun against the received state rather
+than the value embedded in the request: `state: valid`, `ready: true`, exit 0,
+no diagnostics, 13 staged paths in four ordered groups matching the request
+exactly.
+
+- Group 1, `fix(tools): remove staged compiler probe`: the packager and the
+  inherited relocation harness. Least dependent and correctly first, since the
+  behavior it changes is what the rest records.
+- Group 2, `test(tools): cover step 5 package boundaries`: the new focused
+  harness and the cumulative runner that wires it.
+- Group 3, `docs(tools): retain step 5 candidate evidence`: the sidecar, the
+  acceptance view, the four new evidence captures and the program inventory.
+- Group 4, `docs(tools-archive-rebuild): record step 5 validation`: the
+  validation plan alone, most dependent, since it summarizes the other three.
+
+Ordering is least to most dependent, every staged path appears exactly once,
+and each subject is a conventional single-purpose line whose type matches its
+content: `fix` for the packager behavior, `test` for the fixtures, and two
+`docs` groups separating retained candidate evidence from the step's validation
+record. Splitting those two is a reasonable choice rather than a defect, since
+the evidence captures and the validation verdict have different review
+lifetimes.
+
+Scope matches the step: no path outside Step 5's named files, its evidence or
+its validation record, and no application change, which is right because Step 5
+is a cplx-side build and packaging step.
+
+Executability was checked as well, not just mechanical validity, because step 4
+showed the two can differ: the installed staged sensitive-content hook returns
+exit 0 over this index, so this commit can actually run.
+
+### Findings and boundaries for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+No rework is required for Step 5, and nothing in the staged content needs to
+change before the human decides.
+
+Three things are worth recording, none of them blocking.
+
+- The declared plan command again embeds an absolute path inside a host scratch
+  directory, as step 3's did. It is not runnable from the authoring host as
+  written, and once that directory is cleaned nobody can re-run it, including a
+  later reader of this transcript. The home-local transport driver is what makes
+  it reproducible, and naming the driver in the declaration rather than the
+  frozen snapshot path would close the gap. Step 4's final round did exactly
+  that for its application walk, so the pattern is already established here.
+- A future reader of this evidence will not find the candidate where the
+  ordinary package directory would suggest: that directory's newest entry and
+  its `tools.latest` symlink still point at a September 13 archive, because this
+  build correctly ran in an isolated owned namespace. The reviewer had to search
+  the host to find the two retained copies. One sanitized line in the candidate
+  capture saying the archive is retained in an isolated run root and an evidence
+  copy, without the private path, would save that search and make the retention
+  claim checkable by whoever runs Step 6.
+- Step 6 will need to bind exact inputs and reassess affected cells. The record
+  is already shaped for that, with 26 of 30 required publication cells pending
+  and the wheel, lock and platform cells untouched, so nothing here preempts
+  that work.
+
+Worth crediting, because these are the parts that made this round quick to
+verify: the acceptance view is rendered from the sidecar rather than written
+beside it, the register controls drive the real inherited functions instead of
+reimplementations and fail if the extraction breaks, every package case compares
+the whole live tree before and after, and the evidence states its own limits
+about historical library rows and the unconfigured pytest environment.
+
+When the exchange reaches the human gate, the registered choices are "Rework and
+review again" and "Commit". The commit decision belongs to the human, not to
+this reviewer and not to the requestor.
+
+### Decision rationale for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+The recommendation is commit-ready, and it is advisory only: it does not
+authorize a commit.
+
+All six readiness-floor results pass:
+
+1. Identity. Exact agreement between the live exchange, the envelope, the
+   human-readable request, the plan, the declared step, the positive round and
+   the request-time index tree, which still matched at publication.
+2. Completeness. Step 5's completion boundary is met: an identified archive, a
+   conclusive Python and SQLite build result, the private-stage cleanup with its
+   ownership accounting, and resolved declaration authority.
+3. Validation and coverage. Both resolved commands were run and pass, with the
+   native run confirming all seven package cases, all five register controls,
+   the newly wired installer and wrapper suites and every earlier suite. The
+   reviewer additionally ran the installed commit gate, which step 4 proved can
+   refuse a plan the mechanical checker calls ready.
+4. Staged attribution. No reviewer repair, so nothing is attributed to it, and
+   this round left no residue in either repository.
+5. Unresolved findings. None.
+6. `a.commit`. Mechanically valid, correctly grouped and ordered, and
+   executable.
+
+No substantive repair was made in this round, so the recommendation is not
+disqualified by the same-round rule.
+
+What carried this round was measuring the deliverable rather than reading about
+it. Step 5's whole point is that a specific archive exists with a specific
+identity, so the reviewer located it on the build host and hashed the bytes:
+both retained copies come to
+`d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1`, and the
+retained evidence copy is exactly 545310257 bytes. That took a search, because
+the archive is deliberately absent from the account's ordinary package
+directory, whose newest entry is four days older; the build ran in an isolated
+owned namespace, which is what the plan requires and what keeps the live
+installation untouched. Finding it there is a confirmation of the isolation
+rule, not an anomaly.
+
+The rest of the evidence chain was checked the same way: the six indexed capture
+digests recomputed from their versioned files, the four recorded source hashes
+recomputed, both authority commits confirmed as ancestors of the recorded build
+base by an ancestry check, the declaration digest unchanged with no renewal and
+no staged declaration file, and the acceptance Markdown byte-identical to the
+validator's own render of the sidecar. The record passes exactly four of thirty
+required publication cells, so it cannot authorize publication, which is the
+correct state before Step 6.
+
+Two smaller judgments are recorded so they are not mistaken for oversights. The
+statement that the record cannot authorize publication rests on the cell census
+rather than on a validator call, because the reviewer's direct call refused
+earlier on archive identity when handed a stand-in path instead of the 545 MB
+file. And the reviewer honoured the request not to re-run the payload build: the
+build is not part of the fixture gate, and re-running it would prove nothing the
+archive's own digest does not already establish, while the plan explicitly warns
+against repeated expensive build loops.
+
+What this answer does not claim: no platform acceptance, no publication, no
+adoption, no release-pin change and no umbrella completion. Twenty-six required
+cells remain pending, the historical library rows are inherited parser input
+rather than complete refreshed-library qualification, and Step 6 owns the actual
+RHEL and Debian acceptance of this candidate.
+
+### Final reviewer decision for step 5 tools-archive-rebuild (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-5-round-1 -->
+
+## Round 1 by human - Step 5 - human-confirmation
+
+- Recorded: 2026-09-18T09:20:19+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
