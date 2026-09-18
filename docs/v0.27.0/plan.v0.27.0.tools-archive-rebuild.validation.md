@@ -3,7 +3,7 @@
 No, it is not implemented.
 
 Track the seven steps in [the implementation plan](plan.v0.27.0.tools-archive-rebuild.md).
-Steps 1-2 are checked below. Steps 3-7 and final-archive acceptance remain pending.
+Steps 1-5 are checked below. Steps 6-7 and final-archive acceptance remain pending.
 
 ## File-based IO cost clarification
 
@@ -546,39 +546,135 @@ No existing feature or reporting capability is impaired.
 
 ### Analysis of Step 5 implementation state
 
-Not started. Step 5 is not implemented because no item 7 final candidate, cleanup result or release-time Python decision has been established.
+Yes. Step 5 has been fully implemented.
+
+The explicitly selected Python 3.13.15 was refreshed and rebuilt with SQLite
+in the owned RHEL namespace. The actual archive `tools.2026-09-17_222857.tar.gz` is bound to
+build evidence, preservation comparisons and passing AR1/AR2/AR4 assertions.
+Declaration authority remains valid. Step 6 runtime acceptance and the final
+publishing revision remain pending, as the plan requires.
 
 ### Goal for Step 5
 
-Build the explicitly selected Python with SQLite, clean the private archive stage and preserve declaration authority.
+Build the explicitly selected Python with SQLite, clean the private archive
+stage and preserve declaration authority.
 
 ### Step 5 improvement expectations
 
-The exact timestamped archive has conclusive build evidence; every inherited ownership entry is discharged correctly.
+The exact timestamped archive has conclusive build evidence; every inherited
+ownership entry is discharged correctly.
 
 ### What was implemented for Step 5
 
-_(empty — no check has taken place yet.)_.
+- **Private stage**: `pkg_tools.sh` unlinks only `tools/python/root/a.out`
+  before the closure gate and tar. It rejects symlinked parent boundaries and
+  a directory at the exact residual path. The live tree and protected providers
+  remain intact, including terminal symlink and hardlink cases.
+- **Residual accounting**: only the discharged literal `STEP4_ARCHIVE_DEFECTS`
+  register changed in the inherited relocation harness. The new focused harness
+  checks seven package cases and clean, stale, unowned, owned and replaced
+  ownership controls. Gate/tar trees compare equally; unrelated names survive.
+- **Refresh and build**: the dated official-source review selected 3.13.15.
+  Existing item 5 resolution supplied 106 curated rows and 81 distinct RPMs.
+  Owned temporary space and selected-tool context repairs retained their refused
+  attempts. The existing extraction can retain newer files; the capture records
+  measured runtime bytes separately from input RPM identities. Git was reused,
+  with 2 shared paths aligned from the refreshed Python tree.
+  No host packages were installed and Git was not rebuilt.
+- **SQLite and archive evidence**: the existing acceptance driver completed
+  explicit reconfiguration, clean compilation, installation, promotion and
+  operator probes. Configured SQLite, same-process mapped-provider identity and
+  file-backed commit/close/reopen checks passed. `pkg_tools.sh` produced
+  545310257 bytes, SHA-256 `d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1`, with SHA-1, commands and elapsed times
+  recorded in the [candidate capture](evidence.tools-archive-rebuild.step5-candidate.json).
+  Live trees, payloads, Git executables and the project sentinel passed their
+  preservation comparisons. Raw captures and the exact archive are retained.
+- **Actual archive assertions**: the pre-frozen program oracle, actual extracted
+  archive and inherited harness established zero selected residual programs,
+  an empty handoff and an empty, non-stale register. All 539 cases passed;
+  AR1, AR2 and AR4 pass.
+  Historical library rows provide the inherited parser input; they do not claim
+  complete refreshed-library qualification.
+- **Authority and record**: source authority `13c80d572ba7bda91728806ad7dc11c53629a506`
+  and retention merge `5f8d4d67ca549bb74e3bcbb798124d628c3d0619` are reachable from
+  build base `6ed601008162f0527d289758005f7e16cffaf806`. The declaration remains
+  `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa` and matches the
+  packaged file. No renewal was required. Source overlay, authority and future
+  publishing revision are distinct. The sidecar binds six capture digests and
+  only AR1/AR2/AR4/RA1 pass; its Markdown is rendered from that sidecar.
+- **Cumulative validation**: native RHEL `verify.tools-archive-rebuild.sh --step 5`
+  passed in 63 seconds with syntax, lint and compile gates; 7 package cases,
+  5 register controls, 63 installer cases, 53 wrapper cases, 38 SQLite acceptance
+  controls and all earlier suites passed. The inherited closure suite reported
+  254 cases, zero failures. The [validation capture](evidence.tools-archive-rebuild.step5-validation.txt)
+  records the full-log digest and distinguishes fixtures from candidate proof.
+- **Resume verification**: the four current source hashes and retained full-log
+  digest match that native run. A fresh record check verified capture bindings,
+  rendered Markdown and pending acceptance cells. Read-only checks of the
+  retained candidate and raw-capture bundle verified their sizes, SHA-256 and
+  SHA-1. A fresh `ghog day` passed shell lint, then stopped with exit 5 because
+  cplx has no configured pytest environment. The plan's native cumulative runner
+  supplies the required validation; no pytest or coverage percentage is claimed.
 
 ### New types/classes introduced for Step 5
 
-_(empty — no check has taken place yet.)_.
+No production class or type was introduced. `package_case` and `register_case`
+are test-only Bash functions in the focused harness; its callbacks exercise
+unchanged inherited ownership functions. Existing refresh, acceptance and
+packaging entry points perform the actual build.
 
 ### Architecture check for Step 5
 
-_(empty — no check has taken place yet.)_.
+The change stays in the native packaging adapter. No business layer imports a
+technical dependency or gains build responsibilities. The focused test owns its
+fixtures; the 6,661-line inherited harness changes only its literal register,
+as the plan explicitly requires. The plan's 650-line Python-file ceiling does
+not apply to these Bash files. Evidence files contain data, with
+generated release-record prose derived from the existing validator.
+
+No, there is no architecture violation, smell or size issue to address for Step 5.
 
 ### Performance check for Step 5
 
-_(empty — no check has taken place yet.)_.
+The new unlink and two parent-boundary checks have fixed cost. Existing stage
+copying, closure walks and tar creation retain their linear passes. The focused
+fixtures use a fixed number of cases and linear tree comparisons. Evidence
+hashing and measured runtime alignment process each selected object once per
+phase; no new quadratic or sorting path was introduced. The captures retain
+refresh, build, promotion and package times. The successful native build was
+not repeated after its checks passed.
+
+No, there is no performance issue to address for Step 5.
 
 ### Unit test coverage check for Step 5
 
-_(empty — no check has taken place yet.)_.
+No Python class or class-focused unit test was changed. This repository's
+planned native cumulative runner is the validation entry for these Bash
+integration and acceptance checks. The application's separate coverage gate
+measures `src/pdfss`; its prior green result supplies no percentage for cplx
+scripts or developer tools. The stdlib fixture runs likewise make no percentage
+claim for those files.
+
+Both new top-level test functions are invoked by their case loops. Their local
+callbacks are referenced by the extracted production functions. The affected
+`pkg_tools_build_stage` and `pkg_tools_trim_stage` functions are called by the
+real packager in fixtures and in the candidate build. The cumulative runner
+executes every newly wired entry. The finite pathname and ownership classes are
+covered explicitly; a property-based generator adds no required case here.
+
+No, there is no unit-tested class below 100% that needs completing for Step 5.
+No, there is no unreferenced top-level symbol outside the coverage gate.
 
 ### Feature integrity for Step 5
 
-_(empty — no check has taken place yet.)_.
+The real closure gate still runs against the same trimmed stage that is archived.
+Protected loader/provider bytes and loader aliases survive; the live build tree
+is unchanged. Stale and unowned residual reporting remains effective. Existing
+installer, wrapper, SQLite, D10, agent, release-record and publication fixtures
+remain green. PA results, multi-role RA2, lock/wheel identities, publication and
+adoption remain pending. Step 6 must bind exact inputs and reassess affected cells.
+
+No existing feature or reporting capability is impaired by Step 5.
 
 ## Step 6. Complete pre-publication platform acceptance
 
