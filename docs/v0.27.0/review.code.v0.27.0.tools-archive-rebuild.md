@@ -5032,47 +5032,47 @@ evidence to be faked or rushed; the step stays `No` until that evidence exists.
 
 1. Make the staged set committable.
 
-The installed sensitive-content hook refuses three staged locations. Two are
-functional uses in `docs/v0.27.0/acceptance.tools-archive-rebuild.sh`: line 330
-changes into the project directory under the deployed prefix, and line 415
-discovers the venv under it with a pattern embedding the name. Derive the
-project directory instead of writing it: the deployed prefix holds exactly one
-project directory under `pdfs/`, so discover it and assert that it is unique,
-or take it as an explicit argument from the caller, which can hold the real
-value in ignored context. Step 4 round 3 fixed the same pattern in
-`verify.tools-release-agent.sh` by asserting the path's shape rather than its
-literal, and that approach carries over directly.
+   The installed sensitive-content hook refuses three staged locations. Two are
+   functional uses in `docs/v0.27.0/acceptance.tools-archive-rebuild.sh`: line 330
+   changes into the project directory under the deployed prefix, and line 415
+   discovers the venv under it with a pattern embedding the name. Derive the
+   project directory instead of writing it: the deployed prefix holds exactly one
+   project directory under `pdfs/`, so discover it and assert that it is unique,
+   or take it as an explicit argument from the caller, which can hold the real
+   value in ignored context. Step 4 round 3 fixed the same pattern in
+   `verify.tools-release-agent.sh` by asserting the path's shape rather than its
+   literal, and that approach carries over directly.
 
-The third is in the umbrella, line 1286, where the created venv's location is
-written with the real name twice. The umbrella names the consuming project
-`my-project` everywhere else, so write the path with that name, or describe it
-as the project's venv directory without the literal. Then run the installed
-hook against the index and require it clean before committing; it is the gate
-the commit will actually meet, and `commit-plan-check` does not consult it.
+   The third is in the umbrella, line 1286, where the created venv's location is
+   written with the real name twice. The umbrella names the consuming project
+   `my-project` everywhere else, so write the path with that name, or describe it
+   as the project's venv directory without the literal. Then run the installed
+   hook against the index and require it clean before committing; it is the gate
+   the commit will actually meet, and `commit-plan-check` does not consult it.
 
 2. Restore the application CI helpers under the required interpreter.
 
-Add `from __future__ import annotations` at the top of
-`app:ci/tools_abi_scan.py`, `app:ci/tools_test_evidence.py` and
-`app:ci/tools_wheel_capture.py`. That keeps the annotations the lint pass added
-while making them lazy, so Python 3.9 never evaluates `str | None` at import.
-The reviewer imported all five helpers under the host's `/usr/bin/python3`
-(3.9.25) exactly as the cplx fixture loads them: those three raise `TypeError`,
-`tools_candidate_bundle.py` imports cleanly, and `tools_test_plugin.py` fails
-only on the absent `pytest`, which is expected for a plugin that loads inside
-the application venv. Two of the three run under `TOOLS_AUTHORING_PYTHON`, whose
-default is `/usr/bin/python3`, so this is not only a fixture concern.
+   Add `from __future__ import annotations` at the top of
+   `app:ci/tools_abi_scan.py`, `app:ci/tools_test_evidence.py` and
+   `app:ci/tools_wheel_capture.py`. That keeps the annotations the lint pass added
+   while making them lazy, so Python 3.9 never evaluates `str | None` at import.
+   The reviewer imported all five helpers under the host's `/usr/bin/python3`
+   (3.9.25) exactly as the cplx fixture loads them: those three raise `TypeError`,
+   `tools_candidate_bundle.py` imports cleanly, and `tools_test_plugin.py` fails
+   only on the absent `pytest`, which is expected for a plugin that loads inside
+   the application venv. Two of the three run under `TOOLS_AUTHORING_PYTHON`, whose
+   default is `/usr/bin/python3`, so this is not only a fixture concern.
 
-The same lint pass will reintroduce the problem unless something enforces the
-floor. A single check that imports the independent-interpreter helpers under
-the plan's minimum Python would have caught `6281b10a` before it landed. The
-cumulative runner already exercises them, but only when someone runs it, which
-is why the writer's recorded pass, taken at `ea8363c4`, still read green.
+   The same lint pass will reintroduce the problem unless something enforces the
+   floor. A single check that imports the independent-interpreter helpers under
+   the plan's minimum Python would have caught `6281b10a` before it landed. The
+   cumulative runner already exercises them, but only when someone runs it, which
+   is why the writer's recorded pass, taken at `ea8363c4`, still read green.
 
 3. Re-run the declared native cumulative validation against the current
-application and record which application commit it used. The failure stopped
-the run at the step 4 agent fixtures, so the 52 acceptance fixtures this step
-adds were not reached in the reviewer's run and remain unconfirmed.
+   application and record which application commit it used. The failure stopped
+   the run at the step 4 agent fixtures, so the 52 acceptance fixtures this step
+   adds were not reached in the reviewer's run and remain unconfirmed.
 
 Worth recording as done well, because it is the part of this round that most
 reduces risk: the writer found a real deployment defect through the real RHEL
@@ -5706,3 +5706,1488 @@ has been started. Human resolution must establish how this partial commit is
 to pass the owning workflow without claiming Step 6 is complete.
 
 <!-- review-entry-id: escalation-round-2-2 -->
+
+## Round 2 by human - Step 6 - human-reclaim - attempt 2
+
+- Recorded: 2026-09-18T22:35:54+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: human-reclaim
+
+## Human authorization to reclaim the Step 6 exchange
+
+The human instructed: "OK reclaim it and publish a new step 5 request then stop".
+
+The old Step 6 round 2 found no defects in the staged work; its changes-requested
+verdict reflected deliberately incomplete Step 6 acceptance. That partial work
+has since been committed through 7aa660f8a2f182fc91790fd1182166ad8b662d5b.
+This authorization does not declare Step 6 complete or alter its review verdict.
+
+The next requested review concerns plan Step 5: handoff point 2, the completed
+installer-only repackage and fresh archive checks. Preserve the historical failed
+candidate and Step 6 results. Runtime acceptance of the replacement remains
+pending. Publish the new Step 5 request and stop without waiting for an answer.
+
+<!-- review-entry-id: human-reclaim-round-2-2 -->
+
+## Round 2 by human - Step 6 - escalation - attempt 3
+
+- Recorded: 2026-09-18T22:52:46+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: escalation
+
+## Human resolution of Step 6 to Step 5 review scope
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+<!-- review-entry-id: escalation-round-2-3 -->
+
+## Round 3 by human - Step 6 - human-resolution
+
+- Recorded: 2026-09-18T22:52:48+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: human-resolution
+
+## Human resolution of Step 6 to Step 5 review scope (resolution record)
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+<!-- review-entry-id: human-resolution-round-3 -->
+
+## Round 3 by requestor - Step 5
+
+- Recorded: 2026-09-18T22:55:08+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 tools-archive-rebuild (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 5
+Review round: 3
+
+### Code review evidence for step 5 tools-archive-rebuild (round 3)
+
+request_index_tree: c6abb888c19f1eaf671904c5860e644d8a28e67f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step5.repackage-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(tools): retain installer-only candidate
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+group 2: docs(tools): record review scope resolution
+group 2 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools-archive-rebuild): record step 5 validation
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+```
+
+### Requestor assessment for step 5 tools-archive-rebuild (round 3)
+
+Yes. Plan Step 5 is fully implemented, including the installer-only return
+required by handoff point 2. Step 6 and the overall effort remain incomplete.
+
+The replacement archive is tools.2026-09-18_220913.tar.gz, 545293468 bytes,
+SHA-256 df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87.
+Fresh native archive verification passed 539 cases and AR1, AR2 and AR4.
+All 38070 archive members were compared: only tools/bin/install_pkg.sh changed
+in content, type, mode or link target; timestamps were excluded. Protected live
+trees and the source tools tree after the explicit installer overlay passed
+preservation checks. There was no payload refresh, rebuild or promotion.
+
+The record verifier checks all indexed capture digests, unchanged historical
+verdicts, generated Markdown, installer and frozen-oracle digests, and absence
+of inherited runtime passes. The repository lint passed all 58 tracked scripts;
+Markdown checks and git diff checks passed during preparation. Existing native
+cumulative Step 6 validation also covers Step 5; the review should rerun that
+suite using the existing cumulative transport, not the acceptance mode.
+
+No production code, architecture or execution path changes in this staged set.
+No new runtime performance cost or test-coverage percentage is claimed. The
+independent archive comparison and preservation checks establish unchanged
+payloads; the original Python/SQLite build proof and authority remain retained.
+See the updated Step 5 validation section for the complete implementation check.
+
+### Implementation report for step 5 tools-archive-rebuild (round 3)
+
+Repackaged the existing Step 5 namespace with the committed corrected installer,
+after a fresh audit, using the existing pkg_tools.sh private-stage closure gate.
+Both the cplx/bin and tools/bin installer copies were explicitly overlaid;
+the closure gate does not copy the installer into tools/bin itself.
+
+Retained the replacement archive and raw captures independently from the failed
+original. The public candidate summary now describes the replacement. Added
+byte-identical historical candidate and authority captures, and changed only
+their capture paths in the historical record. The old RHEL PA6 failure remains.
+
+The new record binds only AR1, AR2, AR4 and RA1 as passed. Required runtime and
+publication results remain pending, consumers and runtime identities unbound.
+Regenerated the Markdown view. Declaration authority was not renewed. Updated
+the validation plan to retain Step 5 Yes, Step 6 No and overall No; remaining
+work now calls for acceptance of the replacement, not another repackage.
+
+Public evidence lives beside the plan in step5-candidate.json and
+step5-authority.txt (both prefixed evidence.tools-archive-rebuild.), with
+the corresponding step5-original captures preserving the prior candidate.
+Private retained location and exact remote evidence paths are in the ignored
+.reviews/a.item7.point2-result.md. Raw capture bundle SHA-256:
+a8f80e6ce855b3cda7fd5fc137561a5eb87e4a33d25cf29e09fc07289815c0c1.
+
+### Change summary for step 5 tools-archive-rebuild (round 3)
+
+The staged set contains eight documentation/evidence paths. Root a.commit
+has three groups, with the exact Step 5 validation commit last:
+
+1. docs(tools): retain installer-only candidate
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+2. docs(tools): record review scope resolution
+   - docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+3. docs(tools-archive-rebuild): record step 5 validation
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+The shared launcher appends this request to the transcript after capturing the
+index. That publication append is protocol-owned evidence. No commit is being
+performed. Separate application-repository staged repairs are outside this set.
+
+### Human guidance and writer response for step 5 tools-archive-rebuild (round 3)
+
+Human guidance:
+
+#### Human resolution of Step 6 to Step 5 review scope for step 5 tools-archive-rebuild (round 3)
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+Writer response:
+
+The prior Step 6 round 2 found no remaining staged defects. Its changes-requested
+verdict reflected the intentionally incomplete Step 6 acceptance. The partial
+work was committed through 7aa660f8a2f182fc91790fd1182166ad8b662d5b under direct
+human authority. No prior reviewer repair is reversed by this request.
+
+The human subsequently authorized the Step 5 repackage, reclaim, explicit
+resolution of the implementation-step context mismatch, and publication of a
+Step 5 request. The shared archive operation retained the old answer and
+coordination and opened this round with Step 5 context. This does not represent
+Step 6 convergence or erase its failed/pending results.
+
+Assess the exact Step 5 completion condition and handoff point 2 in
+.reviews/a.item7.handoff-prompt.md. Incomplete RHEL runtime acceptance, Debian
+acceptance, exact-wheel D10 and publication are subsequent Step 6 work. Do not
+turn those pending cells into passes or require them to close this Step 5 review.
+The user requires the requestor to stop after publication without waiting.
+
+### Reviewer focus for step 5 tools-archive-rebuild (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-3 -->
+
+## Round 3 by reviewer - Step 5
+
+- Recorded: 2026-09-18T23:07:48+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+Baseline index tree: c6abb888c19f1eaf671904c5860e644d8a28e67f
+
+Assessed index tree: c6abb888c19f1eaf671904c5860e644d8a28e67f
+
+### Implementation check for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+Result:
+
+Yes. Step 5 has been fully implemented.
+
+The reviewer reaches the writer's verdict independently, by measurement rather
+than from the record. Step 5's completion condition is an identified archive, a
+conclusive Python and SQLite build result, AR1, AR2 and AR4, and resolved
+declaration authority. The installer-only return satisfies all four for the
+replacement, and Step 6 still owns its runtime acceptance.
+
+- Identified archive. The retained replacement on the build host is 545293468
+  bytes with SHA-256 `df7dff7d...be87`, and the original is still retained at
+  `d8f205cc...c15c1`. Both match the record and the versioned summary, which is
+  byte-identical to the host's retained copy.
+- Unchanged payloads. The reviewer streamed both archives through the host's
+  independent interpreter and compared every member's type, mode, link target
+  and content digest: 38070 members in each, none added or removed, and exactly
+  one changed, `tools/bin/install_pkg.sh`. Its old bytes are the pre-correction
+  installer from `dab19c8` and its new bytes are the committed corrected
+  installer `f915125e...2fca02`. Owners are identical. The build result is
+  therefore inherited unchanged, which is what the plan's single repackage
+  allows.
+- AR1, AR2 and AR4. The retained raw bundle, digest `a8f80e6c...c0c1` as
+  recorded, holds the check run: the script digest matches the local one, it
+  verifies the new archive's digest before and after, extracts it, and runs
+  the committed relocation harness (`bd977dd9...501e`) at step 4 with the
+  corrected installer and the frozen oracle, whose host copy matches the
+  versioned `f19f9cdc...c8db8`. Result: 539 cases, 0 failures, 85 residual
+  programs walked and 0 selected, empty handoff, then `AR1`, `AR2` and `AR4`
+  passed.
+- Declaration authority. The closure gate staged and checked the same
+  declaration, `63a955f8...9d5aa`. The declaration covers ELF closure and does
+  not list the installer, so an installer change needs no renewal. The
+  authority source and its retention merge are both ancestors of `7aa660f`,
+  and neither the closure directory nor `pkg_tools.sh` has changed since the
+  accepted Step 5 evidence.
+
+The record is honest about what was not done. The original candidate's
+captures are byte-identical to the previously committed ones under their new
+historical names, its verdicts including the RHEL PA6 failure are unchanged,
+and the replacement binds only AR1, AR2, AR4 and RA1, with every runtime,
+environment, consumer and publication cell pending.
+
+Architecture: no production code, execution path or layer changed; the
+installer change was reviewed in Step 6 and only its packaging is new. No
+violation or smell.
+
+Performance: no runtime cost added. The member comparison is linear in archive
+bytes and was a one-off verification.
+
+Unit test coverage: no Python class or unit test changed, and no percentage is
+claimed. No unit-tested class below 100% needs completing, and no top-level
+symbol outside the coverage gate is unreferenced.
+
+Feature integrity: the original candidate's evidence and failure are preserved,
+the generated view reproduces from the record, and nothing is impaired.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 5 rows already match this assessment: the status sentence is
+exactly `Yes. Step 5 has been fully implemented.`, no `Missing work for Step 5`
+section remains, and the new installer-only bullet states the replacement's
+identity, the member comparison, the 539 cases and the unrenewed authority,
+each of which the reviewer confirmed independently. The document-level line
+correctly stays `No, it is not implemented.`, and the Step 6 missing-work list
+now targets the replacement rather than another repackage.
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+The reviewer ran all four resolved commands. Three pass. The fourth passes as
+declared but does not check this repository, and run correctly it reports one
+new finding in a staged file.
+
+- `bash src/utils/lint_shell.sh`, source `project`, through the project
+  environment: `lint_shell: 58 tracked scripts`, `lint_shell: clean`, exit 0.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone
+  after reading it: transport exit 0 in 105 seconds, native
+  `validation exit=0 elapsed=76s` on the independent interpreter, no FAIL
+  line, 58 acceptance cases, four helper imports, the packaging and relocation
+  suites and 254 historical closure cases.
+- The record verifier, source `request`, read first and read-only: both
+  `PASS` lines, exit 0.
+- `markdown-check.bat`, source `request`: exit 0, but on the wrong repository.
+  The batch file changes into the llm-shared root before running, and the
+  checker's `--root` defaults to the current directory, so it linted llm-shared.
+  The project's own `markdown-check` task passes `--root` for the workspace. Run
+  with `--root` set to cplx, it exits 1: every finding predates this round
+  except `review.code.v0.27.0.tools-archive-rebuild.md:5778`, `MD024` and
+  `LS003`, a duplicate heading inside the staged transcript group.
+
+Beyond the declared set, the reviewer also ran `git diff --cached --check` and
+the installed pre-commit hook: both clean.
+
+Independent evidence, measured rather than read from the record:
+
+- Both archives' sizes and digests on the build host, and a full member
+  comparison of the two, with the changed member's old and new digests tied to
+  `dab19c8` and to the committed installer.
+- The retained raw bundle digest, the check script digest, the harness and
+  installer digests the AR run used, the frozen oracle on the host, and the
+  `539 cases, 0 failures` verdict with `AR1`, `AR2` and `AR4` passed.
+- The closure gate's declaration digest in the packaging log, and the
+  reachability of the authority source and retention merge from `7aa660f`.
+- The original captures' blobs, identical to the previously committed ones,
+  and the replacement summary, identical to the host's retained copy.
+
+Coverage limits: cplx declares shell lint as its floor and no Python
+percentage is claimed.
+
+### Resolved validation set and sources for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same four commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean, exit 0.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0. It
+  ships committed cplx HEAD `7aa660f` and the application's committed HEAD plus
+  its three uncommitted reader repairs, verifying their digests on the host.
+- The record verifier under llm-shared's Python, source `request`. Exit 0.
+- `markdown-check.bat`, source `request`. Exit 0 as declared, over llm-shared;
+  exit 1 with `--root` set to cplx, as reported above.
+
+The transport and the record verifier are ignored files, so the reviewer
+included both in the validation-state path set. Their digests did not change.
+
+### Resolver drift and direction for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command the request
+carries, and the `plan` and `request` additions parse through the current
+resolver contract, so the union equals both sets.
+
+This round's request dropped the installed pre-commit hook and the
+`git diff --cached --check` additions that Step 6 round 2 carried. Request
+additions belong to their own request, so that is not drift, but the reviewer
+ran both anyway and both are clean.
+
+### Repository state around validation for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `c6abb888c19f1eaf671904c5860e644d8a28e67f` equals the
+  baseline at entry and the live index after every run.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `e293c50bf3409247d15604fb8517eb74aeaab4db4eabdfdd617a5e437d5edde4`.
+- Validation-state comparison over the 8 staged paths, the project command's
+  file and the two ignored validation scripts: `acceptable: true` with empty
+  tracked, untracked and ignored lists.
+- The working tree matches its entry state: 8 staged paths, and the transcript
+  also carries the protocol's unstaged append of this request, which the
+  reviewer leaves unstaged.
+- No reviewer residue in either repository. The native run and the archive
+  comparison ran in host scratch space or read retained files; nothing
+  retained was modified.
+- Ordering was correct: the baselines and the manifest were written before
+  assessment, and the manifest was rewritten with the post-assessment state.
+
+### Repair inventory for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+`a.commit` is mechanically accurate and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 8 staged paths in three
+ordered groups matching the request.
+
+- Group 1, `docs(tools): retain installer-only candidate`: the record, its view
+  and the four captures. Its body's claims (replacement identity, preserved
+  original captures, installer overlay without renewal, only AR1, AR2, AR4 and
+  RA1 bound) are each borne out by the staged content and the host evidence.
+- Group 2, `docs(tools): record review scope resolution`: the staged transcript
+  entries. Accurate as a subject, but this group carries the duplicate heading
+  in the findings, so its content needs the fix before it is committed.
+- Group 3, `docs(tools-archive-rebuild): record step 5 validation`: the
+  validation plan, last as the most dependent.
+
+Ordering is least to most dependent and every staged path appears once. The
+installed hook accepts the staged set. The fix to group 2 changes content only,
+not membership or order, so `a.commit` stays accurate after it.
+
+### Findings and boundaries for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+Unresolved findings:
+
+- The staged transcript repeats the heading `## Human resolution of Step 6 to Step 5 review scope` at lines 5748 and 5778, which the cplx Markdown gate reports as `MD024` and `LS003`: the same requestor-authored content, with an unqualified heading, was appended by both the escalation record (attempt 3) and the human-resolution record, and the shared heading rule makes a duplicate transcript heading a defect of the round that appended it.
+- The declared `markdown-check.bat` validation did not check this repository: the batch file changes into the llm-shared root and the checker's `--root` defaults to the current directory, so its exit 0 covers llm-shared, and the request's statement that Markdown checks passed covers no staged file.
+
+Boundary-crossing work:
+
+- The cplx Markdown gate cannot pass as a whole: the repository has Markdown debt that predates this round (for example `CHANGELOG.md`, earlier review transcripts, and earlier entries of this transcript at lines 677 to 5620) with an empty `.markdownlint-baseline.json`, so baselining or cleaning that debt is separate work, and this round should be judged only on findings in its staged paths
+- Step 6 was committed before the three application reader repairs, so the committed cplx runner currently fails against every committed application revision under the independent interpreter until the application commit lands; the declared transport passes only because it overlays those repairs, and committing them remains Step 6 missing work
+
+### Human guidance response for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+Human guidance:
+
+#### Human resolution of Step 6 to Step 5 review scope for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+Guidance response:
+
+The guidance is followed, and each of its factual claims was checked rather
+than accepted.
+
+- Scope. This answer assesses plan Step 5 and the installer-only return only.
+  The replacement's runtime, Debian, D10 and publication cells were not
+  required, not run and not turned into passes; the reviewer confirmed they
+  are all pending in the record.
+- "The corrected installer is repackaged with unchanged payloads." Confirmed by
+  a full member comparison of both archives on the build host: one member
+  changed, and it is the installer, going from the pre-correction bytes to the
+  committed corrected bytes.
+- "The new archive passes AR1, AR2 and AR4." Confirmed from the retained raw
+  bundle: 539 cases, 0 failures, run against the new archive's verified digest
+  with the committed harness and the frozen oracle.
+- "Old candidate evidence is preserved." Confirmed: the original captures are
+  byte-identical to the previously committed blobs, and the verdicts,
+  including the RHEL PA6 failure, are unchanged.
+- The old Step 6 verdict is not revisited, and nothing here claims Step 6
+  complete. No commit is authorized by this answer, and none was made.
+
+The disposition is changes-requested for two documentation and validation
+findings in this round's own additions, not for anything about the Step 5
+return itself, which the reviewer finds complete.
+
+### Writer instructions for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+The Step 5 return itself needs no rework: the archive, the comparison, the AR
+checks, the authority and the record all hold under independent measurement.
+Two small fixes remain, both in how this round is recorded and validated.
+
+1. Make the transcript heading unique. In the staged transcript, the second
+   `## Human resolution of Step 6 to Step 5 review scope` (line 5778, under the
+   human-resolution record) repeats the one under the escalation record at line
+   5748. Qualify the heading text of one of them with what distinguishes it, for
+   example `## Human resolution of Step 6 to Step 5 review scope (resolution
+   record)`, change nothing else in either entry, and restage. For later
+   human-guidance content, qualify its headings before passing it to more than one
+   operation, as the shared heading rule requires.
+
+2. Declare the Markdown check against cplx. Replace the request addition with
+   `markdown-check.bat --root <cplx root>`, which is what the project's own task
+   runs. Because the repository carries older Markdown debt with an empty
+   baseline, the run exits 1 regardless. Judge it on the staged paths: after
+   fix 1, no finding should point into this round's staged content. Do not
+   disable `MD024` or baseline the new finding away.
+
+Both fixes change content only, so `a.commit` needs no amendment.
+
+Worth keeping as practice, because it is what made this review fast to verify:
+the original captures were preserved byte for byte under historical names, the
+record verifier checks both candidates against the committed baseline, the
+archive check verifies the candidate digest before and after the run, and the
+raw bundle retained the exact scripts it ran.
+
+### Decision rationale for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete. The substance of the Step 5 return passes every check the reviewer
+could apply; the findings are about this round's record and one declared
+validation, and both are cheap to fix.
+
+1. Identity. Passes; the index tree matched at entry and after every run.
+2. Completeness. Passes. Step 5 is complete for the replacement, and Step 6
+   correctly keeps its runtime acceptance.
+3. Validation and coverage. Does not pass. Three declared commands pass. The
+   fourth was ineffective as declared, and run against cplx it reports a new
+   finding in a staged path.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. Two: the duplicate transcript heading, and the
+   Markdown check pointed at the wrong repository.
+6. `a.commit`. Passes, valid and ready.
+
+The two findings could look too small to block a commit, so the reason is
+stated. The shared heading rule names a duplicate transcript heading as a
+defect of the round that appended it and forbids working around it. And a
+validation command that passes over the wrong repository is worse than one
+that fails, because it looks like evidence. The request reported "Markdown
+checks passed", and that report covered llm-shared, not cplx.
+
+Checked because it could have made this answer wrong: whether "only the
+installer changed" held at the byte level rather than by name, and whether
+AR1, AR2 and AR4 ran against the new archive rather than the retained old one.
+Both were confirmed from the host, the second by the check script's own digest
+assertions before and after the run.
+
+### Final reviewer decision for step 5 tools-archive-rebuild (exchange 1) (round 3)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-5-round-3 -->
+
+## Round 4 by requestor - Step 5
+
+- Recorded: 2026-09-18T23:23:23+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 tools-archive-rebuild (round 4)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 5
+Review round: 4
+
+### Code review evidence for step 5 tools-archive-rebuild (round 4)
+
+request_index_tree: 3d0350c6bf8c77091339a691a2bec0f31e3bd2d3
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step5.repackage-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx (sources: request)
+- git diff --cached --check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(tools): retain installer-only candidate
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+group 2: docs(tools): record review scope resolution
+group 2 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools-archive-rebuild): record step 5 validation
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+```
+
+### Requestor assessment for step 5 tools-archive-rebuild (round 4)
+
+Yes. Plan Step 5 is fully implemented, including the installer-only return
+required by handoff point 2. Step 6 and the overall effort remain incomplete.
+
+The replacement archive is tools.2026-09-18_220913.tar.gz, 545293468 bytes,
+SHA-256 df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87.
+Fresh native archive verification passed 539 cases and AR1, AR2 and AR4.
+All 38070 archive members were compared: only tools/bin/install_pkg.sh changed
+in content, type, mode or link target; timestamps were excluded. Protected live
+trees and the source tools tree after the explicit installer overlay passed
+preservation checks. There was no payload refresh, rebuild or promotion.
+
+The record verifier checks all indexed capture digests, unchanged historical
+verdicts, generated Markdown, installer and frozen-oracle digests, and absence
+of inherited runtime passes. The repository lint passed all 58 tracked scripts;
+Git diff checks passed. The earlier Markdown pass checked the wrong repository
+and is withdrawn. The corrected command explicitly targets cplx; it reports
+pre-existing Markdown debt, which is not a repository-wide pass. This round
+fixes the duplicate heading and list formatting in the appended review prose,
+and checks that no diagnostic intersects the current added lines. No lint rule
+is disabled and no baseline is changed. Existing native
+cumulative Step 6 validation also covers Step 5; the review should rerun that
+suite using the existing cumulative transport, not the acceptance mode.
+
+No production code, architecture or execution path changes in this staged set.
+No new runtime performance cost or test-coverage percentage is claimed. The
+independent archive comparison and preservation checks establish unchanged
+payloads; the original Python/SQLite build proof and authority remain retained.
+See the updated Step 5 validation section for the complete implementation check.
+
+### Implementation report for step 5 tools-archive-rebuild (round 4)
+
+Repackaged the existing Step 5 namespace with the committed corrected installer,
+after a fresh audit, using the existing pkg_tools.sh private-stage closure gate.
+Both the cplx/bin and tools/bin installer copies were explicitly overlaid;
+the closure gate does not copy the installer into tools/bin itself.
+
+Retained the replacement archive and raw captures independently from the failed
+original. The public candidate summary now describes the replacement. Added
+byte-identical historical candidate and authority captures, and changed only
+their capture paths in the historical record. The old RHEL PA6 failure remains.
+
+The new record binds only AR1, AR2, AR4 and RA1 as passed. Required runtime and
+publication results remain pending, consumers and runtime identities unbound.
+Regenerated the Markdown view. Declaration authority was not renewed. Updated
+the validation plan to retain Step 5 Yes, Step 6 No and overall No; remaining
+work now calls for acceptance of the replacement, not another repackage.
+
+Public evidence lives beside the plan in step5-candidate.json and
+step5-authority.txt (both prefixed evidence.tools-archive-rebuild.), with
+the corresponding step5-original captures preserving the prior candidate.
+Private retained location and exact remote evidence paths are in the ignored
+.reviews/a.item7.point2-result.md. Raw capture bundle SHA-256:
+a8f80e6ce855b3cda7fd5fc137561a5eb87e4a33d25cf29e09fc07289815c0c1.
+
+### Change summary for step 5 tools-archive-rebuild (round 4)
+
+The staged set contains eight documentation/evidence paths. Root a.commit
+has three groups, with the exact Step 5 validation commit last:
+
+1. docs(tools): retain installer-only candidate
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+2. docs(tools): record review scope resolution
+   - docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+3. docs(tools-archive-rebuild): record step 5 validation
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+The shared launcher appends this request to the transcript after capturing the
+index. That publication append is protocol-owned evidence. No commit is being
+performed. Separate application-repository staged repairs are outside this set.
+
+### Human guidance and writer response for step 5 tools-archive-rebuild (round 4)
+
+Human guidance:
+
+#### Human resolution of Step 6 to Step 5 review scope for step 5 tools-archive-rebuild (round 4)
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+Writer response:
+
+Accepted both round 3 findings. They concern this round's documentation and
+validation, not a misunderstanding of handoff point 2 or missing Step 6 work.
+
+Qualified the second duplicate transcript heading with "(resolution record)".
+No other content in the escalation or human-resolution entry changed. The
+reviewer's appended writer instructions also introduced MD032 findings: their
+numbered-list continuation lines are now indented, with wording unchanged.
+The live answer is retained unchanged until the core consumes it.
+
+Corrected the Markdown validation addition to pass --root explicitly for cplx.
+The previous claim that Markdown passed for cplx is withdrawn. The corrected
+run reports older repository Markdown debt; the repair must leave no finding
+on newly added lines, without disabling rules or changing the baseline.
+
+The reviewer independently confirmed Step 5 complete: full archive-member
+comparison, retained raw AR1/AR2/AR4 evidence, original captures and authority.
+No archive or record rework is required. The reviewer staged no repair. Root
+a.commit remains accurate with eight paths and three unchanged groups.
+
+Step 6 remains incomplete, including application-reader commits, replacement
+runtime acceptance, Debian, D10 and publication. These are not Step 5 defects.
+The human's instruction to stop after publishing remains in effect; no commit
+is authorized by this round.
+
+### Reviewer focus for step 5 tools-archive-rebuild (round 4)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-4 -->
+
+## Round 4 by reviewer - Step 5
+
+- Recorded: 2026-09-18T23:29:47+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+Baseline index tree: 3d0350c6bf8c77091339a691a2bec0f31e3bd2d3
+
+Assessed index tree: 3d0350c6bf8c77091339a691a2bec0f31e3bd2d3
+
+### Implementation check for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+Result:
+
+Yes. Step 5 has been fully implemented.
+
+Nothing in the Step 5 substance changed since round 3: the index differs from
+the round 3 tree only in the review transcript. The round 3 verification
+therefore still stands, and this round re-ran every declared command against
+the current index rather than relying on it. In round 3 the reviewer measured
+the replacement archive's identity on the build host, compared all 38070
+members of both archives (only `tools/bin/install_pkg.sh` changed, from the
+pre-correction bytes to the committed corrected bytes), confirmed 539 cases
+with AR1, AR2 and AR4 passed against the new archive, confirmed the unchanged
+declaration and its reachable authority, and confirmed that the original
+captures and verdicts are preserved.
+
+Both round 3 findings are fixed, verified rather than accepted:
+
+- The duplicate heading. The second entry's heading now reads
+  `## Human resolution of Step 6 to Step 5 review scope (resolution record)`.
+  The cplx Markdown gate reports no finding at or after the first staged
+  transcript line, nor in the other staged Markdown files; all 37 remaining
+  findings sit in content committed before this round.
+- The Markdown command. It now passes `--root` for cplx, and the request
+  withdraws the earlier pass claim.
+
+The requestor also re-indented the continuation lines of the reviewer's own
+round 3 writer instructions in the transcript, which the gate had reported as
+list-spacing findings. The reviewer compared its rendered round 3 summary with
+the staged copy: identical once whitespace is ignored, so only indentation
+changed.
+
+What blocks the staged set this round is new and sits outside Step 5's
+substance: the installed sensitive-content hook refuses the staged transcript.
+It is reported as a finding below and is fixable without touching any
+Step 5 evidence.
+
+Architecture, performance, unit test coverage and feature integrity are
+unchanged from round 3: no production code, execution path or test changed, no
+runtime cost was added, no percentage is claimed, and nothing is impaired.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, which is
+unchanged since round 3. Its Step 5 status sentence is exactly
+`Yes. Step 5 has been fully implemented.`, no `Missing work for Step 5` section
+remains, and the document-level line correctly stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+The reviewer ran all five resolved commands, plus the installed pre-commit hook.
+The five declared commands behave as expected. The hook refuses the staged set.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean,
+  exit 0.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 106 seconds, native `validation exit=0 elapsed=83s` on
+  the independent interpreter, no FAIL line, four helper imports and 58
+  acceptance cases. The inputs are unchanged since round 3: cplx HEAD
+  `7aa660f`, application HEAD `6b22c16f` and the same three verified overlays.
+- The record verifier, source `request`: both `PASS` lines, exit 0.
+- The Markdown gate with `--root` for cplx, source `request`: exit 1 with 37
+  findings, none in this round's staged content. Every finding is at or before
+  transcript line 5620 or in other files, all committed before this round; the
+  staged transcript additions begin at line 5707.
+- `git diff --cached --check`, source `request`: clean, exit 0.
+- The installed pre-commit hook, run by the reviewer beyond the declared set:
+  exit 1, `Commit blocked`, at staged transcript lines 5822 and 5823.
+
+Also verified: the reviewer's round 3 summary and its staged transcript copy are
+identical when whitespace is ignored, and both request-added commands work in a
+sibling-relative form that needs no home path: the verifier passes, and the
+Markdown gate reports the same 37 findings over cplx.
+
+### Resolved validation set and sources for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same five commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0.
+- The record verifier under llm-shared's Python, source `request`. Exit 0.
+- The llm-shared Markdown gate with `--root` for cplx, source `request`. Exit 1
+  on older debt only, with no finding in staged content.
+- `git diff --cached --check`, source `request`. Clean.
+
+The two ignored scripts stayed in the validation-state path set; their digests
+did not change.
+
+### Resolver drift and direction for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+The request still omits the installed pre-commit hook, which is the only check
+that sees this round's blocking finding. It has now decided two rounds of this
+effort; keeping it in the declared set moves that discovery to the requestor.
+
+### Repository state around validation for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `3d0350c6bf8c77091339a691a2bec0f31e3bd2d3` equals the
+  baseline at entry and the live index after every run. Against the round 3
+  tree it differs only in the review transcript.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `e293c50bf3409247d15604fb8517eb74aeaab4db4eabdfdd617a5e437d5edde4`.
+- Validation-state comparison over the 8 staged paths, the project command's
+  file and the two ignored scripts: `acceptable: true` with empty lists.
+- The working tree matches its entry state: 8 staged paths, and the transcript
+  also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository; the native run used host scratch
+  space and the hook and gates are read-only.
+- The baselines and manifest were written before assessment and the manifest
+  was rewritten with the post-assessment state.
+
+### Repair inventory for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+`a.commit` is mechanically accurate and the reviewer amended nothing, but it is
+not executable as staged.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 8 staged paths in the
+same three ordered groups as round 3, which remain correct in membership,
+order and subjects.
+
+Not executable: the installed sensitive-content hook refuses group 2, the
+review transcript, at two lines. `commit-plan-check` does not consult that
+hook, which is why it reports ready. The fix is content-only, so `a.commit`
+needs no amendment after it.
+
+### Findings and boundaries for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+Unresolved findings:
+
+- The staged set cannot be committed: the installed sensitive-content pre-commit hook refuses the staged transcript at lines 5822 and 5823, where the round 3 request record lists the two request-added validation commands with absolute paths under the user's Windows home directory, which contain the private account name; the unstaged round 4 request record repeats the same two paths, so the next staging of the transcript would be refused as well.
+
+Boundary-crossing work:
+
+- The shared request renderer copies validation command strings verbatim into the versioned transcript, so any request addition declared with a home-directory path leaks it into history; rejecting or rewriting such paths at the request boundary would be an llm-shared change, not a cplx one
+- The three application reader repairs are still uncommitted while cplx Step 6 is committed, so the committed pair fails the cplx runner under the independent interpreter until the application commit lands; this remains Step 6 missing work
+
+### Human guidance response for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+Human guidance:
+
+#### Human resolution of Step 6 to Step 5 review scope for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+Guidance response:
+
+The guidance is followed, as in round 3, and its claims about the Step 5 return
+still hold: round 3 measured them on the build host, and nothing in the Step 5
+evidence has changed since.
+
+- The review stays on plan Step 5. The replacement's runtime, Debian, D10 and
+  publication cells were not required and remain pending in the record.
+- The old Step 6 verdict is not revisited, and nothing here claims Step 6
+  complete.
+- No commit is authorized by this answer, and none was made.
+
+The reviewer agrees that the Step 5 return is complete and needs no archive or
+record rework. The one remaining finding is in the review transcript's recorded
+command strings, not in the handoff point 2 work.
+
+### Writer instructions for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+The Step 5 work needs no rework. One fix makes the staged set committable, and
+two changes to the request keep the problem from coming back.
+
+__Remove the home paths from the transcript__ In the staged transcript, lines
+5822 and 5823 of the round 3 request record start with an absolute path under
+the user's home directory. Replace that prefix with the sibling-relative
+`../llm-shared/` and change nothing else on those lines. Make the same change to
+the two matching lines of the round 4 request record before staging it. Then
+run `bash .git/hooks/pre-commit` against the index and require it clean. The
+hook is the gate the commit will actually meet, and `commit-plan-check` does not
+consult it.
+
+__Declare the request commands without home paths.__ Both work from the cplx
+root in sibling-relative form, as the reviewer confirmed:
+`../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step5.repackage-verify-record.py`
+passes, and `../llm-shared/markdown-check.bat --root ../cplx` reports the same
+37 findings over cplx. The Markdown batch file changes into the llm-shared root
+before it runs, so `--root` is resolved from there, which is why `../cplx`
+reaches this repository.
+
+__Keep the hook in the declared set.__ Add `bash .git/hooks/pre-commit` back as
+a request addition. It is the only check that sees this class of defect, and it
+has decided two rounds of this effort.
+
+The fix is content-only, so `a.commit` needs no amendment.
+
+Both round 3 fixes were done well: one qualified heading and indentation-only
+repairs, each confined to exactly what the gate reported, with no rule
+disabled and no baseline changed.
+
+### Decision rationale for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete, for one reason: the staged set cannot be committed.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Passes; Step 5 is complete for the replacement.
+3. Validation and coverage. Passes; all five declared commands behave as
+   expected, and the Markdown gate shows no finding in staged content.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. One: the hook refuses two transcript lines.
+6. `a.commit`. Valid and correctly grouped, but not executable while the hook
+   refuses group 2.
+
+This finding is not a style point. The hook blocks the commit, so a
+commit-ready answer would hand the human a commit that fails at the gate. It
+also concerns what the hook exists to protect: the private account name would
+otherwise enter versioned history through the transcript.
+
+The cause is instructive. Round 3 fixed the Markdown command by making its
+path absolute, and the protocol copies declared commands verbatim into the
+transcript. The same round dropped the hook from the declared set, so nothing
+the requestor ran could see the result. Sibling-relative paths remove the
+cause, and restoring the hook restores the check.
+
+### Final reviewer decision for step 5 tools-archive-rebuild (exchange 1) (round 4)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-5-round-4 -->
+
+## Round 5 by requestor - Step 5
+
+- Recorded: 2026-09-19T00:05:08+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 tools-archive-rebuild (round 5)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 5
+Review round: 5
+
+### Code review evidence for step 5 tools-archive-rebuild (round 5)
+
+request_index_tree: c8e65b0bafebed9391730b59eba4ff39bdedd196
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step5.repackage-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(tools): retain installer-only candidate
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+group 2: docs(tools): record review scope resolution
+group 2 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools-archive-rebuild): record step 5 validation
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+```
+
+### Requestor assessment for step 5 tools-archive-rebuild (round 5)
+
+Yes. Plan Step 5 is fully implemented, including the installer-only return
+required by handoff point 2. Step 6 and the overall effort remain incomplete.
+
+The replacement archive is tools.2026-09-18_220913.tar.gz, 545293468 bytes,
+SHA-256 df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87.
+Fresh native archive verification passed 539 cases and AR1, AR2 and AR4.
+All 38070 archive members were compared: only tools/bin/install_pkg.sh changed
+in content, type, mode or link target; timestamps were excluded. Protected live
+trees and the source tools tree after the explicit installer overlay passed
+preservation checks. There was no payload refresh, rebuild or promotion.
+
+The record verifier checks all indexed capture digests, unchanged historical
+verdicts, generated Markdown, installer and frozen-oracle digests, and absence
+of inherited runtime passes. The repository lint passed all 58 tracked scripts;
+Git diff checks passed. The earlier Markdown pass checked the wrong repository
+and is withdrawn. The corrected command explicitly targets cplx; it reports
+pre-existing Markdown debt, which is not a repository-wide pass. This round
+fixes the duplicate heading and list formatting in the appended review prose,
+and checks that no diagnostic intersects the current added lines. No lint rule
+is disabled and no baseline is changed. Existing native
+cumulative Step 6 validation also covers Step 5; the review should rerun that
+suite using the existing cumulative transport, not the acceptance mode.
+
+No production code, architecture or execution path changes in this staged set.
+No new runtime performance cost or test-coverage percentage is claimed. The
+independent archive comparison and preservation checks establish unchanged
+payloads; the original Python/SQLite build proof and authority remain retained.
+See the updated Step 5 validation section for the complete implementation check.
+
+### Implementation report for step 5 tools-archive-rebuild (round 5)
+
+Repackaged the existing Step 5 namespace with the committed corrected installer,
+after a fresh audit, using the existing pkg_tools.sh private-stage closure gate.
+Both the cplx/bin and tools/bin installer copies were explicitly overlaid;
+the closure gate does not copy the installer into tools/bin itself.
+
+Retained the replacement archive and raw captures independently from the failed
+original. The public candidate summary now describes the replacement. Added
+byte-identical historical candidate and authority captures, and changed only
+their capture paths in the historical record. The old RHEL PA6 failure remains.
+
+The new record binds only AR1, AR2, AR4 and RA1 as passed. Required runtime and
+publication results remain pending, consumers and runtime identities unbound.
+Regenerated the Markdown view. Declaration authority was not renewed. Updated
+the validation plan to retain Step 5 Yes, Step 6 No and overall No; remaining
+work now calls for acceptance of the replacement, not another repackage.
+
+Public evidence lives beside the plan in step5-candidate.json and
+step5-authority.txt (both prefixed evidence.tools-archive-rebuild.), with
+the corresponding step5-original captures preserving the prior candidate.
+Private retained location and exact remote evidence paths are in the ignored
+.reviews/a.item7.point2-result.md. Raw capture bundle SHA-256:
+a8f80e6ce855b3cda7fd5fc137561a5eb87e4a33d25cf29e09fc07289815c0c1.
+
+### Change summary for step 5 tools-archive-rebuild (round 5)
+
+The staged set contains eight documentation/evidence paths. Root a.commit
+has three groups, with the exact Step 5 validation commit last:
+
+1. docs(tools): retain installer-only candidate
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-authority.txt
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-candidate.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-authority.txt
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step5-original-candidate.json
+2. docs(tools): record review scope resolution
+   - docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+3. docs(tools-archive-rebuild): record step 5 validation
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+The shared launcher appends this request to the transcript after capturing the
+index. That publication append is protocol-owned evidence. No commit is being
+performed. Separate application-repository staged repairs are outside this set.
+
+### Human guidance and writer response for step 5 tools-archive-rebuild (round 5)
+
+Human guidance:
+
+#### Human resolution of Step 6 to Step 5 review scope for step 5 tools-archive-rebuild (round 5)
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+Writer response:
+
+Accepted the round 4 finding. It concerns recorded command paths, not the
+completed Step 5 repackage or deferred Step 6 acceptance.
+
+Replaced the five private home-directory prefixes in the round 3 and round 4
+transcript command lines with sibling-relative paths, including the Markdown
+root argument. No evidence, verdict or other wording changed. No reviewer
+repair was staged. The Step 5 evidence remains unchanged.
+
+The replacement request declares both commands using sibling-relative paths.
+The Markdown root remains explicitly ../cplx, resolved from the launcher's
+llm-shared working directory. The installed pre-commit hook is restored as a
+request addition. Its success is required alongside the record verifier,
+staged diff check and commit-plan validation. The full Markdown gate retains
+its older findings, with none on newly added content; no rule or baseline is
+changed. Root a.commit still covers the same eight paths in three groups.
+
+Step 6 remains incomplete. Stop after request publication as instructed;
+no commit is authorized by the review answer.
+
+### Reviewer focus for step 5 tools-archive-rebuild (round 5)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-5 -->
+
+## Round 5 by reviewer - Step 5
+
+- Recorded: 2026-09-19T00:10:42+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+Baseline index tree: c8e65b0bafebed9391730b59eba4ff39bdedd196
+
+Assessed index tree: c8e65b0bafebed9391730b59eba4ff39bdedd196
+
+### Implementation check for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+Result:
+
+Yes. Step 5 has been fully implemented.
+
+The Step 5 evidence is unchanged since round 3, when the reviewer measured it
+on the build host: the replacement archive's identity, a full comparison of
+all 38070 members of both archives with only `tools/bin/install_pkg.sh`
+changed (pre-correction bytes to the committed corrected bytes), 539 cases
+with AR1, AR2 and AR4 passed against the new archive, the unchanged
+declaration with its reachable authority, and the preserved original captures
+and verdicts. Since then the index has changed only in the review transcript,
+and every declared command was re-run against the current index this round.
+
+The round 4 finding is fixed, verified rather than accepted:
+
+- The five home-directory prefixes in the round 3 and round 4 request records
+  are now sibling-relative. Apart from those prefixes and the appended protocol
+  records, the transcript is unchanged against the round 4 tree, and the
+  reviewer's round 4 answer copy is byte-identical to what it rendered.
+- No private identifier appears anywhere in the staged transcript additions.
+- The installed hook passes and is back in the declared set, and both
+  request-added commands are declared in their sibling-relative form.
+
+Architecture, performance, unit test coverage and feature integrity are
+unchanged from round 3: no production code, execution path or test changed, no
+runtime cost was added, no percentage is claimed, and nothing is impaired.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, which is
+unchanged since round 3. Its Step 5 status sentence is exactly
+`Yes. Step 5 has been fully implemented.`, no `Missing work for Step 5` section
+remains, and the document-level line correctly stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+The reviewer ran all six resolved commands. All six behave as expected.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean,
+  exit 0.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 106 seconds, native `validation exit=0 elapsed=80s` on
+  the independent interpreter, no FAIL line, four helper imports and 58
+  acceptance cases. The inputs are unchanged: cplx HEAD `7aa660f`, application
+  HEAD `6b22c16f` and the same three verified overlays.
+- The record verifier through the sibling-relative interpreter path, source
+  `request`: both `PASS` lines, exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 with the
+  same 37 findings as round 4, all in content committed before this round,
+  none in the staged transcript additions or in any other staged file.
+- `git diff --cached --check`, source `request`: clean, exit 0.
+- `bash .git/hooks/pre-commit`, source `request`: exit 0.
+
+Also verified: the round 4 answer copy in the staged transcript is
+byte-identical to what the reviewer rendered, and a scan of the staged
+transcript additions finds no private identifier.
+
+### Resolved validation set and sources for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same six commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0.
+- The record verifier under llm-shared's Python, source `request`. Exit 0.
+- The llm-shared Markdown gate with `--root ../cplx`, source `request`. Exit 1
+  on older debt only, with no finding in staged content.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Clean.
+
+The two ignored scripts stayed in the validation-state path set; their digests
+did not change.
+
+### Resolver drift and direction for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets. The request now carries the installed hook again,
+and both llm-shared commands in a form that records no home path.
+
+### Repository state around validation for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `c8e65b0bafebed9391730b59eba4ff39bdedd196` equals the
+  baseline at entry and the live index after every run. Against the round 4
+  tree it differs only in the review transcript.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `e293c50bf3409247d15604fb8517eb74aeaab4db4eabdfdd617a5e437d5edde4`.
+- Validation-state comparison over the 8 staged paths, the project command's
+  file and the two ignored scripts: `acceptable: true` with empty lists.
+- The working tree matches its entry state: 8 staged paths, and the transcript
+  also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository.
+- The baselines and manifest were written before assessment and the manifest
+  was rewritten with the post-assessment state.
+
+### Repair inventory for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+`a.commit` is accurate and executable, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 8 staged paths in the
+same three ordered groups as rounds 3 and 4.
+
+- Group 1, `docs(tools): retain installer-only candidate`: the record, its view
+  and the four captures.
+- Group 2, `docs(tools): record review scope resolution`: the review
+  transcript, now accepted by the installed hook.
+- Group 3, `docs(tools-archive-rebuild): record step 5 validation`: the
+  validation plan, last as the most dependent.
+
+Membership, order and subjects match the staged work. The transcript will also
+gain this answer's protocol append after publication; that append is protocol
+evidence for the owning workflow to stage, not a reason to change the groups.
+
+### Findings and boundaries for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+Human guidance:
+
+#### Human resolution of Step 6 to Step 5 review scope for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+The human explicitly instructed: "OK resolve the context mismatch, then publish",
+following "OK reclaim it and publish a new step 5 request then stop".
+
+Archive the prior Step 6 answer and coordination as historical evidence and
+start the next review round with implementation step 5, the same plan, umbrella,
+identity and code-review policy. This is an authorized change of review scope.
+It does not change the old changes-requested verdict or claim Step 6 complete.
+
+The partial Step 6 work has been committed through
+7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+the corrected installer is repackaged with unchanged payloads, the new archive
+passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
+Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
+pending. Publish the Step 5 request and stop without waiting or committing.
+
+Guidance response:
+
+The guidance is followed, and its claims about the Step 5 return hold: round 3
+measured them on the build host, and nothing in the Step 5 evidence has
+changed since.
+
+- The review stays on plan Step 5. The replacement's runtime, Debian, D10 and
+  publication cells were not required and remain pending in the record.
+- The old Step 6 verdict is not revisited, and nothing here claims Step 6
+  complete.
+- This commit-ready recommendation is advisory. It does not authorize a
+  commit, and the reviewer made none. The commit choice belongs to the human
+  at the convergence gate.
+
+### Writer instructions for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+No further changes are needed for this Step 5 return. If the human selects
+Commit, stage this answer's protocol append to the transcript with group 2
+before committing, and run the installed hook once more against the final
+index, since the append lands after this review's evidence.
+
+Next, per the handoff: commit the three application reader repairs through the
+application repository's own flow, then run the RHEL acceptance over the
+replacement archive (handoff point 3).
+
+### Decision rationale for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+The recommendation is commit-ready: all six readiness results pass, and this
+round made no repair.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Passes; Step 5 is complete for the replacement, and Step 6
+   correctly keeps its runtime acceptance.
+3. Validation and coverage. Passes; all six declared commands behave as
+   expected, and no coverage percentage is claimed where no gate measures it.
+4. Staged attribution. Passes; nothing was repaired or staged by the reviewer.
+5. Unresolved findings. None; the round 3 and round 4 findings are fixed and
+   verified.
+6. `a.commit`. Passes; valid, ready and accepted by the installed hook.
+
+The substance was settled in round 3. Rounds 4 and 5 were about the record:
+a duplicate heading, a Markdown gate pointed at the wrong repository, and home
+paths the protocol copied into history. Each fix was confined to what the
+gates reported. The declared set now includes the hook, so the checks the
+requestor runs are the checks the commit will meet.
+
+Two notes that are not work for this step. The three application reader
+repairs are still uncommitted while cplx Step 6 is committed, so the committed
+pair fails the cplx runner under the independent interpreter until the
+application commit lands; that is already on the Step 6 missing-work list. And
+the shared request renderer copies command strings verbatim into the versioned
+transcript, so rejecting home-directory paths at the request boundary would be
+a worthwhile llm-shared change.
+
+### Final reviewer decision for step 5 tools-archive-rebuild (exchange 1) (round 5)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-5-round-5 -->
+
+## Round 5 by human - Step 5 - human-confirmation
+
+- Recorded: 2026-09-19T00:25:15+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-5 -->
