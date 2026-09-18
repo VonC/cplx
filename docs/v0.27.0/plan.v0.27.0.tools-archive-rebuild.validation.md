@@ -3,7 +3,10 @@
 No, it is not implemented.
 
 Track the seven steps in [the implementation plan](plan.v0.27.0.tools-archive-rebuild.md).
-Steps 1-5 are checked below. Steps 6-7 and final-archive acceptance remain pending.
+Steps 1-5 are checked below. Step 6 is checked and not complete: the RHEL
+cells are bound, PA6 on RHEL fails on the shipped installer's wheel search-path
+rewrite, and the Debian agent cells, consumer identities and D10 reading await
+a pushed candidate build. Step 7 and final publication remain pending.
 
 ## File-based IO cost clarification
 
@@ -680,7 +683,24 @@ No existing feature or reporting capability is impaired by Step 5.
 
 ### Analysis of Step 6 implementation state
 
-Not started. Step 6 is not implemented because the final archive has not completed the required RHEL and actual Debian acceptance matrix.
+No. Step 6 has NOT been fully implemented.
+
+The acceptance mechanism is implemented and was exercised on the real RHEL
+target: the verification bundle composed from a commit and checked on both
+sides, the platform acceptance driver, its fixtures and the runner at
+`--step 6`. Ten RHEL cells are bound in the release record from one run of the
+exact Step 5 archive: nine pass, including AR3's three HOME states and
+migration positivity. The step's completion condition is not met. PA6 on RHEL
+fails conclusively, because the installer shipped inside the archive rewrites
+the wheel objects' search path and drops their `$ORIGIN` entry, so the
+deployed venv no longer imports pymupdf or pikepdf. That defect is corrected
+in the working tree (the ELF pass now excludes venv trees, decided 2026-09-18
+as Q06 of the requirement), but the archive ships the installer, so PA6 stays
+failing until a repackaged candidate is accepted. The nine Debian cells, the
+consumer identities and the wheel-bound D10 reading need a candidate build on
+the actual Jenkins agent that only a pushed pipeline commit produces, and RA2,
+RA3, RA4, RA5 (publication), RA7, RA8 (publication) and the backend cell stay
+pending. The validator's publication phase therefore refuses.
 
 ### Goal for Step 6
 
@@ -692,27 +712,229 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
 
 ### What was implemented for Step 6
 
-_(empty — no check has taken place yet.)_.
+- **Bundle composition**: `ci/deliver-closure-tools.sh` gains `--bundle FILE`
+  beside the unchanged `--into DIR` delivery. It archives every tracked file
+  below `src/` and eleven acceptance controls (the item 6 SQLite driver and
+  helpers, the installer, relocation and wrapper harnesses, the archive
+  oracle and the new platform driver) from the exact commit, writes
+  `acceptance/source-revision.txt` and a two-space SHA-256 manifest over every
+  other regular member, produces deterministic bytes (fixed owner, commit
+  timestamp, sorted members, unstamped gzip), then reads the archive back as a
+  consumer would and verifies the manifest, the revision and the member
+  count before printing `BUNDLE|COMPLETE|commit|sha256|path`. Links below
+  `src/`, a branch name, a missing control and an occupied destination refuse
+  with nothing written.
+- **Platform acceptance driver**: `docs/v0.27.0/acceptance.tools-archive-rebuild.sh`
+  takes explicit archive, bundle, revision, pdfs, deploy-script and
+  previous-installer pins and refuses a wrong digest, a misplaced or occupied
+  run home or a non-timestamped archive before any probe. Its `rhel` mode runs
+  PA1 (fresh `--prefix` relocation, forced reinstall reproducing the fresh
+  counters, `deploy_pkgs.sh --force` over the existing prefix), PA2, the PA3
+  deploy role through item 6's driver from the bundle plus the retained build
+  role capture, PA4, PA5 through the delivered closure checker, PA6 (offline
+  dry-run lock audit, heavy-wheel imports, retained wheel search path), PA10,
+  PA11 through `env -i` operator probes, and AR3 with the relocation pass
+  alone over a v0.26.0-relocated tree. Each probe leaves a raw log, an exit
+  file and a cell file bound to the pinned archive and run. Its `debian` mode
+  reads a retained agent build into the same cells, re-runs the application's
+  test-evidence validator and checks the lock against the application
+  revision. Its `d10` mode wraps the inherited reader with one permitted
+  rebuild and refuses a third iteration. `summarize` digests every named
+  capture, refuses foreign identities and unknown states, turns a pass without
+  a capture into inconclusive and a required cell that never ran into pending,
+  and exits 0, 1, 2 or 5.
+- **Fixtures**: `docs/v0.27.0/verify.tools-release-acceptance.sh` covers 58
+  cases: bundle composition on both sides including the consuming project's
+  bundle adapter, tampering, missing controls and links; driver pin refusals;
+  nine summary outcomes; twelve Debian reader outcomes including a foreign
+  identity and a drifted lock; and the D10 archive-only, rebuild, settle,
+  third-iteration, non-convergent and inconclusive paths over compiled
+  provider fixtures, plus the venv exclusion run and its wheel-preservation
+  assertions.
+- **Runner**: `verify.tools-archive-rebuild.sh --step 6` lints the three
+  scripts with ShellCheck and runs the new fixtures before the inherited
+  suites.
+- **Real RHEL acceptance**: the driver ran natively for 3995 seconds over the
+  exact archive with a bundle composed from the transferred tree. PA1, PA2,
+  PA3 (both roles), PA4, PA5, PA10, PA11 and AR3 pass; AR3 observed the
+  interpreter as a fresh program, then as a migration with 162 objects
+  checked equal to the case 5 population and zero failures, then as already
+  correct with zero rewrites, and the forced reinstall reproduced the 446
+  rewrites of the fresh install before settling likewise. PA6 fails: the
+  relocated `_extra.so` carries only the prefix toolchain directories where
+  the production tree carries `RUNPATH [$ORIGIN]`, and `libmupdf.so.27.2` is
+  not found. Two earlier runs the same day were driver corrections (force
+  reinstall re-extraction, operator probes under errexit); the record binds
+  the third run only.
+- **Record and view**: the [results capture](evidence.tools-archive-rebuild.step6-rhel.json)
+  and [validation capture](evidence.tools-archive-rebuild.step6-validation.txt)
+  are indexed in the sidecar; the RHEL deploy environment carries the run,
+  OS and provider digests, the build environment its transfer digest, ten
+  cells their state, run, captures and input snapshot, and the acceptance
+  view gained a Step 6 section with the finding and the prepared Debian
+  inputs. Raw captures and the bundle are retained on the build host under
+  the run identity with their digests.
+- **Venv-tree exclusion in the ELF pass (decided 2026-09-18)**: the
+  requirement's PA6 row and a Q06 clarification, the design's acceptance
+  table, the plan's Step 6 file set and umbrella item 8 now record the
+  decision. `install_pkg.sh` lists every directory holding `pyvenv.cfg` in
+  one walk and prunes those trees from the ELF pass, naming each excluded
+  tree in the install output; wheel objects keep their `$ORIGIN` search path
+  and resolve shipped providers through the interpreter's forced `DT_RPATH`,
+  while the symlink and text passes still relocate a shipped venv. The
+  fixture harness compiles a venv tree with an `$ORIGIN`-relative wheel
+  object beside a builder-anchored library outside the venv, runs the pass
+  over that root and requires the wheel bytes and `RUNPATH` unchanged, one
+  walked and rewritten object, and one case 4 record; it failed first
+  against the unchanged installer and passes after the correction.
+- **Validation evidence**: native cumulative `--step 6` passed in 74 seconds
+  (shell lint, ShellCheck, 16 record tests, 49 D10, 33 agent, 12 packaging,
+  63 installer, 53 wrapper, 38 SQLite controls, 52 acceptance fixtures, 21
+  publication and transport tests, 254 historical closure cases), and the
+  relocation corpus `--step 3` passed its 104 cases against the corrected
+  installer. A `ghog day` walk passed the shell lint gate and stopped at
+  exit 5 for the known absence of a cplx pytest environment. The inherited
+  closure harness at `--step 6` passes all thirteen delivery cases with the
+  updated script; its three other failures (two live-tree alias comparisons
+  and the gate archive) are identical with the committed script and
+  unrelated to delivery.
+- **Review round 1 repairs (2026-09-18)**: native cumulative validation passed
+  again in 84 seconds with 58 acceptance fixtures and four independent helper
+  imports under Python 3.9.25. The capture retains application HEAD
+  `6b22c16fdf9d0aa2ba083f935771209d4a5fc862` plus three uncommitted reader
+  repair digests, and all six current cplx overlay digests. The prior
+  74-second run above is historical evidence for its earlier application.
+  The driver derives a unique deployed project and venv, with six fixtures
+  for missing/ambiguous discovery and the audit's working directory. The
+  umbrella uses its public project alias. The installed sensitive-content
+  hook passes. Postponed annotations repair the three application readers;
+  the agent fixture now models the typed pytest hooks and current callback
+  signature. Focused application Ruff passes. The application repairs remain
+  staged in its sibling checkout for its separate commit flow. The RHEL PA6
+  failure and remaining candidate acceptance stay unresolved; this check
+  retains No and the missing-work list below. Per handoff point 1, those
+  later acceptance obligations do not prevent reviewing the current work.
+
+### Missing work for Step 6
+
+- **Repackage and re-accept PA6 on RHEL**: the accepted Step 5 archive ships
+  the uncorrected installer, so it is a failed candidate. Return to Step 5
+  for a single repackage of the unchanged payloads with the corrected
+  `install_pkg.sh` promoted into `tools/bin`, record the new candidate
+  identity and its Step 5 evidence, repeat AR1, AR2 and AR4, then rerun the
+  RHEL driver over the new archive until PA6 passes with the deployed venv
+  importing pymupdf and pikepdf, and rebind the affected RHEL cells.
+- **Commit the application reader repairs**: the postponed annotations in
+  `ci/tools_abi_scan.py`, `ci/tools_test_evidence.py` and
+  `ci/tools_wheel_capture.py` are staged in the application checkout but not
+  committed. Commit them through that repository's own flow and record the
+  application commit carrying the three digests in the validation capture, so
+  the Step 6 evidence names a committed revision rather than an overlay.
+- **Debian agent candidate build**: push the five pending application commits
+  to the pipeline branch, host the accepted archive and the composed bundle
+  on the snapshot repository under an item 7 version, commit the five-key
+  `tools/tools.candidate` pin (and the SQLite candidate pin for PA3) through
+  the group-commits flow, run one build, retrieve its archived `a.evidence`
+  tree and console, run the driver's `debian` mode with the application
+  checkout and revision, and bind PA1 to PA9 (Debian), the Debian environment
+  (build, image, container, OS, transfer digest) and the consumers (lock
+  digest, wheel digests, venv base) into the record.
+- **D10 with the agent's wheels**: materialize the build's `wheels.tar.gz`
+  artifacts on RHEL with `tools_wheel_inventory.sh materialize`, obtain both
+  candidate provider trees (GCC 11 and a GCC 12 `libstdc++.so.6` and
+  `libgcc_s.so.1`, which the host does not carry), run the driver's `d10`
+  mode with `--wheel-root`, and bind `d10.readings`, `packaged_generation`
+  and `selected_generation`; a required rebuild is the single permitted return
+  to Step 5 and needs the second reading to settle.
+- **Remaining pre-publication obligations**: bind RA2 (both roles' SQLite
+  acceptance, closure checks with no waiver, source authority), RA3, RA4, RA7,
+  RA8 (publication), RA5 (publication) and the backend cell with their
+  captures once the evidence above exists, record any affected/unaffected
+  assessment for changed application, lock or wheel inputs, and run
+  `tools_release_record.py publication` against the archive and the release
+  revision until it prints the accepted digest.
 
 ### New types/classes introduced for Step 6
 
-_(empty — no check has taken place yet.)_.
+No production class or type was introduced. `deliver_check_source`,
+`deliver_into`, `deliver_bundle` and `deliver_bundle_check` are Bash
+functions extracted from and added to the delivery script's main flow. The
+driver's `rhel_*`, `debian_main`, `d10_main`, `summarize_main`, `bundle_check`,
+`deployed_venv` and `probe_main` are Bash functions; its JSON work runs in
+stdlib Python heredocs under the explicitly named independent interpreter.
+`expect`, `run_home`, `cell`, `evidence` and `debian` are test-only functions
+of the fixture harness.
 
 ### Architecture check for Step 6
 
-_(empty — no check has taken place yet.)_.
+- **Placement**: delivery and bundle composition stay in the CI bootstrap
+  script that already owned authoritative copies; the driver is effort
+  evidence under `docs/v0.27.0/` that composes the shipped installer, the
+  delivered closure checker, the item 6 acceptance driver and the consuming
+  project's deployment entry without reimplementing any of them.
+- **Boundaries**: the driver reads controls only from the verified bundle and
+  never from the archive under test; the Debian reader re-runs the
+  application's own evidence validator rather than reinterpreting its
+  counts; the release validator and the D10 reader are unchanged.
+- **Size**: the driver is 943 physical lines of Bash and the delivery script
+  312; the installer grows from 1308 to 1334 lines of Bash; the Python
+  ceiling does not apply to them. The changed Python files are the agent
+  fixture at 215 physical lines and the three repaired application readers
+  at 250, 94 and 121, all below the 650-line ceiling.
+- **Installer change**: the venv exclusion stays inside the native
+  relocation adapter's ELF pass, next to the existing `.git` and
+  `__pycache__` prunes, and adds one listing walk rather than a fork per
+  directory; the classifier, the record grammar and the other passes are
+  untouched.
+
+No, there is no architecture violation, smell or size issue to address for Step 6.
 
 ### Performance check for Step 6
 
-_(empty — no check has taken place yet.)_.
+- **No new `O(n^2)` or `O(n log n)` path**: composition digests each bundle
+  member once and sorts member names for determinism, as inherited inventory
+  sorting already does; the summarizer hashes each named capture once and
+  reads each cell once; the readers scan the console with anchored patterns.
+- **Real run cost**: 3995 seconds on RHEL, dominated by four relocations, two
+  deployments and the SQLite deploy role, all existing entry points.
+- **Plan-bound alignment**: work is linear in explicitly supplied evidence and
+  artifact bytes; no repeated all-pairs scan was introduced.
+
+No, there is no performance issue to address for Step 6.
 
 ### Unit test coverage check for Step 6
 
-_(empty — no check has taken place yet.)_.
+No Python class or class-focused unit test was changed; `tools_release_record.py`
+and its 16 tests are untouched and still pass natively. cplx has no configured
+pytest coverage gate, so no percentage is claimed; the native cumulative runner
+is the validation entry. Statically, every top-level function of the delivery
+script is reached from `deliver_main`, every driver function from `main`, its
+`rhel_*` phases from `rhel_main` and the probes through the driver's own
+re-invocation, and every fixture helper from the harness body; the fixtures
+exercise the composer, the consumer check, the summarizer, the Debian reader
+and the D10 wrapper, while the RHEL phases are exercised by the real run only.
+
+No, there is no unit-tested class below 100% that needs completing for Step 6.
+No, there is no unreferenced top-level symbol outside the coverage gate.
 
 ### Feature integrity for Step 6
 
-_(empty — no check has taken place yet.)_.
+- **Delivery**: `--into` behaves as before; the inherited closure harness's
+  thirteen delivery cases pass with the updated script, and the combined
+  `--into` plus `--bundle` call refuses.
+- **Inherited harnesses and record**: installer, wrapper, SQLite, D10, agent,
+  packaging, publication and record suites remain green, and the relocation
+  corpus step passes against the corrected installer, whose `.git` and
+  `__pycache__` prunes, classifier and record grammar are unchanged; the
+  record keeps every Step 5 result with its original run and only adds
+  Step 6 cells, so no old pass was relabeled and PA6 is recorded as the
+  failure it is.
+- **Reporting**: cells carry pass, fail, inconclusive or pending with a
+  reason and digested captures; a skipped required cell cannot summarize as
+  a pass.
+
+No existing feature or reporting capability is impaired by Step 6. The
+step remains incomplete for the reasons listed under its missing work.
 
 ## Step 7. Publish, adopt and close with integration evidence
 
