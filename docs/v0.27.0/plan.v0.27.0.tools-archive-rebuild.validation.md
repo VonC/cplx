@@ -3,10 +3,11 @@
 No, it is not implemented.
 
 Track the seven steps in [the implementation plan](plan.v0.27.0.tools-archive-rebuild.md).
-Steps 1-5 are checked below. Step 6 is checked and not complete: the RHEL
-cells are bound, PA6 on RHEL fails on the shipped installer's wheel search-path
-rewrite, and the Debian agent cells, consumer identities and D10 reading await
-a pushed candidate build. Step 7 and final publication remain pending.
+Steps 1-5 are checked below, including the installer-only Step 5 repackage.
+Step 6 is checked and not complete: the original candidate retains its RHEL
+PA6 failure, and all runtime cells await acceptance of the replacement.
+Debian agent cells, consumer identities and D10 require a pushed candidate
+build. Step 7 and final publication remain pending.
 
 ## File-based IO cost clarification
 
@@ -552,10 +553,12 @@ No existing feature or reporting capability is impaired.
 Yes. Step 5 has been fully implemented.
 
 The explicitly selected Python 3.13.15 was refreshed and rebuilt with SQLite
-in the owned RHEL namespace. The actual archive `tools.2026-09-17_222857.tar.gz` is bound to
-build evidence, preservation comparisons and passing AR1/AR2/AR4 assertions.
-Declaration authority remains valid. Step 6 runtime acceptance and the final
-publishing revision remain pending, as the plan requires.
+in the owned RHEL namespace. Handoff point 2 has now completed the installer-only
+repackage as `tools.2026-09-18_220913.tar.gz`, with unchanged payload
+bytes, fresh preservation checks and passing AR1/AR2/AR4 assertions. The original
+candidate retains its historical evidence and RHEL PA6 failure. Declaration
+authority remains valid. Step 6 runtime acceptance for the replacement and the
+final publishing revision remain pending, as the plan requires.
 
 ### Goal for Step 5
 
@@ -589,7 +592,7 @@ ownership entry is discharged correctly.
   operator probes. Configured SQLite, same-process mapped-provider identity and
   file-backed commit/close/reopen checks passed. `pkg_tools.sh` produced
   545310257 bytes, SHA-256 `d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1`, with SHA-1, commands and elapsed times
-  recorded in the [candidate capture](evidence.tools-archive-rebuild.step5-candidate.json).
+  recorded in the [candidate capture](evidence.tools-archive-rebuild.step5-original-candidate.json).
   Live trees, payloads, Git executables and the project sentinel passed their
   preservation comparisons. Raw captures and the exact archive are retained.
 - **Actual archive assertions**: the pre-frozen program oracle, actual extracted
@@ -618,6 +621,24 @@ ownership entry is discharged correctly.
   SHA-1. A fresh `ghog day` passed shell lint, then stopped with exit 5 because
   cplx has no configured pytest environment. The plan's native cumulative runner
   supplies the required validation; no pytest or coverage percentage is claimed.
+
+- **Installer-only return on 2026-09-18**: the committed installer was overlaid
+  into both namespace copies before a fresh audit and the existing packager.
+  `tools.2026-09-18_220913.tar.gz` is 545293468 bytes,
+  SHA-256 `df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87`.
+  Content hashes, modes, entry types and link targets match for all
+  38070 archive members except `tools/bin/install_pkg.sh`;
+  timestamps are excluded. No refresh, compilation or promotion was repeated.
+  The source tree after the explicit overlay and protected live trees passed
+  preservation checks. Fresh frozen-oracle archive checks passed all 539 cases,
+  with zero selected residuals and empty handoff/register. The
+  [replacement capture](evidence.tools-archive-rebuild.step5-candidate.json)
+  binds a separate retained archive and raw bundle; the original captures remain
+  byte-identical under explicit historical filenames. Authority and retention
+  merge remain reachable from source revision `7aa660f8a2f182fc91790fd1182166ad8b662d5b`.
+  The record verifier checks both candidates and their capture digests, preserves
+  historical verdicts, reproduces the Markdown view and permits only
+  AR1/AR2/AR4/RA1 passes for the replacement. No runtime pass was inherited.
 
 ### New types/classes introduced for Step 5
 
@@ -817,13 +838,12 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
 
 ### Missing work for Step 6
 
-- **Repackage and re-accept PA6 on RHEL**: the accepted Step 5 archive ships
-  the uncorrected installer, so it is a failed candidate. Return to Step 5
-  for a single repackage of the unchanged payloads with the corrected
-  `install_pkg.sh` promoted into `tools/bin`, record the new candidate
-  identity and its Step 5 evidence, repeat AR1, AR2 and AR4, then rerun the
-  RHEL driver over the new archive until PA6 passes with the deployed venv
-  importing pymupdf and pikepdf, and rebind the affected RHEL cells.
+- **Re-accept the replacement on RHEL**: handoff point 2 completed the Step 5
+  repackage as `tools.2026-09-18_220913.tar.gz` and repeated AR1/AR2/AR4.
+  Run the RHEL driver over this replacement until PA6 passes with the deployed
+  venv importing pymupdf and pikepdf, and bind the affected RHEL cells to its
+  new digest. The original candidate's failed PA6 and earlier passes remain
+  historical evidence and do not qualify the replacement.
 - **Commit the application reader repairs**: the postponed annotations in
   `ci/tools_abi_scan.py`, `ci/tools_test_evidence.py` and
   `ci/tools_wheel_capture.py` are staged in the application checkout but not
