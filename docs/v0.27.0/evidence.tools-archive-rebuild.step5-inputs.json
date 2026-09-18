@@ -1,0 +1,634 @@
+{
+    "date":  "2026-09-17",
+    "architecture":  "rhel_9.8_x86_64",
+    "selection_rule":  "Existing metadata_context/list fallback and find_package_in_arch",
+    "sources":  {
+                    "src/setups/pkgs/packages_rhel_9.8_x86_64.txt":  "451e586369fc9ebb8c62d4e79b7bbede4baeecd8a717a72eab7d8b3c215be6d8",
+                    "src/setups/pkgs/python/python_rhel_9.6_x86_64.txt":  "b799098736789f5a14dd697397223bf9daf5155da7c90f0eb9f4199e770a7b91",
+                    "src/setups/pkgs/git/git_rhel_9.6_x86_64.txt":  "2516c69c503c1b2345ebe0fc706d06a24e7106c9024f371cc3a9b4814df31041"
+                },
+    "python_source":  {
+                          "filename":  "python-src-3.13.15.tar.gz",
+                          "bytes":  30106468,
+                          "sha256":  "c28d9d213c09b5b5ab2c29812950e12f746999e099b82894231be954b26baed9"
+                      },
+    "transfer":  {
+                     "bytes":  86118400,
+                     "sha256":  "6f789cfa7742d2aa2731b1a3901054c58e3d99280de7e807aaa7be1cb1b50a5c"
+                 },
+    "resolution":  [
+                       {
+                           "tool":  "python",
+                           "expression":  "make",
+                           "filename":  "make-4.3-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "zlib",
+                           "filename":  "zlib-1.2.11-41.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "zlib-devel",
+                           "filename":  "zlib-devel-1.2.11-41.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "gmp",
+                           "filename":  "gmp-6.2.0-13.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libzstd",
+                           "filename":  "libzstd-1.5.5-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "gcc",
+                           "filename":  "gcc-11.5.0-15.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "cpp",
+                           "filename":  "cpp-11.5.0-15.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libmpc",
+                           "filename":  "libmpc-1.2.1-4.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libgcc",
+                           "filename":  "libgcc-11.5.0-15.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "glibc",
+                           "filename":  "glibc-2.34-276.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libstdc\\+\\+",
+                           "filename":  "libstdc++-11.5.0-15.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "binutils",
+                           "filename":  "binutils-2.35.2-72.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "glibc-devel",
+                           "filename":  "glibc-devel-2.34-276.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "glibc-headers",
+                           "filename":  "glibc-headers-2.34-276.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "kernel-headers",
+                           "filename":  "kernel-headers-5.14.0-737.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "ncurses-devel",
+                           "filename":  "ncurses-devel-6.2-12.20210508.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "openssl-libs",
+                           "filename":  "openssl-libs-3.5.7-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "openssl",
+                           "filename":  "openssl-3.5.7-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "openssl-devel",
+                           "filename":  "openssl-devel-3.5.7-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "openssl-pkcs11",
+                           "filename":  "openssl-pkcs11-0.4.11-9.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "openssl-perl",
+                           "filename":  "openssl-perl-3.5.7-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "bzip2-libs",
+                           "filename":  "bzip2-libs-1.0.8-11.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "bzip2",
+                           "filename":  "bzip2-1.0.8-11.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "bzip2-devel",
+                           "filename":  "bzip2-devel-1.0.8-11.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libffi",
+                           "filename":  "libffi-3.4.2-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libffi-devel",
+                           "filename":  "libffi-devel-3.4.2-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "ncurses",
+                           "filename":  "ncurses-6.2-12.20210508.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "ncurses-libs",
+                           "filename":  "ncurses-libs-6.2-12.20210508.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "ncurses-devel",
+                           "filename":  "ncurses-devel-6.2-12.20210508.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "gdbm-libs",
+                           "filename":  "gdbm-libs-1.23-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "gdbm-devel",
+                           "filename":  "gdbm-devel-1.23-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libgpg-error",
+                           "filename":  "libgpg-error-1.42-5.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libgpg-error-devel",
+                           "filename":  "libgpg-error-devel-1.42-5.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libgcrypt",
+                           "filename":  "libgcrypt-1.10.0-13.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libgcrypt-devel",
+                           "filename":  "libgcrypt-devel-1.10.0-13.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libxml2",
+                           "filename":  "libxml2-2.9.13-16.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libxml2-devel",
+                           "filename":  "libxml2-devel-2.9.13-16.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "xz",
+                           "filename":  "xz-5.2.5-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "xz-devel",
+                           "filename":  "xz-devel-5.2.5-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "xz-libs",
+                           "filename":  "xz-libs-5.2.5-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libxslt",
+                           "filename":  "libxslt-1.1.34-16.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libtool-ltdl",
+                           "filename":  "libtool-ltdl-2.4.6-46.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "gnutls",
+                           "filename":  "gnutls-3.8.10-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "p11-kit",
+                           "filename":  "p11-kit-0.26.4-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "p11-kit-devel",
+                           "filename":  "p11-kit-devel-0.26.4-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "p11-kit-trust",
+                           "filename":  "p11-kit-trust-0.26.4-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libtasn1",
+                           "filename":  "libtasn1-4.16.0-10.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "nettle",
+                           "filename":  "nettle-3.10.1-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "gnutls",
+                           "filename":  "gnutls-3.8.10-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libidn2",
+                           "filename":  "libidn2-2.3.0-7.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libuuid",
+                           "filename":  "libuuid-2.37.4-27.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "libuuid-devel",
+                           "filename":  "libuuid-devel-2.37.4-27.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "readline",
+                           "filename":  "readline-8.1-4.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "readline-devel",
+                           "filename":  "readline-devel-8.1-4.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "sqlite-libs",
+                           "filename":  "sqlite-libs-3.34.1-11.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "python",
+                           "expression":  "sqlite-devel",
+                           "filename":  "sqlite-devel-3.34.1-11.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "bzip2-libs",
+                           "filename":  "bzip2-libs-1.0.8-11.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "unzip",
+                           "filename":  "unzip-6.0-59.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "make",
+                           "filename":  "make-4.3-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "zlib",
+                           "filename":  "zlib-1.2.11-41.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "zlib-devel",
+                           "filename":  "zlib-devel-1.2.11-41.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "gmp",
+                           "filename":  "gmp-6.2.0-13.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libzstd",
+                           "filename":  "libzstd-1.5.5-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libmpc",
+                           "filename":  "libmpc-1.2.1-4.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libgcc",
+                           "filename":  "libgcc-11.5.0-15.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "glibc",
+                           "filename":  "glibc-2.34-276.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "glibc-common",
+                           "filename":  "glibc-common-2.34-276.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "glibc-devel",
+                           "filename":  "glibc-devel-2.34-276.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "glibc-headers",
+                           "filename":  "glibc-headers-2.34-276.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "kernel-headers",
+                           "filename":  "kernel-headers-5.14.0-737.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "openssl",
+                           "filename":  "openssl-3.5.7-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "openssl-libs",
+                           "filename":  "openssl-libs-3.5.7-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "openssl-devel",
+                           "filename":  "openssl-devel-3.5.7-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libcurl",
+                           "filename":  "libcurl-7.76.1-43.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libcurl-devel",
+                           "filename":  "libcurl-devel-7.76.1-43.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "expat",
+                           "filename":  "expat-2.5.0-7.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "expat-devel",
+                           "filename":  "expat-devel-2.5.0-7.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libxcrypt",
+                           "filename":  "libxcrypt-4.4.18-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libxcrypt-devel",
+                           "filename":  "libxcrypt-devel-4.4.18-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libcom_err",
+                           "filename":  "libcom_err-1.46.5-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libcom_err-devel",
+                           "filename":  "libcom_err-devel-1.46.5-8.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "binutils",
+                           "filename":  "binutils-2.35.2-72.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "gcc",
+                           "filename":  "gcc-11.5.0-15.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "cpp",
+                           "filename":  "cpp-11.5.0-15.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "m4",
+                           "filename":  "m4-1.4.19-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "autoconf271",
+                           "filename":  "autoconf271-2.71-8.el9.noarch.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "perl-File-Compare",
+                           "filename":  "perl-File-Compare-1.100.600-483.el9.noarch.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "perl-File-Copy",
+                           "filename":  "perl-File-Copy-2.34-483.el9.noarch.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "asciidoc",
+                           "filename":  "asciidoc-9.1.0-3.el9.noarch.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "docbook-style-xsl",
+                           "filename":  "docbook-style-xsl-1.79.2-16.el9.noarch.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "docbook-dtds",
+                           "filename":  "docbook-dtds-1.0-79.el9.noarch.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "xmlto",
+                           "filename":  "xmlto-0.0.28-17.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libxslt",
+                           "filename":  "libxslt-1.1.34-16.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "glib2",
+                           "filename":  "glib2-2.68.4-21.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "elfutils-libelf",
+                           "filename":  "elfutils-libelf-0.195-1.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "glib2-devel",
+                           "filename":  "glib2-devel-2.68.4-21.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libgpg-error",
+                           "filename":  "libgpg-error-1.42-5.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libgpg-error-devel",
+                           "filename":  "libgpg-error-devel-1.42-5.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libassuan",
+                           "filename":  "libassuan-2.5.5-3.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libgcrypt",
+                           "filename":  "libgcrypt-1.10.0-13.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libgcrypt-devel",
+                           "filename":  "libgcrypt-devel-1.10.0-13.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libmount",
+                           "filename":  "libmount-2.37.4-27.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libmount-devel",
+                           "filename":  "libmount-devel-2.37.4-27.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libsecret",
+                           "filename":  "libsecret-0.20.4-4.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "libsecret-devel",
+                           "filename":  "libsecret-devel-0.20.4-4.el9.x86_64.rpm"
+                       },
+                       {
+                           "tool":  "git",
+                           "expression":  "pinentry-tty",
+                           "filename":  "pinentry-tty-1.1.1-8.el9.x86_64.rpm"
+                       }
+                   ],
+    "payloads":  {
+                     "make-4.3-8.el9.x86_64.rpm":  "3f6a7886f17d9bf4266d507e8f93a3e6164cb3444429517da6cfcacf041a08a4",
+                     "zlib-1.2.11-41.el9.x86_64.rpm":  "370951ea635bc16313f21ac2823ec815147ed1124b74865a34c54e94e4db9602",
+                     "zlib-devel-1.2.11-41.el9.x86_64.rpm":  "f41f5fc4a53f5b84e06b815dd3402847eb0415bf74bfb77ce490d9920fab91b4",
+                     "gmp-6.2.0-13.el9.x86_64.rpm":  "b6d592895ccc0fcad6106cd41800cd9d68e5384c418e53a2c3ff2ac8c8b15a33",
+                     "libzstd-1.5.5-1.el9.x86_64.rpm":  "3439a7437a4b47ef4b6efbcd8c5862180fb281dd956d70a4ffe3764fd8d997dd",
+                     "gcc-11.5.0-15.el9.x86_64.rpm":  "99e891f10bc6497834668940313d2e8c7fdba72547499d5be8a6ec6fceabf878",
+                     "cpp-11.5.0-15.el9.x86_64.rpm":  "1c1e4c8785b647ea94981f83c20ffe23d660e6a2b6ba88841a180dd1de102102",
+                     "libmpc-1.2.1-4.el9.x86_64.rpm":  "207e758fadd4779cb11b91a78446f098d0a95b782f30a24c0e998fe08e2561df",
+                     "libgcc-11.5.0-15.el9.x86_64.rpm":  "522e07f3a8a09a6d5c9174340031d3002d319d4f6ecad8a483d30d68f02fc36d",
+                     "glibc-2.34-276.el9.x86_64.rpm":  "d426507e84b3c89b464b5e4149c8137d8b21facbc25ef0c56e7e342048853e8b",
+                     "libstdc++-11.5.0-15.el9.x86_64.rpm":  "aef7b17304d056eb7cbd07ecf8cb75e10de85b010b15905d3127d06bdf045ffe",
+                     "binutils-2.35.2-72.el9.x86_64.rpm":  "6f9b078ceaae9d8f4b87158b1fa911efe08e54287513232def5730d125b25900",
+                     "glibc-devel-2.34-276.el9.x86_64.rpm":  "2d670b03a572998c4004da93741085370694e186525dea16e2d9367b67d8fb32",
+                     "glibc-headers-2.34-276.el9.x86_64.rpm":  "e9acc9fe7ead2449403aff40e760ddf2b4f69260ac882fb24e7b8a05de9d780f",
+                     "kernel-headers-5.14.0-737.el9.x86_64.rpm":  "c7d0a45580c58744421ac1c9b23855a80d493f5298ce90e4014308fc9c31d9b8",
+                     "ncurses-devel-6.2-12.20210508.el9.x86_64.rpm":  "b8cadf3cfef76ce367666cf45303f648a1780c8ef381176fd1365fe74026dc35",
+                     "openssl-libs-3.5.7-3.el9.x86_64.rpm":  "a9f646a8992864ce82fd8ce8140c9e118a2b7e17c64fc085949ae777566f7ff3",
+                     "openssl-3.5.7-3.el9.x86_64.rpm":  "3ec16bd697b1e8925ffb3577dafc6a69732f14016fd0921a9395ce9d9f2bc0fe",
+                     "openssl-devel-3.5.7-3.el9.x86_64.rpm":  "462fa61fd55922e4eaf0834dd206f79e876f4a045b33f69f24c9260919da3891",
+                     "openssl-pkcs11-0.4.11-9.el9.x86_64.rpm":  "5dee50eca9c7768d1d8579e7b78f400e6b2f75262b0a8f064ee9633fab6b16c1",
+                     "openssl-perl-3.5.7-3.el9.x86_64.rpm":  "a5b1afa5749ad5e7c6583c8fa0440ce23a78c43283381030d86689609ac0b801",
+                     "bzip2-libs-1.0.8-11.el9.x86_64.rpm":  "e1f4ca1a16276a6ede5f67cab8d8d2920b98531419af7498f5fded85835e0fca",
+                     "bzip2-1.0.8-11.el9.x86_64.rpm":  "27de96d7fb8285910bdd240cf6c6a842863b9a01d20b25874f5d121a16239441",
+                     "bzip2-devel-1.0.8-11.el9.x86_64.rpm":  "4395fefd067ebca746021d6f76fa9beaa07f890bd8cbd23d84db4e9f3f786b86",
+                     "libffi-3.4.2-8.el9.x86_64.rpm":  "110d5008364a65b38b832949970886fdccb97762b0cdb257571cc0c84182d7d0",
+                     "libffi-devel-3.4.2-8.el9.x86_64.rpm":  "39464cd83d7779bfbcadabe14a46bd8e8d90f7a73500e9d0481c8b1d9ce5dbdf",
+                     "ncurses-6.2-12.20210508.el9.x86_64.rpm":  "7f23a7c5b57d3a5bf58ba306a5863073026aeaa468ce39c417a34dd3fd79a013",
+                     "ncurses-libs-6.2-12.20210508.el9.x86_64.rpm":  "7b396883232158d4f9a6977bcd72b5e6f7fa6bc34a51030379833d4c0d24ab6f",
+                     "gdbm-libs-1.23-1.el9.x86_64.rpm":  "cada66331cc07a4f8a0701fc1ad13c346913a0d6f913e35c0257a68b6a1e6ce0",
+                     "gdbm-devel-1.23-1.el9.x86_64.rpm":  "2b692995878dd17d2072f85db626cce5b9014670122705e3b8f7dbc3a41a212b",
+                     "libgpg-error-1.42-5.el9.x86_64.rpm":  "a1883804c376f737109f4dff06077d1912b90150a732d11be7bc5b3b67e512fe",
+                     "libgpg-error-devel-1.42-5.el9.x86_64.rpm":  "7b19450714eef8b6c85ff2ace6d26921a05e8a6f5181dba76d5c26d9ade96823",
+                     "libgcrypt-1.10.0-13.el9.x86_64.rpm":  "71026b5a461fc0c4777db81a529dea0f9205f74c175bbdfbc0f5bab8475d05c9",
+                     "libgcrypt-devel-1.10.0-13.el9.x86_64.rpm":  "86aea1605c9f3c8d5e11d25faeaab513618cad1fcfec1d6ebab1ea4bf6b1a861",
+                     "libxml2-2.9.13-16.el9.x86_64.rpm":  "66a9bffc0993810538f3532a1964d56e7a073c128a9dbe8e394bbe56cd29f5d6",
+                     "libxml2-devel-2.9.13-16.el9.x86_64.rpm":  "6d1f30f41f76a7b318f9aaef59dee0870d0101a57faafd0ca588954a68945e4b",
+                     "xz-5.2.5-8.el9.x86_64.rpm":  "159f0d11b5a78efa493b478b0c2df7ef42a54a9710b32dba9f94dd73eb333481",
+                     "xz-devel-5.2.5-8.el9.x86_64.rpm":  "b04077515f5bea9a46adaf85a5217cec0f7eaa2a1286c5147310aedfc57bf94f",
+                     "xz-libs-5.2.5-8.el9.x86_64.rpm":  "ff3c88297d75c51a5f8e9d2d69f8ad1eaf8347e20920b4335a3e0fc53269ad28",
+                     "libxslt-1.1.34-16.el9.x86_64.rpm":  "7695356471d253e2017cf4b3aa56e1d00cca841950bdf01c6963fc6a9e3162dc",
+                     "libtool-ltdl-2.4.6-46.el9.x86_64.rpm":  "a04d5a4ccd83b8903e2d7fe76208f57636a6ed07f20e0d350a2b1075c15a2147",
+                     "gnutls-3.8.10-8.el9.x86_64.rpm":  "7995375d84e6592cdba3d94ba01e47f5607aecb2ff73b7af67a756def78e8a31",
+                     "p11-kit-0.26.4-1.el9.x86_64.rpm":  "185c0ee8f5470fe94b492f11c1e0c1674be3051062e906cdd32473a5ff8db045",
+                     "p11-kit-devel-0.26.4-1.el9.x86_64.rpm":  "15f734762be6b78244453f4ad0bd5758a8620f4eec4a8b5e18b8fb0845a31477",
+                     "p11-kit-trust-0.26.4-1.el9.x86_64.rpm":  "8dc277e3855df15bf2db2e8acd03e08311cd565152fa958ac75cbb862f98ebe1",
+                     "libtasn1-4.16.0-10.el9.x86_64.rpm":  "05f75ceb9f083ec511756eb9ed4078368c56ad55a6fe0abb819b8948e50b0d90",
+                     "nettle-3.10.1-1.el9.x86_64.rpm":  "aa28996450c98399099cfcc0fb722723b5821edff27cff53288e1c0298a98190",
+                     "libidn2-2.3.0-7.el9.x86_64.rpm":  "f7fa1ad2fcd86beea5d4d965994c21dc98f47871faff14f73940190c754ab244",
+                     "libuuid-2.37.4-27.el9.x86_64.rpm":  "2e340e7920662e24867f38f624b199102384f9142010a0d10223ee5acc31a0d5",
+                     "libuuid-devel-2.37.4-27.el9.x86_64.rpm":  "bb70205ddb96e05974cac56652c2158948839097a1b5b3ffdee321ec900d41f6",
+                     "readline-8.1-4.el9.x86_64.rpm":  "49945472925286ad89b0575657b43f9224777e36b442f0c88df67f0b61e26aee",
+                     "readline-devel-8.1-4.el9.x86_64.rpm":  "9587d558de77fe136d93aa449b1eb31e2afb56328fa04cd3bb7291f28c0d0876",
+                     "sqlite-libs-3.34.1-11.el9.x86_64.rpm":  "dfdc4f315ec0723e6c2687f810bcc5a9d3cb83f4d73496734645123bd5a6f3d4",
+                     "sqlite-devel-3.34.1-11.el9.x86_64.rpm":  "6c7f364e6c25c427c83619b851df26bd96d917e3c0d58b4dfa9416a72e744259",
+                     "unzip-6.0-59.el9.x86_64.rpm":  "84afb7b45bb59601ec32a3bc89ce2df71f296dc90bacae650582951b25c303e4",
+                     "glibc-common-2.34-276.el9.x86_64.rpm":  "30bcfae00ae8128416a96a2df6ff4c986cce05d9ffb29d1b9e39b6c8b460ce40",
+                     "libcurl-7.76.1-43.el9.x86_64.rpm":  "f346e10b0fb6174716c52e9f09994888df1a38f34d033a2c01d5156c470cfdad",
+                     "libcurl-devel-7.76.1-43.el9.x86_64.rpm":  "74e035e96c17c2e3cd9045c594b6bbf6347d2070ea66680e321ca945ed721fbd",
+                     "expat-2.5.0-7.el9.x86_64.rpm":  "91f7f3ca1a349fefc44a35229bdb9796a6fec6b717591ee537059039b2c68024",
+                     "expat-devel-2.5.0-7.el9.x86_64.rpm":  "03da46a24f3a206fb0ceb202d196842ea8ddf23f857b6ce16ff741db10bf9e8c",
+                     "libxcrypt-4.4.18-3.el9.x86_64.rpm":  "97e88678b420f619a44608fff30062086aa1dd6931ecbd54f21bba005ff1de1a",
+                     "libxcrypt-devel-4.4.18-3.el9.x86_64.rpm":  "162461e5f31f94907c91815370b545844cc9d33b1311e0063e23ae427241d1e0",
+                     "libcom_err-1.46.5-8.el9.x86_64.rpm":  "ef43794f39d49b69e12506722e432a497e7f96038e26cab2c34476aad4b3d413",
+                     "libcom_err-devel-1.46.5-8.el9.x86_64.rpm":  "2f305bb2283ce2b5d39e52a4a362150b764b8082d63fdbcb3d553b0282d1cb6d",
+                     "m4-1.4.19-1.el9.x86_64.rpm":  "42683a7130bb3f7052d785dbe10ca285b391f934f98fc649c9e8b754112bdba3",
+                     "autoconf271-2.71-8.el9.noarch.rpm":  "831e80c3abc6742e4a1298197f8ab47bbae4b1708aac4825d83e652f5e08559e",
+                     "perl-File-Compare-1.100.600-483.el9.noarch.rpm":  "ab670ad4fb9bd69072af6435799b18c5aa1d75614cdf3cb97703813d57165085",
+                     "perl-File-Copy-2.34-483.el9.noarch.rpm":  "5562614522645bad82222badd06fdcc0b41f52048147affa71350fcea25b38f7",
+                     "asciidoc-9.1.0-3.el9.noarch.rpm":  "8ffc5da843e050d6b825e3a8c6d8f85da552b2569da2e4f61468e7f531d89688",
+                     "docbook-style-xsl-1.79.2-16.el9.noarch.rpm":  "d61504dec1e351ffea978a7e38494b06bb70716d7c20d1e4e8269e618dc6b0c3",
+                     "docbook-dtds-1.0-79.el9.noarch.rpm":  "cf2a325450a11d4ccd8b7e4f33d37da7ac446c14b1ec195667aaa7275ebaa38d",
+                     "xmlto-0.0.28-17.el9.x86_64.rpm":  "a24de83373d07692432d4698e28a268302bad2dd8a54966d886f507b85c6b5a0",
+                     "glib2-2.68.4-21.el9.x86_64.rpm":  "14d17524b3ebb78f5bd090092c870ef2ff22c9e7e6e76be61bef586dd6e41a9a",
+                     "elfutils-libelf-0.195-1.el9.x86_64.rpm":  "a40d7e70ab22bd27d37ce9bbc6be25aceaee9cdc4dc9989863d6ed8bd3fe6727",
+                     "glib2-devel-2.68.4-21.el9.x86_64.rpm":  "5848fddf9b3a5eb9affd99ad16733ad0ed3fb7edde619ee4f6c8a7241a8b9775",
+                     "libassuan-2.5.5-3.el9.x86_64.rpm":  "3f7ab80145768029619033b31406a9aeef8c8f0d42a0c94ad464d8a3405e12b0",
+                     "libmount-2.37.4-27.el9.x86_64.rpm":  "c9a9db91ef7911a1a88b2716cbde213c2a627f0d8ac5444438b03808afbabfdf",
+                     "libmount-devel-2.37.4-27.el9.x86_64.rpm":  "9ae45227ea082b27fa9784628d3126cb093bf7ec1c8e5427d25e2313e9fa1350",
+                     "libsecret-0.20.4-4.el9.x86_64.rpm":  "6bc2db2e95a95c1e0be74c7edfe021d450293353b98d81678b61ac6b1b2bf886",
+                     "libsecret-devel-0.20.4-4.el9.x86_64.rpm":  "204a40008d581ce233d2b2883c23ede763b12e65e18de299290b1a7e3ce7aee3",
+                     "pinentry-tty-1.1.1-8.el9.x86_64.rpm":  "1a5efaac607981f743f172ceebd3563e19b4a5e7fbdda4821fdb3ee4f18ef362"
+                 }
+}
