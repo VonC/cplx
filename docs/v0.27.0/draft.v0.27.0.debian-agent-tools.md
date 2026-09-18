@@ -1202,7 +1202,11 @@ because restoring a previous release will re-resolve rather than restore
 copied bytes. Nothing in this item's plan changes, and no step is added
 here: item 8 is sequenced after publication precisely so that an
 accepted archive and its adoption evidence are not disturbed by a
-packaging change.
+packaging change. One correction landed inside this item on 2026-09-18,
+when its Step 6 run on RHEL found the shipped installer rewriting the
+venv's wheel objects: the ELF pass now excludes venv trees (Q06 of this
+item's requirement), so the shipped-venv arrangement holds until item 8
+replaces it, at the price of one repackage of the unchanged payloads.
 
 Depends on: items 1 to 6.
 
@@ -1256,6 +1260,43 @@ from that release's lock, so a wheel withdrawn from the index or a
 changed `uv` can make a rollback fail at the moment it is needed. The
 offline wheel set answers this too, which is why the two questions are
 one decision.
+
+THE RELOCATION PASS NEVER WALKS A VENV, DECIDED 2026-09-18 DURING ITEM
+7'S PLATFORM ACCEPTANCE. Step 6 of item 7 found PA6 failing on RHEL: the
+installer shipped in the rebuilt archive rewrote every library under the
+pdfs tree, wheel objects included, and dropped the `$ORIGIN` entry
+through which `pymupdf` finds its bundled `libmupdf`. The production
+tree, relocated by v0.26.0, still carries `RUNPATH [$ORIGIN]`, and the
+Debian pipeline never sees the problem because its venv is created after
+relocation and never walked. The decision, recorded as Q06 of item 7's
+requirement: the ELF pass excludes every venv tree (a directory holding
+`pyvenv.cfg`). Wheel objects carry no builder path, their `$ORIGIN` entry
+is valid at any prefix, and their shipped needs resolve through the
+interpreter's forced `DT_RPATH`, so rewriting them only subtracts. For
+this item that settles two things. A venv created on the target was
+never going to be walked, so nothing here waits on the fix. And the
+shipped-venv arrangement item 7 releases on is no longer broken by a
+full deployment or a forced redeploy in the window before this item
+lands. The symlink and text passes still relocate a shipped venv's
+`bin/python` link and `pyvenv.cfg`, and those are exactly the
+relocation-bound readiness checks this item retires.
+
+WHERE THE CREATED VENV LIVES AND WHAT IT IS CALLED, DECIDED 2026-09-18:
+unchanged from today. The venv is
+`pdfs/my-project/venvs/python_<version>_my-project`, the name the
+application's `.env` already derives from `tools/python/current` (dashes
+turned into underscores, the project name appended) and the pattern
+`deploy_pkgs.sh` readiness already selects. That `.env` already creates
+the venv with `python -m venv` when it is absent and points
+`UV_PROJECT_ENVIRONMENT` at it; this item adds what follows creation,
+`uv sync` against the project lock, and states the rule for a venv that
+is already there: keep it and sync it. Two consequences come with the
+unchanged location. The venv sits inside the tree the pdfs installer
+mirrors with `rsync --delete` and walks with its ELF pass, so a pdfs
+redeploy removes a venv created on the target and the next deployment
+recreates and syncs it, which is the stated rule rather than an
+accident. And any venv present at pass time is left untouched only by
+the venv-tree exclusion above.
 
 Acceptance: a deployment with no venv creates and syncs one; a deployment
 that already has one follows an explicit stated rule rather than an
