@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cumulative native Linux checks through private-stage packaging in Step 5.
+# Cumulative native Linux checks through platform acceptance fixtures in Step 6.
 # Explicit app checkout and independent Python 3.9+ are required.
 set -euo pipefail
 step="" python="" app=""
@@ -11,8 +11,8 @@ while [ "$#" -gt 0 ]; do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ "$step" =~ ^[12345]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
-    printf 'Required: --step 1|2|3|4|5 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
+[[ "$step" =~ ^[123456]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
+    printf 'Required: --step 1|2|3|4|5|6 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
 }
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 cd "$root"
@@ -33,6 +33,10 @@ fi
 if [ "$step" -ge 5 ]; then
     scripts+=(docs/v0.27.0/verify.tools-release-package.sh)
 fi
+if [ "$step" -ge 6 ]; then
+    scripts+=(ci/deliver-closure-tools.sh docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+        docs/v0.27.0/verify.tools-release-acceptance.sh)
+fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
 shellcheck --external-sources --source-path="$app" "${scripts[@]}"
 "$python" -m py_compile "$app/tools/tools_release_http.py" "$app/tools/tools_release_transport.py"
@@ -46,6 +50,18 @@ if [ "$step" -ge 3 ]; then
 fi
 if [ "$step" -ge 4 ]; then
     "$python" -m py_compile "$app"/ci/tools_*.py docs/v0.27.0/fixtures.tools-release-agent.py
+    # Compilation does not evaluate annotations. Import the independent helpers
+    # with the selected system interpreter (minimum supported version: 3.9).
+    # The pytest plugin belongs to the candidate venv, not this interpreter.
+    "$python" - "$app" <<'PY'
+import runpy
+import sys
+from pathlib import Path
+
+for name in ("tools_abi_scan", "tools_test_evidence", "tools_wheel_capture", "tools_candidate_bundle"):
+    runpy.run_path(str(Path(sys.argv[1]) / "ci" / (name + ".py")), run_name="compatibility_check")
+    print("PASS independent helper import:", name)
+PY
     bash docs/v0.27.0/verify.tools-release-agent.sh --python "$python" --app-repo "$app"
 fi
 if [ "$step" -ge 5 ]; then
@@ -56,6 +72,12 @@ if [ "$step" -ge 5 ]; then
         --wrapper "$root/src/install/env/python/bin/python" \
         --setenv "$root/src/install/env/python/bin/setenv"
     bash docs/v0.27.0/verify.python-sqlite-acceptance.sh --python "$python"
+fi
+if [ "$step" -ge 6 ]; then
+    # Bundle composition, driver refusals, cell summaries, the Debian evidence
+    # reader and the bounded D10 rebuild, all over owned fixtures. The real
+    # platform driver runs separately on each host and is never substituted.
+    bash docs/v0.27.0/verify.tools-release-acceptance.sh --python "$python" --app-repo "$app"
 fi
 bash docs/v0.27.0/verify.tools-release-publish.sh --python "$python" --app-repo "$app"
 # The current declaration deliberately retired the old SQLite waiver. Preserve

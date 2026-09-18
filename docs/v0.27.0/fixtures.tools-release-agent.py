@@ -171,7 +171,9 @@ def wheel_fixtures(app, scratch):
 def plugin_fixtures(app, scratch):
     # Invoke pytest's documented hooks with a configuration double. The native
     # application walk, not this dependency-free fixture, executes real tests.
-    pytest = SimpleNamespace(hookimpl=lambda **kw: lambda function: function, UsageError=ValueError)
+    pytest = SimpleNamespace(hookimpl=lambda **kw: lambda function: function, UsageError=ValueError,
+                             Config=SimpleNamespace, Item=SimpleNamespace,
+                             Session=SimpleNamespace, TestReport=SimpleNamespace)
     sys.path.insert(0, str(app))
     with patch.dict(sys.modules, pytest=pytest):
         plugin = module(app / "ci/tools_test_plugin.py")
@@ -197,7 +199,7 @@ def plugin_fixtures(app, scratch):
                                                         passed=True, skipped=False))
     output = scratch / "hook-tests.json"
     with patch.dict(os.environ, TOOLS_TEST_EVIDENCE=str(output)):
-        plugin.pytest_sessionfinish(session, 0)
+        plugin.pytest_sessionfinish(0)
     coverage = scratch / "hook-coverage.xml"
     coverage.write_text('<coverage lines-valid="10" lines-covered="10" line-rate="1"/>')
     evidence = module(app / "ci/tools_test_evidence.py")
