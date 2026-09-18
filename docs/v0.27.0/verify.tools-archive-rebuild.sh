@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cumulative native Linux checks through main-chain qualification in Step 4.
+# Cumulative native Linux checks through private-stage packaging in Step 5.
 # Explicit app checkout and independent Python 3.9+ are required.
 set -euo pipefail
 step="" python="" app=""
@@ -11,8 +11,8 @@ while [ "$#" -gt 0 ]; do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ "$step" =~ ^[1234]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
-    printf 'Required: --step 1|2|3|4 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
+[[ "$step" =~ ^[12345]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
+    printf 'Required: --step 1|2|3|4|5 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
 }
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 cd "$root"
@@ -30,6 +30,9 @@ if [ "$step" -ge 4 ]; then
         "$app/ci/tools_agent_identity.sh" "$app/ci/provision_toolchain.sh"
         "$app/tools/sqlite_candidate_capture.sh")
 fi
+if [ "$step" -ge 5 ]; then
+    scripts+=(docs/v0.27.0/verify.tools-release-package.sh)
+fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
 shellcheck --external-sources --source-path="$app" "${scripts[@]}"
 "$python" -m py_compile "$app/tools/tools_release_http.py" "$app/tools/tools_release_transport.py"
@@ -44,6 +47,15 @@ fi
 if [ "$step" -ge 4 ]; then
     "$python" -m py_compile "$app"/ci/tools_*.py docs/v0.27.0/fixtures.tools-release-agent.py
     bash docs/v0.27.0/verify.tools-release-agent.sh --python "$python" --app-repo "$app"
+fi
+if [ "$step" -ge 5 ]; then
+    bash docs/v0.27.0/verify.tools-release-package.sh
+    bash docs/v0.27.0/verify.install-pkg.sh --step 3 \
+        --installer "$root/src/setups/env/bin/install_pkg.sh"
+    bash docs/v0.27.0/verify.wrapper-scope.sh --step 2 \
+        --wrapper "$root/src/install/env/python/bin/python" \
+        --setenv "$root/src/install/env/python/bin/setenv"
+    bash docs/v0.27.0/verify.python-sqlite-acceptance.sh --python "$python"
 fi
 bash docs/v0.27.0/verify.tools-release-publish.sh --python "$python" --app-repo "$app"
 # The current declaration deliberately retired the old SQLite waiver. Preserve
