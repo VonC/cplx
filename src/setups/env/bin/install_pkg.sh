@@ -10,6 +10,13 @@
 # the method that produced it, under "Host tools install_pkg.sh needs" in
 # wiki/reference/relocation-tools.md. rsync is optional there: without it
 # the script falls back to cp at both transfer sites.
+# The ELF pass never walks a venv tree (a directory holding pyvenv.cfg):
+# wheel objects carry no builder path, their $ORIGIN search path is valid
+# at any prefix, and their shipped needs resolve through the interpreter's
+# forced DT_RPATH, so rewriting them only removed the entry that finds a
+# wheel's bundled providers (v0.27.0 tools-archive-rebuild Step 6, Q06).
+# The symlink and text passes still relocate a shipped venv's bin/python
+# link and its pyvenv.cfg.
 # Application-specific install steps (extra bin entries) belong to the
 # consuming project's own deployment script (my-project does them in
 # tools/deploy_pkgs.sh: see my-project docs/pkg-tools-migration-to-cplx.md).
@@ -965,6 +972,24 @@ fix_elf_paths() {
         info "New interpreter: ${new_interp:-<unchanged>}"
         info "New rpath      : ${new_rpath:-<unchanged>}"
 
+        # THE VENV TREES ARE NEVER WALKED. A venv's wheel objects carry no
+        # builder path to replace: their search path is $ORIGIN, valid at any
+        # prefix and the only entry through which a wheel finds the providers
+        # bundled beside it, while their shipped needs (libstdc++, libgcc_s,
+        # libc) resolve through the interpreter's forced DT_RPATH. Walking them
+        # as case 4 libraries replaced $ORIGIN with the target list and broke
+        # the heavy wheels on the deployment target; the pipeline never saw it
+        # because its venv is created after relocation. So every directory that
+        # holds a pyvenv.cfg is pruned, and named here so the retained install
+        # output shows what the pass deliberately left alone. One listing walk
+        # finds the roots; no fork per directory is spent testing for the marker.
+        local venv_prunes=() venv_root
+        while IFS= read -r -d '' venv_root; do
+            venv_prunes+=(-o -path "$venv_root")
+            info "Venv tree excluded from the ELF pass: ${venv_root#"$root_path/./"}"
+        done < <(find "$root_path/." \( -name '.git' -o -name '__pycache__' \) -prune -o \
+                 -type f -name 'pyvenv.cfg' -printf '%h\0' 2>/dev/null)
+
         # Size and path in ONE walk: `elf_observe` needs the size, and asking for it
         # per file would fork once per object over a tree of several hundred.
         while IFS= read -r -d '' file_size && IFS= read -r -d '' file_path; do
@@ -1068,7 +1093,8 @@ fix_elf_paths() {
                 "$file_path" "$root_path"; then
                 warning "Could not record '$file_path' as a CPLX-ELF/1 object"
             fi
-        done < <(find "$root_path/." \( -name '.git' -o -name '__pycache__' \) -prune -o -type f -size +4c -printf '%s\0%p\0' 2>/dev/null)
+        done < <(find "$root_path/." \( -name '.git' -o -name '__pycache__' ${venv_prunes[@]+"${venv_prunes[@]}"} \) -prune -o \
+                 -type f -size +4c -printf '%s\0%p\0' 2>/dev/null)
     fi
 
     # THE ONE TERMINAL SITE, reached on every path by construction rather than
