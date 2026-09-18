@@ -63,7 +63,7 @@ to Python files, not to Bash, Groovy, package lists or Markdown.
 | `src/setups/env/bin/closure_elf.sh` | 607 | Existing reader, reused without planned edits |
 | `src/setups/env/bin/pkg_tools.sh` | 270 | Step 5: targeted stage cleanup |
 | `src/setups/env/bin/pkg.sh` | 452 | Existing gated packager, reused |
-| `src/setups/env/bin/install_pkg.sh` | 1308 | Existing relocation implementation, reused |
+| `src/setups/env/bin/install_pkg.sh` | 1308 | Step 6 (decided 2026-09-18): the ELF pass excludes venv trees; otherwise reused |
 | `src/install/env/python/python_install_functions.sh` | 176 | Existing SQLite build/probe path, reused |
 | `src/install/env/python/sqlite_probe.py` | 337 | Existing probe; safe band, 650-line ceiling, no planned growth |
 | `src/setups/env/closure/closure-config.txt` | 33 | Step 5: conditional authorized renewal |
@@ -507,14 +507,30 @@ Files:
 - `ci/deliver-closure-tools.sh` (existing, to be updated).
 - `docs/v0.27.0/acceptance.tools-archive-rebuild.sh` (new, to be created).
 - `docs/v0.27.0/verify.tools-release-acceptance.sh` (new, to be created).
+- `docs/v0.27.0/fixtures.tools-release-agent.py` (existing, to be updated:
+  align the pytest double and session-finish call with the current application).
 - `docs/v0.27.0/verify.tools-archive-rebuild.sh` (existing after Step 1, to be updated).
 - `docs/v0.27.0/acceptance.tools-archive-rebuild.json` (existing after Step 2, to be updated).
 - `docs/v0.27.0/acceptance.tools-archive-rebuild.md` (existing after Step 1, to be updated).
+- `src/setups/env/bin/install_pkg.sh` (existing, to be updated: the ELF pass
+  excludes venv trees, decided 2026-09-18 after PA6 failed on RHEL).
 
 Tests first: acceptance driver receives explicit archive/verifier/revision pins,
 captures fail/inconclusive statuses, refuses missing cells and wrong identities,
 retains raw evidence and never turns a skipped required role into pass. Exercise
-invalidation and one permitted D10 rebuild with controlled fixtures.
+invalidation and one permitted D10 rebuild with controlled fixtures. A venv
+tree fixture proves the ELF pass leaves a wheel object's `$ORIGIN` search path
+untouched while still rewriting a library outside the venv.
+Deployment discovery must reject absent or ambiguous project/venv directories.
+Import the independent application helpers with the selected Python 3.9+
+interpreter as well as compiling them, so evaluated annotations are checked.
+The application's three independent readers need postponed annotations;
+retain their source revision and any uncommitted repair digests with validation.
+
+The installer ships inside the archive, so its correction makes the accepted
+Step 5 candidate a failed one: return to Step 5 for a single repackage of the
+unchanged payloads with the corrected installer, record the new candidate
+identity, repeat AR1, AR2 and AR4, then repeat the affected RHEL cells.
 
 Compose independently delivered verification controls and the existing SQLite,
 installer, relocation and wrapper harnesses. Keep controls outside the candidate

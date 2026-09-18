@@ -201,7 +201,12 @@ Static checking and live observation remain separate, complementary evidence.
 The installed ABI sweep covers the whole declared resolution scope. Direct
 venv Python execution establishes interpreter/base-executable identity and
 loads the heavy wheels under `LD_DEBUG=libs,versions`; absent or unusable traces
-are inconclusive. No per-wheel patching repairs a failing candidate.
+are inconclusive. No per-wheel patching repairs a failing candidate, and no
+relocation rewrites a wheel object either: the ELF pass excludes venv trees
+(decided 2026-09-18), so wheels keep their `$ORIGIN` search path to bundled
+providers while the interpreter's forced `DT_RPATH` resolves their shipped
+`libstdc++`, `libgcc_s` and `libc` needs, on a shipped venv as on one created
+on the target.
 
 Preserve item 4's strict provider and family checks, item 2's virtual-kernel
 and loader-name accounting, and loader paths/aliases inside tools. Recognized
@@ -349,6 +354,7 @@ configuration; it never replaces bytes under the failed immutable release.
 | A newer unqualified archive replaces the default latest target | Refuse that selection; explicit accepted bytes remain the only qualified candidate. |
 | The publisher lacks a demonstrated private-stage/atomic-commit adapter | Publication remains blocked; Maven success is not evidence of the missing contract. |
 | Pre-publication Jenkins passes, but release-pin retrieval or adoption fails | Preserve the failed coordinate, keep uploads off during recovery and verify the restored working configuration. |
+| A deployment relocates a shipped venv and its wheel objects lose their `$ORIGIN` search path | The relocation ELF pass excludes venv trees; wheel objects are never rewritten and PA6 must import the heavy wheels from the deployed venv. A shipped installer that walks them makes the archive a failed candidate to repackage. |
 
 ## Design decisions for tools-archive-rebuild
 
