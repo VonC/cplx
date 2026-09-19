@@ -1,0 +1,82 @@
+Handoff point 3: replacement RHEL acceptance, 2026-09-19
+
+Scope: rerun and retain RHEL acceptance only, within plan Step 6.
+Step 6 remains No. No application commit, upload, push, Debian build, D10
+reading, publication or adoption was performed by this checkpoint.
+
+Archive: tools.2026-09-18_220913.tar.gz
+Archive bytes: 545293468
+Archive SHA-256: df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87
+Run: tools-archive-rebuild-step6-20260919T094141Z-rhel
+Recorded UTC: 2026-09-19T10:47:19.029385+00:00
+Elapsed seconds: 3936
+Verdict: fail
+Results SHA-256: 56fd511cd3e8305c294c9d2c91ab63fc53658ecaedb24651c6c718afaa2e41d5
+Bundle SHA-256: cbdbe1299c100858d8731b6f9580afc0108d5f784373bfc9b9ad266962d85231
+Raw captures SHA-256: b841644b025f3b4175e97144d9aa87c249e29d6f8e75b6f5b8f785b1d1224c64
+Raw retention: $HOME/cplx-release-evidence/tools-archive-rebuild-step6.20260919T094141Z/
+Local verified retention: .reviews/a.step6.point3-retained/
+All seven files in retention.sha256 verified after download.
+The monitor's optional JSON display raised a SyntaxError after retaining and
+hashing the evidence. Fetch and digest verification succeeded; the driver's
+results.json was read directly. This display error did not affect the run.
+
+Source cplx commit: b3387f9f2f62befda8741dd437299653e2775fee
+Transferred cplx fixture commit: 70f9d83a390bfcfe9998593448ed961999572f4a
+The transport initializes a fixture repository from git archive and overlays;
+the bundle revision is that fixture commit, not a new release authority.
+Application source HEAD: 6b22c16fdf9d0aa2ba083f935771209d4a5fc862
+Transferred application fixture commit: 37c12b7d886c59a36c510adfb99ec5d93492883c
+Application staged reader overlays, unchanged from prior Step 6 validation:
+ci/tools_abi_scan.py 13a07fd90963b810d427580ac6683c5e161ee8dee59ec472d1f1d654de81c176
+ci/tools_test_evidence.py bd9c1125bd82a43a79a71eb5beb80891639ac36818a50e9703efd467c0e7c50c
+ci/tools_wheel_capture.py 2657ee7f2e122559c8317d4e6f08eb7f400fb8b3d88681b5ddd9146d7a27056d
+
+Measured states:
+pass: AR3, PA1:rhel, PA1:rhel-redeploy, PA2:rhel, PA3:rhel-deploy,
+      PA4:rhel, PA5:rhel, PA10:rhel, PA11:rhel
+fail: PA3:rhel-build
+inconclusive: PA6:rhel
+Eight of ten required cells pass. PA1:rhel-redeploy additionally passes.
+
+Raw PA3 diagnostic (raw/build-role.log, complete):
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+KeyError: 'probes'
+Log SHA-256: 186c3811aa5d931d50a295f08d73fcd1b5622b6edd3c87cff01cd7fb6fd010b1
+The replacement Step 5 candidate summary lacks the probes object expected by
+the build-role reader. This is a capture-contract failure, not evidence of a
+new compiler or SQLite runtime failure. The earlier candidate's pass is not
+assigned to this candidate.
+
+Raw PA6 cell reason:
+no unique deployed project and venv, uv or toolchain interpreter to audit
+The prerequisite branch emits no raw PA6 probe log. Neither the offline lock
+audit nor heavy-wheel imports ran. The reason does not distinguish which
+prerequisite was unavailable; the missing prerequisite has not been isolated.
+No claim is made that pymupdf/pikepdf import or that wheel RPATH was verified
+in this run. Both deployment readiness checks passed, but are not PA6 proof.
+Raw deploy-fresh.log SHA-256: cc72205abde3f4c7ffb900f3eaca95dd56df1b24edecd6396bff37aa15f711b7
+Raw deploy-force.log SHA-256: ac22ded11be580a9e5ee84d79fa26b130fcdcef427199a2772f9ecee5f915760
+Per the handoff, stop acceptance repair here and report these diagnostics.
+
+Separate cumulative validation:
+Command: bash .reviews/a.step6.transport.sh cumulative
+Native verify.tools-archive-rebuild.sh --step 6: exit 0, 79 seconds.
+Log SHA-256: b35a1105a431209a918cbbe8a542cbad3485a409329f5d8a4bbff93af54511c5
+This fixture result does not change the measured candidate verdict.
+Project shell lint: 58 tracked scripts clean.
+
+Record impact assessment:
+The historical candidate and its verdicts are preserved. Its results capture
+is retained byte-for-byte as evidence.tools-archive-rebuild.step6-original-rhel.json.
+Only its capture path changes. The replacement capture uses the canonical
+step6-rhel.json name and records the new candidate's exact measured states.
+The replacement deployment environment now has measured provider identities.
+AR1, AR2, AR4 and RA1 keep their Step 5 snapshots and run identities: this run
+changed neither archive bytes, packaging inputs nor source authority. Their
+archive/build evidence is unaffected by adding deployment observations.
+No old input snapshot or pass is relabeled. Final publication must assess
+later changed application, lock and wheel inputs and satisfy the validator.
+Consumer identities, Debian, D10, backend, publication and adoption remain
+pending, with release_revision unset. No release gate has been weakened.
