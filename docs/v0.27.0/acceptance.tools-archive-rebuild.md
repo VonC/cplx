@@ -453,7 +453,7 @@ closure checker taken from the verified bundle (SHA-256
 `64512d838a8c7142112fa6ed532115b346b14c986b24f2c45b51e7144bcd355d`, composed
 from the transferred tree commit the record names as this run's revision).
 The run took 3995 seconds. The
-[RHEL results capture](evidence.tools-archive-rebuild.step6-rhel.json)
+[RHEL results capture](evidence.tools-archive-rebuild.step6-original-rhel.json)
 records every cell with its raw capture digests. The raw logs, the relocated
 prefixes' trailers, the SQLite deploy-role evidence and the bundle are
 retained beside the Step 5 evidence on the build host as
@@ -577,9 +577,57 @@ Python selection and build evidence because every payload byte is unchanged.
 The [authority capture](evidence.tools-archive-rebuild.step5-authority.txt)
 adds the installer overlay; the declaration and source authority are unchanged.
 
-All replacement Step 6 runtime, consumer, D10, backend, publication and adoption
-cells remain pending. The earlier RHEL run cannot qualify the replacement.
-Handoff point 3 must run RHEL acceptance against these new bytes.
+At the Step 5 checkpoint, all replacement Step 6 runtime cells were pending.
+The following point 3 run records fresh RHEL verdicts for the replacement;
+consumer, D10, backend, publication and adoption obligations remain pending.
+
+## Handoff point 3 replacement RHEL checkpoint
+
+The replacement `tools.2026-09-18_220913.tar.gz` was tested in run
+`tools-archive-rebuild-step6-20260919T094141Z-rhel` for 3936 seconds.
+Its SHA-256 is
+`df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87`.
+The [measured results](evidence.tools-archive-rebuild.step6-point3-failed-rhel.json) record
+an overall **fail**. Eight of ten required cells pass; the additional
+`PA1:rhel-redeploy` cell also passes.
+
+- `PA3:rhel-build` fails: the retained replacement candidate summary lacks
+  the `probes` object required by the reader (`KeyError: 'probes'`).
+- `PA6:rhel` is inconclusive: the driver reports no unique deployed project
+  and venv, uv or toolchain interpreter to audit. Neither the offline lock
+  audit nor the heavy-wheel imports ran. Successful deployment readiness
+  checks do not establish PA6, and this run does not prove the wheel repair.
+
+The [point 3 capture](evidence.tools-archive-rebuild.step6-point3.txt) retains
+source and transport provenance, evidence digests, raw diagnostics and the
+unchanged-input assessment for the Step 5 cells. The original candidate's
+[RHEL result](evidence.tools-archive-rebuild.step6-original-rhel.json) remains
+byte-for-byte preserved. The separate native cumulative Step 6 checks passed
+in 79 seconds, and project shell lint passed for 58 tracked scripts.
+
+Point 3 belongs to Step 6 but does not complete it. Per the handoff's PA6
+stop condition, no acceptance repair or later handoff point was attempted.
+The missing RHEL proof, application reader commits, Debian build, wheel-bound
+D10 and remaining publication obligations still prevent Step 6 completion.
+
+## Point 3 review round 2: matching Python 3.13.15 environment
+
+The new native RHEL run passes all ten required cells, including PA3 and PA6,
+and the additional forced-redeployment cell. The tools archive is unchanged.
+The pdfs verification archive now ships one complete locked Python 3.13.15
+environment, including uv. The deployed environment passes the offline audit
+and imports pymupdf and pikepdf after fresh and forced deployment.
+
+PA3 uses the original build probes with explicit provenance: a fresh member
+comparison proves the replacement changed only the installer. The reader and
+venv discovery guard remain unchanged. Both earlier failed runs are retained.
+
+See the [native results](evidence.tools-archive-rebuild.step6-rhel.json),
+[preparation provenance](evidence.tools-archive-rebuild.step6-r2-preparation.json),
+and [round 2 evidence](evidence.tools-archive-rebuild.step6-point3-round2.txt).
+Step 6 remains No: Debian, final consumer/D10 identities, publication and
+adoption are still pending. The July application lock used for this RHEL
+qualification does not establish the later Debian consumer identity.
 
 ## Generated release record
 
@@ -634,19 +682,19 @@ Source: `acceptance.tools-archive-rebuild.json`.
 | --- | --- | --- |
 | AR1 | pass | tools-archive-rebuild-step5-repackage-2026-09-18_220913 |
 | AR2 | pass | tools-archive-rebuild-step5-repackage-2026-09-18_220913 |
-| AR3 | pending | None |
+| AR3 | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | AR4 | pass | tools-archive-rebuild-step5-repackage-2026-09-18_220913 |
 | PA1:debian | pending | None |
-| PA1:rhel | pending | None |
+| PA1:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | PA2:debian | pending | None |
-| PA2:rhel | pending | None |
+| PA2:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | PA3:debian | pending | None |
 | PA4:debian | pending | None |
-| PA4:rhel | pending | None |
+| PA4:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | PA5:debian | pending | None |
-| PA5:rhel | pending | None |
+| PA5:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | PA6:debian | pending | None |
-| PA6:rhel | pending | None |
+| PA6:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | PA7:debian | pending | None |
 | PA7:rhel | pending | None |
 | PA8:debian | pending | None |
@@ -654,11 +702,11 @@ Source: `acceptance.tools-archive-rebuild.json`.
 | PA9:debian | pending | None |
 | PA9:rhel | pending | None |
 | PA10:debian | not applicable | None |
-| PA10:rhel | pending | None |
+| PA10:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | PA11:debian | not applicable | None |
-| PA11:rhel | pending | None |
-| PA3:rhel-build | pending | None |
-| PA3:rhel-deploy | pending | None |
+| PA11:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
+| PA3:rhel-build | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
+| PA3:rhel-deploy | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | RA1 | pass | tools-archive-rebuild-step5-repackage-2026-09-18_220913 |
 | RA2 | pending | None |
 | RA3 | pending | None |
@@ -678,7 +726,7 @@ Source: `acceptance.tools-archive-rebuild.json`.
   "schema_version": 1,
   "preparation": {
     "state": "pending",
-    "reason": "Historical Step 1 capability; original candidate retains its RHEL PA6 failure; installer-only replacement passes Step 5 archive checks, with Step 6 runtime qualification and publication pending",
+    "reason": "Both earlier RHEL failures retained; replacement RHEL acceptance passes with the matching 3.13.15 pdfs venv; Debian, D10 and publication remain pending",
     "cplx_revision": "66de88c2b2d8259fb8b67d161823745e7d0b7685",
     "application_revision": "7a2c1c1650a1252e9e73c4dbc9dfe73bcf5d8b87",
     "validator": {
@@ -909,7 +957,7 @@ Source: `acceptance.tools-archive-rebuild.json`.
         },
         "step6-rhel": {
           "identity": "step6-rhel-20260918",
-          "path": "evidence.tools-archive-rebuild.step6-rhel.json",
+          "path": "evidence.tools-archive-rebuild.step6-original-rhel.json",
           "sha256": "563b43461c6e8519a916a4070df1ff1637c46ce62a8fb65ba2eb9dfde2678eee",
           "retention": "versioned"
         },
@@ -1905,12 +1953,18 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
         },
         "rhel-deploy": {
-          "run": null,
-          "os": null,
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "os": "Red Hat Enterprise Linux 9.8 (Plow)",
           "image": null,
           "container": null,
-          "runtime": {},
-          "transfer_sha256": null
+          "runtime": {
+            "python": "3.13.15",
+            "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+            "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+            "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+            "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+          },
+          "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
         }
       },
       "validator": {
@@ -1965,6 +2019,36 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "identity": "step5-authority-repackage-20260918",
           "path": "evidence.tools-archive-rebuild.step5-authority.txt",
           "sha256": "a469e148ad558bcbcbf47b554b47cfdbb49351028e0dfb8c98c4a2e734e46dfb",
+          "retention": "versioned"
+        },
+        "step6-rhel": {
+          "identity": "step6-rhel-20260919T113628Z",
+          "path": "evidence.tools-archive-rebuild.step6-rhel.json",
+          "sha256": "08114f9ee15b62194883e1ac4688888653273872e3a9ebb2443e1eaa6a948115",
+          "retention": "versioned"
+        },
+        "step6-point3": {
+          "identity": "step6-point3-20260919T094141Z",
+          "path": "evidence.tools-archive-rebuild.step6-point3.txt",
+          "sha256": "62cefed981c508313be75c9457b1b6f2743cbc119d4451d1b6e78075096f340f",
+          "retention": "versioned"
+        },
+        "step6-point3-failed-rhel": {
+          "identity": "step6-point3-failed-rhel-20260919T094141Z",
+          "path": "evidence.tools-archive-rebuild.step6-point3-failed-rhel.json",
+          "sha256": "56fd511cd3e8305c294c9d2c91ab63fc53658ecaedb24651c6c718afaa2e41d5",
+          "retention": "versioned"
+        },
+        "step6-r2-preparation": {
+          "identity": "step6-r2-preparation-20260919T113628Z",
+          "path": "evidence.tools-archive-rebuild.step6-r2-preparation.json",
+          "sha256": "5ff3fc73ed70682d2bc1d4d9dcd897698629726e61f2df0e163d24d25925f0c0",
+          "retention": "versioned"
+        },
+        "step6-point3-round2": {
+          "identity": "step6-point3-round2-20260919T113628Z",
+          "path": "evidence.tools-archive-rebuild.step6-point3-round2.txt",
+          "sha256": "2fc4d54838be2b08c3213bed23de281f3c26c352bff8df3154401be6485e9ab7",
           "retention": "versioned"
         }
       },
@@ -2058,10 +2142,55 @@ Source: `acceptance.tools-archive-rebuild.json`.
           }
         },
         "AR3": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "AR4": {
           "state": "pass",
@@ -2114,10 +2243,55 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA1:rhel": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA2:debian": {
           "state": "pending",
@@ -2126,10 +2300,55 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA2:rhel": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA3:debian": {
           "state": "pending",
@@ -2144,10 +2363,55 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA4:rhel": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA5:debian": {
           "state": "pending",
@@ -2156,10 +2420,55 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA5:rhel": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA6:debian": {
           "state": "pending",
@@ -2168,10 +2477,55 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA6:rhel": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA7:debian": {
           "state": "pending",
@@ -2216,10 +2570,55 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA10:rhel": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA11:debian": {
           "state": "not applicable",
@@ -2228,22 +2627,157 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA11:rhel": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA3:rhel-build": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA3:rhel-deploy": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+          "captures": [
+            "step6-rhel",
+            "step6-r2-preparation",
+            "step6-point3-round2"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "RA1": {
           "state": "pass",

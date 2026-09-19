@@ -1,31 +1,27 @@
 {
   "captures": {
-    "raw/build-provider.txt": {
-      "sha256": "fa33007ec7e660fac853451ecf894e92d4def6c15c98092a615c0770990e38f6",
-      "size": 146
-    },
     "raw/build-role.json": {
-      "sha256": "13808e09df55dc82a07cd843ca9ad5a22a20621587056912c803e4f5458d6b85",
-      "size": 12449
+      "sha256": "17bc82c556e7cc26388926548d9f0e2ba23b2cda6a3becf56ebb921f79f0475c",
+      "size": 5852
     },
     "raw/build-role.log": {
-      "sha256": "51839ae868d98fbec57b69b4b000a76f040cd11b93e5f64915f0e38df2544993",
-      "size": 62
+      "sha256": "186c3811aa5d931d50a295f08d73fcd1b5622b6edd3c87cff01cd7fb6fd010b1",
+      "size": 92
     },
     "raw/closure-check.log": {
-      "sha256": "65105b9e8b3b9528dba0565131aa4708193bad41f1974ca2fd15add57b166131",
+      "sha256": "55d9060674c2f688be82fd9065cd99e2d927902d28902fc418cec5168fd02f55",
       "size": 159705
     },
     "raw/deploy-force.log": {
-      "sha256": "6615baaccd0722f4787efefa6fb417a328d99a3e2d673154f79065077d0b6945",
-      "size": 10359
+      "sha256": "ac22ded11be580a9e5ee84d79fa26b130fcdcef427199a2772f9ecee5f915760",
+      "size": 10358
     },
     "raw/deploy-fresh.log": {
-      "sha256": "5d361b2e6f858a658353fe8f7306ecf3e46196f09a5da0f3db07858f2c35d673",
-      "size": 10359
+      "sha256": "cc72205abde3f4c7ffb900f3eaca95dd56df1b24edecd6396bff37aa15f711b7",
+      "size": 10358
     },
     "raw/dotenv.log": {
-      "sha256": "c02796821732547b01fc7cb2b8f1983ab7a6f29eaa0610e825b62cc99adfa47c",
+      "sha256": "ee24993a6e3152aae9560dd44bc0b187475f9a6df5fe3af601065634996206f7",
       "size": 330
     },
     "raw/git-elf.log": {
@@ -41,27 +37,23 @@
       "size": 570
     },
     "raw/home-fresh.log": {
-      "sha256": "3bc648f68945ea4fe20fa332c9d8d786119e74b126d13d0d988ab63b9e85015b",
+      "sha256": "ae857be0cda1d1e3d2465443bfb414916a4f2ec852ab5ec5183c21b597496cca",
       "size": 2891315
     },
     "raw/home-previous.log": {
-      "sha256": "444a0567bb6347cd47964f654a1d3c88e7b5a218c8114dce4f5ed89af07bfc61",
+      "sha256": "14426c2ea35e69aee74460b859611d5859045a83e5d1c794cd3248660f46d119",
       "size": 2796335
     },
     "raw/imports-deploy.log": {
-      "sha256": "418857fb9692e2024e285fdbe032164098ebddd6238b49fe7c6de89dae03fddf",
+      "sha256": "3417202df0b3274b1c46db58ba7fd4f3cab87f3d8390db968e6316dbe70490b3",
       "size": 148
-    },
-    "raw/imports-wheels.log": {
-      "sha256": "aaba628fad32bba4a2063e9717f0ca52009f484d83f28658db785baf3d1fa6b8",
-      "size": 145
     },
     "raw/install-force.elf.json": {
       "sha256": "fd6c668642e5b7bae06dbc05e80daf4c52efc6869e244c61ce0840b52c03af39",
       "size": 570
     },
     "raw/install-force.log": {
-      "sha256": "d77a08617c9764ab2107a8b812cdc1f897bf07bca9cfd398f436cffc957d2397",
+      "sha256": "c3b79b9423804c42b3e3c12cfe881e805a29d91aba58c51412dd67bbc007deb8",
       "size": 789051
     },
     "raw/install-fresh.elf.json": {
@@ -69,15 +61,15 @@
       "size": 570
     },
     "raw/install-fresh.log": {
-      "sha256": "b5da6d64add710ccfa747054f6a982318ad443aa1de7e733ab6c3a11b741f68c",
-      "size": 2891354
+      "sha256": "45675e7813bd249b4059c88794b591a323dcb671923b1ec6e1a8b833383b86d9",
+      "size": 2891353
     },
     "raw/pass-after-force.elf.json": {
       "sha256": "2462c8eb660f8c9938c4e074640b3570b6e57790ea5312cf2f50b81e61951ac9",
       "size": 567
     },
     "raw/pass-after-force.log": {
-      "sha256": "aedecc47916743b7e0dd08128e035d0a445f1d8252124722543f3c5f142e4b69",
+      "sha256": "15c6c31dbce72370cbbab5aab7c35c344d44285e3158438cf946a5b5b73eeea4",
       "size": 99147
     },
     "raw/pass-again.elf.json": {
@@ -85,7 +77,7 @@
       "size": 567
     },
     "raw/pass-again.log": {
-      "sha256": "a186831341c83d408262837c45fda09b1e124dbf0bf113fd3818b8f56c029525",
+      "sha256": "ce990be20e1b8aebd3b8f4df4044f388e13f81b41155295afcdce1f087eed98c",
       "size": 99171
     },
     "raw/pass-migrate.elf.json": {
@@ -93,39 +85,31 @@
       "size": 571
     },
     "raw/pass-migrate.log": {
-      "sha256": "a03c14fa1876e8356a4830a4af8d423cbf312af484b8ae4c916881388df5632b",
+      "sha256": "572ab47e2b27a9730e2e8490e216810f219e66b32631eacf74e9f3acff771cdc",
       "size": 96497
     },
     "raw/senv.log": {
-      "sha256": "d75167d1fcb90f10ce2d3474ef0b602b5847827a5ceaa879a383f0fec948e344",
+      "sha256": "ed42ac06a5ec4b81a95ae7cc983a5a7f4e3d83efe96bc83664f1de0fab581f25",
       "size": 560
     },
     "raw/sqlite-deploy.log": {
-      "sha256": "6582e00580296484b8f0c63584571b648beede8eb33aad3169c54228cf745e1f",
+      "sha256": "28980b1f90d22617c9b327a968abfc00d9e96fc14ecf435fcb0ab6e1cc3c38e3",
       "size": 832
     },
     "raw/sqlite-operator.json": {
-      "sha256": "d7c2d558be61d00b9ef4fa236b0db561bb7faaa7360aa481e236d39f33aa7914",
+      "sha256": "8ec60e78c1d9c8fa4d8d1993e6d5cac93cd28994c297a4712b29a84008694c9f",
       "size": 904
     },
     "raw/sqlite-role.json": {
-      "sha256": "b85c6075417b4c47c4ff3b54bed6946933dce5a934df9f6bde51b914361858cc",
+      "sha256": "2174e7d3e6d1fc0596ebec8308a6a01de60a35609048860869133660fc6a7fa8",
       "size": 198
     },
-    "raw/uv-sync.log": {
-      "sha256": "5158e60c8ba0f49260f231202ebc4773d75f72574e65de6fa4b5eb407a958915",
-      "size": 182
-    },
-    "raw/wheel-rpath.log": {
-      "sha256": "627851b25805bab78b56cd5c15d745e0ddbf6daa90604f2fdf7896155dd1d4ed",
-      "size": 2063
-    },
     "raw/wrapper-first.log": {
-      "sha256": "b68f26e7b144003aa4839fc6302d7701d8f23593bbcd2a5ae46b290a42043413",
+      "sha256": "006a645f24f0d00c5719325786eb26ab79e1714a9433d04522d3423954c4f34a",
       "size": 114
     },
     "raw/wrapper-second.log": {
-      "sha256": "b68f26e7b144003aa4839fc6302d7701d8f23593bbcd2a5ae46b290a42043413",
+      "sha256": "006a645f24f0d00c5719325786eb26ab79e1714a9433d04522d3423954c4f34a",
       "size": 114
     }
   },
@@ -190,11 +174,10 @@
     "PA3:rhel-build": {
       "captures": [
         "raw/build-role.json",
-        "raw/build-role.log",
-        "raw/build-provider.txt"
+        "raw/build-role.log"
       ],
-      "reason": "retained build-role capture passed every probe stage over the pinned archive",
-      "state": "pass"
+      "reason": "retained build-role capture does not pass over the pinned archive",
+      "state": "fail"
     },
     "PA3:rhel-deploy": {
       "captures": [
@@ -222,17 +205,13 @@
       "state": "pass"
     },
     "PA6:rhel": {
-      "captures": [
-        "raw/uv-sync.log",
-        "raw/imports-wheels.log",
-        "raw/wheel-rpath.log"
-      ],
-      "reason": "deployed venv matches the lock offline and imports the heavy wheels",
-      "state": "pass"
+      "captures": [],
+      "reason": "no unique deployed project and venv, uv or toolchain interpreter to audit",
+      "state": "inconclusive"
     }
   },
   "consumers": {},
-  "elapsed_seconds": 3930,
+  "elapsed_seconds": 3936,
   "environment": {
     "": "",
     "ANSI_COLOR": "0;31",
@@ -260,14 +239,14 @@
   "pins": {
     "archive": "tools.2026-09-18_220913.tar.gz",
     "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
-    "bundle_sha256": "d286ee2a7a0f59e90c6efcf8aa17faf1fc78e2a90e6fb60bef03de7fcbfa8115",
+    "bundle_sha256": "cbdbe1299c100858d8731b6f9580afc0108d5f784373bfc9b9ad266962d85231",
     "deploy_script_sha256": "a94d3737807bd3f647d32f4b75e62c284fb3d46f4fa7cfb4f4453434e6514a74",
-    "pdfs": "pdfs.2026-09-19_133520.tar.gz",
-    "pdfs_sha256": "0b3c120e965630ea2c21e3b584d7ad1a9f8df7d58a73f9b82d919c042362e9b0",
+    "pdfs": "pdfs.2026-07-22_205852.tar.gz",
+    "pdfs_sha256": "07889e8e5bb4a009246f762e6b894d2fe940a905d08053df4f7fd11bc9b0bece",
     "previous_installer_sha256": "8ffb726c8a3d598e01eb990dbcc6d5300acb45d5dfb2a2e0de19c0ea37b43e05",
-    "revision": "f805de88677522968c0f550b6cc7ad0e5630155f"
+    "revision": "70f9d83a390bfcfe9998593448ed961999572f4a"
   },
-  "recorded_utc": "2026-09-19T12:42:00.153771+00:00",
+  "recorded_utc": "2026-09-19T10:47:19.029385+00:00",
   "required": [
     "AR3",
     "PA1:rhel",
@@ -281,17 +260,15 @@
     "PA11:rhel"
   ],
   "role": "rhel",
-  "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+  "run": "tools-archive-rebuild-step6-20260919T094141Z-rhel",
   "runtime": {
-    "build_provider": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff",
-    "build_run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
     "ld-linux-x86-64.so.2": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
     "libc.so.6": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746",
-    "libsqlite3.so.0": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
-    "libstdc++.so.6": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+    "libsqlite3.so.0": "dcea9cc68d0d4ee823e6d6d887fc18ed070b5e529903e2d9a34fb6eb4f5089f2",
+    "libstdc++.so.6": "60f8d775086b6d4ef4190e880ff80cdd6a0a200a960f71580ada508cea29281a",
     "python": "3.13.15"
   },
   "schema": "tools-archive-rebuild-acceptance/1",
   "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
-  "verdict": "pass"
+  "verdict": "fail"
 }

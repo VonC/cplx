@@ -1,31 +1,31 @@
 {
   "captures": {
     "raw/build-provider.txt": {
-      "sha256": "fa33007ec7e660fac853451ecf894e92d4def6c15c98092a615c0770990e38f6",
-      "size": 146
+      "sha256": "f25ee7b1a0b9726a0f36c06216a069a79763b6d5a9b731c5bc42a67c6bb2b001",
+      "size": 138
     },
     "raw/build-role.json": {
-      "sha256": "13808e09df55dc82a07cd843ca9ad5a22a20621587056912c803e4f5458d6b85",
-      "size": 12449
+      "sha256": "7fb03becc9d73c850c093f5aa6c04886922dc58a27a659fa89d29b00b8acf693",
+      "size": 52734
     },
     "raw/build-role.log": {
       "sha256": "51839ae868d98fbec57b69b4b000a76f040cd11b93e5f64915f0e38df2544993",
       "size": 62
     },
     "raw/closure-check.log": {
-      "sha256": "65105b9e8b3b9528dba0565131aa4708193bad41f1974ca2fd15add57b166131",
+      "sha256": "7662f076c11a3290381edd50022ffd29b5ba1ddfd8688f4fc29a5093c92a3f69",
       "size": 159705
     },
     "raw/deploy-force.log": {
-      "sha256": "6615baaccd0722f4787efefa6fb417a328d99a3e2d673154f79065077d0b6945",
-      "size": 10359
+      "sha256": "7d48259d2adeb15bd85173baf4eae086f09377bf68b4f0cc3b79a356fa142bd1",
+      "size": 10358
     },
     "raw/deploy-fresh.log": {
-      "sha256": "5d361b2e6f858a658353fe8f7306ecf3e46196f09a5da0f3db07858f2c35d673",
-      "size": 10359
+      "sha256": "3105128f3b64cc1efc6ac51d0659052e5c53f9d3bbe4d59aabd7be12610346c8",
+      "size": 10358
     },
     "raw/dotenv.log": {
-      "sha256": "c02796821732547b01fc7cb2b8f1983ab7a6f29eaa0610e825b62cc99adfa47c",
+      "sha256": "611948707c76b6e7f5e577b1c554658fc3e1765e0772264f273e3c2f91560e70",
       "size": 330
     },
     "raw/git-elf.log": {
@@ -41,27 +41,27 @@
       "size": 570
     },
     "raw/home-fresh.log": {
-      "sha256": "3bc648f68945ea4fe20fa332c9d8d786119e74b126d13d0d988ab63b9e85015b",
+      "sha256": "50f37351efa303e434ebd7abeeadb828a1bd25befed9fd9377935433721bfa15",
       "size": 2891315
     },
     "raw/home-previous.log": {
-      "sha256": "444a0567bb6347cd47964f654a1d3c88e7b5a218c8114dce4f5ed89af07bfc61",
+      "sha256": "7ff704499ea37758f2288f6922b3481b22651e8698b000168ebec881eb7617b7",
       "size": 2796335
     },
     "raw/imports-deploy.log": {
-      "sha256": "418857fb9692e2024e285fdbe032164098ebddd6238b49fe7c6de89dae03fddf",
+      "sha256": "25e12d0db1c23665a524cade7c06145e3fab46613b267120eeed93083b099f81",
       "size": 148
     },
     "raw/imports-wheels.log": {
-      "sha256": "aaba628fad32bba4a2063e9717f0ca52009f484d83f28658db785baf3d1fa6b8",
-      "size": 145
+      "sha256": "5b8d215dd5cbaba61c46a8d56c364503c201ec4a11477f6caf9f35a212732de1",
+      "size": 789
     },
     "raw/install-force.elf.json": {
       "sha256": "fd6c668642e5b7bae06dbc05e80daf4c52efc6869e244c61ce0840b52c03af39",
       "size": 570
     },
     "raw/install-force.log": {
-      "sha256": "d77a08617c9764ab2107a8b812cdc1f897bf07bca9cfd398f436cffc957d2397",
+      "sha256": "5a56283d2a0022696932412090b20e321ad42e187293a72862411724bfb52cbf",
       "size": 789051
     },
     "raw/install-fresh.elf.json": {
@@ -69,15 +69,15 @@
       "size": 570
     },
     "raw/install-fresh.log": {
-      "sha256": "b5da6d64add710ccfa747054f6a982318ad443aa1de7e733ab6c3a11b741f68c",
-      "size": 2891354
+      "sha256": "7f37b93ae5ccfc054fdf475dac97211bf34a406350d7a8db7b8ad2d49eb51103",
+      "size": 2891353
     },
     "raw/pass-after-force.elf.json": {
       "sha256": "2462c8eb660f8c9938c4e074640b3570b6e57790ea5312cf2f50b81e61951ac9",
       "size": 567
     },
     "raw/pass-after-force.log": {
-      "sha256": "aedecc47916743b7e0dd08128e035d0a445f1d8252124722543f3c5f142e4b69",
+      "sha256": "35da929018f464a9110fe16395668670281a7928f2636666031990dbfe48af96",
       "size": 99147
     },
     "raw/pass-again.elf.json": {
@@ -85,7 +85,7 @@
       "size": 567
     },
     "raw/pass-again.log": {
-      "sha256": "a186831341c83d408262837c45fda09b1e124dbf0bf113fd3818b8f56c029525",
+      "sha256": "2ddb3a34cb45b905f21ad6434bf82c041181eb49801d7c68dea7b4195340a2dd",
       "size": 99171
     },
     "raw/pass-migrate.elf.json": {
@@ -93,39 +93,39 @@
       "size": 571
     },
     "raw/pass-migrate.log": {
-      "sha256": "a03c14fa1876e8356a4830a4af8d423cbf312af484b8ae4c916881388df5632b",
+      "sha256": "14f0bace2438381b928a2ce39686399544f84142c0bc7c93d91b19344e1bdb52",
       "size": 96497
     },
     "raw/senv.log": {
-      "sha256": "d75167d1fcb90f10ce2d3474ef0b602b5847827a5ceaa879a383f0fec948e344",
+      "sha256": "fba269ea0f8b794af13ccca06f25808a43e12d80049d42f1774fc77080c87b8e",
       "size": 560
     },
     "raw/sqlite-deploy.log": {
-      "sha256": "6582e00580296484b8f0c63584571b648beede8eb33aad3169c54228cf745e1f",
+      "sha256": "c6efb84aa873e9ede91be04c79521da25e5c08517e5bde72ea2fb0b44fc25356",
       "size": 832
     },
     "raw/sqlite-operator.json": {
-      "sha256": "d7c2d558be61d00b9ef4fa236b0db561bb7faaa7360aa481e236d39f33aa7914",
+      "sha256": "167740074666cb136bd967518609dc001a536f2230427230a25bf36d56b34a62",
       "size": 904
     },
     "raw/sqlite-role.json": {
-      "sha256": "b85c6075417b4c47c4ff3b54bed6946933dce5a934df9f6bde51b914361858cc",
+      "sha256": "4d428680270c0bc7dd97ffcdaf194c28b9b4df9f200d89f0438ea56ccbd5662a",
       "size": 198
     },
     "raw/uv-sync.log": {
-      "sha256": "5158e60c8ba0f49260f231202ebc4773d75f72574e65de6fa4b5eb407a958915",
-      "size": 182
+      "sha256": "7a1ad81e3b034364807b0a0ed6fdb946cf4c930a357a276541c80e4cda13f051",
+      "size": 1961
     },
     "raw/wheel-rpath.log": {
-      "sha256": "627851b25805bab78b56cd5c15d745e0ddbf6daa90604f2fdf7896155dd1d4ed",
-      "size": 2063
+      "sha256": "f31a72c29c2966ed040be6ddb22b936fe7a727b2d561c86e8d8cc5f465be51b1",
+      "size": 2876
     },
     "raw/wrapper-first.log": {
-      "sha256": "b68f26e7b144003aa4839fc6302d7701d8f23593bbcd2a5ae46b290a42043413",
+      "sha256": "6b4181d52fd65dd285cebbfaa2739d5727bdcdb503092dd0ddac8652ef30e962",
       "size": 114
     },
     "raw/wrapper-second.log": {
-      "sha256": "b68f26e7b144003aa4839fc6302d7701d8f23593bbcd2a5ae46b290a42043413",
+      "sha256": "6b4181d52fd65dd285cebbfaa2739d5727bdcdb503092dd0ddac8652ef30e962",
       "size": 114
     }
   },
@@ -227,12 +227,12 @@
         "raw/imports-wheels.log",
         "raw/wheel-rpath.log"
       ],
-      "reason": "deployed venv matches the lock offline and imports the heavy wheels",
-      "state": "pass"
+      "reason": "pymupdf/pikepdf import exited 1",
+      "state": "fail"
     }
   },
   "consumers": {},
-  "elapsed_seconds": 3930,
+  "elapsed_seconds": 3995,
   "environment": {
     "": "",
     "ANSI_COLOR": "0;31",
@@ -258,16 +258,16 @@
   },
   "missing": [],
   "pins": {
-    "archive": "tools.2026-09-18_220913.tar.gz",
-    "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
-    "bundle_sha256": "d286ee2a7a0f59e90c6efcf8aa17faf1fc78e2a90e6fb60bef03de7fcbfa8115",
+    "archive": "tools.2026-09-17_222857.tar.gz",
+    "archive_sha256": "d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1",
+    "bundle_sha256": "64512d838a8c7142112fa6ed532115b346b14c986b24f2c45b51e7144bcd355d",
     "deploy_script_sha256": "a94d3737807bd3f647d32f4b75e62c284fb3d46f4fa7cfb4f4453434e6514a74",
-    "pdfs": "pdfs.2026-09-19_133520.tar.gz",
-    "pdfs_sha256": "0b3c120e965630ea2c21e3b584d7ad1a9f8df7d58a73f9b82d919c042362e9b0",
+    "pdfs": "pdfs.2026-07-22_205852.tar.gz",
+    "pdfs_sha256": "07889e8e5bb4a009246f762e6b894d2fe940a905d08053df4f7fd11bc9b0bece",
     "previous_installer_sha256": "8ffb726c8a3d598e01eb990dbcc6d5300acb45d5dfb2a2e0de19c0ea37b43e05",
-    "revision": "f805de88677522968c0f550b6cc7ad0e5630155f"
+    "revision": "ad7c597bad4a27394ef32ee9475650cf2b1e9c4f"
   },
-  "recorded_utc": "2026-09-19T12:42:00.153771+00:00",
+  "recorded_utc": "2026-09-18T12:42:07.526979+00:00",
   "required": [
     "AR3",
     "PA1:rhel",
@@ -281,17 +281,17 @@
     "PA11:rhel"
   ],
   "role": "rhel",
-  "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+  "run": "tools-archive-rebuild-step6-20260918T113530Z-rhel",
   "runtime": {
     "build_provider": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff",
-    "build_run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+    "build_run": "tools-archive-rebuild-step5-20260917-rhel-build",
     "ld-linux-x86-64.so.2": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
     "libc.so.6": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746",
-    "libsqlite3.so.0": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
-    "libstdc++.so.6": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+    "libsqlite3.so.0": "d042c975c27aa62f0f2ffd4335f8bd70f6b5f37ad10549b0e1846b92839507d6",
+    "libstdc++.so.6": "f734452313dd06f36f6b337f2b3ddd2a08c3ae8058e2d74ea2bccc0451aec576",
     "python": "3.13.15"
   },
   "schema": "tools-archive-rebuild-acceptance/1",
-  "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
-  "verdict": "pass"
+  "transfer_sha256": "d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1",
+  "verdict": "fail"
 }
