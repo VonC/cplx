@@ -1205,8 +1205,16 @@ accepted archive and its adoption evidence are not disturbed by a
 packaging change. One correction landed inside this item on 2026-09-18,
 when its Step 6 run on RHEL found the shipped installer rewriting the
 venv's wheel objects: the ELF pass now excludes venv trees (Q06 of this
-item's requirement), so the shipped-venv arrangement holds until item 8
-replaces it, at the price of one repackage of the unchanged payloads.
+item's requirement). The shipped-venv arrangement remains conditional on
+the pdfs archive containing a complete environment for the candidate
+Python version; excluding wheel objects from relocation alone does not
+establish that condition. The 2026-09-19 replacement run found a shipped
+3.13.9 environment alongside an empty 3.13.15 environment selected by
+deployment. The human selected 3.13.15 as the target. A matching pdfs
+verification archive now ships one complete locked 3.13.15 environment,
+including uv; repeated native deployment and PA6 pass. This is item 7's
+shipped-venv acceptance repair; item 8 still owns the later switch to
+creating and synchronising the environment on the target.
 
 Depends on: items 1 to 6.
 

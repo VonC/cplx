@@ -4,8 +4,8 @@ No, it is not implemented.
 
 Track the seven steps in [the implementation plan](plan.v0.27.0.tools-archive-rebuild.md).
 Steps 1-5 are checked below, including the installer-only Step 5 repackage.
-Step 6 is checked and not complete: the original candidate retains its RHEL
-PA6 failure, and all runtime cells await acceptance of the replacement.
+Step 6 is checked and not complete: both earlier RHEL failures are retained,
+and replacement RHEL acceptance now passes with the matching 3.13.15 venv.
 Debian agent cells, consumer identities and D10 require a pushed candidate
 build. Step 7 and final publication remain pending.
 
@@ -706,19 +706,15 @@ No existing feature or reporting capability is impaired by Step 5.
 
 No. Step 6 has NOT been fully implemented.
 
-The acceptance mechanism is implemented and was exercised on the real RHEL
-target: the verification bundle composed from a commit and checked on both
-sides, the platform acceptance driver, its fixtures and the runner at
-`--step 6`. Ten RHEL cells are bound in the release record from one run of the
-exact Step 5 archive: nine pass, including AR3's three HOME states and
-migration positivity. The step's completion condition is not met. PA6 on RHEL
-fails conclusively, because the installer shipped inside the archive rewrites
-the wheel objects' search path and drops their `$ORIGIN` entry, so the
-deployed venv no longer imports pymupdf or pikepdf. That defect is corrected
-in the working tree (the ELF pass now excludes venv trees, decided 2026-09-18
-as Q06 of the requirement), but the archive ships the installer, so PA6 stays
-failing until a repackaged candidate is accepted. The nine Debian cells, the
-consumer identities and the wheel-bound D10 reading need a candidate build on
+The acceptance mechanism and installer correction are committed. Handoff
+point 2 produced the replacement archive. Point 3 first recorded eight
+required passes, a PA3 build-capture failure and an inconclusive PA6 result.
+The human then authorised those repairs and selected Python 3.13.15.
+The new native RHEL run passes all ten required cells and the additional
+forced-redeployment cell with a matching, complete shipped venv. Both earlier
+failed runs remain retained; the reader and discovery guards are unchanged.
+The nine Debian cells, consumer identities and the wheel-bound D10 reading
+need a candidate build on
 the actual Jenkins agent that only a pushed pipeline commit produces, and RA2,
 RA3, RA4, RA5 (publication), RA7, RA8 (publication) and the backend cell stay
 pending. The validator's publication phase therefore refuses.
@@ -787,7 +783,7 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
   not found. Two earlier runs the same day were driver corrections (force
   reinstall re-extraction, operator probes under errexit); the record binds
   the third run only.
-- **Record and view**: the [results capture](evidence.tools-archive-rebuild.step6-rhel.json)
+- **Original record and view**: the [results capture](evidence.tools-archive-rebuild.step6-original-rhel.json)
   and [validation capture](evidence.tools-archive-rebuild.step6-validation.txt)
   are indexed in the sidecar; the RHEL deploy environment carries the run,
   OS and provider digests, the build environment its transfer digest, ten
@@ -836,14 +832,39 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
   retains No and the missing-work list below. Per handoff point 1, those
   later acceptance obligations do not prevent reviewing the current work.
 
+- **Handoff point 3 checkpoint (2026-09-19)**: the replacement RHEL run and
+  all seven retained-file digests were downloaded and verified. The
+  [results](evidence.tools-archive-rebuild.step6-point3-failed-rhel.json) and
+  [provenance and raw diagnostics](evidence.tools-archive-rebuild.step6-point3.txt)
+  bind eight required passes, one additional redeployment pass, the PA3
+  build-role failure and PA6 inconclusive state to the replacement. The
+  original result bytes are preserved under `step6-original-rhel.json`;
+  the historical candidate changes only its capture path. Step 5 snapshots
+  remain unchanged, with an explicit unaffected-input assessment. Native
+  cumulative `--step 6` passed in 79 seconds; project shell lint passed for
+  58 scripts. No production code changed in this checkpoint, and no later
+  handoff point was attempted.
+
+- **Point 3 review round 2 repairs (2026-09-19)**: the user selected Python
+  3.13.15 and authorised installing uv. A new pdfs verification archive ships
+  one complete locked venv for that interpreter. All 80 compatible wheel
+  files were verified against the unchanged application lock before offline
+  installation. Fresh and forced deployment now pass the unchanged PA6
+  offline audit and heavy-wheel import checks, with wheel RPATH retained.
+  PA3 passes using candidate-bound build evidence with original probe hashes
+  and a fresh comparison proving 38069 unchanged payload members; only the
+  installer differs. The earlier failed replacement capture is preserved as
+  `evidence.tools-archive-rebuild.step6-point3-failed-rhel.json`.
+  See [round 2 results](evidence.tools-archive-rebuild.step6-rhel.json),
+  [preparation](evidence.tools-archive-rebuild.step6-r2-preparation.json), and
+  [retained evidence](evidence.tools-archive-rebuild.step6-point3-round2.txt).
+  Native cumulative `--step 6` passed in 77 seconds. The July application lock
+  is a RHEL qualification input; final Debian consumer identities remain
+  pending. The umbrella note now states the matching-Python prerequisite,
+  and exactly seven exchange 2 round 1 transcript headings were qualified.
+
 ### Missing work for Step 6
 
-- **Re-accept the replacement on RHEL**: handoff point 2 completed the Step 5
-  repackage as `tools.2026-09-18_220913.tar.gz` and repeated AR1/AR2/AR4.
-  Run the RHEL driver over this replacement until PA6 passes with the deployed
-  venv importing pymupdf and pikepdf, and bind the affected RHEL cells to its
-  new digest. The original candidate's failed PA6 and earlier passes remain
-  historical evidence and do not qualify the replacement.
 - **Commit the application reader repairs**: the postponed annotations in
   `ci/tools_abi_scan.py`, `ci/tools_test_evidence.py` and
   `ci/tools_wheel_capture.py` are staged in the application checkout but not
@@ -915,7 +936,9 @@ No, there is no architecture violation, smell or size issue to address for Step 
   member once and sorts member names for determinism, as inherited inventory
   sorting already does; the summarizer hashes each named capture once and
   reads each cell once; the readers scan the console with anchored patterns.
-- **Real run cost**: 3995 seconds on RHEL, dominated by four relocations, two
+- **Real run cost**: 3995 seconds for the original RHEL run, 3936 seconds
+  for the first replacement run, and 3930 seconds for the passing repair run,
+  dominated by four relocations, two
   deployments and the SQLite deploy role, all existing entry points.
 - **Plan-bound alignment**: work is linear in explicitly supplied evidence and
   artifact bytes; no repeated all-pairs scan was introduced.
@@ -947,8 +970,8 @@ No, there is no unreferenced top-level symbol outside the coverage gate.
   corpus step passes against the corrected installer, whose `.git` and
   `__pycache__` prunes, classifier and record grammar are unchanged; the
   record keeps every Step 5 result with its original run and only adds
-  Step 6 cells, so no old pass was relabeled and PA6 is recorded as the
-  failure it is.
+  Step 6 cells, so no old pass was relabeled. The original PA6 failure and
+  replacement PA6 inconclusive state both remain explicit.
 - **Reporting**: cells carry pass, fail, inconclusive or pending with a
   reason and digested captures; a skipped required cell cannot summarize as
   a pass.
