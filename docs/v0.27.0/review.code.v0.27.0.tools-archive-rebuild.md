@@ -7191,3 +7191,1517 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-5 -->
+
+## Round 1 by requestor - Step 6 (exchange 2)
+
+- Recorded: 2026-09-19T12:54:22+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 1
+
+### Code review evidence for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+request_index_tree: 175a36c4936e7c717a6a0860daf19dc1088508fc
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.point3-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.point3-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.point3-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(tools): record replacement RHEL acceptance
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 2: docs(tools): record RHEL checkpoint gaps
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+No. Step 6 has NOT been fully implemented.
+
+This review covers the user-authorized handoff point 3 evidence checkpoint,
+not completion of Step 6. The replacement acceptance attempt is finished and
+retained; its PA6 stop condition has been honored. No production code changes
+are staged. The validation plan records concrete outstanding work.
+
+The native RHEL run took 3936 seconds: eight required passes, one required
+failure (PA3:rhel-build, missing probes capture), one required inconclusive
+cell (PA6:rhel, unmet audit prerequisites), and an additional redeployment
+pass. No wheel import or offline lock-audit success is claimed. Raw evidence
+was retained, downloaded and verified; every indexed raw capture matches its
+digest and size. The monitor's post-retention display SyntaxError is recorded
+separately and did not affect the driver result.
+
+Native cumulative --step 6 passed in 79 seconds. Project shell lint passed
+for 58 tracked scripts. The point3 record verifier checks exact pins and cell
+states, historical capture bytes, capture hashes, Step 5 snapshot preservation,
+pending obligations and generated Markdown. git diff --cached --check,
+the sensitive-content hook and commit-plan readiness all pass. Full Markdown
+checking reports 39 existing findings; none intersects added lines. No rule
+or baseline was disabled. No Python coverage percentage is claimed: this
+repository's gate is shell lint and native fixtures, not a pytest project.
+
+There is no new production type, layer dependency or performance path. No
+existing feature is changed. Evidence records failures without weakening any
+gate, preserving the original failed candidate alongside the replacement.
+
+Do not repeat the 65-minute acceptance deployment as review validation. The
+separate cumulative fixture command and retained evidence are sufficient to
+review this checkpoint. Points 4-6 remain outside the user's current scope.
+
+### Implementation report for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+The replacement tools archive was passed to the existing RHEL acceptance
+driver with verified archive and bundle pins. The run's JSON and raw captures
+were retained under its exact identity. The canonical RHEL evidence file now
+contains the replacement run; the former file is preserved byte-for-byte as
+step6-original-rhel.json and the historical candidate's capture path follows it.
+
+The release record binds ten required RHEL cells to the new measured states,
+captures and environment, preserving Step 5 results and every nonexecuted
+obligation. The additional PA1:rhel-redeploy measurement remains visible in
+the raw result (it is not a separate release-record schema cell). The
+acceptance view is regenerated from the record. A provenance capture states
+source versus fixture revisions, unchanged-input reasoning, diagnostics,
+validation and limitations. The Step 6 check remains No, with precise PA3
+and PA6 missing-work entries and later work preserved.
+
+### Change summary for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Root a.commit is formatted and mechanically ready with two groups:
+
+1. docs(tools): record replacement RHEL acceptance
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+2. docs(tools): record RHEL checkpoint gaps
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+These six paths are the exact staged implementation checkpoint. Protocol
+publication appends its own versioned transcript as normal. No commit is
+authorized by this request.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Human guidance:
+
+The user authorized only point 3 of `.reviews/a.item7.handoff-prompt.md`:
+rerun RHEL acceptance against the installer-only replacement archive, retain
+the results and report the actual PA6 verdict. Point 3 belongs to plan Step 6
+but does not complete Step 6. Read that handoff before judging the scope.
+
+Points 4 through 6, the Debian candidate build, application commits and push,
+wheel-bound D10, and remaining publication obligations are outside this
+checkpoint. Step 6 must remain No and those obligations must remain pending.
+Do not request completion of those later points as a repair to this evidence
+checkpoint, and do not relabel partial qualification as Step 6 completion.
+
+Review the staged evidence, preservation of original-candidate history, exact
+replacement pins, truthful cell states, generated view, validation-plan update,
+and commit grouping. A failed or inconclusive measured cell is evidence to
+retain, not permission to weaken its gate. The handoff explicitly says to stop
+and report raw diagnostics if PA6 does not pass.
+
+Do not launch acceptance mode during review: it is a costly real deployment
+run already retained under one exact run identity. The cumulative fixture mode
+is separate and safe to run as the declared validation command.
+
+The user requests publication followed by an immediate stop, without waiting
+for the review answer. No commit, upload, application push or later handoff
+point is authorized by this review request.
+
+Writer response:
+
+This is a fresh review of handoff point 3 after the committed Step 5 round 5
+checkpoint. Earlier Step 6 and Step 5 repairs are already in the source
+baseline; none has been reversed. There is no reviewer answer to consume in
+this exchange yet and no disagreement is being recorded.
+
+The user specifically asks for the handoff context to govern scope. Step 6
+remaining No is expected: this checkpoint stops at PA6's unsuccessful result
+as the handoff directs. Review the accuracy and completeness of this evidence
+checkpoint without treating later Debian, D10 or publication work as omitted
+implementation in the currently authorized task. The user explicitly requests
+publishing this request and stopping without waiting for an answer.
+
+### Reviewer focus for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-1-exchange-2 -->
+
+## Round 1 by reviewer - Step 6 (exchange 2)
+
+- Recorded: 2026-09-19T13:05:10+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Baseline index tree: 175a36c4936e7c717a6a0860daf19dc1088508fc
+
+Assessed index tree: 08649acc40df39a22a261b1e0b78969be44f8d7b
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The reviewer reaches the writer's verdict independently. This round reviews the
+handoff point 3 evidence checkpoint: the replacement archive's RHEL run,
+retained and recorded, stopping where PA6 did not pass. The checkpoint itself
+is accurate. Its central result needs a decision before any rerun.
+
+What the staged evidence gets right, verified rather than accepted:
+
+- Pins and identity. The recorded results file is byte-identical to the
+  `results.json` retained on the build host (`56fd511c...41d5`), and all seven
+  files in the retention list verify there. The run is pinned to the
+  replacement archive `df7dff7d...be87`, the bundle `cbdbe129...5231` and the
+  transferred fixture revision, which the provenance capture correctly
+  distinguishes from source commit `b3387f9`.
+- Preservation. The original candidate's results are byte-identical to the
+  previously committed capture under their historical name, and the original
+  candidate changes only that capture path. Its PA6 failure stays.
+- Truthful states. Eight required cells pass, PA3:rhel-build fails and PA6:rhel
+  is inconclusive, as measured. PA3's failure is the driver reading a build
+  summary with no `probes` stages, which the capture calls a capture-contract
+  failure rather than a build regression; that is accurate, and the cell was
+  not relabeled.
+- The record verifier and generated view reproduce, and the Step 5 snapshots
+  for AR1, AR2, AR4 and RA1 are unchanged.
+
+What PA6 actually measured: nothing. The driver took its prerequisite branch
+and ran neither the offline lock audit nor the wheel import. The writer did not
+isolate which prerequisite failed. The reviewer did, on the run's retained
+prefix, which is still on the build host:
+
+- By the end of the forced redeployment the project holds two venvs. The
+  shipped `python_3.13.9_my-project` carries the heavy wheels (173
+  site-packages entries, pymupdf and pikepdf present) and `uv`. A second
+  `python_3.13.15_my-project` is empty (pip only, no `uv`), named after the
+  candidate toolchain, and its `pyvenv.cfg` records creation with
+  `python3.13_bin -m venv` at 12:33:35, inside the redeployment window
+  (12:26:46 to 12:33:40). The PA6 cell was written at 12:33:40, after it.
+- Discovery therefore saw two venvs and correctly refused to choose.
+- The operator `senv` probe resolved `python` from the empty venv, and the
+  newest-venv rule of `deploy_pkgs.sh` selects the empty venv on the final
+  prefix.
+
+This changes what PA6 means for this item. Its RHEL row requires the check
+over the venv the deployment provides, shipped inside the pdfs archive until
+item 8. The pdfs archive used here was built under 3.13.9, so its shipped venv
+is named for 3.13.9. With the 3.13.15 toolchain, the deployment creates and
+uses an empty 3.13.15 venv instead. The installer fix may well preserve the
+shipped wheels' search path, but the environment the operator gets would not
+import pymupdf at all. Which venv counts, and which pdfs archive produces it, is
+a decision for the human, not a discovery fix.
+
+This also corrects the reviewer's own earlier answer. In exchange 1 round 2 the
+reviewer stated that only the shipped venv existed at audit time and that the
+uniqueness rule would select the venv the old pattern selected. That was
+inferred from the deployment logs never naming a 3.13.15 venv; the file system
+was not checked. The file system shows the second venv existed at audit time.
+The old pattern's lexical `sort | tail -n 1` would also have picked the
+3.13.9 venv with both present, which is why the original run's PA6 measured
+the shipped venv and failed on its search path.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+- Decide which venv the deployment provides for PA6 under the shipped-venv
+  arrangement; the reviewer recommends a pdfs archive whose shipped venv is
+  built with the candidate toolchain. Then rerun PA6 over that venv without
+  relaxing discovery, and bind conclusive lock and import evidence.
+- Supply candidate-bound PA3 build-role evidence the reader accepts, with
+  explicit unchanged-payload evidence if the original probes are reused.
+- Commit the three application reader repairs.
+- Run the Debian candidate build, the exact-wheel D10 reading and the
+  remaining pre-publication obligations, which the guidance keeps out of this
+  checkpoint.
+
+Architecture, performance and unit test coverage: no production code, type,
+dependency or path changed in this checkpoint, and no percentage is claimed.
+No unit-tested class below 100% needs completing, and no top-level symbol
+outside the coverage gate is unreferenced.
+
+Feature integrity: both candidates keep their exact states, the inconclusive
+and failed cells stay as measured, and no gate was weakened.
+
+Validation plan effects:
+
+The reviewer rewrote one Step 6 missing-work bullet in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` and staged
+exactly that attributable patch.
+
+The writer's bullet asked to identify the unavailable PA6 prerequisite and to
+"correct the environment or discovery as warranted". The reviewer isolated the
+prerequisite on the retained prefix, so the bullet now states the measured
+cause: two venvs, the shipped one with the wheels and an empty one named after
+the candidate toolchain, which is what `senv` resolves. It also states the
+consequence as a decision about which venv the deployment provides, and it
+rules out relaxing discovery to pick the wheel-bearing venv while the
+deployment selects another. That last clause follows from the requirement's
+PA6 row ("over the venv the deployment provides") and the driver's reviewed
+refusal to choose between candidates; it adds no new design decision.
+
+Every other Step 6 row is the writer's and was left as written. The status
+sentence stays exactly `No. Step 6 has NOT been fully implemented.`, the
+`Missing work for Step 6` section stays present, and the document-level line
+stays `No, it is not implemented.`
+
+Pre-repair blob `17e11fa0b3df9ede1852c3bb0f5c534c093d8271` was recorded before
+the edit, `attribute-reviewer-patch` returned `attributable: true`, and
+`git apply --cached` staged exactly that patch.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+The reviewer ran all seven resolved commands before its repair. Six behave as
+expected. The Markdown intersection check fails, but only on content the
+protocol appended after the request was captured.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 100 seconds, native `validation exit=0 elapsed=77s`, no
+  FAIL line, four helper imports and 58 acceptance cases.
+- The point 3 record verifier, source `request`: `PASS`, measured verdict
+  `fail`, exit 0.
+- The Markdown gate over cplx with its log redirected, source `request`:
+  exit 1 on repository debt, as the request states.
+- The Markdown intersection checker, source `request`: exit 1. It reports 7
+  duplicate headings (MD024 and LS003) at transcript lines 7206 to 7358. All
+  of them are in the request record the protocol appended at publication, whose
+  section headings end in `(round 1)` without the exchange occurrence, so they
+  repeat exchange 1's round 1 request headings. None is in the staged set; the
+  writer's run passed because it ran before publication.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean.
+
+The reviewer reran the diff check, the hook, the commit-plan check and the
+Markdown gate after staging its repair: all as above, and no finding in the
+validation plan.
+
+Evidence measured on the build host rather than read from the record: the
+retention list's seven digests, the results, raw bundle and verification
+bundle digests, the raw PA3 log, and on the retained deployed prefix the two
+venvs, their contents and `pyvenv.cfg` creation commands and times, the PA6
+cell's write time, the `senv` probe's resolved `python`, and the newest-venv
+selection. The deployment logs do not name the venv the readiness checks
+inspected, so this answer makes no claim about it.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0.
+- The point 3 record verifier, source `request`. Exit 0.
+- The Markdown gate over cplx, logged, source `request`. Exit 1 on older debt.
+- The Markdown intersection checker, source `request`. Exit 1, on the
+  protocol's appended request record only.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Clean.
+
+As declared, the acceptance mode was not launched. The retained run was
+verified from its retention list and read on the host instead.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+One property of the Markdown intersection checker is worth knowing: it diffs
+the working tree against HEAD, so it includes the transcript that publication
+appends. Run before publication it passes, and run at review time it fails on
+the appended request. That is a timing property, not drift.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Every comparison came from the shared evidence launcher. The only tracked change
+is the reviewer's own attributable validation-row patch.
+
+- Request-time index tree `175a36c4936e7c717a6a0860daf19dc1088508fc` equals the
+  baseline at entry. The assessed tree is
+  `08649acc40df39a22a261b1e0b78969be44f8d7b`, which differs by exactly the
+  staged reviewer patch.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `e293c50bf3409247d15604fb8517eb74aeaab4db4eabdfdd617a5e437d5edde4`.
+- Validation-state comparison over the 6 staged paths, the project command's
+  file and the four ignored validation files: `acceptable: false`, naming the
+  validation plan and the index (the reviewer's permitted Step 6 row patch)
+  and the ignored Markdown log that the declared command rewrites. Ignored
+  validation artifacts are acceptable, and no tracked side effect occurred.
+- The working tree matches its entry state apart from that staged patch: 6
+  staged paths, plus the protocol's unstaged transcript append.
+- No reviewer residue in either repository. The native run used host scratch
+  space, and the retained prefix and evidence on the host were only read.
+- The baselines and manifest were written before assessment, the pre-repair
+  blob before the edit, and the manifest rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Repairs made:
+
+- `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, polishing-only review metadata confined to one Step 6 missing-work bullet: the PA6 bullet now states the measured cause (two venvs, the empty one named after the candidate toolchain and resolved by `senv`) and the decision it requires, and rules out relaxing discovery
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` (the attributable reviewer patch only, applied to the index with `git apply --cached`)
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+`a.commit` is accurate and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json`, run against the received
+state and again after the reviewer's staged patch: `state: valid`,
+`ready: true`, exit 0, no diagnostics, 6 staged paths in two ordered groups
+matching the request. The installed hook accepts the staged set.
+
+- Group 1, `docs(tools): record replacement RHEL acceptance`: both RHEL
+  captures, the point 3 provenance capture, the record and its view.
+- Group 2, `docs(tools): record RHEL checkpoint gaps`: the validation plan,
+  including the reviewer's rewritten PA6 bullet, which is a gap and fits the
+  subject.
+
+Ordering is least to most dependent and every staged path appears once. The
+transcript is not in the plan, correctly: it carries the protocol's appends,
+including the request record whose headings need the exchange occurrence
+before it is committed.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Unresolved findings:
+
+- PA6 on RHEL was not measured for the replacement, and the cause is a product question rather than a driver fault: by the end of the forced redeployment the prefix holds the shipped `python_3.13.9_my-project` venv with the heavy wheels and an empty `python_3.13.15_my-project` venv created with `python -m venv` and named after the candidate toolchain, which the operator `senv` resolves, so under the shipped-venv arrangement with a 3.13.9-built pdfs archive the deployed application environment has no pymupdf or pikepdf at all, and which venv PA6 must measure needs a human decision before any rerun.
+
+Boundary-crossing work:
+
+- Umbrella item 7's note states that after the venv-tree exclusion "the shipped-venv arrangement holds until item 8 replaces it"; this run shows it does not hold with the 3.13.15 toolchain and a 3.13.9-built pdfs archive, so the note (written by this reviewer in commit 3bbd15c) needs revising once the human decides, which reviewer mode cannot do
+- The shared request renderer qualifies request section headings with the round but not the exchange occurrence, so the exchange 2 round 1 request repeats seven headings of exchange 1 round 1 in the transcript; the answer renderer already adds the exchange, and fixing the request renderer is an llm-shared change
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Human guidance:
+
+The user authorized only point 3 of `.reviews/a.item7.handoff-prompt.md`:
+rerun RHEL acceptance against the installer-only replacement archive, retain
+the results and report the actual PA6 verdict. Point 3 belongs to plan Step 6
+but does not complete Step 6. Read that handoff before judging the scope.
+
+Points 4 through 6, the Debian candidate build, application commits and push,
+wheel-bound D10, and remaining publication obligations are outside this
+checkpoint. Step 6 must remain No and those obligations must remain pending.
+Do not request completion of those later points as a repair to this evidence
+checkpoint, and do not relabel partial qualification as Step 6 completion.
+
+Review the staged evidence, preservation of original-candidate history, exact
+replacement pins, truthful cell states, generated view, validation-plan update,
+and commit grouping. A failed or inconclusive measured cell is evidence to
+retain, not permission to weaken its gate. The handoff explicitly says to stop
+and report raw diagnostics if PA6 does not pass.
+
+Do not launch acceptance mode during review: it is a costly real deployment
+run already retained under one exact run identity. The cumulative fixture mode
+is separate and safe to run as the declared validation command.
+
+The user requests publication followed by an immediate stop, without waiting
+for the review answer. No commit, upload, application push or later handoff
+point is authorized by this review request.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- Scope. The review covers point 3 only. It asks for no Debian build,
+  application push, D10 reading or publication work as a repair, and Step 6
+  stays `No`.
+- Items to review. The staged evidence, original-candidate preservation, exact
+  replacement pins, truthful cell states, generated view, validation-plan
+  update and grouping were each checked and are accurate. The one repair makes
+  the PA6 missing-work bullet state its measured cause.
+- Measured cells. PA3's failure and PA6's inconclusive state are retained as
+  measured. The finding explicitly rules out weakening PA6's discovery to
+  produce a pass.
+- No acceptance mode was launched. The retained run was verified from its
+  retention list and its prefix was read on the host. Only the cumulative
+  fixture mode ran.
+- No commit, upload, push or later point was performed or is authorized.
+
+The handoff's stop condition was honored and was the right call. Stopping at
+PA6 is what surfaced the finding: rerunning or adjusting discovery would have
+hidden it.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+The staged evidence needs no rework. Three things follow from this round.
+
+**Take the PA6 venv question to the human before any rerun.** The deployment
+provides two venvs and the operator environment uses the empty one. PA6 has to
+measure the venv the deployment provides, so the question is which pdfs archive
+makes that venv carry the wheels. The reviewer recommends a pdfs archive whose
+shipped venv is built with the candidate toolchain, which keeps item 7 on the
+shipped-venv arrangement the umbrella describes. Other routes are auditing the
+shipped 3.13.9 venv explicitly while recording that the operator path fails, or
+bringing item 8 forward. Do not change discovery to pick the wheel-bearing
+venv.
+
+**Qualify the appended request headings before committing the transcript.**
+The exchange 2 round 1 request record repeats seven headings from exchange 1
+round 1. When the transcript is next staged, add the exchange occurrence to
+those seven headings, for example
+`### Review identity for step 6 tools-archive-rebuild (exchange 2) (round 1)`,
+and rerun the intersection checker. Change nothing else.
+
+**Keep the PA3 work as written.** The missing-work bullet for build-role
+evidence is accurate. Supply the reader's `probes` stages from the original
+build with the member comparison as unchanged-payload proof, or rerun the
+probes, but do not relax the reader.
+
+Done well this round: the stop condition was honored, both candidates' evidence
+is preserved byte for byte, the provenance capture separates source commits
+from fixture commits, and PA3 and PA6 are recorded as measured rather than
+explained away.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete. Step 6 is deliberately incomplete, and this round adds one finding
+that needs the human before Step 6 can move.
+
+1. Identity. Passes. The request tree matched at entry, and the assessed tree
+   differs by exactly the reviewer's staged patch.
+2. Completeness. Fails, by design and per the guidance.
+3. Validation and coverage. The staged set passes all its checks. The declared
+   Markdown intersection checker fails only on the protocol's appended request
+   record, which is outside the staged set.
+4. Staged attribution. Passes. One attributable validation-row patch, which is
+   review metadata rather than a substantive repair.
+5. Unresolved findings. One: which venv PA6 must measure.
+6. `a.commit`. Passes, valid, ready and accepted by the hook.
+
+The finding is the most important result of point 3, more important than the
+two cells' states. The item's premise was that the venv-tree exclusion keeps
+the shipped-venv arrangement working until item 8. On the real target with the
+candidate toolchain, the application environment does not use the shipped venv
+at all: it gets an empty one named for 3.13.15. A PA6 pass over the shipped
+3.13.9 venv would have been real and still misleading.
+
+The reviewer corrects its own earlier claim here rather than letting it stand
+in the transcript. Exchange 1 round 2 said only the shipped venv existed at
+audit time. That came from logs that never named the second venv, not from the
+file system, and it was wrong. The practice this round follows instead: a
+claim about what is on the target is checked on the target.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 2) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-1-exchange-2 -->
+
+## Round 2 by requestor - Step 6 (exchange 2)
+
+- Recorded: 2026-09-19T14:45:07+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 2
+
+### Code review evidence for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+request_index_tree: 69b06f05b4e46d4b7031cb1a433d03db37fefff3
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(tools): qualify RHEL with Python 3.13.15
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-failed-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-r2-preparation.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-round2.txt
+group 2: docs(tools): record repaired RHEL checkpoint
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 2 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 3: docs(review): retain point 3 review context
+group 3 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-failed-rhel.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-round2.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-r2-preparation.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+#### Assessment for step 6 tools-archive-rebuild (round 2)
+
+Step 6 remains deliberately incomplete because Debian, final consumer/D10
+identities, publication and adoption are later handoff work. This request
+covers point 3 and the explicitly authorised PA3/PA6 repairs after exchange 2
+round 1. The human selected Python 3.13.15 and authorised installing uv.
+
+The new RHEL acceptance run passed all ten required cells and the
+additional forced-redeployment cell in 3930 seconds. The
+record verifier checks those states, exact archive/bundle/pdfs pins, every
+retained raw capture digest, preservation of both failed runs, unchanged
+Step 5 snapshots and the generated view. No production reader, discovery
+guard or acceptance condition was weakened.
+
+Native cumulative Step 6 validation passed in 77 seconds. Project shell lint
+passed for 58 scripts. Full Markdown checking retains 39 existing findings;
+the intersection check finds none on changed lines. The sensitive-content
+hook, staged whitespace check and commit-plan checker also pass.
+There is no new executable source change or coverage reduction.
+
+### Implementation report for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+#### Implementation details for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Prepared a new pdfs verification archive using the candidate Python 3.13.15
+interpreter and the unchanged July application lock. The archive contains one
+complete shipped venv, including uv. Eighty compatible wheel files were
+downloaded through the configured corporate mirror, checked against their
+locked hashes and transferred to the offline host. The locked requirements
+were installed there, and the offline dry-run audit and heavy imports passed
+before packaging. Only generated venv text paths and symlinks were normalised
+for the account-shaped archive; wheel ELF objects were not modified.
+
+Used the existing application packaging overlay and cplx packager. The
+unchanged acceptance driver tests fresh and forced deployment of that pdfs
+archive with the exact replacement tools archive. The selected venv is the
+operator environment for Python 3.13.15, not the old wheel-bearing 3.13.9 venv.
+
+PA3 receives compatible build evidence with the original probe stages and
+explicit provenance. A fresh comparison verifies all 38070 archive members:
+only the installer changed, so the 38069 payload members retain the original
+build observations. Replacement deployment acceptance is newly measured.
+
+The acceptance record preserves both previous failures and binds the new
+RHEL run. Preparation evidence identifies the pdfs lock, wheel transport and
+package hash without promoting them to final Debian consumer identities.
+The umbrella now makes the matching-Python prerequisite explicit. The seven
+duplicate exchange 2 round 1 request headings were qualified as requested.
+
+### Change summary for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+#### Staged path inventory for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Group 1: Replacement RHEL acceptance and preserved failures.
+
+- `docs/v0.27.0/acceptance.tools-archive-rebuild.json`
+- `docs/v0.27.0/acceptance.tools-archive-rebuild.md`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-failed-rhel.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-r2-preparation.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-round2.txt`
+
+Group 2: Step 6 checkpoint and shipped environment prerequisite.
+
+- `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`
+- `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md`
+
+Group 3: Point 3 review exchange.
+
+- `docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md`
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Human guidance:
+
+#### Human scope and review guidance for step 6 tools-archive-rebuild (round 2)
+
+Review Step 6 handoff point 3 and the user's explicit follow-up: address round 1,
+fix PA3 and PA6, use Python 3.13.15, install uv if needed, and publish round 2. The human has answered the venv question raised by round 1. Do not request
+that same decision again or treat the earlier stop-at-PA6 instruction as
+prohibiting these now-authorised repairs.
+
+Step 6 remains No because later Debian, consumer/D10, publication and adoption
+work has not run. Do not treat this checkpoint as final Step 6 completion.
+Assess whether the reviewed evidence and bounded repairs are ready to commit.
+The request does not authorise a commit, application push, Jenkins build,
+upload or later handoff point.
+
+Use the retained native results and input hashes. Do not launch acceptance
+mode during review; it performs another costly real deployment. The declared
+cumulative mode is the separate fixture validation and is safe to run.
+The user requests publication followed by a stop without waiting for an
+answer.
+
+Writer response:
+
+#### Response to round 1 for step 6 tools-archive-rebuild (round 2)
+
+Accepted the reviewer's diagnosis and staged validation-row clarification.
+The subsequent human instruction resolves the prerequisite decision:
+"3.13.15 should be the target, so if uv is missing, install it."
+That instruction also explicitly authorises repairing PA3 and PA6 and
+publishing round 2. It supersedes the earlier handoff stop at the failed PA6
+checkpoint; no additional permission question is needed.
+
+Prepared a matching complete shipped 3.13.15 venv instead of selecting the old
+3.13.9 venv or bringing item 8 forward. The same discovery guard and offline
+audit remain in force. The earlier incomplete prefix and both failure
+captures remain intact. The umbrella's previously unconditional claim is now
+conditional on a matching complete environment.
+
+Supplied the original PA3 probes with source hashes and a newly verified
+installer-only member comparison. The build-role reader is unchanged.
+
+Qualified exactly the seven new duplicate transcript headings. The Markdown
+intersection check is now clean. This is the requested targeted transcript
+repair, not a rewrite of review history. There is no disagreement with the
+review findings; the human decision and new measurements resolve them.
+
+### Reviewer focus for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-2-exchange-2 -->
+
+## Round 2 by reviewer - Step 6 (exchange 2)
+
+- Recorded: 2026-09-19T14:54:31+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Baseline index tree: 69b06f05b4e46d4b7031cb1a433d03db37fefff3
+
+Assessed index tree: 69b06f05b4e46d4b7031cb1a433d03db37fefff3
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The verdict is the expected one: Debian, the exact-wheel D10 reading, consumer
+identities, publication and adoption have not run, and the guidance keeps them
+out of this checkpoint. Within point 3, the repairs are sound and the RHEL
+result is now conclusive. Every central claim was measured on the build host
+rather than read from the record.
+
+- PA6 now measures the venv the deployment uses. On the retained prefix the
+  project holds exactly one venv, `python_3.13.15_my-project`, with `uv`; the
+  operator `senv` probe resolves `python` from it, and the PA6 cell was written
+  after both deployments. The offline audit reports "Would use project
+  environment", "Checked 80 packages" and "Would make no changes" with exit 0.
+  pymupdf 1.27.2.3 and pikepdf 10.7.1 import under the 3.13.15 interpreter with
+  exit 0, and the wheel object keeps `RUNPATH [$ORIGIN]`. The discovery guard is
+  unchanged and passed because the layout is now unambiguous, not because it
+  was relaxed.
+- The pdfs verification archive is what the preparation capture says. It is
+  253693690 bytes with SHA-256 `0b3c120e...e9b0` and holds one venv. Its
+  `uv.lock` digest `e43a6232...687b` equals the lock inside the July pdfs
+  archive, so the lock is unchanged. All 80 transported wheel hashes appear in
+  that lock. The reviewer checked every installed site-packages file against
+  its wheel's `RECORD`: 9923 entries, zero mismatches, including all 80 ELF
+  objects, so no wheel file was modified by the path normalisation.
+- PA3 reuses the original build evidence faithfully. The build-role input
+  (`13808e09...6b85`) carries probe stages byte-equal to the original Step 5
+  summary, whose digest `7fb03bec...f693` matches the recorded provenance. The
+  unchanged reader passed all four stages, and the installer-only member
+  comparison was verified independently in Step 5 round 3.
+- The record is honest. The results file equals the host's retained
+  `results.json` (`08114f9e...8115`), all seven retention digests verify, both
+  earlier failed runs are preserved byte for byte, and the Step 5 snapshots are
+  unchanged.
+- The umbrella note, which the reviewer wrote in `3bbd15c` and flagged in
+  round 1 as contradicted, now makes the shipped-venv arrangement conditional
+  on a complete venv for the candidate Python. That is accurate and scoped.
+- The staged transcript's seven round 1 request headings now carry the
+  exchange occurrence, no heading repeats, and the reviewer's round 1 answer
+  copy is byte-identical to what it rendered.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+- Commit the three application reader repairs.
+- Run the Debian agent candidate build and bind the Debian cells, environment
+  and consumers.
+- Take the D10 reading with the agent's exact wheels.
+- Bind the remaining pre-publication obligations and pass the publication
+  phase.
+
+Architecture, performance and unit test coverage: no production code, reader,
+guard or path changed, no runtime cost was added, and no percentage is
+claimed. No unit-tested class below 100% needs completing, and no top-level
+symbol outside the coverage gate is unreferenced.
+
+Feature integrity: both earlier failures stay retained as measured, the
+replacement's passes are candidate-bound, and no gate was weakened.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows match this assessment. The status sentence is exactly
+`No. Step 6 has NOT been fully implemented.`, the `Missing work for Step 6`
+section keeps only the genuinely remaining items (application commits, Debian
+build, D10 and the pre-publication obligations), and the resolved PA3 and PA6
+bullets, including the reviewer's round 1 PA6 bullet, were correctly removed
+now that both pass. The round 2 repair bullet's claims were each confirmed on
+the host. The document-level line stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+The reviewer ran all seven resolved commands. Six behave as expected. The
+Markdown intersection checker fails, again only on the request record the
+protocol appended at publication, which is outside the staged set.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 99 seconds, native `validation exit=0 elapsed=75s`, no
+  FAIL line, four helper imports and 58 acceptance cases.
+- The round 2 record verifier, source `request`: `PASS`, exit 0.
+- The Markdown gate over cplx with its log redirected, source `request`:
+  exit 1 on repository debt, as the request states.
+- The Markdown intersection checker, source `request`: exit 1 with three
+  findings, all in the appended round 2 request record. Two are duplicate
+  headings: the requestor's own sub-headings
+  `Implementation report for step 6 tools-archive-rebuild (round 2)` and
+  `Change summary for step 6 tools-archive-rebuild (round 2)` already carried a
+  round suffix, so the renderer left them unqualified, and they repeat exchange
+  1's round 2 section headings. The third is MD032: a wrapped guidance line
+  begins with `2. The human`, which Markdown parses as a list item.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean on the index.
+
+The appended round 2 request record also lists three of this request's
+validation commands with absolute paths under the user's home directory, which
+contain the private account name. The hook does not see them yet because the
+append is unstaged; it will refuse them when the transcript is next staged.
+
+Measured on the build host: the round 2 retention list, the results and raw
+bundle digests, the PA6 raw captures (audit, imports, search path), the
+deployed prefix's single venv and cell timing, the `senv` resolution, the pdfs
+verification archive's digest, venv, lock and a full `RECORD` check of its
+installed files, the July lock digest, and PA3's probe equality with the
+original summary.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0.
+- The round 2 record verifier, source `request`. Exit 0.
+- The Markdown gate over cplx, logged, source `request`. Exit 1 on older debt.
+- The Markdown intersection checker, source `request`. Exit 1, on the
+  appended request record only.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Clean on the index.
+
+Acceptance mode was not launched, as the guidance directs. The retained run and
+prefix were read on the host instead.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+Three request additions are again declared with absolute home-directory paths,
+which Step 5 round 5 had replaced with sibling-relative forms. That is not
+drift, but it is why the appended request record now carries the account name.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `69b06f05b4e46d4b7031cb1a433d03db37fefff3` equals the
+  baseline at entry and the live index after every run.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `0c2f846213875be83c31e9a85cf51ab9cc804f3273488ab41e12dd398f0b4798`.
+  The digest differs from earlier rounds because the writer's staged umbrella
+  note is in the working tree; within this round it did not change, and no
+  umbrella row was completed.
+- Validation-state comparison over the 11 staged paths, the project command's
+  file and the four ignored validation files: `acceptable: true` with empty
+  lists.
+- The working tree matches its entry state: 11 staged paths, and the
+  transcript also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository. The native run used host scratch
+  space; the reviewer's two read-only host scripts ran from `/var/tmp` and were
+  removed, and nothing retained was modified.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+`a.commit` is accurate for the staged set, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 11 staged paths in three
+ordered groups matching the request. The installed hook accepts the index.
+
+- Group 1, `docs(tools): qualify RHEL with Python 3.13.15`: the record, its
+  view and the six RHEL and preparation captures, including both preserved
+  failures.
+- Group 2, `docs(tools): record repaired RHEL checkpoint`: the validation plan
+  and the umbrella note.
+- Group 3, `docs(review): retain point 3 review context`: the staged
+  transcript, which is clean.
+
+Ordering is least to most dependent and every staged path appears once. One
+caution for the commit: if the owning workflow stages the transcript's newer
+protocol appends into group 3, the round 2 request record comes with it, and
+the hook will refuse that record's three account-name lines until they are
+fixed.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Unresolved findings:
+
+- The appended round 2 request record, built from this request's own content, will block or fail the next transcript commit: three of its validation-command lines carry absolute paths under the user's home directory with the private account name, which the installed hook refuses once staged (a regression of the Step 5 round 5 fix), and the declared Markdown intersection checker fails on two requestor-authored sub-headings that repeat exchange 1's round 2 section headings and on a wrapped guidance line that begins with `2.` and parses as a list.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Human guidance:
+
+#### Human scope and review guidance for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Review Step 6 handoff point 3 and the user's explicit follow-up: address round 1,
+fix PA3 and PA6, use Python 3.13.15, install uv if needed, and publish round 2. The human has answered the venv question raised by round 1. Do not request
+that same decision again or treat the earlier stop-at-PA6 instruction as
+prohibiting these now-authorised repairs.
+
+Step 6 remains No because later Debian, consumer/D10, publication and adoption
+work has not run. Do not treat this checkpoint as final Step 6 completion.
+Assess whether the reviewed evidence and bounded repairs are ready to commit.
+The request does not authorise a commit, application push, Jenkins build,
+upload or later handoff point.
+
+Use the retained native results and input hashes. Do not launch acceptance
+mode during review; it performs another costly real deployment. The declared
+cumulative mode is the separate fixture validation and is safe to run.
+The user requests publication followed by a stop without waiting for an
+answer.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- The venv decision is taken as answered. The reviewer does not raise it
+  again; it checked that the repair implements it: the deployment's only venv
+  is the complete 3.13.15 one, and PA6 measured that venv.
+- Step 6 stays `No`, and nothing here treats the checkpoint as completion.
+- Readiness to commit: the staged evidence and bounded repairs are ready. Every
+  claim that decides PA3 and PA6 was measured on the host and holds. The one
+  finding concerns the round 2 request record the protocol appended after the
+  index was captured, which is not in the staged set but will reach the next
+  transcript commit.
+- Acceptance mode was not launched. Only the declared cumulative fixture mode
+  ran, and the retained run was read in place.
+- No commit, push, build, upload or later point was performed or is
+  authorized.
+
+The disposition is changes-requested because Step 6 is incomplete by design
+and because of that one transcript finding, not because of any defect in the
+point 3 evidence.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+The staged checkpoint needs no rework. One transcript fix is needed before the
+review history is committed, plus one habit to keep.
+
+**Fix the appended round 2 request record before staging it.** In the working
+tree transcript, the round 2 request record lists three validation commands
+with absolute paths under the user's home directory. Replace that prefix with
+the sibling-relative form (`../llm-shared/...` and `--root ../cplx`), as was
+done for Step 5 rounds 3 and 4. In the same record, add the exchange
+occurrence to the two sub-headings that repeat exchange 1's round 2 section
+headings, for example
+`#### Implementation report for step 6 tools-archive-rebuild (exchange 2) (round 2)`.
+Rewrap the guidance paragraph so that no line begins with `2.` followed by a
+space. Then stage the transcript, run the hook and the intersection checker,
+and require both clean.
+
+**Declare request commands without home paths, and give sub-headings their
+own names.** The absolute paths came back in this request's declared
+commands; the sibling-relative forms work and were used in Step 5 round 5. A
+sub-heading inside an assessment or report section does not need to repeat the
+section's own title; a short distinct title avoids the collision entirely.
+
+Done well this round: the repair measured the venv the deployment actually
+uses instead of steering discovery to the wheel-bearing one, the pdfs
+verification archive's wheels are provably unmodified, PA3 reuses the original
+probes with verifiable provenance, both failed runs are preserved, and the
+umbrella note was corrected to match the evidence.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete: Step 6 is incomplete by design, and one transcript finding remains.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails by design, per the guidance.
+3. Validation and coverage. The staged set passes. The declared Markdown
+   intersection checker fails only on the appended round 2 request record.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. One: the appended request record's home paths,
+   duplicate sub-headings and list-parsing line.
+6. `a.commit`. Passes, valid and ready, and the hook accepts the index.
+
+On substance this is the round that makes RHEL acceptance real. Round 1 showed
+that PA6 could not pass honestly with a 3.13.9-built pdfs archive under the
+3.13.15 toolchain. This round changed the input, not the gate: one complete
+3.13.15 venv, built from the unchanged lock with provably unmodified wheels,
+deployed twice and audited by the unchanged driver. The reviewer checked the
+properties that would have made a pass misleading: a second venv, a changed
+lock, edited wheel objects, or a relaxed discovery guard. None is present.
+
+For the human: the PA6 pass qualifies the tools archive with a pdfs
+verification archive built for this purpose, not with a pdfs archive the
+application pipeline produced. The record and umbrella say so. The pipeline's
+own pdfs build with the candidate toolchain belongs to the Debian point, where
+final consumer identities are bound.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 2) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-2-exchange-2 -->
+
+## Round 3 by requestor - Step 6
+
+- Recorded: 2026-09-19T15:37:27+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (exchange 2) (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 3
+
+### Code review evidence for step 6 tools-archive-rebuild (exchange 2) (round 3)
+
+request_index_tree: df54d0dac9ea1f633b89ae970e2312feff83a60f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(tools): qualify RHEL with Python 3.13.15
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-failed-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-r2-preparation.json
+group 1 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-round2.txt
+group 2: docs(tools): record repaired RHEL checkpoint
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 2 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 3: docs(review): retain point 3 review context
+group 3 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-failed-rhel.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-round2.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-r2-preparation.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (exchange 2) (round 3)
+
+Step 6 remains deliberately incomplete because Debian, final consumer/D10
+identities, publication and adoption are later handoff work. This request
+covers point 3 and the explicitly authorised PA3/PA6 repairs after exchange 2
+round 1. The human selected Python 3.13.15 and authorised installing uv.
+
+The new RHEL acceptance run passed all ten required cells and the
+additional forced-redeployment cell in 3930 seconds. The
+record verifier checks those states, exact archive/bundle/pdfs pins, every
+retained raw capture digest, preservation of both failed runs, unchanged
+Step 5 snapshots and the generated view. No production reader, discovery
+guard or acceptance condition was weakened.
+
+Native cumulative Step 6 validation passed in 77 seconds. Project shell lint
+passed for 58 scripts. Full Markdown checking retains 39 existing findings;
+the intersection check finds none on changed lines. The sensitive-content
+hook, staged whitespace check and commit-plan checker also pass.
+There is no new executable source change or coverage reduction.
+
+Round 3 changes only review-history formatting and command paths. The reviewer
+independently confirmed the retained PA3/PA6 evidence and reran cumulative
+validation in round 2. No executable or acceptance input changed since then.
+
+### Implementation report for step 6 tools-archive-rebuild (exchange 2) (round 3)
+
+Prepared a new pdfs verification archive using the candidate Python 3.13.15
+interpreter and the unchanged July application lock. The archive contains one
+complete shipped venv, including uv. Eighty compatible wheel files were
+downloaded through the configured corporate mirror, checked against their
+locked hashes and transferred to the offline host. The locked requirements
+were installed there, and the offline dry-run audit and heavy imports passed
+before packaging. Only generated venv text paths and symlinks were normalised
+for the account-shaped archive; wheel ELF objects were not modified.
+
+Used the existing application packaging overlay and cplx packager. The
+unchanged acceptance driver tests fresh and forced deployment of that pdfs
+archive with the exact replacement tools archive. The selected venv is the
+operator environment for Python 3.13.15, not the old wheel-bearing 3.13.9 venv.
+
+PA3 receives compatible build evidence with the original probe stages and
+explicit provenance. A fresh comparison verifies all 38070 archive members:
+only the installer changed, so the 38069 payload members retain the original
+build observations. Replacement deployment acceptance is newly measured.
+
+The acceptance record preserves both previous failures and binds the new
+RHEL run. Preparation evidence identifies the pdfs lock, wheel transport and
+package hash without promoting them to final Debian consumer identities.
+The umbrella now makes the matching-Python prerequisite explicit. The seven
+duplicate exchange 2 round 1 request headings were qualified as requested.
+
+For round 3, repaired only the round 2 request record: sibling-relative
+validation commands, distinct exchange-qualified subheadings, and guidance
+paragraph wrapping. All native captures and their bindings remain unchanged.
+
+### Change summary for step 6 tools-archive-rebuild (exchange 2) (round 3)
+
+Group 1: Replacement RHEL acceptance and preserved failures.
+
+- `docs/v0.27.0/acceptance.tools-archive-rebuild.json`
+- `docs/v0.27.0/acceptance.tools-archive-rebuild.md`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-original-rhel.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3.txt`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-failed-rhel.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-rhel.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-r2-preparation.json`
+- `docs/v0.27.0/evidence.tools-archive-rebuild.step6-point3-round2.txt`
+
+Group 2: Step 6 checkpoint and shipped environment prerequisite.
+
+- `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`
+- `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md`
+
+Group 3: Point 3 review exchange.
+
+- `docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md`
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (exchange 2) (round 3)
+
+Human guidance:
+
+Review Step 6 handoff point 3 and the user's explicit follow-up: address round 2 findings and publish round 3. The human has answered the venv question raised by round 1. Do not request
+that same decision again or treat the earlier stop-at-PA6 instruction as
+prohibiting these now-authorised repairs.
+
+Step 6 remains No because later Debian, consumer/D10, publication and adoption
+work has not run. Do not treat this checkpoint as final Step 6 completion.
+Assess whether the reviewed evidence and bounded repairs are ready to commit.
+The request does not authorise a commit, application push, Jenkins build,
+upload or later handoff point.
+
+Use the retained native results and input hashes. Do not launch acceptance
+mode during review; it performs another costly real deployment. The declared
+cumulative mode is the separate fixture validation and is safe to run.
+The user requests publication followed by a stop without waiting for an
+answer.
+
+Writer response:
+
+Accepted the round 2 finding. The reviewer made no staged repairs.
+
+Replaced the three declared validation commands' private home prefixes with
+sibling-relative paths in the round 2 request record. Renamed the two
+redundant subheadings to distinct exchange-qualified titles, avoiding a
+collision with their parent headings. Rewrapped the guidance paragraph.
+The staged transcript is checked by the sensitive-content hook and Markdown
+intersection checker. No linter rule or baseline was changed.
+
+New authored inputs omit redundant headings, and new declared commands use
+sibling-relative paths. Runtime launcher calls still follow the shared
+absolute-path shell contract. The request summary receives exchange-qualified
+section headings before publication. There is no disagreement. The three
+commit groups and their subjects remain accurate and unchanged.
+
+PA3 and PA6 remain passing on the retained Python 3.13.15 run. Step 6 remains
+No for later handoff work; this request seeks review of the point 3 checkpoint.
+
+The reviewer answer copied the same wrapped guidance paragraph, producing
+one additional MD032 finding. Rewrapped that copy too; its words, findings
+and verdict are unchanged.
+
+### Reviewer focus for step 6 tools-archive-rebuild (exchange 2) (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-3 -->
+
+## Round 3 by reviewer - Step 6
+
+- Recorded: 2026-09-19T15:44:29+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+Baseline index tree: df54d0dac9ea1f633b89ae970e2312feff83a60f
+
+Assessed index tree: df54d0dac9ea1f633b89ae970e2312feff83a60f
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The verdict is the expected one, per the guidance: Debian, the exact-wheel D10
+reading, consumer identities, publication and adoption have not run. Within
+handoff point 3 the checkpoint is complete and correct.
+
+Since round 2 the index has changed only in the review transcript: 519 lines
+appended and none removed, holding the round 2 request record and the
+reviewer's round 2 answer. Every RHEL, pdfs and PA3 claim the reviewer measured
+on the build host in round 2 therefore still stands on unchanged bytes, and
+every declared command was re-run against the current index this round.
+
+The round 2 finding is fixed, verified rather than accepted:
+
+- The round 2 request record's three validation commands are sibling-relative,
+  and no line in the working-tree transcript carries the private account name.
+- Its two sub-headings no longer repeat exchange 1's section headings, and the
+  guidance paragraph no longer wraps onto a line that parses as a list. The
+  staged transcript has no duplicate heading anywhere.
+- The reviewer's round 2 answer copy is word-for-word identical to what it
+  rendered. The only edit rewrapped the copied guidance paragraph, which the
+  reviewer had carried over with the same list-parsing line; the requestor
+  fixed that too.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+- Commit the three application reader repairs.
+- Run the Debian agent candidate build and bind the Debian cells, environment
+  and consumers.
+- Take the D10 reading with the agent's exact wheels.
+- Bind the remaining pre-publication obligations and pass the publication
+  phase.
+
+Architecture, performance and unit test coverage: no production code, reader,
+guard or path changed, no runtime cost was added, and no percentage is
+claimed. No unit-tested class below 100% needs completing, and no top-level
+symbol outside the coverage gate is unreferenced.
+
+Feature integrity: both earlier failures stay retained as measured, the
+replacement's passes stay candidate-bound, and no gate was weakened.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, which is
+unchanged since round 2. The Step 6 status sentence is exactly
+`No. Step 6 has NOT been fully implemented.`, the `Missing work for Step 6`
+section lists only the remaining later-point work, and the document-level line
+stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+The reviewer ran all seven resolved commands. All seven behave as expected.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 99 seconds, native `validation exit=0 elapsed=75s`, no
+  FAIL line, four helper imports and 58 acceptance cases.
+- The round 2 record verifier, source `request`: `PASS`, exit 0.
+- The Markdown gate over cplx with its log redirected, source `request`:
+  exit 1 on repository debt, as declared.
+- The Markdown intersection checker, source `request`: `PASS`, 39 existing
+  diagnostics and none on lines added since HEAD. This run already includes
+  the round 3 request record the protocol appended at publication, which the
+  earlier rounds' runs did not survive.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean.
+
+Also verified: a scan of the whole working-tree transcript finds no line with
+the private account name; the staged transcript has no duplicate heading; and
+the reviewer's round 2 answer copy matches its rendering word for word.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0.
+- The round 2 record verifier, source `request`. Exit 0.
+- The Markdown gate over cplx, logged, source `request`. Exit 1 on older debt.
+- The Markdown intersection checker, source `request`. Exit 0.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Clean.
+
+All request additions are declared in sibling-relative form. Acceptance mode
+was not launched, as the guidance directs.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `df54d0dac9ea1f633b89ae970e2312feff83a60f` equals the
+  baseline at entry and the live index after every run. Against the round 2
+  tree it differs only in the review transcript.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `0c2f846213875be83c31e9a85cf51ab9cc804f3273488ab41e12dd398f0b4798`.
+- Validation-state comparison over the 11 staged paths, the project command's
+  file and the four ignored validation files: `acceptable: true` with empty
+  lists.
+- The working tree matches its entry state: 11 staged paths, and the
+  transcript also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+`a.commit` is accurate and executable, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 11 staged paths in the
+same three ordered groups as round 2. The installed hook accepts the index.
+
+- Group 1, `docs(tools): qualify RHEL with Python 3.13.15`: the record, its
+  view and the six RHEL and preparation captures.
+- Group 2, `docs(tools): record repaired RHEL checkpoint`: the validation plan
+  and the umbrella note.
+- Group 3, `docs(review): retain point 3 review context`: the staged
+  transcript, now clean under both the hook and the Markdown checks.
+
+When the owning workflow stages this answer's protocol append into group 3,
+run the hook and the intersection checker once more on the final index, since
+that append lands after this review's evidence.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+Human guidance:
+
+Review Step 6 handoff point 3 and the user's explicit follow-up: address round 2 findings and publish round 3. The human has answered the venv question raised by round 1. Do not request
+that same decision again or treat the earlier stop-at-PA6 instruction as
+prohibiting these now-authorised repairs.
+
+Step 6 remains No because later Debian, consumer/D10, publication and adoption
+work has not run. Do not treat this checkpoint as final Step 6 completion.
+Assess whether the reviewed evidence and bounded repairs are ready to commit.
+The request does not authorise a commit, application push, Jenkins build,
+upload or later handoff point.
+
+Use the retained native results and input hashes. Do not launch acceptance
+mode during review; it performs another costly real deployment. The declared
+cumulative mode is the separate fixture validation and is safe to run.
+The user requests publication followed by a stop without waiting for an
+answer.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- The venv decision is not raised again.
+- Step 6 stays `No`, and nothing here treats the checkpoint as completion.
+- Readiness to commit: yes. The reviewed evidence and bounded repairs are ready
+  to commit. The substance was measured on the build host in round 2 and is
+  unchanged, the round 2 transcript finding is fixed, and no finding remains.
+- Acceptance mode was not launched; only the declared cumulative fixture mode
+  ran.
+- No commit, push, build, upload or later point was performed or is
+  authorized.
+
+The disposition below is changes-requested only because the shared rule ties a
+commit-ready recommendation to a complete step, and Step 6 is incomplete by
+design. That is the same position as the exchange 1 round 2 checkpoint, which
+the human then committed through the owning workflow. The commit choice for
+this checkpoint is likewise the human's.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+No rework is needed. The point 3 checkpoint is ready to commit through the
+owning workflow if the human chooses to. Stage this answer's protocol append
+into group 3 and run the hook and the intersection checker once more on the
+final index before committing.
+
+After that, per the handoff: commit the three application reader repairs, then
+continue with the Debian candidate build when the human authorizes it.
+
+Done well across this checkpoint: the stop at PA6 was honored, the human's
+decision was implemented by changing the input rather than the gate, every
+repair was confined to what the checks reported, and the review history is now
+clean under both the hook and the Markdown checks.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete, for one reason only: Step 6 is incomplete by design. Every other
+readiness result passes, and no finding remains.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails by design, per the guidance.
+3. Validation and coverage. Passes; all seven declared commands behave as
+   expected, including the Markdown intersection check after publication.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. None.
+6. `a.commit`. Passes, valid, ready and accepted by the hook.
+
+The reviewer does not bend the completeness rule for a partial checkpoint, and
+states instead what it means here: nothing is left for the writer to rework,
+and the evidence is ready to commit.
+
+One process note from the reviewer's side. Its round 2 answer carried over the
+guidance line that parsed as a list, and its own pre-publication lint of the
+appended summary did not reproduce the finding, because the checker's list
+detection depends on surrounding context. For its own content the reviewer now
+also rejects any wrapped line that begins with a number and a period, rather
+than relying on that lint alone.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 3)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-3 -->
