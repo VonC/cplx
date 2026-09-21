@@ -242,9 +242,10 @@ deliver_bundle() {
     fi
     printf '%s\n' "$commit" > "$stage/tree/$DELIVER_BUNDLE_REVISION"
     # The manifest covers every regular member but itself, in one fixed order,
-    # in the two-space form the consuming adapter parses.
+    # in the two-space form the consuming adapter parses. Hash binary bytes on
+    # every platform, then normalize the binary marker (Git Bash defaults to it).
     if ! (cd "$stage/tree" && find src acceptance -type f -print0 | LC_ALL=C sort -z \
-            | xargs -0 sha256sum -- > "$stage/manifest"); then
+            | xargs -0 sha256sum --binary -- | sed 's/ \*/  /' > "$stage/manifest"); then
         deliver_refuse "the bundle members could not be digested"
         rm -rf -- "$stage"
         return 1

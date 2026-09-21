@@ -623,7 +623,9 @@ fields = dict(line.split("=", 1) for line in text_of(runtime).splitlines() if "=
 environment = {"build": fields.get("build", ""), "os": fields.get("PRETTY_NAME", "").strip('"'),
                "image": fields.get("image", ""), "container": fields.get("container", ""), "kernel": ""}
 keep("verification.sha256", tree / "verification.sha256")
-log = text_of(console)
+# Jenkins consoleText carries timestamp prefixes. Keep the original capture
+# byte-for-byte and remove only this known transport prefix for parsing.
+log = re.sub(r"^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] ", "", text_of(console), flags=re.M)
 
 trailer = re.search(r"^CPLX-ELF/1 end state=(\S+) reason=(\S+)", log, re.M)
 if trailer is None:
@@ -666,9 +668,72 @@ elif "toolchain python ELF:" in log:
 
 closure = keep("abi-closure.txt", tree / "abi-closure.txt")
 abi = keep("abi", tree / "abi")
-abi_pass = re.search(r"^ABI PASS: subjects=(\d+) dynamic=(\d+) flags=0", log, re.M)
+abi_pass = re.search(r"^ABI PASS: subjects=(\d+) dynamic=(\d+)(?: availability-rows=\d+ runtime-rows=[1-9]\d*)?(?: dangling-links=\d+)? flags=0$", log, re.M)
 abi_fail = re.search(r"^ABI INCONCLUSIVE/FAIL: (.*)$", log, re.M)
-if abi_pass and closure is not None:
+# Q08 does not authorize a blanket exception for system-loader executables.
+# Older scanners recorded these without mapping them. Require the retained
+# per-subject map and its availability rows; a PASS counter alone is not proof.
+def unmapped_system_objects(abi):
+    if abi is None:
+        return False
+    rows = text_of(abi / "providers.txt").splitlines()
+    subjects = text_of(abi / "inventory.txt").splitlines()
+    available = {row.split("|", 1)[1] for row in rows if row.startswith("availability|")}
+    aliases = {}
+    for row in rows:
+        if not row.startswith("map-alias|"):
+            continue
+        parts = row.split("|")
+        if len(parts) != 3 or not all(value.startswith("/") for value in parts[1:]):
+            return True
+        alias, target = parts[1:]
+        if alias in aliases and aliases[alias] != target:
+            return True
+        aliases[alias] = target
+    excluded = set()
+    for row in rows:
+        if not row.startswith("excluded-monitoring|"):
+            continue
+        for value in row.split("|")[1:]:
+            path = Path(value)
+            parent = str(path.parent)
+            known = parent.startswith("/opt/dynatrace/oneagent/") or parent in {
+                "/usr/lib", "/usr/lib64", "/lib", "/lib64",
+                "/usr/lib/x86_64-linux-gnu", "/lib/x86_64-linux-gnu",
+                "/usr/lib/aarch64-linux-gnu", "/lib/aarch64-linux-gnu"}
+            if known and re.fullmatch(r"liboneagent.+\.so", path.name) and not any(
+                    part in value for part in ("/../", "/./", "//")):
+                excluded.add(value)
+    for row in rows:
+        if not row.startswith("system-interpreter-object|"):
+            continue
+        parts = row.split("|")
+        if len(parts) != 3 or subjects.count(parts[1]) != 1:
+            return True
+        listing = text_of(abi / (str(subjects.index(parts[1])) + ".list.txt"))
+        if not listing or re.search(r"not found|lookup error|undefined symbol", listing, re.I):
+            return True
+        providers = set()
+        for line in listing.splitlines():
+            match = re.search(r"(?:=>\s+)?(/\S+)\s+\(0x[0-9a-fA-F]+\)", line)
+            if match:
+                if match[1] not in excluded:
+                    providers.add(match[1])
+            elif line.strip() and not re.fullmatch(r"linux-(vdso|gate)\S* \(0x[0-9a-fA-F]+\)", line.strip()):
+                return True
+        # The scanner resolves aliases on the agent and records their physical
+        # providers. Never normalize paths against this reader's filesystem or
+        # accept an alias whose recorded target lacks an availability row.
+        if not providers or not all(value in available or aliases.get(value) in available for value in providers):
+            return True
+    return False
+
+unqualified_objects = unmapped_system_objects(abi)
+if abi_pass and unqualified_objects:
+    reason = "system-loader objects outside the retained helper scope lack provider qualification (Q08)"
+    cell("PA5:debian", "inconclusive", reason, "abi-closure.txt", "abi", "console.txt")
+    cell("PA7:debian", "inconclusive", reason, "abi", "console.txt")
+elif abi_pass and closure is not None:
     cell("PA5:debian", "pass", "closure checker and whole-scope ABI listing accepted", "abi-closure.txt", "abi")
     cell("PA7:debian", "pass", "loader listing over %s subjects, %s dynamic, zero flags" % abi_pass.groups(), "abi", "console.txt")
 elif abi_fail:
@@ -680,10 +745,15 @@ elif closure is not None:
     cell("PA5:debian", "inconclusive", "closure output retained without an ABI verdict", "abi-closure.txt")
 
 imports = text_of(abi / "imports.txt") if abi else ""
-if "wheels load" in imports and re.search(r"^venv_base=", log, re.M) and "uv sync --locked" in log:
+import_failed = re.search(r"Traceback \(most recent call last\)|(?:ImportError|ModuleNotFoundError|OSError):|symbol lookup error", imports)
+sync_failed = re.search(r"^TOOLS-LOCKED-SYNC/1 state=failed(?: |$)", log, re.M)
+sync_passed = re.search(r"^TOOLS-LOCKED-SYNC/1 state=passed(?: |$)", log, re.M) or "uv sync --locked" in log
+if import_failed or sync_failed:
+    cell("PA6:debian", "fail", "retained heavy-wheel import or locked-sync failure", "abi", "console.txt")
+elif "wheels load" in imports and re.search(r"^venv_base=", log, re.M) and sync_passed:
     cell("PA6:debian", "pass", "uv sync --locked then pymupdf and pikepdf imported from the candidate venv", "abi", "console.txt")
 elif abi is not None:
-    cell("PA6:debian", "fail", "heavy wheel imports or the locked sync are not evidenced", "abi", "console.txt")
+    cell("PA6:debian", "inconclusive", "heavy-wheel import, venv identity or locked-sync evidence is missing", "abi", "console.txt")
 
 traces = list(abi.glob("ld-debug.*")) if abi else []
 if abi_pass and len(traces) == 1 and traces[0].stat().st_size > 0:
@@ -695,7 +765,7 @@ elif abi is not None:
          "%d direct-venv trace(s) retained; %s" % (len(traces), abi_fail.group(1) if abi_fail else "no ABI verdict"), "abi")
 
 walks = sorted(tree.glob("test-walk.*"))
-summary = re.search(r"^Full acceptance PASS: collected=(\d+) executed=(\d+) setup_skipped=(\d+); coverage=100%", log, re.M)
+summary = re.search(r"^(?:Full acceptance PASS|Acceptance PASS over all tests(?: except the browser cases \(stealth-gate Q01\))?): collected=(\d+) executed=(\d+) setup_skipped=(\d+)(?: excluded=(\d+))?; coverage=100%$", log, re.M)
 if walks:
     walk = keep("test-walk", walks[-1])
     report, coverage = walk / "tests.json", walk / "coverage.xml"
@@ -704,13 +774,51 @@ if walks:
     elif summary is None:
         cell("PA9:debian", "fail", "the full acceptance walk did not report PASS", "test-walk", "console.txt")
     elif app:
-        checked = subprocess.run([sys.executable, str(Path(app) / "ci/tools_test_evidence.py"), str(report), str(coverage)],
+        # The validator decides PA9, so bind its executable bytes to the same
+        # application revision as the lock. Run the retained, verified bytes
+        # in isolated mode, not a mutable checkout or its import search path.
+        validator_path = "ci/tools_test_evidence.py"
+        if not app_revision:
+            refuse("application revision is required to pin the test evidence validator")
+        shown = subprocess.run(["git", "-C", app, "show", app_revision + ":" + validator_path],
+                               capture_output=True, check=False)
+        source = Path(app) / validator_path
+        if shown.returncode != 0 or not source.is_file() or source.read_bytes() != shown.stdout:
+            refuse("test evidence validator differs from or is unavailable at application revision " + app_revision)
+        validator = raw / "tools_test_evidence.py"
+        validator.write_bytes(shown.stdout)
+        captures[validator.name] = validator
+        binding = raw / "test-evidence-validator.json"
+        binding.write_text(json.dumps({"application_revision": app_revision, "path": validator_path,
+                                       "sha256": hashlib.sha256(shown.stdout).hexdigest()},
+                                      indent=2, sort_keys=True) + "\n")
+        captures[binding.name] = binding
+        checked = subprocess.run([sys.executable, "-I", str(validator), str(report), str(coverage)],
                                  capture_output=True, text=True, check=False)
+        record = json.loads(report.read_text())
+        excluded = record.get("excluded", [])
+        expression = record.get("markexpr", "")
+        nodeids = [item.get("nodeid", "") for item in excluded]
+        browser_scope = expression == "not browser"
+        bound = (expression in ("", "not browser")
+                 and len(nodeids) == len(set(nodeids)) and all(nodeids)
+                 and len(excluded) == record["deselected"]
+                 and all(item.get("marker") == "browser" for item in excluded)
+                 and (browser_scope or not excluded)
+                 and browser_scope == ("except the browser cases" in summary.group(0))
+                 and tuple(map(int, summary.group(1, 2, 3))) == tuple(record[k] for k in ("collected", "executed", "setup_skipped"))
+                 and int(summary.group(4) or 0) == record["deselected"])
+        passed = checked.returncode == 0 and bound
         (raw / "test-evidence-check.txt").write_text(checked.stdout + checked.stderr)
+        if not bound:
+            with (raw / "test-evidence-check.txt").open("a") as check_log:
+                check_log.write("Console scope/counts or excluded test identities do not bind to the report\n")
         captures["test-evidence-check.txt"] = raw / "test-evidence-check.txt"
-        cell("PA9:debian", "pass" if checked.returncode == 0 else "fail",
-             "full selection, SQLite-guarded suites and 100%% coverage re-validated" if checked.returncode == 0
-             else "independent test evidence check refused", "test-walk", "console.txt", "test-evidence-check.txt")
+        scope = "all tests except browser (stealth-gate Q01); not browser evidence" if browser_scope else "all tests"
+        cell("PA9:debian", "pass" if passed else "fail",
+             scope + "; SQLite-guarded suites and 100% coverage re-validated" if passed
+             else "independent test evidence check refused", "test-walk", "console.txt", "test-evidence-check.txt",
+             "tools_test_evidence.py", "test-evidence-validator.json")
     else:
         cell("PA9:debian", "inconclusive", "no application checkout to re-validate the test evidence", "test-walk", "console.txt")
 
