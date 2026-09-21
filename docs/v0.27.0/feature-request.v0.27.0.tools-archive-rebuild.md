@@ -167,6 +167,13 @@ base-prefix and base-executable identities resolved through wrappers and
 symlinks. Retained helper programs with system interpreter paths are reported
 separately, not used to claim that a loader alias is unnecessary.
 
+Deployment venvs exclude the application's `tooling` group (ruff, ty and uv).
+Deployment synchronization and RHEL PA6 use uv from the tools installation.
+RHEL qualification and D10 must use that deployment consumer scope; earlier
+captures of a venv including tooling remain historical evidence until the
+affected checks are repeated. Local development defaults do not define the
+deployment consumer set (human decision of 2026-09-19, Step 6 round 10).
+
 The final archive must pass the SQLite floor and acceptance again. Item 6
 owns removal of the SQLite waiver when a file named `libsqlite3.so.0` is
 present under `tools/python` in the resolution scope. Any active item 4
@@ -248,7 +255,7 @@ installer and wrapper, without pipeline repair shims or per-wheel patching.
 | PA6 | `uv sync`, then `import pymupdf, pikepdf`, without patching wheels; the relocation ELF pass never walks a venv tree, so wheel objects keep their `$ORIGIN` search path and resolve shipped providers through the interpreter's search path | Required | Required, over the venv the deployment provides (shipped inside the pdfs archive until item 8, created on the target from item 8 on) |
 | PA7 | Shipped loader `--list` over toolchain ELFs and venv wheels: no `not found`, missing version node or in-scope host runtime provider | Required | The downstream probe is optional; inherited item 4 closure rules still apply |
 | PA8 | `LD_DEBUG=libs,versions` on venv Python importing the heavy wheels: no in-scope runtime dependency from a host path | Required, with conclusive trace inventory | The downstream probe is optional; inherited item 4 runtime-scope rules still apply |
-| PA9 | Full application acceptance suite with the final archive's interpreter, coverage and testmon active, and the application's existing coverage threshold satisfied | Required | Optional; Windows development flow covers it |
+| PA9 | All application tests in the authorized CI scope, excluding only individually identified browser-marked cases (Q10), with the final archive's interpreter, coverage and testmon active, and the application's existing coverage threshold satisfied; no browser evidence | Required | Optional; Windows development flow covers it |
 | PA10 | `deploy_pkgs.sh` end to end, including readiness checks | Not applicable | Required |
 | PA11 | Operator `senv` and `.env` sourcing | Not applicable | Required |
 
@@ -257,6 +264,14 @@ plugin import, a no-tests-selected testmon result or SQLite-availability skips
 do not satisfy acceptance. Unrelated expected skips remain governed by the
 application's existing rules. This qualification does not impose a new cplx
 coverage threshold or prevent later incremental testmon use.
+
+The application's stealth-gate plan Q01 explicitly excludes browser-marked
+cases on the Jenkins agent while keeping them mandatory in the local full
+walk. Human decision Q10 (2026-09-20) authorizes PA9 to certify that declared
+CI scope only: retain `markexpr` and each
+excluded test's unique identity and browser marker, reconcile the counts,
+and never describe this result as browser evidence. Other narrowing remains
+refused; coverage and SQLite execution requirements remain unchanged.
 
 Read the static ABI listing and live trace together. The listing covers the
 whole runtime search path; a root-object sweep alone can overstate host
@@ -419,4 +434,90 @@ converged in round 2, accepting option A for Q01 to Q05.
 | Q03 | Bind acceptance to the archive and its consuming application, dependency and runtime identities. The release maintainer records change impact, repeats affected checks and explains retained results. | Validity of the final archive acceptance evidence; RA7 | Treating unchanged archive bytes as sufficient permits stale wheel, ABI or coverage evidence. |
 | Q04 | Require candidate qualification on the existing Jenkins agent before immutable publication, using the available validation route, and separately confirm the published release pin afterward. | Platform acceptance; release publication; RA4 and RA6 | Plain-container qualification alone can expose Jenkins-specific failures only after consuming an immutable coordinate. |
 | Q05 | Keep failed adoption incomplete and uploads off during recovery; restore and verify the known working configuration before normal uploads resume. Preserve the failure and use a new eligible coordinate for a corrected archive. | Release publication and consuming-project adoption; RA8 | Keeping the failing pin indefinitely can block otherwise working application delivery. |
-| Q06 (2026-09-18, after Step 6 found PA6 failing on RHEL) | Keep PA6 as a required cell on both platforms and settle how a deployed venv meets it: the relocation ELF pass excludes every venv tree (a directory holding `pyvenv.cfg`), so wheel objects are never rewritten, keep their `$ORIGIN` search path to bundled providers and resolve shipped providers through the interpreter's own search path, as the Debian pipeline already proves on a venv it never walks. The installer ships inside the archive, so the corrected archive is a new candidate. | Platform acceptance; PA6 and RA4; umbrella item 8 | Preserving `$ORIGIN` entries while still rewriting wheel objects adds nothing the process lacks and keeps a walk over objects that carry no builder path. Retiring PA6 on RHEL would leave the shipped interpreter unproven against the resolved wheels on the deployment target. |
+| Q06 (2026-09-18, after Step 6 found PA6 failing on RHEL) | Keep PA6 as a required cell on both platforms and settle how a deployed venv meets it: the relocation ELF pass excludes every venv tree (a directory holding `pyvenv.cfg`), so wheel objects are never rewritten, keep their `$ORIGIN` search path to bundled providers. Correction from build 180: a wheel with its own `DT_RUNPATH` does not inherit the executable's `DT_RPATH` for its dependencies; the previously asserted shipped-provider mechanism was not proven. Q09 records the replacement mechanism question. The installer ships inside the archive, so the corrected archive is a new candidate. | Platform acceptance; PA6 and RA4; umbrella item 8 | Preserving `$ORIGIN` entries while still rewriting wheel objects adds nothing the process lacks and keeps a walk over objects that carry no builder path. Retiring PA6 on RHEL would leave the shipped interpreter unproven against the resolved wheels on the deployment target. |
+| Q07 (2026-09-19, Step 6 round 10) | Exclude the tooling group from deployment venvs; use uv from the tools installation. Repeat affected RHEL qualification and use that consumer scope for D10. | Confirmed runtime scope; PA6; Step 6 validation and umbrella item 8 | Keeping ruff, ty and uv in deployment venvs would require qualifying their native binaries as additional consumers. |
+| Q08 (2026-09-20, Step 6 round 11) | Keep the existing retained-helper exception; other system-loader executables must be qualified. | ABI scanner; PA5 and PA7 | A blanket exception would leave wheel executables outside provider qualification. |
+| Q09 (2026-09-20, Step 6 round 11) | Adopt shared `tools/runtime_env.sh`, with shipped library directories first and unchanged wheel ELFs, subject to actual provider traces on Debian and RHEL. | Q06 correction; PA5-PA8; D10; umbrella item 8 | A wheel's own RUNPATH prevents relying on interpreter RPATH alone; the runtime setup must be shared by CI and deployment. |
+| Q10 (2026-09-20, Step 6 round 14) | PA9 certifies all tests in the authorized CI scope excluding only individually identified browser-marked tests. Keep 100% coverage, active nonselecting testmon and guarded SQLite suites unchanged; provide no browser evidence. | PA9 scope clarification; Q02 and RA4 | The existing CI agent does not provision Chromium and its system libraries. Browser workflows remain separate application qualification; executable provider qualification, including wheel Node, is unchanged. |
+
+## Decisions from Step 6 round 10
+
+### Q08: Scope of system-loader exceptions
+
+The application scanner now records any system-loader executable as excluded,
+including the wheel's Node executable. The settled exception covers retained
+helper programs; it does not establish a blanket executable exception.
+
+- Option A (recommended): retain the existing helper exception and qualify
+  other executable consumers. This preserves provider coverage but requires
+  the application scanner to refuse or measure the additional subjects.
+- Option B: explicitly permit all system-loader executable consumers to use
+  host runtime providers. This matches the current scanner, but expands the
+  host contract and makes their portability depend on the target host.
+
+Answer (2026-09-20): the human selected option A. Keep the existing retained
+helper exception; other executables must be qualified. The fixture requires
+a provider map outside that exception and refusal of a host provider. The
+application's former broader exclusion is repaired in `30ef4422`; forced
+maps remain availability evidence, separate from actual runtime traces.
+
+### Q09: Shared runtime environment for wheel dependencies
+
+Build 180's direct import selected host libpthread beside shipped libc and
+failed on GLIBC_ABI_DT_RELR. The wheel's own RUNPATH explains why the
+executable's RPATH alone did not protect that dependency. Historical RHEL
+success on a compatible host does not establish shipped-provider selection.
+
+- Option A (recommended): adopt the application-owned `tools/runtime_env.sh`
+  as the supported shared setup for CI and deployment. It derives the shipped
+  directory order from the archive layout, matching `build_elf_rpath`, and
+  places those directories before inherited paths in `LD_LIBRARY_PATH`.
+  Wheel ELFs remain unchanged. This makes the setup versioned and reproducible,
+  but every entry point must source it and both platforms need real traces.
+- Option B: leave the mechanism undecided and collect the new Jenkins run as
+  diagnostic evidence only. This avoids settling the contract prematurely,
+  but leaves PA5-PA8, D10 and item 8 runtime qualification unresolved.
+
+Answer (2026-09-20): the human selected option A, adopting the shared setup
+subject to runtime qualification. Build 181 rejected the ambient export in
+`ad6d7ed8`. Application `30ef4422` instead applies the shipped environment per
+command; sourcing the helper leaves the caller's library environment intact.
+Host children of a shipped process remain an explicit qualification risk.
+Re-derivation avoids the unrelated PATH, aliases and compiler settings in
+`setenv`; it must remain equivalent to the installer directory order.
+An account-private `~/.env_` is not a reproducible archive prerequisite.
+Fresh RHEL qualification must use Q07's venv without tooling and the same
+runtime setup before D10. Item 8 must carry that setup to target-created venvs.
+
+### Q10: PA9 CI test scope
+
+Round 13 found that PA9 still says full application acceptance while the
+reader permits the application's Q01 CI scope, excluding only browser-marked
+tests. This changes what the required cell certifies and needs an explicit
+human decision.
+
+- Option A (recommended): certify all tests in the declared CI scope except
+  the individually identified browser-marked cases. Keep 100% coverage,
+  active nonselecting testmon and guarded SQLite suites unchanged. This fits
+  the existing agent and the application's Q01 decision, but does not qualify
+  Chromium or browser workflows on Linux; those need separate qualification.
+- Option B: require browser cases within PA9. This gives one acceptance result
+  that also exercises browser execution on the platform, but requires
+  provisioning Chromium and its system libraries on an appropriate Linux
+  agent, expands the existing CI setup and leaves PA9 blocked until ready.
+
+Answer (2026-09-20): after discussing both choices, the human selected
+"PA9 excludes only browser-marked tests". PA9 certifies option A and does not
+claim browser evidence. Chromium launches are not a cplx build or relocation
+requirement; browser workflows remain separate application qualification.
+Q08's provider qualification of wheel executables, including Node, is unchanged.
+
+### Shipped Python and uv bootstrap
+
+Human instruction (2026-09-20): use the relocated Python 3.13.15 to install
+its pip and uv, relocate uv itself, then use it for locked dependency sync.
+The deployed dependency bootstrap must not depend on the agent's Python 3.9
+or pip. Keep the application venv's tooling exclusion and unchanged wheel
+ELFs. Qualify uv separately as a tooling executable, with its relocated
+loader, library map and actual execution retained. Disable automatic Python
+downloads so uv cannot substitute another interpreter.

@@ -1216,6 +1216,38 @@ including uv; repeated native deployment and PA6 pass. This is item 7's
 shipped-venv acceptance repair; item 8 still owns the later switch to
 creating and synchronising the environment on the target.
 
+Point 4 retains build 188 (SUCCESS) on application `ec2e72bc`. All nine
+independent Debian cells PA1 to PA9 pass. Earlier builds and their original
+reader outcomes remain unchanged. Candidate archive and bundle pins remain
+unchanged, with publication off.
+
+The [reading](evidence.tools-archive-rebuild.step6-debian-build188.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build188-retention.json)
+bind the exact application revision, raw artifacts and both reader outcomes.
+Build 188 finishes SUCCESS on application ec2e72bc. The real relocated uv sync emits the stable success marker. Provider-map aliases retain their qualified physical targets. Shipped Python 3.13.15, its own pip, relocated uv 0.12.17, canonical lock, wheel bytes and blocking heavy-wheel traces remain intact. Native acceptance passes with 6501 collected, 6500 executed and 31 individually identified browser exclusions. Coverage is 100%, 27256 of 27256 lines. Guarded SQLite suites pass and testmon collects without selecting. No browser evidence is claimed.
+
+Round 14's validator finding is fixed: the reader compares the validator to
+the committed blob before execution, retains its bytes and SHA-256, and runs
+the retained copy in isolated mode. The transport includes the ci tree and
+validator blob. Missing or modified validators are refused. Provider-map
+aliases require an explicitly qualified physical target; the locked-sync
+success marker follows the real relocated uv command's successful exit.
+These repairs close PA5, PA6 and PA7 without broadening provider policy.
+
+The publication checker now uses the publisher's own complete entry renderer,
+including metadata and footer. The staged index remains unchanged after the
+request is rendered. Q10 excludes only individually identified browser-marked
+tests; 100% coverage, nonselecting testmon and guarded suites remain mandatory.
+This CI qualification supplies no browser evidence.
+
+On 2026-09-21 the human selected: "OK go for checkpoint, then work on completing
+step 6". Round 15 therefore assesses readiness to commit this repaired Debian
+checkpoint. Immediately after that commit, continue with fresh RHEL acceptance
+at Q07 scope, D10 and the remaining pre-publication checks, then review the
+completed Step 6. These obligations are not waived. Step 6 remains No until
+their evidence is conclusive. Shipped Python 3.13.15, its own pip and relocated
+uv remain required. The proposed DT_NEEDED additions remain unadopted.
+
 Depends on: items 1 to 6.
 
 #### 8. Create the venv at deployment instead of shipping it
@@ -1242,6 +1274,12 @@ invention. The pipeline already does exactly this before it packages, in
 `ci/provision_toolchain.sh`, which is why the collection's acceptance
 matrix already carries the `uv sync` then import row as required on both
 distributions. What changes is WHERE the venv is materialised, not how.
+
+The human-selected deployment scope excludes the application's `tooling`
+group (ruff, ty and uv). Use uv from the tools installation. Item 7 must
+requalify that shipped venv on RHEL before D10; item 8 keeps the same scope
+when synchronization moves to the deployment target. Historical captures
+of a tooling-inclusive venv do not qualify this deployment scope.
 
 D11 SETTLES WHAT THAT COSTS, and the cost is one sentence: the deployed
 venv is lock-identical rather than byte-identical. The pipeline tests one
@@ -1279,8 +1317,13 @@ Debian pipeline never sees the problem because its venv is created after
 relocation and never walked. The decision, recorded as Q06 of item 7's
 requirement: the ELF pass excludes every venv tree (a directory holding
 `pyvenv.cfg`). Wheel objects carry no builder path, their `$ORIGIN` entry
-is valid at any prefix, and their shipped needs resolve through the
-interpreter's forced `DT_RPATH`, so rewriting them only subtracts. For
+is valid at any prefix. Build 180 corrected the earlier assumption about
+shipped needs: a wheel's own `DT_RUNPATH` bypasses the interpreter's
+`DT_RPATH` for those dependencies. Item 7 Q09 adopts the shared,
+versioned application runtime setup with shipped directories first in
+`LD_LIBRARY_PATH`, subject to runtime qualification. Item 8 must carry this
+setup into target-created venvs and qualify actual providers, without
+rewriting wheel ELFs or relying on an account-private `~/.env_`. For
 this item that settles two things. A venv created on the target was
 never going to be walked, so nothing here waits on the fix. And the
 shipped-venv arrangement item 7 releases on is no longer broken by a
