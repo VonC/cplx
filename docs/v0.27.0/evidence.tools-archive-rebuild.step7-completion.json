@@ -1,0 +1,25 @@
+{
+  "schema": "tools-step7-completion/1",
+  "state": "pass",
+  "exit": 0,
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "public_record_sha256": "7e9be760e8d018414401faeb79e5363bc82607388a944602e67c31b6c7035b1a",
+  "private_record_sha256": "feaff0fb4ff69896e55259e7a67165d599cdd6d7e2dadd132392b2debddf3891",
+  "coordinate_reference": "private-coordinate-sha256:22bbe9f29a27a49f132b8b408ae2b572d61bf8e2d20d6d620b05077337d3fc79",
+  "private_preflight_sha256": "4a25af9c6582f7131aabb30690cf8a4d23423a1310c9c4d9a2a9b0a0ef15b2ad",
+  "validator_sha256": "9467be06c5a26cf2e8a67201b27ac2aff98a0e4b35826d756594de8662a315a2",
+  "only_changed_field": "candidates.df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87.publication.coordinate",
+  "all_other_values_equal": true,
+  "metrics": {
+    "interpreter": "independent system Python",
+    "version": "3.9.25",
+    "record_reads": 1,
+    "capture_reads": 47,
+    "phase": "completion",
+    "bytes_read": 550396181,
+    "sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+    "sha1": "5a0c68abac266a68ff5373376f6d55860781ede8",
+    "elapsed_seconds": 2.6570730039384216
+  },
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-step7-completion/"
+}
