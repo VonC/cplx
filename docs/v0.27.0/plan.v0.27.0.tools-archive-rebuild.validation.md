@@ -1,13 +1,13 @@
 # Implementation validation v0.27.0: tools archive release
 
-No, it is not implemented.
+Yes, it is implemented.
 
 Track the seven steps in [the implementation plan](plan.v0.27.0.tools-archive-rebuild.md).
-Steps 1-5 are checked below, including the installer-only Step 5 repackage.
-Step 6 is checked and not complete: both earlier RHEL failures are retained,
-and replacement RHEL acceptance now passes with the matching 3.13.15 venv.
-Debian agent cells, consumer identities and D10 require a pushed candidate
-build. Step 7 and final publication remain pending.
+All seven steps are checked below. The accepted archive was published as
+tools release 10.0.0 and adopted through the normal release pin in Jenkins
+build 189. Required Debian, RHEL, D10 and publication obligations are complete;
+snapshot uploads resumed only after actual adoption passed. Earlier failed
+observations remain retained with their original scope and identities.
 
 ## File-based IO cost clarification
 
@@ -1118,7 +1118,14 @@ publication and adoption remain pending under Step 7.
 
 ### Analysis of Step 7 implementation state
 
-Not started. Step 7 is not implemented because the eligible archive has not been published and accepted through the normal release pin.
+Yes. Step 7 has been fully implemented.
+
+The exact accepted archive was published through the real transactional
+tools-only entry, retrieved independently, and accepted through the normal
+10.0.0 release pin on the actual Debian Jenkins agent. Build 189 succeeded
+with uploads off. All nine Debian acceptance cells and the independent
+completion validator passed. Only afterward did the application restore
+snapshot uploads. No actual adoption failure required production recovery.
 
 ### Goal for Step 7
 
@@ -1130,24 +1137,123 @@ Real integration evidence completes the record; verified recovery preserves serv
 
 ### What was implemented for Step 7
 
-_(empty — no check has taken place yet.)_.
+- **Publication**: the existing manual tools-only entry used the explicit
+  timestamped archive and authoritative eligible record. The COMMITTED
+  receipt binds SHA-256
+  `df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87`
+  to SHA-1 `5a0c68abac266a68ff5373376f6d55860781ede8`. Independent HEAD
+  and full GET returned HTTP 200 and the same 545,293,468 bytes. No intermediate
+  Maven artifact, POM preflight, latest-file reselection or overwrite was used.
+- **Adoption**: application revision
+  `47418c764a5b7be5230896a6ebf31cf55c7f1728` selects 10.0.0, removes
+  `tools/tools.candidate`, retains the accepted independent verification
+  bundle in `tools/tools.verification`, and keeps uploads off. Build 189
+  passed relocation, wrapper and SQLite acceptance, provisioning, package,
+  complete ABI and required application tests. ABI counted 686 subjects,
+  603 dynamic subjects, and zero flags. PA9 retains the authorized browser
+  exclusion and does not claim browser evidence.
+- **Evidence reader**: `acceptance.tools-archive-rebuild.sh` accepts an explicit
+  immutable release version. It binds the release download digest and bundle
+  identity, requires one matching startup pin, release selection, uploads off
+  and Jenkins SUCCESS, and retains digest/version evidence in its summary.
+  Candidate-mode acceptance remains available.
+- **Fixtures**: `verify.tools-release-acceptance.sh` covers complete release
+  adoption and wrong digest, pin, candidate override, premature uploads and
+  failed main-chain refusals. The publication integration composes the real
+  local TLS adapter, transaction, normal-pin retrieval and completion gate;
+  a different immutable asset receives no PUT. The owned Git recovery test
+  rejects pin-only restoration, accepts the whole compatible configuration,
+  and proves recovered failed adoption still cannot complete the release.
+- **Input assessment**: the archive, application code, lock, wheels and
+  executable pipeline are unchanged from the accepted candidate. Exact
+  revision comparison permits only the pin and verification-selector changes.
+  Fresh Debian results replace the old run; explicit unaffected assessments
+  preserve archive, RHEL and D10 results and their original identities.
+  RA5:adoption, RA6 and RA8:adoption now pass in the archive-indexed record.
+- **Recovery and uploads**: the acceptance document retains both whole prior
+  configurations, their evidence and a reviewable restore-and-verify procedure.
+  Actual adoption succeeded, so production recovery is not applicable. The
+  mode-only follow-up `1a5101e8` restores snapshot uploads after acceptance;
+  the qualifying run remains bound to the uploads-off revision.
+- **Completion**: independent system Python 3.9.25 validated the real archive
+  and final record. The retained proof binds public and private record hashes,
+  the prior coordinate preflight and the sole coordinate-field materialization;
+  all other values remain equal. The public summary explicitly records its
+  single private workspace-prefix substitution while retaining the original
+  summary and every raw capture identity.
+
+Evidence:
+
+- [Execution and timings](evidence.tools-archive-rebuild.step7-execution.json).
+- [Actual Debian acceptance](evidence.tools-archive-rebuild.step7-debian.json).
+- [Original artifact retention](evidence.tools-archive-rebuild.step7-debian-retention.json).
+- [Completion proof](evidence.tools-archive-rebuild.step7-completion.json).
+- [Acceptance record and recovery procedure](acceptance.tools-archive-rebuild.md).
 
 ### New types/classes introduced for Step 7
 
-_(empty — no check has taken place yet.)_.
+None. This step extends existing acceptance functions and process-integration
+tests; it introduces no production class or type.
 
 ### Architecture check for Step 7
 
-_(empty — no check has taken place yet.)_.
+Publication, platform acceptance and record validation remain separate
+responsibilities. The acceptance reader consumes retained actual evidence;
+the record validator does not publish or run tests. Release selection extends
+the existing reader without moving platform behavior into application domain
+code. Fixture-only Docker identity and bundle-fetch replacements are explicit
+and are not used as actual Jenkins evidence. No DDD or layer violation was
+introduced. The changed Python integration file remains below 650 lines.
+
+No, there is nothing that needs to be addressed.
 
 ### Performance check for Step 7
 
-_(empty — no check has taken place yet.)_.
+Native cumulative Step 7 validation took 92 seconds. The later digest-capture
+refinement passed ShellCheck and all 104 acceptance cases in 20 seconds.
+The successful real publication took 61 seconds; independent full retrieval
+took 11.621 seconds. Jenkins adoption took 2,854.823 seconds, within its
+existing 60-minute timeout. Controlled recovery took 0.351 seconds.
+Completion read the record once, resolved 47 captures and processed
+550,396,181 bytes in 2.657 seconds. Earlier setup failures and historical
+non-gating diagnostics remain retained, not silently counted as successes.
+
+New digest work is linear in bytes; release-log parsing is linear in console
+length. Existing deterministic capture sorting remains unchanged. No repeated
+all-pairs scan, new latency target or additional full build was introduced.
+
+No, there is no performance issue that needs to be addressed.
 
 ### Unit test coverage check for Step 7
 
-_(empty — no check has taken place yet.)_.
+No production class is introduced or changed. Although located under the
+existing unit-test directory, the new publication and recovery cases exercise
+multiple real processes and are integration tests, without a per-class
+coverage claim. Both new test methods are discovered by unittest; the shell
+fixture helper is invoked by the release cases, and every changed acceptance
+entry remains reachable from its dispatcher.
+
+The application's coverage scope is `src/pdfss`; actual build 189 revalidated
+100% coverage, active nonselecting testmon and the guarded SQLite suites in
+the authorized non-browser scope. This does not measure the cplx acceptance
+scripts or external release helpers. Their evidence is the native cumulative
+and focused process/acceptance runs. The local application ghog walk exited 0
+with no changed Python files, and is not claimed as a fresh full suite.
+Implementation-check reasoned from these retained results and code without
+rerunning tests.
+
+No, there is no unit-tested class below 100% that needs completing.
+No, none of the changed top-level symbols outside the coverage gate is
+unreferenced.
 
 ### Feature integrity for Step 7
 
-_(empty — no check has taken place yet.)_.
+Normal release-pin operation now uses the accepted archive with the independent
+verification bundle. Existing candidate qualification, immutable collision
+refusal and recovery protections remain exercised. Snapshot restoration changes
+only its mode file and follows actual acceptance. Historical diagnostic failures
+are explicitly non-gating and remain visible; required acceptance failures
+still refuse completion. The final archive and all current required obligations
+pass the completion gate. No existing feature or reporting capability is
+impaired. This final check completes umbrella item 7 with the requirement and
+validation-plan paths.
