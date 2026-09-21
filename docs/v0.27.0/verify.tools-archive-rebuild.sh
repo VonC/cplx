@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cumulative native Linux checks through platform acceptance fixtures in Step 6.
+# Cumulative native Linux checks through release publication and adoption in Step 7.
 # Explicit app checkout and independent Python 3.9+ are required.
 set -euo pipefail
 step="" python="" app="" capture_python=""
@@ -12,8 +12,8 @@ while [ "$#" -gt 0 ]; do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ "$step" =~ ^[123456]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
-    printf 'Required: --step 1|2|3|4|5|6 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
+[[ "$step" =~ ^[1234567]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
+    printf 'Required: --step 1|2|3|4|5|6|7 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
 }
 if [ "$step" -ge 4 ]; then
     [[ "$capture_python" = /* && -x "$capture_python" ]] || {

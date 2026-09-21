@@ -1,5 +1,5 @@
 #!/bin/bash
-# Platform acceptance driver for the identified final tools archive (Step 6 of
+# Platform acceptance driver for the identified final tools archive (Steps 6-7 of
 # plan.v0.27.0.tools-archive-rebuild.md).
 #
 # Every subcommand takes EXPLICIT PINS: the archive digest, the independently
@@ -13,7 +13,7 @@
 #             PA6, PA10, PA11 and the AR3 archive-content assertions) into a new
 #             run home under /home, with the installer, closure checker and
 #             SQLite acceptance driver taken from the verified bundle.
-#   debian    read one retained candidate build of the actual Jenkins agent (its
+#   debian    read one retained candidate or release-pin build of the actual Jenkins agent (its
 #             archived evidence tree and console) into the same cell grammar.
 #   d10       take one D10 reading with the bounded rebuild policy: a first
 #             reading may demand one rebuild, the second must settle, and a
@@ -549,22 +549,24 @@ PY
 # is never re-run here: a missing capture leaves its cell pending, a refused
 # capture fails it, and an identity that differs from the pins refuses.
 debian_main() {
-    local evidence="" run="" archive_sha="" bundle_sha="" revision="" python="" out="" app="" app_revision=""
+    local evidence="" run="" archive_sha="" bundle_sha="" revision="" python="" out="" app="" app_revision="" release_version=""
     while (($#)); do
         (($# >= 2)) || refuse "debian options come in pairs"
         case $1 in
             --evidence) evidence=$2 ;; --run) run=$2 ;; --archive-sha256) archive_sha=$2 ;;
             --bundle-sha256) bundle_sha=$2 ;; --revision) revision=$2 ;; --python) python=$2 ;;
             --out) out=$2 ;; --app-repo) app=$2 ;; --application-revision) app_revision=$2 ;;
+            --release-version) release_version=$2 ;;
             *) refuse "unknown debian option: $1" ;;
         esac
         shift 2
     done
-    [[ -d $evidence && -n $run && -n $out ]] || refuse "usage: debian --evidence DIR --run ID --archive-sha256 HEX --bundle-sha256 HEX --revision HEX --python /abs/python --out DIR [--app-repo DIR --application-revision HEX]"
+    [[ -d $evidence && -n $run && -n $out ]] || refuse "usage: debian --evidence DIR --run ID --archive-sha256 HEX --bundle-sha256 HEX --revision HEX --python /abs/python --out DIR [--app-repo DIR --application-revision HEX] [--release-version X.Y.Z]"
     if ! hex64 "$archive_sha" || ! hex64 "$bundle_sha" || ! hex40 "$revision"; then
         refuse "archive, bundle and revision pins must be hex"
     fi
     [[ -z $app_revision ]] || hex40 "$app_revision" || refuse "application revision must be 40 hex characters"
+    [[ -z $release_version || $release_version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || refuse "release version must be immutable X.Y.Z"
     [[ -z $app || -d $app/ci ]] || refuse "application checkout must hold ci/: $app"
     independent_python "$python"
     [[ ! -e $out ]] || refuse "output directory already exists: $out"
@@ -573,7 +575,8 @@ debian_main() {
     mkdir -p -- "$out/cells" "$out/raw" "$out/inputs"
     printf 'run=%s\nrole=debian\nschema=%s\narchive_sha256=%s\nbundle_sha256=%s\nrevision=%s\nstarted_utc=%s\n' \
         "$run" "$ACCEPT_SCHEMA" "$archive_sha" "$bundle_sha" "$revision" "$(date -u +%FT%TZ)" > "$out/inputs/pins"
-    "$python" - "$evidence" "$out" "$archive_sha" "$bundle_sha" "$revision" "$run" "$app" "$app_revision" <<'PY'
+    if [[ -n $release_version ]]; then printf 'release_version=%s\n' "$release_version" >> "$out/inputs/pins"; fi
+    "$python" - "$evidence" "$out" "$archive_sha" "$bundle_sha" "$revision" "$run" "$app" "$app_revision" "$release_version" <<'PY'
 import hashlib
 import json
 import re
@@ -585,6 +588,8 @@ from pathlib import Path
 
 evidence, out = Path(sys.argv[1]), Path(sys.argv[2])
 archive_sha, bundle_sha, revision, run, app, app_revision = sys.argv[3:9]
+release_version = sys.argv[9]
+source = "release" if release_version else "candidate"
 raw = out / "raw"
 captures = {}
 
@@ -624,7 +629,8 @@ identity = keep("identity", tree / "identity")
 if identity is None or console is None:
     refuse("the evidence set needs console.txt and a.evidence/identity")
 pins = dict(line.split("=", 1) for line in text_of(identity).splitlines() if "=" in line)
-if (pins.get("revision"), pins.get("archive_sha256"), pins.get("bundle_sha256")) != (revision, archive_sha, bundle_sha):
+identity_archive = "release-pin" if release_version else archive_sha
+if (pins.get("revision"), pins.get("archive_sha256"), pins.get("bundle_sha256")) != (revision, identity_archive, bundle_sha):
     refuse("the build's identity differs from the pinned archive, bundle or revision")
 runtime = keep("runtime.txt", tree / "runtime.txt")
 fields = dict(line.split("=", 1) for line in text_of(runtime).splitlines() if "=" in line)
@@ -634,17 +640,32 @@ keep("verification.sha256", tree / "verification.sha256")
 # Jenkins consoleText carries timestamp prefixes. Keep the original capture
 # byte-for-byte and remove only this known transport prefix for parsing.
 log = re.sub(r"^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] ", "", text_of(console), flags=re.M)
+if release_version:
+    download = keep("release-archive.sha256", tree / "release-archive.sha256")
+    match = re.fullmatch(r"([0-9a-f]{64}) [ *](?:[^\n]*/)?tools\." + re.escape(release_version)
+                         + r"\.tar\.gz\n?", text_of(download))
+    if match is None or match.group(1) != archive_sha:
+        refuse("published-pin download differs from the accepted archive")
+    if re.findall(r"^toolchain pin from tools/tools.version: (.+)$", log, re.M) != [release_version]:
+        refuse("startup release pin differs or is ambiguous")
+    if re.findall(r"^toolchain source: (.+)$", log, re.M) != ["release"] or "closure validation candidate:" in log:
+        refuse("candidate override survived release adoption")
+    if re.findall(r"^publish mode from tools/publish.mode: (.+)$", log, re.M) != ["off"]:
+        refuse("adoption requires uploads off")
+    if re.findall(r"^Finished: (.+)$", log, re.M) != ["SUCCESS"]:
+        refuse("release adoption requires the successful main integration chain")
 
 trailer = re.search(r"^CPLX-ELF/1 end state=(\S+) reason=(\S+)", log, re.M)
 if trailer is None:
-    if "toolchain source: candidate" in log:
+    if "toolchain source: " + source in log:
         cell("PA1:debian", "inconclusive", "no relocation trailer in the console", "console.txt")
 elif trailer.group(1) != "completed" or "RSYNC_SHIM" in log or "rsync shim" in log:
     cell("PA1:debian", "fail", "relocation trailer %s/%s or a shim marker" % trailer.groups(), "console.txt")
-elif "toolchain source: candidate" not in log:
-    cell("PA1:debian", "fail", "the build did not select the candidate source", "console.txt")
+elif "toolchain source: " + source not in log:
+    cell("PA1:debian", "fail", "the build did not select the expected source", "console.txt")
 else:
-    cell("PA1:debian", "pass", "candidate relocated without a shim, trailer completed", "console.txt")
+    cell("PA1:debian", "pass", source + " relocated without a shim, trailer completed",
+         "console.txt", "identity", "release-archive.sha256")
 
 accept = keep("verify-wrapper-accept.debian.txt", tree / "verify-wrapper-accept.debian.txt")
 verdict = text_of(accept)
@@ -1052,7 +1073,7 @@ record = {"schema": schema, "role": role, "run": pins["run"], "verdict": verdict
           "recorded_utc": datetime.now(timezone.utc).isoformat(),
           "pins": {key: pins[key] for key in ("archive", "archive_sha256", "bundle_sha256", "revision", "pdfs", "pdfs_sha256",
                                               "deploy_script_sha256", "previous_installer_sha256",
-                                              "runtime_inputs_sha256", "runtime_reader_sha256") if key in pins},
+                                              "runtime_inputs_sha256", "runtime_reader_sha256", "release_version") if key in pins},
           "transfer_sha256": transfer.read_text().strip() if transfer.is_file() else "",
           "environment": environment, "runtime": runtime, "consumers": consumers,
           "elapsed_seconds": int(pins.get("elapsed_seconds", "0") or 0),

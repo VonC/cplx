@@ -1,5 +1,5 @@
 #!/bin/bash
-# Step 6 fixtures for the platform acceptance driver and the bundle composition.
+# Platform acceptance fixtures, including Step 7 release-pin adoption refusals.
 # Every input lives in an owned scratch tree; no archive is relocated, no host
 # environment is read and no result here is candidate acceptance evidence.
 #
@@ -394,6 +394,39 @@ assert binding == {"application_revision": sys.argv[3], "path": "ci/tools_test_e
 assert "raw/tools_test_evidence.py" in record["captures"]
 assert "raw/test-evidence-validator.json" in record["captures"]
 PY
+# The same platform obligations apply after publication. Release identity comes
+# from the downloaded bytes, while the independent bundle names release-pin.
+release_evidence() {
+    local dir
+    dir=$(evidence "$1")
+    sed -i 's/toolchain source: candidate/toolchain source: release/' "$dir/console.txt"
+    printf 'toolchain pin from tools/tools.version: 1.2.3\nFinished: SUCCESS\n' >> "$dir/console.txt"
+    sed -i "s/archive_sha256=$archive_sha/archive_sha256=release-pin/" "$dir/a.evidence/identity"
+    printf '%s  tools.1.2.3.tar.gz\n' "$archive_sha" > "$dir/a.evidence/release-archive.sha256"
+    printf '%s' "$dir"
+}
+dir=$(release_evidence release-complete)
+expect 0 debian-release-complete debian release-complete "$dir" --release-version 1.2.3
+said debian-release-complete '^SUMMARY|debian|build-207|pass|9 cells|0 missing'
+"$python" - "$scratch/debian-release-complete/results.json" <<'PY'
+import json
+import sys
+record = json.load(open(sys.argv[1]))
+assert record["pins"]["release_version"] == "1.2.3"
+assert "raw/release-archive.sha256" in record["cells"]["PA1:debian"]["captures"]
+PY
+for mutation in digest pin candidate uploads failed; do
+    dir=$(release_evidence "release-$mutation")
+    case $mutation in
+        digest) printf '%s  tools.1.2.3.tar.gz\n' "$hexes" > "$dir/a.evidence/release-archive.sha256" ;;
+        pin) sed -i 's/version: 1.2.3/version: 1.2.4/' "$dir/console.txt" ;;
+        candidate) printf 'toolchain source: candidate\n' >> "$dir/console.txt" ;;
+        uploads) sed -i 's/publish.mode: off/publish.mode: snapshot/' "$dir/console.txt" ;;
+        failed) sed -i 's/Finished: SUCCESS/Finished: FAILURE/' "$dir/console.txt" ;;
+    esac
+    expect 2 "debian-release-$mutation" debian "release-$mutation" "$dir" --release-version 1.2.3
+done
+
 dir=$(evidence validator-identity)
 expect 2 debian-validator-no-revision debian validator-no-revision "$dir" --application-revision ""
 said debian-validator-no-revision 'application revision is required'
