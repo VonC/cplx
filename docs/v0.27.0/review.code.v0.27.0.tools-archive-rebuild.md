@@ -7766,7 +7766,7 @@ resolved_validation_set:
 - bash src/utils/lint_shell.sh (sources: project)
 - bash .reviews/a.step6.transport.sh cumulative (sources: plan)
 - ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-verify-record.py (sources: request)
-- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/markdown-check.bat --root . > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
 - ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
 - git diff --cached --check (sources: request)
 - bash .git/hooks/pre-commit (sources: request)
@@ -8705,3 +8705,6859 @@ than relying on that lint alone.
 Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
 
 <!-- review-entry-id: answer-step-6-round-3 -->
+
+## Round 4 by requestor - Step 6
+
+- Recorded: 2026-09-19T17:00:47+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 4)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 4
+
+### Code review evidence for step 6 tools-archive-rebuild (round 4)
+
+request_index_tree: 20e98f6708897030a14926bda7f52c38409a8717
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: docs(tools): bind Debian candidate evidence
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 3: docs(tools): record point 4 checkpoint
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 4)
+
+No. Step 6 has NOT been fully implemented.
+
+The handoff point 4 attempt is retained: committed candidate pins were pushed with
+publication off; build 176 finished FAILURE; its full console
+and archived evidence were retained and independently read on native Linux.
+Every Debian cell and available application/runtime identity is bound to that
+retained run. Provisioning failed because uv 0.12.17 refused uv.lock under
+`uv sync --locked` with CPython 3.13.15. PA1 to PA4 pass; PA5 to PA9 are pending.
+No agent wheel inventory or successful venv base capture exists. Their fields
+remain pending; the committed lock digest is retained only as input provenance.
+Resolve the lock refusal and repeat the candidate build before point 5 D10.
+The agent also reports failures in historical diagnostic harnesses, including
+the older Python 3.13.9 relocation inventory. Those raw findings are retained
+and are not represented as passes by this checkpoint.
+
+Native cumulative step 6 validation passed in 77 seconds, including 61
+acceptance fixtures, the inherited suites and 16 release-record tests. The
+project shell lint gate passes for 58 tracked scripts. The repaired Git Bash
+bundle passes the application's unchanged strict adapter. Record/provenance
+checks verify the exact pins, capture hashes, generated view, historical
+snapshots and unchanged publication/adoption gates. Full Markdown lint has
+existing repository debt; the added-line check records whether new findings
+were introduced. No Python coverage percentage is claimed.
+
+The code changes are a linear manifest normalization and one anchored console
+prefix normalization. They preserve raw captures and keep production controls
+and post-build reader provenance distinct. No new architectural layer or
+unbounded processing is introduced. Historical failing evidence remains
+retained. Fresh RHEL acceptance for the newly bound consumers, D10 with the
+agent wheels, any unresolved Debian cells and the remaining publication
+obligations are still required before Step 6 can complete.
+
+### Implementation report for step 6 tools-archive-rebuild (round 4)
+
+The composer now explicitly hashes binary bytes and normalizes the binary
+marker to the two-space manifest format required by the application adapter.
+Build 175 exposed the Git Bash incompatibility and is retained as a failure.
+Build 176 used a native bundle from committed cplx source. The shipped archive
+identity is unchanged.
+
+The Debian evidence reader removes Jenkins timestamp prefixes for anchored
+probe parsing while retaining the raw console byte-for-byte. Regressions cover
+binary marker generation, timestamped passing evidence, and timestamped ABI
+failure. Both original and repaired readers were run on the real evidence;
+their results and exact reader digest are retained separately.
+
+The application reader repairs were committed as 784f33ed. Candidate pins in
+application commit 7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e select archive
+df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87, verification bundle
+dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51 and cplx source
+72f6cb290700faf328b73d946e78e8fedab8c2cd. Publication remains off.
+
+Recorded Debian cells:
+
+- PA1:debian: pass. candidate relocated without a shim, trailer completed
+- PA2:debian: pass. wrapper first-call acceptance met
+- PA3:debian: pass. SQLite acceptance role over the pinned archive
+- PA4:debian: pass. toolchain git answered --version after relocation
+- PA5:debian: pending. not executed in this run
+- PA6:debian: pending. not executed in this run
+- PA7:debian: pending. not executed in this run
+- PA8:debian: pending. not executed in this run
+- PA9:debian: pending. not executed in this run
+
+The sidecar, generated acceptance view, validation plan and umbrella record
+this checkpoint. Earlier RHEL captures and input snapshots are unchanged.
+The earlier RHEL PA5/PA6 passes cannot stand for this application or an
+uncaptured agent wheel set, so their current release obligations remain pending.
+
+### Change summary for step 6 tools-archive-rebuild (round 4)
+
+The root a.commit orders the staged work as follows:
+
+1. fix(tools): normalize candidate verification evidence
+   - ci/deliver-closure-tools.sh
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+   - docs/v0.27.0/verify.tools-release-acceptance.sh
+2. docs(tools): bind Debian candidate evidence
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+3. docs(tools): record point 4 checkpoint
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+
+The request publication appends its protocol-owned transcript after index
+capture. No cplx point 4 changes are committed by this request.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 4)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop".
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4, after the reviewed point 3 checkpoint was committed.
+Point 5 (D10 with the agent wheels) and point 6 (publication closure) are
+deliberately outside this checkpoint. Step 6 remains checked No. Assess any
+defects in the staged work separately from the unfinished later obligations;
+do not weaken the completion or publication gates to obtain commit-ready.
+
+The requestor stops after publication, as explicitly instructed by the human.
+
+Writer response:
+
+Step 6 round 3 (exchange 2) reported no findings. Its changes-requested verdict
+reflected the deliberately incomplete step. The human authorized the sequence:
+the point 3 checkpoint was committed, then the application reader repairs and
+candidate pins were committed and pushed before the candidate run.
+
+No reviewer repair was reversed and there is no disagreement. This replacement
+round adds point 4 evidence and two integration corrections found during that
+work: portable manifest formatting and timestamp-aware console parsing. The
+acceptance expectations, evidence identity checks and release gates remain
+unchanged. Historical failed captures are preserved rather than relabeled.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 4)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-4 -->
+
+## Round 4 by reviewer - Step 6
+
+- Recorded: 2026-09-19T17:12:20+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+Baseline index tree: 20e98f6708897030a14926bda7f52c38409a8717
+
+Assessed index tree: 20e98f6708897030a14926bda7f52c38409a8717
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The reviewer reaches the writer's verdict independently. Point 4's candidate
+build failed at provisioning, so PA5 to PA9 on Debian, the agent's wheel
+inventory and venv base, D10 with those wheels and the publication obligations
+remain open. The checkpoint records that failure honestly, and its two code
+repairs are correct.
+
+Verified rather than accepted:
+
+- Build 176. The Jenkins API reports build 176 `FAILURE`, built from application
+  commit `7acda8ac`, which is the recorded application and pipeline revision.
+  The retained console is byte-identical to the live `consoleText` (1151009
+  bytes), and it contains the refusal verbatim: uv 0.12.17 reported that the
+  lockfile needs to be updated but `--locked` was provided.
+- The Debian reading. The staged capture equals the reading retained on the
+  RHEL host except for the host node name, which was removed with a recorded
+  sanitization note: same nine cells, pins and `incomplete` verdict. The
+  reading archive and verification bundle digests on the host match the
+  recorded ones. The reader that produced it is the staged driver, whose
+  digest `b5b2a2ce...8789` is the one the retention records; the committed
+  bundle reader is recorded separately with its own `fail` result.
+- The record. PA1 to PA4 on Debian pass on build 176 and PA5 to PA9 stay
+  pending. RHEL PA5 and PA6 move from pass to pending with their original run
+  and input snapshot kept and a stated reason. That follows the requirement:
+  a relevant change makes affected results pending until repeated, and the
+  validator itself refuses a PA5 or PA6 pass whose lock or wheels changed. The
+  original candidate and every earlier capture are unchanged.
+- Manifest repair. `sha256sum --binary` plus a first-occurrence `sed` turns the
+  `*` marker into the two-space form on every platform; a hex digest holds no
+  space, so only the separator changes. The new fixture forces the binary
+  marker on Linux and requires a byte-identical bundle.
+- Reader repair. Only the anchored Jenkins timestamp prefix is stripped, for
+  parsing; the raw console is kept byte for byte. New fixtures cover a
+  timestamped pass and a timestamped ABI failure that must stay a failure.
+- The umbrella note and validation rows describe this accurately, including
+  the new sizes (driver 945 lines, delivery script 313).
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+- Resolve the application lock refusal under uv 0.12.17 and CPython 3.13.15
+  without bypassing `--locked`, then repeat the candidate build with
+  publication off and capture its lock, wheels and venv base.
+- Run PA5 to PA9 on Debian from that build.
+- Repeat RHEL PA5 and PA6 against the new consumer inputs.
+- Take the D10 reading with the agent's exact wheels.
+- Bind the remaining pre-publication obligations and pass the publication
+  phase.
+
+Architecture: both repairs stay in the component that owns the behavior, the
+composer and the post-build reader. No violation or smell.
+
+Performance: one linear `sed` over the manifest and one anchored substitution
+over the console. No new quadratic path.
+
+Unit test coverage: no Python class changed and no percentage is claimed. No
+unit-tested class below 100% needs completing, and no top-level symbol outside
+the coverage gate is unreferenced.
+
+Feature integrity: bundle bytes are unchanged on Linux, the raw console is
+preserved, and a timestamped ABI failure still fails. Nothing is impaired.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows match this assessment: the status sentence is exactly
+`No. Step 6 has NOT been fully implemented.`, the fixture count and sizes are
+correct, and the `Missing work for Step 6` section replaces the finished
+application-commit and build bullets with the lock refusal, the pending Debian
+cells and the consumer-bound RHEL rerun. The document-level line stays
+`No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+The reviewer ran all seven resolved commands. Five pass as declared. The
+declared Markdown pair does not check this repository.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`: the first
+  attempt failed before validation because the RHEL host's `/var/tmp` was
+  full. The reviewer removed only its own scratch from earlier review rounds
+  there and reran: transport exit 0 in 104 seconds, native
+  `validation exit=0 elapsed=81s`, no FAIL line, four helper imports, the
+  three new cases and 61 acceptance cases. It ran against application HEAD
+  `812e7949`, which now carries the reader repairs.
+- The point 4 record verifier, source `request`: `PASS`, exit 0.
+- The Markdown gate as declared, source `request`: exit 0 with zero findings,
+  because the batch file changes into the llm-shared root and `--root .` then
+  names llm-shared. The intersection checker, source `request`, therefore
+  fails its own guard ("Expected retained repository-debt diagnostics").
+  Rerun with `--root` naming cplx, the gate reports the 39 older findings and
+  the checker passes: nothing in the staged content or the appended request.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean on the index.
+
+The working-tree transcript also carries one line with the private account
+name: the round 4 request record's Markdown command. The hook will refuse it
+when the transcript is next staged.
+
+Measured independently: build 176's result and revision through the Jenkins
+API; the retained console against the live one; the host retention's reading
+and bundle digests; the staged Debian capture against the host's reading; and
+the reader digest.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands, plus the corrected form of the Markdown
+gate so the staged content could be judged.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0 on the
+  second attempt.
+- The point 4 record verifier, source `request`. Exit 0.
+- The Markdown gate, source `request`. Declared with `--root .`, which lints
+  llm-shared.
+- The Markdown intersection checker, source `request`. Fails on the declared
+  log, passes on a cplx log.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Clean on the index.
+
+The reviewer removed each of its own native scratch fixtures after use,
+including the one from this round.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+The Markdown gate declaration regressed from the round 3 form
+`../llm-shared/markdown-check.bat --root ../cplx` to an absolute home path with
+`--root .`. That is not drift, but it both leaks the account name into the
+transcript and points the gate at the wrong repository.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `20e98f6708897030a14926bda7f52c38409a8717` equals the
+  baseline at entry and the live index after every run.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `aa8ef02c7c952e36c5dcec44c5366aec5972f0b24ce6d2d132d185defa4198ac`.
+  No umbrella row was completed.
+- Validation-state comparison over the 9 staged paths, the project command's
+  file and the four ignored validation files: `acceptable: true` with empty
+  lists.
+- The working tree matches its entry state: 9 staged paths, and the transcript
+  carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository. On the RHEL host the reviewer
+  removed its own scratch from earlier review rounds, the failed attempt's
+  partial fixture and transfer tar, and this round's fixture. It left the
+  writer's fixtures and every retained evidence directory in place.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+`a.commit` is accurate for the staged set, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 9 staged paths in three
+ordered groups matching the request. The installed hook accepts the index.
+
+- Group 1, `fix(tools): normalize candidate verification evidence`: the
+  composer, the driver's reader and their fixtures. `fix` fits: both correct
+  behavior the real build exposed.
+- Group 2, `docs(tools): bind Debian candidate evidence`: the Debian capture,
+  its retention, the record and its view.
+- Group 3, `docs(tools): record point 4 checkpoint`: the validation plan and
+  the umbrella note.
+
+Ordering is least to most dependent and every staged path appears once. The
+transcript is not in the plan; when it is staged later, its round 4 request
+record needs the home-path fix first.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+Unresolved findings:
+
+- The declared Markdown gate `markdown-check.bat --root .` regressed to an absolute home-directory path and to a root that resolves to llm-shared, because the batch file changes into its own root first: as declared it checks no cplx file and the paired intersection checker fails its own guard, and the path copied into the round 4 request record puts the private account name in the transcript, which the installed hook will refuse once staged.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop".
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4, after the reviewed point 3 checkpoint was committed.
+Point 5 (D10 with the agent wheels) and point 6 (publication closure) are
+deliberately outside this checkpoint. Step 6 remains checked No. Assess any
+defects in the staged work separately from the unfinished later obligations;
+do not weaken the completion or publication gates to obtain commit-ready.
+
+The requestor stops after publication, as explicitly instructed by the human.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- Scope. The review covers point 4 only. D10 with the agent wheels and the
+  publication closure are not requested, and Step 6 stays `No`.
+- Defects in the staged work, assessed separately from the later
+  obligations: the staged code, evidence, record and notes have none. The one
+  finding is in the declared validation, not in the staged work.
+- No gate was weakened, and none is proposed. The lock refusal stays a
+  failure to resolve, not a gate to bypass, and RHEL PA5 and PA6 stay pending
+  until repeated against the new consumers.
+- No commit, push, build or later point was performed or is authorized.
+
+The disposition is changes-requested because Step 6 is incomplete by design
+and because the declared Markdown command must be corrected before the
+transcript is committed.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+The staged checkpoint needs no rework. Fix the declared Markdown command, then
+continue with the lock refusal.
+
+**Restore the working Markdown declaration.** Declare
+`../llm-shared/markdown-check.bat --root ../cplx`, the form round 3 used. The
+batch file changes into the llm-shared root before running, so `--root .`
+names llm-shared, and an absolute home path leaks the account name into the
+transcript. Before staging the transcript, replace the round 4 request
+record's home prefix with the sibling-relative form, then run the hook and the
+intersection checker on the final index and require both clean.
+
+**Next: the lock refusal.** Build 176 shows uv 0.12.17 refusing the committed
+`uv.lock` as out of date. Resolve that in the application, for example by
+regenerating the lock with the agent's uv version and committing it, then
+repeat the candidate build with publication off. The application HEAD has
+already moved past the built revision, so the next run will bind new consumer
+identities, which is what the pending RHEL PA5 and PA6 reruns need.
+
+**RHEL host space.** The RHEL host's `/var/tmp` was full during this review.
+The reviewer cleared its own scratch, but many fixtures from earlier runs
+remain there, and point 5 and the RHEL reruns will need room.
+
+Done well: the failed build was recorded as a failure with its raw console
+matching Jenkins byte for byte, the reader repair keeps the raw capture
+intact, and the manifest repair is proven byte-identical on Linux by a
+fixture that forces the Windows behavior.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete: Step 6 is incomplete by design, and one validation finding
+remains.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails by design, per the guidance.
+3. Validation and coverage. The staged work passes every check that actually
+   examines it. The declared Markdown pair examines llm-shared instead.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. One: the Markdown declaration.
+6. `a.commit`. Passes, valid and ready, and the hook accepts the index.
+
+This is the third time the Markdown declaration has pointed away from cplx,
+and the second time a home path has reached the transcript through a declared
+command. The correct form has worked since Step 5 round 5. The finding is
+small, but it matters because a validation that silently checks another
+repository looks like evidence.
+
+On substance, point 4 did what a checkpoint should: it ran the real build,
+kept the failure as a failure, and fixed only the two integration defects the
+real build exposed, each with a regression test.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 4)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-4 -->
+
+## Round 5 by requestor - Step 6
+
+- Recorded: 2026-09-19T17:32:21+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 5)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 5
+
+### Code review evidence for step 6 tools-archive-rebuild (round 5)
+
+request_index_tree: 8ec81a121c4a110d7917b12a47362803c02539d2
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: docs(tools): bind Debian candidate evidence
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 3: docs(tools): record point 4 checkpoint
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 4: docs(review): correct point 4 validation declaration
+group 4 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 5)
+
+No. Step 6 has NOT been fully implemented.
+
+The handoff point 4 attempt is retained: committed candidate pins were pushed with
+publication off; build 176 finished FAILURE; its full console
+and archived evidence were retained and independently read on native Linux.
+Every Debian cell and available application/runtime identity is bound to that
+retained run. Provisioning failed because uv 0.12.17 refused uv.lock under
+`uv sync --locked` with CPython 3.13.15. PA1 to PA4 pass; PA5 to PA9 are pending.
+No agent wheel inventory or successful venv base capture exists. Their fields
+remain pending; the committed lock digest is retained only as input provenance.
+Resolve the lock refusal and repeat the candidate build before point 5 D10.
+The agent also reports failures in historical diagnostic harnesses, including
+the older Python 3.13.9 relocation inventory. Those raw findings are retained
+and are not represented as passes by this checkpoint.
+
+Native cumulative step 6 validation passed in 77 seconds, including 61
+acceptance fixtures, the inherited suites and 16 release-record tests. The
+project shell lint gate passes for 58 tracked scripts. The repaired Git Bash
+bundle passes the application's unchanged strict adapter. Record/provenance
+checks verify the exact pins, capture hashes, generated view, historical
+snapshots and unchanged publication/adoption gates. Full Markdown lint has
+existing repository debt; the added-line check records whether new findings
+were introduced. No Python coverage percentage is claimed.
+
+The code changes are a linear manifest normalization and one anchored console
+prefix normalization. They preserve raw captures and keep production controls
+and post-build reader provenance distinct. No new architectural layer or
+unbounded processing is introduced. Historical failing evidence remains
+retained. Fresh RHEL acceptance for the newly bound consumers, D10 with the
+agent wheels, any unresolved Debian cells and the remaining publication
+obligations are still required before Step 6 can complete.
+
+Round 5 corrects the declared Markdown root and removes the local account
+path from the round 4 transcript command. No production code or retained
+build evidence changed after round 4. Full cplx lint retains 39 existing
+findings; the added-line check and final staged sensitive-content hook pass.
+
+### Implementation report for step 6 tools-archive-rebuild (round 5)
+
+The composer now explicitly hashes binary bytes and normalizes the binary
+marker to the two-space manifest format required by the application adapter.
+Build 175 exposed the Git Bash incompatibility and is retained as a failure.
+Build 176 used a native bundle from committed cplx source. The shipped archive
+identity is unchanged.
+
+The Debian evidence reader removes Jenkins timestamp prefixes for anchored
+probe parsing while retaining the raw console byte-for-byte. Regressions cover
+binary marker generation, timestamped passing evidence, and timestamped ABI
+failure. Both original and repaired readers were run on the real evidence;
+their results and exact reader digest are retained separately.
+
+The application reader repairs were committed as 784f33ed. Candidate pins in
+application commit 7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e select archive
+df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87, verification bundle
+dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51 and cplx source
+72f6cb290700faf328b73d946e78e8fedab8c2cd. Publication remains off.
+
+Recorded Debian cells:
+
+- PA1:debian: pass. candidate relocated without a shim, trailer completed
+- PA2:debian: pass. wrapper first-call acceptance met
+- PA3:debian: pass. SQLite acceptance role over the pinned archive
+- PA4:debian: pass. toolchain git answered --version after relocation
+- PA5:debian: pending. not executed in this run
+- PA6:debian: pending. not executed in this run
+- PA7:debian: pending. not executed in this run
+- PA8:debian: pending. not executed in this run
+- PA9:debian: pending. not executed in this run
+
+The sidecar, generated acceptance view, validation plan and umbrella record
+this checkpoint. Earlier RHEL captures and input snapshots are unchanged.
+The earlier RHEL PA5/PA6 passes cannot stand for this application or an
+uncaptured agent wheel set, so their current release obligations remain pending.
+
+### Change summary for step 6 tools-archive-rebuild (round 5)
+
+The root a.commit orders the staged work as follows:
+
+1. fix(tools): normalize candidate verification evidence
+   - ci/deliver-closure-tools.sh
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+   - docs/v0.27.0/verify.tools-release-acceptance.sh
+2. docs(tools): bind Debian candidate evidence
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+3. docs(tools): record point 4 checkpoint
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+
+The request publication appends its protocol-owned transcript after index
+capture. No cplx point 4 changes are committed by this request.
+
+4. docs(review): correct point 4 validation declaration
+   - docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+
+The existing transcript through round 4 is staged after correcting only the
+reviewer-identified command. Round 5 publication appends after index capture.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 5)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop".
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4, after the reviewed point 3 checkpoint was committed.
+Point 5 (D10 with the agent wheels) and point 6 (publication closure) are
+deliberately outside this checkpoint. Step 6 remains checked No. Assess any
+defects in the staged work separately from the unfinished later obligations;
+do not weaken the completion or publication gates to obtain commit-ready.
+
+The requestor stops after publication, as explicitly instructed by the human.
+
+Writer response:
+
+Accepted the round 4 finding. The Markdown declaration now uses
+`../llm-shared/markdown-check.bat --root ../cplx`, preserving the repository
+selection after the launcher changes directory. The round 4 transcript's
+command uses that same account-free form. The final index includes the
+corrected transcript and a matching fourth a.commit group.
+
+No reviewer repairs were staged, and no production repair was reversed.
+The code and retained evidence remain exactly as reviewed in round 4.
+
+The user supplied a separate investigation identifying the missing CI lock
+URL smudge as the likely cause of build 176's locked-sync refusal. Local
+inspection confirms the suggested one-line rewrite also needs coordinated
+evidence handling: the reader compares the captured lock digest to the
+committed lock bytes. Regenerating dependencies is therefore not adopted as
+the presumed fix. Keep --locked and the committed-lock identity gate while
+addressing transport URL handling in subsequent application work. Build 175
+failed earlier at manifest verification, not at locked synchronization.
+
+This round closes the declaration finding only. No new build was launched,
+and the unresolved acceptance cells remain pending. Points 5 and 6 remain
+outside this checkpoint; the requestor stops after publication as instructed.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 5)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-5 -->
+
+## Round 5 by reviewer - Step 6
+
+- Recorded: 2026-09-19T17:38:30+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+Baseline index tree: 8ec81a121c4a110d7917b12a47362803c02539d2
+
+Assessed index tree: 8ec81a121c4a110d7917b12a47362803c02539d2
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The verdict is the expected one: the point 4 candidate build failed at locked
+synchronization, so PA5 to PA9 on Debian, the agent's wheels and venv base, the
+consumer-bound RHEL reruns, D10 and the publication obligations remain open.
+
+Since round 4 the index has changed only in the review transcript: 498 lines
+appended and none removed, holding the round 4 request record and the
+reviewer's round 4 answer. The code, record and retained evidence that round 4
+verified (build 176 through the Jenkins API, the console byte-identical to
+Jenkins, the host reading, the reader digest and both code repairs with their
+fixtures) are unchanged, and every declared command was re-run this round.
+
+The round 4 finding is fixed for this round's declaration:
+
+- The request now declares `../llm-shared/markdown-check.bat --root ../cplx`,
+  which lints cplx, and the intersection checker passes on its log.
+- No line of the working-tree transcript carries the private account name, and
+  the installed hook accepts the index with the transcript staged.
+- The reviewer's round 4 answer copy is byte-identical to what it rendered, and
+  the staged transcript has no duplicate heading.
+
+One accuracy issue remains in how the round 4 record was edited: the recorded
+round 4 command now reads `--root ../cplx`, although round 4 declared
+`--root .`. The home prefix had to go; the root argument did not, because it
+is what round 4 actually ran and what the reviewer's round 4 finding
+describes. It is reported below.
+
+The writer's note on the lock refusal is well founded. Keeping `--locked` and
+the committed-lock identity gate, and treating build 176's refusal as a
+transport URL handling issue to investigate rather than regenerating
+dependencies, is the more careful course than the reviewer's round 4 example.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+- Resolve build 176's locked-synchronization refusal without bypassing
+  `--locked` or the committed-lock identity check, then repeat the candidate
+  build with publication off and capture its lock, wheels and venv base.
+- Run PA5 to PA9 on Debian from that build.
+- Repeat RHEL PA5 and PA6 against the new consumer inputs.
+- Take the D10 reading with the agent's exact wheels.
+- Bind the remaining pre-publication obligations and pass the publication
+  phase.
+
+Architecture, performance and unit test coverage are unchanged from round 4:
+no new code since then, no percentage claimed. No unit-tested class below 100%
+needs completing, and no top-level symbol outside the coverage gate is
+unreferenced.
+
+Feature integrity: unchanged from round 4; nothing is impaired.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, which is
+unchanged since round 4. The Step 6 status sentence is exactly
+`No. Step 6 has NOT been fully implemented.`, the `Missing work for Step 6`
+section is present, and the document-level line stays
+`No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+The reviewer ran all seven resolved commands. All seven behave as expected.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 102 seconds, native `validation exit=0 elapsed=77s`, no
+  FAIL line, four helper imports and 61 acceptance cases. The reviewer removed
+  its own scratch fixture afterwards; the RHEL host's `/var/tmp` stays at 85%.
+- The point 4 record verifier, source `request`: `PASS`, exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the 39
+  older findings, as declared.
+- The Markdown intersection checker, source `request`: `PASS`, none on lines
+  added since HEAD, including this round's appended request.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean, with the transcript
+  now staged.
+
+Also verified: no working-tree transcript line carries the private account
+name, the staged transcript has no duplicate heading, and the reviewer's round
+4 answer copy is byte-identical.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0.
+- The point 4 record verifier, source `request`. Exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`. Exit 1 on older
+  debt only.
+- The Markdown intersection checker, source `request`. Exit 0.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Clean.
+
+Every request addition is declared in sibling-relative form and names cplx.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `8ec81a121c4a110d7917b12a47362803c02539d2` equals the
+  baseline at entry and the live index after every run. Against the round 4
+  tree it differs only in the staged review transcript.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `aa8ef02c7c952e36c5dcec44c5366aec5972f0b24ce6d2d132d185defa4198ac`.
+- Validation-state comparison over the 10 staged paths, the project command's
+  file and the four ignored validation files: `acceptable: true` with empty
+  lists.
+- The working tree matches its entry state: 10 staged paths, and the
+  transcript also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository or on the RHEL host.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+`a.commit` is mechanically accurate and the reviewer amended nothing, but group
+4's message overstates what the transcript edit should be.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 10 staged paths in four
+ordered groups matching the request. The installed hook accepts the index.
+
+- Groups 1 to 3 are unchanged from round 4 and remain accurate.
+- Group 4, `docs(review): correct point 4 validation declaration`, carries the
+  staged transcript. Its body says the round 4 command was corrected "as
+  requested by the reviewer". The reviewer asked only for the home prefix to
+  be replaced; the corrected declaration belongs to this round's request,
+  which already carries it. Once the recorded round 4 command keeps its
+  original `--root .`, a subject such as
+  `docs(review): redact the point 4 validation path` describes the edit
+  accurately. Membership and order do not change.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+Unresolved findings:
+
+- The staged transcript's round 4 request record now shows `../llm-shared/markdown-check.bat --root ../cplx`, but round 4 declared `--root .` and the reviewer's round 4 answer in the same transcript describes that declaration, so the record was changed beyond removing the home prefix and now misstates what round 4 ran; group 4's commit message repeats the claim that the declaration itself was corrected at the reviewer's request.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop".
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4, after the reviewed point 3 checkpoint was committed.
+Point 5 (D10 with the agent wheels) and point 6 (publication closure) are
+deliberately outside this checkpoint. Step 6 remains checked No. Assess any
+defects in the staged work separately from the unfinished later obligations;
+do not weaken the completion or publication gates to obtain commit-ready.
+
+The requestor stops after publication, as explicitly instructed by the human.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- Scope. The review covers point 4 only; points 5 and 6 are not requested, and
+  Step 6 stays `No`.
+- Defects in the staged work, assessed separately from the later obligations:
+  the code, evidence, record and notes have none. The one finding is the edit
+  to the round 4 request record in the staged transcript.
+- No gate was weakened or proposed to be. The reviewer supports keeping
+  `--locked` and the committed-lock identity gate while the lock refusal is
+  investigated.
+- No commit, push, build or later point was performed or is authorized.
+
+The disposition is changes-requested because Step 6 is incomplete by design
+and because of that one record-accuracy finding.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+The code and evidence need no rework. One small transcript correction remains.
+
+**Keep the round 4 record truthful.** In the staged transcript's round 4
+request record, restore the root argument round 4 actually declared while
+keeping the home prefix out, so the line reads
+`../llm-shared/markdown-check.bat --root . > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)`.
+The redaction of the account path is right; the change of `--root .` to
+`--root ../cplx` rewrites what round 4 ran, and the reviewer's round 4 answer
+in the same transcript describes the original. The corrected declaration
+already lives in this round's request. Then describe group 4 as a redaction,
+for example `docs(review): redact the point 4 validation path`, and rerun the
+hook and the intersection checker on the final index.
+
+**Next: the lock refusal.** Your investigation is the better lead: keep
+`--locked` and the committed-lock identity check, and address the CI lock URL
+handling in the application so the agent's uv sees the lock it expects. The
+reviewer's round 4 suggestion to regenerate the lock was only an example and
+is superseded by that finding.
+
+Done well: the declaration now names cplx in its working form, the account
+path is gone from the whole transcript, and the reviewer's answer copy is
+untouched.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete: Step 6 is incomplete by design, and one small record-accuracy
+finding remains.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails by design, per the guidance.
+3. Validation and coverage. Passes; all seven declared commands behave as
+   expected and now examine cplx.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. One: the round 4 request record's changed root
+   argument and the matching group 4 wording.
+6. `a.commit`. Mechanically valid and ready; group 4's message needs the same
+   correction.
+
+The finding is small, and it is raised for the reason this effort insists on
+throughout: a record says what happened. Redacting a private path from a
+recorded command is required; changing its arguments to what should have been
+declared is a rewrite, and it leaves the transcript contradicting itself. The
+fix is two tokens and a commit subject.
+
+On the lock refusal, the reviewer defers to the investigation the writer
+cites: it explains the refusal without touching dependencies, and it keeps
+every gate in place.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 5)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-5 -->
+
+## Round 6 by requestor - Step 6
+
+- Recorded: 2026-09-19T17:51:23+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 6)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 6
+
+### Code review evidence for step 6 tools-archive-rebuild (round 6)
+
+request_index_tree: aff7f5f8e0817f27bb315da20130b5d8a5df4c6f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: docs(tools): bind Debian candidate evidence
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 3: docs(tools): record point 4 checkpoint
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 4: docs(review): redact the point 4 validation path
+group 4 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 6)
+
+No. Step 6 has NOT been fully implemented.
+
+The handoff point 4 attempt is retained: committed candidate pins were pushed with
+publication off; build 176 finished FAILURE; its full console
+and archived evidence were retained and independently read on native Linux.
+Every Debian cell and available application/runtime identity is bound to that
+retained run. Provisioning failed because uv 0.12.17 refused uv.lock under
+`uv sync --locked` with CPython 3.13.15. PA1 to PA4 pass; PA5 to PA9 are pending.
+No agent wheel inventory or successful venv base capture exists. Their fields
+remain pending; the committed lock digest is retained only as input provenance.
+Resolve the lock refusal and repeat the candidate build before point 5 D10.
+The agent also reports failures in historical diagnostic harnesses, including
+the older Python 3.13.9 relocation inventory. Those raw findings are retained
+and are not represented as passes by this checkpoint.
+
+Native cumulative step 6 validation passed in 77 seconds, including 61
+acceptance fixtures, the inherited suites and 16 release-record tests. The
+project shell lint gate passes for 58 tracked scripts. The repaired Git Bash
+bundle passes the application's unchanged strict adapter. Record/provenance
+checks verify the exact pins, capture hashes, generated view, historical
+snapshots and unchanged publication/adoption gates. Full Markdown lint has
+existing repository debt; the added-line check records whether new findings
+were introduced. No Python coverage percentage is claimed.
+
+The code changes are a linear manifest normalization and one anchored console
+prefix normalization. They preserve raw captures and keep production controls
+and post-build reader provenance distinct. No new architectural layer or
+unbounded processing is introduced. Historical failing evidence remains
+retained. Fresh RHEL acceptance for the newly bound consumers, D10 with the
+agent wheels, any unresolved Debian cells and the remaining publication
+obligations are still required before Step 6 can complete.
+
+Round 6 preserves the historical round 4 root argument while redacting
+only its account path. The current declaration continues to name cplx.
+No production code or build evidence changed since round 4.
+
+### Implementation report for step 6 tools-archive-rebuild (round 6)
+
+The composer now explicitly hashes binary bytes and normalizes the binary
+marker to the two-space manifest format required by the application adapter.
+Build 175 exposed the Git Bash incompatibility and is retained as a failure.
+Build 176 used a native bundle from committed cplx source. The shipped archive
+identity is unchanged.
+
+The Debian evidence reader removes Jenkins timestamp prefixes for anchored
+probe parsing while retaining the raw console byte-for-byte. Regressions cover
+binary marker generation, timestamped passing evidence, and timestamped ABI
+failure. Both original and repaired readers were run on the real evidence;
+their results and exact reader digest are retained separately.
+
+The application reader repairs were committed as 784f33ed. Candidate pins in
+application commit 7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e select archive
+df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87, verification bundle
+dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51 and cplx source
+72f6cb290700faf328b73d946e78e8fedab8c2cd. Publication remains off.
+
+Recorded Debian cells:
+
+- PA1:debian: pass. candidate relocated without a shim, trailer completed
+- PA2:debian: pass. wrapper first-call acceptance met
+- PA3:debian: pass. SQLite acceptance role over the pinned archive
+- PA4:debian: pass. toolchain git answered --version after relocation
+- PA5:debian: pending. not executed in this run
+- PA6:debian: pending. not executed in this run
+- PA7:debian: pending. not executed in this run
+- PA8:debian: pending. not executed in this run
+- PA9:debian: pending. not executed in this run
+
+The sidecar, generated acceptance view, validation plan and umbrella record
+this checkpoint. Earlier RHEL captures and input snapshots are unchanged.
+The earlier RHEL PA5/PA6 passes cannot stand for this application or an
+uncaptured agent wheel set, so their current release obligations remain pending.
+
+### Change summary for step 6 tools-archive-rebuild (round 6)
+
+The root a.commit orders the staged work as follows:
+
+1. fix(tools): normalize candidate verification evidence
+   - ci/deliver-closure-tools.sh
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+   - docs/v0.27.0/verify.tools-release-acceptance.sh
+2. docs(tools): bind Debian candidate evidence
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+3. docs(tools): record point 4 checkpoint
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+
+The request publication appends its protocol-owned transcript after index
+capture. No cplx point 4 changes are committed by this request.
+
+4. docs(review): redact the point 4 validation path
+   - docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+
+The transcript through round 5 is staged with the historical round 4 root
+argument restored. Round 6 publication appends after index capture.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 6)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop".
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4, after the reviewed point 3 checkpoint was committed.
+Point 5 (D10 with the agent wheels) and point 6 (publication closure) are
+deliberately outside this checkpoint. Step 6 remains checked No. Assess any
+defects in the staged work separately from the unfinished later obligations;
+do not weaken the completion or publication gates to obtain commit-ready.
+
+The requestor stops after publication, as explicitly instructed by the human.
+
+Writer response:
+
+Accepted the round 5 record-accuracy finding. The round 4 request record
+again declares --root ., which is what that round actually ran. Only the
+private launcher path is redacted. The current declaration retains the
+working --root ../cplx form. Group 4 now describes the historical redaction,
+not a correction to what round 4 ran. Membership and order are unchanged.
+
+There were no reviewer-staged repairs and no reversals of production fixes.
+The code and retained evidence remain as independently verified in round 5.
+
+The user asked whether a new Jenkins build could test recent fixes. Checking
+origin3 develop found application commit 812e794934be08f921f2d82a224220de4c1c9c15.
+The provisioning code still has no lock URL rewrite before uv sync --locked.
+The recent changes corrected review declarations only. No expensive unchanged
+build was launched; a coordinated application fix preserving committed-lock
+identity is still needed before a run can test resolution. No dependency
+regeneration, gate bypass, commit, push or later handoff point was performed.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 6)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-6 -->
+
+## Round 6 by reviewer - Step 6
+
+- Recorded: 2026-09-19T17:55:47+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+Baseline index tree: aff7f5f8e0817f27bb315da20130b5d8a5df4c6f
+
+Assessed index tree: aff7f5f8e0817f27bb315da20130b5d8a5df4c6f
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The verdict is the expected one: the point 4 candidate build failed at locked
+synchronization, so PA5 to PA9 on Debian, the agent's wheels and venv base, the
+consumer-bound RHEL reruns, D10 and the publication obligations remain open.
+Within point 4 the checkpoint is complete and correct.
+
+Since round 5 the index has changed only in the review transcript: 484 lines
+appended (the round 5 request record and the reviewer's round 5 answer) and
+one line changed. The code, record and retained evidence verified in round 4
+are unchanged, and every declared command was re-run this round.
+
+The round 5 finding is fixed, verified rather than accepted:
+
+- The round 4 request record's Markdown command again reads `--root .`, what
+  round 4 actually declared, with only the home prefix replaced by the
+  sibling-relative form. The transcript no longer contradicts itself.
+- Group 4 of `a.commit` is now `docs(review): redact the point 4 validation
+  path`, which describes the edit accurately.
+- The reviewer's round 5 answer copy is byte-identical to what it rendered,
+  no transcript line carries the private account name, and no heading
+  repeats.
+
+The writer's decision not to launch an unchanged build is sound: the pushed
+application still has no lock URL rewrite before `uv sync --locked`, so a new
+run could only repeat build 176's refusal.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+- Add the coordinated application fix for the lock URL handling while keeping
+  `--locked` and the committed-lock identity check, then repeat the candidate
+  build with publication off and capture its lock, wheels and venv base.
+- Run PA5 to PA9 on Debian from that build.
+- Repeat RHEL PA5 and PA6 against the new consumer inputs.
+- Take the D10 reading with the agent's exact wheels.
+- Bind the remaining pre-publication obligations and pass the publication
+  phase.
+
+Architecture, performance and unit test coverage are unchanged from round 4:
+no new code since then, no percentage claimed. No unit-tested class below 100%
+needs completing, and no top-level symbol outside the coverage gate is
+unreferenced.
+
+Feature integrity: unchanged from round 4; nothing is impaired.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, which is
+unchanged since round 4. The Step 6 status sentence is exactly
+`No. Step 6 has NOT been fully implemented.`, the `Missing work for Step 6`
+section is present, and the document-level line stays
+`No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+The reviewer ran all seven resolved commands. All seven behave as expected.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 104 seconds, native `validation exit=0 elapsed=82s`, no
+  FAIL line, four helper imports and 61 acceptance cases. The reviewer removed
+  its own scratch fixture afterwards.
+- The point 4 record verifier, source `request`: `PASS`, exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the 39
+  older findings, as declared.
+- The Markdown intersection checker, source `request`: `PASS`, none on lines
+  added since HEAD, including this round's appended request.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean.
+
+Also verified: the round 5 to round 6 index difference is the transcript only,
+its single changed line is the restored `--root .`, the reviewer's round 5
+answer copy is byte-identical, no working-tree transcript line carries the
+private account name, and no heading repeats.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands, all clean or, for the full Markdown gate,
+exiting on older debt only.
+
+- `bash src/utils/lint_shell.sh`, source `project`.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`.
+- The point 4 record verifier, source `request`.
+- The Markdown gate with `--root ../cplx`, source `request`.
+- The Markdown intersection checker, source `request`.
+- `git diff --cached --check`, source `request`.
+- `bash .git/hooks/pre-commit`, source `request`.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `aff7f5f8e0817f27bb315da20130b5d8a5df4c6f` equals the
+  baseline at entry and the live index after every run. Against the round 5
+  tree it differs only in the staged review transcript.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `aa8ef02c7c952e36c5dcec44c5366aec5972f0b24ce6d2d132d185defa4198ac`.
+- Validation-state comparison over the 10 staged paths, the project command's
+  file and the four ignored validation files: `acceptable: true` with empty
+  lists.
+- The working tree matches its entry state: 10 staged paths, and the
+  transcript also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository or on the RHEL host.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+`a.commit` is accurate and executable, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 10 staged paths in four
+ordered groups matching the request. The installed hook accepts the index.
+
+- Groups 1 to 3 are unchanged since round 4 and remain accurate.
+- Group 4, `docs(review): redact the point 4 validation path`, now describes
+  the transcript edit as what it is.
+
+When the owning workflow stages this answer's protocol append into group 4,
+run the hook and the intersection checker once more on the final index.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop".
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4, after the reviewed point 3 checkpoint was committed.
+Point 5 (D10 with the agent wheels) and point 6 (publication closure) are
+deliberately outside this checkpoint. Step 6 remains checked No. Assess any
+defects in the staged work separately from the unfinished later obligations;
+do not weaken the completion or publication gates to obtain commit-ready.
+
+The requestor stops after publication, as explicitly instructed by the human.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- Scope. The review covers point 4 only; points 5 and 6 are not requested, and
+  Step 6 stays `No`.
+- Defects in the staged work, assessed separately from the later obligations:
+  none. The round 5 record-accuracy finding is fixed, and no finding remains.
+- No gate was weakened or proposed to be; the lock refusal stays a failure to
+  fix in the application, with `--locked` and the committed-lock identity
+  check kept.
+- No commit, push, build or later point was performed or is authorized.
+
+The disposition is changes-requested only because the shared rule ties a
+commit-ready recommendation to a complete step, and Step 6 is incomplete by
+design. The point 4 checkpoint is ready to commit through the owning workflow
+if the human chooses to, as the earlier Step 6 checkpoints were.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+No rework is needed. The point 4 checkpoint is ready to commit through the
+owning workflow if the human chooses to. Stage this answer's protocol append
+into group 4 and run the hook and the intersection checker once more on the
+final index before committing.
+
+After that, per the handoff: make the coordinated application change for the
+lock URL handling, keeping `--locked` and the committed-lock identity check,
+then repeat the candidate build with publication off.
+
+Done well across point 4: the failed build was recorded as a failure and
+matched against Jenkins, both integration repairs came with regression tests,
+no build was spent on an unchanged input, and every record correction was
+confined to what the review reported.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete, for one reason only: Step 6 is incomplete by design. Every other
+readiness result passes, and no finding remains.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails by design, per the guidance.
+3. Validation and coverage. Passes; all seven declared commands behave as
+   expected and examine cplx.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. None.
+6. `a.commit`. Passes, valid, ready and accepted by the hook.
+
+The reviewer does not bend the completeness rule for a partial checkpoint, and
+states instead what it means here: nothing is left for the writer to rework,
+and the point 4 evidence is ready to commit.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 6)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-6 -->
+
+## Round 7 by requestor - Step 6
+
+- Recorded: 2026-09-19T20:16:58+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 7)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 7
+
+### Code review evidence for step 6 tools-archive-rebuild (round 7)
+
+request_index_tree: bda08b9a786f08de4e0dff8ad55b3c52252fbef7
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-retry-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: docs(tools): bind Debian candidate evidence
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 3: docs(tools): record point 4 checkpoint
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 4: docs(review): redact the point 4 validation path
+group 4 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 7)
+
+No. Step 6 has NOT been fully implemented.
+
+This request is the handoff point 4 checkpoint after the human reported the
+application lock fix pushed as 6b43b39e. Build 177 checked out that exact
+commit with publication off. Its lock transport identity check passed for
+83 packages and 491 artifacts. uv 0.12.17 completed uv sync --locked with
+CPython 3.13.15, installing 80 packages and capturing the venv base.
+The lock-URL refusal from build 176 is resolved.
+
+Build 177 nevertheless finished FAILURE: exact wheel capture refused
+playwright-1.60.0.dist-info. Package and Test were skipped. The console and
+all 24 archived artifacts were retained and independently read on native
+Linux. PA1-PA4 pass; PA5-PA9 remain pending. Agent wheels and the archived
+agent lock remain missing. The committed lock digest is provenance only.
+The new application-side capture blocker must be fixed before another build;
+a successful venv base alone does not establish PA6 or permit point 5 D10.
+
+Production code and regression fixtures are unchanged since round 4. The
+manifest normalization and anchored timestamp parsing preserve strict input
+checks and raw evidence, add no architecture layer, and remain linear in
+their inputs. Feature integrity is unchanged. No new class or uncovered
+production symbol is introduced and no coverage percentage is claimed.
+
+Validation includes the project shell lint floor (58 scripts), the native
+cumulative Step 6 suite (exit 0 in 77 seconds), the new exact build-177 record/provenance verifier,
+the commit-plan check and staged hook. Full Markdown lint retains 39 existing
+findings; none intersects added lines. Original build 176 sidecars and all
+earlier RHEL capture bytes remain unchanged. Publication, adoption and source
+authority are unchanged. Current historical RHEL PA5/PA6 obligations remain
+pending with their original input snapshots preserved.
+
+The validation plan retains its No result and explicit missing work:
+application wheel capture, PA5-PA9 Debian, consumer-bound RHEL acceptance,
+D10 with agent wheels and remaining pre-publication obligations. The current
+checkpoint does not waive the finished-step rule for commit readiness.
+
+### Implementation report for step 6 tools-archive-rebuild (round 7)
+
+The staged integration repairs are unchanged: normalize Git Bash binary hash
+markers in candidate manifests; strip Jenkins timestamps from the parser's
+view while preserving the raw console; retain regression cases for passing
+and failing timestamped evidence and binary-marker manifests.
+
+This round adds two build-177 sidecars and binds their digests, application
+and pipeline revision, Debian environment, venv base and all nine Debian
+cells in the acceptance record. The generated view, validation plan and
+umbrella now distinguish the resolved lock-URL issue from the remaining exact
+wheel-capture failure. The commit plan includes both new sidecars.
+
+Build 177 used application/pipeline revision
+6b43b39ef60cd9ff895986492cd94dbeee81b569, archive
+df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87,
+bundle dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51
+and cplx source 72f6cb290700faf328b73d946e78e8fedab8c2cd.
+Publication stayed off. The application fix itself was committed and pushed
+by the sibling project; this cplx round does not change its source.
+
+The raw console SHA-256 is
+d4a76cd621662e6ff686a44fc1f03165f1458a66d4ffe9fa20dc977339e5a2f6.
+The native reading archive SHA-256 is
+baf7e379c674c7d84742a5c78332fe489ac71f9b9bfa6be60ad163525db8ae73.
+Both original and repaired readers ran; the repaired reading is incomplete
+with four passes and five pending cells. Historical diagnostic failures are
+retained separately and are not turned into candidate acceptance passes.
+
+The unchanged build-176 sidecars and earlier RHEL snapshots remain bound as
+historical evidence. The new captures sanitize agent home/workspace prefixes
+and omit the executor name; raw result and artifact digests are retained.
+No D10 reading, publication closure, adoption, or cplx commit was performed.
+
+### Change summary for step 6 tools-archive-rebuild (round 7)
+
+The root a.commit groups all 12 staged paths in this order:
+
+1. fix(tools): normalize candidate verification evidence
+   - ci/deliver-closure-tools.sh
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+   - docs/v0.27.0/verify.tools-release-acceptance.sh
+2. docs(tools): bind Debian candidate evidence
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+3. docs(tools): record point 4 checkpoint
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+4. docs(review): redact the point 4 validation path
+   - docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+
+The transcript through round 6 is staged. Round 7 publication appends its
+protocol-owned request after index capture. No cplx commit is authorized by
+this request.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 7)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop". They subsequently
+authorized a new Jenkins build and reported the coordinated application fix
+committed and pushed as 6b43b39e on develop.
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4. Point 5 (D10 with agent wheels) and point 6
+(publication closure) remain outside this checkpoint. Step 6 remains No.
+Assess defects in the staged work separately from later unfinished
+obligations; do not weaken completion or publication gates for commit-ready.
+
+The requestor stops immediately after publishing round 7 as instructed.
+
+Writer response:
+
+Round 6 reported no unresolved findings and no reviewer repairs. Its
+changes-requested disposition came only from Step 6 being unfinished by
+design. The historical round 4 root argument and its account-path redaction
+remain as accepted; no transcript history was rewritten in this round.
+
+The human then reported the application lock fix committed and pushed as
+6b43b39e. Under the existing authorization for a new candidate build, the
+requestor verified publication-off mode and the pushed revision, then ran
+build 177. That provides new reviewed evidence, hence reviewed-work-changed
+is true even though no production code changed. There is no disagreement or
+reversal of a reviewer repair.
+
+The new evidence resolves the lock-URL refusal and establishes a separate
+application-side blocker: ci/tools_wheel_capture.py refused the installed
+Playwright identity after successful synchronization. The diagnostic does
+not distinguish an absent match from an ambiguous match; no unsupported root
+cause is asserted. A focused handoff is prepared for the human to pass to
+the application project. No message was sent to another project or reviewer.
+
+The root a.commit retains its four ordered groups, adding the new sidecars
+to the Debian evidence group and updating the outcome wording. Current
+evidence and pending obligations are accurate without promoting Step 6 to
+complete or permitting point 5 before its required agent wheels exist.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 7)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-7 -->
+
+## Round 7 by reviewer - Step 6
+
+- Recorded: 2026-09-19T20:24:45+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+Baseline index tree: bda08b9a786f08de4e0dff8ad55b3c52252fbef7
+
+Assessed index tree: bda08b9a786f08de4e0dff8ad55b3c52252fbef7
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The verdict is the expected one. Build 177 resolved the lock refusal but
+failed at exact wheel capture, so PA5 to PA9 on Debian, the agent wheels, the
+consumer-bound RHEL reruns, D10 and the publication obligations remain open.
+Within point 4 the checkpoint is accurate.
+
+Verified rather than accepted:
+
+- Build 177. The Jenkins API reports `FAILURE`, built from application commit
+  `6b43b39e`, the recorded application and pipeline revision. The live
+  console's SHA-256 equals the recorded `d4a76cd6...a2f6`, and it shows the
+  lock transport identity check preserving 83 packages and 491 artifacts,
+  83 packages resolved, 80 installed, and then "Wheel capture refused: locked
+  wheel identity absent or ambiguous: playwright-1.60.0.dist-info".
+- The record. The nine Debian cells move from build 176 to build 177 with the
+  same states: PA1 to PA4 pass and PA5 to PA9 pending. The consumers now name
+  `6b43b39e` and the captured venv base, with wheels and the agent lock still
+  pending. Both build 176 sidecars stay versioned and unchanged, RHEL PA5 and
+  PA6 keep their original run and input snapshot with only their reason text
+  updated, and the original candidate is unchanged. The record verifier ties
+  the build 177 sidecars to the retained raw reading byte for byte.
+- The umbrella note and validation rows now distinguish the resolved lock-URL
+  refusal from the new capture failure, accurately.
+- The staged code and fixtures are unchanged since round 4, and the transcript
+  only gained the round 6 records: nothing removed, the reviewer's round 6
+  answer copy byte-identical, no private identifier, no repeated heading.
+
+The reviewer also isolated the capture failure, which the writer
+deliberately did not guess at. The capture script matches an installed
+distribution by the exact tag set in its `WHEEL` metadata against the tag set
+parsed from each locked wheel filename. The Linux x86_64 wheel the lock pins
+is `playwright-1.60.0-py3-none-manylinux1_x86_64.whl`, whose filename tag set
+is `py3-none-manylinux1_x86_64`. The installed Playwright 1.60.0 in the RHEL
+verification archive, installed from that same lock-pinned file, declares
+`Tag: py3-none-any` in its `WHEEL` metadata. The package's metadata disagrees
+with its own platform filename, so no locked key matches: the "absent" branch
+of the refusal. The fix belongs to the application's capture script, not to the
+lock or to cplx.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+- Make the application's wheel capture identify a wheel whose `WHEEL` tags
+  disagree with its filename, without weakening the one-exact-match rule, then
+  repeat the candidate build with publication off and capture the agent wheels
+  and lock.
+- Run PA5 to PA9 on Debian from that build.
+- Repeat RHEL PA5 and PA6 against the new consumer inputs.
+- Take the D10 reading with the agent's exact wheels.
+- Bind the remaining pre-publication obligations and pass the publication
+  phase.
+
+Architecture, performance and unit test coverage are unchanged from round 4:
+no new code since then, no percentage claimed. No unit-tested class below 100%
+needs completing, and no top-level symbol outside the coverage gate is
+unreferenced.
+
+Feature integrity: unchanged from round 4; nothing is impaired.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows match this assessment. The status sentence is exactly
+`No. Step 6 has NOT been fully implemented.`, the `Missing work for Step 6`
+section names the application wheel capture as the next blocker, and the
+document-level line stays `No, it is not implemented.` The reviewer's
+Playwright diagnosis is offered in this answer for the application-side fix;
+it does not require a validation-row change in cplx.
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+The reviewer ran all seven resolved commands. All seven behave as expected.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 99 seconds, native `validation exit=0 elapsed=77s`, no
+  FAIL line, four helper imports and 61 acceptance cases. The reviewer removed
+  its own scratch fixture afterwards.
+- The build 177 record verifier, source `request`: both `PASS` lines, exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the 39
+  older findings, as declared.
+- The Markdown intersection checker, source `request`: `PASS`, none on lines
+  added since HEAD.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean.
+
+Measured independently: build 177's result and revision through the Jenkins
+API and its live console digest and key lines; the record's changes against
+the round 6 tree; the transcript's round 6 additions; and, on the RHEL host,
+the installed Playwright 1.60.0 `WHEEL` metadata, compared with the lock's
+Playwright wheel filenames at `6b43b39e` and with the capture script's matching
+rule.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands, all clean or, for the full Markdown gate,
+exiting on older debt only.
+
+- `bash src/utils/lint_shell.sh`, source `project`.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`.
+- The build 177 record verifier, source `request`.
+- The Markdown gate with `--root ../cplx`, source `request`.
+- The Markdown intersection checker, source `request`.
+- `git diff --cached --check`, source `request`.
+- `bash .git/hooks/pre-commit`, source `request`.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `bda08b9a786f08de4e0dff8ad55b3c52252fbef7` equals the
+  baseline at entry and the live index after every run.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `cd77192fcd2d8d32456d32781b9170ae2ac7e9966abe7097273c7866ebe97d2a`.
+  No umbrella row was completed.
+- Validation-state comparison over the 12 staged paths, the project command's
+  file and the four ignored validation files: `acceptable: true`, naming only
+  the ignored Markdown log that the declared command rewrites.
+- The working tree matches its entry state: 12 staged paths, and the
+  transcript also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository or on the RHEL host.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+`a.commit` is accurate and executable, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 12 staged paths in four
+ordered groups matching the request. The installed hook accepts the index.
+
+- Group 1 is unchanged since round 4 and accurate.
+- Group 2 now also carries both build 177 sidecars next to the unchanged
+  build 176 ones, the record and its view.
+- Group 3 carries the validation plan and umbrella note, both updated for the
+  capture failure.
+- Group 4 carries the staged transcript through round 6.
+
+When the owning workflow stages this answer's protocol append into group 4,
+run the hook and the intersection checker once more on the final index.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop". They subsequently
+authorized a new Jenkins build and reported the coordinated application fix
+committed and pushed as 6b43b39e on develop.
+
+Read `.reviews/a.item7.handoff-prompt.md` as the sequencing context. This
+request covers point 4. Point 5 (D10 with agent wheels) and point 6
+(publication closure) remain outside this checkpoint. Step 6 remains No.
+Assess defects in the staged work separately from later unfinished
+obligations; do not weaken completion or publication gates for commit-ready.
+
+The requestor stops immediately after publishing round 7 as instructed.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- Scope. The review covers point 4 only; points 5 and 6 are not requested, and
+  Step 6 stays `No`.
+- Defects in the staged work, assessed separately from the later obligations:
+  none. The build 177 evidence, record, notes and transcript are accurate.
+- No gate was weakened or proposed to be. The recommended application fix
+  keeps the capture's one-exact-match rule; it only has to recognize a wheel
+  whose metadata tags disagree with its own filename.
+- No commit, push, build or later point was performed or is authorized.
+
+The disposition is changes-requested only because Step 6 is incomplete by
+design. The point 4 checkpoint is ready to commit through the owning workflow
+if the human chooses to.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+No rework is needed in cplx. The point 4 checkpoint is ready to commit through
+the owning workflow if the human chooses to; stage this answer's protocol
+append into group 4 and rerun the hook and the intersection checker first.
+
+**For the application handoff: the Playwright refusal is a tag mismatch.**
+`ci/tools_wheel_capture.py` keys each installed distribution by the exact tag
+set in its `WHEEL` metadata and each locked wheel by the tag set in its
+filename. Playwright 1.60.0's Linux x86_64 file is
+`playwright-1.60.0-py3-none-manylinux1_x86_64.whl`, but the installed copy
+declares `Tag: py3-none-any` (measured on the RHEL verification archive, which
+installed that lock-pinned file). No locked key has that tag set, so the
+capture reports the identity absent. A fix that keeps the gate strict would
+fall back, only when the exact tag match finds nothing, to the locked wheels of
+the same name, version and build, choose the ones whose filename tags the
+running interpreter supports, and still require exactly one. Pass this
+diagnosis with the handoff so the next build tests a fix rather than a guess.
+
+Then repeat the candidate build with publication off, capture the agent wheels
+and lock, and continue with PA5 to PA9 on Debian and the RHEL reruns.
+
+Done well: the lock fix was confirmed by a real build rather than assumed, the
+new failure was recorded without an invented cause, and both builds' evidence
+is kept side by side.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete, for one reason only: Step 6 is incomplete by design. Every other
+readiness result passes, and no finding remains.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails by design, per the guidance.
+3. Validation and coverage. Passes; all seven declared commands behave as
+   expected.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. None.
+6. `a.commit`. Passes, valid, ready and accepted by the hook.
+
+Build 177 moved point 4 forward by one real blocker. Its lock check and locked
+synchronization now pass, so the failure is later and narrower. The reviewer
+spent its extra effort on the one question the record left open: why the
+capture refused Playwright. The answer is a metadata inconsistency inside the
+Playwright wheel, measured rather than inferred, and it points at a strict,
+bounded fix in the application.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 7)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-7 -->
+
+## Round 8 by requestor - Step 6
+
+- Recorded: 2026-09-19T21:39:19+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 8)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 8
+
+### Code review evidence for step 6 tools-archive-rebuild (round 8)
+
+request_index_tree: b92f2063de8be6473ae1f65b41ec65430a65ace5
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r8-verify-record.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: test(tools): cover ranked wheel metadata fallback
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): redact the point 4 validation path
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 8)
+
+Round 7 requested changes with no unresolved findings or reviewer repairs.
+Its checkpoint assessment is accepted without disagreement. Step 6 remains
+No and its documentation state remains not implemented. This is the next
+point 4 checkpoint, not a request to waive the finished-step commit gate.
+
+Build 178 used application 68ef3af9 and unchanged committed candidate pins,
+with publication off. Locked synchronization and all 80 wheel selections and
+downloads succeeded. The Playwright generic-tag fix is confirmed on Linux.
+All downloaded wheel hashes match the canonical committed application lock.
+
+The build failed next in the delivered cplx inventory helper:
+INCONCLUSIVE: ELF outside site-packages: ty-0.0.37.data/scripts/ty.
+Its installed_name mapping supports purelib/platlib but excludes scripts.
+Downloaded ruff and uv wheels also carry script ELFs. The repair belongs to
+the cplx inventory contract, with coordinated application invocation for the
+installed scripts root. No ELF was skipped and no acceptance gate weakened.
+That repair and a newly committed verification bundle remain missing work.
+
+The independent native reader binds PA1 through PA4 passing and PA5 through
+PA9 pending. Pipeline failure is not converted into invented failed cells.
+No completed inventory, wheels.tar.gz or archived agent lock was produced.
+Raw downloaded wheels do not establish installed byte equality. Point 4
+remains incomplete; point 5 D10 and point 6 publication closure follow later.
+
+All four earlier Debian sidecars, historical RHEL captures and original
+input snapshots are unchanged. Historical consumer-dependent passes remain
+pending for the new application. Source authority, publication and adoption
+gates are unchanged. No cplx commit is authorized.
+
+### Implementation report for step 6 tools-archive-rebuild (round 8)
+
+The staged checkpoint contains 15 paths in five a.commit groups. Existing
+manifest portability and timestamp parsing repairs remain unchanged. The new
+fixture accommodates the application's generic-tag fallback while checking
+ranked selection, exact-match precedence, unsupported platforms, ties and
+absent releases. No application source was modified.
+
+Build 178 and all 104 archived artifacts, including 80 raw wheels, were
+retained with hashes. Native Linux independently read the raw evidence using
+the original bundled reader and repaired timestamp-aware reader. The latter
+reports four passes and five pending cells. Two new versioned sidecars bind
+the raw reading, transport, artifact digests, source pins and new blocker.
+The acceptance JSON and generated Markdown now bind build 178. Validation
+and umbrella notes identify the cplx installed-script inventory limitation.
+
+Validation completed:
+
+- Native cumulative suite passed in 78 seconds with independent Python 3.9.25.
+  Its record, D10 fixture, helper-import, agent fixture, acceptance and installer
+  checks passed. This fixture run does not execute handoff point 5 D10.
+- The new application import requires packaging; authoring transport supplies
+  lock-pinned packaging 26.2 as a hash-verified wheel on temporary PYTHONPATH.
+  The first missing dependency and obsolete fixture failures remain retained.
+- Canonical application uv.lock transport was checked byte-for-byte on Linux.
+- All 80 downloaded wheels independently match canonical locked SHA-256s.
+- The exact record verifier passed: nine cells, pins, every raw artifact hash,
+  preserved prior sidecars and RHEL snapshots, generated view and release gates.
+- Project shell lint passed for 58 scripts. git diff --cached --check passed.
+- Full Markdown check has 39 existing diagnostics; none intersects added lines.
+  No baseline or rule was relaxed. The full repository check remains non-green.
+- Sensitive-content pre-commit hook passed after redacting a project name in
+  the appended round 7 transcript. Its historical meaning is preserved.
+- commit-plan-check reports five valid groups matching the staged paths.
+
+Jenkins failed during inventory; Package, Test and Publish were skipped.
+Neither full Jenkins success nor coverage is claimed. The native helper's
+refusal is preserved and explicitly recorded as unresolved cplx work.
+
+### Change summary for step 6 tools-archive-rebuild (round 8)
+
+Since round 7, verified application fix 68ef3af9 and ran Jenkins build 178
+once with publication off. Playwright wheel identification now passes.
+Retained all 104 artifacts and independently bound the new Debian result.
+Documented the next failure: cplx does not map wheel .data/scripts ELF files
+to their installed venv destinations. PA1-PA4 pass; PA5-PA9 remain pending.
+
+Updated the generic wheel metadata fixture to the new application contract
+without weakening refusals. Preserved all build 176/177 captures and RHEL
+history. Updated the acceptance view, missing work and umbrella checkpoint.
+Redacted one sensitive project name from the appended historical transcript
+after the pre-commit hook identified it. No reviewer repair was reversed.
+
+Step 6 remains incomplete. Stop after publishing this round as requested.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 8)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop". They subsequently
+asked to address round 7 and prepare round 8, explicitly authorizing another
+Jenkins build after application commit 68ef3af9 was pushed.
+
+Read .reviews/a.item7.handoff-prompt.md as the sequencing context. This
+request covers point 4. Point 5 D10 and point 6 publication closure remain
+later handoff work. Step 6 remains No. Assess staged defects separately from
+unfinished later obligations; do not weaken readiness or publication gates.
+
+The requestor stops immediately after publishing round 8. No cplx commit is
+authorized by this request.
+
+Writer response:
+
+Round 7 has no unresolved findings and made no reviewer repairs. Its
+assessment of the point 4 checkpoint is accepted. No repair was reversed and
+there is no disagreement. Step 6 remains incomplete; this request does not
+waive the finished-step rule.
+
+The application project supplied commit 68ef3af9 in response to the measured
+Playwright metadata mismatch. The writer verified that exact commit on the
+CI remote, its unchanged candidate pins and publication-off setting, and
+triggered build 178 once. This round binds the resulting evidence; the build
+outcome and remaining cells are detailed in the assessment and report.
+
+The native cumulative check initially stopped because the application helper
+now imports packaging, absent from the independent system Python. The helper
+runs in the synchronized candidate venv in Jenkins. For the authoring check,
+the transport now supplies packaging 26.2 as a temporary pure-Python wheel on
+the independent Python 3.9 import path. Its SHA-256 was checked against the
+exact application lock. No import check or production gate was removed, and
+the system site-packages were not changed. The original failed log is retained.
+
+Once imports ran, the older absent-wheel-tag fixture rejected the behavior
+the application fix intentionally supports. The writer updated that fixture
+to assert the ranked generic-tag fallback and exact-match precedence, with
+explicit unsupported-platform, tied-choice and absent-release refusals.
+These are cplx test-contract changes; no application source or acceptance
+gate was edited.
+
+The native source transport also carries the exact committed uv.lock blob
+instead of git archive's locally smudged lock, plus the root metadata blobs
+needed for Git object validation. Native git show was checked byte for byte
+against the transported canonical lock before reading the Jenkins evidence.
+
+Reviewed work changed because this round adds new build evidence and updates
+its current bindings and checkpoint notes. Earlier captures remain retained.
+
+Build 178 confirms the application fix. The next refusal is owned by cplx:
+the inventory does not support script ELFs outside site-packages. This is
+explicit missing work, not a new finding attributed to the round 7 reviewer.
+Neither wheel selection nor download hashing proves installed byte equality.
+The sensitive-content hook also required redacting one project name in the
+appended round 7 transcript; the historical statement is otherwise preserved.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 8)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-8 -->
+
+## Round 8 by reviewer - Step 6
+
+- Recorded: 2026-09-19T21:47:16+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+Baseline index tree: b92f2063de8be6473ae1f65b41ec65430a65ace5
+
+Assessed index tree: b92f2063de8be6473ae1f65b41ec65430a65ace5
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The verdict is the expected one. Build 178 resolved the Playwright refusal but
+failed in the cplx wheel inventory, so PA5 to PA9 on Debian, the agent wheels
+and lock, the consumer-bound RHEL reruns, D10 and the publication obligations
+remain open.
+
+Verified rather than accepted:
+
+- Build 178. The Jenkins API reports `FAILURE`, built from application commit
+  `68ef3af9`, the recorded application and pipeline revision. The live
+  console's SHA-256 equals the one both build 178 sidecars record, and it shows
+  the lock transport check, 80 packages installed, and then
+  "wheel inventory: INCONCLUSIVE: ELF outside site-packages:
+  ty-0.0.37.data/scripts/ty". The Playwright identification that failed in
+  build 177 no longer stops the build.
+- The record. The nine Debian cells now bind build 178 (PA1 to PA4 pass, PA5
+  to PA9 pending), all four earlier Debian sidecars and every RHEL capture are
+  unchanged, and the record verifier ties the new sidecars to the retained raw
+  reading byte for byte.
+- The fixture change. The agent fixture now asserts the application's ranked
+  generic-tag fallback, exact-match precedence, and refusals for an
+  unsupported platform, a tie and an absent release; all five pass natively.
+  It supplies explicit platform tags, so its verdicts do not depend on the
+  host.
+- The transcript. Its round 7 additions are appended with nothing earlier
+  removed; the redaction the writer made was in the requestor's own round 7
+  request record, the reviewer's round 7 answer copy is byte-identical, and no
+  private identifier or repeated heading remains.
+
+What the validation does not show. From `68ef3af9` the application's
+`ci/tools_wheel_capture.py` imports `packaging.tags` at module level and runs in
+the candidate venv. The committed cplx runner still imports it with the
+independent interpreter (`verify.tools-archive-rebuild.sh`, line 61), and the
+staged agent fixture loads it too. The RHEL host's `/usr/bin/python3` 3.9.25
+has no `packaging` module. The declared run passes only because the ignored
+native script exports `PYTHONPATH` to a lock-pinned `packaging` wheel for the
+whole run. The runner as the plan names it,
+`verify.tools-archive-rebuild.sh --step 6 --python /usr/bin/python3`, would
+fail at the helper import without that. The committed runner and plan should
+own this dependency explicitly.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+- Make the committed runner own the capture helper's third-party dependency:
+  either supply the hash-verified, lock-pinned `packaging` wheel itself, scoped
+  to the capture import and the agent fixture, or treat the capture as a
+  candidate-venv helper and stop importing it with the bare independent
+  interpreter. Update the plan's Step 6 helper wording to match.
+- Extend the cplx wheel inventory to map and verify `.data/scripts` ELFs
+  against the venv's scripts directory without skipping them, deliver the
+  corrected bundle, and repeat the candidate build with publication off.
+- Run PA5 to PA9 on Debian, repeat RHEL PA5 and PA6 against the new consumers,
+  take the D10 reading with the agent's wheels, and complete the remaining
+  pre-publication obligations.
+
+Architecture: the fixture change stays in the test contract. The dependency
+question above is a boundary issue between the independent interpreter and a
+helper that became venv-bound.
+
+Performance: no runtime cost added. Unit test coverage: no Python class
+changed and no percentage is claimed. No unit-tested class below 100% needs
+completing, and no top-level symbol outside the coverage gate is unreferenced.
+
+Feature integrity: the capture's strict refusals are all still asserted.
+Nothing is impaired, but the committed runner's portability to the stock
+independent interpreter is lost until the dependency is owned.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows are accurate about build 178 and the `.data/scripts`
+inventory gap, and they disclose that the native run supplied `packaging` to
+the independent interpreter. What they lack is a missing-work bullet making the
+committed runner own that dependency. Adding one needs a decision between
+supplying the wheel in the runner and reclassifying the capture helper, so the
+reviewer leaves it to the writer instead of choosing in a validation row.
+
+The status sentence stays exactly `No. Step 6 has NOT been fully implemented.`,
+and the document-level line stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+The reviewer ran all seven resolved commands. All seven pass as declared.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone
+  after reading the changed transport and native scripts: transport exit 0 in
+  103 seconds, native `validation exit=0 elapsed=77s`, no FAIL line, four helper
+  imports, the five new wheel-capture fixture cases and 61 acceptance cases.
+  The native script printed `Independent dependency: 26.2` from the injected
+  `packaging` wheel. The reviewer removed its own scratch fixture afterwards.
+- The build 178 record verifier, source `request`: both `PASS` lines, exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the 39
+  older findings, as declared.
+- The Markdown intersection checker, source `request`: `PASS`.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: clean.
+
+Measured independently: build 178 through the Jenkins API and its live console
+digest and key lines; the application capture's imports and caller at
+`68ef3af9`; the RHEL host's `/usr/bin/python3` (3.9.25, `ModuleNotFoundError:
+No module named 'packaging'`); the transcript's round 7 additions; and the
+host's `/var/tmp`, now at 94% with 244 MB free.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same seven commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Its native
+  script now exports `PYTHONPATH` to a hash-checked `packaging` wheel before
+  running the committed runner; that is the dependency in the finding.
+- The build 178 record verifier, source `request`.
+- The Markdown gate with `--root ../cplx`, source `request`.
+- The Markdown intersection checker, source `request`.
+- `git diff --cached --check`, source `request`.
+- `bash .git/hooks/pre-commit`, source `request`.
+
+The changed transport and native scripts were read in full before running and
+kept in the validation-state path set.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets. The plan command is unchanged in name, but its
+ignored native script now alters the interpreter's import path; the finding
+covers that.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `b92f2063de8be6473ae1f65b41ec65430a65ace5` equals the
+  baseline at entry and the live index after every run.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `a9856ba7bfacaaec37d2030f2285f17d079eaf2c498274385407e1bd4d45f759`.
+  No umbrella row was completed.
+- Validation-state comparison over the 15 staged paths, the project command's
+  file and the five ignored validation files: `acceptable: true`, naming only
+  the ignored Markdown log that the declared command rewrites.
+- The working tree matches its entry state: 15 staged paths, and the
+  transcript also carries the protocol's unstaged append of this request.
+- No reviewer residue in either repository or on the RHEL host.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+`a.commit` is mechanically accurate and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 15 staged paths in five
+ordered groups matching the request. The installed hook accepts the index.
+
+- Group 1 is unchanged since round 4 and accurate.
+- Group 2, `test(tools): cover ranked wheel metadata fallback`, carries the
+  agent fixture alone, which fits.
+- Groups 3 to 5 carry the Debian evidence, the validation plan and umbrella,
+  and the transcript, in dependency order.
+
+When the runner is changed to own the `packaging` dependency, that change
+belongs with the fixture in group 2 or in its own `fix(tools)` group before it.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+Unresolved findings:
+
+- The committed cplx runner and the staged agent fixture now depend on the third-party `packaging` module, because application commit `68ef3af9` made `ci/tools_wheel_capture.py` import `packaging.tags` at module level, yet the runner still imports that helper with the bare independent interpreter; the RHEL host's `/usr/bin/python3` 3.9.25 has no `packaging`, so the declared validation passes only because the ignored native script exports `PYTHONPATH` to a lock-pinned wheel, and `verify.tools-archive-rebuild.sh --step 6 --python /usr/bin/python3` as the plan names it would fail at the helper import.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+Human guidance:
+
+The human instructed: "Follow the sequence and, after addressing point 4,
+submit a new code review request for step 6, and stop". They subsequently
+asked to address round 7 and prepare round 8, explicitly authorizing another
+Jenkins build after application commit 68ef3af9 was pushed.
+
+Read .reviews/a.item7.handoff-prompt.md as the sequencing context. This
+request covers point 4. Point 5 D10 and point 6 publication closure remain
+later handoff work. Step 6 remains No. Assess staged defects separately from
+unfinished later obligations; do not weaken readiness or publication gates.
+
+The requestor stops immediately after publishing round 8. No cplx commit is
+authorized by this request.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- Scope. The review covers point 4 only; D10 and the publication closure are
+  not requested, and Step 6 stays `No`.
+- Staged defects, assessed separately from the later obligations: one. The
+  staged fixture and the committed runner rely on a dependency that only the
+  ignored transport provides.
+- No gate was weakened, and the recommended fix weakens none: it makes an
+  existing dependency explicit and hash-verified in committed code, or moves
+  the capture helper to the environment it already runs in.
+- No commit, push, build or later point was performed or is authorized.
+
+The disposition is changes-requested because Step 6 is incomplete by design
+and because of that one finding.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+The build 178 evidence and the fixture change are good. One cplx change is
+needed so the committed runner passes without the ignored transport.
+
+**Make the runner own the `packaging` dependency.** The application's capture
+helper now needs `packaging`, and the stock independent interpreter does not
+have it. Choose one of these in committed cplx code, then update the plan's
+Step 6 helper wording to match:
+
+- Supply the lock-pinned `packaging` wheel from the runner itself, verified by
+  its hash from the application lock, and scope it to the capture import and
+  the agent fixture rather than the whole run. The other helpers then keep
+  proving they import on the bare interpreter.
+- Or treat the capture as the candidate-venv helper it now is: drop it from the
+  bare-interpreter import list and exercise it where `packaging` is present.
+
+The reviewer leans to the first option, because it keeps the fixture's
+coverage of the ranked fallback in the cumulative runner. After the change,
+remove the `PYTHONPATH` export from the native script and rerun, so the
+evidence shows the committed runner passing on its own.
+
+**Then the inventory.** Extend the cplx wheel inventory to map `.data/scripts`
+ELFs to the venv's scripts directory and verify them, as the missing work
+says, deliver the corrected bundle, and repeat the build.
+
+**RHEL host space.** `/var/tmp` is at 94% with 244 MB free again. The next
+native runs need about 130 MB each, so older fixtures should be cleared soon.
+
+Done well: build 178 confirmed the application fix, the new failure was traced
+to the component that owns it, and the dependency workaround was disclosed
+rather than hidden.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete: Step 6 is incomplete by design, and one finding remains.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails by design, per the guidance.
+3. Validation and coverage. The declared commands pass, but the plan command
+   passes only with an interpreter change made in an ignored script.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. One: the hidden `packaging` dependency.
+6. `a.commit`. Passes, valid and ready, and the hook accepts the index.
+
+The finding matters because of what the independent interpreter is for. The
+plan runs helpers under a Python that is independent of the candidate, and the
+runner's import check exists to prove they load there. Exporting `PYTHONPATH`
+for the whole run from an ignored script keeps the check green while changing
+what it proves, and the committed runner can no longer be reproduced from
+committed code. The writer disclosed the workaround, which is why this is a
+clean finding rather than a surprise.
+
+The build 178 evidence itself is sound: the application fix works, and the
+next blocker is correctly placed in cplx.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 8)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-8 -->
+
+## Round 9 by requestor - Step 6
+
+- Recorded: 2026-09-19T22:55:30+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 9)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 9
+
+### Code review evidence for step 6 tools-archive-rebuild (round 9)
+
+request_index_tree: a990d62b63790d20f4270e1d6c3beaa22a967c4f
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r9-verify-record.py (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r9-check-wheels.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: fix(tools): separate wheel capture test dependencies
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 2 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): redact the point 4 validation path
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 9)
+
+Round 8's unresolved dependency finding is addressed using its explicit
+application-venv option. The committed runner requires --capture-python for
+Step 4 and later, checks its venv dependencies and runs capture fixtures there.
+The other three helper imports remain isolated under bare Python 3.9.25.
+The plan now describes this boundary. No temporary PYTHONPATH is required.
+
+The instruction to expand installed-script ELF mapping is disputed in light
+of application commits dae99121 and 6ce03c2c. CI does not use the native CLI
+tools in its venv; the application now excludes their tooling group from its
+locked sync. That preserves the existing inventory contract. The previous
+writer assessment assigning this repair to cplx was too broad. No inventory
+rule or refusal is relaxed, and no reviewer repair has been reverted.
+
+Step 6 remains No, with its documentation status not implemented. This is
+handoff point 4 only. D10, affected RHEL acceptance and publication obligations
+remain later work. The actual build 179 evidence and cell states accompany
+this assessment. No cplx commit is authorized. Stop after publication.
+
+### Implementation report for step 6 tools-archive-rebuild (round 9)
+
+The staged checkpoint contains 20 paths in five valid a.commit groups.
+Existing manifest portability and timestamp parsing repairs remain unchanged.
+The cumulative runner and agent harness require an explicit capture venv,
+isolate capture fixtures from independent Python checks, and report actual
+interpreter/dependency identities. The implementation plan describes this
+boundary. The outside-home fixture now works when TMPDIR is inside home.
+No application source or production inventory rule was changed.
+
+Build 179 checked out application 6ce03c2c using the unchanged candidate
+archive and verification bundle with publication off. Provision and Package
+passed. Locked synchronization excluded the tooling group; installed-byte
+inventory captured 77 wheels and 80 ELFs. All 77 downloaded wheel hashes
+match the canonical lock; the archived lock matches committed public-URL bytes.
+
+Test stopped before pytest because the ABI inventory encountered a dangling
+tools/python/root/usr/lib/cpp -> ../bin/cpp alias. Inspection of the exact
+pinned archive found that alias in both Python and Git roots, with neither
+target present. This new candidate archive issue belongs to cplx and requires
+candidate preparation and renewed acceptance. It was not bypassed or repaired
+inside this point 4 evidence checkpoint. Publish was skipped.
+
+All 109 artifacts and the raw console are retained locally and on the native
+evidence volume. The original bundled reader and timestamp-aware working
+reader were both run independently on Linux. The latter binds four passes
+(PA1-PA4), two failures (PA5/PA7), and three pending cells (PA6/PA8/PA9).
+Two new versioned sidecars bind the raw readings, transport and all artifact
+digests. The release record now includes the agent lock and 77 wheel identities.
+All six earlier Debian sidecars, historical RHEL captures and original input
+snapshots remain unchanged. Authority, publication and adoption are unchanged.
+
+Validation completed:
+
+- Native cumulative Step 6 passed in 78 seconds, including 61 acceptance
+  fixtures and project shell lint for 58 scripts, with PYTHONPATH unset.
+  Independent Python 3.9.25 has no packaging; its three helper imports pass.
+  The explicitly selected capture venv reports Python 3.13.9 and packaging
+  26.2. This fixture interpreter does not qualify candidate Python 3.13.15;
+  the real Jenkins provisioning uses the selected 3.13.15 target.
+- Missing capture arguments and a bare capture interpreter are rejected.
+  The initial 48-second TMPDIR fixture failure and successful rerun are kept.
+  Native output is .reviews/a.point4-r9-native-full.log; explicit rejection
+  checks are .reviews/a.point4-r9-boundary.log. New remote run material is
+  retained below $HOME/cplx-release-evidence instead of the nearly full /var/tmp.
+- Canonical application lock transport matches byte-for-byte on Linux.
+- The record verifier passes all nine bindings, raw capture/artifact hashes,
+  historical preservation, current reassessments, gates and generated view.
+- git diff --cached --check and the sensitive-content pre-commit hook pass.
+- Full Markdown check retains 39 existing diagnostics; none intersects added
+  lines. No baseline or rule changed; the full repository check is non-green.
+- commit-plan-check reports ready=true with five groups matching all 20 paths.
+- The mandatory ghog day entry passed its check phase (21.6 seconds), then
+  affected testing reported exit 5 because this repository has no pytest on
+  its configured PATH. The wrapper returned 1. This known project limitation
+  remains explicit; the planned native suite supplies the integration checks.
+
+No full Jenkins success, executed pytest suite or coverage result is claimed.
+Step 6 stays No; archive repair, remaining Debian cells, affected RHEL acceptance,
+D10 and publication obligations remain. No cplx commit is authorized.
+
+### Change summary for step 6 tools-archive-rebuild (round 9)
+
+Since round 8, addressed the actual dependency finding in the committed runner:
+capture uses an explicit application venv while independent checks stay on
+bare Python. Updated its plan and made the outside-home fixture independent
+of TMPDIR placement. Native validation passes without PYTHONPATH injection.
+
+Ran build 179 once on application 6ce03c2c with unchanged candidate pins and
+publication off. Provisioning, 77-wheel/80-ELF capture and packaging pass.
+The application tooling-group change resolves the previous inventory refusal;
+the prior instruction to broaden the cplx inventory contract is corrected.
+
+Retained 109 artifacts and independently bound four Debian passes, two failures
+and three pending cells. The new failure is the pinned archive's dangling cpp
+alias, exposed by the ABI inventory before pytest. Current consumer identities
+now include the exact agent lock and wheels. Earlier sidecars and RHEL history
+are preserved. Updated the generated view, missing work, umbrella and a.commit.
+
+Step 6 remains incomplete. Stop after publishing round 9 as requested.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 9)
+
+Human guidance:
+
+The human asks to address Step 6 round 8, check a fresh Jenkins build after
+application 6ce03c2c, and publish round 9. Earlier handoff guidance requires
+stopping immediately after publication. This is point 4 only, with publication
+off. Point 5 D10 and point 6 closure remain later work. No cplx commit is
+authorized. Read .reviews/a.item7.handoff-prompt.md for the sequence.
+
+Writer response:
+
+Accepted round 8's concrete dependency finding. No reviewer repairs were made,
+so none was reversed. The committed cumulative runner now requires an explicit
+--capture-python application-venv interpreter for Step 4 and later. The agent
+harness checks its packaging and tomllib dependencies in isolated mode, and
+imports and tests wheel capture there. The three independent helpers and
+other parser fixtures still run with isolated independent Python 3.9. The
+plan documents this boundary. This implements the reviewer's second option.
+The ignored global PYTHONPATH export and wheel injection were removed.
+
+Explicit disagreement with the instruction to extend the inventory contract:
+new application commits dae99121 and 6ce03c2c address what the CI venv contains.
+Native CLI tools move to the tooling group, excluded only from CI's locked
+sync. They are not runtime consumers of the packaged application. Local default
+groups still include them. The Test stage uses uvtool's uv. Therefore the
+existing site-packages-only inventory remains the appropriate scope; it must
+not silently skip an installed ELF or need a broader script-root contract for
+this application. The fresh build tests that claim against the exact pinned
+bundle, not the application's mock installation. Its measured outcome is
+reported separately. The round 8 ownership assessment was too broad and is
+corrected in current notes; historical build 178 captures remain unchanged.
+
+Native scratch storage now uses the home evidence volume because /var/tmp is
+almost full. This exposed an acceptance fixture that assumed TMPDIR was
+outside /home. Its refused test path is now explicitly under /var/tmp, preserving
+the same boundary assertion without creating a fixture tree on that volume.
+The first failure remains retained. No acceptance boundary was relaxed.
+
+Reviewed work changed through the committed runner/fixture/plan repairs, new
+build evidence and current checkpoint bindings. a.commit is updated for those
+paths and responsibilities. Step 6 remains incomplete; no commit is authorized.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 9)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-9 -->
+
+## Round 9 by reviewer - Step 6
+
+- Recorded: 2026-09-19T23:07:45+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+Baseline index tree: a990d62b63790d20f4270e1d6c3beaa22a967c4f
+
+Assessed index tree: 10a769cf445f9743cd23891e133fa2a31b8fad56
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+The verdict is the expected one. Build 179 got past wheel capture, then failed
+on a defect in the pinned tools archive itself, so the candidate must be
+repaired and re-accepted before PA5 to PA9, D10 and publication can proceed.
+
+The round 8 finding is fixed in committed code, verified rather than accepted:
+
+- The runner now requires `--capture-python` for Step 4 and later, imports only
+  the three stdlib helpers under the bare interpreter in isolated mode, and
+  runs the wheel-capture import and fixtures under an explicit interpreter
+  that must be a venv holding `packaging` and `tomllib`. The plan documents the
+  boundary, and the native script no longer exports `PYTHONPATH`; it asserts
+  the bare interpreter has no `packaging`.
+- Against the committed application `6ce03c2c`, the reviewer's run passed:
+  exit 0 in 78 seconds, three independent helper imports on bare 3.9.25, the
+  capture helper and its five fixture cases under the capture venv, and 61
+  acceptance cases.
+
+Build 179, verified against the evidence and the archive:
+
+- Consumers: 77 wheel hashes match the committed lock, 80 ELFs were captured,
+  none of ruff, ty or uv is among them, and the archived lock equals the
+  committed bytes, as the wheel checker confirms.
+- The new failure is real and belongs to cplx. On the RHEL host the retained
+  replacement archive holds `usr/lib/cpp -> ../bin/cpp` in both the Python and
+  Git roots, plus two `usr/lib/.build-id/` links per root aimed at the same
+  absent `usr/bin/cpp`: six dangling links. The original candidate carries the
+  same six. The 539 archive cases never flagged them. PA5 and PA7 on Debian
+  fail on exactly that missing target, as recorded.
+- The record binds build 179 and the new consumers, keeps all six earlier
+  Debian sidecars and every RHEL capture, and the transcript is clean: the
+  reviewer's round 8 answer copy is byte-identical, nothing earlier was
+  removed, no private identifier, no repeated heading.
+
+On the writer's dispute about the inventory: the cplx inventory's
+site-packages scope is a coherent contract, and moving the native CLI tools
+out of CI's locked sync is the application's decision to make. But the
+deployed venv still contains them: the application's `default-groups` include
+`tooling`, the RHEL-qualified 3.13.15 venv holds 80 packages including ruff, ty
+and uv, and the RHEL PA6 audit runs that venv's `uv`. All four binaries there
+(uv, uvx, ruff, ty) need `libgcc_s.so.1`, one of the providers D10 selects.
+That is a consumer-scope question for the human, not a cplx defect.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+- Remove or resolve all six dangling `cpp` links through candidate packaging,
+  add an archive check that refuses dangling links, produce a new candidate,
+  and repeat the affected acceptance with exact new pins.
+- Record the human's decision on whether the deployed venv's tooling binaries
+  are in the qualified consumer set, and align the RHEL PA6 audit and the
+  Debian consumer set with it.
+- Run PA5 to PA9 on Debian, repeat RHEL PA5 and PA6 against the current
+  consumers, take the D10 reading and complete the pre-publication obligations.
+
+Architecture: the capture boundary is now explicit and enforced. Performance:
+no runtime cost added. Unit test coverage: no Python class changed, no
+percentage claimed; no unit-tested class below 100% needs completing, and no
+top-level symbol outside the coverage gate is unreferenced.
+
+Feature integrity: the independence check is stronger than before, since
+isolated mode now keeps any caller `PYTHONPATH` out. Nothing is impaired.
+
+Validation plan effects:
+
+The reviewer extended one Step 6 missing-work bullet in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` and staged
+exactly that attributable patch.
+
+The writer's `Candidate archive alias` bullet named only the
+`usr/lib/cpp -> ../bin/cpp` alias. The reviewer measured both candidate
+archives on the RHEL host and found two more dangling links per root under
+`usr/lib/.build-id/`, aimed at the same absent `usr/bin/cpp`, six in all, and
+the same six in the original candidate, which the 539 archive cases did not
+detect. The bullet now says so and asks to resolve all six, so the repackage
+does not fix only the first link the ABI scan tripped on. It is a factual
+addition and adds no design decision.
+
+The status sentence stays exactly `No. Step 6 has NOT been fully implemented.`,
+the `Missing work for Step 6` section stays present, and the document-level line
+stays `No, it is not implemented.`
+
+Pre-repair blob `141e890261b8e1c8e2872b28126447e97ef8389e` was recorded before
+the edit, `attribute-reviewer-patch` returned `attributable: true`, and
+`git apply --cached` staged exactly that patch.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+The reviewer ran all eight resolved commands. Seven pass. The native transport,
+run as declared, failed, for a reason outside the staged work.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`: native
+  `validation exit=1` after 34 seconds. The cplx agent fixture raised
+  `TypeError: inventory() missing 1 required positional argument: 'dangling'`.
+  The transport still overlays three application helpers from the
+  application's working tree, a round 1 mechanism for then-uncommitted
+  repairs. The application checkout now holds an uncommitted edit to
+  `ci/tools_abi_scan.py` (working-tree digest `de10145e...1149`, committed
+  `6ce03c2c` blob `13a07fd9...c176`) that adds that parameter. The declared
+  run therefore tested unrelated, unfinished application work.
+- The same run against the committed application: the reviewer used its own
+  copy of the transport that ships only the committed HEAD (the same native
+  script, unchanged), and got exit 0 in 78 seconds, no FAIL line, three
+  independent helper imports on bare 3.9.25, the capture helper and its
+  fixtures under the capture venv, and 61 acceptance cases.
+- The build 179 record verifier, source `request`: both `PASS` lines, exit 0.
+- The wheel checker, source `request`: `PASS`, 77 locked wheel hashes, 80
+  ELFs, tooling excluded, canonical lock archived.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the 39
+  older findings, as declared.
+- The Markdown intersection checker, source `request`: `PASS`.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`: both clean, before and after the reviewer's staged patch.
+
+Measured independently: the six dangling `cpp` links in both candidate
+archives; the `libgcc_s.so.1` needs of uv, uvx, ruff and ty in the
+RHEL-qualified venv and its 80 packages; the application's `default-groups`
+and CI sync flags at `6ce03c2c`; and the application checkout's uncommitted
+helper edit. The reviewer removed both of its scratch fixtures from the RHEL
+host and did not touch the application checkout.
+
+No coverage percentage is claimed; cplx's floor is shell lint.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same eight commands, plus one reviewer-owned variant.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 1 as
+  declared, from the application working-tree overlay.
+- The build 179 record verifier, source `request`. Exit 0.
+- The wheel checker, source `request`. Exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`. Exit 1 on older
+  debt only.
+- The Markdown intersection checker, source `request`. Exit 0.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Clean.
+
+The variant is `.reviews/a.code-review.s6r9-transport-committed.sh`: the same
+transport without the working-tree overlay, with helper digests taken from the
+committed blobs. It is kept as caller evidence in the artifact home.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+Every comparison came from the shared evidence launcher. The only tracked change
+is the reviewer's own attributable validation-row patch.
+
+- Request-time index tree `a990d62b63790d20f4270e1d6c3beaa22a967c4f` equals the
+  baseline at entry. The assessed tree is
+  `10a769cf445f9743cd23891e133fa2a31b8fad56`, which differs by exactly the
+  staged reviewer patch.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `e1d94dba81fd7292cc260e9a1799f34293bbf286460ba05644e8191f0df9a23b`.
+- Validation-state comparison over the 20 staged paths, the project command's
+  file and the six ignored validation files: `acceptable: false`, naming the
+  validation plan and the index (the reviewer's permitted Step 6 row patch)
+  and the ignored Markdown log the declared command rewrites.
+- The working tree matches its entry state apart from that staged patch, plus
+  the protocol's unstaged transcript append and the reviewer's ignored
+  transport variant.
+- The application checkout was read, never written; its uncommitted edit is
+  the application team's and was left in place.
+- No residue on the RHEL host: both reviewer scratch fixtures were removed.
+- The baselines and manifest were written before assessment, the pre-repair
+  blob before the edit, and the manifest rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+Repairs made:
+
+- `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`, polishing-only review metadata confined to one Step 6 missing-work bullet: the candidate archive bullet now names all six dangling `cpp` links (the `usr/lib/cpp` alias and two `usr/lib/.build-id/` links per root), notes the original candidate carries them too and that the 539 archive cases missed them
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` (the attributable reviewer patch only, applied to the index with `git apply --cached`)
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+`a.commit` is accurate, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json`, run against the received
+state and again after the reviewer's staged patch: `state: valid`,
+`ready: true`, exit 0, no diagnostics, 20 staged paths in five ordered groups
+matching the request. The installed hook accepts the index.
+
+- Group 1 is unchanged since round 4.
+- Group 2, `fix(tools): separate wheel capture test dependencies`, carries the
+  runner, the agent harness, the fixture and the plan text for the capture
+  boundary. `fix` fits: it repairs the runner's hidden dependency.
+- Groups 3 to 5 carry the Debian evidence, the validation plan (with the
+  reviewer's patch) and umbrella, and the transcript, in dependency order.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+Unresolved findings:
+
+- The declared native validation is not hermetic: `.reviews/a.step6.transport.sh` still overlays `ci/tools_abi_scan.py`, `ci/tools_test_evidence.py` and `ci/tools_wheel_capture.py` from the application working tree, so with the application's current uncommitted edit to `tools_abi_scan.py` the declared command exits 1 in the cplx agent fixture, although the staged cplx work passes against the committed application `6ce03c2c`; the overlay served round 1's uncommitted repairs, which are now committed, and should be removed so the command validates committed inputs only.
+
+Boundary-crossing work:
+
+- The consumer scope of the deployed venv needs a human decision: CI now syncs without the application's `tooling` group, so the bound Debian consumer set is 77 wheels, while local syncs keep `default-groups = ["dev", "tooling"]`, the RHEL-qualified venv holds 80 packages including ruff, ty and uv, the RHEL PA6 audit executes that venv's `uv`, and uv, uvx, ruff and ty all need `libgcc_s.so.1`, a provider D10 selects; decide whether deployment venvs exclude the tooling group too (and where PA6 gets `uv`) or whether those binaries join the qualified consumer set
+- The application checkout holds an uncommitted edit that changes `tools_abi_scan.inventory` to require a `dangling` argument; when it is committed, the cplx agent fixture's `abi.inventory(tools, venv)` call must change in the same coordinated step, or the cumulative runner will fail against that application revision
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+Human guidance:
+
+The human asks to address Step 6 round 8, check a fresh Jenkins build after
+application 6ce03c2c, and publish round 9. Earlier handoff guidance requires
+stopping immediately after publication. This is point 4 only, with publication
+off. Point 5 D10 and point 6 closure remain later work. No cplx commit is
+authorized. Read .reviews/a.item7.handoff-prompt.md for the sequence.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- Round 8 is addressed, and the reviewer confirmed it against the committed
+  application.
+- Build 179 was checked through its retained evidence and the archive it
+  pinned; the new blocker is confirmed and scoped more precisely.
+- Scope stays point 4. D10 and the publication closure are not requested, and
+  Step 6 stays `No`.
+- No commit, push, build or later point was performed or is authorized, and
+  the application checkout was not touched.
+
+The disposition is changes-requested because Step 6 is incomplete by design,
+because the declared validation must stop reading the application's working
+tree, and because two items need the human: the tooling-group consumer scope
+and the coordination of the in-progress application helper change.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+The staged cplx work is sound. Three things follow.
+
+**Make the declared validation hermetic.** Remove the application working-tree
+overlay from `.reviews/a.step6.transport.sh` and take the helper digests from
+the committed blobs. The reviewer's copy,
+`.reviews/a.code-review.s6r9-transport-committed.sh`, shows the change and
+passes. The round 1 repairs it served are committed, and the overlay now pulls
+in whatever the application team has in progress.
+
+**Plan the candidate repair for all six links.** Remove or resolve the
+`usr/lib/cpp` alias and the two `usr/lib/.build-id/` links per root aimed at
+`usr/bin/cpp`, in the Python and Git roots, through candidate packaging. Add an
+archive check that refuses dangling links, since the 539 cases missed these.
+A new candidate means a new Step 5 return and renewed acceptance, which needs
+the human's go-ahead.
+
+**Bring two items to the human.** First, the consumer scope of the tooling
+group: CI's consumer set is 77 wheels, while the deployed venv holds 80,
+including uv, ruff and ty, which need `libgcc_s.so.1` and whose `uv` the RHEL
+PA6 audit runs. Second, the application's in-progress change to
+`tools_abi_scan.inventory`: the cplx agent fixture must change with it, in one
+coordinated step.
+
+The inventory dispute is accepted as far as cplx goes: the site-packages scope
+is coherent, and the round 8 missing-work bullet was indeed broader than
+needed. What remains is the scope decision above, which belongs to the human.
+
+Done well: the dependency finding was fixed in committed code with explicit,
+enforced boundaries, the fixture's TMPDIR assumption was found and corrected,
+and the archive defect was traced to the candidate rather than patched around.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete.
+
+1. Identity. Passes; the assessed tree differs from the request by exactly the
+   reviewer's staged patch.
+2. Completeness. Fails, now for a concrete reason beyond the plan: the pinned
+   candidate archive has six dangling links and must be rebuilt.
+3. Validation and coverage. The staged work passes against the committed
+   application. The declared native command fails because it reads the
+   application's working tree.
+4. Staged attribution. Passes; one attributable validation-row patch, which is
+   review metadata.
+5. Unresolved findings. One: the transport's working-tree overlay.
+6. `a.commit`. Passes, valid, ready and accepted by the hook.
+
+This round's central result is the archive defect. It is not a point 4 issue:
+it has been in both candidates since the original build, the archive checks
+never looked for dangling links, and the application's ABI scan found it only
+because the build finally got that far. It means another candidate, so the
+human decides how and when.
+
+The transport finding explains a run that fails for the reviewer but passed
+for the writer, and shows why a declared validation should read only committed
+inputs.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 9)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-9 -->
+
+## Human-authorized recovery after round 9 - Step 6
+
+- Recorded: 2026-09-19T23:53:49+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: escalation
+
+review disagreement remained after the clarification round
+
+<!-- review-entry-id: escalation-round-9 -->
+
+## Round 9 by human - Step 6 - human-reclaim
+
+- Recorded: 2026-09-20T01:04:22+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: human-reclaim
+
+### Human resolution of archive disagreement for step 6 tools-archive-rebuild (round 10) (recovery record)
+
+The human selected: Use c2b71daf/#180 evidence; publish round 10.
+The current request reiterates publication after first writing instructions
+for application-owned fixes in application.
+
+The human subsequently explicitly authorized reclaiming ownership, publishing
+round 10 and stopping. Resume this stopped manual handoff using that authority;
+the archive disagreement is resolved by the evidence decision above.
+
+Use application c2b71daf and retained Jenkins build 180 as authoritative
+evidence that dangling aliases no longer stop inventory and loader maps.
+Leave the candidate archive unchanged for this checkpoint. Preserve the
+reviewer's measured links and historical build 179 evidence. Retain the real
+host-library import failure as unresolved; no runtime or release waiver is
+granted. Broader system-interpreter scope remains reviewable.
+
+The application follow-up instructions were written first to
+`.reviews/a.point4-runtime-import-handoff.md`. They identify the application
+scanner's forced-map/runtime mismatch, require the direct-import refusal to
+remain blocking, and require coordination if the runtime fix belongs to cplx.
+
+Publish round 10 and stop without waiting or committing. Step 6 stays No;
+D10, fresh RHEL qualification and publication remain later work.
+
+<!-- review-entry-id: human-reclaim-round-9 -->
+
+Editorial correction for round 11: application-project names in this recovery
+record and its repeated round 10 guidance were redacted; recovery headings
+were qualified. The decision and live exchange artifacts are unchanged.
+
+## Round 10 by requestor - Step 6
+
+- Recorded: 2026-09-20T01:06:59+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 10)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 10
+
+### Code review evidence for step 6 tools-archive-rebuild (round 10)
+
+request_index_tree: c0078dd0941f9871aa650a3fee5018f083c4f3ca
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r10-verify-record.py (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r10-check-wheels.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: fix(tools): align application verification fixtures
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 2 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): retain point 4 review exchanges
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 10)
+
+Round 9's validation transport finding is addressed. Application source is
+archived from one committed revision, with committed helper hashes retained;
+the ignored transport no longer overlays application working-tree helpers.
+The cplx fixtures now use the committed ABI scanner API, including explicit
+dangling-link evidence and the venv interpreter search path.
+
+The mandatory archive-rebuild repair is explicitly disputed. The six measured
+cpp links are real and remain documented, but unused aliases and RPM debug
+links alone do not establish a missing runtime provider. This disagreement
+triggered the review exchange's escalation rule. The response preserves the
+reviewer's observation and earlier captures, and identifies the remaining
+system-interpreter scope question rather than claiming a release waiver.
+
+The human chose deployment venvs without tooling and uv from the tools
+installation. Requirement, design, plan and checkpoint notes record this
+decision. Fresh RHEL qualification must measure that scope before D10.
+
+Step 6 remains No. This is handoff point 4 only; D10, fresh consumer-dependent
+RHEL acceptance and publication obligations remain later work. No cplx commit
+is authorized. The human resolved the archive disagreement using c2b71daf
+and build 180 as authority, and explicitly authorized ownership reclaim and
+round 10 publication. Recovery succeeded. Dangling aliases remain unchanged
+for this checkpoint; the actual import failure remains unresolved.
+
+Application follow-up instructions were written before publication in
+`.reviews/a.point4-runtime-import-handoff.md`. They identify the scanner's
+forced-map/runtime mismatch without claiming a application-only runtime fix.
+
+### Implementation report for step 6 tools-archive-rebuild (round 10)
+
+The staged point 4 checkpoint contains 24 paths in five a.commit groups.
+Existing manifest portability and timestamp parsing repairs remain included.
+The cumulative runner uses an explicit application capture venv, keeping
+independent helper imports isolated on bare Python. The transport archives
+one committed application revision and checks its committed helper hashes,
+without an application working-tree overlay. Fixtures supply the scanner's
+new dangling-link argument and interpreter RPATH. Missing providers and
+unknown outside interpreters still refuse. The reader supports the optional
+dangling count and rejects malformed zero-flags lines.
+
+The human chose deployment venvs without tooling and uv from the tools
+installation. Requirement, design, plan, validation and umbrella record that
+scope and the need for fresh RHEL acceptance before D10. No deployed venv
+was modified in this evidence checkpoint.
+
+Build 180 checked out c2b71daf with the unchanged candidate archive and
+verification bundle, publication off. Provision and Package passed. Locked
+synchronization used Python 3.13.15, uv 0.12.17 and --no-group tooling.
+All 77 captured wheel hashes and the archived public-URL lock match the
+committed lock; capture records 80 installed ELFs.
+
+The scanner inventories 686 objects, records 488 dangling links and completes
+519 per-object loader observations. The real direct-venv import then fails
+in pymupdf: _extra.so's RUNPATH is searched for libpthread, followed by the
+host cache, which selects /lib/x86_64-linux-gnu/libpthread.so.0. Its
+GLIBC_ABI_DT_RELR requirement is absent from candidate libc. Host libdl,
+libutil and libstdc++ are selected too. No ABI pass, pytest execution or
+coverage result is claimed. Publish was skipped.
+
+All 1320 artifacts and the console are retained locally and on the native
+evidence volume. Both original bundled and updated readers ran on native
+Linux. The updated reading binds PA1 to PA4 pass, PA5 to PA8 fail and PA9
+pending. Two new sidecars bind readings, transport, raw captures and every
+artifact digest. Eight earlier Debian sidecars, historical RHEL captures and
+original input snapshots are preserved. Authority, publication and adoption
+are unchanged. Consumer-dependent historical RHEL passes remain pending.
+
+Validation:
+
+- Native cumulative Step 6 passes in 77 seconds, including 63 acceptance
+  fixtures and shell lint for 58 scripts. Bare Python 3.9.25 helper imports
+  stay isolated; the fixture capture venv reports Python 3.13.9, packaging
+  26.2. That fixture does not qualify candidate Python 3.13.15.
+- Committed lock transport is byte-identical on Linux. All 77 wheel hashes,
+  80 ELFs, tooling exclusion and canonical archived lock checks pass.
+- The evidence verifier checks exact cells, all retained digests, historical
+  preservation, reassessments, unchanged gates and the generated view.
+- The staged diff passes. Commit-plan checking is
+  ready=true for all 24 paths in five groups.
+- Full Markdown checking reports 39 existing diagnostics plus two new
+  diagnostics on the workflow-owned transcript's duplicate Round 9 requestor
+  heading (LS003 and MD024, line 11721). The changed-line check therefore
+  fails too. The review tool appended that heading while consuming this
+  answer; no caller edit to the core-owned transcript is made or claimed.
+  This new tooling diagnostic is reported, not hidden as existing lint debt.
+- The required ghog day check phase passes in 17.2 seconds; affected testing
+  exits 5 because pytest is absent from this repository's configured PATH.
+  The wrapper exits 1. The planned native suite supplies integration checks;
+  the repository-wide ghog result is not claimed green.
+
+The mandatory archive rebuild solely for dangling cpp/debug links is explicitly
+disputed; the human resolved that disagreement using c2b71daf/build 180 and
+authorized reclaiming ownership and publishing round 10. Recovery succeeded.
+The actual
+direct-venv search-path failure remains unresolved, and broader scanner
+system-interpreter exclusions still require review against the settled scope.
+Step 6 stays No. D10, RHEL requalification and publication remain later work.
+No cplx commit is authorized. Stop immediately after publishing round 10.
+
+Before publication, wrote `.reviews/a.point4-runtime-import-handoff.md` for
+the application. Its scanner forces per-object search paths which the real import
+does not use. The instructions require truthful diagnostics and preservation
+of the direct-import gate, with coordinated cplx follow-up if no supported
+application-side runtime repair exists. No runtime fix is claimed.
+
+Final publication checks after authorized ownership recovery:
+
+- Commit-plan validation remains ready=true for 24 paths in five groups.
+- The changed-line Markdown check still reports the duplicate Round 9 heading.
+- The sensitive-content hook now fails on two application-name mentions in
+  the core-appended human-reclaim summary (transcript lines 11751 and 11764).
+  This is a new checkpoint defect, not a passing hook or existing lint debt.
+  Authored inputs use generic application wording except the exact human
+  recovery guidance, which the publication protocol requires verbatim.
+  No manual edit to core-owned history was made; review must address it
+  before any commit. No commit is authorized in this round.
+
+### Change summary for step 6 tools-archive-rebuild (round 10)
+
+Since round 9, removed the validation transport's application working-tree
+overlay and bound application source and helper hashes to one commit. Updated
+the agent fixtures for that committed scanner API, including dangling-link
+accounting and interpreter RPATH. Missing and outside providers still refuse.
+The reader accepts the optional dangling count only in a complete success line.
+
+Recorded the human's deployment scope: exclude tooling and use tools-provided
+uv. Fresh RHEL qualification must measure this scope before D10. Explicitly
+disputed the mandatory archive rebuild for the six dangling cpp/debug links;
+the human resolved that disagreement using c2b71daf/build 180 as authority
+and explicitly authorized ownership reclaim and round 10 publication.
+The archive remains unchanged for this checkpoint, with no runtime waiver.
+
+Ran build 180 once on application c2b71daf, with unchanged candidate pins and
+publication off. Provisioning, 77-wheel/80-ELF capture and packaging pass.
+All 519 per-object loader observations complete after inventorying 686 objects
+and recording 488 dangling links. The actual heavy-wheel import then fails:
+pymupdf's RUNPATH and the host cache select host libpthread, whose
+GLIBC_ABI_DT_RELR requirement is absent from candidate libc. The trace also
+selects host libdl, libutil and libstdc++. No pytest execution is claimed.
+
+Retained 1320 artifacts and both native reader outputs. Bound four Debian
+passes, four failures and one pending cell, preserving eight earlier Debian
+sidecars and the RHEL history. Updated missing work, the generated acceptance
+view, umbrella and the five a.commit groups. No runtime repair, new scope
+waiver, cplx commit, D10 execution or Step 6 completion is claimed.
+
+Prepared the the application instructions in
+`.reviews/a.point4-runtime-import-handoff.md` before publication. The scanner
+diagnostic mismatch is application-owned; the runtime repair's ownership
+still requires investigation against the current contract.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 10)
+
+Human guidance:
+
+#### Human resolution of archive disagreement for step 6 tools-archive-rebuild (round 10)
+
+The human selected: Use c2b71daf/#180 evidence; publish round 10.
+The current request reiterates publication after first writing instructions
+for application-owned fixes in the application project.
+
+The human subsequently explicitly authorized reclaiming ownership, publishing
+round 10 and stopping. Resume this stopped manual handoff using that authority;
+the archive disagreement is resolved by the evidence decision above.
+
+Use application c2b71daf and retained Jenkins build 180 as authoritative
+evidence that dangling aliases no longer stop inventory and loader maps.
+Leave the candidate archive unchanged for this checkpoint. Preserve the
+reviewer's measured links and historical build 179 evidence. Retain the real
+host-library import failure as unresolved; no runtime or release waiver is
+granted. Broader system-interpreter scope remains reviewable.
+
+The application follow-up instructions were written first to
+`.reviews/a.point4-runtime-import-handoff.md`. They identify the application
+scanner's forced-map/runtime mismatch, require the direct-import refusal to
+remain blocking, and require coordination if the runtime fix belongs to cplx.
+
+Publish round 10 and stop without waiting or committing. Step 6 stays No;
+D10, fresh RHEL qualification and publication remain later work.
+
+Writer response:
+
+Accepted the round 9 transport finding. The declared transport no longer
+overlays application working-tree helpers. It captures one application commit,
+archives that revision and verifies hashes from the same committed blobs.
+The now-committed c2b71daf scanner API is integrated in the cplx fixtures:
+inventory receives its dangling-link evidence list, the interpreter fixture
+supplies its RPATH, and known system-loader helpers remain visibly classified.
+Unknown external interpreters, external providers and missing runtime providers
+still refuse. Independent Python and capture-venv roles remain separate.
+
+Explicit disagreement with the reviewer repair's mandatory archive rebuild:
+the six measured cpp links are real, and that observation remains recorded.
+However, those non-loadable aliases do not by themselves establish a missing
+runtime provider or violate the protected loader-alias contract. The committed
+application fix records dangling links and still refuses an absent provider in
+a loader map. Blanket rejection of every dangling RPM debug link would add an
+archive requirement not present in the settled scope. Current missing-work
+wording is corrected accordingly, rather than silently retaining an instruction
+to rebuild the archive for this scanner failure. Historical build 179 sidecars
+and the reviewer answer remain unchanged. No archive is repackaged this round.
+
+This does not establish that every new system-interpreter classification is
+acceptable. The settled exception covers retained helper programs; the new
+scanner also reports system-interpreter objects outside tools/bin, including
+the wheel's node executable. The request calls out that boundary for review;
+it does not authorize additional outside-prefix runtime providers or treat a
+pipeline verdict as sufficient release qualification.
+
+The deployed tooling-group discrepancy is real. The human selected deployment
+venvs without tooling, with uv supplied by the tools installation. The
+requirement, design, plan and checkpoint notes record that decision. Fresh
+RHEL acceptance must implement and measure this scope before D10; the old
+tooling-inclusive RHEL captures remain historical. No deployed venv is changed
+in this point 4 evidence round, and no fresh RHEL qualification is claimed.
+
+The ABI evidence reader accepts the new optional dangling-links count and
+requires a complete zero-flags verdict. Regression fixtures cover the old and
+new formats, timestamps and refusal of malformed flags. The raw evidence is
+preserved. Step 6 remains incomplete, and no cplx commit is authorized.
+
+Build 180 on c2b71daf confirms that inventory and 519 per-object loader
+observations complete. Its direct-venv pymupdf import then fails because
+the wheel's RUNPATH and the host cache select host libpthread against
+candidate libc, which lacks GLIBC_ABI_DT_RELR. This is a real runtime
+failure, not an alias-inventory refusal. Host libdl, libutil and libstdc++
+also appear in the trace. The forced observation path is not evidence of
+actual import resolution. PA5 to PA8 remain failed and PA9 pending; the
+new failure must be resolved within the settled runtime contract.
+
+The human resolved the archive disagreement using c2b71daf/build 180 and
+explicitly authorized ownership reclaim and round 10 publication. The shared
+launcher reclaimed the stopped handoff and advanced to round 10. The prior
+disagreement remains explained above; it is no longer awaiting a decision.
+The application follow-up instructions were prepared before publication in
+`.reviews/a.point4-runtime-import-handoff.md`.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 10)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-10 -->
+
+## Round 10 by reviewer - Step 6
+
+- Recorded: 2026-09-20T01:18:00+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+Baseline index tree: c0078dd0941f9871aa650a3fee5018f083c4f3ca
+
+Assessed index tree: c0078dd0941f9871aa650a3fee5018f083c4f3ca
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+Build 180 got past inventory and loader observation, then failed on a real
+runtime import, so PA5 to PA8 fail, PA9 stays pending, and D10, the fresh RHEL
+qualification and the publication obligations remain open.
+
+Verified rather than accepted:
+
+- Round 9's transport finding is fixed. The transport archives one committed
+  application revision and verifies committed helper digests; the reviewer's
+  declared run passed, exit 0 in 79 seconds, with three isolated bare-interpreter
+  helper imports, the capture venv, 63 acceptance cases and no FAIL line.
+- Build 180. The Jenkins API reports `FAILURE` from application `c2b71daf`, and
+  the live console's SHA-256 equals the recorded `5bc2029b...bb55`.
+- The real failure, read from the retained artifact rather than the summary:
+  `abi/imports.txt` records
+  `ImportError: <candidate>/tools/python/root/usr/lib64/libc.so.6: version
+  'GLIBC_ABI_DT_RELR' not found (required by /lib/x86_64-linux-gnu/libpthread.so.0)`.
+  The host libpthread was loaded against the candidate libc. That matches the
+  request's description exactly.
+- Consumers: 77 wheel hashes match the committed lock, 80 ELFs captured, no
+  ruff, ty or uv, canonical lock archived.
+- The human's Q07 decision is recorded in the requirement, design, plan and
+  umbrella: deployment venvs exclude `tooling`, uv comes from the tools
+  installation, affected RHEL qualification is repeated at that scope, and the
+  tooling-inclusive captures stay historical. The cells and record are honest.
+- The reader change is bounded: the optional `dangling-links=N` count is
+  accepted only inside a complete `flags=0` line anchored at end, and a
+  malformed `flags=01` is refused, with fixtures for both.
+- The archive disagreement is the human's to settle, and they settled it. The
+  reviewer's measurement stands recorded, the archive is unchanged this round,
+  and no waiver is claimed. The reviewer does not reopen it.
+- The transcript's earlier content is unchanged and the reviewer's round 9
+  answer copy is byte-identical.
+
+What the evidence adds beyond the request, measured on the RHEL prefix:
+
+- The candidate interpreter carries `DT_RPATH` listing the shipped lib
+  directories. `pymupdf/_extra.so` carries its own `DT_RUNPATH` of `$ORIGIN`
+  and needs `libpthread`, `libdl`, `libutil`, `libstdc++` and `libgcc_s`.
+  A loader consults the executable's `RPATH` only for objects that have no
+  `RUNPATH` of their own, so those five needs never reach the shipped
+  providers: they fall through `$ORIGIN`, then `LD_LIBRARY_PATH`, then the host
+  cache. That is why build 180 selected host libpthread, libdl, libutil and
+  libstdc++.
+- This contradicts the mechanism Q06 records, that wheel objects "resolve
+  shipped providers through the interpreter's own search path". On RHEL the
+  same objects also took host providers; PA6 passed there because the RHEL
+  host's copies happen to be compatible with the candidate libc, not because
+  the shipped ones were used. The same premise underpins D10's choice of a
+  shipped `libstdc++` generation.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+- Decide and record how venv wheel objects reach the shipped providers, given
+  that their own `RUNPATH` shadows the interpreter's `RPATH`: for example an
+  explicit `LD_LIBRARY_PATH` in the deployment environment, providers beside
+  the objects, or a revision of Q06. Then re-establish PA6 on both platforms
+  under that mechanism, and re-examine what D10's generation choice governs.
+- Resolve the build 180 import failure under that decision and repeat PA5 to
+  PA9 on Debian.
+- Repeat RHEL qualification at the Q07 deployment scope before D10, then take
+  the D10 reading and complete the pre-publication obligations.
+- Make the staged set committable and settle the loader-scope question below.
+
+Architecture: the fixture and reader changes stay in the test contract, except
+the scope change noted in the findings. Performance: no new cost. Unit test
+coverage: no Python class changed and no percentage is claimed; no unit-tested
+class below 100% needs completing, and no top-level symbol outside the
+coverage gate is unreferenced.
+
+Feature integrity: missing providers, unknown interpreters and malformed ABI
+lines are still refused, and the raw evidence is preserved.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` this round.
+
+The writer's Step 6 rows record build 180, the Q07 scope decision and the
+corrected archive wording after the human's resolution, and the reviewer's
+round 9 measurement of the six dangling links is preserved. The reviewer's
+`RUNPATH` finding above belongs in those rows once the human decides the
+mechanism, so it is offered in this answer rather than written as a row that
+would presume the decision.
+
+The status sentence stays exactly `No. Step 6 has NOT been fully implemented.`,
+and the document-level line stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+The reviewer ran all eight resolved commands. Six pass. Two fail, both on the
+staged transcript's protocol-appended content.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone
+  after reading the changed transport: transport exit 0 in 103 seconds, native
+  `validation exit=0 elapsed=79s`, no FAIL line, three isolated helper imports
+  on bare 3.9.25, the capture venv, the new dangling-count and malformed-flags
+  cases, and 63 acceptance cases. The application source is now one committed
+  revision with committed helper digests, as round 9 asked.
+- The build 180 record verifier, source `request`: both `PASS` lines, exit 0.
+- The wheel checker, source `request`: `PASS`, 77 locked hashes, 80 ELFs,
+  tooling excluded, canonical lock archived.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1, now with
+  two new findings beyond the 39 older ones, both on the duplicated round 9
+  requestor heading.
+- The Markdown intersection checker, source `request`: exit 1 on that heading
+  at line 11721 and on a second duplicate at line 12023, the human-resolution
+  heading that appears in both the reclaim summary and this round's request.
+- `git diff --cached --check`, source `request`: clean.
+- `bash .git/hooks/pre-commit`, source `request`: exit 1, `Commit blocked`, at
+  staged transcript lines 11751 and 11764.
+
+Measured independently: build 180's result, revision and live console digest
+through the Jenkins API; the import failure read from the retained
+`abi/imports.txt`; the candidate interpreter's `DT_RPATH` and
+`pymupdf/_extra.so`'s `DT_RUNPATH` and NEEDED list on the RHEL prefix; the
+staged transcript's two blocked lines and two duplicate headings; and the
+reviewer's round 9 answer copy, byte-identical.
+
+The reviewer removed its scratch fixture from the RHEL host and left the
+application checkout untouched. No coverage percentage is claimed.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same eight commands.
+
+- `bash src/utils/lint_shell.sh`, source `project`. Clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0, now
+  from one committed application revision.
+- The build 180 record verifier, source `request`. Exit 0.
+- The wheel checker, source `request`. Exit 0.
+- The Markdown gate with `--root ../cplx`, source `request`. Exit 1, with two
+  new findings on the transcript.
+- The Markdown intersection checker, source `request`. Exit 1.
+- `git diff --cached --check`, source `request`. Clean.
+- `bash .git/hooks/pre-commit`, source `request`. Exit 1, commit blocked.
+
+The request declared both failures before publication, which the reviewer
+confirms rather than discovers.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets. Every request addition names cplx and carries no
+home path.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `c0078dd0941f9871aa650a3fee5018f083c4f3ca` equals the
+  baseline at entry and the live index after every run.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `3e1c04e74d54c61a0878b62454ab64cfd31dc5f61c5e7d0d18af7bdd9b01a3f7`.
+  No umbrella row was completed.
+- Validation-state comparison over the 24 staged paths, the project command's
+  file and the six ignored validation files: `acceptable: true`, naming only
+  the ignored Markdown log that the declared command rewrites.
+- The working tree matches its entry state: 24 staged paths, plus the
+  protocol's unstaged transcript append.
+- No reviewer residue: the scratch fixture on the RHEL host was removed, the
+  application checkout was only read, and no tracked file was changed.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+`a.commit` is mechanically accurate and the reviewer amended nothing, but the
+staged set is not committable.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 24 staged paths in five
+ordered groups matching the request. Membership and order fit the work: the
+delivery and driver repairs, the capture-boundary and scanner-API fixtures,
+the Debian evidence with all ten sidecars, the requirement, design, plan,
+validation and umbrella records of Q07, and the transcript.
+
+Not executable: the installed hook refuses group 5, the transcript, at two
+lines. `commit-plan-check` does not consult that hook. The fix is content-only
+and changes neither membership nor order.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+Unresolved findings:
+
+- The staged set cannot be committed: the installed sensitive-content hook refuses the staged transcript at lines 11751 and 11764, where the protocol-appended human-reclaim summary quotes the human's guidance naming the application project, and the declared Markdown intersection checker fails on the duplicate heading `## Round 9 by requestor - Step 6` at staged line 11721 (a second appended round 9 request entry, the first at line 11159), with a further duplicate at line 12023 in this round's unstaged append; the reviewer cannot edit the transcript, so the requestor or the human must redact those two mentions and qualify the duplicated headings before any commit.
+- The staged agent fixture relaxes a loader-scope rule without a recorded decision: it previously required that moving a system-interpreter subject out of `tools/bin` removed the exception, and it now asserts that such an object is accepted anywhere in the tree as `system-interpreter-object`, which the request itself flags as covering the wheel's `node` executable; the requirement's wording covers "retained helper programs" only, so this scope needs the human's explicit decision and a recorded question before the fixture asserts it.
+
+Boundary-crossing work:
+
+- The runtime search-path mechanism needs the human: `pymupdf/_extra.so` carries its own `DT_RUNPATH`, so the candidate interpreter's `DT_RPATH` is not consulted for that object's `libpthread`, `libdl`, `libutil`, `libstdc++` and `libgcc_s`, which is why build 180 loaded host libraries against candidate libc; Q06 records the opposite mechanism, the RHEL PA6 pass rested on host compatibility rather than shipped providers, and D10's generation choice rests on the same premise, so the decision spans the requirement, the design and item 8 rather than this checkpoint
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+Human guidance:
+
+#### Human resolution of archive disagreement for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+The human selected: Use c2b71daf/#180 evidence; publish round 10.
+The current request reiterates publication after first writing instructions
+for application-owned fixes in the application project.
+
+The human subsequently explicitly authorized reclaiming ownership, publishing
+round 10 and stopping. Resume this stopped manual handoff using that authority;
+the archive disagreement is resolved by the evidence decision above.
+
+Use application c2b71daf and retained Jenkins build 180 as authoritative
+evidence that dangling aliases no longer stop inventory and loader maps.
+Leave the candidate archive unchanged for this checkpoint. Preserve the
+reviewer's measured links and historical build 179 evidence. Retain the real
+host-library import failure as unresolved; no runtime or release waiver is
+granted. Broader system-interpreter scope remains reviewable.
+
+The application follow-up instructions were written first to
+`.reviews/a.point4-runtime-import-handoff.md`. They identify the application
+scanner's forced-map/runtime mismatch, require the direct-import refusal to
+remain blocking, and require coordination if the runtime fix belongs to cplx.
+
+Publish round 10 and stop without waiting or committing. Step 6 stays No;
+D10, fresh RHEL qualification and publication remain later work.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- The archive disagreement is treated as settled by the human. The reviewer
+  does not reopen it: the archive stays unchanged this round, the measured
+  links remain recorded, build 179's evidence is preserved, and no waiver is
+  read into that decision.
+- Build 180 and application `c2b71daf` were used as the authority they were
+  given, and both were verified against Jenkins and the retained artifacts.
+- The host-library import failure is retained as unresolved, and this answer
+  adds the measured reason it happens rather than a claim that it is fixed.
+- The broader system-interpreter scope was reviewed, as the guidance invites,
+  and is returned as a finding needing an explicit decision.
+- Step 6 stays `No`. No commit, push, build or later point was performed or is
+  authorized, and the application checkout was not touched.
+
+The disposition is changes-requested: Step 6 is incomplete by design, the
+staged set is blocked by the hook, and one scope question needs the human.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+Three things, in order.
+
+**Make the staged set committable.** The hook refuses the staged transcript at
+lines 11751 and 11764, where the appended human-reclaim summary quotes guidance
+naming the application project. Redact those two mentions to the generic
+wording used elsewhere, keeping the sentence otherwise verbatim, and note the
+redaction. Then qualify the duplicated headings: the second
+`## Round 9 by requestor - Step 6` entry at line 11721, and the
+human-resolution heading that now appears both in the reclaim summary and in
+this round's request. Rerun the hook and the intersection checker on the final
+index and require both clean. If the protocol appended those entries in a way
+a caller may not edit, say so and ask the human, since no commit is possible
+while the hook refuses.
+
+**Take the loader-scope question to the human before the fixture asserts it.**
+The fixture now accepts a system-interpreter object anywhere in the tree, where
+it previously required the exception to end outside `tools/bin`, and the
+request notes this now covers the wheel's `node`. Record it as a numbered
+question with its rationale, as Q06 and Q07 were, and keep the fixture's old
+assertion until it is answered.
+
+**Bring the runtime mechanism to the human too.** Build 180's import failure is
+not incidental: `_extra.so` has its own `RUNPATH`, so the interpreter's `RPATH`
+never applies to its `libpthread`, `libdl`, `libutil`, `libstdc++` and
+`libgcc_s`, and the host copies win. Q06 states the opposite, the RHEL pass
+depended on host compatibility, and D10's generation choice rests on the same
+premise. Decide the mechanism first; the application-side scanner instructions
+you prepared are worth sending either way, but they will not resolve this.
+
+Done well: the transport now validates committed inputs only, the Q07 decision
+is recorded in all four documents with the requalification it implies, the
+reader change is tightly bounded with fixtures for both formats, and both
+publication defects were reported rather than left for the reviewer to find.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete.
+
+1. Identity. Passes; the index matched at entry and after every run.
+2. Completeness. Fails, and this round shows why in runtime terms rather than
+   in pipeline terms.
+3. Validation and coverage. Two declared commands fail: the hook and the
+   Markdown intersection check, both on the staged transcript.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. Two: the blocked transcript and the unrecorded
+   loader-scope relaxation.
+6. `a.commit`. Mechanically valid and correctly grouped, and not executable
+   while the hook refuses.
+
+The substance of this round is good work: the transport is hermetic, Q07 is
+recorded where it belongs, the reader change is bounded, and the failing build
+was reported with its raw evidence rather than summarized away.
+
+The reviewer's own contribution is the mechanism behind the failure. The
+request describes what happened; the measurement explains why it must happen:
+an object with `DT_RUNPATH` never consults the executable's `DT_RPATH` for its
+own dependencies. That makes build 180's failure the expected outcome on any
+host whose libraries are newer than the candidate's libc, and it makes the
+RHEL pass a fact about the RHEL host rather than about the shipped providers.
+It is raised as a decision for the human because it touches Q06, D10 and item
+8, not because this checkpoint recorded it wrongly.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 10)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-10 -->
+
+## Round 11 by requestor - Step 6
+
+- Recorded: 2026-09-20T12:33:48+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 11)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 11
+
+### Code review evidence for step 6 tools-archive-rebuild (round 11)
+
+request_index_tree: 3280b1e74cd93c77a36c5378365f3fac819e80ad
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- bash .reviews/a.step6.r11-focused-transport.sh (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r11-verify-record.py (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r11-check-provision.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: fix(tools): align application verification fixtures
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 2 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): retain point 4 review exchanges
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 11)
+
+Round 10's concrete findings are accepted. The transcript's recovery entry
+and repeated guidance are redacted, duplicate recovery headings are qualified,
+and the correction is explicitly recorded. The sensitive-content hook and
+Markdown intersection check pass; the full Markdown check retains 39 existing
+diagnostics, without changing the baseline or rules.
+
+The human settled Q08's narrow helper exception and adopted Q09's shared
+runtime mechanism subject to qualification. The fixture again requires
+refusal outside the retained-helper scope. Its native cumulative run against
+committed ad6d7ed8 correctly exposes the application scanner's broader
+exemption; no cumulative green is claimed. The evidence reader also refuses
+to treat those unmapped objects as whole-scope qualification.
+
+The executable-RPATH premise in Q06, the design and item 8 is corrected using
+the retained trace. The application shared runtime script derives the same
+directory order as build_elf_rpath in a native fixture. An inherited-prefix
+idempotence counterexample is retained and added to the application handoff.
+That edge case is not assumed to occur in the Jenkins environment.
+
+All 66 focused acceptance fixtures pass, including current and historical ABI
+verdict formats, zero-runtime refusal, and the unresolved system-object scope.
+The cumulative run's preceding shell lint checks 58 scripts successfully and
+its independent helpers import on bare Python 3.9.25. The capture venv remains
+separate. Real platform acceptance cannot be replaced by these fixtures.
+
+Build 181 ran ad6d7ed8 and failed during Provision, exit 127. Host readlink
+selected shipped libc after the shared runtime export and failed on
+__rtld_libc_freeres (GLIBC_PRIVATE). Package, Test and Publish were skipped.
+Only 24 artifacts were produced; there is no build 181 wheel/import evidence.
+The independent reading binds PA1-PA4 pass and PA5-PA9 pending. Earlier
+captures, including build 180's real import failure, remain unchanged.
+
+Step 6 remains No. This is point 4's evidence checkpoint. Fresh RHEL consumer
+qualification with Q07's venv scope and the settled runtime setup, D10 and
+publication closure remain later work. No cplx commit is authorized.
+
+### Implementation report for step 6 tools-archive-rebuild (round 11)
+
+The Debian reader understands availability/runtime row counts while requiring
+a complete zero-flags verdict and nonzero runtime rows when those fields are
+present. Historical verdicts remain readable. System-loader objects outside
+the retained-helper scope keep PA5/PA7 inconclusive; direct-import PA6/PA8
+remain separate observations. Regression fixtures cover both changes.
+
+The fixture no longer approves arbitrary system-loader objects. It preserves
+the old refusal under confirmed Q08 and exposes the application regression.
+Q09 adopts a library-only shared application setup, avoiding setenv's
+unrelated environment changes and private account prerequisites. The documents
+no longer claim that executable RPATH governs a wheel with its own RUNPATH.
+
+The requestor's historical recovery prose has generic application wording and
+unique headings. Live exchange artifacts and the reviewer's findings were not
+edited. The application handoff records the independently reproduced runtime
+ordering edge case and the confirmed decisions.
+
+Build 181's 24 artifacts and raw console are retained with exact digests.
+Both the original and current readers were run natively. The current reading
+is incomplete, with PA1-PA4 pass and PA5-PA9 pending because Provision stopped
+before consumer capture. Earlier wheel identities were not copied into the
+new run. The handoff now also requires isolating host utility execution from
+the shipped-libc environment across CI and deployment.
+
+### Change summary for step 6 tools-archive-rebuild (round 11)
+
+The staged work retains the five proposed commit groups, without committing:
+
+- Keep committed application-helper provenance and the isolated capture venv
+  in the native fixture transport; restore refusal for system-loader objects
+  outside the retained-helper exception.
+- Extend the independent evidence reader for availability/runtime counters,
+  require nonzero runtime observations, and keep unqualified executable scope
+  inconclusive. All 66 focused acceptance cases pass.
+- Retain build 181 and its independent readings beside immutable earlier
+  captures, update the candidate record and generated view, and preserve
+  publication off and the incomplete Step 6 checkpoint.
+- Correct the disproven executable-RPATH premise across requirement, design
+  and item 8; record the human's Q08/Q09 decisions and require fresh RHEL
+  qualification with Q07 before D10.
+- Redact requestor recovery wording and distinguish duplicate historical
+  headings; publish this response through the paired review renderer.
+
+The ignored application handoff adds the independently reproduced runtime
+ordering edge case. No application code or candidate archive was rewritten.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 11)
+
+Human guidance:
+
+The user asked to address round 10, run Jenkins on the application fixes at
+ad6d7ed8, and publish round 11. The existing instruction to stop after
+publication remains in effect. No cplx commit, D10 execution or release
+publication is authorized by this checkpoint.
+
+The human answered both round 10 decisions on 2026-09-20:
+
+- Q08: keep the existing retained-helper exception; other executables must
+  be qualified.
+- Q09: adopt the shared runtime setup with shipped library directories first,
+  unchanged wheel ELFs, and actual provider traces required on Debian and
+  RHEL, subject to runtime qualification.
+
+Writer response:
+
+Accepted all three round 10 writer instructions. There were no reviewer repairs
+to accept or reverse. No new disagreement is asserted, and the earlier human
+resolution about unused dangling aliases remains settled.
+
+The historical requestor recovery and its repeated guidance now use generic
+application wording. The duplicate round-9/recovery headings are distinguished
+and an editorial correction records the redaction. The final-index hook and
+Markdown intersection checks are required again before publication.
+
+The human selected Q08's existing helper exception, retaining the narrow assertion.
+The application scanner still exempts system-loader objects elsewhere, so
+the cumulative fixture fails at that exact boundary. The independent reader
+keeps whole-scope acceptance inconclusive when such rows occur rather than
+turning the scanner's PASS line into a scope waiver.
+
+The human adopted Q09's shared application runtime setup, with implications for
+Q06, fresh RHEL acceptance, D10 and item 8. The formerly asserted executable
+RPATH mechanism is corrected. The native directory-order comparison passes;
+an inherited-prefix idempotence edge case is recorded for application repair.
+The reader consumes the new availability/runtime counts without conflating
+forced availability with actual loading. No wheel ELF was modified.
+
+The user requested a Jenkins retry on the committed application fixes, followed
+by round 11 publication. The retained build and independent reading report
+the actual outcome, with candidate pins unchanged and uploads off. Publication
+of this request is the stopping point; no commit or later handoff point follows.
+
+That retry is build 181, FAILURE in Provision: the shared export reaches
+host readlink and causes a GLIBC_PRIVATE symbol failure against shipped libc.
+The 24 retained artifacts prove no new wheel inventory, real import or pytest
+run. PA1-PA4 pass; PA5-PA9 are pending in this run. The prior failed import
+remains retained. The application handoff records this new integration failure
+and requires a compatible loader/provider boundary for host tools as well as
+the shipped interpreter; adoption of Q09 does not qualify this implementation.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 11)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-11 -->
+
+## Round 11 by reviewer - Step 6
+
+- Recorded: 2026-09-20T12:40:01+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Exact disagreement for step 6 tools-archive-rebuild (exchange 1) (round 11)
+
+The live index does not match the request-time index tree, so this round is
+returned without an implementation assessment.
+
+- Request-time index tree: `3280b1e74cd93c77a36c5378365f3fac819e80ad`.
+- Live index tree at review entry, captured twice and stable:
+  `79aa84c011ac8c046081f9e9b7d2e5d0ef85e1cb`.
+- The difference is exactly one staged file,
+  `docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md`, with 243 lines
+  added and none removed: the protocol's own round 11 request record, from
+  `## Round 11 by requestor - Step 6` through
+  `### Reviewer focus for step 6 tools-archive-rebuild (round 11)`.
+
+That record is written by the publication itself, after the request captures
+the index, and it was then staged. Nothing in the implementation differs, and
+the reviewer makes no claim that the staged work is wrong. The problem is only
+that the described state and the reviewed state are not the same bytes: the
+request's evidence, including its commit-plan result, describes an index the
+repository no longer has, and every check the reviewer runs on the transcript,
+the hook and the Markdown intersection check among them, would answer for a
+different index than the one the request recorded.
+
+Concrete writer action, either of:
+
+- Leave the publication's own append unstaged while the round is under review,
+  as rounds 3 to 10 of this step did, and publish the next request unchanged;
+  the owning workflow can stage it with group 5 at commit time. In those
+  rounds the transcript showed as staged plus unstaged, and the trees matched.
+- Or stage it deliberately and then publish, so that the request captures the
+  index after staging and its recorded tree is the one under review.
+
+Nothing else is requested. The reviewer read the request, took the baselines
+and stopped at this check: no validation command beyond the index capture was
+run for the assessment, no repair was made, no staged path, `a.commit`,
+validation plan or umbrella was touched, and the retained manifest records the
+live tree.
+
+For the record, so the next round is not slowed by it: the reviewer's own
+round 10 answer copy in the staged transcript is byte-identical to what it
+rendered, and the two lines the hook refused last round no longer carry the
+application name.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 11)
+
+Republish this round so that the recorded index tree is the one under review.
+Either leave the publication's own transcript append unstaged while the round
+is open, as rounds 3 to 10 did, or stage it first and publish afterwards, so
+the request captures the index in its staged state. Change nothing else: the
+staged implementation, the evidence, `a.commit` and the documents are not in
+question here, and the reviewer made no change to them.
+
+When the next request arrives, the reviewer will assess the round 11 work in
+full: the Q08 and Q09 records, the restored fixture refusal, the reader's
+availability and runtime counters, build 181's provisioning failure and the
+corrected Q06 premise. Nothing in this answer prejudges any of it.
+
+Two things are already confirmed and need no further work: the reviewer's
+round 10 answer copy in the staged transcript is byte-identical to what it
+rendered, and the installed hook now accepts the staged transcript, so the
+round 10 blocking finding is resolved.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 11)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-11 -->
+
+## Round 12 by requestor - Step 6
+
+- Recorded: 2026-09-20T16:57:34+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 12)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 12
+
+### Code review evidence for step 6 tools-archive-rebuild (round 12)
+
+request_index_tree: aed587bd3a4ca871b306b88cb99dc6cdd480af88
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- bash .reviews/a.step6.r12-focused-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-runtime-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-bootstrap-transport.sh (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r12b-verify-record.py (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r12-check-build.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: fix(tools): align application verification fixtures
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 2 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): retain point 4 review exchanges
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 12)
+
+Step 6 remains No. This request replaces returned round 11 at the user's
+point 4 checkpoint; protocol numbering is round 12. The reviewer returned
+round 11 solely because the requestor staged its transcript append after index
+capture. That finding is accepted. Existing work is staged before rendering;
+the new append remains unstaged while this request is open.
+
+Build 183 ran application 97337c39, following bootstrap commit 7906fcbe and the
+application's 30ef4422 runtime boundary repair. Its result is FAILURE.
+Build 183 passes Provision and Package with shipped Python 3.13.15, its own pip 26.2.1 and relocated uv 0.12.17. The ABI gate passes (686 subjects, 603 dynamic, 732 availability rows, 265 runtime rows, 488 dangling links, zero flags), with both heavy wheels loaded by the direct trace. Test then exits 4 before collection: the command supplies a browser marker exclusion which the full-selection plugin rejects. The independent reader also leaves PA5/PA7 inconclusive for unresolved raw-map/canonical-provider alias bindings and reports PA6 fail because the console lacks its required literal locked-sync marker; those are evidence-reader limitations, not observed import failures.
+
+Build 182 is preserved separately: shipped Python 3.13.15 created pip 26.2.1
+and installed uv 0.12.17, but the new bootstrap validator incorrectly refused
+the existing OneAgent exclusion before uv execution. The writer accepts that
+defect. Commit 97337c39 reuses the scanner's provider policy without broadening
+it; the retained map is also replayed through the exact embedded validator in
+a native fixture that rejects host, unresolved and monitoring-only observations.
+
+The independent reading binds PA1:debian pass; PA2:debian pass; PA3:debian pass; PA4:debian pass; PA5:debian inconclusive; PA6:debian fail; PA7:debian inconclusive; PA8:debian pass; PA9:debian inconclusive.
+Raw build artifacts, committed application sources, original and current reader
+outcomes and their digests are retained. Earlier captures remain unchanged.
+The candidate archive and verification bundle pins are unchanged and uploads
+remain off. No prior build's wheel inventory is attributed to this run.
+
+The cumulative native fixture run passes on committed application 97337c39;
+its final retained log is .reviews/a.step6.r12-cumulative-final-pass.log. The 71
+acceptance-reader cases pass, including missing and failed system-executable
+maps and visible monitoring exclusion. Agent fixtures require a map outside
+tools/bin and reject host providers.
+A separate native shell fixture passes installer-directory-order, inert
+sourcing, command-local environment, inherited ordering and idempotence checks.
+All 34 focused application boundary/scanner tests pass on Windows, with the 25
+scanner tests repeated successfully for the bootstrap correction. ShellCheck
+passes on the changed application scripts; cplx shell lint passes 58 scripts.
+
+The fixture harness now supplies the scanner's required runtime data and
+recognizes direct pytest interpreter execution. Initial failures at those
+obsolete fixture assumptions are retained alongside the corrected successful
+run. No runtime trace or provider gate was suppressed.
+
+Fresh RHEL consumer qualification, host-subprocess behavior, D10 and publication
+closure remain later work. The proposed DT_NEEDED change has not been tested or
+adopted. Local fixtures do not prove glibc behavior. No cplx commit is authorized.
+
+### Implementation report for step 6 tools-archive-rebuild (round 12)
+
+The application now bootstraps its tooling through the shipped Python
+3.13.15, creates an isolated pip environment, installs uv and relocates that
+binary's interpreter and RPATH. It records the Python/pip identity, uv version,
+hash, loader, RPATH and provider map, retaining recognized OneAgent exclusions
+and refusing other external runtime providers through the scanner's policy.
+Locked sync uses that uv and explicit shipped Python with downloads disabled.
+Post-relocation inventory, scanner and test-evidence authoring also use shipped
+Python. Application wheel ELFs, canonical lock and no-tooling scope are preserved.
+
+The cplx reader accepts system-loader coverage only when retained per-subject
+maps match availability rows. The fixture checks actual measurement outside the
+retained-helper exemption and refusal of a host provider. Runtime trace remains
+separate and blocking. Documentation records the per-command setup, the user's
+bootstrap requirement and remaining host-child inheritance risk. Builds 182/183 and
+its independent readings are added without rewriting historical captures.
+
+### Change summary for step 6 tools-archive-rebuild (round 12)
+
+The proposed cplx commit plan retains five groups, without executing them:
+
+- Evidence portability: timestamp parsing and availability/runtime counters,
+  with retained per-subject maps required for non-helper system executables.
+- Application verification fixtures: explicit capture interpreter, committed
+  helper provenance, required runtime data, narrow helper exemption and host
+  provider refusal, with direct pytest interpreter wiring.
+- Debian evidence: retain builds 182 and 183 and both independent reader outcomes beside
+  unchanged earlier captures; bind the current candidate record and generated
+  view to the actual result, preserving incomplete acceptance and uploads off.
+- Runtime contract: preserve Q06 correction and Q07/Q08/Q09 decisions, add the
+  user's shipped Python/pip/relocated-uv requirement and host-child risk.
+- Review transcript: retain the returned round and earlier editorial repairs;
+  stage existing content before request capture and leave the new append unstaged.
+
+Separately, application commit 7906fcbe adds ci/tools_bootstrap_uv.sh, wires it
+into provisioning, uses the relocated interpreter for post-relocation evidence
+authoring and adds the helper to ShellCheck. That commit is pushed on the three
+application develop remotes and is the exact input to build 182.
+Commit 97337c39 corrects the omitted existing OneAgent exclusion by reusing the
+scanner's provider policy. It is pushed to the same remotes for build 183.
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 12)
+
+Human guidance:
+
+The user requests the replacement for returned round 11 after a Jenkins job,
+and explicitly requires relocated Python 3.13.15 to bootstrap pip and uv, with
+uv itself relocated before locked dependency synchronization. Protocol numbering
+advances the replacement to round 12; round 11 remains preserved.
+
+Q08 keeps only the existing retained-helper exception. Q09 adopts the shared
+runtime setup subject to real provider traces on Debian and fresh RHEL.
+Application wheel ELFs and canonical public-lock identities remain unchanged.
+
+Publish this evidence checkpoint and stop. No cplx commit, reviewer invocation,
+D10 or immutable release publication is requested. Assess the staged index
+captured in the request; the newly appended transcript entry remains unstaged.
+
+Writer response:
+
+Round 11's index mismatch is accepted. The reviewer made no implementation
+assessment or repairs. The writer had staged the publication's own transcript
+append after request capture. For this replacement, all existing changes and
+the retained answer are staged before rendering; the new publication append
+will remain unstaged. No disagreement is asserted.
+
+The human then requested a Jenkins retry on the application boundary repair,
+with shipped Python 3.13.15 bootstrapping its own pip and relocated uv. The
+application successor 7906fcbe implements that instruction on top of 30ef4422.
+It is committed and pushed separately; no cplx commit or release is performed.
+Build 182 confirms that bootstrap but stops before uv execution because the
+new checker omitted the existing OneAgent exclusion. The writer corrected that
+defect in application 97337c39 by reusing the scanner policy, retaining visible
+monitoring rows and refusal of all other external providers. Build 183 tests
+that correction. Both exact outcomes are retained in the assessment and evidence.
+
+Q08 remains the narrow retained-helper exception. Other executables now have
+forced maps, labelled availability. The cplx fixtures require those objects
+to be mapped and reject a host provider; the evidence reader requires retained
+per-subject maps and corresponding availability rows. Missing or unusable maps
+remain inconclusive. This is qualification of availability, not a claim that
+the executable or its child processes ran successfully.
+
+Q09 remains adopted subject to qualification. Native fixture checks confirm
+the directory order matches build_elf_rpath, sourcing leaves the caller's
+LD_LIBRARY_PATH unchanged, and command-local composition reorders inherited
+shipped entries correctly and is idempotent. The cumulative harness now supplies
+the required scanner runtime data and follows the direct pytest interpreter
+entry. Its initial stale-fixture failures and successful corrected run remain
+retained. No provider policy or actual import check was weakened.
+
+The suggested interpreter DT_NEEDED additions remain an untested proposal.
+Host subprocess inheritance is still a qualification risk. New archive bytes,
+fresh RHEL qualification, D10 and publication are not claimed by this review.
+After publishing protocol round 12, stop as instructed; do not wait or commit.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 12)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-12 -->
+
+## Round 12 by reviewer - Step 6
+
+- Recorded: 2026-09-20T17:09:02+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+Baseline index tree: aed587bd3a4ca871b306b88cb99dc6cdd480af88
+
+Assessed index tree: aed587bd3a4ca871b306b88cb99dc6cdd480af88
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+Build 183 is the best result this step has produced: the Q09 runtime setup
+works, both heavy wheels load, and the ABI gate passes. The test walk then
+stops before collection, three Debian cells stay inconclusive, and PA6 is
+recorded as a failure it did not observe. D10, the fresh RHEL qualification at
+the Q07 scope and the publication obligations remain open.
+
+Verified rather than accepted:
+
+- Round 11's finding is fixed: the request-time tree equals the live index, and
+  the publication's own append is left unstaged.
+- Builds 182 and 183. The Jenkins API reports `FAILURE` for both, from
+  application `7906fcbe` and `97337c39`, and both live console digests equal the
+  recorded ones (`01c98991...d29a` and `48ccb182...e527`).
+- The ABI verdict is exactly as claimed:
+  `ABI PASS: subjects=686 dynamic=603 availability-rows=732 runtime-rows=265
+  dangling-links=488 flags=0`.
+- The heavy wheels load. The retained `abi/imports.txt` reads `wheels load`,
+  where build 180's read an `ImportError` on host libpthread. PA8 passes with
+  one direct-venv trace and zero host flags. That is the Q09 mechanism doing
+  what round 10 said it had to do.
+- The test walk exits 4 before collection with
+  `ERROR: Tools acceptance requires coverage and full testmon selection`, so
+  PA9 is correctly inconclusive for missing `tests.json` and `coverage.xml`.
+- The reader change is conservative and matches Q08: a system-loader object
+  outside the retained-helper scope must carry its own retained map whose
+  providers all appear as availability rows, with monitoring exclusions limited
+  to recognized OneAgent names in known directories and no path trickery; an
+  unmapped or unusable map yields `inconclusive`, never a pass. The
+  availability and runtime counters are accepted only inside a complete
+  `flags=0` line with nonzero runtime rows.
+- The fixtures now require a forced map outside `tools/bin`, refuse a host
+  provider, keep the narrow helper exception, and check that the test walk
+  runs pytest through the shipped runtime rather than `uv run`.
+- The bootstrap and runtime decisions are recorded in the requirement, design
+  and umbrella, including the per-command boundary that build 181 forced and
+  the unresolved host-child inheritance risk.
+- All ten declared commands pass, including 71 focused acceptance cases, the
+  runtime ordering fixture and the bootstrap validator fixture.
+
+The one thing the evidence does not support is PA6's state. Its pass branch
+requires three things: `wheels load` in the imports evidence, a `venv_base=`
+line, and the literal string `uv sync --locked` in the console. The first two
+are present; the third appears zero times, because the bootstrap now invokes
+the relocated uv differently. The locked synchronization did happen: the
+declared build checker confirms the relocated uv executed and captured 77
+canonical locked wheel hashes. So the cell is recorded `fail` with the reason
+"heavy wheel imports or the locked sync are not evidenced" while the retained
+evidence shows the imports succeeded and the sync ran. The driver treats
+unobservable evidence as `inconclusive` everywhere else in this same round,
+including PA5, PA7 and PA9; PA6 deserves the same distinction, and it matters
+because a PA6 failure is what drove the Step 5 repackage earlier in this step.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+- Distinguish an absent marker from an observed failure for PA6: emit a stable
+  locked-sync marker from the pipeline, and split the reader's branch so a
+  missing marker is inconclusive while a real import failure stays fail. Then
+  rebind PA6 from the evidence.
+- Resolve the test-walk selection so the walk reaches collection, and obtain
+  PA9's `tests.json` and `coverage.xml`.
+- Qualify the system-loader objects that keep PA5 and PA7 inconclusive.
+- Qualify host subprocess inheritance under the per-command runtime boundary.
+- Repeat RHEL acceptance at the Q07 scope with the settled runtime setup, take
+  the D10 reading, and complete the pre-publication obligations.
+
+Architecture: the runtime boundary is applied per command rather than to the
+operator shell, which is what build 181's failure required. Performance: no
+new cost. Unit test coverage: no Python class changed and no percentage is
+claimed; no unit-tested class below 100% needs completing, and no top-level
+symbol outside the coverage gate is unreferenced.
+
+Feature integrity: host providers, unmapped objects, malformed verdicts and
+unresolved maps are all still refused, and earlier captures are unchanged.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows record builds 182 and 183, the bootstrap requirement,
+the per-command runtime boundary and the cells as measured. The PA6 labelling
+finding belongs in those rows once the pipeline or the reader is changed, so
+the reviewer leaves it in this answer rather than writing a row that would
+presume which of the two fixes is chosen.
+
+The status sentence stays exactly `No. Step 6 has NOT been fully implemented.`,
+and the document-level line stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+The reviewer ran all ten resolved commands. All ten pass.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  transport exit 0 in 106 seconds, native `validation exit=0 elapsed=81s`,
+  against committed application `97337c39`.
+- The focused transport, source `request`: `PASS tools-release-acceptance: 71
+  cases`, exit 0.
+- The runtime transport, source `request`: `PASS installer directory order,
+  inert sourcing, command boundary, inherited-prefix reordering, idempotence`.
+- The bootstrap transport, source `request`: the exact embedded validator
+  accepts the retained OneAgent scope and refuses host, monitoring-only and
+  unresolved maps.
+- The build 183 record verifier, source `request`: both `PASS` lines.
+- The build checker, source `request`: builds 182 and 183 identities, isolated
+  shipped Python and pip, relocated uv loader and RPATH, 77 canonical locked
+  wheel hashes, 80 ELF captures, heavy-wheel trace passed, walk refused before
+  collection.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the 39
+  older findings only.
+- The Markdown intersection checker, source `request`: `PASS`.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`: both clean. The hook accepts the staged transcript, so round 10's
+  blocking finding stays resolved.
+
+Measured independently: builds 182 and 183 through the Jenkins API, with both
+live console digests equal to the recorded ones; the ABI verdict line; the
+absence of the literal `uv sync --locked` and the presence of `venv_base=` in
+build 183's console; the retained `abi/imports.txt` reading `wheels load`; the
+test walk's exit 4 message; and the staged transcript, where the reviewer's
+round 11 answer copy is byte-identical, no private identifier appears and no
+heading repeats.
+
+The reviewer removed its scratch fixture from the RHEL host. The other native
+commands reused the writer's retained fixture without modifying it. No
+coverage percentage is claimed.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: the same ten commands, each after reading the scripts it runs.
+
+- `bash src/utils/lint_shell.sh`, source `project`.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`.
+- The focused, runtime and bootstrap transports, source `request`. They reuse
+  the writer's retained host fixture; the reviewer read each script and its
+  native half before running and changed nothing there.
+- The build 183 record verifier and the build checker, source `request`.
+- The Markdown gate and its intersection checker, source `request`.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`.
+
+All ten exit as expected, the Markdown gate on older debt only.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets. The three new native transports widen what the
+round proves, which is the direction the no-removal rule protects.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `aed587bd3a4ca871b306b88cb99dc6cdd480af88` equals the
+  baseline at entry and the live index after every run. Round 11's mismatch is
+  resolved.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `f3a04d8910e6dfad1f62c4b0f3d9b0609b60422db39f7fa53e0652fa34cfba7a`.
+  No umbrella row was completed.
+- Validation-state comparison over the 30 staged paths, the project command's
+  file and the nine ignored validation files: `acceptable: true` with empty
+  lists.
+- The working tree matches its entry state: 30 staged paths, plus the
+  protocol's unstaged transcript append.
+- No reviewer residue: the cumulative run's scratch fixture was removed, the
+  writer's retained fixture was reused without modification, and the
+  application checkout was only read.
+- The baselines and manifest were written before assessment and the manifest
+  rewritten after.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+`a.commit` is accurate and executable, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 30 staged paths in five
+ordered groups matching the request. The installed hook accepts the index.
+
+- Group 1, evidence portability: the composer, the reader and its fixtures.
+- Group 2, verification fixtures: the agent fixture, both runners and the plan
+  text for the capture and map boundaries.
+- Group 3, Debian evidence: all fourteen sidecars from builds 176 to 183 with
+  the record and its view.
+- Group 4, runtime contract: requirement, design, validation plan and umbrella.
+- Group 5, the transcript.
+
+Ordering is least to most dependent and every staged path appears once. The
+PA6 finding, once fixed, touches group 1 and group 3 together, since the
+reader and the bound cell change in the same step.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+Unresolved findings:
+
+- PA6:debian is recorded `fail` for evidence the run did not produce rather than for an observed failure: the reader's pass branch needs the literal `uv sync --locked` in the console, which appears zero times in build 183 because the bootstrap invokes the relocated uv differently, while `venv_base=` is present, the retained `abi/imports.txt` reads `wheels load`, and the declared build checker confirms the relocated uv executed and captured 77 canonical locked wheel hashes; the same round records PA5, PA7 and PA9 as inconclusive for unobservable evidence, so PA6 should either be driven by a stable marker the pipeline emits or split so that an absent marker is inconclusive and only an actual import or sync failure is a fail.
+
+Boundary-crossing work:
+
+- Host subprocess inheritance under the per-command runtime boundary is still unqualified: build 181 showed that a process-wide export makes host utilities load shipped libc, and the documents record the risk, but nothing yet measures what a host child of a shipped process inherits on either platform; that qualification spans the application's runtime helper and the cplx acceptance contract
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+Human guidance:
+
+The user requests the replacement for returned round 11 after a Jenkins job,
+and explicitly requires relocated Python 3.13.15 to bootstrap pip and uv, with
+uv itself relocated before locked dependency synchronization. Protocol numbering
+advances the replacement to round 12; round 11 remains preserved.
+
+Q08 keeps only the existing retained-helper exception. Q09 adopts the shared
+runtime setup subject to real provider traces on Debian and fresh RHEL.
+Application wheel ELFs and canonical public-lock identities remain unchanged.
+
+Publish this evidence checkpoint and stop. No cplx commit, reviewer invocation,
+D10 or immutable release publication is requested. Assess the staged index
+captured in the request; the newly appended transcript entry remains unstaged.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- The staged index captured in the request is what was assessed: the trees
+  match, and the new append is unstaged.
+- The bootstrap instruction is implemented and verified: shipped Python 3.13.15
+  creates its own pip environment, installs uv, and that uv is relocated before
+  the locked synchronization, with its loader, RPATH and provider map retained.
+- Q08 stays narrow and Q09 stays adopted subject to qualification. Both are
+  recorded, and the fixtures enforce them rather than assert them.
+- Step 6 stays `No`. No commit, reviewer invocation, D10 or publication was
+  performed or is authorized, and the application checkout was only read.
+
+The disposition is changes-requested because Step 6 is incomplete by design
+and because PA6 is labelled a failure the evidence does not show.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+The staged work needs one correction, and the rest is next-step execution.
+
+**Give PA6 a truthful label.** Its pass branch requires the literal
+`uv sync --locked`, which build 183's console never prints, while the retained
+evidence shows the wheels load and the declared build checker confirms the
+relocated uv executed and captured 77 canonical locked wheel hashes. Emit a
+stable locked-sync marker from the pipeline, since that is the pipeline's own
+claim to make, and split the reader's branch so an absent marker is
+inconclusive while an actual import or sync failure stays a fail. Then rebind
+PA6 from the evidence. Keep the cell blocking either way; this is about not
+recording a failure that was not observed, in the cell whose earlier failure
+justified a full repackage.
+
+**Then the remaining Debian work.** Fix the test-walk selection so the walk
+reaches collection and produces `tests.json` and `coverage.xml` for PA9, and
+qualify the system-loader objects that hold PA5 and PA7 inconclusive.
+
+**Then qualification.** Measure what a host child of a shipped process
+inherits under the per-command boundary, repeat RHEL acceptance at the Q07
+scope with the settled runtime setup, and take the D10 reading.
+
+Done well, and worth saying plainly: round 10's `RUNPATH` finding was turned
+into Q09, implemented per command after build 181 showed the ambient export
+breaking host utilities, and build 183 now loads both heavy wheels with a
+clean ABI verdict. The reader was tightened rather than loosened at every
+step, the failing builds were kept with their raw evidence, and round 11's
+index finding was accepted without argument.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete.
+
+1. Identity. Passes; the request tree equals the live index at entry and after
+   every run, which round 11 had returned.
+2. Completeness. Fails by design, and the remaining work is now concrete.
+3. Validation and coverage. Passes; all ten declared commands behave as
+   expected.
+4. Staged attribution. Passes; the reviewer made no repair.
+5. Unresolved findings. One: PA6's label.
+6. `a.commit`. Passes, valid, ready and accepted by the hook.
+
+This round earns its result. The mechanism round 10 measured became Q09,
+build 181 proved that applying it ambiently breaks host utilities, and the
+per-command boundary in build 183 makes both heavy wheels load with a clean
+ABI verdict. That is the first time this step has shown the shipped providers
+actually serving the wheels.
+
+The single finding is about labelling, not about substance: a cell that
+reports a failure the run did not observe is the same class of problem as a
+pass without evidence, and this step has been careful about that distinction
+everywhere else, including PA5, PA7 and PA9 in this very round.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 12)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-12 -->
+
+## Round 13 by requestor - Step 6
+
+- Recorded: 2026-09-20T19:19:57+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 13)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 13
+
+### Code review evidence for step 6 tools-archive-rebuild (round 13)
+
+request_index_tree: 31f986b8e457df460723f034d210a51b96e359fb
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- bash .reviews/a.step6.r13-focused-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-runtime-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-bootstrap-transport.sh (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r13-verify-record.py (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r13-check-build.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: fix(tools): align application verification fixtures
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 2 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): retain point 4 review exchanges
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 13)
+
+Step 6 remains No. Round 13 accepts round 12's single finding: missing PA6
+evidence is inconclusive, while an observed import or locked-sync failure is
+fail. No reviewer repair was reversed. An independent native rereading of the
+original build 183 changes only PA6's classification; its historical sidecars
+remain unchanged, with the rereading and its digests retained separately.
+
+Build 184 ran the exact supplied application 4093c353. Result:
+FAILURE. Build 184 passes Provision and Package with shipped Python 3.13.15, its own pip and relocated uv 0.12.17. The ABI gate passes with 686 subjects, 603 dynamic objects, 732 availability rows, 265 runtime rows, 488 dangling links and zero flags. The repaired selector allows pytest to run: 11 failed, 6438 passed, 15 skipped, 31 deselected and 9 xfailed; coverage is 99.90%, below the unchanged 100% gate. A host Bash child demonstrably inherits the shipped libc and fails on its GLIBC_2.36 requirement before the brownout harness starts. Ten runtime-boundary tests also fail at the host Bash launch, but their retained exception summaries do not include child stderr. Publish is skipped and publication remains off.
+
+The current independent reading binds: PA1:debian pass; PA2:debian pass; PA3:debian pass; PA4:debian pass; PA5:debian inconclusive; PA6:debian inconclusive; PA7:debian inconclusive; PA8:debian pass; PA9:debian fail.
+The new build 184 sidecars retain exact source, lock, wheel, reader and console
+identities. Original and current reader outcomes are both retained. No earlier
+build's evidence is attributed to this run. Candidate pins and publication-off
+state remain unchanged; no application source was changed in this round.
+
+PA9 supports the application's existing stealth-gate Q01 CI scope. It requires
+the exact authorized marker, unique excluded identities and browser markers,
+matching console/report counts and scope, and the committed application
+validator's coverage, nonselecting testmon and guarded SQLite-suite gates.
+This scope is not browser evidence. Broader application-local success claims
+are reported by the application, not independently rerun by cplx this round.
+
+Validation: the cumulative native fixture run passes in 84 seconds on the
+committed application, with its full provenance in
+.reviews/a.step6.r13-cumulative-retry.log. The 83 focused acceptance-reader
+cases pass (.reviews/a.step6.r13-focused.log). The initial cumulative failure
+is retained: updated application hook annotations require a newer interpreter
+than the fixture's bare Python 3.9. Hook fixtures now use the existing explicit
+application interpreter; independent evidence reading still uses Python 3.9.
+Shell lint passes all 58 tracked scripts. Existing runtime-boundary and
+bootstrap-policy fixtures remain applicable and their exact commands remain
+in the resolved validation set. Local fixtures do not qualify native glibc.
+
+The generated release view, raw artifact digests, historical captures,
+consumer invalidation, candidate pins and publish-off state are checked by the
+round 13 record and build validators. Markdown retains 39 existing diagnostics,
+with none on added lines. Cached whitespace, the sensitive-content hook and
+the five-group, 32-path commit plan all pass before publication. The initial
+ignored build-check helper used the Windows default text encoding for the
+Jenkins console; explicit UTF-8 corrected that diagnostic-only helper and the
+complete build check then passed.
+
+Stable locked-sync emission, unresolved path-alias evidence, fresh RHEL
+consumer qualification, host-subprocess qualification, D10 and publication
+closure remain open as recorded in the actual build outcome. The suggested
+DT_NEEDED change remains untested and unadopted. Existing changes and transcript
+entries are staged before rendering; round 13's append remains unstaged. The
+user requests publication and stop, with no cplx commit or reviewer invocation.
+
+### Implementation report for step 6 tools-archive-rebuild (round 13)
+
+The cplx Debian reader distinguishes missing PA6 observations from retained
+import or sync errors. It recognizes a stable locked-sync marker for a future
+pipeline emitter while continuing to require import and venv identity evidence.
+Current application sources do not emit that marker; its absence is blocking,
+not a claimed runtime failure.
+
+PA9 accepts the application's exact Q01 CI scope only when its console scope
+and counts match tests.json, exclusions have unique nonempty identities and
+browser markers, and the committed application validator passes the coverage,
+testmon and SQLite-suite gates. Legacy full-scope records remain supported.
+The reader does not present browser-excluded evidence as an all-tests walk.
+
+Native fixtures cover missing/failing PA6 evidence and valid/invalid browser
+scope, counts and identities. Application hook fixtures use the explicit
+application interpreter required by current hook annotations. Requirement and
+design text make these evidence boundaries explicit. New build 184 sidecars
+and the current release-record binding preserve all earlier captures.
+
+### Change summary for step 6 tools-archive-rebuild (round 13)
+
+Five proposed cplx commit groups remain, with no commit executed:
+
+- Evidence portability: PA6 missing/failure classification and PA9 Q01 scope
+  binding join the existing conservative loader-map reader changes and fixtures.
+- Application verification fixtures: use the explicit application interpreter
+  for application hooks, preserving bare independent evidence reading.
+- Debian evidence: add build 184 reading/retention sidecars and bind the record
+  and generated view to the exact result without rewriting historical captures.
+- Runtime contract: record Q01 CI scope and distinguish absent PA6 evidence
+  from failure, alongside the existing Q08/Q09 and bootstrap requirements.
+- Review transcript: stage existing entries before request capture, leaving
+  round 13's own append unstaged after publication.
+
+The application checkout is unchanged in this round. Its supplied revision
+4093c353 is retained in Jenkins and reader provenance. Step 6 remains incomplete.
+
+Staged path inventory:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/acceptance.tools-archive-rebuild.json
+- docs/v0.27.0/acceptance.tools-archive-rebuild.md
+- docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+- docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+- docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/fixtures.tools-release-agent.py
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+- docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/verify.tools-archive-rebuild.sh
+- docs/v0.27.0/verify.tools-release-acceptance.sh
+- docs/v0.27.0/verify.tools-release-agent.sh
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 13)
+
+Human guidance:
+
+The user asks for round 13 after testing Jenkins on the supplied application
+revision 4093c353. Assess the actual build and the round 12 repair, retaining
+remaining blockers rather than declaring Step 6 complete. The user preserves
+shipped Python 3.13.15, its own pip and relocated uv before locked sync.
+
+Publish round 13 and stop. No cplx commit, reviewer invocation, QAL deployment,
+D10 or release publication is authorized by this checkpoint. Assess the index
+captured in the request; the new transcript append remains unstaged.
+
+Writer response:
+
+Round 12's single finding is accepted without disagreement. The reviewer made
+no repairs and staged no paths. The reader had conflated missing PA6 evidence
+with an observed import failure. The writer now classifies missing evidence
+as inconclusive and explicitly observed import or locked-sync failures as fail.
+Regression cases cover the absent marker, absent imports, explicit failures,
+and the proposed stable marker. No pipeline success is substituted for evidence.
+
+The user supplied application 4093c353 and requested a Jenkins run before round 13.
+That exact revision is the input to build 184. No application source was
+changed by the requestor in this round. The application implements its existing
+stealth-gate Q01 browser exclusion; the cplx reader now binds that scope, counts
+and unique excluded identities to the report and re-runs the application reader.
+Other narrowing, missing guarded-suite execution and sub-gate coverage remain
+refused. This CI scope is explicitly not browser evidence.
+
+The native cumulative run initially exposed an outdated fixture assumption:
+the application plugin now uses annotations requiring Python 3.10 or newer,
+while the fixture invoked it through bare Python 3.9. Application hook fixtures
+now use the existing explicit application interpreter. Independent evidence
+reading remains on bare Python 3.9; no application source or dependency is
+rewritten to suit the fixture. The corrected cumulative run and 83 focused
+acceptance cases pass; the initial failure remains retained.
+
+Build 183's historical reader result is preserved unchanged and identified as
+superseded interpretation. The new build's current cells use the corrected
+reader. Candidate pins, wheel ELFs, provider policy and publication-off state
+are unchanged. Stable locked-sync emission, path-alias evidence, host-child
+qualification, fresh RHEL acceptance, D10 and publication closure remain open
+unless the retained build evidence explicitly settles them.
+
+All existing changes and the retained round 12 answer will be staged before
+rendering round 13. Its new publication append remains unstaged. Publish and
+stop as instructed; no cplx commit or reviewer invocation.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 13)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-13 -->
+
+## Round 13 by reviewer - Step 6
+
+- Recorded: 2026-09-20T19:51:56+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+Baseline index tree: 31f986b8e457df460723f034d210a51b96e359fb
+
+Assessed index tree: 31f986b8e457df460723f034d210a51b96e359fb
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+Build 184 is the first run in this step whose acceptance walk actually
+executes, and it turns round 12's unqualified host-child risk into a measured
+failure with a retained case. Round 12's PA6 finding is fixed exactly as
+instructed. PA5, PA6 and PA7 stay inconclusive, PA9 fails, and D10, the fresh
+RHEL qualification at the Q07 scope and the publication obligations remain
+open. Three things need attention, and two of them are in the round 13 append
+rather than in the staged work.
+
+Verified rather than accepted:
+
+- The PA6 split is right and conservative in all three branches. The cell now
+  fails only on an observed import traceback or an explicit
+  `TOOLS-LOCKED-SYNC/1 state=failed` marker; it passes only with `wheels load`,
+  a `venv_base=` line and a passed marker (or the earlier literal); otherwise
+  it is inconclusive. It stays blocking either way, as asked. Build 184 records
+  it inconclusive because the pipeline does not yet emit the marker, and the
+  request says so rather than claiming the sync.
+- The reassessment of the original build 183 artifacts changes `PA6:debian`
+  from `fail` to `inconclusive` and nothing else. The declared checker asserts
+  that cell by cell against the committed reading, and both raw digests match.
+- Build 184 itself: the Jenkins API reports `FAILURE` from application
+  `4093c353`, and the live console digest equals the recorded
+  `eb648176...128b`.
+- The ABI verdict is exactly as claimed: `ABI PASS: subjects=686 dynamic=603
+  availability-rows=732 runtime-rows=265 dangling-links=488 flags=0`.
+- The walk ran: `11 failed, 6438 passed, 15 skipped, 31 deselected, 9 xfailed`
+  in 232.85 seconds. Coverage is 99.90%, 27203 of 27231 lines, and the console
+  carries `FAIL Required test coverage of 100% not reached`.
+- The eleven failures share one cause, and it is precisely the qualification
+  round 12 left open: `/usr/bin/bash: ... version 'GLIBC_2.36' not found
+  (required by /usr/bin/bash)`. A host child of a shipped process inherits the
+  library path and loads the shipped libc. One brownout lifecycle case and ten
+  runtime-boundary cases fail there. The record names the observed case, calls
+  the other ten an inference pending their stderr, and refuses to suppress
+  them. That is the honest reading.
+- PA9 fails before its new scope logic is reached: no acceptance PASS line
+  exists, so the reader never consults the report. The recorded reason is
+  exactly that.
+- Where the scope binding does apply, it is tight: `markexpr` limited to empty
+  or `not browser`, unique non-empty excluded identities, every exclusion
+  marked `browser`, the console phrase and the marker forced to agree in both
+  directions, collected, executed and setup-skipped reconciled, `excluded=N`
+  equal to `deselected`, the application's own committed validator required to
+  return zero, and `coverage=100%` still demanded in the same summary line. The
+  gate is not lowered.
+- The wheels: 77 canonical locked hashes equal to application `4093c353`'s
+  committed lock, 80 ELF captures, no tooling wheel, the archived lock
+  identical to the committed one, and `abi/imports.txt` reading `wheels load`.
+- Ten of the eleven declared commands behave as declared, including 83 focused
+  acceptance cases and a cumulative native run of 254 cases at exit 0 from the
+  committed application revision.
+
+Three things do not hold.
+
+The round 13 append carries the application's private repository name twice.
+The staged index has never carried it: the effective replacement rules map that
+name to `my-project`, and the whole effort has respected that. The hook passes
+today only because the append is unstaged, and the hook checks staged blobs
+only. Run against those two lines, the same checker reports sensitive content
+and blocks. Group 5 of `a.commit` stages that transcript, so the next commit
+is refused unless the append is reworded first.
+
+The declared Markdown intersection checker fails on the same append. Transcript
+line 13629 begins with a number and a period, wrapped from the previous line,
+which Markdown reads as an ordered-list item, so MD032 fires. The request's
+claim of 39 diagnostics with none on added lines was true when it was measured,
+before publication created the append; my run measures 40, and the one new
+finding is that line. This is the same class the writer repaired for the
+reviewer's own round 3 instructions.
+
+PA9's scope narrowing is recorded, but not the way this effort records scope
+decisions. The requirement's PA9 row still reads "Full application acceptance
+suite", while a new paragraph below it authorizes certifying the application's
+CI scope with browser-marked cases excluded. Q06, Q07, Q08 and Q09 are each a
+dated numbered decision with the human's answer, and the paragraph immediately
+above this one carries its own "human decision of 2026-09-19" attribution. This
+paragraph carries none, and the request attributes the human only the supplied
+application revision and the Jenkins run. The narrowing is defensible, tightly
+fenced and currently inert, since PA9 fails for other reasons; it still changes
+what a required cell may certify, and the browser cases are the ones closest to
+the wheel that already refused capture in build 177.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+- Reword the round 13 append so the application's private name does not enter
+  the transcript, and reflow line 13629 so no wrapped line starts with a number
+  and a period. Both must be clean before group 5 is committed.
+- Record the PA9 CI-scope narrowing as a numbered human decision, or withdraw
+  it. If it is confirmed, amend the PA9 row so the table and the prose agree.
+- Qualify the shipped-process to host-child boundary before exec, retain the
+  child stderr for the ten inferred cases, and rerun the host shell cases.
+- Restore the unchanged 100% coverage gate.
+- Emit the stable locked-sync marker so PA6 can bind to evidence.
+- Qualify the system-loader objects that hold PA5 and PA7 inconclusive.
+- Repeat RHEL acceptance at the Q07 scope with the settled runtime setup, take
+  the D10 reading, and complete the pre-publication obligations.
+
+Architecture: the runtime boundary stays per command, and build 184 shows the
+cost of that choice at the process edge rather than hiding it. Performance: the
+walk adds 232.85 seconds to the pipeline; no other new cost. Unit test
+coverage: no Python class changed in cplx and no percentage is claimed for it;
+no unit-tested class below 100% needs completing, and no top-level symbol
+outside the coverage gate is unreferenced. The application's own 99.90% is
+reported as a failure against its unchanged gate, not adopted as a new one.
+
+Feature integrity: host providers, unmapped objects, malformed verdicts,
+unresolved maps, broader test narrowing and sub-gate coverage are all still
+refused, and earlier captures are unchanged.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows record build 184, the PA6 classification split, the
+CI test scope and the cells as measured. The three findings belong in those
+rows only after the append is reworded and the human answers the PA9 scope
+question, so the reviewer leaves them in this answer rather than writing rows
+that would presume either outcome.
+
+The status sentence stays exactly `No. Step 6 has NOT been fully implemented.`,
+and the document-level line stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+The reviewer ran all eleven resolved commands. Ten behave as declared; the
+Markdown intersection checker fails on the round 13 append.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  native `validation exit=0 elapsed=85s`, 254 cases, zero failures, against
+  committed application `4093c353` with the three committed helper digests
+  verified on the host.
+- The focused transport, source `request`: `PASS tools-release-acceptance: 83
+  cases`, exit 0, including both directions of the new scope binding and the
+  PA6 classification cases.
+- The runtime transport, source `request`: `PASS installer directory order,
+  inert sourcing, command boundary, inherited-prefix reordering, idempotence`.
+- The bootstrap transport, source `request`: the exact embedded validator
+  accepts the retained scope and refuses host, monitoring-only and unresolved
+  maps.
+- The round 13 record verifier, source `request`: both `PASS` lines.
+- The build checker, source `request`: all four `PASS` lines, covering the
+  exact application identity, the shipped Python and pip, the relocated uv and
+  its providers, 77 canonical locked wheel hashes, 80 ELF captures, the
+  retained failing walk with its 31 identified browser exclusions and passing
+  guarded suites, and the build 183 reassessment touching only PA6.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1, as
+  expected for the repository's older debt, but 40 diagnostics rather than the
+  39 the request measured.
+- The Markdown intersection checker, source `request`: fails. The one new
+  finding is `review.code.v0.27.0.tools-archive-rebuild.md:13629: MD032`, on a
+  line of the round 13 append that begins with a number and a period after a
+  wrapped sentence. Nothing in the staged tree is implicated.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`: both clean against the staged index. The hook checks staged blobs
+  only, so it does not see the append.
+
+Measured independently: build 184 through the Jenkins API, with the live
+console digest equal to the recorded one; the ABI verdict line; the pytest
+summary, the coverage failure line and the host Bash `GLIBC_2.36` message in
+the retained walk; the commit plan through the shared readiness checker; and
+the staged transcript, where the reviewer's round 12 answer is byte-identical
+in all three sections and no heading repeats.
+
+Two measurements were taken beyond the declared set, both read-only. The
+effective sensitive-replacement rules were read, and the round 13 append's two
+offending lines were passed to the same checker the hook runs, in its message
+mode, against the cplx root: it reports sensitive content and blocks. The index
+was not touched to obtain that result.
+
+The reviewer removed its own scratch fixture from the RHEL host after the
+cumulative run. The other native commands reused the writer's retained fixture
+without modifying it, and the application checkout was only read. No coverage
+percentage is claimed for cplx.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: eleven commands, each after reading the scripts it runs.
+
+- `bash src/utils/lint_shell.sh`, source `project`.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`.
+- The round 13 focused transport, source `request`, read before running: it
+  copies three committed documents to the retained host fixture and runs the
+  native half from the reviewer's own side.
+- The runtime and bootstrap transports, source `request`, unchanged since
+  round 12 and reused without modification.
+- The round 13 record verifier and the build checker, source `request`, both
+  read in full before running.
+- The Markdown gate and its intersection checker, source `request`.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`.
+
+Ten exit as expected. The Markdown gate exits 1 on repository debt, which is
+expected, but its declared interpreter then fails on a new diagnostic in the
+round 13 append.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets. Round 12's ten commands are all still present; the
+round 13 focused transport replaces the round 12 one at the same position and
+widens the focused suite from 71 cases to 83, which is the direction the
+no-removal rule protects.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `31f986b8e457df460723f034d210a51b96e359fb` equals the
+  baseline at entry and the live index after every run, including after the
+  five native transports.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `4db6be68...7200`. No umbrella row was completed.
+- Validation-state comparison over the 42 captured paths: `acceptable: true`,
+  with empty tracked and untracked lists. The only entry is the ignored
+  Markdown log the declared command rewrites by design.
+- The working tree matches its entry state: 32 staged paths, plus the
+  protocol's unstaged transcript append.
+- No reviewer residue: the cumulative run's scratch fixture was removed from
+  the host, the writer's retained fixture was reused without modification, and
+  the application checkout was only read.
+- The sensitive-rule probe ran in message mode against a scratch file outside
+  the repository. It read the index rules but changed nothing.
+- The baselines and manifest were written before assessment, and the manifest
+  is retired after publication.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+`a.commit` is accurate and executable as a plan, and the reviewer amended
+nothing. It will nevertheless be refused at commit time until the transcript
+append is reworded.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 32 staged paths in five
+ordered groups matching the request.
+
+- Group 1, candidate evidence portability: the composer, the reader and its
+  acceptance fixtures, including the PA6 split and the CI scope binding.
+- Group 2, explicit wheel capture test environment: the agent fixture, both
+  runners and the plan text.
+- Group 3, Debian candidate evidence: all sixteen sidecars from builds 176 to
+  184 with the record and its view.
+- Group 4, point 4 checkpoint status: requirement, design, validation plan and
+  umbrella.
+- Group 5, point 4 review record: the transcript.
+
+Ordering is least to most dependent and every staged path appears once. Group 1
+and group 3 again move together, since the reader change and the cells it binds
+belong in the same step.
+
+The blocking point is group 5. The hook accepts the index today because the
+round 13 append is unstaged and the hook checks staged blobs only. Once that
+transcript is staged, the append's two occurrences of the application's private
+repository name match the effective replacement rules, and the commit is
+refused. The plan does not need restructuring; the append needs rewording.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+Unresolved findings:
+
+- The round 13 transcript append carries the application's private repository name on two lines, which the staged index has never contained and which the effective replacement rules map to `my-project`; the installed hook passes only because the append is unstaged and the hook checks staged blobs alone, and running the same checker over those two lines in message mode against the cplx root reports sensitive content and blocks, so group 5 of `a.commit`, which stages that transcript, will be refused until the append is reworded.
+- The declared Markdown intersection checker fails on the same append: transcript line 13629 begins with a number and a period, wrapped from the sentence above it, so Markdown reads an ordered-list item and MD032 fires; the request's measurement of 39 diagnostics with none on added lines was taken before publication created the append, my run measures 40, and the single new diagnostic is that line, which is the same class the writer repaired for the reviewer's round 3 instructions.
+- PA9's narrowing to the application's CI scope is recorded as unattributed prose while the requirement's PA9 row still reads "Full application acceptance suite": Q06, Q07, Q08 and Q09 are each a dated numbered decision carrying the human's answer, and the tooling-scope paragraph immediately above this one carries its own human-decision attribution, while this paragraph carries none and the request attributes the human only the supplied application revision and the Jenkins run; the narrowing is inert today because PA9 fails for other reasons, but it changes what a required cell may certify, and the excluded cases are the ones closest to the wheel whose identity already refused capture in build 177.
+
+Boundary-crossing work:
+
+- Host subprocess inheritance under the per-command runtime boundary is now a demonstrated failure rather than an open risk, and closing it still spans both repositories: build 184's walk fails eleven cases because a host child of a shipped process inherits the library path and `/usr/bin/bash` then loads the shipped libc and requires a missing `GLIBC_2.36`, with one case observed directly and ten inferred pending their stderr capture; the fix belongs to the application's runtime helper, which must settle the boundary before exec rather than inside an unstartable host shell, while the cplx acceptance contract must say what evidence qualifies that boundary on both platforms.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+Human guidance:
+
+The user asks for round 13 after testing Jenkins on the supplied application
+revision `4093c353`. Assess the actual build and the round 12 repair, retaining
+remaining blockers rather than declaring Step 6 complete. The user preserves
+shipped Python 3.13.15, its own pip and relocated uv before locked sync.
+
+Publish round 13 and stop. No cplx commit, reviewer invocation, QAL deployment,
+D10 or release publication is authorized by this checkpoint. Assess the index
+captured in the request; the new transcript append remains unstaged.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- The index captured in the request is what was assessed: the trees match at
+  entry and after every run, and the new append is unstaged.
+- The actual build is assessed rather than the claim about it. Build 184 is
+  `FAILURE` from the supplied revision, its live console digest equals the
+  recorded one, and its walk, coverage figure and host Bash failure were read
+  from the retained evidence.
+- The round 12 repair is assessed and accepted: the PA6 split is correct,
+  conservative in all three branches, and the build 183 reassessment changes
+  that cell alone.
+- Blockers are retained rather than closed. Step 6 stays `No`, PA9 fails,
+  three cells stay inconclusive, and the host-child boundary is now a
+  demonstrated failure.
+- The bootstrap the user preserves is verified again this round: shipped Python
+  3.13.15, its own pip environment, uv relocated before the locked sync, with
+  its loader, RPATH and provider map retained.
+- No cplx commit, reviewer invocation, deployment, D10 or publication was
+  performed, and none is authorized here. The application checkout was only
+  read.
+
+The disposition is changes-requested because Step 6 is incomplete by design,
+because the round 13 append would be refused by the installed hook once it is
+staged, and because PA9's scope narrowing is not recorded as a decision.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+The staged work is sound this round. Three corrections, then execution.
+
+**Clean the round 13 append before it is staged.** It names the application's
+private repository twice, in the human guidance paragraph and in the writer
+response about locally reported results. The staged index has never carried
+that name, the effective rules map it to `my-project`, and the installed hook
+refuses staged blobs that match. The hook passes today only because the append
+is unstaged and it checks staged blobs alone; group 5 stages exactly that file.
+While reflowing, fix line 13629, which wraps a sentence so the continuation
+begins with a number and a period: Markdown reads an ordered-list item there
+and MD032 fires, which is why the declared intersection checker fails. Neither
+defect can be caught by validating before rendering, since publication creates
+the append; a lint pass over the rendered text before publishing is the only
+place that catches them.
+
+**Record the PA9 narrowing as a decision, or withdraw it.** The requirement's
+PA9 row still reads "Full application acceptance suite", while a new paragraph
+authorizes certifying the application's CI scope with browser-marked cases
+excluded. Every comparable change here is a numbered human decision with a
+date, including the tooling-scope paragraph directly above it. Put the question
+to the human as Q10 with the alternatives stated, and if the answer confirms
+the narrowing, amend the PA9 row so the table and the prose agree. Keep the
+fence exactly as written: coverage and guarded-suite execution unchanged, no
+other narrowing, and never described as browser evidence. The reader itself
+needs no change; it already binds the scope tightly in both directions.
+
+**Then the work build 184 exposed.** Qualify the shipped-process to host-child
+boundary before exec and retain the child stderr for the ten inferred cases, so
+the count rests on measurement rather than a shared-cause inference. Restore
+the 100% gate. Emit the stable locked-sync marker so PA6 binds to evidence
+instead of staying inconclusive. Qualify the system-loader objects holding PA5
+and PA7. Then repeat RHEL at the Q07 scope, take the D10 reading and close the
+publication obligations.
+
+Worth saying plainly: this round did the difficult thing correctly. The PA6
+split is exactly the distinction that was asked for and it keeps the cell
+blocking in every branch; the reassessment of the older build changed that one
+label and nothing else, and proved it cell by cell. The walk finally runs, and
+rather than presenting 6438 passing tests as progress, the record leads with
+the eleven failures, names the observed case, marks the other ten an inference,
+and states that suppressing them is not an option. That is what the per-command
+boundary needed to be tested against, and it now has a reproducible case.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete.
+
+1. Identity. Passes; the request tree equals the live index at entry and after
+   every run.
+2. Completeness. Fails by design, and the remaining work is concrete and now
+   measured rather than anticipated.
+3. Validation and coverage. Fails; ten of the eleven declared commands behave
+   as declared, and the Markdown intersection checker fails on the round 13
+   append rather than on anything staged.
+4. Staged attribution. Passes; the reviewer made no repair and staged nothing.
+5. Unresolved findings. Three: the private name in the append, the MD032 line
+   in the same append, and the unattributed PA9 narrowing.
+6. `a.commit`. Valid, ready and accepted against the current index, but group 5
+   will be refused by the hook once the transcript is staged.
+
+Two of the three findings sit in the append, not in the staged work, and that
+is structural: the requestor validates before rendering, and publication then
+creates text that nothing has checked. It is still content this repository will
+carry, and the private name is the one class this effort has been strict about
+everywhere else.
+
+The staged work itself earns its result. The PA6 split is the correction that
+was asked for, implemented conservatively in all three branches, with the older
+build reassessed to change that label alone. The walk runs for the first time,
+and the eleven failures it produces are exactly the host-child boundary round
+12 listed as unqualified, now with a named case and a refusal to suppress it.
+PA9 fails honestly on an unchanged 100% gate. The one substantive question is
+whether the narrowing that PA9 may certify has been decided or merely written.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 13)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-13 -->
+
+## Round 14 by requestor - Step 6
+
+- Recorded: 2026-09-20T23:32:09+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 14)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 14
+
+### Code review evidence for step 6 tools-archive-rebuild (round 14)
+
+request_index_tree: afbab4030856f0fe69ca991422015aaa341f5ee5
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- bash .reviews/a.step6.r14-focused-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-runtime-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-bootstrap-transport.sh (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r14-verify-record.py (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r14-check-build.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r14-check-rendered.py (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: fix(tools): align application verification fixtures
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 2 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): retain point 4 review exchanges
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 14)
+
+No. Step 6 has NOT been fully implemented.
+
+Round 14 accepts all three round 13 findings. The exact retained writer append
+no longer contains the application's private name or a numeric continuation
+that Markdown interprets as a list. Human decision Q10 records the confirmed
+PA9 scope and the requirement table agrees with its prose. No reviewer repair
+was reversed. The new publication-input check examines the rendered request,
+the simulated transcript append, and sensitive content before publication.
+
+Build 187 ran application revision f8a0217f with the runtime and test repairs and finished
+SUCCESS. Build 187 finishes SUCCESS on application f8a0217f. Provisioning and packaging use shipped Python 3.13.15, its own pip and relocated uv 0.12.17. The ABI gate and real heavy-wheel import pass. After fixture isolation, explicit empty-prefix preservation and portable branch tests, native acceptance passes with 6498 collected, 6497 executed and 31 individually identified browser exclusions. Coverage is 100%, 27256 of 27256 lines. Guarded SQLite suites pass and testmon collects without selecting. The failed builds 185 and 186 and their independent readings remain retained. Publication stays off; no browser evidence is claimed.
+
+Build 185 on supplied revision 294b3066 failed twelve tests. Its raw artifacts
+and independent reading remain retained. Application commit 23d141a0 fixes
+three test files: module-local platform views preserve the real filesystem,
+and synthetic runtime fixtures clear carried metadata after composing the
+host launch environment. Local groundhog completed with zero failures,
+100% coverage and no duration outliers before that commit was pushed.
+
+Build 186 then failed one empty-toolchain fixture and left two path branches
+uncovered on Linux. Commit f8a0217f preserves an explicitly published empty
+shipped list and exercises both path branches without host filesystem
+assumptions. A native synthetic regression reproduces the helper defect with
+the old implementation and passes with the repair. The failed build and its
+independent reading remain retained.
+
+The final application revision's full local confirmation walk passed with
+zero failures, 100% coverage and no duration outliers. One preceding walk
+reported a 4.96-second property-test outlier; an isolated profile measured
+that call at 0.27 seconds and the confirmation walk did not reproduce it.
+No assertion, example count or timing threshold was changed. Both reports
+and the profile remain retained in the local round 14 evidence.
+
+The independent reading binds: PA1:debian pass; PA2:debian pass; PA3:debian pass; PA4:debian pass; PA5:debian inconclusive; PA6:debian inconclusive; PA7:debian inconclusive; PA8:debian pass; PA9:debian pass.
+The build sidecars retain exact application, lock, wheel, reader and console
+identities. Both original and current reader outcomes are retained. Historical
+captures are unchanged; no earlier build's evidence is attributed to this run.
+
+Q10 authorizes only the identified browser-marked exclusions. Coverage,
+nonselecting testmon and guarded SQLite execution stay required. This CI pass
+is not browser evidence, and Chromium launch qualification remains separate
+application work. Wheel executable provider qualification is unchanged.
+
+Validation: native cumulative fixtures pass in 87 seconds against committed
+application 294b3066, and all 83 focused acceptance-reader cases pass. The
+logs are .reviews/a.step6.r14-cumulative.log and
+.reviews/a.step6.r14-focused.log. Shell lint passes all 58 tracked scripts.
+The existing runtime and bootstrap fixture checks remain in the validation
+set. No cplx Python class is changed and no cplx percentage is claimed.
+The application coverage result is measured from the retained native walk.
+
+Record and build checks verify raw artifact hashes, exact source identities,
+wheel byte equality, unchanged candidate pins and publication off. The final
+Markdown intersection, whitespace, sensitive-content and commit-plan checks
+must pass before publication. Existing Markdown debt remains disclosed.
+
+Fresh RHEL consumer qualification, D10, unresolved evidence cells and release
+publication obligations remain open. The suggested DT_NEEDED change remains
+untested and unadopted. Existing changes and transcript entries are staged
+before rendering; round 14's publication append remains unstaged. Publish and
+stop as requested, without a cplx commit or reviewer invocation.
+
+### Implementation report for step 6 tools-archive-rebuild (round 14)
+
+The writer repaired the round 13 transcript text and aligned PA9 with the
+human-confirmed Q10 decision. The evidence record and generated view now
+retain build 187, its independent reading and exact application provenance.
+A publication-input checker validates rendered Markdown and sensitive
+content before the append exists in the working tree. The application
+revision supplies the host-child and cross-platform coverage fixes; the
+writer repaired test isolation, empty-prefix fallback and path coverage
+defects exposed by builds 185 and 186.
+
+### Change summary for step 6 tools-archive-rebuild (round 14)
+
+Five proposed cplx commit groups remain; no commit has been executed.
+
+- Evidence portability and strict acceptance-reader fixtures.
+- Application verification fixtures with an explicit interpreter.
+- Debian evidence, adding builds 185 to 187 without rewriting historical captures.
+- Runtime contract and checkpoint status, including human decision Q10.
+- Review transcript, including repaired round 13 text and its answer.
+
+The captured index contains these paths:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/acceptance.tools-archive-rebuild.json
+- docs/v0.27.0/acceptance.tools-archive-rebuild.md
+- docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+- docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+- docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/fixtures.tools-release-agent.py
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+- docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/verify.tools-archive-rebuild.sh
+- docs/v0.27.0/verify.tools-release-acceptance.sh
+- docs/v0.27.0/verify.tools-release-agent.sh
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 14)
+
+Human guidance:
+
+The user requests round 14 after testing the supplied application revision
+294b3066 in Jenkins, and requires the Jenkins job to finish green before
+publication. Preserve shipped Python 3.13.15, its own pip, relocated uv,
+unchanged wheel ELFs, coverage and provider gates, and publication off.
+
+Builds 185 and 186 exposed application defects during that qualification.
+The writer's repairs are committed as 23d141a0 and f8a0217f; build 187 tests
+the latter exact revision. Retain both failed attempts alongside its result.
+
+Publish round 14 and stop. No cplx commit, reviewer invocation, QAL deployment,
+D10 or release publication is authorized by this checkpoint. Assess the index
+captured in the request; the new transcript append remains unstaged.
+
+Writer response:
+
+Round 13's three findings are accepted without disagreement. The reviewer
+made no repairs and staged no paths. The writer repaired the two private-name
+occurrences and the numeric continuation in the exact retained round 13
+append. The repository Markdown intersection check returns to 39 existing
+diagnostics with none on added lines. A new publication-input check runs the
+same Markdown rules against the rendered request and the staged transcript
+with the proposed summary appended, and the installed sensitive-content
+checker against both rendered artifacts. This runs after rendering, before
+publication, without altering the captured index.
+
+The transcript simulation permits only the staged baseline's existing
+diagnostics. Sensitive-content checks use the publisher's exact repository
+prefix removal, preserving canonical absolute identities in the private
+request while checking the portable content that enters the transcript.
+
+The supplied application revision implements host-child environment
+composition in the parent before exec and adds cross-platform execution of
+the previously uncovered branches. Its local reports are not substituted
+for native Jenkins evidence. No DT_NEEDED proposal is adopted. Final build
+facts are recorded in the assessment. After discussing both alternatives,
+the human selected "PA9 excludes only browser-marked tests" on 2026-09-20.
+Q10 records that answer, the PA9 row now matches it, and the scope paragraph
+cites it. The reader's existing strict checks need no change. Browser
+execution remains separate application qualification; Q08 still requires
+provider qualification of wheel executables, including Node.
+
+Step 6 remains incomplete while the independently measured acceptance cells,
+fresh RHEL qualification, D10 and publication obligations remain unresolved.
+A green Jenkins job does not itself close those obligations. Candidate pins,
+historical captures and publication-off state remain preserved.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 14)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-14 -->
+
+## Round 14 by reviewer - Step 6
+
+- Recorded: 2026-09-21T00:13:27+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+Baseline index tree: afbab4030856f0fe69ca991422015aaa341f5ee5
+
+Assessed index tree: afbab4030856f0fe69ca991422015aaa341f5ee5
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+Build 187 is the first green run of this step, and it is green for the right
+reasons: the host-child boundary that failed eleven tests in build 184 is
+fixed in the parent before exec, the walk covers 100% of 27256 lines, and the
+three cells that lack evidence are still recorded as lacking it. Round 13's
+three findings are all resolved, and all twelve declared commands behave as
+declared, which has not happened before in this step. PA5, PA6 and PA7 remain
+inconclusive, and the fresh RHEL qualification at the Q07 scope, D10 and the
+publication obligations remain open, so the step stays incomplete.
+
+Verified rather than accepted:
+
+- All three live console digests equal the recorded ones: build 185
+  `9458a286...46e9` FAILURE, build 186 `0e936508...3eaf` FAILURE, build 187
+  `40b7d69c...ad31` SUCCESS, the last from application `f8a0217f`. The two
+  failures are retained with their own readings rather than discarded.
+- The acceptance line is exactly what the reader demands:
+  `Acceptance PASS over all tests except the browser cases (stealth-gate Q01):
+  collected=6498 executed=6497 setup_skipped=1 excluded=31; coverage=100%`.
+- The report behind it binds: 31 excluded entries, 31 unique non-empty
+  node identities, every one marked `browser`, equal to `deselected`, and
+  collected, executed and setup-skipped equal to the console. The exclusions
+  are three browser-driving test files, which is what Q10 authorizes.
+- Coverage is measured, not claimed: `lines-valid` and `lines-covered` are both
+  27256 with a line rate of 1, and the console reads `Required test coverage of
+  100% reached`. The guarded SQLite suites ran 13 of 13 and 10 of 10 with zero
+  skipped.
+- The walk is green because tests were fixed, not removed: 6486 passed against
+  build 184's 6438, five skipped against fifteen, no failures. The application
+  adds a `host_runtime` module with its own unit tests that composes the host
+  child's environment in the parent before exec, and its docstring cites build
+  184's exact failure. The only `GLIBC_2.36` lines left in build 187 are the
+  Debian host's own ABI ceiling report.
+- PA6 stays inconclusive correctly even in a SUCCESS build. The literal
+  `uv sync --locked` appears zero times and no locked-sync marker is emitted,
+  so the pass branch cannot be reached although the imports evidence reads
+  `wheels load` and `venv_base=` is present. A green pipeline is not allowed to
+  stand in for the missing observation, which is the distinction round 12 asked
+  for.
+- Round 13's finding on the append is repaired surgically. Against the original
+  rendered summary, exactly three things changed: two occurrences of the
+  application's private name became neutral wording, and the wrapped line that
+  began with a number and a period was rejoined. Nothing else in that
+  290-line entry moved, and the private name now appears nowhere in the staged
+  index or the working transcript.
+- Round 13's Markdown finding is measured as fixed: the gate reports 39
+  diagnostics again, and its declared interpreter passes with none on added
+  lines.
+- Round 13's scope finding is resolved the way it was asked. Q10 is a dated
+  numbered decision carrying both options and the human's answer, the PA9 row
+  now reads the narrowed scope and cites Q10, the requirement prose cites it,
+  and the design says the same. The fence is unchanged: coverage, nonselecting
+  testmon and guarded SQLite execution stay required, and no browser evidence
+  is claimed.
+- The reader, its fixtures, the verification runners, the plan and the
+  composer are byte-identical to round 13. This round changed evidence and
+  documents only, so the code I validated last round is the code that ran.
+- The new publication-input checker does what the gap needed: it lints the
+  rendered request, lints the staged transcript with the proposed summary
+  appended and permits only the existing diagnostics, and runs the installed
+  sensitive-content checker over both artifacts after stripping the repository
+  prefix exactly as publication does. I confirmed the simulated append matches
+  the real one in content, and that publication strips that prefix.
+- The application's committed helpers are byte-identical across the three
+  revisions of this round, so the cumulative fixture run against the earlier
+  committed revision exercises the same helper bytes as build 187.
+- The independent evidence validator ran under the independent 3.9.25
+  interpreter and returned zero, so the reader path still holds the 3.9 floor.
+
+One thing is not yet proven by the evidence it rests on.
+
+PA9's pass depends on executing application code whose bytes the reader never
+pins. The cell runs `ci/tools_test_evidence.py` from the checkout directory it
+is handed, while `--application-revision` is used for one thing only: comparing
+the build's `uv.lock` with that revision. The checkout is checked for the
+existence of `ci/`, nothing more, and the retained reading records no digest of
+the validator it executed. The transport carries only the commit, the root
+tree and three blobs, so the reader could not read that file from the pinned
+revision even if it tried.
+
+In this round the bytes are right, and I checked that rather than assuming it:
+the packer builds the material with `git archive` at the pinned revision. But
+that is a property of a transport script in `.reviews`, not of the independent
+reading, and the reading is what outlives the transport and is what the release
+record cites. The same checkout could carry a modified validator, or one from
+another revision, and every check in the reader would still pass as long as
+`uv.lock` matched. This mattered less while PA9 was failing; it is now the cell
+that turned green, and a pass whose validator is unpinned is the shape of
+problem this step has refused everywhere else.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+- Pin the validator the way the lock is pinned: transport the `ci` tree object
+  and the validator blob, compare the file the reader is about to run against
+  `<revision>:ci/tools_test_evidence.py`, and refuse or record inconclusive on
+  a mismatch. Retain that digest in the reading so the evidence carries it.
+- Emit the stable locked-sync marker so PA6 can bind to an observation.
+- Qualify the system-loader objects and the provider path aliases that hold
+  PA5 and PA7 inconclusive.
+- Repeat RHEL acceptance at the Q07 scope with the settled runtime setup, take
+  the D10 reading, and complete the pre-publication obligations.
+
+Architecture: the host boundary now belongs to the parent process, which is
+where it can be enforced, and the shipped and host environments are composed
+explicitly rather than reset after the fact. Performance: the walk costs 233
+seconds; no other new cost. Unit test coverage: no cplx Python class changed
+and no cplx percentage is claimed; the application's 100% is measured from the
+retained walk, not adopted as a cplx gate. No unit-tested class below 100%
+needs completing, and no top-level symbol outside the coverage gate is
+unreferenced.
+
+Feature integrity: host providers, unmapped objects, malformed verdicts,
+unresolved maps, broader test narrowing and sub-gate coverage are still
+refused; historical captures and candidate pins are unchanged; publication
+stays off, which I confirmed at the pinned application revision.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows record builds 185 to 187, Q10, the repaired append
+and the cells as measured, and the Point 4 narrative now describes the build
+187 checkpoint while the retained sidecars keep every earlier reading intact.
+The validator-pinning finding belongs in those rows once the reader and the
+transport are changed, so the reviewer leaves it in this answer rather than
+writing a row that would presume the shape of the fix.
+
+The status sentence stays exactly `No. Step 6 has NOT been fully implemented.`,
+and the document-level line stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+The reviewer ran all twelve resolved commands. All twelve behave as declared,
+which is the first time this step has reached that state.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  native `validation exit=0 elapsed=87s`, 254 cases, zero failures, against the
+  committed application revision, with the three committed helper digests
+  verified on the host.
+- The round 14 focused transport, source `request`: `PASS
+  tools-release-acceptance: 83 cases`, exit 0.
+- The runtime transport, source `request`: `PASS installer directory order,
+  inert sourcing, command boundary, inherited-prefix reordering, idempotence`.
+- The bootstrap transport, source `request`: the exact embedded validator
+  accepts the retained scope and refuses host, monitoring-only and unresolved
+  maps.
+- The round 14 record verifier, source `request`: both `PASS` lines.
+- The build checker, source `request`: all three `PASS` lines, covering the
+  exact application identity, the shipped Python and pip, the relocated uv and
+  its providers, 77 canonical locked wheel hashes, 80 ELF captures, Jenkins
+  SUCCESS, the native acceptance PASS, 100% measured coverage, the guarded
+  suites and the 31 identified browser exclusions.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the 39
+  older findings, back to the count round 13 disturbed.
+- The Markdown intersection checker, source `request`: `PASS: 39 existing
+  diagnostics; none intersects added Markdown lines since HEAD`.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`: both clean.
+- The publication-input checker, source `request`: `PASS`, covering the
+  rendered request, the simulated transcript append and the sensitive-content
+  check of both portable artifacts.
+
+Measured independently rather than read from the request: builds 185, 186 and
+187 through the Jenkins API, with all three live console digests equal to the
+recorded ones and 187 reporting SUCCESS from the stated revision; the
+acceptance PASS line and the coverage line in the live console; the retained
+report's 31 unique browser-marked exclusions and their reconciliation with the
+console counts; the coverage XML totals; the guarded suite results; the pytest
+summary showing more tests passing than before and none failing; the three
+application helper blobs compared across this round's three revisions; the
+application change that fixed the host-child boundary; the surgical scope of
+the round 13 append repair; the Q10 decision, the amended PA9 row and the
+design text; and the commit plan through the shared readiness checker.
+
+Two read-only measurements went beyond the declared set. I compared the
+simulated transcript append against the real appended entry to confirm the new
+checker lints what publication actually writes, and I traced how the reader
+binds the application checkout, which is where this round's finding comes from.
+
+The reviewer removed its own scratch fixture from the RHEL host after the
+cumulative run. The other native commands reused the writer's retained fixture
+without modifying it, and the application checkout was only read. No coverage
+percentage is claimed for cplx.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: twelve commands, each after reading the scripts it runs.
+
+- `bash src/utils/lint_shell.sh`, source `project`.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`.
+- The round 14 focused transport, source `request`, read before running.
+- The runtime and bootstrap transports, source `request`, unchanged since
+  round 12 and reused without modification.
+- The round 14 record verifier and the build checker, source `request`, both
+  read in full before running.
+- The Markdown gate and its intersection checker, source `request`.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`.
+- The publication-input checker, source `request`, new this round and read in
+  full before running.
+
+All twelve exit as expected, the Markdown gate on repository debt only.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets. Round 13's eleven commands are all still present,
+with the focused transport advanced to this round's fixture and one command
+added rather than removed. The addition is the publication-input checker, which
+covers the gap round 13 found, so the set widens in the direction the
+no-removal rule protects.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `afbab4030856f0fe69ca991422015aaa341f5ee5` equals the
+  baseline captured at entry and the live index after every run, including
+  after the five native transports and the publication-input checker.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `298f54d3...874a`. The umbrella changed with this round's staged
+  work, before the review, and not during it. No umbrella row was completed.
+- Validation-state comparison over the 50 captured paths, the 38 staged paths
+  with the project command's file and the eleven ignored validation files:
+  `acceptable: true` with empty tracked and untracked lists. The only entry is
+  the ignored Markdown log the declared command rewrites by design.
+- The working tree matches its entry state: 38 staged paths, plus the
+  protocol's unstaged transcript append.
+- No reviewer residue: the cumulative run's scratch fixture was removed from
+  the host, the writer's retained fixture was reused without modification, and
+  the application checkout was only read.
+- The baselines and manifest were written before assessment, and the manifest
+  is retired after publication.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+`a.commit` is accurate and executable, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 38 staged paths in five
+ordered groups matching the request. The installed hook accepts the index, and
+this time it also accepts the transcript group, because the append that would
+have blocked it was repaired before staging.
+
+- Group 1, candidate evidence portability: the composer, the reader and its
+  acceptance fixtures, all byte-identical to round 13.
+- Group 2, application verification fixtures: the agent fixture, both runners
+  and the plan text, likewise unchanged.
+- Group 3, Debian candidate evidence: twenty-four sidecars from builds 176 to
+  187 with the record and its generated view.
+- Group 4, point 4 checkpoint status: requirement with Q10, design, validation
+  plan and umbrella.
+- Group 5, point 4 review record: the transcript.
+
+Ordering is least to most dependent and every staged path appears once. Groups
+1 and 2 carry no change this round, which is correct: they hold the reader and
+fixtures that earlier rounds staged and that this round did not touch.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+Unresolved findings:
+
+- PA9's pass rests on application code the reader never pins: the cell executes `ci/tools_test_evidence.py` from whatever checkout it is handed, while `--application-revision` is used only to compare the build's `uv.lock` with that revision, the checkout is verified no further than the existence of `ci/`, and the retained reading records no digest of the validator it ran; the transport carries only the commit, the root tree and three blobs, so the reader could not read that file from the pinned revision even if it tried. In this round the bytes are correct, and I verified that by reading the packer, which builds the material with `git archive` at the pinned revision, but that is a property of an ignored transport script rather than of the independent reading that outlives it and that the release record cites. Pin the validator the way the lock is pinned: transport the `ci` tree object and the validator blob, compare the file about to run against `<revision>:ci/tools_test_evidence.py`, refuse or record inconclusive on a mismatch, and retain that digest in the reading.
+
+Boundary-crossing work:
+
+- Two obligations still span both repositories and cannot be closed from the cplx side alone: the stable locked-sync marker that would let PA6 bind to an observation must be emitted by the application pipeline, since it is the pipeline's own claim to make, while the cplx reader already refuses to accept stage success in its place; and the provider path aliases plus the system-loader objects that hold PA5 and PA7 inconclusive need the application scanner to carry qualified maps for subjects outside the retained helper exception, against a cplx contract that says what qualifies. Both are recorded, neither is claimed as done, and this round's green pipeline is explicitly not offered as a substitute for either.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+Human guidance:
+
+The user requests round 14 after testing the supplied application revision
+294b3066 in Jenkins, and requires the Jenkins job to finish green before
+publication. Preserve shipped Python 3.13.15, its own pip, relocated uv,
+unchanged wheel ELFs, coverage and provider gates, and publication off.
+
+Builds 185 and 186 exposed application defects during that qualification.
+The writer's repairs are committed as 23d141a0 and f8a0217f; build 187 tests
+the latter exact revision. Retain both failed attempts alongside its result.
+
+Publish round 14 and stop. No cplx commit, reviewer invocation, QAL deployment,
+D10 or release publication is authorized by this checkpoint. Assess the index
+captured in the request; the new transcript append remains unstaged.
+
+Guidance response:
+
+The guidance is followed on every point.
+
+- The index captured in the request is what was assessed: the trees match at
+  entry and after every run, and the new append is unstaged.
+- The job finished green, and I confirmed it from Jenkins rather than from the
+  request: build 187 is SUCCESS on the stated revision, and its live console
+  digest equals the recorded one.
+- Both failed attempts are retained. Builds 185 and 186 are FAILURE with their
+  own readings and sidecars staged, and their live console digests match the
+  record too.
+- The preserved elements are verified again this round: shipped Python
+  3.13.15, its own pip environment, uv relocated before the locked sync with
+  its loader, RPATH and provider map, 77 canonical locked wheel hashes with no
+  tooling wheel, the coverage gate unchanged at 100%, and the provider gates
+  still refusing what they refused before.
+- Publication is off, checked at the pinned application revision, and the
+  candidate pins are unchanged.
+- No cplx commit, reviewer invocation, deployment, D10 or publication was
+  performed, and none is authorized here. The application checkout was only
+  read.
+
+The disposition is changes-requested because Step 6 is incomplete by design,
+with three Debian cells still lacking evidence and the RHEL, D10 and
+publication obligations open, and because PA9's new pass depends on a
+validator the reader does not pin.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+One correction, one small hardening, then the remaining execution.
+
+**Pin the validator PA9 runs.** The cell executes the application's
+`ci/tools_test_evidence.py` from the checkout it is handed, and the only thing
+`--application-revision` currently governs is the `uv.lock` comparison. Carry
+the `ci` tree object and the validator blob in the transport, compare the file
+about to run against `<revision>:ci/tools_test_evidence.py`, refuse or record
+inconclusive on a mismatch, and retain that digest in the reading. The bytes
+are right today, and I checked the packer rather than assuming it, but that
+correctness lives in an ignored transport script while the reading is what the
+release record cites. This is the same pinning discipline the lock already
+gets, applied to the one input that decides a cell that just turned green.
+
+**Make the simulated append match the real one.** The new publication-input
+checker is the right answer to round 13, and it earned its place this round.
+Its simulated entry uses a different heading form and one metadata bullet,
+where publication writes the entry-id comment, `## Round N by <role> - Step 6`
+and nine bullets. The content is what matters and the content is faithful, so
+this is hardening rather than a defect: build the simulated entry from the
+publisher's exact header so a future heading or metadata change cannot slip
+past the check that exists to catch exactly that.
+
+**Then the remaining evidence.** Emit the stable locked-sync marker so PA6
+binds to an observation instead of an absence. Qualify the system-loader
+objects and the provider path aliases holding PA5 and PA7. Then repeat RHEL
+acceptance at the Q07 scope with the settled runtime setup, take the D10
+reading, and close the pre-publication obligations.
+
+Worth saying plainly, because this round earned it. All three round 13
+findings were fixed at the root rather than patched: the append repair changed
+exactly the two names and the one wrap and nothing else in a 290-line entry;
+Q10 was put to the human with both options and their real costs, and the table,
+the prose and the design now agree; and the gap that let two defects reach a
+published append is now closed by a check that lints what publication actually
+writes. The build itself is the stronger result: the host-child boundary that
+failed eleven tests is fixed in the parent before exec, with a new module, its
+own tests and a docstring that cites the failing build, and the walk came back
+green with more tests passing and fewer skipped rather than with fewer tests
+run. In a green build, PA5, PA6 and PA7 are still recorded as lacking
+evidence, and the request says in its own words that a green pipeline does not
+close those obligations. That is the habit that makes the eventual pass worth
+something.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete.
+
+1. Identity. Passes; the request tree equals the live index at entry and after
+   every run.
+2. Completeness. Fails by design. Three Debian cells still lack evidence, and
+   the RHEL qualification at the Q07 scope, D10 and the publication
+   obligations remain open.
+3. Validation and coverage. Passes; all twelve declared commands behave as
+   declared, which this step had not achieved before.
+4. Staged attribution. Passes; the reviewer made no repair and staged nothing.
+5. Unresolved findings. One: the validator behind PA9's pass is not pinned.
+6. `a.commit`. Passes, valid, ready, and now accepted by the hook including
+   its transcript group.
+
+Commit-ready is not available, and the reason is completeness rather than
+quality. The rule reserves that recommendation for a complete implementation,
+and the writer says plainly that Step 6 is not complete. It would be wrong to
+convert a good round into a finished one.
+
+The single finding is proportionate to what changed. PA9 moved from fail to
+pass this round, so the inputs behind that verdict deserve the same scrutiny
+the cell itself received, and one of them is bound only by an ignored transport
+script. The evidence is not wrong: I traced the packer and it uses the pinned
+revision. What is missing is that the independent reading cannot demonstrate
+it, and the reading is the artifact that survives.
+
+The rest of this round is the strongest work in this step. Every round 13
+finding was fixed at its root, the narrowing question went to the human with
+both options priced, the failing builds were kept with their evidence, and the
+green walk is green because tests were repaired rather than removed. The three
+cells without evidence are still recorded as inconclusive inside a SUCCESS
+build, which is the distinction this step has been defending since round 12.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 14)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-14 -->
+
+## Round 15 by requestor - Step 6
+
+- Recorded: 2026-09-21T10:26:03+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: request
+
+### Review identity for step 6 tools-archive-rebuild (round 15)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 6
+Review round: 15
+
+### Code review evidence for step 6 tools-archive-rebuild (round 15)
+
+request_index_tree: 16c7b5e2c8643c9480569f6df95c370299a2d86a
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash .reviews/a.step6.transport.sh cumulative (sources: plan)
+- bash .reviews/a.step6.r14-focused-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-runtime-transport.sh (sources: request)
+- bash .reviews/a.step6.r12-bootstrap-transport.sh (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r15-verify-record.py (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.point4-r15-check-build.py (sources: request)
+- ../llm-shared/markdown-check.bat --root ../cplx > .reviews/a.step6.r2-markdown.log 2>&1 (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r2-check-markdown.py (sources: request)
+- git diff --cached --check (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+- ../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe .reviews/a.step6.r15-check-rendered.py (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: fix(tools): normalize candidate verification evidence
+group 1 path: ci/deliver-closure-tools.sh
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 2: fix(tools): align application verification fixtures
+group 2 path: docs/v0.27.0/fixtures.tools-release-agent.py
+group 2 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 2 path: docs/v0.27.0/verify.tools-release-agent.sh
+group 2 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+group 3: docs(tools): bind Debian candidate evidence
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187-retention.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build188.json
+group 3 path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build188-retention.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 3 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 4: docs(tools): record point 4 checkpoint
+group 4 path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+group 4 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 5: docs(review): retain point 4 review exchanges
+group 5 path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: ci/deliver-closure-tools.sh
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build188-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build188.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+staged path: docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/fixtures.tools-release-agent.py
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: docs/v0.27.0/verify.tools-release-agent.sh
+```
+
+### Requestor assessment for step 6 tools-archive-rebuild (round 15)
+
+Checkpoint ready for independent review. Full Step 6 remains No.
+
+The human selected checkpoint commit followed immediately by completing
+Step 6. This round therefore assesses that checkpoint's commit readiness;
+fresh RHEL consumer qualification, D10 and remaining pre-publication checks
+remain required and follow the commit. No candidate publication is authorized
+by this scope decision.
+
+Round 14's finding is repaired: PA9 executes retained validator bytes checked
+against the exact application commit, with a retained revision/path/digest
+binding. Missing or modified validators are refused before execution. The
+minimal Git transport includes the validator blob and ci tree.
+
+Build 188 finishes SUCCESS on application ec2e72bc. The real relocated uv sync emits the stable success marker. Provider-map aliases retain their qualified physical targets. Shipped Python 3.13.15, its own pip, relocated uv 0.12.17, canonical lock, wheel bytes and blocking heavy-wheel traces remain intact. Native acceptance passes with 6501 collected, 6500 executed and 31 individually identified browser exclusions. Coverage is 100%, 27256 of 27256 lines. Guarded SQLite suites pass and testmon collects without selecting. No browser evidence is claimed.
+
+All nine independent Debian acceptance cells PA1 through PA9 pass. Explicit
+provider alias provenance closes the path-spelling gap without expanding the
+provider policy. The stable locked-sync marker records the real relocated uv
+command's outcome. Historical captures remain unchanged and preserve their
+original identities. Both original-bundle and repaired-reader outcomes remain
+retained. The proposed DT_NEEDED change is unadopted.
+
+The application's complete local groundhog walk passed with zero failures,
+100% coverage and no duration outliers. An earlier new regression exceeded
+the duration floor because its shell stub launched two extra executables.
+Profiling identified subprocess overhead; replacing that stub with a shell
+function preserves the actual production branch, arguments, success/failure
+assertions and exit-code check. The isolated regression and complete walk
+then passed. No timing threshold or assertion was weakened.
+
+Native cumulative fixtures passed against committed application ec2e72bc in
+95 seconds. All 91 focused reader cases pass. Shell lint passes 58 tracked
+scripts; runtime and bootstrap regression checks pass. Logs are retained in
+the round 15 local evidence. No cplx Python coverage percentage is claimed.
+
+Record and build checks bind raw hashes, source revisions, canonical lock,
+77 wheels and 80 wheel ELFs, shipped Python/pip, relocated uv and publication
+off. Markdown, whitespace, sensitive-content and commit-plan checks precede
+publication. The publication check uses the actual publisher's entry renderer
+including metadata and footer and rejects new transcript diagnostics.
+
+The existing transcript and all implementation changes are staged before
+the request captures its index. That index stays unchanged through assessment.
+At checkpoint convergence, the human has already authorized Commit. Continue
+through the canonical commit workflow, then complete the remaining Step 6
+work and obtain its completion review.
+
+### Implementation report for step 6 tools-archive-rebuild (round 15)
+
+The independent acceptance reader now pins, retains and executes the exact
+committed application test validator. Its fixture suite covers missing,
+modified and unbound validators and qualified, conflicting or malformed
+provider aliases. The application scanner emits explicit physical alias
+bindings and provisioning records the real locked-sync outcome.
+
+Build 188 evidence and both independent reader outcomes are retained with
+exact source and artifact identities. The record, view and validation status
+reflect all nine Debian cells passing while retaining full Step 6 as No.
+Human guidance explicitly authorizes this checkpoint commit followed by the
+remaining qualification. The publication checker validates the complete
+publisher-rendered transcript entry before publication.
+
+### Change summary for step 6 tools-archive-rebuild (round 15)
+
+Five proposed cplx commit groups remain:
+
+- Evidence portability, pinned validator and strict acceptance-reader fixtures.
+- Application verification fixtures with an explicit interpreter.
+- Debian evidence through build 188, preserving historical captures.
+- Runtime contract and authorized checkpoint status, including Q10.
+- Review transcript and retained responses.
+
+The captured index contains these paths:
+
+- ci/deliver-closure-tools.sh
+- docs/v0.27.0/acceptance.tools-archive-rebuild.json
+- docs/v0.27.0/acceptance.tools-archive-rebuild.md
+- docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+- docs/v0.27.0/design.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build177.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build178.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build179.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build180.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build181.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build182.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build183.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build184.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build185.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build186.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build187.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build188-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-build188.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian-retention.json
+- docs/v0.27.0/evidence.tools-archive-rebuild.step6-debian.json
+- docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/fixtures.tools-release-agent.py
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+- docs/v0.27.0/review.code.v0.27.0.tools-archive-rebuild.md
+- docs/v0.27.0/verify.tools-archive-rebuild.sh
+- docs/v0.27.0/verify.tools-release-acceptance.sh
+- docs/v0.27.0/verify.tools-release-agent.sh
+
+### Human guidance and writer response for step 6 tools-archive-rebuild (round 15)
+
+Human guidance:
+
+The human's latest instruction on 2026-09-21 is: "OK go for checkpoint,
+then work on completing step 6". It follows the explicit instruction to
+aim for convergence and commit after round 14.
+
+Assess commit readiness of this repaired Debian checkpoint. Full Step 6
+remains incomplete: fresh RHEL acceptance at Q07 scope, D10 and the remaining
+pre-publication obligations follow immediately after the checkpoint commit.
+The human explicitly selected this order rather than waiting for full Step 6
+completion before committing. Do not mistake that scope decision for a waiver
+of the later acceptance work or authorization to publish the candidate.
+
+Preserve shipped Python 3.13.15, its own pip, relocated uv, unchanged wheel
+ELFs, strict provider qualification, Q10 CI test scope, 100% coverage and
+publication off. Assess the index captured in the request. No index mutation
+will follow rendering or publication. The publisher's own entry renderer
+checks the prospective transcript append before publication.
+
+At checkpoint convergence the user has already authorized Commit. After the
+canonical commit continuation, proceed with the remaining Step 6 work and its
+own review; do not mark this checkpoint as completion of the entire step.
+
+The human also requires Python package downloads to use the internal Nexus
+mirror because direct public-index downloads are blocked. The exact uv wheel
+for the subsequent RHEL qualification has been retained from that mirror and
+checked against its index digest. D10's GCC 12 input is a runtime-provider
+comparison; no compiler upgrade or host package installation is authorized.
+
+Writer response:
+
+Round 14's validator-pinning finding is accepted without disagreement. The
+reviewer made no code repairs. The independent reader now requires the exact
+application revision, reads its committed ci/tools_test_evidence.py blob,
+compares the supplied checkout bytes before execution, and retains both the
+verified executable bytes and their revision/path/SHA-256 identity. It runs
+that retained copy in Python isolated mode. Missing revisions, missing Git
+objects, absent validator files and changed bytes are refused before execution.
+The transport now carries the ci tree and validator blob as well as the
+previous minimal objects. Native fixtures cover each refusal and the positive
+retained digest.
+
+The publication checker now calls the publisher's actual pure transcript
+renderer, including its exact heading, metadata and entry footer, rather than
+approximating the surrounding Markdown. Existing baseline diagnostics remain
+the only permitted diagnostics; sensitive-content checks still cover both
+portable publication inputs.
+
+The application scanner now records observed provider spellings and their
+qualified physical targets as map-alias rows. The reader accepts an alias only
+when its target has an availability row, and refuses malformed or conflicting
+rows. This is availability evidence, not a loaded-provider claim. Actual import
+traces remain authoritative and blocking; the retained-helper exception is
+unchanged. The application's relocated uv sync now emits its stable success
+marker only after exit zero, and emits the failure marker with the original
+nonzero exit otherwise. New application regressions exercise both outcomes.
+
+The human selected checkpoint commit followed immediately by completion of
+the remaining Step 6 work. Full-step incompleteness is retained explicitly;
+it is not represented as a completed release qualification. The new request
+asks for commit readiness of this checkpoint under that authorized scope.
+
+### Reviewer focus for step 6 tools-archive-rebuild (round 15)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-6-round-15 -->
+
+## Round 15 by reviewer - Step 6
+
+- Recorded: 2026-09-21T10:40:56+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 6
+- Outcome: answer
+
+### Assessed index identity for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+Baseline index tree: 16c7b5e2c8643c9480569f6df95c370299a2d86a
+
+Assessed index tree: 16c7b5e2c8643c9480569f6df95c370299a2d86a
+
+### Implementation check for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+Result:
+
+No. Step 6 has NOT been fully implemented.
+
+I found no defect in the staged work this round. Round 14's finding is fixed
+more thoroughly than it was raised, the three cells that had been inconclusive
+since round 11 are now passing on evidence I could reproduce, and all twelve
+declared commands behave as declared. What keeps this answer at `No` is the
+step's own scope: the plan's Step 6 requires RHEL PA1 to PA6 at the Q07 venv
+scope and the D10 reading against both actual provider candidates, and neither
+has been done. The writer records the same status.
+
+Verified rather than accepted:
+
+- The validator pinning is right, and it is stronger than what round 14 asked
+  for. `--application-revision` is now required for PA9; the reader reads the
+  validator from `<revision>:ci/tools_test_evidence.py`, refuses unless the
+  checkout's file matches those bytes exactly, writes the pinned bytes into the
+  retained evidence, records revision, path and SHA-256 in a binding file, and
+  executes the retained copy with `-I` rather than the checkout's. Both new
+  artifacts are captured, so the retained reading now carries what it ran.
+- The refusals are fixture-tested in four directions: absent revision, unknown
+  revision, a foreign checkout whose validator raises on execution, and a
+  missing file. The drift fixture also asserts that the poisoned validator's
+  marker never appears in the log, which proves the refusal happens before
+  execution rather than after it.
+- Build 188 is SUCCESS on application `ec2e72bc`, and its live console digest
+  `231c5a82...6f54` equals the recorded one.
+- PA6's pass is a real observation. The marker is printed from the exit status
+  of the relocated uv itself, in an if/else whose failure branch prints
+  `state=failed` and exits, with a unit test covering both branches. The
+  console shows the sync resolving 83 packages and installing 77 immediately
+  before `TOOLS-LOCKED-SYNC/1 state=passed`, and the sync runs
+  `--no-group tooling`, which is the Q07 scope.
+- PA5 and PA7 close on spelling, not on policy. I replayed the reader's own
+  provider logic over the retained evidence: across the 84 system-loader
+  subjects, 111 providers resolve directly and 30 through an alias, and zero
+  resolve to a target outside the shipped prefix. Every alias in use is a
+  soname pointing at its real versioned file in the same shipped directory.
+  The reader refuses a malformed row, a conflicting duplicate and an alias
+  whose target has no availability row, and all three refusals are fixtures.
+- The reader never normalizes paths against its own filesystem, which is the
+  right call for a reader that runs on a different host than the agent.
+- PA9 still binds the same way: 31 unique browser-marked exclusions equal to
+  `deselected` and to the console's `excluded=31`, counts reconciled, coverage
+  100% at 27256 of 27256, guarded SQLite suites passing with zero skipped.
+- The publication-input checker now builds its simulated entry from the
+  publisher's own renderer, metadata and footer included, which is the
+  hardening round 14 suggested.
+- The commit plan is valid and ready: 40 staged paths, five ordered groups, no
+  diagnostics, and no stale commit-phase marker anywhere that would block the
+  canonical workflow.
+- The record is honest about scope: it states that the obligations after the
+  checkpoint are not waived and that Step 6 remains `No` until their evidence
+  is conclusive.
+
+On the disposition, and why it is not a judgment on this work.
+
+The human's instruction is to commit this checkpoint and then finish Step 6,
+and the request asks me to assess the checkpoint's commit readiness. I can
+report what I measured: five of the six readiness-floor results pass, and I
+have no finding against the staged work. But the shared reviewer rule reserves
+a `commit-ready` recommendation for a complete implementation among the six,
+and `implementation-check` does not offer a partial status: a step that is not
+fully implemented is recorded as `No`, which is what the writer wrote and what
+the plan's Step 6 text supports. Guidance may direct scrutiny; it cannot move a
+disposition rule. So the answer is `changes-requested`, and the change being
+requested is the remaining Step 6 work itself, not a repair.
+
+This answer neither authorizes nor blocks the checkpoint commit. That choice
+belongs to the human, who has already made it, and no reviewer answer of either
+kind would change that. If a mid-step checkpoint should be able to converge
+through this protocol, that is a change to the shared instruction rather than
+something a reviewer can grant inside a round.
+
+#### Missing work for Step 6 for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+- Run fresh RHEL acceptance for PA1 to PA6 at the Q07 venv scope, with
+  `--no-group tooling` and uv from the tools installation, using the settled
+  per-command runtime setup.
+- Materialize the Step 4 agent's exact wheels on RHEL and take the D10 reading
+  against both actual provider candidates, rebuilding once and repeating the
+  affected acceptance if the generation changes.
+- Record RHEL PA10 readiness, deploy and redeploy against the packaged
+  inventory, and PA11 operator `senv` and `.env` behavior.
+- Complete the remaining pre-publication obligations, then obtain the
+  completion review for the whole step.
+
+Architecture: unchanged this round; the reader gained a pinning step and an
+alias lookup, both local to the functions that own those decisions.
+Performance: no new cost. Unit test coverage: no cplx Python class changed and
+no cplx percentage is claimed; the application's 100% is measured from the
+retained walk. No unit-tested class below 100% needs completing, and no
+top-level symbol outside the coverage gate is unreferenced.
+
+Feature integrity: host providers, unmapped objects, malformed verdicts,
+unresolved maps, unpinned validators, broader test narrowing and sub-gate
+coverage are all refused; historical captures and candidate pins are unchanged;
+publication stays off, checked at the pinned application revision.
+
+Validation plan effects:
+
+None. The reviewer wrote no row in
+`docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`.
+
+The writer's Step 6 rows record build 188, the validator pinning, the alias
+provenance, the observed locked sync, the human's checkpoint decision and the
+obligations that survive it. The reviewer has no finding to add and no
+correction to make to those rows.
+
+The status sentence stays exactly `No. Step 6 has NOT been fully implemented.`,
+and the document-level line stays `No, it is not implemented.`
+
+No pre-repair blob was recorded and no reviewer patch was attributed or staged.
+
+### Pre-repair mandatory checks and coverage for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+The reviewer ran all twelve resolved commands. All twelve behave as declared.
+
+- `bash src/utils/lint_shell.sh`, source `project`: 58 tracked scripts, clean.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
+  native `validation exit=0 elapsed=87s`, 254 cases, zero failures, against
+  committed application `ec2e72bc`.
+- The round 14 focused transport, source `request`: `PASS
+  tools-release-acceptance: 91 cases`, eight more than last round, covering the
+  four validator refusals and the three alias refusals.
+- The runtime and bootstrap transports, source `request`: both pass unchanged.
+- The round 15 record verifier, source `request`: all three `PASS` lines,
+  including that every raw cell is `pass` and that the retained executed
+  validator equals the committed blob at the pinned revision.
+- The build checker, source `request`: all four `PASS` lines, including the
+  observed locked sync and the explicit provider aliases with no flagged or
+  unresolved providers.
+- The Markdown gate with `--root ../cplx`, source `request`: exit 1 on the same
+  39 repository findings.
+- The Markdown intersection checker, source `request`: `PASS`, none on added
+  lines.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`: both clean.
+- The publication-input checker, source `request`: `PASS`, now rendering its
+  simulated entry through the publisher's own renderer.
+
+Measured independently rather than read from the request: build 188 through
+the Jenkins API, SUCCESS from the stated revision with its live console digest
+equal to the recorded one; the locked-sync marker in the live console, its
+emitting branch in the committed application pipeline and the unit test that
+covers both of its branches; the uv sync resolving 83 and installing 77
+packages just before the marker; a replay of the reader's own provider logic
+over the retained evidence, giving 111 providers resolved directly, 30 through
+an alias and none outside the shipped prefix; the alias rows themselves, which
+are sonames pointing at their real versioned files; the PA9 report and its 31
+unique browser-marked exclusions with the console counts; the coverage totals;
+the reader diff and the fixture cases that exercise its new refusals; the
+commit plan through the shared readiness checker; and the absence of any stale
+commit-phase marker.
+
+The reviewer removed its own scratch fixture from the RHEL host after the
+cumulative run. The other native commands reused the writer's retained fixture
+without modifying it, and the application checkout was only read. No coverage
+percentage is claimed for cplx.
+
+### Resolved validation set and sources for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+The reviewer ran the union of the request validation set and the current
+resolver set: twelve commands, each after reading the scripts it runs.
+
+- `bash src/utils/lint_shell.sh`, source `project`.
+- `bash .reviews/a.step6.transport.sh cumulative`, source `plan`.
+- The focused, runtime and bootstrap transports, source `request`.
+- The round 15 record verifier and build checker, source `request`, both read
+  in full and diffed against their round 14 counterparts before running.
+- The Markdown gate and its intersection checker, source `request`.
+- `git diff --cached --check` and `bash .git/hooks/pre-commit`, source
+  `request`.
+- The publication-input checker, source `request`, read in full again because
+  it changed to use the publisher's own entry renderer.
+
+All twelve exit as expected, the Markdown gate on repository debt only.
+
+### Resolver drift and direction for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+No drift in either direction.
+
+The project floor still resolves to the single `project` command, and the
+`plan` and `request` additions parse through the current resolver contract, so
+the union equals both sets. The twelve commands match round 14's set, with the
+record and build checkers advanced to this round's build and the publication
+checker strengthened rather than relaxed. Nothing was dropped.
+
+### Repository state around validation for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+The repository state around validation is unchanged, and every comparison came
+from the shared evidence launcher.
+
+- Request-time index tree `16c7b5e2c8643c9480569f6df95c370299a2d86a` equals the
+  baseline captured at entry and the live index after every run.
+- Umbrella digest comparison: `applicable: true`, `changed: false`, before and
+  after both `ea05112c...71b8`. The umbrella changed with this round's staged
+  work, before the review, not during it. No umbrella row was completed.
+- Validation-state comparison over the 52 captured paths, the 40 staged paths
+  with the project command's file and the eleven ignored validation files:
+  `acceptable: true` with empty tracked and untracked lists.
+- The working tree matches its entry state: 40 staged paths, plus the
+  protocol's unstaged transcript append.
+- No reviewer residue: the cumulative run's scratch fixture was removed from
+  the host, the writer's retained fixture was reused without modification, and
+  the application checkout was only read. The live console fetch and the
+  provider replay wrote only ignored reviewer scratch files.
+- The baselines and manifest were written before assessment, and the manifest
+  is retired after publication.
+
+### Repair inventory for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+`a.commit` is accurate and executable, and the reviewer amended nothing.
+
+Independent `commit-plan-check.bat --format json` against the received state:
+`state: valid`, `ready: true`, exit 0, no diagnostics, 40 staged paths in five
+ordered groups matching the request. The installed hook accepts the index.
+
+- Group 1, candidate evidence portability: the composer, the reader with its
+  validator pinning and alias rules, and the acceptance fixtures that exercise
+  both.
+- Group 2, application verification fixtures: unchanged this round.
+- Group 3, Debian candidate evidence: twenty-six sidecars from builds 176 to
+  188 with the record and its generated view.
+- Group 4, point 4 checkpoint status: requirement, design, validation plan and
+  umbrella.
+- Group 5, point 4 review record: the transcript.
+
+Ordering is least to most dependent and every staged path appears once. Group 1
+and group 3 again move together, which is correct: the reader change and the
+cells it binds belong in the same step.
+
+Two things worth recording because a commit is imminent. No stale
+`a.code-review-commit-phase` marker exists anywhere in the repository or the
+artifact home, so the canonical workflow will not trip over a leftover from an
+earlier step. And the hook accepts the staged transcript, including the round
+14 append, so group 5 commits cleanly.
+
+### Findings and boundaries for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+Unresolved findings:
+
+- None. The reviewer found no defect in the staged work this round.
+
+Boundary-crossing work:
+
+- The remaining Step 6 work still spans both repositories, which is why it cannot be closed from the cplx side alone: the plan requires materializing the Step 4 agent's exact wheels on RHEL and running D10 against both actual provider candidates, so the application supplies the wheel identities and the venv at the Q07 scope while cplx owns the acceptance contract and the D10 reading, and a generation change there forces a rebuild, a new candidate identity and a repeat of the affected acceptance. None of that is waived by the checkpoint decision, and the staged record says so in its own words.
+
+### Human guidance response for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+Human guidance:
+
+The human's latest instruction on 2026-09-21 is: "OK go for checkpoint,
+then work on completing step 6". It follows the explicit instruction to
+aim for convergence and commit after round 14.
+
+Assess commit readiness of this repaired Debian checkpoint. Full Step 6
+remains incomplete: fresh RHEL acceptance at Q07 scope, D10 and the remaining
+pre-publication obligations follow immediately after the checkpoint commit.
+The human explicitly selected this order rather than waiting for full Step 6
+completion before committing. Do not mistake that scope decision for a waiver
+of the later acceptance work or authorization to publish the candidate.
+
+Preserve shipped Python 3.13.15, its own pip, relocated uv, unchanged wheel
+ELFs, strict provider qualification, Q10 CI test scope, 100% coverage and
+publication off. Assess the index captured in the request. No index mutation
+will follow rendering or publication. The publisher's own entry renderer
+checks the prospective transcript append before publication.
+
+At checkpoint convergence the user has already authorized Commit. After the
+canonical commit continuation, proceed with the remaining Step 6 work and its
+own review; do not mark this checkpoint as completion of the entire step.
+
+Guidance response:
+
+The guidance is followed on every point, and one of its requests cannot be
+granted in the form it asks for.
+
+- The index captured in the request is what was assessed: the trees match at
+  entry and after every run, and the new append is unstaged.
+- The checkpoint's readiness was assessed, not assumed. I found no defect in
+  the staged work, and five of the six readiness-floor results pass.
+- The scope decision is not treated as a waiver. The remaining RHEL
+  acceptance at the Q07 scope, D10 and the pre-publication obligations are
+  recorded as missing work, and no candidate publication is implied by
+  anything here.
+- The preserved elements are verified again: shipped Python 3.13.15, its own
+  pip, relocated uv with the sync run at `--no-group tooling`, unchanged wheel
+  ELFs, provider qualification that still refuses every unqualified target,
+  the Q10 scope with its 31 identified exclusions, 100% coverage at 27256 of
+  27256 lines, and publication off at the pinned application revision.
+- The publication check does now use the publisher's own entry renderer, and
+  it passes on both rendered artifacts.
+
+What cannot be granted is the disposition the checkpoint framing asks for.
+`commit-ready` is reserved by the shared rule for a complete implementation
+among the six floor results, and `implementation-check` has no partial status:
+a step that is not fully implemented is recorded as `No`, which is what the
+writer wrote and what the plan's Step 6 text supports. Guidance may direct
+additional scrutiny but cannot move a disposition rule, so this answer is
+`changes-requested` and the change requested is the remaining Step 6 work.
+
+This is not a block on the commit. The commit choice belongs to the human,
+who has already made it, and neither disposition would change that: a
+`commit-ready` recommendation never authorizes a commit either. If a mid-step
+checkpoint is meant to converge through this protocol, that belongs in the
+shared instruction rather than in a reviewer's in-round judgment.
+
+### Writer instructions for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+There is nothing to repair in the staged work. The instructions are the
+remaining step.
+
+**Run the RHEL side at the Q07 scope.** PA1 to PA6 on the build account and
+deployment target, with the shipped venv prepared `--no-group tooling`, uv
+taken from the tools installation, and the per-command runtime setup that
+Debian has now exercised twice. Keep the earlier tooling-inclusive capture as
+history without letting it stand in for this one. Record PA10 readiness,
+deploy and redeploy against the packaged inventory, and PA11 operator `senv`
+and `.env` behavior.
+
+**Then D10.** Materialize the Step 4 agent's exact wheels on RHEL and read D10
+against both actual provider candidates. If the generation changes, rebuild
+once, mint a new candidate identity and repeat the affected acceptance,
+including the second reading the plan allows.
+
+**Then close the step.** Complete the remaining pre-publication obligations
+and request the completion review for Step 6 as a whole. The checkpoint commit
+does not shorten that list, and your own record already says so.
+
+If the human commits the checkpoint first, nothing here needs to change. The
+plan is valid and ready, no stale commit-phase marker exists, the hook accepts
+the index including the transcript group, and the five groups are ordered
+least to most dependent.
+
+Worth saying plainly. Round 14's finding asked you to pin the validator the
+way the lock is pinned; you did that and went further, retaining the bytes,
+recording the binding and running the retained copy in isolated mode, then
+proving with a fixture that a substituted validator is refused before it
+executes rather than after. The two cells that had been inconclusive since
+round 11 closed on real evidence: a marker printed from the actual relocated
+uv's exit status with both branches unit-tested, and alias rows that resolve
+sonames to their own versioned files inside the shipped prefix, with malformed,
+conflicting and unqualified targets all refused and all three refusals
+fixtured. I replayed the provider logic myself over the retained evidence and
+not one accepted provider points outside the shipped prefix. That is the
+opposite of loosening a gate to get a pass, and it is why nine passing cells
+read as a result rather than as an outcome someone wanted.
+
+### Decision rationale for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+The disposition is changes-requested and the readiness floor is recorded as
+incomplete. Five of the six results pass.
+
+1. Identity. Passes; the request tree equals the live index at entry and after
+   every run.
+2. Completeness. Fails. The plan's Step 6 requires RHEL PA1 to PA6 at the Q07
+   venv scope, PA10 and PA11, and the D10 reading against both actual provider
+   candidates. None of those has been run, and the writer records the same
+   status.
+3. Validation and coverage. Passes; all twelve declared commands behave as
+   declared, and the focused suite grew by eight cases that all exercise
+   refusals.
+4. Staged attribution. Passes; the reviewer made no repair and staged nothing.
+5. Unresolved findings. None. Round 14's finding is fixed, and this round
+   produced no new one.
+6. `a.commit`. Passes, valid, ready, accepted by the hook, with no stale
+   commit-phase marker to trip the canonical workflow.
+
+Only completeness fails, and it fails on scope rather than on quality. The rule
+reserves `commit-ready` for a complete implementation, and `implementation-check`
+offers no partial status, so a checkpoint that deliberately stops short of the
+step cannot carry that signal no matter how sound it is. Human guidance can
+direct scrutiny; it cannot move a disposition rule. Saying so plainly is more
+useful than stretching the signal, because the recommendation would not have
+authorized the commit anyway: that choice is the human's and is already made.
+
+The work itself deserves its own sentence. Round 14's finding was not just
+answered but overtaken: the validator is pinned to the committed revision,
+retained, digested and executed in isolation, with a fixture proving a
+substitute is refused before it runs. PA5, PA6 and PA7 closed on evidence I
+could reproduce independently rather than on a relaxed rule: a marker printed
+from the real uv's exit status, and aliases that only ever map a soname to its
+own versioned file inside the shipped prefix. Across 84 system-loader subjects,
+no accepted provider points outside that prefix. Nine passing cells, earned.
+
+### Final reviewer decision for step 6 tools-archive-rebuild (exchange 1) (round 15)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-6-round-15 -->
