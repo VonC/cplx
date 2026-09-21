@@ -511,6 +511,7 @@ Files:
 
 - `ci/deliver-closure-tools.sh` (existing, to be updated).
 - `docs/v0.27.0/acceptance.tools-archive-rebuild.sh` (new, to be created).
+- `docs/v0.27.0/acceptance.tools-runtime-rhel.sh` (new: deployed runtime qualification).
 - `docs/v0.27.0/verify.tools-release-acceptance.sh` (new, to be created).
 - `docs/v0.27.0/fixtures.tools-release-agent.py` (existing, to be updated:
   align the pytest double and session-finish call with the current application).
@@ -562,6 +563,13 @@ For the human-selected deployment scope (2026-09-19), prepare the shipped
 venv with `--no-group tooling`, use uv from the tools installation for RHEL
 PA6, and repeat affected RHEL acceptance before D10. Retain the earlier
 tooling-inclusive capture as history, without claiming it accepts this venv.
+Bind the deployed application helpers and offline inputs before executing them.
+Bootstrap uv with shipped Python and its own pip, relocate uv, and retain its
+provider map. Check deployed wheel ELF byte equality against the agent inventory,
+run the application's shared-runtime import trace, and exercise a real host
+child launched with the environment composed in its shipped Python parent.
+Retain those detailed captures alongside the deployment result. Keep host
+utilities outside the shipped library environment.
 
 Materialize the Step 4 agent's exact wheels on RHEL and run Step 3 D10 against
 both actual provider candidates. If generation changes, rebuild once, create a
@@ -574,6 +582,15 @@ original identities and explicit reasons, never relabel an old run.
 Completion: release validator publication phase passes every pre-publication
 obligation, including actual Jenkins PA9, final source authority and Step 1
 backend proof. Future adoption cells remain pending by design.
+
+Keep a private publication coordinate out of versioned evidence when the
+repository's sensitive-content rule requires it. Retain the actual preflight
+privately and bind it by digest; the public record uses an explicit opaque
+coordinate reference, never a substitute upload target. Before native
+eligibility validation, materialize only that field in a private execution
+record, prove every other value equal, and retain both record digests and the
+actual-coordinate validation result. Publication must use that resolved record
+and revalidate it; a reference alone cannot authorize an upload.
 
 ### Step 6 addendums
 

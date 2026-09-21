@@ -59,18 +59,85 @@ mkdir -p "$venv/bin"
 touch "$venv/pyvenv.cfg"
 expect 0 deployed-venv-unique bash "$driver" probe deployed-venv "$deployfix"
 [[ $(cat "$scratch/deployed-venv-unique.log") == "$venv" ]]
-cat > "$venv/bin/uv" <<'UV'
+mkdir -p "$deployfix/uvtool/bin"
+cat > "$deployfix/uvtool/bin/uv" <<'UV'
 #!/bin/bash
 [[ $PWD == "$HOME/pdfs/my-project" && $UV_OFFLINE == 1 ]]
+[[ $* == --version || $* == 'sync --locked --offline --no-group tooling --dry-run' ]]
 UV
-chmod +x "$venv/bin/uv"
+chmod +x "$deployfix/uvtool/bin/uv"
 expect 0 deployed-uv-project bash "$driver" probe uv-audit "$deployfix" "$venv" "$python"
+printf '#!/bin/bash\nexit 17\n' > "$deployfix/uvtool/bin/uv"
+expect 17 deployed-uv-version-failure bash "$driver" probe uv-audit "$deployfix" "$venv" "$python"
 mkdir -p "$deployfix/pdfs/my-project/venvs/python_3.12_my-project"
 touch "$deployfix/pdfs/my-project/venvs/python_3.12_my-project/pyvenv.cfg"
 expect 1 deployed-venv-ambiguous bash "$driver" probe deployed-venv "$deployfix"
 rm "$deployfix/pdfs/my-project/venvs/python_3.12_my-project/pyvenv.cfg"
 mkdir "$deployfix/pdfs/another-project"
 expect 1 deployed-project-ambiguous bash "$driver" probe deployed-venv "$deployfix"
+
+# --- deployed runtime refuses source or offline-input drift before execution --
+runtime=$root/docs/v0.27.0/acceptance.tools-runtime-rhel.sh
+runtimefix=$scratch/runtime
+project=$runtimefix/pdfs/project
+runtimevenv=$project/venvs/environment
+mkdir -p "$runtimevenv" "$project/tools" "$project/ci" "$project/src/pdfss/core" \
+    "$runtimefix/tools/git/current/bin" "$runtimefix/inputs"
+ln -s "$(command -v git)" "$runtimefix/tools/git/current/bin/git"
+printf '# fixture runtime source\n' > "$project/tools/runtime_env.sh"
+printf '# fixture scanner\n' > "$project/ci/tools_abi_scan.py"
+printf '# fixture host boundary\n' > "$project/src/pdfss/core/host_runtime.py"
+printf 'fixture canonical lock\n' > "$project/uv.lock"
+printf 'fixture offline input\n' > "$runtimefix/inputs/wheel.whl"
+git -C "$project" init -q
+git -C "$project" add .
+git -C "$project" commit -qm fixture
+"$python" - "$runtimefix" <<'PY'
+import hashlib, json, pathlib, subprocess, sys
+root = pathlib.Path(sys.argv[1])
+project = root / 'pdfs/project'
+metadata = {
+    'application_revision': subprocess.check_output(['git', '-C', str(project), 'rev-parse', 'HEAD']).decode().strip(),
+    'lock_sha256': hashlib.sha256((project / 'uv.lock').read_bytes()).hexdigest(),
+    'files': {'wheel.whl': hashlib.sha256((root / 'inputs/wheel.whl').read_bytes()).hexdigest()},
+}
+(root / 'inputs/runtime-inputs.json').write_text(json.dumps(metadata))
+PY
+cp "$runtimefix/inputs/runtime-inputs.json" "$runtimefix/manifest.original"
+cat > "$runtimefix/interpreter" <<'PYTHON'
+#!/bin/bash
+touch "$HOME/interpreter-reached"
+exit 42
+PYTHON
+chmod +x "$runtimefix/interpreter"
+runtime_probe() {
+    bash "$runtime" "$runtimefix" "$runtimevenv" "$runtimefix/interpreter" \
+        "$runtimefix/inputs" "$runtimefix/out" "$python"
+}
+expect 42 runtime-exact-inputs runtime_probe
+said runtime-exact-inputs 'SOURCE AND OFFLINE INPUT BINDINGS PASS'
+[[ -f $runtimefix/interpreter-reached ]]
+rm "$runtimefix/interpreter-reached"
+printf '# drift\n' >> "$project/tools/runtime_env.sh"
+expect 1 runtime-source-drift runtime_probe
+[[ ! -f $runtimefix/interpreter-reached ]]
+git -C "$project" checkout -- tools/runtime_env.sh
+printf 'changed wheel\n' >> "$runtimefix/inputs/wheel.whl"
+expect 1 runtime-input-drift runtime_probe
+[[ ! -f $runtimefix/interpreter-reached ]]
+printf 'fixture offline input\n' > "$runtimefix/inputs/wheel.whl"
+for field in application_revision lock_sha256; do
+    "$python" - "$runtimefix/inputs/runtime-inputs.json" "$field" <<'PY'
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+metadata = json.loads(path.read_text())
+metadata[sys.argv[2]] = '0' * len(metadata[sys.argv[2]])
+path.write_text(json.dumps(metadata))
+PY
+    expect 1 "runtime-wrong-$field" runtime_probe
+    [[ ! -f $runtimefix/interpreter-reached ]]
+    cp "$runtimefix/manifest.original" "$runtimefix/inputs/runtime-inputs.json"
+done
 
 # --- bundle composition: a commit in, a manifest-checked archive out ----------
 repo=$scratch/repo
@@ -80,7 +147,7 @@ cp "$root"/src/setups/env/closure/closure-{config,envelope}.txt "$repo/src/setup
 cp "$root/src/utils/lint_shell.sh" "$repo/src/utils/"
 for name in acceptance.python-sqlite-capture.sh acceptance.python-sqlite-deploy.sh \
     acceptance.python-sqlite-namespace.sh acceptance.python-sqlite-report.sh \
-    acceptance.python-sqlite-support.sh acceptance.tools-archive-rebuild.sh \
+    acceptance.python-sqlite-support.sh acceptance.tools-archive-rebuild.sh acceptance.tools-runtime-rhel.sh \
     verify.install-pkg.sh verify.relocation-rpath.sh verify.wrapper-scope.sh \
     verify.wrapper-accept.sh inventory.tools-archive-rebuild.txt; do
     cp "$root/docs/v0.27.0/$name" "$repo/docs/v0.27.0/"
@@ -206,6 +273,19 @@ assert record["captures"]["raw/probe.log"]["sha256"] == sys.argv[3] and record["
 assert all(cell["state"] == "pass" and cell["captures"] == ["raw/probe.log"] for cell in record["cells"].values())
 assert record["environment"]["PRETTY_NAME"] == "Fixture OS" and record["environment"]["kernel"] == "0.0"
 assert not any(cell["reason"].startswith("/") for cell in record["cells"].values())
+PY
+mkdir -p "$dir/raw/deployed-runtime/abi"
+printf 'runtime provider trace\n' > "$dir/raw/deployed-runtime/abi/providers.txt"
+printf 'runtime_inputs_sha256=%s\nruntime_reader_sha256=%s\n' "$hexes" "$hexes" >> "$dir/inputs/pins"
+cell "$dir" PA6:rhel pass "$archive_sha" raw/probe.log raw/deployed-runtime
+expect 0 summarize-runtime-captures summarize "$dir" rhel
+"$python" - "$dir/results.json" "$(sha "$dir/raw/deployed-runtime/abi/providers.txt")" "$hexes" <<'PY'
+import json, sys
+record = json.load(open(sys.argv[1]))
+name = 'raw/deployed-runtime/abi/providers.txt'
+assert name in record['cells']['PA6:rhel']['captures']
+assert record['captures'][name]['sha256'] == sys.argv[2]
+assert record['pins']['runtime_inputs_sha256'] == record['pins']['runtime_reader_sha256'] == sys.argv[3]
 PY
 dir=$(run_home one-fail rhel)
 for name in "${rhel_cells[@]}"; do cell "$dir" "$name" pass "$archive_sha" raw/probe.log; done
@@ -527,6 +607,8 @@ import zipfile
 with zipfile.ZipFile('wheels/native-1-py3-none-linux_x86_64.whl', 'w') as wheel:
     wheel.write('installed/native.so', 'native.so')
     wheel.writestr('native-1.dist-info/METADATA', 'Name: native\nVersion: 1\n')
+with zipfile.ZipFile('wheels/pure-1-py3-none-any.whl', 'w') as wheel:
+    wheel.writestr('pure.py', 'answer = 42\n')
 PY
 inventory=$root/src/setups/env/bin/tools_wheel_inventory.sh
 bash "$inventory" --python "$python" capture --lock uv.lock --wheel-dir wheels --installed-root installed --output inventory.json > /dev/null
@@ -539,7 +621,7 @@ expect 0 d10-archive-only d10_read "$d10/read-archive"
 said d10-archive-only 'D10 CONVERGED at 11'
 expect 3 d10-rebuild-required d10_read "$d10/read-rebuild" "${wheel_args[@]}"
 said d10-rebuild-required 'D10 REBUILD REQUIRED: rebuild with 12'
-"$python" -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["generation"]==11 and r["selected_generation"]==12 and r["providers"]["11"]["satisfies"] is False and r["providers"]["12"]["satisfies"] is True and len(r["consumers"])==1 and r["required_nodes"]' "$d10/read-rebuild/reading-1.json"
+"$python" -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["generation"]==11 and r["selected_generation"]==12 and r["providers"]["11"]["satisfies"] is False and r["providers"]["12"]["satisfies"] is True and len(r["consumers"])==2 and len(r["abi_consumers"])==1 and "pure-1-py3-none-any.whl" in r["consumers"] and r["required_nodes"]' "$d10/read-rebuild/reading-1.json"
 cp "$d10"/gcc12/* "$d10/archive/"
 expect 0 d10-second-reading-settles d10_read "$d10/read-rebuild" "${wheel_args[@]}"
 said d10-second-reading-settles 'D10 CONVERGED at 12'

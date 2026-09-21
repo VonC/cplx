@@ -143,6 +143,7 @@ usage: acceptance.tools-archive-rebuild.sh rhel --run ID --home DIR --python /ab
          --archive FILE --archive-sha256 HEX --bundle FILE --bundle-sha256 HEX --revision HEX
          --pdfs FILE --deploy-script FILE --deploy-script-sha256 HEX
          --previous-installer FILE --previous-installer-sha256 HEX
+         --runtime-inputs FILE --runtime-inputs-sha256 HEX
          [--build-evidence FILE] [--sqlite-parser /usr/bin/python3] [--live-root PATH]...
 USAGE
     exit 2
@@ -151,6 +152,7 @@ USAGE
 rhel_main() {
     local run="" home="" python="" archive="" archive_sha="" bundle="" bundle_sha="" revision=""
     local pdfs="" deploy="" deploy_sha="" previous="" previous_sha="" build_evidence="" parser=/usr/bin/python3
+    local runtime_inputs="" runtime_sha=""
     local -a live=()
     while (($#)); do
         (($# >= 2)) || rhel_usage
@@ -160,6 +162,7 @@ rhel_main() {
             --bundle) bundle=$2 ;; --bundle-sha256) bundle_sha=$2 ;; --revision) revision=$2 ;;
             --pdfs) pdfs=$2 ;; --deploy-script) deploy=$2 ;; --deploy-script-sha256) deploy_sha=$2 ;;
             --previous-installer) previous=$2 ;; --previous-installer-sha256) previous_sha=$2 ;;
+            --runtime-inputs) runtime_inputs=$2 ;; --runtime-inputs-sha256) runtime_sha=$2 ;;
             --build-evidence) build_evidence=$2 ;; --sqlite-parser) parser=$2 ;; --live-root) live+=("$2") ;;
             *) rhel_usage ;;
         esac
@@ -181,6 +184,10 @@ rhel_main() {
     [[ $(digest_of "$previous") == "$previous_sha" ]] || refuse "previous installer digest differs from its pin"
     [[ -z $build_evidence ]] || absolute_file "$build_evidence" || refuse "build evidence must be an absolute regular file: $build_evidence"
     [[ $parser == /* && -x $parser ]] || refuse "absolute SQLite JSON parser required"
+    if ! absolute_file "$runtime_inputs" || ! hex64 "$runtime_sha"; then
+        refuse "pinned offline runtime inputs required"
+    fi
+    [[ $(digest_of "$runtime_inputs") == "$runtime_sha" ]] || refuse "runtime inputs differ from their pin"
     ((${#live[@]})) || live=("$HOME/cplx" "$HOME/tools" "$HOME/pkgs" "$HOME/.env" "$HOME/.env_" "$HOME/.profile")
 
     ACCEPT_RUN=$run ACCEPT_HOME=$home ACCEPT_PYTHON=$python ACCEPT_ARCHIVE_SHA256=$archive_sha
@@ -198,6 +205,21 @@ rhel_main() {
     cp -- "$pdfs" "$home/inputs/$pdfs_name"
     cp -- "$deploy" "$home/inputs/deploy_pkgs.sh"
     cp -- "$previous" "$home/inputs/install_pkg.previous.sh"
+    cp -- "${BASH_SOURCE[0]%/*}/acceptance.tools-runtime-rhel.sh" "$home/inputs/acceptance.tools-runtime-rhel.sh"
+    "$python" -I - "$runtime_inputs" "$home/inputs/runtime" <<'PY'
+import hashlib, json, pathlib, shutil, sys
+source, dest = map(pathlib.Path, sys.argv[1:])
+metadata = json.loads(source.read_text())
+dest.mkdir()
+shutil.copyfile(source, dest / 'runtime-inputs.json')
+for name, expected in metadata['files'].items():
+    assert pathlib.PurePosixPath(name).name == name
+    path = source.parent / name
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == expected, name
+    shutil.copyfile(path, dest / name)
+PY
+    printf 'runtime_inputs_sha256=%s\nruntime_reader_sha256=%s\n' "$runtime_sha" \
+        "$(digest_of "$home/inputs/acceptance.tools-runtime-rhel.sh")" >> "$home/inputs/pins"
     {
         cat /etc/os-release
         printf 'kernel=%s\nbash=%s\nrsync=%s\n' "$(uname -r)" "$BASH_VERSION" "$(command -v rsync || echo absent)"
@@ -343,8 +365,8 @@ probe_main() {
         uv-audit)
             export HOME=$2 UV_PROJECT_ENVIRONMENT=$3 UV_PYTHON=$4 UV_OFFLINE=1 UV_NO_PROGRESS=1
             cd -- "$3/../.." || return 1
-            "$3/bin/uv" --version
-            "$3/bin/uv" sync --locked --offline --dry-run ;;
+            "$2/uvtool/bin/uv" --version || return
+            "$2/uvtool/bin/uv" sync --locked --offline --no-group tooling --dry-run ;;
         deployed-venv) deployed_venv "$2" ;;
         elf-pass)
             # The relocation pass alone over an already deployed tree, the way
@@ -427,34 +449,20 @@ rhel_deployment() {
     # cannot rewrite it, before the heavy wheels are imported from it. An audit
     # the host cannot answer, or a venv the pdfs archive built under another
     # patch release, is recorded as inconclusive and never as a pass.
-    state=pass reason="deployed venv matches the lock offline and imports the heavy wheels"
+    state=pass reason="Q07 deployed venv matches the lock offline, wheel bytes and real allowed-provider traces"
     venv=$(deployed_venv "$prefix") || venv=''
     interpreter=$(find "$prefix/tools/python/current/bin" -maxdepth 1 -name 'python3*_bin' -type f | head -n 1)
     [[ -n $interpreter ]] || interpreter=$(find "$prefix/tools/python/current/bin" -maxdepth 1 -name 'python3.1[0-9]' -type f | head -n 1)
-    if [[ -z $venv || -z $interpreter || ! -x $venv/bin/uv ]]; then
-        state=inconclusive reason="no unique deployed project and venv, uv or toolchain interpreter to audit"
+    if [[ -z $venv || -z $interpreter ]]; then
+        state=inconclusive reason="no unique deployed project and venv or toolchain interpreter to audit"
     else
-        if ! capture uv-sync bash "${BASH_SOURCE[0]}" probe uv-audit "$prefix" "$venv" "$interpreter"; then
-            if grep -qiE 'offline|network|download|cache|No solution' "$ACCEPT_HOME/raw/uv-sync.log"; then
-                state=inconclusive reason="offline lock audit could not be answered on this host"
-            else
-                state=fail reason="uv sync --locked --offline --dry-run exited $(cat "$ACCEPT_HOME/raw/uv-sync.exit")"
-            fi
-        elif grep -qE 'Would (install|remove|replace|create|update)' "$ACCEPT_HOME/raw/uv-sync.log"; then
-            state=inconclusive reason="deployed venv differs from the lock under the candidate interpreter"
-        fi
-        if ! capture imports-wheels env HOME="$prefix" "$venv/bin/python" -I -c 'import sys, pymupdf, pikepdf; print(sys.version.split()[0], sys._base_executable); print(pymupdf.__version__, pikepdf.__version__)'; then
-            state=fail reason="pymupdf/pikepdf import exited $(cat "$ACCEPT_HOME/raw/imports-wheels.exit")"
-        fi
-        # The relocated wheel ELF's own search path, retained beside the import
-        # result: a bundled provider is found through an ORIGIN-relative entry,
-        # so its absence after relocation names the cause of a failed import.
-        capture wheel-rpath find "$venv/lib" -path '*/pymupdf/_extra*.so' -exec readelf -d {} \; || true
-        if [[ $state == fail ]] && grep -qE 'R(UN)?PATH' "$ACCEPT_HOME/raw/wheel-rpath.log" && ! grep -q 'ORIGIN' "$ACCEPT_HOME/raw/wheel-rpath.log"; then
-            reason="$reason; the relocated wheel ELF search path carries no ORIGIN entry"
+        if ! capture deployed-runtime bash "$ACCEPT_HOME/inputs/acceptance.tools-runtime-rhel.sh" \
+            "$prefix" "$venv" "$interpreter" "$ACCEPT_HOME/inputs/runtime" \
+            "$ACCEPT_HOME/raw/deployed-runtime" "$ACCEPT_PYTHON"; then
+            state=fail reason="deployed runtime qualification exited $(cat "$ACCEPT_HOME/raw/deployed-runtime.exit")"
         fi
     fi
-    cell_write PA6:rhel "$state" "$reason" raw/uv-sync.log raw/imports-wheels.log raw/wheel-rpath.log
+    cell_write PA6:rhel "$state" "$reason" raw/deployed-runtime.log raw/deployed-runtime
 
     # The toolchain exposes its interpreter on the operator PATH as the
     # `python` wrapper and its git as the `git` wrapper; both must resolve
@@ -854,12 +862,15 @@ PY
 # must settle on the same generation; a third reading is refused.
 d10_main() {
     local out="" python="" root="" reader="" previous="" number=1 code=0 selected generation
-    local -a args=()
+    local wheel_lock=""
+    local -a args=() wheel_roots=()
     while (($#)); do
         (($# >= 2)) || refuse "d10 options come in pairs"
         case $1 in
             --out) out=$2 ;; --python) python=$2 ;; --reader) reader=$2 ;; --root) root=$2 ;;
-            --candidate|--wheel-root|--wheel-lock|--wheel-python) args+=("$1" "$2") ;;
+            --wheel-root) wheel_roots+=("$2"); args+=("$1" "$2") ;;
+            --wheel-lock) wheel_lock=$2; args+=("$1" "$2") ;;
+            --candidate|--wheel-python) args+=("$1" "$2") ;;
             *) refuse "unknown d10 option: $1" ;;
         esac
         shift 2
@@ -875,7 +886,9 @@ d10_main() {
         args+=(--previous "$previous")
     fi
     bash "$reader" --root "$root" "${args[@]}" > "$out/reading-$number.log" 2>&1 || code=$?
-    "$python" - "$out/reading-$number.log" "$out/reading-$number.json" "$number" "$code" <<'PY'
+    "$python" - "$out/reading-$number.log" "$out/reading-$number.json" "$number" "$code" \
+        "${reader%/*}/tools_wheel_inventory.py" "$wheel_lock" "${wheel_roots[@]}" <<'PY'
+import importlib.util
 import json
 import re
 import sys
@@ -891,6 +904,24 @@ if policy and policy.group(1).isdigit():
     reading["selected_generation"] = int(policy.group(1))
 for match in re.finditer(r"^  consumer wheel:(\S+) wheel-sha256=([0-9a-f]{64}) installed=\S+ \S+ sha256=", log, re.M):
     reading["consumers"][match.group(1)] = match.group(2)
+# The release record binds the whole resolved wheel set, including pure-Python
+# wheels. Keep the measured ABI subset separate from those validated inputs.
+reading["abi_consumers"] = dict(reading["consumers"])
+if code == 0 and sys.argv[7:]:
+    spec = importlib.util.spec_from_file_location("wheel_inventory", sys.argv[5])
+    inventory = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(inventory)
+    resolved = {}
+    for root in sys.argv[7:]:
+        data = inventory.load_inventory(Path(root) / "inventory.json", Path(sys.argv[6]))
+        for wheel in data["wheels"]:
+            name, digest = wheel["filename"], wheel["sha256"]
+            if name in resolved and resolved[name] != digest:
+                raise ValueError("conflicting wheel identity: " + name)
+            resolved[name] = digest
+    if any(resolved.get(name) != digest for name, digest in reading["abi_consumers"].items()):
+        raise ValueError("measured ABI consumer differs from the resolved inventory")
+    reading["consumers"] = resolved
 reading["required_nodes"] = sorted(set(re.findall(r"^  require (\S+)", log, re.M)))
 defines = set(re.findall(r"^  defines (\S+)", log, re.M))
 for gen, provider, digest in re.findall(r"^  candidate (\d+) (\S+) (\S+)", log, re.M):
@@ -1020,7 +1051,8 @@ consumers = json.loads((home / "inputs/consumers.json").read_text()) if (home / 
 record = {"schema": schema, "role": role, "run": pins["run"], "verdict": verdict,
           "recorded_utc": datetime.now(timezone.utc).isoformat(),
           "pins": {key: pins[key] for key in ("archive", "archive_sha256", "bundle_sha256", "revision", "pdfs", "pdfs_sha256",
-                                              "deploy_script_sha256", "previous_installer_sha256") if key in pins},
+                                              "deploy_script_sha256", "previous_installer_sha256",
+                                              "runtime_inputs_sha256", "runtime_reader_sha256") if key in pins},
           "transfer_sha256": transfer.read_text().strip() if transfer.is_file() else "",
           "environment": environment, "runtime": runtime, "consumers": consumers,
           "elapsed_seconds": int(pins.get("elapsed_seconds", "0") or 0),

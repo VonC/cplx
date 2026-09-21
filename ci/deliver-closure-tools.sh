@@ -71,6 +71,7 @@ DELIVER_ACCEPTANCE=(
     'acceptance.python-sqlite-capture.sh' 'acceptance.python-sqlite-deploy.sh'
     'acceptance.python-sqlite-namespace.sh' 'acceptance.python-sqlite-report.sh'
     'acceptance.python-sqlite-support.sh' 'acceptance.tools-archive-rebuild.sh'
+    'acceptance.tools-runtime-rhel.sh'
     'verify.install-pkg.sh' 'verify.relocation-rpath.sh'
     'verify.wrapper-scope.sh' 'verify.wrapper-accept.sh'
     'inventory.tools-archive-rebuild.txt'
