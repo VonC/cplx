@@ -713,11 +713,37 @@ The human then authorised those repairs and selected Python 3.13.15.
 The new native RHEL run passes all ten required cells and the additional
 forced-redeployment cell with a matching, complete shipped venv. Both earlier
 failed runs remain retained; the reader and discovery guards are unchanged.
-The nine Debian cells, consumer identities and the wheel-bound D10 reading
-need a candidate build on
-the actual Jenkins agent that only a pushed pipeline commit produces, and RA2,
-RA3, RA4, RA5 (publication), RA7, RA8 (publication) and the backend cell stay
-pending. The validator's publication phase therefore refuses.
+Point 4 retains build 188 (SUCCESS) on application `ec2e72bc`. All nine
+independent Debian cells PA1 to PA9 pass. Earlier builds and their original
+reader outcomes remain unchanged. Candidate archive and bundle pins remain
+unchanged, with publication off.
+
+The [reading](evidence.tools-archive-rebuild.step6-debian-build188.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build188-retention.json)
+bind the exact application revision, raw artifacts and both reader outcomes.
+Build 188 finishes SUCCESS on application ec2e72bc. The real relocated uv sync emits the stable success marker. Provider-map aliases retain their qualified physical targets. Shipped Python 3.13.15, its own pip, relocated uv 0.12.17, canonical lock, wheel bytes and blocking heavy-wheel traces remain intact. Native acceptance passes with 6501 collected, 6500 executed and 31 individually identified browser exclusions. Coverage is 100%, 27256 of 27256 lines. Guarded SQLite suites pass and testmon collects without selecting. No browser evidence is claimed.
+
+Round 14's validator finding is fixed: the reader compares the validator to
+the committed blob before execution, retains its bytes and SHA-256, and runs
+the retained copy in isolated mode. The transport includes the ci tree and
+validator blob. Missing or modified validators are refused. Provider-map
+aliases require an explicitly qualified physical target; the locked-sync
+success marker follows the real relocated uv command's successful exit.
+These repairs close PA5, PA6 and PA7 without broadening provider policy.
+
+The publication checker now uses the publisher's own complete entry renderer,
+including metadata and footer. The staged index remains unchanged after the
+request is rendered. Q10 excludes only individually identified browser-marked
+tests; 100% coverage, nonselecting testmon and guarded suites remain mandatory.
+This CI qualification supplies no browser evidence.
+
+On 2026-09-21 the human selected: "OK go for checkpoint, then work on completing
+step 6". Round 15 therefore assesses readiness to commit this repaired Debian
+checkpoint. Immediately after that commit, continue with fresh RHEL acceptance
+at Q07 scope, D10 and the remaining pre-publication checks, then review the
+completed Step 6. These obligations are not waived. Step 6 remains No until
+their evidence is conclusive. Shipped Python 3.13.15, its own pip and relocated
+uv remain required. The proposed DT_NEEDED additions remain unadopted.
 
 ### Goal for Step 6
 
@@ -760,14 +786,16 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
   capture, refuses foreign identities and unknown states, turns a pass without
   a capture into inconclusive and a required cell that never ran into pending,
   and exits 0, 1, 2 or 5.
-- **Fixtures**: `docs/v0.27.0/verify.tools-release-acceptance.sh` covers 58
+- **Fixtures**: `docs/v0.27.0/verify.tools-release-acceptance.sh` covers 61
   cases: bundle composition on both sides including the consuming project's
   bundle adapter, tampering, missing controls and links; driver pin refusals;
-  nine summary outcomes; twelve Debian reader outcomes including a foreign
+  nine summary outcomes; fourteen Debian reader outcomes including a foreign
   identity and a drifted lock; and the D10 archive-only, rebuild, settle,
   third-iteration, non-convergent and inconclusive paths over compiled
   provider fixtures, plus the venv exclusion run and its wheel-preservation
-  assertions.
+  assertions. Three added cases cover binary-marker manifest production,
+  timestamped Jenkins success with unchanged raw console bytes, and a
+  timestamped ABI failure that must remain a failure.
 - **Runner**: `verify.tools-archive-rebuild.sh --step 6` lints the three
   scripts with ShellCheck and runs the new fixtures before the inherited
   suites.
@@ -863,23 +891,157 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
   pending. The umbrella note now states the matching-Python prerequisite,
   and exactly seven exchange 2 round 1 transcript headings were qualified.
 
+- **Point 4 transport and reader repairs (2026-09-19)**: application commit
+  `784f33ed` contains the three postponed-annotation reader repairs. The
+  candidate pins were committed and pushed with publication off; application
+  commit `7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e` selects the native bundle
+  composed from cplx `72f6cb290700faf328b73d946e78e8fedab8c2cd`.
+  Build 175 refused the earlier Git Bash bundle because its manifest used
+  binary markers. The composer now hashes binary bytes explicitly and emits
+  the consumer's required two-space format. The Debian reader strips only
+  Jenkins timestamp prefixes for parsing, retaining the raw console intact.
+  Native cumulative validation passed in 77 seconds with 61 acceptance
+  fixtures; project shell lint passed for all 58 tracked scripts. A bundle
+  from the repaired Git Bash composer also passed the application adapter.
+
+- **Point 4 retained Debian reading (2026-09-19)**: build 176
+  finished FAILURE. The independent native reader binds nine cells
+  and available application/runtime identities from the retained console and
+  archived artifacts. The original bundled reader and repaired reader were
+  both run; their results and the exact reader digest are retained. See
+  [Debian cells](evidence.tools-archive-rebuild.step6-debian.json) and
+  [build provenance](evidence.tools-archive-rebuild.step6-debian-retention.json).
+  The failed build 175 remains retained separately. Publication stayed off.
+  That result binding preserved historical RHEL captures and original input
+  snapshots; consumer-dependent PA5/PA6 still required fresh acceptance.
+  At that checkpoint the wheel and venv captures were missing, rather than
+  inferred from the committed lock. Build 177 below supersedes the current
+  binding while retaining those historical captures.
+
+- **Point 4 lock transport retry (2026-09-19)**: build 177 checked out
+  application commit `6b43b39e` with publication off. The transport identity
+  check preserved 83 packages and 491 artifacts; uv 0.12.17 completed
+  `uv sync --locked`, installing 80 packages under CPython 3.13.15.
+  Its venv base is captured. Provisioning then failed with
+  `Wheel capture refused: locked wheel identity absent or ambiguous: playwright-1.60.0.dist-info`.
+  Package and Test were skipped. All 24 artifacts and the raw console are
+  retained, independently read on native Linux and bound in the
+  [retry reading](evidence.tools-archive-rebuild.step6-debian-build177.json)
+  and [retry provenance](evidence.tools-archive-rebuild.step6-debian-build177-retention.json).
+  PA1 to PA4 pass; PA5 to PA9 remain pending. The original build 176 sidecars
+  are unchanged. The committed lock digest is provenance only: no successful
+  agent wheel inventory or archived lock was produced. The application owned
+  the wheel-identification repair at this checkpoint; build 178 resolves it.
+
+- **Point 4 wheel metadata retry (2026-09-19)**: build 178 uses application
+  `68ef3af9`, the same archive and verification bundle, with publication off.
+  Locked synchronization and all 80 wheel selections/downloads pass, including
+  Playwright. All 80 hashes match the committed lock. The cplx inventory then
+  reports `INCONCLUSIVE: ELF outside site-packages: ty-0.0.37.data/scripts/ty`.
+  Raw wheel inspection also finds script ELFs in ruff and uv; none are bypassed.
+  All 104 artifacts and raw console are retained and independently read on
+  native Linux. The [reading](evidence.tools-archive-rebuild.step6-debian-build178.json)
+  and [retention](evidence.tools-archive-rebuild.step6-debian-build178-retention.json)
+  bind PA1 to PA4 passing and PA5 to PA9 pending. All four build 176/177
+  sidecars remain byte-identical. No completed inventory, wheel bundle or
+  archived agent lock was produced; downloaded hashes alone cannot qualify PA6.
+  The generic-tag fixture now checks ranked selection, exact-match precedence,
+  unsupported platforms, ties and absent releases. Native cumulative validation
+  passed in 78 seconds after correcting its obsolete rejection expectation and
+  supplying the independent reader's new packaging dependency from the
+  hash-verified, lock-pinned packaging 26.2 wheel. The independent interpreter
+  remains Python 3.9.25. Initial prerequisite/fixture failures remain retained.
+
+- **Round 8 dependency finding**: the committed cumulative runner now requires
+  `--capture-python` for Step 4 and later. The application wheel-capture helper
+  and its fixtures run in that explicit venv with `packaging` and `tomllib`;
+  the other three application helpers retain isolated imports under independent
+  Python 3.9.25. This implements the reviewer's application-venv option and
+  updates the implementation plan. Native cumulative validation passed in
+  78 seconds with `PYTHONPATH` unset and no packaging installed in the
+  independent interpreter. The fixture venv reports Python 3.13.9 and packaging
+  26.2; this fixture run does not qualify the candidate's Python 3.13.15 runtime.
+  Missing capture arguments and a bare interpreter are rejected explicitly.
+  New scratch and evidence use the home volume because `/var/tmp` is nearly
+  full. The first run exposed an outside-home fixture that assumed `TMPDIR`
+  was outside home; its explicit outside-home path now restores that boundary
+  check. The initial 48-second failure and successful rerun are both retained.
+
+- **Round 8 inventory ownership correction**: application commits `dae99121`
+  and `6ce03c2c` move unused native CLI tools to a tooling group and exclude
+  that group from CI's locked synchronization. The previous instruction to
+  extend cplx inventory mapping was too broad: the existing site-packages ELF
+  boundary matches the intended CI venv once those tools are excluded. No
+  inventory rule is relaxed. The fresh build's outcome is recorded separately.
+
+- **Point 4 tooling separation retry (2026-09-19)**: build 179 confirms the
+  application fix under Python 3.13.15 and uv 0.12.17. The unchanged pinned
+  inventory captures 77 wheels and 80 ELFs; all hashes and the archived lock
+  match committed application `6ce03c2c`. All 109 artifacts and raw console
+  are retained and independently read on Linux. The
+  [reading](evidence.tools-archive-rebuild.step6-debian-build179.json) and
+  [retention](evidence.tools-archive-rebuild.step6-debian-build179-retention.json)
+  bind PA1 to PA4 passing, PA5/PA7 failing and PA6/PA8/PA9 pending. The ABI
+  inventory stops at the pinned archive's dangling Python-root `usr/lib/cpp`
+  alias; the same absent target exists in the Git root. Heavy-wheel tracing
+  and pytest did not run. The six earlier Debian sidecars remain byte-identical.
+  Current consumer identities now include the completed agent lock and wheels;
+  historical RHEL passes and original snapshots are preserved, with affected
+  acceptance still pending. Step 6 and publication remain incomplete.
+
+- **Round 10 committed application validation**: removed the ignored transport's
+  application working-tree overlay. Archive and helper hashes now use one
+  captured commit. Updated agent fixtures for `c2b71daf`'s dangling-link list,
+  interpreter RPATH and visible system-helper accounting, while retaining
+  missing-provider and external-provider refusals. The reader accepts the
+  optional dangling count in the complete zero-flags line. Native cumulative
+  validation passes in 77 seconds with 63 acceptance cases, isolated bare
+  Python 3.9.25 and the explicit fixture capture venv (actual Python 3.13.9).
+  That fixture interpreter does not qualify candidate Python 3.13.15.
+
+- **Point 4 ABI retry (build 180, 2026-09-19)**: `c2b71daf` progresses past
+  the dangling-alias refusal and per-object loader observations. The direct
+  import fails on host libpthread's GLIBC_ABI_DT_RELR requirement against
+  candidate libc; pymupdf's RUNPATH and the host cache appear in the retained
+  trace. All 1320 artifacts are retained. The independent native reading
+  binds PA1 to PA4 pass, PA5 to PA8 fail, and PA9 pending. Exact wheel hashes
+  and the archived lock match the committed public-URL lock. Both reader
+  versions and earlier captures remain retained; no scan or import is skipped.
+
 ### Missing work for Step 6
 
-- **Commit the application reader repairs**: the postponed annotations in
-  `ci/tools_abi_scan.py`, `ci/tools_test_evidence.py` and
-  `ci/tools_wheel_capture.py` are staged in the application checkout but not
-  committed. Commit them through that repository's own flow and record the
-  application commit carrying the three digests in the validation capture, so
-  the Step 6 evidence names a committed revision rather than an overlay.
-- **Debian agent candidate build**: push the five pending application commits
-  to the pipeline branch, host the accepted archive and the composed bundle
-  on the snapshot repository under an item 7 version, commit the five-key
-  `tools/tools.candidate` pin (and the SQLite candidate pin for PA3) through
-  the group-commits flow, run one build, retrieve its archived `a.evidence`
-  tree and console, run the driver's `debian` mode with the application
-  checkout and revision, and bind PA1 to PA9 (Debian), the Debian environment
-  (build, image, container, OS, transfer digest) and the consumers (lock
-  digest, wheel digests, venv base) into the record.
+- **Debian acceptance checkpoint (build 188)**: PA1 to PA9 pass with
+  committed validator provenance, explicit provider aliases and an observed
+  successful locked sync. PA9 uses Q10 scope and provides no browser evidence.
+- **Runtime and bootstrap boundary**: qualify shipped Python, its own pip,
+  relocated uv and the application under the per-command shared setup. Host
+  subprocesses must retain compatible loader/library pairs. The proposed
+  interpreter DT_NEEDED change remains untested and would require candidate
+  requalification if adopted.
+- **Round 10 decisions**: Q08's narrow exception and Q09's shared setup remain
+  binding. The updated scanner maps other executable subjects, and fixtures
+  require those maps and reject a host provider. Q06's previous executable-RPATH
+  premise remains corrected.
+- **ABI scanner scope**: the six dangling cpp links measured in round 9 remain
+  real archive observations, including the two debug links per root. Application
+  `c2b71daf` records non-loadable dangling aliases rather than treating them as
+  physical ELFs. A missing runtime provider still refuses. The earlier blanket
+  repackage dispute is settled by the human's evidence decision: these links
+  alone do not establish a protected loader/provider defect. Preserve build 179.
+  Assess the
+  new scanner's system-interpreter rows against the settled retained-helper
+  exception; a reported system interpreter is not permission to omit an
+  in-scope runtime consumer. No archive rebuild or new scope waiver is claimed.
+- **Deployment tooling scope (human decision, 2026-09-19)**: exclude the
+  application's `tooling` group from deployment venvs and use uv from the tools
+  installation. Prepare and qualify that shipped venv on RHEL before D10.
+  The earlier 80-package tooling-inclusive venv cannot qualify this scope.
+- **Consumer-bound RHEL acceptance**: after successful agent consumer capture,
+  repeat PA5 and PA6 against those inputs before recording current
+  passes. The earlier qualification captures, runs and input snapshots stay
+  unchanged. Resolve their previously unknown consumer identities with
+  original evidence, or repeat the necessary probes; an unaffected-input
+  assessment cannot make an incomplete historical input snapshot valid.
 - **D10 with the agent's wheels**: materialize the build's `wheels.tar.gz`
   artifacts on RHEL with `tools_wheel_inventory.sh materialize`, obtain both
   candidate provider trees (GCC 11 and a GCC 12 `libstdc++.so.6` and
@@ -916,9 +1078,11 @@ of the fixture harness.
 - **Boundaries**: the driver reads controls only from the verified bundle and
   never from the archive under test; the Debian reader re-runs the
   application's own evidence validator rather than reinterpreting its
-  counts; the release validator and the D10 reader are unchanged.
-- **Size**: the driver is 943 physical lines of Bash and the delivery script
-  312; the installer grows from 1308 to 1334 lines of Bash; the Python
+  counts. Point 4 records the repaired post-build reader's working-tree digest
+  separately from the committed bundle used by the agent; the release validator
+  and the D10 reader are unchanged.
+- **Size**: the driver is 945 physical lines of Bash and the delivery script
+  313; the installer grows from 1308 to 1334 lines of Bash; the Python
   ceiling does not apply to them. The changed Python files are the agent
   fixture at 215 physical lines and the three repaired application readers
   at 250, 94 and 121, all below the 650-line ceiling.

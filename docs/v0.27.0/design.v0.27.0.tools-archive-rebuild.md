@@ -204,9 +204,36 @@ loads the heavy wheels under `LD_DEBUG=libs,versions`; absent or unusable traces
 are inconclusive. No per-wheel patching repairs a failing candidate, and no
 relocation rewrites a wheel object either: the ELF pass excludes venv trees
 (decided 2026-09-18), so wheels keep their `$ORIGIN` search path to bundled
-providers while the interpreter's forced `DT_RPATH` resolves their shipped
-`libstdc++`, `libgcc_s` and `libc` needs, on a shipped venv as on one created
-on the target.
+providers. Build 180 disproved the former assumption that interpreter
+`DT_RPATH` also resolves every wheel's shipped dependencies: a wheel with its
+own `DT_RUNPATH` needs a process search path reaching the shipped providers.
+Requirement Q09 adopts the versioned application `tools/runtime_env.sh`,
+shared by CI and deployment, with shipped directories first in
+`LD_LIBRARY_PATH` and unchanged wheel ELFs. Its directory list mirrors
+`build_elf_rpath`; re-deriving that list avoids unrelated `setenv` effects.
+Apply this environment at the shipped command boundary, not to the operator
+shell: build 181 showed that a host loader paired with shipped libc fails.
+Sourcing the helper publishes the directory list without changing the
+caller's library path. Host subprocess inheritance still needs qualification.
+A private account `~/.env_` cannot establish this contract. Adoption remains
+subject to real provider traces on Debian and fresh RHEL acceptance under
+Q07 are required before D10; item 8 must preserve the selected setup.
+Forced `availability|` rows establish provider availability only. The
+blocking direct-import trace and its `provider|` rows establish actual loading.
+Q08 retains the existing helper exception for system-loader executables;
+other executable consumers must be qualified.
+
+The deployment venv excludes the application's `tooling` group. The tools
+installation supplies uv for synchronization and RHEL PA6. Fresh RHEL
+qualification and D10 use this consumer scope, matching CI's exclusion of
+ruff, ty and uv wheels. Historical tooling-inclusive RHEL captures do not
+qualify the reduced deployment venv (human decision of 2026-09-19).
+The human's 2026-09-20 bootstrap instruction uses relocated Python 3.13.15
+to create an isolated pip environment and install uv. Relocate that uv's
+interpreter and RPATH before synchronization, retain its provider map and
+execution evidence, and reject host providers. This tooling relocation does
+not modify application wheels. uv uses the explicit shipped interpreter with
+automatic interpreter downloads disabled.
 
 Preserve item 4's strict provider and family checks, item 2's virtual-kernel
 and loader-name accounting, and loader paths/aliases inside tools. Recognized
@@ -243,11 +270,21 @@ ambiguous candidate inputs or digest mismatches before provisioning.
 
 Qualification uses the intended adopted pipeline configuration: no rsync
 shim, no temporary wheel patching, coverage and pytest-testmon enabled, and
-the ABI probe blocking with zero flags. PA9 forces a full acceptance selection
+the ABI probe blocking with zero flags. PA9 forces the Q10-authorized CI selection
 with both plugins active, satisfies the application's existing threshold,
 and demonstrates that SQLite-guarded suites executed. Persisted testmon state
 cannot turn qualification into a no-tests-selected success. Later routine
 incremental testmon use remains allowed.
+
+Human decision Q10 adopts the application's Q01 browser exception for PA9;
+the exception is explicit in the CI evidence.
+The reader binds the PASS line's scope and counts to `tests.json`, checks
+unique excluded identities marked `browser` for exactly `not browser`, and
+re-runs the committed application evidence validator. A CI pass over this
+scope is not browser evidence. Missing PA6 import, venv or locked-sync evidence
+is inconclusive; observed import or sync failure remains fail. The reader
+recognizes `TOOLS-LOCKED-SYNC/1 state=passed|failed` for a future pipeline
+emitter; absent evidence must not be inferred from a successful build stage.
 
 RHEL supplies its required deployment, redeployment, readiness and operator
 results against the same archive. The requirement's optional downstream RHEL
