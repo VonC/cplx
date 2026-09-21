@@ -704,46 +704,23 @@ No existing feature or reporting capability is impaired by Step 5.
 
 ### Analysis of Step 6 implementation state
 
-No. Step 6 has NOT been fully implemented.
+Yes. Step 6 has been fully implemented.
 
-The acceptance mechanism and installer correction are committed. Handoff
-point 2 produced the replacement archive. Point 3 first recorded eight
-required passes, a PA3 build-capture failure and an inconclusive PA6 result.
-The human then authorised those repairs and selected Python 3.13.15.
-The new native RHEL run passes all ten required cells and the additional
-forced-redeployment cell with a matching, complete shipped venv. Both earlier
-failed runs remain retained; the reader and discovery guards are unchanged.
-Point 4 retains build 188 (SUCCESS) on application `ec2e72bc`. All nine
-independent Debian cells PA1 to PA9 pass. Earlier builds and their original
-reader outcomes remain unchanged. Candidate archive and bundle pins remain
-unchanged, with publication off.
+The checkpoint ending `92e361a` is committed. Fresh RHEL qualification binds
+the final application, canonical lock and all 77 Debian-resolved wheels to
+the unchanged archive. Its ten required cells pass, as do fresh AR1/AR2/AR4
+checks. D10 compares both retained provider pairs and selects the packaged
+GCC 11 runtime; no candidate rebuild or additional Jenkins job is needed.
+Build 188 remains the exact Debian qualification: PA1 through PA9 pass,
+6500 tests execute, coverage is 100%, and Q10 excludes only 31 identified
+browser cases. No browser evidence is claimed.
 
-The [reading](evidence.tools-archive-rebuild.step6-debian-build188.json) and
-[retention](evidence.tools-archive-rebuild.step6-debian-build188-retention.json)
-bind the exact application revision, raw artifacts and both reader outcomes.
-Build 188 finishes SUCCESS on application ec2e72bc. The real relocated uv sync emits the stable success marker. Provider-map aliases retain their qualified physical targets. Shipped Python 3.13.15, its own pip, relocated uv 0.12.17, canonical lock, wheel bytes and blocking heavy-wheel traces remain intact. Native acceptance passes with 6501 collected, 6500 executed and 31 individually identified browser exclusions. Coverage is 100%, 27256 of 27256 lines. Guarded SQLite suites pass and testmon collects without selecting. No browser evidence is claimed.
-
-Round 14's validator finding is fixed: the reader compares the validator to
-the committed blob before execution, retains its bytes and SHA-256, and runs
-the retained copy in isolated mode. The transport includes the ci tree and
-validator blob. Missing or modified validators are refused. Provider-map
-aliases require an explicitly qualified physical target; the locked-sync
-success marker follows the real relocated uv command's successful exit.
-These repairs close PA5, PA6 and PA7 without broadening provider policy.
-
-The publication checker now uses the publisher's own complete entry renderer,
-including metadata and footer. The staged index remains unchanged after the
-request is rendered. Q10 excludes only individually identified browser-marked
-tests; 100% coverage, nonselecting testmon and guarded suites remain mandatory.
-This CI qualification supplies no browser evidence.
-
-On 2026-09-21 the human selected: "OK go for checkpoint, then work on completing
-step 6". Round 15 therefore assesses readiness to commit this repaired Debian
-checkpoint. Immediately after that commit, continue with fresh RHEL acceptance
-at Q07 scope, D10 and the remaining pre-publication checks, then review the
-completed Step 6. These obligations are not waived. Step 6 remains No until
-their evidence is conclusive. Shipped Python 3.13.15, its own pip and relocated
-uv remain required. The proposed DT_NEEDED additions remain unadopted.
+The independent native publication validator accepts the exact archive after
+checking the completed prepublication floor. The private coordinate is
+retained by digest; materializing that one field leaves every other record
+value equal. This is publication eligibility, not an upload. Immutable
+publication, normal-pin retrieval and adoption remain Step 7, with uploads
+off. The proposed interpreter DT_NEEDED additions remain unadopted.
 
 ### Goal for Step 6
 
@@ -757,7 +734,7 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
 
 - **Bundle composition**: `ci/deliver-closure-tools.sh` gains `--bundle FILE`
   beside the unchanged `--into DIR` delivery. It archives every tracked file
-  below `src/` and eleven acceptance controls (the item 6 SQLite driver and
+  below `src/` and the acceptance controls (the item 6 SQLite driver and
   helpers, the installer, relocation and wrapper harnesses, the archive
   oracle and the new platform driver) from the exact commit, writes
   `acceptance/source-revision.txt` and a two-space SHA-256 manifest over every
@@ -825,7 +802,8 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
   decision. `install_pkg.sh` lists every directory holding `pyvenv.cfg` in
   one walk and prunes those trees from the ELF pass, naming each excluded
   tree in the install output; wheel objects keep their `$ORIGIN` search path
-  and resolve shipped providers through the interpreter's forced `DT_RPATH`,
+  and resolve shipped providers through the application's shared runtime
+  setup (Q09),
   while the symlink and text passes still relocate a shipped venv. The
   fixture harness compiles a venv tree with an `$ORIGIN`-relative wheel
   object beside a builder-anchored library outside the venv, runs the pass
@@ -1008,54 +986,41 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
   and the archived lock match the committed public-URL lock. Both reader
   versions and earlier captures remain retained; no scan or import is skipped.
 
-### Missing work for Step 6
-
-- **Debian acceptance checkpoint (build 188)**: PA1 to PA9 pass with
-  committed validator provenance, explicit provider aliases and an observed
-  successful locked sync. PA9 uses Q10 scope and provides no browser evidence.
-- **Runtime and bootstrap boundary**: qualify shipped Python, its own pip,
-  relocated uv and the application under the per-command shared setup. Host
-  subprocesses must retain compatible loader/library pairs. The proposed
-  interpreter DT_NEEDED change remains untested and would require candidate
-  requalification if adopted.
-- **Round 10 decisions**: Q08's narrow exception and Q09's shared setup remain
-  binding. The updated scanner maps other executable subjects, and fixtures
-  require those maps and reject a host provider. Q06's previous executable-RPATH
-  premise remains corrected.
-- **ABI scanner scope**: the six dangling cpp links measured in round 9 remain
-  real archive observations, including the two debug links per root. Application
-  `c2b71daf` records non-loadable dangling aliases rather than treating them as
-  physical ELFs. A missing runtime provider still refuses. The earlier blanket
-  repackage dispute is settled by the human's evidence decision: these links
-  alone do not establish a protected loader/provider defect. Preserve build 179.
-  Assess the
-  new scanner's system-interpreter rows against the settled retained-helper
-  exception; a reported system interpreter is not permission to omit an
-  in-scope runtime consumer. No archive rebuild or new scope waiver is claimed.
-- **Deployment tooling scope (human decision, 2026-09-19)**: exclude the
-  application's `tooling` group from deployment venvs and use uv from the tools
-  installation. Prepare and qualify that shipped venv on RHEL before D10.
-  The earlier 80-package tooling-inclusive venv cannot qualify this scope.
-- **Consumer-bound RHEL acceptance**: after successful agent consumer capture,
-  repeat PA5 and PA6 against those inputs before recording current
-  passes. The earlier qualification captures, runs and input snapshots stay
-  unchanged. Resolve their previously unknown consumer identities with
-  original evidence, or repeat the necessary probes; an unaffected-input
-  assessment cannot make an incomplete historical input snapshot valid.
-- **D10 with the agent's wheels**: materialize the build's `wheels.tar.gz`
-  artifacts on RHEL with `tools_wheel_inventory.sh materialize`, obtain both
-  candidate provider trees (GCC 11 and a GCC 12 `libstdc++.so.6` and
-  `libgcc_s.so.1`, which the host does not carry), run the driver's `d10`
-  mode with `--wheel-root`, and bind `d10.readings`, `packaged_generation`
-  and `selected_generation`; a required rebuild is the single permitted return
-  to Step 5 and needs the second reading to settle.
-- **Remaining pre-publication obligations**: bind RA2 (both roles' SQLite
-  acceptance, closure checks with no waiver, source authority), RA3, RA4, RA7,
-  RA8 (publication), RA5 (publication) and the backend cell with their
-  captures once the evidence above exists, record any affected/unaffected
-  assessment for changed application, lock or wheel inputs, and run
-  `tools_release_record.py publication` against the archive and the release
-  revision until it prints the accepted digest.
+- **Step 6 completion after the checkpoint (2026-09-21)**: the
+  [fresh RHEL evidence](evidence.tools-archive-rebuild.step6-final-rhel.json)
+  retains the original run and a reporting-only reread adding runtime input
+  pins and recursive captures. It passes all ten required cells in
+  5734 seconds, with shipped Python 3.13.15, its own pip,
+  relocated uv 0.12.17, the Q07 lock scope, byte equality for 77 wheels and
+  80 ELF objects, real allowed-provider imports, a host child environment
+  composed before exec, and a shipped child retaining its runtime.
+- **Final archive and D10**: the [fresh archive checks](evidence.tools-archive-rebuild.step6-final-archive.json)
+  pass 539 cases. The [D10 reading](evidence.tools-archive-rebuild.step6-d10.json)
+  compares actual GCC 11 and GCC 12 libraries without installing GCC 12,
+  records all 77 resolved wheels separately from ABI-bearing consumers, and
+  selects generation 11 in one reading. Inputs came from retained artifacts
+  and Nexus. Candidate bytes, the lock, application and Debian runtime did
+  not change, so the nine build 188 cells keep their original run/input
+  snapshots with explicit unaffected assessments. Replaced historical
+  snapshots remain in the record history rather than gaining invented IDs.
+- **Readiness and release boundary**: the [readiness capture](evidence.tools-archive-rebuild.step6-readiness.json)
+  binds fresh source-authority and zero-waiver closure checks, the retained
+  actual transactional backend proof with a byte-exact helper impact
+  assessment, a read-only coordinate preflight and complete prior application
+  configurations for recovery. Recovery must be verified before uploads
+  resume; no actual restoration or adoption pass is claimed. The public
+  record uses a digest reference for the private coordinate. The retained
+  private record resolves only that field and passes the native publication
+  validator against the real selected coordinate and exact archive. The
+  [publication eligibility check](evidence.tools-archive-rebuild.step6-publication-check.json)
+  retains both record digests and the one-field binding proof.
+- **Final validation**: cumulative native Step 6 checks pass in 89 seconds,
+  including 98 acceptance cases, the 16 record tests, ShellCheck and the
+  inherited suites. The cplx `ghog day` shell lint gate passes for all 58
+  tracked scripts but its pytest phase exits 5 because this repository has
+  no pytest environment; this is not reported as a green walk. The new helper
+  is also explicitly linted by the native runner. Application coverage is
+  evidence for the unchanged application, not for these Bash controls.
 
 ### New types/classes introduced for Step 6
 
@@ -1079,13 +1044,14 @@ of the fixture harness.
   never from the archive under test; the Debian reader re-runs the
   application's own evidence validator rather than reinterpreting its
   counts. Point 4 records the repaired post-build reader's working-tree digest
-  separately from the committed bundle used by the agent; the release validator
-  and the D10 reader are unchanged.
-- **Size**: the driver is 945 physical lines of Bash and the delivery script
-  313; the installer grows from 1308 to 1334 lines of Bash; the Python
-  ceiling does not apply to them. The changed Python files are the agent
-  fixture at 215 physical lines and the three repaired application readers
-  at 250, 94 and 121, all below the 650-line ceiling.
+  separately from the committed bundle used by the agent; the release
+  validator is unchanged. The D10 wrapper now separates
+  complete resolved wheel identities from its ABI-bearing subset.
+- **Size**: the platform driver is 1083 physical Bash lines;
+  its deployed runtime helper is 115 lines. Runtime qualification has
+  its own file. No new Python module or class is introduced; the Python line
+  ceiling does not apply to these shell scripts. Independent Python heredocs
+  remain local evidence parsing and checking, outside a percentage gate.
 - **Installer change**: the venv exclusion stays inside the native
   relocation adapter's ELF pass, next to the existing `.git` and
   `__pycache__` prunes, and adds one listing walk rather than a fork per
@@ -1096,16 +1062,18 @@ No, there is no architecture violation, smell or size issue to address for Step 
 
 ### Performance check for Step 6
 
-- **No new `O(n^2)` or `O(n log n)` path**: composition digests each bundle
-  member once and sorts member names for determinism, as inherited inventory
-  sorting already does; the summarizer hashes each named capture once and
+- **Bounded inventory processing**: composition digests each bundle member
+  once and sorts member names in `O(n log n)` for determinism; the summarizer
+  hashes each named capture once and
   reads each cell once; the readers scan the console with anchored patterns.
 - **Real run cost**: 3995 seconds for the original RHEL run, 3936 seconds
-  for the first replacement run, and 3930 seconds for the passing repair run,
+  for the first replacement run, 3930 seconds for the earlier passing repair
+  run, and 5734 seconds for final qualification with the deployed runtime,
   dominated by four relocations, two
   deployments and the SQLite deploy role, all existing entry points.
 - **Plan-bound alignment**: work is linear in explicitly supplied evidence and
-  artifact bytes; no repeated all-pairs scan was introduced.
+  artifact bytes apart from deterministic sorting; no repeated all-pairs scan
+  was introduced. The existing green Jenkins run is reused on unchanged inputs.
 
 No, there is no performance issue to address for Step 6.
 
@@ -1119,7 +1087,9 @@ script is reached from `deliver_main`, every driver function from `main`, its
 `rhel_*` phases from `rhel_main` and the probes through the driver's own
 re-invocation, and every fixture helper from the harness body; the fixtures
 exercise the composer, the consumer check, the summarizer, the Debian reader
-and the D10 wrapper, while the RHEL phases are exercised by the real run only.
+and the D10 wrapper, while the RHEL phases are exercised by the real run.
+The runtime helper's `check_wheels` function is called before and after live
+imports. Its source/input refusal paths are covered by focused fixtures.
 
 No, there is no unit-tested class below 100% that needs completing for Step 6.
 No, there is no unreferenced top-level symbol outside the coverage gate.
@@ -1133,15 +1103,16 @@ No, there is no unreferenced top-level symbol outside the coverage gate.
   packaging, publication and record suites remain green, and the relocation
   corpus step passes against the corrected installer, whose `.git` and
   `__pycache__` prunes, classifier and record grammar are unchanged; the
-  record keeps every Step 5 result with its original run and only adds
-  Step 6 cells, so no old pass was relabeled. The original PA6 failure and
+  record preserves original Step 5 snapshots in its history when fresh
+  observations replace them, so no old pass was relabeled. The original PA6
+  failure and
   replacement PA6 inconclusive state both remain explicit.
 - **Reporting**: cells carry pass, fail, inconclusive or pending with a
   reason and digested captures; a skipped required cell cannot summarize as
   a pass.
 
-No existing feature or reporting capability is impaired by Step 6. The
-step remains incomplete for the reasons listed under its missing work.
+No existing feature or reporting capability is impaired by Step 6. Actual
+publication and adoption remain pending under Step 7.
 
 ## Step 7. Publish, adopt and close with integration evidence
 
