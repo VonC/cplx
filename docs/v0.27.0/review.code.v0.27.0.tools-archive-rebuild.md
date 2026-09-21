@@ -16268,3 +16268,366 @@ No additional Jenkins run or acceptance regeneration is required for the
 documentation correction.
 
 <!-- review-entry-id: escalation-round-17 -->
+
+## Round 1 by requestor - Step 7
+
+- Recorded: 2026-09-21T17:01:30+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 tools-archive-rebuild (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+Implementation step: 7
+Review round: 1
+
+### Code review evidence for step 7 tools-archive-rebuild (round 1)
+
+request_index_tree: d8d5e926a059c7582ad26b25c1bb8402fb49894c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 7 --python /usr/bin/python3 --app-repo $TOOLS_TEST_APP --capture-python $TOOLS_CAPTURE_PYTHON (sources: plan)
+- git diff --cached --check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(tools-release): verify normal-pin adoption and coherent recovery
+group 1 path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+group 1 path: docs/v0.27.0/verify.tools-release-acceptance.sh
+group 1 path: tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py
+group 2: docs(tools-release): retain publication and release-pin adoption evidence
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+group 2 path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-completion.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian-retention.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian.json
+group 2 path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-execution.json
+group 3: docs(tools-archive-rebuild): record step 7 validation
+group 3 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.json
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.md
+staged path: docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-completion.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian-retention.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian.json
+staged path: docs/v0.27.0/evidence.tools-archive-rebuild.step7-execution.json
+staged path: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+staged path: docs/v0.27.0/verify.tools-archive-rebuild.sh
+staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
+staged path: tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py
+```
+
+### Requestor assessment for step 7 tools-archive-rebuild (round 1)
+
+Step 7 is fully implemented. Review the current staged implementation and the
+Step 7 validation section against the exact plan and approved requirements.
+
+Actual tools-only publication committed the accepted archive as release 10.0.0.
+Independent full retrieval matched its SHA-256. Application commit 47418c764a5b7be5230896a6ebf31cf55c7f1728
+removed the candidate selector and adopted the normal pin with uploads off.
+Jenkins build 189 succeeded in 2854.823 seconds. All nine Debian acceptance
+cells passed, including ABI (686 subjects, zero flags) and the authorized
+non-browser tests with 100% application coverage. Snapshot uploads resumed only
+afterward in mode-only application commit 1a5101e8.
+
+Native RHEL cumulative step 7 passed in 92 seconds. The later digest-capture
+refinement passed ShellCheck and 104 acceptance cases in 20 seconds. Controlled
+whole-configuration recovery passed; actual recovery was not applicable.
+Independent Python 3.9.25 completion validation passed against the real archive
+and final record in 2.657 seconds. The completion proof binds the final record
+hash and sole private-coordinate materialization.
+
+No production class changed. New process tests are integration tests despite
+their inherited directory. Application coverage measures src/pdfss, not these
+external helpers. There is no new architecture issue, quadratic scan or feature
+regression. The validation document records these boundaries explicitly.
+
+The native runner is the previously approved cplx adaptation: cplx has no
+pytest environment. The renderer resolves the configured project default to
+bash src/utils/lint_shell.sh; retain that default and the additive native runner.
+Do not mistake an unavailable cplx pytest setup for application validation. The application
+ghog day passed with no changed Python files, and actual Jenkins supplies the
+fresh required full-suite evidence. Run shell/platform checks on native Linux,
+not Git Bash. Resolve TOOLS_TEST_APP and TOOLS_CAPTURE_PYTHON to the retained
+native fixture app and application capture interpreter described in the local
+execution scripts and evidence retention. Do not republish the immutable asset
+or rerun the 48-minute CI without a concrete new concern.
+
+### Implementation report for step 7 tools-archive-rebuild (round 1)
+
+The Debian acceptance reader now accepts an explicit release version, checks
+the downloaded archive digest, one startup release pin, release source,
+uploads off and successful main chain, and retains digest/version captures.
+Candidate qualification stays supported.
+
+Fixtures cover release success and wrong digest, pin, surviving candidate,
+premature uploads and failed chain. The composed local TLS integration covers
+real transaction to normal-pin retrieval and completion, collision refusal
+without PUT, and whole-tree versus pin-only recovery.
+
+The durable release record now contains actual publication and fresh Debian
+adoption results. Unchanged archive, application code, lock, wheels and
+executable pipeline justify the explicit RHEL/D10 unaffected assessments.
+Prior overwritten results retain their original identities in history.
+Public evidence retains all original capture hashes; the sole workspace-prefix
+redaction records both original and exported summary hashes.
+
+Implementation-check completed the validation document and only umbrella row
+7, with exact requirement and validation paths. The child draft's selected-row
+copy remains historical context, not the canonical umbrella table.
+
+### Change summary for step 7 tools-archive-rebuild (round 1)
+
+The root a.commit is formatted and the readiness checker accepts all 12 staged
+paths in three ordered groups:
+
+1. feat(tools-release): verify normal-pin adoption and coherent recovery
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+   - docs/v0.27.0/verify.tools-archive-rebuild.sh
+   - docs/v0.27.0/verify.tools-release-acceptance.sh
+   - tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py
+2. docs(tools-release): retain publication and release-pin adoption evidence
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.json
+   - docs/v0.27.0/acceptance.tools-archive-rebuild.md
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step7-completion.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian-retention.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian.json
+   - docs/v0.27.0/evidence.tools-archive-rebuild.step7-execution.json
+3. docs(tools-archive-rebuild): record step 7 validation
+   - docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+   - docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md
+
+The protocol-appended transcript is a workflow side effect for the later
+authorized residual commit, not part of the captured implementation index.
+
+### Writer response for step 7 tools-archive-rebuild (round 1)
+
+Writer response:
+
+This is a new step 7 review, round 1. The human explicitly closed the already
+committed step 6 and prohibited a step 6 round 17. The prior exchange is closed;
+do not reopen it. There is no earlier feedback for step 7 to consume.
+
+Historical diagnostic failures in build 189 are explicitly non-gating in the
+existing pipeline and remain retained as failures. The adopted blocking ABI,
+test evidence and final SUCCESS are independently checked. No production
+rollback was manufactured after successful adoption.
+
+### Reviewer focus for step 7 tools-archive-rebuild (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-1 -->
+
+## Round 1 by reviewer - Step 7
+
+- Recorded: 2026-09-21T17:27:02+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+Baseline index tree: d8d5e926a059c7582ad26b25c1bb8402fb49894c
+
+Assessed index tree: d8d5e926a059c7582ad26b25c1bb8402fb49894c
+
+### Implementation check for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 7 has been fully implemented.
+
+The reviewer checked the staged Step 7 work against the plan and confirmed its
+external claims on the live systems. It did not rely on the retained summaries alone.
+
+- Publication: the release repository answers HEAD for the 10.0.0 tools asset
+  with HTTP 200, 545,293,468 bytes and an ETag SHA-1 of
+  `5a0c68abac266a68ff5373376f6d55860781ede8`, which matches the COMMITTED
+  receipt and the record. Its Last-Modified time falls inside the fourth,
+  successful invocation window, so the three earlier failed invocations left no asset.
+- Adoption: application revision `47418c764a5b7be5230896a6ebf31cf55c7f1728`
+  pins `10.0.0`, keeps `publish.mode` at `off` and removes
+  `tools/tools.candidate`. Jenkins build 189 built that revision and finished
+  SUCCESS in 2,854,823 ms. Its live console hashes to the retained
+  `console_sha256` (`1149f02e...`).
+- Upload restoration: `1a5101e84491ed88e6c7944cde097a96da7dd932` changes only
+  `tools/publish.mode` to `snapshot`, is a child of the adoption revision, and was
+  committed after build 189 ended.
+- Debian acceptance: the retained record for build 189 passes all nine cells
+  with `release_version` 10.0.0 and the accepted archive digest.
+- Record: publication and adoption are `pass` for the accepted archive, bound to
+  the adoption revision. The three RHEL cells still pending (PA7, PA8, PA9) are
+  `OPTIONAL` in the validator and stay outside the completion gate by design.
+- Plan tests: the full fixture chain (streamed transaction, normal-pin
+  retrieval, completion) and every listed negative exist and pass: changed
+  download digest, different immutable asset without PUT, surviving candidate
+  override, uploads before adoption, failed main chain, and pin-only recovery.
+- Validation document: all seven step analyses read Yes, so the document-level
+  `Yes, it is implemented.` is correct. The umbrella row 7 completion names an
+  existing requirement and this validation plan.
+
+Architecture: the reader extension stays in the acceptance script and the
+validator neither publishes nor tests, so no layer or DDD violation was found. New work
+is linear in bytes or console length, with no quadratic scan. The changed Python
+test file has 278 lines, under the 650 ceiling. The new test methods are process
+integration tests under the inherited unit directory, as the validation
+document states. Nothing needs to be addressed.
+
+Validation plan effects:
+
+The reviewer made no edit to the validation plan. The writer's Step 7 rows and
+the document-level status were checked and found accurate, so no reviewer
+change was needed.
+
+### Pre-repair mandatory checks and coverage for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+All mandatory validation ran before any possible repair, and the reviewer made no repair.
+
+- `bash src/utils/lint_shell.sh` through the project environment: exit 0,
+  58 tracked scripts clean. Direct ShellCheck at style severity on the three
+  changed scripts: exit 0.
+- `bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 7 --python /usr/bin/python3 --app-repo <fixture-app> --capture-python <application-venv-python>`
+  on native RHEL 9.8, with the bare independent Python 3.9.25. The shipped tree
+  was exactly the request-time index tree
+  `d8d5e926a059c7582ad26b25c1bb8402fb49894c` (git archive of the tree, no
+  working-tree overlay). The fixture application was the adopted cicd revision
+  `1a5101e84491ed88e6c7944cde097a96da7dd932`, with its committed helper digests
+  checked. Exit 0 in 94 seconds, log SHA-256
+  `c7047482cdcf5279412733668c1b3f803239668951d3aaaf1b72f22d1711aa09`. The run
+  includes `PASS debian-release-complete`, the five release refusals, and both
+  new publication and recovery test methods reported `ok`.
+- `git diff --cached --check`: exit 0.
+
+This rerun covers the later digest-capture refinement, which the writer had
+validated only through the focused 104-case suite after its 92-second
+cumulative run.
+
+### Resolved validation set and sources for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 7 --python /usr/bin/python3 --app-repo $TOOLS_TEST_APP --capture-python $TOOLS_CAPTURE_PYTHON` (source: plan).
+- `git diff --cached --check` (source: request).
+
+### Resolver drift and direction for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+No drift. The current resolver set equals the request set, and all three commands ran.
+
+### Repository state around validation for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+The index tree was `d8d5e926a059c7582ad26b25c1bb8402fb49894c` at request time,
+at review entry and after the assessment. The umbrella digest was unchanged
+before and after (`46b95d18...`). The validation-state comparison over all
+twelve staged paths is acceptable, with no tracked, untracked or ignored
+differences. The only unstaged change is the protocol-appended transcript,
+which the request declares outside the captured index.
+
+### Repair inventory for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+Repairs made:
+
+- None. The reviewer made no repair and staged nothing.
+
+Paths staged:
+
+- - `docs/v0.27.0/acceptance.tools-archive-rebuild.json`
+- - `docs/v0.27.0/acceptance.tools-archive-rebuild.md`
+- - `docs/v0.27.0/acceptance.tools-archive-rebuild.sh`
+- - `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md`
+- - `docs/v0.27.0/evidence.tools-archive-rebuild.step7-completion.json`
+- - `docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian-retention.json`
+- - `docs/v0.27.0/evidence.tools-archive-rebuild.step7-debian.json`
+- - `docs/v0.27.0/evidence.tools-archive-rebuild.step7-execution.json`
+- - `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md`
+- - `docs/v0.27.0/verify.tools-archive-rebuild.sh`
+- - `docs/v0.27.0/verify.tools-release-acceptance.sh`
+- - `tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py`
+
+### Commit plan assessment for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+The independent `commit-plan-check.bat --format json` run returned state
+`valid`, `ready: true` and no diagnostics. It covers all twelve staged paths in
+three groups, in order: tests and harness (`feat(tools-release)`), then the retained
+publication and adoption evidence (`docs(tools-release)`), then the validation
+and umbrella completion (`docs(tools-archive-rebuild)`). Each group depends only
+on the ones before it, and the subjects and bodies match the staged content.
+`a.commit` remains accurate; the reviewer did not amend it.
+
+### Findings and boundaries for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+No rework is required. If the human selects Commit, stage this answer's protocol
+append to the transcript as the workflow prescribes, then run the installed
+hook and the commit-plan checker once more against the final index before
+committing.
+
+### Decision rationale for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+All six readiness-floor results pass: exact identity, complete implementation,
+mandatory validation (rerun independently on native RHEL against the exact
+tree), attributable staged scope with no reviewer repair, no unresolved
+blocking finding, and an accurate `a.commit`. The step's external claims
+(publication, retrieval identity, build 189 and its console, the adoption and
+upload-restoration revisions) were confirmed on the live systems. The
+recommendation is commit-ready. It is advisory and does not authorize a commit.
+
+The writer asked the reviewer not to republish the immutable asset or rerun
+the 48-minute CI without a concrete new concern. The reviewer did neither and
+used read-only HEAD and API queries plus the retained console instead.
+
+Two optional notes, neither a defect nor required for this step:
+
+- The PA6 Debian detail string still reads "from the candidate venv" in release
+  mode. The venv is the application venv provisioned from the release archive,
+  and PA1 and the pins already record `source release` and `release_version`
+  10.0.0, so no verdict depends on the wording. Changing it now would alter the
+  reader digest bound in the retained build 189 evidence, so it fits a later
+  reader change better.
+- The five release refusal fixtures assert exit status 2 without a `said`
+  message check. Each mutation changes exactly one input read by one release
+  check, and only `refuse` exits 2, so each result is attributable today.
+  Adding the message checks would be a possible hardening.
+
+### Final reviewer decision for step 7 tools-archive-rebuild (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-7-round-1 -->
+
+## Round 1 by human - Step 7 - human-confirmation
+
+- Recorded: 2026-09-21T17:44:10+02:00
+- Exchange: code/code/v0.27.0/tools-archive-rebuild
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 7
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
