@@ -1,0 +1,30 @@
+{
+  "schema": "tools-step6-publication-eligibility/1",
+  "exit": 0,
+  "binding": {
+    "public_record_sha256": "b8a1fc1c14a69453e79977ee2315b1392fbac03416d5e92c9a062ef9ac6250c9",
+    "private_record_sha256": "c0b0bb0bb74ec122b9be646e6450a9db1243c36cb3cb48798419cc5059d0ba45",
+    "coordinate_reference": "private-coordinate-sha256:22bbe9f29a27a49f132b8b408ae2b572d61bf8e2d20d6d620b05077337d3fc79",
+    "private_preflight_sha256": "4a25af9c6582f7131aabb30690cf8a4d23423a1310c9c4d9a2a9b0a0ef15b2ad",
+    "only_changed_field": "candidates.df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87.publication.coordinate",
+    "all_other_values_equal": true
+  },
+  "invocation": {
+    "interpreter": "/usr/bin/python3",
+    "version": "3.9.25",
+    "record_reads": 1,
+    "capture_reads": 44,
+    "phase": "publication",
+    "bytes_read": 550031693,
+    "sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+    "sha1": "5a0c68abac266a68ff5373376f6d55860781ede8",
+    "elapsed_seconds": 2.7064743828959763
+  },
+  "release_revision": "92e361a6af56ebd0a25c92010b6346d6c307b59c",
+  "validator_sha256": "9467be06c5a26cf2e8a67201b27ac2aff98a0e4b35826d756594de8662a315a2",
+  "resolver_sha256": "042bd4380fe019165eb12fe0516b5772a40dde2fe49a44c25f63ed445c8f40ee",
+  "command_sha256": "1d9430676558bc6519a944d0f4bb0fdd310221429adf843f8131fe5d7ca1c560",
+  "stdout_sha256": "1e5bc4f295b9b83d1bf54214414eb9cecda6ce44314a38b47ae94a2ce752200b",
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-step6-r16-completion/",
+  "scope": "Private execution record accepted with the real coordinate. Public opaque reference deliberately cannot pass lifecycle validation or serve as an upload target. No upload, adoption or restoration performed."
+}
