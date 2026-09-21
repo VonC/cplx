@@ -1,0 +1,151 @@
+{
+  "scope": "Step 6 handoff point 4 retry after application lock transport fix; publication remains off",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "bundle_sha256": "dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51",
+  "cplx_revision": "72f6cb290700faf328b73d946e78e8fedab8c2cd",
+  "application_revision": "6b43b39ef60cd9ff895986492cd94dbeee81b569",
+  "pipeline_revision": "6b43b39ef60cd9ff895986492cd94dbeee81b569",
+  "committed_lock_sha256": "6e0452c49ee5a6cf4fd99f70395710c3d73f6c0b77b2f7fb19dc5a5b9e547d8e",
+  "reader_sha256": "b5b2a2ce336d3ad1c6919a61c866e4f068eeed299428dbc8806efd921e6f8789",
+  "reader_origin": "Reviewed working-tree reader adds Jenkins timestamp parsing to the committed bundle reader",
+  "reader_comparison": {
+    "original": "fail",
+    "repaired": "incomplete"
+  },
+  "raw_reading_archive_sha256": "baf7e379c674c7d84742a5c78332fe489ac71f9b9bfa6be60ad163525db8ae73",
+  "raw_transport_sha256": "72af4e73a0e1af973bea5afe2fdbfba4dd0a72a2bb2629162bd8aad394a59fb5",
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-point4-build-177/",
+  "previous_versioned_captures": {
+    "evidence.tools-archive-rebuild.step6-debian.json": "f8ca335c2efa23cf6262cc604390e241d794c742631ee7f69827e3a21140e98a",
+    "evidence.tools-archive-rebuild.step6-debian-retention.json": "e7af3c5605ea857f903202703862a3c663ecee17483a06f9a0979bfa589b943e"
+  },
+  "builds": [
+    {
+      "number": 177,
+      "result": "FAILURE",
+      "duration_ms": 2440847,
+      "console_sha256": "d4a76cd621662e6ff686a44fc1f03165f1458a66d4ffe9fa20dc977339e5a2f6",
+      "build_metadata_sha256": "f8bfc2dcf611d8709ffe2c3f23c68763332c63905afae89af78b7836cf2806ec",
+      "checkout_revisions": [
+        "d08f5f6a75376d418aba854a76db6aef307b7bae",
+        "6b43b39ef60cd9ff895986492cd94dbeee81b569"
+      ],
+      "artifacts": {
+        "a.evidence/copy-form.debian.txt": {
+          "sha256": "6e9aa4301446d7db29ca7da378a7fb45c12b86454e31616d33bb8548a984e4a5",
+          "size": 12464
+        },
+        "a.evidence/destination-shape.debian.txt": {
+          "sha256": "ebacb8f35b38d9d4598700f9a58bcc1723e4d71ffebcb58a6ec510281d002890",
+          "size": 6495
+        },
+        "a.evidence/identity": {
+          "sha256": "d83278c53533a3fbd901a164326c7afba9705ef7c85a3febcac354ed4a0ebe51",
+          "size": 209
+        },
+        "a.evidence/installer-contract.debian.txt": {
+          "sha256": "c91cc1d44c6ff807d0ee3ef23552f3ca05eb988f941d342bb44710678455430a",
+          "size": 775
+        },
+        "a.evidence/inventory-record.debian.txt": {
+          "sha256": "f260c98ec7741054ca7bf728d48142fbad847e244c6880a1be72a1109cf81332",
+          "size": 12962
+        },
+        "a.evidence/loader-probe.debian.txt": {
+          "sha256": "b469a72e7e0dcd20cf4f926edae8ced37b67e4f744d37d54f77ab299ce6a6c0c",
+          "size": 1249
+        },
+        "a.evidence/mirror-root.debian.txt": {
+          "sha256": "8356f53498785b9c128ca76143de4432dbbe2d7415a55aed08e240bc327a53b4",
+          "size": 1502
+        },
+        "a.evidence/runtime.txt": {
+          "sha256": "f616161833c2d99f7193d50d15feb9d07ef213cb8a04bb4c82d595464bbf0e9d",
+          "size": 516
+        },
+        "a.evidence/shellcheck.debian.txt": {
+          "sha256": "0f232d35c5fbf1ba61a36c1f3294e68092662bf22177f8aa6d846ca4af907e49",
+          "size": 135
+        },
+        "a.evidence/sqlite-candidate.debian.tar.gz": {
+          "sha256": "c99dbed4644d4ad6354bef293ae3be9778079f8215f6f9c13cb852ddbcd76627",
+          "size": 2012276
+        },
+        "a.evidence/sqlite-runtime.txt": {
+          "sha256": "f616161833c2d99f7193d50d15feb9d07ef213cb8a04bb4c82d595464bbf0e9d",
+          "size": 516
+        },
+        "a.evidence/verification.sha256": {
+          "sha256": "98577e24508d502006c0587e8ab7a20678591d0a82ef9401e0a869e3e857fd82",
+          "size": 18714
+        },
+        "a.evidence/verify-closure-check.debian.txt": {
+          "sha256": "0fc445e47aed376f23240ad371e794394b139d9de189e4c0bd65d6c701c964d2",
+          "size": 520496
+        },
+        "a.evidence/verify-relocation-step0.debian.txt": {
+          "sha256": "3291f9b48276c4aa56a6ee6f7423bcd84d5561a35aece618dd7254a680ccda4d",
+          "size": 14704
+        },
+        "a.evidence/verify-relocation-step1.debian.txt": {
+          "sha256": "5c7fcc67c63bd703deb2aec63adbd5b6e3591d01a0f8cf2ed8825af010e82b03",
+          "size": 35050
+        },
+        "a.evidence/verify-relocation-step2.debian.txt": {
+          "sha256": "021a4274b6a5db4c5cfd397bf0e9e85c9e3bc13382b7a24cca328b1a6c5ffd3c",
+          "size": 94815
+        },
+        "a.evidence/verify-relocation-step3.debian.txt": {
+          "sha256": "2b9d1c4156d8e9318c06c11214a041e1149d8ee76599489c349f2827e8ca634e",
+          "size": 20523
+        },
+        "a.evidence/verify-relocation-step4.debian.txt": {
+          "sha256": "5e6f837a4e96c8d271d8d6adec8f2ae07b976147483abd1278e03162d36bebce",
+          "size": 31580
+        },
+        "a.evidence/verify-relocation-step6.debian.txt": {
+          "sha256": "a080980c51eb61fd53f4e8d1d2c2b2df70516593f667a629ec5c09ce5e1b91bd",
+          "size": 23575
+        },
+        "a.evidence/verify-sqlite-candidate.debian.txt": {
+          "sha256": "fb79434f35e331e45b2385e4cfc1fd5858098d8330dab1df44444f7017ae9b2a",
+          "size": 3023
+        },
+        "a.evidence/verify-step0.debian.txt": {
+          "sha256": "3bd8d636a15b63873e3fd4b03b02c0e57c29f631d6bae540dd7db4fe28b1d16a",
+          "size": 1463
+        },
+        "a.evidence/verify-step5.debian.txt": {
+          "sha256": "6cf64fb9eb73af82cb6caafc808d5091302d21813c385992739c19d20cc698f7",
+          "size": 9984
+        },
+        "a.evidence/verify-wrapper-accept.debian.txt": {
+          "sha256": "d0e4416a10478dc964c3009f255cb4f58a4f4bd81bd66bc060cf550cd9fc54e8",
+          "size": 9051
+        },
+        "a.evidence/verify-wrapper-scope.debian.txt": {
+          "sha256": "5a50c321b332408f55694e70280a7fb8772865edc754276a6e5d2f52454c5eb0",
+          "size": 1560
+        }
+      }
+    }
+  ],
+  "application_fix": "Validate an index-only lock transport rewrite before uv sync --locked; restore and archive the canonical committed lock; use the transport lock to acquire the same wheels.",
+  "provisioning": {
+    "locked_sync": "passed",
+    "uv_version": "0.12.17",
+    "python_version": "3.13.15",
+    "transport_identity_check": "packages=83 artifacts=491",
+    "installed_packages": 80,
+    "venv_base_captured": true,
+    "failure": "Wheel capture refused: locked wheel identity absent or ambiguous: playwright-1.60.0.dist-info",
+    "owner": "Application ci/tools_wheel_capture.py",
+    "missing_consumers": [
+      "agent wheel inventory",
+      "archived agent lock"
+    ],
+    "required_followup": "Repair exact installed-wheel identification without changing the lock or selecting a substitute wheel; repeat the candidate build with publication off."
+  },
+  "consumer_change": "Historical RHEL consumer-dependent passes do not qualify the new application, lock or agent wheels. Preserve original input snapshots and repeat affected acceptance before publication.",
+  "diagnostic_scope": "Historical diagnostic harness output remains raw evidence; candidate-bound Debian cells are evaluated independently. A pipeline result alone does not establish all acceptance cells."
+}

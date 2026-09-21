@@ -1,0 +1,101 @@
+Step 3 validation, 2026-09-17
+cplx starting revision: 740b6f66ba72949e6b376f4270f0b9b1a5d06415
+Explicit clean app revision: 489bbbde741328ab7953e2338a29952cd1a9f18c
+Native host: RHEL 9.8; independent /usr/bin/python3 3.9.25
+Fresh owned snapshots of both revisions; the five changed sources below overlaid.
+Compiler-only wrapper supplies the existing GCC libraries, without altering test-process libraries.
+Pinned Linux ShellCheck 0.10.0 SHA-256: 6c881ab0698e4e6ea235245f22832860544f17ba386442fe7e9d629f8cbedf87
+Command: bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 3 --python /usr/bin/python3 --app-repo <owned-app-checkout>
+Result: exit 0, elapsed 49 seconds
+Raw local capture: a.tools-step3-native.log
+Raw capture SHA-256: dc5610c081982435930775cdf436f37541b79d72d662e4e5b478c24c760fefd2
+This sanitized summary is fixture evidence, not release-candidate acceptance.
+
+Source SHA-256 and physical lines:
+91f0b7fab2eadd7ffe7a126d178dc70372940a994ce70ef3c78e94d45b8afffe 630 src/setups/env/bin/closure_d10.sh
+60a32653135e171e03060d23c16a5fcbc7c9e87e808f9eb0957950b3b2323c1a 11 src/setups/env/bin/tools_wheel_inventory.sh
+bbd3935d4642947892bf30b2175ea8b07ba8b1432bb318940a637fa4e4a0d01d 258 src/setups/env/bin/tools_wheel_inventory.py
+e4057aaf70f66b5b41a9531be0a099d340535a2747e65bd3f43688109a86b0ef 218 docs/v0.27.0/verify.tools-release-d10.sh
+3300415508e94a31a97ad6299780818cb514a4953813c2c139aa02847186848a 54 docs/v0.27.0/verify.tools-archive-rebuild.sh
+Baselines: closure_d10.sh 524; cumulative runner 46; new files 0.
+
+Native output excerpts:
+Independent interpreter: /usr/bin/python3 3.9.25
+lint_shell: 58 tracked scripts
+lint_shell: clean
+Record tests: Ran 16 tests in 3.160s; OK
+PASS legacy
+PASS zero-headroom
+PASS capture
+PASS materialize
+PASS wheel-demands
+Measured union: walks=2 readelf=8 (archive=3 wheel=1 candidates=4); D10 elapsed=0s
+PASS duplicate-root-walk
+PASS mixed-providers
+PASS unread-consumer
+PASS same-second-reading
+PASS higher-second-reading
+PASS lower-second-reading
+PASS missing-root
+PASS wrong-lock
+PASS materialize-lock-mismatch
+PASS extraneous-elf
+PASS missing-elf
+PASS changed-elf
+PASS extra-installed
+PASS missing-installed
+PASS changed-wheel
+PASS unsafe-member
+PASS corrupt-wheel
+PASS unsafe-absolute-capture
+PASS unsafe-absolute-extract
+PASS unsafe-backslash-capture
+PASS unsafe-backslash-extract
+PASS unsafe-symlink-capture
+PASS unsafe-symlink-extract
+PASS unsafe-duplicate-capture
+PASS unsafe-duplicate-extract
+PASS unsafe-collision-capture
+PASS unsafe-collision-extract
+PASS occupied-destination
+PASS preserved-destination
+PASS missing-wheel
+PASS relocated-capture
+PASS relocated-materialize
+PASS duplicate-demands
+PASS permuted-materialize
+PASS permuted-demands
+PASS multiple-roots
+PASS malformed-inventory
+PASS subject-symlink
+PASS gcc-only-demand
+PASS neither
+PASS neither-second-reading
+PASS unread-provider
+PASS empty-legacy
+PASS wheel-only
+D10 fixtures: 49 cases passed
+Transport tests: Ran 15 tests in 11.519s; OK
+Publication tests: Ran 6 tests in 1.143s; OK
+SQLite fixture controls: passed
+Historical closure Step 5: cases 254, failures 0, OBJECTIVE MET
+The historical declaration/envelope digests are verified by the cumulative runner.
+Their retired waiver is confined to owned regression copies.
+
+Windows authoring check:
+Fresh ghog day log checked against a start flag; ghog status returned state=done exit=5.
+Ended: 2026-09-17T14:38:13+02:00. Shell lint passed; pytest executable unavailable.
+The plan and .review-validation declare the native Bash gate for cplx, not pytest.
+Final native lint also covers the newly added scripts; no Python coverage percentage claimed.
+git diff --check: passed.
+
+Diagnostic history:
+Tests were authored before implementation; initial native attempts stopped at compiler setup.
+GCC libraries were then isolated to the compiler process after a global library path broke TLS fixtures.
+Fresh snapshot transport needed numeric tar ownership on Windows.
+Owned transfer archives were removed after /tmp filled; source trees and diagnostics were retained.
+Exported reader instrumentation received a scoped ShellCheck annotation for indirect child-process calls.
+An optional frozen closure Step 7 run passed its D10 policy/convergence/evidence assertions,
+then exited 5 during separate live archive extraction because scratch space was exhausted.
+That acceptance run is outside this step; it is not in the final cumulative command.
+No payload was rebuilt, published, installed or adopted by this step.

@@ -1,0 +1,40 @@
+Step 5 cumulative fixture validation, 2026-09-17
+
+Run: native RHEL 9.8, Bash 5.1.8, independent system Python 3.9.25.
+ShellCheck: 0.10.0, archive SHA-256
+6c881ab0698e4e6ea235245f22832860544f17ba386442fe7e9d629f8cbedf87.
+Source: cplx 6ed601008162f0527d289758005f7e16cffaf806 plus the Step 5
+overlay recorded in evidence.tools-archive-rebuild.step5-authority.txt.
+Application: ea8363c401c97b4cfae8dfb9d6e9f0b7318d42b0.
+Full native log SHA-256:
+0776c10a3fd39a2d7ef31f8c705cb5631d601428c0abc4eb664f5186edd84448.
+
+Command, with independently selected role paths:
+bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 5 --python <system-python> --app-repo <application-checkout>
+
+Result: exit 0, elapsed 63 seconds.
+The runner's Bash syntax, shell lint, ShellCheck and Python compile gates passed.
+Release record unit tests: 16 passed.
+D10 fixtures: 49 passed.
+Agent shell fixtures: 33 passed; parser and wiring fixtures passed.
+Private packaging: 7 cases passed (regular, absent, terminal symlink,
+terminal hardlink, unexpected directory, Python parent symlink, root symlink).
+Inherited ownership register: 5 controls passed (clean, stale, unowned,
+owned and replaced). Unowned findings remain explicit; they are not a clean set.
+Installer --step 3: 63 cases, 0 failures.
+Wrapper scope --step 2: 53 cases, 0 failures.
+SQLite acceptance controls: 38 passed, explicitly no candidate acceptance.
+Publication/adapter tests: 15 passed.
+SQLite probe unit tests: 6 passed.
+Current SQLite closure fixtures: 25 passed.
+Historical closure --step 5: 254 cases, 0 failures, OBJECTIVE MET.
+The historical waiver pair is a frozen fixture; the production declaration
+remains waiver-free and was checked separately.
+
+The initial focused red run exited 1 because the old packager left root/a.out.
+After the targeted private-stage unlink, all seven package cases passed.
+The first cumulative attempt exposed fixture-only ShellCheck annotations;
+the next passed. Adding inherited checks exposed unsupported installer step 4
+(documentation only); the corrected final runner selects step 3 explicitly.
+No payload compilation or candidate qualification occurs in these fixtures.
+No Python coverage percentage is claimed from these stdlib test runs.

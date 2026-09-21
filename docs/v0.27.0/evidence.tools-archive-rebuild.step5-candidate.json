@@ -1,0 +1,152 @@
+{
+  "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+  "recorded_utc": "2026-09-18T20:23:22.204431+00:00",
+  "candidate": {
+    "filename": "tools.2026-09-18_220913.tar.gz",
+    "size": 545293468,
+    "sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+    "sha1": "5a0c68abac266a68ff5373376f6d55860781ede8"
+  },
+  "previous_candidate_sha256": "d8f205cc10d07a71618e730f69d09c179a884c85ce4bb93f163111b5188a15c1",
+  "source_revision": "7aa660f8a2f182fc91790fd1182166ad8b662d5b",
+  "source_build_base": "6ed601008162f0527d289758005f7e16cffaf806",
+  "reason": "Installer-only repackage after the original candidate failed RHEL PA6",
+  "rebuilt_payloads": false,
+  "refreshed_payloads": false,
+  "archive_comparison": {
+    "members": 38070,
+    "changes": {
+      "tools/bin/install_pkg.sh": {
+        "before": [
+          "0",
+          493,
+          "",
+          "6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625"
+        ],
+        "after": [
+          "0",
+          493,
+          "",
+          "f915125e4bce0eb9709dff57b3726d93bc9b0439a52572d467f71f9cb08fca02"
+        ]
+      }
+    }
+  },
+  "installer_sha256": "f915125e4bce0eb9709dff57b3726d93bc9b0439a52572d467f71f9cb08fca02",
+  "archive_assertions": {
+    "AR1": "pass",
+    "AR2": "pass",
+    "AR4": "pass"
+  },
+  "archive_assertion_cases": 539,
+  "oracle_sha256": "f19f9cdc6c856a3697addb705f09e67103f8c9802a44761d6e189b865a9c8db8",
+  "closure_declaration_sha256": "63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa",
+  "preservation": {
+    "tools_after_installer_overlay": "passed",
+    "live_account": "passed"
+  },
+  "command_and_result": "HOME=<owned-home> BASH_ENV=unset bash <owned-home>/cplx/bin/pkg_tools.sh \nexit=0\nelapsed_seconds=119\n",
+  "captures": {
+    "repackage-point2/package.command": {
+      "filename": "package.command",
+      "size": 107,
+      "sha256": "3a28afbd79c79088bab28a991b8db06b74fda0d178859f8ecc9d418169346e1c",
+      "sha1": "1b64046fc2c0c5bcf1d8a5611da3a2b4558b4704"
+    },
+    "repackage-point2/package.log": {
+      "filename": "package.log",
+      "size": 134484,
+      "sha256": "7f1f636d98d9dd3fb07e8897020ec0317a9de94385e339813f451da371615cb2",
+      "sha1": "478a1aaa14c84c3b9f5f94e5748abd89f19a3b17"
+    },
+    "repackage-point2/package.timeline": {
+      "filename": "package.timeline",
+      "size": 148812,
+      "sha256": "70122e6a69c0144bbc90af186ab8a9e1b146413c2860f93deb9870de08b92050",
+      "sha1": "fd54be4f5bab089d0df5d359c9c40495980a31a5"
+    },
+    "repackage-point2/audit": {
+      "filename": "audit",
+      "size": 10450,
+      "sha256": "c80e1b1fc49965ec897304da96dc0a8dcf984ba091fc9993ab93f0df797cab5d",
+      "sha1": "4b6913b899ffa0dad68255016da514435b0ef40e"
+    },
+    "repackage-point2/audit.sha256": {
+      "filename": "audit.sha256",
+      "size": 65,
+      "sha256": "3c480bef5cbe70e76cb3a3a1c7cffc82a8a55c45bc5b5e17e7ee4199c0690745",
+      "sha1": "78fa916ba5836c328406180033235356b3b23d43"
+    },
+    "repackage-point2/installer.before": {
+      "filename": "installer.before",
+      "size": 213,
+      "sha256": "4b3f1c8b0684b1bab4c3c0c805f85d3b183d2e1285e28b8e847e43a988ad1b14",
+      "sha1": "d012b7786584dfc4d8b86ed1b7816eb105315ca7"
+    },
+    "repackage-point2/installer.after": {
+      "filename": "installer.after",
+      "size": 213,
+      "sha256": "3d9f7b89571063a6e993126465edf9118140bba4ac0dbda1304120cac3064912",
+      "sha1": "19411af247258a76584d3e931d8797af927cd6f9"
+    },
+    "repackage-point2/tools.before": {
+      "filename": "tools.before",
+      "size": 6380916,
+      "sha256": "4f3778dddb5d85ed9f4576829f2f6d37eaf5f0922057821e5991a241aa61e499",
+      "sha1": "0133ad561cca9394e36222116701a83b5a60bcc8"
+    },
+    "repackage-point2/tools.after": {
+      "filename": "tools.after",
+      "size": 6380916,
+      "sha256": "4f3778dddb5d85ed9f4576829f2f6d37eaf5f0922057821e5991a241aa61e499",
+      "sha1": "0133ad561cca9394e36222116701a83b5a60bcc8"
+    },
+    "repackage-point2/live.before": {
+      "filename": "live.before",
+      "size": 37014369,
+      "sha256": "411f405abf68f76ee63c264f0094e455a7f90ad4e94709d1e650b2858a1ea8ae",
+      "sha1": "813315fc87b08ff13d0c8c39d370d046a08c8445"
+    },
+    "repackage-point2/live.after": {
+      "filename": "live.after",
+      "size": 37014369,
+      "sha256": "411f405abf68f76ee63c264f0094e455a7f90ad4e94709d1e650b2858a1ea8ae",
+      "sha1": "813315fc87b08ff13d0c8c39d370d046a08c8445"
+    },
+    "repackage-point2/archive-comparison.json": {
+      "filename": "archive-comparison.json",
+      "size": 361,
+      "sha256": "900b4a407de2f5379f92bd00cdb9ff1107186261d97911d82b6a73265525a8e7",
+      "sha1": "6fa403803f6b2913ce762c93343f64014abebd6b"
+    },
+    "archive-checks/relocation.log": {
+      "filename": "relocation.log",
+      "size": 30263,
+      "sha256": "cceffa640406c0e4cb95f5505498923ceab4617bf122d16a8e1ab7e3aa194f52",
+      "sha1": "263d405a1023fddde4fe6894445a6d2a75b939f2"
+    },
+    "archive-checks/result": {
+      "filename": "result",
+      "size": 33,
+      "sha256": "190c2b992954a83e02531d7c70b47e41a9d03549b66cfdd3c24c6f3a2d376c84",
+      "sha1": "b062ecf3f7d84c595172cacc04685f62c668b811"
+    }
+  },
+  "raw_retention": {
+    "storage": "retained-build-host-evidence",
+    "archive": {
+      "filename": "step5-repackage-raw-captures.tar.gz",
+      "size": 19199945,
+      "sha256": "a8f80e6ce855b3cda7fd5fc137561a5eb87e4a33d25cf29e09fc07289815c0c1",
+      "sha1": "2190d447a95ee5cfc96b63e792b95051c242327e"
+    }
+  },
+  "phase_times": {
+    "repackage_started": "2026-09-18T20:04:57Z",
+    "repackage_done": "2026-09-18T20:15:57Z",
+    "checks_started": "2026-09-18T20:16:40Z",
+    "checks_done": "2026-09-18T20:23:02Z"
+  },
+  "runtime_acceptance": "pending; original-candidate results do not qualify these bytes",
+  "publishing_revision": null
+}

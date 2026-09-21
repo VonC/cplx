@@ -1,0 +1,164 @@
+{
+  "scope": "Step 6 handoff point 4 retry after application shared runtime setup; publication remains off",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "bundle_sha256": "dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51",
+  "cplx_revision": "72f6cb290700faf328b73d946e78e8fedab8c2cd",
+  "application_revision": "ad6d7ed81136fb5021068fb62a78f691b689c92d",
+  "pipeline_revision": "ad6d7ed81136fb5021068fb62a78f691b689c92d",
+  "committed_lock_sha256": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+  "reader_sha256": "beaa3e45158396797156394b87e6d7e3a3a4ecd103fb9fbaf275a121db2883b1",
+  "reader_origin": "Working-tree reader adds Jenkins timestamp parsing, optional ABI availability/runtime and dangling-link counts, and refusal of unqualified system-loader scope to the committed bundle reader; both readers and their outcomes are retained",
+  "reader_comparison": {
+    "original": "fail",
+    "repaired": "incomplete"
+  },
+  "raw_reading_archive_sha256": "9411b470c3263715aa72c2380f01359e634214f35f3cc031af65b16747f09725",
+  "raw_transport_sha256": "393192870bab21c1d76bc2bc817f7899651826a9d2276c0ac926ca0ec2e96f32",
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-point4-build-181/",
+  "previous_versioned_captures": {
+    "evidence.tools-archive-rebuild.step6-debian-build177-retention.json": "f294296d1a3f02008b983a495694b890d20ceae7d8825ceb57c0641f3714d9ad",
+    "evidence.tools-archive-rebuild.step6-debian-build177.json": "5f7cfc945c57dd7680d120dfb4ceafc12df4d255130d08310e920dcf88731433",
+    "evidence.tools-archive-rebuild.step6-debian-build178-retention.json": "59c381c75af0bdac4b47542d0f448ac03ec4306d5cf89b302d0bc6c30de1d1e3",
+    "evidence.tools-archive-rebuild.step6-debian-build178.json": "4954a30b4646cf6a4a380fc6c74b641baec26f3fbb957e85d439c60af6b75220",
+    "evidence.tools-archive-rebuild.step6-debian-build179-retention.json": "baef83cec86d2463ed55e6d0f7a7606faf94a3df4f5e471a3f7f68e7df8750ed",
+    "evidence.tools-archive-rebuild.step6-debian-build179.json": "fac3f0c465af4be02275c2e285d0fefebfaa2cc1052fa9e5ab35d5d4e5f9581f",
+    "evidence.tools-archive-rebuild.step6-debian-build180-retention.json": "fbbd7a68180c38d3c781d116edb4fca5cfe3535ebdb0209472b1b0ca52d02848",
+    "evidence.tools-archive-rebuild.step6-debian-build180.json": "4f3be41e7479c48819f3a7b4285f5a683d9d008f0b3a95ed59bdc58a5c436ed9",
+    "evidence.tools-archive-rebuild.step6-debian-retention.json": "e7af3c5605ea857f903202703862a3c663ecee17483a06f9a0979bfa589b943e",
+    "evidence.tools-archive-rebuild.step6-debian.json": "f8ca335c2efa23cf6262cc604390e241d794c742631ee7f69827e3a21140e98a"
+  },
+  "builds": [
+    {
+      "number": 181,
+      "result": "FAILURE",
+      "duration_ms": 2466634,
+      "console_sha256": "094f8c728229ee13f20ebf7e6cdc2ca86222107b589e658db99f34b4aa8958d5",
+      "build_metadata_sha256": "d4d673f2d0fe90b0b2a1c5f4ed18a5ee7fbbebc0ea59eccb8579dc7e0d51b13e",
+      "checkout_revisions": [
+        "d08f5f6a75376d418aba854a76db6aef307b7bae",
+        "ad6d7ed81136fb5021068fb62a78f691b689c92d"
+      ],
+      "artifacts": {
+        "a.evidence/copy-form.debian.txt": {
+          "sha256": "fc6c302de219ae55a519c3af3cf0fdb1a3ae6a6e23871a2235ae96cb0a76900f",
+          "size": 12464
+        },
+        "a.evidence/destination-shape.debian.txt": {
+          "sha256": "cbb98245981b79c63236889dcaf5e45815024920c5f96482247408fd0798c27e",
+          "size": 6495
+        },
+        "a.evidence/identity": {
+          "sha256": "d83278c53533a3fbd901a164326c7afba9705ef7c85a3febcac354ed4a0ebe51",
+          "size": 209
+        },
+        "a.evidence/installer-contract.debian.txt": {
+          "sha256": "eba255ac56220cdc582ae23e70e5b618d047ee951ef3efb6ee7aa46c1635f76a",
+          "size": 775
+        },
+        "a.evidence/inventory-record.debian.txt": {
+          "sha256": "c9912a6eb0e2fc224709a00088f3518f169a172aeb6430ce494b977ee2f1fc86",
+          "size": 12962
+        },
+        "a.evidence/loader-probe.debian.txt": {
+          "sha256": "b469a72e7e0dcd20cf4f926edae8ced37b67e4f744d37d54f77ab299ce6a6c0c",
+          "size": 1249
+        },
+        "a.evidence/mirror-root.debian.txt": {
+          "sha256": "5147abc689da3ead8ccb1dabe95357e2b76b7a8eea59f5aee2c45917068fa714",
+          "size": 1502
+        },
+        "a.evidence/runtime.txt": {
+          "sha256": "76e82cae0f9efcb041cd2d7f443c252bf1e7c735c5fa3366a8a71b505cd41cfd",
+          "size": 516
+        },
+        "a.evidence/shellcheck.debian.txt": {
+          "sha256": "0f232d35c5fbf1ba61a36c1f3294e68092662bf22177f8aa6d846ca4af907e49",
+          "size": 135
+        },
+        "a.evidence/sqlite-candidate.debian.tar.gz": {
+          "sha256": "ca4ed2a1d76da4fc95f4adb01450ae539178ea0030423e53dd5c509b5750af35",
+          "size": 2010482
+        },
+        "a.evidence/sqlite-runtime.txt": {
+          "sha256": "76e82cae0f9efcb041cd2d7f443c252bf1e7c735c5fa3366a8a71b505cd41cfd",
+          "size": 516
+        },
+        "a.evidence/verification.sha256": {
+          "sha256": "98577e24508d502006c0587e8ab7a20678591d0a82ef9401e0a869e3e857fd82",
+          "size": 18714
+        },
+        "a.evidence/verify-closure-check.debian.txt": {
+          "sha256": "4832d4a24abbe10bfe4e9f3e645ea07d9e12fcae70665f3938b386db3ecb1faa",
+          "size": 520496
+        },
+        "a.evidence/verify-relocation-step0.debian.txt": {
+          "sha256": "d8b6f2dce84489584baa5cb4221b0771ba77175ea7a3ee8c49c03a71841cfc75",
+          "size": 14704
+        },
+        "a.evidence/verify-relocation-step1.debian.txt": {
+          "sha256": "1d1b86df92776fa7695df51956015fe363d67225523445519f220acf6ddffa04",
+          "size": 35050
+        },
+        "a.evidence/verify-relocation-step2.debian.txt": {
+          "sha256": "3859f5885d4fde01b65d34d747eac478add8d782219684fa45738c287b8c01bd",
+          "size": 94815
+        },
+        "a.evidence/verify-relocation-step3.debian.txt": {
+          "sha256": "c3e264bdcca3d2e3c499628c24feddcc8ebd78fe13fb9380b2b79411021ef6ce",
+          "size": 20523
+        },
+        "a.evidence/verify-relocation-step4.debian.txt": {
+          "sha256": "b8f0994ad9b151aef0be0c0e7523f3bf59a6330469920d874a2bbf35d47dbdf5",
+          "size": 31580
+        },
+        "a.evidence/verify-relocation-step6.debian.txt": {
+          "sha256": "36c703b59264b8d40bc65959a54f6924b5b7807890c222c6344fb2a8715f38d5",
+          "size": 23575
+        },
+        "a.evidence/verify-sqlite-candidate.debian.txt": {
+          "sha256": "16b883a76fa3a258c46e03d2c7a9ba209593cad99531a59edc734d25ba95c535",
+          "size": 3023
+        },
+        "a.evidence/verify-step0.debian.txt": {
+          "sha256": "6a6e58d56acb8fed10fc9d4929f8eab88130455a37efb1f4d583d89ec7b7f4ec",
+          "size": 1463
+        },
+        "a.evidence/verify-step5.debian.txt": {
+          "sha256": "d20731b2fe06c44268db22b235d3b96e0a878f12c9ab4d3f637d3ffe933e6397",
+          "size": 9984
+        },
+        "a.evidence/verify-wrapper-accept.debian.txt": {
+          "sha256": "6d3e5e2c3cec07ebb9136ddd53f52b6561d41541b8a04ba797a697ca99ddfe50",
+          "size": 9051
+        },
+        "a.evidence/verify-wrapper-scope.debian.txt": {
+          "sha256": "e9e217239ebf4ea6b86684b7a1b1792563940992d85080f3f58044d65ee33f94",
+          "size": 1560
+        }
+      }
+    }
+  ],
+  "application_fix": "Build 181 fails during Provision, before wheel capture or imports: exporting the shipped LD_LIBRARY_PATH causes host readlink to load the shipped libc and fail on __rtld_libc_freeres (GLIBC_PRIVATE). The shared setup is adopted subject to qualification, but this implementation does not qualify it.",
+  "human_decisions": {
+    "Q08": "Keep the retained-helper exception; other system-loader executables must be qualified.",
+    "Q09": "Adopt shared runtime_env.sh with shipped library directories first and unchanged wheel ELFs, subject to actual provider qualification on Debian and RHEL."
+  },
+  "provisioning": {
+    "stage_clone": "passed",
+    "locked_sync": "not reached",
+    "completed_agent_inventory": false,
+    "archived_agent_lock": false,
+    "wheels_tar_gz": false,
+    "later_stages": "Package, Test and Publish skipped after Provision exited 127; no build 181 wheel, ABI import, pytest or coverage evidence exists."
+  },
+  "remaining_failure": {
+    "stage": "Provision: provision_toolchain.sh venv",
+    "error": "readlink: symbol lookup error: <agent-workspace>/prefix/tools/python/root/usr/lib64/libc.so.6: undefined symbol: __rtld_libc_freeres, version GLIBC_PRIVATE",
+    "observed_sequence": "Source tools/runtime_env.sh, then REAL_PY=$(tools_python_path); that function calls readlink -f on the selected interpreter. The exported shipped library path reaches the host executable.",
+    "owner": "Application runtime-environment integration; moving the first readlink alone is insufficient because later host commands would inherit the same library path.",
+    "required_followup": "Keep the shared CI/deployment runtime mechanism, but isolate host-tool execution from the shipped-libc environment and qualify every affected executable with a compatible loader/provider pair. Preserve blocking heavy-wheel imports, repair the Q08 blanket scope exemption, and fix the inherited-prefix idempotence counterexample before repeating acceptance."
+  },
+  "deployment_scope": "Q07 excludes tooling from deployment venvs. Fresh RHEL acceptance with the shared setup remains required before D10; historical host-compatible imports do not qualify shipped providers.",
+  "consumer_change": "Historical RHEL consumer-dependent passes do not qualify the new application, lock or agent wheels. Preserve original input snapshots and repeat affected acceptance before publication.",
+  "diagnostic_scope": "Historical diagnostic harness output remains raw evidence; candidate-bound Debian cells are evaluated independently. A pipeline result alone does not establish all acceptance cells."
+}

@@ -1,0 +1,46 @@
+{
+  "run": "tools-archive-rebuild-step6-archive-20260921",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "exit": 0,
+  "assertions": {
+    "AR1": "pass",
+    "AR2": "pass",
+    "AR4": "pass"
+  },
+  "cases": 539,
+  "started": "2026-09-21T09:32:33Z",
+  "ended": "2026-09-21T09:39:46Z",
+  "captures": {
+    "started": {
+      "sha256": "715ac7559eb3a7d8eb8c1f8082905818a1f8a4de10f4566d5cd05b025bb4f3c7",
+      "size": 21
+    },
+    "ended": {
+      "sha256": "16fd81e2d2544e222f1ace5d1f9d32d16167174a12d392b6b72e630033973a9f",
+      "size": 21
+    },
+    "exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "size": 2
+    },
+    "relocation.log": {
+      "sha256": "2280c3b9460d4e51ee8af3bde399a52fb034f5dc9206afad90c7146eb985fb59",
+      "size": 30443
+    },
+    "result": {
+      "sha256": "8e7b0f1b451a02ac27ed66c31caddd94191fda5423aaf3325ca3730af714423a",
+      "size": 27
+    },
+    "readers.sha256": {
+      "sha256": "b9e4c21fa2f1a92fcadf311c7289ca02b4aea2b38b464fcce98aeddf9b6d4c0f",
+      "size": 576
+    }
+  },
+  "readers_sha256": {
+    "inventory.tools-archive-rebuild.txt": "f19f9cdc6c856a3697addb705f09e67103f8c9802a44761d6e189b865a9c8db8",
+    "verify.relocation-rpath.sh": "bd977dd9b80fd28f28c0c5cacbb77be8dac9145ae463c2c0eafa46d211eb501e",
+    "install_pkg.sh": "f915125e4bce0eb9709dff57b3726d93bc9b0439a52572d467f71f9cb08fca02"
+  },
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-step6-r16-archive/",
+  "command": "bash verify.relocation-rpath.sh --step 4 --installer <checkpoint>/src/setups/env/bin/install_pkg.sh --prefix <private-prefix> --patchelf <private-prefix>/tools/bin/patchelf --inventory <checkpoint>/docs/v0.27.0/inventory.tools-archive-rebuild.txt --target-is-exact"
+}

@@ -1,0 +1,22 @@
+CONSISTENT|63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa|INTERNAL CONSISTENCY ONLY: a host with no cplx access cannot tell an authentic bundle from the reviewed one
+CONSISTENT|63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa|INTERNAL CONSISTENCY ONLY: a host with no cplx access cannot tell an authentic bundle from the reviewed one
+AUTHORITATIVE|63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa|13c80d572ba7bda91728806ad7dc11c53629a506
+build-base=6ed601008162f0527d289758005f7e16cffaf806
+source-reachable=yes
+retention-merge-reachable=yes
+renewed=no
+declaration-sha256=63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa
+Step 5 source overlay (separate from envelope authority and future publishing revision):
+3304b0f299f39e80eb536cd117b36db893b6767a90f4dcfd8706af3ed2448f80 *src/setups/env/bin/pkg_tools.sh
+bd977dd9b80fd28f28c0c5cacbb77be8dac9145ae463c2c0eafa46d211eb501e *docs/v0.27.0/verify.relocation-rpath.sh
+b59b8cd575d02592abd4543ce3e6fb6111198aadff93c8829a971835135077b9 *docs/v0.27.0/verify.tools-release-package.sh
+2e49d12689d6249287bebc6019042855cb2fc8ce442dc648d1d3b1c74e57e515 *docs/v0.27.0/verify.tools-archive-rebuild.sh
+
+Installer-only repackage overlay (2026-09-18):
+source-revision=7aa660f8a2f182fc91790fd1182166ad8b662d5b
+source-and-retention-merge-reachable-from-source-revision=yes
+f915125e4bce0eb9709dff57b3726d93bc9b0439a52572d467f71f9cb08fca02 *src/setups/env/bin/install_pkg.sh
+Both cplx/bin and tools/bin namespace copies match this overlay.
+Archive member comparison: only tools/bin/install_pkg.sh changed.
+The original build overlays above remain historical build evidence.
+Declaration unchanged; authority not renewed; publishing revision pending.

@@ -1513,8 +1513,10 @@ Five more from round 6, because a transaction is proved by its failure paths:
   comparison rather than comparing an empty string, and aborts;
 - an ABORT failure, the stub refusing to abort: the run still refuses, and the
   stage handle is named on stderr so an operator can find what may persist;
-- a COMMIT failure: nothing is public, because `committed` is still 0 when the
-  trap runs.
+- a COMMIT failure before remote commit: abort leaves nothing public. The
+  2026-09-17 owning-design resolution adds missing-response checks: after commit
+  intent, read back the exact asset and compare SHA-256; if inconclusive, retain
+  an unknown outcome and block adoption/retry. A local flag cannot prove absence.
 
 Six more from round 7, which are the paths the previous flow left open:
 
@@ -1628,8 +1630,10 @@ and a duplicate archive is still deduplicated by SHA1 to the previous file.
   digest is known, and a non-zero exit cannot retract a public upload. So the
   callback drives an adapter with four operations: `upload_begin` creates an
   object that IS NOT PUBLICLY VISIBLE and prints its handle, `upload_write`
-  consumes stdin into it, `upload_abort` destroys it leaving nothing public, and
-  `upload_commit` makes it public atomically. THOSE FOUR NAMES ARE THIS
+  consumes stdin into it, `upload_abort` closes unfinished staging, and
+  `upload_commit` makes it public atomically. Under the 2026-09-17 resolution,
+  abort after commit intent reconciles the exact asset without deleting it.
+  THOSE FOUR NAMES ARE THIS
   EFFORT'S ADAPTER ABI, tested here against a stub. Umbrella item 7 keeps
   whatever public API it has and supplies an adapter with these semantics; this
   plan does not impose its names on item 7's surface.
@@ -1705,7 +1709,8 @@ and a duplicate archive is still deduplicated by SHA1 to the previous file.
     `cleanup`, so a signal arriving during cleanup cannot re-enter it and call
     `upload_abort` twice.
   - `committed` FLIPS ONLY AFTER `upload_commit` RETURNS 0, so every other exit
-    path, a signal and a commit failure included, aborts the stage.
+    path, a signal and a commit failure included, invokes adapter cleanup. The
+    adapter closes unfinished staging or reconciles durable commit intent.
 
   The scratch directory is created exclusively with `mktemp -d` at 0700 inside
   the protected staging root, so the FIFO and the digest file cannot be
@@ -1715,14 +1720,17 @@ and a duplicate archive is still deduplicated by SHA1 to the previous file.
   IF `rm -rf` ITSELF FAILS the scratch path is named on stderr and the exit
   status is unchanged: local cleanup is an operator concern, and the publication
   verdict does not depend on it.
-- FAILURE POSTCONDITIONS ARE STATED, so a caller always knows what exists:
-  `upload_begin` failing leaves NOTHING staged and nothing public, and the trap
-  is not yet armed; `upload_abort` succeeding leaves nothing public and no
-  retained stage, and failing leaves a stage that MAY persist, named on stderr,
-  with the run still refusing; `upload_commit` succeeding makes the object
-  public, and failing leaves nothing public because the trap aborts. An adapter
-  whose commit could fail after publishing does not satisfy the ABI, since
-  atomic commit is what makes the failure postcondition knowable.
+- FAILURE POSTCONDITIONS ARE STATED, including unresolved remote outcomes:
+  `upload_begin` failing starts no public write and may retain diagnostics;
+  `upload_abort` succeeding closes unfinished staging without publishing it.
+  Failed cleanup retains the named attempt; staging or a public release may
+  exist after commit intent, with the run still refusing. `upload_commit`
+  succeeding makes the object
+  public. Under the 2026-09-17 owning-design resolution, a missing or unusable
+  commit response requires read-back of the exact coordinate and a SHA-256
+  comparison. A match resolves success; otherwise status 3 retains an unknown
+  outcome and blocks adoption/retry. Cleanup after commit intent must reconcile,
+  never delete a public release or infer absence from the local committed flag.
 - WHERE THE UPLOADER CANNOT BE INVOKED THIS WAY, THIS PLAN DOES NOT CLAIM THE
   PROPERTY. Umbrella item 7 owns the real uploader, so the four-operation
   callback interface is item 7's PREREQUISITE: until item 7 accepts it, or
