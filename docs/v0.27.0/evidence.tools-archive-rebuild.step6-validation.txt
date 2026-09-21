@@ -1,0 +1,98 @@
+Step 6 cumulative fixture validation, 2026-09-18
+
+Run: native RHEL 9.8, Bash 5.1.8, independent system Python 3.9.25.
+ShellCheck: 0.10.0, archive SHA-256
+6c881ab0698e4e6ea235245f22832860544f17ba386442fe7e9d629f8cbedf87.
+Source: cplx dab19c8 (the Step 5 review commit) plus the Step 6 overlay below,
+committed as a transferred tree on the host for the fixture run only.
+Application: ea8363c401c97b4cfae8dfb9d6e9f0b7318d42b0 (tools, ci, Jenkinsfile,
+uv.lock and pyproject.toml, committed as a transferred tree on the host).
+Full native log SHA-256:
+70e59afdca717826d25b6effe99d36c9f8a964ff48f81052e5c811ae1a4aa6e4.
+
+Command, with independently selected role paths:
+bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 6 --python <system-python> --app-repo <application-checkout>
+
+Result: exit 0, elapsed 74 seconds.
+The runner's Bash syntax, shell lint (58 tracked scripts), ShellCheck and
+Python compile gates passed, with the three Step 6 scripts added to the
+ShellCheck set.
+Release record unit tests: 16 passed.
+D10 fixtures: 49 passed.
+Agent shell fixtures: 33 passed; parser and wiring fixtures passed.
+Private packaging: 7 package cases and 5 register controls passed.
+Installer --step 3: 63 cases, 0 failures.
+Wrapper scope --step 2: 53 cases, 0 failures.
+SQLite acceptance controls: 38 passed, explicitly no candidate acceptance.
+Platform acceptance fixtures: 52 cases passed (bundle composition on both
+sides including the application's bundle adapter, driver pin refusals, cell
+summaries, the Debian evidence reader, the bounded D10 rebuild, and the ELF
+pass leaving a venv tree's wheel object untouched while rewriting a library
+outside it).
+Publication/adapter tests: 15 passed.
+SQLite probe unit tests: 6 passed.
+Current SQLite closure fixtures: 25 passed.
+Historical closure --step 5: 254 cases, 0 failures, OBJECTIVE MET.
+Relocation corpus --step 3 against the corrected installer, run separately in
+the same transferred tree: 104 cases, 0 failures, OBJECTIVE MET.
+
+Three earlier native attempts failed inside the new fixtures and were fixed
+before the first green run: tar directory entries read as unsafe or foreign
+bundle members (composer and consumer checks), `git revert -q` on Git 2.52,
+and one assertion reading another case's output directory. Two further green
+runs followed the driver corrections made after the real platform runs: the
+force-reinstall and HOME-state assertions now measure the relocation pass
+alone over the deployed tree, the operator probes check the `python` wrapper
+the toolchain exposes and run without the driver's errexit, and the wheel
+search path is captured beside the PA6 import result. The venv-tree case was
+then added and run first against the unchanged installer, where it failed on
+the rewritten wheel object's bytes; this final green run follows the ELF
+pass correction. No payload compilation or candidate qualification occurs in
+these fixtures. No Python coverage percentage is claimed from these stdlib
+test runs.
+
+Step 6 overlay (SHA-256 and physical lines of the LF working-tree files this
+step changed or created; the transferred tree commit is a fixture identity):
+d72b40c3cafb05d93025efa4794949e7972f997528aff3f07ab38a5ae2042655  ci/deliver-closure-tools.sh (312)
+a848087e85599d94ca1dc509551cd45064287d9c1052757cf1cda1ba078ac9dc  docs/v0.27.0/acceptance.tools-archive-rebuild.sh (927)
+279c09f28d4b656c2cb759d2a7b0fd8d261400cb2282dbb663341a52e9957ef7  docs/v0.27.0/verify.tools-release-acceptance.sh (419)
+6578ffeaed109f8ae555b343d7450df389358534ad065c34bf7b5f8bb0ad9885  docs/v0.27.0/verify.tools-archive-rebuild.sh (86)
+f915125e4bce0eb9709dff57b3726d93bc9b0439a52572d467f71f9cb08fca02  src/setups/env/bin/install_pkg.sh (1334)
+The bound RHEL run used the installer shipped inside the accepted Step 5
+archive, not the corrected one above; the correction reaches a deployment
+only through a repackaged candidate.
+
+Review round 1 repairs, 2026-09-18
+
+The historical run above remains valid for its recorded source. The current
+native cumulative rerun uses application HEAD 6b22c16fdf9d0aa2ba083f935771209d4a5fc862
+plus the three uncommitted application repair files identified below.
+Those repairs postpone annotations; the wheel reader also moves its
+annotation-only Message import under TYPE_CHECKING to pass Ruff.
+Application repairs remain in the sibling checkout pending its commit flow.
+Transferred fixture commits are not application source revisions.
+
+Application repair overlay SHA-256:
+13a07fd90963b810d427580ac6683c5e161ee8dee59ec472d1f1d654de81c176 *ci/tools_abi_scan.py
+bd9c1125bd82a43a79a71eb5beb80891639ac36818a50e9703efd467c0e7c50c *ci/tools_test_evidence.py
+2657ee7f2e122559c8317d4e6f08eb7f400fb8b3d88681b5ddd9146d7a27056d *ci/tools_wheel_capture.py
+
+Current cplx overlay SHA-256 and physical lines:
+d72b40c3cafb05d93025efa4794949e7972f997528aff3f07ab38a5ae2042655  ci/deliver-closure-tools.sh (312)
+b6e56722f7144d0489d16535d950da2a013196f073bee5e5c294927751b2e858  docs/v0.27.0/acceptance.tools-archive-rebuild.sh (943)
+b6c5aae1f8c8e6c0a96c8f961c00aac207d359c1ba1fe9759eddc9048a0f5e67  docs/v0.27.0/verify.tools-release-acceptance.sh (442)
+cc031a7498b808c0821de5ad47836754ec0432b242bd7bfdffc718df03dbcab7  docs/v0.27.0/verify.tools-archive-rebuild.sh (98)
+f915125e4bce0eb9709dff57b3726d93bc9b0439a52572d467f71f9cb08fca02  src/setups/env/bin/install_pkg.sh (1334)
+e65f425eca96ab6d04c995e7d926505b7e9658da5a046e064b15e8329439a586  docs/v0.27.0/fixtures.tools-release-agent.py (215)
+
+Result: exit 0, elapsed 84 seconds, independent Python 3.9.25.
+Full native log SHA-256: df3ca54b7291930f3382f2344f40696e5793996ea324c6185107c6fd4c1d3923.
+All inherited cumulative suites passed, including 58 platform acceptance
+fixtures (the original 52 plus six deployment discovery/audit cases).
+Four independent application helper imports passed under Python 3.9.25.
+The current typed pytest hooks are exercised with an updated double and
+the current session-finish signature; no application test gate was weakened.
+Local ShellCheck, the installed staged sensitive-content hook and focused
+application Ruff checks passed. No new candidate acceptance was performed.
+One preceding rerun passed the helper imports but stopped at the stale
+pytest double before acceptance fixtures; this run follows that repair.

@@ -1,0 +1,47 @@
+Step 6 point 3, review round 2: RHEL acceptance repairs, 2026-09-19
+
+Human decision: Python 3.13.15 is the target; install uv if missing.
+The earlier prefix held the shipped 3.13.9 venv and an empty 3.13.15 venv
+selected by senv/deployment. The replacement pdfs verification archive ships
+one complete locked 3.13.15 venv. The discovery guard and offline audit are unchanged.
+
+Run: tools-archive-rebuild-step6-20260919T113628Z-rhel
+Recorded UTC: 2026-09-19T12:42:00.153771+00:00
+Elapsed seconds: 3930
+Verdict: pass
+Tools SHA-256: df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87
+Pdfs archive: pdfs.2026-09-19_133520.tar.gz
+Pdfs SHA-256: 0b3c120e965630ea2c21e3b584d7ad1a9f8df7d58a73f9b82d919c042362e9b0
+Pdfs lock SHA-256: e43a6232ce7a640dad8389dc25728b6ca957c80a6de2f3c943b24037fd89687b
+Bundle SHA-256: d286ee2a7a0f59e90c6efcf8aa17faf1fc78e2a90e6fb60bef03de7fcbfa8115
+Transferred cplx fixture revision: f805de88677522968c0f550b6cc7ad0e5630155f
+Results SHA-256: 08114f9ee15b62194883e1ac4688888653273872e3a9ebb2443e1eaa6a948115
+Raw archive SHA-256: 3dcb726a22cacf389fb40f5dabf85dfa6ed6bdfb26b5698715fe60ef8ec454f3
+Retention: $HOME/cplx-release-evidence/tools-archive-rebuild-step6.20260919T113628Z/
+Local verified retention: .reviews/a.step6.r2-retained/
+
+All ten required RHEL cells pass; PA1:rhel-redeploy additionally passes.
+PA3 reuses only the unchanged build/installed/operator probes with explicit
+source-summary hashes and a fresh comparison of all 38070 archive members.
+Only tools/bin/install_pkg.sh differs; no replacement deployment pass is inherited.
+The unchanged PA3 reader validates the new candidate-bound build evidence.
+PA6 audits and imports the venv after real fresh and forced deployments.
+The wheel search-path observation is retained by the driver.
+
+The July pdfs application and its lock remain the qualification input; the
+application source fixture is the separate current CI-helper checkout with
+the same three staged Python 3.9 annotation repairs as round 1. This is not
+a final Debian wheel/lock identity or a release authority.
+Original candidate failure and replacement round 1 failure remain retained
+byte-for-byte. Step 5 archive/build snapshots remain unchanged because no
+tools archive, packaging input, or source authority changed in this repair.
+The new pdfs identity is bound in the fresh RHEL pins and preparation capture.
+Consumer, Debian, D10, publication and adoption gates stay pending; Step 6 is No.
+
+Native cumulative validation: exit 0, 77 seconds.
+Command: bash .reviews/a.step6.transport.sh cumulative
+Retained local log: .reviews/a.step6.r2-validation.log
+Log SHA-256: 8cffb38e2280ec80c78c6db47057987fa434dba88386f1c7ff06db877fb1d740
+Project shell lint: 58 tracked scripts clean.
+Markdown: 39 existing diagnostics; none intersects added lines since HEAD.
+The seven duplicate exchange 2 round 1 request headings were qualified.

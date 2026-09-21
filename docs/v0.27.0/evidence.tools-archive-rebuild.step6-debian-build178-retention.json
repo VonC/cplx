@@ -1,0 +1,474 @@
+{
+  "scope": "Step 6 handoff point 4 retry after application wheel metadata fix; publication remains off",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "bundle_sha256": "dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51",
+  "cplx_revision": "72f6cb290700faf328b73d946e78e8fedab8c2cd",
+  "application_revision": "68ef3af9bf02901fe918d8311392f5b0150e5cb9",
+  "pipeline_revision": "68ef3af9bf02901fe918d8311392f5b0150e5cb9",
+  "committed_lock_sha256": "6e0452c49ee5a6cf4fd99f70395710c3d73f6c0b77b2f7fb19dc5a5b9e547d8e",
+  "reader_sha256": "b5b2a2ce336d3ad1c6919a61c866e4f068eeed299428dbc8806efd921e6f8789",
+  "reader_origin": "Reviewed working-tree reader adds Jenkins timestamp parsing to the committed bundle reader",
+  "reader_comparison": {
+    "original": "fail",
+    "repaired": "incomplete"
+  },
+  "raw_reading_archive_sha256": "c85deeffe7c4b834fb6dea5585ec681334e71a2c963156dafe5a0a0b8e1d78e1",
+  "raw_transport_sha256": "1fe9a9719fe561de7e3194d994d7e2401ede9c5a0509bc7cf633e0f5d78bd2e9",
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-point4-build-178/",
+  "previous_versioned_captures": {
+    "evidence.tools-archive-rebuild.step6-debian-build177-retention.json": "f294296d1a3f02008b983a495694b890d20ceae7d8825ceb57c0641f3714d9ad",
+    "evidence.tools-archive-rebuild.step6-debian-build177.json": "5f7cfc945c57dd7680d120dfb4ceafc12df4d255130d08310e920dcf88731433",
+    "evidence.tools-archive-rebuild.step6-debian-retention.json": "e7af3c5605ea857f903202703862a3c663ecee17483a06f9a0979bfa589b943e",
+    "evidence.tools-archive-rebuild.step6-debian.json": "f8ca335c2efa23cf6262cc604390e241d794c742631ee7f69827e3a21140e98a"
+  },
+  "builds": [
+    {
+      "number": 178,
+      "result": "FAILURE",
+      "duration_ms": 2484179,
+      "console_sha256": "f48e009b3325ddb71bc8a6946bafd16f6413256f20c25abdd23960d5e954bb7b",
+      "build_metadata_sha256": "aeece3cfcd40f47f6b6fb3e5e10d1cdc6621486fedda1afa16f0b3668d251590",
+      "checkout_revisions": [
+        "d08f5f6a75376d418aba854a76db6aef307b7bae",
+        "68ef3af9bf02901fe918d8311392f5b0150e5cb9"
+      ],
+      "artifacts": {
+        "a.evidence/copy-form.debian.txt": {
+          "sha256": "c9c31212df4d4b7f01df187ca1827e8e1baf1e7cd7b2f5f13946c34d026ffe2e",
+          "size": 12464
+        },
+        "a.evidence/destination-shape.debian.txt": {
+          "sha256": "03cd9c66621fe57698fda39d25f6a25e5d8d899ba5de2ce0cd76f73e1dbaf1ab",
+          "size": 6495
+        },
+        "a.evidence/identity": {
+          "sha256": "d83278c53533a3fbd901a164326c7afba9705ef7c85a3febcac354ed4a0ebe51",
+          "size": 209
+        },
+        "a.evidence/installer-contract.debian.txt": {
+          "sha256": "a578664cd560f5b40ea06b88acb130582818496c67e42e7e61c8f7908f3d7d81",
+          "size": 775
+        },
+        "a.evidence/inventory-record.debian.txt": {
+          "sha256": "d2ed77b9c78f484feb03d983f8d05be70957a348467b0fa5327d3e0a1ca64cbc",
+          "size": 12962
+        },
+        "a.evidence/loader-probe.debian.txt": {
+          "sha256": "b469a72e7e0dcd20cf4f926edae8ced37b67e4f744d37d54f77ab299ce6a6c0c",
+          "size": 1249
+        },
+        "a.evidence/mirror-root.debian.txt": {
+          "sha256": "2f148b6e13af7ae90a2323f058088834915c48dfb9155b9be4d076e5ff73c818",
+          "size": 1502
+        },
+        "a.evidence/runtime.txt": {
+          "sha256": "68003ec2af2441bc634e92ff42a320a7f5889db7ca0828c15285b582b7835447",
+          "size": 516
+        },
+        "a.evidence/shellcheck.debian.txt": {
+          "sha256": "0f232d35c5fbf1ba61a36c1f3294e68092662bf22177f8aa6d846ca4af907e49",
+          "size": 135
+        },
+        "a.evidence/sqlite-candidate.debian.tar.gz": {
+          "sha256": "37e27ee9141766476974f430a47b0136164906db8bba0fdf81dcc1ec4bad1951",
+          "size": 2008243
+        },
+        "a.evidence/sqlite-runtime.txt": {
+          "sha256": "68003ec2af2441bc634e92ff42a320a7f5889db7ca0828c15285b582b7835447",
+          "size": 516
+        },
+        "a.evidence/verification.sha256": {
+          "sha256": "98577e24508d502006c0587e8ab7a20678591d0a82ef9401e0a869e3e857fd82",
+          "size": 18714
+        },
+        "a.evidence/verify-closure-check.debian.txt": {
+          "sha256": "9b17272f8c343558da36b1e198b5256cc93e60ea73b020a216d440406437d800",
+          "size": 520496
+        },
+        "a.evidence/verify-relocation-step0.debian.txt": {
+          "sha256": "65626c88e198e7e97351275895630d04ac5bc97f225cf8d6a5ccbd88f2e3c7bd",
+          "size": 14704
+        },
+        "a.evidence/verify-relocation-step1.debian.txt": {
+          "sha256": "e53f9ee639ab7b09faa7dc204304a8fb8ade78056957d3db201610a82c41bb22",
+          "size": 35050
+        },
+        "a.evidence/verify-relocation-step2.debian.txt": {
+          "sha256": "eb6cb49d8374dafa6e090cb58db9e172087ec7270a2cc198bccdc5973c5ed875",
+          "size": 94815
+        },
+        "a.evidence/verify-relocation-step3.debian.txt": {
+          "sha256": "3fa4659ac160b480bb07e208b70049c8cfe0010f6e011a3b768520d3c953ab57",
+          "size": 20523
+        },
+        "a.evidence/verify-relocation-step4.debian.txt": {
+          "sha256": "e66e669aac02eaec96998cbc7f8e1a0f188269d84c67e0086ad976ab41721b4b",
+          "size": 31580
+        },
+        "a.evidence/verify-relocation-step6.debian.txt": {
+          "sha256": "3a45383c728967ff796ca35ab1202ab0112f2445ac4f687def4dd64d8c7983ce",
+          "size": 23575
+        },
+        "a.evidence/verify-sqlite-candidate.debian.txt": {
+          "sha256": "787a80306e224bb1b11477252a483a58c1dcbbfb2a2a0fcab76a155eac729312",
+          "size": 3023
+        },
+        "a.evidence/verify-step0.debian.txt": {
+          "sha256": "f808f6fdb61e4a4cb8922e6607dc20ae6556ec0a85ba741cf9ad8e8186b01bbc",
+          "size": 1463
+        },
+        "a.evidence/verify-step5.debian.txt": {
+          "sha256": "e1235db4153ea17dcf0adf3b54099df59e8c19038c8b253228993f82bcbc1239",
+          "size": 9984
+        },
+        "a.evidence/verify-wrapper-accept.debian.txt": {
+          "sha256": "0593f9d642061340a31fba2f666a9f0faba3d476f7223ae278bc214b5b01ce83",
+          "size": 9051
+        },
+        "a.evidence/verify-wrapper-scope.debian.txt": {
+          "sha256": "f50bcc26dc86507cab48edaa1d9397365ccefed1a11827ebcbef52ec4ca975d5",
+          "size": 1560
+        },
+        "a.evidence/wheels/artifacts/aiofiles-25.1.0-py3-none-any.whl": {
+          "sha256": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+          "size": 14668
+        },
+        "a.evidence/wheels/artifacts/annotated_doc-0.0.4-py3-none-any.whl": {
+          "sha256": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+          "size": 5303
+        },
+        "a.evidence/wheels/artifacts/annotated_types-0.7.0-py3-none-any.whl": {
+          "sha256": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+          "size": 13643
+        },
+        "a.evidence/wheels/artifacts/anyio-4.14.2-py3-none-any.whl": {
+          "sha256": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+          "size": 125813
+        },
+        "a.evidence/wheels/artifacts/argon2_cffi-25.1.0-py3-none-any.whl": {
+          "sha256": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+          "size": 14657
+        },
+        "a.evidence/wheels/artifacts/argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+          "size": 87126
+        },
+        "a.evidence/wheels/artifacts/build-1.5.0-py3-none-any.whl": {
+          "sha256": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+          "size": 26018
+        },
+        "a.evidence/wheels/artifacts/cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": {
+          "sha256": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+          "size": 219499
+        },
+        "a.evidence/wheels/artifacts/click-8.4.0-py3-none-any.whl": {
+          "sha256": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+          "size": 116147
+        },
+        "a.evidence/wheels/artifacts/colorama-0.4.6-py2.py3-none-any.whl": {
+          "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+          "size": 25335
+        },
+        "a.evidence/wheels/artifacts/coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": {
+          "sha256": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+          "size": 253961
+        },
+        "a.evidence/wheels/artifacts/cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": {
+          "sha256": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+          "size": 4734462
+        },
+        "a.evidence/wheels/artifacts/fastapi-0.136.1-py3-none-any.whl": {
+          "sha256": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+          "size": 117683
+        },
+        "a.evidence/wheels/artifacts/fsspec-2026.4.0-py3-none-any.whl": {
+          "sha256": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+          "size": 203402
+        },
+        "a.evidence/wheels/artifacts/greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+          "size": 616187
+        },
+        "a.evidence/wheels/artifacts/h11-0.16.0-py3-none-any.whl": {
+          "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+          "size": 37515
+        },
+        "a.evidence/wheels/artifacts/httpcore2-2.13.0-py3-none-any.whl": {
+          "sha256": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+          "size": 83162
+        },
+        "a.evidence/wheels/artifacts/httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": {
+          "sha256": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+          "size": 478596
+        },
+        "a.evidence/wheels/artifacts/httpx2-2.13.0-py3-none-any.whl": {
+          "sha256": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+          "size": 95565
+        },
+        "a.evidence/wheels/artifacts/humanize-4.15.0-py3-none-any.whl": {
+          "sha256": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+          "size": 132203
+        },
+        "a.evidence/wheels/artifacts/hypothesis-6.152.7-py3-none-any.whl": {
+          "sha256": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+          "size": 533802
+        },
+        "a.evidence/wheels/artifacts/idna-3.20-py3-none-any.whl": {
+          "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+          "size": 69583
+        },
+        "a.evidence/wheels/artifacts/importlib_metadata-9.0.0-py3-none-any.whl": {
+          "sha256": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+          "size": 27789
+        },
+        "a.evidence/wheels/artifacts/iniconfig-2.3.0-py3-none-any.whl": {
+          "sha256": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+          "size": 7484
+        },
+        "a.evidence/wheels/artifacts/itsdangerous-2.2.0-py3-none-any.whl": {
+          "sha256": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+          "size": 16234
+        },
+        "a.evidence/wheels/artifacts/jinja2-3.1.6-py3-none-any.whl": {
+          "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+          "size": 134899
+        },
+        "a.evidence/wheels/artifacts/lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+          "size": 5228304
+        },
+        "a.evidence/wheels/artifacts/mando-0.7.1-py2.py3-none-any.whl": {
+          "sha256": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+          "size": 28149
+        },
+        "a.evidence/wheels/artifacts/markdown-3.10.2-py3-none-any.whl": {
+          "sha256": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+          "size": 108180
+        },
+        "a.evidence/wheels/artifacts/markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+          "size": 22980
+        },
+        "a.evidence/wheels/artifacts/nodeenv-1.10.0-py2.py3-none-any.whl": {
+          "sha256": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+          "size": 23438
+        },
+        "a.evidence/wheels/artifacts/numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+          "size": 16633390
+        },
+        "a.evidence/wheels/artifacts/packaging-26.2-py3-none-any.whl": {
+          "sha256": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+          "size": 100195
+        },
+        "a.evidence/wheels/artifacts/passlib-1.7.4-py2.py3-none-any.whl": {
+          "sha256": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+          "size": 525554
+        },
+        "a.evidence/wheels/artifacts/pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+          "size": 2131148
+        },
+        "a.evidence/wheels/artifacts/pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+          "size": 6937129
+        },
+        "a.evidence/wheels/artifacts/pip-26.2.1-py3-none-any.whl": {
+          "sha256": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+          "size": 1816632
+        },
+        "a.evidence/wheels/artifacts/playwright-1.60.0-py3-none-manylinux1_x86_64.whl": {
+          "sha256": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+          "size": 47467220
+        },
+        "a.evidence/wheels/artifacts/pluggy-1.6.0-py3-none-any.whl": {
+          "sha256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+          "size": 20538
+        },
+        "a.evidence/wheels/artifacts/portalocker-3.2.0-py3-none-any.whl": {
+          "sha256": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+          "size": 22424
+        },
+        "a.evidence/wheels/artifacts/progressbar2-4.5.0-py3-none-any.whl": {
+          "sha256": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+          "size": 57132
+        },
+        "a.evidence/wheels/artifacts/psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+          "size": 155560
+        },
+        "a.evidence/wheels/artifacts/pycparser-3.0-py3-none-any.whl": {
+          "sha256": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+          "size": 48172
+        },
+        "a.evidence/wheels/artifacts/pydantic-2.13.4-py3-none-any.whl": {
+          "sha256": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+          "size": 472262
+        },
+        "a.evidence/wheels/artifacts/pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": {
+          "sha256": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+          "size": 2094467
+        },
+        "a.evidence/wheels/artifacts/pyee-13.0.1-py3-none-any.whl": {
+          "sha256": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+          "size": 15659
+        },
+        "a.evidence/wheels/artifacts/pygments-2.20.0-py3-none-any.whl": {
+          "sha256": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+          "size": 1231151
+        },
+        "a.evidence/wheels/artifacts/pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+          "size": 148641
+        },
+        "a.evidence/wheels/artifacts/pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": {
+          "sha256": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+          "size": 24963198
+        },
+        "a.evidence/wheels/artifacts/pyproject_hooks-1.2.0-py3-none-any.whl": {
+          "sha256": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+          "size": 10216
+        },
+        "a.evidence/wheels/artifacts/pyright-1.1.410-py3-none-any.whl": {
+          "sha256": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+          "size": 6082448
+        },
+        "a.evidence/wheels/artifacts/pytest-9.1.0-py3-none-any.whl": {
+          "sha256": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+          "size": 386453
+        },
+        "a.evidence/wheels/artifacts/pytest_asyncio-1.3.0-py3-none-any.whl": {
+          "sha256": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+          "size": 15075
+        },
+        "a.evidence/wheels/artifacts/pytest_cov-7.1.0-py3-none-any.whl": {
+          "sha256": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+          "size": 22876
+        },
+        "a.evidence/wheels/artifacts/pytest_rerunfailures-16.2-py3-none-any.whl": {
+          "sha256": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+          "size": 14505
+        },
+        "a.evidence/wheels/artifacts/pytest_testmon-2.2.0-py3-none-any.whl": {
+          "sha256": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+          "size": 25199
+        },
+        "a.evidence/wheels/artifacts/pytest_timeout-2.4.0-py3-none-any.whl": {
+          "sha256": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+          "size": 14382
+        },
+        "a.evidence/wheels/artifacts/pytest_watcher-0.6.3-py3-none-any.whl": {
+          "sha256": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+          "size": 12431
+        },
+        "a.evidence/wheels/artifacts/python_dotenv-1.2.2-py3-none-any.whl": {
+          "sha256": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+          "size": 22101
+        },
+        "a.evidence/wheels/artifacts/python_utils-3.9.1-py2.py3-none-any.whl": {
+          "sha256": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+          "size": 32078
+        },
+        "a.evidence/wheels/artifacts/pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+          "size": 801626
+        },
+        "a.evidence/wheels/artifacts/radon-6.0.1-py2.py3-none-any.whl": {
+          "sha256": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+          "size": 52784
+        },
+        "a.evidence/wheels/artifacts/ruff-0.15.13-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": {
+          "sha256": "cc411dfebe5eebe55ce041c6ae080eb7668955e866daa2fbb16692a784f1c4ca",
+          "size": 11434486
+        },
+        "a.evidence/wheels/artifacts/six-1.17.0-py2.py3-none-any.whl": {
+          "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+          "size": 11050
+        },
+        "a.evidence/wheels/artifacts/sortedcontainers-2.4.0-py2.py3-none-any.whl": {
+          "sha256": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+          "size": 29575
+        },
+        "a.evidence/wheels/artifacts/starlette-1.3.1-py3-none-any.whl": {
+          "sha256": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+          "size": 73632
+        },
+        "a.evidence/wheels/artifacts/tabulate-0.10.0-py3-none-any.whl": {
+          "sha256": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+          "size": 39814
+        },
+        "a.evidence/wheels/artifacts/truststore-0.10.4-py3-none-any.whl": {
+          "sha256": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+          "size": 18660
+        },
+        "a.evidence/wheels/artifacts/ty-0.0.37-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": {
+          "sha256": "1b96bfc1cc725d9d859abef4e3aa32a6da0f7472eaaafae2d9a6cffd729c7c61",
+          "size": 11610336
+        },
+        "a.evidence/wheels/artifacts/typing_extensions-4.15.0-py3-none-any.whl": {
+          "sha256": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+          "size": 44614
+        },
+        "a.evidence/wheels/artifacts/typing_inspection-0.4.2-py3-none-any.whl": {
+          "sha256": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+          "size": 14611
+        },
+        "a.evidence/wheels/artifacts/uv-0.11.19-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": {
+          "sha256": "731d9fab8db5d41590af64236d03f8069c8da665fd0f9493b85985f19c86cd90",
+          "size": 24872664
+        },
+        "a.evidence/wheels/artifacts/uvicorn-0.47.0-py3-none-any.whl": {
+          "sha256": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+          "size": 71301
+        },
+        "a.evidence/wheels/artifacts/uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": {
+          "sha256": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+          "size": 4366890
+        },
+        "a.evidence/wheels/artifacts/vulture-2.16-py3-none-any.whl": {
+          "sha256": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+          "size": 26993
+        },
+        "a.evidence/wheels/artifacts/watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": {
+          "sha256": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+          "size": 79078
+        },
+        "a.evidence/wheels/artifacts/watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": {
+          "sha256": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+          "size": 454782
+        },
+        "a.evidence/wheels/artifacts/websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": {
+          "sha256": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+          "size": 184975
+        },
+        "a.evidence/wheels/artifacts/wheel-0.47.0-py3-none-any.whl": {
+          "sha256": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+          "size": 32218
+        },
+        "a.evidence/wheels/artifacts/zipp-3.23.1-py3-none-any.whl": {
+          "sha256": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc",
+          "size": 10378
+        }
+      }
+    }
+  ],
+  "application_fix": "Commit 68ef3af9 resolves generic WHEEL metadata through ranked compatible locked filenames. Build 178 selected Playwright's Linux wheel successfully.",
+  "provisioning": {
+    "locked_sync": "passed",
+    "python": "3.13.15",
+    "uv": "0.12.17",
+    "installed_packages": 80,
+    "identified_and_downloaded_wheels": 80,
+    "downloaded_wheel_hashes": "All 80 match the canonical committed lock; this does not establish installed ELF byte equality.",
+    "inventory": "INCONCLUSIVE: ELF outside site-packages: ty-0.0.37.data/scripts/ty",
+    "owner": "cplx src/setups/env/bin/tools_wheel_inventory.py installed_name",
+    "limitation": "The inventory accepts purelib/platlib .data destinations but not scripts. Downloaded ruff, ty and uv wheels contain script ELFs outside site-packages.",
+    "required_followup": "Support verified installed-script mapping and installed-byte equality in the cplx inventory contract, integrate its invocation with the application and deliver a new committed verification bundle before retrying. Do not skip these ELFs.",
+    "completed_agent_inventory": false,
+    "archived_agent_lock": false,
+    "wheels_tar_gz": false,
+    "later_stages": "Package, Test and Publish skipped"
+  },
+  "consumer_change": "Historical RHEL consumer-dependent passes do not qualify the new application, lock or agent wheels. Preserve original input snapshots and repeat affected acceptance before publication.",
+  "diagnostic_scope": "Historical diagnostic harness output remains raw evidence; candidate-bound Debian cells are evaluated independently. A pipeline result alone does not establish all acceptance cells."
+}

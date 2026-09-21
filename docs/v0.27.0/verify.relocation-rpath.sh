@@ -5831,8 +5831,7 @@ A30|R2|X13|7|excluded|not-applicable|0,0"
 # gate, because it is this harness's own bookkeeping rather than the archive's
 # contents: an entry the archive no longer carries fails, so a rebuilt archive
 # cannot land while this file still names a violation the rebuild removed.
-STEP4_ARCHIVE_DEFECTS="\
-tools/python/root/a.out|umbrella requirement 7, tools-archive-rebuild"
+STEP4_ARCHIVE_DEFECTS=""
 
 # step4_defect_owner RELPATH: the owner if RELPATH is registered, empty if not.
 step4_defect_owner() {

@@ -1,0 +1,70 @@
+{
+  "schema": "tools-actual-http-probe/1",
+  "probe_version": "probe-20260917-003",
+  "target": "configured private project in immutable hosted releases",
+  "bytes": 29,
+  "sha256": "a1b1b81d3d1afdb8fe119b002318c12c20934713b9754a40f702adb18a2540b9",
+  "helper_sha256": "7f56c2edb5803e74bfd6040f0b24d8cf0606155d6f25a94aef26b62d7b65d24b",
+  "observations": [
+    {
+      "operation": "initial-absent",
+      "utc": "2026-09-17T06:29:03.991591+00:00",
+      "seconds": 0.184,
+      "result": true
+    },
+    {
+      "operation": "write-private",
+      "utc": "2026-09-17T06:29:04.240673+00:00",
+      "seconds": 0.131,
+      "result": true
+    },
+    {
+      "operation": "abort-absent",
+      "utc": "2026-09-17T06:29:04.398614+00:00",
+      "seconds": 0.158,
+      "result": true
+    },
+    {
+      "operation": "second-write-private",
+      "utc": "2026-09-17T06:29:04.610744+00:00",
+      "seconds": 0.117,
+      "result": true
+    },
+    {
+      "operation": "commit-acknowledged",
+      "utc": "2026-09-17T06:29:04.656491+00:00",
+      "seconds": 0.046,
+      "result": true
+    },
+    {
+      "operation": "actual-helper-readback-sha256",
+      "utc": "2026-09-17T06:29:04.794161+00:00",
+      "seconds": 0.138,
+      "result": true
+    },
+    {
+      "operation": "collision-refused",
+      "utc": "2026-09-17T06:29:04.969804+00:00",
+      "seconds": 0.031,
+      "result": true
+    },
+    {
+      "operation": "collision-preserved-digest",
+      "utc": "2026-09-17T06:29:05.093527+00:00",
+      "seconds": 0.124,
+      "result": true
+    },
+    {
+      "operation": "owned-probe-delete",
+      "utc": "2026-09-17T06:29:05.392389+00:00",
+      "seconds": 0.0,
+      "result": true
+    },
+    {
+      "operation": "cleanup-absent",
+      "utc": "2026-09-17T06:29:05.540317+00:00",
+      "seconds": 0.148,
+      "result": true
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "schema": "tools-step6-readiness/1",
+  "release_revision": "92e361a6af56ebd0a25c92010b6346d6c307b59c",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "authority": {
+    "source_commit": "13c80d572ba7bda91728806ad7dc11c53629a506",
+    "retention_merge": "5f8d4d67ca549bb74e3bcbb798124d628c3d0619",
+    "declaration_sha256": "63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa",
+    "fresh_clone": "pass",
+    "source_and_retention_ancestors": "pass",
+    "closure_recheck": "pass",
+    "active_waivers": 0,
+    "log_sha256": "c89a6274f5f02c04f563107b807aed87108552dfbfbf0cd4bc6dde719da5f79d"
+  },
+  "application": {
+    "application_revision": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+    "files": {
+      "tools/tools_release_http.py": {
+        "sha256": "97083a9af422c3fd55fa25fcf94eab8575a2bea69903891fd170326708dabb81"
+      },
+      "tools/tools_release_transport.py": {
+        "sha256": "5c52bed63ce78d4293b7f8a104d57ae99a220a8a892f4b635a01d278539c9349"
+      },
+      "tools/tools_release_adapter.sh": {
+        "sha256": "99cd0ed37442f245127e9d7d1f197b0f2cfd02d5cdf375a891d26091a02b786c"
+      },
+      "tools/tools.version": {
+        "sha256": "8806f2061eea03bded0d21136e0840d239157e06d42ffb465f0cddcbbb4fe0db",
+        "value": "9.13.4"
+      },
+      "tools/publish.mode": {
+        "sha256": "b470b84cf0cd3189e10615bffea7d5cbd9f61134ba1c2cfd513ddd45b776a5f6",
+        "value": "off"
+      },
+      "tools/tools.candidate": {
+        "sha256": "4b0d389bed7bb0bf2f47a1b3bcf5962f9e1601de54790f2ef85923f16a07933d"
+      },
+      "version.txt": {
+        "sha256": "1a2da89467b923bc67f5089f46bcf550244595e050f532fa74cece28a0a5f5e0",
+        "value": "10.0.0-SNAPSHOT -- The Lights Stay Green"
+      },
+      "Jenkinsfile": {
+        "sha256": "2fa4faf1631264faeb52e05f9edf15767dcba45e21ecad4ec511f6098f9effb0"
+      },
+      "ci/provision_toolchain.sh": {
+        "sha256": "cc80b3bbc08c6a95154360b4397f9d27771c30daaaeb3cc0129dcabe09f8e01d"
+      },
+      "ci/tools_test_acceptance.sh": {
+        "sha256": "e17516cb2889cca358fc84688bcec3641275997bbb42321d989ee3494a557da3"
+      },
+      "tools/runtime_env.sh": {
+        "sha256": "f246a5b6cf396abf63f5653dc2f11cacc875a73b89072ce05e94295ea2447993"
+      }
+    },
+    "prior_release": {
+      "tag": "v9.13.4",
+      "revision": "96464de906670fd64f47c52c709d6cb4aae38151",
+      "tools_coordinate_version": "9.13.4",
+      "qualification": "Historical release source; not a verified Jenkins recovery configuration"
+    },
+    "http_probe_amendment": {
+      "previous_sha256": "7f56c2edb5803e74bfd6040f0b24d8cf0606155d6f25a94aef26b62d7b65d24b",
+      "delta": "Add ET.ParseError to NETWORK_ERRORS only"
+    }
+  },
+  "backend": {
+    "actual_probe": "evidence.tools-archive-rebuild.adapter-http-probe.json",
+    "probe_sha256": "1979d008787626659e67a5e5dbe4b8ec0e52e826283cf5e345ff96cad40c435b",
+    "retention_assessment": "The sole HTTP helper byte delta is ET.ParseError in NETWORK_ERRORS. Removing that addition reproduces the actual-probe helper digest. Network methods, atomic publication and reconciliation are unchanged. Current native protocol fixtures pass; no new backend write was performed."
+  },
+  "coordinate": {
+    "mode": "read-only",
+    "selected": "private-coordinate-sha256:22bbe9f29a27a49f132b8b408ae2b572d61bf8e2d20d6d620b05077337d3fc79",
+    "observations": [
+      {
+        "status": 200,
+        "utc": "2026-09-21T09:18:37.3766275Z",
+        "version": "10.0.0",
+        "items": []
+      },
+      {
+        "status": 200,
+        "utc": "2026-09-21T09:18:37.4665669Z",
+        "version": "9.13.4",
+        "items": [
+          {
+            "checksum": {
+              "sha1": "a326a3b0a32a2e8ae5c11506a81db48e8d5a2fe5",
+              "md5": "6ef36c3580b8059609a2d4a7325b8ef1"
+            },
+            "fileSize": null,
+            "path_sha256": "3a7fdc6a398e0e9feb51ed3b3b0f82285ab3066cf0529a74e654b816db3a1320"
+          }
+        ]
+      }
+    ],
+    "schema": "tools-coordinate-preflight/1",
+    "prior": "private-coordinate-sha256:c9fe2ac019b79af59aa4bca9bf82f9ba50acbb88d315556bff84954ccdd31c8a",
+    "private_capture_sha256": "4a25af9c6582f7131aabb30690cf8a4d23423a1310c9c4d9a2a9b0a0ef15b2ad",
+    "resolution": "Coordinate values are opaque SHA-256 references, not aliases or upload targets. The private preflight resolves them. Only publication.coordinate is materialized in a private record for actual-coordinate validation; every other record value stays equal."
+  },
+  "recovery_preparation": {
+    "backups": {
+      "pre-candidate": {
+        "revision": "1c701a787d13095beadfa2467bfa72e6b7e3bfdf",
+        "source_archive_sha256": "8d32d079ebef058aba69e5815d6e58c84dfe911e9ef2a8ab87fd8a2d81d261e0",
+        "size": 49418240
+      },
+      "accepted-candidate": {
+        "revision": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+        "source_archive_sha256": "4e3e2c5408ef7e59eea6c73b96ab3c577ca494923221130b74aa7f9850adb963",
+        "size": 51240960
+      }
+    },
+    "uploads": "off",
+    "scope": "Prepublication policy and retained source, not executed recovery or adoption acceptance",
+    "pre_candidate_limit": "The 9.13.4 pin and compatible pre-candidate pipeline are retained together. Their restoration must pass the application gate before uploads resume; no current green recovery claim is made.",
+    "accepted_candidate": "Build 188 source, candidate reference and disabled upload switch are retained as the proven pre-adoption checkpoint.",
+    "rule": [
+      "Keep publication and adoption incomplete on failure; retain the failed coordinate, receipt and all evidence.",
+      "Keep uploads off. Restore the whole compatible pin and pipeline configuration, not only tools.version. Run its application gate before resuming uploads.",
+      "If the restored configuration cannot be verified, keep uploads off and recovery incomplete.",
+      "Never retry an uncertain transaction automatically. Reconcile the retained handle read-only.",
+      "A corrected archive requires a new eligible coordinate and renewed acceptance. Never replace failed immutable bytes."
+    ]
+  },
+  "native_validation": {
+    "exit": 0,
+    "elapsed_seconds": 89,
+    "log_sha256": "956feaaf6d7de1f8735dae828d1dd3c60b475d9a4ac42f073f32b3c310146860",
+    "fixture": "tools-release-step6.tAyazEuC",
+    "acceptance_cases": 98
+  },
+  "raw_retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-step6-r16-completion/; authority inputs are retained separately under tools-archive-rebuild-step6-r16-authority/"
+}

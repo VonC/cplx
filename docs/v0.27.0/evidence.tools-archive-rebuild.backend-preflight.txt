@@ -1,0 +1,81 @@
+Tools archive rebuild Step 1: sanitized backend discovery
+Captured: 2026-09-17
+Target: configured corporate releases backend in the application publisher
+Credentials: existing Maven release-server entry; identity omitted
+Transport: HTTPS, certificate validation on, 20-second request timeout
+Initial sequence: three read-only GET requests
+Follow-up sequence: GET, HEAD and OPTIONS; zero upload, delete or promotion requests
+Result at preflight: transaction capability not demonstrated; Step 1 incomplete
+Later streaming experiments: evidence.tools-archive-rebuild.stream-probe.json
+This file records only the earlier read-only requests, before those experiments.
+
+probe=swagger-authenticated
+utc=2026-09-17T05:16:15.4705960Z
+method=GET
+path=/service/rest/swagger.json
+http=200
+server=Nexus/3.18.0-01 (OSS)
+seconds=0.291927
+body_sha256=63839166ad8fe3be3a69dc348d77f6fcafc4357d789fe3b18b973113fd70ade8
+schema_version=3.18.0-01
+schema_paths_matching_staging_tag_or_promot=0
+
+probe=scripts-authenticated
+utc=2026-09-17T05:16:15.6482791Z
+method=GET
+path=/service/rest/v1/script
+http=403
+server=Nexus/3.18.0-01 (OSS)
+seconds=0.037430899999999996
+body_sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+conclusion=custom script discovery unavailable with the configured credentials
+
+probe=staging-authenticated
+utc=2026-09-17T05:16:15.7218507Z
+method=GET
+path=/service/rest/v1/staging/move/releases
+http=404
+server=Nexus/3.18.0-01 (OSS)
+seconds=0.0694042
+body_sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+conclusion=read-only diagnostic only; the documented POST was not attempted
+
+No stage was created; no archive or POM was uploaded; no cleanup was required.
+No private-stage, atomic-commit or immutable-collision success is claimed.
+
+User authorization: existing private project group and artifact, tools classifier
+Probe version: probe-20260917-001
+Private group, artifact URL and backend access identifiers deliberately omitted.
+
+probe=probe-version-search
+utc=2026-09-17T05:26:12.4916116Z
+method=GET
+target=asset search scoped to the authorized project and exact probe version
+http=200
+server=Nexus/3.18.0-01 (OSS)
+seconds=0.20506639999999998
+body_sha256=8bb57c1e239bdd0f5327bb6695ce5b94681d78463c1b3243de1c93a79510d1fc
+asset_count=0
+has_continuation=false
+
+probe=probe-asset-head
+utc=2026-09-17T05:26:12.6513490Z
+method=HEAD
+target=tools archive at the authorized project and exact probe version
+http=404
+server=Nexus/3.18.0-01 (OSS)
+seconds=0.043555699999999996
+body_sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+probe=staging-options
+utc=2026-09-17T05:26:12.6813469Z
+method=OPTIONS
+path=/service/rest/v1/staging/move/releases
+http=404
+server=Nexus/3.18.0-01 (OSS)
+seconds=0.0243519
+body_sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+allow_methods=none_advertised
+
+The authorized probe version is unused at inspection, not reserved remotely.
+No write was attempted. The transaction-capability prerequisite remains unmet.

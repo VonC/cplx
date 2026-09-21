@@ -1,0 +1,274 @@
+{
+  "captures": {
+    "raw/build-role.json": {
+      "sha256": "17bc82c556e7cc26388926548d9f0e2ba23b2cda6a3becf56ebb921f79f0475c",
+      "size": 5852
+    },
+    "raw/build-role.log": {
+      "sha256": "186c3811aa5d931d50a295f08d73fcd1b5622b6edd3c87cff01cd7fb6fd010b1",
+      "size": 92
+    },
+    "raw/closure-check.log": {
+      "sha256": "55d9060674c2f688be82fd9065cd99e2d927902d28902fc418cec5168fd02f55",
+      "size": 159705
+    },
+    "raw/deploy-force.log": {
+      "sha256": "ac22ded11be580a9e5ee84d79fa26b130fcdcef427199a2772f9ecee5f915760",
+      "size": 10358
+    },
+    "raw/deploy-fresh.log": {
+      "sha256": "cc72205abde3f4c7ffb900f3eaca95dd56df1b24edecd6396bff37aa15f711b7",
+      "size": 10358
+    },
+    "raw/dotenv.log": {
+      "sha256": "ee24993a6e3152aae9560dd44bc0b187475f9a6df5fe3af601065634996206f7",
+      "size": 330
+    },
+    "raw/git-elf.log": {
+      "sha256": "1b5be440c77a69dc59d5bf55542e2e2f71cb2c6f721bd6b2ad216897fd59283c",
+      "size": 19
+    },
+    "raw/git-wrapper.log": {
+      "sha256": "1b5be440c77a69dc59d5bf55542e2e2f71cb2c6f721bd6b2ad216897fd59283c",
+      "size": 19
+    },
+    "raw/home-fresh.elf.json": {
+      "sha256": "fd6c668642e5b7bae06dbc05e80daf4c52efc6869e244c61ce0840b52c03af39",
+      "size": 570
+    },
+    "raw/home-fresh.log": {
+      "sha256": "ae857be0cda1d1e3d2465443bfb414916a4f2ec852ab5ec5183c21b597496cca",
+      "size": 2891315
+    },
+    "raw/home-previous.log": {
+      "sha256": "14426c2ea35e69aee74460b859611d5859045a83e5d1c794cd3248660f46d119",
+      "size": 2796335
+    },
+    "raw/imports-deploy.log": {
+      "sha256": "3417202df0b3274b1c46db58ba7fd4f3cab87f3d8390db968e6316dbe70490b3",
+      "size": 148
+    },
+    "raw/install-force.elf.json": {
+      "sha256": "fd6c668642e5b7bae06dbc05e80daf4c52efc6869e244c61ce0840b52c03af39",
+      "size": 570
+    },
+    "raw/install-force.log": {
+      "sha256": "c3b79b9423804c42b3e3c12cfe881e805a29d91aba58c51412dd67bbc007deb8",
+      "size": 789051
+    },
+    "raw/install-fresh.elf.json": {
+      "sha256": "fd6c668642e5b7bae06dbc05e80daf4c52efc6869e244c61ce0840b52c03af39",
+      "size": 570
+    },
+    "raw/install-fresh.log": {
+      "sha256": "45675e7813bd249b4059c88794b591a323dcb671923b1ec6e1a8b833383b86d9",
+      "size": 2891353
+    },
+    "raw/pass-after-force.elf.json": {
+      "sha256": "2462c8eb660f8c9938c4e074640b3570b6e57790ea5312cf2f50b81e61951ac9",
+      "size": 567
+    },
+    "raw/pass-after-force.log": {
+      "sha256": "15c6c31dbce72370cbbab5aab7c35c344d44285e3158438cf946a5b5b73eeea4",
+      "size": 99147
+    },
+    "raw/pass-again.elf.json": {
+      "sha256": "2462c8eb660f8c9938c4e074640b3570b6e57790ea5312cf2f50b81e61951ac9",
+      "size": 567
+    },
+    "raw/pass-again.log": {
+      "sha256": "ce990be20e1b8aebd3b8f4df4044f388e13f81b41155295afcdce1f087eed98c",
+      "size": 99171
+    },
+    "raw/pass-migrate.elf.json": {
+      "sha256": "06ad225cf1e61c2cc780104334fb20d43804e5d629c7bdde2e49de01868f70fd",
+      "size": 571
+    },
+    "raw/pass-migrate.log": {
+      "sha256": "572ab47e2b27a9730e2e8490e216810f219e66b32631eacf74e9f3acff771cdc",
+      "size": 96497
+    },
+    "raw/senv.log": {
+      "sha256": "ed42ac06a5ec4b81a95ae7cc983a5a7f4e3d83efe96bc83664f1de0fab581f25",
+      "size": 560
+    },
+    "raw/sqlite-deploy.log": {
+      "sha256": "28980b1f90d22617c9b327a968abfc00d9e96fc14ecf435fcb0ab6e1cc3c38e3",
+      "size": 832
+    },
+    "raw/sqlite-operator.json": {
+      "sha256": "8ec60e78c1d9c8fa4d8d1993e6d5cac93cd28994c297a4712b29a84008694c9f",
+      "size": 904
+    },
+    "raw/sqlite-role.json": {
+      "sha256": "2174e7d3e6d1fc0596ebec8308a6a01de60a35609048860869133660fc6a7fa8",
+      "size": 198
+    },
+    "raw/wrapper-first.log": {
+      "sha256": "006a645f24f0d00c5719325786eb26ab79e1714a9433d04522d3423954c4f34a",
+      "size": 114
+    },
+    "raw/wrapper-second.log": {
+      "sha256": "006a645f24f0d00c5719325786eb26ab79e1714a9433d04522d3423954c4f34a",
+      "size": 114
+    }
+  },
+  "cells": {
+    "AR3": {
+      "captures": [
+        "raw/home-fresh.log",
+        "raw/home-fresh.elf.json",
+        "raw/home-previous.log",
+        "raw/pass-migrate.log",
+        "raw/pass-migrate.elf.json",
+        "raw/pass-again.log",
+        "raw/pass-again.elf.json",
+        "raw/install-force.elf.json",
+        "raw/pass-after-force.log",
+        "raw/pass-after-force.elf.json"
+      ],
+      "reason": "three HOME states and migration positivity hold",
+      "state": "pass"
+    },
+    "PA10:rhel": {
+      "captures": [
+        "raw/deploy-fresh.log",
+        "raw/deploy-force.log"
+      ],
+      "reason": "deployment and forced redeployment passed every readiness check",
+      "state": "pass"
+    },
+    "PA11:rhel": {
+      "captures": [
+        "raw/senv.log",
+        "raw/dotenv.log"
+      ],
+      "reason": "senv anchors HOME and .env exposes the prefix toolchain",
+      "state": "pass"
+    },
+    "PA1:rhel": {
+      "captures": [
+        "raw/install-fresh.log",
+        "raw/install-fresh.elf.json",
+        "raw/install-force.log",
+        "raw/install-force.elf.json"
+      ],
+      "reason": "fresh relocation completed and the forced reinstall reproduced it",
+      "state": "pass"
+    },
+    "PA1:rhel-redeploy": {
+      "captures": [
+        "raw/deploy-force.log"
+      ],
+      "reason": "deploy_pkgs.sh --force redeployed over the existing prefix",
+      "state": "pass"
+    },
+    "PA2:rhel": {
+      "captures": [
+        "raw/wrapper-first.log",
+        "raw/wrapper-second.log"
+      ],
+      "reason": "wrapper first and second calls answered 3.13",
+      "state": "pass"
+    },
+    "PA3:rhel-build": {
+      "captures": [
+        "raw/build-role.json",
+        "raw/build-role.log"
+      ],
+      "reason": "retained build-role capture does not pass over the pinned archive",
+      "state": "fail"
+    },
+    "PA3:rhel-deploy": {
+      "captures": [
+        "raw/imports-deploy.log",
+        "raw/sqlite-deploy.log",
+        "raw/sqlite-role.json",
+        "raw/sqlite-operator.json"
+      ],
+      "reason": "ssl, zlib and sqlite3 import through the relocated wrapper",
+      "state": "pass"
+    },
+    "PA4:rhel": {
+      "captures": [
+        "raw/git-wrapper.log",
+        "raw/git-elf.log"
+      ],
+      "reason": "toolchain git wrapper and executable answer --version",
+      "state": "pass"
+    },
+    "PA5:rhel": {
+      "captures": [
+        "raw/closure-check.log"
+      ],
+      "reason": "closure checker accepts the relocated prefix",
+      "state": "pass"
+    },
+    "PA6:rhel": {
+      "captures": [],
+      "reason": "no unique deployed project and venv, uv or toolchain interpreter to audit",
+      "state": "inconclusive"
+    }
+  },
+  "consumers": {},
+  "elapsed_seconds": 3936,
+  "environment": {
+    "": "",
+    "ANSI_COLOR": "0;31",
+    "BUG_REPORT_URL": "https://issues.redhat.com/",
+    "CPE_NAME": "cpe:/o:redhat:enterprise_linux:9::baseos",
+    "DOCUMENTATION_URL": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9",
+    "HOME_URL": "https://www.redhat.com/",
+    "ID": "rhel",
+    "ID_LIKE": "fedora",
+    "LOGO": "fedora-logo-icon",
+    "NAME": "Red Hat Enterprise Linux",
+    "PLATFORM_ID": "platform:el9",
+    "PRETTY_NAME": "Red Hat Enterprise Linux 9.8 (Plow)",
+    "REDHAT_BUGZILLA_PRODUCT": "Red Hat Enterprise Linux 9",
+    "REDHAT_BUGZILLA_PRODUCT_VERSION": "9.8",
+    "REDHAT_SUPPORT_PRODUCT": "Red Hat Enterprise Linux",
+    "REDHAT_SUPPORT_PRODUCT_VERSION": "9.8",
+    "VERSION": "9.8 (Plow)",
+    "VERSION_ID": "9.8",
+    "bash": "5.1.8(1)-release",
+    "kernel": "5.14.0-687.44.1.el9_8.x86_64",
+    "rsync": "/bin/rsync"
+  },
+  "missing": [],
+  "pins": {
+    "archive": "tools.2026-09-18_220913.tar.gz",
+    "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+    "bundle_sha256": "cbdbe1299c100858d8731b6f9580afc0108d5f784373bfc9b9ad266962d85231",
+    "deploy_script_sha256": "a94d3737807bd3f647d32f4b75e62c284fb3d46f4fa7cfb4f4453434e6514a74",
+    "pdfs": "pdfs.2026-07-22_205852.tar.gz",
+    "pdfs_sha256": "07889e8e5bb4a009246f762e6b894d2fe940a905d08053df4f7fd11bc9b0bece",
+    "previous_installer_sha256": "8ffb726c8a3d598e01eb990dbcc6d5300acb45d5dfb2a2e0de19c0ea37b43e05",
+    "revision": "70f9d83a390bfcfe9998593448ed961999572f4a"
+  },
+  "recorded_utc": "2026-09-19T10:47:19.029385+00:00",
+  "required": [
+    "AR3",
+    "PA1:rhel",
+    "PA2:rhel",
+    "PA3:rhel-build",
+    "PA3:rhel-deploy",
+    "PA4:rhel",
+    "PA5:rhel",
+    "PA6:rhel",
+    "PA10:rhel",
+    "PA11:rhel"
+  ],
+  "role": "rhel",
+  "run": "tools-archive-rebuild-step6-20260919T094141Z-rhel",
+  "runtime": {
+    "ld-linux-x86-64.so.2": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+    "libc.so.6": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746",
+    "libsqlite3.so.0": "dcea9cc68d0d4ee823e6d6d887fc18ed070b5e529903e2d9a34fb6eb4f5089f2",
+    "libstdc++.so.6": "60f8d775086b6d4ef4190e880ff80cdd6a0a200a960f71580ada508cea29281a",
+    "python": "3.13.15"
+  },
+  "schema": "tools-archive-rebuild-acceptance/1",
+  "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "verdict": "fail"
+}

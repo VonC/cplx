@@ -30,6 +30,9 @@ set -o pipefail
 # leave `$HOME/tools` alone. Earlier drafts of this file put them back into the
 # live tree to satisfy an assertion that read them there; the assertion now reads
 # them from the archive, which is where the contract always meant them to be.
+# The Python compiler probe root/a.out is also removed from this private stage;
+# its parent directories are checked before unlinking so a copied directory
+# symlink cannot redirect that cleanup into the live build tree.
 
 PKG_TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 if [ ! -f "${PKG_TOOLS_DIR}/pkg.sh" ]; then
@@ -80,7 +83,8 @@ esac
 
 # cp -a preserves directory symlinks. Unlinking a child through one would reach
 # the live tree even though the other regular files are independent hardlinks.
-for pkg_tools_write_root in "$HOME/tools" "$HOME/tools/bin" "$HOME/tools/closure"; do
+for pkg_tools_write_root in "$HOME/tools" "$HOME/tools/bin" "$HOME/tools/closure" \
+    "$HOME/tools/python" "$HOME/tools/python/root"; do
     [ ! -L "$pkg_tools_write_root" ] \
         || pkg_tools_fatal "refusing a symlink at a staging write boundary: $pkg_tools_write_root." 3
 done
@@ -119,6 +123,13 @@ pkg_tools_links_binutils() {
 pkg_tools_trim_stage() {
     local root="$1" candidate name
     [ -d "$root/tools" ] || pkg_tools_fatal "the stage has no tools tree at $root/tools." 3
+
+    # The literal residual owned by tools-archive-rebuild is a compiler probe,
+    # not a runtime provider. Unlink exactly this staged name, including when
+    # it aliases a protected provider; never recursively remove an unexpected
+    # directory and never follow it. Other a.out names remain unadjudicated.
+    rm -f -- "$root/tools/python/root/a.out" \
+        || pkg_tools_fatal "the staged Python compiler probe could not be removed." 3
 
     # (a) the GCC internals trees
     find "$root/tools" -type d -path '*/root/usr/libexec/gcc' -prune \
@@ -162,7 +173,8 @@ pkg_tools_build_stage() {
     local root="$1" boundary
     cp -al -- "$HOME/tools" "$root/tools" \
         || pkg_tools_fatal "the hardlink mirror of $HOME/tools could not be made." 3
-    for boundary in "$root/tools" "$root/tools/bin" "$root/tools/closure"; do
+    for boundary in "$root/tools" "$root/tools/bin" "$root/tools/closure" \
+        "$root/tools/python" "$root/tools/python/root"; do
         [ ! -L "$boundary" ] \
             || pkg_tools_fatal "refusing a copied symlink at a staging write boundary: $boundary." 3
     done

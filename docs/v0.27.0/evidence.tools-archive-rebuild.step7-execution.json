@@ -1,0 +1,106 @@
+{
+  "schema": "tools-step7-execution/1",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "native_validation": {
+    "step": 7,
+    "exit": 0,
+    "elapsed_seconds": 92,
+    "platform": "RHEL 9.8",
+    "authoring_python": "3.9.25",
+    "log_sha256": "8e7ae8293622c0e1ea8520b3bc59110d00ef46b48064867ec5f550e827b8b9fe",
+    "retention": "$HOME/cplx-release-evidence/tools-release-step7.sz7vG4ve/",
+    "followup": {
+      "purpose": "Bind the checked release digest and release version into retained acceptance evidence.",
+      "shellcheck_exit": 0,
+      "acceptance_exit": 0,
+      "cases": 104,
+      "elapsed_seconds": 20,
+      "log_sha256": "e982075f8d669151ff4deacaa461b88d8377e62c6e767f907de6e7292b2b0686",
+      "log": "step7-focused2.log",
+      "prior_attempt": "Focused run stopped at the D10 fixtures because its PATH omitted the existing compiler wrapper; preserved as step7-focused.log."
+    },
+    "recovery_fixture": {
+      "exit": 0,
+      "elapsed_seconds": 0.35079078492708504,
+      "log_sha256": "60a1278b6fd9388cde972b5cc941e3739ccf53fd670f63e5a34be854e82c9aa2",
+      "scope": "Controlled fixture: pin-only restoration fails; whole compatible configuration passes; failed adoption cannot complete."
+    }
+  },
+  "publication": {
+    "attempts": [
+      {
+        "invocation": 1,
+        "exit": 1,
+        "started": "2026-09-21T13:44:39Z",
+        "ended": "2026-09-21T13:44:42Z",
+        "log_sha256": "816289916fdcaee96758d8ebbdf4da0111fde371acc2e683a7cd8e16e0783e46"
+      },
+      {
+        "invocation": 2,
+        "exit": 1,
+        "started": "2026-09-21T13:45:11Z",
+        "ended": "2026-09-21T13:46:04Z",
+        "log_sha256": "77b866b3e31584628b8404ee027160a5ad0fb06cfbe7cc0668bdf9fe0d143029"
+      },
+      {
+        "invocation": 3,
+        "exit": 1,
+        "started": "2026-09-21T13:47:52Z",
+        "ended": "2026-09-21T13:47:56Z",
+        "log_sha256": "c65c25df6d61c1bf20c0ac3ee5678aa01d256298563025da163843096366f5d9"
+      },
+      {
+        "invocation": 4,
+        "exit": 0,
+        "started": "2026-09-21T13:48:54Z",
+        "ended": "2026-09-21T13:49:55Z",
+        "log_sha256": "80a1304c769e0620f4e85a3af05556dc61d11128dac00a48a59ed5f098f8b63e"
+      }
+    ],
+    "receipt": {
+      "phase": "COMMITTED",
+      "sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+      "target_sha256": "c6a634d305e86ae490fdfb786031f6dbf34397625bcefef8a581fe890d96ef91"
+    },
+    "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-step7-publication/",
+    "retrieval": {
+      "head_status": 200,
+      "get_status": 200,
+      "bytes": 545293468,
+      "sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+      "log_sha256": "383d103aa4e3fdc447001fdb21893f435dead0008874a28e486c744caaa4f590"
+    },
+    "timed_retrieval": {
+      "state": "pass",
+      "get_status": 200,
+      "bytes": 545293468,
+      "sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+      "started": "2026-09-21T14:16:01.844022+00:00",
+      "ended": "2026-09-21T14:16:13.465056+00:00",
+      "elapsed_seconds": 11.621049945009872
+    }
+  },
+  "adoption": {
+    "state": "pass",
+    "uploads": "off",
+    "application_revision": "47418c764a5b7be5230896a6ebf31cf55c7f1728",
+    "release_version": "10.0.0",
+    "candidate_override": false,
+    "build": 189,
+    "recovery": "not applicable",
+    "duration_ms": 2854823,
+    "result": "SUCCESS",
+    "acceptance_cells": 9
+  },
+  "uploads_restoration": {
+    "state": "pass",
+    "mode": "snapshot",
+    "revision": "1a5101e84491ed88e6c7944cde097a96da7dd932",
+    "accepted_adoption_revision": "47418c764a5b7be5230896a6ebf31cf55c7f1728",
+    "changed_paths": [
+      "tools/publish.mode"
+    ],
+    "observed_utc": "2026-09-21T14:55:00.355765+00:00",
+    "scope": "Mode-only follow-up after build 189 passed with uploads off; no fresh full-suite claim for this follow-up."
+  }
+}

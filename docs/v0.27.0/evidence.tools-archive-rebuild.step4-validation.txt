@@ -1,0 +1,111 @@
+Step 4 validation after review round 1, 2026-09-17
+cplx starting revision: 863933eeedb21bac5bfa7a662d1a0d25a048a079
+App starting revision: 489bbbde741328ab7953e2338a29952cd1a9f18c
+Native host: RHEL 9.8; independent /usr/bin/python3 3.9.25
+Fresh owned snapshots; the sources listed below overlaid before validation.
+Scratch uses /var/tmp. Compiler-only wrapper supplies existing GCC libraries; test-process libraries are unchanged.
+Pinned ShellCheck 0.10.0 SHA-256: 6c881ab0698e4e6ea235245f22832860544f17ba386442fe7e9d629f8cbedf87
+Command: bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step 4 --python /usr/bin/python3 --app-repo ../app
+Native result: exit 0, elapsed 58 seconds
+Post-run comparison: all 20 native source inputs match the retained tested snapshot (LF normalized).
+Raw local capture: .reviews/a.step4.round2-native-full.log
+Raw capture SHA-256: 49d8f5dbd4390042b3273d9dec1f565e70724b9e287628e06365e7446930021c
+
+Native results: shell syntax and ShellCheck clean; Python adapters compile.
+Agent fixtures: 33 shell cases plus ABI, wheel, test-evidence and plugin-configuration cases passed.
+Inherited gates: 49 D10 cases, 16 record tests, 15 transport tests, 6 publication tests,
+25 current SQLite closure checks and 254 historical closure Step 5 cases passed.
+The review reproduction first failed the new release-venv diagnostic assertion before the repair.
+New cases prove missing release verifier pins fail early before venv side effects,
+valid release verifier pins pass preflight, and SQLite diagnostics allow publication-enabled mode.
+The authorized system-interpreter-helper branch is exercised; moving the same ELF outside tools/bin refuses.
+Other refusals cover partial/conflicting pins, upload intent, damaged transport or controls,
+changed archives before relocation, ambiguous interpreter/wheel identity, outside providers,
+aliases outside the prefix, empty inventories, unusable direct traces, inactive testmon,
+empty/deselected execution, skipped SQLite suites and missing/sub-gate coverage.
+Monitoring exclusions remain visible under the inherited recognition policy.
+Ordinary platform skips are counted separately; both guarded SQLite suites must pass fully.
+
+Application authoring: ghog day --force --detach, through the absolute llm-shared launcher,
+with PRJ_DIR explicitly set to the app checkout. Freshness marker precedes the log.
+Final ghog status and report:
+app: ghog day state=done exit=0 ended=2026-09-17T19:05:35+02:00
+ghog: run finished - branch on the exit= above, then read the a.ghog.log tail
+Objective reached
+
+nag: warn=3 xfail=8 worth a look
+
+app: ghog full done fail=0 warn=3 xfail=8 cov=100 outliers=0 excluded=0 exit=0
+app: ------------------------------------------------------------
+app: == ghog full == ended | 2026-09-17T19:05:34+02:00 | duration=4m 54.8s
+app: ------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -------
+Authoring log SHA-256: 8fdcabdc0035d6842c6eb094a147c25433e9c82abd8f45bcdc8daaee71f35571
+Full selection reported 6040 collected items; the final run completed with zero failures and 100% coverage.
+The first forced walk reached 100% coverage but exited 8 for two duration outliers:
+auth lifecycle 1.24 seconds; polluted PDF activation 1.03 seconds.
+Profiles identified real router/OpenAPI construction and real XObject traversal.
+Auth setup now builds the real routes/schema in a module fixture; startup and all HTTP assertions stay in the call.
+The activation sample uses exactly 1000 XObjects, the production threshold; the fallback input stays unchanged.
+Focused remeasurement: auth call below 0.10 seconds; activation 0.30 seconds; all four cases passed.
+ghog single on both affected files: exit 0, no failures, warnings or expected failures.
+No assertion, coverage threshold, duration floor, timeout or exclusion was weakened.
+The application coverage source is src/pdfss; ci adapters are outside that percentage.
+Their integration fixtures and static references establish exercise without a claimed percentage.
+
+Round 2 LF-normalized source SHA-256 and physical lines (app: identifies the separate application checkout):
+2d2201abb4c3a24f4307cc9429728b75698dd79fd38365663318ec9458e283d8 204 docs/v0.27.0/verify.tools-release-agent.sh
+d7ac807bfb0d033deb0ad1f79d42348653aad083a14fcf9365ddb0b555868c02 213 docs/v0.27.0/fixtures.tools-release-agent.py
+90d5ae0ca684709ef41f75a3bfe46f8d6c2fde48b93433488b1157b2328650e5 64 docs/v0.27.0/verify.tools-archive-rebuild.sh
+2fa4faf1631264faeb52e05f9edf15767dcba45e21ecad4ec511f6098f9effb0 326 app:Jenkinsfile
+b01722c5d5731b9ab6600107da49d0c626041a0f802f94c6ddc82ce3811aec7f 28 app:ci/Jenkinsfile.relocation
+d2329d1099765c1f4bbf3fb7be6d16a4ec6cc2f3efa5c463046999e9fb132db8 1000 app:ci/Jenkinsfile.diagnostics
+1818f2526ca8f84e65ee4cfef1aabff08969c99c0293d5d784b49f3d953d63ad 297 app:ci/provision_toolchain.sh
+1770854ee56b2d91a16f6d6c30d139dc97f4c29a5e4cb7fc67ad92457597728c 1 app:ci/__init__.py
+59a569756b59c1c7d4cb5230134c29d57de660fa38c9bf9be83dcbdb38b11325 129 app:ci/tools_candidate.sh
+c8715a7edfca3c2dfe52561cb0a59f72b9d13eabbbcdde2ff7fe258c3d15ea9d 98 app:ci/tools_candidate_bundle.py
+d147f8f8ddd73614665e0fda8bfb72c2f594258a6055e3d4bd5ab01b8d5afc34 39 app:ci/tools_agent_identity.sh
+36c5aa9484b48fcf1580148a88e7a198b16b8af67324dd29aae5bf9c18e22034 79 app:ci/tools_wheel_capture.py
+89e4cbd730853d9c1ec9792cc1810e021cfdfc5ad1caefac4bd75f4dbaebb34d 14 app:ci/tools_abi_acceptance.sh
+9a802265f43d5b4a8af8d0fcf9971fae8bd42afad2c2b02180215bf84fbecf12 187 app:ci/tools_abi_scan.py
+c11b48c493695998b51e74bbe73a8e4315abbb360254157c80e57726d1bc3a1a 34 app:ci/tools_test_acceptance.sh
+789546db84d1991e54ba53d50c2700bd69ca5c8746ea9325bb5550ab5bbef41e 98 app:ci/tools_test_plugin.py
+86df65742378f13aa9e2c2773c8488277ff2d4dc476a014800630971601aff36 61 app:ci/tools_test_evidence.py
+b2da8f60bdbe058fa6d50122bc46545028a5981108abc4e58486fe33d911f493 58 app:ci/TOOLS-VERIFICATION.md
+ffdb289a6b99987cbed5d0017c401d04a699f6a0889cdd91e8bbb9e7097b132a 43 app:tools/sqlite_candidate_capture.sh
+b470b84cf0cd3189e10615bffea7d5cbd9f61134ba1c2cfd513ddd45b776a5f6 1 app:tools/publish.mode
+c52ffff4b8be5a1463daca801d7a33f73c1b67a40941470f79b637665886ddc6 522 app:src/pdfss/tests/integration/adapters/inbound/sentinel_service/test_sentinel_auth_lifecycle/test_sentinel_auth_lifecycle_tdd.py
+091d3ff92459ef3f303fa0e653b6d952e7d2de05da4520dd47c4749ddeb7895d 114 app:src/pdfss/tests/integration/application/handlers/test_pdf_processing_handler_polluted_pdf/_synthetic_polluted_samples.py
+73871e4f77c029daf87468aba541dea845311272ec9d357e3b41905cb35ed05e 493 app:src/pdfss/tests/integration/application/handlers/test_pdf_processing_handler_polluted_pdf/test_pdf_processing_handler_polluted_pdf_acceptance_tdd.py
+
+Limits: fixture and Windows authoring evidence only. Step 6 owns actual Debian/Jenkins
+and final native candidate acceptance, using the Step 5 archive and independent verifier pins.
+No final candidate pass, publication, release pin change or umbrella completion is claimed.
+The raw-Python/UV_PYTHON bypass remains pending wrapper-to-uv acceptance.
+Ordinary release builds now explicitly require tools/tools.verification before provisioning;
+ci/TOOLS-VERIFICATION.md documents how the job owner obtains and supplies its independent pin.
+Candidate mode requires tools/tools.candidate and publication explicitly off.
+The diagnostic-only SQLite pin remains usable when publication is enabled.
+The existing tracked tools/publish.mode was already off and remains off.
+
+Review round 2 follow-up, 2026-09-17:
+The reviewer independently passed the project floor, cumulative native gate and forced application walk.
+The application walk retained cov=100, fail=0, warn=3, xfail=8 and outliers=0.
+The only requested repair concerns sensitive content in the staged set.
+The same-venv fixture now checks its exact prefix, interpreter version and matching
+application directory/name shape without embedding a private application name.
+Fresh cumulative native Step 4 rerun: exit 0, elapsed 53 seconds, including PASS same-venv.
+ShellCheck and syntax clean; 33 agent cases, 49 D10 cases, 16 record tests,
+15 transport tests, 6 publication tests, 25 current SQLite checks and 254 historical cases passed.
+All 20 native source inputs match the new retained snapshot (LF normalized).
+Raw local capture: .reviews/a.step4.round3-native-full.log
+Raw capture SHA-256: e53dd84788d3c322f2248811d964217687e758ecc53dd9d1005460a01742a4ae
+The following LF-normalized source identity supersedes its Round 2 row:
+b479cfe14bf1815a32ecea5c908ac8a09cf605dd4c766d49badeb4114b1638ce 208 docs/v0.27.0/verify.tools-release-agent.sh
+All other listed source inputs and the companion staged set are unchanged.
+After the fixture repair, the staged sensitive-content check reported four earlier review-transcript entries.
+The human approved the prepared four-line correction using the configured repository replacements.
+Source and proposal SHA-256 guards verified the approved bytes before applying them.
+The complete staged set, including the corrected transcript, now passes the installed sensitive-content checker.
+The original transcript is retained in ignored evidence; no sensitive rule or commit gate was relaxed.
+The companion index was recaptured as a130e310e2abc8690abf7766c8a6efd998346e32, unchanged from round 2.
+Step 4 implementation is complete within its fixture/wiring boundary; replacement review and the human commit decision remain.
