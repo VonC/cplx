@@ -2,18 +2,24 @@
 # Cumulative native Linux checks through platform acceptance fixtures in Step 6.
 # Explicit app checkout and independent Python 3.9+ are required.
 set -euo pipefail
-step="" python="" app=""
+step="" python="" app="" capture_python=""
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --step) step="${2:?--step needs a number}"; shift 2 ;;
         --python) python="${2:?--python needs a path}"; shift 2 ;;
         --app-repo) app="${2:?--app-repo needs a path}"; shift 2 ;;
+        --capture-python) capture_python="${2:?--capture-python needs a path}"; shift 2 ;;
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
 [[ "$step" =~ ^[123456]$ && "$python" = /* && -x "$python" && "$app" = /* && -d "$app/tools" ]] || {
     printf 'Required: --step 1|2|3|4|5|6 --python /absolute/python --app-repo /absolute/checkout\n' >&2; exit 2;
 }
+if [ "$step" -ge 4 ]; then
+    [[ "$capture_python" = /* && -x "$capture_python" ]] || {
+        printf 'Step 4+ requires --capture-python /absolute/application-venv/python\n' >&2; exit 2;
+    }
+fi
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 cd "$root"
 "$python" -c 'import sys; print("Independent interpreter:", sys.executable, sys.version); assert sys.version_info >= (3, 9)'
@@ -52,17 +58,19 @@ if [ "$step" -ge 4 ]; then
     "$python" -m py_compile "$app"/ci/tools_*.py docs/v0.27.0/fixtures.tools-release-agent.py
     # Compilation does not evaluate annotations. Import the independent helpers
     # with the selected system interpreter (minimum supported version: 3.9).
-    # The pytest plugin belongs to the candidate venv, not this interpreter.
-    "$python" - "$app" <<'PY'
+    # The wheel capture and pytest plugin belong to the application venv.
+    # Isolated mode keeps caller PYTHONPATH out of this independence check.
+    "$python" -I - "$app" <<'PY'
 import runpy
 import sys
 from pathlib import Path
 
-for name in ("tools_abi_scan", "tools_test_evidence", "tools_wheel_capture", "tools_candidate_bundle"):
+for name in ("tools_abi_scan", "tools_test_evidence", "tools_candidate_bundle"):
     runpy.run_path(str(Path(sys.argv[1]) / "ci" / (name + ".py")), run_name="compatibility_check")
     print("PASS independent helper import:", name)
 PY
-    bash docs/v0.27.0/verify.tools-release-agent.sh --python "$python" --app-repo "$app"
+    bash docs/v0.27.0/verify.tools-release-agent.sh --python "$python" --app-repo "$app" \
+        --capture-python "$capture_python"
 fi
 if [ "$step" -ge 5 ]; then
     bash docs/v0.27.0/verify.tools-release-package.sh

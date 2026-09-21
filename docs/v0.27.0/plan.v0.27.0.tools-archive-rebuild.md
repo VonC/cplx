@@ -146,6 +146,11 @@ steps. Its native Linux invocation is:
 bash docs/v0.27.0/verify.tools-archive-rebuild.sh --step N --python /absolute/authoring/python --app-repo /absolute/app/checkout
 ```
 
+For Step 4 or later, also pass `--capture-python /absolute/application-venv/python`.
+This explicit venv interpreter supplies `packaging` and `tomllib` for the
+application wheel-capture import and its fixtures only. Independent checks
+continue to use the selected authoring Python; no global `PYTHONPATH` is needed.
+
 The runner first executes `bash src/utils/lint_shell.sh`, then Bash syntax and
 ShellCheck for new harnesses, stdlib Python compile/unittest checks when added,
 and the cumulative affected fixture suites. It composes the inherited closure,
@@ -524,7 +529,12 @@ untouched while still rewriting a library outside the venv.
 Deployment discovery must reject absent or ambiguous project/venv directories.
 Import the independent application helpers with the selected Python 3.9+
 interpreter as well as compiling them, so evaluated annotations are checked.
-The application's three independent readers need postponed annotations;
+The ABI, test-evidence and candidate-bundle helpers remain independent.
+The wheel-capture helper is application-venv code: import it and run the
+wheel-selection fixtures with the explicit `--capture-python` interpreter,
+in isolated mode with its installed `packaging` and `tomllib` dependencies.
+Keep the other agent fixtures on the independent interpreter in isolated mode.
+The application's independent readers need postponed annotations;
 retain their source revision and any uncommitted repair digests with validation.
 
 The installer ships inside the archive, so its correction makes the accepted
@@ -547,6 +557,11 @@ whole-scope loader ABI, usable direct-venv traces, full coverage/testmon walk
 with SQLite suites executed. Record RHEL PA10 readiness/deploy/redeploy and
 PA11 operator senv/.env behavior. Optional RHEL downstream cells remain marked
 optional; inherited closure checks always apply.
+
+For the human-selected deployment scope (2026-09-19), prepare the shipped
+venv with `--no-group tooling`, use uv from the tools installation for RHEL
+PA6, and repeat affected RHEL acceptance before D10. Retain the earlier
+tooling-inclusive capture as history, without claiming it accepts this venv.
 
 Materialize the Step 4 agent's exact wheels on RHEL and run Step 3 D10 against
 both actual provider candidates. If generation changes, rebuild once, create a
