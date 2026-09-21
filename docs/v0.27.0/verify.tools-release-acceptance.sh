@@ -95,6 +95,19 @@ said bundle-compose "^BUNDLE|COMPLETE|$commit|"
 bundle_sha=$(sha "$scratch/bundle.tar.gz")
 expect 0 bundle-deterministic bash "$deliver" --repo "$repo" --commit "$commit" --bundle "$scratch/bundle-again.tar.gz"
 [[ $(sha "$scratch/bundle-again.tar.gz") == "$bundle_sha" ]]
+# Windows defaults to binary markers; force that producer behavior on Linux.
+mkdir "$scratch/binary-sha"
+real_sha=$(command -v sha256sum)
+printf '#!/bin/bash\nreal_sha=%q\n' "$real_sha" > "$scratch/binary-sha/sha256sum"
+cat >> "$scratch/binary-sha/sha256sum" <<'SHA'
+for arg; do
+    if [[ $arg == --check ]]; then exec "$real_sha" "$@"; fi
+done
+exec "$real_sha" --binary "$@"
+SHA
+chmod +x "$scratch/binary-sha/sha256sum"
+expect 0 bundle-binary-manifest env PATH="$scratch/binary-sha:$PATH" bash "$deliver" --repo "$repo" --commit "$commit" --bundle "$scratch/binary.tar.gz"
+[[ $(sha "$scratch/binary.tar.gz") == "$bundle_sha" ]]
 expect 2 bundle-and-into-refuse bash "$deliver" --repo "$repo" --commit "$commit" --bundle "$scratch/x.tar.gz" --into "$scratch/x"
 expect 1 bundle-occupied bash "$deliver" --repo "$repo" --commit "$commit" --bundle "$scratch/bundle.tar.gz"
 expect 1 bundle-branch bash "$deliver" --repo "$repo" --commit master --bundle "$scratch/branch.tar.gz"
@@ -153,7 +166,8 @@ expect 2 rhel-wrong-archive rhel "${pins[@]}" --archive-sha256 "$hexes"
 said rhel-wrong-archive 'archive digest differs from its pin'
 expect 2 rhel-wrong-deploy rhel "${pins[@]}" --deploy-script-sha256 "$hexes"
 expect 2 rhel-wrong-previous rhel "${pins[@]}" --previous-installer-sha256 "$hexes"
-expect 2 rhel-home-outside rhel "${pins[@]}" --home "$scratch/outside"
+# TMPDIR may itself live below /home; use a literal outside that boundary.
+expect 2 rhel-home-outside rhel "${pins[@]}" --home "/var/tmp/tools-acceptance-outside-$$"
 said rhel-home-outside 'below /home'
 expect 2 rhel-home-occupied rhel "${pins[@]}" --home "/home/$(id -un)"
 expect 2 rhel-bad-run rhel "${pins[@]}" --run 'not a token'
@@ -285,14 +299,156 @@ debian() { # NAME EVIDENCE [EXTRA...]
 dir=$(evidence complete)
 expect 0 debian-complete debian complete "$dir"
 said debian-complete '^SUMMARY|debian|build-207|pass|9 cells|0 missing'
-"$python" - "$scratch/debian-complete/results.json" "$hexes" <<'PY'
-import json, sys
+"$python" - "$scratch/debian-complete/results.json" "$hexes" "$app_revision" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
 record = json.load(open(sys.argv[1]))
 assert record["environment"]["image"] == "sha256:" + sys.argv[2] and record["environment"]["build"] == "207"
 assert record["consumers"]["wheels"] == {"native-1-py3-none-linux_x86_64.whl": sys.argv[2]}
 assert len(record["consumers"]["lock_sha256"]) == 64 and record["consumers"]["venv_base"].endswith("python3.13_bin")
 assert record["cells"]["PA9:debian"]["captures"] and "raw/test-evidence-check.txt" in record["captures"]
+raw = Path(sys.argv[1]).parent / "raw"
+binding = json.loads((raw / "test-evidence-validator.json").read_text())
+assert binding == {"application_revision": sys.argv[3], "path": "ci/tools_test_evidence.py",
+                   "sha256": hashlib.sha256((raw / "tools_test_evidence.py").read_bytes()).hexdigest()}
+assert "raw/tools_test_evidence.py" in record["captures"]
+assert "raw/test-evidence-validator.json" in record["captures"]
 PY
+dir=$(evidence validator-identity)
+expect 2 debian-validator-no-revision debian validator-no-revision "$dir" --application-revision ""
+said debian-validator-no-revision 'application revision is required'
+expect 2 debian-validator-unknown-revision debian validator-unknown-revision "$dir" --application-revision "$commit"
+said debian-validator-unknown-revision 'validator differs from or is unavailable'
+# A checkout with the right objects but changed validator bytes must refuse
+# before executing the substitute. Never alter the supplied application.
+foreign_app=$scratch/foreign-app
+mkdir -p "$foreign_app/ci"
+printf 'gitdir: %s\n' "$(git -C "$app" rev-parse --absolute-git-dir)" > "$foreign_app/.git"
+printf 'raise RuntimeError("UNPINNED VALIDATOR EXECUTED")\n' > "$foreign_app/ci/tools_test_evidence.py"
+expect 2 debian-validator-drift debian validator-drift "$dir" --app-repo "$foreign_app"
+said debian-validator-drift 'validator differs from or is unavailable'
+if grep -q 'UNPINNED VALIDATOR EXECUTED' "$scratch/debian-validator-drift.log"; then
+    printf 'FAIL: unpinned validator was executed\n' >&2; exit 1
+fi
+rm "$foreign_app/ci/tools_test_evidence.py"
+expect 2 debian-validator-missing debian validator-missing "$dir" --app-repo "$foreign_app"
+said debian-validator-missing 'validator differs from or is unavailable'
+
+dir=$(evidence missing-sync-marker)
+sed -i '/^uv sync --locked$/d' "$dir/console.txt"
+expect 5 debian-missing-sync-marker debian missing-sync-marker "$dir"
+said debian-missing-sync-marker 'CELL|PA6:debian|inconclusive|'
+printf 'TOOLS-LOCKED-SYNC/1 state=passed\n' >> "$dir/console.txt"
+expect 0 debian-stable-sync-marker debian stable-sync-marker "$dir"
+printf 'TOOLS-LOCKED-SYNC/1 state=failed\n' >> "$dir/console.txt"
+expect 1 debian-failed-sync debian failed-sync "$dir"
+said debian-failed-sync 'CELL|PA6:debian|fail|'
+
+dir=$(evidence missing-import)
+printf '' > "$dir/a.evidence/abi/imports.txt"
+expect 5 debian-missing-import debian missing-import "$dir"
+said debian-missing-import 'CELL|PA6:debian|inconclusive|'
+printf 'ImportError: fixture unresolved provider\n' > "$dir/a.evidence/abi/imports.txt"
+expect 1 debian-failed-import debian failed-import "$dir"
+said debian-failed-import 'CELL|PA6:debian|fail|'
+
+dir=$(evidence browser-scope)
+sed -i 's/Full acceptance PASS: collected=4 executed=4 setup_skipped=0;/Acceptance PASS over all tests except the browser cases (stealth-gate Q01): collected=4 executed=4 setup_skipped=0 excluded=1;/' "$dir/console.txt"
+"$python" - "$dir/a.evidence/test-walk.fixture/tests.json" <<'PY'
+import json, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+record = json.loads(path.read_text())
+record.update(markexpr="not browser", deselected=1, excluded=[{"nodeid": "test_browser.py::test_page", "marker": "browser"}])
+path.write_text(json.dumps(record))
+PY
+expect 0 debian-browser-scope debian browser-scope "$dir"
+said debian-browser-scope 'not browser evidence'
+sed -i 's/collected=4/collected=5/' "$dir/console.txt"
+expect 1 debian-browser-count-mismatch debian browser-count-mismatch "$dir"
+sed -i 's/collected=5/collected=4/;s/ except the browser cases (stealth-gate Q01)//' "$dir/console.txt"
+expect 1 debian-browser-scope-mismatch debian browser-scope-mismatch "$dir"
+sed -i 's/PASS over all tests:/PASS over all tests except the browser cases (stealth-gate Q01):/' "$dir/console.txt"
+for defect in missing-node duplicate-node wrong-marker wrong-expression; do
+    "$python" - "$dir/a.evidence/test-walk.fixture/tests.json" "$defect" <<'PY'
+import json, sys
+from pathlib import Path
+path, defect = Path(sys.argv[1]), sys.argv[2]
+record = json.loads(path.read_text())
+record.update(markexpr="not browser", deselected=1, excluded=[{"nodeid": "test_browser.py::test_page", "marker": "browser"}])
+if defect == "missing-node":
+    record["excluded"][0]["nodeid"] = ""
+elif defect == "duplicate-node":
+    record["excluded"] *= 2
+    record["deselected"] = 2
+elif defect == "wrong-marker":
+    record["excluded"][0]["marker"] = ""
+else:
+    record["markexpr"] = "not slow"
+path.write_text(json.dumps(record))
+PY
+    expect 1 "debian-browser-$defect" debian "browser-$defect" "$dir"
+    said "debian-browser-$defect" 'CELL|PA9:debian|fail|'
+done
+
+dir=$(evidence timestamped)
+sed -i 's/^/[2026-09-19T14:05:16.123Z] /' "$dir/console.txt"
+expect 0 debian-timestamped debian timestamped "$dir"
+said debian-timestamped '^SUMMARY|debian|build-207|pass|9 cells|0 missing'
+cmp "$dir/console.txt" "$scratch/debian-timestamped/raw/console.txt"
+dir=$(evidence dangling-count)
+sed -i 's/dynamic=2 flags=0/dynamic=2 dangling-links=488 flags=0/' "$dir/console.txt"
+expect 0 debian-dangling-count debian dangling-count "$dir"
+said debian-dangling-count '^SUMMARY|debian|build-207|pass|9 cells|0 missing'
+sed -i 's/flags=0/flags=01/' "$dir/console.txt"
+expect 1 debian-malformed-abi-pass debian malformed-abi-pass "$dir"
+dir=$(evidence availability-runtime-counts)
+sed -i 's/dynamic=2 flags=0/dynamic=2 availability-rows=8 runtime-rows=3 dangling-links=488 flags=0/' "$dir/console.txt"
+expect 0 debian-availability-runtime-counts debian availability-runtime-counts "$dir"
+said debian-availability-runtime-counts '^SUMMARY|debian|build-207|pass|9 cells|0 missing'
+sed -i 's/runtime-rows=3/runtime-rows=0/' "$dir/console.txt"
+expect 1 debian-no-runtime-providers debian no-runtime-providers "$dir"
+
+dir=$(evidence unqualified-system-object)
+printf 'system-interpreter-object|venv/node|/lib64/ld-linux-x86-64.so.2\n' >> "$dir/a.evidence/abi/providers.txt"
+expect 5 debian-unqualified-system-object debian unqualified-system-object "$dir"
+said debian-unqualified-system-object 'CELL|PA7:debian|inconclusive|system-loader objects'
+
+dir=$(evidence mapped-system-object)
+printf 'system-interpreter-object|venv/node|/lib64/ld-linux-x86-64.so.2\navailability|/prefix/tools/libc.so.6\n' >> "$dir/a.evidence/abi/providers.txt"
+printf 'venv/node\n' > "$dir/a.evidence/abi/inventory.txt"
+printf 'libc.so.6 => /prefix/tools/libc.so.6 (0x1)\n' > "$dir/a.evidence/abi/0.list.txt"
+expect 0 debian-mapped-system-object debian mapped-system-object "$dir"
+printf 'excluded-monitoring|/opt/dynatrace/oneagent/agent/bin/current/linux-x86-64/liboneagentproc.so\n' >> "$dir/a.evidence/abi/providers.txt"
+printf '/opt/dynatrace/oneagent/agent/bin/current/linux-x86-64/liboneagentproc.so (0x2)\n' >> "$dir/a.evidence/abi/0.list.txt"
+expect 0 debian-mapped-system-monitoring debian mapped-system-monitoring "$dir"
+printf 'excluded-monitoring|/lib/libc.so.6\n' >> "$dir/a.evidence/abi/providers.txt"
+printf '/lib/libc.so.6 (0x3)\n' >> "$dir/a.evidence/abi/0.list.txt"
+expect 5 debian-false-monitoring-provider debian false-monitoring-provider "$dir"
+sed -i '\|^/lib/libc.so.6 |d' "$dir/a.evidence/abi/0.list.txt"
+sed -i '/^availability|/d' "$dir/a.evidence/abi/providers.txt"
+expect 5 debian-unbound-system-map debian unbound-system-map "$dir"
+printf 'availability|/prefix/tools/libc.so.6\n' >> "$dir/a.evidence/abi/providers.txt"
+printf 'libc.so.6 => not found\n' > "$dir/a.evidence/abi/0.list.txt"
+expect 5 debian-failed-system-map debian failed-system-map "$dir"
+
+dir=$(evidence system-map-alias)
+printf 'system-interpreter-object|venv/node|/lib64/ld-linux-x86-64.so.2\navailability|/prefix/tools/libc-2.34.so\nmap-alias|/prefix/tools/libc.so.6|/prefix/tools/libc-2.34.so\n' > "$dir/a.evidence/abi/providers.txt"
+printf 'venv/node\n' > "$dir/a.evidence/abi/inventory.txt"
+printf 'libc.so.6 => /prefix/tools/libc.so.6 (0x1)\n' > "$dir/a.evidence/abi/0.list.txt"
+expect 0 debian-system-map-alias debian system-map-alias "$dir"
+sed -i 's|map-alias.*|map-alias\|/prefix/tools/libc.so.6\|/lib/libc.so.6|' "$dir/a.evidence/abi/providers.txt"
+expect 5 debian-system-map-host-alias debian system-map-host-alias "$dir"
+printf 'map-alias|/prefix/tools/libc.so.6|/prefix/tools/libc-2.34.so\n' >> "$dir/a.evidence/abi/providers.txt"
+expect 5 debian-system-map-conflicting-alias debian system-map-conflicting-alias "$dir"
+printf 'map-alias|/prefix/tools/broken\n' >> "$dir/a.evidence/abi/providers.txt"
+expect 5 debian-system-map-malformed-alias debian system-map-malformed-alias "$dir"
+
+dir=$(evidence timestamped-failure)
+sed -i 's/^/[2026-09-19T10:20:30.123Z] /' "$dir/console.txt"
+sed -i 's/ABI PASS:.*/ABI INCONCLUSIVE\/FAIL: outside provider: \/usr\/lib\/libstdc++.so.6/' "$dir/console.txt"
+expect 1 debian-timestamped-fail debian timestamped-fail "$dir"
+
 dir=$(evidence foreign)
 printf 'revision=%s\narchive_sha256=%s\nbundle_sha256=%s\n' "$commit" "$hexes" "$bundle_sha" > "$dir/a.evidence/identity"
 expect 2 debian-foreign-identity debian foreign "$dir"
