@@ -1,0 +1,138 @@
+{
+  "captures": {
+    "raw/console.txt": {
+      "sha256": "f48e009b3325ddb71bc8a6946bafd16f6413256f20c25abdd23960d5e954bb7b",
+      "size": 1169700
+    },
+    "raw/sqlite-candidate.debian.tar.gz": {
+      "sha256": "37e27ee9141766476974f430a47b0136164906db8bba0fdf81dcc1ec4bad1951",
+      "size": 2008243
+    },
+    "raw/verify-wrapper-accept.debian.txt": {
+      "sha256": "0593f9d642061340a31fba2f666a9f0faba3d476f7223ae278bc214b5b01ce83",
+      "size": 9051
+    }
+  },
+  "cells": {
+    "PA1:debian": {
+      "captures": [
+        "raw/console.txt"
+      ],
+      "reason": "candidate relocated without a shim, trailer completed",
+      "state": "pass"
+    },
+    "PA2:debian": {
+      "captures": [
+        "raw/verify-wrapper-accept.debian.txt"
+      ],
+      "reason": "wrapper first-call acceptance met",
+      "state": "pass"
+    },
+    "PA3:debian": {
+      "captures": [
+        "raw/sqlite-candidate.debian.tar.gz"
+      ],
+      "reason": "SQLite acceptance role over the pinned archive",
+      "state": "pass"
+    },
+    "PA4:debian": {
+      "captures": [
+        "raw/console.txt"
+      ],
+      "reason": "toolchain git answered --version after relocation",
+      "state": "pass"
+    },
+    "PA5:debian": {
+      "captures": [],
+      "reason": "not executed in this run",
+      "state": "pending"
+    },
+    "PA6:debian": {
+      "captures": [],
+      "reason": "not executed in this run",
+      "state": "pending"
+    },
+    "PA7:debian": {
+      "captures": [],
+      "reason": "not executed in this run",
+      "state": "pending"
+    },
+    "PA8:debian": {
+      "captures": [],
+      "reason": "not executed in this run",
+      "state": "pending"
+    },
+    "PA9:debian": {
+      "captures": [],
+      "reason": "not executed in this run",
+      "state": "pending"
+    }
+  },
+  "consumers": {
+    "lock_sha256": "",
+    "venv_base": "<agent-workspace>/prefix/tools/python/python-3.13.15/bin/python3.13_bin",
+    "wheels": {}
+  },
+  "elapsed_seconds": 0,
+  "environment": {
+    "build": "178",
+    "container": "fc37136ab17c5517a92fde6a2028ebe4fb10330c08c5cc2c6acfb8d179b83e1e",
+    "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+    "kernel": "",
+    "os": "Debian GNU/Linux 12 (bookworm)"
+  },
+  "missing": [
+    "PA5:debian",
+    "PA6:debian",
+    "PA7:debian",
+    "PA8:debian",
+    "PA9:debian"
+  ],
+  "pins": {
+    "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+    "bundle_sha256": "dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51",
+    "revision": "72f6cb290700faf328b73d946e78e8fedab8c2cd"
+  },
+  "recorded_utc": "2026-09-19T19:35:03.755194+00:00",
+  "required": [
+    "PA1:debian",
+    "PA2:debian",
+    "PA3:debian",
+    "PA4:debian",
+    "PA5:debian",
+    "PA6:debian",
+    "PA7:debian",
+    "PA8:debian",
+    "PA9:debian"
+  ],
+  "role": "debian",
+  "run": "build-178",
+  "runtime": {
+    "BUG_REPORT_URL": "\"https://bugs.debian.org/\"",
+    "HOME_URL": "\"https://www.debian.org/\"",
+    "ID": "debian",
+    "NAME": "\"Debian GNU/Linux\"",
+    "PRETTY_NAME": "\"Debian GNU/Linux 12 (bookworm)\"",
+    "SUPPORT_URL": "\"https://www.debian.org/support\"",
+    "VERSION": "\"12 (bookworm)\"",
+    "VERSION_CODENAME": "bookworm",
+    "VERSION_ID": "\"12\"",
+    "build": "178",
+    "container": "fc37136ab17c5517a92fde6a2028ebe4fb10330c08c5cc2c6acfb8d179b83e1e",
+    "docker_host_available": "yes",
+    "docker_socket_available": "no",
+    "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f"
+  },
+  "schema": "tools-archive-rebuild-acceptance/1",
+  "transfer_sha256": "",
+  "verdict": "incomplete",
+  "sanitization": {
+    "raw_results_sha256": "5c9546c54c86d69300def704511ba39414b06b37876c1f34ddacb53bfb2ae1bb",
+    "changes": [
+      "Replace agent workspace prefix with <agent-workspace>",
+      "Replace other agent home prefixes with <agent-home>",
+      "Omit executor node name from public runtime fields"
+    ],
+    "raw_retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-point4-build-178/"
+  }
+}

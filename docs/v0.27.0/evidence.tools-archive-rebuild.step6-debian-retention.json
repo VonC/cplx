@@ -1,0 +1,183 @@
+{
+  "scope": "Step 6 handoff point 4 candidate build; publication remains off",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "bundle_sha256": "dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51",
+  "cplx_revision": "72f6cb290700faf328b73d946e78e8fedab8c2cd",
+  "application_revision": "7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e",
+  "pipeline_revision": "7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e",
+  "reader_sha256": "b5b2a2ce336d3ad1c6919a61c866e4f068eeed299428dbc8806efd921e6f8789",
+  "reader_origin": "Reviewed working-tree reader adds Jenkins timestamp parsing to the committed bundle reader",
+  "reader_comparison": {
+    "original": "fail",
+    "repaired": "incomplete"
+  },
+  "raw_reading_archive_sha256": "e7025857bcb2e869686db8a4d772254fc6af4cc33b414d87f5a992aef228bc18",
+  "raw_transport_sha256": "7cebf838e8f8c079f956689395f2eb0d482a8792c66d8c209a6b7fd97a79e5df",
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-point4-build-176/",
+  "builds": [
+    {
+      "number": 175,
+      "result": "FAILURE",
+      "duration_ms": 89014,
+      "console_sha256": "56a3a596200c3ec7801e3890937d36644028998c342263168fdcd9b9aa2a30de",
+      "build_metadata_sha256": "98708ca24cf38ca5145a6b4c2db95add8961dfe432eb6ee352fa40ce432e3e5b",
+      "checkout_revisions": [
+        "d08f5f6a75376d418aba854a76db6aef307b7bae",
+        "6d1e4ea4bb4de7550a0c4087ecf6edbc1deb458d"
+      ],
+      "artifacts": {
+        "a.evidence/copy-form.debian.txt": {
+          "sha256": "d7854400b245188c1632976e5964f82c67e4241ee5880707af95fa9a69561f7e",
+          "size": 12464
+        },
+        "a.evidence/destination-shape.debian.txt": {
+          "sha256": "03cd9c66621fe57698fda39d25f6a25e5d8d899ba5de2ce0cd76f73e1dbaf1ab",
+          "size": 6495
+        },
+        "a.evidence/installer-contract.debian.txt": {
+          "sha256": "d8d650b0142eeca533707a3268c7c50892cddbd1f62223dcabb2e5bf328bb2c7",
+          "size": 775
+        },
+        "a.evidence/mirror-root.debian.txt": {
+          "sha256": "610d86dfd0804b3d9c2834bc205728d67ad8da15a5e75fe34dd9a5a1b8403de1",
+          "size": 1502
+        }
+      }
+    },
+    {
+      "number": 176,
+      "result": "FAILURE",
+      "duration_ms": 2481515,
+      "console_sha256": "b8a34d0233f43d2c26c412fb476cd69ca5a555af726a77a9a00b17ad14499d90",
+      "build_metadata_sha256": "39900366d6aeb3f1867b5328465e936bf90d100aced97a692791494d61a40531",
+      "checkout_revisions": [
+        "d08f5f6a75376d418aba854a76db6aef307b7bae",
+        "7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e"
+      ],
+      "artifacts": {
+        "a.evidence/copy-form.debian.txt": {
+          "sha256": "387b16a17e1f2348bf04b0191d47e01083eb135bdfdf19569be00bc3e6ba878e",
+          "size": 12464
+        },
+        "a.evidence/destination-shape.debian.txt": {
+          "sha256": "de100c9ccdcfff06afcb9ca0723ef75ccf16514b0a5d99c98ac82e210fbb3429",
+          "size": 6495
+        },
+        "a.evidence/identity": {
+          "sha256": "d83278c53533a3fbd901a164326c7afba9705ef7c85a3febcac354ed4a0ebe51",
+          "size": 209
+        },
+        "a.evidence/installer-contract.debian.txt": {
+          "sha256": "784fb201576284f0c228347fc12224946a0c7e2dcbe3c1d28c2c0cc9d626ce00",
+          "size": 775
+        },
+        "a.evidence/inventory-record.debian.txt": {
+          "sha256": "3c36a6d592bee890d1525b08a14e37a13ee906442ea00bcd8b06669ddec64f6d",
+          "size": 12962
+        },
+        "a.evidence/loader-probe.debian.txt": {
+          "sha256": "b469a72e7e0dcd20cf4f926edae8ced37b67e4f744d37d54f77ab299ce6a6c0c",
+          "size": 1249
+        },
+        "a.evidence/mirror-root.debian.txt": {
+          "sha256": "58de342f7f8930929d6a5bd08a04874ae3ad535a368e1b476e021eee1bdc6df2",
+          "size": 1502
+        },
+        "a.evidence/runtime.txt": {
+          "sha256": "a365d152d2e28c5e0b9745df783a8ea221e1f5e2e68228f89752f78e4d051ea0",
+          "size": 516
+        },
+        "a.evidence/shellcheck.debian.txt": {
+          "sha256": "0f232d35c5fbf1ba61a36c1f3294e68092662bf22177f8aa6d846ca4af907e49",
+          "size": 135
+        },
+        "a.evidence/sqlite-candidate.debian.tar.gz": {
+          "sha256": "219bfbca1d87db228953765e21a0c18c0c676f3a60864a383a6e7510dffec9a9",
+          "size": 2010408
+        },
+        "a.evidence/sqlite-runtime.txt": {
+          "sha256": "a365d152d2e28c5e0b9745df783a8ea221e1f5e2e68228f89752f78e4d051ea0",
+          "size": 516
+        },
+        "a.evidence/verification.sha256": {
+          "sha256": "98577e24508d502006c0587e8ab7a20678591d0a82ef9401e0a869e3e857fd82",
+          "size": 18714
+        },
+        "a.evidence/verify-closure-check.debian.txt": {
+          "sha256": "9a2f5232cb21062a32ec3a81b64233b93c6facdbd30e4c02e35cdb0768bab3ee",
+          "size": 520497
+        },
+        "a.evidence/verify-relocation-step0.debian.txt": {
+          "sha256": "c643762fc3eb0e24719f6029f3237f6b8e2340bba7c2fdfdbe17bc24b4b9e217",
+          "size": 14704
+        },
+        "a.evidence/verify-relocation-step1.debian.txt": {
+          "sha256": "767c0da13379c732d8c4168f17bf150479fc72541127dad8f3600f18df53f5b6",
+          "size": 35050
+        },
+        "a.evidence/verify-relocation-step2.debian.txt": {
+          "sha256": "910b3dcd851a50d9e1a2e0146a41d919b8c7d51720af7ce37a1c4555f9a45e49",
+          "size": 94815
+        },
+        "a.evidence/verify-relocation-step3.debian.txt": {
+          "sha256": "f668114b5dbb91286c391573b4af24d3028229be894ce773397d788caab6d52a",
+          "size": 20523
+        },
+        "a.evidence/verify-relocation-step4.debian.txt": {
+          "sha256": "c98f79e4fe2ef120e2db348779210e993acfba73221b1182d20cd758f1f0a0da",
+          "size": 31580
+        },
+        "a.evidence/verify-relocation-step6.debian.txt": {
+          "sha256": "25754ac1a8f210db9c2e20d20b988d3f70855c8fe2a2b90ce1696641d11396c3",
+          "size": 23589
+        },
+        "a.evidence/verify-sqlite-candidate.debian.txt": {
+          "sha256": "f45fa7417e7f47ba3c35762d1a215186bb168be20c0b845ea11e9896d8392abe",
+          "size": 3023
+        },
+        "a.evidence/verify-step0.debian.txt": {
+          "sha256": "a85fb3c55e6cf3689eda42702d64571ef73246743c84da29e11a24b19b411b48",
+          "size": 1463
+        },
+        "a.evidence/verify-step5.debian.txt": {
+          "sha256": "b72b3ed95e15b8d37d74bc6b52dc177e16436a426b5ddf84a7f34b9fe9903dfd",
+          "size": 9984
+        },
+        "a.evidence/verify-wrapper-accept.debian.txt": {
+          "sha256": "49abf74f4885c41a06752bac80fe462d738827d90d2bbc1f90068e34fd6fa769",
+          "size": 9051
+        },
+        "a.evidence/verify-wrapper-scope.debian.txt": {
+          "sha256": "94333a6b8268fcfb41324303d62e683b12706813ab554f20d3d7719b6277a1ab",
+          "size": 1560
+        }
+      }
+    }
+  ],
+  "failed_bundle": {
+    "sha256": "ec22b9cf3cdaed405511022b9b7913ce2834dc5d4dbc631e9fb631984e6b3f2a",
+    "reason": "Build 175 refused the Git Bash binary-marker manifest before acceptance; no cells inferred"
+  },
+  "consumer_change": "Earlier RHEL qualification used the July application lock. Build 176 selected the current application but locked synchronization failed before wheel capture. The earlier PA5/PA6 passes are historical, not acceptance of this application or an uncaptured wheel set.",
+  "provisioning_failure": {
+    "tool": "uv 0.12.17",
+    "interpreter": "CPython 3.13.15",
+    "command": "uv sync --locked",
+    "reason": "The lockfile needs to be updated; packaging and tests were skipped",
+    "committed_lock_sha256": "02357276123458ea95d1fdee55d3b90fd14dd680aa00600afe38419c44b9800f",
+    "missing_consumers": [
+      "agent wheel inventory",
+      "successful venv base capture"
+    ],
+    "required_followup": "Resolve the application lock refusal and repeat the candidate build before D10 with the agent wheels"
+  },
+  "diagnostic_scope": "The agent also runs historical diagnostic harnesses. Their failures remain in the raw artifacts; notably the relocation inventory still names Python 3.13.9. The nine candidate-bound Debian cells are recorded separately, without turning historical diagnostic failures into passes.",
+  "validation": {
+    "native_cumulative_exit": 0,
+    "native_elapsed_seconds": 77,
+    "acceptance_fixture_cases": 61,
+    "native_log_sha256": "366b0630d9952409cfc0212dbb4af2b2c0125da26536e9f41ec61304e3a5c9c9",
+    "git_bash_fixed_bundle_sha256": "668db08d8098d4c21a66123699a3ef805cfdc0781e4d6ffa75910c52e3f391d0",
+    "application_adapter_exit": 0
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "scope": "Step 6 handoff point 4 retry after application shared runtime setup; publication remains off",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "bundle_sha256": "dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51",
+  "cplx_revision": "72f6cb290700faf328b73d946e78e8fedab8c2cd",
+  "application_revision": "7906fcbe344b5020738c2f68bf1dfb8f1a302711",
+  "pipeline_revision": "7906fcbe344b5020738c2f68bf1dfb8f1a302711",
+  "committed_lock_sha256": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+  "reader_sha256": "3de360eec4f46c1b7b768f958aed3f835c64dd09c32373283296fa325768053f",
+  "reader_origin": "Working-tree reader adds Jenkins timestamp parsing, optional ABI availability/runtime and dangling-link counts, and refusal of unqualified system-loader scope to the committed bundle reader; both readers and their outcomes are retained",
+  "reader_comparison": {
+    "original": "fail",
+    "repaired": "incomplete"
+  },
+  "raw_reading_archive_sha256": "00827a04613c4a0dd7d9bd1643f9ea231a72534d99d3e2942269c2d174149158",
+  "raw_transport_sha256": "4fea5c87faf0e5b7302a102d0851b7260c5938564f2781024e7182adfb9ee3a6",
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-point4-build-182/",
+  "previous_versioned_captures": {
+    "evidence.tools-archive-rebuild.step6-debian-build177-retention.json": "f294296d1a3f02008b983a495694b890d20ceae7d8825ceb57c0641f3714d9ad",
+    "evidence.tools-archive-rebuild.step6-debian-build177.json": "5f7cfc945c57dd7680d120dfb4ceafc12df4d255130d08310e920dcf88731433",
+    "evidence.tools-archive-rebuild.step6-debian-build178-retention.json": "59c381c75af0bdac4b47542d0f448ac03ec4306d5cf89b302d0bc6c30de1d1e3",
+    "evidence.tools-archive-rebuild.step6-debian-build178.json": "4954a30b4646cf6a4a380fc6c74b641baec26f3fbb957e85d439c60af6b75220",
+    "evidence.tools-archive-rebuild.step6-debian-build179-retention.json": "baef83cec86d2463ed55e6d0f7a7606faf94a3df4f5e471a3f7f68e7df8750ed",
+    "evidence.tools-archive-rebuild.step6-debian-build179.json": "fac3f0c465af4be02275c2e285d0fefebfaa2cc1052fa9e5ab35d5d4e5f9581f",
+    "evidence.tools-archive-rebuild.step6-debian-build180-retention.json": "fbbd7a68180c38d3c781d116edb4fca5cfe3535ebdb0209472b1b0ca52d02848",
+    "evidence.tools-archive-rebuild.step6-debian-build180.json": "4f3be41e7479c48819f3a7b4285f5a683d9d008f0b3a95ed59bdc58a5c436ed9",
+    "evidence.tools-archive-rebuild.step6-debian-build181-retention.json": "c37a4fe50b402cae764fe9c11160fbc6e95d3ff11f54109b2a4d714b34dddbc2",
+    "evidence.tools-archive-rebuild.step6-debian-build181.json": "9412da78fa47a30e752f49e996d920d9bb4fcf8f9af7d220702c8cd2025ac924",
+    "evidence.tools-archive-rebuild.step6-debian-retention.json": "e7af3c5605ea857f903202703862a3c663ecee17483a06f9a0979bfa589b943e",
+    "evidence.tools-archive-rebuild.step6-debian.json": "f8ca335c2efa23cf6262cc604390e241d794c742631ee7f69827e3a21140e98a"
+  },
+  "builds": [
+    {
+      "number": 182,
+      "result": "FAILURE",
+      "duration_ms": 2486638,
+      "console_sha256": "01c9899193e9d89fdf0fb91597e18b3a8113179d4ff3f7d3715f61653ca2d29a",
+      "build_metadata_sha256": "af5dbc46f3fee5837afa5f8c8d7b55fb2e616b125b95e522bdfae03d839a2e89",
+      "checkout_revisions": [
+        "d08f5f6a75376d418aba854a76db6aef307b7bae",
+        "7906fcbe344b5020738c2f68bf1dfb8f1a302711"
+      ],
+      "artifacts": {
+        "a.evidence/bootstrap/python.txt": {
+          "sha256": "a566e90b8459073976dce8e254dc7b922379e96c557a7b3506120281621a4991",
+          "size": 325
+        },
+        "a.evidence/bootstrap/uv-interpreter.txt": {
+          "sha256": "67cd9c6b329b9ba3714b6fe4f5872aca75ee6101f90c65564d49aad59697b012",
+          "size": 109
+        },
+        "a.evidence/bootstrap/uv-providers.txt": {
+          "sha256": "d3623aeb4c530fb1dcf34531bd96e550cb526e74fb66c07a53dd1d4230b171e3",
+          "size": 1107
+        },
+        "a.evidence/bootstrap/uv-rpath.txt": {
+          "sha256": "7de43173a840c62f7ccf584f0a539b7a385cb269dcb72db7a552eafa5a4a6a08",
+          "size": 716
+        },
+        "a.evidence/copy-form.debian.txt": {
+          "sha256": "c704291870522bb015ab048b078fc18f816f2ee8a68e9bebab3dc716c77246f2",
+          "size": 12464
+        },
+        "a.evidence/destination-shape.debian.txt": {
+          "sha256": "de100c9ccdcfff06afcb9ca0723ef75ccf16514b0a5d99c98ac82e210fbb3429",
+          "size": 6495
+        },
+        "a.evidence/identity": {
+          "sha256": "d83278c53533a3fbd901a164326c7afba9705ef7c85a3febcac354ed4a0ebe51",
+          "size": 209
+        },
+        "a.evidence/installer-contract.debian.txt": {
+          "sha256": "36482b05534c21c428ed77374369f1fa7e02d4b1a79776346982b4f076b55f9c",
+          "size": 775
+        },
+        "a.evidence/inventory-record.debian.txt": {
+          "sha256": "0e4691f7247a8cfa04a37cf2fa2c38214e9a8ae40e40acfbe7385e1cb1001e8b",
+          "size": 12962
+        },
+        "a.evidence/loader-probe.debian.txt": {
+          "sha256": "b469a72e7e0dcd20cf4f926edae8ced37b67e4f744d37d54f77ab299ce6a6c0c",
+          "size": 1249
+        },
+        "a.evidence/mirror-root.debian.txt": {
+          "sha256": "031acbde3eb839e9756116a5e30a4c8ca83709cb3944ae2b39cd8621bea6cf99",
+          "size": 1502
+        },
+        "a.evidence/runtime.txt": {
+          "sha256": "f37f4844ec9ab8d4de545fb89da7f99dcfe37a5505b596c1a94ee8da6bf22ffc",
+          "size": 516
+        },
+        "a.evidence/shellcheck.debian.txt": {
+          "sha256": "0f232d35c5fbf1ba61a36c1f3294e68092662bf22177f8aa6d846ca4af907e49",
+          "size": 135
+        },
+        "a.evidence/sqlite-candidate.debian.tar.gz": {
+          "sha256": "3bd1bbb630ad7c92d763601260ac65fa40300f8f248cd90e9316e56418e0015d",
+          "size": 2013670
+        },
+        "a.evidence/sqlite-runtime.txt": {
+          "sha256": "f37f4844ec9ab8d4de545fb89da7f99dcfe37a5505b596c1a94ee8da6bf22ffc",
+          "size": 516
+        },
+        "a.evidence/verification.sha256": {
+          "sha256": "98577e24508d502006c0587e8ab7a20678591d0a82ef9401e0a869e3e857fd82",
+          "size": 18714
+        },
+        "a.evidence/verify-closure-check.debian.txt": {
+          "sha256": "ab99040976e3cc66711fa7ae5100a40f51cecd0d87063a8da3ddc60d0a600b31",
+          "size": 520496
+        },
+        "a.evidence/verify-relocation-step0.debian.txt": {
+          "sha256": "06b9b7ee0873cf89aa7f544515ad3b27abd42e6cda000ba8572b70532d02c261",
+          "size": 14704
+        },
+        "a.evidence/verify-relocation-step1.debian.txt": {
+          "sha256": "2dd90ffc2a0c62eef8c7fd4752584391980f7f5fffe89b2d43c536f737e57a93",
+          "size": 35050
+        },
+        "a.evidence/verify-relocation-step2.debian.txt": {
+          "sha256": "3e241f8b49f264b7f4a80735b8f5ddd33de26820311f1b208082f7820832727b",
+          "size": 94796
+        },
+        "a.evidence/verify-relocation-step3.debian.txt": {
+          "sha256": "87a34339d4846de79dc961db7b3f2019bc6bc2d6d347da42aad87a24ff8509e8",
+          "size": 20523
+        },
+        "a.evidence/verify-relocation-step4.debian.txt": {
+          "sha256": "bc209935a06073ed400f15cb729d4202858e1782fe3d9b144a46c43e01612395",
+          "size": 31580
+        },
+        "a.evidence/verify-relocation-step6.debian.txt": {
+          "sha256": "2bf3736f2acea944ff1447568ac9e90c68622ca2c9f54fe4f701159688c71407",
+          "size": 23575
+        },
+        "a.evidence/verify-sqlite-candidate.debian.txt": {
+          "sha256": "dfef8569d75e208c9b14d7988b7e64ebda95a9d255a373c925620be6c0a3f93c",
+          "size": 3023
+        },
+        "a.evidence/verify-step0.debian.txt": {
+          "sha256": "42c172334eb905f518ac4e87ef182f292d720a1bcbb5b89bda206782d88910b7",
+          "size": 1463
+        },
+        "a.evidence/verify-step5.debian.txt": {
+          "sha256": "950452e22b33b460e34534dd30cfb8ec5e0c7c4076a086b01b5311f838e1a40f",
+          "size": 9984
+        },
+        "a.evidence/verify-wrapper-accept.debian.txt": {
+          "sha256": "496976e7d8516f01edc886162cd8e1c0de3abfd25f2884449dd9178272523f5e",
+          "size": 9051
+        },
+        "a.evidence/verify-wrapper-scope.debian.txt": {
+          "sha256": "a2591612d8103162538349cd6f39c96929cdb817d62526c3460269d7868b7d2b",
+          "size": 1560
+        }
+      }
+    }
+  ],
+  "application_fix": "Build 182 passes the former readlink boundary and uses shipped Python 3.13.15 to create pip 26.2.1 and install uv 0.12.17. The relocated uv loader map names shipped runtime providers and injected OneAgent. Provisioning fails because the new bootstrap checker incorrectly rejects that existing monitoring exclusion; uv execution, locked sync and application imports are not reached.",
+  "human_decisions": {
+    "Q08": "Keep the retained-helper exception; other system-loader executables must be qualified.",
+    "Q09": "Adopt shared runtime_env.sh subject to actual provider qualification on Debian and RHEL, preserving application wheel ELFs.",
+    "bootstrap": "Use shipped Python 3.13.15 with its own pip and relocate installed uv before locked sync."
+  },
+  "provisioning": {
+    "stage_clone": "passed",
+    "python": "3.13.15, shipped interpreter",
+    "pip": "26.2.1, isolated Python 3.13 tooling venv",
+    "uv_install": "0.12.17 installed and relocated; provider policy check failed before --version",
+    "locked_sync": "not reached",
+    "completed_agent_inventory": false,
+    "archived_agent_lock": false,
+    "wheels_tar_gz": false,
+    "later_stages": "Package, Test and Publish skipped; no build 182 application wheel, import, pytest or coverage evidence exists."
+  },
+  "remaining_failure": {
+    "stage": "Provision: tools_bootstrap_uv.sh provider validation",
+    "error": "AssertionError: /opt/dynatrace/oneagent/agent/bin/current/linux-x86-64/liboneagentproc.so",
+    "owner": "New application bootstrap validator added by the cplx requestor; it omitted the existing monitoring exclusion.",
+    "required_followup": "Reuse the scanner's existing validate_list policy, retaining visible excluded-monitoring rows and refusing all other external runtime providers, then repeat Jenkins acceptance."
+  },
+  "deployment_scope": "Publication remains off. Fresh RHEL qualification, host-child inheritance and all unobserved Debian runtime cells remain open.",
+  "consumer_change": "Historical RHEL consumer-dependent passes do not qualify the new application, lock or agent wheels. Preserve original input snapshots and repeat affected acceptance before publication.",
+  "diagnostic_scope": "Historical diagnostic harness output remains raw evidence; candidate-bound Debian cells are evaluated independently. A pipeline result alone does not establish all acceptance cells."
+}

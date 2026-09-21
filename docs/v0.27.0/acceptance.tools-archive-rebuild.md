@@ -629,6 +629,318 @@ Step 6 remains No: Debian, final consumer/D10 identities, publication and
 adoption are still pending. The July application lock used for this RHEL
 qualification does not establish the later Debian consumer identity.
 
+## Point 4: retained failed builds and reader repairs
+
+The committed candidate pins select the replacement archive and a native
+verification bundle from the committed cplx source, with publication off.
+Build 175 refused a Windows binary-marker manifest before acceptance.
+The composer now normalizes binary markers; the evidence reader removes
+Jenkins timestamps only for parsing and preserves the raw console bytes.
+
+The original [build 176 reading](evidence.tools-archive-rebuild.step6-debian.json)
+and [retention](evidence.tools-archive-rebuild.step6-debian-retention.json)
+remain unchanged. That build failed when uv 0.12.17 refused the application
+lock under `uv sync --locked`, using CPython 3.13.15. It recorded PA1 to PA4
+passing and PA5 to PA9 pending, with no wheel or successful venv base capture.
+
+## Point 4 retry after application lock transport fix
+
+Build 177 checked out application commit `6b43b39e` with publication off.
+The lock transport identity check preserved 83 packages and 491 artifacts.
+`uv sync --locked` completed with uv 0.12.17 and CPython 3.13.15, installing
+80 packages. The venv base was captured. This resolves the lock-URL refusal.
+Provisioning then failed with
+`Wheel capture refused: locked wheel identity absent or ambiguous: playwright-1.60.0.dist-info`.
+Package and Test were skipped. All 24 archived artifacts and the console were
+retained and independently read on native Linux with both readers.
+
+See the [new Debian reading](evidence.tools-archive-rebuild.step6-debian-build177.json)
+and [retry provenance](evidence.tools-archive-rebuild.step6-debian-build177-retention.json).
+PA1 to PA4 pass; PA5 to PA9 remain pending. The venv base is bound, but the
+agent lock and wheel inventory remain missing. The committed lock digest is
+provenance only. The application owned the wheel-identification repair at this checkpoint;
+build 178 below confirms its resolution.
+
+## Point 4 retry after application wheel metadata fix
+
+Build 178 checked out application commit `68ef3af9` with publication off.
+Locked synchronization passed under CPython 3.13.15 and uv 0.12.17.
+All 80 installed packages were identified and their locked wheels downloaded,
+including Playwright's Linux wheel. All 80 downloaded hashes match the
+canonical committed lock. The application wheel-identification fix worked.
+
+Provisioning then stopped in cplx's `tools_wheel_inventory.py`:
+`INCONCLUSIVE: ELF outside site-packages: ty-0.0.37.data/scripts/ty`.
+The inventory supports purelib/platlib destinations but cannot verify script
+ELFs installed outside site-packages. Downloaded ruff and uv wheels also
+contain script ELFs. The checkpoint initially assigned a repair to cplx;
+the following retry corrects that ownership assessment while preserving
+installed-byte checks for every ELF.
+
+All 104 artifacts, including the 80 raw wheel files, and the raw console are
+retained. See the [build 178 reading](evidence.tools-archive-rebuild.step6-debian-build178.json)
+and [retention](evidence.tools-archive-rebuild.step6-debian-build178-retention.json).
+The native independent reader establishes PA1 to PA4 passing and PA5 to PA9
+pending. Package, Test and Publish were skipped. No completed inventory,
+wheel bundle or archived agent lock was produced. Downloaded wheel hashes
+do not establish installed-byte equality or completed consumer identities.
+
+The build 178 sidecars retain that checkpoint. All build 176/177 sidecars and
+historical RHEL captures and input snapshots remain unchanged. Historical
+PA5/PA6 passes do not accept this application's consumers. Step 6 remains
+No. Point 5 D10 and point 6 publication closure remain later handoff work.
+
+## Point 4 retry after application tooling separation
+
+Build 179 checked out `6ce03c2c`, using the same candidate archive and pinned
+verification bundle with publication off. `uv sync --locked --no-group tooling`
+passed under Python 3.13.15 and uv 0.12.17. The application excludes unused
+ruff, ty and uv CLI wheels from its CI venv. The existing cplx inventory then
+captured 77 wheels and 80 ELFs, including installed-byte checks. All retained
+wheel hashes match the committed lock; the archived `uv.lock` is byte-identical
+to its canonical public-URL form. No inventory rule was changed.
+
+Provisioning and packaging passed. Test stopped before pytest because the ABI
+inventory could not resolve `tools/python/root/usr/lib/cpp -> ../bin/cpp`.
+The pinned archive contains that dangling alias in both Python and Git roots,
+with neither target present. Round 9 assigned this to candidate archive work.
+That repair assessment is disputed in round 10: an unused alias alone does
+not establish a missing runtime provider. The failed capture stays unchanged.
+
+All 109 artifacts and the raw console are retained. The native independent
+[reading](evidence.tools-archive-rebuild.step6-debian-build179.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build179-retention.json)
+bind PA1 to PA4 passing, PA5 and PA7 failing, and PA6, PA8 and PA9 pending.
+The heavy-wheel trace and full test walk did not run. The generated record
+binds build 179, its completed agent lock and 77 wheel identities. Earlier
+Debian sidecars, RHEL captures and original input snapshots remain unchanged.
+Historical consumer-dependent RHEL passes require fresh acceptance. Resolve
+the scanner-scope assessment and repeat affected acceptance before completion;
+point 5 D10 and point 6 publication closure remain later work.
+
+## Point 4 retry after the application ABI scanner fix
+
+Build 180 checked out `c2b71daf`, with the same candidate archive, verification
+bundle and publication-off pin. Provisioning and packaging passed. Python
+3.13.15 and uv 0.12.17 completed `uv sync --locked --no-group tooling`;
+the 77 wheel hashes, 80 captured ELFs and archived canonical lock are verified.
+
+The scanner recorded 686 objects and 488 dangling links, then reached the
+direct-venv heavy-wheel import. This failed in pymupdf: its `_extra.so`
+RUNPATH was searched for `libpthread.so.0`, then the host cache selected
+`/lib/x86_64-linux-gnu/libpthread.so.0`. That library requires
+`GLIBC_ABI_DT_RELR`, absent from candidate libc. The trace also selects host
+libdl, libutil and libstdc++. The forced per-object observation path is not
+proof of actual import resolution. No ABI pass or pytest execution is claimed.
+
+All 1320 artifacts, the console and both independent reader outputs are
+retained. The [reading](evidence.tools-archive-rebuild.step6-debian-build180.json)
+and [retention](evidence.tools-archive-rebuild.step6-debian-build180-retention.json)
+bind PA1 to PA4 pass, PA5 to PA8 fail and PA9 pending. Historical Debian and
+RHEL captures remain unchanged. Resolve the direct-venv provider path under
+the settled contract and assess the scanner's system-interpreter exclusions;
+neither this failed run nor the dangling-link accounting grants a scope waiver.
+
+The human chose deployment venvs without tooling, using uv from the tools
+installation. Fresh RHEL qualification must measure that scope before D10.
+Step 6 remains No; point 5 D10 and publication closure remain later work.
+
+## Point 4 shared-runtime retry
+
+Point 4 retains build 181 (FAILURE) on application `ad6d7ed8`, preserving
+builds 176 to 180. Candidate archive and bundle pins remain unchanged, with
+publication off. Build 181 fails during Provision, before wheel capture or imports: exporting the shipped LD_LIBRARY_PATH causes host readlink to load the shipped libc and fail on __rtld_libc_freeres (GLIBC_PRIVATE). The shared setup is adopted subject to qualification, but this implementation does not qualify it.
+
+The independent native reading binds: PA1 pass; PA2 pass; PA3 pass; PA4 pass; PA5 pending; PA6 pending; PA7 pending; PA8 pending; PA9 pending.
+The [reading](evidence.tools-archive-rebuild.step6-debian-build181.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build181-retention.json)
+record the original and current reader outcomes and all available artifacts.
+The current reader recognizes availability/runtime counts and keeps unmapped
+system-loader objects outside the helper exception inconclusive. A forced
+availability map is not proof of actual loading.
+
+The human settled Q08 and Q09: retain the narrow helper exception and adopt
+the shared runtime setup subject to qualification. The cumulative fixture
+fails against the application's broader exclusion. All 66 focused acceptance
+fixtures pass. A native comparison confirms the runtime helper's directory
+order matches `build_elf_rpath`; a separate inherited-prefix idempotence
+counterexample is retained for application repair. It does not establish that
+the Jenkins process had that ordering.
+
+Fresh RHEL acceptance must use Q07's venv without tooling and the selected
+shared runtime setup before D10. Historical host-compatible imports do not
+qualify shipped providers. Step 6 remains No; D10 and publication closure
+remain later work.
+
+## Point 4 relocated tooling retry
+
+Point 4 retains build 182 (FAILURE) on application
+`7906fcbe`, preserving builds 176 to 181. Candidate archive and bundle pins
+remain unchanged, with publication off. Build 182 passes the former readlink boundary and uses shipped Python 3.13.15 to create pip 26.2.1 and install uv 0.12.17. The relocated uv loader map names shipped runtime providers and injected OneAgent. Provisioning fails because the new bootstrap checker incorrectly rejects that existing monitoring exclusion; uv execution, locked sync and application imports are not reached.
+
+The independent native reading binds: PA1 pass; PA2 pass; PA3 pass; PA4 pass; PA5 pending; PA6 pending; PA7 pending; PA8 pending; PA9 pending.
+The [reading](evidence.tools-archive-rebuild.step6-debian-build182.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build182-retention.json)
+record both reader outcomes and all available artifacts. Per-subject maps and
+availability rows must accompany system-loader objects outside the retained
+helper exception. These maps do not establish actual execution; the blocking
+heavy-wheel trace remains separate.
+
+Application `30ef4422` makes the runtime boundary per command and fixes the
+inherited-prefix ordering. Its successor `7906fcbe` uses shipped Python 3.13.15
+to bootstrap pip and uv, relocates uv, checks its providers and disables Python
+downloads before locked sync. Native fixture checks confirm the shared helper
+matches the installer directory order without changing the caller's library
+environment. The 69 acceptance-reader fixtures and 34 focused application
+boundary/scanner tests pass. These fixtures do not replace native qualification.
+
+Round 11 was returned without assessment because its transcript append was
+staged after publication captured the index. The replacement is protocol round
+12: stage existing work first, capture that index, then leave the new append
+unstaged throughout review.
+
+Fresh RHEL acceptance must use Q07's venv without tooling and the selected
+runtime setup before D10. Host subprocess inheritance remains a qualification
+risk. The suggested interpreter DT_NEEDED additions are an untested candidate
+proposal, not an adopted fix. Step 6 remains No; D10 and publication closure
+remain later work.
+
+## Point 4 provider-policy retry
+
+Point 4 retains build 183 (FAILURE) on application
+`97337c39`, preserving builds 176 to 182. Candidate archive and bundle pins
+remain unchanged, with publication off. Build 183 passes Provision and Package with shipped Python 3.13.15, its own pip 26.2.1 and relocated uv 0.12.17. The ABI gate passes (686 subjects, 603 dynamic, 732 availability rows, 265 runtime rows, 488 dangling links, zero flags), with both heavy wheels loaded by the direct trace. Test then exits 4 before collection: the command supplies a browser marker exclusion which the full-selection plugin rejects. The independent reader also leaves PA5/PA7 inconclusive for unresolved raw-map/canonical-provider alias bindings and reports PA6 fail because the console lacks its required literal locked-sync marker; those are evidence-reader limitations, not observed import failures.
+
+The independent native reading binds: PA1 pass; PA2 pass; PA3 pass; PA4 pass; PA5 inconclusive; PA6 fail; PA7 inconclusive; PA8 pass; PA9 inconclusive.
+The [reading](evidence.tools-archive-rebuild.step6-debian-build183.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build183-retention.json)
+record both reader outcomes and all available artifacts. Per-subject maps and
+availability rows must accompany system-loader objects outside the retained
+helper exception. These maps do not establish actual execution; the blocking
+heavy-wheel trace remains separate.
+
+Application `30ef4422` makes the runtime boundary per command and fixes the
+inherited-prefix ordering. Successor `7906fcbe` uses shipped Python 3.13.15
+to bootstrap pip and uv, relocates uv, checks its providers and disables Python
+downloads before locked sync. Build 182 exposed a missing monitoring exclusion
+in that new check; `97337c39` reuses the existing scanner provider policy. Native fixture checks confirm the shared helper
+matches the installer directory order without changing the caller's library
+environment. The 71 acceptance-reader fixtures and 34 focused application
+boundary/scanner tests pass. These fixtures do not replace native qualification.
+
+Round 11 was returned without assessment because its transcript append was
+staged after publication captured the index. The replacement is protocol round
+12: stage existing work first, capture that index, then leave the new append
+unstaged throughout review.
+
+Fresh RHEL acceptance must use Q07's venv without tooling and the selected
+runtime setup before D10. Host subprocess inheritance remains a qualification
+risk. The suggested interpreter DT_NEEDED additions are an untested candidate
+proposal, not an adopted fix. Step 6 remains No; D10 and publication closure
+remain later work.
+
+## Point 4 test-scope retry
+
+Point 4 retains build 184 (FAILURE) on application
+`4093c353`, preserving builds 176 to 183 and their original reader outcomes.
+Candidate archive and bundle pins remain unchanged, with publication off.
+Build 184 passes Provision and Package with shipped Python 3.13.15, its own pip and relocated uv 0.12.17. The ABI gate passes with 686 subjects, 603 dynamic objects, 732 availability rows, 265 runtime rows, 488 dangling links and zero flags. The repaired selector allows pytest to run: 11 failed, 6438 passed, 15 skipped, 31 deselected and 9 xfailed; coverage is 99.90%, below the unchanged 100% gate. A host Bash child demonstrably inherits the shipped libc and fails on its GLIBC_2.36 requirement before the brownout harness starts. Ten runtime-boundary tests also fail at the host Bash launch, but their retained exception summaries do not include child stderr. Publish is skipped and publication remains off.
+
+The independent native reading binds: PA1 pass; PA2 pass; PA3 pass; PA4 pass; PA5 inconclusive; PA6 inconclusive; PA7 inconclusive; PA8 pass; PA9 fail.
+The [reading](evidence.tools-archive-rebuild.step6-debian-build184.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build184-retention.json)
+bind the exact application revision, raw artifacts and both reader outcomes.
+
+Round 12's single finding is accepted. Missing PA6 evidence is now inconclusive;
+an observed import or locked-sync failure remains fail. Build 183's archived
+failed label is retained as a historical reader result, not endorsed as a
+runtime failure. The current result uses the corrected reader. A stable
+locked-sync marker remains an application followup; stage success alone does
+not satisfy the reader. The existing path-alias evidence gap still blocks
+PA5/PA7; forced availability maps do not prove execution or replace the trace.
+
+The application resolves the browser selector conflict under its stealth-gate
+Q01 decision. PA9 binds the declared scope and counts to uniquely identified
+browser exclusions and re-runs the committed application validator. A CI
+result over all tests except browser is never browser evidence. Coverage,
+active nonselecting testmon and guarded SQLite suite execution stay required.
+
+Application hook fixtures now use the explicit application interpreter because
+the updated hooks use Python 3.10+ annotations; the independent evidence reader
+still runs on bare Python 3.9. This fixture correction is not a change to the
+application or a claim of application compatibility with Python 3.9.
+
+Fresh RHEL acceptance at Q07 scope, host subprocess qualification, D10 and
+publication obligations remain open. Shipped Python 3.13.15, its own pip and
+relocated uv are retained. The suggested DT_NEEDED additions remain untested
+and unadopted. Step 6 stays No. Round 13 captures the staged index before
+publication and leaves the new transcript append unstaged.
+
+## Point 4 host-child qualification retry
+
+Point 4 retains build 187 (SUCCESS) on application `f8a0217f`, preserving
+builds 176 to 186 and their original reader outcomes. Candidate archive and
+bundle pins remain unchanged, with publication off.
+Build 187 finishes SUCCESS on application f8a0217f. Provisioning and packaging use shipped Python 3.13.15, its own pip and relocated uv 0.12.17. The ABI gate and real heavy-wheel import pass. After fixture isolation, explicit empty-prefix preservation and portable branch tests, native acceptance passes with 6498 collected, 6497 executed and 31 individually identified browser exclusions. Coverage is 100%, 27256 of 27256 lines. Guarded SQLite suites pass and testmon collects without selecting. The failed builds 185 and 186 and their independent readings remain retained. Publication stays off; no browser evidence is claimed.
+
+The independent native reading binds: PA1 pass; PA2 pass; PA3 pass; PA4 pass; PA5 inconclusive; PA6 inconclusive; PA7 inconclusive; PA8 pass; PA9 pass.
+The [reading](evidence.tools-archive-rebuild.step6-debian-build187.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build187-retention.json)
+bind the exact application revision, raw artifacts and both reader outcomes.
+
+Round 13's three findings are accepted. The exact writer append is repaired
+for its private-name occurrences and numeric continuation. Rendered request
+and summary content are checked before publication, including a simulated
+append to the staged transcript. The captured index is not changed afterward.
+Human decision Q10 (2026-09-20) authorizes PA9's CI scope excluding only
+individually identified browser-marked cases; the table and prose now agree.
+Coverage, active nonselecting testmon and guarded SQLite execution remain
+unchanged. Chromium launches are separate application qualification, and this
+CI pass provides no browser evidence. Q08 executable provider scope is unchanged.
+
+Jenkins success does not replace missing acceptance evidence. The stable
+locked-sync marker and unresolved provider-path aliases remain open wherever
+the reader records an inconclusive result. Historical captures stay unchanged.
+Fresh RHEL acceptance at Q07 scope, D10 and publication obligations remain
+open. Shipped Python 3.13.15, its own pip and relocated uv are retained.
+The suggested DT_NEEDED additions remain untested and unadopted. Step 6 stays
+No. Round 14 captures the staged index before publication and leaves the new
+transcript append unstaged.
+
+## Point 4 qualified Debian checkpoint
+
+Point 4 retains build 188 (SUCCESS) on application `ec2e72bc`. All nine
+independent Debian cells PA1 to PA9 pass. Earlier builds and their original
+reader outcomes remain unchanged. Candidate archive and bundle pins remain
+unchanged, with publication off.
+
+The [reading](evidence.tools-archive-rebuild.step6-debian-build188.json) and
+[retention](evidence.tools-archive-rebuild.step6-debian-build188-retention.json)
+bind the exact application revision, raw artifacts and both reader outcomes.
+Build 188 finishes SUCCESS on application ec2e72bc. The real relocated uv sync emits the stable success marker. Provider-map aliases retain their qualified physical targets. Shipped Python 3.13.15, its own pip, relocated uv 0.12.17, canonical lock, wheel bytes and blocking heavy-wheel traces remain intact. Native acceptance passes with 6501 collected, 6500 executed and 31 individually identified browser exclusions. Coverage is 100%, 27256 of 27256 lines. Guarded SQLite suites pass and testmon collects without selecting. No browser evidence is claimed.
+
+Round 14's validator finding is fixed: the reader compares the validator to
+the committed blob before execution, retains its bytes and SHA-256, and runs
+the retained copy in isolated mode. The transport includes the ci tree and
+validator blob. Missing or modified validators are refused. Provider-map
+aliases require an explicitly qualified physical target; the locked-sync
+success marker follows the real relocated uv command's successful exit.
+These repairs close PA5, PA6 and PA7 without broadening provider policy.
+
+The publication checker now uses the publisher's own complete entry renderer,
+including metadata and footer. The staged index remains unchanged after the
+request is rendered. Q10 excludes only individually identified browser-marked
+tests; 100% coverage, nonselecting testmon and guarded suites remain mandatory.
+This CI qualification supplies no browser evidence.
+
+On 2026-09-21 the human selected: "OK go for checkpoint, then work on completing
+step 6". Round 15 therefore assesses readiness to commit this repaired Debian
+checkpoint. Immediately after that commit, continue with fresh RHEL acceptance
+at Q07 scope, D10 and the remaining pre-publication checks, then review the
+completed Step 6. These obligations are not waived. Step 6 remains No until
+their evidence is conclusive. Shipped Python 3.13.15, its own pip and relocated
+uv remain required. The proposed DT_NEEDED additions remain unadopted.
+
 ## Generated release record
 
 Source: `acceptance.tools-archive-rebuild.json`.
@@ -684,22 +996,22 @@ Source: `acceptance.tools-archive-rebuild.json`.
 | AR2 | pass | tools-archive-rebuild-step5-repackage-2026-09-18_220913 |
 | AR3 | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
 | AR4 | pass | tools-archive-rebuild-step5-repackage-2026-09-18_220913 |
-| PA1:debian | pending | None |
+| PA1:debian | pass | build-188 |
 | PA1:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
-| PA2:debian | pending | None |
+| PA2:debian | pass | build-188 |
 | PA2:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
-| PA3:debian | pending | None |
-| PA4:debian | pending | None |
+| PA3:debian | pass | build-188 |
+| PA4:debian | pass | build-188 |
 | PA4:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
-| PA5:debian | pending | None |
-| PA5:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
-| PA6:debian | pending | None |
-| PA6:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
-| PA7:debian | pending | None |
+| PA5:debian | pass | build-188 |
+| PA5:rhel | pending | tools-archive-rebuild-step6-20260919T113628Z-rhel |
+| PA6:debian | pass | build-188 |
+| PA6:rhel | pending | tools-archive-rebuild-step6-20260919T113628Z-rhel |
+| PA7:debian | pass | build-188 |
 | PA7:rhel | pending | None |
-| PA8:debian | pending | None |
+| PA8:debian | pass | build-188 |
 | PA8:rhel | pending | None |
-| PA9:debian | pending | None |
+| PA9:debian | pass | build-188 |
 | PA9:rhel | pending | None |
 | PA10:debian | not applicable | None |
 | PA10:rhel | pass | tools-archive-rebuild-step6-20260919T113628Z-rhel |
@@ -726,7 +1038,7 @@ Source: `acceptance.tools-archive-rebuild.json`.
   "schema_version": 1,
   "preparation": {
     "state": "pending",
-    "reason": "Both earlier RHEL failures retained; replacement RHEL acceptance passes with the matching 3.13.15 pdfs venv; Debian, D10 and publication remain pending",
+    "reason": "Debian PA1 to PA9 pass at the retained checkpoint; consumer-dependent RHEL acceptance, D10 and publication obligations remain pending",
     "cplx_revision": "66de88c2b2d8259fb8b67d161823745e7d0b7685",
     "application_revision": "7a2c1c1650a1252e9e73c4dbc9dfe73bcf5d8b87",
     "validator": {
@@ -1926,20 +2238,99 @@ Source: `acceptance.tools-archive-rebuild.json`.
         ]
       },
       "consumers": {
-        "application_revision": null,
-        "pipeline_revision": null,
-        "lock_sha256": null,
-        "wheels": {},
-        "venv_base": null
+        "application_revision": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+        "pipeline_revision": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+        "lock_sha256": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+        "wheels": {
+          "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+          "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+          "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+          "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+          "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+          "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+          "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+          "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+          "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+          "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+          "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+          "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+          "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+          "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+          "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+          "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+          "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+          "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+          "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+          "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+          "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+          "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+          "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+          "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+          "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+          "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+          "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+          "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+          "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+          "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+          "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+          "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+          "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+          "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+          "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+          "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+          "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+          "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+          "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+          "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+          "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+          "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+          "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+          "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+          "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+          "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+          "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+          "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+          "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+          "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+          "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+          "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+          "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+          "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+          "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+          "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+          "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+          "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+          "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+          "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+          "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+          "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+          "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+          "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+          "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+          "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+          "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+          "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+          "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+          "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+          "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+          "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+          "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+          "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+          "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+          "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+          "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+        },
+        "venv_base": "<agent-workspace>/prefix/tools/python/python-3.13.15/bin/python3.13_bin"
       },
       "environments": {
         "debian": {
-          "run": null,
-          "os": null,
-          "image": null,
-          "container": null,
-          "runtime": {},
-          "transfer_sha256": null
+          "build": "188",
+          "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+          "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+          "kernel": "",
+          "os": "Debian GNU/Linux 12 (bookworm)",
+          "run": "build-188",
+          "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
         },
         "rhel-build": {
           "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
@@ -2049,6 +2440,162 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "identity": "step6-point3-round2-20260919T113628Z",
           "path": "evidence.tools-archive-rebuild.step6-point3-round2.txt",
           "sha256": "2fc4d54838be2b08c3213bed23de281f3c26c352bff8df3154401be6485e9ab7",
+          "retention": "versioned"
+        },
+        "step6-debian": {
+          "identity": "step6-debian-build-176",
+          "path": "evidence.tools-archive-rebuild.step6-debian.json",
+          "sha256": "f8ca335c2efa23cf6262cc604390e241d794c742631ee7f69827e3a21140e98a",
+          "retention": "versioned"
+        },
+        "step6-debian-retention": {
+          "identity": "step6-debian-retention-build-176",
+          "path": "evidence.tools-archive-rebuild.step6-debian-retention.json",
+          "sha256": "e7af3c5605ea857f903202703862a3c663ecee17483a06f9a0979bfa589b943e",
+          "retention": "versioned"
+        },
+        "step6-debian-build177": {
+          "identity": "step6-debian-build177",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build177.json",
+          "sha256": "5f7cfc945c57dd7680d120dfb4ceafc12df4d255130d08310e920dcf88731433",
+          "retention": "versioned"
+        },
+        "step6-debian-build177-retention": {
+          "identity": "step6-debian-build177-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build177-retention.json",
+          "sha256": "f294296d1a3f02008b983a495694b890d20ceae7d8825ceb57c0641f3714d9ad",
+          "retention": "versioned"
+        },
+        "step6-debian-build178": {
+          "identity": "step6-debian-build178",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build178.json",
+          "sha256": "4954a30b4646cf6a4a380fc6c74b641baec26f3fbb957e85d439c60af6b75220",
+          "retention": "versioned"
+        },
+        "step6-debian-build178-retention": {
+          "identity": "step6-debian-build178-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build178-retention.json",
+          "sha256": "59c381c75af0bdac4b47542d0f448ac03ec4306d5cf89b302d0bc6c30de1d1e3",
+          "retention": "versioned"
+        },
+        "step6-debian-build179": {
+          "identity": "step6-debian-build179",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build179.json",
+          "sha256": "fac3f0c465af4be02275c2e285d0fefebfaa2cc1052fa9e5ab35d5d4e5f9581f",
+          "retention": "versioned"
+        },
+        "step6-debian-build179-retention": {
+          "identity": "step6-debian-build179-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build179-retention.json",
+          "sha256": "baef83cec86d2463ed55e6d0f7a7606faf94a3df4f5e471a3f7f68e7df8750ed",
+          "retention": "versioned"
+        },
+        "step6-debian-build180": {
+          "identity": "step6-debian-build180",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build180.json",
+          "sha256": "4f3be41e7479c48819f3a7b4285f5a683d9d008f0b3a95ed59bdc58a5c436ed9",
+          "retention": "versioned"
+        },
+        "step6-debian-build180-retention": {
+          "identity": "step6-debian-build180-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build180-retention.json",
+          "sha256": "fbbd7a68180c38d3c781d116edb4fca5cfe3535ebdb0209472b1b0ca52d02848",
+          "retention": "versioned"
+        },
+        "step6-debian-build181": {
+          "identity": "step6-debian-build181",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build181.json",
+          "sha256": "9412da78fa47a30e752f49e996d920d9bb4fcf8f9af7d220702c8cd2025ac924",
+          "retention": "versioned"
+        },
+        "step6-debian-build181-retention": {
+          "identity": "step6-debian-build181-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build181-retention.json",
+          "sha256": "c37a4fe50b402cae764fe9c11160fbc6e95d3ff11f54109b2a4d714b34dddbc2",
+          "retention": "versioned"
+        },
+        "step6-debian-build182": {
+          "identity": "step6-debian-build182",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build182.json",
+          "sha256": "38462b55190390cfa0dd317610e5f17e96d2eac8892d7e8ba7cf139af1c11180",
+          "retention": "versioned"
+        },
+        "step6-debian-build182-retention": {
+          "identity": "step6-debian-build182-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build182-retention.json",
+          "sha256": "31a1a63261ab9dfe6eba1ea36a66e272230262817076e0632a1ec34a9cb84da6",
+          "retention": "versioned"
+        },
+        "step6-debian-build183": {
+          "identity": "step6-debian-build183",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build183.json",
+          "sha256": "e134f401cda38ce5d9f923bdb854af5e20bb172d3335ccad6748962185ab52e1",
+          "retention": "versioned"
+        },
+        "step6-debian-build183-retention": {
+          "identity": "step6-debian-build183-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build183-retention.json",
+          "sha256": "d45f2cf8973b56d7eb148b99e968f2eab6e5fdcf51cdc523a005b828b494dc85",
+          "retention": "versioned"
+        },
+        "step6-debian-build184": {
+          "identity": "step6-debian-build184",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build184.json",
+          "sha256": "de4a656844f0fcf09777b23360327df548ef1aae662ba2ba28b5fbe6d9df5013",
+          "retention": "versioned"
+        },
+        "step6-debian-build184-retention": {
+          "identity": "step6-debian-build184-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build184-retention.json",
+          "sha256": "ed9be39ac7763dc70a87bba6cb25bec46dbabff5226b97efe59873e2176f8767",
+          "retention": "versioned"
+        },
+        "step6-debian-build185": {
+          "identity": "step6-debian-build185",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build185.json",
+          "sha256": "9bc7afb2e1fb602b67e5dc13b2a35553b78a4f3cb1b85c982e33773cc48c266d",
+          "retention": "versioned"
+        },
+        "step6-debian-build185-retention": {
+          "identity": "step6-debian-build185-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build185-retention.json",
+          "sha256": "a2950c21c816fcce347a30e36c7ec56d178de8290434e1234c47e4e49d1490bc",
+          "retention": "versioned"
+        },
+        "step6-debian-build186": {
+          "identity": "step6-debian-build186",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build186.json",
+          "sha256": "efd3b155e7cf255f5dd2b03f7727766954ac3107634a79fd4705f079f55665cb",
+          "retention": "versioned"
+        },
+        "step6-debian-build186-retention": {
+          "identity": "step6-debian-build186-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build186-retention.json",
+          "sha256": "a17eef2f976634cdb3d074af9b30adb5291835ed7cb2609b18cc3c477a6d5154",
+          "retention": "versioned"
+        },
+        "step6-debian-build187": {
+          "identity": "step6-debian-build187",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build187.json",
+          "sha256": "bcc655a03a514b9b0e230ce29b7b567d56ec4f9d651dacd1301991393a1228c7",
+          "retention": "versioned"
+        },
+        "step6-debian-build187-retention": {
+          "identity": "step6-debian-build187-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build187-retention.json",
+          "sha256": "256897bd02db5cedd507dc5bb6d69df1957d58cd19ce4e991e1c44cee2ac60cf",
+          "retention": "versioned"
+        },
+        "step6-debian-build188": {
+          "identity": "step6-debian-build188",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build188.json",
+          "sha256": "c825f374c435fa8f1e92a1b430265f4931264b548a118ba1ac0188106e01f2c6",
+          "retention": "versioned"
+        },
+        "step6-debian-build188-retention": {
+          "identity": "step6-debian-build188-retention",
+          "path": "evidence.tools-archive-rebuild.step6-debian-build188-retention.json",
+          "sha256": "12fcb5ed690995561f10f21c92bb66a10d8bfa994c07b441f336dc24771072a7",
           "retention": "versioned"
         }
       },
@@ -2237,10 +2784,134 @@ Source: `acceptance.tools-archive-rebuild.json`.
           }
         },
         "PA1:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "candidate relocated without a shim, trailer completed",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA1:rhel": {
           "state": "pass",
@@ -2294,10 +2965,134 @@ Source: `acceptance.tools-archive-rebuild.json`.
           }
         },
         "PA2:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "wrapper first-call acceptance met",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA2:rhel": {
           "state": "pass",
@@ -2351,16 +3146,264 @@ Source: `acceptance.tools-archive-rebuild.json`.
           }
         },
         "PA3:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "SQLite acceptance role over the pinned archive",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA4:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "toolchain git answered --version after relocation",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA4:rhel": {
           "state": "pass",
@@ -2414,13 +3457,137 @@ Source: `acceptance.tools-archive-rebuild.json`.
           }
         },
         "PA5:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "closure checker and whole-scope ABI listing accepted",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA5:rhel": {
-          "state": "pass",
+          "state": "pending",
           "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
           "captures": [
             "step6-rhel",
@@ -2468,16 +3635,141 @@ Source: `acceptance.tools-archive-rebuild.json`.
                 "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
               }
             }
-          }
+          },
+          "reason": "Historical qualification retained; fresh acceptance is required for the current application after exact agent wheel capture succeeds"
         },
         "PA6:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "uv sync --locked then pymupdf and pikepdf imported from the candidate venv",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA6:rhel": {
-          "state": "pass",
+          "state": "pending",
           "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
           "captures": [
             "step6-rhel",
@@ -2525,13 +3817,138 @@ Source: `acceptance.tools-archive-rebuild.json`.
                 "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
               }
             }
-          }
+          },
+          "reason": "Historical qualification retained; fresh acceptance is required for the current application after exact agent wheel capture succeeds"
         },
         "PA7:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "loader listing over 686 subjects, 603 dynamic, zero flags",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA7:rhel": {
           "state": "pending",
@@ -2540,10 +3957,134 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA8:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "one direct-venv LD_DEBUG trace retained with zero host flags",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA8:rhel": {
           "state": "pending",
@@ -2552,10 +4093,134 @@ Source: `acceptance.tools-archive-rebuild.json`.
           "inputs": {}
         },
         "PA9:debian": {
-          "state": "pending",
-          "run": null,
-          "captures": [],
-          "inputs": {}
+          "state": "pass",
+          "run": "build-188",
+          "reason": "all tests except browser (stealth-gate Q01); not browser evidence; SQLite-guarded suites and 100% coverage re-validated",
+          "captures": [
+            "step6-debian-build188",
+            "step6-debian-build188-retention"
+          ],
+          "inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          }
         },
         "PA9:rhel": {
           "state": "pending",
@@ -2891,7 +4556,2024 @@ Source: `acceptance.tools-archive-rebuild.json`.
         "selected_generation": null,
         "readings": []
       },
-      "assessments": {},
+      "assessments": {
+        "AR1": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "AR2": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "AR3": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "AR4": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "PA1:rhel": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "PA2:rhel": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "PA4:rhel": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "PA10:rhel": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "PA11:rhel": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "PA3:rhel-build": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "PA3:rhel-deploy": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        },
+        "RA1": {
+          "decision": "unaffected",
+          "previous_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": null,
+            "pipeline": null,
+            "lock": null,
+            "wheels": {},
+            "runtime": {
+              "debian": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": null,
+                "os": null,
+                "image": null,
+                "container": null,
+                "runtime": {},
+                "transfer_sha256": null
+              }
+            }
+          },
+          "current_inputs": {
+            "archive": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+            "application": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "pipeline": "ec2e72bcb3dc8d0fb27dd1cdad7e32ec2600e490",
+            "lock": "4d010aec7fe59bf371d37ee71a036c495a6144d07a8213023fd27a62d5777056",
+            "wheels": {
+              "aiofiles-25.1.0-py3-none-any.whl": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695",
+              "annotated_doc-0.0.4-py3-none-any.whl": "571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320",
+              "annotated_types-0.7.0-py3-none-any.whl": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53",
+              "anyio-4.14.2-py3-none-any.whl": "9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494",
+              "argon2_cffi-25.1.0-py3-none-any.whl": "fdc8b074db390fccb6eb4a3604ae7231f219aa669a2652e0f20e16ba513d5741",
+              "argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "d3e924cfc503018a714f94a49a149fdc0b644eaead5d1f089330399134fa028a",
+              "build-1.5.0-py3-none-any.whl": "13f3eecb844759ab66efec90ca17639bbf14dc06cb2fdf37a9010322d9c50a6f",
+              "cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "c8d3b5532fc71b7a77c09192b4a5a200ea992702734a2e9279a37f2478236f26",
+              "click-8.4.0-py3-none-any.whl": "40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81",
+              "colorama-0.4.6-py2.py3-none-any.whl": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+              "coverage-7.14.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "9d1aa57a1dc8e05bdc42e81c5d671d849577aeedf279f4c449d6d286f9ed88ca",
+              "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+              "fastapi-0.136.1-py3-none-any.whl": "a6e9d7eeada96c93a4d69cb03836b44fa34e2854accb7244a1ece36cd4781c3f",
+              "fsspec-2026.4.0-py3-none-any.whl": "11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2",
+              "greenlet-3.5.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl": "09201fa698768db245920b00fdc86ee3e73540f01ca6db162be9632642e1a473",
+              "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+              "httpcore2-2.13.0-py3-none-any.whl": "35ae5be347aa40467b4a5dc032ac67ebb6d27189fc97e8cebcf99616f6a1bb9e",
+              "httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "04c6c0e6c5fb0739c5b8a9eb046d298650a0ff38cf42537fc372b28dc7e4472c",
+              "httpx2-2.13.0-py3-none-any.whl": "fc12720cedf72faa26cca6b4ca394e05c894e7d7933fc45cafe767960804e49a",
+              "humanize-4.15.0-py3-none-any.whl": "b1186eb9f5a9749cd9cb8565aee77919dd7c8d076161cf44d70e59e3301e1769",
+              "hypothesis-6.152.7-py3-none-any.whl": "c0b17dd428fcb6e962f60315f6f4a77816c72fbb281ce9ba73699dabead5ec82",
+              "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+              "importlib_metadata-9.0.0-py3-none-any.whl": "2d21d1cc5a017bd0559e36150c21c830ab1dc304dedd1b7ea85d20f45ef3edd7",
+              "iniconfig-2.3.0-py3-none-any.whl": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+              "itsdangerous-2.2.0-py3-none-any.whl": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef",
+              "jinja2-3.1.6-py3-none-any.whl": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+              "lxml-6.1.1-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl": "1d4962d4c66bf830a7e59ed6cfc17d148149898a3aefa8ec6e59763e6e3ed085",
+              "mando-0.7.1-py2.py3-none-any.whl": "26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a",
+              "markdown-3.10.2-py3-none-any.whl": "e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36",
+              "markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "ccfcd093f13f0f0b7fdd0f198b90053bf7b2f02a3927a30e63f3ccc9df56b676",
+              "nodeenv-1.10.0-py2.py3-none-any.whl": "5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827",
+              "numpy-2.4.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1616bde34b2bcba2fa9bde06217ce00da4f3d1bdfb264d54525a99e8fe170d83",
+              "packaging-26.2-py3-none-any.whl": "5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e",
+              "passlib-1.7.4-py2.py3-none-any.whl": "aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1",
+              "pikepdf-10.7.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "1f5a82d3e7443521f3eac24694f0f842d5daed5fef7ccb53d3efe98cee7cea41",
+              "pillow-12.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl": "0847a763afefb695bc912d7c131e7e0632d4edc1d8698f58ddabec8e46b8b6d3",
+              "pip-26.2.1-py3-none-any.whl": "71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e",
+              "playwright-1.60.0-py3-none-manylinux1_x86_64.whl": "1c2bfae7884fb3fb05b853290eab8f343d524e5016f2f1def702acbbdf14c93e",
+              "pluggy-1.6.0-py3-none-any.whl": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+              "portalocker-3.2.0-py3-none-any.whl": "3cdc5f565312224bc570c49337bd21428bba0ef363bbcf58b9ef4a9f11779968",
+              "progressbar2-4.5.0-py3-none-any.whl": "625c94a54e63915b3959355e6d4aacd63a00219e5f3e2b12181b76867bf6f628",
+              "psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9",
+              "pycparser-3.0-py3-none-any.whl": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+              "pydantic-2.13.4-py3-none-any.whl": "45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba",
+              "pydantic_core-2.46.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9551187363ffc0de2a00b2e47c25aeaeb1020b69b668762966df15fc5659dd5a",
+              "pyee-13.0.1-py3-none-any.whl": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+              "pygments-2.20.0-py3-none-any.whl": "81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176",
+              "pyinstrument-5.1.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "eb3a05108edebc30f31e2c69c904576042f1158b2513ab80adc08f7848a7a8f0",
+              "pymupdf-1.27.2.3-cp310-abi3-manylinux_2_28_x86_64.whl": "857842b4888827bd6155a1131341b2822a7ebe9a8c15a975fd7d490d7a64a30c",
+              "pyproject_hooks-1.2.0-py3-none-any.whl": "9e5c6bfa8dcc30091c74b0cf803c81fdd29d94f01992a7707bc97babb1141913",
+              "pyright-1.1.410-py3-none-any.whl": "5e961bed37cacf96b3f7cd7b1da39b350a9239aa2e69138d0e88f728cfaf296c",
+              "pytest-9.1.0-py3-none-any.whl": "8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32",
+              "pytest_asyncio-1.3.0-py3-none-any.whl": "611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5",
+              "pytest_cov-7.1.0-py3-none-any.whl": "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678",
+              "pytest_rerunfailures-16.2-py3-none-any.whl": "c22a53d2827becc76f057d4ded123c0e726523f2f0e5f0bb4efb31fd59e1f14e",
+              "pytest_testmon-2.2.0-py3-none-any.whl": "2604ca44a54d61a2e830d9ce828b41a837075e4ebc1f81b148add8e90d34815b",
+              "pytest_timeout-2.4.0-py3-none-any.whl": "c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2",
+              "pytest_watcher-0.6.3-py3-none-any.whl": "83e7748c933087e8276edb6078663e6afa9926434b4fd8b85cf6b32b1d5bec89",
+              "python_dotenv-1.2.2-py3-none-any.whl": "1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a",
+              "python_utils-3.9.1-py2.py3-none-any.whl": "0273d7363c7ad4b70999b2791d5ba6b55333d6f7a4e4c8b6b39fb82b5fab4613",
+              "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6",
+              "radon-6.0.1-py2.py3-none-any.whl": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859",
+              "six-1.17.0-py2.py3-none-any.whl": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+              "sortedcontainers-2.4.0-py2.py3-none-any.whl": "a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0",
+              "starlette-1.3.1-py3-none-any.whl": "c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6",
+              "tabulate-0.10.0-py3-none-any.whl": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+              "truststore-0.10.4-py3-none-any.whl": "adaeaecf1cbb5f4de3b1959b42d41f6fab57b2b1666adb59e89cb0b53361d981",
+              "typing_extensions-4.15.0-py3-none-any.whl": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548",
+              "typing_inspection-0.4.2-py3-none-any.whl": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7",
+              "uvicorn-0.47.0-py3-none-any.whl": "2c5715bc12d1892d84752049f400cd1c3cb018514967fdfeb97640443a6a9432",
+              "uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": "0530a5fbad9c9e4ee3f2b33b148c6a64d47bbad8000ea63704fa8260f4cf728e",
+              "vulture-2.16-py3-none-any.whl": "6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee",
+              "watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl": "20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2",
+              "watchfiles-1.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "ca148d73dea36c9763aaa351e4d7a51780ec1584217c45276f4fe8239c768b71",
+              "websockets-16.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl": "95724e638f0f9c350bb1c2b0a7ad0e83d9cc0c9259f3ea94e40d7b02a2179ae5",
+              "wheel-0.47.0-py3-none-any.whl": "212281cab4dff978f6cedd499cd893e1f620791ca6ff7107cf270781e587eced",
+              "zipp-3.23.1-py3-none-any.whl": "0b3596c50a5c700c9cb40ba8d86d9f2cc4807e9bedb06bcdf7fac85633e444dc"
+            },
+            "runtime": {
+              "debian": {
+                "build": "188",
+                "container": "602c5d12b25cb7285eccbf5cba3b1635005ec9782794abafb813b0c601a78efb",
+                "image": "sha256:9cb0364f561d564c78a249663fa184c370f2ac5f9f314a99afe06c5516337d3f",
+                "kernel": "",
+                "os": "Debian GNU/Linux 12 (bookworm)",
+                "run": "build-188",
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-build": {
+                "run": "tools-archive-rebuild-step5-repackage-2026-09-18_220913",
+                "os": "RHEL 9.8 x86_64",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "sqlite_provider_sha256": "007322505ff5177c820251b31612a9e4c2e6e4c78a5ad62df81d92ba329d65ff"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              },
+              "rhel-deploy": {
+                "run": "tools-archive-rebuild-step6-20260919T113628Z-rhel",
+                "os": "Red Hat Enterprise Linux 9.8 (Plow)",
+                "image": null,
+                "container": null,
+                "runtime": {
+                  "python": "3.13.15",
+                  "loader_sha256": "58b211cde994b9373c9a39abeb2633191b832574c7ca0bd44e362d33e0cc6111",
+                  "sqlite_provider_sha256": "c20f1de1dfead51849bd7b0eedef29a5798532ece1ca3925d4159ffe8c80255d",
+                  "libstdcxx_sha256": "8a4850b551dc07d922fa6591671c0debbbdd20d631eef9e826e68e1a571d932e",
+                  "libc_sha256": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746"
+                },
+                "transfer_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87"
+              }
+            }
+          },
+          "captures": [
+            "step6-debian-build188-retention"
+          ],
+          "reason": "Archive and original RHEL runtime are unchanged. This archive/installer/wrapper/SQLite qualification does not consume application wheels. Original snapshots remain unchanged; previously unknown consumer identities still require resolution before publication."
+        }
+      },
       "publication": {
         "coordinate": null,
         "state": "pending",
