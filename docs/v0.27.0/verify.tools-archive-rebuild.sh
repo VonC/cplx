@@ -41,6 +41,7 @@ if [ "$step" -ge 5 ]; then
 fi
 if [ "$step" -ge 6 ]; then
     scripts+=(ci/deliver-closure-tools.sh docs/v0.27.0/acceptance.tools-archive-rebuild.sh
+        docs/v0.27.0/acceptance.tools-runtime-rhel.sh
         docs/v0.27.0/verify.tools-release-acceptance.sh)
 fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
