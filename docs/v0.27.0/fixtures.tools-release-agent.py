@@ -43,15 +43,23 @@ def helper_accounting(abi, tools, venv, trace, loader_map, scratch):
     base = tools / "python/bin/python"
     base.parent.mkdir()
     base.write_bytes(b"python")
+    (venv / "bin").mkdir()
+    (venv / "bin/python").symlink_to(base)
+    interpreter = "/lib64/ld-linux-x86-64.so.2"
+    helper_map = None
+    mapped = []
 
     def observe(args, output, env=None):
         if args[0] == "readelf":
             result = "Type: DYN\n(NEEDED) libc.so.6\n"
+            if args == ["readelf", "-d", str(base)]:
+                result += "(RPATH) Library rpath: [" + str(tools) + "]\n"
             if args[-1] == str(helper):
-                result += "[Requesting program interpreter: /lib64/host-loader.so]\n"
+                result += "[Requesting program interpreter: " + interpreter + "]\n"
         elif "--list" in args:
-            result = loader_map
-        elif env:
+            mapped.append(args[-1])
+            result = helper_map if args[-1] == str(helper) and helper_map is not None else loader_map
+        elif env and "LD_DEBUG_OUTPUT" in env:
             Path(env["LD_DEBUG_OUTPUT"] + ".123").write_text(trace)
             result = "wheels load\n"
         else:
@@ -60,12 +68,29 @@ def helper_accounting(abi, tools, venv, trace, loader_map, scratch):
         return result
 
     evidence = scratch / "helper-evidence"
-    with patch.object(abi, "command", observe):
+    with patch.dict(os.environ, {"PDFSS_RUNTIME_LIB_PATH": str(tools)}), patch.object(abi, "command", observe):
         abi.run(tools.parent, venv, evidence)
     assert "system-interpreter-helper|" + str(helper) in (evidence / "providers.txt").read_text()
-    # Moving the same subject out of tools/bin must remove the exception.
+    assert str(helper) not in mapped
+    # The retained-helper exception does not authorize every system-loader ELF.
+    # Q08 requires qualification outside tools/bin: an explicit forced map,
+    # labelled availability, must reject a host provider rather than exempt it.
     helper.rename(tools / "runtime-helper")
     helper = tools / "runtime-helper"
+    outside = scratch / "system-object-evidence"
+    with patch.dict(os.environ, {"PDFSS_RUNTIME_LIB_PATH": str(tools)}), patch.object(abi, "command", observe):
+        abi.run(tools.parent, venv, outside)
+    rows = (outside / "providers.txt").read_text()
+    assert "system-interpreter-helper|" + str(helper) not in rows
+    assert str(helper) in mapped
+    assert "availability|" in rows
+    helper_map = "libc.so.6 => /usr/lib/libc.so.6 (0x1)"
+    with patch.dict(os.environ, {"PDFSS_RUNTIME_LIB_PATH": str(tools)}), patch.object(abi, "command", observe):
+        expect("system-interpreter-host-provider-refused", abi.run,
+               tools.parent, venv, scratch / "host-object-evidence", fail=True)
+    helper_map = None
+    # An arbitrary external interpreter is still refused, in either location.
+    interpreter = "/lib64/host-loader.so"
     with patch.object(abi, "command", observe):
         expect("outside-interpreter-runtime-refused", abi.run, tools.parent, venv,
                scratch / "runtime-evidence", fail=True)
@@ -116,11 +141,17 @@ def main():
     expect("host-version-provider", abi.validate_trace, trace.replace(str(tools / "libc.so.6") + " [0]", "/usr/lib/libc.so.6 [0]"), tools, venv, fail=True)
     expect("unparsed-version", abi.validate_trace, trace + "1: checking for version unknown\n", tools, venv, fail=True)
     expect("trace-visible-monitoring", abi.validate_trace, trace + "1: calling init: /opt/dynatrace/oneagent/agent/liboneagentproc.so\n", tools, venv)
-    expect("whole-tree-outside-alias", abi.inventory, tools, venv, fail=True)
+    expect("whole-tree-outside-alias", abi.inventory, tools, venv, [], fail=True)
     (tools / "outside").unlink()
-    expect("empty-elf-inventory", abi.inventory, tools, venv, fail=True)
+    expect("empty-elf-inventory", abi.inventory, tools, venv, [], fail=True)
     (tools / "libc.so.6").write_bytes(b"\x7fELFfixture")
-    assert abi.inventory(tools, venv) == [tools / "libc.so.6"]
+    assert abi.inventory(tools, venv, []) == [tools / "libc.so.6"]
+    (tools / "missing-alias").symlink_to("missing-target")
+    dangling = []
+    assert abi.inventory(tools, venv, dangling) == [tools / "libc.so.6"]
+    assert dangling == ["dangling-link|" + str(tools / "missing-alias") + "|missing-target"]
+    expect("missing-runtime-provider-refused", abi.validate_list,
+           "missing.so => " + str(tools / "missing-alias") + " (0x1)", tools, venv, fail=True)
     print("PASS inventory-canonical-once")
     helper_accounting(abi, tools, venv, trace, "\n".join(good), scratch)
 
@@ -143,12 +174,12 @@ def main():
     expect("coverage-missing", tests.validate, report, scratch / "missing.xml", fail=True)
     cov.write_text('<coverage lines-valid="10" lines-covered="9" line-rate="0.9"/>')
     expect("coverage-below-gate", tests.validate, report, cov, fail=True)
-    wheel_fixtures(app, scratch)
     plugin_fixtures(app, scratch)
 
 
 def wheel_fixtures(app, scratch):
     capture = module(app / "ci/tools_wheel_capture.py")
+    print("PASS application-venv helper import: tools_wheel_capture")
     site = scratch / "wheel-site"
     info = site / "fixture-1.0.dist-info"
     info.mkdir(parents=True)
@@ -162,8 +193,26 @@ def wheel_fixtures(app, scratch):
     lock["package"][0]["wheels"].append(dict(wheel, url="https://other/fixture-1.0-py3-none-any.whl"))
     expect("ambiguous-wheel", capture.identify, lock, site, fail=True)
     lock["package"][0]["wheels"].pop()
-    (info / "WHEEL").write_text("Tag: cp313-cp313-linux_x86_64\n")
-    expect("absent-wheel-tag", capture.identify, lock, site, fail=True)
+    # Playwright's generic WHEEL metadata does not match its platform filename.
+    # Supply explicit platform ranks so this contract is host-independent.
+    linux = dict(wheel, url="https://fixture/fixture-1.0-py3-none-manylinux1_x86_64.whl")
+    windows = dict(wheel, url="https://fixture/fixture-1.0-py3-none-win_amd64.whl")
+    choices = lock["package"][0]["wheels"]
+    choices[:] = [windows, linux]
+    supported = ["py3-none-manylinux1_x86_64", "py3-none-win_amd64", "py3-none-any"]
+    result = capture.identify(lock, site, supported)
+    assert result == [("fixture-1.0-py3-none-manylinux1_x86_64.whl", "a" * 64, linux["url"])]
+    print("PASS generic-wheel-ranked-fallback")
+    expect("unsupported-wheel-platform", capture.identify, lock, site, ["py3-none-any"], fail=True)
+    choices.append(dict(linux, url="https://other/fixture-1.0-py3-none-manylinux1_x86_64.whl"))
+    expect("tied-wheel-fallback", capture.identify, lock, site, supported, fail=True)
+    choices[:] = [linux, wheel]
+    result = capture.identify(lock, site, supported)
+    assert result == [("fixture-1.0-py3-none-any.whl", "a" * 64, wheel["url"])]
+    print("PASS exact-wheel-precedes-fallback")
+    (info / "METADATA").write_text("Name: fixture\nVersion: 2.0\n")
+    expect("absent-wheel-release", capture.identify, lock, site, supported, fail=True)
+    (info / "METADATA").write_text("Name: fixture\nVersion: 1.0\n")
     (info / "direct_url.json").write_text('{"dir_info":{"editable":true}}')
     expect("unlocked-editable", capture.identify, lock, site, fail=True)
 
@@ -212,4 +261,7 @@ def plugin_fixtures(app, scratch):
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 4 and sys.argv[3] == "--wheels":
+        wheel_fixtures(Path(sys.argv[1]), Path(sys.argv[2]))
+    else:
+        main()

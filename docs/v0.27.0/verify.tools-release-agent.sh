@@ -2,15 +2,30 @@
 # Native fixtures for main-chain candidate transport, ABI and full-test evidence.
 # All inputs live in an owned scratch tree; no real environment or agent is used.
 set -euo pipefail
-python='' app=''
+python='' app='' capture_python=''
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --python) python=${2:?}; shift 2 ;;
         --app-repo) app=${2:?}; shift 2 ;;
+        --capture-python) capture_python=${2:?}; shift 2 ;;
         *) exit 2 ;;
     esac
 done
 [[ $python = /* && -x $python && $app = /* && -d $app/ci ]] || exit 2
+[[ $capture_python = /* && -x $capture_python ]] || {
+    printf 'Required: --capture-python /absolute/application-venv/python\n' >&2; exit 2;
+}
+# This helper executes inside the application's synchronized venv in CI.
+# Require its dependencies there, without polluting the independent checks.
+"$capture_python" -I - <<'PY'
+import packaging
+import sys
+import tomllib
+
+assert sys.prefix != sys.base_prefix, "capture interpreter must be a venv"
+print("Capture interpreter:", sys.executable, sys.version)
+print("Capture dependency:", packaging.__version__, packaging.__file__)
+PY
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
 scratch=$(mktemp -d "${TMPDIR:-/tmp}/tools-agent-fixtures.XXXXXXXX")
 trap 'rm -rf -- "$scratch"' EXIT
@@ -181,7 +196,10 @@ grep -q FAILED "$scratch/changed-archive-before-relocate.log"
 expect fail missing-image env DOCKER_CONTAINER_ID=invalid bash "$WORKSPACE/ci/tools_agent_identity.sh" "$scratch/missing-identity.txt"
 
 # The parser fixtures exercise real provider paths and preserve raw observations.
-"$python" "$root/docs/v0.27.0/fixtures.tools-release-agent.py" "$app" "$scratch"
+# Application hooks use Python 3.10+ annotation syntax. Exercise their actual
+# sources with the explicit application interpreter, not the bare reader's 3.9.
+"$capture_python" -I "$root/docs/v0.27.0/fixtures.tools-release-agent.py" "$app" "$scratch"
+"$capture_python" -I "$root/docs/v0.27.0/fixtures.tools-release-agent.py" "$app" "$scratch" --wheels
 
 # Groovy owns orchestration; these assertions cover its exact shell entry points.
 "$python" - "$app" <<'PY'
@@ -202,7 +220,9 @@ assert "tools_wheel_capture.py" in provision and "tools_wheel_inventory.sh" in p
 assert "--wheel-dir" in provision and "--installed-root" in provision
 abi = diagnostics.split("def abiContract()", 1)[1]
 assert "tools_abi_acceptance.sh" in abi and "exit 0" not in abi
-assert "--no-sync" in (app / "ci/tools_test_acceptance.sh").read_text()
+walk = (app / "ci/tools_test_acceptance.sh").read_text()
+assert 'pdfss_runtime_run "$UV_PROJECT_ENVIRONMENT/bin/python" -m pytest' in walk
+assert "uv run" not in walk
 print("PASS main-chain-wiring")
 PY
 printf 'Agent shell fixtures: %s cases passed; parser and wiring fixtures passed\n' "$cases"
