@@ -1241,12 +1241,22 @@ tests; 100% coverage, nonselecting testmon and guarded suites remain mandatory.
 This CI qualification supplies no browser evidence.
 
 On 2026-09-21 the human selected: "OK go for checkpoint, then work on completing
-step 6". Round 15 therefore assesses readiness to commit this repaired Debian
-checkpoint. Immediately after that commit, continue with fresh RHEL acceptance
-at Q07 scope, D10 and the remaining pre-publication checks, then review the
-completed Step 6. These obligations are not waived. Step 6 remains No until
-their evidence is conclusive. Shipped Python 3.13.15, its own pip and relocated
-uv remain required. The proposed DT_NEEDED additions remain unadopted.
+step 6". The repaired Debian checkpoint is committed through `92e361a6`.
+Step 6 is now fully implemented, as independently confirmed in round 16.
+The [fresh RHEL run](evidence.tools-archive-rebuild.step6-final-rhel.json)
+passes all ten required cells at Q07 scope, with the deployed venv bound to
+the committed application lock and byte-equal wheel ELFs. It qualifies shipped
+Python 3.13.15, its own pip, relocated uv 0.12.17, real provider traces and
+both host and shipped child boundaries. [D10](evidence.tools-archive-rebuild.step6-d10.json)
+settles on packaged generation 11 in one reading; generation 12 was compared,
+not installed. No rebuild or additional Jenkins run was needed. The nine Debian
+cells retain build 188's original evidence with explicit unaffected-input
+assessments. The [pre-publication eligibility check](evidence.tools-archive-rebuild.step6-publication-check.json)
+passes against the exact archive and privately resolved coordinate.
+
+Item 7 remains open for Step 7's immutable publication, normal-pin retrieval
+and adoption, with uploads off. Its pending row does not describe unfinished
+Step 6 acceptance. The proposed DT_NEEDED additions remain unadopted.
 
 Depends on: items 1 to 6.
 
