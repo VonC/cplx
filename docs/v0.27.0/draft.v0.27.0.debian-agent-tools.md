@@ -789,7 +789,7 @@ the correction below.
 | 4 | Issue | Ship a complete runtime closure in the archive | `toolchain-runtime-closure` | completed | `docs/v0.27.0/issue.v0.27.0.toolchain-runtime-closure.md` | `docs/v0.27.0/plan.v0.27.0.toolchain-runtime-closure.validation.md` |
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | completed | `docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md` | `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md` |
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
-| 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | pending | - | - |
+| 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | completed | `docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md` | `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` |
 | 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | - | - |
 
 ### Requirement details for the umbrella
