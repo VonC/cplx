@@ -120,7 +120,7 @@ Do not pass the handoff itself to public review artifacts.
 | P18 | Existing deployment automation task | 77 | Step 4 delivery and invocation |
 | P19 | Existing deployment artifact defaults | 30 | Step 4 companion/input-file coordinates |
 | P20 | Existing private deployment reference | 189 | Steps 4 and 7 document and qualify |
-| P21 | New dedicated phase 2 test-framework observer (Python) | 0 | Step 5, safe band, ceiling 650; Q05 recommendation |
+| P21 | New dedicated phase 2 test-framework observer (Python) | 0 | Step 5, safe band, ceiling 650; Q05 decision |
 
 P11, P14 and P21 are new source files; P17 is new generated output. P12 is reused
 without a phase mode or weaker assertions. P16 is an
@@ -182,9 +182,9 @@ pin into each candidate release record. cplx verifies the supplied archive again
 that record, never a mutable checkout, application version or newest timestamp.
 Its reusable commands do not fetch missing inputs; they fail before mutation.
 
-Q08 proposes carrying the new helpers inside the already required reconstruction
+Q08 confirms carrying the new helpers inside the already required reconstruction
 companion, with an explicit member manifest and immutable cplx source revision.
-The reviewer accepted option B in round 2; it awaits human consolidation.
+The reviewer accepted option B in round 2; the human confirmed it at consolidation.
 Step 1 implements member
 binding/assembly using minimal fixtures; Step 3 implements target bootstrap and
 dispatch; Step 4 assembles the complete production helper closure from a pinned
@@ -597,7 +597,7 @@ existing checks and the consumer's directory/artifact contracts.
 
 Files involved:
 
-- `src/setups/env/bin/deploy_venv_release.py` (existing, to be updated; created in Step 4, current baseline 0; Q03 recommendation).
+- `src/setups/env/bin/deploy_venv_release.py` (existing, to be updated; created in Step 4, current baseline 0; Q03 decision).
 - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` (existing, to be updated by implementation-check for this step).
 - `docs/v0.27.0/verify.deploy-venv-sync.sh` (existing, to be updated; created in an earlier step, current baseline 0).
 - `docs/v0.27.0/acceptance.deploy-venv-sync.sh` (existing, to be updated; created in an earlier step, current baseline 0).
@@ -811,234 +811,21 @@ or publication authorization is missing, record the specific open gate and
 leave its step incomplete. No local lint, unit test, probe or Jenkins success
 label alone establishes the full acceptance result.
 
-## Open questions for the v0.27.0 deploy-venv-sync implementation plan
-
-Recommended answers below are proposals for independent review, not human-confirmed decisions.
-
-### Q01: Repository-specific verification commands
-
-Question description: The shared skill expects ghog day, while cplx has native Bash/unittest harnesses and no configured pytest/coverage project. Which concrete command strategy should the implementation steps use?
-
-#### BBQ for Q01
-
-Two workshops use different inspection equipment. The native cplx harness is one workshop's inspection line, and the consumer groundhog walk is the other's; a sticker from the latter cannot certify work done in the former.
-
-#### Options for Q01
-
-- Option A: Use cplx's cumulative native harness and the consumer's configured ghog day.
-  - pro: Keeps the existing repository floor and uses a real configured full coverage walk where available.
-  - con: The cplx result must be reported as native regression validation, with no invented coverage claim.
-- Option B: Add cplx pytest/coverage/groundhog configuration in Step 1.
-  - pro: Provides the same command shape in both authoring repositories.
-  - con: Adds test-tooling setup outside the current source pattern and needs an explicit coverage scope before a meaningful gate.
-
-#### Recommended option for Q01 (with arguments for this choice)
-
-Option A: Retain the plan's native cplx harness plus the configured consumer walk, with every gate/result named honestly.
-
-#### Answer to Q01: option A (with reason why it must be accepted as the answer)
-
-Option A: Retain the plan's native cplx harness plus the configured consumer walk, with every gate/result named honestly. This is the writer's recommended answer pending review and consolidation.
-
-### Q02: Early qualification fixture and step ordering
-
-Question description: Step 1 must prove actual uv/transport viability before Steps 2-4 deliver the full lifecycle. How should its acceptance mode avoid depending on unfinished production commands or prematurely qualifying a release?
-
-#### BBQ for Q02
-
-A fitting trial precedes assembly. In this picture: the fitting trial is the Step 1 transport probe, assembly is Steps 2-6, and the finished-product inspection is exact-candidate Step 7 acceptance.
-
-#### Options for Q02
-
-- Option A: Keep a minimal operation-owned transport/bootstrap probe in Step 1.
-  - pro: Tests the highest-risk locked transport early without requiring the later lifecycle.
-  - con: Needs clearly distinct probe results so they cannot satisfy final candidate qualification.
-- Option B: Move all real transport qualification to Step 7.
-  - pro: Simplifies the early harness by keeping it entirely synthetic.
-  - con: Allows lifecycle and CI work to depend on an unproven uv/effective-lock combination.
-
-#### Recommended option for Q02 (with arguments for this choice)
-
-Option A: Keep Step 1's narrow real-tool probe and reject its evidence as final readiness/qualification; Step 7 must rerun the complete flow for frozen candidate bytes.
-
-#### Answer to Q02: option A (with reason why it must be accepted as the answer)
-
-Option A: Keep Step 1's narrow real-tool probe and reject its evidence as final readiness/qualification; Step 7 must rerun the complete flow for frozen candidate bytes. This is the writer's recommended answer pending review and consolidation.
-
-### Q03: Shared CI evidence-test implementation target
-
-Question description: Step 5 lists synthetic public CI-evidence tests but most behavior lives in private adapters. Which executable boundary should those public tests exercise so they do not merely reimplement the expected verdict?
-
-#### BBQ for Q03
-
-An inspector records measurements and a clerk checks whether the certificate is complete. In this picture: the inspector is the private CI observer, the certificate is the sanitized CI record, and the clerk is the shared release eligibility validator.
-
-#### Options for Q03
-
-- Option A: Extend deploy_venv_release.py with generic combined-verdict input validation in Step 5.
-  - pro: Public fixture mutations execute the same eligibility validation later used in Step 6.
-  - con: Requires listing that existing file as a Step 5 mutation and keeping private observation capture separate.
-- Option B: Keep all CI-evidence unit tests in the consuming application.
-  - pro: Tests directly exercise its real adapter and observer code.
-  - con: Leaves the public release validator's combined-CI eligibility contract without those focused tests until Step 6.
-
-#### Recommended option for Q03 (with arguments for this choice)
-
-Option A: Add the generic validator as a Step 5 file target; private tests still prove actual observation and public tests validate only the sanitized record contract.
-
-#### Answer to Q03: option A (with reason why it must be accepted as the answer)
-
-Option A: Add the generic validator as a Step 5 file target; private tests still prove actual observation and public tests validate only the sanitized record contract. This is the writer's recommended answer pending review and consolidation.
-
-### Q04: Complete-selection test oracle
-
-Question description: Step 2 adds complete distribution-selection validation. How should its tests establish marker, extras and effective-default-group correctness without treating the new parser's own output as the expected inventory?
-
-#### BBQ for Q04
-
-A scale is checked with a certified weight before arbitrary loads. In this picture: the scale is the selection checker, the certified weight is qualified-uv fixture output, and arbitrary loads are generated marker/group mutations.
-
-#### Options for Q04
-
-- Option A: Use independently captured qualified-uv selection fixtures plus generated mutations.
-  - pro: Provides an external oracle for each supported profile and checks order independence and drift.
-  - con: Fixtures require recording the uv/toolchain/target/profile provenance and refreshing only after qualification.
-- Option B: Use only handcrafted lock graphs and expected distribution sets.
-  - pro: Keeps unit cases small and easy to understand.
-  - con: Can miss a mismatch with actual uv treatment of defaults, markers or workspace selection.
-
-#### Recommended option for Q04 (with arguments for this choice)
-
-Option A: Use both compact handcrafted edge cases and qualified-uv selection fixtures as the independent oracle, then mutate those identities in the existing PBT module.
-
-#### Answer to Q04: option A (with reason why it must be accepted as the answer)
-
-Option A: Use both compact handcrafted edge cases and qualified-uv selection fixtures as the independent oracle, then mutate those identities in the existing PBT module. This is the writer's recommended answer pending review and consolidation.
-
-### Q05: Phase-specific test observer files
-
-Question description: The existing consumer observer enforces its preliminary full-suite options. The mandated phase uses different hardcoded commands. How should Step 5 add its independently loaded test-session observation without weakening preliminary coverage/scope checks?
-
-#### BBQ for Q05
-
-Two examinations have different papers but both require attendance and completion. In this picture: the papers are phase-specific test commands, attendance/completion are session records, and the independent marking rules are the two observer policies.
-
-#### Options for Q05
-
-- Option A: Add a dedicated phase 2 observer module and reuse phase-neutral evidence validation only.
-  - pro: Keeps phase 1's strict options intact and makes required start/completion records explicit.
-  - con: Adds one private Python module and its focused test leaf to the line-budget mapping.
-- Option B: Add an explicit phase 2 mode to the existing observer.
-  - pro: Uses fewer files and shares the current recording hooks.
-  - con: Mode dispatch can accidentally relax preliminary requirements and needs strong negative tests for both modes.
-
-#### Recommended option for Q05 (with arguments for this choice)
-
-Option A: Prefer a dedicated phase 2 observer, preserving the existing phase 1 policy and adding concrete private filename/baseline/test ownership before implementation.
-
-#### Answer to Q05: option A (with reason why it must be accepted as the answer)
-
-Option A: Prefer a dedicated phase 2 observer, preserving the existing phase 1 policy and adding concrete private filename/baseline/test ownership before implementation. This is the writer's recommended answer pending review and consolidation.
-
-### Q06: Packaging exclusions test matrix
-
-Question description: Step 4 reuses the packager's exclusions interface, including caller extra roots. Which integration fixtures should establish that filename encoding, option ordering and alias traversal cannot put a venv back into the application archive?
-
-#### BBQ for Q06
-
-A packing list is checked against the sealed box. In this picture: the list is generated exclusions, the box is the produced archive, and extra loading doors are additional roots and dereferenced aliases.
-
-#### Options for Q06
-
-- Option A: Test real tar output for multiple roots, unusual names and dereference attempts.
-  - pro: Exercises the consumer overlay and final archive instead of trusting a generated exclusion list.
-  - con: Needs native GNU tar fixtures and explicit rejection behavior for unsupported unsafe invocation forms.
-- Option B: Test exclusion-list generation and ordinary archive paths only.
-  - pro: Provides fast focused cases with less harness setup.
-  - con: Misses failures introduced by tar options, additional roots or dereferenced aliases.
-
-#### Recommended option for Q06 (with arguments for this choice)
-
-Option A: Require real archive inspection for every supported path/option shape and rejection tests for unsafe ones; keep fixtures small and native-Linux.
-
-#### Answer to Q06: option A (with reason why it must be accepted as the answer)
-
-Option A: Require real archive inspection for every supported path/option shape and rejection tests for unsafe ones; keep fixtures small and native-Linux. This is the writer's recommended answer pending review and consolidation.
-
-### Q07: Operator runner details before implementation
-
-Question description: Scenario 1 already fixes publication outside CI. The private mapping proposes a wrapper around the existing workstation publisher, but the concrete authorized host, invocation and credential source are not yet qualified. When should Step 6 settle and verify those implementation inputs?
-
-#### BBQ for Q07
-
-A delivery needs both a labelled parcel and an assigned driver. In this picture: the parcel is the qualified candidate pair, the driver is the authorized operator host, and the vehicle keys are its controlled publication credentials.
-
-#### Options for Q07
-
-- Option A: Record the concrete runner inputs privately before implementing its live backend path.
-  - pro: Makes the wrapper reviewable and reproducible against the actual publisher and credential mechanism.
-  - con: Requires operator-specific details before real backend verification; public fixture work can proceed meanwhile.
-- Option B: Implement a generic wrapper first and select the runner during final rollout.
-  - pro: Allows most script work before operator setup is available.
-  - con: Defers shell/tool/backend assumptions until the final acceptance stage.
-
-#### Recommended option for Q07 (with arguments for this choice)
-
-Option A: Settle concrete host/shell, wrapper arguments and credential provisioning in the private mapping before live backend work, while proceeding with generic eligibility tests; do not reopen the approved outside-CI boundary.
-
-#### Answer to Q07: option A (with reason why it must be accepted as the answer)
-
-Option A: Settle concrete host/shell, wrapper arguments and credential provisioning in the private mapping before live backend work, while proceeding with generic eligibility tests; do not reopen the approved outside-CI boundary. This is the writer's recommended answer pending review and consolidation.
-
-### Q08: Deliver and retain the new deployment helper files
-
-Question description: Round 1 identified no delivery for helpers introduced after the accepted toolchain archive. The user clarified that deployment automation copies the separately published application-versioned entry script, and requested an independently recorded tools version for missing-archive acquisition. Which concrete payload path should Steps 1, 3 and 4 implement so those helpers arrive on RHEL targets and Debian agents, with matching predecessor recovery? Keep the accepted companion and toolchain boundaries; no toolchain republication is authorized.
-
-#### BBQ for Q08
-
-A repair kit must arrive with instructions that identify the correct kit for that machine, including when restoring an older configuration. In this picture: the instructions are the separately copied entry script and release input record, the kit is the versioned helper payload, the machine is the target installation, and restoring an older configuration is predecessor rollback.
-
-#### Options for Q08
-
-- Option A: Deliver a separately pinned verification/helper bundle through the existing verification-bundle mechanism.
-  - pro: Reuses immutable-source delivery without changing the accepted tools archive.
-  - con: Adds another delivered artifact and bootstrap/retention reference beyond the existing reconstruction companion; the current verification bundle includes unrelated acceptance controls.
-- Option B: Include the explicit helper closure in the existing reconstruction companion; deliver its binding record alongside the separate deployment entry.
-  - pro: Uses the already required companion and the documented separate-script automation; one retained companion contains the reconstruction dependencies and helpers for that release.
-  - con: Helper changes require a new companion and qualification; automation and publication must deliver the input record and companion before invocation.
-- Option C: Republish the toolchain archive with the helpers.
-  - pro: Places the helpers beside the shipped interpreter.
-  - con: Violates the effort's accepted-archive boundary and would require renewed toolchain acceptance; rejected within this scope.
-
-#### Recommended option for Q08 (with arguments for this choice)
-
-Option B: Step 1 implements helper/member bindings and fixture assembly; Step 3 implements bootstrap verification and delivered-path dispatch; Step 4 completes immutable-source helper assembly and consumer delivery. Bind entry script, companion, helper revision/member manifest and independent tools version/digest in the generated release record. Step 5 proves helper identity on actual agents, Step 6 publishes the frozen delivery set, and Step 7 qualifies offline reconstruction/rollback from local inputs, with consumer acquisition validated separately. Retain each predecessor's full set. The round 2 reviewer accepts option B and withdraws the earlier option A recommendation; human consolidation remains pending.
-
-#### Answer to Q08: option B (with reason why it must be accepted as the answer)
-
-Option B: Use the required reconstruction companion for the helper files, with explicit pre-execution verification, delivery ownership and predecessor retention. It closes the missing delivery path without rebuilding tools. This is the writer's implementation proposal pending review and consolidation; the user's deployment-flow clarification does not itself approve the payload choice.
-
-### Q09: Consumer delivery boundary for offline cplx reconstruction
-
-Question description: Round 2 identified a conflict between consumer acquisition and the earlier offline forward-deployment wording. The human has now approved an explicit boundary and the corresponding requirement/design amendment. Review whether the plan consistently implements this boundary; do not reopen the consumer's transport choice as a cplx prerequisite.
-
-#### BBQ for Q09
-
-A workshop receives a complete kit and proves it can perform the repair without further deliveries. The consumer supplies the kit; cplx checks it and performs reconstruction. Empty tool caches do not mean throwing away the supplied kit.
-
-#### Options for Q09
-
-- Option A: Make cplx own or prescribe end-to-end consumer acquisition.
-  - pro: Places delivery and reconstruction in one scope.
-  - con: Conflicts with the human-approved reusable boundary and couples cplx progress to private delivery mechanisms.
-- Option B: Consumer supplies files and recorded identities; cplx verifies and reconstructs offline.
-  - pro: Preserves offline execution, input integrity and predecessor recovery while allowing independently verified cplx work to proceed.
-  - con: Requires separate consumer integration evidence before combined completion or gated release promotion.
-
-#### Recommended option for Q09 (with arguments for this choice)
-
-Option B implements the human-approved amendment. The generic supplied-information table and definitions above describe the interface. Requirement Q09 records the amended offline starting boundary and its history; design Q09 remains the operator-publication decision. The reviewer should assess consistency and test coverage, not infer that the full consumer delivery process is offline.
-
-#### Answer to Q09: option B (with reason why it must be accepted as the answer)
-
-Option B: the human approved the boundary, definitions, generic table and separate completion accounting. This resolves the earlier requirement-amendment prerequisite. The amended documents are submitted for consistency review; plan consolidation, implementation and integration qualification have not occurred.
+## Implementation decisions
+
+Human-authorized consolidation after review round 3 confirms Q01-Q07 option A
+and Q08-Q09 option B. Their implementation tasks and evidence gates are integrated
+below and in the named sections. No follow-up planning question remains.
+Implementation and real integration qualification have not started.
+
+| Question | Decision and reason | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | A: Use the native cumulative cplx harness and the consumer's configured groundhog walk; report their actual scope without inventing coverage. | Shared execution command checklist; per-step command forms | Adding unrelated cplx pytest/coverage configuration. |
+| Q02 | A: Run a minimal real-tool transport/bootstrap probe early to expose compatibility failures; it cannot qualify the final candidate. | Step 1; Step 7 | Deferring all real transport checks until final acceptance. |
+| Q03 | A: Extend deploy_venv_release.py in Step 5 so public evidence fixtures exercise the same eligibility validator used for promotion. Private tests establish real observation. | Step 5; Step 6 | Keeping all CI evidence tests private and postponing the shared contract tests. |
+| Q04 | A: Combine qualified-uv selection fixtures with compact handcrafted cases and generated mutations for an independent inventory oracle. | Step 2 | Relying only on handcrafted graphs or the new parser's own output. |
+| Q05 | A: Add dedicated phase 2 observer P21 and share only phase-neutral validation through P13, preserving phase 1 observer P12 unchanged. | Step 5 | Adding phase dispatch that could weaken the existing observer policy. |
+| Q06 | A: Inspect real tar output for supported roots, unusual names and dereference attempts; reject unsafe invocations. | Step 4 | Testing only generated exclusion lists and ordinary archive paths. |
+| Q07 | A: Record actual operator host, shell, arguments and credential provisioning privately before live backend implementation; generic eligibility tests may proceed independently. | Step 6 | Deferring runner assumptions until final rollout or reopening the outside-CI publication decision. |
+| Q08 | B: Deliver the explicit helper closure in the required reconstruction companion, with pinned source identity, member verification, separate entry script/input record and predecessor retention. This closes delivery without rebuilding tools. | Consumer delivery and cplx reconstruction responsibilities; Steps 1, 3-7 | Another helper artifact or republication of the accepted toolchain archive. |
+| Q09 | B: Consumer supplies complete local files and recorded identities; cplx verifies and reconstructs offline. Independently verified cplx work may progress while required private integration remains pending. | Consumer delivery and cplx reconstruction responsibilities; Steps 4 and 7; Rollout | Making cplx prescribe consumer acquisition or treating missing integration evidence as whole-topic completion. |
