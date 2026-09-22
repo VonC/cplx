@@ -161,12 +161,10 @@ Archive deployment must work without Git filters or a Git checkout on the target
 Materialize a valid effective lock and configuration before sync, retain its
 verifiable relationship to the canonical lock, and do not bypass lock consistency.
 
-Validate bootstrap and sync using an empty cache with public Python library referential access
-unavailable. Forward deployment additionally requires digest-pinned release
-inputs sufficient for bootstrap and locked sync with every Python library
-referential, mirror, and remote artifact service unreachable and caches empty.
-Source transport, uv provisioning, and recovery-input retention must be
-specified in design within this offline deployment requirement.
+After the consumer supplies the complete required files locally, validate cplx
+bootstrap and locked reconstruction with empty caches and all remote artifact
+services unavailable. Source transport, uv provisioning and recovery retention
+must preserve this boundary; consumer acquisition precedes it.
 
 Install Python library dependencies from compatible, prebuilt wheels on both
 targets. Never fall back to building a dependency from source during venv
@@ -327,22 +325,57 @@ deployment procedure. Lock-based reconstruction applies from the second
 venv-free release onward. Both recovery forms must pass the offline readiness
 test on the target.
 
-Forward deployment must also succeed with every Python library referential,
-mirror, and remote artifact service unreachable, using digest-pinned inputs
-delivered with the release. Prove this with empty caches. A reachable private
-mirror is not a deployment prerequisite. Deliver qualified uv with application
-release inputs, preserving the toolchain archive.
+After local delivery, cplx reconstruction must succeed without downloads, a target
+Git checkout or previously cached packages. Deliver qualified uv with application
+release inputs, preserving the toolchain archive. The consumer's earlier delivery
+phase is outside this offline execution guarantee.
+
+## Consumer delivery and offline reconstruction boundary
+
+The consumer supplies the locations of the required files on the target machine,
+together with their recorded versions and checksums. cplx verifies and uses those
+files. The consumer decides how to obtain them. Acquisition, transport,
+authentication and download policy belong to the consumer before invoking cplx;
+they are outside the reusable cplx interface.
+
+Required local inputs include the application archive and release record,
+toolchain archive, qualified uv, dependency wheels, canonical metadata and
+reconstruction helpers. A matching installed toolchain does not remove the
+requirement to retain archives needed for reconstruction and predecessor recovery.
+
+| Supplied information | Purpose |
+| --- | --- |
+| Path to the tools archive | Locate the archive already supplied on the target machine. |
+| Required tools version and archive SHA-256 | Verify the exact qualified archive, rather than another file with a similar name. |
+| Path to the reconstruction companion and its SHA-256 | Locate and verify the supplied helpers, uv, wheels and metadata. |
+| Application release record | Associate these inputs with the application release being deployed. |
+
+Versions and checksums identify files; they are not credentials. The complete
+release manifest also binds the application and entry script as applicable.
+
+Empty caches means installation tools cannot rely on packages left by an earlier
+run. Explicitly retained release archives and wheels remain available: they are
+required inputs, not disposable caches.
+
+No target Git checkout means the deployment server need not clone the application
+repository or execute Git filters to obtain dependency information. The supplied
+release contains that information.
+
+Remote artifact services are denied during cplx reconstruction to demonstrate
+that the supplied files suffice. Consumer acquisition beforehand may use remote
+services. Offline predecessor recovery still requires the complete retained set
+and never depends on fetching missing recovery inputs.
 
 ## Acceptance criteria for deployment-created environments
 
 | ID | Required result and evidence |
 | --- | --- |
 | AC01 | Archive inspection covers current/stale, alternate-name, and nested Python venvs identified by `pyvenv.cfg` throughout packaging inputs; all are excluded and release metadata/reconstruction inputs remain present. |
-| AC02 | Archive-only installation on both supported platforms, without a pre-existing application venv or target Git checkout, provisions uv, creates the named venv, performs locked sync, and passes readiness without developer-environment assumptions. |
+| AC02 | From complete locally supplied release archives and inputs, installation on both supported platforms provisions the supplied uv, creates the named venv, performs locked sync and passes readiness without a pre-existing application venv, target application Git checkout or developer-environment assumptions. Consumer acquisition precedes this check. |
 | AC03 | Host Python earlier on PATH does not override toolchain Python. Missing/incompatible toolchain Python and a foreign-base existing venv fail clearly. Base executable, prefix, and full version are verified. |
 | AC04 | Valid existing venvs sync successfully; repeated sync succeeds; mirroring-induced removal causes recreation. Multiple version directories do not affect exact selection, and a toolchain-Python version change uses the correctly named environment. |
 | AC05 | Both targets use the same canonical release lock, qualified uv, explicit groups, and valid marker selections. A stale lock or failed sync prevents readiness and subsequent packaging/publication. A failed in-place sync reports the failure and permits recovery by redeployment or rollback; the old venv need not remain usable throughout. |
-| AC06 | Forward deployment bootstrap and effective-source locked sync succeed with empty caches and every Python library referential, mirror, and remote artifact service unreachable, using digest-pinned release-delivered inputs, including deployment without Git. Any source mapping preserves canonical dependency/artifact identities and hashes. |
+| AC06 | After the consumer has supplied the required release files locally, cplx must reconstruct the Python environment and pass readiness checks without downloading anything, cloning a repository, or relying on previously cached packages. Missing or invalid inputs must cause a clear failure before deployment changes begin. Source mapping preserves canonical dependency/artifact identities and hashes. |
 | AC07 | Inventory rejects missing/mismatched/extra distributions against target-selected lock identities and hashes; installed wheel ELFs equal original retained wheel binaries. Deliberate ELF modification blocks readiness. No wheel ELF rewriting or loss of required `$ORIGIN` paths occurs; complete non-ELF file-byte coverage is not claimed. |
 | AC08 | Runtime checks and heavy-wheel imports pass on both platforms. Debian has conclusive live trace evidence and no host fallback for ABI-critical libraries. RHEL providers follow item 7's validation matrix and operator readiness succeeds. |
 | AC09 | Debian application acceptance runs on the exact identified RHEL-built toolchain archive; platform, interpreter, lock, and artifact provenance accompany the results. |
@@ -357,8 +390,11 @@ release inputs, preserving the toolchain archive.
 ## Requirement clarifications
 
 The human confirmed consolidation after round 4, including option A for Q02,
-Q05, and Q09. All ten questions are settled; private integration mechanisms
-remain outside this public requirement.
+Q05, and Q09. The later human-approved plan-review amendment narrows requirement
+Q09 to the explicit consumer-delivery/cplx-reconstruction boundary above, preserving
+the original decision as history. All ten questions are settled; private integration
+mechanisms remain outside this public requirement. Plan Q09 records this boundary;
+design Q09 remains the separate, unchanged operator-publication decision.
 
 | Question | Decision and reason | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
@@ -370,8 +406,17 @@ remain outside this public requirement.
 | Q06 | A: reconstruct phase 2's named venv with our scripts from the same toolchain archive, lock, and effective dependency selection; compare provenance, revisions, and before/after inventories. Fresh agents require equivalence evidence. | Required single-build CI sequence without publication; AC10a and AC10b | Copied phase 1 files, same-storage demands, library-created replacement venvs, or an exact phase 2 uv-version demand despite proven unchanged dependencies. |
 | Q07 | A: exclude every Python venv under packaging inputs using its pyvenv.cfg boundary; current, stale, alternate-name, and nested venvs all count. | Required packaging and Python venv lifecycle; AC01 | Excluding only the selected or conventionally named venv. |
 | Q08 | A: consuming automation or operators enforce serialization per application root; this covers competing sync, mirroring/deletion, and rollback/deployment. | Required packaging and Python venv lifecycle; AC15 | Supporting overlapping mutations to the same root in this feature. |
-| Q09 | A: forward deployment must work offline with empty caches and digest-pinned release-delivered inputs; installation and recovery have compatible availability guarantees. | Required release lock and dependency source behavior; Required recovery from the preceding release; AC06 | Making a reachable private mirror a forward-deployment prerequisite. |
+| Q09 | A originally required offline forward deployment. Human-approved amendment: cplx reconstruction starts with complete locally supplied files and remains offline with empty caches; the consumer owns earlier acquisition/delivery. Offline predecessor recovery retains its complete-input guarantee. | Consumer delivery and offline reconstruction boundary; AC02 and AC06 | Downloads or cache/Git dependencies during cplx reconstruction; fetching missing predecessor inputs during recovery. |
 | Q10 | B: deliver uv with application release inputs, preserving the qualified toolchain archive. Qualify the latest stable version, then freeze its version and digest for deployment and recovery regardless of install location. | Required toolchain Python and uv provenance; AC05; AC10a | Repacking the toolchain only to deliver uv, floating latest at deployment, or silently substituting another release's uv. |
+
+## File-based IO cost clarification for deployment-created environments
+
+Read the explicitly selected release manifest/index and referenced metadata
+directly; do not discover state through documentation/history or unrelated
+directory scans. Reuse parsed identity maps within a phase and walk only declared
+archive/inventory roots. Retain required streaming hashes, integrity-boundary
+checks and complete offline inputs. This batch workflow has no new latency SLO;
+record phase timings without weakening byte-identity or readiness checks.
 
 ## Scope and source references for topic 8
 
