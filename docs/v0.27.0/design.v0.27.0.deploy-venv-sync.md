@@ -87,6 +87,46 @@ validation must demonstrate exclusion across mirroring, sync and rollback.
 
 ## Release inputs and retention for v0.27.0 deploy-venv-sync
 
+### Consumer-supplied local inputs and offline execution
+
+The consumer supplies the locations of the required files on the target machine,
+together with their recorded versions and checksums. cplx verifies and uses those
+files. The consumer decides how to obtain them. Acquisition, transport,
+authentication and download policy belong to the consumer before invoking cplx;
+they are outside the reusable cplx interface.
+
+Required local inputs include the application archive and release record,
+toolchain archive, qualified uv, dependency wheels, canonical metadata and
+reconstruction helpers. A matching installed toolchain does not remove the
+requirement to retain archives needed for reconstruction and predecessor recovery.
+
+| Supplied information | Purpose |
+| --- | --- |
+| Path to the tools archive | Locate the archive already supplied on the target machine. |
+| Required tools version and archive SHA-256 | Verify the exact qualified archive, rather than another file with a similar name. |
+| Path to the reconstruction companion and its SHA-256 | Locate and verify the supplied helpers, uv, wheels and metadata. |
+| Application release record | Associate these inputs with the application release being deployed. |
+
+Versions and checksums identify files; they are not credentials. The complete
+release manifest also binds the application and entry script as applicable.
+
+Empty caches means installation tools cannot rely on packages left by an earlier
+run. Explicitly retained release archives and wheels remain available: they are
+required inputs, not disposable caches.
+
+No target Git checkout means the deployment server need not clone the application
+repository or execute Git filters to obtain dependency information. The supplied
+release contains that information.
+
+Remote artifact services are denied during cplx reconstruction to demonstrate
+that the supplied files suffice. Consumer acquisition beforehand may use remote
+services. Offline predecessor recovery still requires the complete retained set
+and never depends on fetching missing recovery inputs.
+
+The human-approved requirement Q09 amendment defines this starting boundary.
+Plan Q09 records its implementation consequences. Design Q09 still concerns
+operator publication outside CI and is unchanged.
+
 ### Release reconstruction bundle
 
 Deliver a digest-addressed companion bundle with the application release. Treat
@@ -174,7 +214,7 @@ the pair from the same source revision, pin all reconstruction inputs, record
 the new digests and qualify those bytes through the same validation and target
 checks before publication. A matching revision alone never transfers qualification.
 
-Confirmed execution boundary (Q09): an operator-run publication outside CI uses
+Confirmed publication execution boundary (design Q09): an operator-run publication outside CI uses
 the existing application publisher, with controlled credentials and reproducible
 inputs. Record the source build, candidate digests, qualification record and
 publication receipts. This adds no Jenkins job or bypass mode to validation.
@@ -184,9 +224,10 @@ authorize an actual publication.
 
 Repository retention protects the complete current and preceding release pairs
 and referenced toolchain inputs independently of CI build retention. Before
-deployment, delivery downloads and verifies the complete pair and required
-toolchain into release-specific local storage outside the mirrored application
-tree. Offline preflight and rollback consume that local store, not the repository
+cplx invocation, the consumer supplies the complete pair and required toolchain
+in release-specific local storage outside the mirrored application tree. cplx
+verifies the files and their recorded identities before mutation; the consumer
+owns how they reached that storage. Offline preflight and rollback consume that local store, not the repository
 or a CI workspace. The predecessor remains retained until the new release is ready
 and the rollback-retention boundary can safely advance. Missing inputs block
 deployment before mutation; repository availability is not an offline guarantee.
@@ -409,8 +450,9 @@ as build-scoped, non-secret values; no credential travels this way. The
 manifest/profile can be regenerated from the identical checkout and compared
 with those digests. It does not assume access to phase 1's workspace or upload its
 newly tested package to make inputs reachable. If an input is unavailable or its
-identity differs, phase 2 fails. Offline forward deployment and recovery still
-use delivered bundles; this CI acquisition path does not relax their contract.
+identity differs, phase 2 fails. Offline cplx reconstruction starts after consumer
+delivery and recovery uses retained bundles; this CI acquisition path does not
+relax either execution contract.
 
 Capture complete selected inventory and interpreter provenance before and after
 the mandated Python commands, compare them with phase 1, and record the actual
@@ -490,6 +532,15 @@ design retains all execution qualification gates and introduces no new questions
 | Q07 | A: Acquire existing phase 2 inputs from configured services and verify phase 1 toolchain/profile/wheel digests without prior-workspace access. | Two-phase CI integration | Depending on an unproven transfer of phase 1's bundle into the mandated agent. |
 | Q08 | A: Promote the exact qualified candidate pair, protecting retention and binding all qualification evidence to its digests. | Qualification, publication and local delivery | Treating same-revision rebuilt bytes as qualified automatically; rebuild remains possible only with fresh qualification. |
 | Q09 | C: Use a reproducible operator publication run outside CI, preserving the single mandated validation build and publishing only its qualified bytes. | Qualification, publication and local delivery; Two-phase CI integration | A publication-only mode of the same job or a separate publication job; neither is needed for the confirmed scenario. |
+
+## File-based IO cost clarification for deployment reconstruction
+
+Read the explicitly selected release manifest/index and referenced metadata
+directly; do not discover state through documentation/history or unrelated
+directory scans. Reuse parsed identity maps within a phase and walk only declared
+archive/inventory roots. Retain required streaming hashes, integrity-boundary
+checks and complete offline inputs. This batch workflow has no new latency SLO;
+record phase timings without weakening byte-identity or readiness checks.
 
 ## Supporting references for v0.27.0 deploy-venv-sync
 
