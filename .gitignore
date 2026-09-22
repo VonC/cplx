@@ -31,3 +31,6 @@ tmp*
 tmp*/
 /tools/batcolors/
 .claude/settings.local.json
+
+# Generated dependency compatibility file
+/requirements.txt
