@@ -19,8 +19,9 @@ and uninterrupted service during failed in-place sync remain outside this topic.
 Public components accept generic application configuration. Application names,
 private paths, endpoints, library entry points, compatibility details and build
 links remain in private integration records. Existing application directories
-are preserved; examples do not rename them. The proposals below require design
-review and execution qualification; they are not implementation evidence.
+are preserved; examples do not rename them. The decisions below were consolidated
+after round 4 review and human confirmation. Execution qualification remains
+required; these decisions are not implementation evidence.
 
 ## Confirmed technical facts for v0.27.0 deploy-venv-sync
 
@@ -81,6 +82,8 @@ or failure recording. The consuming automation owns exclusive access to the
 application root for that entire interval, including rollback. An enforced
 deployment lock or an equivalent serialized job is a precondition; an operator
 note alone is not proof. Independent roots may proceed independently.
+The consuming adapter supplies an explicit serialization attestation; integration
+validation must demonstrate exclusion across mirroring, sync and rollback.
 
 ## Release inputs and retention for v0.27.0 deploy-venv-sync
 
@@ -190,7 +193,7 @@ deployment before mutation; repository availability is not an offline guarantee.
 
 ### Offline source transport
 
-Proposed transport: qualify filesystem-backed registry/artifact locations in the
+Selected transport: qualify filesystem-backed registry/artifact locations in the
 retained bundle first, addressed through `file:` URLs in an effective lock and
 matching source configuration. This avoids a listening socket and server lifetime.
 It is not enough to supply a wheel directory while leaving remote locked URLs
@@ -210,7 +213,7 @@ Preserve the canonical lock byte-for-byte and record both digests and the mappin
 Validate the canonical/transport round trip before sync and afterwards.
 
 Both transports require the same identity-preserving effective-lock contract.
-The local transport is a proposed design, not a claim that an arbitrary rewritten
+The local transport is a selected design, not a claim that an arbitrary rewritten
 lock is accepted by uv. Qualification must establish `--locked` consistency with
 the effective project configuration on both targets. Never substitute `--frozen`
 or an independent requirements installation to make this pass. If the qualified
@@ -470,6 +473,24 @@ results. CI records additionally identify phase and executing agent privately.
 Public reports contain sanitized outcomes and remaining gaps. Local/static checks
 cannot close Debian Jenkins or RHEL readiness/rollback acceptance.
 
+## Design decisions for v0.27.0 deploy-venv-sync
+
+Human-authorized consolidation settles Q01 to Q09 after review round 4.
+Scenario 1 is Q09 option C: operator-run publication outside CI. The selected
+design retains all execution qualification gates and introduces no new questions.
+
+| Question | Decision and rationale | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | B: Qualify filesystem transport first to avoid a server; retain loopback only as a qualified fallback with identical lock/integrity guarantees. | Offline source transport | Loopback as the default; unverified lock rewriting or frozen sync. |
+| Q02 | A: Deliver a required digest-bound companion bundle, allowing independent retention and deduplication with complete-delivery preflight. | Release reconstruction bundle | Embedding all reconstruction inputs in each application archive. |
+| Q03 | B: Qualify an unmodified static uv artifact first for one provenance identity; record separately hashed adaptation only if qualification requires it. | Qualified uv bootstrap | Target-specific adaptation as the default or conflating original and derived digests. |
+| Q04 | A: Compose complete selection verification with the existing ELF helper, binding both reports to the same lock/profile/wheels and extending ELF scope compatibly. | Inventory and runtime boundaries | Replacing the established helper contract with an incompatible unified format. |
+| Q05 | A: Require consumer serialization attestation plus demonstrated exclusion across the entire mutation interval, preserving the consumer's enforcement responsibility. | Current and target lifecycle; Packaging and recovery boundaries | Moving all archive and lifecycle locking into a new reusable lock owner; operator notes alone. |
+| Q06 | A: Observe dependency command status and independent test-framework results with expected start/completion records and deliberate-failure qualification. | Two-phase CI integration | Inventory, coverage or an exit hook alone as proof of successful masked commands. |
+| Q07 | A: Acquire existing phase 2 inputs from configured services and verify phase 1 toolchain/profile/wheel digests without prior-workspace access. | Two-phase CI integration | Depending on an unproven transfer of phase 1's bundle into the mandated agent. |
+| Q08 | A: Promote the exact qualified candidate pair, protecting retention and binding all qualification evidence to its digests. | Qualification, publication and local delivery | Treating same-revision rebuilt bytes as qualified automatically; rebuild remains possible only with fresh qualification. |
+| Q09 | C: Use a reproducible operator publication run outside CI, preserving the single mandated validation build and publishing only its qualified bytes. | Qualification, publication and local delivery; Two-phase CI integration | A publication-only mode of the same job or a separate publication job; neither is needed for the confirmed scenario. |
+
 ## Supporting references for v0.27.0 deploy-venv-sync
 
 - [Item 7 design](design.v0.27.0.tools-archive-rebuild.md) and
@@ -481,265 +502,3 @@ cannot close Debian Jenkins or RHEL readiness/rollback acceptance.
   project-installation and network controls must be qualified together.
 - [uv cache behavior](https://docs.astral.sh/uv/concepts/cache/): caches are an
   optimization, not the retained original-wheel delivery contract.
-
-## Open questions for the v0.27.0 deploy-venv-sync design
-
-Q09 is human-confirmed. The other answers remain review recommendations pending
-consolidation.
-
-### Q01: Offline source transport
-
-Should the release use a loopback static referential, or a filesystem-only transport? Either must pass locked consistency with empty caches and all remote services unavailable.
-
-#### BBQ for Q01
-
-The pantry can serve ingredients through a counter or directly from labeled boxes. In this picture: the pantry is the retained bundle, the counter is the loopback referential, and labeled boxes are filesystem artifact locations.
-
-#### Options for Q01
-
-- Option A: Qualify a loopback static referential as proposed.
-  - Pro: Preserves registry-style artifact locations without remote access.
-  - Con: Adds server lifetime, port and effective-lock configuration concerns.
-- Option B: Qualify filesystem-backed locations first, keeping loopback as a fallback.
-  - Pro: Avoids listening sockets and server lifecycle.
-  - Con: Needs the same effective lock and matching source configuration as A; the qualified uv must accept filesystem locations under locked consistency.
-
-#### Recommended option for Q01
-
-Option B: Avoid server lifetime and listening sockets when the qualified uv accepts local filesystem locations. Both choices retain the same identity validator and locked-consistency gate; loopback is a fallback only after filesystem qualification fails.
-
-#### Answer to Q01: option B
-
-Option B: Qualify filesystem transport first; use the loopback fallback only with equivalent identity and empty-cache evidence on both targets.
-
-### Q02: Release bundle delivery
-
-Should reconstruction inputs be a digest-bound companion archive or embedded in the application archive?
-
-#### BBQ for Q02
-
-A meal kit can include its pantry box or travel with a separately labeled box. In this picture: the meal kit is the application archive, the pantry box is the reconstruction bundle, and its label is the digest binding.
-
-#### Options for Q02
-
-- Option A: Keep a required companion archive bound by the release manifest.
-  - Pro: Allows independent retention and deduplication while preserving existing application archive contents.
-  - Con: Delivery must enforce that both parts are present before mutation.
-- Option B: Embed the bundle in the application archive.
-  - Pro: Makes completeness easier to enforce through one delivered object.
-  - Con: Increases repeated archive transfer and couples dependency retention to application packaging.
-
-#### Recommended option for Q02
-
-Option A: Require a complete logical delivery and reject missing companions before mirroring, avoiding reliance on disposable caches.
-
-#### Answer to Q02: option A
-
-Option A: Require a complete logical delivery and reject missing companions before mirroring, avoiding reliance on disposable caches.
-
-### Q03: uv executable provenance
-
-How should target-specific uv adaptation coexist with the release-pinned original artifact?
-
-#### BBQ for Q03
-
-A sealed ingredient may need preparation before serving. In this picture: the sealed ingredient is the original uv artifact, preparation is runtime adaptation, and the served portion is the derived executable.
-
-#### Options for Q03
-
-- Option A: Permit a separately hashed derived executable with recorded transformation and qualification.
-  - Pro: Accommodates the existing cross-distribution runtime boundary without changing the accepted toolchain archive.
-  - Con: Requires two provenance identities and target-specific evidence.
-- Option B: Qualify an unmodified fully statically linked uv artifact first, with adaptation only as a fallback.
-  - Pro: Simplifies provenance and recovery verification.
-  - Con: May require selecting a different qualified artifact or bootstrap strategy if runtime compatibility fails.
-
-#### Recommended option for Q03
-
-Option B: A qualified static artifact keeps one executable identity and avoids runtime adaptation. Verify linkage and actual execution on both targets; if unsuitable, qualify A with original and derived hashes separately.
-
-#### Answer to Q03: option B
-
-Option B: Record static linkage and the artifact digest in the manifest, retaining the explicit adaptation fallback only if qualification demonstrates a need.
-
-### Q04: Inventory verification ownership
-
-Should complete distribution selection and all installed ELF locations share one expanded inventory helper, or compose with the existing helper?
-
-#### BBQ for Q04
-
-The guest list and food inspection answer different questions. In this picture: the guest list is selected distribution membership, food inspection is wheel ELF verification, and the event report is combined readiness evidence.
-
-#### Options for Q04
-
-- Option A: Compose a selection verifier with the existing ELF helper, extending ELF scope compatibly where needed.
-  - Pro: Preserves item 7's established evidence contract and makes the added responsibility explicit.
-  - Con: Requires a shared identity binding so two reports cannot describe different selections.
-- Option B: Replace the helper contract with one unified inventory format and verifier.
-  - Pro: Offers one complete inventory entry point.
-  - Con: Expands migration and regression scope for existing item 7 callers and evidence.
-
-#### Recommended option for Q04
-
-Option A: Bind both reports to the same canonical lock, profile and wheel manifest while retaining existing consumers.
-
-#### Answer to Q04: option A
-
-Option A: Bind both reports to the same canonical lock, profile and wheel manifest while retaining existing consumers.
-
-### Q05: Serialization interface
-
-How should consuming deployment procedures demonstrate exclusive ownership of an application root?
-
-#### BBQ for Q05
-
-Only one cook can rearrange a shared preparation bench at a time. In this picture: the cook is a deployment or rollback operation, the bench is the application root, and exclusive use is mutation serialization.
-
-#### Options for Q05
-
-- Option A: Require an explicit serialization attestation from the consuming adapter and verify exclusion in integration.
-  - Pro: Works with existing CI scheduling or operator locking without imposing one cross-platform locking implementation.
-  - Con: The adapter must demonstrate enforcement across mirror, sync and rollback rather than merely claim it.
-- Option B: Make the reusable lifecycle own a per-root lock spanning archive installation and readiness.
-  - Pro: Provides a uniform locking contract to callers.
-  - Con: Requires integrating every existing mutation entry point and managing lock lifetime across them.
-
-#### Recommended option for Q05
-
-Option A: Keep enforcement with the consumer as the requirement specifies, but make its boundary and verification part of the interface.
-
-#### Answer to Q05: option A
-
-Option A: Keep enforcement with the consumer as the requirement specifies, but make its boundary and verification part of the interface.
-
-### Q06: CI command outcome evidence
-
-Which evidence boundary should the application adapter establish for commands whose failures the unchanged library masks?
-
-#### BBQ for Q06
-
-A clean table does not prove every dish was cooked successfully. In this picture: the clean table is an unchanged dependency inventory, each dish is a library command, and the service record is its independently observed result.
-
-#### Options for Q06
-
-- Option A: Require command-status observation plus fresh attributable test evidence, with unresolved observation blocking acceptance.
-  - Pro: Distinguishes successful commands from masked failures and preserves the unchanged-library constraint.
-  - Con: The private adapter must prove its instrumentation catches the actual masked command forms.
-- Option B: Rely on isolated fresh output artifacts and postconditions as the primary evidence, qualifying their completeness for each command.
-  - Pro: May avoid fragile shell instrumentation.
-  - Con: Inventory and coverage artifacts alone cannot prove dependency/test exit status, so this route may be unable to satisfy acceptance.
-
-#### Recommended option for Q06
-
-Option A: Combine shell-level error observation for dependency commands outside conditional constructs with a test-framework session result for tests whose shell status is discarded. Require fresh start/completion evidence and deliberate-failure qualification on the actual agent. Any unobserved command form blocks acceptance.
-
-#### Answer to Q06: option A
-
-Option A: The two complementary observation boundaries address both dependency failures and discarded test status, without treating an exit hook or unchanged inventory as proof. Each boundary records its own start and completion, so an observer that never ran cannot imply success. Qualification remains mandatory.
-
-### Q07: Phase 2 input sources
-
-How does the application adapter obtain identical toolchain and wheel inputs on
-the fresh mandated test agent, without assuming phase 1 workspace access?
-
-#### BBQ for Q07
-
-A second kitchen can order the same sealed ingredients or receive the first
-kitchen's unopened supplies. In this picture: the kitchens are the CI agents,
-sealed ingredients are digest-verified archives and wheels, and the order list
-is the release bundle's CI selection profile.
-
-#### Options for Q07
-
-- Option A: Acquire existing inputs from configured private mirror/artifact services and verify them against phase 1 digests and canonical wheel hashes.
-  - Pro: Works from the adapter's own shell without accessing the earlier workspace or uploading the tested package.
-  - Con: CI requires those services to retain the exact inputs; unavailable artifacts fail the build.
-- Option B: Transfer phase 1's reconstruction bundle through a supported publication-free CI artifact mechanism.
-  - Pro: Reuses exactly the retained bytes and avoids a second mirror acquisition.
-  - Con: Requires a proven transfer into the library-owned agent that its shell adapter may not expose.
-
-#### Recommended option for Q07
-
-Option A: Use the same bundle CI selection, verify its profile and wheel manifest
-digests against phase 1, and check the toolchain archive and canonical wheel
-hashes. Regenerated manifests must match the recorded digest. No new release
-artifact upload is required. Offline deployment and recovery still use bundles.
-
-#### Answer to Q07: option A
-
-Option A: Existing services provide the fresh agent's inputs while digest checks
-establish identity. Missing or mismatched inputs fail; prior workspace access is
-never assumed.
-
-### Q08: Qualified release publication
-
-Should publication promote the validation build's exact archive and bundle, or
-rebuild them from the qualified source revision?
-
-#### BBQ for Q08
-
-A tested meal kit can be shipped sealed or assembled again from the same recipe.
-In this picture: the sealed kit is the qualified archive/bundle pair, the recipe
-is the source revision, and inspection is qualification of the actual bytes.
-
-#### Options for Q08
-
-- Option A: Promote the exact digest-verified candidate pair in a separate publication run.
-  - Pro: Preserves qualification identity and keeps release publishing disabled throughout validation.
-  - Con: Requires reliable candidate retention and retrieval until promotion.
-- Option B: Build a new pair from the same revision in a publication run and qualify those bytes before publishing.
-  - Pro: Fits release systems that cannot promote archived candidates directly.
-  - Con: Repeats qualification; identical source alone cannot establish identical artifacts.
-
-#### Recommended option for Q08
-
-Option A: Publish the qualified bytes and their binding manifest to the release
-repository, retaining complete current/predecessor inputs there and locally for
-offline rollback. Option B is a fallback only with fresh qualification of its
-actual digests. The mandated pipeline remains CI validation, not deployment.
-
-#### Answer to Q08: option A
-
-Option A: Prefer promotion of the exact qualified pair; candidate loss blocks
-promotion rather than silently authorizing a same-revision rebuild as equivalent.
-Pending candidates survive later builds until promotion or explicit abandonment,
-and qualification evidence must bind to the exact archive/bundle digests.
-
-### Q09: Publication execution boundary
-
-Where should the authorized publication run execute while preserving the single
-Jenkinsfile/job/build validation sequence and its mandated pipeline?
-
-#### BBQ for Q09
-
-The inspected meal kit still needs a dispatcher. In this picture: inspection is
-the complete validation sequence, the dispatcher is the publication runner, and
-the sealed kit is the retained candidate pair.
-
-#### Options for Q09
-
-- Option A: An explicitly authorized publication mode of the same Jenkins job.
-  - Pro: Preserves one job and its existing publisher credential boundary.
-  - Con: Requires confirmation that the mandate permits a build without validation phases, plus fail-closed mode selection.
-- Option B: A separate publication job consuming qualified candidates.
-  - Pro: Separates validation permissions from publication permissions.
-  - Con: Adds a job and requires authorization relative to the one-job constraint.
-- Option C: Operator-run publication outside CI through the existing application publisher.
-  - Pro: Preserves every validation build's mandated flow without an additional Jenkins job or an assumed exception.
-  - Con: Requires a reproducible runner with controlled credentials and durable publication evidence.
-
-#### Recommended option for Q09
-
-Option C: Use the existing publisher from an explicitly authorized operator run,
-with the same digest/evidence gate and manifest-last publication contract. Record
-source build, candidate digests, qualification record and publication receipts;
-credentials remain in the authorized runner, outside bundles and evidence. Options
-A/B require confirmation that their CI execution model is permitted.
-
-#### Answer to Q09: option C
-
-Option C: confirmed by the user on 2026-09-22 as scenario 1, operator-run
-publication outside CI. The single validation build still runs both phases with
-its publishers disabled. Operator publication consumes its qualified bytes and
-does not rerun the mandated pipeline. Deployment does not invoke that pipeline.
-This design decision does not authorize an actual publication.
