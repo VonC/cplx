@@ -90,6 +90,11 @@ alone is insufficient. Storage layout is left to design.
    and subsequent packaging/publication, and must not report a partial
    environment as usable.
 
+A failed in-place sync may leave the Python venv unusable. Report the failure
+clearly and provide recovery through redeployment or rollback; uninterrupted
+availability and preservation of the previous venv on every failure are not
+required.
+
 When the toolchain archive changes but its Python version and resulting venv
 name do not, reuse the venv only after validation against the current interpreter,
 prefix, locked dependencies, and runtime providers. Record the current archive
@@ -157,10 +162,11 @@ Materialize a valid effective lock and configuration before sync, retain its
 verifiable relationship to the canonical lock, and do not bypass lock consistency.
 
 Validate bootstrap and sync using an empty cache with public Python library referential access
-unavailable. Shipping digest-pinned wheels and syncing offline remains an option
-within D11. Source transport, uv provisioning, and recovery-input retention must
-be specified before implementation; this requirement does not silently choose
-between a reachable private mirror and retained offline inputs.
+unavailable. Forward deployment additionally requires digest-pinned release
+inputs sufficient for bootstrap and locked sync with every Python library
+referential, mirror, and remote artifact service unreachable and caches empty.
+Source transport, uv provisioning, and recovery-input retention must be
+specified in design within this offline deployment requirement.
 
 Install Python library dependencies from compatible, prebuilt wheels on both
 targets. Never fall back to building a dependency from source during venv
@@ -315,17 +321,17 @@ lock and dependency wheels as required by that release's recovery procedure.
 Neither withdrawn artifacts nor a service outage may prevent this recovery.
 
 For venv-free predecessors, reconstruct the Python venv from that release's
-canonical lock without compiling dependencies. For the first transition, Q05
-now proposes redeploying the predecessor archive, including its shipped venv,
-using its own deployment procedure. Lock-based reconstruction would apply from
-the second venv-free release onward. This first-transition proposal still awaits
-human confirmation; the offline recovery guarantee itself is confirmed.
+canonical lock without compiling dependencies. For the first transition,
+redeploy the predecessor archive, including its shipped venv, using its own
+deployment procedure. Lock-based reconstruction applies from the second
+venv-free release onward. Both recovery forms must pass the offline readiness
+test on the target.
 
-Offline rollback does not silently settle forward deployment: Q09 asks whether
-a new release must also install with every referential/mirror/artifact service
-unreachable or may require a reachable private mirror. Resolve Q09 before
-implementation. Q10 confirms qualified uv delivery with application release
-inputs, preserving the toolchain archive.
+Forward deployment must also succeed with every Python library referential,
+mirror, and remote artifact service unreachable, using digest-pinned inputs
+delivered with the release. Prove this with empty caches. A reachable private
+mirror is not a deployment prerequisite. Deliver qualified uv with application
+release inputs, preserving the toolchain archive.
 
 ## Acceptance criteria for deployment-created environments
 
@@ -335,18 +341,37 @@ inputs, preserving the toolchain archive.
 | AC02 | Archive-only installation on both supported platforms, without a pre-existing application venv or target Git checkout, provisions uv, creates the named venv, performs locked sync, and passes readiness without developer-environment assumptions. |
 | AC03 | Host Python earlier on PATH does not override toolchain Python. Missing/incompatible toolchain Python and a foreign-base existing venv fail clearly. Base executable, prefix, and full version are verified. |
 | AC04 | Valid existing venvs sync successfully; repeated sync succeeds; mirroring-induced removal causes recreation. Multiple version directories do not affect exact selection, and a toolchain-Python version change uses the correctly named environment. |
-| AC05 | Both targets use the same canonical release lock, qualified uv, explicit groups, and valid marker selections. A stale lock or failed sync prevents readiness and subsequent packaging/publication. |
-| AC06 | Bootstrap and effective-source locked sync succeed with empty caches and public Python library referential access unavailable, including deployment without Git. Any source mapping preserves canonical dependency/artifact identities and hashes. |
+| AC05 | Both targets use the same canonical release lock, qualified uv, explicit groups, and valid marker selections. A stale lock or failed sync prevents readiness and subsequent packaging/publication. A failed in-place sync reports the failure and permits recovery by redeployment or rollback; the old venv need not remain usable throughout. |
+| AC06 | Forward deployment bootstrap and effective-source locked sync succeed with empty caches and every Python library referential, mirror, and remote artifact service unreachable, using digest-pinned release-delivered inputs, including deployment without Git. Any source mapping preserves canonical dependency/artifact identities and hashes. |
 | AC07 | Inventory rejects missing/mismatched/extra distributions against target-selected lock identities and hashes; installed wheel ELFs equal original retained wheel binaries. Deliberate ELF modification blocks readiness. No wheel ELF rewriting or loss of required `$ORIGIN` paths occurs; complete non-ELF file-byte coverage is not claimed. |
 | AC08 | Runtime checks and heavy-wheel imports pass on both platforms. Debian has conclusive live trace evidence and no host fallback for ABI-critical libraries. RHEL providers follow item 7's validation matrix and operator readiness succeeds. |
 | AC09 | Debian application acceptance runs on the exact identified RHEL-built toolchain archive; platform, interpreter, lock, and artifact provenance accompany the results. |
 | AC10a | Phase 2 environment equivalence and evidence: our scripts create phase 2's local named venv with toolchain Python from phase 1's toolchain archive digest, canonical lock and groups; no copied phase 1 venv or library-created replacement is accepted. Phase 1's effective dependency selection equals the selection the library's unqualified sync applies, so that sync neither adds nor removes distributions. Record and compare checkout revisions, archive/lock digests, groups, interpreter/base-prefix provenance and selected inventories with phase 1, including phase 2 inventory before/after library Python commands and the local venv path. Any phase 2 uv version is allowed if inventory stays unchanged and dependency commands succeed. |
 | AC10b | Build sequencing and failure propagation: one Jenkinsfile/job/build runs blocking validation and packaging before unchanged mandated stages. Phase 1 failure prevents phase 2; either phase's failure fails the build. Revision mismatch, dependency drift, wrong interpreter, missing equivalence evidence, or a failed dependency/test command fails validation even when the library masks it. A branch update between checkouts requires a new build and is reported as a revision mismatch, not a product failure. Artifacts/evidence remain attributable to their phase and phase 1 archives stay unchanged. Unresolved compatibility blocks completion. |
 | AC11 | Actual Debian CI evidence shows no Maven deployment invocation or release-artifact upload from either phase, while required checks, quality gates, and independent packaging execute. |
-| AC12 | RHEL rollback restores the preceding release to readiness with every Python library referential, mirror, and remote artifact service unreachable, using target-local or archive-delivered retained inputs. A venv-free predecessor is reconstructed from its lock. For the first transition, Q05 proposes redeployment of the predecessor's shipped venv by its own procedure, pending confirmation. Compilation or current service availability alone is insufficient evidence. |
+| AC12 | RHEL rollback restores the preceding release to readiness with every Python library referential, mirror, and remote artifact service unreachable, using target-local or archive-delivered retained inputs. A venv-free predecessor is reconstructed from its lock. For the first transition, redeploy the predecessor's shipped venv by its own procedure. Compilation or current service availability alone is insufficient evidence. |
 | AC13 | Public effort artifacts and review content contain no private application/library identifiers, infrastructure paths, endpoints, credentials, or job links. |
 | AC14 | Deployment/CI venv sync and recovery install compatible prebuilt dependency wheels without source builds. An unavailable compatible wheel fails clearly and blocks readiness. The application project itself is not built or installed during dependency sync. Independent application packaging and RHEL toolchain compilation are distinct. |
 | AC15 | A same-Python-version toolchain replacement permits venv reuse only with current interpreter/prefix, lock and runtime validation plus fresh archive-digest evidence. Consuming automation/operator procedures enforce serialization for overlapping sync, mirroring, deployment, and rollback on the same application root. |
+
+## Requirement clarifications
+
+The human confirmed consolidation after round 4, including option A for Q02,
+Q05, and Q09. All ten questions are settled; private integration mechanisms
+remain outside this public requirement.
+
+| Question | Decision and reason | Integrated in | Rejected alternatives |
+| --- | --- | --- | --- |
+| Q01 | A: prove preceding-release recovery with all remote services unreachable; a service outage must not prevent recovery. | Required recovery from the preceding release; AC12 | Testing only the usual mirror outage or relying on remote retained inputs. |
+| Q02 | A: require clear sync failure and recoverability, without uninterrupted availability; in-place sync can leave the venv unusable. | Required packaging and Python venv lifecycle; AC05 | Requiring every failed sync to preserve the previous venv unchanged and usable. |
+| Q03 | A: reject extra distributions and compare installed wheel ELFs with original retained wheels; path adjustments to scripts or links do not justify changing wheel binaries. | Required wheel integrity and runtime readiness; AC07 | Blanket venv relocation, wheel ELF rewriting, or claiming complete non-ELF byte coverage. |
+| Q04 | A: permit same-version venv reuse only after current interpreter, prefix, lock, runtime, and archive-digest validation; a version string alone is insufficient. | Required packaging and Python venv lifecycle; AC15 | Unconditional reuse on equal Python versions or mandatory recreation for every archive change. |
+| Q05 | A: recover the first transition using the predecessor's shipped venv and its own procedure; subsequent venv-free predecessors use lock reconstruction. This supports historical releases without inventing missing inputs. | Required recovery from the preceding release; AC12 | Requiring historical lock reconstruction before the first venv-free release. |
+| Q06 | A: reconstruct phase 2's named venv with our scripts from the same toolchain archive, lock, and effective dependency selection; compare provenance, revisions, and before/after inventories. Fresh agents require equivalence evidence. | Required single-build CI sequence without publication; AC10a and AC10b | Copied phase 1 files, same-storage demands, library-created replacement venvs, or an exact phase 2 uv-version demand despite proven unchanged dependencies. |
+| Q07 | A: exclude every Python venv under packaging inputs using its pyvenv.cfg boundary; current, stale, alternate-name, and nested venvs all count. | Required packaging and Python venv lifecycle; AC01 | Excluding only the selected or conventionally named venv. |
+| Q08 | A: consuming automation or operators enforce serialization per application root; this covers competing sync, mirroring/deletion, and rollback/deployment. | Required packaging and Python venv lifecycle; AC15 | Supporting overlapping mutations to the same root in this feature. |
+| Q09 | A: forward deployment must work offline with empty caches and digest-pinned release-delivered inputs; installation and recovery have compatible availability guarantees. | Required release lock and dependency source behavior; Required recovery from the preceding release; AC06 | Making a reachable private mirror a forward-deployment prerequisite. |
+| Q10 | B: deliver uv with application release inputs, preserving the qualified toolchain archive. Qualify the latest stable version, then freeze its version and digest for deployment and recovery regardless of install location. | Required toolchain Python and uv provenance; AC05; AC10a | Repacking the toolchain only to deliver uv, floating latest at deployment, or silently substituting another release's uv. |
 
 ## Scope and source references for topic 8
 
@@ -362,363 +387,3 @@ Earlier toolchain publication, unrelated CI workaround cleanup, and coverage
 restoration remain separately tracked; preservation of current checks is required
 here. Python 3.14 is outside this cycle. No runtime implementation or content
 filter configuration is changed by writing this requirement.
-
-## Open questions for the v0.27.0 deployment venv feature request
-
-Q01, Q03, Q04, Q06, Q07, Q08, and Q10 record human-confirmed answers and remain
-here for review traceability until authorized consolidation. After round 2,
-the human clarified Q06 again after round 3: same environment means toolchain
-Python and locked dependencies, reconstructed locally by our scripts in phase 2,
-not shared venv files;
-Q10 selects the latest stable uv at qualification, pinned for each release.
-Q02, Q05, and Q09 remain proposals requiring human confirmation. Reviewer
-agreement does not replace that confirmation.
-
-### Q01: Must rollback work with Python library referentials and mirrors unavailable?
-
-Confirmed: recovery means returning the immediately preceding application
-release to readiness after an unsuccessful deployment. An unavailable Python
-library referential or mirror means dependency downloads cannot reach it.
-The recovery test also makes every remote artifact service unreachable.
-
-#### BBQ for Q01
-
-A barbecue reserve must work while all shops are closed. The reserve is the
-retained release inputs; shops are Python library referentials, mirrors, and
-artifact services.
-
-#### Options for Q01
-
-- Option A: Require rollback using only inputs already on the target or delivered with retained release archives, including qualified uv.
-  - pro: Removes service availability and artifact withdrawal as recovery dependencies.
-  - con: Requires a complete, verified recovery set.
-- Option B: Permit rollback to depend on a reachable retained-artifact service.
-  - pro: Allows centralized storage without complete target-local inputs.
-  - con: Rollback can fail during network or service outages.
-
-#### Recommended option for Q01
-
-Option A: The human confirmed offline rollback; make the outage test cover every remote
-source, not just the usual mirror.
-
-#### Answer to Q01: option A
-
-Human-confirmed option A. AC12 requires preceding-release readiness with every
-Python library referential, mirror, and artifact service unreachable. Q05
-separately addresses the first transition's recovery procedure.
-
-### Q02: What remains usable after an in-place Python venv sync fails?
-
-A failed sync blocks readiness. Clarify whether the old Python venv must remain
-unchanged or may require recovery.
-
-#### BBQ for Q02
-
-Replacing a barbecue's gas supply can leave it unusable until a spare is fitted.
-The replacement is sync, and fitting the spare is redeployment or rollback.
-
-#### Options for Q02
-
-- Option A: Require clear failure and recoverability without uninterrupted-service guarantees.
-  - pro: Matches keep-and-sync behavior.
-  - con: The venv may be unusable until recovery.
-- Option B: Keep the previous venv unchanged and usable on every failure.
-  - pro: Provides stronger continuity.
-  - con: Adds a transactional availability requirement.
-
-#### Recommended option for Q02
-
-Option A: Keep failure handling and proven recovery without promising zero downtime.
-
-#### Answer to Q02: option A
-
-Proposed option A: failed sync reports failure and blocks readiness; the Python
-venv may be unusable afterwards. Recovery is successful redeployment of the
-same or preceding release, not a guarantee of an unchanged prior venv.
-
-### Q03: Which package identities and installed wheel bytes must match?
-
-The human confirmed selected package identity checks and wheel ELF equality.
-Retained wheels are the exact original saved .whl files, verified against the
-canonical lock hashes and kept with their release/platform/group manifest.
-Installed copies, URLs, or an expendable cache alone are not retained originals.
-
-#### BBQ for Q03
-
-A menu and sealed ingredient packets provide two references for a barbecue.
-The menu is the selected lock; sealed packets are original retained wheels;
-checking the grill parts represents ELF byte comparison.
-
-#### Options for Q03
-
-- Option A: Reject missing/mismatched/extra distributions against target-selected lock identities and hashes; compare installed wheel ELFs to original retained wheel binaries.
-  - pro: Detects package-set drift and binary rewriting with explicit reference artifacts.
-  - con: Does not verify every installed non-ELF file byte.
-- Option B: Also verify every installed Python/data file with generated-file exceptions.
-  - pro: Covers more post-install modifications.
-  - con: Adds a broader integrity system.
-
-#### Recommended option for Q03
-
-Option A: The human agreed to package identity and ELF verification, with the retained
-reference defined. Marker-based platform/group differences are not drift.
-
-#### Answer to Q03: option A
-
-Human-confirmed option A. Extra means a distribution absent from the selected
-lock set. Do not relocate wheel libraries, including wheel ELFs in venv/bin.
-Create the venv at its final path and verify links/shebangs; text or symlink
-adjustments do not change wheel ELF library bytes.
-
-### Q04: May a Python venv be reused when the toolchain archive changes but Python's version does not?
-
-The toolchain archive contains the shipped Python interpreter, supporting
-native runtime libraries, and utilities; it does not mean application Python
-library dependencies. A replacement archive can retain the same Python version
-and thus the same named venv path.
-
-#### BBQ for Q04
-
-Two fuel bottles may share a label but contain different batches. The label is
-the Python version, the batch is the toolchain archive digest, and the appliance
-check is current interpreter and runtime validation.
-
-#### Options for Q04
-
-- Option A: Allow reuse only after current interpreter/prefix validation, locked sync, and readiness, recording the current archive digest.
-  - pro: Preserves valid existing venvs with fresh provenance.
-  - con: Requires checking the actual replacement toolchain.
-- Option B: Recreate the Python venv for every changed toolchain archive digest.
-  - pro: Gives a simple replacement rule.
-  - con: Discards potentially valid venvs.
-
-#### Recommended option for Q04
-
-Option A: The human confirmed reuse with validation tied to the current toolchain.
-
-#### Answer to Q04: option A
-
-Human-confirmed option A. Record fresh per-platform evidence against the current
-toolchain archive digest. Application Python library dependencies use compatible
-prebuilt wheels only; source rebuilding during sync/recovery is forbidden and
-a missing compatible wheel fails clearly. --locked alone does not enforce this.
-
-### Q05: How should rollback cross the first venv-free release boundary?
-
-The preceding release may have shipped its Python venv and never retained
-inputs for lock-based reconstruction. Round 1 recommended using the recovery
-procedure that predecessor actually supports.
-
-#### BBQ for Q05
-
-Yesterday's barbecue meal can be restored from a prepared reserve even when
-future meals use recipes. The prepared reserve is the predecessor archive with
-its venv; the recipe is a venv-free release's lock.
-
-#### Options for Q05
-
-- Option A: For the first transition, redeploy the predecessor archive with its shipped venv using its own procedure; reconstruct from locks from the second venv-free release onward.
-  - pro: Uses the predecessor's supported recovery path and proves it on target.
-  - con: Requires two recovery forms during one transition.
-- Option B: Require lock reconstruction of the predecessor before the first venv-free release.
-  - pro: Uses one recovery form immediately.
-  - con: Can require historical inputs never retained and block adoption without a safety gain.
-
-#### Recommended option for Q05
-
-Option A: Accept the reviewer's revised recommendation; preserve confirmed offline
-recovery without retroactively requiring missing historical inputs.
-
-#### Answer to Q05: option A
-
-Proposed option A, awaiting human confirmation. AC12 names this first-transition
-proposal explicitly. Its target readiness test must still succeed with all
-Python library referentials, mirrors, and remote artifact services unreachable.
-
-### Q06: What must the mandated phase 2 Python environment share with phase 1?
-
-The human decision of 2026-09-22 supersedes the round 3 same-files wording.
-Phase 2's fresh test agent has its own checkout and cannot access phase 1's
-venv files. "Same environment" means toolchain Python and locked dependencies.
-
-#### BBQ for Q06
-
-Two kitchens use the same verified ingredients and recipe to prepare equivalent
-meals. The ingredients are the toolchain archive and selected dependency wheels;
-the recipe is the canonical lock and groups. They do not transport the first meal.
-
-#### Options for Q06
-
-- Option A: Our scripts create a local named venv in phase 2 before the library's Python commands, using the same toolchain archive digest, canonical lock and groups as phase 1.
-  - pro: Preserves interpreter and dependency equivalence on fresh agents without copying venvs.
-  - con: Requires reconstruction and comparison evidence from the actual phase 2 test agent.
-- Option B: Require phase 2 to use phase 1's exact venv files and storage.
-  - pro: Would establish physical continuity.
-  - con: Superseded by the human decision and incompatible with the confirmed fresh-agent execution.
-
-#### Recommended option for Q06
-
-Option A: Apply the human's clarified meaning of same environment. No same-storage
-question or invariant is required. Keep the two-phase order and phase 1 artifacts.
-
-#### Answer to Q06: option A
-
-Human-confirmed option A. The library's dependency, activation and test commands
-must use the venv prepared by our scripts, never a copied phase 1 venv or a
-replacement created by the library's own commands. A verified explicit alias
-to the canonical named venv is not the implicit environment forbidden by
-lifecycle rule 4.
-
-Compare archive digest, canonical lock digest, groups, selected inventory and
-checkout revision with phase 1. Record phase 2's resolved interpreter, base
-prefix and venv path. Capture selected inventory before and after the library's
-Python commands. Phase 1's effective dependency selection must equal the
-selection the library's unqualified sync applies, so that sync neither adds
-nor removes distributions. Any uv version
-is acceptable in phase 2 if the locked inventory remains unchanged and its
-dependency commands succeed. Dependency drift, revision mismatch, or failed
-dependency commands fail validation even when masked by the library.
-
-Deployment and recovery still use the release-pinned uv exactly. Integration
-uses the consuming Jenkinsfile and a tracked application script; the private
-mechanism belongs to design, with shared-library sources unchanged.
-
-### Q07: Must packaging exclude every Python venv found within its input tree?
-
-Identify a Python venv root by its pyvenv.cfg, then exclude that entire subtree.
-This covers current/stale version directories, alternate names, and nested venvs
-within packaging inputs; it does not search unrelated host directories.
-
-#### BBQ for Q07
-
-Removing one cooler from a delivery leaves a spare cooler behind. The delivery
-is the packaging input tree; the coolers are separately identified Python venvs.
-
-#### Options for Q07
-
-- Option A: Yes: exclude every Python venv identified by pyvenv.cfg throughout packaging inputs.
-  - pro: Keeps packaging and relocation exclusions consistent.
-  - con: Requires scanning all packaging inputs for that marker.
-- Option B: Exclude only the conventionally named application venv directory.
-  - pro: Narrows the exclusion rule.
-  - con: Can ship stale, alternate-name, or nested venvs.
-
-#### Recommended option for Q07
-
-Option A: The human explicitly answered yes to the broader packaging exclusion.
-
-#### Answer to Q07: option A
-
-Human-confirmed option A. Validate current, stale, alternate-name, and nested
-Python venv cases. Use the same pyvenv.cfg boundary as relocation exclusion.
-
-### Q08: Must changes to one application installation run one at a time?
-
-Scenarios are two deployments syncing the same Python venv, archive mirroring
-or deletion overlapping sync, and rollback overlapping forward deployment.
-These modify the same application root. Independent roots remain independent.
-
-#### BBQ for Q08
-
-Two cooks changing one grill's fuel supply need a one-cook rule. The cooks are
-deployment invocations and the grill is the shared application installation.
-
-#### Options for Q08
-
-- Option A: Require the invoking automation/operator to enforce serialization per application root.
-  - pro: Makes the rare overlap cases explicit without adding concurrent deployment support.
-  - con: The consuming deployment procedure must enforce the rule.
-- Option B: Guarantee safe overlapping operations within this feature.
-  - pro: Supports overlapping invocations.
-  - con: Adds concurrency behavior and failure cases beyond this topic.
-
-#### Recommended option for Q08
-
-Option A: The human confirmed serialization; verify the deployment precondition rather
-than assuming simultaneous operations never happen.
-
-#### Answer to Q08: option A
-
-Human-confirmed option A. Verify the consuming automation/operator procedure
-prevents overlapping sync, mirroring/deletion, and rollback/forward deployment
-against one application root. Separate installations may run independently.
-
-### Q09: Must forward deployment also work without Python library referentials or mirrors?
-
-Offline preceding-release recovery is confirmed by Q01. This does not establish
-whether a new release may depend on a reachable private mirror. Resolve target
-reachability as a requirement before selecting source transport in design.
-
-#### BBQ for Q09
-
-A reserve meal for yesterday does not ensure tomorrow's ingredients are already
-at the barbecue. Yesterday's reserve is rollback inputs; tomorrow's delivery is
-the new release; the shop is the Python library referential or its mirror.
-
-#### Options for Q09
-
-- Option A: Require new-release deployment with every referential, mirror, and remote artifact service unreachable, using digest-pinned inputs delivered with the release.
-  - pro: Aligns forward installation and offline recovery prerequisites.
-  - con: Requires complete release deliveries for each supported target.
-- Option B: Allow a reachable private mirror as a documented, verified forward-deployment prerequisite.
-  - pro: Allows downloading new-release wheels during deployment.
-  - con: Forward deployment depends on service availability. Downloaded wheels must still be kept as retained originals for post-sync comparison and as the next rollback's inputs.
-
-#### Recommended option for Q09
-
-Option A: Recommend self-contained new-release inputs, consistent with confirmed offline
-recovery. This remains a proposal, not an inferred reachability guarantee.
-
-#### Answer to Q09: option A
-
-Proposed option A. Test empty-cache forward deployment with all remote package
-and artifact services unreachable. Only human confirmation can choose this over
-a documented reachable-mirror prerequisite; both choices prohibit source builds.
-
-### Q10: Which release delivers qualified uv, and which version must be qualified?
-
-The toolchain archive means cplx's shipped Python/runtime/utilities archive.
-Putting uv inside changes its digest and requires a new release plus repeated
-item 7 acceptance. Prior relocation evidence cites uv 0.12.17; the consuming
-release tooling lock pins 0.11.19. A dependency utility and application Python
-libraries are distinct, even when that utility is pinned in a tooling group.
-
-#### BBQ for Q10
-
-A barbecue lighter can arrive in the grill crate or with the meal ingredients.
-The grill crate is the toolchain archive, the lighter is qualified uv, and the
-meal delivery is the application release's retained inputs.
-
-#### Options for Q10
-
-- Option A: Deliver uv inside a new toolchain archive and repeat item 7 qualification.
-  - pro: Makes uv part of one toolchain delivery.
-  - con: Changes the qualified archive and adds release/acceptance scope.
-- Option B: Select the latest stable uv at release qualification, deliver its exact digest-pinned artifact with application release inputs, and install explicitly using toolchain Python, retaining the current toolchain archive.
-  - pro: Supports offline recovery and preserves item 7's exact archive.
-  - con: Requires separate uv delivery/bootstrap evidence on both targets.
-
-- Option C (not admissible under confirmed Q01): Obtain uv from a Python library referential or mirror during deployment, with no retained local recovery copy.
-  - pro: Avoids delivering uv with a release archive.
-  - con: Cannot satisfy confirmed Q01 and is not an admissible choice under the agreed recovery guarantee.
-
-#### Recommended option for Q10
-
-Option B: The human confirmed application delivery and requested the most recent
-version. Select latest stable at qualification, align the consuming tooling lock,
-and qualify the exact delivered artifact and bootstrap on both targets. Prior
-relocation evidence alone does not prove the new delivery path.
-
-#### Answer to Q10: option B
-
-Human-confirmed option B. The latest stable release checked on 2026-09-22 is
-[uv 0.12.17](https://github.com/astral-sh/uv/releases/tag/0.12.17).
-Recheck when qualification begins and use the latest stable then; freeze that
-version and artifact digest for the release and its recovery. Do not upgrade
-implicitly during deployment or rollback. Align the tooling lock while preserving
-canonical public URLs. Install under the toolchain prefix using its explicit
-Python/pip where required. Deployment and recovery must select the exact
-release-pinned uv artifact regardless of install location; a shared installation
-must not silently serve another release's uv. Retain it locally under Q01.
-Phase 2 may use any uv version subject to Q06's unchanged-inventory and successful
-dependency-command evidence; this exception does not apply to deployment/recovery.
