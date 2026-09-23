@@ -70,6 +70,7 @@
     "ELFDATA",
     "elfedit",
     "elfs",
+    "ENETUNREACH",
     "enginemtime",
     "errexit",
     "excludable",
