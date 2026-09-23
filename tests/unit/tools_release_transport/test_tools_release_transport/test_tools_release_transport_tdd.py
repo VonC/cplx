@@ -1,4 +1,4 @@
-"""Test the real adapter against an isolated TLS repository, without live writes.
+"""Test the real adapter against an isolated TLS repository on native Linux.
 
 These are process integration fixtures using unittest, not unit coverage claims.
 The finite outcome matrix needs no additional property-testing dependency.
@@ -94,8 +94,9 @@ class Repository(http.server.BaseHTTPRequestHandler):
             self.answer(500 if self.server.mode == "error" else 201)
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "requires native Linux shell paths")
 class TransportTests(unittest.TestCase):
-    """Assert privacy, byte binding and mandatory response-loss reconciliation."""
+    """Assert privacy, byte binding and response-loss reconciliation on Linux."""
 
     @classmethod
     def setUpClass(cls):

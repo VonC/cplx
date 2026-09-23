@@ -21,8 +21,9 @@ import unittest
 from .test_tools_release_record_tdd import ROOT, REVISION, release, valid_record
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "requires native Linux shell paths")
 class ReleasePublicationTests(unittest.TestCase):
-    """Bind eligibility, streamed publication, release retrieval and completion."""
+    """Bind eligibility, streaming, retrieval and completion on native Linux."""
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="tools-entry-")
