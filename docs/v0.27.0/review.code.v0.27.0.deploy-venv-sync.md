@@ -819,3 +819,326 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 2
+
+- Recorded: 2026-09-23T19:50:10+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 2
+- Outcome: request
+
+### Review identity for step 2 deploy-venv-sync (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 2
+Review round: 1
+
+### Code review evidence for step 2 deploy-venv-sync (round 1)
+
+request_index_tree: 53ed76c3ec8edb601726280cd060de7594e010fa
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 2 --python <selected-python> --app-repo <consumer-root> (sources: plan)
+- bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 2 --tools-prefix <tools> --application-root <app> --manifest <manifest> --profile <profile> --selection-profile <selection-profile> --evidence-root <evidence> --python <selected-python> --installed-root <site-packages> --wheel-dir <wheels> --venv-root <venv> (sources: plan)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(deploy-venv-sync): verify selected wheels
+group 1 path: src/setups/env/bin/deploy_venv_selection.py
+group 1 path: src/setups/env/bin/tools_wheel_inventory.py
+group 2: test(deploy-venv-sync): cover selection drift
+group 2 path: tests/unit/deploy_venv_sync/test_selection_integrity/__init__.py
+group 2 path: tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_pbt.py
+group 2 path: tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_tdd.py
+group 2 path: tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py
+group 2 path: tests/unit/tools_release_transport/test_tools_release_transport/test_tools_release_transport_tdd.py
+group 3: build(deploy-venv-sync): run selection checks
+group 3 path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+group 3 path: docs/v0.27.0/verify.deploy-venv-sync.sh
+group 4: docs(deploy-venv-sync): record step 2 validation
+group 4 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/verify.deploy-venv-sync.sh
+staged path: src/setups/env/bin/deploy_venv_selection.py
+staged path: src/setups/env/bin/tools_wheel_inventory.py
+staged path: tests/unit/deploy_venv_sync/test_selection_integrity/__init__.py
+staged path: tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_pbt.py
+staged path: tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_tdd.py
+staged path: tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py
+staged path: tests/unit/tools_release_transport/test_tools_release_transport/test_tools_release_transport_tdd.py
+```
+
+### Requestor assessment for step 2 deploy-venv-sync (round 1)
+
+Step 2 is fully implemented according to the writer check in the validation
+plan. The new qualified selection helper binds lock, project, target markers,
+groups, extras, wheel tags, wheel hashes and exact installed distributions.
+The opt-in inventory compares ELF subjects in site-packages and bin while
+preserving schema 1 clients. The native cumulative harness passed syntax,
+ShellCheck, D10 compatibility and all unit tests on the target platform.
+Native acceptance passed a retained wheel fixture; the consuming application
+passed its full CI test and coverage run. The cplx local groundhog walk passed
+tests but lacks a configured coverage TOTAL line; the plan names the native
+cumulative harness as its equivalent. The consuming application's duration-only
+groundhog exception was accepted for Step 2 only. No architecture or performance
+issue was found. No production class was added, and every new helper symbol is
+referenced by tests or within its module.
+
+### Implementation report for step 2 deploy-venv-sync (round 1)
+
+The staged change adds deploy_venv_selection.py and extends
+tools_wheel_inventory.py with schema 2. It adds a native Step 2 acceptance path,
+extends cumulative verification, and adds fixed and generated drift tests.
+Two inherited Linux shell-path integration classes skip on Windows but still
+run on native Linux. The validation plan now records a Yes verdict for Step 2;
+later steps remain pending.
+
+### Change summary for step 2 deploy-venv-sync (round 1)
+
+Ten paths are staged. The ready root a.commit groups them as follows:
+
+1. Selection and inventory implementation: two production helpers.
+2. Tests: three new selection files and two Linux platform guards.
+3. Native entry points: acceptance and cumulative verifier scripts.
+4. Validation: the Step 2 validation-plan update.
+
+The final group uses the required subject
+`docs(deploy-venv-sync): record step 2 validation`. The commit-plan checker
+reported ready with no diagnostics. No commits have been made.
+
+### Writer response for step 2 deploy-venv-sync (round 1)
+
+Writer response:
+
+This is the first Step 2 implementation review round. There is no earlier
+review feedback to accept or dispute.
+
+### Reviewer focus for step 2 deploy-venv-sync (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-2-round-1 -->
+
+## Round 1 by reviewer - Step 2
+
+- Recorded: 2026-09-23T20:00:54+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: answer
+
+### Assessed index identity for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+Baseline index tree: 53ed76c3ec8edb601726280cd060de7594e010fa
+
+Assessed index tree: 53ed76c3ec8edb601726280cd060de7594e010fa
+
+### Implementation check for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 2 has been fully implemented.
+
+I reproduced the step's evidence on the native target with the exact reviewed
+tree `53ed76c3ec8edb601726280cd060de7594e010fa`, and exercised the new
+acceptance path myself rather than reading its retained result.
+
+- **Cumulative harness at `--step 2` on RHEL 9.8**: exit 0, 76 focused and 157
+  all-unit tests, the D10 compatibility regression, the mandatory Bash lint
+  floor, ShellCheck, syntax and the 650-line scan.
+- **New Step 2 acceptance branch**, run with the retained release bundle, the
+  writer's selection profile and a venv produced by my own Step 1 probe: exit 0,
+  and the emitted selection record carries the same lock, project, profile,
+  toolchain and wheel-manifest digests as the writer's retained result.
+- **Drift is rejected on the real path, not only in unit tests.** Pointing the
+  same command at two venvs that lack the selected distribution ends in exit 5
+  with "installed distribution selection mismatch", and the acceptance script
+  fails with it.
+- **Step 1 remains green under the modified scripts**: the Step 1 acceptance
+  probe still passes (state passed, loopback, negatives at exit 1, 1 and 2).
+
+The selection helper binds the qualified profile to the canonical lock and
+project digests, resolves markers, groups and extras through its own closure
+walk, checks wheel tags, filenames and hashes against the lock, compares the
+retained original wheels by digest, and finally requires the chosen set to equal
+both the lock closure and the installed distributions. The inventory extension
+adds opt-in schema 2 for wheel ELF subjects in site-packages and `bin` while
+keeping the schema 1 interface, and its capture and describe paths still pass
+the inherited regression.
+
+Two points the human should see at the gate, both disclosed by the writer and
+verified by me rather than open findings:
+
+- **The staged set exceeds the plan's declared Step 2 file list by two files**,
+  the inherited publication and transport test classes, which now skip outside
+  native Linux. I verified the guards do not weaken the qualified platform: the
+  RHEL run reports zero skipped tests, and those two classes contribute 23
+  passing tests there. The validation plan and the commit grouping both name
+  this change.
+- **The consumer walk carries a duration-only exception for this step**, which
+  the validation plan records as accepted for Step 2 only. That is a recorded
+  human decision, not a reviewer judgement, and it is stated rather than hidden.
+
+Architecture: the selection helper and the inventory extension stay separate
+command-line helpers bound by JSON identities, with no new production class and
+no layer violation. Nothing needs to be addressed.
+
+Performance: selection builds identity maps and walks installed distributions
+once; inventory capture walks site-packages and `bin` once each. The marker
+evaluator visits each parsed node once. No quadratic scan. No performance issue
+needs to be addressed.
+
+Unit test coverage: cplx has no configured coverage gate, so no percentage is
+claimed; the native cumulative harness is the repository equivalent, as the plan
+states. Every top-level symbol in the new module and the inventory extension is
+referenced by the new fixed and generated tests or within its module. No
+unit-tested class is below 100%, and no changed top-level symbol outside a
+coverage gate is unreferenced.
+
+Validation plan effects:
+
+The reviewer made no edit to the validation plan. Its Step 2 rows were checked
+against reproduced evidence and are accurate, including the recorded scope of
+the consumer walk exception and the platform guards.
+
+### Pre-repair mandatory checks and coverage for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+All mandatory validation ran, and the reviewer made no repair.
+
+- `bash src/utils/lint_shell.sh`: exit 0, clean, locally and inside the native
+  harness.
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 2 --python <toolchain
+  3.13.15> --app-repo <consumer checkout>` on native RHEL 9.8, against the
+  reviewed index tree shipped as a fresh archive: exit 0, 76 focused and 157
+  all-unit tests, the D10 compatibility regression with the shipped compiler
+  wrapper, ShellCheck, syntax and the 650-line scan.
+- `bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 2` on native RHEL
+  9.8 with the retained bundle, selection profile, wheel directory, and the
+  installed root and venv from my own Step 1 probe: exit 0, with a selection
+  record whose digests match the writer's retained result.
+- Negative runs of the same command against two venvs lacking the selected
+  distribution: exit 5, "installed distribution selection mismatch".
+- Step 1 acceptance probe on the same tree, as a regression: exit 0, state
+  passed, transport loopback.
+- `git diff --cached --check`: exit 0.
+- The consumer walk was not rerun by the reviewer. Its recorded result, and the
+  duration-only exception accepted for this step, are the writer's and the
+  human's respectively.
+
+### Resolved validation set and sources for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 2 --python <selected-python> --app-repo <consumer-root>` (source: plan).
+- `bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 2 ...` with selection profile, installed root, wheel dir and venv root (source: plan).
+- `consumer: ghog day` (source: plan); recorded by the writer, with the duration-only exception accepted for this step.
+
+### Resolver drift and direction for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+No drift. The current resolver set equals the request set. Three of the four
+commands ran under the reviewer; the consumer walk is the recorded result.
+
+### Repository state around validation for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+The index tree was `53ed76c3ec8edb601726280cd060de7594e010fa` at request time,
+at review entry and after the assessment. The umbrella digest is unchanged
+(`46b95d18...`). The validation-state comparison over all ten staged paths is
+acceptable, with no tracked, untracked or ignored differences. The only
+unstaged change is the protocol transcript.
+
+### Repair inventory for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+Repairs made:
+
+- None. The reviewer made no repair and staged nothing.
+
+Paths staged:
+
+- - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- - `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- - `src/setups/env/bin/deploy_venv_selection.py`
+- - `src/setups/env/bin/tools_wheel_inventory.py`
+- - `tests/unit/deploy_venv_sync/test_selection_integrity/__init__.py`
+- - `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_pbt.py`
+- - `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_tdd.py`
+- - `tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py`
+- - `tests/unit/tools_release_transport/test_tools_release_transport/test_tools_release_transport_tdd.py`
+
+### Commit plan assessment for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+The independent `commit-plan-check.bat --format json` run returned state
+`valid`, `ready: true` and no diagnostics for all ten staged paths in four
+ordered groups: the two production helpers, then the tests including the two
+platform guards, then the native entry points, then the validation plan alone
+with the required subject. Each group depends only on the ones before it, and
+the subjects match the staged content. `a.commit` remains accurate; the reviewer
+did not amend it.
+
+### Findings and boundaries for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+No rework is required. If the human selects Commit, stage this protocol append
+with the final group as the workflow prescribes, then run the installed hook and
+the commit-plan checker once more against the final index before committing.
+
+### Decision rationale for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+All six readiness-floor results pass: exact identity, complete implementation,
+mandatory validation rerun independently on the native target, attributable
+staged scope with no reviewer repair, no unresolved finding, and an accurate
+`a.commit`. I exercised the new acceptance path and its rejection path myself
+and obtained the same identities as the retained evidence. The recommendation is
+commit-ready. It is advisory and does not authorize a commit.
+
+Two notes for the human at the gate, neither an open finding:
+
+- The staged set includes two inherited test files outside the plan's declared
+  Step 2 list, now skipping outside native Linux. The qualified platform is
+  unaffected: zero tests skip on RHEL and those classes contribute 23 passing
+  tests there. The validation plan and the commit grouping disclose it.
+- The new helper reports every refusal as "Selection INCONCLUSIVE" with exit 5,
+  including a detected drift. That follows the inherited wheel-inventory
+  helper's own convention, so it is consistent rather than wrong, but the word
+  means something narrower elsewhere in this effort, where an inconclusive
+  observation is distinct from a rejection. Worth aligning when the acceptance
+  cells of a later step read these results.
+
+### Final reviewer decision for step 2 deploy-venv-sync (exchange 1) (round 1)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-2-round-1 -->
+
+## Round 1 by human - Step 2 - human-confirmation
+
+- Recorded: 2026-09-23T20:18:32+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 2
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-1 -->
