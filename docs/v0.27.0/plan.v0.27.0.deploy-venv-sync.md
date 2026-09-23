@@ -276,8 +276,8 @@ It accepts `--step N` and includes all prior step fixtures.
 On Debian/RHEL use native Linux Bash, never Git Bash for ELF/runtime qualification:
 
 ```bash
-bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 1 --python /absolute/authoring/python
-bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 1 --tools-prefix /absolute/tools --application-root /absolute/application --manifest /absolute/release/manifest.json --profile /absolute/release/profile.json --evidence-root /absolute/evidence
+bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 1 --python /absolute/authoring/python --app-repo /absolute/consumer
+bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 1 --python /absolute/tools/python/bin/python3 --tools-prefix /absolute/tools --application-root /absolute/application --manifest /absolute/release/manifest.json --profile /absolute/release/profile.json --evidence-root /absolute/evidence
 ```
 
 Substitute the current step and actual qualified input paths. Step 1 acceptance
@@ -330,14 +330,21 @@ Files involved:
 - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` (existing, to be updated by implementation-check for this step).
 - `src/setups/env/bin/deploy_venv_inputs.py` (new, to be created).
 - `src/setups/env/bin/deploy_venv_transport.py` (new, to be created).
+- `src/setups/env/bin/deploy_venv_probe.py` (new, native qualification and restricted local server).
 - `docs/v0.27.0/verify.deploy-venv-sync.sh` (new, to be created).
 - `docs/v0.27.0/acceptance.deploy-venv-sync.sh` (new, to be created).
 - `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py` (new, to be created).
 - `tests/unit/deploy_venv_sync/test_release_inputs/__init__.py` (new, to be created).
 - `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_pbt.py` (new, to be created).
 - `tests/unit/deploy_venv_sync/__init__.py` (new, to be created).
+- `tests/unit/deploy_venv_sync/test_native_probe/test_native_probe_tdd.py` and its empty `__init__.py` (new, native prerequisite and HTTP boundary tests).
 
 P01-P05, P16-P17: provisioning, bootstrap, transport validator, canonical project/lock inputs, existing tools pin and generated release input record. Existing sizes and new private test paths are in the local mapping.
+P02 delegates checked original-artifact acquisition to a new standard-library
+Python helper (baseline 0, ceiling 650); its concrete path and test references
+remain in the private mapping. The consumer's frozen native probe snapshot has
+explicit digest/syntax checks and native acceptance, separate from its normal
+application formatting, typing and complexity checks.
 Reuse existing test parent markers unchanged; new leaf markers above are empty.
 Read-only reused dependencies and their baselines are in the shared table.
 
@@ -359,19 +366,33 @@ for a named actual-agent or backend completion criterion.
 
 #### Step 1 addendums
 
+Complete these four checkpoints in order; the validation plan records their verdicts:
+
+1. Retain native manifest-driven locked synchronization evidence on Debian 12 and
+   RHEL 9.8, including isolation, empty caches and negative cases.
+2. Complete consumer P01-P05 changes and tests, preserve the independent P16
+   tools pin, and bind the P17 fixture record. Production record generation remains Step 4.
+3. Audit manifest, bundle and transport completeness; close missing-input,
+   workspace and compatible-wheel negatives; pass cumulative native checks and
+   the consumer groundhog objective, and record final line counts.
+4. Run implementation-check, prepare grouped changes, and publish Step 1 code
+   review round 1 when review mode is enabled.
+
 Line-budget checkpoint:
 
-- [ ] `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: existing planning document; recount before/after; no Python ceiling.
-- [ ] `src/setups/env/bin/deploy_venv_inputs.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] `src/setups/env/bin/deploy_venv_transport.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] `docs/v0.27.0/verify.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
-- [ ] `docs/v0.27.0/acceptance.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
-- [ ] `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] `tests/unit/deploy_venv_sync/test_release_inputs/__init__.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_pbt.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] `tests/unit/deploy_venv_sync/__init__.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] Recount the step's private mapped files; P03/P12/P13 and all new Python tests are safe at baseline, ceiling 650.
-- [ ] If a Python file enters 550-650, avoid growth where practical; split only above 650. Separate manifest/transport, inventory mapping, or test cases by responsibility.
+- [x] `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: existing planning document; recount before/after; no Python ceiling.
+- [x] `src/setups/env/bin/deploy_venv_inputs.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] `src/setups/env/bin/deploy_venv_transport.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] `src/setups/env/bin/deploy_venv_probe.py`: baseline 0; native qualification responsibility separated from structural transport; Python ceiling 650; recount before/after.
+- [x] `tests/unit/deploy_venv_sync/test_native_probe/test_native_probe_tdd.py` and its empty `__init__.py`: baseline 0; Python ceiling 650; recount before/after.
+- [x] `docs/v0.27.0/verify.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
+- [x] `docs/v0.27.0/acceptance.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
+- [x] `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] `tests/unit/deploy_venv_sync/test_release_inputs/__init__.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_pbt.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] `tests/unit/deploy_venv_sync/__init__.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] Recount the step's private mapped files; P03/P12/P13 and all new Python tests are safe at baseline, ceiling 650.
+- [x] If a Python file enters 550-650, avoid growth where practical; split only above 650. Separate manifest/transport, inventory mapping, or test cases by responsibility.
 
 Full workflow timing run readiness: use the shared native cumulative harness
 with `--step 1`, the corresponding acceptance mode and the consumer
