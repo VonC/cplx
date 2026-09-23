@@ -2,9 +2,9 @@
 
 No, it is not implemented.
 
-Initial skeleton for the [implementation plan](plan.v0.27.0.deploy-venv-sync.md).
-No implementation check has taken place. All seven steps include their private
-integration obligations; none is completed by this documentation task.
+Step 1 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) was checked
+on 2026-09-23. Steps 2-7 remain pending. Each step includes its mapped private
+integration obligations; Step 1 qualification does not validate the full lifecycle.
 
 ## File-based IO cost clarification for deploy-venv-sync implementation
 
@@ -35,8 +35,16 @@ A passing fixture is not evidence that the corresponding target case executed.
 
 ### Analysis of Step 1 implementation state
 
-Not started. Step 1 is not implemented because its planned code, integration
-and execution evidence have not been produced or checked.
+Yes. Step 1 has been fully implemented.
+
+Manifest-driven qualification passed on Debian 12 and RHEL 9.8 with the same
+original static uv 0.12.17 and accepted tools archive, using shipped Python
+3.13.15. Consumer acquisition/provisioning and tooling-lock changes are complete;
+cumulative native checks and the consumer groundhog objective passed. Concrete
+private revisions, build identities, receipts and source comparison remain in
+the required local integration handoff. Review round 1 found an unusable-loopback
+precondition gap; the writer fixed it and repeated the cumulative native checks
+before requesting round 2.
 
 ### Goal for Step 1
 
@@ -53,27 +61,137 @@ Use `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
 
 ### What was implemented for Step 1
 
-_(empty — no check has taken place yet.)_.
+`deploy_venv_inputs.py` verifies explicit local inputs, independent application
+and tools identities, immutable helper revisions, wheel hashes and workspace
+metadata closure. It assembles and verifies a companion with an exact regular-file
+inventory and generates the non-circular outer bootstrap record. Duplicate JSON
+keys, unsafe or duplicate members, symlinks, changed bytes and overwrites fail.
+
+`deploy_venv_transport.py` creates a new effective metadata workspace and changes
+only mapped location values. Structural inverse comparison and canonical byte
+checks preserve dependency, version, group, marker and artifact identities before
+and after synchronization. Documentation URLs remain unchanged.
+
+`deploy_venv_probe.py` checks the explicit interpreter, profile, uv version/static
+linkage and current network namespace. It binds and connects a loopback socket
+before attempting transports, rejecting an unusable loopback as an environment
+error rather than a design failure. It attempts a real file Simple index with
+`--offline` first, then the approved allowlisted loopback fallback. Every sync
+has its own empty cache and environment and uses `--locked --no-build`, explicit
+Python, disabled Python downloads and no project/workspace installation.
+
+Both targets passed the loopback path; the file attempt exited 1. Missing wheels
+and stale locks exited 1, and incompatible wheels exited 2. Retained diagnostics
+confirm absence of a usable binary distribution for the incompatible-wheel case.
+Only loopback was present and external connection failed with ENETUNREACH.
+The installed fixture inventory was packaging 25.0. Complete application
+selection and wheel ELF equivalence remain Step 2 responsibilities.
+
+Consumer P01-P05 now use the confirmed acquisition source and digest-pinned
+original uv, preserve P16, and exercise the P17 fixture record. The production
+bootstrap verifies the original wheel and executable before installation;
+canonical lock regeneration changes only the tooling pin. Frozen qualification
+sources have explicit digest and Python syntax checks, plus native execution.
+Production P17 assembly remains Step 4.
+
+| Validation evidence and scope | Result |
+| --- | --- |
+| Native cumulative `verify.deploy-venv-sync.sh --step 1`, with explicit Python and consumer root | After round 1 repair: 108 tests, 23.583 seconds; syntax, mandatory Bash lint, ShellCheck and 650-line scan passed |
+| Debian manifest acceptance | Passed, 8.595 seconds; isolated locked loopback sync and all three negative cases |
+| RHEL manifest acceptance | Passed, 9.480 seconds; isolated locked loopback sync and all three negative cases |
+| Focused consumer CI execution | Passed in 10 minutes 27 seconds, including production uv acquisition and archived manifest evidence |
+| Consumer `ghog day` | Static checks, affected suite and full suite passed; full stage 5 minutes 46.4 seconds, 6544 collected, fail=0, warn=8, xfail=8, cov=100, outliers=0, excluded=0 |
+| Step source inspection and `git diff --check` | Passed |
+
+The plan records the runnable native command forms. Exact substituted commands,
+canonical/effective inputs and raw logs are retained privately. Qualification
+does not invoke the later single-build CI sequence or publish a release.
+
+The two new regression tests failed before the repair and passed afterwards:
+bind/connect failures report an unusable namespace, while a real loopback socket
+connection succeeds. The Debian/RHEL acceptance and consumer results above
+predate this precondition-only repair. They were independently confirmed in
+round 1 and were not rerun: synchronization behavior and qualified inputs are
+unchanged. The consumer's frozen qualification snapshot remains at that tested
+revision. No fresh platform qualification is claimed for the repaired helper.
+
+Physical counts include blank lines. New public files have baseline 0:
+
+| File | Final lines |
+| --- | --- |
+| `deploy_venv_inputs.py` | 282 |
+| `deploy_venv_transport.py` | 186 |
+| `deploy_venv_probe.py` | 315 |
+| `test_release_inputs_tdd.py` | 276 |
+| `test_release_inputs_pbt.py` | 25 |
+| `test_native_probe_tdd.py` | 99 |
+| Three new package markers | 0 each |
+| Native verification shell entry | 40 |
+| Native acceptance shell entry | 31 |
+
+Private counts: P01 329, P02 23, its new Python delegate 118, P03 116, P04 301,
+P05 1337 and unchanged P16 1. New consumer test modules are 71 and 30 lines.
+All involved Python files are below 550 and the enforced 650-line ceiling.
+The validation document baseline was 343 lines; its final count is recorded
+with the check evidence. Shell, lock and documentation sizes have no Python gate.
 
 ### New types or classes introduced for Step 1
 
-_(empty — no check has taken place yet.)_.
+Public helpers use focused functions. The probe's nested HTTP handler serves only
+declared files and generated pages and is disposed with its server/thread.
+The consumer bootstrap adds a restricted redirect handler and Simple-page link
+parser; neither enters application domain code. Unit fixtures introduce release
+input, transport, generated-property and probe test cases.
 
 ### Architecture check for Step 1
 
-_(empty — no check has taken place yet.)_.
+Manifest verification, transport rewriting and native qualification have separate
+modules. The transport dispatch loads the delivered probe lazily; the probe
+reuses transport preparation without import-time execution. Shell entries only
+validate explicit arguments and invoke shipped Python. Consumer acquisition
+stays outside reusable cplx reconstruction; no domain layer imports these tools.
+Helpers are delivered by explicit path rather than discovered through PATH.
+No architecture or file-size issue needs addressing.
 
 ### Performance check for Step 1
 
-_(empty — no check has taken place yet.)_.
+Identity maps and metadata visitors process their declared inputs linearly.
+Archive hashing and transfer are streamed, with deliberate repeated checks at
+transfer boundaries. Generated Simple pages cost the size of the declared
+registry/package output, without searching history or unrelated trees. No new
+sorting or pairwise dependency comparison was introduced. Native timings above
+include synchronization and negative cases; they are observations, not an SLO.
+No performance issue needs addressing.
 
 ### Unit test coverage check for Step 1
 
-_(empty — no check has taken place yet.)_.
+The unit fixtures cover independent pins, missing/corrupt inputs, duplicate keys,
+safe extraction, exact member closure, workspace/local-source metadata, wheel
+identity, transport inverse preservation, documentation URLs, unsafe mappings,
+source drift, native prerequisites and allowlisted GET/HEAD behavior. Generated
+tests exercise 24 transport permutations and identity-changing mutations.
+
+The consumer's 100% coverage result measures only its configured application
+source root. It does not measure the standalone CI scripts, frozen fixtures or
+cplx helpers. No percentage is claimed for those files. Static reference review
+finds every public top-level helper used by another helper, its CLI guard or
+unit fixtures; the probe is reached through the transport dispatch. Consumer
+bootstrap functions/classes are referenced by its acquisition entry or tests,
+and transport functions by its CLI/tests. Real platform acceptance additionally
+executes acquisition and sync, without being counted as unit coverage.
+
+No measured unit-tested class below 100% needs completing. No top-level symbol
+in the unmeasured implementation files is unreferenced.
 
 ### Feature integrity for Step 1
 
-_(empty — no check has taken place yet.)_.
+The independently accepted tools archive and pin remain unchanged. Existing
+wheel/installer behavior and reporting interfaces were not modified. Cumulative
+tests retain earlier release and transport checks. Canonical metadata remains
+immutable, and evidence is separate from frozen release inputs. The consumer's
+unrelated local changes were preserved. Later deployment naming, readiness,
+recovery, publication and complete-candidate qualification remain unimplemented
+under Steps 2-7, not implicit claims of this Step 1 result.
 
 ## Step 2. Verify complete dependency selection and wheel ELF identity
 
