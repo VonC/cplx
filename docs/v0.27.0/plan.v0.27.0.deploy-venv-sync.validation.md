@@ -2,9 +2,10 @@
 
 No, it is not implemented.
 
-Step 1 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) was checked
-on 2026-09-23. Steps 2-7 remain pending. Each step includes its mapped private
-integration obligations; Step 1 qualification does not validate the full lifecycle.
+Steps 1 and 2 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md)
+were checked on 2026-09-23. Steps 3-7 remain pending. Each step includes its
+mapped private integration obligations; these checks do not validate the full
+lifecycle.
 
 ## File-based IO cost clarification for deploy-venv-sync implementation
 
@@ -197,8 +198,14 @@ under Steps 2-7, not implicit claims of this Step 1 result.
 
 ### Analysis of Step 2 implementation state
 
-Not started. Step 2 is not implemented because its planned code, integration
-and execution evidence have not been produced or checked.
+Yes. Step 2 has been fully implemented.
+
+The qualified selection is checked against the canonical lock, target profile,
+retained wheel hashes and installed distributions. The compatible wheel inventory
+checks ELF files in site-packages and wheel-provided bin locations. Native target
+tests and acceptance, the inherited compatibility regression, and the consuming
+application's full CI test and coverage run passed. Runtime provider qualification
+belongs to a later step.
 
 ### Goal for Step 2
 
@@ -215,27 +222,79 @@ Use `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integri
 
 ### What was implemented for Step 2
 
-_(empty — no check has taken place yet.)_.
+- `deploy_venv_selection.py` validates qualified uv selection provenance,
+  marker/group/extra closure, wheel identity and tags, and the exact installed
+  distribution set. It emits lock, project, toolchain, profile and wheel-manifest
+  digests.
+- `tools_wheel_inventory.py` adds opt-in schema 2 capture for wheel ELF files in
+  site-packages and `bin`, while retaining the schema 1 capture, materialize
+  and describe interface. It checks original wheel and installed ELF hashes,
+  collisions and unsafe paths.
+- The native acceptance script composes the separate selection and ELF reports
+  against one lock and profile. The cumulative verifier includes Step 2 tests
+  and the unchanged compatibility regression. Unit fixtures cover deliberate
+  selection and ELF drift, including generated mutations.
+- The consuming application's provisioning and acceptance path retains the
+  qualified selection and original wheel identities. Its full CI test and
+  coverage run and native target fixture acceptance passed with publication off.
+- Two inherited native-Linux integration test classes now skip on Windows;
+  their Linux execution remains covered by the cumulative native harness.
 
 ### New types or classes introduced for Step 2
 
-_(empty — no check has taken place yet.)_.
+No production class or type was introduced. The new selection module uses
+focused functions and a JSON profile; the inventory retains its function-based
+interface.
 
 ### Architecture check for Step 2
 
-_(empty — no check has taken place yet.)_.
+Selection and ELF inventory remain separate command-line helpers. Their JSON
+identity binding keeps the domain decision independent of the consuming
+application's shell adapters. No incorrect layer import or misplaced behavior
+was found. Nothing needs fixing.
 
 ### Performance check for Step 2
 
-_(empty — no check has taken place yet.)_.
+Selection uses identity maps and one installed-distribution walk. ELF capture
+streams each retained wheel and walks the declared installed roots once;
+hashing work scales with required input bytes. Tag expansion and deterministic
+sorting have bounded selection-size cost. No performance issue needs addressing.
 
 ### Unit test coverage check for Step 2
 
-_(empty — no check has taken place yet.)_.
+The new production helpers are function-based, so no unit-tested production
+class has a per-class coverage target. Focused TDD and generated-mutation tests
+exercise selection, profile binding, installed metadata and library/bin ELF
+checks; inherited tests exercise schema 1 clients. The cplx native unittest
+harness has no configured coverage percentage gate for these helper files, so
+the consuming application's passing coverage gate is not attributed to them.
+Static reference inspection found every new top-level helper used by its own
+module or its tests. No unit-tested class below 100% needs completing. No
+top-level symbol outside a coverage gate is unreferenced.
 
 ### Feature integrity for Step 2
 
-_(empty — no check has taken place yet.)_.
+The independent qualified-uv profile records uv version, toolchain digest,
+source revision, target markers, effective groups and wheel hashes. Selection
+rejects missing, extra, duplicate, wrong-version, wrong-tag and hash-drifted
+distributions while respecting excluded markers. Schema 2 rejects changed
+site-packages and bin ELF files and duplicate destinations; schema 1 clients
+and the existing compatibility regression still pass. The native cumulative
+harness passed on the target OS, and the consuming application's full CI run
+passed its tests and coverage with release publication disabled. The local
+cplx groundhog walk passed affected and full tests but had no configured
+coverage-total line; the native cumulative harness is the cplx repository's
+specified equivalent. The consuming application's duration-only groundhog
+exception was accepted for Step 2 only and does not extend to later steps.
+
+## Analysis of Step 2 Implementation
+
+Step 2 now binds one explicit qualified dependency selection and every retained
+original wheel to the installed distributions and ELF subjects. The new
+selection helper validates lock closure and installation identity; the opt-in
+inventory extension verifies wheel ELF identity in both library and bin
+locations. The native verifier and acceptance entry cover the new path while
+preserving existing helper behavior. There are no new production classes.
 
 ## Step 3. Implement exact-path reconstruction and readiness
 
