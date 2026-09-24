@@ -3,7 +3,8 @@
 No, it is not implemented.
 
 Steps 1 and 2 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md)
-were checked on 2026-09-23. Steps 3-7 remain pending. Each step includes its
+were checked on 2026-09-23. Steps 3, 3b and 4-7 remain pending. Step 3b is a
+non-qualifying probe added on 2026-09-24. Each step includes its
 mapped private integration obligations; these checks do not validate the full
 lifecycle.
 
@@ -337,6 +338,53 @@ _(empty — no check has taken place yet.)_.
 _(empty — no check has taken place yet.)_.
 
 ### Feature integrity for Step 3
+
+_(empty — no check has taken place yet.)_.
+
+## Step 3b. Probe the mandated pipeline on actual agents, non-qualifying
+
+### Analysis of Step 3b implementation state
+
+Not started. Step 3b is not implemented because no probe build has run and no
+observation has been recorded.
+
+### Goal for Step 3b
+
+Reach the mandated pipeline from the one consuming Jenkinsfile on actual agents, with publication disabled, and record the facts the Step 5 adapter is built on.
+
+### Step 3b improvement expectations
+
+Check that the default CI mode and its publication behavior are unchanged, that the probe build proves no publication command ran, and that the recorded publication setting is the value the library resolved.
+Check that part A records hook propagation, agent identity, working directory, checkout revision against the build revision, resolved interpreter and uv, created or selected environments, and real exit statuses including one deliberate test failure.
+Check that part B, after Step 3, records whether the venv reconstructed through P01 is selected by the library's commands without drift.
+Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
+
+At least one probe build of each part ran on actual agents and every expected observation is recorded, successful or not. Step 3b qualifies no candidate, proves no AC row and cannot complete Step 5.
+Review the plan's file-by-file changes and its mapped private obligations.
+Public entries stay sanitized; exact builds, agents, library revision and command mechanics stay in the private handoff.
+Record each observation handed to Step 5, with its sanitized outcome, under "What was implemented for Step 3b".
+
+### What was implemented for Step 3b
+
+_(empty — no check has taken place yet.)_.
+
+### New types or classes introduced for Step 3b
+
+_(empty — no check has taken place yet.)_.
+
+### Architecture check for Step 3b
+
+_(empty — no check has taken place yet.)_.
+
+### Performance check for Step 3b
+
+_(empty — no check has taken place yet.)_.
+
+### Unit test coverage check for Step 3b
+
+_(empty — no check has taken place yet.)_.
+
+### Feature integrity for Step 3b
 
 _(empty — no check has taken place yet.)_.
 
