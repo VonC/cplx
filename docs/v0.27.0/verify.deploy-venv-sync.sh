@@ -10,8 +10,8 @@ while (($#)); do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ ( "$step" == 1 || "$step" == 2 ) && "$python" == /* && -x "$python" && "$app" == /* && -d "$app/tools" ]] || {
-    echo 'Required: --step 1|2 --python /absolute/python (3.11+) --app-repo /absolute/consumer' >&2; exit 2;
+[[ ( "$step" == 1 || "$step" == 2 || "$step" == 3 ) && "$python" == /* && -x "$python" && "$app" == /* && -d "$app/tools" ]] || {
+    echo 'Required: --step 1|2|3 --python /absolute/python (3.11+) --app-repo /absolute/consumer' >&2; exit 2;
 }
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.."
 status=0
@@ -23,9 +23,10 @@ export TOOLS_TEST_APP="$app"
 "$python" -B -m unittest discover -s tests/unit/deploy_venv_sync -t . -p 'test_*_*.py' -v
 bash src/utils/lint_shell.sh
 scripts=(docs/v0.27.0/verify.deploy-venv-sync.sh docs/v0.27.0/acceptance.deploy-venv-sync.sh)
+if [[ "$step" == 3 ]]; then scripts+=(src/setups/env/bin/deploy_venv.sh); fi
 for script in "${scripts[@]}"; do bash -n "$script"; done
 shellcheck "${scripts[@]}"
-if [[ "$step" == 2 ]]; then
+if [[ "$step" == 2 || "$step" == 3 ]]; then
     bash docs/v0.27.0/verify.tools-release-d10.sh --python "$python"
 fi
 "$python" -B -m unittest discover -s tests/unit -t . -p 'test_*_*.py' -v

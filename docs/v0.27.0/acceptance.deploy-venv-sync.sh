@@ -3,6 +3,7 @@
 set -euo pipefail
 step='' tools='' app='' manifest='' profile='' evidence='' python=''
 installed='' wheels='' venv='' selection_profile=''
+helper='' runtime='' attestation='' project=''
 while (($#)); do
     case "$1" in
         --step) step=${2:?}; shift 2 ;;
@@ -16,11 +17,15 @@ while (($#)); do
         --installed-root) installed=${2:?}; shift 2 ;;
         --wheel-dir) wheels=${2:?}; shift 2 ;;
         --venv-root) venv=${2:?}; shift 2 ;;
+        --helper) helper=${2:?}; shift 2 ;;
+        --runtime-setup) runtime=${2:?}; shift 2 ;;
+        --serialization-attestation) attestation=${2:?}; shift 2 ;;
+        --project) project=${2:?}; shift 2 ;;
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ ( "$step" == 1 || "$step" == 2 ) && $(uname -s) == Linux ]] || {
-    echo 'Step 1 or 2 requires native Linux' >&2; exit 2;
+[[ ( "$step" == 1 || "$step" == 2 || "$step" == 3 ) && $(uname -s) == Linux ]] || {
+    echo 'Step 1, 2 or 3 requires native Linux' >&2; exit 2;
 }
 for value in "$tools" "$app" "$manifest" "$profile" "$evidence"; do
     [[ "$value" == /* ]] || { echo 'Explicit absolute input paths required' >&2; exit 2; }
@@ -31,6 +36,20 @@ done
     echo 'Supply --python with the selected toolchain executable under --tools-prefix' >&2; exit 2;
 }
 root=$(cd -- "${BASH_SOURCE[0]%/*}/../.." && pwd)
+if [[ "$step" == 3 ]]; then
+    for value in "$selection_profile" "$helper" "$runtime" "$attestation"; do
+        [[ "$value" == /* && -f "$value" ]] || {
+            echo 'Step 3 requires absolute delivered selection, helper, runtime and attestation files' >&2; exit 2;
+        }
+    done
+    [[ -n "$project" ]] || { echo 'Step 3 requires --project' >&2; exit 2; }
+    exec bash "$root/src/setups/env/bin/deploy_venv.sh" \
+        --application-root "$app" --project "$project" --tools-prefix "$tools" \
+        --manifest "$manifest" --profile "$profile" \
+        --selection-profile "$selection_profile" --helper "$helper" \
+        --runtime-setup "$runtime" --serialization-attestation "$attestation" \
+        --evidence-root "$evidence"
+fi
 if [[ "$step" == 2 ]]; then
     [[ "$selection_profile" == /* && -f "$selection_profile" ]] || {
         echo 'Step 2 requires an absolute --selection-profile' >&2; exit 2;
