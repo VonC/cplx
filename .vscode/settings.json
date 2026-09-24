@@ -186,6 +186,7 @@
     "pyconfig",
     "pydoc",
     "pyee",
+    "pygmentize",
     "pyprog",
     "reasking",
     "recalibrated",
