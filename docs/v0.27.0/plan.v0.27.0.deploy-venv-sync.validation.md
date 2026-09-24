@@ -3,8 +3,9 @@
 No, it is not implemented.
 
 Steps 1 and 2 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md)
-were checked on 2026-09-23. Steps 3, 3b and 4-7 remain pending. Step 3b is a
-non-qualifying probe added on 2026-09-24. Each step includes its
+were checked on 2026-09-23; Step 3 was checked on 2026-09-24. Steps 3b and
+4-7 remain pending. Step 3b is a non-qualifying probe added on 2026-09-24.
+Each step includes its
 mapped private integration obligations; these checks do not validate the full
 lifecycle.
 
@@ -301,8 +302,13 @@ preserving existing helper behavior. There are no new production classes.
 
 ### Analysis of Step 3 implementation state
 
-Not started. Step 3 is not implemented because its planned code, integration
-and execution evidence have not been produced or checked.
+Yes. Step 3 has been fully implemented.
+
+The exact-path lifecycle and consumer P01/P07 wiring pass the Step 3 native
+verifier, direct acceptance with a console-script wheel on first and repeated
+targets, and the record-backed companion path. The finite state matrix covers
+the selection, target and failure boundaries, including an early Bash failure
+after a previous ready record and a foreign venv interpreter link.
 
 ### Goal for Step 3
 
@@ -319,27 +325,98 @@ Use `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py`
 
 ### What was implemented for Step 3
 
-_(empty — no check has taken place yet.)_.
+The Linux entry selects the shipped interpreter by absolute path, derives one
+full-version venv path, validates or creates only that target, verifies the
+qualified local inputs, runs the release's absolute uv with ambient selection
+disabled, and records operation-bound readiness or the first failure. The
+consumer P01 and P07 paths verify the delivered bundle, dispatch the entry by
+absolute path, use its returned `VENV`, and retain the application-root
+serialization boundary across mirroring, reconstruction and readiness. P01 and
+P07 each reread the ten-key release record at their own integrity boundary;
+their grammars agree. The native verifier and acceptance mode now cover Step 3.
+
+The RHEL 9.8 target passed the cumulative `--step 3` verifier with 189 total
+unit cases. Direct acceptance used the shipped runtime with host/PATH/activation
+decoys and an offline wheel that installs `bin/pygmentize`: first and repeated
+runs each recorded two installed distributions and the exact venv Python
+shebang. The P07 record-backed companion path repeated that result and passed
+all 11 readiness checks. The earlier historical no-record recovery path also
+passed. The full-mode Debian 12 agent build 198 passed Provision, Package and
+Test with publication skipped; its acceptance reported 100% configured source
+coverage. P01/P07 bytes did not change during review repair, so that agent
+build was not repeated. The consumer `ghog day --force` passed 6,546 tests
+with 100% configured source coverage and no duration outliers. Exact input
+identities, commands and artifacts are retained privately under AC13.
 
 ### New types or classes introduced for Step 3
 
-_(empty — no check has taken place yet.)_.
+No new production class or type. The lifecycle is a focused Bash entry with
+embedded Python functions. The unit fixture is split into two modules by
+responsibility, with the original 11 cases and 21 additional matrix cases.
 
 ### Architecture check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The consumer retains archive and lock ownership; the cplx entry performs only
+the verified venv lifecycle and delegates selection, transport and inventory
+to the existing helpers. No application domain layer imports a deployment
+adapter. The shipped runtime boundary is explicit, and host archive utilities
+stay outside its exports. No architecture fix is needed.
 
 ### Performance check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The path is computed from one shipped interpreter and one release identity.
+Declared inputs and inventories are walked once per phase; rereads occur at
+separate integrity boundaries. No new quadratic or sorting-driven discovery
+path was found. The named host runs completed without a new timing gate.
+No performance fix is needed.
 
 ### Unit test coverage check for Step 3
 
-_(empty — no check has taken place yet.)_.
+The original 11 lifecycle unit cases cover exact naming, suffix escape,
+target symlink and foreign base, wrong prefix and version, selection flags,
+ambient environment sanitizing, command failure logs, readiness revocation
+and serialization attestation. The 21 matrix cases cover symlinked venv Python
+with an accepted console shebang; foreign shebang, configuration home and
+stdlib; matching and foreign `bin/python3` links; equal-version toolchain
+change; zero or several shipped Python
+candidates; directory and running-interpreter mismatch; unbound profile and
+metadata drift; source preparation and final inventory checks; stale lock,
+missing or corrupt wheel, interrupted or failed sync and failed post-sync
+check; repeat and mirror-removed targets; parent escape; and the Bash shipped
+Python selection and an early Bash failure after an earlier ready record. The
+matrix stubs command execution for finite failure rows. The RHEL cumulative
+native harness passed all 189 unit cases. The consumer's
+100% gate measures only configured application source (`src/pdfss`), not these
+Bash entries, embedded Python, or P01/P07. The real target acceptance reached
+the console-script branch. No production class is below a class-level coverage
+target, and no top-level symbol outside the configured gate is unreferenced.
+No unit-tested class below 100% needs completing. No top-level symbol outside
+the configured coverage gate is unreferenced.
 
 ### Feature integrity for Step 3
 
-_(empty — no check has taken place yet.)_.
+The record-backed path intentionally omits Git restoration: Step 3 item 6
+requires replacing the new path's Git restoration, and the design's
+"Packaging and recovery boundaries" states that delivered metadata is used
+directly without Git restoration or a smudge filter. The historical no-record
+path still restores tracked content and checks repository cleanliness on the
+RHEL target. The consumer's directory, artifact and readiness contracts passed
+the Debian 12 agent build. ShellCheck passed for the edited script. The cplx
+`ghog day` wrapper passed its check step, then stopped at its non-applicable
+pytest step because this repository has no pytest project configuration; no
+cplx coverage result is claimed. The plan names the native cumulative harness
+as its repository-specific equivalent, and that harness passed on the target.
+
+## Analysis of Step 3 Implementation
+
+Step 3 now reconstructs one manifest-bound full-version venv using the shipped
+Python and qualified offline wheels. The entry invalidates any earlier ready
+record before handing off to the lifecycle, verifies all venv interpreter
+links and console-script shebangs, and retains operation-specific evidence.
+The consumer keeps archive and lock ownership and uses the exact returned
+`VENV` throughout readiness. The native verifier, unit matrix and real target
+acceptance cover creation, reuse, console scripts and failure boundaries.
+There are no new production classes.
 
 ## Step 3b. Probe the mandated pipeline on actual agents, non-qualifying
 
