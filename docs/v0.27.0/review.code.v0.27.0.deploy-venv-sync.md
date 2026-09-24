@@ -844,8 +844,8 @@ request_index_tree: 53ed76c3ec8edb601726280cd060de7594e010fa
 resolved_validation_set:
 
 - bash src/utils/lint_shell.sh (sources: project)
-- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 2 --python <selected-python> --app-repo <consumer-root> (sources: plan)
-- bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 2 --tools-prefix <tools> --application-root <app> --manifest <manifest> --profile <profile> --selection-profile <selection-profile> --evidence-root <evidence> --python <selected-python> --installed-root <site-packages> --wheel-dir <wheels> --venv-root <venv> (sources: plan)
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 2 --python <selected-python> --app-repo <consumer-root>` (sources: plan)
+- `bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 2 --tools-prefix <tools> --application-root <app> --manifest <manifest> --profile <profile> --selection-profile <selection-profile> --evidence-root <evidence> --python <selected-python> --installed-root <site-packages> --wheel-dir <wheels> --venv-root <venv>` (sources: plan)
 
 commit_plan_result:
 
@@ -1496,20 +1496,20 @@ third group's body: it still says the record "reports the completed step".
 
 Unresolved findings:
 
-- 1. High: `interpreter_state` in `src/setups/env/bin/deploy_venv.sh` resolves
-- the shebang interpreter through the venv's `bin/python` symlink, so every
-- wheel console script is reported as a foreign Python shebang. No retained
-- run installed a console script.
-- 2. Medium: the plan's tests-first finite state matrix is only partly
-- implemented. `interpreter_state`, `preflight`, the success path and the Bash
-- shipped-Python selection have no unit case, and stale lock, missing wheel,
-- interruption, failed post-sync check, changed toolchain and
-- repeated or mirror-removed target rows have neither unit nor retained target
-- evidence.
-- 3. Low: the Bash `EXIT` trap overwrites the operation-bound not-ready record
-- after every lifecycle failure.
-- 4. Low: the two `interpreter_state` calls share the `venv-state` log label.
-- 5. Low: `operate` does not catch `zipfile.BadZipFile`.
+1. High: `interpreter_state` in `src/setups/env/bin/deploy_venv.sh` resolves
+the shebang interpreter through the venv's `bin/python` symlink, so every
+wheel console script is reported as a foreign Python shebang. No retained
+run installed a console script.
+2. Medium: the plan's tests-first finite state matrix is only partly
+implemented. `interpreter_state`, `preflight`, the success path and the Bash
+shipped-Python selection have no unit case, and stale lock, missing wheel,
+interruption, failed post-sync check, changed toolchain and
+repeated or mirror-removed target rows have neither unit nor retained target
+evidence.
+3. Low: the Bash `EXIT` trap overwrites the operation-bound not-ready record
+after every lifecycle failure.
+4. Low: the two `interpreter_state` calls share the `venv-state` log label.
+5. Low: `operate` does not catch `zipfile.BadZipFile`.
 
 Boundary-crossing work: None.
 
@@ -1928,11 +1928,11 @@ amend `a.commit`. Once the fix lands, refresh two bodies:
 
 Unresolved findings:
 
-- 1. Medium: after `trap - EXIT`, a lifecycle that fails before `operate`
-- writes its record, on a rejected argument or a failed helper import, leaves
-- an earlier ready record in `readiness.json`.
-- 2. Low: `interpreter_state` verifies only `bin/python`. Other `bin/python*`
-- links and the interpreter a shebang names are not checked.
+1. Medium: after `trap EXIT`, a lifecycle that fails before `operate`
+writes its record, on a rejected argument or a failed helper import, leaves
+an earlier ready record in `readiness.json`.
+2. Low: `interpreter_state` verifies only `bin/python`. Other `bin/python*`
+links and the interpreter a shebang names are not checked.
 
 Boundary-crossing work: None.
 
@@ -2388,3 +2388,545 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-3 -->
+
+## Round 1 by requestor - Step 3b
+
+- Recorded: 2026-09-24T23:11:48+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 3b
+- Outcome: request
+
+### Review identity for step 3b deploy-venv-sync (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 3b
+Review round: 1
+
+### Code review evidence for step 3b deploy-venv-sync (round 1)
+
+request_index_tree: 808f024de9f828a5521fb098e7f810d76576bb4c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- git diff --cached --check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(deploy-venv-sync): record step 3b validation
+group 1 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Requestor assessment for step 3b deploy-venv-sync (round 1)
+
+Yes. Step 3b has been fully implemented as the non-qualifying actual-agent probe defined in the plan. Part A probe build 201 and part B probe build 205 each reached the mandated pipeline. Both resolved publication as disabled, generated a distinct POM, skipped deployment, and finished without a publication command. The final result of each complete build and each relevant command's real status were recorded separately.
+
+Part A showed that P11 runs once in the nested test shell after matching checkout and before dependency commands. Synchronization and activation returned 0, missing compatibility input made installation return 2, and a deliberate test failure returned 1 although the enclosing test shell returned 0. Part B verified the phase-1 archive digest, but P01 preparation returned 127 on the nested agent because a fixed host interpreter path was unavailable. The Step 4 reconstruction input was not yet present. The mandatory commands therefore selected an implicit environment: synchronization and activation returned 0; installation returned 0 with unchanged inventory in that wrong environment; the test command returned 1 but was masked. The focused 12 tests passed, while the whole-project coverage gate failed at 19.31% against 100%. Named-venv selection and zero drift were not proved.
+
+The public validation entry is limited to sanitized outcomes. Detailed build, library and agent records remain private under AC13. No cplx source or shared-library file changed. Architecture and performance checks found no Step 3b issue; Step 5 items 2, 4 and 6 own the observed incompatibilities and fail-closed behavior. No class-level unit coverage target was added in this probe. The cplx groundhog walk passed its check phase and exited 9 at the non-applicable pytest phase because cplx has no pytest project; the actual-agent probe builds supply this step's execution evidence. This step qualifies no candidate and proves no acceptance criterion.
+
+### Implementation report for step 3b deploy-venv-sync (round 1)
+
+The consumer's P10 and P11 probe changes were committed outside this reviewed cplx batch. A dedicated probe branch was prepared first; the CI job did not index it, so a probe mode in the one consuming Jenkinsfile ran both parts. The original full mode was restored after the probes. P11 observed the nested test shell, command boundaries and outcomes in archived records. Probe-only failure injection stayed outside the normal mode.
+
+The sole staged cplx change is the Step 3b validation-plan entry. It records build 201 and build 205, the publication verdict, command outcomes, the failed P01 reconstruction, and explicit Step 5 inputs in public vocabulary. The complete records are private under AC13. No cplx source file or shared-library source was changed.
+
+### Change summary for step 3b deploy-venv-sync (round 1)
+
+Staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md.
+
+Root a.commit has one documentation group with subject `docs(deploy-venv-sync): record step 3b validation`. The plan is formatted and commit-plan-check reports ready. The staged diff passed `git diff --cached --check`, and the installed pre-commit hook passed. No commit has been made.
+
+### Writer response for step 3b deploy-venv-sync (round 1)
+
+Writer response:
+
+This is the first review round for Step 3b. There is no earlier feedback or disagreement. Please assess the staged public validation entry against the plan's non-qualifying completion rule, including whether each failed observation is stated without implying named-venv or full-suite qualification.
+
+### Reviewer focus for step 3b deploy-venv-sync (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3b-round-1 -->
+
+## Round 1 by reviewer - Step 3b
+
+- Recorded: 2026-09-24T23:20:28+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3b
+- Outcome: answer
+
+### Assessed index identity for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+Baseline index tree: 808f024de9f828a5521fb098e7f810d76576bb4c
+
+Assessed index tree: 54278034744cd76c34150202f1ce960c736d5eb7
+
+### Implementation check for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+Result:
+
+No. Step 3b has NOT been fully implemented.
+
+The probe work itself is sound. The step is not complete because the plan's
+feature-preservation clause is unproven.
+
+Evidence I checked:
+
+- the plan's Step 3b section;
+- the staged validation diff and `a.commit`;
+- the requestor's private journal and the probe record table, covering builds
+  199 to 205;
+- the P10 and probe-test diff on the consumer's default branch, from before
+  the probe to the restored mode;
+- the CI server's build list for that job, read-only.
+
+What holds:
+
+- **Two complete probes.** Part A (build 201) and part B (build 205) each ran
+  on actual agents and reached the mandated pipeline in one build. P11 arrived
+  once in the nested test shell after a matching checkout and before the first
+  dependency command, and stayed inactive elsewhere.
+- **Publication proven off.** Each build recorded the effective
+  publication-disabled value, no overriding job parameter, the generated POM,
+  and the explicit deployment skip with no deployment command.
+- **Honest command records.** Real statuses are recorded apart from the masked
+  shell status, including the deliberate failure in part A and the
+  coverage-gate failure in part B.
+- **Part B's negative result.** P01 preparation failed on the nested agent,
+  and the release path lacks the Step 4 inputs. This is recorded as such, not
+  as a pass, with each consequence named as a Step 5 input. P01 sits outside
+  Step 3b's P10/P11 scope, so a record rather than a fix is the right outcome.
+- **The fallback.** The dedicated probe branch was not indexed, so the probe
+  used the plan's own fallback, a probe mode in P10.
+
+What does not hold yet:
+
+- **Feature preservation (blocking).** The plan requires the consumer's
+  default CI mode to stay unchanged. The fallback puts a top-level read of the
+  mode file ahead of the pre-existing declarative pipeline and moves that whole
+  pipeline into the switch's fallback branch. Builds 199 to 205 all took the
+  probe branch. The mode was restored in a later consumer commit, but the build
+  list shows no build since then.
+
+  So the default path has not run once in its new position. Whether the CI
+  server's declarative parser accepts the pipeline there is unverified, and I
+  cannot settle it statically. The validation text nonetheless states the
+  default path and publication behavior as "preserved".
+- **Transcript encoding (low).** The request's authored sections came from
+  input files with a UTF-8 byte order mark. Four U+FEFF characters now sit
+  inside the unstaged transcript, at the start of the requestor's round 1
+  paragraphs, and would be committed with it.
+
+Architecture: no violation. P10 orchestrates and P11 observes; no cplx source
+or shared-library file changed. No architecture fix is needed.
+
+Performance: one bounded record per build and no new scan. No performance fix
+is needed.
+
+Unit test coverage: no cplx production code changed. The probe-only failing
+test skips unless part A is selected and sits outside the consumer's
+configured test paths. No unit-tested class is below 100%, and no top-level
+symbol outside the gate is unreferenced.
+
+Validation plan effects:
+
+The reviewer edited only the Step 3b rows of
+`docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`:
+
+- the status is now `No. Step 3b has NOT been fully implemented.`, with its
+  reason;
+- a `### Missing work for Step 3b` section follows
+  `What was implemented for Step 3b`;
+- the Yes-only `## Analysis of Step 3b Implementation` summary is removed.
+
+No other row, step or umbrella entry changed, and the document-level status
+stays `No, it is not implemented.`
+
+### Pre-repair mandatory checks and coverage for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+The resolved validation set is requestor evidence, and the reviewer did not
+rerun it. Reviewer evidence:
+
+- `commit-plan-check.bat --format json`: `valid`, ready, one group, before
+  and after the reviewer patch.
+- `git diff --cached --check`: exit 0.
+- The installed sensitive pre-commit hook: exit 0 on the staged blobs.
+- A read-only query of the CI job's build list: the newest build is probe
+  build 205, which predates the restore commit.
+
+`ghog check` was not rerun: no shell file changed in cplx this step, and the
+requestor's run passed the lint floor.
+
+### Resolved validation set and sources for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `git diff --cached --check` (source: request).
+
+### Resolver drift and direction for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+No drift. Step 3b names no plan command in cplx. The project floor matches,
+and the one request addition only adds a check. The step's executed evidence
+is its probe builds, recorded privately.
+
+### Repository state around validation for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+The index tree was `808f024de9f828a5521fb098e7f810d76576bb4c` at request time
+and at review entry. After the reviewer's validation-plan patch it is
+`54278034744cd76c34150202f1ce960c736d5eb7`. The umbrella digest is unchanged
+(`46b95d18...`). The validation-state comparison reports one tracked
+difference, the validation plan, confined to the Step 3b rows and attributed
+to the reviewer. The only unstaged change is the protocol transcript.
+
+### Repair inventory for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+Repairs made:
+
+- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 3b rows
+- updated to the reviewer's No verdict, with a Missing work list; the Yes-only
+- summary was removed. The patch was attributed cleanly and staged.
+- Classification: polishing-only review metadata.
+- No implementation file was modified.
+
+Paths staged:
+
+- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+
+### Commit plan assessment for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+The independent `commit-plan-check.bat --format json` run returned `valid`,
+`ready: true` and no diagnostics, before and after the reviewer patch. One
+group holds the single staged path, with the required subject
+`docs(deploy-venv-sync): record step 3b validation`. `a.commit` remains
+accurate; the reviewer did not amend it. After rework, refresh its body if it
+mentions the preservation claim.
+
+### Findings and boundaries for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+Unresolved findings:
+
+1. Medium: P10's default mode has not run since the probe switch moved it into
+the fallback branch, so the plan's feature-preservation clause is
+unproven, and the validation text asserts it.
+2. Low: four U+FEFF characters from BOM-carrying input files sit in the
+unstaged transcript.
+
+Boundary-crossing work:
+
+- Not a writer finding: part B's central observation, whether the mandated
+- commands select the reconstructed named venv without drift, remains open. It
+- needs a P01 change, since its agent-identity helper hard-codes the host
+- interpreter path, and the Step 4 release inputs. Both are outside Step 3b's
+- P10/P11 scope. The handoff already names it as a Step 5 input. The human may
+- want to decide whether to re-run part B once those exist.
+
+### Writer instructions for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+1. Trigger one consumer build of the restored default mode, with publication
+   off as that mode already configures. Capture its console and stage list, and
+   compare them with build 198, the last default-mode build before the probe.
+   Record it in the probe handoff and the journal.
+2. If that build fails because of the new position of the pre-existing
+   pipeline, restructure P10 so that pipeline runs as before. One option is to
+   keep the probe in its own file loaded only in probe mode. Rerun the build.
+3. Replace the "preserved" and "remains selected" sentences in the Step 3b
+   rows with that build's number and outcome. Then re-run implementation-check
+   on step 3b.
+4. Before staging the transcript at Commit, strip the four U+FEFF characters
+   from the start of your round 1 paragraphs. Write future input files as UTF-8
+   without a byte order mark.
+
+### Decision rationale for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+The readiness floor does not pass:
+
+- Identity, staged attribution and the mechanical `a.commit` check pass.
+- Completeness fails on the plan's feature-preservation clause: the default
+  mode was moved inside a new switch and has not run since.
+- Two findings remain.
+
+The disposition is changes-requested. One default-mode build closes the main
+finding; it is needed anyway before Steps 4 and 5 rely on that job.
+
+The probe itself met the plan's bar. Both parts ran on actual agents with
+publication proven off, and every expected observation is recorded,
+including part B's negative result.
+
+### Final reviewer decision for step 3b deploy-venv-sync (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-3b-round-1 -->
+
+## Round 2 by requestor - Step 3b
+
+- Recorded: 2026-09-24T23:52:12+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3b
+- Outcome: request
+
+### Review identity for step 3b deploy-venv-sync (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 3b
+Review round: 2
+
+### Code review evidence for step 3b deploy-venv-sync (round 2)
+
+request_index_tree: 5fa28abb3c8ba0653d7cf910672a72820a0e9eb7
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- git diff --cached --check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(deploy-venv-sync): record step 3b validation
+group 1 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Requestor assessment for step 3b deploy-venv-sync (round 2)
+
+Yes. Step 3b has been fully implemented as a non-qualifying actual-agent probe. Part A build 201 and part B build 205 each reached the mandated pipeline in one build with effective publication disabled. Both generated a distinct POM, explicitly skipped deployment, ran no publication command and have retained console, stage and adapter records. The final build result and each relevant command's real status were recorded separately.
+
+Part A proved P11 reaches the nested test shell once after matching checkout and before dependency commands. Synchronization and activation returned 0; missing compatibility input made installation return 2; the deliberately failing test returned 1 while the enclosing shell returned 0. Part B verified the phase-1 archive digest but P01 preparation returned 127 on the nested agent because a fixed host interpreter path was unavailable, and the Step 4 reconstruction input was not yet present. Synchronization and activation then selected an implicit environment, installation returned 0 with unchanged inventory in that environment, and the real test status 1 was masked to shell status 0. Named-venv selection and zero drift were not proved. These are named Step 5 inputs, not qualification claims.
+
+The reviewer's default-mode finding was reproduced in build 206: a probe switch broke declarative execution before any stage. P10 was restored byte-for-byte to its pre-probe form, the probe-only failing test was removed from the default branch, and repaired build 207 succeeded. Its ordered stage names and statuses exactly matched pre-probe build 198, including the consumer's own publication stage skipped. No publication command ran in either default-mode check. The dedicated probe branch retains the pipeline call.
+
+The public validation entry reports only sanitized outcomes. Detailed integration records remain private under AC13. No cplx source or shared-library file changed. Architecture and performance checks found no Step 3b issue; no class-level unit coverage target was added. The cplx groundhog walk passed its check phase and exited 9 at the non-applicable pytest phase because cplx has no pytest project. This step qualifies no candidate and proves no acceptance criterion.
+
+### Implementation report for step 3b deploy-venv-sync (round 2)
+
+The consumer's P10 and P11 probe changes were committed outside this reviewed cplx batch. A dedicated probe branch was prepared first; the CI job did not index it, so a probe mode in the one consuming Jenkinsfile ran both parts. The dedicated branch retains the mandated pipeline call. P11 observed the nested test shell, command boundaries and outcomes in archived records.
+
+After the probes, the first restored default-mode check failed before stages because the top-level switch changed declarative execution. The consumer repair restored P10 to its pre-probe bytes and removed the probe-only failing test from the default branch. The next default-mode build succeeded with the exact pre-probe stage sequence and publication skipped. The private handoff records both outcomes and the comparison with the prior default build.
+
+The sole staged cplx change is the Step 3b validation-plan entry. It records builds 201, 205, 206 and 207, the publication verdict, command outcomes, failed named-venv reconstruction, successful default-mode repair and explicit Step 5 inputs in public vocabulary. Detailed records are private under AC13. No cplx source file or shared-library source changed.
+
+### Change summary for step 3b deploy-venv-sync (round 2)
+
+Staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md.
+
+Root a.commit has one documentation group with subject `docs(deploy-venv-sync): record step 3b validation`. The plan is formatted and commit-plan-check reports ready. The staged diff passed `git diff --cached --check`, the cplx lint floor passed for 59 tracked scripts, and the installed pre-commit hook and sensitive checks passed. The append-only review transcript remains unstaged outside the reviewed batch. No cplx commit has been made.
+
+### Writer response for step 3b deploy-venv-sync (round 2)
+
+Writer response:
+
+I accept the round 1 finding. Default-mode build 206 reproduced the parser regression before any stage. I restored the consumer's original P10 bytes, removed the probe-only failing test from its default branch, and recorded repaired build 207: SUCCESS with the same ordered stage names and statuses as pre-probe build 198, including publication skipped. The public Step 3b validation rows now cite both checks and the private handoff retains their console and stage evidence.
+
+I also removed the four embedded U+FEFF characters identified in the unstaged transcript. The edited transcript passes the message-mode sensitive checker, and the new authored inputs use UTF-8 without a byte order mark. I retained the reviewer's Part B negative finding and its Step 5 ownership without claiming named-venv qualification. There is no disagreement with the round 1 answer.
+
+### Reviewer focus for step 3b deploy-venv-sync (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-3b-round-2 -->
+
+## Round 2 by reviewer - Step 3b
+
+- Recorded: 2026-09-24T23:56:20+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3b
+- Outcome: answer
+
+### Assessed index identity for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+Baseline index tree: 5fa28abb3c8ba0653d7cf910672a72820a0e9eb7
+
+Assessed index tree: 5fa28abb3c8ba0653d7cf910672a72820a0e9eb7
+
+### Implementation check for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+Result:
+
+Yes. Step 3b has been fully implemented.
+
+Both round 1 findings are closed, and the probe results stand as recorded in
+round 1. I checked:
+
+- the staged Step 3b rows and `a.commit`;
+- the consumer's default branch on the CI remote: P10 is byte-identical to
+  its pre-probe version, the probe-only failing test is gone, the CI mode
+  file reads the default mode, and only the inactive adapter and one ignore
+  rule remain from the probe;
+- the CI server's records for builds 206, 207 and 198, read-only;
+- the transcript, for stray byte order marks.
+
+Details:
+
+- **Feature preservation.** My round 1 concern was real. Build 206, the first
+  default-mode build after the probe, failed about two seconds in, before any
+  stage: the switch had broken the pre-existing declarative pipeline. The
+  writer restored P10's pre-probe bytes. Build 207, on that repair, succeeded,
+  and its thirteen stage names and statuses match build 198 one for one,
+  including the consumer's own publication stage not executed. The rows now
+  say this with build numbers instead of asserting preservation.
+- **Transcript.** No U+FEFF character remains, and this round's request
+  carries none.
+- **Probe result, unchanged from round 1.** Parts A and B each have a
+  complete build (201 and 205) on actual agents, with publication proven not
+  invoked. Every expected observation is recorded, including part B's
+  negative result and the masked test status. That meets the plan's
+  completion bar for a non-qualifying probe.
+
+Architecture: no violation, and no cplx source or shared-library file changed.
+No architecture fix is needed.
+
+Performance: nothing changed since round 1. No performance fix is needed.
+
+Unit test coverage: no cplx production code changed. No unit-tested class is
+below 100%, and no top-level symbol outside the gate is unreferenced.
+
+Validation plan effects:
+
+The reviewer made no edit to the validation plan this round. The staged Step 3b
+rows are accurate:
+
+- the exact Yes sentence;
+- no Missing work section;
+- the summary placed after `Feature integrity for Step 3b`;
+- builds 201, 205, 206 and 207 cited in public vocabulary.
+
+The document-level status stays `No, it is not implemented.`
+
+### Pre-repair mandatory checks and coverage for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+The resolved validation set is requestor evidence, and the reviewer did not
+rerun it. Reviewer evidence:
+
+- `commit-plan-check.bat --format json`: `valid`, ready, one group.
+- `git diff --cached --check`: exit 0.
+- The installed sensitive pre-commit hook: exit 0 on the staged blobs.
+- A scan of the staged Step 3b rows for private names: none. The only hit is
+  the plan's own generic "consuming Jenkinsfile".
+- A read-only CI query: build 206 failed in about two seconds, and build 207
+  succeeded with the same stages as build 198.
+
+### Resolved validation set and sources for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `git diff --cached --check` (source: request).
+
+### Resolver drift and direction for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+No drift. The project floor matches, and the request addition only adds a
+check.
+
+### Repository state around validation for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+The index tree was `5fa28abb3c8ba0653d7cf910672a72820a0e9eb7` at request time,
+at review entry and after the assessment. The umbrella digest is unchanged
+(`46b95d18...`). The validation-state comparison is acceptable, with no
+differences. The only unstaged change is the protocol transcript.
+
+### Repair inventory for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+Repairs made:
+
+- None. The reviewer made no repair and staged nothing this round.
+
+Paths staged:
+
+- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+
+### Commit plan assessment for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+The independent `commit-plan-check.bat --format json` run returned `valid`,
+`ready: true` and no diagnostics. One group holds the single staged path, with
+the required subject `docs(deploy-venv-sync): record step 3b validation`.
+`a.commit` remains accurate; the reviewer did not amend it.
+
+### Findings and boundaries for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+No rework is required. If the human selects Commit:
+
+1. Stage the protocol transcript with the final group, as the workflow
+   prescribes. Then run the hook and the commit-plan check once more on the
+   final index.
+2. Before or right after committing, add one bullet to the private probe
+   handoff's "Inputs from the probes to Step 5". That file is ignored, so the
+   edit does not touch the reviewed batch. The bullet covers the full-suite
+   duration in the mandated test step: about 1,290 s against 271 s for the
+   same suite in the consumer's own build. It also covers the outer allocation
+   lost during that step in builds 200 and 204, which kept the later stages
+   from running. Step 5 should capture the test agent's processor count and
+   quota, and time the suite with its output redirected.
+
+### Decision rationale for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+All six readiness-floor results pass:
+
+- exact identity;
+- complete implementation against the plan's non-qualifying completion bar;
+- validation and coverage: no cplx code changed, the lint floor passed, and
+  both probe parts plus the default-mode check are evidenced on actual
+  agents;
+- attributable staged scope: one validation file, no reviewer repair;
+- no unresolved finding;
+- accurate `a.commit`.
+
+The recommendation is commit-ready. It is advisory and does not authorize a
+commit.
+
+A note for the human at the gate. Step 3b shows that the mandated pipeline
+runs for the consumer on actual agents with publication off, and that the
+adapter hook reaches its test shell. It does not yet show that the pipeline
+tests on the cplx interpreter. Part B's named venv was never built: a P01
+helper hard-codes a host interpreter path missing on the test agent, and the
+release inputs arrive in Step 4. The full suite in the mandated test step is
+also about five times slower than in the consumer's own build, and it lost the
+outer allocation twice. Both are Step 5 inputs.
+
+### Final reviewer decision for step 3b deploy-venv-sync (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-3b-round-2 -->
+
+## Round 2 by human - Step 3b - human-confirmation
+
+- Recorded: 2026-09-25T00:26:57+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 3b
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
