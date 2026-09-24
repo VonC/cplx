@@ -422,8 +422,15 @@ There are no new production classes.
 
 ### Analysis of Step 3b implementation state
 
-Not started. Step 3b is not implemented because no probe build has run and no
-observation has been recorded.
+Yes. Step 3b has been fully implemented.
+
+Probe builds 201 (part A) and 205 (part B) ran on actual agents, reached the
+mandated pipeline and proved publication was not invoked. Part B found that
+P01 could not reconstruct the named venv on the test agent, so its commands ran
+against an implicit environment. These are non-qualifying findings for Step 5.
+Default-mode build 206 exposed a probe-switch regression before any stage;
+after P10 was restored byte-for-byte, build 207 succeeded with the same stage
+names and statuses as pre-probe build 198, including publication skipped.
 
 ### Goal for Step 3b
 
@@ -443,27 +450,100 @@ Record each observation handed to Step 5, with its sanitized outcome, under "Wha
 
 ### What was implemented for Step 3b
 
-_(empty — no check has taken place yet.)_.
+- P10 and P11 probe changes were committed separately in the consumer and
+  pushed to its CI remote before each build. The dedicated probe branch retains
+  the pipeline call; P10's default path was restored byte-for-byte after the
+  probes, and the deliberate failing test was removed from the default branch.
+- Part A build 201 and part B build 205 each ran the preliminary provisioning
+  allocation followed by one mandated pipeline call in the same build.
+- Both builds recorded the loaded pipeline revision, actual agent identities,
+  stage durations and final result; allocation waits were not reported.
+- In both builds the test-agent checkout matched the build revision, and P11
+  ran once in the workspace root after checkout and before dependency commands.
+  It did not initialize outside the test step or again in child shells.
+- Part A recorded the host interpreter and tool version, an implicit project
+  environment, synchronization status 0 and fixed activation status 0.
+- Part A recorded requirements installation status 2 because its input was
+  absent, and the deliberate test failure status 1 masked to shell status 0.
+- Part B verified that its independently fetched toolchain archive matched the
+  digest passed from phase 1, but P01 preparation exited 127 because a fixed
+  host interpreter path was unavailable on the nested test agent.
+- Part B recorded that the Step 4 reconstruction companion was not yet
+  available (release-path status 2), so no named venv or verified alias was
+  prepared and zero drift against that environment could not be demonstrated.
+- Without reconstruction, part B synchronization status 0 selected the host
+  interpreter and created an implicit project environment; fixed activation
+  status 0 then selected that environment and changed the resolved tool version.
+- Part B requirements installation returned 0 against the implicit environment
+  and left its 80-package inventory unchanged; this does not establish a no-op
+  against the required named venv.
+- Part B's 12 focused unit tests passed, but the whole-project coverage gate
+  made the real test command exit 1; the mandated command masked it to shell
+  status 0, and the final build result was SUCCESS.
+- In both builds the effective publication-disabled setting was confirmed,
+  the job had no overriding publication parameter, a distinct POM was generated,
+  and the deployment command was explicitly skipped and never invoked.
+- Default-mode build 206 failed before any stage because the fallback switch
+  changed declarative execution. P10 was repaired to its pre-probe bytes;
+  build 207 then succeeded with the same ordered stage names and statuses as
+  pre-probe build 198, including the consumer's own publication stage skipped.
+  No publication command ran in either default-mode check.
+- Full console, stage and archived P11 records are retained privately for both
+  builds. The failed preparation, implicit environment and masked test status
+  are explicit inputs to Step 5 items 2, 4 and 6; no shared-library source
+  changed. Step 3b qualifies no candidate and proves no acceptance criterion.
 
 ### New types or classes introduced for Step 3b
 
-_(empty — no check has taken place yet.)_.
+None. P10 and P11 are consuming scripts; the deliberate failure is a
+probe-only test, with no new production class.
 
 ### Architecture check for Step 3b
 
-_(empty — no check has taken place yet.)_.
+The probe keeps orchestration in P10 and test-shell observation in P11. It
+adds no cplx source dependency or domain-layer import. The observational
+fallback is confined to probe mode; Step 5 must fail closed when preparation
+or outcome observation fails. No Step 3b architecture fix is needed.
 
 ### Performance check for Step 3b
 
-_(empty — no check has taken place yet.)_.
+P11 writes one bounded record per build from named command boundaries. The
+complete probes took 354.376 and 313.791 seconds; their stage durations are
+retained privately. No new project-tree scan or quadratic operation was added.
+No Step 3b performance fix is needed.
 
 ### Unit test coverage check for Step 3b
 
-_(empty — no check has taken place yet.)_.
+No cplx production class or Python symbol was changed. The consumer's
+configured coverage gate measures its application source, excluding P10, P11
+and the probe-only failing test. The focused 12 tests in build 205 passed, but
+19.31% whole-project coverage missed its 100% gate; that is a masked-command
+finding, not a coverage pass. The cplx groundhog walk passed its check phase
+and stopped at the non-applicable pytest phase because cplx is not configured
+as a pytest project. No unit-tested class below 100% needs completing for
+Step 3b. No top-level symbol outside the gate is unreferenced.
 
 ### Feature integrity for Step 3b
 
-_(empty — no check has taken place yet.)_.
+The consumer's original full-mode P10 bytes were restored after build 206
+showed that the probe switch broke declarative execution. Build 207 succeeded
+with the same ordered stage names and statuses as pre-probe build 198, including
+the consumer's own publication stage skipped. That stage was absent from probe
+mode. Both complete probe builds confirmed the mandated publication stage
+skipped deployment, while their final results and masked command failures were
+recorded separately. The broader consumer suite did not pass in the additional
+part B run because browser prerequisites were unavailable; Step 5 retains the
+full-suite and truthful-failure gates.
+
+## Analysis of Step 3b Implementation
+
+Step 3b made the consuming pipeline and adapter observable on actual agents.
+Both parts ran in one build each with publication disabled, and their private
+records cover the hook, revision, command statuses, agent allocation and final
+results. Part B established a precise incompatibility with the named-venv
+reconstruction path; it did not qualify an environment. The first default-mode
+check found a regression, which was repaired and verified by build 207 against
+the pre-probe stage sequence. No cplx source or shared-library file changed.
 
 ## Step 4. Package without venvs and wire retained deployment recovery
 
