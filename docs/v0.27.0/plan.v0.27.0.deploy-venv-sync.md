@@ -14,6 +14,7 @@ that execution has already succeeded.
 | 1 | Qualify release inputs and locked offline transport |
 | 2 | Verify complete dependency selection and wheel ELF identity |
 | 3 | Implement exact-path reconstruction and readiness |
+| 3b | Probe the mandated pipeline on actual agents, non-qualifying |
 | 4 | Package without venvs and wire retained deployment recovery |
 | 5 | Integrate and qualify the single-build CI sequence |
 | 6 | Implement operator promotion and immutable release binding |
@@ -26,6 +27,10 @@ Step 1's real uv/transport probes precede production
 lifecycle work. Step 5 retains the candidate that Step 7 qualifies. Step 6
 implements and tests the publication gate before Step 7 exercises real promotion.
 Step 7 qualifies the candidate before enabling the operator's publication action.
+Step 3b moves Step 5's first non-qualifying actual-agent probe forward so that
+mandated-pipeline incompatibilities surface before Steps 4 and 5 depend on it.
+Its part A may run while Step 3 is in progress; part B follows Step 3.
+Step 3b qualifies nothing and never gates Step 3 or Step 4 completion.
 If Step 6 changes a helper included in Step 5's frozen companion, produce a new
 candidate through the complete Step 5 build before Step 7 qualification; never
 patch a frozen companion or reuse qualification for different helper bytes.
@@ -109,8 +114,8 @@ Do not pass the handoff itself to public review artifacts.
 | P07 | Existing deployment entry | 608 | Steps 3-4 |
 | P08 | Existing packaging overlay | 79 | Step 4 |
 | P09 | Existing assembly configuration | 51 | Step 4 |
-| P10 | Existing unique Jenkinsfile | 326 | Step 5 |
-| P11 | New tracked command-shell adapter | 0 | Step 5 |
+| P10 | Existing unique Jenkinsfile | 326 | Step 3b probe mode; Step 5 |
+| P11 | New tracked command-shell adapter | 0 | Step 3b probe draft; Step 5 |
 | P12 | Existing phase 1 test-framework observer (Python) | 154 | Step 5 reuse unchanged; preserve strict policy |
 | P13 | Existing test evidence reader (Python) | 137 | Step 5, safe band, ceiling 650 |
 | P14 | New operator promotion wrapper | 0 | Step 6 |
@@ -534,6 +539,99 @@ Time-gated status: no new timeout/xfail gate; missing required execution stays i
 
 Step inspection: `rg -n 'UV_PYTHON|UV_PROJECT_ENVIRONMENT|readiness|pyvenv|base' src/setups/env/bin/deploy_venv.sh`.
 
+### Step 3b. Probe the mandated pipeline on actual agents, non-qualifying
+
+#### Step 3b analysis and intent
+
+Step 5 depends on the unchanged mandated shared-library pipeline accepting
+the application-owned adapter on its own agents. Nothing has exercised that
+pipeline for this consumer yet, and its command forms are the ones the
+design's Two-phase CI integration section singles out: implicit environment
+creation, a mandatory installation command, discarded test status and an
+enabled publication stage. Discovering an incompatibility in Step 5, after
+Step 4 has frozen the candidate shape, would cost a full repackaging cycle.
+
+This step is the non-qualifying actual-agent probe that Step 5 item 2 already
+required, moved forward. It adds no design decision: it observes, on actual
+agents, the facts the Step 5 adapter is built on, and records them privately.
+Shared-library sources remain unchanged. The step is labelled `3b` so that
+Step 3's review exchange keeps its identity; nothing depends on the label.
+
+Expected outcome: A recorded, reproducible probe build of the one consuming
+Jenkinsfile that reaches the mandated pipeline with publication disabled,
+and a private list of the adapter hook point, agent allocation, checkout
+revision, command forms and publication controls that Step 5 must handle.
+Complexity impact: probe output is a bounded record per build; no tree walks
+beyond the named workspaces.
+Feature preservation: the consumer's default CI mode, its phase 1 checks and
+its publication behavior outside the probe mode stay byte-for-byte unchanged.
+
+#### Step 3b implementation
+
+Files involved:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` (existing, to be updated by implementation-check for this step).
+
+P10 and P11 only: a probe mode or probe branch of the consuming Jenkinsfile,
+and a draft of the tracked adapter. The concrete library entry point, its
+configuration keys, agent labels, branch and job coordinates, and the exact
+observation commands are in the private local handoff for this step; re-read
+it before implementation and never copy its terms into public files.
+No cplx source file changes in this step.
+
+Tests first: Before the first probe build, write the private list of expected
+observations and of the deliberate failure the probe must see. A probe build
+whose record lacks an expected observation is incomplete, not green.
+
+Classes and behavior (prefer focused script functions; no new class hierarchy):
+
+1. Part A, may start while Step 3 is in progress. Add a probe mode to P10 that
+   runs a minimal phase 1 (existing provisioning only), releases its agent,
+   then calls the mandated pipeline once in the same build. The default mode
+   keeps its current behavior. Disable publication through the library's own
+   configuration and record the effective value the library resolved, not only
+   the value passed; a probe build that reaches a publication command fails.
+2. In part A, the P11 draft only observes: it proves whether a build-scoped
+   hook reaches the actual Python-command shell on the mandated test agent,
+   after that agent's checkout and before its first dependency command. Record
+   agent identity, working directory, checked-out revision against the build's
+   revision, the interpreter and uv each library command resolves, the
+   environment each creates or selects, and each command's real exit status.
+   Include one deliberately failing test to show whether its status is masked.
+3. Part B, after Step 3's exact-path helper and P01 wiring are committed:
+   extend the P11 draft to reconstruct the named venv on the mandated test
+   agent through P01 and to place it ahead of the library's commands. Record
+   whether the library's environment and installation commands then select it
+   without drift, and which ones do not.
+4. Record every result, including failures, in the private handoff and a
+   sanitized one-line outcome per observation in the validation plan. Each
+   unhandled command form becomes a named input to Step 5 items 2, 4 and 6.
+   An incompatibility never authorizes a shared-library change.
+5. Keep P10 and P11 probe changes in their own commits, outside Step 3's
+   reviewed batch. Push them to the remote the CI server builds before
+   triggering a probe build.
+
+Completion criteria: At least one probe build of each part ran on actual agents
+with publication proven not invoked, and every expected observation is
+recorded, whether it succeeded or failed. Step 3b qualifies no candidate,
+proves no AC row and cannot complete Step 5. Its failures are findings, not
+reasons to stop Steps 3 or 4.
+
+#### Step 3b addendums
+
+Line-budget checkpoint:
+
+- [ ] `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: existing planning document; recount before/after; no Python ceiling.
+- [ ] Recount P10 and P11 before and after; P11 is Bash, no Python ceiling. Any new Python probe helper follows the 650 ceiling.
+
+Full workflow timing run readiness: record each probe build's duration, the
+mandated pipeline's stage durations and agent wait times privately.
+Time-gated status: no timeout/xfail gate; a probe build that did not run leaves
+the step incomplete.
+
+Step inspection: none in cplx sources; the private handoff names the P10/P11
+inspection command.
+
 ### Step 4. Package without venvs and wire retained deployment recovery
 
 #### Step 4 analysis and intent
@@ -634,7 +732,7 @@ Tests first: Public synthetic evidence tests reject revision/profile/toolchain d
 Classes and behavior (prefer focused script functions; no new class hierarchy):
 
 1. Update the single consuming Jenkinsfile (P10) to run scripted blocking tool provision, environment verification, acceptance/coverage and archive/bundle assembly first. Freeze and archive the exact candidate pair, manifests and phase 1 evidence; preserve diagnostics in finally handling and release the preliminary node before calling the mandated pipeline once in that same build.
-2. Add the tracked application-owned adapter P11 at the accepted private path. First run a non-qualifying actual-agent probe for hook propagation, working directory, revision and fetch prerequisites. Then scope initialization to the actual Python-command step after checkout, disable recursive initialization, and fail if required initialization is incomplete.
+2. Complete the tracked application-owned adapter P11 at the accepted private path, starting from Step 3b's draft and recorded observations. Repeat the Step 3b probe only if the adapter, the loaded library revision or the agent allocation changed since. Then scope initialization to the actual Python-command step after checkout, disable recursive initialization, and fail if required initialization is incomplete.
 3. Obtain or assemble the exact helper set from the pinned cplx revision and compare its member manifest with phase 1 before execution; record actual helper paths and reject drift or absent delivery. Reconstruct an equivalent local named venv from the same toolchain archive digest, canonical lock and exact effective selection including defaults. Fetch existing toolchain/wheels from configured services; verify phase 1 toolchain/profile/wheel-manifest digests passed as non-secret build inputs. Reject revision or provenance drift and never require the phase 1 workspace.
 4. Set explicit Python/venv/download/locked/no-build controls, real executable PATH, VIRTUAL_ENV and shipped runtime setup in the actual command shell. Verify fixed activation aliases and successful compatibility installation as a no-op before and after activation. Record the actual uv version and reject dependency drift; the qualified exception for another phase 2 uv never applies to deployment.
 5. Select shipped Git for application-controlled operations after provisioning and exercise an actual operation. Record Jenkins bootstrap checkout provenance separately: adapter initialization cannot select a Git executable for an already completed checkout or unrelated agent.
@@ -838,6 +936,12 @@ Human-authorized consolidation after review round 3 confirms Q01-Q07 option A
 and Q08-Q09 option B. Their implementation tasks and evidence gates are integrated
 below and in the named sections. No follow-up planning question remains.
 Implementation and real integration qualification have not started.
+
+Human-requested amendment on 2026-09-24, before Step 3 started: move Step 5's
+non-qualifying actual-agent probe forward as Step 3b, so that the mandated
+pipeline runs on actual agents as early as possible. It reorders an existing
+task; it changes no design decision, no acceptance row and no step's completion
+criteria other than Step 5 item 2 reusing its results.
 
 | Question | Decision and reason | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
