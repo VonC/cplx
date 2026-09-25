@@ -6,6 +6,8 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tarfile
 import tempfile
@@ -47,7 +49,10 @@ def fixture(root):
         "wheels": [],
         "transport": artifact("transport.json", b'{"schema":1,"locations":{}}'),
         "runtime": [artifact("evidence/runtime.json", b'{"qualified":true}')],
-        "helpers": {"revision": "b" * 40, "members": [artifact("helpers/entry.py", b"print('fixture')\n")]},
+        "helpers": {"revision": "b" * 40, "members": [
+            artifact("helpers/" + name, ("fixture " + name + "\n").encode())
+            for name in (*module("deploy_venv_inputs").HELPER_SOURCES, "runtime_env.sh")
+        ]},
     }
 
 
@@ -73,8 +78,112 @@ class ReleaseInputsTest(unittest.TestCase):
         self.inputs.extract(bundle, destination, self.inputs.sha256(bundle))
         inner = json.loads((destination / "manifest.json").read_text())
         self.assertNotIn("companion", inner)
-        self.assertEqual((destination / "helpers/entry.py").read_bytes(), b"print('fixture')\n")
+        self.assertEqual((destination / "helpers/deploy_venv.sh").read_bytes(),
+                         b"fixture deploy_venv.sh\n")
         self.assertFalse((destination / "external/tools.tar").exists())
+
+    def test_release_qualification_checks_inner_and_outer_bindings(self):
+        release = module("deploy_venv_release")
+        bundle = self.root / "companion.tar"
+        self.inputs.assemble(self.manifest, self.root, bundle)
+        record_path = self.root / "release-inputs.txt"
+        record_path.write_text(self.inputs.release_record(self.manifest, bundle), newline="\n")
+        files = {"application": self.root / self.manifest["application"]["path"],
+                 "tools": self.root / self.manifest["tools"]["path"],
+                 "entry": self.root / self.manifest["entry"]["path"],
+                 "companion": bundle}
+        release.qualify(record_path, files)
+        altered = record_path.read_text().replace("tools_version=1.7", "tools_version=1.8")
+        record_path.write_text(altered, newline="\n")
+        with self.assertRaisesRegex(ValueError, "companion outer identity"):
+            release.qualify(record_path, files)
+
+    def test_generated_record_uses_independent_tools_pin_and_qualifies(self):
+        release = module("deploy_venv_release")
+        bundle = self.root / "companion.tar"
+        self.inputs.assemble(self.manifest, self.root, bundle)
+        files = {"application": self.root / self.manifest["application"]["path"],
+                 "tools": self.root / self.manifest["tools"]["path"],
+                 "entry": self.root / self.manifest["entry"]["path"],
+                 "companion": bundle}
+        record_path = self.root / "generated.record"
+        record_path.write_text(release.create_record(files), newline="\n")
+        self.assertEqual(record_path.read_text(), self.inputs.release_record(self.manifest, bundle))
+        self.assertEqual(release.qualify(record_path, files)["tools_version"], "1.7")
+        self.assertEqual(release.qualify(record_path, files)["application_version"], "2.0")
+
+    def test_qualification_rejects_companion_without_entry_helper(self):
+        release = module("deploy_venv_release")
+        manifest = copy.deepcopy(self.manifest)
+        manifest["helpers"]["members"] = [
+            row for row in manifest["helpers"]["members"]
+            if row["path"] != "helpers/deploy_venv.sh"
+        ]
+        bundle = self.root / "missing-helper.tar"
+        data = self.inputs.encoded(manifest)
+        with tarfile.open(bundle, "w") as archive:
+            item = tarfile.TarInfo("manifest.json")
+            item.size = len(data)
+            archive.addfile(item, io.BytesIO(data))
+            for row in self.inputs.members(manifest):
+                archive.add(self.root / row["path"], arcname=row["path"])
+        files = {"application": self.root / manifest["application"]["path"],
+                 "tools": self.root / manifest["tools"]["path"],
+                 "entry": self.root / manifest["entry"]["path"],
+                 "companion": bundle}
+        identity = {"application_version": "2.0", "tools_version": "1.7",
+                    "tools_coordinate": manifest["tools"]["coordinate"],
+                    "helpers_revision": manifest["helpers"]["revision"],
+                    "helpers_manifest_sha256": hashlib.sha256(
+                        self.inputs.encoded(manifest["helpers"])).hexdigest()}
+        record_path = self.root / "release-inputs.txt"
+        record_path.write_text(release.record(identity, files), newline="\n")
+        with self.assertRaisesRegex(ValueError, "helper closure"):
+            release.qualify(record_path, files)
+
+    def test_record_publishes_only_after_qualification(self):
+        release = module("deploy_venv_release")
+        bundle = self.root / "companion.tar"
+        self.inputs.assemble(self.manifest, self.root, bundle)
+        files = {"application": self.root / self.manifest["application"]["path"],
+                 "tools": self.root / self.manifest["tools"]["path"],
+                 "entry": self.root / self.manifest["entry"]["path"],
+                 "companion": bundle}
+        output = self.root / "published.record"
+        files["application"].write_bytes(b"wrong application")
+        with self.assertRaisesRegex(ValueError, "outer identity"):
+            release.write_qualified_record(output, files)
+        self.assertFalse(output.exists())
+        self.assertFalse(list(self.root.glob(".release-record-*")))
+        files["application"].write_bytes(b"app")
+        release.write_qualified_record(output, files)
+        self.assertEqual(release.qualify(output, files)["application_version"], "2.0")
+        with self.assertRaises(FileExistsError):
+            release.write_qualified_record(output, files)
+
+    def test_record_cli_refuses_bad_tar_without_publishing(self):
+        bad = self.root / "bad-companion.tar"
+        bad.write_bytes(b"not a tar archive")
+        output = self.root / "published.record"
+        command = [sys.executable, str(HELPERS / "deploy_venv_release.py"), "record",
+                   "--application", str(self.root / self.manifest["application"]["path"]),
+                   "--tools", str(self.root / self.manifest["tools"]["path"]),
+                   "--entry", str(self.root / self.manifest["entry"]["path"]),
+                   "--companion", str(bad), "--output", str(output)]
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("Release refused:", result.stderr)
+        self.assertFalse(output.exists())
+
+    def test_release_record_refuses_utf8_bom(self):
+        release = module("deploy_venv_release")
+        bundle = self.root / "companion.tar"
+        self.inputs.assemble(self.manifest, self.root, bundle)
+        record_path = self.root / "bom.record"
+        record_path.write_bytes(b"\xef\xbb\xbf" + self.inputs.release_record(
+            self.manifest, bundle).encode())
+        with self.assertRaisesRegex(ValueError, "incomplete|unsafe|malformed"):
+            release.parse(record_path)
 
     def test_missing_required_fields(self):
         for key in self.manifest:
@@ -195,6 +304,83 @@ class ReleaseInputsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.inputs.extract(output, destination, self.inputs.sha256(output))
         self.assertFalse(destination.exists())
+
+
+class StageHelpersTest(unittest.TestCase):
+    """Pinned helper assembly never reads mutable source bytes."""
+
+    def setUp(self):
+        self.inputs = module("deploy_venv_inputs")
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.repo = self.root / "source"
+        self.repo.mkdir()
+        self.run_git("init", "-q")
+        self.run_git("config", "user.name", "Fixture")
+        self.run_git("config", "user.email", "fixture@example.invalid")
+        source = self.repo / "src/setups/env/bin"
+        source.mkdir(parents=True)
+        for name in self.inputs.HELPER_SOURCES:
+            (source / name).write_bytes(("committed " + name + "\n").encode())
+        self.run_git("add", ".")
+        self.run_git("commit", "-qm", "fixture")
+        self.revision = self.run_git("rev-parse", "HEAD").stdout.strip()
+        self.runtime = self.root / "runtime.sh"
+        self.runtime.write_bytes(b"runtime setup\n")
+        self.destination = self.root / "candidate"
+        self.destination.mkdir()
+
+    def run_git(self, *args):
+        return subprocess.run(["git", "-C", str(self.repo), *args], check=True,
+                              capture_output=True, text=True)
+
+    def test_exact_revision_wins_over_worktree_edits(self):
+        source = self.repo / "src/setups/env/bin/deploy_venv.sh"
+        source.write_bytes(b"uncommitted edit\n")
+        manifest = {}
+        self.inputs.stage_helpers(self.repo, self.revision, self.destination,
+                                  manifest, self.runtime)
+        self.assertEqual((self.destination / "helpers/deploy_venv.sh").read_bytes(),
+                         b"committed deploy_venv.sh\n")
+        self.assertEqual(manifest["helpers"]["revision"], self.revision)
+        self.assertEqual(len(manifest["helpers"]["members"]),
+                         len(self.inputs.HELPER_SOURCES) + 1)
+
+    def test_abbreviated_or_noncommit_revision_is_refused(self):
+        for revision in (self.revision[:12], "f" * 40):
+            with self.subTest(revision=revision), self.assertRaises(
+                    (ValueError, subprocess.CalledProcessError)):
+                self.inputs.stage_helpers(self.repo, revision, self.destination,
+                                          {}, self.runtime)
+        self.assertFalse((self.destination / "helpers").exists())
+
+    def test_missing_or_aliased_runtime_is_refused(self):
+        missing = self.root / "missing.sh"
+        with self.assertRaisesRegex(ValueError, "runtime setup"):
+            self.inputs.stage_helpers(self.repo, self.revision, self.destination,
+                                      {}, missing)
+        alias = self.root / "runtime-alias.sh"
+        try:
+            alias.symlink_to(self.runtime)
+        except OSError:
+            if sys.platform != "win32":
+                raise
+        else:
+            with self.assertRaisesRegex(ValueError, "runtime setup"):
+                self.inputs.stage_helpers(self.repo, self.revision, self.destination,
+                                          {}, alias)
+        self.assertFalse((self.destination / "helpers").exists())
+
+    def test_existing_destination_member_is_refused(self):
+        helper = self.destination / "helpers/deploy_venv.sh"
+        helper.parent.mkdir()
+        helper.write_bytes(b"existing")
+        with self.assertRaisesRegex(ValueError, "destination already exists"):
+            self.inputs.stage_helpers(self.repo, self.revision, self.destination,
+                                      {}, self.runtime)
+        self.assertEqual(helper.read_bytes(), b"existing")
+        self.assertEqual(sorted(p.name for p in helper.parent.iterdir()), ["deploy_venv.sh"])
 
 
 class TransportTest(unittest.TestCase):

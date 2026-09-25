@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Canonical cplx copy of the relocating installer: unpacks the latest
-# <target>.*.tar.gz produced by pkg.sh into an installation prefix, then
+# Canonical cplx copy of the relocating installer: unpacks an explicitly
+# selected --archive, or the latest <target>.*.tar.gz produced by pkg.sh, then
 # makes the tree self-contained there — symlink targets, text files, ELF
 # interpreter (PT_INTERP) and rpath are re-anchored from the build
 # account's /home/<user> to the prefix. Run it from any account.
@@ -1120,7 +1120,7 @@ fix_elf_paths() {
 # it was meant to precede.
 
 usage() {
-    fatal "Usage: $0 <target-folder> [-f|--force] [-p|--prefix <dir>]" 1
+    fatal "Usage: $0 <target-folder> [-f|--force] [-p|--prefix <dir>] [--archive <absolute-file>]" 1
 }
 
 # --- 1b. Select the copy engine ---
@@ -1159,6 +1159,7 @@ fi
 # --- 1. Argument Parsing ---
 FORCE=0
 TARGET=""
+EXPLICIT_ARCHIVE=""
 
 # Parse args
 while [[ "$#" -gt 0 ]]; do
@@ -1170,6 +1171,14 @@ while [[ "$#" -gt 0 ]]; do
                 usage
             fi
             INSTALL_PREFIX="$2"
+            shift
+            ;;
+        --archive)
+            if [ -z "${2:-}" ]; then
+                error "Error: --archive requires a file argument."
+                usage
+            fi
+            EXPLICIT_ARCHIVE="$2"
             shift
             ;;
         -*) error "Unknown parameter: $1"; usage ;;
@@ -1211,7 +1220,19 @@ select_copy_engine
 # target.*.tar.gz, and keep the newest by modification time.
 task "Searching for latest $TARGET archive..."
 
-LATEST_ARCHIVE=$(find "$INSTALL_PREFIX" "$PKG_DIR" "$HOME" "$HOME/pkgs" -maxdepth 1 -type f -name "${TARGET}.*.tar.gz" -printf '%T@ %p\n' 2>/dev/null | sort -unr | head -n 1 | cut -d' ' -f2-)
+if [ -n "$EXPLICIT_ARCHIVE" ]; then
+    case "$EXPLICIT_ARCHIVE" in
+        /*) ;;
+        *) fatal "Error: --archive needs an absolute file path." 2 ;;
+    esac
+    if [ ! -f "$EXPLICIT_ARCHIVE" ] || [ -L "$EXPLICIT_ARCHIVE" ] \
+            || [[ ${EXPLICIT_ARCHIVE##*/} != "${TARGET}."*.tar.gz ]]; then
+        fatal "Error: --archive does not name a regular matching archive." 2
+    fi
+    LATEST_ARCHIVE="$EXPLICIT_ARCHIVE"
+else
+    LATEST_ARCHIVE=$(find "$INSTALL_PREFIX" "$PKG_DIR" "$HOME" "$HOME/pkgs" -maxdepth 1 -type f -name "${TARGET}.*.tar.gz" -printf '%T@ %p\n' 2>/dev/null | sort -unr | head -n 1 | cut -d' ' -f2-)
+fi
 
 if [ -z "$LATEST_ARCHIVE" ]; then
     fatal "Error: No archive found for '$TARGET' in $INSTALL_PREFIX, $HOME or $PKG_DIR" 2
