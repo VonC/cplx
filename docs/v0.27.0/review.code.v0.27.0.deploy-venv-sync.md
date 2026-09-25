@@ -305,23 +305,23 @@ unstaged change is the protocol transcript created by publication.
 Repairs made:
 
 - None. The reviewer made no repair and staged nothing. The single finding needs
-- a behavior change with its own test, which belongs to the writer.
+  a behavior change with its own test, which belongs to the writer.
 
 Paths staged:
 
-- - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
-- - `docs/v0.27.0/verify.deploy-venv-sync.sh`
-- - `src/setups/env/bin/deploy_venv_inputs.py`
-- - `src/setups/env/bin/deploy_venv_probe.py`
-- - `src/setups/env/bin/deploy_venv_transport.py`
-- - `tests/unit/deploy_venv_sync/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_native_probe/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_native_probe/test_native_probe_tdd.py`
-- - `tests/unit/deploy_venv_sync/test_release_inputs/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_pbt.py`
-- - `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv_inputs.py`
+- `src/setups/env/bin/deploy_venv_probe.py`
+- `src/setups/env/bin/deploy_venv_transport.py`
+- `tests/unit/deploy_venv_sync/__init__.py`
+- `tests/unit/deploy_venv_sync/test_native_probe/__init__.py`
+- `tests/unit/deploy_venv_sync/test_native_probe/test_native_probe_tdd.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/__init__.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_pbt.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
 
 ### Commit plan assessment for step 1 deploy-venv-sync (exchange 1) (round 1)
 
@@ -339,21 +339,21 @@ the reviewer did not amend it.
 Unresolved findings:
 
 - One finding, in `src/setups/env/bin/deploy_venv_probe.py`.
-- `check_isolation` proves that only `lo` is present and that external access
-- fails, but not that loopback is usable. A namespace from `unshare -rn` has `lo`
-- DOWN by default. The probe then reports "both designed transports failed;
-- design review required", which is the plan's trigger to stop the step and
-- return to design review, although only the caller's namespace setup was wrong.
-- Reproduction on RHEL 9.8, with the staged code and the retained release inputs:
-- - `unshare -rn bash acceptance.deploy-venv-sync.sh --step 1 ...` fails, with
-- `loopback.log` showing `tcp connect error: Network unreachable (os error 101)`
-- against `http://127.0.0.1:<port>/wheels/...`.
-- - The same command with `ip link set lo up` first passes, state `passed`,
-- transport `loopback`.
-- Suggested fix: after the interface check, bind a socket on `127.0.0.1:0`,
-- connect to it and close it. On failure raise a distinct error such as
-- "supplied namespace has no usable loopback", separate from any transport
-- verdict. Add the matching case to `test_native_probe_tdd.py`.
+  `check_isolation` proves that only `lo` is present and that external access
+  fails, but not that loopback is usable. A namespace from `unshare -rn` has `lo`
+  DOWN by default. The probe then reports "both designed transports failed;
+  design review required", which is the plan's trigger to stop the step and
+  return to design review, although only the caller's namespace setup was wrong.
+  Reproduction on RHEL 9.8, with the staged code and the retained release inputs:
+  `unshare -rn bash acceptance.deploy-venv-sync.sh --step 1 ...` fails, with
+  `loopback.log` showing `tcp connect error: Network unreachable (os error 101)`
+  against `http://127.0.0.1:<port>/wheels/...`.
+  The same command with `ip link set lo up` first passes, state `passed`,
+  transport `loopback`.
+  Suggested fix: after the interface check, bind a socket on `127.0.0.1:0`,
+  connect to it and close it. On failure raise a distinct error such as
+  "supplied namespace has no usable loopback", separate from any transport
+  verdict. Add the matching case to `test_native_probe_tdd.py`.
 
 Boundary-crossing work:
 
@@ -724,19 +724,19 @@ Repairs made:
 
 Paths staged:
 
-- - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
-- - `docs/v0.27.0/verify.deploy-venv-sync.sh`
-- - `src/setups/env/bin/deploy_venv_inputs.py`
-- - `src/setups/env/bin/deploy_venv_probe.py`
-- - `src/setups/env/bin/deploy_venv_transport.py`
-- - `tests/unit/deploy_venv_sync/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_native_probe/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_native_probe/test_native_probe_tdd.py`
-- - `tests/unit/deploy_venv_sync/test_release_inputs/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_pbt.py`
-- - `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv_inputs.py`
+- `src/setups/env/bin/deploy_venv_probe.py`
+- `src/setups/env/bin/deploy_venv_transport.py`
+- `tests/unit/deploy_venv_sync/__init__.py`
+- `tests/unit/deploy_venv_sync/test_native_probe/__init__.py`
+- `tests/unit/deploy_venv_sync/test_native_probe/test_native_probe_tdd.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/__init__.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_pbt.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
 
 ### Commit plan assessment for step 1 deploy-venv-sync (exchange 1) (round 2)
 
@@ -1066,16 +1066,16 @@ Repairs made:
 
 Paths staged:
 
-- - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
-- - `docs/v0.27.0/verify.deploy-venv-sync.sh`
-- - `src/setups/env/bin/deploy_venv_selection.py`
-- - `src/setups/env/bin/tools_wheel_inventory.py`
-- - `tests/unit/deploy_venv_sync/test_selection_integrity/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_pbt.py`
-- - `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_tdd.py`
-- - `tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py`
-- - `tests/unit/tools_release_transport/test_tools_release_transport/test_tools_release_transport_tdd.py`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv_selection.py`
+- `src/setups/env/bin/tools_wheel_inventory.py`
+- `tests/unit/deploy_venv_sync/test_selection_integrity/__init__.py`
+- `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_pbt.py`
+- `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_tdd.py`
+- `tests/unit/tools_release_record/test_tools_release_record/test_release_publication_tdd.py`
+- `tests/unit/tools_release_transport/test_tools_release_transport/test_tools_release_transport_tdd.py`
 
 ### Commit plan assessment for step 2 deploy-venv-sync (exchange 1) (round 1)
 
@@ -1466,21 +1466,21 @@ The only unstaged change is the protocol transcript.
 
 Repairs made:
 
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 3 rows
-- updated to the reviewer's No verdict, with a Missing work list and a
-- corrected unit coverage row. The patch was attributed cleanly and staged.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 3 rows
+  updated to the reviewer's No verdict, with a Missing work list and a
+  corrected unit coverage row. The patch was attributed cleanly and staged.
 - Classification: polishing-only review metadata. It changes no code, test,
-- acceptance behavior or commit grouping.
+  acceptance behavior or commit grouping.
 - No implementation code or test was modified.
 
 Paths staged:
 
-- - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
-- - `docs/v0.27.0/verify.deploy-venv-sync.sh`
-- - `src/setups/env/bin/deploy_venv.sh`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv.sh`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/__init__.py`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py`
 
 ### Commit plan assessment for step 3 deploy-venv-sync (exchange 1) (round 1)
 
@@ -1895,22 +1895,22 @@ attributed to the reviewer. The one ignored difference is `a.ghog.log`, from
 
 Repairs made:
 
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 3 rows
-- updated to the reviewer's No verdict with a Missing work list. The misplaced
-- Yes-only summary section was removed. The patch was attributed cleanly and
-- staged. Classification: polishing-only review metadata; no code, test,
-- acceptance behavior or commit grouping changed.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 3 rows
+  updated to the reviewer's No verdict with a Missing work list. The misplaced
+  Yes-only summary section was removed. The patch was attributed cleanly and
+  staged. Classification: polishing-only review metadata; no code, test,
+  acceptance behavior or commit grouping changed.
 - No implementation code or test was modified.
 
 Paths staged:
 
-- - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
-- - `docs/v0.27.0/verify.deploy-venv-sync.sh`
-- - `src/setups/env/bin/deploy_venv.sh`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_matrix_tdd.py`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv.sh`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/__init__.py`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_matrix_tdd.py`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py`
 
 ### Commit plan assessment for step 3 deploy-venv-sync (exchange 1) (round 2)
 
@@ -2294,13 +2294,13 @@ Repairs made:
 
 Paths staged:
 
-- - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
-- - `docs/v0.27.0/verify.deploy-venv-sync.sh`
-- - `src/setups/env/bin/deploy_venv.sh`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/__init__.py`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_matrix_tdd.py`
-- - `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv.sh`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/__init__.py`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_matrix_tdd.py`
+- `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py`
 
 ### Commit plan assessment for step 3 deploy-venv-sync (exchange 1) (round 3)
 
@@ -2594,15 +2594,15 @@ to the reviewer. The only unstaged change is the protocol transcript.
 
 Repairs made:
 
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 3b rows
-- updated to the reviewer's No verdict, with a Missing work list; the Yes-only
-- summary was removed. The patch was attributed cleanly and staged.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 3b rows
+  updated to the reviewer's No verdict, with a Missing work list; the Yes-only
+  summary was removed. The patch was attributed cleanly and staged.
 - Classification: polishing-only review metadata.
 - No implementation file was modified.
 
 Paths staged:
 
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
 
 ### Commit plan assessment for step 3b deploy-venv-sync (exchange 1) (round 1)
 
@@ -2853,7 +2853,7 @@ Repairs made:
 
 Paths staged:
 
-- - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
 
 ### Commit plan assessment for step 3b deploy-venv-sync (exchange 1) (round 2)
 
@@ -2924,6 +2924,737 @@ Decision: commit-ready (advisory). The evidence floor is complete, but this reco
 - Requestor LLM nature: codex
 - Reviewer LLM nature: claude
 - Implementation step: 3b
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 4
+
+- Recorded: 2026-09-25T13:36:35+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 deploy-venv-sync (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 4
+Review round: 1
+
+### Code review evidence for step 4 deploy-venv-sync (round 1)
+
+request_index_tree: cc0e5bca162afba54c03e53b63f2757d4b5bee50
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 4 (sources: plan)
+- bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 4 (sources: plan)
+- shellcheck -x -S style docs/v0.27.0/verify.deploy-venv-sync.sh docs/v0.27.0/acceptance.deploy-venv-sync.sh src/setups/env/bin/install_pkg.sh (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+- git diff --cached --check (sources: request)
+- Debian 12 agent full-mode build 210 with publication off (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(deploy-venv-sync): retain release inputs
+group 1 path: src/setups/env/bin/deploy_venv_archive.py
+group 1 path: src/setups/env/bin/deploy_venv_inputs.py
+group 1 path: src/setups/env/bin/deploy_venv_release.py
+group 1 path: src/setups/env/bin/install_pkg.sh
+group 1 path: docs/v0.27.0/verify.deploy-venv-sync.sh
+group 1 path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+group 1 path: tests/unit/deploy_venv_sync/test_archive_recovery/__init__.py
+group 1 path: tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd.py
+group 1 path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+group 2: docs(deploy-venv-sync): record step 4 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/verify.deploy-venv-sync.sh
+staged path: src/setups/env/bin/deploy_venv_archive.py
+staged path: src/setups/env/bin/deploy_venv_inputs.py
+staged path: src/setups/env/bin/deploy_venv_release.py
+staged path: src/setups/env/bin/install_pkg.sh
+staged path: tests/unit/deploy_venv_sync/test_archive_recovery/__init__.py
+staged path: tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd.py
+staged path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+```
+
+### Requestor assessment for step 4 deploy-venv-sync (round 1)
+
+Step 4 is fully implemented. The archive adapter discovers venv roots once,
+passes exclusions to the existing packager, and inspects each produced archive.
+The release record binds the entry, companion, helper closure and independent
+tools pin. Preflight refuses missing, truncated or wrong-digest local inputs
+before mutation or fetching. Retained current and predecessor inputs remain
+outside the mirrored tree; readiness gates promotion.
+
+The final cumulative verifier passed on the RHEL 9.8 target, including 202
+broader tests, shell lint, the tools release gate and syntax/line ceilings.
+Acceptance passed with host interpreter and PATH decoys. Controlled fixtures
+proved record-backed deployment, historical first transition, both offline
+rollback formats, mirror deletion, root-lock contention and independent roots.
+The installer relocation regression passed 63 cases. The Debian 12 agent's
+full-mode build 210 succeeded on the final delivered bytes. It had the same 13
+stage outcomes as build 207; Package and Test passed, Publish was not executed,
+and package and assembly lists matched at 3,529 members with no `pyvenv.cfg`.
+
+The cplx `ghog day` project default passed its check phase and then reached its
+expected exit 9 at the non-applicable pytest phase. cplx is not a pytest
+project. The consumer's own `ghog day` passed check, affected and full, with
+fail=0 and its configured application-source coverage gate at 100%. That gate
+does not measure the deployment scripts. Unit tests under the cplx unit root
+exercise the new top-level helper functions; no new class hierarchy was added.
+No architecture, performance or feature-integrity issue was found in this
+check. Detailed target and build records are private under AC13.
+
+### Implementation report for step 4 deploy-venv-sync (round 1)
+
+The cplx archive helper supplies safe exclusions to the existing packager and
+inspects its result. The input helper assembles a pinned helper and runtime
+closure and emits a non-circular release record. The release helper validates
+the record and referenced files, stages complete copies, selects retained
+inputs and promotes a candidate only after readiness. The installer accepts an
+exact selected archive. Cumulative verify and acceptance commands cover the
+new release and recovery boundaries.
+
+The consumer's P07-P09 and P16-P20 changes were committed separately, outside
+this reviewed cplx batch. They use the new helpers for both packaging routes,
+local qualification, serialized deployment and offline recovery. The default
+pipeline file stayed byte-identical to its successful baseline and publication
+remained off. Detailed consumer records are private under AC13.
+
+### Change summary for step 4 deploy-venv-sync (round 1)
+
+The staged cplx batch has ten paths and two commit groups in the root
+`a.commit`:
+
+- Behavior and tests: `deploy_venv_archive.py`, `deploy_venv_inputs.py`,
+  `deploy_venv_release.py`, `install_pkg.sh`, the cumulative verify and
+  acceptance scripts, and the archive/recovery and release-input unit tests.
+- Validation: the Step 4 rows of
+  `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`.
+
+The first group is `feat(deploy-venv-sync): retain release inputs`. The trailing
+group is `docs(deploy-venv-sync): record step 4 validation`. The staged
+whitespace check, sensitive pre-commit hook and commit-plan readiness check
+passed. No cplx commit has been made for this batch.
+
+### Writer response for step 4 deploy-venv-sync (round 1)
+
+Writer response:
+
+This is round 1. There is no earlier reviewer feedback for Step 4.
+
+### Reviewer focus for step 4 deploy-venv-sync (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-1 -->
+
+## Round 1 by reviewer - Step 4
+
+- Recorded: 2026-09-25T13:43:43+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+Baseline index tree: cc0e5bca162afba54c03e53b63f2757d4b5bee50
+
+Assessed index tree: 3dfbfb4bec34a21d1dda27403fd3a866fe9ade81
+
+### Implementation check for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+Result:
+
+No. Step 4 has NOT been fully implemented.
+
+The packaging, retention and recovery work is substantial and largely sound.
+One integrity rule the plan names for item 3 is not enforced, and two new
+behaviors have no unit case.
+
+Evidence I checked:
+
+- the plan's Step 4 section;
+- all ten staged paths: both new helpers in full, the input-helper,
+  installer and harness diffs, both unit modules' case lists, and the Step 4
+  validation rows;
+- `a.commit`;
+- the consumer commits for P07-P09 and P16-P20, and how the consuming
+  deployment route calls the release helper.
+
+What holds:
+
+- **Archive helper.** It walks each declared root once, without following
+  aliases, and fails closed on a dangling alias. It passes literal
+  exclusions after the caller's own rules and generates the assembly
+  descriptor from the same discovery. The produced archive is rejected when
+  any member is named `pyvenv.cfg` or sits under an excluded boundary.
+- **Release helper.** It parses a strict ten-key record without shell
+  evaluation, checks every outer input against the record before any
+  mutation, and verifies inner and outer bindings through the companion.
+  Promotion happens only on an explicit ready result and keeps the previous
+  current release as predecessor.
+- **Helper assembly.** Helpers come from one exact revision through the
+  version-control store, never from working-tree bytes.
+- **Evidence.** The requestor reports RHEL cumulative and acceptance runs
+  covering both offline rollback formats, mirror deletion, competing root
+  operations and independent roots, plus Debian build 210 matching build 207
+  with no `pyvenv.cfg` in the 3,529 packaged members.
+
+What does not hold yet:
+
+- **Closure check (medium).** `verify` enforces the complete production
+  helper closure only when `helpers/deploy_venv.sh` is among the members. A
+  companion that omits exactly that entry helper therefore skips the check.
+  `qualify` and release-record creation call the same `verify`, so such a
+  candidate qualifies. The plan requires "Make missing helper delivery fail
+  before candidate freeze" and "Reject missing members". The consuming
+  bootstrap's later file check does not run before freeze.
+- **Untested behaviors (medium-low).**
+  - `stage_helpers`, the pinned-revision helper assembly at the core of
+    item 3, has no unit case.
+  - The installer's new `--archive` selection, which implements the
+    tests-first row "unrelated newer archive ignored", has none either.
+- **Installer scope (low).** `install_pkg.sh` is not in Step 4's file list,
+  and the plan's table calls it a reused boundary. The opt-in change is
+  justified by the plan: it never selects the newest file, and the helper
+  closure now ships the installer. But the request and the validation rows do
+  not say so, and `usage()` does not list the option.
+- **Record operation (low).** It writes the record before qualifying it, so a
+  failed qualification leaves a plausible record on disk. `tarfile.TarError`
+  is also not recorded as a refusal.
+- **Duplicate retention (low).** `deploy_venv_release.stage` refuses to
+  re-stage an identical retained release, and the consuming route does not
+  use it: it stages in its own Bash, which tolerates a retry. So two
+  implementations of the retention layout can drift.
+
+Architecture: no violation. Packaging, input validation and retention are
+separate script boundaries. The duplicated retention is noted above.
+
+Performance: discovery is one walk per root, and hashing is linear in input
+size. `promote` re-verifies current, predecessor and candidate at that
+boundary, which is an accepted integrity reread. No performance fix is needed.
+
+Unit test coverage: no class hierarchy was added, and every top-level function
+is referenced. `stage_helpers` and the installer option have no case, as
+listed.
+
+Validation plan effects:
+
+The reviewer edited only the Step 4 rows of
+`docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`:
+
+- the status is now `No. Step 4 has NOT been fully implemented.`, with its
+  reason;
+- a `### Missing work for Step 4` section follows
+  `What was implemented for Step 4`;
+- the unit coverage row gains its closing Yes phrase;
+- the Yes-only `## Analysis of Step 4 Implementation` summary is removed.
+
+No other step or umbrella row changed.
+
+### Pre-repair mandatory checks and coverage for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+The resolved validation set is requestor evidence, and the reviewer did not
+rerun it. Reviewer evidence:
+
+- `ghog check`: exit 0, lint clean, covering the staged installer and
+  harness scripts.
+- `ghog affected --no-cov`: not run, since cplx is not a pytest project.
+- `commit-plan-check.bat --format json`: `valid`, ready, no diagnostics,
+  before and after the reviewer patch.
+- `git diff --cached --check` and the installed pre-commit hook: exit 0.
+
+### Resolved validation set and sources for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 4` (source: plan).
+- `bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 4` (source: plan).
+- `shellcheck -x -S style` on the verify, acceptance and installer scripts (source: request).
+- `bash .git/hooks/pre-commit` (source: request).
+- `git diff --cached --check` (source: request).
+- Debian 12 agent full-mode build 210 with publication off (source: request).
+
+### Resolver drift and direction for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+No drift. The project floor and the two Step 4 plan commands match the plan
+text. The four request additions, including the Debian build, only add
+checks.
+
+### Repository state around validation for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+The index tree was `cc0e5bca162afba54c03e53b63f2757d4b5bee50` at request time
+and at review entry. After the reviewer's validation-plan patch it is
+`3dfbfb4bec34a21d1dda27403fd3a866fe9ade81`. The umbrella digest is unchanged
+(`46b95d18...`). The validation-state comparison reports one tracked
+difference, the validation plan, confined to the Step 4 rows and attributed
+to the reviewer. The one ignored difference is `a.ghog.log`. The only unstaged
+change is the protocol transcript.
+
+### Repair inventory for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+Repairs made:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 4 rows
+  updated to the reviewer's No verdict, with a Missing work list; the Yes-only
+  summary was removed. The patch was attributed cleanly and staged.
+- Classification: polishing-only review metadata.
+- No implementation file was modified.
+
+Paths staged:
+
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv_archive.py`
+- `src/setups/env/bin/deploy_venv_inputs.py`
+- `src/setups/env/bin/deploy_venv_release.py`
+- `src/setups/env/bin/install_pkg.sh`
+- `tests/unit/deploy_venv_sync/test_archive_recovery/__init__.py`
+- `tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
+
+### Commit plan assessment for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+The independent `commit-plan-check.bat --format json` run returned `valid`,
+`ready: true` and no diagnostics, before and after the reviewer patch. Two
+ordered groups hold all ten staged paths: behavior and tests first, then the
+validation plan alone with the required subject
+`docs(deploy-venv-sync): record step 4 validation`. `a.commit` remains
+accurate; the reviewer did not amend it. After rework, refresh the first
+group's body if it gains new cases or the installer's rationale.
+
+### Findings and boundaries for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+Unresolved findings:
+
+1. Medium: the production helper-closure check is skipped for a companion
+   that omits `helpers/deploy_venv.sh`, so qualification accepts it.
+2. Medium-low: `stage_helpers` and the installer's `--archive` selection have
+   no unit case.
+3. Low: `install_pkg.sh` changed outside the file list without a stated
+   basis or a `usage()` entry.
+4. Low: the `record` operation leaves a record behind when qualification
+   fails, and `tarfile.TarError` is not recorded as a refusal.
+5. Low: the retention layout is implemented twice, and the cplx `stage` is not
+   idempotent for an identical retained release.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+1. **Closure check.** Make the complete helper-closure check explicit on the
+   production paths (assembly, record creation, qualification), and let
+   fixtures opt out by an explicit argument rather than by omitting
+   `helpers/deploy_venv.sh`. Add a qualification case that refuses a helper
+   list without that entry helper.
+2. **`stage_helpers` cases,** in `test_archive_recovery` or `test_release_inputs`,
+   using a temporary Git repository:
+   - exact-revision bytes win over working-tree edits;
+   - an abbreviated or non-commit revision is refused;
+   - an aliased or missing runtime setup is refused;
+   - an existing destination member is refused.
+3. **Installer option.** Add `--archive <absolute path>` to `install_pkg.sh`'s
+   `usage()` and header comment. Add Linux-only cases showing that an explicit
+   archive wins over a newer unrelated one, and that a relative path, a
+   symlink and a mismatched name are refused. Say in "What was implemented"
+   why a file outside the list changed: the plan's "never newest timestamp"
+   rule and the helper closure that now ships the installer.
+4. **Record operation.** In `deploy_venv_release.py record`, write to a
+   temporary path and rename after qualification. Add `tarfile.TarError` to
+   the refusals.
+5. **Retention.** Either make `stage` idempotent for identical retained bytes
+   and call it from the consuming deployment route instead of the Bash
+   staging, or remove `stage` and state that the consumer owns staging.
+6. Rerun `verify.deploy-venv-sync.sh --step 4` on the RHEL 9.8 target. Rerun
+   the acceptance mode if the release helper's CLI changes. A Debian build is
+   needed only if consumer packaging bytes change. Refresh the consumer's
+   helper snapshot and its digest file.
+
+### Decision rationale for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+The readiness floor does not pass:
+
+- Identity, staged attribution and the mechanical `a.commit` check pass.
+- Completeness fails on the plan's item 3 rule, since missing helper delivery
+  must fail before candidate freeze.
+- Coverage fails on the two untested behaviors.
+- Five findings remain.
+
+The disposition is changes-requested.
+
+The fixes are small and local to the cplx helpers, apart from the optional
+move of consumer staging onto the cplx `stage`. None of them touches the
+archive, rollback or concurrency behavior the target runs already exercised.
+
+### Final reviewer decision for step 4 deploy-venv-sync (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-4-round-1 -->
+
+## Round 2 by requestor - Step 4
+
+- Recorded: 2026-09-25T14:10:38+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: request
+
+### Review identity for step 4 deploy-venv-sync (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 4
+Review round: 2
+
+### Code review evidence for step 4 deploy-venv-sync (round 2)
+
+request_index_tree: e92e0e777b2fd5829bf43c31387b03adadcd5817
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 4 (sources: plan)
+- bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 4 (sources: plan)
+- shellcheck -x -S style docs/v0.27.0/verify.deploy-venv-sync.sh docs/v0.27.0/acceptance.deploy-venv-sync.sh src/setups/env/bin/install_pkg.sh (sources: request)
+- bash .git/hooks/pre-commit (sources: request)
+- git diff --cached --check (sources: request)
+- Debian 12 agent full-mode build 210 with publication off (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: feat(deploy-venv-sync): retain release inputs
+group 1 path: src/setups/env/bin/deploy_venv_archive.py
+group 1 path: src/setups/env/bin/deploy_venv_inputs.py
+group 1 path: src/setups/env/bin/deploy_venv_release.py
+group 1 path: src/setups/env/bin/install_pkg.sh
+group 1 path: docs/v0.27.0/verify.deploy-venv-sync.sh
+group 1 path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+group 1 path: tests/unit/deploy_venv_sync/test_archive_recovery/__init__.py
+group 1 path: tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd.py
+group 1 path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+group 2: docs(deploy-venv-sync): record step 4 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/verify.deploy-venv-sync.sh
+staged path: src/setups/env/bin/deploy_venv_archive.py
+staged path: src/setups/env/bin/deploy_venv_inputs.py
+staged path: src/setups/env/bin/deploy_venv_release.py
+staged path: src/setups/env/bin/install_pkg.sh
+staged path: tests/unit/deploy_venv_sync/test_archive_recovery/__init__.py
+staged path: tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd.py
+staged path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+```
+
+### Requestor assessment for step 4 deploy-venv-sync (round 2)
+
+Step 4 is fully implemented after the round 1 repairs. Production input
+verification now requires the complete helper closure for assembly, record
+creation and qualification. A candidate without the deployment entry helper
+is refused. Pinned helper staging and exact installer archive selection have
+focused tests, including Linux execution on the RHEL 9.8 target.
+
+The cumulative verifier passed on the RHEL 9.8 target after repair, including
+210 broader tests, shell lint, the tools release gate and syntax/line ceilings.
+Acceptance passed with host interpreter and PATH decoys. Earlier controlled
+fixtures proved record-backed deployment, historical first transition, both
+offline rollback formats, mirror deletion, root-lock contention and independent
+roots. The installer relocation regression passed 63 cases.
+
+The Debian 12 agent's full-mode build 210 succeeded on the packaging bytes,
+with the same 13 stage outcomes as build 207. Package and Test passed, Publish
+was not executed, and package and assembly lists matched at 3,529 members
+with no `pyvenv.cfg`. The review repairs did not change packaging bytes, so
+the reviewer did not require a new Debian build.
+
+The cplx `ghog day` project default passed its check phase and reached its
+expected exit 9 at the non-applicable pytest phase. The consumer's own `ghog
+day` passed check, affected and full, with fail=0 and its configured
+application-source coverage gate at 100%. That gate does not measure the
+deployment scripts; the focused and native tests exercise them. No new class
+hierarchy was added. No architecture, performance or feature-integrity issue
+was found. Detailed target and build records are private under AC13.
+
+### Implementation report for step 4 deploy-venv-sync (round 2)
+
+The archive helper discovers venv roots once, passes exclusions to the
+packager, and inspects both produced archive routes. The input helper stages
+the full pinned helper and runtime closure and creates the non-circular
+release record. Verification now requires every production helper by name,
+regardless of which helpers a candidate lists.
+
+The release helper checks the record and local files, qualifies a temporary
+record before publishing it atomically without replacement, refuses malformed
+tar inputs, and reads current or predecessor retained inputs. The consumer
+owns immutable retention staging and keeps its root lock through readiness.
+The installer accepts an exact absolute archive so an unrelated newer archive
+cannot be selected during retained reconstruction. The option and its
+refusals are documented and tested.
+
+The consumer's P07-P09 and P16-P20 changes were committed separately, outside
+this reviewed cplx batch. Its refreshed probe snapshot and digest table were
+also committed separately. The default pipeline file and packaging bytes
+stayed unchanged; publication remained off. Detailed consumer records are
+private under AC13.
+
+### Change summary for step 4 deploy-venv-sync (round 2)
+
+The staged cplx batch has ten paths and two groups in the root `a.commit`:
+
+- Behavior and tests: the archive, input and release helpers, installer, the
+  cumulative verify and acceptance scripts, and the archive/recovery and
+  release-input unit tests.
+- Validation: the Step 4 rows of
+  `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`.
+
+The first group is `feat(deploy-venv-sync): retain release inputs`. The trailing
+group is `docs(deploy-venv-sync): record step 4 validation`. The staged
+whitespace check, sensitive pre-commit hook and commit-plan readiness check
+passed. No cplx commit has been made for this batch. The live review
+transcript is left outside the stable reviewed index.
+
+### Writer response for step 4 deploy-venv-sync (round 2)
+
+Writer response:
+
+All five round 1 findings were accepted and repaired:
+
+1. Production verification requires the full helper closure unconditionally.
+   The fixtures now supply that closure, and qualification refuses a candidate
+   missing the entry helper.
+2. Temporary-Git tests prove helper bytes come from the exact commit and
+   reject abbreviated or non-commit revisions, missing or aliased runtime
+   setup, and existing destinations. Linux installer cases cover an explicit
+   archive winning over a newer one and relative, symlink and name refusals.
+3. The installer header and usage name `--archive`; the validation plan states
+   its basis in the Step 4 unrelated-newer-archive rule and helper closure.
+4. Record creation qualifies a same-directory temporary file before atomic
+   no-clobber publication, leaves no output after failure and handles tar
+   errors as refusals.
+5. The duplicate cplx retention writer was removed. The consumer owns staging;
+   the cplx helper validates selection and readiness-gated promotion.
+
+The RHEL 9.8 target cumulative verifier and acceptance passed on repaired
+bytes. The consumer snapshot and checksums were refreshed and committed
+separately. Its packaging bytes did not change, so build 210 remains the
+Debian package-stage evidence under the reviewer's round 1 instruction.
+
+### Reviewer focus for step 4 deploy-venv-sync (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-4-round-2 -->
+
+## Round 2 by reviewer - Step 4
+
+- Recorded: 2026-09-25T14:14:24+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
+- Outcome: answer
+
+### Assessed index identity for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+Baseline index tree: e92e0e777b2fd5829bf43c31387b03adadcd5817
+
+Assessed index tree: d65660186c8e5201b0417211069e5131fb61adb1
+
+### Implementation check for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+Result:
+
+Yes. Step 4 has been fully implemented.
+
+All five round 1 findings are fixed in the staged bytes. I checked the staged
+helpers, the installer, both unit modules and the Step 4 validation rows.
+
+- **Helper closure.** `verify` now requires the complete helper and runtime
+  closure unconditionally. The fixtures supply it, and
+  `test_qualification_rejects_companion_without_entry_helper` refuses a
+  candidate that lacks the entry helper.
+- **Pinned assembly.** A temporary-repository class covers `stage_helpers`:
+  - exact-revision bytes win over a working-tree edit;
+  - an abbreviated or non-commit revision is refused;
+  - a missing or aliased runtime setup is refused;
+  - an existing destination member is refused.
+- **Installer.** The header and `usage()` name `--archive <absolute-file>`,
+  and the rows state its plan basis. A Linux-only case shows the explicit
+  archive selected, and a relative path, a symlink and a mismatched name
+  refused.
+
+  A note, not a finding: the case's "newer" archive sits outside the
+  installer's search directories. It proves the explicit path is honored,
+  since without it the run finds no archive and fails. Precedence over a
+  discoverable newer archive follows from the if/else itself.
+- **Record operation.** It qualifies a same-directory temporary file, then
+  publishes it with a no-clobber link and removes the temporary file on any
+  failure. `tarfile.TarError` is a refusal. Two new cases cover both.
+- **Retention.** The unused, non-idempotent cplx `stage` is removed. The
+  consumer owns staging, and cplx keeps selection and readiness-gated
+  promotion, as the rows now say.
+
+Architecture: no violation, and a single owner for retention staging. No
+architecture fix is needed.
+
+Performance: unchanged from round 1. No performance fix is needed.
+
+Unit test coverage: no class hierarchy was added, and every top-level function
+is referenced by a test, including `stage_helpers` and the installer option.
+No unit-tested class is below 100%, and no top-level symbol outside the gate is
+unreferenced.
+
+Validation plan effects:
+
+The reviewer added the Yes-only `## Analysis of Step 4 Implementation` summary
+after `Feature integrity for Step 4`, where Steps 1 to 3b keep theirs. The
+requestor's rows had omitted it, and the implementation-check format requires
+it on a Yes verdict. The summary restates the staged behavior only. No verdict,
+evidence row, other step or umbrella row changed.
+
+### Pre-repair mandatory checks and coverage for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+The resolved validation set is requestor evidence, and the reviewer did not
+rerun it. Reviewer evidence:
+
+- `ghog check`: exit 0, lint clean, covering the edited installer.
+- `ghog affected --no-cov`: not run, since cplx is not a pytest project.
+- `commit-plan-check.bat --format json`: `valid`, ready, before and after the
+  reviewer patch.
+- `git diff --cached --check` and the installed pre-commit hook: exit 0.
+
+### Resolved validation set and sources for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 4` (source: plan).
+- `bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 4` (source: plan).
+- `shellcheck -x -S style` on the verify, acceptance and installer scripts (source: request).
+- `bash .git/hooks/pre-commit` (source: request).
+- `git diff --cached --check` (source: request).
+- Debian 12 agent full-mode build 210 with publication off (source: request).
+
+### Resolver drift and direction for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+No drift. The project floor and the Step 4 plan commands match. The request
+additions only add checks. Build 210 remains valid packaging evidence, since
+the round 2 repairs changed no consumer packaging bytes.
+
+### Repository state around validation for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+The index tree was `e92e0e777b2fd5829bf43c31387b03adadcd5817` at request time
+and at review entry. After the reviewer's validation-plan patch it is
+`d65660186c8e5201b0417211069e5131fb61adb1`. The umbrella digest is unchanged
+(`46b95d18...`). The validation-state comparison reports one tracked
+difference, the validation plan, confined to the Step 4 summary and
+attributed to the reviewer. The only unstaged change is the protocol
+transcript.
+
+### Repair inventory for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+Repairs made:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: added the
+  missing `## Analysis of Step 4 Implementation` summary after the Step 4
+  feature-integrity row. The patch was attributed cleanly and staged.
+- Classification: polishing-only review metadata. It changes no code, test,
+  acceptance behavior, verdict or commit grouping.
+
+Paths staged:
+
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv_archive.py`
+- `src/setups/env/bin/deploy_venv_inputs.py`
+- `src/setups/env/bin/deploy_venv_release.py`
+- `src/setups/env/bin/install_pkg.sh`
+- `tests/unit/deploy_venv_sync/test_archive_recovery/__init__.py`
+- `tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
+
+### Commit plan assessment for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+The independent `commit-plan-check.bat --format json` run returned `valid`,
+`ready: true` and no diagnostics, before and after the reviewer patch. Two
+ordered groups hold all ten staged paths: behavior and tests first, then the
+validation plan alone with the required subject. `a.commit` remains accurate;
+the reviewer did not amend it.
+
+### Findings and boundaries for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Writer instructions for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+No rework is required. If the human selects Commit, stage the protocol
+transcript with the final group as the workflow prescribes. Then run the hook
+and the commit-plan check once more on the final index.
+
+Optionally, in a later change, move the installer case's "newer" archive into
+one of the installer's search directories, so it also proves precedence over a
+discoverable archive.
+
+### Decision rationale for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+All six readiness-floor results pass:
+
+- exact identity;
+- complete implementation, with every round 1 Missing work item closed;
+- validation and coverage: the reviewer's `ghog check` is green, the new
+  behaviors have cases, and the requestor's RHEL verifier and acceptance ran
+  on the repaired bytes;
+- attributable staged scope: the only reviewer change is a polishing-only
+  summary;
+- no unresolved finding;
+- accurate `a.commit`.
+
+The recommendation is commit-ready. It is advisory and does not authorize a
+commit.
+
+### Final reviewer decision for step 4 deploy-venv-sync (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-4-round-2 -->
+
+## Round 2 by human - Step 4 - human-confirmation
+
+- Recorded: 2026-09-25T14:51:21+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 4
 - Outcome: human-confirmation
 
 Human choice: Commit
