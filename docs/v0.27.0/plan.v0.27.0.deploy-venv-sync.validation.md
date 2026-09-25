@@ -3,11 +3,10 @@
 No, it is not implemented.
 
 Steps 1 and 2 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md)
-were checked on 2026-09-23; Step 3 was checked on 2026-09-24. Steps 3b and
-4-7 remain pending. Step 3b is a non-qualifying probe added on 2026-09-24.
-Each step includes its
-mapped private integration obligations; these checks do not validate the full
-lifecycle.
+were checked on 2026-09-23; Step 3 was checked on 2026-09-24. Steps 3b and 4
+have been checked; Steps 5-7 remain pending. Step 3b is a non-qualifying probe
+added on 2026-09-24. Each step includes its mapped private integration
+obligations; these checks do not validate the full lifecycle.
 
 ## File-based IO cost clarification for deploy-venv-sync implementation
 
@@ -549,8 +548,13 @@ the pre-probe stage sequence. No cplx source or shared-library file changed.
 
 ### Analysis of Step 4 implementation state
 
-Not started. Step 4 is not implemented because its planned code, integration
-and execution evidence have not been produced or checked.
+Yes. Step 4 has been fully implemented.
+
+The application archives exclude discovered venv roots. Complete release
+inputs, including every required helper, qualify before mutation and are
+retained outside the mirror for offline recovery. The RHEL 9.8 target passed
+the cumulative verifier and acceptance after the round 1 repairs. Debian 12
+agent build 210 proved the unchanged packaging bytes in the default pipeline.
 
 ### Goal for Step 4
 
@@ -568,27 +572,111 @@ Use `tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd
 
 ### What was implemented for Step 4
 
-_(empty — no check has taken place yet.)_.
+- `deploy_venv_archive.py` discovers `pyvenv.cfg` roots once in declared
+  packaging roots, supplies exclusions to the existing packager, rejects unsafe
+  tar rules and inspects the completed archive. The consumer's packaging and
+  assembly routes use the same discovery and retain their archive coordinates.
+- `deploy_venv_inputs.py` assembles helpers and runtime support from a pinned
+  cplx revision. Its non-circular release record identifies the entry script,
+  companion and independent tools archive with exact checksums. Production
+  verification requires the full helper closure even when the entry helper is
+  omitted from a candidate manifest.
+- `deploy_venv_release.py` validates complete local inputs, publishes a record
+  only after qualification, and selects current or predecessor inputs. The
+  consumer owns staging of immutable retained copies. Readiness gates
+  promotion, and an explicit application archive prefix keeps retention names
+  independent of application naming.
+- `install_pkg.sh` accepts an explicit absolute archive path for the retained
+  installer. The Step 4 rule to ignore unrelated newer archives requires this
+  option, and the shipped installer is part of the complete helper closure.
+- The consuming deployment route validates supplied files before mutation,
+  keeps one root lock through mirroring, install, reconstruction and readiness,
+  and reconstructs from retained inputs after mirror deletion. It also retains
+  the historical first-transition path with its shipped venv and no modern
+  record requirement. Consumer changes were committed separately.
+- The cumulative native verifier passed on the RHEL 9.8 target with 210 broader
+  tests, shell lint, tools release gate and line/syntax ceilings. Acceptance
+  passed after the repairs with host interpreter and PATH decoys. Controlled runs refused missing,
+  truncated and wrong-digest inputs before mutation without fetches; exercised
+  modern and historical offline rollback, mirror deletion, competing root
+  operations and independent roots; and passed the 63-case installer regression.
+- Debian 12 agent build 210 succeeded on the packaging bytes, which the review
+  repairs did not change, with
+  publication disabled. Its default-mode stage sequence matched build 207;
+  its package and assembly member lists matched at 3,529 entries with no
+  `pyvenv.cfg`. All 1,406 archived evidence entries were captured.
 
 ### New types or classes introduced for Step 4
 
-_(empty — no check has taken place yet.)_.
+No class hierarchy was added. The new scripts provide focused functions for
+archive discovery and inspection, release-input qualification, retention and
+CLI dispatch. The existing input helper gained pinned helper assembly and
+release-record generation.
 
 ### Architecture check for Step 4
 
-_(empty — no check has taken place yet.)_.
+Packaging, release-input validation and retention remain separate script
+boundaries. The consumer orchestrates acquisition, installation and readiness;
+cplx validates supplied local inputs and performs reconstruction. No business
+layer was made dependent on a platform adapter. No Step 4 architecture fix is
+needed.
 
 ### Performance check for Step 4
 
-_(empty — no check has taken place yet.)_.
+Venv discovery walks only explicitly supplied roots once, then shares the
+result with exclusions and the assembly descriptor. Archive inspection and
+hashing are linear in selected input size; retention reads only referenced
+records. No repeated repository or release-history scan was added. No Step 4
+performance fix is needed.
 
 ### Unit test coverage check for Step 4
 
-_(empty — no check has taken place yet.)_.
+The archive/recovery and release-input unit folders exercise the new helper
+functions through discovery, unsafe-path, record, companion, retention and
+rollback cases. The focused Windows run passed 11 archive cases with two
+Linux-only cases skipped, and 30 release-input cases; the native cumulative
+verifier exercised the Linux path. There are no new classes with a class-file
+coverage target. cplx is not configured as a pytest project: its groundhog
+check passed, then stopped at the expected non-applicable pytest phase. The
+consumer's 100% configured gate measures application source only and excludes
+the changed deployment and packaging scripts; their exercise is established
+by the focused and native checks, not by that percentage. No unit-tested class
+below 100% needs completing. No top-level symbol outside the gate is
+unreferenced. The pinned helper staging and exact installer archive selection
+now have focused cases, including the Linux installer path on the target.
 
 ### Feature integrity for Step 4
 
-_(empty — no check has taken place yet.)_.
+The accepted tools archive and installer relocation exclusions remain intact.
+The consumer's default pipeline file stayed byte-identical to build 207's
+baseline. Build 210 succeeded with publication off and the same stage names
+and statuses; Package and Test passed and Publish was not executed. Release
+inputs are retained independently of mirrored application files and CI or uv
+caches. Missing local inputs do not trigger a fetch or advance predecessor
+protection. Publication eligibility remains Step 6 and actual target
+qualification remains Step 7.
+
+## Analysis of Step 4 Implementation
+
+Step 4 packages the application without any venv and gives deployment a
+complete, locally verifiable set of release inputs:
+
+- The archive helper discovers venv boundaries once in the declared packaging
+  roots. It feeds literal exclusions to the existing packager and to the
+  assembly descriptor, then rejects any produced archive that still carries a
+  venv.
+- The input helper stages the complete helper and runtime closure from one
+  exact revision and requires that closure on every production path. It
+  writes the non-circular release record.
+- The release helper checks the record and every supplied file before
+  mutation, and publishes a record only after qualifying it. It reads the
+  explicit current or predecessor inputs and promotes a candidate only after
+  readiness.
+- The installer accepts one exact archive, so an unrelated newer archive
+  cannot be selected.
+
+The consumer owns retained staging and its root lock. No class hierarchy was
+added; the new helpers are focused script functions.
 
 ## Step 5. Integrate and qualify the single-build CI sequence
 
