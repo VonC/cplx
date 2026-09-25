@@ -727,7 +727,7 @@ P06, P10-P11, P13 and new P21 plus private CI adapter tests; reuse P12 unchanged
 Reuse existing test parent markers unchanged; new leaf markers above are empty.
 Read-only reused dependencies and their baselines are in the shared table.
 
-Tests first: Public synthetic evidence tests reject revision/profile/toolchain drift, stale/incomplete observations, independent dependency and test failures, missing archive pair and overwritten candidate identity. Private actual-agent acceptance also covers wrong host Python/Git, foreign activation/base, missing/multiple venvs, parameter override attempts and fresh/reused workspaces.
+Tests first: Public synthetic evidence tests reject revision/profile/toolchain drift, stale/incomplete observations, independent dependency and test failures, missing archive pair, overwritten candidate identity and a phase 1 coverage report whose digest or revision differs from the candidate's. Private actual-agent acceptance also covers wrong host Python/Git, foreign activation/base, missing/multiple venvs, parameter override attempts and fresh/reused workspaces.
 
 Classes and behavior (prefer focused script functions; no new class hierarchy):
 
@@ -739,8 +739,31 @@ Classes and behavior (prefer focused script functions; no new class hierarchy):
 6. Implement shell-level dependency failure observation plus independently loaded test-framework start/completion/session outcome records in dedicated phase 2 module P21; reuse only phase-neutral validation through P13, leaving phase 1 observer P12 unchanged. Require fresh operation identifiers, command statuses, interpreter/installation target and before/after inventory evidence. Prove sync/install failures, deliberately failing tests and missing/disabled observation fail the combined build even when outer commands mask status.
 7. Disable both publishers effectively despite parameter overrides; prove no deployment command or release upload executed. Preserve conformity/quality/report behavior, phase 1 artifact and coverage identity, and fresh/reused-workspace configuration compatibility. A phase 1 failure prevents entry into phase 2; a phase 2 failure fails combined validation.
 8. Extend deploy_venv_release.py with the shared combined-CI eligibility validator used by the public evidence fixtures and private adapter: reject stale/incomplete outcomes and mismatched candidate, helper, tools or profile identity. Protect each named pending candidate build from discarding until promotion/abandonment; if unavailable, copy verified bytes before cleanup to the approved durable non-release candidate store. Index source build/revision/pair digests and prove a later build cannot replace a pending candidate.
+9. Decide phase 2's test scope by diagnosis, in this order (human decision of
+   2026-09-25, recorded under Implementation decisions):
+   1. Diagnose first. Let the mandated test command run the complete suite on
+      the reconstructed named venv, with the mandated analysis stage at its
+      default scope, the repository root. Record the test agent's processor
+      count and quota, the suite duration, whether the later mandated stages
+      start, and any lost allocation.
+   2. Investigate each cause found. Try consumer-side remedies that leave the
+      shared library unchanged, such as options passed through the test
+      command's option variable. Record each attempt and its result.
+   3. If a remedied build completes every mandated stage, keep the complete
+      suite in phase 2 and the default analysis scope.
+   4. Only if the complete suite is confirmed unable to finish within the
+      mandated pipeline, with its cause recorded, switch phase 2 to a declared,
+      tracked smoke selection. It proves that the mandated test command runs in
+      the named venv on the shipped interpreter. The mandated analysis stage
+      then receives phase 1's coverage report for the same revision, with its
+      scope set to the application source. Phase 1 keeps the complete suite and
+      its full coverage gate as the blocking check.
 
-Completion criteria: Actual Debian agents execute both phases with preserved acceptance/coverage and conclusive ABI/provider evidence, truthful failures and no release publication. Candidate retention survives a later build. A probe or static Jenkinsfile inspection cannot complete this step.
+   The eligibility validator of item 8 rejects a phase 1 coverage report whose
+   digest or revision differs from the candidate's. Deliberate failure modes stay
+   probe-only and must fail the combined build under either scope.
+
+Completion criteria: Actual Debian agents execute both phases with preserved acceptance/coverage and conclusive ABI/provider evidence, truthful failures and no release publication. Candidate retention survives a later build. Phase 2's test scope follows item 9, and a switch to the smoke selection requires the recorded diagnosis. A probe or static Jenkinsfile inspection cannot complete this step.
 Pass the Shared execution command checklist and the applicable Ready-to-run
 command forms, including the consumer groundhog objective for consumer changes
 and native target checks where specified. Test fixture success cannot substitute
@@ -942,6 +965,18 @@ non-qualifying actual-agent probe forward as Step 3b, so that the mandated
 pipeline runs on actual agents as early as possible. It reorders an existing
 task; it changes no design decision, no acceptance row and no step's completion
 criteria other than Step 5 item 2 reusing its results.
+
+Human decision on 2026-09-25, before Step 5 started: phase 2's test scope is
+settled by diagnosis, as Step 5 item 9 orders it. The probes found the complete
+suite several times slower inside the mandated test command than in phase 1,
+and the mandated pipeline lost its outer allocation before its later stages.
+The complete suite is tried first, with the mandated analysis stage at its
+default scope. A declared smoke selection, phase 1's coverage report and an
+application-source analysis scope replace it only if that failure is confirmed
+and its cause recorded. The decision keeps the two-phase order, the blocking
+phase 1 full-suite coverage gate, the shared library unchanged and every
+acceptance row as written. Under the smoke selection, the mandated analysis
+stage no longer reviews files outside the application source.
 
 | Question | Decision and reason | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |

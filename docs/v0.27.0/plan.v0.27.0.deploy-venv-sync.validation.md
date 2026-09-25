@@ -695,6 +695,13 @@ Check deploy_venv_release.py as a Step 5 implementation/line-budget target. Prov
 Check dedicated phase 2 observer P21 and its negative tests; phase 1 observer P12 remains unchanged and only phase-neutral validation is shared through P13.
 Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
 
+Check phase 2's test scope against plan item 9. A complete-suite diagnosis with
+the default analysis scope comes first, with its recorded cause and remedy
+attempts. A switch to the declared smoke selection, phase 1's coverage report
+and the application-source analysis scope is acceptable only after that
+diagnosis confirms the failure. The phase 1 coverage report fed to the analysis
+stage must match the candidate's digest and revision.
+
 Actual Debian agents execute both phases with preserved acceptance/coverage and conclusive ABI/provider evidence, truthful failures and no release publication. Candidate retention survives a later build. A probe or static Jenkinsfile inspection cannot complete this step.
 Review the plan's file-by-file changes and its mapped private obligations.
 Use `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py` and the step's native integration/acceptance cases.
