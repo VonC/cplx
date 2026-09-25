@@ -13,6 +13,7 @@ import json
 from pathlib import Path, PurePosixPath
 import re
 import shutil
+import subprocess
 import sys
 import tarfile
 import tomllib
@@ -22,6 +23,12 @@ REQUIRED = {"schema", "application", "tools", "entry", "uv", "metadata",
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 VERSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.+-]*\Z")
 REVISION = re.compile(r"[0-9a-f]{40}(?:[0-9a-f]{24})?\Z")
+HELPER_SOURCES = (
+    "deploy_venv.sh", "deploy_venv_inputs.py", "deploy_venv_transport.py",
+    "deploy_venv_selection.py", "deploy_venv_probe.py",
+    "deploy_venv_archive.py", "deploy_venv_release.py",
+    "tools_wheel_inventory.py", "tools_wheel_inventory.sh", "install_pkg.sh",
+)
 
 
 def sha256(path):
@@ -121,6 +128,11 @@ def verify(manifest, root, tools_pin=None, *, companion_only=False):
     if tools_pin is not None:
         if Path(tools_pin).read_text(encoding="utf-8").strip() != manifest["tools"]["version"]:
             raise ValueError("missing or conflicting tools pin")
+    helper_names = {row["path"] for row in manifest["helpers"]["members"]}
+    expected = {"helpers/" + name for name in HELPER_SOURCES}
+    expected.add("helpers/runtime_env.sh")
+    if helper_names != expected:
+        raise ValueError("incomplete or unlisted production helper closure")
     seen = {"manifest.json"}
     for row in rows:
         name = safe_name(row["path"])
@@ -250,19 +262,65 @@ def release_record(manifest, bundle):
     return "".join(key + "=" + value + "\n" for key, value in rows.items())
 
 
+def stage_helpers(source_repo, revision, root, manifest, runtime):
+    """Copy the declared helper closure from one exact committed source tree.
+
+    The consumer-owned runtime setup is a separate required member. No source
+    working-tree bytes or newer revisions can enter the companion unnoticed.
+    """
+    if not isinstance(revision, str) or not REVISION.fullmatch(revision):
+        raise ValueError("full immutable helper revision required")
+    source_repo = Path(source_repo)
+    root = Path(root)
+    actual = subprocess.run(["git", "-C", str(source_repo), "rev-parse", "--verify",
+                             revision + "^{commit}"], capture_output=True, text=True, check=True).stdout.strip()
+    if actual != revision:
+        raise ValueError("helper source revision changed")
+    planned = {}
+    for name in HELPER_SOURCES:
+        relative = "src/setups/env/bin/" + name
+        content = subprocess.run(["git", "-C", str(source_repo), "show",
+                                  revision + ":" + relative], capture_output=True, check=True).stdout
+        planned["helpers/" + name] = content
+    runtime = Path(runtime)
+    if runtime.is_symlink() or not runtime.is_file():
+        raise ValueError("runtime setup missing or aliased")
+    planned["helpers/runtime_env.sh"] = runtime.read_bytes()
+    for name in planned:
+        if local_path(root, name).exists():
+            raise ValueError("helper destination already exists: " + name)
+    rows = []
+    for name, content in planned.items():
+        path = local_path(root, name)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("xb") as stream:
+            stream.write(content)
+        rows.append({"path": name, "sha256": hashlib.sha256(content).hexdigest()})
+    manifest["helpers"] = {"revision": revision, "members": rows}
+    return manifest
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("verify", "assemble", "extract"))
+    parser.add_argument("operation", choices=("verify", "assemble", "extract", "stage-helpers"))
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--archive", type=Path)
     parser.add_argument("--sha256")
     parser.add_argument("--tools-pin", type=Path)
     parser.add_argument("--record", type=Path)
+    parser.add_argument("--source-repo", type=Path)
+    parser.add_argument("--revision")
+    parser.add_argument("--runtime", type=Path)
     args = parser.parse_args()
     try:
         if args.operation == "extract":
             extract(args.archive, args.root, args.sha256)
+        elif args.operation == "stage-helpers":
+            manifest = load(args.manifest)
+            stage_helpers(args.source_repo, args.revision, args.root, manifest, args.runtime)
+            with args.manifest.open("w", encoding="utf-8", newline="\n") as stream:
+                stream.write(encoded(manifest).decode())
         else:
             manifest = load(args.manifest)
             verify(manifest, args.root, args.tools_pin)
@@ -271,7 +329,8 @@ def main():
                 if args.record:
                     with args.record.open("x", encoding="utf-8", newline="\n") as stream:
                         stream.write(release_record(manifest, args.archive))
-    except (OSError, ValueError, TypeError, KeyError, tarfile.TarError) as error:
+    except (OSError, ValueError, TypeError, KeyError, tarfile.TarError,
+            subprocess.CalledProcessError) as error:
         print("Release inputs refused: " + str(error), file=sys.stderr)
         return 2
     print("Release inputs verified")
