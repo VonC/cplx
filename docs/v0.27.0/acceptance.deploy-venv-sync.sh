@@ -1,11 +1,12 @@
 #!/bin/bash
-# Native target probe, with locally delivered inputs and a fresh owned venv/cache.
+# Native target probe, or explicit isolated operator-backend acceptance for step 6.
 set -euo pipefail
 step='' tools='' app='' manifest='' profile='' evidence='' python=''
 installed='' wheels='' venv='' selection_profile=''
 helper='' runtime='' attestation='' project=''
 record='' companion='' application_archive='' tools_archive='' entry=''
 ci_evidence='' coverage=''
+operator='' candidate='' qualification='' release_config=''
 archive_required=()
 while (($#)); do
     case "$1" in
@@ -31,10 +32,28 @@ while (($#)); do
         --entry) entry=${2:?}; shift 2 ;;
         --ci-evidence) ci_evidence=${2:?}; shift 2 ;;
         --coverage) coverage=${2:?}; shift 2 ;;
+        --operator) operator=${2:?}; shift 2 ;;
+        --candidate-manifest) candidate=${2:?}; shift 2 ;;
+        --qualification-record) qualification=${2:?}; shift 2 ;;
+        --release-config) release_config=${2:?}; shift 2 ;;
         --required-archive-member) archive_required+=("${2:?}"); shift 2 ;;
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
+if [[ "$step" == 6 ]]; then
+    for value in "$operator" "$candidate" "$qualification" "$release_config"; do
+        [[ "$value" == /* && -f "$value" && ! -L "$value" ]] || {
+            echo 'Step 6 requires explicit operator, candidate, qualification and private configuration files' >&2; exit 2;
+        }
+    done
+    [[ "$evidence" == /* && "$python" == /* && -x "$python" ]] || {
+        echo 'Step 6 requires explicit evidence root and operator Python' >&2; exit 2;
+    }
+    # The consumer checks its isolated test scope and runs real backend failures/retries.
+    exec bash "$operator" --candidate-manifest "$candidate" \
+        --qualification-record "$qualification" --release-config "$release_config" \
+        --evidence-root "$evidence" --python "$python" --backend-self-test
+fi
 [[ ( "$step" == 1 || "$step" == 2 || "$step" == 3 || "$step" == 4 || "$step" == 5 ) && $(uname -s) == Linux ]] || {
     echo 'Step 1, 2, 3, 4 or 5 requires native Linux' >&2; exit 2;
 }
