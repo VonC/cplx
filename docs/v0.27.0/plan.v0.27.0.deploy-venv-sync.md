@@ -706,7 +706,7 @@ Step inspection: `rg -n 'pyvenv|preflight|predecessor|retention|manifest' src/se
 
 A separate agent cannot inherit the first phase's files or shell environment. Implement design Q06-Q07 and Two-phase CI integration through the application-owned adapter; shared-library sources remain unchanged.
 
-Expected outcome: Run blocking application validation first and the unchanged mandated pipeline second, with truthful command outcomes and protected candidate bytes.
+Expected outcome: Run blocking application validation first and directly orchestrate the preserved mandated stages second, with truthful command outcomes and protected candidate bytes.
 Complexity impact: operate on explicit inputs and shared per-phase identity maps;
 avoid repeated discovery and preserve necessary integrity-boundary rereads.
 Feature preservation includes accepted toolchain bytes, runtime guarantees,
@@ -731,7 +731,7 @@ Tests first: Public synthetic evidence tests reject revision/profile/toolchain d
 
 Classes and behavior (prefer focused script functions; no new class hierarchy):
 
-1. Update the single consuming Jenkinsfile (P10) to run scripted blocking tool provision, environment verification, acceptance/coverage and archive/bundle assembly first. Freeze and archive the exact candidate pair, manifests and phase 1 evidence; preserve diagnostics in finally handling and release the preliminary node before calling the mandated pipeline once in that same build.
+1. Update the single consuming Jenkinsfile (P10) to run scripted blocking tool provision, environment verification, acceptance/coverage and archive/bundle assembly first. Freeze and archive the exact candidate pair, manifests and phase 1 evidence; preserve diagnostics in finally handling and release the preliminary node before directly orchestrating the mandated stages once in that same build. Preserve checks, stage order, the audited test body, coverage transfer, analysis, quality and dry-run publication. Scope agents to active stages, retaining workspace contexts while omitting the long-lived outer tools allocation and redundant outer Python allocation. Preserve sandbox-safe script receivers and getter-copied SCM maps. Bind the copied stage bodies to the immutable library revision they mirror and record that revision in each qualification. A library revision change requires a new audit of the copy and a new qualification; retain concrete revision identities in private integration records.
 2. Complete the tracked application-owned adapter P11 at the accepted private path, starting from Step 3b's draft and recorded observations. Repeat the Step 3b probe only if the adapter, the loaded library revision or the agent allocation changed since. Then scope initialization to the actual Python-command step after checkout, disable recursive initialization, and fail if required initialization is incomplete.
 3. Obtain or assemble the exact helper set from the pinned cplx revision and compare its member manifest with phase 1 before execution; record actual helper paths and reject drift or absent delivery. Reconstruct an equivalent local named venv from the same toolchain archive digest, canonical lock and exact effective selection including defaults. Fetch existing toolchain/wheels from configured services; verify phase 1 toolchain/profile/wheel-manifest digests passed as non-secret build inputs. Reject revision or provenance drift and never require the phase 1 workspace.
 4. Set explicit Python/venv/download/locked/no-build controls, real executable PATH, VIRTUAL_ENV and shipped runtime setup in the actual command shell. Verify fixed activation aliases and successful compatibility installation as a no-op before and after activation. Record the actual uv version and reject dependency drift; the qualified exception for another phase 2 uv never applies to deployment.
@@ -763,29 +763,37 @@ Classes and behavior (prefer focused script functions; no new class hierarchy):
    digest or revision differs from the candidate's. Deliberate failure modes stay
    probe-only and must fail the combined build under either scope.
 
-Completion criteria: Actual Debian agents execute both phases with preserved acceptance/coverage and conclusive ABI/provider evidence, truthful failures and no release publication. Candidate retention survives a later build. Phase 2's test scope follows item 9, and a switch to the smoke selection requires the recorded diagnosis. A probe or static Jenkinsfile inspection cannot complete this step.
-Pass the Shared execution command checklist and the applicable Ready-to-run
-command forms, including the consumer groundhog objective for consumer changes
-and native target checks where specified. Test fixture success cannot substitute
-for a named actual-agent or backend completion criterion.
+Completion criteria: Actual Debian agents execute both phases with preserved acceptance/coverage and conclusive ABI/provider evidence, truthful failures and no release publication. Candidate retention survives a later build. Phase 2's test scope follows item 9 and the later human-approved exclusions recorded below; no smoke fallback is implied. Remove temporary probe selections and launcher code before a later successful default build, retaining the approved direct orchestration and sandbox corrections. A probe or static Jenkinsfile inspection cannot complete this step. This workaround does not fix infrastructure or qualify the original wrapper.
+Pass the Shared execution command checklist and applicable native target checks.
+For this step, the later human instruction limits local consumer validation to
+`check.bat`; local groundhog, full-suite and test-duration gates are deferred.
+Actual Jenkins tests, coverage and quality gates remain enabled. Test fixture
+success cannot substitute for a named actual-agent or backend completion criterion.
 
 #### Step 5 addendums
 
 Line-budget checkpoint:
 
-- [ ] `src/setups/env/bin/deploy_venv_release.py`: baseline 0; recount Step 4 implementation; Python ceiling 650.
-- [ ] `consumer:P21`: baseline 0, new standalone Python script, no production package marker; ceiling 650; private CI adapter tests own its phase-specific failure cases.
-- [ ] `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: existing planning document; recount before/after; no Python ceiling.
-- [ ] `docs/v0.27.0/verify.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
-- [ ] `docs/v0.27.0/acceptance.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
-- [ ] `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] `tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
-- [ ] Recount the step's private mapped files; P03/P12/P13 and all new Python tests are safe at baseline, ceiling 650.
-- [ ] If a Python file enters 550-650, avoid growth where practical; split only above 650. Separate manifest/transport, inventory mapping, or test cases by responsibility.
+- [x] `src/setups/env/bin/deploy_venv_release.py`: baseline 0; recount Step 4 implementation; Python ceiling 650.
+- [x] `consumer:P21`: baseline 0, new standalone Python script, no production package marker; ceiling 650; private CI adapter tests own its phase-specific failure cases.
+- [x] `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: existing planning document; recount before/after; no Python ceiling.
+- [x] `docs/v0.27.0/verify.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
+- [x] `docs/v0.27.0/acceptance.deploy-venv-sync.sh`: baseline 0; non-Python, Python ceiling not applicable; recount before/after.
+- [x] `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] `tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py`: baseline 0; below 550, safe; Python ceiling 650; recount before/after.
+- [x] Recount the step's private mapped files; P03/P12/P13 and all new Python tests are safe at baseline, ceiling 650.
+- [x] If a Python file enters 550-650, avoid growth where practical; split only above 650. Separate manifest/transport, inventory mapping, or test cases by responsibility.
+
+Line counts after qualification: shared release helper 365; dedicated phase 2
+observer 105; evidence unit test 238; empty package marker 0; verification
+script 45; acceptance script 116; validation document 982
+(820 before this check). The retained private inventory covers every mapped
+file; no affected Python file exceeds 650 physical lines.
 
 Full workflow timing run readiness: use the shared native cumulative harness
-with `--step 5`, the corresponding acceptance mode and the consumer
-`ghog day` walk. Record duration, commands and input identities.
+with `--step 5` and the corresponding acceptance mode. Local consumer validation
+is `check.bat` only under the human deferral; retain actual Jenkins validation
+and record its duration, commands and input identities.
 Time-gated status: no new timeout/xfail gate; missing required execution stays incomplete.
 
 Step inspection: `rg -n 'phase|observation|candidate|revision|inventory' tests/unit/deploy_venv_sync/test_ci_evidence docs/v0.27.0/acceptance.deploy-venv-sync.sh`.
@@ -977,6 +985,24 @@ and its cause recorded. The decision keeps the two-phase order, the blocking
 phase 1 full-suite coverage gate, the shared library unchanged and every
 acceptance row as written. Under the smoke selection, the mandated analysis
 stage no longer reviews files outside the application source.
+
+Later human amendments for Step 5 preserve the complete configured blocking
+phase 1 suite and its coverage gate, while excluding the approved browser and
+CI/tooling cases from phase 2 and excluding CI/tooling sources from analysis.
+The analysis source root remains the repository root; this is not the smoke
+fallback. The approved test and analysis configuration remains in place when
+temporary probes are cleared.
+
+Human direction on 2026-09-29, reaffirmed on 2026-09-30, authorizes direct
+consumer orchestration of the mandated stage behavior after recurring outer
+agent disconnections. Preserve the working stage-local architecture, audited
+tests, coverage transfer, analysis, quality and dry-run publication, including
+the validated sandbox corrections. Do not restore the original outer wrapper.
+This changes orchestration only and makes no infrastructure-repair claim.
+The same direction limits local consumer validation to `check.bat`, deferring
+local full-suite and duration gates while retaining actual Jenkins validation.
+Original qualified candidate bytes must survive the later successful default
+build in the human-approved immutable non-release store.
 
 | Question | Decision and reason | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
