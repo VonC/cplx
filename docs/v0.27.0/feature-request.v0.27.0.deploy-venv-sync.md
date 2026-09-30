@@ -230,8 +230,8 @@ reports while retaining exact operational evidence privately.
 
 Use one consuming-application Jenkinsfile, one Jenkins job, and one build of
 that job. Phase 1 is our blocking application validation and packaging.
-Phase 2 is the unchanged mandated shared-library sequence of CI stages called
-by the same Jenkinsfile in the same build after phase 1 succeeds. It is not
+Phase 2 preserves the mandated shared-library sequence of CI stages, orchestrated
+directly by the same Jenkinsfile in the same build after phase 1 succeeds. It is not
 another job, a downstream build, or another Jenkinsfile; it may allocate
 different agents and workspaces.
 
@@ -240,10 +240,18 @@ ABI/provider checks, application acceptance tests, coverage checks, and independ
 packaging. Archive evidence and preserve the application's build metadata.
 
 Only after successful preliminary validation, release its agent allocation and
-invoke the unchanged mandated shared-library sequence of CI stages, preserving its conformity checks and
+execute the mandated sequence of CI stages, preserving its conformity checks and
 quality gates. Do not modify that shared library or create a second job. A
 preliminary failure must fail the build and prevent the second CI phase from
 starting; a later failure must leave the whole build failed.
+
+The human-approved orchestration workaround scopes agents to the stages that
+use them. Preserve stage order, the audited test body, coverage transfer, analysis,
+quality checks and dry-run publication. Do not restore the long-lived outer
+tools allocation or a redundant outer Python allocation around the actual test
+agent. Workspace-dependent steps still require an agent. Qualification of this
+orchestration does not establish an infrastructure fix or qualify the original
+shared-library wrapper.
 
 Make agent, workspace, and working-directory boundaries explicit. Prior shell
 activation, files, and absolute venv paths cannot be assumed to carry into a
@@ -380,7 +388,7 @@ and never depends on fetching missing recovery inputs.
 | AC08 | Runtime checks and heavy-wheel imports pass on both platforms. Debian has conclusive live trace evidence and no host fallback for ABI-critical libraries. RHEL providers follow item 7's validation matrix and operator readiness succeeds. |
 | AC09 | Debian application acceptance runs on the exact identified RHEL-built toolchain archive; platform, interpreter, lock, and artifact provenance accompany the results. |
 | AC10a | Phase 2 environment equivalence and evidence: our scripts create phase 2's local named venv with toolchain Python from phase 1's toolchain archive digest, canonical lock and groups; no copied phase 1 venv or library-created replacement is accepted. Phase 1's effective dependency selection equals the selection the library's unqualified sync applies, so that sync neither adds nor removes distributions. Record and compare checkout revisions, archive/lock digests, groups, interpreter/base-prefix provenance and selected inventories with phase 1, including phase 2 inventory before/after library Python commands and the local venv path. Any phase 2 uv version is allowed if inventory stays unchanged and dependency commands succeed. |
-| AC10b | Build sequencing and failure propagation: one Jenkinsfile/job/build runs blocking validation and packaging before unchanged mandated stages. Phase 1 failure prevents phase 2; either phase's failure fails the build. Revision mismatch, dependency drift, wrong interpreter, missing equivalence evidence, or a failed dependency/test command fails validation even when the library masks it. A branch update between checkouts requires a new build and is reported as a revision mismatch, not a product failure. Artifacts/evidence remain attributable to their phase and phase 1 archives stay unchanged. Unresolved compatibility blocks completion. |
+| AC10b | Build sequencing and failure propagation: one Jenkinsfile/job/build runs blocking validation and packaging before direct orchestration of the preserved mandated stages. Phase 1 failure prevents phase 2; either phase's failure fails the build. Revision mismatch, dependency drift, wrong interpreter, missing equivalence evidence, or a failed dependency/test command fails validation even when the library masks it. A branch update between checkouts requires a new build and is reported as a revision mismatch, not a product failure. Artifacts/evidence remain attributable to their phase and phase 1 archives stay unchanged. Unresolved compatibility blocks completion. |
 | AC11 | Actual Debian CI evidence shows no Maven deployment invocation or release-artifact upload from either phase, while required checks, quality gates, and independent packaging execute. |
 | AC12 | RHEL rollback restores the preceding release to readiness with every Python library referential, mirror, and remote artifact service unreachable, using target-local or archive-delivered retained inputs. A venv-free predecessor is reconstructed from its lock. For the first transition, redeploy the predecessor's shipped venv by its own procedure. Compilation or current service availability alone is insufficient evidence. |
 | AC13 | Public effort artifacts and review content contain no private application/library identifiers, infrastructure paths, endpoints, credentials, or job links. |
