@@ -394,8 +394,25 @@ allocation runs existing application provisioning, cplx verification, runtime
 checks, acceptance tests, coverage validation, venv-free packaging and reconstruction
 bundle assembly. Archive its evidence and exact candidate pair and preserve its coverage artifacts before
 cleanup. Failure blocks entry into the mandated phase. Release this allocation
-before calling the unchanged mandated pipeline; do not nest a second declarative
-pipeline or hold an outer agent while the library acquires its own agents.
+before directly orchestrating the mandated stages in the same Jenkinsfile.
+Do not nest a second declarative pipeline or call the long-lived outer wrapper.
+
+The human-approved workaround keeps agents local to the stages that actively
+use them. Preserve the checks, stage order, audited test commands, coverage
+transfer, analysis, quality gate and dry-run publication. Do not allocate a
+redundant outer Python agent around the actual test agent; retain agents for
+all workspace-dependent steps. In sandboxed audit closures, invoke Jenkins
+steps through explicit script receivers. Copy SCM remote configuration into
+maps through whitelisted getters instead of mutating private fields or using
+deprecated non-whitelisted getters. Shared-library sources remain unchanged.
+Successful qualification covers this direct orchestration; it does not prove
+an infrastructure repair or qualify the original wrapper.
+
+The directly orchestrated stage bodies mirror a recorded immutable library
+revision. Each qualification records that revision and audits the copied bodies
+against it. A library revision change requires a new audit of the copy and a
+new qualification before its results can establish eligibility. Concrete
+revision identities and comparison evidence remain in private integration records.
 
 The application-owned integration provides a tracked adapter that runs on the
 second phase's actual test agent after checkout and before its Python commands.

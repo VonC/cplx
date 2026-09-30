@@ -3661,3 +3661,935 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 5
+
+- Recorded: 2026-09-30T10:51:10+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 deploy-venv-sync (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 5
+Review round: 1
+
+### Code review evidence for step 5 deploy-venv-sync (round 1)
+
+request_index_tree: 3e652854e00595208c25a9a0766ef62079b4c3ed
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 5 --python /absolute/authoring/python --app-repo /absolute/consumer (sources: plan)
+- bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 5 --python /absolute/tools/python/bin/python3 --tools-prefix /absolute/tools --application-root /absolute/application --manifest /absolute/release/manifest.json --profile /absolute/release/profile.json --evidence-root /absolute/evidence --selection-profile /absolute/release/selection.json --helper /absolute/release/helpers/tools_env_manifest.py --runtime-setup /absolute/release/helpers/runtime_env.sh --serialization-attestation /absolute/release/serialization.json --project application --release-record /absolute/release/release-inputs.txt --companion /absolute/release/companion.tar --application-archive /absolute/release/application.tar --tools-archive /absolute/release/tools.tar.gz --entry /absolute/release/entry.sh --ci-evidence /absolute/release/ci-evidence.json --coverage /absolute/release/coverage.xml --required-archive-member application/pyproject.toml (sources: plan)
+- git diff --cached --check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(vscode): set inactive status bar color
+group 1 path: .vscode/cplx.code-workspace
+group 2: feat(deploy-venv-sync): validate CI evidence
+group 2 path: src/setups/env/bin/deploy_venv_release.py
+group 2 path: tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py
+group 2 path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+group 2 path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+group 2 path: docs/v0.27.0/verify.deploy-venv-sync.sh
+group 2 path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+group 3: docs(deploy-venv-sync): preserve stage agents
+group 3 path: docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md
+group 3 path: docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 4: docs(deploy-venv-sync): record step 5 validation
+group 4 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/cplx.code-workspace
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+staged path: docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/verify.deploy-venv-sync.sh
+staged path: src/setups/env/bin/deploy_venv_release.py
+staged path: tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py
+staged path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+staged path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+```
+
+### Requestor assessment for step 5 deploy-venv-sync (round 1)
+
+Yes. Step 5 has been fully implemented.
+
+The assessment covers implementation plan Step 5 only, including the later
+human-approved orchestration and validation amendments. The validation plan
+records the source, architecture, performance, unit-exercise and feature
+integrity assessment. Steps 6 and 7 and the overall effort remain incomplete.
+
+The staged shared helper and tests match the retained native cumulative
+verification (217 tests plus syntax, shell and line-budget gates) and native
+acceptance. Current cplx check.bat passes the repository Bash lint floor.
+Consumer local validation is check.bat only under explicit human direction;
+local groundhog, full-suite and duration gates were deferred. Actual Jenkins
+tests, coverage and quality checks remained enabled.
+
+Private qualification binds exact sources, complete consoles/artifacts,
+independent phase observations, ABI/provider evidence, ordered failures,
+adverse runtime and workspace cases, actual publication refusal, restored
+defaults and original-candidate retention. Review those retained records via
+the writer notes; public content intentionally omits private identities.
+
+cplx has no Python coverage configuration. The consumer 100% gate measures its
+configured application source, excluding CI helpers. Static references include
+module-level uses and framework registration; every affected unmeasured
+implementation symbol is referenced. No percentage is attributed to those
+modules. No architecture, performance, file-size or feature-integrity issue was
+identified in the checked step.
+
+The repository-wide Markdown check reports existing findings outside the
+changed documents. The focused changed-document check passes; no full-repository
+Markdown pass is claimed. The mandatory repository lint gate is green.
+
+### Implementation report for step 5 deploy-venv-sync (round 1)
+
+Step 5 binds combined-CI eligibility to the exact qualified application,
+toolchain, entry script, companion, selection profile and phase 1 coverage.
+The shared release helper rejects stale or incomplete observations, ambiguous
+evidence, identity drift, dependency failures and missing or failed independent
+test-session outcomes. The native verification and acceptance entry points now
+cover Step 5, with focused evidence mutations in the public unit-test tree.
+
+The consumer owns direct orchestration of the mandated stage behavior, with
+stage-local workspace agents, sandbox-safe script receivers and copied SCM
+configuration. It preserves checks, stage order, the audited Test commands,
+coverage transfer, analysis, quality and dry-run publication. The shared
+library stays unchanged. This qualifies the approved consumer workaround;
+it does not claim infrastructure repair or qualification of the original
+shared-library wrapper.
+
+The actual command adapter uses the named shipped environment and independent
+phase 2 observation. Retained negative executions establish failure handling,
+while runtime/workspace cases establish correct selection and reuse. The
+publication-override launcher and child establish actual guard execution.
+Temporary selections and launcher code are removed before the final default
+success. The original pending candidate is compared against every byte in its
+approved immutable index after that success.
+
+Public requirement, design and plan wording records the human amendments and
+the local check-only validation boundary. The validation plan assesses Step 5
+without completing the later promotion or rollout steps.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step5.journal.md` and
+`.reviews/a.deploy-venv-sync.step5.handoff.md`.
+
+### Change summary for step 5 deploy-venv-sync (round 1)
+
+The root `a.commit` groups every staged path in dependency order. The separate
+workspace preference is an existing unrelated change preserved for its own
+commit. The completed Step 5 validation is the trailing documentation group.
+
+- `chore(vscode): set inactive status bar color`
+  - `.vscode/cplx.code-workspace`
+- `feat(deploy-venv-sync): validate CI evidence`
+  - `src/setups/env/bin/deploy_venv_release.py`
+  - `tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py`
+  - `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`
+  - `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
+  - `docs/v0.27.0/verify.deploy-venv-sync.sh`
+  - `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs(deploy-venv-sync): preserve stage agents`
+  - `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md`
+  - `docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md`
+  - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`
+- `docs(deploy-venv-sync): record step 5 validation`
+  - `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+
+No private consumer source or integration evidence is part of the cplx index.
+The request's typed index-tree evidence identifies the exact staged snapshot.
+No cplx commit has been created.
+
+### Human guidance and writer response for step 5 deploy-venv-sync (round 1)
+
+Human guidance:
+
+The human authorized review submission only. Do not start or message a
+counterpart, and do not commit cplx. Review and human commit approval remain
+separate gates.
+
+Preserve the working consumer's direct mandated_pipeline-like orchestration. Do not
+restore the shared pipeline call, idle outer tools allocation, or redundant
+outer Python allocation around the actual Test agent. Keep agents for steps
+that require workspaces, explicit script receivers in audited closures, and
+SCM remote configuration copied through whitelisted getters into maps.
+
+Consumer local validation is check.bat only: no local ghog/day, full suite or
+test-duration gate. Actual Jenkins validation remains required and retained.
+Do not repeat successful builds or tests to compensate for evidence-download
+failures. Preserve original frozen candidate bytes and all private evidence.
+
+The validation-command forms use generic absolute-input placeholders for
+private native environments. Exact executed commands and qualified input
+identities are retained in the ignored writer notes. Keep private names,
+paths, endpoints, revisions and build evidence out of tracked review prose.
+The separate editor-workspace group preserves an unrelated existing change.
+
+Writer response:
+
+This is the first request for implementation Step 5. No reviewer answer or
+repair for this step has been received, and no disagreement is asserted.
+
+The human's later amendments supersede the older outer-agent orchestration
+and local full-suite workflow instructions. The request preserves direct
+orchestration, its validated sandbox corrections and the approved test and
+analysis settings. Temporary probe removal does not revert that architecture.
+
+### Reviewer focus for step 5 deploy-venv-sync (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-1 -->
+
+## Round 1 by reviewer - Step 5
+
+- Recorded: 2026-09-30T11:09:22+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+Baseline index tree: 3e652854e00595208c25a9a0766ef62079b4c3ed
+
+Assessed index tree: 09baeb84141af210646418ca4e157f863990ccd0
+
+### Implementation check for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+Result:
+
+No. Step 5 has NOT been fully implemented.
+
+The shared eligibility validator, its `ci-check` entry point and the Step 5
+extensions of the native verification and acceptance scripts match plan item 8
+and the tests-first list. The retained private records cover the positive
+qualification, the runtime and workspace matrix, the actual publication-override
+refusal, the restored default build and byte-identical retention of the original
+pending candidate in the approved non-release store, all under the approved
+direct orchestration.
+
+Two gaps keep the step open. First, the deliberate-failure qualification that
+design Q06 and plan item 6 require (dependency sync failure, install failure, a
+masked failing test and disabled observation) was executed only under the
+earlier wrapper-based orchestration. The human then approved direct
+orchestration of the preserved stages, and every qualifying build ran that new
+orchestration; no record shows that the fault conclusions carry over to it.
+Second, `validate_ci_evidence` has rejection statements that no unit test
+reaches, including the check that publication stayed `dry-run`, and it accepts
+a boolean `true` schema.
+
+The staged specification amendments leave AC10b requiring "unchanged mandated
+stages", and they do not bind the copied stage bodies to the library revision
+they mirror. The validation plan's Step 5 expectations were replaced by an
+implementation summary instead of being amended.
+
+Architecture: the validator stays in the existing technical helper, with no
+new class hierarchy and no layer violation. The one architecture item is the
+unbound copy of the mandated stage bodies. Performance: fixed key-set checks
+and linear scans over explicit inputs; no quadratic path. Line budgets: the
+helper has 363 lines and the new test 152, both under 650.
+
+The reviewer recorded this verdict in the Step 5 rows of the validation plan,
+with a `### Missing work for Step 5` section.
+
+Validation plan effects:
+
+The reviewer changed only the Step 5 rows of the validation plan, as the
+reviewer-mode implementation-check allows: the No verdict and its summary, a
+`### Missing work for Step 5` section, the architecture, unit test coverage and
+feature integrity conclusions, and removal of the Yes-only analysis section.
+The document-level status stays `No, it is not implemented.`, and no other step
+and no umbrella row changed.
+
+### Pre-repair mandatory checks and coverage for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+The reviewer ran its two permitted evidence commands once each, from the
+project root, with the log-freshness proof.
+
+- `ghog check`: exit 0. The repository shell lint is clean on 59 tracked
+  scripts.
+- `ghog affected --no-cov`: exit 9, not applicable, because cplx is not a
+  pytest project. This is recorded as unavailable focused evidence, not as a
+  pass. The validator's unit tests run through the native cumulative
+  verification, which the requestor owns and reports as green.
+- `git diff --cached --check`: exit 0 on the received index.
+
+The unit test assessment is static, as the implementation-check requires.
+
+### Resolved validation set and sources for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 5 --python <selected-python> --app-repo <consumer-root>` (source: plan).
+- `bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 5 ...` with the
+  delivered toolchain, release record, companion, archive pair, entry script,
+  combined-CI evidence and phase 1 coverage inputs (source: plan).
+- `git diff --cached --check` (source: request).
+
+### Resolver drift and direction for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+No drift. The request's four commands match the plan's Step 5 command forms,
+the project lint gate and the request's staged-diff check. The reviewer did
+not run the set; the requestor owns it. The request records the native
+cumulative verification (217 tests) and acceptance on the unchanged validator.
+The plan's former consumer groundhog requirement is replaced, in the staged
+plan amendment, by the human-directed local check-only boundary.
+
+### Repository state around validation for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+The index tree was `3e652854e00595208c25a9a0766ef62079b4c3ed` at request time
+and at review entry. After the reviewer staged its Step 5 validation rows, the
+assessed tree is `09baeb84141af210646418ca4e157f863990ccd0`. The umbrella digest
+is unchanged (`46b95d18...`). The validation-state comparison reports one
+tracked difference, the validation plan, confined to the Step 5 rows and
+attributable to the reviewer; the only ignored differences are the reviewer's
+own ghog logs. The only unstaged change is the protocol transcript.
+
+### Repair inventory for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+Repairs made:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: review
+  metadata, not substantive. The reviewer-mode implementation-check rewrote
+  only the Step 5 rows: the status sentence and summary now read No, a
+  `### Missing work for Step 5` section lists F1 to F6, the architecture and
+  unit test coverage conclusions record F5 and F2, the feature integrity
+  paragraph limits the fault evidence to the earlier orchestration, and the
+  Yes-only `## Analysis of Step 5 Implementation` section is removed. The
+  patch is attributable and staged. No implementation code, test, script or
+  specification was changed.
+
+Paths staged:
+
+- `.vscode/cplx.code-workspace`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` (includes the
+  reviewer's Step 5 rows)
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv_release.py`
+- `tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py`
+- `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
+
+### Commit plan assessment for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+The independent `commit-plan-check.bat --format json` run returned state
+`valid`, `ready: true` and no diagnostics for all eleven staged paths in four
+ordered groups: the unrelated workspace preference, the validator with its
+tests and native entry points, the specification amendments, and the
+validation plan alone. The rerun after staging the reviewer's validation rows
+is still `valid` and ready. Membership, order and subjects remain accurate, and
+the reviewer did not amend `a.commit`. The group 4 message body describes a
+completed step; the writer should refresh it after the rework.
+
+### Findings and boundaries for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+Unresolved findings:
+
+- F1 (blocking): the deliberate-failure qualification required by design Q06
+  and plan item 6 ran only under the earlier wrapper-based orchestration. The
+  qualifying positive, override and default builds all ran the later direct
+  orchestration, and no record shows that the fault conclusions carry over.
+  The validation plan's feature integrity claim was therefore unsupported for
+  the qualifying orchestration.
+- F2 (blocking): `validate_ci_evidence` has rejection statements that no unit
+  test reaches: the duplicate-key hook, the top-level and section key-set
+  checks, the build-result check, the analysis, quality and `dry-run`
+  publication status check, and the profile digest format check. Phase 1
+  identity drift, before-command inventory drift, a symlinked coverage report
+  and mistyped dependency statuses are also not exercised.
+- F3 (blocking): `validate_ci_evidence` accepts `"schema": true`, because
+  `True != 1` is false in Python. The session and dependency statuses are
+  already typed strictly; the schema is not.
+- F4 (blocking): AC10b in the requirement still requires "unchanged mandated
+  stages", which contradicts the staged amendment to direct orchestration of
+  the preserved stages.
+- F5 (blocking): the staged design and plan amendments copy the mandated stage
+  bodies into the consumer without binding the copy to the library revision it
+  mirrors, or requiring re-audit and re-qualification after a library change.
+- F6 (blocking): the validation plan's "Step 5 improvement expectations" were
+  replaced by an implementation summary. The planned checklist, including the
+  item 9 order and the phase 1 coverage identity expectation, is no longer
+  visible to the reviewer.
+- F7 (blocking, AC13): the round 1 request carries two private identifiers
+  that its transcript append has already copied into the tracked review
+  transcript: the private library's name in the human guidance paragraph, and
+  a consumer-named runtime helper file in the acceptance command form of the
+  resolved validation set. Neither appears in any committed cplx file. This
+  answer does not repeat them.
+
+Boundary-crossing work:
+
+- The F1 route is a human decision: new fault-probe builds under the direct
+  orchestration, or an accepted equivalence proof. The reviewer does not
+  choose it.
+- Releasing a pending candidate at promotion or abandonment belongs to Step 6
+  and is not assessed here.
+
+### Human guidance response for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+Human guidance:
+
+The human authorized review submission only. Do not start or message a
+counterpart, and do not commit cplx. Review and human commit approval remain
+separate gates.
+
+Preserve the working consumer's direct [private library name redacted by the
+reviewer, see F7]-like orchestration. Do not
+restore the shared pipeline call, idle outer tools allocation, or redundant
+outer Python allocation around the actual Test agent. Keep agents for steps
+that require workspaces, explicit script receivers in audited closures, and
+SCM remote configuration copied through whitelisted getters into maps.
+
+Consumer local validation is check.bat only: no local ghog/day, full suite or
+test-duration gate. Actual Jenkins validation remains required and retained.
+Do not repeat successful builds or tests to compensate for evidence-download
+failures. Preserve original frozen candidate bytes and all private evidence.
+
+The validation-command forms use generic absolute-input placeholders for
+private native environments. Exact executed commands and qualified input
+identities are retained in the ignored writer notes. Keep private names,
+paths, endpoints, revisions and build evidence out of tracked review prose.
+The separate editor-workspace group preserves an unrelated existing change.
+
+Guidance response:
+
+The human guidance was applied as written. The reviewer started and messaged
+no counterpart, made no commit, and treated the direct stage-local
+orchestration, its sandbox corrections and the local check-only boundary as
+approved. No finding asks to restore the shared pipeline call, the outer tools
+allocation or the redundant outer Python allocation.
+
+F1 asks for fault evidence under that approved orchestration; it does not
+question the orchestration itself. It does not ask to repeat any successful
+build or test: its first route adds four short failure builds that do not
+exist yet, and its second route needs no build. Private names, paths,
+endpoints, revisions and build evidence stay out of this answer. The guidance
+is reproduced with the private library name redacted; see F7.
+
+### Writer instructions for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+- F1: ask the human to choose between two routes, and record the choice.
+  Either run the four probe-only faults (sync failure, install failure,
+  failing test, disabled observation) against the direct orchestration, one
+  short build each, capturing each failed combined build with no publication,
+  then remove the fault selection and keep the default green. Or, if the human
+  accepts equivalence instead of new builds, add a bounded private proof that
+  the Test-stage command body, the adapter hook and the observer wiring are
+  byte-identical between the probed and the qualifying orchestration, and
+  that the failure reaches the combined result through the same path. Either
+  way, state in the validation plan which orchestration carried the fault
+  evidence.
+- F2: add subtests in `test_ci_evidence_tdd.py` for each unreached branch
+  listed in F2. Include `publish_status` values such as `"success"` and
+  `"skipped"`, a build `result` of `"FAILURE"`, a phase `status` of
+  `"failure"`, a duplicate key written as raw JSON text, a missing and an
+  extra key at top level and in one section, a malformed profile digest, a
+  changed candidate `record_sha256`, phase 1 tool, helper and profile drift,
+  `inventory_before_sha256` drift, a coverage symlink, and `sync_status` and
+  `install_status` set to `false` and `0.0`.
+- F3: require `type(data["schema"]) is int and data["schema"] == 1`, and add
+  a `true` schema subtest.
+- F4: amend AC10b so it describes direct orchestration of the preserved
+  mandated stages, in the same wording as the staged amendment.
+- F5: in the design's Two-phase CI integration section and plan Step 5 item 1,
+  state that the directly orchestrated stage bodies mirror a recorded library
+  revision, that each qualification records it, and that a library change
+  requires a re-audit of the copy and a new qualification. Keep the concrete
+  revision private.
+- F6: restore the planned Step 5 improvement expectations, amending only the
+  sentences the human amendments changed, such as the phase 2 test scope and
+  the local check-only boundary.
+- F7: in the replacement request, write the guidance paragraph with public
+  vocabulary ("the mandated pipeline", "direct stage orchestration") and give
+  the runtime helper a generic placeholder in the command form. Before the
+  final commit, have the round 1 transcript entry sanitized through the
+  workflow's approved route, and confirm that the sensitive pre-commit hook
+  rejects both identifiers; add them to the project's sensitive rules if it
+  does not.
+- After the fixes, rerun the implementation-check for Step 5, rerun the
+  native cumulative verification and acceptance on the changed validator, and
+  refresh the group 4 message body in `a.commit`: it currently describes a
+  completed step.
+
+### Decision rationale for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+The readiness floor fails on three of six results. Identity passes: the
+envelope, request fields, plan, step, round and index tree agree. Staged
+attribution passes: the only reviewer change is the attributable Step 5
+validation rows. The mechanical `a.commit` result passes. Completeness fails
+on F1 and F4 to F6. Validation and coverage fail on the static gaps in F2 and
+the strictness defect in F3, and the reviewer's focused test command is not
+applicable to cplx. Unresolved findings F1 to F7 remain; F7 is a public-record
+defect in the request itself.
+
+The disposition is changes-requested. The positive evidence is strong: the
+qualifying default build, the actual publication-override refusal and the
+retained original candidate are well bound. The open items are either cheap
+test and wording fixes or one evidence question whose route is the human's
+decision. This recommendation is advisory and authorizes nothing.
+
+### Final reviewer decision for step 5 deploy-venv-sync (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-5-round-1 -->
+
+## Round 2 by requestor - Step 5
+
+- Recorded: 2026-09-30T15:28:54+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: request
+
+### Review identity for step 5 deploy-venv-sync (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 5
+Review round: 2
+
+### Code review evidence for step 5 deploy-venv-sync (round 2)
+
+request_index_tree: cc600aeb6f8845082a2fd4ca5a2e5faba2c77b1b
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 5 --python /absolute/authoring/python --app-repo /absolute/consumer (sources: plan)
+- bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 5 --python /absolute/tools/python/bin/python3 --tools-prefix /absolute/tools --application-root /absolute/application --manifest /absolute/release/manifest.json --profile /absolute/release/profile.json --evidence-root /absolute/evidence --selection-profile /absolute/release/selection.json --helper /absolute/release/helpers/tools_env_manifest.py --runtime-setup /absolute/release/helpers/runtime_env.sh --serialization-attestation /absolute/release/serialization.json --project application --release-record /absolute/release/release-inputs.txt --companion /absolute/release/companion.tar --application-archive /absolute/release/application.tar --tools-archive /absolute/release/tools.tar.gz --entry /absolute/release/entry.sh --ci-evidence /absolute/release/ci-evidence.json --coverage /absolute/release/coverage.xml --required-archive-member application/pyproject.toml (sources: plan)
+- git diff --cached --check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(vscode): set inactive status bar color
+group 1 path: .vscode/cplx.code-workspace
+group 2: feat(deploy-venv-sync): validate CI evidence
+group 2 path: src/setups/env/bin/deploy_venv_release.py
+group 2 path: tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py
+group 2 path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+group 2 path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+group 2 path: docs/v0.27.0/verify.deploy-venv-sync.sh
+group 2 path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+group 3: docs(deploy-venv-sync): preserve stage agents
+group 3 path: docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md
+group 3 path: docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md
+group 3 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 3 path: docs/v0.27.0/review.code.v0.27.0.deploy-venv-sync.md
+group 4: docs(deploy-venv-sync): record step 5 validation
+group 4 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/cplx.code-workspace
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+staged path: docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/review.code.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/verify.deploy-venv-sync.sh
+staged path: src/setups/env/bin/deploy_venv_release.py
+staged path: tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py
+staged path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+staged path: tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py
+```
+
+### Requestor assessment for step 5 deploy-venv-sync (round 2)
+
+Yes. Step 5 has been fully implemented.
+
+The final implementation check records no remaining Step 5 implementation gap.
+Independent review and the human cplx commit gate remain pending.
+
+The schema and behavioral rejection findings are repaired. Native cumulative
+verification passed 225 tests, native acceptance passed, and repository shell
+lint passed on 59 scripts. The repaired validator also qualifies the retained
+successful default evidence. Focused Markdown checks passed for the four
+changed specification and validation documents.
+
+Architecture remains within the existing release helper and consumer adapter
+boundaries. The immutable library copy binding is explicit. Affected Python
+files remain below the 650-line ceiling. Fixed key checks and linear scans over
+explicit inputs introduce no quadratic path. The unit assessment maps each
+added rejection to a behavioral mutation; no unreferenced top-level changed
+implementation symbol remains. No Python coverage percentage is inferred for
+the shared or consumer CI helpers.
+
+Four actual controlled failures are qualified under the approved orchestration
+with complete captures and exact source/console reviews. The restored-default
+build passed both full approved suites and all required later stages. Complete
+capture, ABI/provider and independent phase outcomes, exact analysis and strict
+eligibility are accepted. Every frozen original-candidate byte remains identical
+to its approved immutable index after that later successful build.
+
+### Implementation report for step 5 deploy-venv-sync (round 2)
+
+Step 5 adds a shared combined-CI eligibility validator. It binds the successful
+build and both phases to the exact candidate, delivered inputs, selection
+profile, dependency inventories and phase 1 coverage. Independent framework
+observations expose failures hidden by the mandated shell command. Publication
+must remain dry-run.
+
+The consumer directly orchestrates the preserved mandated stages. Each active
+stage owns its required workspace agent; audited test commands, checks,
+coverage transfer, analysis, quality and dry-run publication remain. Explicit
+script receivers and getter-copied SCM maps preserve sandbox compatibility.
+The copy audit binds those stage bodies to their immutable library revision;
+a revision change requires another audit and qualification.
+
+Round 2 fixes schema typing and expands behavioral rejection tests. It also
+aligns AC10b with direct orchestration, restores the planned validation
+expectations and removes two private identifiers from the tracked transcript.
+Local sensitive hooks now reject both identifiers, with generic prose accepted.
+
+Native cumulative verification passed 225 tests. Native acceptance passed with
+delivered toolchain inputs and poisoned ambient selections. Repository shell
+lint passed on 59 tracked scripts. The consumer application coverage gate does
+not measure CI helpers; static symbol and rejection-path assessment supplements
+their dedicated tests without asserting a coverage percentage.
+
+Actual direct-orchestration qualification now covers sync and install failures,
+a masked failing test and disabled observation. Each complete capture binds the
+original command outcomes and observer refusal to the exact source and loaded
+library, with later stages not entered and publication disabled. The subsequent
+default build passed all required stages with the full approved test selection,
+quality OK and deployment explicitly skipped. Its complete capture, ABI and
+phase audits, exact analysis and strict eligibility are accepted. The entire
+restored source tree matches the accepted pre-probe tree, and every frozen
+original-candidate byte matches the approved immutable index after that success.
+The final implementation check is Yes.
+
+The stage-local workaround does not claim infrastructure repair or validation
+of the original wrapper. Operator promotion and final target rollout belong to
+Steps 6 and 7. No cplx commit is authorized.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step5.journal.md` and
+`.reviews/a.deploy-venv-sync.step5.handoff.md` contain the private evidence and
+continuation record and may be read for this review.
+
+### Change summary for step 5 deploy-venv-sync (round 2)
+
+The root `a.commit` orders the complete twelve-path change set in four groups.
+The canonical after-check handoff staged all twelve paths; grouped readiness
+passed with four groups and the Step 5 validation record last.
+
+- Independent workspace preference: `.vscode/cplx.code-workspace`.
+- Shared eligibility and validation:
+  `src/setups/env/bin/deploy_venv_release.py`,
+  `tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py`,
+  `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`,
+  `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`,
+  `docs/v0.27.0/verify.deploy-venv-sync.sh` and
+  `docs/v0.27.0/acceptance.deploy-venv-sync.sh`.
+- Specification and review documentation:
+  `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md`,
+  `docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md`,
+  `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md` and
+  `docs/v0.27.0/review.code.v0.27.0.deploy-venv-sync.md`.
+- Step 5 validation record:
+  `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`, as the final group.
+
+Round 2 adds strict schema typing, rejection cases, immutable library-copy
+binding and consistent planned expectations. It preserves all earlier staged
+work and the unrelated workspace preference. cplx remains uncommitted.
+
+### Human guidance and writer response for step 5 deploy-venv-sync (round 2)
+
+Human guidance:
+
+The human requests preparation and submission of round 2. Do not start or
+message a reviewer, and do not commit cplx. Review and human commit approval
+remain separate gates.
+
+Preserve the approved direct orchestration: mandated checks, ordered stages,
+audited test commands, coverage transfer, analysis, quality and dry-run
+publication. Keep workspace agents scoped to active stages and preserve the
+sandbox corrections and approved test and analysis settings. Removing probes
+must preserve that architecture. Neither infrastructure repair nor validation
+of the original outer wrapper is claimed.
+
+Local consumer validation is check.bat only. Local full-suite, groundhog and
+test-duration gates are deferred by the human; actual Jenkins validation
+remains required. Private integration records remain outside public prose.
+
+Writer response:
+
+All seven findings from round 1 are accepted. The reviewer's Step 5 No verdict
+and missing-work inventory were appropriate for the evidence available then.
+No reviewer repair is reversed or disputed.
+
+- F1: the existing human authorization for consumer fixes and normal
+  commit/push/build workflows covers the actual fault-build route. The four
+  faults are qualified on the approved direct orchestration through the
+  existing probe selectors; no equivalence substitution is claimed. Complete
+  captures and exact source/console reviews establish the original command
+  outcomes, observer refusals and absence of publication. The subsequent
+  restored-default build is successful and fully qualified. After that success,
+  every frozen original-candidate byte matches the approved immutable index.
+- F2: new behavioral rejection cases exercise duplicate keys, object shapes,
+  build and phase failures, analysis/quality/publication outcomes, malformed
+  profiles, identity and before-command inventory drift, missing or symlinked
+  coverage and mistyped dependency statuses.
+- F3: schema 1 now requires an integer. Boolean true and floating-point 1.0
+  failed the new tests before the repair and are rejected afterward.
+- F4: AC10b now requires direct orchestration of the preserved mandated stages.
+- F5: design and plan bind copied stages to the immutable library revision
+  they mirror; every qualification records it, and a change requires a fresh
+  copy audit and qualification.
+- F6: the planned expectations are restored, including the test-scope order,
+  phase 1 coverage identity and observer boundaries, with the later human
+  amendments stated explicitly.
+- F7: the tracked transcript uses generic terminology for the two disclosed
+  identifiers. Review-entry markers and live protocol records are preserved.
+  Local sensitive rules and actual hook tests reject both identifiers; a
+  generic control passes. Replacement request prose and command forms use
+  generic paths and identifiers.
+
+The native cumulative verification passed 225 tests, including the new
+rejections, and native acceptance passed with delivered runtime inputs.
+The replacement round contains substantive code and test repairs.
+
+### Reviewer focus for step 5 deploy-venv-sync (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-5-round-2 -->
+
+## Round 2 by reviewer - Step 5
+
+- Recorded: 2026-09-30T15:35:08+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: answer
+
+### Assessed index identity for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+Baseline index tree: cc600aeb6f8845082a2fd4ca5a2e5faba2c77b1b
+
+Assessed index tree: cc600aeb6f8845082a2fd4ca5a2e5faba2c77b1b
+
+### Implementation check for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+Result:
+
+Yes. Step 5 has been fully implemented.
+
+All seven round 1 findings are resolved in the staged tree, and the writer's
+Step 5 validation rows are accurate.
+
+- F1: the four probe-only faults (sync failure, install failure, a masked
+  failing test and disabled observation) now ran under the approved direct
+  orchestration. The private records show each one captured completely, with
+  the approved orchestration unchanged apart from the fault selector, the
+  loaded library revision recorded, the combined build failed, later stages
+  not entered and publication disabled. A restored default build then passed
+  every stage and was fully captured. Its source tree equals the accepted
+  pre-probe tree, and every frozen byte of the original pending candidate still
+  matches its immutable index.
+- F2: new behavioral mutations reach every rejection statement of
+  `validate_ci_evidence`. They cover duplicate keys, wrong shapes and key sets,
+  failed build, phase, analysis and quality outcomes, a publication status
+  other than `dry-run`, malformed profile digests, candidate and phase 1
+  identity drift, before-command inventory drift, missing or symlinked
+  coverage, and mistyped dependency statuses. I traced each assertion to the
+  statement it targets, including its expected message.
+- F3: the schema must now be the integer 1; booleans, `1.0`, strings and other
+  values are rejected and tested.
+- F4: AC10b now requires direct orchestration of the preserved mandated stages.
+- F5: the design and plan item 1 bind the copied stage bodies to a recorded
+  library revision and require a new audit and qualification after a change,
+  keeping the concrete revision private.
+- F6: the planned Step 5 expectations are restored, with the human amendments
+  stated explicitly.
+- F7: the staged transcript and the round 2 request contain no private
+  identifier. The one consumer-prefixed function name left in older rounds is
+  already committed in cplx sources.
+
+Architecture: the validator stays in the existing technical helper, with no
+new class hierarchy and no layer violation, and the copied stages are now
+bound to their source revision. Performance: fixed key-set checks and linear
+scans over explicit inputs. Line budgets: helper 365 lines, test 238, both
+under 650.
+
+Validation plan effects:
+
+The reviewer made no edit to the validation plan in round 2. The writer's
+Step 5 rows record the Yes verdict, the restored expectations, the fault
+evidence under the qualifying orchestration and the unit mutation mapping,
+and they are accurate. The document-level status stays
+`No, it is not implemented.` because Steps 6 and 7 remain.
+
+### Pre-repair mandatory checks and coverage for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+The reviewer ran its focused evidence once, from the project root, with the
+log-freshness proof.
+
+- `ghog check`: exit 0; the repository shell lint is clean.
+- `ghog affected --no-cov`: not run again this round. It exits 9, not
+  applicable, because cplx is not a pytest project; round 1 recorded that as
+  unavailable evidence, not a pass.
+- `git diff --cached --check`: exit 0 on the received index.
+
+The unit assessment is static: each new mutation was traced to the rejection
+statement and message it targets.
+
+### Resolved validation set and sources for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 5 --python <selected-python> --app-repo <consumer-root>` (source: plan).
+- `bash docs/v0.27.0/acceptance.deploy-venv-sync.sh --step 5 ...` with the
+  delivered toolchain, release record, companion, archive pair, entry script,
+  combined-CI evidence and phase 1 coverage inputs (source: plan).
+- `git diff --cached --check` (source: request).
+
+### Resolver drift and direction for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+No drift. The four commands match round 1 and the plan's Step 5 command forms;
+the runtime helper argument now uses a generic placeholder. The reviewer did
+not run the set; the requestor owns it and reports native cumulative
+verification (225 tests), native acceptance and the shell lint as green on the
+repaired validator.
+
+### Repository state around validation for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+The index tree was `cc600aeb6f8845082a2fd4ca5a2e5faba2c77b1b` at request time,
+at review entry and after the assessment. The umbrella digest is unchanged
+(`46b95d18...`). The validation-state comparison over all twelve staged paths
+is acceptable, with no tracked or untracked difference; only the reviewer's
+own ignored ghog logs changed.
+
+### Repair inventory for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+Repairs made:
+
+- None. The reviewer made no repair and staged nothing in round 2.
+
+Paths staged:
+
+- `.vscode/cplx.code-workspace`
+- `docs/v0.27.0/acceptance.deploy-venv-sync.sh`
+- `docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`
+- `docs/v0.27.0/review.code.v0.27.0.deploy-venv-sync.md`
+- `docs/v0.27.0/verify.deploy-venv-sync.sh`
+- `src/setups/env/bin/deploy_venv_release.py`
+- `tests/unit/deploy_venv_sync/test_ci_evidence/__init__.py`
+- `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`
+- `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py`
+
+### Commit plan assessment for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+The independent `commit-plan-check.bat --format json` run returned state
+`valid`, `ready: true` and no diagnostics for all twelve staged paths in four
+ordered groups: the unrelated workspace preference, the validator with its
+tests and native entry points, the specification amendments with the
+sanitized review transcript, and the validation plan alone. Group 3's message
+names the transcript's role, and group 4's message matches the Yes record.
+`a.commit` remains accurate; the reviewer did not amend it.
+
+### Findings and boundaries for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+Human guidance:
+
+The human requests preparation and submission of round 2. Do not start or
+message a reviewer, and do not commit cplx. Review and human commit approval
+remain separate gates.
+
+Preserve the approved direct orchestration: mandated checks, ordered stages,
+audited test commands, coverage transfer, analysis, quality and dry-run
+publication. Keep workspace agents scoped to active stages and preserve the
+sandbox corrections and approved test and analysis settings. Removing probes
+must preserve that architecture. Neither infrastructure repair nor validation
+of the original outer wrapper is claimed.
+
+Local consumer validation is check.bat only. Local full-suite, groundhog and
+test-duration gates are deferred by the human; actual Jenkins validation
+remains required. Private integration records remain outside public prose.
+
+Guidance response:
+
+The guidance was applied as written. The reviewer started and messaged no
+counterpart and made no commit. It assessed the direct stage-local
+orchestration, its sandbox corrections, the approved test and analysis
+settings and the local check-only boundary as approved, and found them
+preserved after probe removal. No finding asks to restore the outer wrapper.
+Private integration details stay in the writer's ignored records.
+
+### Writer instructions for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+No rework is required. If the human selects Commit, stage this round's
+transcript append into group 3 with the rest of the review transcript, then run
+the installed sensitive hook and the commit-plan checker once more against the
+final index before committing.
+
+### Decision rationale for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+All six readiness-floor results pass. Identity: the envelope, request fields,
+plan, step, round and index tree agree. Completeness: the implementation-check
+is Yes, and F1 is backed by complete actual-agent evidence under the
+qualifying orchestration. Validation and coverage: the focused lint is green,
+the static mapping reaches every rejection statement, and the requestor's
+native verification and acceptance are green. Staged attribution: the reviewer
+made no repair. Unresolved findings: none. `a.commit`: valid, ready and
+accurate.
+
+The recommendation is commit-ready. It is advisory and does not authorize a
+commit; the Commit or Rework choice belongs to the human.
+
+### Final reviewer decision for step 5 deploy-venv-sync (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-5-round-2 -->
+
+## Round 2 by human - Step 5 - human-confirmation
+
+- Recorded: 2026-09-30T15:43:06+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 5
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
