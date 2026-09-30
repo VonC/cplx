@@ -682,53 +682,215 @@ added; the new helpers are focused script functions.
 
 ### Analysis of Step 5 implementation state
 
-Not started. Step 5 is not implemented because its planned code, integration
-and execution evidence have not been produced or checked.
+Yes. Step 5 has been fully implemented.
+
+The repaired eligibility validator passes native verification and acceptance.
+Actual agents qualify all four deliberate failures under the approved direct
+orchestration, followed by a fully captured successful default build. Its exact
+source, immutable library, ABI, phase outcomes and analysis are qualified.
+Every frozen original-candidate byte matches the approved immutable index after
+that later success. Runtime, workspace and actual publication-refusal evidence
+remains retained. Steps 6 and 7 and the overall effort remain incomplete.
 
 ### Goal for Step 5
 
-Run blocking application validation first and the unchanged mandated pipeline second, with truthful command outcomes and protected candidate bytes.
+Run blocking application validation first and directly orchestrate the preserved
+mandated stages second, with truthful command outcomes and protected candidate
+bytes.
 
 ### Step 5 improvement expectations
 
-Check deploy_venv_release.py as a Step 5 implementation/line-budget target. Prove actual agents use the same pinned helper member identity and reject missing or changed helper delivery.
-Check dedicated phase 2 observer P21 and its negative tests; phase 1 observer P12 remains unchanged and only phase-neutral validation is shared through P13.
-Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
+Check deploy_venv_release.py as a Step 5 implementation/line-budget target.
+Prove actual agents use the same pinned helper member identity and reject
+missing or changed helper delivery. Check dedicated phase 2 observer P21 and
+its negative tests; phase 1 observer P12 remains unchanged and only
+phase-neutral validation is shared through P13. Review this validation file as
+a per-step update target; keep unchecked evidence fields empty until
+implementation-check runs.
 
 Check phase 2's test scope against plan item 9. A complete-suite diagnosis with
 the default analysis scope comes first, with its recorded cause and remedy
 attempts. A switch to the declared smoke selection, phase 1's coverage report
 and the application-source analysis scope is acceptable only after that
-diagnosis confirms the failure. The phase 1 coverage report fed to the analysis
-stage must match the candidate's digest and revision.
+diagnosis confirms the failure. The later human amendments retain the approved
+browser and CI/tooling exclusions, the repository analysis source root and
+stage-local direct orchestration; they do not select the smoke fallback. The
+phase 1 coverage report fed to analysis must match the candidate's digest and
+revision. Local consumer validation is `check.bat` only under the human
+amendment; actual Jenkins tests, application coverage and quality checks remain
+mandatory.
 
-Actual Debian agents execute both phases with preserved acceptance/coverage and conclusive ABI/provider evidence, truthful failures and no release publication. Candidate retention survives a later build. A probe or static Jenkinsfile inspection cannot complete this step.
-Review the plan's file-by-file changes and its mapped private obligations.
-Use `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py` and the step's native integration/acceptance cases.
+Actual Debian agents execute both phases with preserved acceptance/coverage,
+conclusive ABI/provider evidence, truthful failures under the qualifying
+orchestration and no release publication. Candidate retention survives a later
+successful default build. A probe or static Jenkinsfile inspection cannot
+complete this step. Review the plan's file-by-file changes and its mapped
+private obligations. Use
+`tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py` and the
+step's native integration/acceptance cases.
 
 ### What was implemented for Step 5
 
-_(empty — no check has taken place yet.)_.
+- `src/setups/env/bin/deploy_venv_release.py` adds combined-CI eligibility
+  validation and the `ci-check` entry point. It rejects ambiguous JSON,
+  incomplete or stale outcomes, candidate/revision/helper/tool/profile drift,
+  foreign coverage, altered inventory, failed dependency commands and absent,
+  mistyped or failed test-session observations. Schema version 1 requires an
+  integer, rejecting booleans and floating-point lookalikes. It verifies the exact existing
+  application, toolchain, entry-script and companion inputs before eligibility.
+- `verify.deploy-venv-sync.sh` and `acceptance.deploy-venv-sync.sh` accept
+  Step 5. Verification retains the cumulative unit, shell, syntax and physical
+  line-budget gates. Acceptance adds explicit combined-CI and coverage inputs
+  to the existing delivered-toolchain reconstruction contract.
+- The new `test_ci_evidence` unit module exercises positive eligibility and
+  rejection of stale, incomplete, mistyped, failed or mismatched evidence.
+  The existing release-input fixture now supplies the selection profile in
+  the companion bundle; its other contracts remain unchanged.
+- The consumer directly preserves the mandated checks, ordered stages, audited
+  test body, coverage transfer, analysis, quality and dry-run publication.
+  Agents own the stages that use their workspaces. Explicit script receivers
+  and getter-copied SCM configuration preserve sandbox compatibility without
+  private SCM mutation or a deprecated submodule getter.
+- The actual command-shell adapter reconstructs the named venv from pinned
+  delivered inputs, records provenance and before/after inventories, selects
+  shipped tools for application-controlled work and validates independent
+  framework observations. Bootstrap checkout provenance remains separate.
+- Retained negative executions cover real sync/install failures, a masked
+  failing test, disabled observation and foreign-base refusal before mutation.
+  Actual runtime cases cover wrong ambient Python/Git, absent and multiple
+  venvs, repeated retained targets, and fresh/reused generated configuration.
+- A consumer-only launcher exercised the publication-override guard in its
+  actual child build. The launcher and child outcomes were captured and
+  recursion was prevented. Temporary selections and launcher code were then
+  removed, preserving the approved architecture and test/analysis settings.
+- Complete default-build evidence passes the shared eligibility validator.
+  Every frozen byte of the original qualified candidate matches the approved
+  immutable index after that later successful build. The non-release store
+  retains the pending candidate until explicit promotion or abandonment.
 
 ### New types or classes introduced for Step 5
 
-_(empty — no check has taken place yet.)_.
+`CiEvidenceTest` is a new `unittest.TestCase` in the public unit-test tree.
+The production change adds focused functions to the existing release helper;
+the consumer's phase 2 observer is a dedicated script module. No production
+class hierarchy or new domain abstraction is introduced.
 
 ### Architecture check for Step 5
 
-_(empty — no check has taken place yet.)_.
+Release-input validation stays in the existing technical helper boundary.
+The application owns its shell adapter and Jenkins orchestration; shared
+library sources remain unchanged. The phase 2 observer records framework
+outcomes independently without weakening phase 1 policy. No domain class
+imports a transport, CI or filesystem adapter, and no business-layer dependency
+is introduced.
+
+The approved orchestration retains workspace agents while releasing idle outer
+allocations. This qualifies the consumer implementation; it does not establish
+an infrastructure repair or qualify the original shared-library wrapper.
+
+The release helper has 365 physical lines, its new evidence test has 238, and
+the empty package marker has zero. The dedicated consumer observer has 105
+lines. All affected Python files remain at or below 650 lines; the private
+inventory records the other mapped files. The verification and acceptance
+scripts have 45 and 116 lines respectively. The validation document is a
+non-Python reporting artifact.
+
+The copied stage bodies are bound to a recorded immutable library revision.
+Each qualification records it; a library revision change requires a new copy
+audit and qualification. The private source audit compares the ordered stages,
+checks, audited commands, coverage transfer and publication controls against
+that immutable revision, recording the explicitly approved agent and sandbox
+changes separately.
+
+No architecture, layer or file-size issue needs addressing.
 
 ### Performance check for Step 5
 
-_(empty — no check has taken place yet.)_.
+The new evidence checks use fixed section/key comparisons and linear scans of
+the explicit profile and artifact inputs. Hashing and archive validation scale
+with input bytes at required integrity boundaries; they introduce no quadratic
+search or new sorting step. Phase identities reuse explicit maps and retained
+observations. Native cumulative verification completed without a new timeout
+or expected-failure gate. Actual CI durations and agent CPU observations are
+retained privately; the human-deferred local consumer duration gate is not
+reported as executed.
+
+No performance issue needs addressing.
 
 ### Unit test coverage check for Step 5
 
-_(empty — no check has taken place yet.)_.
+The public evidence tests sit under
+`tests/unit/deploy_venv_sync/test_ci_evidence/` and exercise the new shared
+validator through positive and mutation cases, including strict boolean and
+integer session outcomes. Existing release-input tests cover the reused
+archive and binding checks. The cumulative native verification passed
+225 tests against the repaired implementation, with its preceding
+failing cases retained. This count describes the executed verification scope,
+not a unit-only coverage percentage.
+
+cplx has no configured Python coverage gate. The consumer's 100% gate measures
+its configured application source scope; CI helpers lie outside that scope.
+No percentage is inferred for either shared helpers or consumer CI modules.
+Static inspection includes module-level references and framework hook
+registration: every top-level symbol in an affected unmeasured implementation
+module is referenced by its package or tests. Unchanged phase 1 observer P12
+is outside the changed-symbol assessment. Actual fault executions supplement
+the dedicated phase 2 observer unit tests without becoming coverage claims.
+
+Static reading now maps every added rejection statement to a unit mutation:
+duplicate JSON keys; wrong object shapes or key sets; strictly typed schema;
+failed build, phase, analysis or quality; unsafe publication status; malformed
+profile digest; candidate and phase identity drift; changed before/after
+inventories; missing, changed or symlinked coverage; and mistyped dependency or
+session outcomes. The schema mutations failed before the strict-integer repair
+and pass after it. These are behavioral rejection cases, not a measured
+coverage percentage.
+
+No unit-test gap in the changed implementation needs completing. No top-level
+symbol in an affected unmeasured implementation module is unreferenced.
 
 ### Feature integrity for Step 5
 
-_(empty — no check has taken place yet.)_.
+Both actual-agent phases and every required later stage succeed under the
+approved defaults. The configured blocking phase 1 suite and coverage remain
+in place; phase 2 keeps the explicitly approved exclusions and the analysis
+root stays at the repository root. No smoke fallback or phase 1 coverage
+substitution is claimed. ABI/provider inspection, heavy-library imports,
+delivered-helper identity, dependency inventory and shipped-runtime selection
+remain conclusive in the retained private evidence.
+
+Actual sync and install failures, a masked failing test and disabled observation
+each failed combined validation under the qualifying direct orchestration.
+The exact source and immutable loaded library are recorded for each case;
+later analysis, quality and publication stages were not entered. Publication
+remains disabled, and an actual override attempt is refused. Full consoles and
+artifacts survive acquisition retries. The restored default source tree exactly
+matches the accepted pre-probe tree. After its successful build, every frozen
+original-candidate file remains byte-identical to the approved immutable index.
+The stage-local workaround preserves reporting and audit behavior without
+claiming infrastructure stability. Operator promotion and final target rollout
+remain the work of Steps 6 and 7. Review submission and the human cplx commit
+gate remain workflow gates after this implementation check.
+
+## Analysis of Step 5 Implementation
+
+Step 5 makes combined validation attributable to one exact candidate. The shared
+release helper checks both CI phases, delivered input identities, independent
+test-session outcomes, dependency inventories and phase 1 coverage before
+declaring eligibility. Native verification and acceptance expose that contract.
+
+The consumer adapter reconstructs the pinned environment in the actual command
+shell and refuses failed commands or missing observations. Direct orchestration
+preserves the mandated checks, ordered stages, audited test body, coverage,
+analysis, quality and dry-run publication with stage-local workspace agents.
+Actual controlled failures, restored defaults, runtime cases and immutable
+retention establish the planned behavior without qualifying the original wrapper.
+
+The new `CiEvidenceTest` class exercises eligibility and its rejection paths.
+Production changes use focused helper functions and a dedicated phase 2 observer;
+they introduce no production class hierarchy. The architecture, performance,
+unit exercise and feature-integrity assessments above have no remaining Step 5
+implementation gap. Independent review and human commit approval remain pending.
 
 ## Step 6. Implement operator promotion and immutable release binding
 
