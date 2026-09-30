@@ -156,6 +156,105 @@ def qualify(record_path, files):
     return row
 
 
+def _unique(pairs):
+    """Reject ambiguous evidence keys instead of accepting the final value."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate CI evidence key")
+        result[key] = value
+    return result
+
+
+def validate_ci_evidence(record_path, files, coverage_path, evidence_path):
+    """Require typed successful observations bound to these exact candidate bytes."""
+    row = qualify(record_path, files)
+    with Path(evidence_path).open(encoding="utf-8") as stream:
+        data = json.load(stream, object_pairs_hook=_unique)
+    if (not isinstance(data, dict)
+            or set(data) != {"schema", "build", "candidate", "phase1", "phase2"}
+            or type(data["schema"]) is not int or data["schema"] != 1):
+        raise ValueError("incomplete CI evidence")
+    build, candidate, first, second = (data[name] for name in ("build", "candidate", "phase1", "phase2"))
+    expected = {
+        "build": {"number", "revision", "result"},
+        "candidate": {"record_sha256", "application_sha256", "companion_sha256",
+                      "helpers_revision", "helpers_manifest_sha256", "tools_sha256",
+                      "profile_sha256"},
+        "phase1": {"build", "revision", "status", "complete", "coverage_sha256",
+                   "coverage_revision", "inventory_sha256", "tools_sha256",
+                   "helpers_manifest_sha256", "profile_sha256"},
+        "phase2": {"build", "revision", "test_revision", "sonar_revision", "status",
+                   "complete", "sonar_status", "quality_status", "publish_status",
+                   "sync_status", "install_status", "test_session",
+                   "inventory_before_sha256", "inventory_after_sha256", "tools_sha256",
+                   "helpers_manifest_sha256", "profile_sha256"},
+    }
+    for name, section in (("build", build), ("candidate", candidate),
+                          ("phase1", first), ("phase2", second)):
+        if not isinstance(section, dict) or set(section) != expected[name]:
+            raise ValueError("incomplete CI " + name)
+    if (not isinstance(build["number"], str) or not re.fullmatch(r"[1-9][0-9]*", build["number"])
+            or build["result"] != "SUCCESS"):
+        raise ValueError("CI build did not succeed")
+    spec = importlib.util.spec_from_file_location(
+        "deploy_venv_inputs", Path(__file__).with_name("deploy_venv_inputs.py"))
+    inputs = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(inputs)
+    with tempfile.TemporaryDirectory(prefix=".ci-evidence-") as scratch:
+        manifest = inputs.extract(files["companion"], Path(scratch) / "contents",
+                                  row["companion_sha256"])
+    revision = manifest["application"]["revision"]
+    if (not REVISION.fullmatch(revision) or
+            any(value != revision for value in (build["revision"], first["revision"],
+                 first["coverage_revision"], second["revision"],
+                 second["test_revision"], second["sonar_revision"]))):
+        raise ValueError("CI revision differs from candidate")
+    if (first["build"] != build["number"] or second["build"] != build["number"]
+            or first["status"] != "success" or second["status"] != "success"
+            or first["complete"] is not True or second["complete"] is not True):
+        raise ValueError("stale or incomplete CI phase")
+    if (second["sonar_status"] != "success" or second["quality_status"] != "success"
+            or second["publish_status"] != "dry-run"):
+        raise ValueError("mandated stages did not complete safely")
+    bindings = {"record_sha256": sha256(record_path),
+                "application_sha256": row["application_sha256"],
+                "companion_sha256": row["companion_sha256"],
+                "helpers_revision": row["helpers_revision"],
+                "helpers_manifest_sha256": row["helpers_manifest_sha256"],
+                "tools_sha256": row["tools_sha256"]}
+    if any(candidate[key] != value for key, value in bindings.items()):
+        raise ValueError("CI candidate identity differs")
+    profile = candidate["profile_sha256"]
+    if not isinstance(profile, str) or not SHA256.fullmatch(profile):
+        raise ValueError("invalid CI profile identity")
+    selection_profiles = [item for item in manifest["profiles"]
+                          if item["path"] == "profiles/selection.json"]
+    if len(selection_profiles) != 1 or selection_profiles[0]["sha256"] != profile:
+        raise ValueError("CI profile differs from candidate")
+    for phase in (first, second):
+        for key in ("tools_sha256", "helpers_manifest_sha256", "profile_sha256"):
+            if phase[key] != candidate[key]:
+                raise ValueError("CI phase identity differs")
+    coverage = Path(coverage_path)
+    if (coverage.is_symlink() or not coverage.is_file()
+            or first["coverage_sha256"] != sha256(coverage)):
+        raise ValueError("phase 1 coverage identity differs")
+    session = second["test_session"]
+    if (not isinstance(session, dict) or set(session) != {"started", "completed", "exit_status"}
+            or session["started"] is not True or session["completed"] is not True
+            or type(session["exit_status"]) is not int or session["exit_status"] != 0
+            or type(second["sync_status"]) is not int or second["sync_status"] != 0
+            or type(second["install_status"]) is not int or second["install_status"] != 0):
+        raise ValueError("dependency or test command failed or is unobserved")
+    inventory = first["inventory_sha256"]
+    if (not isinstance(inventory, str) or not SHA256.fullmatch(inventory)
+            or second["inventory_before_sha256"] != inventory
+            or second["inventory_after_sha256"] != inventory):
+        raise ValueError("dependency inventory drift")
+    return data
+
+
 def selected(retention, identity, application_prefix="application"):
     """Read only the explicit retained identity and verify it again."""
     if not SHA256.fullmatch(identity):
@@ -225,7 +324,7 @@ def write_qualified_record(output, files):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("record", "preflight", "qualify", "select", "promote"))
+    parser.add_argument("operation", choices=("record", "preflight", "qualify", "ci-check", "select", "promote"))
     parser.add_argument("--record", type=Path)
     parser.add_argument("--application", type=Path)
     parser.add_argument("--entry", type=Path)
@@ -236,6 +335,8 @@ def main():
     parser.add_argument("--ready", action="store_true")
     parser.add_argument("--application-prefix", default="application")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--coverage", type=Path)
+    parser.add_argument("--evidence", type=Path)
     args = parser.parse_args()
     files = {name: getattr(args, name) for name in FILES}
     try:
@@ -247,6 +348,8 @@ def main():
             preflight(args.record, files)
         elif args.operation == "qualify":
             qualify(args.record, files)
+        elif args.operation == "ci-check":
+            validate_ci_evidence(args.record, files, args.coverage, args.evidence)
         elif args.operation == "select":
             root, _ = selected(args.retention, args.identity, args.application_prefix)
             print(root)
