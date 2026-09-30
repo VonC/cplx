@@ -896,8 +896,14 @@ implementation gap. Independent review and human commit approval remain pending.
 
 ### Analysis of Step 6 implementation state
 
-Not started. Step 6 is not implemented because its planned code, integration
-and execution evidence have not been produced or checked.
+Yes. Step 6 has been fully implemented.
+
+The separate operator command checks exact candidate qualification, preserves
+the existing publisher's artifact semantics, verifies retained inputs and
+publishes the binding last, and five actual backend cases passed with verified
+cleanup. Operator eligibility has its own command outside the delivered helper
+closure. The plan lists that module and its line budget. The expanded native
+suite exercises the publication safety boundaries and isolated command entry.
 
 ### Goal for Step 6
 
@@ -905,36 +911,174 @@ Provide the separate operator command that validates and publishes the exact qua
 
 ### Step 6 improvement expectations
 
-Check publication of the exact qualified entry script and helper-bearing companion before exposing their generated binding record. Reject mixed versions, partial release sets and newer-checkout substitutions.
-Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
-
-The reproducible command and backend integration prove eligibility guards and immutable pair/manifest behavior with preserved publisher semantics. The operator host/interface and credential source are recorded privately before execution. Production publication remains gated by step 7.
-Review the plan's file-by-file changes and its mapped private obligations.
-Use `tests/unit/deploy_venv_sync/test_release_promotion/test_release_promotion_tdd.py` and the step's native integration/acceptance cases.
+Publish the exact application, entry script and helper-bearing companion before
+their generated binding record. Reject mixed versions, incomplete qualification,
+partial releases and changed local bytes before announcement. Preserve current
+and predecessor inputs independently of CI retention. Private P14/P15 own the
+operator environment, credentials, repository coordinates and existing transport.
 
 ### What was implemented for Step 6
 
-_(empty — no check has taken place yet.)_.
+- **Eligibility**: `deploy_venv_publication.py publication-check` is an
+  operator-only command, reusing the unchanged release helper. Strict documents bind retained,
+  unexpired candidates to successful combined CI and six complete qualification
+  results: both target families, offline, readiness and both rollback forms.
+  Every result identifies the same candidate and predecessors and hashes its
+  nonempty evidence. Same-revision replacement bytes remain ineligible.
+- **Publication**: explicit role coordinates bind every file digest. Validated
+  identities survive the copy boundary; frozen byte copies are checked before
+  transport. Full remote readback checks retained tools and predecessors, rejects
+  conflicts, and verifies uploaded objects before the final binding. Equal-byte
+  retries retain the same binding without additional uploads.
+- **Private operator integration**: P14 wraps P15 using existing controlled
+  credentials and deploy-file transport. Exact-byte staging under the requested
+  extension preserves older publisher behavior for role-named local inputs.
+  Repository-bound backend receipts survive authorized test cleanup; actual
+  current and predecessor retention is checked on each publication.
+- **Execution entry points**: `verify.deploy-venv-sync.sh --step 6` extends the
+  cumulative native gate. `acceptance.deploy-venv-sync.sh --step 6` invokes the
+  explicit private operator with isolated backend test configuration. Neither
+  path adds a build, deployment, validation bypass or pipeline invocation.
+- **Local and native evidence**: the cplx groundhog walk completed with exit 9
+  for its non-pytest layout, followed by 248 native tests in 33.265 seconds,
+  syntax, ShellCheck and line-budget checks. The fresh consumer walk passed its
+  static checks, affected tests and full 6,662-test suite: no failures, eight
+  expected failures, measured coverage 100%, and no duration outliers. Its full
+  phase took 10 minutes 45.8 seconds. Freshness and terminal status were checked.
+- **Actual backend evidence**: complete publication, interrupted pair recovery,
+  failed binding recovery, conflicting bytes and missing retained inputs all
+  passed through the existing publisher. A direct conflicting deployment was
+  rejected and original bytes remained intact. Five owned test components were
+  deleted; all 240 associated asset URLs and all five component reads then
+  returned absent. The retention case created no component. Execution plus
+  cleanup took 937.836 seconds. Private receipts retain the exact identities,
+  host, shell, credential source, commands and observations.
+- **Evidence limits**: the selected snapshot backend allowed overwrite at an
+  exact timestamped coordinate. Immutable acceptance therefore used disposable
+  release coordinates after deletion capability was proven, as authorized.
+  Repository administration policy was not visible to the configured account;
+  the report records actual write/read behavior rather than unseen settings.
+
+Measured physical line counts, including markers and private integration files:
+
+| File or mapped responsibility | Before | After |
+| --- | --- | --- |
+| `deploy_venv_release.py` (reused unchanged) | 365 | 365 |
+| `deploy_venv_publication.py` | 0 | 249 |
+| `test_release_promotion_tdd.py` | 0 | 350 |
+| New public / private test leaf markers | 0 / 0 | 0 / 8 |
+| `verify.deploy-venv-sync.sh` | 45 | 45 |
+| `acceptance.deploy-venv-sync.sh` | 116 | 135 |
+| P14 operator adapter / backend acceptance | 0 / 0 | 286 / 165 |
+| P14 shell entry / focused tests | 0 / 0 | 14 / 128 |
+| P15 existing publisher | 395 | 410 |
+| Existing consumer value-object property test | 319 | 322 |
+| Implementation plan | 1017 | 1021 |
+| This validation document | 982 | 1126 |
+
+Every changed Python implementation and new test module is below the 550-line
+advisory threshold and the 650-line ceiling. This validation document is not
+subject to the Python ceiling; its physical size was recounted for the check.
 
 ### New types or classes introduced for Step 6
 
-_(empty — no check has taken place yet.)_.
+No production class hierarchy was introduced. Focused functions implement
+eligibility, predecessor binding, coordinate validation and publication through
+the `digest`/`upload` transport port. P14 supplies that port and the real backend
+acceptance adapter. `ReleasePromotionTest` provides the finite mutation and
+failure-injection cases; the private operator tests use parameterized functions.
 
 ### Architecture check for Step 6
 
-_(empty — no check has taken place yet.)_.
+The public helper owns qualification and publication order without credentials,
+network clients or consumer names. The private adapter owns authenticated reads,
+repository observations and the existing publisher invocation. No domain layer
+imports these operator adapters. Runtime reconstruction and consumer delivery
+remain separate responsibilities. Splitting publication from the release helper
+keeps both files below their budget without a new abstraction hierarchy.
+
+The publication module imports the unchanged release helper. Target-delivered
+code has no dependency on the operator module, and the delivered helper closure
+is unchanged. The private operator already selects that publication module;
+the acceptance entry retains its existing delegation to the private operator.
+
+No, there is no architecture issue that needs addressing for Step 6.
 
 ### Performance check for Step 6
 
-_(empty — no check has taken place yet.)_.
+Processing walks explicit files and fixed role maps. Hashing and freezing cost
+O(n) in the selected bytes; required integrity-boundary rereads remain explicit.
+Dictionary lookups avoid repeated discovery. Deterministic JSON sorting operates
+only on fixed schema and role keys, not an unbounded discovered collection.
+No new O(n squared) or input-dependent O(n log n) path was introduced.
+
+The consumer duration gate identified one affected property whose generation
+cost was reduced using its existing smaller sample budget, preserving strategies
+and assertions. The final complete walk had no duration outliers. Backend time
+includes real transport and cleanup, not a fixture-only timing claim.
+
+No, there is no performance issue that needs addressing for Step 6.
 
 ### Unit test coverage check for Step 6
 
-_(empty — no check has taken place yet.)_.
+The public suite exercises 23 test methods with finite mutations covering
+identity, expiry, missing files, incomplete CI and qualification, coordinate
+aliasing, source changes, retention, false upload success, retry and conflict.
+Seventeen private cases cover coordinate policy, exact publisher arguments,
+four destination extensions and historical receipt acceptance after cleanup.
+The cases are deterministic enumerations; no new property-based generator is
+needed for these operator rules. Both new test leaf packages include markers.
+
+The consumer coverage gate measures its application source root and reports
+100%; tests and standalone operator tools are outside that reported scope.
+cplx's native unittest gate reports execution, not a coverage percentage.
+No new or changed production class file is introduced by these function-based
+helpers. The existing value-object class exercised by the adjusted property
+remains inside the consumer's measured scope. Every top-level helper symbol
+outside the coverage gate is referenced by a test or its own implementation
+package, including the acceptance and CLI entry points.
+
+Additional mutations cover snapshot coordinates in multiple cases, missing
+objects in an already announced release, corrupt manifest readback, empty
+evidence with a matching digest, timezone-less expiry, relative and actual
+symlinked evidence roots, and non-path inputs. Early refusals prove zero upload;
+manifest readback failure proves no success receipt is emitted. The isolated
+operator command is exercised with both valid and incomplete qualification.
+The native Linux gate executes the real symlink case; only the supplementary
+Windows run skips it. All 248 native tests passed without skips.
+
+No, there is no unit-tested class below its required coverage needing work.
+No, there is no unreferenced top-level symbol in the changed standalone helpers.
 
 ### Feature integrity for Step 6
 
-_(empty — no check has taken place yet.)_.
+Existing deployment, packaging, CI validation and publisher entry paths remain
+intact. Backend tests used only dedicated disposable coordinates; accepted
+toolchain and production artifacts were preserved. The new private shell entry
+passes syntax and ShellCheck; the existing publisher's six diagnostics match
+its baseline exactly, with no new diagnostic introduced by the added branch.
+Receipts retain byte identities, failures and cleanup evidence locally.
+
+The bundled release helper is byte-identical to its prior committed version.
+Step 6 therefore does not require rebuilding the candidate to change its helper
+closure. Step 7 must still verify and fully qualify the selected exact candidate;
+any changed candidate inputs require renewed qualification. Retained candidates
+must not be edited in place. Synthetic backend fixtures establish publication
+behavior only and do not qualify a real candidate's target runtime.
+
+No existing feature or reporting capability is impaired by Step 6.
+
+## Analysis of Step 6 Implementation
+
+The implementation provides exact-candidate operator promotion through the
+existing consumer publisher. A focused operator module validates combined CI,
+target and rollback identities, freezes their bytes and verifies retained tools
+and predecessors before publishing objects and their binding in that order.
+Its command entry stays outside the unchanged target helper closure. No new
+production class hierarchy was introduced; the test class supplies the finite
+mutation and failure-injection matrix. Native, consumer and live backend
+evidence close Step 6, including verified disposal of all backend test artifacts.
+Final target qualification and production promotion remain Step 7.
 
 ## Step 7. Complete exact-candidate target acceptance and rollout
 
