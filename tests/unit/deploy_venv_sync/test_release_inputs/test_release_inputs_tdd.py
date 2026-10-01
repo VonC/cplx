@@ -385,7 +385,7 @@ class StageHelpersTest(unittest.TestCase):
 
 
 class TransportTest(unittest.TestCase):
-    """Only explicitly mapped registry/artifact strings may change in TOML trees."""
+    """Map only locations and preserve TOML numbers, including fractional settings."""
 
     def setUp(self):
         self.transport = module("deploy_venv_transport")
@@ -416,6 +416,37 @@ class TransportTest(unittest.TestCase):
         import tomllib
         value = {"project": {"name": "quote\"name", "dependencies": ["a; python_version >= '3.11'"]}, "tool": {"uv": {"index": [{"name": "local", "url": "file:///wheels", "default": True}], "workspace": {"members": ["child"]}}}}
         self.assertEqual(tomllib.loads(self.transport.dumps(value)), value)
+
+    def test_toml_serializer_preserves_float_values_and_types(self):
+        import math
+        import tomllib
+        for number in (2.0, -0.0, 0.125, 5e-324, 1.7976931348623157e308,
+                       float("inf"), float("-inf")):
+            with self.subTest(number=number):
+                original = {"tool": {"retry": {"delay": number}}}
+                parsed = tomllib.loads(self.transport.dumps(original))
+                actual = parsed["tool"]["retry"]["delay"]
+                self.assertIs(type(actual), float)
+                self.assertEqual(actual, number)
+                self.assertEqual(math.copysign(1, actual), math.copysign(1, number))
+
+    def test_workspace_preserves_fractional_project_configuration(self):
+        import tomllib
+        inputs = module("deploy_venv_inputs")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = fixture(root)
+            project = root / "metadata/pyproject.toml"
+            original = project.read_bytes() + b"\n[tool.retry]\ndelay = 2.0\n"
+            project.write_bytes(original)
+            manifest["metadata"][0]["sha256"] = inputs.sha256(project)
+            workspace = root / "operation"
+            mapping = self.transport.workspace(manifest, root, workspace)
+            self.transport.check_workspace(manifest, root, workspace, mapping)
+            self.assertEqual(project.read_bytes(), original)
+            parsed = tomllib.loads((workspace / "pyproject.toml").read_text())
+            self.assertIs(type(parsed["tool"]["retry"]["delay"]), float)
+            self.assertEqual(parsed["tool"]["retry"]["delay"], 2.0)
 
     def test_workspace_is_new_and_canonical_bytes_are_immutable(self):
         inputs = module("deploy_venv_inputs")
