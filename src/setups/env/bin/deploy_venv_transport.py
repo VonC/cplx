@@ -3,6 +3,7 @@
 The canonical files remain immutable. Before and after uv runs, parsed trees
 must match through the exact inverse mapping, including dependency and wheel
 hash identities. No resolver or source download is hidden in this adapter.
+Floating-point tool settings survive serialization without integer coercion.
 """
 
 from __future__ import annotations
@@ -74,6 +75,8 @@ def dumps(document):
             return "true" if node else "false"
         if isinstance(node, int):
             return str(node)
+        if isinstance(node, float):
+            return repr(node)
         if isinstance(node, list):
             return "[" + ", ".join(value(item) for item in node) + "]"
         if isinstance(node, dict):
