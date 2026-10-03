@@ -790,7 +790,7 @@ the correction below.
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | completed | `docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md` | `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md` |
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
 | 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | completed | `docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md` | `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` |
-| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | - | - |
+| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | completed | `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md` | `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` |
 
 ### Requirement details for the umbrella
 
