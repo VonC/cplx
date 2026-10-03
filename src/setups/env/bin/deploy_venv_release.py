@@ -167,7 +167,20 @@ def _unique(pairs):
 
 
 def validate_ci_evidence(record_path, files, coverage_path, evidence_path):
-    """Require typed successful observations bound to these exact candidate bytes."""
+    """Require a successful non-publishing build before promotion eligibility."""
+    return validate_ci_observation(record_path, files, coverage_path, evidence_path)
+
+
+def validate_ci_observation(record_path, files, coverage_path, evidence_path, *,
+                            publication="dry-run"):
+    """Check exact CI observations without granting publication eligibility.
+
+    Explicit published mode records an already published build truthfully. The
+    eligibility entry above always requires dry-run; neither mode authorizes a
+    publication or substitutes for backend read-back and target qualification.
+    """
+    if publication not in ("dry-run", "published"):
+        raise ValueError("invalid CI publication observation mode")
     row = qualify(record_path, files)
     with Path(evidence_path).open(encoding="utf-8") as stream:
         data = json.load(stream, object_pairs_hook=_unique)
@@ -215,7 +228,7 @@ def validate_ci_evidence(record_path, files, coverage_path, evidence_path):
             or first["complete"] is not True or second["complete"] is not True):
         raise ValueError("stale or incomplete CI phase")
     if (second["sonar_status"] != "success" or second["quality_status"] != "success"
-            or second["publish_status"] != "dry-run"):
+            or second["publish_status"] != publication):
         raise ValueError("mandated stages did not complete safely")
     bindings = {"record_sha256": sha256(record_path),
                 "application_sha256": row["application_sha256"],
