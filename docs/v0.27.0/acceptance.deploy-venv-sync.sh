@@ -1,5 +1,5 @@
 #!/bin/bash
-# Native target probe, or explicit isolated operator-backend acceptance for step 6.
+# Native target probes, isolated backend checks, and exact-candidate acceptance.
 set -euo pipefail
 step='' tools='' app='' manifest='' profile='' evidence='' python=''
 installed='' wheels='' venv='' selection_profile=''
@@ -7,6 +7,7 @@ helper='' runtime='' attestation='' project=''
 record='' companion='' application_archive='' tools_archive='' entry=''
 ci_evidence='' coverage=''
 operator='' candidate='' qualification='' release_config=''
+acceptance_plan='' publication_authorized=() published_candidate=()
 archive_required=()
 while (($#)); do
     case "$1" in
@@ -36,10 +37,26 @@ while (($#)); do
         --candidate-manifest) candidate=${2:?}; shift 2 ;;
         --qualification-record) qualification=${2:?}; shift 2 ;;
         --release-config) release_config=${2:?}; shift 2 ;;
+        --acceptance-plan) acceptance_plan=${2:?}; shift 2 ;;
+        --publication-authorized) publication_authorized=(--publication-authorized); shift ;;
+        --published-candidate) published_candidate=(--published-candidate); shift ;;
         --required-archive-member) archive_required+=("${2:?}"); shift 2 ;;
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
+if [[ "$step" == 7 ]]; then
+    [[ $(uname -s) == Linux && "$python" == /* && -x "$python" && "$evidence" == /* ]] || {
+        echo 'Step 7 requires native Linux, an explicit Python and evidence root' >&2; exit 2;
+    }
+    for value in "$candidate" "$acceptance_plan"; do
+        [[ "$value" == /* && -f "$value" && ! -L "$value" ]] || {
+            echo 'Step 7 requires explicit retained-candidate and acceptance-plan files' >&2; exit 2;
+        }
+    done
+    exec "$python" -I "${BASH_SOURCE[0]%/*}/acceptance_deploy_venv_sync.py" \
+        --candidate-manifest "$candidate" --acceptance-plan "$acceptance_plan" \
+        --evidence-root "$evidence" "${publication_authorized[@]}" "${published_candidate[@]}"
+fi
 if [[ "$step" == 6 ]]; then
     for value in "$operator" "$candidate" "$qualification" "$release_config"; do
         [[ "$value" == /* && -f "$value" && ! -L "$value" ]] || {

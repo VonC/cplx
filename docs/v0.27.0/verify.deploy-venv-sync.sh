@@ -10,8 +10,8 @@ while (($#)); do
         *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
 done
-[[ "$step" =~ ^[1-6]$ && "$python" == /* && -x "$python" && "$app" == /* && -d "$app/tools" ]] || {
-    echo 'Required: --step 1|2|3|4|5|6 --python /absolute/python (3.11+) --app-repo /absolute/consumer' >&2; exit 2;
+[[ "$step" =~ ^[1-7]$ && "$python" == /* && -x "$python" && "$app" == /* && -d "$app/tools" ]] || {
+    echo 'Required: --step 1|2|3|4|5|6|7 --python /absolute/python (3.11+) --app-repo /absolute/consumer' >&2; exit 2;
 }
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.."
 status=0
@@ -31,14 +31,15 @@ if [[ "$step" -ge 2 ]]; then
     bash docs/v0.27.0/verify.tools-release-d10.sh --python "$python"
 fi
 "$python" -B -m unittest discover -s tests/unit -t . -p 'test_*_*.py' -v
-"$python" - src/setups/env/bin tests/unit/deploy_venv_sync <<'PY'
+"$python" - src/setups/env/bin tests/unit/deploy_venv_sync docs/v0.27.0 <<'PY'
 import ast
 from pathlib import Path
 import sys
 for root in map(Path, sys.argv[1:]):
     for path in root.rglob('*.py'):
         text = path.read_text(encoding='utf-8')
-        if path.name.startswith('deploy_venv_') or 'deploy_venv_sync' in path.parts:
+        if (path.name.startswith('deploy_venv_') or 'deploy_venv_sync' in path.parts
+                or path.name == 'acceptance_deploy_venv_sync.py'):
             assert len(text.splitlines()) <= 650, str(path)
             ast.parse(text, filename=str(path))
 print('PASS syntax and 650 physical-line ceiling')
