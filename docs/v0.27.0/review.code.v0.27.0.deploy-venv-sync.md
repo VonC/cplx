@@ -5330,3 +5330,808 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 7
+
+- Recorded: 2026-10-03T14:10:33+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: unrecorded
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 deploy-venv-sync (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 7
+Review round: 1
+
+### Code review evidence for step 7 deploy-venv-sync (round 1)
+
+request_index_tree: 1e6e3dd43cc53a55110176a58f6b8e5f9b48d24c
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 7 --python <qualified-python> --app-repo <consumer-root> (sources: plan)
+- ghog check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): set the active tab background
+group 1 path: .vscode/cplx.code-workspace
+group 2: feat(deploy): validate published CI observations
+group 2 path: src/setups/env/bin/deploy_venv_release.py
+group 2 path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+group 3: feat(deploy): bind native acceptance evidence
+group 3 path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+group 3 path: docs/v0.27.0/verify.deploy-venv-sync.sh
+group 3 path: docs/v0.27.0/acceptance.deploy-venv-sync.md
+group 3 path: docs/v0.27.0/acceptance_deploy_venv_sync.py
+group 3 path: tests/unit/deploy_venv_sync/test_acceptance_evidence/__init__.py
+group 3 path: tests/unit/deploy_venv_sync/test_acceptance_evidence/test_acceptance_evidence_tdd.py
+group 4: docs(deploy-venv-sync): record step 7 validation
+group 4 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: .vscode/cplx.code-workspace
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.md
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+staged path: docs/v0.27.0/acceptance_deploy_venv_sync.py
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/verify.deploy-venv-sync.sh
+staged path: src/setups/env/bin/deploy_venv_release.py
+staged path: tests/unit/deploy_venv_sync/test_acceptance_evidence/__init__.py
+staged path: tests/unit/deploy_venv_sync/test_acceptance_evidence/test_acceptance_evidence_tdd.py
+staged path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+```
+
+### Requestor assessment for step 7 deploy-venv-sync (round 1)
+
+Yes. Step 7 has been fully implemented.
+
+The validation plan now records exact-candidate acceptance, authorized immutable
+publication through the unchanged operator, normal retrieval and both offline
+predecessor recovery sequences. All 27 acceptance rows have digest-bound evidence
+within explicitly documented execution or unchanged-component reuse scopes.
+The writer-owned umbrella row is completed and belongs to the trailing validation
+commit. Reviewer assessment must preserve that already-staged umbrella state.
+
+The cumulative native verification passed 263 unit checks, Bash syntax,
+ShellCheck, Python syntax and the 650-line ceiling. The observation change has
+retained test-first evidence and 28 passing focused checks. Both native recovery
+sequences passed all ten expected outcomes using normally retrieved release
+inputs, and independent capture verified the recorded bytes. Actual consumer
+delivery and independent service supervision passed separately.
+
+Current consumer changes passed ghog check and ghog affected --no-cov, plus the
+focused release-label and artifact-contract checks. Markdown lint passed for the
+updated validation, umbrella, acceptance guide and private status report.
+Git diff whitespace checks and the public private-identifier scan passed.
+
+Validation scope exception: cplx is not a Python application supported by ghog
+day; the retained attempt exits 9 and is not claimed green. The human explicitly
+forbids further consumer ghog day/full runs and requests check/affected only.
+The typed renderer still includes its mandatory default, but neither that field
+nor the consumer coverage gate establishes coverage of these cplx scripts.
+Do not rerun broad suites or reinterpret the unsupported command as success.
+The native cumulative suite is the actual project-appropriate executable check.
+
+Architecture: orchestration and evidence validation stay in the driver; consumer
+adapters own acquisition, credentials and target lifecycle. Published observation
+does not relax nonpublishing promotion eligibility. No boundary violation found.
+Performance: streamed hashing has bounded memory; maps and identity checks use
+linear traversal, with bounded deterministic sorts. No quadratic work found.
+Coverage: no percentage gate measures these scripts; every added top-level symbol
+is referenced by tests or within its module, including import-time case creation.
+Feature integrity: toolchain and original wheel bytes remain bound; historical
+evidence and negative outcomes keep their original scope. Reboot is untested and
+nonblocking by the human's explicit instruction.
+
+The operational evidence is private. Use the writer notes to inspect its exact
+receipts locally; never copy private infrastructure identities into the answer
+or the versioned transcript.
+
+### Implementation report for step 7 deploy-venv-sync (round 1)
+
+The acceptance driver executes explicit adapters and checks process status,
+fresh run identity, exact candidate binding, complete observations and evidence
+digests. Negative cases require their failing status and explicit observations.
+Fixture success remains nonqualifying; subsets remain incomplete. The shell
+entry validates native inputs and the cumulative runner includes the new tests.
+
+The release helper now offers explicit published-CI observation while its existing
+promotion validator retains the strict dry-run default. Unit tests reject stale,
+changed, failed or incomplete observations and prove the default is unchanged.
+
+The operator guide documents complete local delivery, offline reconstruction,
+predecessor retention and publication responsibilities. The final validation
+records executed rollout and the writer-owned umbrella completion. Historical
+reuse is bounded by recorded unchanged-component comparisons. No new production
+class hierarchy or acquisition redesign is introduced.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step7.journal.md` and
+`.reviews/a.deploy-venv-sync.step7.handoff.md`.
+
+### Change summary for step 7 deploy-venv-sync (round 1)
+
+The root a.commit groups all 11 staged paths from least to most dependent:
+
+1. `chore(editor): set the active tab background`: existing workspace preference
+   in `.vscode/cplx.code-workspace`.
+2. `feat(deploy): validate published CI observations`:
+   `src/setups/env/bin/deploy_venv_release.py` and
+   `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`.
+3. `feat(deploy): bind native acceptance evidence`:
+   `docs/v0.27.0/acceptance.deploy-venv-sync.sh`,
+   `docs/v0.27.0/verify.deploy-venv-sync.sh`,
+   `docs/v0.27.0/acceptance.deploy-venv-sync.md`,
+   `docs/v0.27.0/acceptance_deploy_venv_sync.py`, and
+   `tests/unit/deploy_venv_sync/test_acceptance_evidence/` (empty leaf marker
+   and `test_acceptance_evidence_tdd.py`).
+4. `docs(deploy-venv-sync): record step 7 validation`:
+   `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` and the matching
+   completed row in `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md`.
+
+The formatted plan passed the canonical readiness checker. The generated review
+transcript is a later workflow artifact and will be handled by the authorized
+residual commit continuation if needed.
+
+### Human guidance and writer response for step 7 deploy-venv-sync (round 1)
+
+Human guidance:
+
+The human authorized unattended completion of the exact release sequence and
+Step 7 closure. Do not request the same publication authorization again.
+Reboot is explicitly untested and nonblocking. No additional deployment or
+publication is required for this review.
+
+Do not run ghog day/full in the consumer; the human explicitly limited subsequent
+test commands to check and affected. cplx ghog day is unsupported and its recorded
+exit 9 is not green. Assess the retained native cumulative checks and explicit
+coverage scope instead. The additive native command is shown with sanitized
+arguments; the exact executed invocation is retained in the private writer notes.
+
+Private evidence may be read locally but infrastructure names, paths, endpoints,
+build identities and operational receipts must stay out of the public transcript.
+
+Writer response:
+
+This is the first review round for Step 7. There is no earlier feedback to accept
+or reverse. The writer requests independent assessment of the completed step and
+the four prepared commit groups, preserving the stated evidence boundaries.
+
+### Reviewer focus for step 7 deploy-venv-sync (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-1 -->
+
+## Round 1 by reviewer - Step 7
+
+- Recorded: 2026-10-03T14:31:55+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+Baseline index tree: 1e6e3dd43cc53a55110176a58f6b8e5f9b48d24c
+
+Assessed index tree: 1e6e3dd43cc53a55110176a58f6b8e5f9b48d24c
+
+### Implementation check for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+Result:
+
+Yes. Step 7 has been fully implemented.
+
+The staged work delivers every Step 7 file named by the plan: the acceptance
+driver and its shell entry, the cumulative verifier update, the sanitized
+operator guide, the new acceptance-evidence unit tests and the validation
+record, plus the explicit published-CI observation API in
+`deploy_venv_release.py` with its unit cases. The retained private evidence
+supports the operational claims within their stated scopes: the final
+acceptance map lists all 27 driver cases as evidence-verified with stated
+scope, the publication and normal-retrieval receipts verify the qualified
+bytes, and the offline recovery capture records both predecessor formats
+through baseline, deliberate failed upgrade, recovery, successful upgrade and
+successful-upgrade rollback with network denied. The candidate binding in that
+evidence carries the repaired consumer entry.
+
+The retained native cumulative run reports 263 tests OK, the Python syntax
+check and the 650-line ceiling. Its retained input copies of the six staged
+code and script files match the staged blobs (the two new files byte for byte,
+the four modified files after line-ending normalization), so that executed
+evidence applies to exactly the reviewed bytes.
+
+Architecture: the driver owns orchestration and evidence validation; adapters
+own target commands, acquisition and credentials. `validate_ci_evidence` keeps
+the strict dry-run eligibility and delegates to `validate_ci_observation`, whose
+published mode is opt-in and cannot satisfy the promotion entry. The driver
+loads the shared publication helper by repository-relative path, which matches
+the existing verifier pattern under `docs/v0.27.0/`. No DDD or ports/adapters
+violation found. Something needs addressing: the guide misdescribes the
+publication-authorization flag (finding 4).
+
+Performance: hashing streams with `hashlib.file_digest`; plan validation and
+case execution are linear in the number of cases; no quadratic work. No
+performance issue needs addressing.
+
+Unit test coverage: no configured coverage gate measures these cplx scripts,
+so no percentage is claimed. Every top-level symbol of the driver (`case`,
+`unique`, `document`, `digest`, `write`, `evidence_file`, `validate_command`,
+`run_case`, `candidate_binding`, `main`) and the new `validate_ci_observation`
+is referenced by tests or at module level. Branch-level gaps remain on behavior
+the guide and the implementation report state: the successful `main()` summary
+path (`complete`, `missing`, `qualifying` for non-fixture runs) has no test, and
+the refusal test cannot distinguish its three refusal reasons. Yes, test work
+needs completing; no staged out-of-gate top-level symbol is unreferenced.
+
+Feature integrity: strict promotion eligibility is preserved and covered by the
+new negative case; published observations are explicit and recorded in the
+binding; negative outcomes stay failures; no existing reporting capability is
+impaired. The validation record contains one factual inaccuracy (finding 1).
+
+Validation plan effects:
+
+The reviewer made no edit to `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`.
+The writer's staged Step 7 rows and the document-level status line are unchanged.
+The validation-state comparison over the 11 staged step paths and the validation
+plan reports acceptable, with no tracked, untracked or ignored differences.
+The umbrella digest of `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md` is
+unchanged, so the writer-owned completed umbrella row is preserved as staged.
+The writer should update the Step 7 rows when addressing findings 1 to 3.
+
+### Pre-repair mandatory checks and coverage for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+No repair was made, so no pre-repair blob was recorded. The baseline index tree
+`1e6e3dd43cc53a55110176a58f6b8e5f9b48d24c` equals the request-time index tree.
+Validation state was captured before assessment over the 11 staged step paths,
+including the validation plan, and the umbrella digest was captured before the
+implementation check.
+
+### Resolved validation set and sources for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+The request resolves three requestor-owned commands, which the reviewer did not
+run:
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 7 --python <qualified-python> --app-repo <consumer-root>`
+  (source: plan).
+- `ghog check` (source: request).
+
+Requestor evidence inspected read-only: the retained native cumulative run
+reports 263 tests OK plus the syntax and 650-line ceiling check, and its input
+copies of the six staged code and script files match the staged blobs.
+
+Reviewer evidence, each run once from the cplx root through the project
+environment: `ghog check` exited 0 (fail=0, warn=0). `ghog affected --no-cov`
+exited 9 because cplx is not a pytest project; that is a not-applicable step,
+not a pass, and the native unittest run above is the project-appropriate test
+evidence. `ghog day` and `ghog full` were not run.
+
+### Resolver drift and direction for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+No resolver drift found. The current plan still names the Step 7 native command
+form of `verify.deploy-venv-sync.sh`, the project lint command is unchanged, and
+the staged verifier now accepts `--step 7`, matching the request's plan-sourced
+command. The comparison was made by reading the plan and project files; the set
+was not executed by the reviewer.
+
+### Repository state around validation for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+The live index tree after assessment is `1e6e3dd43cc53a55110176a58f6b8e5f9b48d24c`,
+identical to the baseline and the request-time tree. The umbrella digest compare
+reports unchanged. The validation-state compare reports acceptable with no
+differences. The only unstaged change in the worktree is the versioned review
+transcript maintained by the exchange; the reviewer staged nothing.
+
+### Repair inventory for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+The independent `commit-plan-check.bat --format json` run exited 0 with state
+`valid`, ready true and no diagnostics. Its four groups and 11 staged paths
+match the request exactly: the workspace preference chore, the published CI
+observation API with its tests, the acceptance driver group, and the trailing
+validation plus umbrella documentation group. The order runs from least to most
+dependent and the subjects are conventional. `a.commit` is accurate for the
+current staged state. If the writer changes files for the findings below, the
+same four groups should still hold; refresh the group bodies where they cite
+line counts or test behavior.
+
+### Findings and boundaries for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+Unresolved findings:
+
+1. Validation record accuracy: the Step 7 "What was implemented" bullet in
+   `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` states that the
+   driver has 277 lines and its new unit test file 193. The staged
+   `docs/v0.27.0/acceptance_deploy_venv_sync.py` has 257 lines and
+   `tests/unit/deploy_venv_sync/test_acceptance_evidence/test_acceptance_evidence_tdd.py`
+   has 179.
+2. Weak refusal assertions: `test_missing_inputs_recovery_and_unauthorized_promotion_never_run_adapter`
+   (test file lines 158-175) checks only exit 2 and the generic
+   "acceptance refused" prefix. Off Linux all three cases stop at the platform
+   gate before the gates the test names; on Linux any refusal reason, including
+   the wrong one, satisfies it.
+3. Untested success path: no unit test runs `main()` to a written summary. The
+   guide (lines 103-106) and the implementation report state that a successful
+   subset yields `complete: false` with the remaining cases, and that
+   non-fixture runs are marked qualifying; neither behavior, nor
+   `--published-candidate` through `main()`, is exercised.
+4. Guide misstatement: `docs/v0.27.0/acceptance.deploy-venv-sync.md` lines
+   151-153 say `--publication-authorized` "records authorization already
+   obtained", but `main()` only uses the flag as a gate (driver lines 234-235)
+   and neither `result.json` nor the summary records it.
+5. Minor style: the test class has two consecutive blank lines before
+   `candidate_fixture` (test file lines 115-116), where one is expected inside
+   a class.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+Human guidance:
+
+The human authorized unattended completion of the exact release sequence and
+Step 7 closure. Do not request the same publication authorization again.
+Reboot is explicitly untested and nonblocking. No additional deployment or
+publication is required for this review.
+
+Do not run ghog day/full in the consumer; the human explicitly limited subsequent
+test commands to check and affected. cplx ghog day is unsupported and its recorded
+exit 9 is not green. Assess the retained native cumulative checks and explicit
+coverage scope instead. The additive native command is shown with sanitized
+arguments; the exact executed invocation is retained in the private writer notes.
+
+Private evidence may be read locally but infrastructure names, paths, endpoints,
+build identities and operational receipts must stay out of the public transcript.
+
+Guidance response:
+
+No publication authorization was requested and no deployment or publication is
+asked for. Reboot is treated as untested and nonblocking. No `ghog day` or
+`ghog full` was run anywhere; in cplx the reviewer ran only `ghog check` (exit 0)
+and `ghog affected --no-cov` (exit 9, not a pytest project, recorded as not
+applicable rather than green). The retained native cumulative checks and the
+explicit coverage scope were assessed instead, and their inputs were matched to
+the staged bytes. Private evidence was read locally only; this answer names no
+infrastructure, path, endpoint, build identity or receipt.
+
+### Writer instructions for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+1. Correct the driver and test line counts in the Step 7 validation rows to the
+   staged values (or remove the counts), keeping the 650-line statement.
+2. In the refusal test, assert the specific refusal reason for each case:
+   missing predecessor inputs for `rollback-shipped-venv`, missing publication
+   authorization for `promotion`, and the missing local tools input for
+   `fresh`. Make the test run its gates on any host, for example by patching
+   `platform.system` in-process or skipping off Linux with an explicit reason.
+3. Add a unit test that drives `main()` to success with a one-case plan and the
+   existing worker fixture: exit 0, one summary file, `complete` false,
+   `missing` equal to the 26 other case names, the result `qualifying` true,
+   and a `--published-candidate` variant whose binding records the published
+   mode. Keep it within the existing test file and under the line ceiling.
+4. Either record `publication_authorized: true` in the summary (and cover it in
+   the new test), or reword the guide to say the flag is a required gate that
+   is not recorded.
+5. Remove the extra blank line inside the test class.
+6. Rerun the native cumulative check for `--step 7` on the changed bytes and
+   update the validation rows and the `a.commit` group bodies accordingly.
+
+### Decision rationale for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+The step's operational goals are met and the executed evidence binds to the
+reviewed bytes, so the implementation check is Yes. The readiness floor is not
+complete: findings 1 to 5 are unresolved, two of them leave stated driver
+behavior without precise tests, and the validation record contains an
+inaccurate figure. Each fix is small and stays inside the Step 7 files, but
+fixing test and documentation content is writer work under the request's
+guidance, which authorized no reviewer repair. Changes are therefore requested.
+Items outside this step's plan, such as deploying the released bytes to the
+consumer's test target or the separately tracked reboot test, were not required
+and are not findings.
+
+### Final reviewer decision for step 7 deploy-venv-sync (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-7-round-1 -->
+
+## Round 2 by requestor - Step 7
+
+- Recorded: 2026-10-03T14:49:18+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 7
+- Outcome: request
+
+### Review identity for step 7 deploy-venv-sync (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 7
+Review round: 2
+
+### Code review evidence for step 7 deploy-venv-sync (round 2)
+
+request_index_tree: 7a3745f48c9e52244cb3aafa536288228bc7416b
+resolved_validation_set:
+
+- bash src/utils/lint_shell.sh (sources: project)
+- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 7 --python /qualified/python --app-repo /consumer/root (sources: plan)
+- ghog check (sources: request)
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): set the active tab background
+group 1 path: .vscode/cplx.code-workspace
+group 2: feat(deploy): validate published CI observations
+group 2 path: src/setups/env/bin/deploy_venv_release.py
+group 2 path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+group 3: feat(deploy): bind native acceptance evidence
+group 3 path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+group 3 path: docs/v0.27.0/verify.deploy-venv-sync.sh
+group 3 path: docs/v0.27.0/acceptance.deploy-venv-sync.md
+group 3 path: docs/v0.27.0/acceptance_deploy_venv_sync.py
+group 3 path: tests/unit/deploy_venv_sync/test_acceptance_evidence/__init__.py
+group 3 path: tests/unit/deploy_venv_sync/test_acceptance_evidence/test_acceptance_evidence_tdd.py
+group 4: docs(deploy-venv-sync): record step 7 validation
+group 4 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+group 4 path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: .vscode/cplx.code-workspace
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.md
+staged path: docs/v0.27.0/acceptance.deploy-venv-sync.sh
+staged path: docs/v0.27.0/acceptance_deploy_venv_sync.py
+staged path: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/verify.deploy-venv-sync.sh
+staged path: src/setups/env/bin/deploy_venv_release.py
+staged path: tests/unit/deploy_venv_sync/test_acceptance_evidence/__init__.py
+staged path: tests/unit/deploy_venv_sync/test_acceptance_evidence/test_acceptance_evidence_tdd.py
+staged path: tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py
+```
+
+### Requestor assessment for step 7 deploy-venv-sync (round 2)
+
+Yes. Step 7 remains fully implemented; all five round 1 findings are addressed.
+
+The refreshed native cumulative harness passed 264 tests, shell lint, Bash
+syntax, ShellCheck, Python syntax and the 650-line ceiling on the changed bytes.
+The focused acceptance-driver suite passed 12 tests on the authoring host,
+including exact preflight reasons without depending on the host platform.
+The new main-entry test executes the worker subprocess for both nonpublishing
+and explicitly published inputs. It checks the written summary, the 26 missing
+cases, incomplete status, qualifying result and published binding.
+The current cplx ghog check passed with no failures or warnings.
+
+The validation record removes the incorrect physical-line counts and records
+the refreshed checks. The guide now states that the authorization flag gates
+execution and that the adapter must retain authorization evidence. No runtime
+behavior or candidate input changed in this review round.
+
+The retained operational evidence still covers all 27 acceptance cases within
+their stated execution or unchanged-component reuse scopes: qualification,
+authorized immutable publication, normal retrieval and both offline predecessor
+recovery sequences. Delivery and independent service supervision passed
+separately. No repeat publication or deployment was needed for these repairs.
+The writer-owned completed umbrella row is unchanged.
+
+Architecture and performance are unchanged: the runner validates evidence;
+adapters own target commands and acquisition. Hashing streams input, and maps
+and case processing remain linear. Strict nonpublishing promotion eligibility
+is preserved. No feature or existing check was weakened.
+
+No percentage coverage gate measures these cplx scripts. Each new helper has
+direct test callers. No consumer ghog day/full was run, as instructed by the
+human; the unsupported cplx day result is not claimed green. The native harness
+is the executable project-appropriate evidence. Reboot remains untested and
+nonblocking. Exact operational receipts remain private in the writer notes.
+
+### Implementation report for step 7 deploy-venv-sync (round 2)
+
+The acceptance driver executes explicit adapters and checks process status,
+fresh run identity, exact candidate binding, complete observations and evidence
+digests. Negative cases retain their required failing status and observations.
+Fixture results remain nonqualifying; successful subsets remain incomplete.
+
+Round 2 strengthens only tests and documentation. The main-entry tests now
+check precise refusal gates on every host and verify written native summaries
+for nonpublishing and published candidates using real worker subprocesses.
+The guide precisely describes the publication-authorization gate, and the
+validation plan records refreshed executable checks without stale line counts.
+
+The explicit published-CI observation API remains opt-in. The existing promotion
+entry retains strict nonpublishing eligibility. Previously retained release,
+retrieval, recovery and service evidence keeps its exact scope and identities.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step7.journal.md` and
+`.reviews/a.deploy-venv-sync.step7.handoff.md`.
+
+### Change summary for step 7 deploy-venv-sync (round 2)
+
+The root a.commit groups all 11 staged paths from least to most dependent:
+
+1. `chore(editor): set the active tab background`: existing workspace preference
+   in `.vscode/cplx.code-workspace`.
+2. `feat(deploy): validate published CI observations`:
+   `src/setups/env/bin/deploy_venv_release.py` and
+   `tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py`.
+3. `feat(deploy): bind native acceptance evidence`:
+   `docs/v0.27.0/acceptance.deploy-venv-sync.sh`,
+   `docs/v0.27.0/verify.deploy-venv-sync.sh`,
+   `docs/v0.27.0/acceptance.deploy-venv-sync.md`,
+   `docs/v0.27.0/acceptance_deploy_venv_sync.py`, and
+   `tests/unit/deploy_venv_sync/test_acceptance_evidence/` (empty leaf marker
+   and `test_acceptance_evidence_tdd.py`).
+4. `docs(deploy-venv-sync): record step 7 validation`:
+   `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` and the matching
+   completed row in `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md`.
+
+The formatted plan passed the canonical readiness checker. The generated review
+transcript is a later workflow artifact and will be handled by the authorized
+residual commit continuation if needed.
+
+### Human guidance and writer response for step 7 deploy-venv-sync (round 2)
+
+Human guidance:
+
+The human authorized unattended completion of the exact release sequence and
+Step 7 closure. Do not request the same publication authorization again.
+Reboot is explicitly untested and nonblocking. No additional deployment or
+publication is required for this review.
+
+Do not run ghog day/full in the consumer; the human explicitly limited subsequent
+test commands to check and affected. cplx ghog day is unsupported and its recorded
+exit 9 is not green. Assess the retained native cumulative checks and explicit
+coverage scope instead. The additive native command is shown with sanitized
+arguments; the exact executed invocation is retained in the private writer notes.
+
+Private evidence may be read locally but infrastructure names, paths, endpoints,
+build identities and operational receipts must stay out of the public transcript.
+
+Writer response:
+
+All five findings are accepted. The reviewer made no staged repair, so the
+writer owns these changes and reports reviewed-work-changed true without
+disagreement.
+
+1. Removed inaccurate driver and test physical-line counts from the validation
+   record, preserving the verified 650-line ceiling.
+2. Replaced generic subprocess refusal assertions with in-process entry calls
+   that patch only the platform gate. Each case asserts its exact refusal text,
+   empty stdout, absent evidence and no adapter call. The missing tools case
+   removes only that input; rollback and authorization exercise their own gates.
+3. Added the requested successful one-case main-entry test for both input modes.
+   It runs the existing worker subprocess and verifies exactly one summary,
+   exit zero, incomplete status, the other 26 cases, qualifying non-fixture
+   result, exact record binding and the explicit published mode when requested.
+4. Corrected the guide instead of changing the runtime result schema: the flag
+   gates execution but does not record authorization; the adapter retains it.
+5. Removed the extra blank line inside the test class.
+
+The focused authoring-host suite passed 12 tests. The refreshed native cumulative
+Step 7 check passed 264 tests and all syntax, lint and line-ceiling checks.
+The current ghog check passed. The same four commit groups remain accurate;
+the acceptance group body now also names refusal and native-summary checks.
+No operational candidate bytes, publication or deployment were changed.
+
+### Reviewer focus for step 7 deploy-venv-sync (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-7-round-2 -->
+
+## Round 2 by reviewer - Step 7
+
+- Recorded: 2026-10-03T14:58:27+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 7
+- Outcome: answer
+
+### Assessed index identity for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+Baseline index tree: 7a3745f48c9e52244cb3aafa536288228bc7416b
+
+Assessed index tree: 7a3745f48c9e52244cb3aafa536288228bc7416b
+
+### Implementation check for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+Result:
+
+Yes. Step 7 has been fully implemented.
+
+Round 2 changes only three staged paths relative to round 1: the acceptance
+unit test file, the operator guide and the Step 7 validation rows. The driver,
+the release helper, both shell entries and the CI evidence tests are byte
+identical to the round 1 review, so the round 1 implementation assessment and
+operational evidence review still apply.
+
+All five round 1 findings are resolved:
+
+1. The validation rows no longer state the incorrect line counts; they keep the
+   650-line statement and record the refreshed 264-test native run.
+2. The refusal test now calls `main()` in-process with only the platform gate
+   patched, and asserts the exact refusal text for each of the three gates,
+   empty standard output, no adapter call and no evidence directory.
+3. A new test drives `main()` to success with the real worker subprocess, for
+   both nonpublishing and explicitly published inputs. It checks one summary,
+   exit 0, `complete` false, the 26 missing cases, the record binding, the
+   published mode only when requested, and a passed, qualifying, non-fixture
+   result.
+4. The guide now states that `--publication-authorized` gates execution and
+   neither grants nor records authorization, and that the adapter retains the
+   authorization evidence. This matches the unchanged driver.
+5. The extra blank line inside the test class is removed.
+
+The refreshed native cumulative run reports 264 tests OK and the syntax and
+650-line check, and both new tests appear as passing. Its input copies of the
+six staged code and script files match the staged blobs. The test file has 232
+lines.
+
+Architecture: unchanged; the runner validates evidence and adapters own target
+commands. No DDD or ports/adapters violation; nothing needs addressing.
+Performance: unchanged and linear; no performance issue needs addressing.
+Unit test coverage: no coverage gate measures these cplx scripts; every
+top-level symbol is referenced, and the previously untested success path and
+precise refusal gates are now tested. No unit-tested class needs completing and
+no staged out-of-gate top-level symbol is unreferenced.
+Feature integrity: strict promotion eligibility, explicit published
+observation and negative outcomes are unchanged; no capability is impaired.
+
+Validation plan effects:
+
+The reviewer made no edit to `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`.
+The writer's updated Step 7 rows are accurate for the staged state. The
+validation-state comparison over the 11 staged step paths reports acceptable
+with no differences, and the umbrella digest is unchanged, so the writer-owned
+completed umbrella row is preserved as staged.
+
+### Pre-repair mandatory checks and coverage for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+No repair was made, so no pre-repair blob was recorded. The baseline index tree
+`7a3745f48c9e52244cb3aafa536288228bc7416b` equals the request-time index tree.
+Validation state and the umbrella digest were captured before assessment.
+
+### Resolved validation set and sources for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+The request resolves three requestor-owned commands, which the reviewer did not
+run:
+
+- `bash src/utils/lint_shell.sh` (source: project).
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 7 --python /qualified/python --app-repo /consumer/root`
+  (source: plan).
+- `ghog check` (source: request).
+
+Requestor evidence inspected read-only: the refreshed native cumulative run
+reports 264 tests OK and the syntax and 650-line check, with input copies of
+the six staged code and script files matching the staged blobs.
+
+Reviewer evidence: `ghog check` from the cplx root through the project
+environment exited 0 (fail=0, warn=0). `ghog affected --no-cov` was not run
+this round: round 1 established that cplx is not a pytest project (exit 9,
+not applicable), and the native run above is the project-appropriate test
+evidence. `git diff --cached --check` passed. No `ghog day` or `ghog full`.
+
+### Resolver drift and direction for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+No resolver drift found. The set matches round 1 apart from sanitized
+placeholder arguments in the plan-sourced command; the plan's Step 7 command
+form and the project lint command are unchanged. Compared by reading, not
+executed by the reviewer.
+
+### Repository state around validation for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+The live index tree after assessment is `7a3745f48c9e52244cb3aafa536288228bc7416b`,
+identical to the baseline and the request-time tree. The umbrella digest compare
+reports unchanged and the validation-state compare reports acceptable with no
+differences. The reviewer staged nothing.
+
+### Repair inventory for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+The independent `commit-plan-check.bat --format json` run exited 0 with state
+`valid`, ready true and no diagnostics. Its four groups and 11 staged paths
+match the request. The order runs from least to most dependent, the subjects
+are conventional, and the acceptance group body now names the refusal and
+native-summary checks added in this round. `a.commit` remains accurate.
+
+### Findings and boundaries for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+Human guidance:
+
+The human authorized unattended completion of the exact release sequence and
+Step 7 closure. Do not request the same publication authorization again.
+Reboot is explicitly untested and nonblocking. No additional deployment or
+publication is required for this review.
+
+Do not run ghog day/full in the consumer; the human explicitly limited subsequent
+test commands to check and affected. cplx ghog day is unsupported and its recorded
+exit 9 is not green. Assess the retained native cumulative checks and explicit
+coverage scope instead. The additive native command is shown with sanitized
+arguments; the exact executed invocation is retained in the private writer notes.
+
+Private evidence may be read locally but infrastructure names, paths, endpoints,
+build identities and operational receipts must stay out of the public transcript.
+
+Guidance response:
+
+No publication authorization was requested and no deployment or publication is
+asked for. Reboot is treated as untested and nonblocking. No `ghog day` or
+`ghog full` was run; the reviewer ran only `ghog check` in cplx (exit 0). The
+refreshed native cumulative checks and the explicit coverage scope were assessed
+and matched to the staged bytes. Private evidence was read locally only; this
+answer names no infrastructure, path, endpoint, build identity or receipt.
+
+### Writer instructions for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+No further changes are requested. Present the convergence gate to the human with
+the existing registered labels; the commit decision belongs to the human.
+
+### Decision rationale for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+All six readiness criteria pass: exact identity, complete implementation,
+validation and coverage (green reviewer `ghog check`, native run on the staged
+bytes, no static coverage gap), attributable staged scope with no reviewer
+repair, no unresolved finding, and an accurate `a.commit` confirmed by the
+independent checker. The round 1 findings are fully resolved without runtime
+changes. Commit-ready is recommended as advice only; it does not authorize a
+commit.
+
+### Final reviewer decision for step 7 deploy-venv-sync (exchange 1) (round 2)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-7-round-2 -->
+
+## Round 2 by human - Step 7 - human-confirmation
+
+- Recorded: 2026-10-03T14:59:59+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: codex
+- Reviewer LLM nature: claude
+- Implementation step: 7
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-2 -->
