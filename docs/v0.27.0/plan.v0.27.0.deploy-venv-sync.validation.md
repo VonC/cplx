@@ -1,12 +1,13 @@
 # v0.27.0 deploy-venv-sync implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
-Steps 1 and 2 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md)
-were checked on 2026-09-23; Step 3 was checked on 2026-09-24. Steps 3b and 4
-have been checked; Steps 5-7 remain pending. Step 3b is a non-qualifying probe
-added on 2026-09-24. Each step includes its mapped private integration
-obligations; these checks do not validate the full lifecycle.
+All steps of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md)
+are implemented and validated, including the separately recorded actual
+consumer integration. Step 3b retains its non-qualifying probe status; final
+qualification and rollout are established by Steps 5-7. Step 7 closed on
+2026-10-03 after authorized release publication, normal retrieval and offline
+deployment and recovery. Each step states its evidence scope explicitly.
 
 ## File-based IO cost clarification for deploy-venv-sync implementation
 
@@ -1084,8 +1085,16 @@ Final target qualification and production promotion remain Step 7.
 
 ### Analysis of Step 7 implementation state
 
-Not started. Step 7 is not implemented because its planned code, integration
-and execution evidence have not been produced or checked.
+Yes. Step 7 has been fully implemented.
+
+The reusable implementation and the actual consumer integration have matching
+execution evidence. The qualified nonpublishing candidate was promoted through
+the unchanged outside-CI operator, retrieved through the normal release path,
+and used for both offline predecessor recovery sequences. All 27 acceptance
+rows are backed by digest-bound evidence within their documented execution or
+unchanged-component reuse scopes. Cleaned consumer delivery and independent
+service supervision also passed. Reboot remains untested and nonblocking by
+human decision.
 
 ### Goal for Step 7
 
@@ -1103,24 +1112,145 @@ Use `tests/unit/deploy_venv_sync/test_acceptance_evidence/test_acceptance_eviden
 
 ### What was implemented for Step 7
 
-_(empty — no check has taken place yet.)_.
+- `acceptance_deploy_venv_sync.py` drives 27 explicit acceptance cases through
+  subprocess adapters. It requires fresh completion observations, matching
+  candidate and predecessor identities, nonempty digest-checked evidence and
+  explicit negative readiness assertions. Fixture success is kept separate
+  from native qualification.
+- `acceptance.deploy-venv-sync.sh` and `verify.deploy-venv-sync.sh` wire the
+  driver and its focused unit tests into the native cumulative checks.
+  `acceptance.deploy-venv-sync.md` documents local inputs, adapter contracts,
+  native execution and the publication boundary without private endpoints.
+- `deploy_venv_release.py` exposes explicit CI observation for published
+  evidence while preserving strict nonpublishing eligibility for promotion.
+  Unit cases prove that default eligibility still rejects published evidence.
+- The refreshed cumulative native run passed 264 checks, shell syntax,
+  ShellCheck and the Python line ceiling; no changed Python file exceeds
+  650 lines. Focused driver tests also passed on the authoring host. They
+  assert exact preflight refusal reasons and successful native summaries for
+  both nonpublishing and explicitly published candidates. A successful subset
+  remains incomplete and lists the other 26 cases.
+- Actual native lifecycle evidence covers reconstruction, repeat sync, mirror
+  recreation, missing inputs, invalid environments, lock/wheel/distribution
+  drift, interrupted sync, binary tampering and changed toolchain identity.
+  Debian and RHEL observations include shipped runtime providers, original
+  wheel ELF bytes and dynamic paths, readiness and root serialization.
+- Both predecessor formats passed offline recovery after deliberate failure
+  and after successful upgrade using the repaired consumer entry. Installed
+  predecessor entry bytes match the observed baseline. The historical
+  compatibility exception accepts only two original comment-path relocations.
+- The official consumer deployment passed startup, revision and independent
+  lifecycle observation. Reboot testing is explicitly untested and nonblocking
+  by human decision; it is not used as evidence of lifecycle correctness.
+- A separate nonpublishing candidate passed strict combined CI, repository
+  nonpublication comparison, packaging/source-impact audit, Debian runtime and
+  rejection of mismatched qualification. Earlier negative controls are reused
+  only under explicit unchanged-component comparisons. Its exact native
+  runtime, serialization and both rollback sequences passed; independent
+  capture rehashed 11,934 files. Original provider-failure observations remain
+  explicitly bounded reuse, separate from fresh candidate execution.
+  Candidate retention across a later build is privately recorded.
+- The final qualification record binds combined CI, Debian, RHEL, offline
+  reconstruction, readiness and both predecessor recovery formats. The
+  unchanged operator accepted its exact candidate and predecessor identities.
+  The later authorized publication used those same qualified bytes.
+- The immutable tools archive is published and independently verified. All
+  eight retained predecessor objects have full-byte repository readback and
+  matching digests. Each predecessor retains its own entry, application and
+  tools, plus its reconstruction inputs where applicable.
+- The qualified timestamped snapshot was published, retrieved with matching
+  digests and used for actual offline recovery. The consumer already pins the
+  immutable tools version, URL and digest. No toolchain-acquisition redesign
+  or replacement of the accepted archive was needed.
+- After renewed human authorization, the original operator published the
+  qualified immutable application release. It verified every retained and
+  uploaded object by full-byte readback before publishing the final binding.
+  Normal release retrieval verified the same binding and all object digests.
+- The normally retrieved inputs passed ten native phases with remote services
+  denied before installation: baseline, deliberate failed upgrade, recovery,
+  successful upgrade and successful-upgrade rollback for both predecessor
+  formats. Independent capture rehashed the native evidence; the final
+  acceptance map connects qualification, publication, retrieval and recovery.
+- The consumer registry pins the five normally retrieved release inputs by
+  immutable coordinate and digest. The delivery pipeline and deployment
+  assertions accept exact release labels as well as timestamped snapshots;
+  consumer registration is committed and pushed, and deployment compatibility
+  is merged. Focused consumer and contract checks passed.
+- Temporary consumer diagnostics were removed through committed delivery
+  changes. Structural comparison preserved every other delivery task, and
+  the cleaned official check-mode run verified all five input digests. The
+  subsequent real deployment passed startup and both revision checks. Both
+  service APIs returned healthy matching revisions without drift; independent
+  observation confirmed the service unit watches the same script-started
+  daemon with the administrative hold removed. The minimal acquisition,
+  startup and revision checks remain in the consumer's deployment adapter;
+  shared deployment-library sources are unchanged.
+- Merged temporary diagnostic branches were removed locally and remotely
+  after exact ancestry checks and creation of a verified recovery bundle.
+  All worktree commits and file status were preserved. Reconciliation and
+  cleanup are complete, with historical diagnostics retained privately.
 
 ### New types or classes introduced for Step 7
 
-_(empty — no check has taken place yet.)_.
+The integration driver uses focused functions and explicit dictionaries. It
+adds no production class hierarchy. The new unit-test class owns subprocess
+fixtures for the acceptance evidence contract.
 
 ### Architecture check for Step 7
 
-_(empty — no check has taken place yet.)_.
+The driver owns orchestration and evidence validation; consumer adapters own
+acquisition, credentials, backend transport and application lifecycle commands.
+The shared release helper remains independent of those adapters. The explicit
+published-observation API does not relax promotion eligibility. No DDD or
+ports/adapters boundary violation was found. There is no architecture issue
+that needs addressing.
 
 ### Performance check for Step 7
 
-_(empty — no check has taken place yet.)_.
+File hashing streams bytes with bounded memory. Identity/evidence maps use
+linear traversal; deterministic reporting sorts bounded collections. Rehashes
+at capture, qualification and publication boundaries intentionally detect
+changed inputs. No new quadratic computation was found. There is no
+performance issue that needs addressing.
 
 ### Unit test coverage check for Step 7
 
-_(empty — no check has taken place yet.)_.
+The unit tests under `tests/unit/deploy_venv_sync/test_acceptance_evidence/`
+exercise fresh success, subprocess failure, stale/missing evidence, mutated
+identity, tampered files and incomplete negative observations. Existing CI
+evidence unit tests exercise the added published-observation API and retain
+strict default rejection.
+
+No configured project coverage percentage measures these cplx scripts; the
+consumer application's coverage gate does not measure them. This check makes
+no cplx percentage claim and did not rerun tests to infer one. Static inspection
+found references for every added top-level symbol, including `case()` called
+at module import to construct `CASES`. No production class below 100% coverage
+was identified as needing completion. No top-level symbol is unreferenced.
 
 ### Feature integrity for Step 7
 
-_(empty — no check has taken place yet.)_.
+Accepted toolchain bytes, original wheel bytes, canonical metadata and helper
+provenance remain bound to retained identities. Existing strict CI eligibility
+is preserved, and published CI observations are explicit. Negative outcomes
+remain failures and historical results retain their original candidate
+identity. Deployment and rollback evidence includes the consumer repair;
+earlier failed attempts remain retained. Publication and post-retrieval
+execution now close the remaining rollout gates. Historical observations retain
+their stated scope rather than being presented as new candidate executions.
+
+## Analysis of Step 7 Implementation
+
+Step 7 completes the exact-candidate lifecycle from protected CI inputs to
+authorized immutable publication and repository-independent recovery. The
+acceptance driver invokes explicit consumer adapters, rejects stale or altered
+observations and separates fixtures from target qualification. Its focused
+unit tests and the cumulative native checks passed. The observation API keeps
+published CI evidence distinct from nonpublishing promotion eligibility.
+
+The final operational proof includes both target runtimes, consumer delivery,
+retention, wrong-qualification rejection and release retrieval followed by both
+offline predecessor recoveries. Earlier negative controls are reused only where
+recorded source comparisons establish unchanged affected components. Private
+receipts preserve exact identities and execution details; public outcomes remain
+generic. No required Step 7 work remains unimplemented.
