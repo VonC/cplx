@@ -81,6 +81,40 @@ class CiEvidenceTest(unittest.TestCase):
     def test_complete_build_is_eligible(self):
         self.assertEqual(self.check()["build"]["number"], "211")
 
+    def test_published_observation_does_not_become_dry_run_eligibility(self):
+        self.evidence["phase2"]["publish_status"] = "published"
+        with self.assertRaisesRegex(ValueError, "mandated stages"):
+            self.check()
+        path = self.root / "ci-evidence.json"
+        observed = self.release.validate_ci_observation(
+            self.record, self.files, self.coverage, path, publication="published")
+        self.assertEqual(observed, self.evidence)
+        with self.assertRaisesRegex(ValueError, "mandated stages"):
+            self.release.validate_ci_evidence(self.record, self.files, self.coverage, path)
+
+    def test_published_observation_still_requires_exact_successful_ci(self):
+        for section, key, value in (
+                ("build", "result", "FAILURE"),
+                ("phase2", "publish_status", "dry-run"),
+                ("phase2", "publish_status", "skipped"),
+                ("phase2", "sonar_status", "failure"),
+                ("phase2", "sync_status", 1),
+                ("phase2", "complete", False),
+                ("phase2", "inventory_after_sha256", "f" * 64),
+                ("candidate", "record_sha256", "f" * 64)):
+            bad = copy.deepcopy(self.evidence)
+            bad["phase2"]["publish_status"] = "published"
+            bad[section][key] = value
+            path = self.root / "published.json"
+            path.write_text(json.dumps(bad))
+            with self.subTest(section=section, key=key), self.assertRaises(ValueError):
+                self.release.validate_ci_observation(
+                    self.record, self.files, self.coverage, path, publication="published")
+        for publication in (None, True, "success", "any"):
+            with self.subTest(publication=publication), self.assertRaises(ValueError):
+                self.release.validate_ci_observation(
+                    self.record, self.files, self.coverage, path, publication=publication)
+
     def test_rejects_mistyped_or_unsupported_schema(self):
         for value in (True, False, 1.0, "1", 2, None):
             bad = copy.deepcopy(self.evidence)
