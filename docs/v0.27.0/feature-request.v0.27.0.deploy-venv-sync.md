@@ -8,6 +8,19 @@
 
 ## Revision introducing target-created environments
 
+Revision of 2026-10-03: the human requires delivery through the consumer's
+original deployment orchestration, unchanged, after restoring its entire
+application path to the recorded baseline. AC16, AC17 and requirement Q11 add
+this integration to the validated lifecycle. They preserve AC01-AC15 and the
+consumer-acquisition/reusable-reconstruction boundary.
+
+Revision of 2026-10-04: Step 8 covers the qualification environment only, where
+the temporary delivery task can bootstrap before restoration. Mandatory Step 9
+adds first-time and production delivery through the unchanged original contract,
+after actual AC16/AC17 evidence closes Step 8. AC18, AC19 and requirement Q12
+record this extension. The topic and its umbrella item remain pending until
+Step 9 is validated.
+
 Umbrella item 8 and decision D11 replace a copied application environment with
 one reconstructed from the release lock on the deployment target. Item 7's
 accepted toolchain archive and its publication/adoption evidence remain prerequisites.
@@ -374,6 +387,346 @@ that the supplied files suffice. Consumer acquisition beforehand may use remote
 services. Offline predecessor recovery still requires the complete retained set
 and never depends on fetching missing recovery inputs.
 
+## Required delivery through the consumer's unchanged orchestration
+
+Human decision of 2026-10-03: conform to the orchestration exactly as it exists.
+Its commands, order, variable inconsistencies and behavior are inputs, never
+change requests. Restore the whole application path in the operations repository
+to the recorded baseline while preserving concurrent changes elsewhere. This
+path-only restoration is the only operations change. No role, template, job,
+shared-library, access, network or privilege exception belongs to this effort.
+The reusable reconstruction contract and consumer-owned acquisition boundary
+remain unchanged.
+
+| Finding | Required behavior or evidence |
+| --- | --- |
+| 1. Existing application archive | The role delivers the candidate's exact existing application archive only. Step 8 stop rehashes the four bootstrap-retained inputs with no fetch. Later Step 9 acquisition verifies entry, record, companion and tools before lifecycle change; tools reuse requires a retained exact-hash archive. Store them outside staging. No new transport bundle, registry field or publication is authorized; Selections are signed on the existing shared drive, with no artifact-repository publication. |
+| 2. URL rewrite | Derive the role URL from the query-free immutable application asset plus the fixed sort/direction suffix, and prove byte equality. Consumer fetches use the four canonical URLs directly. Never resolve latest or a moving version. |
+| 3. Unused deploy variable | Only stop and start execute consumer code. Start calls the verified entry synchronously and propagates its result. |
+| 4. Prefix dispatcher | One executable host-Bash dispatcher at the fixed prefix-relative launcher accepts only the two specified argument shapes in expanded or literal home form. Home is only an argument check. No home files, PATH registration, general-shell link or eval. Stable versioned targets from previously verified application bytes survive replaced trees; strict ownership, realpath, mode and atomic installation are mandatory. Foreign existing launcher blocks bootstrap. |
+| 5. Bootstrap ordering | New immutable candidate through the unchanged current five-input delivery installs the dispatcher and targets before restoration. Switch the source-controlled consumer payload only when the restored source is loaded; no real run with mismatched payload and source. |
+| 6. Independent selection | Every attempt, retry and recovery requires a fresh short-lived human-signed selection on the existing shared drive. Stop verifies it with release N's stable public key before mutation, binds all five exact hashes/URLs and target identity, and refuses replay or mismatch. Part C installs trust and retention only, with no arming. |
+| 7. Consumer gates | Assign all sixteen former delivery-task responsibilities to consumer code, each with nonzero failure. Held daemon-first start verifies both local APIs, exact revision/environment, disk/launch agreement and no drift, then releases hold and verifies same-daemon supervision. Re-hold on post-release failure. Rebudget the wrapper rather than putting two further five-minute checks inside its existing 600 seconds. |
+| 8. Separate processes | Durable attempt reservation and short coordination lock span stop and start. Recheck reservation under the existing root deployment lock before install or recovery, excluding competing mutations. |
+| 9. Check mode | Verify exact published bytes on the controller and use the original check job type without arming. Downloads and command tasks are skipped but directory creation may occur. Report controller verification and check traversal separately, with target execution untested. |
+| 10. Explicit recovery | Reject native staging rollback. Each recovery has a fresh signed selection bound to the failed attempt and checkpoint. Our pipeline proves the previous job terminal; stop proves root-lock availability and no live attempt-owned process. No Step 8 operator channel. Both offline predecessor formats and failure before installer/pending state remain covered. |
+| 11. Verification claim | No unchecked byte is installed or run, and any mismatch fails the deployment. The design rules below establish this claim despite staging before verification. |
+| 12. Prerequisite evidence | Before C, our development account on the qualification host records host network/client and shared-folder read/write evidence. C application-account probes remain final authority for account-specific access/proxy, unit and closure, returned through shared logs. Retained check console supplies defaults and per-task orchestration overhead. Accept both tilde forms. Missing evidence blocks restoration. |
+| 13. Staging cost | Replay exact filesystem staging on the same disks with current/previous trees. Add evidenced per-task orchestration overhead times remote operation count and conservative elapsed/disk headroom. The reference archive has 549 directories, 3,085 files, 47 MB packed/81 MB unpacked, about 550 two-operation rotations and 86 permission operations per tree. Fit existing job/pipeline/outage/disk bounds before C and remeasure G. Replay alone does not measure orchestration cost. |
+
+### Stop flow under the fixed contract
+
+Stop and start receive the same arguments for deployment and restart actions.
+They derive operation type from a durable selection snapshot and file identity,
+never from an action argument, newest file, timestamp alone or missing marker.
+
+1. Verify host, non-root application account, real installation prefix and
+   loaded service unit identity, including its user, start and pre-start commands.
+2. Under a short coordination lock, validate and snapshot a signed deploy or
+   recovery selection into an attempt reservation outside staging. Reject live
+   conflicts and preserve failed/held recovery gates. Missing or invalid selection
+   records the condition and admits ordinary stop only, with local exclusion,
+   archive identity and checkpoint, no signed reservation and no share reread.
+3. For Step 8's same-release deploy, rehash all four bootstrap-retained inputs
+   without network, refusing missing or changed bytes. For later Step 9 deploy,
+   fetch the entry, release record, companion and tools
+   archive from the four exact canonical URLs before stopping anything.
+   Reuse tools only when a retained archive hashes to the exact expected value.
+   Bound transfers, reject fallback sources, check every digest, parse the
+   release record as ten unique allowlisted keys without sourcing it, and
+   cross-check its identities with the independent snapshot. Plain restart and
+   recovery fetch nothing.
+4. Record the delivered-archive path's file identity, sufficient to detect
+   replacement with identical bytes, and the exact last working release.
+5. Enter the existing cooperative deployment hold outside replaced trees,
+   preserve the unit hook bridges, signal only verified unit members and
+   confirm its parked host-sleep state within the existing 55-second bound.
+   No root, unit edit or service-manager stop is involved.
+6. Stop the application stack and script-started daemon within their bounds,
+   confirm no survivors and return success.
+
+Failures in items 1-4 return nonzero before role download, preserving the incoming
+application and hold state. On a fresh running entry, failure entering or parking
+the hold releases only the newly introduced hold, verifies restored supervision
+and returns nonzero. An already held/stopped entry preserves its hold on failure.
+Failure after stopping retains a failed attempt and requires bounded recovery.
+
+### Start flow and deterministic operation selection
+
+The start target downloads nothing. It reads the stop snapshot and compares the
+current delivered-archive identity with the recorded pre-delivery identity.
+
+| Stop snapshot | Archive delivered since stop | Mode |
+| --- | --- | --- |
+| Valid reserved deploy, matching | Yes | Deploy |
+| Ordinary stop, no signed deploy/recovery reservation | No | Unsigned checked restart |
+| Ordinary stop, no signed deploy/recovery reservation | Yes | Install nothing; checked checkpoint restoration and nonzero |
+| Valid reserved recovery | No | Typed recovery, even if no installer call is needed |
+| Valid reserved deploy | No | R16 checked restart; forward selection remains pending and unused |
+| Reserved selection mismatches delivery, or recovery has delivery | Yes | Refuse installation; checked checkpoint restoration and nonzero |
+| Missing local lifecycle record, unreadable or ambiguous archive identity, or unresolved competing state | Any | Refuse safely; never infer ordinary start |
+
+Refusal installs nothing. A locally recorded ordinary stop permits checked
+restoration of its working checkpoint even without a signed deployment reservation.
+Unauthorized delivery always returns nonzero, including after successful service
+restoration. A reserved attempt whose bytes or mode fail checks similarly attempts
+its recorded checked last-working restoration and fails. Failed restoration keeps
+the hold. Missing or ambiguous local lifecycle/checkpoint evidence refuses safely;
+ordinary restart never bypasses failed/held or unresolved-attempt recovery gates.
+
+Human clarification on 2026-10-03: after identifying a matching deploy mode,
+start first repeats the bounded stop-only checks using the attempt's already
+verified stable code. Under the root lock, recheck reservation and host/account/
+prefix/unit identity, maintain the cooperative hold, stop any verified survivors
+idempotently and confirm quiescence before proceeding. This does not repeat input
+fetches, create a new reservation, recapture the pre-delivery archive identity,
+change the last-working checkpoint or consume the selection. It runs no code
+from the newly staged archive. Failure installs nothing, retains the failed held
+attempt and returns nonzero. Plain start, recovery and refusal do not perform
+this additional deployment-only stop. New stop behavior becomes active only after
+successful stable-version refresh, for the next operation.
+
+Deploy copies the exact retained downloaded application archive into a private
+attempt directory, verifies that copy against the snapshot, and ignores the
+role's unpacked tree. Rehash the other four retained inputs at use. With the
+existing root deployment lock still held, recheck the reservation and invoke the verified
+entry synchronously using only validated input paths and record values.
+Preserve its nonzero result after its own failed-upgrade recovery.
+
+Start the daemon first while held. Require both local APIs to confirm health,
+exact revision and environment, disk/launch agreement, no stale or drifted
+state, and running service components. Record daemon account, PID, boot identity
+and start ticks. Release the hold only after these checks; then require the unit
+to observe that same daemon. A post-release failure re-holds and fails.
+Only final success advances the last working release. Selection replay protection
+records attempted/consumed identities independently of success; every failed forward
+attempt or recovery needs a fresh signed selection to retry. R16's completed
+restart leaves the forward selection unused and closes its own reservation.
+
+Plain start applies these runtime and supervision checks to the current recorded
+release. Recovery acquires the same root lock, uses the explicitly retained
+predecessor's own entry with the existing offline rollback switch, then checks
+that predecessor's identity through the plain-start gates. Both reconstruction
+and historical shipped-environment predecessors remain reachable without network.
+Failure before the installer or its pending record exists uses the attempt's
+last-working checkpoint, not a guessed older predecessor. Recovery never changes
+the original failed deployment result. Every mode keeps logs and receipts outside
+staging.
+
+### Former delivery-task responsibility coverage
+
+All sixteen responsibilities require explicit consumer owners and fatal outcomes:
+managed target/action/schema/revision identity; five exact asset kinds and allowed
+URLs/digests; staging ownership and safe paths; controller and target byte
+verification; strict ten-key record cross-check; expected versions/profile/selection
+and validated installer inputs; private attempt staging; loaded service user and
+command identity; cooperative-hold capability; held fully stopped installation;
+installer status and bounded diagnostics; first-start status; application health,
+environment and exact launch/disk revision; companion-service health and running
+components; hold release and same-daemon observation; and scoped controller
+cleanup preserving target recovery evidence.
+
+### Verification and rollout boundaries under the fixed contract
+
+**Verification claim: no unchecked byte is installed or run, and any mismatch
+fails the deployment.** The fixed role downloads with certificate checks disabled
+and unpacks before start, but executes nothing from that archive. Our scripts
+never execute its unpacked tree or staging executables. They install only from
+the privately copied, independently hashed downloaded archive and verified retained
+inputs. Mismatch restarts the last working release and returns nonzero.
+Retained recovery inputs, selection, reservation and journals live outside the
+role's rotating staging tree. This does not claim that unchecked bytes never
+reach the server.
+
+A new candidate repeats the complete two-phase build and affected exact-byte
+qualification. Reuse older evidence only for demonstrably unchanged components.
+Step 8 tests one same-release qualification deployment through restored original
+orchestration. Current temporary delivery installs release N's verified stable
+closure/key and supplies probes and retention/activation receipts. Normal path-only
+restoration preserves concurrent history and loaded-source/payload agreement.
+Controller byte verification and original check traversal report separate verdicts.
+After a fresh signed selection, our pipeline launches the real original action;
+independent external checks bind both endpoints, revision, environment, account,
+absent hold and unit observation of the script-started daemon.
+
+Bootstrap, restoration and every operational phase require separate execution
+authorization. Shared logs, pipeline console and endpoints carry evidence with no
+Step 8 maintenance/operator route. Recovery uses fresh signed authority plus
+pipeline job-terminal and target lock/process proof; all inputs remain offline.
+After successful G but failed external H, an unsigned ordinary checked restart
+of the same release preserves the external failure and performs no rollback.
+Unknown job/process state blocks recovery. Reboot remains untested/nonblocking;
+healthy APIs do not prove lost local configuration reconciled. No real original-path
+success is claimed by this specification.
+
+Human decisions at round 8 on 2026-10-04 select shared-drive signed selection
+for every forward attempt, retry and recovery. The human signs on their corporate
+workstation with their own key and writes to a fixed per-environment filesystem
+folder on the existing shared drive. Stop reads and snapshots it before lifecycle
+mutation, verifying the signature with the public key in its pinned verified
+stable closure. The key and host-utility verifier ship in release N, qualified
+in Step 8 B and installed in C; neither requires application Python. Each selection
+binds operation, exact five canonical URLs and SHA-256 values, environment/account,
+profile, unique attempt identity and short expiry chosen when signed. Recovery
+also binds the failed attempt and exact checkpoint. Consumed identities remain
+outside staging. Missing or invalid selection grants no deployment or recovery
+authority. Under confirmed R19, stop records the condition and admits ordinary
+stop only when lifecycle safety permits; it retains local exclusion, archive
+identity and checkpoint without signed reservation or a later share reread.
+Unchanged delivery takes unsigned checked restart; unauthorized delivery installs
+nothing, restores the checked working release and fails. Failed/held or unresolved
+states cannot bypass recovery. Check mode reads no target selection and never
+arms or consumes one.
+
+No arming object is published to the artifact repository. The fixed filesystem
+location does not resolve artifacts; all five input URLs remain immutable and
+latest fallback remains forbidden. Part C installs closure/key, probes and
+retention/activation receipts only, with no forward or recovery arming. Each
+later attempt receives a newly signed selection, including recovery retries.
+No bootstrap count, non-expiring authority or conditional recovery authorization
+survives this decision. The human selected the offline backup key on 2026-10-05:
+release N trusts primary and independently held backup public keys. Evidence and
+qualify one host verifier; never infer a key format or fetch trust on first use.
+
+R16 option A is selected: a stop/start-only launch with a valid pending forward
+selection restarts the last working release using its own reservation, full held
+runtime and supervision checks. Unchanged delivered-file identity at start
+distinguishes that launch because the original forward role never calls start
+after failed delivery. Leave the forward selection pending and unused, release
+only the restart reservation, receipt its result and return the checks' status.
+This applies to outside launches too; our pipeline does not control all launches.
+Unreadable identity refuses. A failed restart retains its evidenced held state
+and diagnostics without converting the forward selection into recovery authority.
+Ordinary unsigned restart and this R16 path omit deployment-only stop recheck.
+
+### Confirmed restart admission and backup trust on 2026-10-05
+
+The human confirms R19: ordinary restart requires no signature. The fixed stop
+argv is identical for forward deployment and ordinary restart. Missing, unreadable
+or unavailable shared selection, or expired, consumed, wrong-target, bad-signature,
+partial or malformed input, is receipted and admits ordinary stop only, subject
+to the normal lifecycle safety gates. Record local exclusion, delivered-file
+identity and the working checkpoint without reserving signed deployment authority.
+Do not reread the share during that ordinary run.
+
+With no delivery, start checks and restarts the working release and returns the
+checks' status. With delivery but no valid signed reservation, start installs
+nothing, restores the working checkpoint with the full checks and returns nonzero.
+The human accepts that an unsigned forward launch can cause downtime before
+start refuses installation. This supersedes the literal pre-lifecycle refusal
+rule for invalid selection. Failed, held or unresolved-attempt states still
+require their checkpoint-bound recovery and cannot be bypassed by ordinary restart.
+A valid pending forward selection with unchanged delivery takes R16, releases
+only its reservation and leaves forward authority unused; expiry is checked on
+later admission. A valid recovery remains typed recovery even with no installer
+call. Failed external H after successful G uses unsigned checked restart of the
+same working release, with no rollback and the earlier failure preserved.
+
+The human selects Q38 option A: release N's verified stable closure trusts the
+primary public key and a second offline backup public key. Backup private-key
+custody must be independent of the primary key's loss condition. Before Part B,
+document backup recovery, verified closure rotation/revocation and continued
+attempt-ID, expiry and checkpoint enforcement. Backup signing issues fresh
+authorized attempts; it provides no unsigned bypass and does not automatically
+revoke a compromised primary key. Revocation requires a verified closure update.
+Qualify primary unavailable, backup unavailable, unauthorized key and interrupted
+rotation fixtures. Q37 still requires public-format and host-utility evidence
+before qualifying one verifier. This decision creates, exports or installs no key.
+
+## Required first-time and production delivery after qualification
+
+Human decision of 2026-10-04: first-time installation and production deployment
+belong to mandatory Step 9, after Step 8 proves AC16 and AC17 in the qualification
+environment. Neither environment can use the temporary delivery task. Conform
+to the original commands, ordering and behavior exactly as they exist. Request
+no variable, role, template, job or operations change for Step 9.
+
+Before the original role's first stop in a new environment, the one-time
+scripts-only bootstrap installs the dispatcher and complete stable closure from
+the exact registered published archive. Independently verify its whole digest
+before safe allowlisted extraction and member verification, then first-activate
+under the root lock with dispatcher last. No existing stable/foreign/damaged state
+may be relabeled as first activation. Existing versions retain normal
+verified-success activation. Prepare verified historical retention where needed;
+dedicated non-dispatch inspection receipts prove completion. Interrupted bootstrap
+refuses premature lifecycle use until its receipt-bound preparation is complete.
+Arming is a separate fresh shared-drive signature after bootstrap, never part of
+the session. Later successful deployments refresh stable scripts without repeating
+first activation.
+
+Route (b) is selected for production and any new environment: an operations-team
+operator runs our exact self-verifying commands as the application account once
+for bootstrap. Route (a) is unavailable in production. This is an operator action,
+not an access, privilege, unit, role, template or job change. Record the named
+operator, existing account/host access and separately authorized session. Later
+arming uses the human's workstation and shared drive, with no recurring operator
+or pipeline shell access. Development rehearsals use our existing development
+account and need no operations operator; Step 8 uses current delivery and original
+pipeline actions and has no operator prerequisite or fallback.
+
+Empty-prefix hooks option (i) is selected. On an independently evidenced empty,
+inactive prefix, verified bootstrap installs hold-aware hooks with deployment
+hold set before any unit execution. No application or tools installation occurs.
+On an installed or running release, bootstrap leaves runtime, staging and unit
+start/pre-start hooks untouched; historical bridging belongs only to the first
+approved stop under hold. Unit configuration remains unchanged in all cases.
+
+For first-time delivery, prove that no application is installed or running and
+record explicitly that there is no last working release or recovery target. Stop
+must succeed with nothing to stop after the normal input and identity gates.
+Deploy start must recognize the selected delivery on an empty prefix and use the
+installer's first-install path. A refusal installs nothing and cannot attempt a
+fictional restart. A failed installation leaves a failed, held, non-ready state
+with evidence and verified inputs retained; no rollback success may be claimed.
+An explicitly authorized fresh retry must remain possible after terminal-process
+proof and safe reconciliation. An absent or ambiguous predecessor never silently
+selects first-install behavior.
+
+The application account, scripts and staging folders, and service unit with the
+required identity must already be provisioned. They are evidence gates, never
+requests for operations changes. The same applies separately in production to
+the managed job and template that run the restored production playbook, target
+artifact-repository access and existing access to the production application
+account for the one-time route (b) bootstrap. Unit identity must be observed for
+qualification and production; only the development replay permits no unit.
+
+Production starts from its actual historical shipped-environment release.
+Inspect its retained archives and completion markers read-only before upgrading.
+If they are absent or unsuitable, establish and verify complete retention of
+that exact historical release before proceeding, without inventing successful
+installation markers or substituting the pair used in an earlier isolated test.
+Refusal and recovery health checks must match the historical runtime interfaces
+and independently prove the selected predecessor's identity. Missing modern
+fields must not silently downgrade a modern candidate's checks.
+
+Production deploys only published, qualified release coordinates. The original
+approval step can wait up to two hours for the operations pilot before our stop;
+the consumer pipeline budget and selection freshness must include that wait.
+Approval expiry or absent approval must not begin the stop. All earlier input,
+serialization, hold, verification and offline-recovery guarantees continue.
+
+The selected rehearsal venue is our development installation under our own
+development account on the qualification host. Both empty-prefix and historical
+upgrade/offline-rollback rehearsals use a replay script, never the orchestration
+tool. Each replay operation identifies its original role task and audited baseline:
+exact stop/start argv through the prefix dispatcher, literal download filename,
+unpack, per-directory rename rotation, staging copy and permission changes. Exercise
+literal and expanded HOME forms, and use direct argv without an intermediate shell
+where the role uses none. Confine paths and lifecycle activity to the development
+installation; preserve its prior state and authorize preparation/restoration.
+
+This installation has no service unit. Its explicit development-only no-unit
+profile is refused for qualification and production, never selected because a
+unit query fails. Replay does not prove managed orchestration, hold parking or
+same-daemon supervision. Step 8 G proves running-release unit behavior on the real
+qualification managed path. Unit-related first-install hooks and historical hook
+bridging first execute for real in production, supported beforehand by fixtures
+and read-only production unit evidence obtained through route (b). AC18/AC19 accept
+the development replays together with Step 8's managed run with these limits.
+Use retained exact historical archives on that host, independently verify their
+pairing against production evidence, and never relabel an earlier isolated tools
+pair as production's pair.
+
 ## Acceptance criteria for deployment-created environments
 
 | ID | Required result and evidence |
@@ -394,6 +747,10 @@ and never depends on fetching missing recovery inputs.
 | AC13 | Public effort artifacts and review content contain no private application/library identifiers, infrastructure paths, endpoints, credentials, or job links. |
 | AC14 | Deployment/CI venv sync and recovery install compatible prebuilt dependency wheels without source builds. An unavailable compatible wheel fails clearly and blocks readiness. The application project itself is not built or installed during dependency sync. Independent application packaging and RHEL toolchain compilation are distinct. |
 | AC15 | A same-Python-version toolchain replacement permits venv reuse only with current interpreter/prefix, lock and runtime validation plus fresh archive-digest evidence. Consuming automation/operator procedures enforce serialization for overlapping sync, mirroring, deployment, and rollback on the same application root. |
+| AC16 | One actual same-release qualification deployment uses the original role archive and independently signed selection with five exact hashes/URLs, four locally rehashed inputs and zero stop fetches. B qualifies primary/backup public keys and the verifier; C installs them without arming. R19 ordinary admission and unauthorized-delivery refusal retain all safety gates. Fresh signed selections govern every G attempt/retry; R16 checked restart preserves unused forward intent. Fatal stable gates, deployment-only stop recheck, runtime/same-daemon proof, baseline equality and concurrent history all pass. Shared logs/console and both external endpoints bind revision/environment/account. Controller-byte and check-traversal verdicts stay separate. |
+| AC17 | Each recovery has fresh signed authority bound to the failed attempt/checkpoint, including retries and role transfer failure before start. Pipeline job-terminal and stop local lock/process proof admit typed offline recovery of both predecessor formats with held runtime/supervision checks. G failure returns to its same-release checkpoint. No operator or Ansible change is required; failure stays failed and missing recovery authority cannot bypass failed/held-state gates. R19 admits ordinary restart only from a safe state, and unauthorized delivery never installs. |
+| AC18 | After AC16/AC17 closure, separately authorized empty-prefix replay in our development installation on the qualification host proves verified scripts-only bootstrap, guarded activation, exact original task/argv/staging replay, first install, no-predecessor failure and fresh signed retry. Accept replay plus Step 8's managed run with explicit limits: development has no unit and proves no hold/parking/supervision or managed orchestration; its no-unit profile is rejected in qualification/production. Option (i) hooks first execute with a real unit in production, backed by fixtures and route (b) unit evidence. New environments use route (b) once for bootstrap, never recurring operator arming. |
+| AC19 | After AC16/AC17 and AC18, the separately authorized development replay proves historical upgrade/offline rollback from retained exact archives whose pairing is verified against production evidence. Accept replay plus Step 8's managed running-release unit proof, explicitly excluding production historical bridging and first-install unit proof from replay. Fixtures and read-only route (b) production unit evidence back those first real production executions. Actual authorized production uses route (b) bootstrap once, fresh shared-drive signed selections, qualified release coordinates, existing managed job/template and unchanged pilot approval. Approval-aware expiry/budgets, all runtime/same-daemon checks and both external endpoints must pass; the topic remains pending until this actual evidence closes. |
 
 ## Requirement clarifications
 
@@ -416,6 +773,17 @@ design Q09 remains the separate, unchanged operator-publication decision.
 | Q08 | A: consuming automation or operators enforce serialization per application root; this covers competing sync, mirroring/deletion, and rollback/deployment. | Required packaging and Python venv lifecycle; AC15 | Supporting overlapping mutations to the same root in this feature. |
 | Q09 | A originally required offline forward deployment. Human-approved amendment: cplx reconstruction starts with complete locally supplied files and remains offline with empty caches; the consumer owns earlier acquisition/delivery. Offline predecessor recovery retains its complete-input guarantee. | Consumer delivery and offline reconstruction boundary; AC02 and AC06 | Downloads or cache/Git dependencies during cplx reconstruction; fetching missing predecessor inputs during recovery. |
 | Q10 | B: deliver uv with application release inputs, preserving the qualified toolchain archive. Qualify the latest stable version, then freeze its version and digest for deployment and recovery regardless of install location. | Required toolchain Python and uv provenance; AC05; AC10a | Repacking the toolchain only to deliver uv, floating latest at deployment, or silently substituting another release's uv. |
+| Q11 | Human decision on 2026-10-03: use the consumer's original orchestration exactly as it exists; only restore the whole application path to its recorded baseline. Consumer code absorbs its command shapes, staging order, URL rewriting and unused deploy variable, performs all gates, and supplies explicit offline recovery. The follow-up clarification adds a deployment-only stable stop recheck without refetch or resnapshot. | Required delivery through the consumer's unchanged orchestration; AC16-AC17; design Q10; plan Q10 | Keeping the temporary delivery task; any orchestration-side edit or exception request, including changing script variables to another application's convention; native staging rollback as recovery; an in-package manifest as selection proof. |
+| Q12 | Human decision on 2026-10-04: Step 8 is qualification-only; mandatory Step 9 adds first-time and production delivery after actual AC16/AC17 closure. Bootstrap through existing maintenance access, explicitly handle no predecessor, prove historical retention and compatible recovery, and satisfy production approval/release/access gates and separate rehearsals. | Required first-time and production delivery; AC18-AC19; design Q11; plan Step 9 | Declaring the topic complete at Step 8; using the removed temporary task elsewhere; any operations-side change request; assuming qualification identity or isolated historical evidence proves production readiness. |
+| Q13 | Human round 6 direction retained except round 8 supersession on 2026-10-04: Step 8 is operator-free; C installs stable closure/key and probes with no arming. Fresh signed selections authorize every G attempt/retry/recovery; pipeline and local terminal proof remain required. | AC16-AC17; design Q12; Step 8 A-I | Bootstrap-recorded non-expiring authority, retry count, operator arming/terminalization and inferred evidence. |
+| Q14 | Human round 8 decision on 2026-10-04: signed selections on the existing shared drive, human key on corporate workstation, stable public key/verifier in release N. Short expiry per attempt, durable replay refusal, recovery checkpoint binding. | AC16-AC19; design Q13; plan Q37-Q41 | Artifact-repository arming objects, floating artifact resolution, unsigned deployment/recovery or first-use trust; offline backup trust is confirmed below. |
+| Q15 | Human round 8 decisions on 2026-10-04: R16 option A preserves pending forward selection during checked stop/start; decision 2 requires fresh signed authority for every attempt and recovery. | Stop/start mode table; AC16-AC17 | Consuming forward intent on an identified restart or carrying recovery authority across retries. |
+| Q16 | Human round 8 decisions on 2026-10-04: development replay venue and no-unit limits, option (i) empty-prefix hooks, route (b) once for production/new-environment bootstrap, and Step 8 A host evidence plus filesystem/remote-overhead budget. | AC18-AC19; Step 8 A; Step 9 | Managed-unit claims from development replay, blanket no-hook-write rule on empty prefixes, recurring operator arming. |
+| Q17 | Human R19 decision on 2026-10-05: ordinary restart needs no signature; invalid selection admits ordinary stop subject to safety, and unauthorized delivery restores/checks the working release and fails without installation. The human accepts possible downtime before refusal. | Stop/start flows; confirmed admission; AC16-AC17 | Signed ordinary restart or promising pre-lifecycle refusal with indistinguishable stop argv. |
+| Q18 | Human Q38 decision on 2026-10-05: release N trusts primary and independently held offline backup public keys. Document custody/recovery and verified rotation/revocation before B, preserving fresh identity/expiry/checkpoint checks. | Confirmed backup trust; AC16-AC19; design Q17; plan Q38 | Relying on unevidenced trust rebootstrap in every environment or unsigned key-loss recovery. |
+
+All requirement questions and the R19/Q38 human choices are consolidated. Trust
+implementation and real execution evidence remain required before their gates.
 
 ## File-based IO cost clarification for deployment-created environments
 
