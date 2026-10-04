@@ -1,13 +1,13 @@
 # v0.27.0 deploy-venv-sync implementation tracking and validation
 
-Yes, it is implemented.
+No, it is not implemented.
 
-All steps of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md)
-are implemented and validated, including the separately recorded actual
-consumer integration. Step 3b retains its non-qualifying probe status; final
-qualification and rollout are established by Steps 5-7. Step 7 closed on
-2026-10-03 after authorized release publication, normal retrieval and offline
-deployment and recovery. Each step states its evidence scope explicitly.
+Steps 1-7 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) retain
+their recorded validation, including Step 3b's non-qualifying scope and Step 7's
+2026-10-03 closure; Step 8 qualification-only original delivery/recovery and
+mandatory Step 9 first-time/production delivery are not started and lack their
+own implementation and actual execution evidence. Step 9 starts only after
+actual AC16/AC17 closure; the topic and umbrella stay pending until AC18/AC19.
 
 ## File-based IO cost clarification for deploy-venv-sync implementation
 
@@ -1254,3 +1254,244 @@ offline predecessor recoveries. Earlier negative controls are reused only where
 recorded source comparisons establish unchanged affected components. Private
 receipts preserve exact identities and execution details; public outcomes remain
 generic. No required Step 7 work remains unimplemented.
+
+## Step 8. Deliver through the consumer's original orchestration, unchanged
+
+### Analysis of Step 8 implementation state
+
+Not started. Consumer dispatch, stable targets, signed selection verification,
+replay prevention, retained-input checks, runtime gates and pipeline adaptation
+are unimplemented/unqualified. Bootstrap, restoration, original check/real run,
+external verification and offline recovery need separately authorized evidence.
+These planning amendments are not implementation or execution evidence.
+
+### Goal for Step 8
+
+Close AC16/AC17 by delivering and recovering the exact selected candidate through
+the fixed original qualification path with our verification/lifecycle control.
+The real run redeploys C's candidate. No maintenance/operator access is needed:
+temporary delivery installs closure/key/verifier and probes/receipts, never arming;
+the human signs each fresh attempt/retry/recovery through the shared drive, and
+the pipeline launches original actions. Recovery uses pipeline job-terminal proof
+plus local lock/process proof; shared logs/console/endpoints return evidence.
+Only normal restoration-PR review involves operations. First installation and
+production remain mandatory Step 9 work, so Step 8 cannot complete the topic.
+
+### Step 8 improvement expectations
+
+Human confirmation on 2026-10-05 settles R19 and Q38, with no execution claim.
+P35/P41 cover absent/unreadable/unavailable share and expired, consumed, wrong-target,
+bad-signature, partial and malformed selection, each with unchanged and delivered
+start. Verify local exclusion/archive identity/checkpoint, no signed deployment
+reservation and no second share read in ordinary mode. Unchanged delivery takes
+checked restart and returns check status; unauthorized delivery installs nothing,
+restores the working checkpoint with checks and returns nonzero. The human accepts
+possible downtime before refusal. Preserve every failed/held or unresolved-attempt
+recovery gate; valid recovery remains typed even without an installer call.
+Before B, document Q38's independent backup custody/recovery and verified closure
+rotation/revocation. Qualify primary unavailable, backup unavailable, unauthorized
+key and interrupted rotation before freezing both public keys in release N.
+Backup signing cannot bypass ID/expiry/checkpoint controls or revoke the primary.
+
+- Preserve Steps 1-7 evidence and every prior acceptance gate.
+- Qualify release N's primary/backup public keys and host-utility verifier in B; install
+  them through C's verified stable closure without application Python. C creates
+  no forward/recovery authorization, retry count or non-expiring selection.
+- Every attempt/retry/recovery requires a new signed ID and short expiry from the
+  human workstation via a fixed environment folder. Verify exact five canonical
+  URLs/hashes, environment/profile and recovery checkpoint/failed-attempt binding.
+  Invalid or missing input grants no signed authority and follows R19 admission;
+  failed/held-state gates cannot be bypassed.
+- Test tampered payload/signature/key/closure, partial writes, clock skew/expiry,
+  shared-folder outage, simultaneous readers, consumed IDs across reboot/cleanup,
+  interrupted persistence, wrong environment/checkpoint and newer archive bytes.
+  No artifact-repository arming object, latest lookup or fallback trust exists.
+- Rehash Step 8's four retained inputs before stop without fetch; start uses only
+  its verified private application copy and fetches nothing. Test offline recovery
+  for both predecessor formats, before-installer failure and repeated recovery
+  after rollback succeeded but runtime checks failed. Each recovery retry is
+  newly signed; shared-drive control remains available while artifact services
+  are denied. Preserve the original failed verdict.
+- R16 A covers outside stop/start with pending forward selection before/after
+  restoration: full held runtime/supervision checks of the working release,
+  reservation release, receipt/check status, and forward selection still unused.
+  Recheck expiry on its later admission. Failed/unknown attempts cannot reuse
+  their signature; Q35/Q41 define the atomic reserve/spent/R16 distinction.
+- Ordinary restart requires no signature and uses the locally recorded working
+  checkpoint with every runtime/supervision check. Failed H after successful G
+  takes this path without rollback, preserving H's failed verdict. Cover both
+  unauthorized delivery after ordinary stop and reserved-attempt refusal restoration;
+  successful restoration cannot turn either refused deployment green.
+- Deployment-only stable stop recheck remains idempotent, before installation,
+  with no refetch/resnapshot/new candidate code; plain start and recovery omit it.
+  Failure remains held/nonzero without installation.
+- Verify unit identity, hold-before-stop and parking, both APIs while held,
+  daemon-first start, hold release and same-daemon supervision with fatal exits.
+  Unknown unit or runtime evidence cannot silently select a no-unit profile.
+- P22 proves the failed job terminal before original recovery launch; P31/P29
+  prove root-lock availability and no live attempt-owned process before local
+  terminalization. Cancellation/timeout alone is insufficient. Cover every Q21
+  state, incoming hold preservation and late old start; no operator fallback.
+- Q37/Q40 fixtures cover canonical version/domain bytes, duplicate fields,
+  unsupported algorithms, encoding changes and unavailable verifier utilities.
+  Verify atomic ready-envelope publication and stable bounded local snapshots.
+  Reserved/spent IDs survive shared-file replacement, cleanup and reboot; crashes
+  before/after each write, concurrent admission and late start cannot replay use.
+- Q34-Q41 bind C's key/closure/probe/retention/activation receipts, shared evidence,
+  candidate/checkpoint, replay state and signing handoff to E's prerequisites.
+  Strict dispatch and all stable control including P38 survive replaced trees;
+  missing application-runtime dependencies fail held.
+- A records development-account host network/client/shared-folder read-write
+  evidence before C, with same-disk staging-only filesystem replay T, disk D and
+  remote task count N. Add evidenced per-task orchestration overhead O from
+  retained or separately authorized check console timings. Budget at least
+  `2 * (T + N * O)` and `2 * D` headroom, using per-class sums where needed, and
+  document skipped-task limits/no double counting. Missing evidence blocks C.
+  C application-account proxy/client/share receipts remain final before E.
+- Verify per-candidate non-collision, source-baseline equality with concurrent
+  ancestry preserved, loaded-source/payload agreement and separate controller
+  five-input/check-traversal dry-run results. Check mode neither arms nor consumes
+  selections and claims no target command execution; directory creation disclosed.
+- Require separate authorization for host evidence/replay, bootstrap, restoration,
+  check/real actions, verification and recovery; remeasure actual G against caps.
+  Q22 preserves the older predecessor and uses the same-release failure checkpoint.
+  Reboot stays untested/nonblocking; healthy APIs do not restore lost local config.
+
+### What was implemented for Step 8
+
+_(empty, no check has taken place yet.)_.
+
+### New types or classes introduced for Step 8
+
+_(empty, no check has taken place yet.)_.
+
+### Architecture check for Step 8
+
+_(empty, no check has taken place yet.)_.
+
+### Performance check for Step 8
+
+_(empty, no check has taken place yet.)_.
+
+### Unit test coverage check for Step 8
+
+_(empty, no check has taken place yet.)_.
+
+### Feature integrity for Step 8
+
+_(empty, no check has taken place yet.)_.
+
+## Step 9. Deliver first-time and production installations through unchanged orchestration
+
+### Analysis of Step 9 implementation state
+
+Not started. Actual Step 8 AC16/AC17 closure precedes all Step 9 implementation
+and lifecycle execution. Human round 8 decisions select the development replay,
+route (b), empty-prefix option (i) and shared-drive signatures. They are planning
+directions, not execution receipts. Q11-Q41 are consolidated, with R19 unsigned
+ordinary admission and Q38 offline backup trust confirmed on 2026-10-05.
+Tooling/layout qualification, production identity/access/unit evidence,
+implementation and separately authorized replays/bootstrap/production/recovery
+remain outstanding.
+
+### Goal for Step 9
+
+Close AC18/AC19 through verified first-time and production delivery under the
+unchanged contract. Accept the selected development replays plus Step 8's managed
+run with explicit no-unit and orchestration limits. Actual production delivery,
+historical recovery readiness and external evidence remain mandatory. The topic
+and umbrella item stay pending until this step is validated.
+
+### Step 9 improvement expectations
+
+- Preserve Steps 1-8 evidence, modern fatal runtime checks, both recovery formats,
+  signed per-attempt authority, stable deployment-only recheck and fixed contract.
+- P40 verifies the exact published archive against the independent registry hash
+  before safe allowlisted extraction/execution, including closure key/verifier.
+  Reject unsafe paths/links/special members, changed bytes, wrong profile/account
+  or staging-derived trust. Use host Bash/utilities, without application install.
+- P28 guarded first activation requires no stable version/current/foreign
+  dispatcher/unresolved attempt. Verify closure and pointer before final atomic
+  dispatcher publication. Test concurrent stop and every interruption cut point:
+  missing dispatcher fails without mutation; incomplete bootstrap refuses even
+  on unchanged staging. Resume only receipt-bound work under the root lock.
+- Inspect P28/P39/P29 receipts without dispatcher stop/start. Bootstrap orders
+  trust/closure installation, exact historical retention if needed and inspection,
+  never arming. Subsequent deployment uses normal successful-release activation.
+- Empty-prefix option (i) installs verified hold-aware hooks with initial hold
+  set and no application. Fixture unexpected unit execution and publication cut
+  points. Installed/running bootstrap leaves unit start/pre-start hooks, runtime
+  and staging untouched; first approved stop bridges only evidenced hooks.
+- Route (b) is a separately authorized one-time production/new-environment session
+  by the evidenced operations operator with existing application-account access,
+  executing our exact self-verifying commands. Route (a) is unavailable production.
+  No recurring operator arming or target-shell recovery dependency is accepted.
+- Human signatures arrive via each environment's fixed shared-drive folder.
+  P30 prepares exact signing instructions and P22 checks applicable receipts;
+  P29/P31 authenticate at admission. Tests cover stale/missing evidence and keys,
+  mismatched/expired/replayed selections, retry/recovery renewal and unarmed dry run.
+  Q38's offline backup signer supplies fresh authority; independent custody and
+  verified rotation/revocation remain mandatory, with no unsigned bypass.
+- Each C/D rehearsal uses our development installation/account on the qualification
+  host, separately authorized confined preparation/restoration and explicit DEV-only
+  no-unit profile. Qualification and production refuse that profile; unit query
+  failure never activates it. Preserve development restoration inputs.
+- P43 replays audited task/baseline stop/start argv, literal download filename,
+  unpack, per-directory rotation, staging copy and permissions. Exercise literal
+  and expanded HOME and direct argv where the role has no shell. Never install
+  or run the orchestration tool; trace every operation and confine every path.
+  Q39 fixes script location; Step 8 A uses only its staging-measurement subset.
+- C proves empty stop, selected first install, refusal/partial failure/no-target
+  states and fresh retry with terminal proof. P41 covers installer pending state
+  naming a provisional release after failed first readiness: no-predecessor
+  checkpoint rejects rollback/restart, held/nonzero.
+- D uses retained exact historical archives on that host, proves their pairing
+  against production reads, and rehearses upgrade/offline rollback with and without
+  staging markers. Never fabricate markers or substitute an isolated tools pair.
+  Bind supported historical health APIs and independent identity without relaxing
+  modern revision/environment/drift checks.
+- Development has no unit and replay is not managed orchestration. Do not claim
+  hold parking or same-daemon proof there. AC18/AC19 combine these replays with
+  Step 8 G's running-release managed unit proof. First-install unit hooks and
+  historical bridges first run for real in production, backed beforehand by
+  fixtures and route (b) read-only production unit evidence. Record those limits.
+- Production requires evidenced existing unit/job/profile/repository/share/access
+  and independently authorized route (b) bootstrap, followed by release-only
+  managed delivery. Keep the unchanged pilot approval and two-hour wait within
+  evidenced outer limits. The human signs the bounded short expiry; overrun,
+  cancellation, absent approval and snapshots block our launch. Target-detected
+  expiry follows R19 ordinary admission where state permits, never deployment
+  authority; a delivered archive is refused with checked restoration and nonzero.
+  No automatic authority refresh or byte change; use a separate execution deadline.
+- Externally verify both production endpoints, release/revision/environment/account,
+  absent hold and same script-started daemon. A fresh signed recovery selection
+  plus pipeline/local terminal proof restores offline without an operator, even
+  when start was never reached. Missing recovery authority cannot bypass the
+  failed/held-state gate; unsigned ordinary restart is limited to safe states.
+- Bind actual AC18/AC19 receipts, accepted DEV evidence limits, production results
+  and recovery readiness without clearing a failed verdict. Check mode and fixture
+  results alone cannot close execution criteria. No action is authorized here.
+
+### What was implemented for Step 9
+
+_(empty, no check has taken place yet.)_.
+
+### New types or classes introduced for Step 9
+
+_(empty, no check has taken place yet.)_.
+
+### Architecture check for Step 9
+
+_(empty, no check has taken place yet.)_.
+
+### Performance check for Step 9
+
+_(empty, no check has taken place yet.)_.
+
+### Unit test coverage check for Step 9
+
+_(empty, no check has taken place yet.)_.
+
+### Feature integrity for Step 9
+
+_(empty, no check has taken place yet.)_.
