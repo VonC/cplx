@@ -5355,7 +5355,7 @@ request_index_tree: 1e6e3dd43cc53a55110176a58f6b8e5f9b48d24c
 resolved_validation_set:
 
 - bash src/utils/lint_shell.sh (sources: project)
-- bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 7 --python <qualified-python> --app-repo <consumer-root> (sources: plan)
+- `bash docs/v0.27.0/verify.deploy-venv-sync.sh --step 7 --python <qualified-python> --app-repo <consumer-root>` (sources: plan)
 - ghog check (sources: request)
 
 commit_plan_result:
