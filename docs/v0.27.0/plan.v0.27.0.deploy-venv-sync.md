@@ -19,6 +19,8 @@ that execution has already succeeded.
 | 5 | Integrate and qualify the single-build CI sequence |
 | 6 | Implement operator promotion and immutable release binding |
 | 7 | Complete exact-candidate target acceptance and rollout |
+| 8 | Deliver through the consumer's original orchestration, unchanged |
+| 9 | Deliver first-time and production installations through the unchanged original orchestration |
 
 Steps preserve the dependencies below. Independently runnable cplx tasks may
 progress while private integration evidence remains pending; mixed steps remain
@@ -36,6 +38,20 @@ candidate through the complete Step 5 build before Step 7 qualification; never
 patch a frozen companion or reuse qualification for different helper bytes.
 Neither validation phase publishes or deploys. No compilation, toolchain archive
 republication, Python 3.14 work or unrelated CI cleanup belongs in this effort.
+
+Step 8 builds on Step 7's qualified lifecycle. Its changed consumer components
+need a new immutable candidate through the complete Step 5 build and Step 7
+qualification; qualification never carries to different bytes. Reused evidence
+requires recorded comparisons showing the relevant components unchanged.
+The 2026-10-03 amendment adds consumer integration, without rewriting Steps 1-7.
+
+Human decision of 2026-10-04: Step 8 is limited to the qualification environment
+that can still bootstrap through the temporary delivery task before restoration.
+It covers neither first-time installation nor production deployment. Mandatory
+Step 9 starts only after actual AC16/AC17 evidence closes Step 8 and owns AC18/AC19.
+The topic and umbrella item 8 remain pending until Step 9 is validated. Changed
+Step 9 bytes require their own complete build, qualification and release binding;
+Step 8 success never qualifies different bytes.
 
 ## Confirmed implementation and test-tree facts
 
@@ -246,7 +262,14 @@ Do not trade away byte checks to reduce IO. Share a phase's verified maps,
 but repeat verification at mutation/transfer boundaries where identity can change.
 Time and count acquisitions, tree walks and bytes hashed separately.
 
-## Shared execution command checklist for all seven steps
+## Shared execution command checklist for the implementation steps
+
+Steps 8-9 execution override, human decisions of 2026-10-03 and 2026-10-04: local consumer
+validation is limited to `ghog check` and `ghog affected`, with permission before
+each run. The historical `ghog day`, `ghog single`, full-suite and `check.bat`
+instructions below and in earlier decisions do not authorize them for Steps 8-9.
+Native CI/target qualification remains separately authorized execution. This
+planning task runs no tests or implementation validation.
 
 1. Read the step, current code/test tree, private mapping and current Git state.
 2. Count every involved file before edits, including blank lines; treat absent new files as baseline 0.
@@ -930,6 +953,1008 @@ Time-gated status: no new timeout/xfail gate; missing required execution stays i
 
 Step inspection: `rg -n 'AC[0-9]|offline|rollback|publication|qualification' docs/v0.27.0/acceptance.deploy-venv-sync.md`.
 
+### Step 8. Deliver through the consumer's original orchestration, unchanged
+
+#### Step 8 analysis and intent
+
+Extend Step 7's qualified lifecycle with AC16 forward delivery and AC17 explicit
+offline recovery through the consumer's fixed role contract. This is plan Step 8,
+not umbrella item 8. Requirement Q11 and design Q10 are settled human direction.
+
+Scope clarification on 2026-10-04: only the qualification environment is covered
+here, because its temporary delivery task can bootstrap before restoration.
+First-time installation and production deployment are excluded from Step 8 and
+move to mandatory Step 9 after this step's actual AC16/AC17 closure. The settled
+Step 8 stop/start, activation, recovery and evidence rules remain intact.
+
+Human round 6 scope retained with round 8 amendments on 2026-10-04: test a
+deployment through the restored,
+unchanged original orchestration on qualification. Part C's existing temporary
+delivery installs the dispatcher, stable targets and control folders first. Every
+Step 8 application-account lifecycle action uses that delivery path before
+restoration or our pipeline's original forward/stop-start actions afterward.
+C installs trust/probes/receipts only; each later attempt/recovery is freshly
+signed through the shared drive. A uses our own development account for
+preliminary host evidence and staging-only replay. No maintenance shell or operator
+route is a prerequisite or fallback. Operations-team involvement is limited to
+normal review of the agreed restoration PR. Evidence returns through existing
+shared logs, pipeline console and two external endpoints; missing evidence is a
+human gate. Operator routes and the separate bootstrap session belong to Step 9.
+
+Expected outcome: the entire application path in the operations repository equals
+its recorded original baseline; consumer scripts absorb its commands and order,
+enforce every former delivery-task gate and recover without orchestration changes.
+The claim is: no unchecked byte is installed or run, and any mismatch fails the
+deployment. Unchecked download/unpacking is not a weakened guarantee: consumer
+code ignores that tree and installs only the independently verified private copy.
+
+Complexity impact: metadata operations address one selected candidate/attempt,
+hashes stream over the five selected inputs, and no history scan selects a release.
+The immutable role's whole-tree staging loop is measured separately while held.
+Preserve accepted tools, offline reconstruction, both predecessor formats and every
+AC01-AC15 gate. No reusable cplx runtime or acceptance-driver change is planned.
+cplx deliverables for this step are documentation and evidence binding.
+
+#### Step 8 implementation
+
+Files involved:
+
+- `docs/v0.27.0/draft.v0.27.0.deploy-venv-sync.md`,
+  `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md` and
+  `docs/v0.27.0/design.v0.27.0.deploy-venv-sync.md`: existing amended context.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md` and
+  `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: tasks and actual
+  evidence accounting; preserve all previous implementation records.
+- `docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md`: item 8 remains pending
+  until the expanded topic is validated; preserve its document cells.
+- Private P07 (existing entry, 996 lines), P20 (existing deployment reference,
+  219), P22 (consumer deployment pipeline, 75), P23 (first-start checks, 177),
+  P24 (wrapper refresh, 156), P25 (cooperative hold, 173), P26 (runtime helpers,
+  277): update at the responsibilities below.
+- New P27 strict dispatcher, P28 strict compatibility installer, P29 shared
+  selection/reservation/acquisition contract helper, P30 controller candidate
+  validator/selection renderer, P31 stable stop target, P32 stable start/recovery
+  target: baseline 0 each; private mapping gives paths and separation reasons.
+- New P33 empty test leaf marker and P34-P36 dispatcher, lifecycle and acquisition
+  tests, baseline 0 each. Reuse existing parent markers and recovery fixtures.
+- Proposed P43 replay helper, baseline 0: Step 8 A staging-only measurement;
+  Step 9 expands to the two lifecycle replays after AC16/AC17. Q39 places the file.
+- New P37 immutable candidate registry file, baseline 0; use the existing schema.
+  Do not edit earlier candidate records or add a transport field.
+- Existing P38 daemon-ownership helper, 57 lines: include in the verified stable
+  closure and resolve it relative to that closure; private mapping records its
+  source and the application-runtime dependency graph.
+
+Private P10 and publication/assembly helpers remain unchanged; the existing build
+packages the added application files. P18/P19 are historical drafted integration
+sources, not the original executing contract, and have no Step 8 edits. Read-only
+cplx acceptance drivers retain their Step 7 scope; consumer evidence closes the
+new acceptance cases without adding a new reusable runtime requirement.
+
+Tests first: P34-P36 exercise subprocess behavior, not source-string assertions.
+Invoke the exact argument vectors with a controlled working directory in native
+Linux fixtures; never run the role on the workstation/target as a unit test.
+Cover both allowed home forms, surplus/foreign arguments, foreign/missing launcher,
+unsafe paths/modes, the stable control operations listed below with replaced trees
+absent, and atomic refresh. Use non-terminal streams with ignored hangup behavior,
+assert no hangup output file, and anchor the application HOME to the verified prefix;
+never locate dispatcher code through incoming HOME.
+Cover every mode row, same-byte replacement, unreadable identities,
+stale/consumed/wrong/newer selections, concurrent attempts and root-lock recheck.
+Independently mutate each fetched digest and record key, simulate bounded HTTP
+failures, exact retained tools reuse and installed-version-only misses.
+Assert failures before hold leave the running application untouched. Test unit
+restart while held, hold failure with supervision restored, no survivors, every
+runtime/observer failure, role transfer failure and offline recovery before
+installer entry. Assert no staging executable runs and every failed gate is nonzero.
+Also repeat deployment-only stop rechecks with no surviving process and with a
+verified survivor; prove stable-version identity, unchanged reservation/archive
+baseline/checkpoint, zero network, single lock ownership and failure before install.
+Assert ordinary start and recovery never take that extra path. Include its deadline
+in timing tests. These fixtures support implementation; actual AC16/AC17 closing
+evidence is separate.
+
+P35's case-to-gate map also covers every attempt-state transition below, the
+pipeline-launched transfer-failure recovery route, same-release checkpoint/index behavior, the
+archive-derived staging non-collision invariant, and park-before-stop requalification.
+Add handled fetch failure followed immediately by a fresh same-candidate selection,
+without maintenance terminalization; repeated bound recovery after rollback success
+but failed runtime checks, including same-release redeployment; and preinstaller
+recovery with zero rollback calls. Verify pending-target mismatch and absent-pending
+identity mismatch refuse held. P34/P35 also cover all bridge paths below: missing
+record, previous-boot record, live recorded daemon and hold.
+P35 covers bound recovery to the historical predecessor format through the pending
+marker, and a no-target marker refused held.
+P35 also covers successful G leaving no conditional recovery, failed external H
+followed by an authenticated checked restart, and fresh signed recovery after failed G.
+Add outside-pipeline stop/start launches before and after restoration and fresh
+signed retry/recovery, expiry and replay cases against the settled R16/R17 rules.
+P34 tests bootstrap activation only after complete runtime success, failed-bootstrap
+non-activation, no activation by wrapper refresh alone, and immutable pinned versions.
+
+#### Step 8 round 8 decision and evidence gate ledger
+
+Human decisions on 2026-10-04 settle R16 option A and fresh signed selections for
+every attempt, retry and recovery. They supersede bootstrap-recorded arming,
+non-expiring authority and pre-recorded retry counts. Operator-free refers to
+application-account maintenance access; the human signs on their workstation.
+
+| Gate | Selected behavior and evidence required |
+| --- | --- |
+| A before C | Development-account host network/client/shared-folder read-write evidence; same-disk filesystem replay cost plus per-task overhead from retained or separately authorized check-console timings times remote operation count. Application-account C probes remain final. |
+| Before B, key-loss policy (R20) | Human decides Q38 before Part B begins, because release N freezes its qualified public keys. Backup key remains a recommendation. Q37 tooling and Q40 layout also close before immutable qualification. |
+| R19 restart authority | Human confirms strict pre-lifecycle refusal or restart-independent admission, including the unavoidable invalid-deployment downtime tradeoff. No admission implementation before this choice. |
+| C bootstrap | Install verified closure/key, probes and retention/activation receipts only. No arming. |
+| D selection handoff | Validate C receipts and the candidate-bound signing handoff. Human supplies a fresh, short-lived signed selection for each actual G attempt and I recovery, outside staging on the existing shared drive. |
+| G outside stop/start | R16 A preserves the forward selection unused, checks/restarts the working release, releases its own reservation and returns the checked status. P22 controls only our launches. |
+| I failure/retry | Fresh signed recovery binds failed attempt/checkpoint; terminal job and local lock/process proof still required. Each retry has a new ID and expiry, never authority inherited from recovery success. |
+
+Classes and behavior (focused script functions; no new class hierarchy):
+
+1. **Part A, prerequisites and evidence.** Read the exact original source and
+   evidence; record loaded source revision, project and execution environment.
+   Define required dispatcher/closure, unit and repository/client evidence here;
+   collect target read-only probes inside Part C's verified bootstrap and return
+   their receipts through existing shared logs. Probe application-account DNS,
+   route/proxy, anonymous exact-URL reads and the usable HTTP client there.
+   Obtain inherited configuration URL, properties-path and remote-copy defaults
+   from pipeline console evidence of original check-mode traversal, using retained
+   evidence before E and reconfirming at F. If retained evidence is insufficient,
+   report the prerequisite gap before restoration; never request operator access.
+   A specifies C's probes and is not a requirement to have C's results before C.
+   Record tilde behavior without blocking on either
+   accepted form. Inventory the real application archive and time the fixed
+   staging operations with current/previous trees: per-directory/top-level
+   basename rotations, whole-tree copy and per-script permission operations.
+   Record actual job timeout, 60-minute pipeline envelope, acceptable outage and
+   disk budget including archive, expanded tree, previous copies and retained
+   inputs. Read-only or separately authorized evidence only.
+   No exact-workload execution receipt exists. Before C, under separate
+   authorization, our development account on the qualification host records
+   network route/client capability and shared-folder read/write evidence.
+   The same-disk replay measures filesystem cost only for the exact candidate,
+   matching current/previous staging populations, OS/filesystem behavior and
+   permissions, with audited task/baseline mapping. Do not run the orchestration
+   tool. Use a bounded staging-only replay mode for A; Step 9 lifecycle rehearsals
+   still wait for AC16/AC17. Q39 places this shared replay helper.
+   Record filesystem elapsed T, incremental disk D and remote operation count N.
+   Obtain per-task orchestration overhead O from retained or separately authorized
+   original check-console timing, accounting for skipped-task limits and operation
+   classes. Missing usable overhead evidence leaves the gate open. Budget at least
+   `2 * (T + N * O)`, using per-class sums where overhead differs, and `2 * D` extra
+   headroom beyond retained data; record how overhead avoids double counting.
+   Fit the recorded job/pipeline/outage/disk limits. Recheck actual G against the
+   same caps. The reference is 549 directories, 3,085 files, about 550 two-operation
+   rotations and 86 permission changes per tree, 47 MB packed/81 MB unpacked.
+   C repeats repository/client/shared-folder probes as the application account;
+   those receipts are final because account proxy settings and permissions differ.
+   Exit: pre-C safety and measured staging budget pass before C; C receipts and
+   retained check-default evidence close remaining gates before E. These reads
+   and replay are not authorized now and require no application-account shell
+   or operations operator.
+
+   Stop: any unresolved gate remains open; any dependency on an operations-side
+   change is reported before restoration, never negotiated as an exception.
+
+2. **Part B, consumer implementation and new-candidate qualification.** Implement
+   P27-P32 and extend P07/P22-P26 with the fixed contract. Keep all sixteen former
+   task checks in their consumer owners as mapped privately, with fatal status.
+   P27 accepts exactly the literal/expanded stop-plus-stop-operand or start-only
+   shapes; P28 installs a complete stable versioned closure outside replaced trees
+   from verified application bytes, checks ownership/mode/realpath, rejects foreign
+   launchers and separates immutable preparation from activation. P24 invokes
+   mandatory preparation strictly, separate from convenience warnings; P07 prepares
+   it through the current five-input path. Pin the running attempt's code version.
+   Original-path activation belongs to P32 after held runtime success, hold release
+   and same-daemon observation. Bootstrap activation belongs to P23 after those same
+   complete checks in Part C, where P32 never runs. Manual/maintenance installs only
+   prepare; neither P07 install success nor P24 refresh grants activation. P28 checks
+   the path-specific success receipt, atomically renames the managed dispatcher and
+   switches the version pointer under the lock. Never alter/delete pinned versions;
+   a failed activation remains a failed attempt with the previous version usable.
+   Derive the manifest from the transitive source/exec graph and enforce the stable
+   versus application-runtime boundary described below, including P38.
+
+   P30 validates the unchanged registry and exact controller downloads, then
+   renders the canonical signing payload from the candidate. P29 verifies host-only
+   signatures using release N's public key; B qualifies both key and verifier,
+   their complete stable closure and missing/invalid/expired/replayed refusal. P22 preserves
+   managed configuration, rejects native rollback, keeps the current payload for
+   bootstrap and switches only at Part E. Its future original payload passes the
+   exact immutable application URL with the fixed sort/direction suffix and the
+   meaningful original variables. Remove delivery-task-only variables there;
+   retain their information in consumer validation/selection, never as an
+   orchestration parameterization. Dry run verifies all five published bytes,
+   uses the original check job type, never arms, and reports two separate verdicts.
+
+   P31 stop sequence is mandatory: verify host/non-root account/real prefix/loaded
+   unit user and start/pre-start identity; under short coordination validate and
+   snapshot signed deploy/recovery/restart selection, rejecting
+   live conflicts using the state table below; for Step 8 deploy rehash all four
+   local retained inputs bound to C's controller-verified record, fetching nothing.
+   Preserve the separately scoped exact-URL acquisition implementation/fixtures for
+   Step 9; they cannot authorize a different-release selection in Step 8;
+   verify every digest and ten unique allowlisted record keys without sourcing;
+   record delivered-file identity and last-working release; enter and park the
+   cooperative deployment hold within 55 seconds, preserving hook bridges and
+   signaling only verified unit members; then bounded stack/daemon stop and
+   no-survivor confirmation. No root, unit edit or service-manager stop.
+   P25/P26 explicitly move parking before stack/daemon stop, replacing their current
+   park-after-stop order. This changes Step 7's qualified lifecycle and requires new
+   exact-byte qualification, including up to 55 seconds parked with the app running.
+   Failure before hold preserves the incoming application state. On a fresh running
+   entry, hold/park failure releases only the newly introduced hold, verifies restored
+   supervision and fails. On an already held/stopped entry, hold/park is idempotent,
+   there is nothing to stop, and any failure preserves the hold; never claim the
+   application remained running. Later failure retains failed held state for recovery.
+   P31 terminalizes each handled failure before returning nonzero, after its owned
+   child processes have exited and under coordination. The fixed orchestration runs
+   nothing further on the host after a failed stop; its unnotified handlers only
+   remove a controller work path. Record the actual running or held state as below.
+
+   P32 start downloads nothing and selects the mode from the durable snapshot and
+   recorded versus current archive file identity, never recency/timestamp alone:
+
+   | Selection snapshot | Archive delivered since stop | Mode |
+   | --- | --- | --- |
+   | Armed deploy, matching | Yes | Deploy |
+   | Authenticated restart, no deploy/recovery | No | Plain start |
+   | Armed recovery | No | Recovery |
+   | No authenticated selection | Any | Refuse without lifecycle change |
+   | Authenticated selection, not matching | Yes | Refuse |
+   | Authenticated restart | Yes | Refuse |
+   | Armed deploy | No | R16 checked restart; forward selection remains unused |
+   | Armed recovery | Yes | Refuse |
+   | Unreadable or ambiguous | Any | Refuse |
+
+   Missing/unreadable/unsigned/expired/consumed/mismatched authority refuses in
+   stop before lifecycle change; absence never authorizes plain restart. R16's
+   unchanged-archive start uses its own restart reservation, checks the working
+   release while held, releases its reservation, receipts and returns check status,
+   leaving forward selection unused. No deployment-only stop recheck runs there.
+   Refusal at start installs nothing. Missing authenticated authority or a valid
+   owned reservation permits no lifecycle change. With a valid reserved attempt,
+   delivery/mode refusal attempts its recorded checked last-working restoration,
+   always returning nonzero; failed restart remains held. For matching deploy mode,
+   P32 first acquires the root lock and rechecks the reservation, then invokes
+   P31's shared bounded stop-only primitive from the attempt-pinned stable closure.
+   Revalidate host/account/prefix/unit, maintain hold/parking and idempotently stop
+   verified survivors; confirm quiescence. Do not rerun prefetch/reservation setup,
+   reset archive baseline/checkpoint, consume intent or acquire the same lock twice.
+   Failure retains the failed held attempt, installs nothing and returns nonzero.
+   Plain start, recovery and refusal omit this extra deployment-only recheck.
+   Deploy then privately copies the
+   role-retained downloaded archive, verifies the copy against selection, ignores
+   the unpacked tree and rehashes the four retained inputs. Under the root lock,
+   recheck the reservation and synchronously invoke only the verified entry with
+   validated record values/private paths. Implement explicit lock ownership without
+   deadlock or an unverified lock-bypass flag. Preserve installer nonzero status
+   after its local snapshot restoration, retaining installer pending state for
+   explicit bound recovery. The forward entry does not invoke rollback itself.
+   P23 starts daemon first while held and
+   verifies both local APIs, exact revision/environment, disk/launch agreement,
+   clean/no-drift state and running components. Then release hold, prove the unit
+   observes the same account/PID/boot/start-ticks daemon, and only then mark the
+   attempt successful and advance last-working. Record single-use selection spend
+   independently of success, including failed/interrupted use and the R16 exception. Re-hold on post-release failure. Plain start checks
+   the current recorded release identically. Attempt-bound recovery under the same
+   root lock selects its action from persisted installer state and the exact attempt
+   checkpoint. With a pending record, validate its association and recovery value
+   against the attempt checkpoint: a release identity must equal a release checkpoint;
+   the installer's historical-predecessor marker is accepted only when the checkpoint
+   is the retained historical predecessor; its no-target marker refuses held.
+   Complete that check before invoking the verified offline rollback entry.
+   That entry follows the pending target and invokes its retained entry. With no
+   pending record and installed identity equal to the checkpoint, call no installer;
+   run only held plain-start checks against the checkpoint. Any other or unreadable
+   state refuses held. Preinstaller failure uses checked checkpoint restart and
+   never calls the rollback switch. An attempt-bound recovery must never reach the
+   no-pending index-predecessor branch, including after an earlier rollback succeeded
+   but runtime checks failed. Intentional rollback to a prior successful release
+   remains a separate explicit selection bound to a consumed checkpoint.
+   Keep every log/receipt/control record outside rotating staging.
+
+   Rebudget the deployment-only stable stop recheck, held start, diagnostics,
+   both APIs, release and observation within
+   the existing 600-second wrapper, with one overall deadline and per-phase caps.
+   Preserve 90-second lifecycle bounds, 5-second unit queries and 55-second park
+   while measuring the remaining allocation; do not append two five-minute waits.
+   Stop retained-input verification has its own bounded pre-downtime budget;
+   separately scoped acquisition remains bounded too. Installation and
+   recovery fit the outer execution envelope with measured margin.
+
+   Test: all fixture cases above plus the full design AC16/AC17 matrix; compare
+   canonical and role URL hashes, reject moving resolution, and deny network in
+   both predecessor recoveries. Prove the stable control operations and safe
+   survivor handling below when application/tools trees are damaged and before
+   installer pending state exists. Measure each gate's
+   failure timing and original-status preservation. Implement locally only with
+   separately authorized `ghog check` and `ghog affected`; no other local
+   consumer validation command is authorized.
+   Build a new immutable candidate through the complete Step 5 sequence and Step 7
+   exact-byte qualification. Reuse evidence only after recorded unchanged-component
+   comparisons, never for changed bytes. P37 binds that candidate; P20 documents
+   the executing original path and no longer presents historical draft sources
+   as the running roles.
+   Exit: new qualified bytes, complete fixtures/negative evidence, all sixteen
+   owners, acceptable deadlines, retained offline recovery and strict bootstrap
+   are reviewable. Stop on failed qualification, unresolved file/lock ownership,
+   missing bytes or any need for orchestration/publication-schema changes.
+
+3. **Part C, bootstrap through current delivery.** Obtain separate explicit human
+   authorization at execution time. Deploy the new candidate through the unchanged
+   current temporary delivery path and five-input payload. Its verified P07/P28
+   prepares the prefix dispatcher and stable targets; P23 activates them only
+   after complete held readiness, release and same-daemon observation succeed.
+   P30's controller-checked five-input binding reaches P07 through the existing
+   payload. P07/P29 retain the verified release record and four other input
+   identities outside staging. P23/P28 install release N's public key/verifier
+   and supply A's before/after closure, unit, repository/client and shared-folder
+   probes. Emit candidate/checkpoint, retention and activation receipts, with no
+   forward selection, recovery authority or retry count. P30/P22 validate returned
+   shared-log/console receipts before E. Account-specific shared-folder reads and
+   proxy behavior are final authority; development-account evidence is preliminary.
+   Pre-C staging budget and qualified attempt-state fixtures remain prerequisites.
+   Failed bootstrap cannot activate prepared code. No operator session is needed.
+
+   Test cold exact-argv invocation and stable closure ownership/identity outside
+   replaced trees; verify healthy runtime and complete predecessor retention.
+   Exit: bootstrap and recovery-entry evidence bound to candidate/installed version.
+   Stop on missing/foreign launcher or failed install; do not restore the path.
+   This proves bootstrap only, never original-path deployment.
+
+4. **Part D, verify trust installation and signing handoff.** Check C's closure,
+   public-key/verifier, probes, retained five-input record and same-release
+   checkpoint receipts before E. There is no arming in C or target arming session.
+   P30 renders exact canonical five hashes/URLs, operation, environment/profile,
+   fresh attempt ID and short expiry for the human's workstation signature. The
+   human writes the signed selection to the fixed per-environment shared-drive
+   folder near each separately authorized real launch, after check mode where
+   scheduled. Stop authenticates and snapshots it under coordination before
+   mutation; consumed/attempted IDs remain outside staging. Check mode neither
+   creates nor consumes selections. Target missing/unreadable/unsigned/expired/
+   consumed/mismatched input refuses untouched. Q37-Q41 settle implementation
+   details without selecting a key algorithm, backup policy or concrete folder.
+   Every G attempt/retry and I recovery gets its own signed ID and expiry;
+   recovery also binds failed attempt and checkpoint. Stop rehashes four local
+   retained inputs without fetch; later role archive must match the signed record.
+   R16 A leaves forward authority unused after identified stop/start, with complete
+   held runtime/supervision checks, its own reservation released and status receipted.
+   No bootstrap retry count or reusable recovery authorization exists. After G
+   success, failed H uses fresh authenticated restart authority on the same release.
+   Test signature/key/member tampering, missing share, partial writes, clock/expiry,
+   replay across cleanup/reboot, concurrent reservations, interrupted finalization,
+   R16 success/failure, wrong/newer archives and both offline recoveries. A new
+   recovery signature needs shared-drive delivery but never an artifact download.
+   Exit: checked trust/retention receipts and reviewable signing procedure before E;
+   actual fresh selection verified at each launch/admission. Missing evidence blocks.
+
+5. **Part E, restore source and switch payload.** Obtain separate explicit human
+   authorization for the normal operations-repository PR workflow. Fast-forward-only
+   pull first; restore the entire application path from the recorded baseline,
+   including deleting later additions; prove a path-only diff and retain concurrent
+   commits as ancestors. No reset, force push, branch-wide revert or other-project
+   edit. After normal merge, prove the baseline-to-remote-master application-path
+   diff is empty and record the exact restored source loaded by orchestration.
+   Only then switch P22 to the original-path payload, preserving job configuration.
+   Test whole-path equality, ancestor preservation and loaded-source/payload match.
+   Exit: these proofs and switch recorded. Stop on new conflicts, nonempty equality
+   diff, mismatched/unknown loaded revision or pipeline/source disagreement;
+   submit no real run until resolved within the authorized path-only scope.
+
+6. **Part F, original check mode.** Obtain separate explicit human authorization.
+   P22 verifies all five exact published bytes and the application URL equivalence,
+   never arms, then invokes original check mode. Record skipped commands/downloads
+   and any work-directory creation separately from controller verification.
+   No target command executes or consumes any shared-drive selection in check mode;
+   Part C has recorded no deployment or recovery authority. Capture inherited
+   defaults from the console and compare them with Part A's evidence.
+   Test failure propagation from either phase and absence of a new armed attempt.
+   Exit: both verdicts and exact loaded identities recorded, runtime still untested.
+   Stop on either failure; check success cannot authorize or qualify a real run.
+
+7. **Part G, one real run.** Obtain separate explicit human authorization for the
+   exact candidate bootstrapped in C and one original-path forward action launched
+   by P22. The human signs a fresh attempt/expiry and writes it through the shared
+   drive for this launch. Every authorized retry repeats that signing step with a
+   new identity; no operator arming session or pre-recorded count applies.
+   This is a same-release redeployment: preserve its existing predecessor index,
+   never make it its own predecessor, and bind the attempt's last-working checkpoint
+   to that same release. Failure recovers to that checkpoint, not an older index entry.
+   Confirm all
+   prior gates, clean terminal state and payload/source agreement. Record stop
+   retained-input rehash with zero fetches and reservation, hold/park/stop, role transfer/staging cost, start
+   mode, stable stop recheck, private copy/digests, synchronous install,
+   both runtime APIs, hold release
+   and same-daemon supervision, status and receipts.
+   Remeasure actual staging duration and peak disk through retained task timing and
+   consumer-script probes returned through existing shared logs/console, against
+   Part A's fixed caps. P31 records the
+   pre-staging time; P32 refuses installation on an exceeded elapsed cap at entry.
+   Missing disk evidence or an exceeded disk/timing cap prevents AC16 completion
+   and any next rollout; retain the failure and enter separately authorized I.
+   Observation must not change the role or its configuration.
+   Test the actual path against the exact qualified bytes and measured envelope.
+   Exit: successful complete evidence pending independent verification.
+   Stop on any nonzero/mismatch/timeout; preserve original failure and use Part I
+   only after its separate authorization and terminal remote-process evidence.
+
+8. **Part H, independent external verification.** Obtain separate explicit human
+   authorization. Verify both external endpoints independently of pipeline output:
+   expected revision, target environment, application account, hold absent and
+   unit watching the same script-started daemon, with stable boot/start identity.
+   Correlate independently read external responses with script-generated identity
+   and unit receipts in shared logs/console. No target session supplies missing
+   fields; an unobtainable field leaves the acceptance gate open for the human.
+   Test external health/identity against the selected record and internal receipt.
+   Exit: AC16 evidence bound to this actual original run. Stop on inconsistency,
+   record failure and follow Part I; healthy APIs do not reconcile lost local
+   configuration. Reboot remains UNTESTED and NONBLOCKING.
+
+9. **Part I, failure recovery runbook.** Obtain separate explicit human authorization
+   at recovery time. P22 proves the original orchestration job terminal before
+   launching its original stop/start-only action. P31 itself verifies root-lock
+   availability and absence of attempt-owned live processes under coordination,
+   then records terminalization and admits a fresh signed recovery selection bound
+   to the failed attempt and checkpoint. Each recovery retry has another signed
+   ID/expiry, even after rollback succeeded but runtime checks failed. Cancellation
+   or elapsed time alone is insufficient. Qualify the composed pipeline/local-proof
+   route before E; no operator fallback. Missing share/signature refuses before
+   changing the incoming running or held state. Recovery fetches no artifact.
+   For successful G followed by failed H, sign an authenticated ordinary restart
+   of that same working release, retaining H's failure and performing no rollback.
+   No conditional recovery authority survives success or failure. Keep receipts
+   deliverable from the stable closure before application recovery; native staging
+   rollback is rejected. A spent selection can never authorize another attempt.
+
+   Before-installer failure uses the attempt checkpoint even with no pending
+   record and calls no rollback entry. After-installer recovery follows the explicit
+   pending/checkpoint decision above; repeated recovery cannot fall through to an
+   older index predecessor. Preserve local snapshot handling and the original return code.
+   Test both offline predecessor formats through the new stable entry, including
+   role-download/staging failure that never called start. Apply identical held
+   runtime and observer checks to the recovered identity.
+   Exit: separate recovery verdict and receipts, original deployment still failed.
+   Stop if terminal ownership is ambiguous or recovery fails; retain hold/evidence
+   and report. Never restore the temporary task or alter orchestration to recover.
+
+#### Pending R19 human clarification of restart authority
+
+Round 9's reviewer proposes that ordinary restart need no signature. This is a
+proposed amendment, not a confirmed interpretation of the round 8 failure rule.
+The same fixed stop argv begins both forward deployment and ordinary restart.
+Without valid selection, stop cannot know which action the unchanged role will
+perform next. Allowing that stop also allows downtime before an unauthorized
+forward delivery is refused at start. It cannot preserve the literal promise
+that invalid deployment authority refuses before any lifecycle change.
+
+| Human choice | Result and tradeoff |
+| --- | --- |
+| Keep literal pre-lifecycle refusal | Missing/invalid authority refuses stop with the incoming lifecycle unchanged; unsigned outside restarts also refuse. Signed ordinary restart is the writer's proposed way to allow those restarts, not a separately selected human requirement. |
+| Confirm R19's restart-independent admission, recommended by reviewer and writer | Missing/unreadable/invalid selection records a receipt and takes ordinary stop; unchanged staging starts the working release with full checks/status. Delivery without valid reserved authority installs nothing, restores the checkpoint with checks and returns nonzero, but may have caused downtime. |
+
+For proposed R19, absent folder, unreadable/unavailable share, expired, consumed,
+wrong-target, bad-signature, partial and malformed files grant no deployment or
+recovery authority. Do not reread the share during that ordinary run. Keep local
+lifecycle exclusion, archive-identity capture and checkpoint evidence, without
+reserving a signed deployment attempt. A valid forward selection with unchanged
+archive takes R16; a valid recovery selection remains recovery, including when
+no installer call is necessary. Failed external H after successful G uses ordinary
+checked restart without signature. Failed/held and unresolved-attempt safeguards
+still apply: ordinary restart must not bypass required checkpoint-bound recovery.
+
+The human must confirm the failure-rule scope before implementing these admission
+paths. The operational flow text retains the strict rule pending that choice;
+its signed ordinary-restart clauses remain a writer proposal. This is a
+requirement/design gate, not a new implementation question. P35/P41 must cover
+each invalid/missing selection case followed by both unchanged and delivered
+start, once the human selects the expected result.
+
+#### Step 8 stable control closure and runtime dependencies
+
+P28's explicit manifest covers P27-P29, P31/P32, P23-P26 and P38, with member
+hashes, interpreter/host-utility dependencies and every source/exec edge. P30 runs
+on the controller and is not a target dependency. Code paths used before recovery
+must not source the prefix environment or enter either replaceable tree.
+
+| Operation or dependency crossing | Implementation boundary and required outcome |
+| --- | --- |
+| Dispatch, selection, reservation, archive identity, locks and retained-entry invocation | P27/P29/P31/P32 use the pinned closure, verified host utilities and retained inputs only; absence of application/tools trees cannot block these control operations. |
+| Hold enter/park/release and same-daemon observation | P25 resolves P38 beside itself. Its stable hook bridges test hold first, then validate and observe the recorded daemon through P38 without loading the application environment. With no record or a previous-boot record, preserve today's exec of the installed runtime watcher and pre-start hook, including arguments; the bridge loads no environment. Held state parks as today. P24 preserves these bridges; no bridge may require an application-tree helper merely to hold or observe. P34/P35 prove all four paths and that the fallback cannot block the first unit start after boot; actual reboot stays untested/nonblocking. |
+| P26 stop loading the prefix environment and calling the application wrapper | This is an explicit installed-runtime boundary. Anchor HOME first and validate installed identity. With missing/damaged runtime code, never execute it; use the verified-survivor procedure below or fail held. |
+| P23 environment, application start and diagnostic collection | Application runtime is required after verified installation/recovery. Use explicit verified runtime paths for diagnostic helpers and their dependencies, not an assumed sibling inside the closure. Missing/damaged runtime fails held and cannot produce activation or readiness. |
+| P23 convenience refresh | Resolve P24/P28 through the closure; preparation is strict and cannot activate on its own. |
+| Optional evidence delivery helpers | Resolve only validated installed-runtime helpers after runtime is available; absence keeps local evidence and must not block control-plane recovery or change a failure into success. |
+
+Before recovery invokes the retained entry's fully-stopped gate, P25 confirms
+parking and P26 scans for survivors using host utilities alone. For each survivor
+eligible for a bounded signal, require a retained identity receipt and revalidate
+account, boot, PID, start ticks and installation/process role immediately before
+signaling. Never signal a guessed PID from a name or broad account match. Record
+identities when processes are started/observed and before stop. An unrecorded or
+ambiguous survivor, failed signal or unresolved runtime dependency remains held
+with a nonzero result and evidence; do not invoke the installer. When all survivors
+are safely stopped or absent, re-scan and invoke the verified retained entry.
+P35 proves this route with removed trees, PID reuse, missing receipts and failed
+signals. The claim is survival of these stable control operations and safe offline
+recovery when quiescence is proven, not successful application start from damaged
+runtime code. Requirement Q11/design Q10 remain unchanged.
+
+#### Step 8 durable attempt transitions and transfer-failure routes
+
+P29 owns one strict state table shared by P31/P32 and exercised by P35. Every
+transition checks identity and the coordination lock; installation/recovery also
+holds the existing root lock. A fresh attempt has a new selection identity, even
+when its candidate equals the failed attempt's candidate. Preserve earlier evidence.
+
+| Persisted state before a new stop | Accepted new stop and next state |
+| --- | --- |
+| No attempt | Fresh signed deploy or restart reserves an attempt; signed recovery additionally requires its explicitly retained checkpoint and failed-attempt binding. Missing selection refuses before mutation. |
+| Reserved | Refuse a new stop while any owning job/process may be active. After proven terminal interruption, record failure before installer with the evidenced running/held state and use that row. |
+| Held and stopped, awaiting start | Original matching start may proceed. Refuse a new stop until job and remote-process terminal evidence proves start cannot still arrive, then record failed and held before installer. |
+| Installing | Refuse every competing stop/start. After proven process termination, record failed and held after installer and retain the installer's pending/recovery evidence. |
+| Failed before hold, application running | P31's handled failure is self-terminalized. Accept a fresh deploy, including the same candidate, or an authenticated plain restart without maintenance-channel terminalization or recovery. Preserve the running application and never invent a hold. |
+| Failed and held before installer | A fresh deploy may supersede it, including retrying the same candidate, with recorded terminal proof and the exact old last-working checkpoint. Accept P31's self-terminal receipt for handled stop failures. A freshly signed recovery bound to this failure restarts the checkpoint with no rollback call. Refuse plain restart and all other inputs. |
+| Failed and held after installer | Accept only freshly signed recovery bound to this failure and its installer state, after terminal-owner proof. Validate pending association and recovery value against the attempt checkpoint before rollback: a release identity must equal a release checkpoint; the historical-predecessor marker requires the retained historical checkpoint; the no-target marker refuses held. With no pending record, allow only an already installed checkpoint and held runtime checks without an installer call. Otherwise refuse held. Refuse fresh deploy and plain restart until recovery completes. |
+| Consumed | Permit a fresh signed deploy or authenticated plain restart; explicit rollback needs a fresh recovery selection bound to the retained successful checkpoint. Reject reused consumed selections. |
+| Recovered | Preserve the original failure and separate recovery success; permit a fresh signed deploy or authenticated plain restart. Any later recovery requires its own valid checkpoint and fresh selection. |
+
+A successful normal stop records held/stopped. Start durably records installing
+immediately before invoking the entry, then successful only after all final gates.
+The table's Consumed row means a successfully completed forward attempt; signed
+selection spend is separate and also survives failures.
+An interrupted installing state is conservatively after-installer failure. A failed
+plain restart that never installed remains failed-before-installer. P31 terminalizes
+its own handled failures while holding coordination, after all owned children exit:
+before hold with the application running, record the running-failure row; after hold,
+record the held-failure row. An already held entry stays held even if acquisition
+fails. A safely unwound new hold with verified restored supervision records running
+failure. Preserve the actual incoming/restored state; never invent a hold or claim
+an unverified running state. P35 proves immediate fresh retry after fetch failure.
+
+For killed/interrupted reserved/installing processes and held/stopped awaiting
+start, P22 first retains proof that the preceding orchestration job is terminal.
+Only then may it launch the authorized original stop/start-only recovery action.
+P31/P29 check local terminal proof themselves: root lock free, no attempt-owned
+process alive, identities unambiguous. They bind that receipt to the stored Part G
+attempt before transition. The target does not claim to read controller job state
+from fixed arguments; P22 owns that separate launch gate. Unknown job state blocks
+launch; unknown local state refuses held. Tests prove both gates together exclude
+an old start, including job-terminal/process-live and process-dead/job-live cases.
+No maintenance-channel terminalization exists in Step 8. Handled stop failures
+retain their self-terminal receipts. Terminalization never changes the original
+result. Stop on an already held,
+stopped installation preserves that hold, parks idempotently and stops nothing.
+Park failure there never releases the hold. Preserve the checkpoint when a fresh
+attempt supersedes a failure; only its new archive baseline and selection are new.
+
+Validate signature, unspent identity and short expiry on every admission, including
+recovery retries. Reserve immutable authenticated bytes under coordination outside
+staging. Q35/Q41 distinguish the signed selection ID, local reservation and success:
+failed/interrupted forward use must remain spent; only identified R16 stop/start
+releases its reservation while leaving forward authority unused. Recheck expiry
+on later admission of that pending selection. Bind an admitted reservation to a
+monotonic deadline covering measured staging, start/recovery and outer job limit;
+do not reapply the shorter transfer expiry at start. Exceeded deadline fails held.
+
+Cleanup removes the hard-link anchor only at proven terminalization/finalization,
+after recording its identity and ensuring no old start can still use it.
+
+P35 covers pipeline job-terminal gating, local terminal proof in the next original
+stop, and bound recovery through its paired start, including transfer failure
+before start was ever called. Fresh shared-drive signatures cover real retries
+after restoration without application-account access. Route (b) is Step 9's
+one-time production/new-environment bootstrap only. None can collide with an old running
+process or turn the original failure green.
+
+#### Step 8 shared staging non-collision invariant
+
+Retention, independent selection, reservations, checkpoints and journals stay
+outside staging. P07 and historical entries still use staging for legacy archive
+selection, completion markers and recovery copies. Do not remove those existing
+recovery paths. For every real candidate, derive the role's rename/write name set
+from all unpacked directory basenames at every depth, all top-level members, the
+literal download name and generated previous-version names. Prove it disjoint
+from every staging name used by P07 and each retained historical entry; also prove
+none of the role's written names matches their archive/marker selection patterns.
+Include pre-populated staging and symlink/type refusals. P35 generates this check
+from the actual member list for each candidate and both predecessor formats;
+a collision blocks qualification before bootstrap/restoration. No blanket claim
+that the installer never uses staging is made.
+
+Completion criteria: AC16 and AC17 close only on actual authorized execution
+through these paths, bound to exact immutable bytes and independently observed
+identity. Fixtures, static inspection, check mode, bootstrap through the temporary
+task, and prior Step 7 success do not close them. All thirteen findings have the
+tasks/tests/exits above; every former delivery-task responsibility has a fatal owner.
+Whole-path baseline equality and concurrent-project ancestry remain mandatory.
+Parts C and E-I each require separate explicit human authorization at execution
+time; this plan grants none. Unclosed prerequisites leave Step 8 incomplete.
+
+This completion establishes qualification-environment delivery and recovery only.
+It closes neither first-time installation nor production deployment and cannot
+complete the topic or its umbrella item. Those require Step 9 and AC18/AC19.
+
+#### Step 8 addendums
+
+Line-budget checkpoint:
+
+- [ ] Recount the six public Markdown documents above before/after; no Python ceiling.
+- [ ] Recount P07/P20/P22-P26 against 996/219/75/177/156/173/277 lines respectively.
+  They are non-Python; keep separate responsibilities rather than growing P07
+  into dispatcher, acquisition and runtime verification at once.
+- [ ] P27-P32 begin at 0; P30 is Python, below 550 at baseline, ceiling 650.
+  The five shell files have no Python ceiling; maintain a clear stable helper closure.
+- [ ] P33-P36 start at 0, Python safe band with ceiling 650; split fixture groups
+  by dispatcher, lifecycle and acquisition responsibility if any exceeds 650.
+  P33 remains an empty package marker.
+- [ ] P37 starts at 0, non-Python; registry schema stays unchanged.
+- [ ] P38 starts at 57, non-Python; recount closure members and classify every
+  source/exec edge, with no unlisted pre-recovery dependency.
+- [ ] At 550-650 Python lines avoid growth where practical; split only above 650.
+  Candidate parsing versus controller byte verification is P30's first split point;
+  do not pre-create speculative files.
+
+Full workflow timing run readiness: record separately pre-stop acquisition,
+hold/stop, immutable role staging, verified install, held APIs, release/observer,
+and failed-attempt recovery. Gate on measured upstream budgets and accepted outage.
+Use only authorized `ghog check`/`ghog affected` locally; repeat the existing
+complete Step 5 and Step 7 candidate workflow under its execution authorization.
+No new reusable acceptance-driver mode is planned.
+Time-gated status: existing limits and measured staging fit are hard rollout gates;
+no new arbitrary timeout/xfail waiver and no static substitute for runtime evidence.
+
+Step inspection: read mapped P07/P22-P32 and P34-P38 against every mode/owner/gate;
+inspect generic AC16/AC17 evidence bindings in the validation plan. Do not run
+a broader test command or target probe as an inspection shortcut.
+
+### Step 9. Deliver first-time and production installations through unchanged orchestration
+
+#### Step 9 analysis and intent
+
+Implement requirement Q12/AC18-AC19 and design Q11 only after Step 8 has actual
+AC16/AC17 closing evidence. Step 8 remains qualification-only. This mandatory
+step removes dependence on the temporary delivery task for a new environment
+and for production's historical shipped-environment release. Conform to each
+original contract without any variable, role, template, job or operations change.
+
+Expected outcome: independently verified scripts-only bootstrap enables the
+first original stop, empty-prefix delivery handles an absent predecessor honestly,
+and production upgrades its actual historical pair with a proven offline recovery
+route. Existing provisioning, unit identity, managed pipeline/template, repository
+access and arming access are environment-specific evidence gates. No fixture or
+qualification-environment result substitutes for the two required rehearsals
+and actual production execution. The topic and umbrella remain pending until then.
+
+Complexity impact: control preparation and historical retention stream hashes
+over explicitly selected files. Profile and attempt operations address one
+environment/attempt, never scan history to choose a release. Reuse Step 8 locks,
+closure, acquisition and runtime owners. No reusable cplx runtime or acceptance
+driver change is planned; cplx deliverables are documentation and evidence binding.
+
+#### Step 9 selected development replay venue
+
+The selected rehearsal venue is our development installation under our own
+development account on the qualification host. Both empty-prefix and historical
+upgrade/offline-rollback rehearsals use a replay script, never the orchestration
+tool. Each replay operation identifies its original role task and audited baseline:
+exact stop/start argv through the prefix dispatcher, literal download filename,
+unpack, per-directory rename rotation, staging copy and permission changes. Exercise
+literal and expanded HOME forms, and use direct argv without an intermediate shell
+where the role uses none. Confine paths and lifecycle activity to the development
+installation; preserve its prior state and authorize preparation/restoration.
+
+This installation has no service unit. Its explicit development-only no-unit
+profile is refused for qualification and production, never selected because a
+unit query fails. Replay does not prove managed orchestration, hold parking or
+same-daemon supervision. Step 8 G proves running-release unit behavior on the real
+qualification managed path. Unit-related first-install hooks and historical hook
+bridging first execute for real in production, supported beforehand by fixtures
+and read-only production unit evidence obtained through route (b). AC18/AC19 accept
+the development replays together with Step 8's managed run with these limits.
+Use retained exact historical archives on that host, independently verify their
+pairing against production evidence, and never relabel an earlier isolated tools
+pair as production's pair.
+
+#### Step 9 one-time bootstrap and signed arming gates
+
+Route (b) is selected for production and any new environment: an operations-team
+operator runs our exact self-verifying commands as the application account once
+for bootstrap. Route (a) is unavailable in production. This is an operator action,
+not an access, privilege, unit, role, template or job change. Record the named
+operator, existing account/host access and separately authorized session. Later
+arming uses the human's workstation and shared drive, with no recurring operator
+or pipeline shell access. Development rehearsals use our existing development
+account and need no operations operator; Step 8 uses current delivery and original
+pipeline actions and has no operator prerequisite or fallback.
+
+Empty-prefix hooks option (i) is selected. On an independently evidenced empty,
+inactive prefix, verified bootstrap installs hold-aware hooks with deployment
+hold set before any unit execution. No application or tools installation occurs.
+On an installed or running release, bootstrap leaves runtime, staging and unit
+start/pre-start hooks untouched; historical bridging belongs only to the first
+approved stop under hold. Unit configuration remains unchanged in all cases.
+
+Bootstrap precedes an environment's first original-path deployment, outside its
+pipeline. Transfer the registered published archive plus independently bound
+digest/profile into a private work area outside staging/replaced trees. Verify
+the whole archive before safe allowlisted extraction, and every closure member
+before execution. P30 prepares the instructions; P28 first-activates under the
+root lock with verified pointer and dispatcher published last. P39 prepares exact
+historical retention where needed. P28/P39/P29 non-dispatch inspections receipt
+completion without installing an application or arming. On a verified empty prefix
+only, P28/P25 also install initial hold-aware hooks with hold set.
+
+Receipt-bound interruption can resume the same verified phase under the lock;
+unknown state refuses. Before dispatcher publication the original stop fails;
+afterward incomplete-bootstrap state refuses before mutation, including unchanged
+staging. P40 covers every cut point. After completion, each fresh signature is a
+separate workstation/shared-drive action, checked by P30/P22 before launch and
+P29/P31 at admission. Later successful deployment activates its own stable version;
+never repeat first activation. Recovery uses the same fresh-signature mechanism.
+
+| Bootstrap, rehearsal and arming gate | Selected route and remaining evidence |
+| --- | --- |
+| Part C first-install replay | Development installation/account on qualification host; separately authorized confined empty-prefix preparation/restoration, verified closure and explicit no-unit profile. No operations operator. |
+| Part D historical replay | Same venue; retained exact historical archives, production pairing evidence, authorized preparation/restoration, offline recovery and explicit no-unit limits. |
+| Part F production bootstrap | Route (b) once: named operations operator, existing application-account access, exact self-verifying archive/closure/retention commands and receipts. Route (a) unavailable. |
+| New environment bootstrap | Route (b) once with environment-specific identity/provisioning evidence; do not request access or configuration changes. |
+| Every deploy, retry and recovery | Human signature through fixed environment folder on shared drive, verified with release N's public key. Fresh ID/short expiry, exact five inputs and checkpoint binding, durable replay prevention. No recurring operator access. |
+| Trust and implementation choices | Q37 tooling, Q38 key loss, Q39 replay file and Q40 arming layout require implementation answers; key-loss policy remains the human's choice. Q41 covers atomic attempt persistence. |
+| Unit evidence and accepted limits | DEV replay proves neither managed orchestration nor unit behavior. Step 8 G proves running-release managed unit behavior. Fixtures plus route (b) read-only production unit evidence support first real production hook/bridge execution. |
+
+Concrete hosts/accounts/shares, commands and receipts stay private. A chosen route
+is planning direction, never a receipt proving access or authorization to execute.
+
+#### Step 9 implementation
+
+Files involved:
+
+- Proposed P43 replay helper, baseline 0 before Step 8: extend the qualified
+  staging-only mode with confined development lifecycle replay after AC16/AC17.
+  Q39 settles its consumer path; record its actual post-Step 8 size before growth.
+
+- The same six public effort documents listed in Step 8, with the umbrella row
+  remaining pending; preserve all Steps 1-8 records and earlier acceptance rows.
+- P07 installer: explicit first-install retry reconciliation and validation of
+  prepared historical retention; leave both existing offline recovery formats.
+- P20 deployment reference and P22 consumer deployment pipeline: environment
+  evidence gates, approved managed routing, release-only production selection,
+  approval-aware timeout/admission and separate execution/recovery runbooks.
+- P23/P25/P26/P38: explicitly bound historical runtime checks and observed unit,
+  hold/bridge, survivor and same-daemon handling; preserve modern gates.
+- P27-P32: reuse dispatcher, strict installation, state/profile, controller,
+  stop and start owners. P28 adds only the guarded first-activation entry;
+  P29 owns explicit empty/no-predecessor states and validated profile binding.
+- New P39 historical-retention helper, baseline 0: verify and prepare the
+  installer's existing historical layout from independently approved archives.
+  Keep acquisition/bootstrap policy out of the already large P07.
+- Existing P33 marker and P34-P36 fixtures: preserve Step 8 regression coverage.
+  Add P40 bootstrap/profile, P41 empty-install/retry and P42 production/historical
+  test leaves, baseline 0 each, beside them; reuse parent markers and fixtures.
+- P37 pattern: new immutable candidate registry entries in the existing schema,
+  one per newly qualified candidate. Environment profiles and concrete receipts
+  remain private; do not put hosts or job identities in public configuration.
+
+Recount all existing consumer files after Step 8 rather than treating its planned
+baseline as the new size. P39-P43 paths and source facts are in the private mapping; Q39 leaves P43 location proposed.
+Publication/assembly owners remain unchanged unless a demonstrated omission is
+reported before scope expansion. No operations repository is a Step 9 edit target.
+
+Tests first: retain all Step 8 subprocess fixtures and add behavioral cases for
+verified scripts-only bootstrap without an application/toolchain, first activation
+guard races, foreign/corrupt pointers, receipt-bound interrupted preparation and
+prepare-only behavior when a stable version exists. Test empty-prefix stop,
+same-byte delivery, first-install success, prefetch/refusal/installer/start failures,
+explicit no-target recovery refusal and safe fresh retry after each terminal state.
+Include successful installer exit/index promotion followed by failed first
+runtime readiness: the index is provisional until full first-install success,
+never a last-working checkpoint or its own predecessor.
+P40 covers an original-path stop before the closure exists, between verified
+pointer publication and dispatcher publication, and after dispatcher publication.
+It also proves that a unit restart between historical bootstrap and the first
+approved stop still uses unchanged historical hooks/runtime, then that the first
+stop bridges only the hooks evidenced in that environment's profile. P41 covers
+a later retry failing after installer entry with recovery naming the provisional
+release: typed recovery refuses against the no-predecessor checkpoint, held and
+nonzero, with no restart or rollback.
+Assert no historical restart is invoked when absent and no modern gate silently
+falls back to the historical profile. Cover mismatched per-environment unit/profile,
+snapshot rejection, full approval wait, queue expiry, cancellation and unchanged
+candidate identity. Rehearse verified historical retention both with and without
+staging archives/markers, missing exact archives, wrong tools pairing and corrupted
+retention. Actual rehearsals below are separate evidence, never fixture claims.
+
+Classes and behavior (existing owners and focused script functions):
+
+1. Part A, dependency and environment evidence. Verify Step 8 AC16/AC17 evidence
+   before beginning Step 9 implementation or execution. For each new/production
+   environment, prepare a private gate ledger for pre-existing account, home,
+   scripts/staging folders, permissions, host utilities, unit user/start/pre-start,
+   runtime interfaces, fixed vars/source identity, inherited defaults, managed
+   job/template, target repository/shared-folder access and one-time route (b)
+   bootstrap identity. Separately authorized read-only production evidence must
+   observe actual historical archives/markers, installed pairing and unit hooks.
+   DEV C/D use the selected development venue and explicit no-unit profile; record
+   confined preparation/restoration authority and retained historical archives.
+   Exit: evidence-bound profiles, exact historical inventory and known rehearsal
+   limits. Missing access, provisioning, identity or routing blocks its gate,
+   without a request to change operations. Step 8 already qualifies/installs the
+   public key and signature verifier; Step 9 reuses them for different releases.
+
+2. Part B, consumer implementation and immutable qualification. Extend P30/P29
+   to render/parse the strict private profile and its digest in the independent
+   selection, without changing the release record or registry schema. P22 selects
+   only evidence-backed existing managed routing and rejects snapshots for
+   production before invocation; P31 repeats the release/profile gate at reservation.
+   P30 prepares the release-bound archive transfer and exact self-verifying
+   session instructions; P28/P39/P29 supply the checked phases and non-dispatch
+   inspections. P29 gates incomplete bootstrap separately from signed admission, and P22 requires
+   the checked receipts. Q31-Q33 allocate these implementation details.
+   P28's standalone verified entry prepares the full host-Bash closure and performs
+   guarded first activation under the root lock, with receipt-bound interruption
+   recovery. Verify the complete closure, publish and verify its version pointer,
+   then publish the dispatcher last by atomic rename. A concurrent original-path
+   stop before dispatcher publication fails at the role's stop task with the
+   historical runtime untouched or the prefix still empty; afterward it reaches
+   the complete closure. On a running historical installation, bootstrap writes
+   only the stable closure, version pointer, dispatcher and consumer control
+   folders; unit start/pre-start hook paths remain untouched until the first
+   approved stop enters the deployment hold and installs the hook bridges.
+   Existing activation rules are unchanged for an installed stable version.
+   On verified empty/inactive prefixes implement option (i): install hold-aware
+   hooks with the initial hold set. Fixture unexpected unit restart and every
+   publication cut point; retain no-hook-write on installed/running releases.
+   P23 and P25/P26 use explicitly selected modern/historical profiles.
+   P39 prepares exact historical retention atomically, validates using P07's reader
+   and never creates synthetic completion markers. Implement the empty-prefix
+   table below in P29/P31/P32 and P07's journal-based retry, with no guessed cleanup.
+   Run only separately authorized `ghog check` and `ghog affected` locally.
+   Build and qualify changed bytes through the full established candidate workflow;
+   production consumes only its qualified, published release binding. Exit: all
+   fixture mappings pass and exact candidate/evidence identities are frozen.
+   Stop on failure, changed bytes or an unresolved runtime/profile dependency.
+3. Part C, separately authorized development first-time replay. After AC16/AC17,
+   prepare an evidenced empty prefix inside our development installation on the
+   qualification host, preserving/restoring its own prior state. Do not disturb
+   qualification. Verify the published archive, guarded scripts-only bootstrap,
+   hold-aware hook placement under option (i), dispatcher-last publication and
+   non-dispatch receipts. No operations operator; use our development account.
+   Sign each real replay attempt/retry freshly through its development folder.
+   P43 replays the task-mapped exact stop/download/unpack/rotation/copy/permissions/
+   start sequence without Ansible, testing literal and expanded HOME argv and
+   avoiding an intermediate shell where the original uses none. Exercise empty
+   stop, five-input gates, first install, refusal/partial failure/no-target states
+   and safe fresh retry. The explicit DEV no-unit profile makes unit checks
+   inapplicable and labels the evidence accordingly; it never reports them passed.
+   Fixtures and route (b) read-only production evidence back first-install unit
+   hooks, whose first real unit execution is production. Exit: AC18 replay evidence
+   plus Step 8 managed running-release proof, with these accepted limits. Stop on
+   unknown state, boundary escape, unsafe retry or missing required runtime evidence.
+4. Part D, separately authorized development historical replay. Use the same
+   confined venue/account and exact retained historical archives, verifying the
+   application/tools pairing against production evidence before claiming AC19
+   historical coverage. Preserve the development restoration inputs. Verify any
+   existing stable receipt instead of repeating bootstrap. Prepare P39 retention
+   both with and without staging markers, never fabricating markers. Human signs
+   each upgrade/recovery/retry selection with failed-attempt/checkpoint binding.
+   P43 replays original task/argv/staging behavior, upgrade and offline rollback,
+   including failure before entry, typed pending recovery, repeat checks after
+   rollback success/runtime failure and intentional successful-upgrade rollback.
+   Artifact services are denied after inputs are local; shared-drive signed
+   control remains available. Record supported historical APIs and independent
+   identity; modern checks cannot downgrade. DEV has no unit: historical bridge,
+   parking and same-daemon behavior are fixture/production-evidence gates until
+   their first real production execution. Exit: exact-pair replay and offline
+   recovery with honest limits and preserved failed verdict. Stop if pairing,
+   identity or local recovery is unproven, or any operations change is needed.
+
+5. Part E, production readiness and bounded approval. Revalidate production
+   evidence under separately authorized access. P22 budgets the unchanged
+   two-hour approval plus bounded queue/dispatch, measured stop/staging/start,
+   external verification and safety margin. Record numeric caps in the private
+   profile and prove their sum fits the evidenced existing outer limits; change
+   only our pipeline timeout. P30 renders a target-bound selection for the human to sign with enough
+   admission lifetime for that bounded pre-stop envelope; P31 rechecks it at
+   reservation. Use a fresh monotonic execution deadline thereafter. Test the
+   full approval wait virtually and qualify actual timing later; no workstation
+   two-hour sleep is a test. Establish production repository access and arming
+   channel separately. Inspect the immutable approval task's check-mode behavior
+   and scope before any separately authorized check traversal. Exit: AC18 and
+   Part D passed, exact release-only candidate, budgets, historical retention,
+   authorized actors and recovery procedure ready. Stop on any stale/unclosed gate.
+6. Part F, separately authorized production bootstrap and delivery. Route (b) is
+   selected once: the evidenced named operations operator runs our exact
+   self-verifying commands as the application account in a separate session.
+   Verify the registered archive, safely extract/reverify the closure/key/verifier,
+   first-activate with dispatcher last, prepare exact historical retention and
+   inspect receipts without dispatcher stop/start. Installed/running release,
+   staging and hooks remain untouched until the first pilot-approved stop enters
+   hold and bridges its evidenced hooks. No application install or arming occurs
+   in bootstrap. Interrupted preparation blocks launch until receipt-bound repair.
+   Later deployments never repeat bootstrap or require operator arming. Human
+   signs each attempt/retry/recovery on the workstation, using the production
+   shared-drive folder and newly chosen short expiry. P22 gates exact existing
+   managed routing, release-only inputs and receipts; stop rechecks signature,
+   profile, expiry and replay state. Dry run remains unarmed with separate
+   controller/traversal verdicts. Real production requires separate human
+   authorization and unchanged pilot approval. Expired/cancelled approval never
+   reaches stop; expired selection refuses before hold. URLs/hashes stay fixed.
+   First real historical hook bridging is production, backed by fixtures and
+   route (b) unit evidence, with all fatal modern runtime and unit gates enforced.
+   Exit: actual production plus independent external evidence for both endpoints,
+   release/revision/environment/account, absent hold and same script-started daemon.
+   Stop on mismatch; successful orchestration alone cannot close AC19.
+
+7. Part G, production failure and completion. Preserve terminal job/process proof,
+   failed attempt, inputs and diagnostics. Before installer entry, restore the
+   historical checkpoint without rollback; after entry, validate the typed pending
+   recovery target and use its retained entry offline under the root lock. Run
+   the bound historical health/identity checks, release hold only after readiness
+   and verify same-daemon observation. A failed restore stays held and nonzero.
+   Even if the role never reaches start, use a fresh signed recovery selection
+   with the proven pipeline original stop/start action and local terminal proof.
+   Each recovery retry is newly signed; no operator recovery access is required.
+   Recovery requires its own authorization and never clears the failed production
+   verdict. Exit: bind actual AC18/AC19 evidence and retained recovery readiness in
+   the validation plan; only then may the topic and umbrella item complete.
+
+#### Step 9 empty-prefix transition extension
+
+This explicit first-install extension applies only to an independently evidenced
+empty prefix with the scripts-only bootstrap already present. It does not change
+Step 8's running/held checkpoint table or typed no-target refusal for recovery.
+
+| State and trigger | Required result and owner |
+| --- | --- |
+| Verified empty/inactive, fresh first-install deploy | P31 validates all identities and four inputs, records no predecessor, holds/parks and proves no survivors; stop succeeds without runtime code. |
+| Empty, pre-hold fetch/identity failure | P31 records terminal failure and preserves actual empty/inactive state; no claim of running application and no restart or rollback. |
+| Held empty, delivered archive with matching deploy | P32 performs pinned stable stop recheck, verifies all five inputs and calls P07's first-install path; full modern runtime gates precede consumption. |
+| Held empty, refusal or failure before installer | No installation/restart/rollback; fail held and retain no-predecessor checkpoint. Fresh selected deploy requires terminal proof. |
+| Failed first install after entry, no-target pending value | Retain journal, partial state and held failure. Explicit recovery refuses; ordinary start and an unqualified competing deploy refuse. |
+| Installer succeeded but first readiness failed | Keep the no-predecessor attempt and held failure; any installer-written current index remains provisional. Only receipt-bound retry reconciliation may handle it, never a guessed recovery or self-predecessor. |
+| Later retry fails after installer entry with pending recovery naming the provisional release | P41 proves bound recovery refuses under the typed checkpoint rule because no predecessor exists. Remain held and nonzero; no restart or rollback runs. |
+| Fresh authorized first-install retry after terminal proof | P07 reconciles only prior attempt-owned paths/state under the root lock with P29 transition checks. Archive previous evidence, preserve no predecessor and begin a new selected attempt; unknown paths/processes refuse. |
+| Full first-install readiness and same-daemon observation | Consume attempt, establish first last-working checkpoint and activate successful stable version; subsequent operations use Step 8's ordinary rules. |
+
+Completion criteria: AC18 development first-install replay, exact historical-pair
+upgrade/offline-rollback replay and actual AC19 production/external evidence are
+mandatory after AC16/AC17. Bind authorizations, exact bytes, development no-unit
+limits, Step 8 managed unit proof, and fixture/read-only production evidence for
+first real unit-hook/bridge execution. Route (b) bootstrap needs actual receipts;
+selection decisions are settled but tooling/key-loss/layout answers and evidence
+are still open. No operations change, check traversal or fixture replaces a required
+execution. Topic and umbrella remain pending until Step 9 is validated.
+
+#### Step 9 addendums
+
+Line-budget checkpoint:
+
+- [ ] Recount all modified P07/P20/P22-P32/P38 after Step 8 and before editing.
+  Keep P07 an installer; P39 owns archive-retention preparation.
+- [ ] P39 begins at 0, shell; keep a single focused responsibility and include
+  it in a verified maintenance helper manifest, outside runtime dispatch unless
+  an explicit dependency is documented.
+- [ ] P40-P42 begin at 0, Python; split bootstrap/profile, empty retry and
+  production/recovery fixtures before any exceeds 650 lines. At 550-650 avoid
+  growth where practical. P30 retains its existing split rule above 650.
+- [ ] Recount public documents and update private file handles/evidence paths;
+  preserve every earlier implementation record and registry schema.
+
+Full workflow timing readiness: measure bootstrap separately from deployment,
+record production approval/queue allowance separately from outage, then reuse
+measured acquisition/hold/stop/staging/install/API/observer/recovery phase caps.
+Prove admission expiry, execution deadline and existing job limits compose without
+extending any operations limit. Local validation remains permission-bound
+`ghog check`/`ghog affected`; each rehearsal, target read, bootstrap, arming, check,
+production run, external verification and recovery needs its stated authorization.
+This plan and its review authorize none of those actions.
+
+Step inspection: check P07/P20/P22-P32/P38-P42 against the state table, per-environment
+gate ledger and AC18/AC19 mapping. Missing actual evidence leaves the step not
+implemented. Record unresolved design alternatives for the human; do not settle
+them through plan implementation questions.
+
 ## Rollout evidence and completion accounting
 
 Record reusable cplx implementation/validation separately from consuming
@@ -945,19 +1970,23 @@ sanitized results. All implementation statuses remain not started in this review
 | Acceptance scope | Owning steps | Required closing evidence |
 | --- | --- | --- |
 | AC01 packaging and metadata | 1, 4, 7 | Actual archive inspection, exact bundle binding |
-| AC02 archive-only installation | 1, 3, 4, 5, 7 | Complete locally supplied application, script, release record, tools archive and companion (uv/wheels/metadata/transport/helpers); bootstrap on both platforms without an existing application venv or target Git checkout. Consumer acquisition is separately validated. |
+| AC02 archive-only installation | 1, 3, 4, 5, 7, 8 | Complete locally supplied application, script, release record, tools archive and companion (uv/wheels/metadata/transport/helpers); bootstrap on both platforms without an existing application venv or target Git checkout. Consumer acquisition is separately validated. |
 | AC03-AC05 exact environment and locked sync | 1, 3, 5, 7 | Exact interpreter/environment selection, repeat/recreated venvs, canonical lock and selected groups; deliberate drift blocks readiness. |
 | AC06 offline cplx reconstruction | 1, 3, 4, 7 | Deny remote services after local delivery and before cplx invocation; empty disposable caches, no target Git checkout, complete verified local inputs. Missing or invalid input fails before mutation without fetching; complete inputs reconstruct and pass readiness. |
 | AC07 wheel and distribution integrity | 2, 7 | Complete inventory and library/bin ELF comparisons |
 | AC08-AC09 cross-platform runtime | 5, 7 | Debian ABI/live providers; RHEL applicable readiness matrix |
 | AC10a-AC10b equivalent CI and truthful outcomes | 5, 7 | Actual-agent before/after provenance and deliberate failures |
 | AC11 validation without publication | 5, 7 | Executed-command evidence in both phases, override attempts |
-| AC12 predecessor recovery | 4, 7 | Both offline rollback paths; predecessor script, helper payload, input record and tools binding; no network or current-helper fallback |
-| AC13 public/private separation | Every step | Sanitized public files and separate private mapping/evidence |
+| AC12 predecessor recovery | 4, 7, 8 | Both offline rollback paths; predecessor script, helper payload, input record and tools binding; no network or current-helper fallback |
+| AC13 public/private separation | Every step, including 8 | Sanitized public files and separate private mapping/evidence |
 | AC14 prebuilt dependency wheels | 1, 3, 5, 7 | Compatible prebuilt wheels only; missing compatible wheel blocks readiness, no dependency source build, and no application build/install during dependency sync. |
-| Design retained inputs and complete delivery | 1, 4, 6, 7 | Complete local inputs before reconstruction and repository-independent predecessor recovery. |
-| AC15 serialization and changed toolchain identity | 3, 4, 7 | Competing mutations excluded and equal-version revalidation |
+| Design retained inputs and complete delivery | 1, 4, 6, 7, 8 | Complete local inputs before reconstruction and repository-independent predecessor recovery. |
+| AC15 serialization and changed toolchain identity | 3, 4, 7, 8 | Competing mutations excluded and equal-version revalidation |
 | Design Q08-Q09 candidate/promotion boundaries | 5, 6, 7 | Retention across later builds, exact-candidate qualification, immutable promotion |
+| AC16 original forward delivery | 8 | Actual same-release original-path deployment; fresh signed selection, four-input local rehash, all fatal checks, R16 restart preservation, baseline/source/ancestry proof, separate dry-run verdicts and shared/console/external evidence. |
+| AC17 original-path explicit recovery | 8 | Fresh signed failed-attempt/checkpoint recovery on every try, both offline formats, preinstaller failure, pipeline/local terminal proof, held runtime/supervision and original failure retained. |
+| AC18 first-time delivery | 9, after 8 | Selected development replay with exact task/argv/staging trace, verified scripts-only bootstrap, option (i) hooks, no-predecessor failures and signed retry. Accept with Step 8 managed run; DEV proves no unit behavior. Fixtures and route (b) production unit evidence back first real hooks in production. |
+| AC19 production delivery | 9, after 8 | Exact retained historical-pair development replay/offline rollback plus Step 8 managed proof, with stated no-unit/replay limits. Route (b) bootstrap once, fresh shared-drive signatures, existing release-only approval-aware managed production and external same-daemon evidence. Historical bridges first execute for real in production. |
 
 Private implementation and execution evidence are mandatory completion inputs.
 If target access, observation compatibility, candidate retention, operator setup
@@ -965,7 +1994,21 @@ or publication authorization is missing, record the specific open gate and
 leave its step incomplete. No local lint, unit test, probe or Jenkins success
 label alone establishes the full acceptance result.
 
+The 2026-10-03 accounting amendment preserves the recorded Step 1-7 validation
+and adds Step 8 as not started. Earlier planning-time status statements are
+historical. AC16/AC17 remain open until their own actual execution evidence exists.
+
+The 2026-10-04 amendment limits those rows to qualification and adds mandatory
+Step 9 as not started. AC18/AC19 cannot close before AC16/AC17 and their own
+actual evidence. AC02, AC12, AC13, AC15 and retained-input obligations also apply
+to Step 9. Keep umbrella item 8 pending until the entire expanded topic is validated.
+
 ## Implementation decisions
+
+Round 9 review follow-up: R20 places Q38 before Part B. R19 proposes unsigned
+ordinary restart and preserves signed installation/recovery, but changes the
+human's literal pre-lifecycle refusal guarantee. The pending human gate above
+states that tradeoff; no restart admission option is silently selected.
 
 Human-authorized consolidation after review round 3 confirms Q01-Q07 option A
 and Q08-Q09 option B. Their implementation tasks and evidence gates are integrated
@@ -1008,6 +2051,47 @@ local full-suite and duration gates while retaining actual Jenkins validation.
 Original qualified candidate bytes must survive the later successful default
 build in the human-approved immutable non-release store.
 
+Human decision on 2026-10-03: requirement Q11 and design Q10 require the consumer's
+original orchestration unchanged. Restore only its whole application path to the
+recorded baseline and preserve concurrent projects. Consumer code absorbs its
+fixed commands, one-archive staging and unused deploy variable; stop verifies four
+pinned inputs before lifecycle changes, start enforces deterministic mode and all
+fatal runtime gates, and explicit recovery stays offline. Add plan Step 8 parts
+A-I, AC16-AC17 and the new candidate/qualification obligation. The original-path
+real run remains unproven. Local consumer checks are only `ghog check` and
+`ghog affected`, each with prior permission; no operational authorization is
+conferred by this plan. The same-day follow-up confirms an idempotent stop-only
+recheck at deployment start using the attempt-pinned verified stable scripts,
+without refetching, resnapshotting or changing ordinary start/recovery.
+Earlier source/validation decisions remain history.
+
+Human decision on 2026-10-04, at the plan's round 3 convergence gate: revise and
+review again. Preserve the covered typed pending-recovery wording and every
+settled Step 8 behavior, but make its qualification-only scope explicit. Add
+mandatory Step 9 after actual AC16/AC17 closure, implementing requirement Q12 and
+design Q11 for first-time and production delivery. Scripts-only bootstrap uses
+existing maintenance access; first activation is narrowly guarded. First-install
+absence, actual historical retention, production approval/release/identity/access
+gates and separately authorized rehearsals precede production. No operations
+change or execution authority follows from this amendment. New questions Q23-Q30
+cover implementation allocation and evidence sequencing only.
+
+Earlier round 5/6 access, venue and arming alternatives are superseded by the
+human's round 8 decisions on 2026-10-04. R1-R15 and Q11-Q36 remain except for
+explicitly superseded assumptions. R16 option A preserves forward selection on
+checked outside stop/start. Decision 2 replaces all bootstrap arming/counts with
+fresh signatures for every attempt/retry/recovery; decision 3 selects shared-drive
+delivery with the human's workstation key and public-key/verifier in release N.
+Part C installs trust, probes and receipts only. Decision 4 selects development
+replay on the qualification host, with no service unit and honest evidence limits.
+Option (i) permits verified empty-prefix hold-aware hooks under initial hold;
+installed/running bootstrap still changes no hooks. Route (b) is the one-time
+production/new-environment bootstrap, never recurring arming. Step 8 A adds
+development-account host evidence and same-disk filesystem timing plus evidenced
+per-task orchestration overhead times remote operation count; C application-account
+probes are final. Q37-Q41 ask implementation details, leaving key-loss policy to
+the human. No implementation or execution is authorized by this amendment.
+
 | Question | Decision and reason | Integrated in | Rejected alternatives |
 | --- | --- | --- | --- |
 | Q01 | A: Use the native cumulative cplx harness and the consumer's configured groundhog walk; report their actual scope without inventing coverage. | Shared execution command checklist; per-step command forms | Adding unrelated cplx pytest/coverage configuration. |
@@ -1019,3 +2103,808 @@ build in the human-approved immutable non-release store.
 | Q07 | A: Record actual operator host, shell, arguments and credential provisioning privately before live backend implementation; generic eligibility tests may proceed independently. | Step 6 | Deferring runner assumptions until final rollout or reopening the outside-CI publication decision. |
 | Q08 | B: Deliver the explicit helper closure in the required reconstruction companion, with pinned source identity, member verification, separate entry script/input record and predecessor retention. This closes delivery without rebuilding tools. | Consumer delivery and cplx reconstruction responsibilities; Steps 1, 3-7 | Another helper artifact or republication of the accepted toolchain archive. |
 | Q09 | B: Consumer supplies complete local files and recorded identities; cplx verifies and reconstructs offline. Independently verified cplx work may progress while required private integration remains pending. | Consumer delivery and cplx reconstruction responsibilities; Steps 4 and 7; Rollout | Making cplx prescribe consumer acquisition or treating missing integration evidence as whole-topic completion. |
+| Q10 | Human decision on 2026-10-03: implement the settled original-orchestration contract only on the consumer side, with new immutable qualification, bootstrap before source restoration, loaded-source/payload agreement and separately authorized execution. | Requirement Q11; design Q10; Step 8 A-I; AC16-AC17 | Orchestration changes or exception requests; a new transport object; home entrypoints/general shell; native staging rollback; reusing qualification for changed bytes. |
+| Round 8 human direction | On 2026-10-04, select R16 A, fresh shared-drive human signatures for every attempt/recovery, release N key/verifier, development replay with no-unit limits, option (i) empty hooks, route (b) bootstrap once and Part A evidence/cost additions. | Requirement Q13-Q16; design Q12-Q15; Steps 8/9; Q37-Q41 | Bootstrap arming/count, recurring operator arming, artifact-repository arming publication, inferred managed/unit proof from DEV. |
+
+## Open questions for the v0.27.0 deploy-venv-sync implementation plan
+
+Q11-Q36 retain their implementation allocation and earlier accepted review changes
+except assumptions explicitly superseded by the human's round 8 decisions of
+2026-10-04. Requirement Q13-Q16 and design Q12-Q15 record the settled behavior.
+Step 8 has no operator access dependency; C installs trust/probes/receipts, never
+arming. Each G attempt/retry and each recovery uses a fresh short-lived signed
+shared-drive selection. R16 A preserves pending forward selection on identified
+outside stop/start with full held checks and its own reservation released.
+Step 9 uses development replay with explicit no-unit limits, empty-prefix option
+(i), and route (b) bootstrap once for production/new environments. Q37-Q41 propose
+implementation answers for the selected mechanism. Key-loss policy remains an
+explicit human choice. No implementation or execution is authorized here.
+
+### Q11: Allocate the consumer helpers and test leaves
+
+Which Step 8 file allocation should implement the settled dispatcher, acquisition, lifecycle and controller responsibilities without further growing P07 or creating duplicate runtime checks?
+
+#### BBQ for Q11
+
+Give each cook one station while keeping the established grill in use. In this picture: cooks are script owners, stations are P27-P32, and the grill is the existing P07/P23/P25/P26 implementation.
+
+#### Options for Q11
+
+- Option A: Keep P27-P32 as six focused source files, extend existing runtime owners, and put subprocess fixtures in P34-P36.
+  - Pro: Makes pre-toolchain host code, controller Python and stable lifecycle responsibilities explicit; preserves existing runtime ownership.
+  - Con: Requires a manifest and tests proving the full stable helper closure.
+- Option B: Merge strict compatibility installation into P27 and controller candidate handling into the deployment pipeline while keeping lifecycle targets separate.
+  - Pro: Introduces fewer source files.
+  - Con: Combines installation with dispatch and makes candidate validation harder to exercise independently.
+
+#### Recommended option for Q11
+
+Option A: The proposed six-file split follows distinct execution environments and responsibilities. Keep runtime verification in P23 and include the existing daemon-ownership helper P38 in the stable manifest; do not add a second verification script. The transport-bundle helper and its publication changes stay dropped.
+
+#### Answer to Q11: option A
+
+Option A is proposed for acceptance because it makes pre-toolchain host code, controller Python and stable lifecycle responsibilities explicit; preserves existing runtime ownership. The proposed six-file split follows distinct execution environments and responsibilities. Keep runtime verification in P23 and include the existing daemon-ownership helper P38 in the stable manifest; do not add a second verification script. The transport-bundle helper and its publication changes stay dropped.
+
+### Q12: Install and refresh the complete stable version
+
+Where should P28 stage the stable helper closure, and how should P07/P24 separate preparation from activation so ordinary wrapper refresh cannot switch code during an active attempt?
+
+#### BBQ for Q12
+
+Prepare the next cooking kit on a side bench and change kits only after the meal passes inspection. In this picture: the kit is the complete stable helper version, the side bench is a private version directory, the meal is deployment plus readiness, and inspection is successful runtime verification.
+
+#### Options for Q12
+
+- Option A: Prepare an immutable version under a dedicated prefix directory; record its explicit member hashes and dependencies; atomically switch the managed pointer only at successful finalization.
+  - Pro: Pins the active attempt to its old verified version and keeps preparation separate from promotion.
+  - Con: Requires distinct prepare/finalize call sites and cleanup rules for unused prepared versions.
+- Option B: Have P07 and P24 each contain their own complete copy-and-activate sequence, both guarded by a final-success receipt.
+  - Pro: Keeps call sites self-contained.
+  - Con: Duplicates ownership, closure and atomic-update rules; makes it easier for convenience refresh to activate early.
+
+#### Recommended option for Q12
+
+Option A: P28 owns separate prepare/activate operations. P32 activates after original-path final readiness and observation; P23 owns bootstrap activation after the same complete success, since P32 does not run there. P07/P24 and manual/maintenance installs only prepare. Never alter a pinned version or replace the dispatcher in place. Derive the transitive manifest including P38; test the stable control operations and verified-survivor recovery described in Step 8 with replaced trees absent. Application-runtime dependency failures remain held.
+
+#### Answer to Q12: option A
+
+Option A is proposed for acceptance because it pins the active attempt to its old verified version and keeps preparation separate from promotion. P28 owns separate prepare/activate operations. P32 activates after original-path final readiness and observation; P23 owns bootstrap activation after the same complete success, since P32 does not run there. P07/P24 and manual/maintenance installs only prepare. Never alter a pinned version or replace the dispatcher in place. Derive the transitive manifest including P38; test the stable control operations and verified-survivor recovery described in Step 8 with replaced trees absent. Application-runtime dependency failures remain held.
+
+### Q13: Reproduce the fixed invocation in subprocess fixtures
+
+How should P34 test exact dispatcher argv and working-directory behavior without running the original orchestration or accessing a target?
+
+#### BBQ for Q13
+
+Rehearse the exact order tickets in a practice kitchen without opening the restaurant. In this picture: order tickets are the two accepted argument vectors, the practice kitchen is a native Linux temporary prefix, and the restaurant is the target orchestration.
+
+#### Options for Q13
+
+- Option A: Use native Linux subprocess fixtures with explicit argv lists, a temporary prefix as cwd, a real executable dispatcher and controlled lifecycle endpoints.
+  - Pro: Preserves literal tilde and whitespace behavior and observes exit status and actual target invocation.
+  - Con: Needs native host utilities and careful fixture isolation for ownership and path checks.
+- Option B: Use Bash command strings that recreate the role text, with separate assertions for literal and expanded home forms.
+  - Pro: Reads similarly to the logged command.
+  - Con: Adds shell expansion absent from the actual command module and can hide dispatcher bugs.
+
+#### Recommended option for Q13
+
+Option A: Use argv arrays, never an extra shell. Cover literal and recorded-home forms, extra operands, wrong home, foreign launcher, bad ownership/modes and damaged replaceable trees. Use prefix cwd and non-terminal streams, preserving nohup's ignored hangup signal without an output file. Assert no incoming HOME lookup for code and explicit prefix HOME before application commands. Fake lifecycle boundaries, not the dispatch code being tested.
+
+#### Answer to Q13: option A
+
+Option A is proposed for acceptance because it preserves literal tilde and whitespace behavior and observes exit status and actual target invocation. Use argv arrays, never an extra shell. Cover literal and recorded-home forms, extra operands, wrong home, foreign launcher, bad ownership/modes and damaged replaceable trees. Use prefix cwd and non-terminal streams, preserving nohup's ignored hangup signal without an output file. Assert no incoming HOME lookup for code and explicit prefix HOME before application commands. Fake lifecycle boundaries, not the dispatch code being tested.
+
+### Q14: Order prerequisite work and authorized rollout parts
+
+Which dependencies allow Part A evidence preparation and Part B implementation to proceed independently while retaining all gates before restoration and the separate execution authorizations?
+
+#### BBQ for Q14
+
+Prepare recipes while checking the venue, but do not serve until both are ready. In this picture: recipes are Part B, venue checks are Part A, service is Parts C-I, and the serving permit is each required human authorization.
+
+#### Options for Q14
+
+- Option A: Allow independent A/B work; require B qualification and applicable A gates before C, then C to D to E to F to G to H, with I entered on failure only after its own authorization.
+  - Pro: Allows useful local progress without weakening operational dependencies.
+  - Con: Requires a prerequisite ledger showing exactly which evidence remains open and where it blocks.
+- Option B: Complete every A gate before starting any B implementation or fixture work.
+  - Pro: Has a simple serial dependency graph.
+  - Con: Blocks independent work on evidence that may require the new candidate or an authorized qualification.
+
+#### Recommended option for Q14
+
+Option A: Use an explicit dependency ledger. Every A prerequisite must close before E; C collects A's target probes through existing delivery, avoiding an A/C cycle. Pre-C safety prerequisites, the Q19 same-disk filesystem replay plus evidenced orchestration overhead and qualified Q21 state table close before C. Live evidence gathering and recovery remain authorized operations, and no fixture result stands in for actual staging timing or AC16/AC17.
+
+#### Answer to Q14: option A
+
+Option A is proposed for acceptance because it allows useful local progress without weakening operational dependencies. Use an explicit dependency ledger. Every A prerequisite must close before E; C collects A's target probes through existing delivery, avoiding an A/C cycle. Pre-C safety prerequisites, the Q19 same-disk filesystem replay plus evidenced orchestration overhead and qualified Q21 state table close before C. Live evidence gathering and recovery remain authorized operations, and no fixture result stands in for actual staging timing or AC16/AC17.
+
+### Q15: Detect identical-byte archive redelivery without inode reuse ambiguity
+
+How should P29 capture the pre-stop delivered-file identity and compare it at start so the same bytes delivered again cannot become a plain start?
+
+#### BBQ for Q15
+
+Keep the old serving tray tagged while comparing the tray returned after service, even if the food looks identical. In this picture: trays are archive file objects, the tag is the retained identity anchor, and identical food is equal archive content.
+
+#### Options for Q15
+
+- Option A: For an existing regular archive, retain a checked same-filesystem hard-link identity anchor outside staging; record identity metadata and absence explicitly, then compare the current archive to that anchor at start.
+  - Pro: Keeps the old inode alive across rotation and distinguishes replacement with identical bytes.
+  - Con: Requires qualified hard-link/filesystem support and safe retention cleanup; in-place mutation must also be detected or refused.
+- Option B: Record only device/inode and high-resolution metadata, rejecting cases the qualified filesystem cannot distinguish reliably.
+  - Pro: Avoids retaining another link.
+  - Con: Can lose evidence when inode numbers are reused or metadata fidelity is inadequate; needs a stronger platform-specific proof.
+
+#### Recommended option for Q15
+
+Option A: Prefer the retained identity anchor, with owner/path/type checks and metadata/content-change checks for in-place modification. Never use SHA alone or timestamps alone. Fixtures replay deletion of the older previous version, rename to the previous-version name, recursive copy, then identical single-file copy. Cover absent-before delivery, same-byte replacement, inode reuse, in-place mutation and unreadable state. Refuse cross-filesystem anchors; remove anchors only after terminalization/finalization proves no old start can use them. Unsupported identity guarantees block rollout.
+
+#### Answer to Q15: option A
+
+Option A is proposed for acceptance because it keeps the old inode alive across rotation and distinguishes replacement with identical bytes. Prefer the retained identity anchor, with owner/path/type checks and metadata/content-change checks for in-place modification. Never use SHA alone or timestamps alone. Fixtures replay deletion of the older previous version, rename to the previous-version name, recursive copy, then identical single-file copy. Cover absent-before delivery, same-byte replacement, inode reuse, in-place mutation and unreadable state. Refuse cross-filesystem anchors; remove anchors only after terminalization/finalization proves no old start can use them. Unsupported identity guarantees block rollout.
+
+### Q16: Implement bounded HTTP acquisition and retained paths
+
+Which host HTTP client and retained-store implementation should P29 qualify for the general four-input acquisition path without relying on the incoming tools tree? Step 8 Part G uses only rehashed bootstrap retention with zero fetches; acquisition fixtures remain for later Step 9 selections, using the selected shared-drive signature mechanism.
+
+#### BBQ for Q16
+
+Collect ingredients with a timed delivery service and store sealed packages away from the clearing table. In this picture: ingredients are four exact inputs, the delivery service is the host HTTP client, seals are expected hashes, and the clearing table is rotating staging.
+
+#### Options for Q16
+
+- Option A: Qualify the existing host curl and use its absolute path with explicit HTTP/TLS/redirect policy, connection and total deadlines, private temporary files and hash-addressed atomic retention.
+  - Pro: Uses one familiar host tool and centralizes timeout, URL and digest handling.
+  - Con: Curl availability/version and its supported flags must be evidenced; numeric limits need measurement.
+- Option B: Implement equivalent curl and wget adapters and choose whichever exists during each operation.
+  - Pro: Accommodates more existing hosts without adding a dependency.
+  - Con: Doubles protocol/deadline qualification and can make behavior depend on PATH or tool availability.
+
+#### Recommended option for Q16
+
+Option A: Choose one evidenced host client before rollout and fail if its capability is unavailable. Pin its executable identity and forbid silent adapter or URL fallback. Evidence must show the trust store covers the repository certificate; TLS verification is never silently downgraded. SHA-256 against independent selection remains the integrity guarantee. Controller and target tests must cover HTTP failure, redirects, truncated bodies, timeouts, canonical URLs, tools-hash reuse and retained-store mutation.
+
+#### Answer to Q16: option A
+
+Option A is proposed for acceptance because it uses one familiar host tool and centralizes timeout, URL and digest handling. Choose one evidenced host client before rollout and fail if its capability is unavailable. Pin its executable identity and forbid silent adapter or URL fallback. Evidence must show the trust store covers the repository certificate; TLS verification is never silently downgraded. SHA-256 against independent selection remains the integrity guarantee. Controller and target tests must cover HTTP failure, redirects, truncated bodies, timeouts, canonical URLs, tools-hash reuse and retained-store mutation.
+
+### Q17: Hand the root lock across the synchronous installer call
+
+How should P32 and P07 share the existing root lock while checking the durable reservation immediately before install or recovery?
+
+#### BBQ for Q17
+
+One cook keeps the kitchen key while an assistant works, and the assistant checks the key rather than requesting a second one. In this picture: the key is the inherited locked file descriptor, the cook is P32, the assistant is P07, and the booking is the durable attempt reservation.
+
+#### Options for Q17
+
+- Option A: Have P32 acquire the root lock on the existing descriptor, recheck reservation, and pass that descriptor to P07, which verifies its path and lock before using the inherited-lock route.
+  - Pro: Fits the existing inherited-descriptor behavior and keeps one lock held through synchronous work and readiness.
+  - Con: Requires tests for descriptor inheritance, forged flags, wrong lock objects and all recovery recursion paths.
+- Option B: Move reservation recheck and root-lock acquisition entirely into P07, with P32 passing a verified reservation reference and waiting for the result.
+  - Pro: Keeps one installer lock owner.
+  - Con: Adds orchestration reservation semantics to P07 and complicates protection of the later readiness/finalization interval.
+
+#### Recommended option for Q17
+
+Option A: Reuse the existing descriptor and held-flag contract exactly rather than introducing a new bypass. A flag without the verified locked descriptor fails. Test competing stop/start attempts, stale reservation changes, nested recovery, child failures and ownership through hold release/finalization.
+
+#### Answer to Q17: option A
+
+Option A is proposed for acceptance because it fits the existing inherited-descriptor behavior and keeps one lock held through synchronous work and readiness. Reuse the existing descriptor and held-flag contract exactly rather than introducing a new bypass. A flag without the verified locked descriptor fails. Test competing stop/start attempts, stale reservation changes, nested recovery, child failures and ownership through hold release/finalization.
+
+### Q18: Allocate and test the bounded lifecycle deadline
+
+How should P23/P25/P26 enforce the 600-second first-start envelope and the separate pre-stop acquisition budget without adding unbounded nested waits?
+
+#### BBQ for Q18
+
+Give the meal one finishing deadline and each station a smaller allowance; time spent at one station still counts. In this picture: the meal deadline is the wrapper bound, station allowances are phase caps, and time spent is elapsed monotonic time across subprocesses.
+
+#### Options for Q18
+
+- Option A: Create one overall monotonic deadline, cap each phase by remaining time and its measured limit, and test deadline propagation with controlled clocks plus a small real subprocess timeout case.
+  - Pro: Bounds aggregate duration and makes failure-budget tests deterministic.
+  - Con: Requires an explicit deadline interface across existing helpers and evidence for the final numeric allocation.
+- Option B: Keep independent fixed timeouts in each helper and verify only that their nominal sum fits 600 seconds.
+  - Pro: Changes fewer helper interfaces.
+  - Con: Process overhead, retries and repeated queries can exceed the nominal sum; less robust failure timing.
+
+#### Recommended option for Q18
+
+Option A: Measure before freezing the allocation, preserving existing 90-second lifecycle, 5-second unit-query and 55-second park limits. Stop acquisition has a separate bounded budget. Explicitly requalify P25/P26's move from park-after-stop to park-before-stop, allowing up to 55 seconds with the application still running; preserve an incoming hold on already stopped entries. Include diagnostics, the deployment-only stable stop recheck, release, observer checks and failed cleanup; do not add two five-minute checks.
+
+#### Answer to Q18: option A
+
+Option A is proposed for acceptance because it bounds aggregate duration and makes failure-budget tests deterministic. Measure before freezing the allocation, preserving existing 90-second lifecycle, 5-second unit-query and 55-second park limits. Stop acquisition has a separate bounded budget. Explicitly requalify P25/P26's move from park-after-stop to park-before-stop, allowing up to 55 seconds with the application still running; preserve an incoming hold on already stopped entries. Include diagnostics, the deployment-only stable stop recheck, release, observer checks and failed cleanup; do not add two five-minute checks.
+
+### Q19: Measure the unchanged staging loop before restoration
+
+How should P43 and the private evidence ledger combine development-account filesystem replay with orchestration overhead before Part C?
+
+#### BBQ for Q19
+
+Time preparation on the same kitchen counters, then add the wait at each service hatch. The counters are the same-disk filesystem, the preparation is staging replay, and service-hatch waits are audited remote-task overhead.
+
+#### Options for Q19
+
+- Option A: Record exact-candidate staging-only replay timing, disk peak and remote operation counts; add evidenced per-task orchestration overhead by operation class.
+  - Pro: Measures the selected venue and keeps filesystem cost separate from orchestration transport.
+  - Con: Needs usable retained or separately authorized check-console timings and explicit skipped-task limits.
+- Option B: Use filesystem timing alone with a large unexplained safety factor.
+  - Pro: Needs fewer timing sources.
+  - Con: Cannot show that the many remote operations fit the existing job limit.
+
+#### Recommended option for Q19
+
+Option A: P43 names each audited role task/baseline and reproduces literal filename, unpack, per-directory rotation, copy and permissions on confined same-disk development paths. Record T, D and N; derive O from retained or separately authorized check-console evidence and budget at least `2 * (T + N * O)`, or a per-class sum, plus `2 * D` headroom. Explain skipped tasks, representativeness and no double counting. Missing overhead evidence blocks C. No orchestration tool runs. C's application-account probes remain final for network/proxy/share permission; remeasure G against caps.
+
+#### Answer to Q19: option A
+
+Option A is proposed for acceptance because it measures the selected venue and keeps filesystem cost separate from orchestration transport. P43 names each audited role task/baseline and reproduces literal filename, unpack, per-directory rotation, copy and permissions on confined same-disk development paths. Record T, D and N; derive O from retained or separately authorized check-console evidence and budget at least `2 * (T + N * O)`, or a per-class sum, plus `2 * D` headroom. Explain skipped tasks, representativeness and no double counting. Missing overhead evidence blocks C. No orchestration tool runs. C's application-account probes remain final for network/proxy/share permission; remeasure G against caps.
+
+### Q20: Place failure fixtures and line-budget split checkpoints
+
+How should P34-P36 cover the mode table, sixteen fatal owners and both offline recovery formats while keeping tests independent of implementation details and source files within their budgets?
+
+#### BBQ for Q20
+
+Inspect every food-safety station with a deliberate fault, grouping checks by what can go wrong. In this picture: stations are consumer gate owners, faults are injected behavioral failures, and inspection groups are dispatcher, lifecycle and acquisition test leaves.
+
+#### Options for Q20
+
+- Option A: Keep P34 dispatch/installation, P35 lifecycle/reservation/recovery and P36 acquisition/controller fixtures; use explicit case-to-gate mapping and split a file only when its measured line budget requires it.
+  - Pro: Makes missing failure coverage visible and preserves distinct fixture responsibilities.
+  - Con: Lifecycle scenarios need shared fixture discipline to avoid duplicating expensive setup.
+- Option B: Put the entire acceptance matrix in one parameterized test module and split only after implementation stabilizes.
+  - Pro: Centralizes the matrix initially.
+  - Con: Mixes host acquisition, locking and lifecycle setup and risks an oversized module late in the step.
+
+#### Recommended option for Q20
+
+Option A: Use observable process exits, state and byte identity, not source-string assertions. Cover every mode row, Q21 transitions and the Step 8 pipeline recovery route, every owner failure, transfer failure before installer pending state, archive-member-derived staging non-collision, Q22 same-release recovery/index cases, park-before-stop failures and both network-denied recoveries. Add self-terminalized fetch failure followed immediately by fresh same-candidate retry; pending-target or installed-checkpoint mismatch refusal; repeated recovery after successful rollback but failed runtime checks, including same-release delivery; and preinstaller recovery with zero rollback calls. P34/P35 exercise held bridges, live recorded-daemon observation, and absent/previous-boot record fallbacks with unchanged exec arguments and no bridge-loaded environment. P35 also covers bound recovery to the historical predecessor format through the pending marker, and a no-target marker refused held. Record P07 and existing baselines, keep Python files below the 650-line ceiling, and run only separately permitted ghog check/ghog affected during implementation.
+
+#### Answer to Q20: option A
+
+Option A is proposed for acceptance because it makes missing failure coverage visible and preserves distinct fixture responsibilities. Use observable process exits, state and byte identity, not source-string assertions. Cover every mode row, Q21 transitions and the Step 8 pipeline recovery route, every owner failure, transfer failure before installer pending state, archive-member-derived staging non-collision, Q22 same-release recovery/index cases, park-before-stop failures and both network-denied recoveries. Add self-terminalized fetch failure followed immediately by fresh same-candidate retry; pending-target or installed-checkpoint mismatch refusal; repeated recovery after successful rollback but failed runtime checks, including same-release delivery; and preinstaller recovery with zero rollback calls. P34/P35 exercise held bridges, live recorded-daemon observation, and absent/previous-boot record fallbacks with unchanged exec arguments and no bridge-loaded environment. P35 also covers bound recovery to the historical predecessor format through the pending marker, and a no-target marker refused held. Record P07 and existing baselines, keep Python files below the 650-line ceiling, and run only separately permitted ghog check/ghog affected during implementation.
+
+### Q21: Implement one durable attempt-state transition table
+
+How should P29, P31 and P32 implement the Step 8 transition table so retries and freshly signed recovery can follow a terminal transfer failure without admitting a competing live attempt?
+
+#### BBQ for Q21
+
+Keep one booking ledger and close the abandoned booking before issuing a new ticket. In this picture: the ledger is P29's durable state table, the booking is the attempt reservation, and a new ticket is a fresh deployment or bound recovery selection.
+
+#### Options for Q21
+
+- Option A: Implement the single Step 8 state table in P29, with explicit terminalization evidence and shared transition checks in both targets; test every row and the pipeline recovery route in P35.
+  - Pro: Gives interrupted and completed attempts one authority and preserves checkpoints across preinstaller retries.
+  - Con: Requires durable phase receipts, terminal-owner proof and deadline accounting across separate processes.
+- Option B: Keep separate stop/start transition functions and make P35 verify their combined behavior against the same table.
+  - Pro: Keeps each target's control flow local.
+  - Con: Duplicates admissibility rules and increases the risk of disagreement after interruption.
+
+#### Recommended option for Q21
+
+Option A: Centralize the table in P29. P31 self-terminalizes handled failures after its owned children exit: the running pre-hold failure state admits fresh deploy or authenticated plain restart without maintenance terminalization, while a held preinstaller failure preserves hold and checkpoint. The fixed orchestration runs nothing further on the host after a failed stop. For killed/interrupted reserved or installing processes and successful stop awaiting start, P22 proves the job terminal before launching original stop/start; P31/P29 then prove root-lock availability and no live attempt-owned process locally before terminalizing. After-installer failures require checkpoint-bound recovery first. Already held/stopped entries keep the hold even if parking fails. Reserve a measured staging-inclusive deadline at stop, retain the original failure, and test immediate fresh retry after fetch failure plus the pipeline-launched freshly signed transfer-failure recovery route, without operator access.
+
+#### Answer to Q21: option A
+
+Option A is proposed for acceptance because one transition authority makes retries and recovery reviewable without weakening exclusion. P31 records its own handled failures because no later host action follows failed stop. A separate failed-before-hold/application-running state permits fresh deploy or authenticated plain restart without recovery or maintenance terminalization. Use P22 job-terminal launch proof plus P31/P29 local lock/process proof for interrupted/killed reserved/installing and successful stop awaiting start; no maintenance channel supplies it. P35 covers every persisted and incoming state, handled fetch failure with immediate fresh same-candidate retry, actual hold preservation, terminalization evidence, fresh signatures, short admission expiry and durable replay prevention, bounded reservation deadlines and pipeline-launched recovery.
+
+### Q22: Qualify the first original-path run as same-release redeployment
+
+Which already qualified candidate should Part G deploy, and which P07/P35 checks bind its last-working checkpoint and predecessor index?
+
+#### BBQ for Q22
+
+Rehearse service with the same approved meal before changing the menu. In this picture: the meal is Part C's candidate, service is the original path in Part G, and the prior menu record is the predecessor index.
+
+#### Options for Q22
+
+- Option A: Part G redeploys Part C's exact candidate with a fresh signed attempt delivered near G through the shared drive; test that the prior predecessor is preserved and failure recovers to the same-release checkpoint.
+  - Pro: Isolates the orchestration transition and exercises same-byte redelivery without introducing another set of release bytes.
+  - Con: Requires explicit same-release index and failure-recovery cases.
+- Option B: Prepare and separately qualify another immutable candidate for Part G.
+  - Pro: Exercises a version advance at the same time.
+  - Con: Adds a full qualification and couples payload changes to the first original-path run without an established need.
+
+#### Recommended option for Q22
+
+Option A: Bind C and G to the same candidate registry identity with a fresh selection/attempt. P07 must not make the release its own predecessor. Under the root lock, attempt-bound recovery validates the pending association and recovery value against the attempt checkpoint before rollback: a release identity must equal a release checkpoint; the installer's historical-predecessor marker is accepted only when the checkpoint is the retained historical predecessor; its no-target marker refuses held. With no pending record and installed identity equal to the checkpoint, run held plain-start checks without any installer call; otherwise refuse held. Preinstaller recovery never calls rollback. Never use the no-pending index-predecessor branch for a failed attempt. P35 repeats recovery after successful rollback but failed runtime checks, including same-release delivery, proving release N remains N rather than N-1 and the original failure stays failed.
+
+#### Answer to Q22: option A
+
+Option A is proposed for acceptance because it tests the delivery-path change with already qualified bytes. Recovery validates persisted association and recovery value against the attempt checkpoint: a release identity must equal a release checkpoint; the installer's historical-predecessor marker is accepted only for the retained historical checkpoint; its no-target marker refuses held. Only a valid matching pending value permits rollback; no pending plus installed checkpoint permits held checks only; all other states refuse held. Cover successful redeployment, interrupted promotion/cleanup, both failure positions, repeated recovery after rollback success/runtime failure and preinstaller recovery with zero rollback calls. The unchanged older predecessor remains available only through a separate explicit selection bound to a consumed checkpoint.
+
+### Q23: Place guarded first activation in the existing compatibility installer
+
+Which file should implement the settled scripts-only first-activation path without duplicating Step 8's closure installation and promotion checks?
+
+#### BBQ for Q23
+
+The kitchen's first key is issued once; replacing an existing key still uses the ordinary approval. In this picture: the first key is scripts-only activation, the ordinary approval is the final runtime success receipt, and the key issuer is P28.
+
+#### Options for Q23
+
+- Option A: Use P28's standalone verified entry with separate prepare, guarded first-activate and ordinary activate operations.
+  - Pro: Reuses one owner for member verification, safe paths, locking and atomic publication.
+  - Con: Requires careful tests that first activation cannot bypass the normal existing-version rule.
+- Option B: Add a separate maintenance bootstrap adapter that calls P28's preparation and activation primitives.
+  - Pro: Offers a distinct operator entrypoint and can keep P28 smaller.
+  - Con: Adds another shipped and verified helper boundary before evidence shows it is needed.
+
+#### Recommended option for Q23
+
+Option A: P28 keeps the operations separate, checks no stable version/current/foreign dispatcher/unresolved attempt under the root lock, and requires an independently bound bootstrap receipt. Verify the complete closure, publish and verify its version pointer, then publish the dispatcher last by atomic rename. P40 covers concurrent first activations, interrupted managed preparation, existing-version refusal and zero application install; an original-path stop before the closure or between pointer and dispatcher fails at stop without runtime mutation, while afterward it reaches the complete closure. On empty prefixes, option (i) installs hold-aware hooks under initial hold. Historical bootstrap never replaces unit start/pre-start hooks; P40 proves an intervening restart uses the unchanged historical runtime, with evidenced bridges installed only at the first approved hold entry. Recount P28 after Step 8 before considering a split.
+
+#### Answer to Q23: option A
+
+Option A is proposed for acceptance. A single checked installer serves both paths while the explicit first-activation guard preserves existing-version promotion.
+
+P28 keeps the operations separate, checks no stable version/current/foreign dispatcher/unresolved attempt under the root lock, and requires an independently bound bootstrap receipt. Verify the complete closure, publish and verify its version pointer, then publish the dispatcher last by atomic rename. P40 covers concurrent first activations, interrupted managed preparation, existing-version refusal and zero application install; an original-path stop before the closure or between pointer and dispatcher fails at stop without runtime mutation, while afterward it reaches the complete closure. On empty prefixes, option (i) installs hold-aware hooks under initial hold. Historical bootstrap never replaces unit start/pre-start hooks; P40 proves an intervening restart uses the unchanged historical runtime, with evidenced bridges installed only at the first approved hold entry. Recount P28 after Step 8 before considering a split.
+
+### Q24: Implement the empty-prefix retry transition extension
+
+How should the no-predecessor states and safe fresh retry be implemented alongside Step 8's established attempt table?
+
+#### BBQ for Q24
+
+An unopened kitchen has no earlier meal to put back on the table. In this picture: the unopened kitchen is the evidenced empty prefix, the earlier meal is a last-working checkpoint, and cleaning only the recorded preparation area is journal-owned retry reconciliation.
+
+#### Options for Q24
+
+- Option A: Extend P29's shared table with explicit evidenced-empty states, with P07 owning journal-based partial-install reconciliation.
+  - Pro: Keeps serialization, terminal proof and attempt ownership under the existing state owner.
+  - Con: Needs assertions that real-checkpoint failures still require their established recovery path.
+- Option B: Add a first-install state adapter that validates explicit empty states before delegating common transitions to P29.
+  - Pro: Isolates first-install-specific code.
+  - Con: Adds another transition layer and more cross-owner failure boundaries.
+
+#### Recommended option for Q24
+
+Option A: P29 records an explicit no-predecessor checkpoint; P31 handles empty stop and P32 dispatches only the selected first-install mode. P07 reconciles journal-owned paths under the root lock for a fresh authorized attempt after terminal proof. P41 covers pre-hold failure, held refusal, partial installation, no-target recovery refusal, unknown files and successful retry, with zero fictional restart/rollback calls. Also cover a retry failing after installer entry whose pending recovery names the provisional release from failed first readiness: the typed no-predecessor checkpoint refuses recovery, held and nonzero, with no restart or rollback.
+
+#### Answer to Q24: option A
+
+Option A is proposed for acceptance. One transition authority makes the exceptional retry auditable without weakening Step 8 recovery-first behavior.
+
+P29 records an explicit no-predecessor checkpoint; P31 handles empty stop and P32 dispatches only the selected first-install mode. P07 reconciles journal-owned paths under the root lock for a fresh authorized attempt after terminal proof. P41 covers pre-hold failure, held refusal, partial installation, no-target recovery refusal, unknown files and successful retry, with zero fictional restart/rollback calls. Also cover a retry failing after installer entry whose pending recovery names the provisional release from failed first readiness: the typed no-predecessor checkpoint refuses recovery, held and nonzero, with no restart or rollback.
+
+### Q25: Allocate verified historical-retention preparation
+
+Where should the explicit preparation route for missing historical staging inputs live while preserving the existing offline recovery layout?
+
+#### BBQ for Q25
+
+The pantry receives labeled ingredients before service rather than inventing a receipt for a meal. In this picture: ingredients are exact historical archives, the pantry is retained recovery storage, and the invented receipt is a synthetic completion marker.
+
+#### Options for Q25
+
+- Option A: Add focused P39 and reuse P07's existing retention reader and validation boundary.
+  - Pro: Keeps archive acquisition/preparation policy outside the large installer and preserves one recovery format.
+  - Con: Adds a maintenance helper whose complete verified dependencies must be recorded.
+- Option B: Add the same explicit preparation entry directly to P07.
+  - Pro: Keeps all retention operations in one executable.
+  - Con: Grows the already large installer and mixes preparation policy with installation and recovery.
+
+#### Recommended option for Q25
+
+Option A: P39 consumes independently verified exact archives and installed-identity evidence, safely extracts the unique original entry, and prepares the existing historical layout atomically under the root lock. It never fabricates completion markers. P42 checks absent markers, wrong pair, corrupted bytes, idempotent verified reuse and refusal without complete identity. Bind qualification to the actual production pair.
+
+#### Answer to Q25: option A
+
+Option A is proposed for acceptance. This separates a new responsibility while retaining the existing rollback reader and archive format.
+
+P39 consumes independently verified exact archives and installed-identity evidence, safely extracts the unique original entry, and prepares the existing historical layout atomically under the root lock. It never fabricates completion markers. P42 checks absent markers, wrong pair, corrupted bytes, idempotent verified reuse and refusal without complete identity. Bind qualification to the actual production pair.
+
+### Q26: Share strict environment-profile parsing and runtime selection
+
+Which existing owners should validate the private per-environment evidence profile and select modern versus historical runtime checks?
+
+#### BBQ for Q26
+
+Each kitchen has its own inspected equipment card, and an older oven has its own documented checks. In this picture: the equipment card is the environment profile, the older oven is the historical runtime, and the inspection is evidence-bound unit and health validation.
+
+#### Options for Q26
+
+- Option A: Use P30 for controller profile validation/serialization, P29 for strict target parsing, and P23 for explicitly bound runtime checks.
+  - Pro: Reuses existing controller, target-contract and runtime owners with a single profile case map.
+  - Con: Requires controller and host-Bash parsers to reject the same malformed records.
+- Option B: Place a separate profile helper between P30/P29 and P23.
+  - Pro: Concentrates profile-specific logic in one new component.
+  - Con: Adds a pre-recovery dependency and risks requiring a target interpreter beyond the host-Bash closure.
+
+#### Recommended option for Q26
+
+Option A: Bind the profile digest to selection and bootstrap receipts; P31/P32 revalidate observed account/prefix/unit identity, while P23 accepts historical checks only for the exact retained predecessor identity. P40/P42 mutate fields, types, duplicates and profile bindings and prove missing modern API fields cannot select historical mode. The explicit development-only no-unit profile is bound to the selected development installation and refused for qualification/production. It never follows a failed unit query. Keep concrete values private.
+
+#### Answer to Q26: option A
+
+Option A is proposed for acceptance. Existing owner boundaries preserve the pre-toolchain control closure and keep modern checks unchanged.
+
+Bind the profile digest to selection and bootstrap receipts; P31/P32 revalidate observed account/prefix/unit identity, while P23 accepts historical checks only for the exact retained predecessor identity. P40/P42 mutate fields, types, duplicates and profile bindings and prove missing modern API fields cannot select historical mode. The explicit development-only no-unit profile is bound to the selected development installation and refused for qualification/production. It never follows a failed unit query. Keep concrete values private.
+
+### Q27: Compose production approval and selection timing
+
+How should P22/P30/P31 implement and test the fixed two-hour approval allowance, admission freshness and later execution deadline?
+
+#### BBQ for Q27
+
+A reservation must remain valid while the kitchen waits for the host to open the dining room. In this picture: the host's wait is operations approval, the reservation is selection admission, and cooking time is the separate deployment execution budget.
+
+#### Options for Q27
+
+- Option A: Derive one validated numeric timing record from the private profile and propagate it through controller selection and target reservation.
+  - Pro: Makes the pre-stop admission window and post-reservation execution deadline explicit and comparable with existing outer limits.
+  - Con: Requires measured queue/dispatch and deployment caps before the profile can be accepted.
+- Option B: Keep explicit timing constants in each owner and add a cross-owner consistency fixture.
+  - Pro: Allows each script to manage its own timeout call directly.
+  - Con: Duplicated constants can drift and obscure which phase consumed the remaining time.
+
+#### Recommended option for Q27
+
+Option A: P22 checks the full approval plus bounded queue/dispatch, measured lifecycle/verification and margin against existing limits. P30 renders the human-signed short expiry and profile identity, including the bounded approval allowance, without moving candidate URLs; no automatic renewal is permitted; P31 checks expiry before hold then records the monotonic execution deadline. P42 uses a controlled clock for full-wait, late-approval, expiry and cancellation cases, with no two-hour test sleep.
+
+#### Answer to Q27: option A
+
+Option A is proposed for acceptance. One validated timing record prevents a selection from expiring during a permitted wait or silently extending an operations limit.
+
+P22 checks the full approval plus bounded queue/dispatch, measured lifecycle/verification and margin against existing limits. P30 renders the human-signed short expiry and profile identity, including the bounded approval allowance, without moving candidate URLs; no automatic renewal is permitted; P31 checks expiry before hold then records the monotonic execution deadline. P42 uses a controlled clock for full-wait, late-approval, expiry and cancellation cases, with no two-hour test sleep.
+
+### Q28: Implement release-only managed production routing
+
+How should the consumer pipeline consume evidence of an existing production route and enforce immutable release-only coordinates?
+
+#### BBQ for Q28
+
+A delivery uses an existing loading bay only after checking its address and cargo label. In this picture: the bay is the managed production route, the address is its evidence-bound profile, and the cargo label is the qualified published release identity.
+
+#### Options for Q28
+
+- Option A: Keep controller route/candidate validation in P30; have P22 consume only its verified descriptor and P31 repeat target release/profile checks.
+  - Pro: Avoids duplicating candidate policy in pipeline syntax and checks the target before hold.
+  - Con: Needs explicit descriptor provenance and a fail-closed P22 invocation boundary.
+- Option B: Implement all controller route and release checks directly in P22, retaining target checks in P31.
+  - Pro: Makes the pipeline's routing branch visible in one source file.
+  - Con: Duplicates parsing already owned by P30 and increases pipeline test surface.
+
+#### Recommended option for Q28
+
+Option A: The descriptor binds the selected private environment profile to the evidenced existing job/template and restored source, plus canonical release URLs and hashes. P22 has no route-creation/configuration path and rejects mismatched evidence. P42 covers snapshots, wrong route/source, profile replacement, approval-time candidate immutability and unarmed dry run. An absent production route remains an evidence stop.
+
+#### Answer to Q28: option A
+
+Option A is proposed for acceptance. The existing validation owner can reject an unproven route before invocation without changing managed configuration.
+
+The descriptor binds the selected private environment profile to the evidenced existing job/template and restored source, plus canonical release URLs and hashes. P22 has no route-creation/configuration path and rejects mismatched evidence. P42 covers snapshots, wrong route/source, profile replacement, approval-time candidate immutability and unarmed dry run. An absent production route remains an evidence stop.
+
+### Q29: Split Step 9 fixture coverage by responsibility
+
+How should new bootstrap, first-install and production cases be placed without crowding Step 8's existing fixture leaves?
+
+#### BBQ for Q29
+
+Separate preparation, cooking and service checklists share the same kitchen setup. In this picture: preparation is bootstrap/profile testing, cooking is first-install retry, service is production/recovery, and the kitchen setup is reused fixtures.
+
+#### Options for Q29
+
+- Option A: Add P40 bootstrap/profile, P41 first-install/retry and P42 production/historical leaves with a case-to-gate map.
+  - Pro: Keeps new state and environment cases reviewable while preserving Step 8 regression ownership.
+  - Con: Requires shared fixture reuse to avoid copying large setups.
+- Option B: Extend P34-P36 first and split only after their measured sizes exceed the ceiling.
+  - Pro: Minimizes new files at the start.
+  - Con: Mixes the new environment-specific suites with settled Step 8 cases and postpones responsibility separation.
+
+#### Recommended option for Q29
+
+Option A: Use native Linux subprocess effects, exit status, identity and journal assertions; keep role execution out of local fixtures. Reuse existing fixtures and empty P33, recount after Step 8, avoid growth at 550-650 Python lines and split above 650. Map each case to AC18/AC19 and the selected development replay or real managed execution. DEV proves neither managed orchestration nor unit behavior; Step 8 G proves running-release units, and fixtures plus route (b) production unit reads back first real hook/bridge execution in production.
+
+#### Answer to Q29: option A
+
+Option A is proposed for acceptance. The three small leaves reflect distinct failure domains and expose missing actual evidence without claiming fixture qualification.
+
+Use native Linux subprocess effects, exit status, identity and journal assertions; keep role execution out of local fixtures. Reuse existing fixtures and empty P33, recount after Step 8, avoid growth at 550-650 Python lines and split above 650. Map each case to AC18/AC19 and the selected development replay or real managed execution. DEV proves neither managed orchestration nor unit behavior; Step 8 G proves running-release units, and fixtures plus route (b) production unit reads back first real hook/bridge execution in production.
+
+### Q30: Sequence the selected development replays and production gates
+
+How should the C/D/E/F gate ledger record the selected replay venue and its accepted evidence limits?
+
+#### BBQ for Q30
+
+Use a practice kitchen for preparation and record which service checks still belong in the restaurant. The practice kitchen is the development installation; live service is Step 8 qualification and Step 9 production.
+
+#### Options for Q30
+
+- Option A: Keep separate C/D development replay receipts, Step 8 managed proof, fixture/unit-read evidence and F production evidence.
+  - Pro: Shows what each execution proves without reopening the selected venue.
+  - Con: Requires explicit cross-references and retained limits for AC18/AC19.
+- Option B: Use one aggregate rehearsal-pass flag.
+  - Pro: Simplifies the checklist.
+  - Con: Hides the absence of unit and managed orchestration evidence in development.
+
+#### Recommended option for Q30
+
+Option A: AC16/AC17 precede Step 9 implementation/lifecycle execution. C/D use our development account on the qualification host, with authorized confined preparation/restoration and exact retained historical archives for D, independently paired against production. P43 emits task/baseline/argv traces; its explicit DEV-only no-unit profile never applies to qualification/production. AC18/AC19 accept these replays plus Step 8 G running-release managed proof. First-install unit hooks and historical bridging first run for real in production, backed by fixtures and route (b) read-only production unit evidence. E/F still require production provisioning, one-time route (b) bootstrap receipts, pilot approval and separate authorization. Topic/umbrella remain pending.
+
+#### Answer to Q30: option A
+
+Option A is proposed for acceptance because it shows what each execution proves without reopening the selected venue. AC16/AC17 precede Step 9 implementation/lifecycle execution. C/D use our development account on the qualification host, with authorized confined preparation/restoration and exact retained historical archives for D, independently paired against production. P43 emits task/baseline/argv traces; its explicit DEV-only no-unit profile never applies to qualification/production. AC18/AC19 accept these replays plus Step 8 G running-release managed proof. First-install unit hooks and historical bridging first run for real in production, backed by fixtures and route (b) read-only production unit evidence. E/F still require production provisioning, one-time route (b) bootstrap receipts, pilot approval and separate authorization. Topic/umbrella remain pending.
+
+### Q31: Transfer and verify the bootstrap archive
+
+Which transfer unit should P30 prepare for the operator's one-time session while preserving the registered published release as the trust root?
+
+#### BBQ for Q31
+
+Carry the sealed parcel and verify its shipping record before opening only the needed compartments. In this picture: the parcel is the published application archive, the shipping record is the independently registered SHA-256, and the compartments are the installer and stable closure.
+
+#### Options for Q31
+
+- Option A: Transfer the exact published application archive with independently bound digest/profile instructions, then verify and safely extract the allowlisted closure on target.
+  - Pro: Direct target hash comparison reaches the existing registry without a new published object or repacked transfer bundle.
+  - Con: Transfers the whole archive and requires sufficient private work space plus safe extraction with qualified host utilities.
+- Option B: Transfer the already verified extracted closure and a controller-derived member manifest bound to the source archive.
+  - Pro: Transfers fewer bytes and retains the earlier closure-based preparation workflow.
+  - Con: Adds trust in the extraction/manifest handoff and gives the target no direct whole-archive comparison with the registry.
+
+#### Recommended option for Q31
+
+Option A: P30 verifies registry/source binding and emits the archive digest, member allowlist and exact instructions; the route (b) operator verifies the same archive on production/new-environment target; development replay uses our own account to verify it outside staging and replaced trees. Reject unsafe member paths, links, special entries and member mismatches before any extracted executable runs. P28 rechecks its complete installed closure. Include the maintenance helper when needed only through a verified member binding. P40 covers wrong archive/profile, unsafe extraction and tampered members; P20 records space and qualified host-tool prerequisites. No application or tools installation and no new publication object belongs to this transfer.
+
+#### Answer to Q31: option A
+
+Option A is proposed for acceptance because the exact existing archive supplies a direct, auditable digest comparison at both ends. Operator commands carry the independent registry binding, never trust a digest from the transferred archive itself, and stop on mismatch before code execution.
+
+### Q32: Allocate bootstrap phases and non-dispatch checks
+
+How should P28/P39/P29 implement the one-time bootstrap separately from each signed admission?
+
+#### BBQ for Q32
+
+Install and inspect the kitchen equipment before accepting any meal ticket. Equipment is the stable closure and hooks; tickets are fresh signed selections.
+
+#### Options for Q32
+
+- Option A: Keep phase-specific receipts for archive/closure/key verification, guarded activation, required historical retention and non-dispatch inspection.
+  - Pro: Distinguishes completed bootstrap from per-attempt authority and supports bounded interruption recovery.
+  - Con: Needs cut-point cases across several existing owners.
+- Option B: Wrap those owners in a new bootstrap coordinator.
+  - Pro: Offers one entrypoint.
+  - Con: Adds an owner and another closure member without removing underlying state requirements.
+
+#### Recommended option for Q32
+
+Option A: Publish verified pointer before dispatcher, gate incomplete bootstrap even when staging is unchanged, and resume only receipt-bound work under the root lock. No arming occurs in bootstrap. On an evidenced empty/inactive prefix, option (i) installs hold-aware hooks with hold set before unit execution. Installed/running bootstrap changes no hooks, runtime or staging. P40/P42 cover every cut point, premature stop, foreign state, empty-prefix unexpected unit execution and historical intervening restart. Inspect without dispatcher stop/start; successful-release activation replaces repeated first activation.
+
+#### Answer to Q32: option A
+
+Option A is proposed for acceptance because it distinguishes completed bootstrap from per-attempt authority and supports bounded interruption recovery. Publish verified pointer before dispatcher, gate incomplete bootstrap even when staging is unchanged, and resume only receipt-bound work under the root lock. No arming occurs in bootstrap. On an evidenced empty/inactive prefix, option (i) installs hold-aware hooks with hold set before unit execution. Installed/running bootstrap changes no hooks, runtime or staging. P40/P42 cover every cut point, premature stop, foreign state, empty-prefix unexpected unit execution and historical intervening restart. Inspect without dispatcher stop/start; successful-release activation replaces repeated first activation.
+
+### Q33: Bind workstation signing and launch evidence
+
+How should P20/P30/P22 carry a fresh signed shared-drive selection and validate the launch handoff without target-account access?
+
+#### BBQ for Q33
+
+Prepare a sealed meal ticket at the booking desk and verify it at the kitchen door. The desk is the human workstation, the seal is the human signature, and the door is stop's authenticated admission.
+
+#### Options for Q33
+
+- Option A: P30 renders the canonical payload and signing instructions; P22 verifies the relevant receipts and signed launch descriptor; P29/P31 authenticate the received bytes.
+  - Pro: Reuses existing validation owners and binds every attempt to exact bytes and the installed trust.
+  - Con: Needs a clear handoff from human signing to pipeline launch, plus atomic shared-folder publication.
+- Option B: Have P20 provide only a manual signing checklist and pipeline acknowledgment.
+  - Pro: Reduces controller parsing.
+  - Con: Cannot detect many stale/mismatched handoffs until the target refuses.
+
+#### Recommended option for Q33
+
+Option A: Use the fixed environment folder and human workstation key, never a target shell or artifact-repository publication. Bind operation, five exact hashes/URLs, environment/profile, new ID/short expiry and recovery failed-attempt/checkpoint. P22 validates bootstrap/retention/key receipts and the signing descriptor; stop rechecks signature/expiry/replay before mutation. Each retry is newly signed; dry run does not arm/consume. Record route (b) operator only for the one-time production/new-environment bootstrap. Test wrong/stale receipts, partial writes, share failure, replay and post-bootstrap ordinary activation. Concrete folders and actors stay private.
+
+#### Answer to Q33: option A
+
+Option A is proposed for acceptance because it reuses existing validation owners and binds every attempt to exact bytes and the installed trust. Use the fixed environment folder and human workstation key, never a target shell or artifact-repository publication. Bind operation, five exact hashes/URLs, environment/profile, new ID/short expiry and recovery failed-attempt/checkpoint. P22 validates bootstrap/retention/key receipts and the signing descriptor; stop rechecks signature/expiry/replay before mutation. Each retry is newly signed; dry run does not arm/consume. Record route (b) operator only for the one-time production/new-environment bootstrap. Test wrong/stale receipts, partial writes, share failure, replay and post-bootstrap ordinary activation. Concrete folders and actors stay private.
+
+### Q34: Allocate bootstrap probes and returned evidence
+
+Which existing owners should collect Part A's target observations during Part C and validate returned receipts before restoration, without requiring the observations before their collection?
+
+#### BBQ for Q34
+
+List the delivery checks before dispatch, but obtain the arrival receipt when the delivery arrives. In this picture: the checklist is Part A, delivery is Part C's verified entry, the arrival receipt is shared-log evidence, and dispatch approval is the Part E gate.
+
+#### Options for Q34
+
+- Option A: P07 coordinates C's verified entry, P23/P28/P29 emit their own bound observations and receipts, and P30/P22 validate the returned set against an explicit A/C/E dependency ledger.
+  - Pro: Keeps unit/closure/key checks with their existing owners and makes missing evidence block restoration without target access.
+  - Con: Requires a receipt schema and reliable evidence delivery even when runtime startup fails.
+- Option B: Put every probe and receipt check directly into P07 and leave P22 a single bootstrap verdict.
+  - Pro: Gives one entrypoint a simple aggregate result.
+  - Con: Grows the large installer and obscures which missing observation blocks the gate.
+
+#### Recommended option for Q34
+
+Option A: P07 coordinates verified bootstrap; P23/P28 receipt unit, closure/key/verifier and application-account client/repository/shared-folder observations, while P29 receipts retained record/checkpoint without arming. A collects development-account preliminary host/share evidence and staging timing. P30 validates candidate/checkpoint/trust binding from existing shared logs and P22 refuses E on missing or mismatched evidence. Record inherited defaults from retained original check console evidence before E and reconfirm at F. P34-P36 cover absent delivery helpers, stale or incomplete receipts and before/after activation states. Stable receipt emission must not need damaged application code. The A/C ledger distinguishes pre-C safety gates from probes C itself supplies; no operator fallback or new target command path.
+
+#### Answer to Q34: option A
+
+Option A is proposed for acceptance because it preserves existing ownership and makes evidence gaps explicit while keeping all Step 8 target work inside authorized delivery/actions.
+
+### Q35: Persist signed selection independently of bootstrap
+
+How should P29 reserve signed authority and distinguish its identity from the local attempt and deployment success?
+
+#### BBQ for Q35
+
+Keep the sealed ticket, table booking and final bill as separate records. They are the signed selection, attempt reservation and readiness result.
+
+#### Options for Q35
+
+- Option A: Use P29 as the locked authority for authenticated snapshot, reservation, spent IDs and checkpoint-bound recovery state outside staging.
+  - Pro: Preserves the existing single transition owner and the settled R16 exception.
+  - Con: Needs explicit interrupted-write ordering and receipt durability.
+- Option B: Let stop and start each maintain their own consumed-selection files.
+  - Pro: Localizes writes to each target.
+  - Con: Duplicates replay/consumption rules and risks conflicting crash decisions.
+
+#### Recommended option for Q35
+
+Option A: Part C only retains verified candidate/checkpoint/key/probe receipts. Every real deploy/retry/recovery has a fresh signature and short expiry. P29 verifies before mutation, prevents competing reservations, preserves spent IDs on failure/interruption and never infers authority from a delivered archive. R16 A identifies unchanged delivery at start, checks/restarts the working release and releases its own reservation while leaving the forward ID unused. Recheck expiry on later admission. Q41 proposes exact atomic ordering and crash cases. Successful G leaves no conditional recovery. Failed H uses checked restart of the working checkpoint, without rollback. Whether that ordinary restart requires authority is the pending R19 human clarification, including its pre-lifecycle refusal versus downtime tradeoff; do not implement either admission option before that choice.
+
+#### Answer to Q35: option A
+
+Option A is proposed for acceptance because it preserves the existing single transition owner and the settled R16 exception. Part C only retains verified candidate/checkpoint/key/probe receipts. Every real deploy/retry/recovery has a fresh signature and short expiry. P29 verifies before mutation, prevents competing reservations, preserves spent IDs on failure/interruption and never infers authority from a delivered archive. R16 A identifies unchanged delivery at start, checks/restarts the working release and releases its own reservation while leaving the forward ID unused. Recheck expiry on later admission. Q41 proposes exact atomic ordering and crash cases. Successful G leaves no conditional recovery. Failed H uses checked restart of the working checkpoint, without rollback. Whether that ordinary restart requires authority is the pending R19 human clarification, including its pre-lifecycle refusal versus downtime tradeoff; do not implement either admission option before that choice.
+
+### Q36: Qualify pipeline and local terminal proof together
+
+Which composed fixture boundary should prove original-action recovery with fresh signatures and no maintenance channel?
+
+#### BBQ for Q36
+
+Close the old booking at the scheduling desk and inspect the kitchen before admitting a new sealed ticket. The desk is P22 job-terminal evidence and the kitchen check is P31/P29 lock/process proof.
+
+#### Options for Q36
+
+- Option A: Compose controller launch gates with native subprocess state/lock/process cases in P35, using P29 transitions.
+  - Pro: Checks both evidence boundaries and excludes a delayed old start.
+  - Con: Requires adversarial ordering across owners.
+- Option B: Inspect pipeline source and exercise only P32 rollback.
+  - Pro: Uses fewer fixtures.
+  - Con: Misses launch rejection, stop-side terminalization and replay races.
+
+#### Recommended option for Q36
+
+Option A: P22 refuses unknown/live job state and binds launch to terminal job/attempt evidence. P31/P29 require a fresh signed recovery plus available root lock and no live/ambiguous attempt-owned process, then terminalize under coordination. Cover job-terminal/process-live, inverse state, cancellation-only, delayed start, transfer failure without P32, interrupted installer, checkpoint mismatch and another fresh recovery after rollback success/runtime failure. R16 A before/after restoration preserves valid forward authority and returns checked status. Missing/invalid-selection admission and failed-H ordinary restart authority follow the pending R19 human choice; cover its selected outcome, without rollback after successful G and preserving the failed external-check verdict. Prove local retained inputs, both recovery formats and shared/console receipts. Fixtures cannot close AC17.
+
+#### Answer to Q36: option A
+
+Option A is proposed for acceptance because it checks both evidence boundaries and excludes a delayed old start. P22 refuses unknown/live job state and binds launch to terminal job/attempt evidence. P31/P29 require a fresh signed recovery plus available root lock and no live/ambiguous attempt-owned process, then terminalize under coordination. Cover job-terminal/process-live, inverse state, cancellation-only, delayed start, transfer failure without P32, interrupted installer, checkpoint mismatch and another fresh recovery after rollback success/runtime failure. R16 A before/after restoration preserves valid forward authority and returns checked status. Missing/invalid-selection admission and failed-H ordinary restart authority follow the pending R19 human choice; cover its selected outcome, without rollback after successful G and preserving the failed external-check verdict. Prove local retained inputs, both recovery formats and shared/console receipts. Fixtures cannot close AC17.
+
+### Q37: Qualify signature tooling without application Python
+
+Which host-utility verifier adapter should P29 and the stable closure support for the human's existing workstation key?
+
+#### BBQ for Q37
+
+Match the kitchen seal reader to the seal already held at the booking desk. The reader is the host verifier and the seal format is the existing human key's public signature format.
+
+#### Options for Q37
+
+- Option A: Inventory the public key format and available workstation/host utilities, then qualify one compatible verifier adapter and canonical payload format.
+  - Pro: Avoids inventing a key algorithm or adding application-runtime dependencies.
+  - Con: Blocks B until compatible utilities and exact verification semantics are evidenced.
+- Option B: Carry multiple verifier formats and choose one from the selection envelope.
+  - Pro: Accommodates more key formats.
+  - Con: Increases negotiation and downgrade surface and the closure/fixture burden.
+
+#### Recommended option for Q37
+
+Option A remains proposed: P30 emits canonical, non-executable payload bytes with an explicit version and operation domain; P29 verifies exactly those bytes using an allowlisted utility/algorithm/key identity from the verified closure, never key material supplied by the selection. Bind the five URLs/hashes and profile/environment/attempt/expiry/checkpoint fields. Qualify malformed signatures, unsupported algorithms, duplicate fields, byte/encoding changes, key mismatch and unavailable utilities before B. Evidence the public format and fingerprints only; never read/export the private key. No algorithm or utility is chosen by this round.
+
+#### Answer to Q37: option A
+
+Option A is proposed for acceptance because it avoids inventing a key algorithm or adding application-runtime dependencies. Option A remains proposed. P30 emits canonical, non-executable payload bytes with an explicit version and operation domain; P29 verifies exactly those bytes using an allowlisted utility/algorithm/key identity from the verified closure, never key material supplied by the selection. Bind the five URLs/hashes and profile/environment/attempt/expiry/checkpoint fields. Qualify malformed signatures, unsupported algorithms, duplicate fields, byte/encoding changes, key mismatch and unavailable utilities before B. Evidence the public format and fingerprints only; never read/export the private key. No algorithm or utility is chosen by this round.
+
+### Q38: Prepare key-loss recovery before immutable qualification
+
+Which recovery trust should release N carry so loss of the human workstation key does not permanently block signed deployments?
+
+#### BBQ for Q38
+
+Store a spare authorized seal securely before the only seal is lost. The spare is an independently held backup signing key whose public half is already trusted.
+
+#### Options for Q38
+
+- Option A: Pre-provision a second offline backup public key in the verified closure and document independently protected backup-key custody and activation.
+  - Pro: Allows a newly signed recovery/deployment without a target shell or unsigned bypass.
+  - Con: Needs a separate protected key, tested access and a revocation/rotation procedure approved by the human.
+- Option B: Rely on a separately authorized verified rebootstrap of the trust closure after key loss.
+  - Pro: Avoids a standing second signer.
+  - Con: Production route (b) may support it, but restored qualification has no application-account shell or proven trust-replacement route; it can leave that environment locked out.
+
+#### Recommended option for Q38
+
+Option A is recommended for the human's explicit choice, not selected. Before B, document how the backup signer is recovered, how a new trusted closure revokes/replaces a lost or compromised key, and how attempted IDs/expiry/checkpoint rules remain enforced. Backup custody must not share the primary key's loss condition. Qualify primary unavailable, backup unavailable, unauthorized key and interrupted key rotation using fixtures; never generate/install keys here. Option B is acceptable only if an independently trusted recovery route is evidenced for every environment, including qualification, without any operations-side change or unsigned bypass. R20 makes this a human policy gate before Part B, because the qualified closure freezes release N public keys.
+
+#### Answer to Q38: option A
+
+Option A is proposed for acceptance because it allows a newly signed recovery/deployment without a target shell or unsigned bypass. Option A is recommended for the human's explicit choice, not selected. Before B, document how the backup signer is recovered, how a new trusted closure revokes/replaces a lost or compromised key, and how attempted IDs/expiry/checkpoint rules remain enforced. Backup custody must not share the primary key's loss condition. Qualify primary unavailable, backup unavailable, unauthorized key and interrupted key rotation using fixtures; never generate/install keys here. Option B is acceptable only if an independently trusted recovery route is evidenced for every environment, including qualification, without any operations-side change or unsigned bypass. R20 makes this a human policy gate before Part B, because the qualified closure freezes release N public keys.
+
+### Q39: Place the replay script and its two bounded modes
+
+Where should P43 live so Step 8 A can measure staging and Step 9 C/D can replay lifecycle tasks from the same audited mapping?
+
+#### BBQ for Q39
+
+Keep one written practice recipe with separate preparation-only and full-meal runs. The recipe is P43, preparation is Step 8 staging timing, and the meal is Step 9 replay.
+
+#### Options for Q39
+
+- Option A: Add a versioned consumer development helper P43 with explicit staging-measurement and DEV lifecycle replay modes; map its concrete path privately.
+  - Pro: Reviews task fidelity with the lifecycle code and avoids two divergent replay scripts.
+  - Con: Needs strict path/profile guards so a development helper cannot operate on qualification or production.
+- Option B: Keep an ignored private replay script with a retained digest and task trace.
+  - Pro: Keeps environment handling local.
+  - Con: Has weaker versioned review/distribution and risks timing/rehearsal drift.
+
+#### Recommended option for Q39
+
+Option A is proposed: choose the exact repository-relative location before implementation and map it privately. Step 8 introduces only the bounded staging mode needed before C; full lifecycle mode is Step 9 work after AC16/AC17. Require a private explicit DEV profile, confined disposable working area for measurement, literal/expanded HOME variants and direct argv where the role uses none. Trace task name/baseline, exact operation, timing and exit; never install/run orchestration. P34 covers task/argv/path safety and P40-P42 later lifecycle behavior. Recount/split by existing line budgets and keep private identities out of source.
+
+#### Answer to Q39: option A
+
+Option A is proposed for acceptance because it reviews task fidelity with the lifecycle code and avoids two divergent replay scripts. Option A is proposed; choose the exact repository-relative location before implementation and map it privately. Step 8 introduces only the bounded staging mode needed before C; full lifecycle mode is Step 9 work after AC16/AC17. Require a private explicit DEV profile, confined disposable working area for measurement, literal/expanded HOME variants and direct argv where the role uses none. Trace task name/baseline, exact operation, timing and exit; never install/run orchestration. P34 covers task/argv/path safety and P40-P42 later lifecycle behavior. Recount/split by existing line budgets and keep private identities out of source.
+
+### Q40: Publish signed selections in the fixed arming folder
+
+How should P30 and P29 lay out and read the human's fixed per-environment shared-drive folder without scanning for a latest artifact?
+
+#### BBQ for Q40
+
+Place one sealed ticket in a named tray only after its envelope is complete. The tray is the fixed control folder and the complete envelope contains payload plus signature.
+
+#### Options for Q40
+
+- Option A: Use one fixed ready-envelope path per environment, atomically replaced after writing an immutable complete signed envelope; snapshot it locally under the root lock.
+  - Pro: Matches the fixed-location decision, prevents partial payload/signature pairing and avoids latest scanning.
+  - Con: Requires proven workstation-to-share rename/read semantics and a deliberate overwrite procedure.
+- Option B: Use separate payload and signature files with a manifest commit marker.
+  - Pro: Works with detached-signature tools and keeps parts inspectable.
+  - Con: Needs multiple-file consistency checks and cleanup of incomplete generations.
+
+#### Recommended option for Q40
+
+Option A is recommended subject to evidenced shared-filesystem semantics and Q37 format. Keep temp publication, ready envelope and private archived receipts separate; never derive URLs from filenames or modification time. P29 bounds size, rejects links/unexpected ownership where evidenced, verifies a stable snapshot and copies authenticated bytes to local coordination outside staging before mutation. Consumed/reserved IDs remain local and survive shared-file replacement, cleanup and reboot. Include account-specific read/write requirements in A/C; only the workstation needs to publish, and target read/write receipt capabilities are tested separately. Exact folder names/permissions/retention stay in the private mapping. Partial/missing/unreadable data refuses untouched.
+
+#### Answer to Q40: option A
+
+Option A is proposed for acceptance because it matches the fixed-location decision, prevents partial payload/signature pairing and avoids latest scanning. Option A is recommended subject to evidenced shared-filesystem semantics and Q37 format. Keep temp publication, ready envelope and private archived receipts separate; never derive URLs from filenames or modification time. P29 bounds size, rejects links/unexpected ownership where evidenced, verifies a stable snapshot and copies authenticated bytes to local coordination outside staging before mutation. Consumed/reserved IDs remain local and survive shared-file replacement, cleanup and reboot. Include account-specific read/write requirements in A/C; only the workstation needs to publish, and target read/write receipt capabilities are tested separately. Exact folder names/permissions/retention stay in the private mapping. Partial/missing/unreadable data refuses untouched.
+
+### Q41: Make selection reservation and consumption crash-safe
+
+Which P29 persistence ordering should implement single-use attempts while leaving R16's identified restart selection unused?
+
+#### BBQ for Q41
+
+Reserve the sealed ticket before the kitchen acts, then record whether a meal was attempted or only the existing service restarted. The reservation is local state, attempted use is replay protection, and restart is R16.
+
+#### Options for Q41
+
+- Option A: Use one locked journal for immutable authenticated bytes, attempt reservation, delivery identity, spent status and terminal receipts, with explicit R16 release.
+  - Pro: Makes selection use independent of readiness and preserves fail-closed crash behavior.
+  - Con: Needs durable-write/cut-point fixtures and a clear ambiguous-use rule.
+- Option B: Mark a selection consumed only when readiness succeeds.
+  - Pro: Has fewer intermediate states.
+  - Con: Allows retries of failed/interrupted authority, contradicting a fresh signed selection for every attempt.
+
+#### Recommended option for Q41
+
+Option A is proposed: Verify and durably reserve before lifecycle mutation; prevent a second admission of the same ID while pending. Once forward delivery or recovery use is identified, persist spent status even on failure. Unknown interrupted use cannot be replayed. Only an identified unchanged-archive R16 start may release its restart reservation while keeping forward authority unused, including a checked failed restart with its held-state receipt. Test crash before/after each write, concurrent readers, reboot, cleanup and late start. R19 proposes unsigned ordinary restart, while installation/recovery keep signed authority. The human must confirm its change to the literal pre-lifecycle refusal rule: indistinguishable stop argv means an invalid forward launch may stop/restart before refusal at start. Keep both expected outcomes conditional on that requirement/design decision; the journal still records local lifecycle exclusion, archive identity and checkpoint without reserving signed deployment authority for ordinary mode. Do not reread the share in ordinary mode or bypass failed/held-state recovery gates. A fresh recovery binds the failed reservation/checkpoint. Success advances working release separately from consumption.
+
+#### Answer to Q41: option A
+
+Option A is proposed for acceptance because it makes selection use independent of readiness and preserves fail-closed crash behavior. Option A is proposed. Verify and durably reserve before lifecycle mutation; prevent a second admission of the same ID while pending. Once forward delivery or recovery use is identified, persist spent status even on failure. Unknown interrupted use cannot be replayed. Only an identified unchanged-archive R16 start may release its restart reservation while keeping forward authority unused, including a checked failed restart with its held-state receipt. Test crash before/after each write, concurrent readers, reboot, cleanup and late start. R19 proposes unsigned ordinary restart, while installation/recovery keep signed authority. The human must confirm its change to the literal pre-lifecycle refusal rule: indistinguishable stop argv means an invalid forward launch may stop/restart before refusal at start. Keep both expected outcomes conditional on that requirement/design decision; the journal still records local lifecycle exclusion, archive identity and checkpoint without reserving signed deployment authority for ordinary mode. Do not reread the share in ordinary mode or bypass failed/held-state recovery gates. A fresh recovery binds the failed reservation/checkpoint. Success advances working release separately from consumption.
