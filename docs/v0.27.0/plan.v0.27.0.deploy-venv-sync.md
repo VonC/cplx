@@ -1109,6 +1109,20 @@ Classes and behavior (focused script functions; no new class hierarchy):
    Record actual job timeout, 60-minute pipeline envelope, acceptable outage and
    disk budget including archive, expanded tree, previous copies and retained
    inputs. Read-only or separately authorized evidence only.
+   Human decision, 2026-10-06: maximum qualification application outage is
+   **10 minutes (600 seconds)** from beginning the stop through verified health
+   and same-daemon supervision. Stop, staging, installation and start consume
+   this single budget; first-start's existing 600-second cap does not grant
+   another 600 seconds. Finish as soon as all checks pass. Verify deadline
+   behavior with controlled clocks or shortened test budgets, without deliberately
+   waiting ten minutes or running a full-duration timeout test. Record actual
+   elapsed time during separately authorized qualification.
+   Human decision, 2026-10-07, superseding the 600-second figure above: the
+   maximum qualification outage is **30 minutes (1,800 seconds)**, with the same
+   start and end points and the same single-budget rules. The unchanged role
+   stages the archive between stop and start, and the earlier temporary path
+   alone measured about 570 seconds of outage, so 600 seconds cannot hold. One
+   persisted consumer constant carries this limit to every lifecycle owner.
    No exact-workload execution receipt exists. Before C, under separate
    authorization, our development account on the qualification host records
    network route/client capability and shared-folder read/write evidence.
