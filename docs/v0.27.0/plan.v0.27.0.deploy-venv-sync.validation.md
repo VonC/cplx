@@ -1259,11 +1259,15 @@ generic. No required Step 7 work remains unimplemented.
 
 ### Analysis of Step 8 implementation state
 
-Not started. Consumer dispatch, stable targets, signed selection verification,
-replay prevention, retained-input checks, runtime gates and pipeline adaptation
-are unimplemented/unqualified. Bootstrap, restoration, original check/real run,
-external verification and offline recovery need separately authorized evidence.
-These planning amendments are not implementation or execution evidence.
+No. Step 8 has NOT been fully implemented.
+
+Reviewer assessment on 2026-10-07, round 6: P23 resolves F1e by conservatively
+refusing extended POSIX ACLs on group-writable files and path components before
+the owning-group decision. Without group write in the ACL mask, named entries
+cannot grant effective writes. F1a-F1d remain resolved for their reported cases;
+no unresolved Part B implementation finding remains. Part A remains partly open,
+the new immutable candidate is absent, and Parts C-I have not run. AC16/AC17 therefore
+remain open; prerequisite commit guidance does not establish whole-step readiness.
 
 ### Goal for Step 8
 
@@ -1359,27 +1363,145 @@ Backup signing cannot bypass ID/expiry/checkpoint controls or revoke the primary
 
 ### What was implemented for Step 8
 
-_(empty, no check has taken place yet.)_.
+The reviewed Part B change set implements strict P27 dispatch, P28 immutable
+closure preparation and receipt-bound activation, P29 signed selection and
+durable attempt state, P31/P32 lifecycle ownership, P30 exact-input acquisition
+and payload generation, and P22 pipeline-derived preceding-job terminal proof.
+P07/P23-P26/P38 wire verified installation, runtime sealing, hold and daemon
+identity checks into those owners. The prefix environment supports an unset
+inherited HOME without loading account login profiles. The staged public plan
+records the dated 1,800-second single outage budget.
+
+P23 checks external files, symlink hops and their ancestors across PATH,
+loader and cache directories. Existing preload lists are checked regardless of
+contents, cached files are checked directly, and searchable but unlistable
+directories refuse. Round 4 removes filesystem boundaries from both tree walks;
+fixtures cover outside targets on the same and different filesystems and a
+nested crossing, retaining trusted-update acceptance. Round 5 replaces
+final-target collection with the host component resolver and one text-pass
+validator for named paths and every non-dangling followed link. Composed fixtures
+cover trusted multi-hop acceptance, replaceable intermediate-hop refusal and
+replacement, and an unsafe directory-component hop. P28 declares the resolver
+and text utility; the loader-cache utility and static-host-utility support remain.
+
+Round 6 flags paths containing group-writable objects, walks their components
+and expanded symlink targets, and checks group-writable non-link components with
+the host ACL utility. Tree scans apply the same conservative ACL refusal before
+owning-group checks. Missing or failed access evidence refuses; P28 declares the
+ACL utility. Composed library and holding-directory fixtures assert the ACL
+diagnostic, establishing refusal before the existing account-group predicate.
+
+Retained check/affected evidence is green; the native receipt reports 189 tests,
+zero failures/errors and no skips on the revised bytes. The reviewer ran no test
+or coverage command. These receipts do not prove a new qualified immutable
+candidate or an actual original-path rollout.
+
+### Missing work for Step 8
+
+- Complete Part A's development-account network/client/share evidence and exact
+  same-disk staging replay. Record T, D, N and evidenced orchestration overhead O,
+  skipped-task limits and no double counting; demonstrate the required time and
+  disk margins against the recorded job, pipeline and 1,800-second outage caps.
+- Close Part B's qualification exit: record tooling/folder and backup-trust
+  evidence, bind required negative fixtures to the final bytes, and build a new
+  immutable candidate through Steps 5/7. Record unchanged-component comparisons
+  before reusing earlier evidence; do not reuse old qualification for changed code.
+- Under separate execution authorization, complete C/D bootstrap and trust/signing
+  handoff. Validate application-account probes, closure/key/activation and retained
+  five-input/checkpoint receipts without arming, then establish fresh signed
+  selection delivery for each actual forward or recovery attempt.
+- Under separate execution authorization, complete E/F restoration and original
+  check mode: prove whole application-path baseline equality and concurrent
+  ancestry, loaded-source/payload agreement, switch P22's payload only after the
+  restoration proof, and record controller verification separately from skipped
+  target traversal and inherited defaults.
+- Under separate execution authorization, complete G/H same-release original
+  delivery and independent external verification. Retain full lifecycle/identity
+  receipts, actual staging time and peak disk against A's caps, and close AC16
+  only when the exact candidate and same supervised daemon are independently proven.
+- Under separate recovery authorization, complete I's AC17 evidence for both
+  offline predecessor formats, before-installer failures and repeated recovery.
+  Prove pipeline terminal state plus local lock/process exclusion, fresh bound
+  recovery authority, zero artifact fetches and preservation of the failed verdict.
 
 ### New types or classes introduced for Step 8
 
-_(empty, no check has taken place yet.)_.
+P30 adds a small immutable acquisition-limits value type; the pipeline-evidence
+adapter adds a connection value type. They configure technical adapters rather
+than introduce a business class hierarchy. The staged Python files remain below
+the 650-line ceiling; the candidate adapter is in the 550-650 caution band.
 
 ### Architecture check for Step 8
 
-_(empty, no check has taken place yet.)_.
+The focused dispatcher, closure, contract, stop/start and pipeline adapters
+retain distinct responsibilities; the reviewed changes introduce no observed
+business-layer dependency on deployment tooling. P23 now retains each resolution
+hop, and resolver errors, missing targets, unknown lines and loops refuse.
+Its external trust boundary now uses the ACL mask to identify possible named
+write grants and refuses extended ACLs on those objects regardless of owning
+group membership. Files and holding ancestry use that rule consistently.
+No implementation repair was made by review.
+
+No additional architecture fix was identified in the reviewed Part B bytes.
 
 ### Performance check for Step 8
 
-_(empty, no check has taken place yet.)_.
+Runtime inventory comparison uses associative membership rather than pairwise
+comparison. Candidate acquisition and lifecycle phases have bounded deadlines;
+the persisted outage constant matches the dated 1,800-second decision. Static
+review found no measured performance defect. Batched resolution and one
+text-validation pass process the reported components; the bounded ACL walker
+copies pending component arrays, so a global linear-complexity claim is not made.
+The native real-host boundary receipt is 1.208 seconds; host-dependent scans still need
+exact-candidate qualification within the existing deadlines.
+Part A's T/D/N/O budget and actual G timing/peak-disk evidence are absent. Unit
+fixture timings do not qualify the unchanged role's transfer and staging workload.
+
+Yes, the required performance-budget evidence needs completing.
 
 ### Unit test coverage check for Step 8
 
-_(empty, no check has taken place yet.)_.
+The consumer's configured coverage source is its application package under
+`src/`; the deployment adapters under `tools/` are outside that measured scope.
+Retained check/affected and native unit results therefore establish no coverage
+percentage for those adapters. Static inspection finds references in tests or
+the tooling package for each top-level Python adapter function and value type,
+including module entry points. No changed production business class was identified.
+
+The revised P23 fixtures cover writable preload lists, searchable directories,
+cached files and followed targets on the same and different filesystems, including
+a nested crossing. The new cases invoke the tree checker directly; static review
+confirms the composed boundary calls it. A literal nested mount was not created;
+the no-boundary walks cover mounts by construction and the native nested crossing
+exercises descendant traversal. The new composed fixtures refuse unsafe
+intermediate and component hops while final code remains trusted, demonstrate
+hop replacement, and accept trusted chains. They resolve that coverage finding.
+Round 6 adds named library and intermediate-directory ACL grants and composed
+refusal with an ACL-specific diagnostic. Native fixtures use the test account as
+trusted owner and grant UID 65534 access; they do not mutate as that grantee or
+create an owning group outside the running account. The diagnostic proves the
+unconditional ACL rejection precedes group membership. Together with static
+ACL-mask semantics, this resolves F1e for the conservative rule; it does not
+establish a privileged exploit replay. Prior safe-chain fixtures remain green.
+
+No additional Part B unit finding was identified; 100% coverage is unestablished
+for the unmeasured automation. No unreferenced top-level Python adapter symbol was found.
 
 ### Feature integrity for Step 8
 
-_(empty, no check has taken place yet.)_.
+Static checks and retained unit evidence support strict dispatch, closure edges,
+signed admission, attempt persistence, pipeline terminal proof and single-budget
+propagation. No unresolved Part B implementation finding remains; the human's
+condition for the prerequisite Part B commit is met at that limited scope.
+The reviewer neither commits nor substitutes that condition for whole-step
+readiness. A new immutable candidate and exact-byte qualification remain required.
+Bootstrap, source restoration, original check/real execution, independent endpoint
+verification and both offline recoveries remain unexecuted; earlier Step 7
+receipts do not close these new original-path acceptance gates.
+
+This assessment changes only Step 8 validation rows. Prior Step 7 completion,
+other steps and the umbrella remain intact. Step 9 is still mandatory before
+topic completion; reboot remains untested and nonblocking.
 
 ## Step 9. Deliver first-time and production installations through unchanged orchestration
 
