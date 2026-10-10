@@ -2195,6 +2195,22 @@ and CA the application account may use on the target, an acquisition budget
 for the tools archive outside the 1800 s outage, and the pipeline signer of the
 2026-10-09 amendment.
 
+Human decisions, 2026-10-10: alternative (1). Then, superseding study revision
+note 4 of 2026-10-03 (the role delivers the application archive itself), the
+original payload's `app_url` names a **delivery marker**: a per-build artifact
+whose only member is the release record. The restored `batch` role runs one
+remote task set per unpacked directory and one permission change per script,
+all while the service is held: the application archive's 658 directories mean
+about 1,450 remote operations, 12 to 24 minutes against the 1800 s cap, and
+Part A's staging gate never had a measured per-task overhead. With the marker,
+staging is a few operations whatever the tree size. Stop acquires the
+application with the other inputs before the outage; start admits a delivered
+marker only when its member is the signed record, then installs the retained
+application; any other delivery refuses. The registry keeps five assets: the
+marker address derives from the application's, and the controller binds its
+member to the registered record. The consumer explains this in its own
+documentation.
+
 ## Rollout evidence and completion accounting
 
 Record reusable cplx implementation/validation separately from consuming
