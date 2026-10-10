@@ -1718,6 +1718,23 @@ One-time deviations recorded on 2026-10-09, for the qualification demonstration:
   mode is removed after the demonstration, and the rehearsals replay the full
   qualification on a full build.
 
+Deviation recorded on 2026-10-10, by human decision, until Step 9 delivers a
+different release through the original orchestration route:
+
+- **Signed re-bootstrap of an activated release.** The pinned bootstrap route
+  accepts a complete activated release (one `bootstrapped` attempt with its
+  activation receipt, the launcher matching the active closure, no pending
+  installer) when a fresh signed bootstrap's checkpoint names the release its
+  `last-working` receipt records. Its control state, launcher and pins are set
+  aside, never deleted, after every refusable check and before publication; a
+  partial state or another checkpoint keeps the refusal before any hold. The
+  pinned entry also loads the daemon observer, so the stop admission reads a
+  running, supervised daemon. The writer signs these qualification attempts.
+- **Ansible restoration gate.** The consumer's Ansible data job returns to its
+  original content only after deliveries at will are proven through the
+  original route without the pinned-delivery changes (Part E, then the Step 9
+  different-release path).
+
 Hardening recorded on 2026-10-09, from the demonstration deploys. Each live
 failure that day passed every fixture and surfaced only on the real target:
 
