@@ -2152,6 +2152,49 @@ gate ledger and AC18/AC19 mapping. Missing actual evidence leaves the step not
 implemented. Record unresolved design alternatives for the human; do not settle
 them through plan implementation questions.
 
+#### Step 9 analysis of 2026-10-10: a different release through the original job
+
+Read-only analysis for the human's restoration gate (Step 8 deviation of
+2026-10-10). It settles nothing; the alternatives below await the human.
+
+- **Original job.** The `pdf/` job at af273f53 runs the `valid`, `batch` and
+  `commons` roles: `~/bin/as stop`, a target `get_url` of the full `app_url`
+  extra variable into `<prefix>/pkgs` (with `.previousversion` renames), then
+  `~/bin/start`. It accepts a QAL snapshot URL, has no health check, and in
+  check mode runs no consumer code.
+- **Today, through the launcher.** With a signed selection for a new release,
+  stop drops the selection (route fields differ from `candidate.txt`) and
+  degrades to an unsigned restart (R19); the role overlays `pkgs`; start sees a
+  delivered archive, picks mode `refuse`, restarts the activated release and
+  fails the job. QAL keeps the old release after the outage.
+- **Missing pieces.** Target-side acquisition of the selection's record, entry,
+  companion and tools (no HTTP client in the closure, no repository trust
+  member); forward admission in stop (route match plus checkpoint naming the
+  working record); an attempt `candidate.txt` taken from the selection; start's
+  candidate/working equality kept only for restart and recovery; moving
+  `candidate.txt` and `last-working.txt` forward after activation, with crash
+  reconciliation; an original mode for the controller payload and a route
+  choice in the deploy job.
+- **Validation limit.** Template 1415 is the only template in evidence and no
+  SCM branch is passed, so a live original-job run on QAL needs either the
+  Part E restoration or an operations-owned template or branch change. Before
+  that, only fixtures, the native RHEL walk and the P43 development replay can
+  exercise the route.
+- **Ordering constraint.** Stop and start run the active closure, so the
+  forward code must be activated by a signed re-bootstrap before Part E. After
+  Part E no pinned route remains; a broken forward path would then need a
+  revert of the restoration.
+
+Alternatives for the human: (1) build the forward route, activate it by
+re-bootstrap, restore `pdf/` with a prepared revert, then prove N to N+1 to N+2
+signed deliveries and an unsigned refusal on the original job; (2) ask
+operations for a second template or branch prompt so the original job can be
+proven before the restoration; (3) keep the pinned route until Step 9 is
+implemented and reviewed as planned. Open points either way: the HTTP client
+and CA the application account may use on the target, an acquisition budget
+for the tools archive outside the 1800 s outage, and the pipeline signer of the
+2026-10-09 amendment.
+
 ## Rollout evidence and completion accounting
 
 Record reusable cplx implementation/validation separately from consuming
