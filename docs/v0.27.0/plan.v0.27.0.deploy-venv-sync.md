@@ -1078,6 +1078,8 @@ Human decisions on 2026-10-04 settle R16 option A and fresh signed selections fo
 every attempt, retry and recovery. They supersede bootstrap-recorded arming,
 non-expiring authority and pre-recorded retry counts. Operator-free refers to
 application-account maintenance access; the human signs on their workstation.
+The 2026-10-09 human amendment below moves ordinary signing to a pipeline key
+of each environment; the human keys remain for break-glass recovery.
 
 | Gate | Selected behavior and evidence required |
 | --- | --- |
@@ -1675,6 +1677,74 @@ time; this plan grants none. Unclosed prerequisites leave Step 8 incomplete.
 This completion establishes qualification-environment delivery and recovery only.
 It closes neither first-time installation nor production deployment and cannot
 complete the topic or its umbrella item. Those require Step 9 and AC18/AC19.
+
+#### Step 8 human amendment on 2026-10-09
+
+The human changes who signs ordinary deployments. R16/R17, R19, Q38 and every
+attempt, expiry, replay and checkpoint rule stay unchanged.
+
+- **Signer.** The deployment pipeline signs each attempt with a key of its own
+  environment: one key pair per environment, the private key kept as a pipeline
+  credential and never written to a workspace, its fingerprint pinned in the
+  verified closure and bound to that environment, so a qualification key can
+  never authorize production. This supersedes "the human signs on their
+  workstation" (2026-10-04) for ordinary deployments and retries.
+- **Production approval.** Production signing waits for an approval step
+  restricted to named approvers; qualification signs without one.
+- **Break-glass.** The existing primary and offline backup keys stay trusted for
+  recovery and for any attempt the pipeline cannot sign; Q38 custody applies.
+- **Precondition gate.** Before the pipeline signer is built, prove how a file
+  written by the pipeline agent appears on the target (owner identity). The
+  bootstrap policy pins the publisher identity; if the agent's file appears
+  under another identity, add a verified policy-update step first.
+- **Tasks.** P29 binds each pinned fingerprint to its environment. P30 renders
+  the payload the pipeline signs. P22 runs the production approval first, then
+  signs with the environment credential, builds the envelope, publishes it
+  atomically on the shared drive and records its digest before the orchestration
+  starts. Tests cover a key used outside its environment, an unapproved
+  production attempt and a missing credential, each refused before any stop.
+
+One-time deviations recorded on 2026-10-09, for the qualification demonstration:
+
+- The first qualification bootstrap met an installation started the Step 7 way,
+  which the bootstrap route could not admit. The route now admits exactly the
+  pinned Step 7 hold and runtime tools: after signed intake and checkpoint
+  checks, and before any publication, their own deployment hold and stop path
+  run in a separate host shell, and a parked or inactive unit with no process
+  left is required. Anything else refuses before publication.
+- The demonstration candidate was built in a temporary deploy-only mode: the
+  test walks, the analysis and the quality gate were skipped, and the frozen
+  candidate records "tests not run" markers instead of a coverage report. The
+  mode is removed after the demonstration, and the rehearsals replay the full
+  qualification on a full build.
+
+Hardening recorded on 2026-10-09, from the demonstration deploys. Each live
+failure that day passed every fixture and surfaced only on the real target:
+
+- **Real start before activation, rehearsed natively.** The rehearsal runs the
+  actual application start, release and same-daemon proof, then activation's
+  second byte verification, on the reference Linux host under a pseudo-terminal
+  and the orchestration's cleared environment. A start that changes a sealed
+  member (hook bridges rewritten by a nested hold, a Git index refreshed by the
+  launch revision check) fails there, not after publication on the target.
+- **Real-data fixtures.** Unit status lines, release record keys, shipped
+  dangling links and previous-model authentication files are copied from the
+  target into fixtures, so parsers meet the shapes the target produces.
+- **Intake preflight in the check-mode run.** The check-mode run evaluates the
+  signed-intake, checkpoint and reset preconditions read-only and reports the
+  first one that would refuse, so a live run is never spent on a known refusal.
+- **Supervised restore after any post-publication failure.** A failure after
+  publication restores supervised service of the release that was running,
+  rather than leaving the unit parked on the hold.
+- **Self-explaining refusals.** Every refusal from reset, verification,
+  activation and supervision names the failed condition on standard error, and
+  verification prints the first differing inventory entries.
+- **Deploy verdict independent of reclaimed agents.** The deploy job's verdict
+  and archived evidence do not depend on a pipeline agent that may be reclaimed
+  during a long run.
+- **Sealed hook bridges stay stable after activation.** Ordinary administrator
+  stops and starts must not rewrite the sealed bridges with another observer
+  path, or a later recovery verification refuses an unchanged release.
 
 #### Step 8 addendums
 
