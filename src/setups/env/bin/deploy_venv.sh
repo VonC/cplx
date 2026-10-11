@@ -367,6 +367,31 @@ def finish_checks(args, manifest, root, target, python, selection, owned, record
     return result
 
 
+EVIDENCE_KEEP = 5
+REPRODUCIBLE = ("cache", "file-source", "selected-wheels")
+OPERATION_NAME = re.compile(r"operation-[0-9a-f]{32}")
+
+
+def prune_evidence(evidence_root, owned, record):
+    """Bound retained evidence: a success drops its reproducible copies (its records
+    keep every digest), and only the newest operations stay, this one included."""
+    dropped = []
+    for name in REPRODUCIBLE:
+        path = owned / name
+        if path.is_dir() and not path.is_symlink():
+            shutil.rmtree(path)
+            dropped.append(name)
+    operations = sorted((path for path in evidence_root.iterdir()
+                         if OPERATION_NAME.fullmatch(path.name) and path.is_dir()
+                         and not path.is_symlink() and path != owned),
+                        key=lambda path: path.stat().st_mtime, reverse=True)
+    removed = operations[EVIDENCE_KEEP - 1:]
+    for path in removed:
+        shutil.rmtree(path)
+    record["evidence_retention"] = {"dropped": dropped, "removed_operations": len(removed),
+                                    "kept_operations": EVIDENCE_KEEP}
+
+
 def operate(args):
     """Run one offline lifecycle and retain a truthful operation result."""
     started = time.monotonic()
@@ -417,6 +442,11 @@ def operate(args):
         temporary = ready_path.with_name(ready_path.name + "." + operation + ".tmp")
         temporary.write_bytes(encoded(record))
         temporary.replace(ready_path)
+        try:
+            prune_evidence(args.evidence_root, owned, record)
+        except OSError as error:
+            # Retention is housekeeping: a failure is recorded, never fatal.
+            record["evidence_retention"] = {"error": str(error)}
         print("VENV=" + str(target))
         return 0
     except (OSError, ValueError, KeyError, TypeError, RuntimeError,
