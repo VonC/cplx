@@ -25,7 +25,7 @@ Checked by the shared `setenv()`; missing → fatal 22/23/24.
 | `build()` | `make`, guarded by a sentinel file | 19 |
 | `clean()` | `make clean` when a `Makefile` exists | 4 |
 
-## Optional hook
+## Optional hooks
 
 `verify_archive()`: when the tool defines it, the dispatcher calls it with
 the exact source archive it selected (the newest file in `sources/` matching
@@ -39,6 +39,16 @@ own `configure()` or `build()`. SQLite uses it for its pinned source identity
 the environment: `git_setenv` sets `M4`; `glibc_setenv` and `gcc_setenv`
 swap in the freshly built make/gcc and neutralize rpath flags;
 `make4_setenv` wires `automake116` in.
+
+`post_install_check()`: when the tool defines it, the dispatcher calls it
+after a successful `install()` and before `package()`, including when
+`install()` was skipped because the prefix was already newer than the
+build. A non-zero return stops the run with that status: nothing is
+packaged and the install prefix's `current` symlink is not advanced, so
+the previous version stays selected. Python uses it to prove the
+installed interpreter's SQLite capability
+([Check Python SQLite capability](../how-to/check-python-sqlite-capability.md));
+tools that do not define it keep their flow unchanged.
 
 ## Inherited: do not redefine
 

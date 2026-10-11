@@ -5,6 +5,11 @@
 Goal: turn the current `-SNAPSHOT` work into a tagged cplx release with a
 regenerated changelog, or cleanly back out of a failed attempt.
 
+This is the release of the cplx **source repository**. Building and
+publishing the toolchain itself, the `tools` archive a consumer pins, is a
+different procedure with its own gates:
+[Rebuild and publish the tools archive](rebuild-and-publish-the-tools-archive.md).
+
 Versioning is handled by the `dev_workflow` submodule around one file,
 `version.txt`:
 

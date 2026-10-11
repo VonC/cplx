@@ -36,6 +36,17 @@ One `if "%CPLX_TOOL%"=="<tool>"` block per tool:
 | `CPLX_RELOAD_PACKAGES` / `CPLX_FORCE_RELOAD_PACKAGES` | either requests one detected-index refresh per invocation despite a done marker (`sdpl` sets the force flag) |
 | `CPLX_SP_REPEAT` | with a valid nonempty list cursor, resume after the first active entry matching the cursor or this value; ineffective with empty/restarted progress |
 
+## Server-side switches (Linux, set for one command)
+
+| Variable | Read by | Effect |
+| --- | --- | --- |
+| `CPLX_INSTALL_PKG_FORCE_CP` | `install_pkg.sh` | exactly `1` forces the `cp` copy engine even where rsync exists, announced as `Copy engine: cp (forced by CPLX_INSTALL_PKG_FORCE_CP=1)`; any other value is treated as unset. A validation surface, not an operating mode |
+| `CPLX_TOOLS_RELEASE` | `closure_publish.sh` | exactly `1` makes `--expected-sha256` mandatory, so a tools release cannot publish without the SHA-256 its release record accepted |
+
+`CPLX_TOOLCHAIN_LD_LIBRARY_PATH` is not a switch: the
+[Python wrapper](python-wrapper.md) sets it to hold the library path it
+removed from its own environment, and nothing reads it from outside.
+
 ## Properties (files, shared by both machines)
 
 `src\setups\setup.properties` (template `.tpl`): `services` and
