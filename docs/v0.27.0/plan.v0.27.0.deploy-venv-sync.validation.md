@@ -1261,6 +1261,22 @@ generic. No required Step 7 work remains unimplemented.
 
 No. Step 8 has NOT been fully implemented.
 
+Writer check on 2026-10-11, against the private journals since the 2026-10-07
+review. Parts B to F ran for real, and the consumer's unchanged original job
+now delivers new releases on qualification under fresh signed selections, with
+an unsigned launch refused and a held stop recovered. AC16 and AC17 still do not
+close. AC16 asks for a same-release run whose stop fetches nothing; the human's
+2026-10-10 decision proved forward deliveries instead, no signed same-release
+run through the original job exists, and R16's checked restart cannot occur
+there because the role delivers its download on every run. AC17's typed
+recovery, a signed selection bound to the failed attempt, never ran; the failed
+attempt identity does not reach the human, and the historical predecessor format
+and the role transfer failure have fixture evidence only. The 2026-10-09
+amendment's pipeline signer is not built: every live attempt was signed on the
+workstation. Part A's staging formula was superseded by the delivery marker
+without a recorded replacement, and peak disk is unmeasured. The delivered
+bytes have not been through the Step 8 code exchange since round 6.
+
 Reviewer assessment on 2026-10-07, round 6: P23 resolves F1e by conservatively
 refusing extended POSIX ACLs on group-writable files and path components before
 the owning-group decision. Without group write in the ACL mask, named entries
@@ -1396,33 +1412,130 @@ zero failures/errors and no skips on the revised bytes. The reviewer ran no test
 or coverage command. These receipts do not prove a new qualified immutable
 candidate or an actual original-path rollout.
 
+Writer record on 2026-10-11 of the execution since that review. Exact runs,
+revisions and receipts are in the private journals; deploy numbers below are
+runs of the consumer's qualification deploy pipeline.
+
+- **Part B, candidates.** Full two-phase pipeline builds again qualify each
+  delivered candidate: both test phases, coverage 100% of the measured source,
+  the analysis gate and publication, then a registry entry per candidate. Native
+  Linux walks of the deployment test package back each lifecycle change (623
+  passed on 2026-10-11). The forward route added target-side acquisition with
+  the repository CA as a closure member, forward admission in stop, an attempt
+  candidate taken from the selection, and control advance with crash
+  reconciliation. The 2026-10-10 delivery marker replaced role staging of the
+  application tree. A workstation signer, a registration tool and a delivery
+  driver (prepare, select, publish, preflight, trigger) are now tracked.
+- **Parts C and D, bootstrap and signing handoff.** After failed attempts on
+  2026-10-09, run 55 completed the first bootstrap through the temporary
+  delivery path: activated, supervised, both APIs on the candidate's revision.
+  Runs 57, 59 and 63 re-bootstrapped activated releases under the 2026-10-10
+  deviation. Primary and offline backup public keys and the repository CA are
+  closure members. Every live attempt carried its own fresh signature, short
+  expiry and checkpoint, written to the fixed share folder.
+- **Part E, restoration.** On 2026-10-11 the operations repository's
+  application path returned to its audited baseline through the normal pull
+  request workflow: path equal to the baseline, merge commit keeping concurrent
+  ancestry. The pipeline payload switched to the original route afterwards.
+- **Part F, original check mode.** Runs 64, 68, 70, 74 and 76 passed in check
+  mode, the controller's five-input verdict recorded separately from the check
+  traversal, with no selection consumed.
+- **Part G as amended on 2026-10-10.** Forward deliveries through the unchanged
+  original job: run 69 (N to N+1), run 72 failed at stop on a post-stop race and
+  run 73 delivered under a fresh signed attempt with the same checkpoint, runs 75
+  and 77. Run 71, an unsigned launch naming a newer release, was refused at start
+  and restarted the running release (R19). Outages measured 9 to 17 minutes,
+  inside the 1,800-second cap; marker staging took under a minute.
+- **Part H.** After run 77 both external endpoints, read independently of the
+  pipeline, named the qualification environment, the exact clean revision and
+  the application account's project root; on the host, read under the
+  development account, the unit's main process observed the started daemon and
+  no hold marker remained.
+- **Part I, partly.** A held-before stop failure was recovered by a fresh signed
+  attempt (runs 72 and 73). Since 2026-10-11 a stop that fails after its hold
+  with nothing left running restarts the running release and records a running
+  failure; failures after the installer keep the hold for signed recovery.
+- **2026-10-09 hardening.** Native start rehearsal on the reference host (a);
+  the check-mode preflight moved to the workstation because check mode runs no
+  target command (c); supervised restore of a failed held stop before the
+  installer (d); named bootstrap refusals (first half of e); verdict written on
+  a fresh agent (f); stable hook bridges (g).
+
+Writer record of the afternoon of 2026-10-11:
+
+- **AC16, same-release run.** Run 79 delivered the candidate carrying typed
+  recovery and attempt receipts (forward, about 10 minutes of outage); run 80
+  then redeployed that same release under a fresh signed same-release
+  selection: stop admitted it, start admitted the checkpoint's marker,
+  reinstalled the retained release and ended `consumed` (outage about 10
+  minutes). Both runs left their attempt receipts on the share. A disk sampler
+  on the target (every 2 seconds) measured no transient peak above the final
+  value: `/project` grew 1.72 GiB and stayed, other filesystems unchanged.
+- **Part A, retention.** The growth is retained evidence: each venv operation
+  kept about 820 MB (uv cache, file index, wheel copies) and nothing removed an
+  operation (19.8 GB after 24 installs). The helper now drops a successful
+  operation's reproducible copies and keeps the five newest operations; the
+  consumer takes it with its next helper refresh.
+- **AC17, live finding.** Run 81, a signed same-release run with the server
+  port held, failed after its installer as planned (`failed-held-after`). The
+  next two signed typed recoveries (runs 82, 83) failed the same way although
+  the port was free by then: the start asked the installer for a rollback
+  through an option the installer does not have, and the installer refused it
+  before writing its log. Every fixture had stubbed that call. The target was
+  held with no admitted recovery and a bootstrap refused; run 84 (a signed
+  recovery whose job run delivered another build's marker) took the start's
+  refusal path, which restarts the installed release without any installer,
+  and ended `failed-running` with the service supervised again (outage about
+  37 minutes). The fix (the start sets the installer's rollback variable) and
+  tests that run the real installer call are in the next candidate, with the
+  way out documented; the AC17 recovery runs restart on that candidate.
+- **Decisions of 2026-10-11.** R16: fixture evidence accepted, the original
+  job cannot produce it. Historical predecessor format and role transfer
+  failure: fixtures plus the Step 9 historical replay accepted. Code exchange:
+  one review round on the final Step 8 bytes after AC17. Pipeline signer:
+  proposed as a QAL-only automation key used from our side (no pipeline
+  credential store exists), awaiting the human.
+
 ### Missing work for Step 8
 
-- Complete Part A's development-account network/client/share evidence and exact
-  same-disk staging replay. Record T, D, N and evidenced orchestration overhead O,
-  skipped-task limits and no double counting; demonstrate the required time and
-  disk margins against the recorded job, pipeline and 1,800-second outage caps.
-- Close Part B's qualification exit: record tooling/folder and backup-trust
-  evidence, bind required negative fixtures to the final bytes, and build a new
-  immutable candidate through Steps 5/7. Record unchanged-component comparisons
-  before reusing earlier evidence; do not reuse old qualification for changed code.
-- Under separate execution authorization, complete C/D bootstrap and trust/signing
-  handoff. Validate application-account probes, closure/key/activation and retained
-  five-input/checkpoint receipts without arming, then establish fresh signed
-  selection delivery for each actual forward or recovery attempt.
-- Under separate execution authorization, complete E/F restoration and original
-  check mode: prove whole application-path baseline equality and concurrent
-  ancestry, loaded-source/payload agreement, switch P22's payload only after the
-  restoration proof, and record controller verification separately from skipped
-  target traversal and inherited defaults.
-- Under separate execution authorization, complete G/H same-release original
-  delivery and independent external verification. Retain full lifecycle/identity
-  receipts, actual staging time and peak disk against A's caps, and close AC16
-  only when the exact candidate and same supervised daemon are independently proven.
-- Under separate recovery authorization, complete I's AC17 evidence for both
-  offline predecessor formats, before-installer failures and repeated recovery.
-  Prove pipeline terminal state plus local lock/process exclusion, fresh bound
-  recovery authority, zero artifact fetches and preservation of the failed verdict.
+- **Pipeline signer, 2026-10-09 amendment.** The deploy pipeline has no
+  credential store we may use, so no pipeline-held key is possible. Proposed
+  instead: a qualification-only automation key, its fingerprint pinned in the
+  verified closure and bound to the qualification environment, used by the
+  delivery driver from our side (render, sign, publish, preflight, trigger in
+  one command); the primary and backup keys stay for production and
+  break-glass. Needs the human's decision; then one candidate carrying the key,
+  one delivery signed with the primary key to activate it, and one delivery
+  signed automatically, with the refusal tests (key outside its environment,
+  missing key).
+- **AC17 typed recovery, rerun on the fixed candidate.** Deliver the candidate
+  that fixes the installer call (its successful start also retires the pending
+  record left by run 84), then on qualification: a deliberate failure after the
+  installer, a signed typed recovery that rolls back, a repeated recovery after
+  a rollback whose runtime failed, and a typed recovery after a held failure
+  before the installer; record the receipts, the terminal-job and local proofs,
+  zero artifact fetches and the preserved failed verdicts.
+- **Part A replacement record.** Record the timing of each run (stop, staging,
+  start, outage, pipeline duration against the job and pipeline envelopes) from
+  the receipts and logs, and confirm on the target that the evidence retention
+  bound holds once the consumer carries the refreshed helper; record that the
+  marker decision replaced the staging formula.
+- **Part B exit records.** Bind each delivered candidate's qualification
+  evidence (pipeline phases, analysis gate, native walk, native rehearsal) to its
+  registry entry; record the unchanged-component comparison against the earlier
+  qualified candidate; point to the backup key custody and rotation record;
+  recount the line budgets of the addendum and extend the private mapping with
+  the new workstation tools.
+- **Code exchange.** One review round on the final Step 8 bytes after the AC17
+  rerun (decided 2026-10-11); resolve its findings before closing the step.
+
+Closed on 2026-10-11 since the morning check: AC16 (run 80); R16 and the two
+recovery cases with no live route (decisions recorded above); hardening e
+(the verification names the first differing entry); hardening b (unit status
+lines, release record keys and shipped dangling links copied from the target
+into fixtures; the previous-model authentication files on the target are
+private to the application account, so their fixture keeps the file name the
+target's own refusal printed).
 
 ### New types or classes introduced for Step 8
 
@@ -1430,6 +1543,9 @@ P30 adds a small immutable acquisition-limits value type; the pipeline-evidence
 adapter adds a connection value type. They configure technical adapters rather
 than introduce a business class hierarchy. The staged Python files remain below
 the 650-line ceiling; the candidate adapter is in the 550-650 caution band.
+The 2026-10-11 workstation tools add one exception type for refused
+registrations and plain functions for the delivery steps; the native rehearsal
+is a shell script. None enters the application package.
 
 ### Architecture check for Step 8
 
@@ -1444,6 +1560,16 @@ No implementation repair was made by review.
 
 No additional architecture fix was identified in the reviewed Part B bytes.
 
+Writer check on 2026-10-11: the forward route, the marker admission and the
+stop's restore of the running release stay inside the stable closure's owners;
+the stop now calls the held-start proof for its own reserved attempt, a narrow
+documented entry rather than a second start path. The workstation delivery
+driver reuses the controller's verification and rendering and imports small
+helpers (hashing, refusal, download) from the registration tool; a shared
+helper module would remove that coupling.
+
+Yes, the helper coupling between the two workstation tools needs addressing.
+
 ### Performance check for Step 8
 
 Runtime inventory comparison uses associative membership rather than pairwise
@@ -1457,7 +1583,20 @@ exact-candidate qualification within the existing deadlines.
 Part A's T/D/N/O budget and actual G timing/peak-disk evidence are absent. Unit
 fixture timings do not qualify the unchanged role's transfer and staging workload.
 
-Yes, the required performance-budget evidence needs completing.
+Writer check on 2026-10-11: actual forward deliveries took 9 to 17 minutes of
+outage against the 1,800-second cap, and the delivery marker cut role staging
+to under a minute; acquisition of the release (about 800 MB) runs before the
+outage under its own 600-second bound. The comparison and scan costs above are
+unchanged. Peak disk per delivery is still unmeasured, and retained releases
+accumulate on the target.
+
+Afternoon of 2026-10-11: the same-release run measured no transient disk peak
+above the final value; the retained growth (about 1.7 GiB per install, most of
+it venv evidence) now has a bound in the helper (five newest operations,
+reproducible copies dropped on success).
+
+Yes, the retention bound must be confirmed on the target once the consumer
+carries the refreshed helper.
 
 ### Unit test coverage check for Step 8
 
@@ -1487,6 +1626,18 @@ establish a privileged exploit replay. Prior safe-chain fixtures remain green.
 No additional Part B unit finding was identified; 100% coverage is unestablished
 for the unmeasured automation. No unreferenced top-level Python adapter symbol was found.
 
+Writer check on 2026-10-11: the coverage gate still measures only the
+application package, so the deployment tooling remains unmeasured. Static
+references: the stop's restore is driven by native fixtures through the real
+stop transaction (completed, failed with survivors, failed restart, restored and
+re-admitted), the reserved-attempt held start by its own case; every top-level
+function of the registration tool and of the delivery driver is called by their
+tests or from the driver's entry point. The native rehearsal script has no unit
+test; its evidence is two real passing runs on the reference host.
+
+No unit-tested class below 100% needs completing. No top-level symbol of the
+unmeasured tooling is unreferenced.
+
 ### Feature integrity for Step 8
 
 Static checks and retained unit evidence support strict dispatch, closure edges,
@@ -1502,6 +1653,12 @@ receipts do not close these new original-path acceptance gates.
 This assessment changes only Step 8 validation rows. Prior Step 7 completion,
 other steps and the umbrella remain intact. Step 9 is still mandatory before
 topic completion; reboot remains untested and nonblocking.
+
+Writer check on 2026-10-11: qualification serves the latest delivered release,
+supervised, and every delivery left the previous release retained. No existing
+feature or report is impaired by the original-route deliveries; an unauthorized
+delivery cannot install. The open items are the acceptance gaps listed under
+missing work, not regressions.
 
 ## Step 9. Deliver first-time and production installations through unchanged orchestration
 
