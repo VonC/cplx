@@ -19,6 +19,8 @@ installed toolchain.
 - The consumer's versioned runtime setup, which puts the shipped library
   directories first for its Python commands
   ([why](../explanation/why-binaries-remember-the-build-home.md#where-dt_rpath-stops-wheels-with-their-own-runpath)).
+  It takes the prefix as first argument and defines `app_runtime_run`
+  ([contract](../reference/deploy-venv-helpers.md)).
 - A lock the consumer holds on the application root for the whole
   operation, mirroring and recovery included.
 

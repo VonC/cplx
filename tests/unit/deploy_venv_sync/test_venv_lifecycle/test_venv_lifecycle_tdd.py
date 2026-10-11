@@ -73,6 +73,31 @@ class VenvLifecycleTest(unittest.TestCase):
         profile["no_default_groups"] = True
         self.assertEqual(self.lifecycle.selection_flags(profile)[0], "--no-default-groups")
 
+    def test_success_bounds_retained_evidence(self):
+        root = self.root / "evidence"
+        older = []
+        for index in range(7):
+            path = root / ("operation-%032x" % index)
+            (path / "cache").mkdir(parents=True)
+            (path / "result.json").write_text("{}", encoding="utf-8")
+            os.utime(path, (1_000_000 + index, 1_000_000 + index))
+            older.append(path)
+        owned = root / ("operation-%032x" % 99)
+        for name in ("cache", "file-source", "selected-wheels", "metadata"):
+            (owned / name).mkdir(parents=True)
+        (owned / "wheel-inventory.json").write_text("{}", encoding="utf-8")
+        unrelated = root / "operation-notes"
+        unrelated.mkdir()
+        record = {}
+        self.lifecycle.prune_evidence(root, owned, record)
+        self.assertEqual(sorted(path.name for path in owned.iterdir()), ["metadata", "wheel-inventory.json"])
+        kept = sorted(path.name for path in root.iterdir() if path.name.startswith("operation-0"))
+        self.assertEqual(kept, sorted(path.name for path in older[3:]) + [owned.name])
+        self.assertTrue(unrelated.is_dir())
+        self.assertEqual(record["evidence_retention"],
+                         {"dropped": ["cache", "file-source", "selected-wheels"], "removed_operations": 3,
+                          "kept_operations": 5})
+
     def test_sanitized_sync_environment_overrides_ambient_selection(self):
         ambient = {"PATH": "/host/bin", "UV_INDEX_URL": "https://wrong.invalid",
                    "UV_PYTHON": "/host/python", "VIRTUAL_ENV": "/foreign",

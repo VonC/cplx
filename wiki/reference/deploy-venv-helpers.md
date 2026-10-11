@@ -63,8 +63,11 @@ deploy_venv.sh --tools-prefix <abs>/tools --helper <abs-file> --runtime-setup <a
 The shell part requires native Linux, absolute paths, regular files (not
 links) for `--helper` and `--runtime-setup`, and exactly one
 `python3*_bin` under `<tools>/python/current/bin`. It sources the runtime
-setup, then runs the lifecycle under that interpreter in isolated mode,
-importing its sibling modules from the `--helper` file's directory:
+setup, which receives the tools' parent as its first argument (also exported
+as `APP_RUNTIME_PREFIX`) and must define `app_runtime_run` (run a shipped
+binary with the shipped library path); a setup without it is refused. It then
+runs the lifecycle under that interpreter in isolated mode, importing its
+sibling modules from the `--helper` file's directory:
 
 1. invalidate `readiness.json`; check the attestation
    (`{"schema":1,"application_root":...,"lock_path":...}`): a non-blocking
@@ -94,6 +97,15 @@ refusal still leaves a not-ready record. `<evidence-root>/readiness.json`
 is replaced atomically, `"state":"ready"` with the release, interpreter,
 lock, profile and inventory digests, or `"state":"not-ready"`. Each
 `operation-<id>/` keeps one log per command with its argv and exit status.
+
+Retained evidence is bounded. After a successful operation, its reproducible
+copies (`cache/`, `file-source/` and `selected-wheels/`, about 800 MB for a
+typical application) are removed: `result.json` and `wheel-inventory.json`
+keep every digest. Only the five newest `operation-<id>/` folders stay, the
+current one included; a failed operation keeps its copies for diagnosis until
+it ages out. `result.json` records what was removed under
+`evidence_retention`; a removal error is recorded there and never fails the
+deployment.
 
 ## Retention layout
 
