@@ -2,7 +2,7 @@
 
 # Canonical cplx copy of the relocating installer: unpacks an explicitly
 # selected --archive, or the latest <target>.*.tar.gz produced by pkg.sh, then
-# makes the tree self-contained there — symlink targets, text files, ELF
+# makes the tree self-contained there: symlink targets, text files, ELF
 # interpreter (PT_INTERP) and rpath are re-anchored from the build
 # account's /home/<user> to the prefix. Run it from any account.
 # It needs the archive, this script, the patchelf shipped in the tools
@@ -12,9 +12,15 @@
 # the script falls back to cp at both transfer sites.
 # The ELF pass never walks a venv tree (a directory holding pyvenv.cfg):
 # wheel objects carry no builder path, their $ORIGIN search path is valid
-# at any prefix, and their shipped needs resolve through the interpreter's
-# forced DT_RPATH, so rewriting them only removed the entry that finds a
+# at any prefix, and rewriting them only removed the entry that finds a
 # wheel's bundled providers (v0.27.0 tools-archive-rebuild Step 6, Q06).
+# Their other needs (libstdc++, libgcc_s) do NOT resolve through the
+# interpreter's DT_RPATH: a wheel object carrying its own DT_RUNPATH makes
+# the loader ignore every DT_RPATH for its lookups, so those search
+# LD_LIBRARY_PATH, that DT_RUNPATH, then the host cache. The prefix alone is
+# therefore not self-contained for a venv; the consumer supplies the shipped
+# library directories per command (see "Where DT_RPATH stops" in
+# wiki/explanation/why-binaries-remember-the-build-home.md).
 # The symlink and text passes still relocate a shipped venv's bin/python
 # link and its pyvenv.cfg.
 # Application-specific install steps (extra bin entries) belong to the
@@ -131,7 +137,11 @@ install_optional_bin_entries() {
     # a pkg_<target> overlay found in its calling directory, so $0 must
     # stay in <prefix>/bin where the overlays are linked.
     install_bin_link "pkg" "$INSTALL_PREFIX/tools/bin/pkg" && installed=1
-    install_bin_wrapper "pkg_tools" "$INSTALL_PREFIX/tools/bin/pkg_tools.sh" && installed=1
+    # The deployed cplx copy, never <prefix>/tools/bin/pkg_tools.sh: that
+    # payload copy refuses to run (exit 3), so a wrapper onto it could only
+    # fail. pkg_tools packages this account's own ~/tools from ~/cplx/bin, and
+    # an account without that copy gets no pkg_tools command.
+    install_bin_wrapper "pkg_tools" "$HOME/cplx/bin/pkg_tools.sh" && installed=1
     install_bin_wrapper "install_pkg" "$INSTALL_PREFIX/tools/bin/install_pkg.sh" && installed=1
 
     if [ "$installed" -eq 1 ]; then
@@ -975,8 +985,10 @@ fix_elf_paths() {
         # THE VENV TREES ARE NEVER WALKED. A venv's wheel objects carry no
         # builder path to replace: their search path is $ORIGIN, valid at any
         # prefix and the only entry through which a wheel finds the providers
-        # bundled beside it, while their shipped needs (libstdc++, libgcc_s,
-        # libc) resolve through the interpreter's forced DT_RPATH. Walking them
+        # bundled beside it. Their other needs (libstdc++, libgcc_s) never see
+        # the interpreter's DT_RPATH, since an object's own DT_RUNPATH turns
+        # every DT_RPATH off for its lookups; the consumer's per-command
+        # LD_LIBRARY_PATH is what reaches them, not this pass. Walking them
         # as case 4 libraries replaced $ORIGIN with the target list and broke
         # the heavy wheels on the deployment target; the pipeline never saw it
         # because its venv is created after relocation. So every directory that
