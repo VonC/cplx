@@ -47,9 +47,13 @@ done
 [[ -n "$python" && -x "$python" ]] || { echo 'Selected shipped Python missing' >&2; exit 2; }
 # The consumer verifies the companion/member hashes before dispatching this entry.
 # Source only the delivered runtime setup, leaving host utilities on their host pair.
+# Its contract: it takes the prefix as first argument (also exported as
+# APP_RUNTIME_PREFIX) and defines app_runtime_run, which runs a shipped binary
+# with the shipped library path.
 export APP_RUNTIME_PREFIX="${tools%/tools}"
 # shellcheck source=/dev/null
 source "$runtime" "$APP_RUNTIME_PREFIX"
+declare -F app_runtime_run >/dev/null || { echo 'Runtime setup defines no app_runtime_run' >&2; exit 2; }
 forward=()
 while ((${#args[@]})); do
     case "${args[0]}" in

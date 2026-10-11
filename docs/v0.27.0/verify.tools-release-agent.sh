@@ -182,9 +182,10 @@ chmod +x "$PREFIX/tools/python/current/bin/python3.13_bin"
 expect pass one-interpreter tools_python_path
 expect pass same-venv bash "$WORKSPACE/ci/provision_toolchain.sh" venv-path
 venv=$(cat "$scratch/same-venv.log")
-[[ $venv == "$PREFIX/app/"* ]]
-venv=${venv#"$PREFIX/app/"}
-[[ $venv =~ ^([^/]+)/venvs/python_3\.13\.15_([^/]+)$ ]]
+# <prefix>/<application root>/<project>/venvs/python_<version>_<project>
+[[ $venv == "$PREFIX/"* ]]
+venv=${venv#"$PREFIX/"}
+[[ $venv =~ ^[^/]+/([^/]+)/venvs/python_3\.13\.15_([^/]+)$ ]]
 [[ ${BASH_REMATCH[1]} == "${BASH_REMATCH[2]}" ]]
 touch "$PREFIX/tools/python/current/bin/python3.14_bin"
 chmod +x "$PREFIX/tools/python/current/bin/python3.14_bin"
@@ -221,7 +222,7 @@ assert "--wheel-dir" in provision and "--installed-root" in provision
 abi = diagnostics.split("def abiContract()", 1)[1]
 assert "tools_abi_acceptance.sh" in abi and "exit 0" not in abi
 walk = (app / "ci/tools_test_acceptance.sh").read_text()
-assert 'app_runtime_run "$UV_PROJECT_ENVIRONMENT/bin/python" -m pytest' in walk
+assert '_runtime_run "$UV_PROJECT_ENVIRONMENT/bin/python" -m pytest' in walk
 assert "uv run" not in walk
 print("PASS main-chain-wiring")
 PY

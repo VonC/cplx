@@ -217,6 +217,13 @@ def wheel_fixtures(app, scratch):
     expect("unlocked-editable", capture.identify, lock, site, fail=True)
 
 
+def application_package(app):
+    """Name the application's single Python package under src/ (its coverage source)."""
+    packages = [path.name for path in (app / "src").iterdir() if (path / "__init__.py").is_file()]
+    assert len(packages) == 1, packages
+    return packages[0]
+
+
 def plugin_fixtures(app, scratch):
     # Invoke pytest's documented hooks with a configuration double. The native
     # application walk, not this dependency-free fixture, executes real tests.
@@ -226,8 +233,9 @@ def plugin_fixtures(app, scratch):
     sys.path.insert(0, str(app))
     with patch.dict(sys.modules, pytest=pytest):
         plugin = module(app / "ci/tools_test_plugin.py")
-    options = dict(testmon=True, testmon_noselect=True, cov_source=["src/my_project"],
-                   cov_fail_under=100, file_or_dir=["src/my_project/tests"])
+    source = "src/" + application_package(app)
+    options = dict(testmon=True, testmon_noselect=True, cov_source=[source],
+                   cov_fail_under=100, file_or_dir=[source + "/tests"])
     config = SimpleNamespace(pluginmanager=SimpleNamespace(hasplugin=lambda name: True),
                              getoption=lambda name, default=None: options.get(name, default),
                              testmon_config=SimpleNamespace(collect=True, select=False))
@@ -239,7 +247,7 @@ def plugin_fixtures(app, scratch):
                 expect("plugin-refuses-" + key, plugin.pytest_configure, config, fail=True)
         config.testmon_config.collect = False
         expect("plugin-inactive-testmon", plugin.pytest_configure, config, fail=True)
-    session = SimpleNamespace(items=[SimpleNamespace(path=Path("src/my_project/tests/unit") / name)
+    session = SimpleNamespace(items=[SimpleNamespace(path=Path(source + "/tests/unit") / name)
                                      for name in plugin.GUARDED for _ in range(2)])
     plugin.pytest_collection_finish(session)
     plugin.pytest_deselected([])

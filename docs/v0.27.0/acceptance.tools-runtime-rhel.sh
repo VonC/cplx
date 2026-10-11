@@ -5,6 +5,18 @@ set -euo pipefail
 [[ $# == 6 ]] || { echo 'usage: tools-runtime-rhel PREFIX VENV PYTHON INPUTS OUT READER_PYTHON' >&2; exit 2; }
 prefix=$1 venv=$2 python=$3 inputs=$4 out=$5 reader=$6
 project=$(cd "$venv/../.." && pwd)
+# The application's runtime setup provides app_runtime_library_path and
+# app_runtime_run; its Python package (src/<package>) provides core.host_runtime.
+# APP_PACKAGE names that package; by default it is the single one under src/.
+package=${APP_PACKAGE:-}
+if [[ -z $package ]]; then
+    shopt -s nullglob
+    found=("$project"/src/*/__init__.py)
+    shopt -u nullglob
+    ((${#found[@]} == 1)) || { echo 'Set APP_PACKAGE: no single package under src/' >&2; exit 2; }
+    package=${found[0]%/__init__.py}
+    package=${package##*/}
+fi
 mkdir -p "$out"
 unset LD_LIBRARY_PATH PYTHONPATH
 export HOME=$prefix UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never UV_NO_PROGRESS=1
@@ -15,15 +27,16 @@ git="$prefix/tools/git/current/bin/git"
 
 # Verify every executed application helper against the retained source commit
 # before sourcing it. The packaged tree must be clean, not merely have that HEAD.
-"$reader" -I - "$inputs" "$project" "$git" "$out" <<'PY'
+"$reader" -I - "$inputs" "$project" "$git" "$out" "$package" <<'PY'
 import hashlib, json, pathlib, subprocess, sys
-inputs, project, git, out = map(pathlib.Path, sys.argv[1:])
+inputs, project, git, out = map(pathlib.Path, sys.argv[1:5])
+package = sys.argv[5]
 metadata = json.loads((inputs / 'runtime-inputs.json').read_text())
 revision = metadata['application_revision']
 assert subprocess.check_output([str(git), '-C', str(project), 'rev-parse', 'HEAD']).decode().strip() == revision
 assert not subprocess.check_output([str(git), '-C', str(project), 'diff', '--name-only', revision, '--']).strip()
 bindings = {}
-for name in ['tools/runtime_env.sh', 'ci/tools_abi_scan.py', 'src/my_project/core/host_runtime.py']:
+for name in ['tools/runtime_env.sh', 'ci/tools_abi_scan.py', 'src/' + package + '/core/host_runtime.py']:
     data = subprocess.check_output([str(git), '-C', str(project), 'show', revision + ':' + name])
     assert (project / name).read_bytes() == data, name
     bindings[name] = hashlib.sha256(data).hexdigest()
@@ -97,10 +110,10 @@ PY
 check_wheels
 "$python" "$project/ci/tools_abi_scan.py" "$prefix" "$venv" "$out/abi"
 # Real host children cross before exec; shipped children keep their runtime.
-app_runtime_run "$venv/bin/python" -I - "$project" "$prefix" <<'PY'
-import os, pathlib, subprocess, sys
+app_runtime_run "$venv/bin/python" -I - "$project" "$prefix" "$package" <<'PY'
+import importlib, os, pathlib, subprocess, sys
 sys.path.insert(0, str(pathlib.Path(sys.argv[1]) / 'src'))
-from my_project.core.host_runtime import host_environment
+host_environment = importlib.import_module(sys.argv[3] + '.core.host_runtime').host_environment
 prefix = pathlib.Path(sys.argv[2])
 assert os.environ.get('LD_LIBRARY_PATH') == os.environ['APP_RUNTIME_LIB_PATH']
 env = host_environment()

@@ -145,6 +145,7 @@ usage: acceptance.tools-archive-rebuild.sh rhel --run ID --home DIR --python /ab
          --previous-installer FILE --previous-installer-sha256 HEX
          --runtime-inputs FILE --runtime-inputs-sha256 HEX
          [--build-evidence FILE] [--sqlite-parser /usr/bin/python3] [--live-root PATH]...
+       APP_PACKAGE names the application's Python package when src/ holds several
 USAGE
     exit 2
 }
@@ -178,7 +179,8 @@ rhel_main() {
     fi
     local pinned
     for pinned in "$archive" "$bundle" "$app" "$deploy" "$previous"; do absolute_file "$pinned" || refuse "absolute regular file required: $pinned"; done
-    [[ $archive == */tools.[0-9]*.tar.gz && $app == */app.[0-9]*.tar.gz ]] || refuse "explicit timestamped tools and application archives are required"
+    [[ $archive == */tools.[0-9]*.tar.gz && $app == */[a-z]*.[0-9]*.tar.gz && ${app##*/} != tools.* ]] \
+        || refuse "explicit timestamped tools and application archives are required"
     [[ $(digest_of "$archive") == "$archive_sha" ]] || refuse "archive digest differs from its pin"
     [[ $(digest_of "$deploy") == "$deploy_sha" ]] || refuse "deploy script digest differs from its pin"
     [[ $(digest_of "$previous") == "$previous_sha" ]] || refuse "previous installer digest differs from its pin"
@@ -325,11 +327,22 @@ rhel_fresh_prefix() {
     printf 'python=%s\n' "$(sed -n 's/^Python //p' "$ACCEPT_HOME/raw/wrapper-second.log" | head -1)" >> "$ACCEPT_HOME/raw/runtime.txt"
 }
 
+# The application archive is <kind>.<stamp>.tar.gz and installs under <prefix>/<kind>.
+application_kind() {
+    local name
+    for name in "$ACCEPT_HOME/inputs/"*.[0-9]*.tar.gz; do
+        name=${name##*/}
+        [[ $name == tools.* ]] || { printf '%s\n' "${name%%.*}"; return 0; }
+    done
+    return 1
+}
+
 # Discover one deployed project and one venv; never choose between candidates.
 deployed_venv() {
-    local prefix=$1 path
+    local prefix=$1 path kind
     local -a projects=() venvs=()
-    for path in "$prefix"/app/*; do
+    kind=$(application_kind) || return 1
+    for path in "$prefix/$kind"/*; do
         [[ ! -d $path ]] || projects+=("$path")
     done
     ((${#projects[@]} == 1)) || return 1
@@ -426,9 +439,10 @@ rhel_home_states() {
 # (the deployed venv audited against the lock offline, then the heavy wheels
 # imported) and PA11 (operator senv and .env sourcing) over one deployment.
 rhel_deployment() {
-    local prefix=$ACCEPT_HOME/prefixes/deploy deploy=$ACCEPT_HOME/inputs/deploy_pkgs.sh state reason venv interpreter
+    local prefix=$ACCEPT_HOME/prefixes/deploy deploy=$ACCEPT_HOME/inputs/deploy_pkgs.sh state reason venv interpreter kind
     mkdir -p -- "$prefix/pkgs"
-    cp -- "$ACCEPT_HOME/inputs/"app.*.tar.gz "$prefix/pkgs/"
+    kind=$(application_kind) || refuse "no application archive among the inputs"
+    cp -- "$ACCEPT_HOME/inputs/$kind".*.tar.gz "$prefix/pkgs/"
     cp -- "$ACCEPT_HOME/inputs/"tools.*.tar.gz "$prefix/pkgs/"
     state=pass reason="deployment and forced redeployment passed every readiness check"
     # MAIL_TO empty skips the automatic log mail; the log stays in the prefix.
