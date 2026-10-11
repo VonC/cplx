@@ -84,7 +84,7 @@ not an invented line-coverage percentage.
 ### Physical-line inventory at plan authoring
 
 Counts include blank lines and the final unterminated line, if any, at
-`642ef28`. Recount the files changed by each step immediately before editing.
+`9994182`. Recount the files changed by each step immediately before editing.
 
 | Existing file | Lines | Planned use |
 | --- | --- | --- |

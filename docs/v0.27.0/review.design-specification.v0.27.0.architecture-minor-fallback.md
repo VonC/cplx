@@ -26,7 +26,7 @@ Review round: 1
 ### Requestor assessment for design-specification architecture-minor-fallback (round 1)
 
 The requirement was consolidated after three independent review rounds and
-human approval of all eleven answers, committed in a5a974f. This design keeps
+human approval of all eleven answers, committed in aafb3e6. This design keeps
 those choices fixed: predecessor-first curated fallback, detected-key indexes,
 curated-only cleanup and progress bound to list identity plus detected key.
 

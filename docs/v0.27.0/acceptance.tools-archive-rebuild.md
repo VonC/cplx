@@ -27,7 +27,7 @@ commit-outcome reporting through the mandatory check described below.
 
 | Input | Inspected revision or path |
 | --- | --- |
-| cplx | `134c270c0b65b5e5c544ac021e8055896f1f25ac` |
+| cplx | `d4201021f8abe98d8d7d0892032df0ca7b68ae2a` |
 | Consuming application | `64a59cb98d77724627dc747bc13d3bb5050404e7` |
 | Publication contract | `src/setups/env/bin/closure_publish.sh`, amended failure diagnostics |
 | Application entry | `app:tools/publish_pdf_nexus.sh`, old tools path refused before remote work |
@@ -409,11 +409,11 @@ Python launch checks passed on the exact extracted archive. The real package
 closure gate ran on the trimmed stage before tar creation.
 
 The [authority capture](evidence.tools-archive-rebuild.step5-original-authority.txt)
-verifies source commit `13c80d572ba7bda91728806ad7dc11c53629a506`, retention merge
-`5f8d4d67ca549bb74e3bcbb798124d628c3d0619` and declaration digest
+verifies source commit `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7`, retention merge
+`f26454defc6eab1b35b9a61609215ea83547b7a6` and declaration digest
 `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa`.
 No declaration renewal was needed. Build base
-`6ed601008162f0527d289758005f7e16cffaf806` and the hashed Step 5 source overlay
+`2ba75d7eee2c06ae3939f7112383a6c42c8fef11` and the hashed Step 5 source overlay
 are recorded separately from the future publishing revision, which remains unset.
 
 Raw evidence is retained outside ignored workspace scratch in
@@ -553,7 +553,7 @@ Step 6 validation capture for identities. Candidate cell states are unchanged.
 
 Handoff point 2 returned to the original owned RHEL namespace after the original
 candidate failed RHEL PA6. The corrected installer from commit
-`7aa660f8a2f182fc91790fd1182166ad8b662d5b` was verified and copied to both
+`a153e6faf55cca02d1fa02f805d783f2c07cc5b4` was verified and copied to both
 `cplx/bin/install_pkg.sh` and `tools/bin/install_pkg.sh`. A fresh audit preceded
 `pkg_tools.sh`; no payload refresh, compilation or promotion was repeated.
 
@@ -943,7 +943,7 @@ uv remain required. The proposed DT_NEEDED additions remain unadopted.
 
 ## Completed Step 6 publication eligibility
 
-The checkpoint ending `92e361a` is committed. Fresh RHEL qualification and
+The checkpoint ending `c160ccf` is committed. Fresh RHEL qualification and
 the exact-archive checks pass; D10 selects the packaged GCC 11 runtime from
 both real provider pairs and the 77 agent wheels. The unchanged candidate
 retains green Jenkins 188, including Q10 CI scope and 100% application
@@ -1122,7 +1122,7 @@ Source: `acceptance.tools-archive-rebuild.json`.
   "preparation": {
     "state": "pass",
     "reason": "Step 6 prepublication evidence complete; immutable publication and adoption remain Step 7 obligations",
-    "cplx_revision": "66de88c2b2d8259fb8b67d161823745e7d0b7685",
+    "cplx_revision": "11b9e616447300e35e5e5ea4a0b53b0ec93a6103",
     "application_revision": "7a2c1c1650a1252e9e73c4dbc9dfe73bcf5d8b87",
     "validator": {
       "identity": "independent-rhel-system-python",
@@ -1257,7 +1257,7 @@ Source: `acceptance.tools-archive-rebuild.json`.
         }
       },
       "authority": {
-        "source_commit": "13c80d572ba7bda91728806ad7dc11c53629a506",
+        "source_commit": "f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7",
         "declaration_sha256": "63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa",
         "release_revision": null,
         "renewed": false,
@@ -2311,9 +2311,9 @@ Source: `acceptance.tools-archive-rebuild.json`.
         }
       },
       "authority": {
-        "source_commit": "13c80d572ba7bda91728806ad7dc11c53629a506",
+        "source_commit": "f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7",
         "declaration_sha256": "63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa",
-        "release_revision": "92e361a6af56ebd0a25c92010b6346d6c307b59c",
+        "release_revision": "c160ccf119a5f12576d3ff911daa5eb1281ee606",
         "renewed": false,
         "captures": [
           "step5-authority",
@@ -13162,7 +13162,7 @@ Source: `acceptance.tools-archive-rebuild.json`.
       },
       "history": [
         {
-          "identity": "before-step6-completion-92e361a",
+          "identity": "before-step6-completion-c160ccf",
           "results": {
             "AR1": {
               "state": "pass",

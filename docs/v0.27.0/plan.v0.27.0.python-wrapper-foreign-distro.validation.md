@@ -970,7 +970,7 @@ One file in this repository, three in the pipeline one, and one build.
 `docs/v0.27.0/verify.wrapper-scope.manifest.txt` carries the three fields the
 plan names and nothing else:
 
-- `freeze_commit` `233b549d1bfa96b0e0e2cf7e9d31c996cf132389`, the commit that
+- `freeze_commit` `c8afc3bdf28a7a662073f2ce50d83ce711be8f72`, the commit that
   froze the harness;
 - `harness_path` `docs/v0.27.0/verify.wrapper-scope.sh`;
 - `file_sha256` `fab864ee...`, over the FILE BYTES at that path, which its own
@@ -1217,12 +1217,12 @@ Criterion by criterion, with the line that answers it:
   _dl_readonly_area, version GLIBC_PRIVATE`. That is the defect itself, measured
   on the agent;
 - THE CONTROL'S PROVENANCE CHECKED BEFORE IT RUNS:
-  `step5/control-wrapper/bytes` against commit `a665f4fc` at
-  `src/install/env/python/bin/python`, and the fixed body against `c5764088`,
+  `step5/control-wrapper/bytes` against commit `55a70344` at
+  `src/install/env/python/bin/python`, and the fixed body against `09819521`,
   both before either tree runs, with
   `step5/control/wrong-control-bytes-refused` proving the gate fires;
 - THE INDEPENDENT IDENTITY CHECK: `identity/manifest/harness-at-freeze-commit`
-  against `233b549d:docs/v0.27.0/verify.wrapper-scope.sh`, its mutated-manifest
+  against `c8afc3bd:docs/v0.27.0/verify.wrapper-scope.sh`, its mutated-manifest
   control refusing, and the capture's three recorded digests admitted;
 - THIS STEP DID NOT MODIFY THE HARNESS:
   `identity/harness/canonical-file-is-still-frozen` reads `fab864ee`, the value
@@ -1299,7 +1299,7 @@ miscounted.
 This step changes no shipped file. The wrapper and `setenv` are read and never
 written, and the acceptance asserts that: the fixed body it installs into its
 own tree is the live `src/install/env/python/bin/python` byte for byte, checked
-against commit `c5764088` before anything runs.
+against commit `09819521` before anything runs.
 
 THE FROZEN HARNESS STAYS FROZEN, which is the structural claim this step had to
 make and the reason the instrument is a second file. `verify.wrapper-scope.sh`

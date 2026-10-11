@@ -59,7 +59,7 @@ changes step 0's scope.
 
 Document changes since the plan was first written, for round 1.
 
-The plan was committed at 04ccde1 and has changed once since, at 4fa8104, in one
+The plan was committed at 74cf5fc and has changed once since, at c04032c, in one
 respect: the Debian acceptance stopped being deferred and became a step of this
 plan.
 

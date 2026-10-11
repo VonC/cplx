@@ -22,7 +22,7 @@ lowest higher minor when no lower candidate exists. Keeping a minor-specific
 override remains necessary when its package requirements differ.
 
 Later repository evidence changes how the generated index should be considered.
-Commit `18c251d`, authored on 24 August 2026, records that resolving packages
+Commit `f69979f`, authored on 24 August 2026, records that resolving packages
 from the 2025-era 9.6 index onto the upgraded 9.8 server produced a sandbox
 whose binutils needed libraries the upgraded system no longer carried. Setup
 had supplied the packages without exposing that runtime inconsistency. That
@@ -65,7 +65,7 @@ The requested change covers three metadata lookups:
 The Git dependency lists for 9.6 and 9.8 are byte-identical, and their mirror
 values in `setup.tpl.properties` are identical rolling CentOS 9 Stream and
 supplementary mirror definitions. The Python lists differ: 9.6 contains
-`zlib-dev`, while 9.8 contains the `zlib-devel` correction from `18c251d`.
+`zlib-dev`, while 9.8 contains the `zlib-devel` correction from `f69979f`.
 Only `zlib-devel` resolves in either generated index. The generated 9.6 and 9.8
 indexes also differ; they are snapshots, not duplicate curated lists.
 

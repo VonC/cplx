@@ -6,7 +6,7 @@ checks all succeeded. AC1-AC12 map to the executed evidence below.
 
 ## Acceptance inputs and isolation
 
-The authoring revision is `9971799aa2b1f5aa856b90131e881625873a13d1`, plus the
+The authoring revision is `ae9a6861ba4fc65aad512d4512d32d2d2b7e8c80`, plus the
 Step 4 working-tree changes. On 2026-09-15 the remote host reported
 `rhel_9.8_x86_64`. Existing version labels are Python `3.13.15` and Git `2.52.0`.
 Raw commands, host identifiers and logs stay in ignored

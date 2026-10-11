@@ -684,7 +684,7 @@ obligation met before a step can run is not one that survives it.
 Eight questions were opened and settled across four review rounds. Each row
 names the question, the decision, where it lives in this plan, and what was
 rejected. The rationale, the pros and cons weighed, and the acceptance reason
-for each answer are preserved in commit `a9f8351`, recorded immediately before
+for each answer are preserved in commit `e032f09`, recorded immediately before
 this table replaced them.
 
 | Question | Decision | Integrated in | Rejected alternatives |

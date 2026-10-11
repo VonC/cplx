@@ -1872,7 +1872,7 @@ The companion application evidence below additionally fixes its reviewed
 index, patch and separate commit plan; it is not part of cplx's Git index.
 
 cplx root: C:/Users/vonc/git/cplx
-Starting HEAD: 863933eeedb21bac5bfa7a662d1a0d25a048a079
+Starting HEAD: 115a2640203324ea099bdfe9b5d57802dd467818
 
 cplx staged paths:
 
@@ -2614,7 +2614,7 @@ plan. The protocol's request_index_tree fixes the cplx index only. Resolve
 the companion app root from .reviews/a.step4.app-context.json; keep its private
 locator out of authored review text and the versioned transcript.
 
-Cplx starting HEAD: 863933eeedb21bac5bfa7a662d1a0d25a048a079.
+Cplx starting HEAD: 115a2640203324ea099bdfe9b5d57802dd467818.
 
 Cplx staged paths:
 
@@ -3360,7 +3360,7 @@ plan. The protocol's request_index_tree fixes the cplx index only. Resolve
 the companion app root from .reviews/a.step4.app-context.json; keep its private
 locator out of authored review text and the versioned transcript.
 
-Cplx starting HEAD: 863933eeedb21bac5bfa7a662d1a0d25a048a079.
+Cplx starting HEAD: 115a2640203324ea099bdfe9b5d57802dd467818.
 
 Cplx staged paths:
 
@@ -4930,7 +4930,7 @@ from the shared evidence launcher rather than from equivalent Git commands.
 - Umbrella digest comparison: `applicable: true`, `changed: false`, before and
   after both `8aabd162a3800f3721b369ab4009f1081de5f7541bc2dfaff5216e2984b2db15`.
   The digest differs from earlier rounds because the umbrella gained D11 and
-  item 8 in commit `3bbd15c` and the writer's staged Q06 additions since; within
+  item 8 in commit `17eb0a7` and the writer's staged Q06 additions since; within
   this round it did not change, and no umbrella row was completed.
 - Validation-state comparison over the ordered path set, holding all 14 staged
   step paths and the file named by the project command: `acceptable: true` with
@@ -5724,7 +5724,7 @@ The human instructed: "OK reclaim it and publish a new step 5 request then stop"
 
 The old Step 6 round 2 found no defects in the staged work; its changes-requested
 verdict reflected deliberately incomplete Step 6 acceptance. That partial work
-has since been committed through 7aa660f8a2f182fc91790fd1182166ad8b662d5b.
+has since been committed through a153e6faf55cca02d1fa02f805d783f2c07cc5b4.
 This authorization does not declare Step 6 complete or alter its review verdict.
 
 The next requested review concerns plan Step 5: handoff point 2, the completed
@@ -5756,7 +5756,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -5786,7 +5786,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -5935,7 +5935,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -5945,7 +5945,7 @@ Writer response:
 
 The prior Step 6 round 2 found no remaining staged defects. Its changes-requested
 verdict reflected the intentionally incomplete Step 6 acceptance. The partial
-work was committed through 7aa660f8a2f182fc91790fd1182166ad8b662d5b under direct
+work was committed through a153e6faf55cca02d1fa02f805d783f2c07cc5b4 under direct
 human authority. No prior reviewer repair is reversed by this request.
 
 The human subsequently authorized the Step 5 repackage, reclaim, explicit
@@ -6003,7 +6003,7 @@ replacement, and Step 6 still owns its runtime acceptance.
   independent interpreter and compared every member's type, mode, link target
   and content digest: 38070 members in each, none added or removed, and exactly
   one changed, `tools/bin/install_pkg.sh`. Its old bytes are the pre-correction
-  installer from `dab19c8` and its new bytes are the committed corrected
+  installer from `7e06ed0` and its new bytes are the committed corrected
   installer `f915125e...2fca02`. Owners are identical. The build result is
   therefore inherited unchanged, which is what the plan's single repackage
   allows.
@@ -6018,7 +6018,7 @@ replacement, and Step 6 still owns its runtime acceptance.
 - Declaration authority. The closure gate staged and checked the same
   declaration, `63a955f8...9d5aa`. The declaration covers ELF closure and does
   not list the installer, so an installer change needs no renewal. The
-  authority source and its retention merge are both ancestors of `7aa660f`,
+  authority source and its retention merge are both ancestors of `a153e6f`,
   and neither the closure directory nor `pkg_tools.sh` has changed since the
   accepted Step 5 evidence.
 
@@ -6087,12 +6087,12 @@ Independent evidence, measured rather than read from the record:
 
 - Both archives' sizes and digests on the build host, and a full member
   comparison of the two, with the changed member's old and new digests tied to
-  `dab19c8` and to the committed installer.
+  `7e06ed0` and to the committed installer.
 - The retained raw bundle digest, the check script digest, the harness and
   installer digests the AR run used, the frozen oracle on the host, and the
   `539 cases, 0 failures` verdict with `AR1`, `AR2` and `AR4` passed.
 - The closure gate's declaration digest in the packaging log, and the
-  reachability of the authority source and retention merge from `7aa660f`.
+  reachability of the authority source and retention merge from `a153e6f`.
 - The original captures' blobs, identical to the previously committed ones,
   and the replacement summary, identical to the host's retained copy.
 
@@ -6106,7 +6106,7 @@ resolver set: the same four commands.
 
 - `bash src/utils/lint_shell.sh`, source `project`. Clean, exit 0.
 - `bash .reviews/a.step6.transport.sh cumulative`, source `plan`. Exit 0. It
-  ships committed cplx HEAD `7aa660f` and the application's committed HEAD plus
+  ships committed cplx HEAD `a153e6f` and the application's committed HEAD plus
   its three uncommitted reader repairs, verifying their digests on the host.
 - The record verifier under llm-shared's Python, source `request`. Exit 0.
 - `markdown-check.bat`, source `request`. Exit 0 as declared, over llm-shared;
@@ -6204,7 +6204,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -6450,7 +6450,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -6568,7 +6568,7 @@ The five declared commands behave as expected. The hook refuses the staged set.
   transport exit 0 in 106 seconds, native `validation exit=0 elapsed=83s` on
   the independent interpreter, no FAIL line, four helper imports and 58
   acceptance cases. The inputs are unchanged since round 3: cplx HEAD
-  `7aa660f`, application HEAD `6b22c16f` and the same three verified overlays.
+  `a153e6f`, application HEAD `6b22c16f` and the same three verified overlays.
 - The record verifier, source `request`: both `PASS` lines, exit 0.
 - The Markdown gate with `--root` for cplx, source `request`: exit 1 with 37
   findings, none in this round's staged content. Every finding is at or before
@@ -6676,7 +6676,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -6909,7 +6909,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -7007,7 +7007,7 @@ The reviewer ran all six resolved commands. All six behave as expected.
 - `bash .reviews/a.step6.transport.sh cumulative`, source `plan`, run alone:
   transport exit 0 in 106 seconds, native `validation exit=0 elapsed=80s` on
   the independent interpreter, no FAIL line, four helper imports and 58
-  acceptance cases. The inputs are unchanged: cplx HEAD `7aa660f`, application
+  acceptance cases. The inputs are unchanged: cplx HEAD `a153e6f`, application
   HEAD `6b22c16f` and the same three verified overlays.
 - The record verifier through the sibling-relative interpreter path, source
   `request`: both `PASS` lines, exit 0.
@@ -7110,7 +7110,7 @@ identity and code-review policy. This is an authorized change of review scope.
 It does not change the old changes-requested verdict or claim Step 6 complete.
 
 The partial Step 6 work has been committed through
-7aa660f8a2f182fc91790fd1182166ad8b662d5b. Handoff point 2 is now complete:
+a153e6faf55cca02d1fa02f805d783f2c07cc5b4. Handoff point 2 is now complete:
 the corrected installer is repackaged with unchanged payloads, the new archive
 passes AR1, AR2 and AR4, and old candidate evidence is preserved. Review that
 Step 5 return. Replacement runtime acceptance and the rest of Step 6 remain
@@ -7396,7 +7396,7 @@ What the staged evidence gets right, verified rather than accepted:
   files in the retention list verify there. The run is pinned to the
   replacement archive `df7dff7d...be87`, the bundle `cbdbe129...5231` and the
   transferred fixture revision, which the provenance capture correctly
-  distinguishes from source commit `b3387f9`.
+  distinguishes from source commit `e45850a`.
 - Preservation. The original candidate's results are byte-identical to the
   previously committed capture under their historical name, and the original
   candidate changes only that capture path. Its PA6 failure stays.
@@ -7618,7 +7618,7 @@ Unresolved findings:
 
 Boundary-crossing work:
 
-- Umbrella item 7's note states that after the venv-tree exclusion "the shipped-venv arrangement holds until item 8 replaces it"; this run shows it does not hold with the 3.13.15 toolchain and a 3.13.9-built application archive, so the note (written by this reviewer in commit 3bbd15c) needs revising once the human decides, which reviewer mode cannot do
+- Umbrella item 7's note states that after the venv-tree exclusion "the shipped-venv arrangement holds until item 8 replaces it"; this run shows it does not hold with the 3.13.15 toolchain and a 3.13.9-built application archive, so the note (written by this reviewer in commit 17eb0a7) needs revising once the human decides, which reviewer mode cannot do
 - The shared request renderer qualifies request section headings with the round but not the exchange occurrence, so the exchange 2 round 1 request repeats seven headings of exchange 1 round 1 in the transcript; the answer renderer already adds the exchange, and fixing the request renderer is an llm-shared change
 
 ### Human guidance response for step 6 tools-archive-rebuild (exchange 2) (round 1)
@@ -7986,7 +7986,7 @@ rather than read from the record.
   `results.json` (`08114f9e...8115`), all seven retention digests verify, both
   earlier failed runs are preserved byte for byte, and the Step 5 snapshots are
   unchanged.
-- The umbrella note, which the reviewer wrote in `3bbd15c` and flagged in
+- The umbrella note, which the reviewer wrote in `17eb0a7` and flagged in
   round 1 as contradicted, now makes the shipped-venv arrangement conditional
   on a complete venv for the candidate Python. That is accurate and scoped.
 - The staged transcript's seven round 1 request headings now carry the
@@ -8817,7 +8817,7 @@ The application reader repairs were committed as 784f33ed. Candidate pins in
 application commit 7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e select archive
 df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87, verification bundle
 dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51 and cplx source
-72f6cb290700faf328b73d946e78e8fedab8c2cd. Publication remains off.
+020181e8f26d5a12bcaf22ed27ec30096f4bf1d6. Publication remains off.
 
 Recorded Debian cells:
 
@@ -9323,7 +9323,7 @@ The application reader repairs were committed as 784f33ed. Candidate pins in
 application commit 7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e select archive
 df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87, verification bundle
 dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51 and cplx source
-72f6cb290700faf328b73d946e78e8fedab8c2cd. Publication remains off.
+020181e8f26d5a12bcaf22ed27ec30096f4bf1d6. Publication remains off.
 
 Recorded Debian cells:
 
@@ -9805,7 +9805,7 @@ The application reader repairs were committed as 784f33ed. Candidate pins in
 application commit 7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e select archive
 df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87, verification bundle
 dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51 and cplx source
-72f6cb290700faf328b73d946e78e8fedab8c2cd. Publication remains off.
+020181e8f26d5a12bcaf22ed27ec30096f4bf1d6. Publication remains off.
 
 Recorded Debian cells:
 
@@ -10255,7 +10255,7 @@ Build 177 used application/pipeline revision
 6b43b39ef60cd9ff895986492cd94dbeee81b569, archive
 df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87,
 bundle dab8bf5036715a45bc21932592923d50d660cb1674adb84111b3630d88fd3b51
-and cplx source 72f6cb290700faf328b73d946e78e8fedab8c2cd.
+and cplx source 020181e8f26d5a12bcaf22ed27ec30096f4bf1d6.
 Publication stayed off. The application fix itself was committed and pushed
 by the sibling project; this cplx round does not change its source.
 
@@ -15645,7 +15645,7 @@ staged path: docs/v0.27.0/verify.tools-release-acceptance.sh
 
 Yes. Step 6 has been fully implemented.
 
-The repaired checkpoint is committed through `92e361a6`. The completion adds
+The repaired checkpoint is committed through `c160ccf1`. The completion adds
 fresh deployed RHEL qualification, an exact-archive assertion run, one D10
 comparison of the two real provider pairs, and the complete prepublication
 readiness floor. The native publication validator accepts the actual archive
@@ -15754,7 +15754,7 @@ Human guidance:
 
 The user authorized the checkpoint commit and then completion of Step 6,
 asking to use at most one further Jenkins round if possible because each
-costs more than 45 minutes. The checkpoint is committed through `92e361a`.
+costs more than 45 minutes. The checkpoint is committed through `c160ccf`.
 This request assesses the completed Step 6 readiness floor, not the earlier
 checkpoint exception. No acceptance obligation is waived.
 
@@ -15836,7 +15836,7 @@ finding below; it does not put any cell in doubt.
 Verified rather than accepted:
 
 - The checkpoint landed exactly as reviewed: five commits whose subjects and
-  membership match the five groups of round 15's plan, with `92e361a6` recorded
+  membership match the five groups of round 15's plan, with `c160ccf1` recorded
   as the release revision in the record's authority block.
 - RHEL is real and fresh. All ten required cells pass with an empty `missing`
   list, over a run that took 5734 seconds and retained 1340 captures. It covers
@@ -16096,7 +16096,7 @@ Human guidance:
 
 The user authorized the checkpoint commit and then completion of Step 6,
 asking to use at most one further Jenkins round if possible because each
-costs more than 45 minutes. The checkpoint is committed through `92e361a`.
+costs more than 45 minutes. The checkpoint is committed through `c160ccf`.
 This request assesses the completed Step 6 readiness floor, not the earlier
 checkpoint exception. No acceptance obligation is waived.
 

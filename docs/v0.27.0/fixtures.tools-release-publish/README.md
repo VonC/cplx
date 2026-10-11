@@ -1,7 +1,7 @@
 # Historical publication regression inputs
 
 These two files are exact blobs from cplx commit
-`3a1d1135a3e627b74d134db24694121e70ea6b14`, paths
+`3286fed0db223df7a60694367f4b8811ed16c762`, paths
 `src/setups/env/closure/closure-config.txt` and
 `src/setups/env/closure/closure-envelope.txt`.
 

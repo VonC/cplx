@@ -357,9 +357,9 @@ Two factual precisions from checking the requested evidence are reflected:
   separately supplied release commit. The requirement preserves both checks
   without describing them as the same identity or operation.
 - Item 6's plan.v0.27.0.python-sqlite-support.validation.md, Step 3, already
-  records retention merge 5f8d4d67ca549bb74e3bcbb798124d628c3d0619 and a successful
+  records retention merge f26454defc6eab1b35b9a61609215ea83547b7a6 and a successful
   fresh single-branch clone on 2026-09-16. The named source commit
-  13c80d572ba7bda91728806ad7dc11c53629a506 is in current HEAD ancestry (git
+  f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7 is in current HEAD ancestry (git
   merge-base --is-ancestor returned 0). We therefore record the prerequisite
   as completed rather than inventing outstanding item 6 work. Its continued
   resolvability at publication and renewal when declaration bytes change
@@ -417,8 +417,8 @@ publication.
 
 Round 1 treated item 6's retention merge and fresh-clone proof as possibly
 outstanding. They are not. The reviewer confirmed with Git that
-`13c80d572ba7bda91728806ad7dc11c53629a506` is an ancestor of the current head,
-and that `5f8d4d67ca549bb74e3bcbb798124d628c3d0619` is the merge retaining it,
+`f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7` is an ancestor of the current head,
+and that `f26454defc6eab1b35b9a61609215ea83547b7a6` is the merge retaining it,
 with the source snapshot as its second parent. Recording the prerequisite as
 completed, with the final publishing-checkout resolution still required, is the
 accurate statement.

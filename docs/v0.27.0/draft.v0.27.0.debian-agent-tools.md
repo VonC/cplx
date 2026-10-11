@@ -469,7 +469,7 @@ Correct the retained 9.6 Python list to `zlib-devel`, then confirm equivalence
 and accepted setup before removing the redundant 9.8 Python/Git lists and
 tracked mirror key. Generated indexes and operator-local properties remain
 outside cleanup. Distinct exact overrides are retained, and generated indexes
-may exist for each minor. Commit `18c251d` records why an older generated
+may exist for each minor. Commit `f69979f` records why an older generated
 snapshot cannot stand in for the detected server's index. Item 5 implementation
 is pending; these are confirmed requirements, not completed code changes.
 
@@ -1241,7 +1241,7 @@ tests; 100% coverage, nonselecting testmon and guarded suites remain mandatory.
 This CI qualification supplies no browser evidence.
 
 On 2026-09-21 the human selected: "OK go for checkpoint, then work on completing
-step 6". The repaired Debian checkpoint is committed through `92e361a6`.
+step 6". The repaired Debian checkpoint is committed through `c160ccf1`.
 Step 6 is now fully implemented, as independently confirmed in round 16.
 The [fresh RHEL run](evidence.tools-archive-rebuild.step6-final-rhel.json)
 passes all ten required cells at Q07 scope, with the deployed venv bound to
