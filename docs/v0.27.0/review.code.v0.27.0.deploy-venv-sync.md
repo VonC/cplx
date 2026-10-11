@@ -6135,3 +6135,2332 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-2 -->
+
+## Round 1 by requestor - Step 8
+
+- Recorded: 2026-10-07T10:11:52+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 1
+
+### Code review evidence for step 8 deploy-venv-sync (round 1)
+
+request_index_tree: 76cc4ceac2524b927ab4707d3d1faf43a8c3e592
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): add the unevidenced planning term
+group 1 path: .vscode/settings.json
+group 2: docs(deploy-venv-sync): set the 30-minute outage cap
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 1)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 1)
+
+#### Writer assessment of the step 8 consumer implementation for step 8 deploy-venv-sync (round 1)
+
+Step 8 is not complete. This round asks for review of the frozen Part B consumer
+implementation before its commit, push and candidate build. Part A evidence is
+partly open, and Parts C to I are separately authorized live stages that have
+not run. Concrete repository, tree and log identities are in the ignored writer
+note `.reviews/a.dvs-step8-code-r1.writer-notes.md`.
+
+The reviewed consumer change set is staged in the consumer repository with a
+valid five-group commit plan. The cplx change set holds the dated outage
+decision in the plan and one spelling-dictionary word.
+
+Validation on the staged bytes: the consumer day walk (check and affected
+tests) is green, the cplx shell lint gate is clean, and the native
+qualification-host suite covers every Linux-only lifecycle module on the same
+bytes. Earlier native failures were fixture defects, each diagnosed with a
+native trace before repair; no production gate was relaxed.
+
+The writer considers Part B ready for review against the plan's P27 to P32,
+P07, P22 to P26, P38 and P43 responsibilities, with three items deliberately
+left to later stages: the new immutable candidate, the Part A replay and
+budget evidence, and the restoration-time switch of the pipeline payload.
+
+### Implementation report for step 8 deploy-venv-sync (round 1)
+
+#### Implementation report for step 8 Part B for step 8 deploy-venv-sync (round 1)
+
+##### Control closure and dispatch for step 8 deploy-venv-sync (round 1)
+
+- P27 accepts only the two fixed role argument shapes, with a literal or an
+  expanded home, verifies the active closure before sourcing any member, and
+  launches lifecycle owners through a cleared environment with a fixed host
+  PATH.
+- P28 prepares an immutable, content-addressed closure from independently
+  verified bytes and activates it only from a success receipt bound to the
+  attempt, release, deadline and supervised daemon.
+- The closure declaration now equals the source and exec edges derived from
+  member text. A cross-platform test fails on any missing or stale edge and on
+  any undeclared absolute host utility. Preparation refuses unless every host
+  utility, script interpreter, dynamically linked or preloaded library, PATH
+  directory and ancestor is root owned and not writable by the account. Host
+  code is trusted by ownership rather than digest, so an operating-system
+  update cannot invalidate an immutable closure.
+
+##### Lifecycle owners and attempt state for step 8 deploy-venv-sync (round 1)
+
+- P29 holds the selection parser, signature verifier, journal, reservation,
+  admission table, owner receipts and archive identity anchor.
+- P31 stop authenticates an optional signed selection, rehashes the retained
+  inputs, journals the attempt, enters and parks the hold before the stop and
+  proves no survivor. Handled failures self-terminalize.
+- P32 start selects deploy, ordinary restart, R16 restart or bound recovery from
+  the durable journal and archive identity, installs only verified private
+  bytes and activates after held checks, hold release and same-daemon
+  observation.
+- One persisted outage deadline bounds every phase. Its value is a single
+  contract constant, 1800 seconds, per the dated plan decision; phase reserves,
+  stop and start bounds, unit queries and parking are unchanged.
+
+##### Runtime boundary for step 8 deploy-venv-sync (round 1)
+
+- P23 seals and verifies the installed runtime, including home hooks, and now
+  also requires the host paths through which the sealed runtime resolves
+  commands and libraries to be root owned and not account writable. The
+  runtime environment is loaded non-login and non-interactive with HOME
+  anchored to the prefix, so account login profiles are neither run nor
+  changed.
+- The prefix environment accepts an empty or unset inherited HOME and keeps
+  host PATH entries.
+
+##### Pipeline inputs and recovery proof for step 8 deploy-venv-sync (round 1)
+
+- P30 verifies the five exact inputs before any launch and keeps the bootstrap
+  payload until the restoration switch.
+- Preceding-job terminal proof now comes only from the deployment pipeline's
+  own evidence, read with the operator's existing pipeline credentials: one
+  finished, uninterrupted build whose console holds exactly one launch line and
+  one later terminal line, with no cancellation attempt. No controller
+  credential or controller API is used, per the human decision.
+
+##### Validation on the staged bytes for step 8 deploy-venv-sync (round 1)
+
+- Day walk: check and affected tests green, full stage skipped by design.
+- Shell gates: style-severity lint and a Bash parse pass over every lifecycle
+  script.
+- Native host suite on the exact staged bytes: every Linux-only lifecycle
+  module, including the host-trust and outage-constant cases.
+- No exclusions were accepted.
+
+### Change summary for step 8 deploy-venv-sync (round 1)
+
+#### Change summary for step 8 Part B for step 8 deploy-venv-sync (round 1)
+
+Consumer commit groups, least to most dependent:
+
+1. Prefix environment without an account HOME: environment entry points and
+   the boot script, with cold-boot regression cases.
+2. Original-role lifecycle closure: dispatcher, contract, preparation and
+   activation, stop, start and bootstrap owners, both public keys, hold,
+   daemon-identity and runtime helpers, runtime seal, strict refresh, the
+   staging-only replay helper, and their native fixtures.
+3. Controller input verification and preceding-job terminal proof from the
+   pipeline's own evidence, with the pipeline definition and tests.
+4. Lint and parse gates for every lifecycle script.
+5. The deployment reference: original contract, restart rules, verifier
+   evidence, backup key custody and verified rotation.
+
+cplx changes:
+
+- The plan's Step 8 Part A records the dated 30-minute outage decision.
+- One spelling-dictionary word used by the plan text.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 1)
+
+Human guidance:
+
+#### Human decisions for step 8 on 2026-10-07 for step 8 deploy-venv-sync (round 1)
+
+- Isolated validation on the native qualification host, as the development
+  account in its own directory, is preapproved without asking again.
+- The offline backup signing key and its password are held independently of
+  the primary key's loss conditions. Confirmed.
+- Only the deployment pipeline job may call the controller. Use the operator's
+  existing pipeline credentials for evidence; do not bind or use a controller
+  credential.
+- The maximum qualification outage is 30 minutes, from the start of the stop
+  through verified health and same-daemon supervision. The earlier 10-minute
+  limit cannot hold because the unchanged role stages the archive between stop
+  and start.
+- Pushes, pipeline triggers, publication, restoration and every live stage keep
+  their own explicit authorization.
+
+Writer response:
+
+#### Writer response before the first step 8 review for step 8 deploy-venv-sync (round 1)
+
+This is the first round of this exchange; there are no earlier findings to
+answer. The writer asks the reviewer to weigh in particular the derived closure
+edges, the host-ownership trust rule, the pipeline-evidence terminal proof and
+the single outage constant, which are new in this round.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-1 -->
+
+## Round 1 by reviewer - Step 8
+
+- Recorded: 2026-10-07T11:02:01+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Baseline index tree: 76cc4ceac2524b927ab4707d3d1faf43a8c3e592
+
+Assessed index tree: 8080be77d7bb8f3f8ecf7ad3252b9ef52427a62c
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Result:
+
+No. Step 8 has NOT been fully implemented.
+
+Part B contains the reviewed dispatcher/closure, attempt-state, lifecycle, runtime and pipeline adapters, but P23's external runtime-code trust check is incomplete. Part A evidence remains partly open, no new immutable candidate is qualified, and C-I remain unexecuted. AC16/AC17 are open. The requested Part B freeze is useful review evidence; it cannot satisfy the exact whole-step completeness gate.
+
+The technical adapters retain their responsibilities without an observed DDD/hexagonal layer violation. All staged Python files are below 650 lines; the candidate adapter is in the caution band. Runtime inventory comparison uses associative membership, with bounded acquisition/lifecycle phases. Actual time/disk qualification remains pending.
+
+Validation plan effects:
+
+Updated and staged only Step 8 rows in `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: the exact No verdict, implemented responsibilities, concrete missing-work list, types, architecture, performance, unit coverage and integrity assessment. Metadata only; no implementation or test repairs. The document-level incomplete verdict, Step 7 evidence, other steps and the umbrella were preserved. The focused Markdown check passed with zero issues.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Inspected the retained check/affected walk and native unit evidence on the frozen consumer bytes. Their reported test outcomes are green; the full/coverage stage was intentionally skipped. No reviewer test or coverage command was run. Static source and fixture inspection established the current defect without repeating those runs.
+
+The application-package coverage gate does not measure the deployment tools. It establishes no percentage for them. Each top-level Python adapter function/value type has a test or tooling-package reference, including module entry points; no unreferenced symbol was found. Runtime provenance unit cases omit writable files inside trusted directories, unsafe resolved ancestors and preload-target libraries. Those gaps block the static coverage result.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Request and current resolver agree on one command, in order: `bash src/utils/lint_shell.sh`, source `project`, from `.review-validation`. No explicit additional command was declared. The reviewer compared the declaration and resolver contract; the requestor owns execution of this set and the reviewer did not run it.
+
+The round-bound scope capture is present and matches the declared whole-suite fingerprint. The envelope's `proof=missing` label is not treated as proof that the actual bound capture is absent.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+None. The ordered command and its project provenance match the request. No command was added, removed, reordered or reassigned.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+The request-time and received cplx index tree matched. The assessed tree differs only by the attributable Step 8 validation-plan metadata patch. The consumer index remains the frozen tree recorded in the writer notes; no consumer implementation or test bytes were changed.
+
+The validation-state comparison reports `acceptable=false`, with only the validation-plan path and `<index>` changed. These are the intentional reviewed-step metadata edit and its staging effect, not a validation side effect. The staged diff is confined to Step 8 rows; there are no other changes within the ordered validation path set. Umbrella comparison reports `changed=false` with equal before/after digests. Existing unstaged protocol transcript work was not read, edited or staged by this reviewer.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Repairs made:
+
+- Polishing-only review metadata: updated the exact Step 8 validation rows and staged only the patch proven attributable to the retained baseline. No implementation or test repair was made; the Human guidance block does not instruct such a repair.
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` (reviewer metadata only).
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+The independent received-state checker was valid/ready with two cplx groups and no diagnostics: editor dictionary, then dated outage decision. After adding the validation rows, amended `a.commit` with a third dependent documentation group. The final independent rerun exits 0, state valid, ready true, diagnostics empty. Its ordered groups cover exactly these staged paths:
+
+1. `chore(editor): add the unevidenced planning term`: `.vscode/settings.json`.
+2. `docs(deploy-venv-sync): set the 30-minute outage cap`: `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`.
+3. `docs(deploy-venv-sync): record incomplete step 8 review`: `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`.
+
+The independently checked consumer plan remains valid/ready, diagnostics empty, with all frozen staged paths covered in five ordered groups: prefix environment, stable lifecycle closure, pipeline inputs/terminal proof, lint gates, deployment reference. Its plan was not changed. Mechanical readiness does not establish whole-step completeness or authorize a commit.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Unresolved findings:
+
+- F1, high, P23/P35: external runtime trust checks only the configured host directories and the preload-list file. It does not check the resolved executable/interpreter/library files, resolved intervening ancestors, or the libraries named by the preload list. Root-owned non-writable directories can still contain account-owned or account-writable files. Changing such a file leaves the accepted directory metadata and prefix seal unchanged, so account-controlled code can be loaded while runtime verification succeeds. The current unit fixture refuses an unsafe directory and misses this safe-directory/unsafe-file case. Validate the actual resolved code and ancestry before environment loading/start; add the negative cases and a trusted OS-update acceptance case.
+- F2, blocking completeness, Step 8 A-I: the writer explicitly reports Part A partly open, the new immutable candidate absent and C-I unexecuted. Part B's unit evidence cannot qualify changed immutable bytes or establish original-path delivery/recovery. Complete the exact candidate qualification and separately authorized operational evidence listed in the Step 8 validation plan; preserve prior Step 7 evidence.
+
+Boundary-crossing work:
+
+- Execution of C-I, restoration, publication, pushes and pipeline triggers requires the separate human authorization already specified in the plan and guidance. The reviewer performs none of these actions.
+- First installation and production remain mandatory Step 9 work. Do not mark the topic or umbrella complete from this Step 8 assessment.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Human guidance:
+
+- Isolated validation on the native qualification host, as the development account in its own directory, is preapproved without asking again.
+- The offline backup signing key and its password are held independently of the primary key's loss conditions. Confirmed.
+- Only the deployment pipeline job may call the controller. Use the operator's existing pipeline credentials for evidence; do not bind or use a controller credential.
+- The maximum qualification outage is 30 minutes, from the start of the stop through verified health and same-daemon supervision. The earlier 10-minute limit cannot hold because the unchanged role stages the archive between stop and start.
+- Pushes, pipeline triggers, publication, restoration and every live stage keep their own explicit authorization.
+
+Guidance response:
+
+Applied the literal Human guidance block explicitly. Isolated native validation is already authorized, but retained native evidence and static source inspection suffice for this assessment; no extra execution was needed. Backup-key independent custody is a confirmed decision, with its required qualification evidence still assessed against the plan. The pipeline-evidence adapter uses the operator's existing pipeline evidence; this review did not invoke the controller or use controller credentials. The 30-minute single outage cap is consistent with the staged decision and lifecycle constant. Pushes, triggers, publication of deployable artifacts, restoration and live stages remain separately authorized. The guidance contains no explicit instruction for the reviewer to repair implementation or tests.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+1. Fix P23 to establish trust in every externally resolved runtime executable/interpreter/library/preload target and relevant resolved ancestor before executing runtime code. Keep host OS-update compatibility. Add P35 fixtures proving refusal of account-controlled files in safe directories, unsafe redirection/ancestors and preload targets, plus accepted trusted updates.
+2. Revalidate the changed bytes through the authorized writer workflow and publish their evidence. Do not infer automation coverage from the application-package gate; document static exercise and the required behavioral unit cases.
+3. Follow `### Missing work for Step 8` in the validation plan to close Part A and the new immutable candidate, then C-I under their separate execution authorizations. Retain exact private identities in private evidence and use P-handles publicly. Full-step convergence requires AC16/AC17 evidence, not only the Part B freeze.
+4. Retain the staged reviewer metadata and amended cplx `a.commit`, reconcile them with the writer's next changes, and publish a replacement request for this exact plan/step through the existing requestor session. This answer authorizes no commit, push, deployment or restoration.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Changes requested. The six readiness-floor results are:
+
+1. Identity: pass. Exact plan, umbrella, step 8, round 1, occurrence 1 and received request-time index agree.
+2. Completeness: fail. The runtime trust defect and outstanding A-I qualification/rollout work leave Step 8 incomplete.
+3. Validation/coverage: fail. Retained unit outcomes support the frozen code, but the external host-code cases are absent and required qualification/performance evidence is missing. No reviewer coverage percentage is claimed.
+4. Staged attribution: pass. The only reviewer-authored tracked patch is attributable Step 8 validation metadata; the consumer freeze is unchanged.
+5. Unresolved findings: fail. F1 and F2 remain open.
+6. Commit plan: pass mechanically. Both independent plans are valid/ready and the cplx plan covers the added metadata.
+
+No substantive implementation repair was made. Neither partial readiness nor mechanical commit-plan validity can override the incomplete full-step floor.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-8-round-1 -->
+
+## Round 2 by requestor - Step 8
+
+- Recorded: 2026-10-07T11:33:17+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 2
+
+### Code review evidence for step 8 deploy-venv-sync (round 2)
+
+request_index_tree: 8080be77d7bb8f3f8ecf7ad3252b9ef52427a62c
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): add the unevidenced planning term
+group 1 path: .vscode/settings.json
+group 2: docs(deploy-venv-sync): set the 30-minute outage cap
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 3: docs(deploy-venv-sync): record incomplete step 8 review
+group 3 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 2)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 2)
+
+#### Writer assessment after the first step 8 findings for step 8 deploy-venv-sync (round 2)
+
+Step 8 remains incomplete, as the first answer states. F1 is repaired with new
+behavioral fixtures and native evidence on the qualification host. F2 is
+accepted as the remaining whole-step gap: the new immutable candidate, the
+Part A replay and budget evidence, and Parts C to I.
+
+The candidate can only be built from published commits, so F2 cannot close
+while the Part B changes stay uncommitted. The human therefore authorized a
+prerequisite commit of the reviewed Part B groups once this round reports no
+unresolved Part B finding. That commit would leave this exchange open for the
+remaining Step 8 evidence and would not claim completion.
+
+This round asks the reviewer to assess the F1 repair and to state explicitly
+whether any unresolved finding remains within Part B. Concrete identities are
+in `.reviews/a.dvs-step8-code-r2.writer-notes.md`.
+
+### Implementation report for step 8 deploy-venv-sync (round 2)
+
+#### Implementation report for the F1 repair for step 8 deploy-venv-sync (round 2)
+
+##### External runtime code trust for step 8 deploy-venv-sync (round 2)
+
+- P23 now checks everything the sealed runtime can load outside the prefix,
+  before seal and before every verification: host PATH directories, loader
+  directories, every directory named by the loader cache, the preload list
+  and each preload entry.
+- Each named path is checked component by component for both the literal and
+  the resolved form, so no intervening link or ancestor can redirect code. A
+  root-owned sticky ancestor is the only shared directory accepted there.
+- Below each root, every reachable regular file and directory is scanned with
+  links followed. Each must be root owned, never writable by others, and never
+  group writable through a group of the account. No shared sticky directory is
+  accepted inside a root. A dangling link may name only a sibling in its
+  already checked directory. Every followed link target's directory and
+  ancestors are checked as well, so a safe-looking file in a replaceable
+  directory refuses.
+- Debug build-id trees and kernel module trees are skipped: the account's
+  processes never load code from them, and on the native host they hold the
+  only dangling links. Unreadable directories are checked, then pruned. Any
+  scan error refuses.
+- Trust follows ownership and modes, not digests, so trusted
+  operating-system updates and added libraries stay accepted.
+
+##### Preparation trust gate for step 8 deploy-venv-sync (round 2)
+
+- The loader-cache reader is a declared host utility; the derived-edge test
+  requires it. A statically linked utility has no library list, so the gate
+  now accepts that form while requiring a report for every declared file.
+
+##### New behavioral fixtures for step 8 deploy-venv-sync (round 2)
+
+- Real-host acceptance of the full runtime boundary.
+- Accepted: content updates, added libraries, sibling dangling links and
+  kernel build links.
+- Refused: other-writable and account-group-writable files in safe
+  directories, links into writable directories, dangling non-sibling links,
+  writable ancestors, shared sticky ancestors not owned by root, writable
+  unreadable directories, relative preload entries and unsafe preload targets.
+
+##### Validation on the repaired staged bytes for step 8 deploy-venv-sync (round 2)
+
+- Day walk green: check and affected tests; full stage skipped by design.
+- cplx shell lint gate clean.
+- Native qualification host: the focused modules pass, and the full native
+  suite covers every Linux-only lifecycle module on the exact staged bytes.
+- No exclusions were accepted. The application coverage gate does not measure
+  the deployment tools; their exercise is established by the behavioral cases
+  above, not by a percentage.
+
+### Change summary for step 8 deploy-venv-sync (round 2)
+
+#### Change summary since the first step 8 round for step 8 deploy-venv-sync (round 2)
+
+Consumer, within the existing commit groups:
+
+- Group 2: P23 external runtime trust rewritten as described; the
+  preparation gate accepts statically linked host utilities and declares the
+  loader-cache reader; a new native fixture module for external trust; the
+  provenance fixture uses the new path check.
+
+cplx:
+
+- The reviewer's Step 8 validation-plan rows and third commit group are
+  retained unchanged.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 2)
+
+Human guidance:
+
+#### Human decision for the step 8 prerequisite commit for step 8 deploy-venv-sync (round 2)
+
+- The whole step cannot converge before its candidate is built, and the
+  candidate needs published commits. The human authorizes a prerequisite
+  commit of the reviewed Part B groups once this round reports no unresolved
+  Part B finding. The exchange stays open for the remaining Step 8 evidence,
+  and the commit does not claim Step 8 complete.
+- The earlier decisions stand: isolated native validation is preapproved,
+  backup key custody is confirmed, only the deployment pipeline job calls the
+  controller, the outage cap is 30 minutes, and every push, trigger,
+  publication, restoration and live stage keeps its own authorization.
+
+Writer response:
+
+#### Writer response to the first step 8 findings for step 8 deploy-venv-sync (round 2)
+
+- F1, accepted and repaired. Resolved files, link targets, intervening and
+  resolved ancestors, loader-cache directories and preload targets are now
+  checked before any runtime code runs, with refusal and trusted-update
+  fixtures. Read-only host evidence shaped two scoped exclusions, debug
+  build-id and kernel module trees, which no process of the account loads.
+- F2, accepted. It cannot close inside Part B: the candidate needs published
+  commits, then the separately authorized stages. The human authorized a
+  prerequisite commit only after this round reports no unresolved Part B
+  finding; the exchange then continues for Parts A and C to I.
+- Writer instructions 2 to 4 are followed: the changed bytes were revalidated,
+  exercise is documented by behavioral cases rather than a coverage
+  percentage, and the reviewer's staged validation rows and commit group are
+  retained.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-2 -->
+
+## Round 2 by reviewer - Step 8
+
+- Recorded: 2026-10-07T11:42:21+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Baseline index tree: 8080be77d7bb8f3f8ecf7ad3252b9ef52427a62c
+
+Assessed index tree: 4c22294719e403129cb1a33a6c26def5fc7bee41
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Result:
+
+No. Step 8 has NOT been fully implemented.
+
+The broad F1 omission is partly repaired: external regular files, link targets and ancestors now have checks and behavioral fixtures. Two concrete Part B trust holes remain (F1a/F1b below). F2 remains the accepted whole-step evidence gap: Part A is partly open, the new immutable candidate is absent, and Parts C-I have not run. AC16/AC17 remain open.
+
+The assessment preserves the focused dispatcher, installer, contract, lifecycle and controller boundaries. No business-layer dependency violation or new quadratic computation was identified. External-tree scanning adds host-dependent work whose timing still needs exact-candidate qualification. The configured application coverage source excludes deployment tooling; no coverage percentage is claimed for it. Prior static symbol-reference assessment remains applicable to the unchanged Python adapters; the new runtime-trust fixtures still miss the two refusal cases.
+
+Validation plan effects:
+
+Updated only Step 8 rows in `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: retained the exact No verdict, acknowledged the revised file/link/ancestor checks, replaced the first-round trust work list with concrete preload-file and searchable-directory repairs and fixtures, and retained the qualification/rollout work. Other steps, prior Step 7 completion and umbrella digest remain unchanged. Attribution reports `attributable=true`; only the attributable metadata patch was staged.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+The received cplx index exactly matches request tree `8080be77d7bb8f3f8ecf7ad3252b9ef52427a62c`. The independently checked consumer index matches the writer-note identity before and after this review. Both commit-plan checks initially returned exit 0, `state=valid`, `ready=true`, with no diagnostics; cplx has three ordered groups and the consumer has five. The consumer checker used an explicit repository root.
+
+Read-only writer evidence: check and affected stages green, coverage skipped and full stage deliberately skipped; revised native receipt reports 180 tests in 615.139 seconds, zero failures/errors and no skips. The real-host external-trust case passes in 0.775 seconds. These are writer receipts, not reviewer executions, coverage proof, or original-path qualification. The reviewer ran no test or coverage command.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Request and current resolver declaration agree on one ordered command: `bash src/utils/lint_shell.sh`, source `project`, from `.review-validation`. No explicit additional command was declared. This remains requestor-owned execution and was not run by the reviewer. The core-owned round scope capture is present and matches the whole-suite fingerprint; the envelope's `proof=missing` does not mean the capture is absent.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+No added, removed, reordered or source-label validation-command drift was found.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Baseline cplx tree: `8080be77d7bb8f3f8ecf7ad3252b9ef52427a62c`. Assessed tree: `4c22294719e403129cb1a33a6c26def5fc7bee41`. The validation-state comparison reports only the Step 8 validation file and `<index>` as changed, with no untracked changes; both are attributable review metadata effects. Umbrella digest comparison reports `changed=false`. Consumer index remained unchanged. Markdown validation reports zero issues and staged whitespace validation passes.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Repairs made:
+
+- No implementation or test repair was made. The human guidance authorizes a conditional prerequisite commit; it does not explicitly direct a reviewer code repair. Only permitted Step 8 review metadata was updated; no substantive repair occurred.
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: reviewer-authored Step 8 assessment metadata, staged through the attributable patch.
+- `.vscode/settings.json`: pre-existing staged editor dictionary change, preserved.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: pre-existing staged outage decision, preserved.
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+The independent cplx final checker returned exit 0, `state=valid`, `ready=true`, no diagnostics. Ordered groups remain: editor dictionary; 30-minute outage decision; incomplete Step 8 assessment. Only group 3 prose was adjusted to describe the remaining defects; membership, order, scope and subjects did not change. The independently checked consumer plan is mechanically valid/ready with five groups, including the new external-trust fixture in the lifecycle group. Neither mechanical result establishes semantic readiness or authorizes a commit.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Unresolved findings:
+
+- **F1a, high, unresolved Part B implementation finding (P23/P35): existing empty preload files escape trust validation.** P23 adds the preload-list file to the ownership/mode path set only when parsing produces a nonempty list (lines 141-145). An empty, whitespace-only or comment-only file writable by the account yields no paths; trusting its parent directory does not prevent account writes to the existing file. The account can supply new preload code after a successful check without changing the sealed prefix. Validate every existing preload file and its resolved ancestors independent of parsed contents, before proceeding to external tools/runtime loading. Add a composed negative fixture for empty/comment-only writable files plus trusted empty/absent-file acceptance.
+- **F1b, high, unresolved Part B implementation finding (P23/P35): unreadable searchable directories hide loadable unsafe code.** Both external-tree walks prune directories on `! -readable` (lines 221-240), and the cache reader retains directories rather than explicitly validating each resolved library file. A root-owned mode-0111 library directory can contain a known account-writable library: the dynamic loader can open that filename because search permission remains, while both walks skip it. The current unreadable fixture uses mode 000, which cannot expose this case. Validate actual resolved cache files and ancestry and refuse any searchable subtree whose runtime-code trust cannot be established; apply the same completeness rule to `-xdev` omissions. Add a behavioral fixture with an execute-only trusted directory and unsafe cached library, proving refusal before runtime execution. Preserve acceptance of genuinely inaccessible trees and trusted OS updates.
+- **F2, blocking whole-step completeness finding, carried and accepted:** Part A replay/T/D/N/O margins, the new immutable candidate and qualification, and Parts C-I receipts remain outstanding. No original-path AC16/AC17 completion or whole-step commit-ready recommendation is established. This remains separate from the requested prerequisite commit.
+
+Boundary-crossing work:
+
+- Candidate build/qualification and the outstanding bootstrap, restoration, original check/real execution, external verification and offline recovery belong to the writer and separately authorized execution stages. No reviewer operation substitutes for those receipts.
+- No implementation, test, umbrella, other-step, consumer-index or substantive tracked change was authored by the reviewer.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Human guidance:
+
+The human authorizes a prerequisite commit of the reviewed Part B groups once this round reports no unresolved Part B finding, with the exchange left open and no Step 8 completion claim. Existing separate authorization boundaries and the 1,800-second outage decision remain.
+
+Guidance response:
+
+Acknowledged the conditional prerequisite-commit direction and the need to publish commits before building the candidate. This review distinguishes those implementation groups from whole-step completion. The stated condition is currently unsatisfied because F1a/F1b remain. The reviewer neither authorizes nor performs commits, consumes answers, changes exchange ownership, pushes, triggers builds, publishes candidates or executes live stages. No reviewer repair was explicitly requested in the literal guidance block.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+1. Fix F1a and F1b in P23 and add the composed P35 behavioral refusal cases; retain the revised writable-file, redirected-ancestor, preload-target and trusted-update cases. Validate existing preload-file metadata regardless of parsed entries and do not equate lack of directory listing permission with lack of code-load access.
+2. Revalidate the changed final bytes with the authorized writer checks and isolated native fixtures, bind their receipts to the exact staged consumer identity, and document timing without claiming coverage for unmeasured deployment tooling.
+3. Publish the next review request with the exact revised staged identity and an explicit response to both Part B findings. The no-unresolved-Part-B condition has not been met in this round.
+4. Continue the acknowledged prerequisite-commit and later qualification/evidence workflow only under its existing human/protocol authority. Retain the Step 8 No verdict until the candidate and Parts A/C-I receipts actually close AC16/AC17; do not convert this answer or a mechanical commit-plan pass into whole-step readiness.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Disposition: changes-requested. Identity and staged attribution pass; both commit plans are mechanically valid. Implementation completeness, missing refusal-case coverage and absence of unresolved findings fail the readiness floor. The precise requested conclusion is: **Yes, unresolved findings remain within Part B (F1a and F1b).** F2 independently prevents whole-step convergence. No substantive reviewer repair was made.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-8-round-2 -->
+
+## Round 3 by requestor - Step 8
+
+- Recorded: 2026-10-07T12:04:29+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 3
+
+### Code review evidence for step 8 deploy-venv-sync (round 3)
+
+request_index_tree: 4c22294719e403129cb1a33a6c26def5fc7bee41
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): add the unevidenced planning term
+group 1 path: .vscode/settings.json
+group 2: docs(deploy-venv-sync): set the 30-minute outage cap
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 3: docs(deploy-venv-sync): record incomplete step 8 review
+group 3 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 3)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 3)
+
+#### Writer assessment after the second step 8 findings for step 8 deploy-venv-sync (round 3)
+
+Step 8 remains incomplete under F2, as both earlier answers state. F1a and F1b
+are repaired with composed behavioral fixtures and native evidence on the
+qualification host, including the real-host boundary over every loader-cache
+library and the mount table.
+
+The human's prerequisite-commit authorization still applies only once a round
+reports no unresolved Part B finding. This round asks the reviewer to assess
+the F1a and F1b repairs and to state explicitly whether any unresolved finding
+remains within Part B. Concrete identities are in
+`.reviews/a.dvs-step8-code-r3.writer-notes.md`.
+
+### Implementation report for step 8 deploy-venv-sync (round 3)
+
+#### Implementation report for the F1a and F1b repairs for step 8 deploy-venv-sync (round 3)
+
+##### Preload list trust for step 8 deploy-venv-sync (round 3)
+
+- An existing preload list is now always checked, with its directory and
+  ancestors, whatever it contains. An empty, blank or comment-only list the
+  account could write refuses, because the account could add an entry later.
+  An absent list and a trusted empty list are accepted.
+
+##### Searchable directories and cached libraries for step 8 deploy-venv-sync (round 3)
+
+- A directory below a root that the account can search but not list refuses:
+  the loader can still open a known name inside it. Only a directory the
+  account cannot search at all is checked and then pruned, since nothing in
+  it can be opened by the account's processes.
+- Every library file named by the loader cache is now checked itself, with its
+  literal and resolved ancestors, in addition to its directory.
+- The scan stays on each root's filesystem, so a mount point strictly inside a
+  resolved root refuses instead of leaving its code unchecked.
+- All checks still run before seal and before every verification, ahead of any
+  runtime code, and trust still follows ownership and modes, so trusted
+  operating-system updates stay accepted.
+
+##### Composed behavioral fixtures for step 8 deploy-venv-sync (round 3)
+
+- Writable empty, comment-only and blank preload lists refuse through the
+  whole external check; trusted empty and absent lists pass.
+- An execute-only directory hiding an account-writable library refuses both
+  through the scan and through a loader-cache entry naming the library; a
+  directory the account cannot search is pruned and accepted.
+- A cached library made writable refuses, and a mount inside a root refuses.
+- The earlier writable-file, redirected-ancestor, preload-target and
+  trusted-update cases are retained, as is real-host acceptance.
+
+##### Validation on the repaired staged bytes for step 8 deploy-venv-sync (round 3)
+
+- Day walk green: check and affected tests; full stage skipped by design.
+- cplx shell lint gate clean.
+- Native qualification host: the focused modules pass, including the
+  real-host boundary over every cached library, and the full native suite
+  covers every Linux-only lifecycle module on the exact staged bytes.
+- No exclusions were accepted, and no coverage percentage is claimed for the
+  deployment tooling, which the application coverage gate does not measure.
+
+### Change summary for step 8 deploy-venv-sync (round 3)
+
+#### Change summary since the second step 8 round for step 8 deploy-venv-sync (round 3)
+
+Consumer, within the existing commit groups:
+
+- Group 2: P23 composes the external-code check from the preload list, the
+  mount table, the loader-cache listing and the roots; it checks every existing
+  preload list and cached library file, refuses searchable but unlistable
+  directories and inner mounts; the closure declaration names the mount table
+  read; the external-trust fixture module gains the composed cases.
+
+cplx:
+
+- The reviewer's Step 8 validation rows and third commit group are retained.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 3)
+
+Human guidance:
+
+#### Human decision for the step 8 prerequisite commit (unchanged) for step 8 deploy-venv-sync (round 3)
+
+- The human authorizes a prerequisite commit of the reviewed Part B groups once
+  a round reports no unresolved Part B finding. The exchange stays open for the
+  remaining Step 8 evidence, and the commit does not claim Step 8 complete.
+- The earlier decisions stand: isolated native validation is preapproved,
+  backup key custody is confirmed, only the deployment pipeline job calls the
+  controller, the outage cap is 30 minutes, and every push, trigger,
+  publication, restoration and live stage keeps its own authorization.
+
+Writer response:
+
+#### Writer response to the second step 8 findings for step 8 deploy-venv-sync (round 3)
+
+- F1a, accepted and repaired. Preload-list metadata is validated whenever the
+  list exists, independently of parsed entries, with composed refusal and
+  acceptance fixtures.
+- F1b, accepted and repaired. A searchable but unlistable directory now
+  refuses rather than being pruned; only directories the account cannot
+  search are pruned. Each cached library file is checked with its ancestry,
+  and inner mounts refuse, so the single-filesystem scan cannot omit code.
+  The execute-only fixture with an unsafe cached library refuses both ways.
+- F2, accepted and unchanged: it closes only through the new candidate and the
+  separately authorized stages, after the prerequisite commit the human
+  authorized once Part B has no unresolved finding.
+- The changed bytes were revalidated as listed; their identities are in the
+  private writer note.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-3 -->
+
+## Round 3 by reviewer - Step 8
+
+- Recorded: 2026-10-07T12:11:57+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Baseline index tree: 4c22294719e403129cb1a33a6c26def5fc7bee41
+
+Assessed index tree: 29938176e70558b7feaf75e061fab8741cae2260
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Result:
+
+No. Step 8 has NOT been fully implemented.
+
+Round 3 repairs F1a: all existing preload-list files are now checked independent of parsed contents. It also repairs the searchable-directory and cached-library-file cases of F1b and adds a mount guard within initial roots. F1c remains a concrete Part B completeness defect for followed directory symlinks across filesystems. F2 remains the accepted whole-step evidence gap: Part A is partly open, the new immutable candidate and qualification are absent, and Parts C-I remain outstanding. AC16/AC17 remain open.
+
+The focused dispatcher, installer, contract, lifecycle and controller boundaries remain intact. No business-layer dependency violation or new quadratic computation was identified. External-tree scanning adds host-dependent work whose timing needs exact-candidate qualification. Coverage source is src/my_project and excludes deployment tools; no deployment coverage percentage is claimed. Prior static symbol-reference assessment remains applicable to unchanged Python adapters; fixtures do not establish completeness for the composed cross-filesystem symlink case.
+
+Validation plan effects:
+
+Updated only Step 8 rows in `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: retained the exact No verdict, credited preload/searchable-directory/cache-file/inner-mount repairs, replaced resolved F1a/F1b actions with concrete F1c repair and composed fixtures, and retained qualification/rollout work. Native test evidence is updated to 183. Other steps, prior Step 7 completion and umbrella digest remain unchanged. Attribution reports `attributable=true`; only the attributable review metadata patch was staged.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+The received cplx index exactly matches request tree `4c22294719e403129cb1a33a6c26def5fc7bee41`. Consumer tree `20b16975ba1999a4123a3cc073fea26c98ab2a20` is unchanged before and after review. Independent initial commit-plan checks returned exit 0, `state=valid`, `ready=true`, with no diagnostics: three cplx groups and five consumer groups. The consumer checker used its explicit root.
+
+Read-only writer receipts: check and affected green, full deliberately skipped and coverage skipped. Revised native receipt reports 183 tests in 631.634 seconds, zero failures/errors/skips; the focused private bundle records 46/46 passing, including its real-host external-boundary case. These are writer receipts, not reviewer executions, deployment-tool coverage proof, or original-path qualification. The reviewer ran no test or coverage command.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Request and current resolver declaration agree on one ordered command: `bash src/utils/lint_shell.sh`, source `project`, from `.review-validation`. No explicit additional command was declared. This remains requestor-owned execution and was not run by the reviewer. The core-owned round scope capture is present and matches the whole-suite fingerprint; the envelope's `proof=missing` does not mean the capture is absent.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+No added, removed, reordered or source-label validation-command drift was found.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Baseline cplx tree: `4c22294719e403129cb1a33a6c26def5fc7bee41`. Assessed tree: `29938176e70558b7feaf75e061fab8741cae2260`. Validation comparison reports `acceptable=false` with only the Step 8 validation file and `<index>` changed, no untracked changes; these are intentional attributable review metadata effects. Umbrella comparison reports `changed=false`, digest `5526ff31b31502c20d6b6ed96bc00049ec6d6b49f1461590667f0deeee17bdb8`. Consumer index stayed unchanged. Validation-plan markdownlint reports zero issues and staged whitespace validation passes.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Repairs made:
+
+- No implementation or test repair was made. The human guidance authorizes a conditional prerequisite commit; it does not explicitly direct a reviewer code repair. Only permitted Step 8 review metadata was updated; no substantive repair occurred.
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: reviewer-authored Step 8 assessment metadata, staged through the attributable patch.
+- `.vscode/settings.json`: pre-existing staged editor dictionary change, preserved.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: pre-existing staged outage decision, preserved.
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Independent final cplx checker returned exit 0, `state=valid`, `ready=true`, no diagnostics. Ordered groups remain editor dictionary; 30-minute outage decision; incomplete Step 8 assessment. Only group 3 prose was adjusted for F1c; membership, order, scope and subjects remain unchanged. Independently checked consumer plan is mechanically valid/ready with five groups and no diagnostics. Neither mechanical result establishes semantic readiness or authorizes a commit.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Unresolved findings:
+
+- **F1c, high, unresolved Part B implementation finding (P23/P35): followed directory symlinks can hide loadable unsafe code on another filesystem.** In P23, `_app_first_code_trusted` passes only initial resolved library/cache-directory roots to `_app_first_mounts_outside` (lines 169-175). Both `_app_first_tree_owned` walks use `find -L ... -xdev` (lines 275 and 283). Consider a trusted directory symlink inside an initial root that points outside every initial root to a trusted directory on another filesystem containing an account-writable known library absent from loader cache and preload lists. The walks check the target directory but omit its descendants because of `-xdev`; the mount guard does not inspect the outside target, and final target-ancestry checks (lines 289-291) cannot establish trust of contained files. The runtime can still open the known library through that symlink path. Refuse unexamined followed directory targets or validate each resolved target as an additional traversal root, with complete nested-symlink/mount checks and cycle handling. Add a composed behavioral fixture using a genuinely different filesystem and an unsafe library absent from cache/preload; also exercise a nested mount below that followed target, proving refusal before runtime execution. Preserve trusted-tree and trusted-update acceptance.
+- **F2, blocking whole-step completeness finding, carried and accepted:** Part A replay/T/D/N/O margins, the new immutable candidate and qualification, and Parts C-I receipts remain outstanding. AC16/AC17 and whole-step commit readiness remain open. This evidence gap is separate from the conditional prerequisite Part B commit.
+
+Boundary-crossing work:
+
+- Candidate build/qualification and the outstanding bootstrap, restoration, original check/real execution, external verification and offline recovery belong to the writer and separately authorized execution stages. No reviewer operation substitutes for those receipts.
+- No implementation, test, umbrella, other-step, consumer-index or substantive tracked change was authored by the reviewer.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Human guidance:
+
+The human authorizes a prerequisite commit of the reviewed Part B groups once this round reports no unresolved Part B finding, with the exchange left open and no Step 8 completion claim. Existing separate authorization boundaries and the 1,800-second outage decision remain.
+
+Guidance response:
+
+Acknowledged the conditional prerequisite Part B commit direction and the need to publish commits before building the candidate, while leaving the exchange open and retaining Step 8 No. The stated condition remains unsatisfied because F1c is unresolved within Part B. The reviewer performs no commits, consumes no answer, starts no requestor workflow, triggers no build or deployment, and executes no live stage. No reviewer implementation repair was explicitly requested by the literal guidance.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+1. Fix F1c in P23 and add the composed P35 refusal fixtures. Account explicitly for followed directory targets outside initial roots, including filesystem changes and nested mounts; validate completely or refuse before runtime loading. Retain the repaired preload/searchable-directory/cache-file and trusted-update cases.
+2. Revalidate final bytes with authorized writer checks and isolated native fixtures. Bind receipts to the exact staged consumer identity and document timing without claiming coverage for unmeasured deployment tooling.
+3. Publish the next request with the revised staged identity and an explicit F1c response. The no-unresolved-Part-B condition remains unsatisfied in this round.
+4. Continue the prerequisite-commit and later qualification/evidence workflow only under existing human/protocol authority. Retain Step 8 No until the candidate and Parts A/C-I receipts close AC16/AC17; do not treat this answer or mechanical commit-plan readiness as whole-step completion.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Disposition: changes-requested. Identity and staged attribution pass; both commit plans are mechanically valid. Completeness, validation/coverage sufficiency and absence of unresolved findings fail the readiness floor. The explicit requested conclusion is: **Yes, unresolved findings remain within Part B (F1c).** F1a and the concrete searchable-directory/cache-file F1b cases are repaired. F2 independently prevents whole-step convergence. No substantive reviewer repair was made.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 3)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-8-round-3 -->
+
+## Round 4 by requestor - Step 8
+
+- Recorded: 2026-10-07T15:17:55+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 4)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 4
+
+### Code review evidence for step 8 deploy-venv-sync (round 4)
+
+request_index_tree: 29938176e70558b7feaf75e061fab8741cae2260
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): add the unevidenced planning term
+group 1 path: .vscode/settings.json
+group 2: docs(deploy-venv-sync): set the 30-minute outage cap
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 3: docs(deploy-venv-sync): record incomplete step 8 review
+group 3 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 4)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 4)
+
+#### Writer assessment after the third step 8 findings for step 8 deploy-venv-sync (round 4)
+
+Step 8 remains incomplete under F2. F1c is repaired: the external-code scans
+no longer stop at a filesystem boundary, so every followed directory target and
+every mount below it is examined, and a link loop still refuses. Composed
+fixtures now use a genuinely different filesystem on the native host, created
+privately and removed by the test with the human's approval.
+
+The human's prerequisite-commit authorization still applies only once a round
+reports no unresolved Part B finding. This round asks the reviewer to assess
+the F1c repair and to state explicitly whether any unresolved finding remains
+within Part B. Concrete identities are in
+`.reviews/a.dvs-step8-code-r4.writer-notes.md`.
+
+### Implementation report for step 8 deploy-venv-sync (round 4)
+
+#### Implementation report for the F1c repair for step 8 deploy-venv-sync (round 4)
+
+##### Followed targets on any filesystem for step 8 deploy-venv-sync (round 4)
+
+- Both external-tree walks follow links without a filesystem boundary. A
+  followed directory target on another filesystem, and any mount below it,
+  is traversed like the root itself: every regular file and directory must be
+  root owned and resist account writes, searchable but unlistable directories
+  refuse, dangling links may name only siblings, and every followed link
+  target's directory and ancestors are checked.
+- A link loop or an access error makes the walk fail, which refuses.
+- The inner-mount guard and its mount-table argument are removed: with no
+  boundary in the walks, a mount inside a root is examined rather than
+  refused, so the guard no longer adds trust.
+- Debug build-id and kernel module trees remain the only skipped subtrees.
+- Ownership and modes, not digests, still decide trust, so trusted
+  operating-system updates stay accepted.
+
+##### Composed behavioral fixtures for step 8 deploy-venv-sync (round 4)
+
+- A followed directory target outside the root on the same filesystem is
+  accepted when trusted and refuses once a library in it is writable.
+- A target on a genuinely different filesystem, a private temporary-memory
+  directory on the native host removed by the test, is accepted when trusted
+  and refuses once its library is writable. A nested link from it back across
+  the boundary is scanned too, and refuses with a writable library.
+- A static case asserts that no walk uses a filesystem boundary.
+- The preload, searchable-directory, cached-file, writable-file, redirected
+  ancestor and trusted-update cases are retained, as is real-host acceptance.
+
+##### Validation on the repaired staged bytes for step 8 deploy-venv-sync (round 4)
+
+- Day walk: check and affected tests; full stage skipped by design.
+- cplx shell lint gate clean.
+- Native qualification host: the focused modules pass with no skips,
+  including real-host acceptance with cross-filesystem traversal, and the full
+  native suite covers every Linux-only lifecycle module on the exact staged
+  bytes.
+- No exclusions were accepted, and no coverage percentage is claimed for the
+  deployment tooling.
+
+### Change summary for step 8 deploy-venv-sync (round 4)
+
+#### Change summary since the third step 8 round for step 8 deploy-venv-sync (round 4)
+
+Consumer, within the existing commit groups:
+
+- Group 2: P23's external-tree walks cross filesystems; the redundant
+  inner-mount guard, its mount-table argument and the corresponding closure
+  read declaration are removed; the external-trust fixtures gain the
+  same-filesystem, cross-filesystem and nested-crossing cases and drop the
+  mount-table case.
+
+cplx:
+
+- The reviewer's Step 8 validation rows and third commit group are retained.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 4)
+
+Human guidance:
+
+#### Human decisions for step 8 deploy-venv-sync (round 4)
+
+- The human approved one private temporary directory on the native host's
+  temporary-memory filesystem, removed by the test, so the fixture can prove
+  scanning across a genuinely different filesystem. Other native writes stay
+  in the isolated directory.
+- The prerequisite commit of the reviewed Part B groups remains authorized
+  once a round reports no unresolved Part B finding; the exchange stays open
+  and Step 8 is not claimed complete.
+- The earlier decisions stand: backup key custody is confirmed, only the
+  deployment pipeline job calls the controller, the outage cap is 30 minutes,
+  and every push, trigger, publication, restoration and live stage keeps its
+  own authorization.
+
+Writer response:
+
+#### Writer response to the third step 8 findings for step 8 deploy-venv-sync (round 4)
+
+- F1c, accepted and repaired by validating rather than refusing: followed
+  directory targets on any filesystem, and mounts below them, are traversed
+  completely, with loop and access errors refusing. The composed fixture uses
+  a genuinely different filesystem with an unsafe library absent from the
+  loader cache and preload list, and a nested crossing below that target.
+  Trusted-tree and trusted-update acceptance is preserved.
+- A literal nested mount cannot be created by an unprivileged account; the
+  nested filesystem crossing below the followed target exercises the same
+  traversal, and the static case proves no walk stops at a mount.
+- F2, accepted and unchanged, closes only through the candidate and the
+  separately authorized stages after the authorized prerequisite commit.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 4)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-4 -->
+
+## Round 4 by reviewer - Step 8
+
+- Recorded: 2026-10-07T15:25:14+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Baseline index tree: 29938176e70558b7feaf75e061fab8741cae2260
+
+Assessed index tree: b80fecc09b9b2900c5adcd0c411c98b840367014
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Result:
+
+No. Step 8 has NOT been fully implemented.
+
+Round 4 resolves F1c: both P23 tree walks now follow directory targets across filesystems, and the redundant mount guard/read declaration is removed. The same-filesystem, real different-filesystem and nested-crossing fixtures exercise acceptance and writable-library refusal. F1a and the searchable-directory/cache-file F1b fixes remain. F1d remains a concrete Part B trust defect: canonical final-target checks erase replaceable intermediate symlink hops. F2 remains accepted: Part A is partly open, the immutable candidate/qualification and Parts C-I remain outstanding; AC16/AC17 stay open.
+
+Focused dispatcher, installer, contract, lifecycle and controller responsibilities remain separated. No new business-layer dependency or quadratic computation was identified. Crossing filesystems increases host-dependent scan work within existing deadlines; exact-candidate timing still needs qualification. Configured coverage source is src/my_project, excluding deployment tools; no deployment coverage percentage is claimed. Earlier Python symbol-reference assessment remains applicable to unchanged adapters. Intermediate-hop refusal coverage is missing.
+
+Validation plan effects:
+
+Updated only Step 8 rows in `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: retained the exact No verdict, credited F1c and the revised traversal fixtures, replaced the resolved filesystem-boundary repair with concrete intermediate-hop trust work and a composed fixture, and retained qualification/rollout work. Native receipt count is 185. Other steps, Step 7 completion and umbrella digest remain unchanged. Attribution is `attributable=true`; only the attributable metadata patch was staged.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Received cplx index matches request tree `29938176e70558b7feaf75e061fab8741cae2260`. Consumer tree `1841f4cb90dbea35360218b7934f906dc8a27277` matches writer notes and stayed unchanged. Independent initial commit-plan checks return exit 0, `state=valid`, `ready=true`, no diagnostics: three cplx groups and five consumer groups. Both used explicit roots.
+
+Read-only writer receipts: check and affected green, full deliberately skipped and coverage skipped. Native full receipt reports 185 tests in 631.017 seconds, zero failures/errors/skips. Focused bundle records 48/48 passing with no skips. Native real-host trust and genuine different-filesystem/nested-crossing fixtures pass. These are writer executions; they do not qualify a new candidate or prove original-path rollout, deployment coverage or the missing chain case. Reviewer ran no test or coverage command.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Request and current resolver declaration agree on one ordered command: `bash src/utils/lint_shell.sh`, source `project`, from `.review-validation`. No explicit additional command was declared. This remains requestor-owned execution and was not run by the reviewer. The core-owned round scope capture is present and matches the whole-suite fingerprint; the envelope's `proof=missing` does not mean the capture is absent.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+No added, removed, reordered or source-label validation-command drift was found.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Baseline cplx tree: `29938176e70558b7feaf75e061fab8741cae2260`; assessed tree: `b80fecc09b9b2900c5adcd0c411c98b840367014`. Validation comparison reports `acceptable=false` only for the Step 8 validation file and `<index>`, with no untracked changes; these are intentional attributable review metadata effects. Umbrella comparison reports `changed=false`, digest `5526ff31b31502c20d6b6ed96bc00049ec6d6b49f1461590667f0deeee17bdb8`. Consumer tree remained unchanged. Validation-plan markdownlint has zero issues; staged whitespace validation passes.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Repairs made:
+
+- No implementation or test repair was made. The human guidance authorizes a conditional prerequisite commit; it does not explicitly direct a reviewer code repair. Only permitted Step 8 review metadata was updated; no substantive repair occurred.
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: reviewer-authored Step 8 assessment metadata, staged through the attributable patch.
+- `.vscode/settings.json`: pre-existing staged editor dictionary change, preserved.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: pre-existing staged outage decision, preserved.
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Independent final cplx checker returns exit 0, `state=valid`, `ready=true`, no diagnostics. Ordered groups remain editor dictionary; 30-minute outage decision; incomplete Step 8 assessment. Only group 3 prose was adjusted for the remaining intermediate-hop defect; membership, ordering, scopes and subjects are unchanged. Consumer checker independently returned mechanically valid/ready with five groups and no diagnostics. These results do not establish semantic readiness or authorize a commit.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Unresolved findings:
+
+- **F1d, high, unresolved Part B implementation finding (P23/P35): canonicalization hides replaceable intermediate symlink hops.** `_app_first_paths_owned` obtains only the canonical final path with `readlink -e` and checks the original-path components plus that final path's components. `_app_first_tree_owned` follows links with `find -L`, then collects only final targets through `realpath -m` and validates their parent ancestry. Neither retains intermediate hops traversed during resolution. Concrete case: a root-owned link inside a trusted library root points to `/replaceable/hop`; that intermediate link, inside an account-writable directory outside the scanned roots, points back to a trusted external library directory. All final files/directories and their final ancestry pass, and neither traversal checks `/replaceable`. The account can replace `hop` afterward to redirect the same known library path to account-controlled code without changing the trusted root link or sealed prefix. This is distinct from F1c: full cross-filesystem traversal does not validate a discarded intermediate resolution path. Validate every symlink hop and its containing ancestry, including hops in path components, with bounded cycle handling; refuse incomplete trust before runtime loading. Add a composed boundary fixture with empty cache/preload inputs that refuses the unsafe chain while final code remains trusted, demonstrates replacement of the intermediate hop, and accepts an entirely trusted multi-hop chain. Existing one-hop unsafe-final-ancestor fixtures do not cover this case.
+- **F2, blocking whole-step completeness finding, carried and accepted:** Part A replay/T/D/N/O margins, the new immutable candidate and qualification, and Parts C-I receipts remain outstanding. AC16/AC17 and whole-step commit readiness remain open. This evidence gap remains separate from the conditional prerequisite Part B commit.
+
+Boundary-crossing work:
+
+- Candidate build/qualification and the outstanding bootstrap, restoration, original check/real execution, external verification and offline recovery belong to the writer and separately authorized execution stages. No reviewer operation substitutes for those receipts.
+- No implementation, test, umbrella, other-step, consumer-index or substantive tracked change was authored by the reviewer.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Human guidance:
+
+The human approved a private temporary directory on another filesystem for the native fixture and its cleanup. The prerequisite Part B commit remains authorized only once a round finds no unresolved Part B issue, with the exchange open and no Step 8 completion claim. Backup custody, deployment-only controller entry and the 1,800-second outage cap remain settled; each publication, trigger, restoration and live stage retains separate authorization.
+
+Guidance response:
+
+Acknowledged the approved cross-filesystem fixture and conditional prerequisite commit. F1c is resolved, but F1d leaves that commit condition unsatisfied. The reviewer performs no commit, push, build trigger, deployment, candidate publication, answer consumption or requestor workflow. The literal guidance does not request reviewer implementation repair. Step 8 remains No and the exchange stays open.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+1. Repair F1d in P23: preserve and validate every symlink-resolution hop and its ancestry, rather than relying on the original and canonical final paths. Bound resolution and handle cycles and component symlinks explicitly.
+2. Add P35 composed external-boundary refusal for a trusted root link traversing a replaceable intermediate link that resolves back to trusted code, with cache/preload empty. Add trusted multi-hop acceptance; retain preload, searchable-directory, cached-file, same/different-filesystem and trusted-update cases.
+3. Revalidate final staged bytes through authorized writer checks and native fixtures, bind receipts to the revised staged identity, and publish the next request with an explicit F1d response. Report timing and evidence scope accurately; no deployment coverage percentage is established.
+4. The no-unresolved-Part-B condition remains unsatisfied. Preserve the human's conditional prerequisite-commit direction, open exchange and Step 8 No; later candidate qualification and Parts A/C-I stay under their existing separate authority.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Disposition: changes-requested. Exact identity, attribution and mechanical commit-plan readiness pass. Completeness, validation/coverage sufficiency and absence of unresolved findings fail the readiness floor. Explicit conclusion: **Yes, unresolved findings remain within Part B (F1d).** F1c's filesystem-boundary omission is repaired; a literal nested mount was not created, but the removed traversal boundary and native nested-crossing case support that repair. F2 independently prevents whole-step convergence. No substantive reviewer repair was made.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 4)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-8-round-4 -->
+
+## Round 5 by requestor - Step 8
+
+- Recorded: 2026-10-07T15:54:22+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 5)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 5
+
+### Code review evidence for step 8 deploy-venv-sync (round 5)
+
+request_index_tree: b80fecc09b9b2900c5adcd0c411c98b840367014
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): add the unevidenced planning term
+group 1 path: .vscode/settings.json
+group 2: docs(deploy-venv-sync): set the 30-minute outage cap
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 3: docs(deploy-venv-sync): record incomplete step 8 review
+group 3 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 5)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 5)
+
+#### Writer assessment after the fourth step 8 findings for step 8 deploy-venv-sync (round 5)
+
+Step 8 remains incomplete under F2. F1d is repaired: every path the runtime
+boundary names, and every followed link the scans meet, is now resolved hop by
+hop, and every component, intermediate link and holding directory on the way
+is checked. Composed fixtures prove refusal of a replaceable intermediate hop
+while the final code stays trusted, and acceptance of a trusted multi-hop
+chain.
+
+The human's prerequisite-commit authorization still applies only once a round
+reports no unresolved Part B finding. This round asks the reviewer to assess
+the F1d repair and to state explicitly whether any unresolved finding remains
+within Part B. Concrete identities are in
+`.reviews/a.dvs-step8-code-r5.writer-notes.md`.
+
+### Implementation report for step 8 deploy-venv-sync (round 5)
+
+#### Implementation report for the F1d repair for step 8 deploy-venv-sync (round 5)
+
+##### Hop-by-hop resolution for step 8 deploy-venv-sync (round 5)
+
+- Every named path (preload list and entries, roots, loader-cache libraries)
+  is resolved by the host's component-by-component resolver, which reports
+  each path component, each symlink hop and every component of each hop's
+  target, recursively, down to the final object.
+- The tree scan passes every followed, non-dangling link it meets through the
+  same resolver, so a link inside a followed directory target is covered too.
+- Every reported line must name an object owned by root or the trusted owner.
+  Directories and files must resist account writes: no write for others except
+  a root-owned sticky directory, and no write through a group of the account.
+  Symlink entries are checked for ownership, while their holding directories
+  appear as their own lines. Device, pipe and socket targets hold no code. Any
+  line the checker cannot classify, any resolver error, a missing target or a
+  link loop refuses.
+- One text pass validates all lines, keeping the cost linear: the full
+  real-host boundary takes under one second on the native host.
+
+##### Composed behavioral fixtures for step 8 deploy-venv-sync (round 5)
+
+- With an empty loader cache and no preload list, a trusted two-hop chain from
+  a root link to trusted code is accepted.
+- The same chain refuses once the intermediate hop's directory becomes
+  replaceable, while the final code itself stays trusted; replacing the hop
+  redirects the same library path and still refuses; restoring the directory
+  is accepted again.
+- A replaceable directory-component hop on the way to trusted code refuses
+  through both the path check and the scan.
+- All earlier preload, searchable-directory, cached-file, same and different
+  filesystem, nested crossing, writable-file and trusted-update cases are
+  retained, as is real-host acceptance.
+
+##### Validation on the repaired staged bytes for step 8 deploy-venv-sync (round 5)
+
+- Day walk: check and affected tests; full stage skipped by design.
+- cplx shell lint gate clean.
+- Native qualification host: the focused modules pass with no skips, and the
+  full native suite covers every Linux-only lifecycle module on the exact
+  staged bytes.
+- No exclusions were accepted, and no coverage percentage is claimed for the
+  deployment tooling.
+
+### Change summary for step 8 deploy-venv-sync (round 5)
+
+#### Change summary since the fourth step 8 round for step 8 deploy-venv-sync (round 5)
+
+Consumer, within the existing commit groups:
+
+- Group 2: P23 path checks and link-hop checks use the host component
+  resolver with a single text-pass validator; the earlier final-target ancestry
+  collection and its helper are removed; the resolver and the text tool are
+  declared host utilities of the closure; the external-trust fixtures gain the
+  intermediate-hop and directory-component-hop cases.
+
+cplx:
+
+- The reviewer's Step 8 validation rows and third commit group are retained.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 5)
+
+Human guidance:
+
+#### Human decisions for step 8 deploy-venv-sync (round 5)
+
+- The prerequisite commit of the reviewed Part B groups remains authorized
+  once a round reports no unresolved Part B finding; the exchange stays open
+  and Step 8 is not claimed complete.
+- After that commit, and before publishing, the human directs the writer to
+  place only the new branch commits on top of an up-to-date integration branch
+  that already contains the earlier branch work, or to reset the branch to it
+  when no new commits exist, then to recompare the qualified bytes.
+- The earlier decisions stand: isolated native validation is preapproved,
+  backup key custody is confirmed, only the deployment pipeline job calls the
+  controller, the outage cap is 30 minutes, and every push, trigger,
+  publication, restoration and live stage keeps its own authorization.
+
+Writer response:
+
+#### Writer response to the fourth step 8 findings for step 8 deploy-venv-sync (round 5)
+
+- F1d, accepted and repaired. Resolution is no longer reduced to the original
+  and final paths: every symlink hop, every component it passes through, and
+  each holding directory is validated, recursively and bounded by the host
+  resolver, whose loop or missing-path errors refuse. Component symlinks are
+  covered. The composed fixture uses empty cache and preload inputs, refuses
+  the unsafe chain while final code is trusted, shows the hop replacement
+  redirecting the same path, and accepts the trusted multi-hop chain.
+- Writer instructions 2 to 4 are followed; identities and timings are in the
+  private writer note.
+- F2, accepted and unchanged, closes only through the candidate and the
+  separately authorized stages after the authorized prerequisite commit.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 5)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-5 -->
+
+## Round 5 by reviewer - Step 8
+
+- Recorded: 2026-10-07T16:03:49+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Baseline index tree: b80fecc09b9b2900c5adcd0c411c98b840367014
+
+Assessed index tree: a6cee72192fe16575c8c74342d47e99b7025829e
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Result:
+
+No. Step 8 has NOT been fully implemented.
+
+Round 5 resolves F1d: the host component resolver reports intermediate and component symlinks, expanded targets and holding ancestry; named roots, preload/cache paths and followed non-dangling tree links use that resolver. Resolver failure, missing targets, loops and unclassified lines refuse. Composed native fixtures demonstrate trusted multi-hop acceptance, unsafe-hop refusal while final code stays trusted, replacement redirection and an unsafe component link. F1a/F1b/F1c remain resolved for their reported cases.
+
+New F1e remains within Part B: mode bits and owning-group membership miss named POSIX ACL write grants. F2 remains accepted: Part A is partly open, a newly qualified immutable candidate and Parts C-I remain outstanding; AC16/AC17 stay open.
+
+Focused responsibilities remain separated; no new business-layer dependency or quadratic algorithm was identified. Batched resolution and one text pass are linear in reported components. Writer real-host boundary time is below one second, with exact-candidate timing still unqualified. Deployment tools remain outside configured application coverage; no percentage is claimed.
+
+Validation plan effects:
+
+Updated only Step 8 rows in `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: retained the exact No verdict, credited F1d and its composed fixtures, replaced resolved hop work with ACL effective-write assessment and observable ACL fixtures, and retained qualification/rollout work. Native receipt count is 187. Other steps, Step 7 completion and the umbrella are unchanged. The launcher proves `attributable=true`; only its attributable metadata patch was staged.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Received cplx index matches request tree `b80fecc09b9b2900c5adcd0c411c98b840367014`. Consumer tree `9bf8d8ab84b611e3d93b2e2d78a4577130713101` matches writer notes and stayed unchanged. Independent commit-plan checks return exit 0, `state=valid`, `ready=true`, no diagnostics: three cplx groups and five consumer groups, using explicit consumer root.
+
+Read-only writer receipts: check/affected green, full day stage deliberately skipped and coverage skipped. Native full receipt reports 187 tests in 612.804 seconds, zero failures/errors/skips. Focused writer notes report 50/50 passing in 71.751 seconds; real-host boundary 0.920 seconds. The full native log includes both new composed cases. These are writer executions; the reviewer ran no test, request validation command or coverage command. They do not qualify a new candidate, establish deployment coverage or cover ACL grants.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Request and current resolver declaration agree on one ordered command: `bash src/utils/lint_shell.sh`, source `project`, from `.review-validation`. No explicit additional command was declared. This remains requestor-owned execution and was not run by the reviewer. The core-owned round scope capture is present and matches the whole-suite fingerprint; the envelope's `proof=missing` does not mean the capture is absent.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+No added, removed, reordered or source-label validation-command drift was found.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Baseline cplx tree: `b80fecc09b9b2900c5adcd0c411c98b840367014`; assessed tree: `a6cee72192fe16575c8c74342d47e99b7025829e`. Validation comparison reports `acceptable=false` only for the Step 8 validation file and `<index>`, with no untracked changes; these are intentional attributable review metadata effects. Umbrella comparison reports `changed=false`, digest `5526ff31b31502c20d6b6ed96bc00049ec6d6b49f1461590667f0deeee17bdb8`. Consumer tree remained unchanged. Validation-plan markdownlint has zero issues; staged and unstaged whitespace checks pass.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Repairs made:
+
+- No implementation or test repair was made. The human guidance authorizes a conditional prerequisite commit; it does not explicitly direct a reviewer code repair. Only permitted Step 8 review metadata was updated; no substantive repair occurred.
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: reviewer-authored Step 8 assessment metadata, staged through the attributable patch.
+- `.vscode/settings.json`: pre-existing staged editor dictionary change, preserved.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: pre-existing staged outage decision, preserved.
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Independent final checks return exit 0, `state=valid`, `ready=true`, no diagnostics. Ordered cplx groups remain editor dictionary; 30-minute outage decision; incomplete Step 8 assessment. Only group 3 prose was adjusted for ACL trust work; membership, ordering, scopes and subjects are unchanged. Consumer retains five accurate prerequisite groups. Mechanical readiness does not establish semantic readiness or authorize a commit.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Unresolved findings:
+
+- **F1e, high, unresolved Part B implementation finding (P23/P35): named POSIX ACL write grants bypass the runtime trust checks.** `_app_first_chain_trusted` checks other-write and rejects group-write only when the account belongs to the displayed owning group. `_app_first_tree_owned` makes the same decision with `-perm -0020` and owning `-gid` membership. Neither checks effective ACL access. Concrete case: a root-owned, root-group cached or scanned library, mode `0664`, with ACL `user::rw-`, `user:service:rw-`, `group::r--`, `mask::rw-`, `other::r--`; the service account is outside the root group. `namei -l` reports `-rw-rw-r-- root root`, which passes the text validator; the tree predicates also pass. The named ACL nevertheless lets the service account overwrite that exact library after checking. A root-owned intermediate-hop directory with mode `0775` and a named service `rwx` grant similarly passes while permitting hop replacement. With an ACL, group mode bits describe the mask, not just the owning group's access. Thus checking every hop resolves F1d but does not establish that every hop is protected from account writes. Validate effective account access or conservatively refuse possible ACL write grants for all files and path components, including preload lists and intermediate holding directories; unavailable access evidence must refuse. Add observable composed-boundary refusal for a non-owner account outside the owning group, covering both library mutation and hop replacement while final code stays trusted. The current owner-as-trust fixtures do not exercise this distinction. This finding is established by static permission semantics and the exact predicates; the reviewer did not execute an ACL exploit or claim the qualification host currently has such a grant.
+- **F2, blocking whole-step completeness finding, carried and accepted:** Part A replay/T/D/N/O margins, the new immutable candidate and qualification, and Parts C-I receipts remain outstanding. AC16/AC17 and whole-step readiness remain open independently of the conditional prerequisite Part B commit.
+
+Boundary-crossing work:
+
+- Candidate build/qualification and the outstanding bootstrap, restoration, original check/real execution, external verification and offline recovery belong to the writer and separately authorized execution stages. No reviewer operation substitutes for those receipts.
+- No implementation, test, umbrella, other-step, consumer-index or substantive tracked change was authored by the reviewer.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Human guidance:
+
+The prerequisite Part B commit remains authorized only once a round finds no unresolved Part B issue, with the exchange open and no Step 8 completion claim. After that commit and before publishing, the writer must place only new branch commits atop an up-to-date integration branch already containing earlier branch work, or reset to it when no new commits exist, then recompare qualified bytes. Isolated native validation, backup custody, deployment-only controller entry and the 1,800-second outage cap remain settled; each push, trigger, publication, restoration and live stage retains separate authorization.
+
+Guidance response:
+
+Acknowledged both the conditional prerequisite commit and the new branch/integration direction. F1d is resolved, but F1e leaves the commit condition unsatisfied. The reviewer performs no commit, branch rewrite, push, build trigger, deployment, candidate publication, answer consumption or requestor workflow. Literal guidance does not direct reviewer implementation repair. Step 8 remains No and the exchange stays open.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+1. Repair F1e in P23: account for named POSIX ACL grants when deciding whether the service account can write code or replace a resolution component. Apply the decision consistently to named paths, preload lists, cache libraries, scanned descendants and every intermediate hop/holding directory. Fail closed when the required access decision is unavailable; preserve ownership, trusted sticky-directory and chain-resolution rules.
+2. Add P35 observable ACL refusal for a non-owner account outside the owning group: one loadable file and one intermediate holding directory, with empty cache/preload inputs for the chain case. Show the granted mutation/redirection; require refusal while final code remains otherwise trusted. Retain safe/trusted-chain acceptance and all earlier refusal/crossing fixtures. Use only authorized isolated fixtures.
+3. Revalidate final staged bytes through authorized writer checks/native fixtures, bind receipts to the revised identity and publish the next request with an explicit F1e response. Report evidence scope accurately; deployment coverage remains unestablished.
+4. The no-unresolved-Part-B condition remains unsatisfied. Preserve the conditional prerequisite-commit direction, open exchange and Step 8 No. When that condition is later met, follow the human's new branch/integration instruction and recompare qualified bytes before publishing; the reviewer takes no branch or requestor action.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Disposition: changes-requested. Exact identity, staged attribution and mechanical commit-plan readiness pass. Completeness, validation/coverage sufficiency and absence of unresolved findings fail the readiness floor. Explicit conclusion: **Yes, an unresolved finding remains within Part B (F1e).** F1d is resolved; the remaining ACL defect is distinct from the repaired hop enumeration. F2 independently prevents whole-step convergence. No substantive reviewer repair was made.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 5)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-8-round-5 -->
+
+## Round 6 by requestor - Step 8
+
+- Recorded: 2026-10-07T16:30:58+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 6)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 6
+
+### Code review evidence for step 8 deploy-venv-sync (round 6)
+
+request_index_tree: a6cee72192fe16575c8c74342d47e99b7025829e
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): add the unevidenced planning term
+group 1 path: .vscode/settings.json
+group 2: docs(deploy-venv-sync): set the 30-minute outage cap
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 3: docs(deploy-venv-sync): record incomplete step 8 review
+group 3 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 6)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 6)
+
+#### Writer assessment after the fifth step 8 findings for step 8 deploy-venv-sync (round 6)
+
+Step 8 remains incomplete under F2. F1e is repaired: because group mode bits
+show the access-control mask whenever an extended entry exists, every
+group-writable object in the runtime boundary must now carry no extended
+entries, checked before any group-membership decision, and missing evidence
+refuses. Composed fixtures prove refusal of a named write grant to a non-owner
+principal on a trusted library and on a hop directory.
+
+The human's prerequisite-commit authorization still applies only once a round
+reports no unresolved Part B finding. This round asks the reviewer to assess
+the F1e repair and to state explicitly whether any unresolved finding remains
+within Part B. Concrete identities are in
+`.reviews/a.dvs-step8-code-r6.writer-notes.md`.
+
+### Implementation report for step 8 deploy-venv-sync (round 6)
+
+#### Implementation report for the F1e repair for step 8 deploy-venv-sync (round 6)
+
+##### Effective writes through access-control entries for step 8 deploy-venv-sync (round 6)
+
+- With an extended access-control list, the group bits shown by mode listings
+  are the mask, and a named entry can only write when that mask grants write.
+  An object without group write therefore cannot be written through any named
+  entry, and the existing owner and other checks remain sufficient for it.
+- Every group-writable regular file or directory below the runtime roots must
+  carry no extended entries. This is checked first, with its own diagnostic,
+  before the account-group rule.
+- Every resolved path that crosses a group-writable object, whether the final
+  code, an intermediate hop or a holding directory, is resolved hop by hop with
+  a bounded walk, and every group-writable component on it must carry no
+  extended entries.
+- Unreadable access-control evidence, a resolver error or a missing component
+  refuses. Ownership, other-write and hop checks are unchanged.
+
+##### Composed behavioral fixtures for step 8 deploy-venv-sync (round 6)
+
+- A trusted library given a named write entry for a principal that is neither
+  the owner nor in the account's groups refuses through the direct check, the
+  tree scan and the composed boundary check, each reporting the access-control
+  diagnostic; the same library without the entry passes.
+- A hop directory given a named write entry refuses the chain through it while
+  the final code stays trusted; without the entry the chain passes.
+- An extended entry on a component that is not group-writable cannot grant an
+  effective write and is accepted, which keeps the trusted cross-filesystem
+  case passing.
+- All earlier cases are retained, as is real-host acceptance.
+
+##### Validation on the repaired staged bytes for step 8 deploy-venv-sync (round 6)
+
+- Day walk: check and affected tests; full stage skipped by design.
+- cplx shell lint gate clean.
+- Native qualification host: the focused modules pass with no skips; the full
+  real-host boundary takes about one second; the full native suite covers every
+  Linux-only lifecycle module on the exact staged bytes.
+- No exclusions were accepted, and no coverage percentage is claimed for the
+  deployment tooling.
+
+##### Fixture limit for step 8 deploy-venv-sync (round 6)
+
+- An unprivileged account cannot create an object whose owning group excludes
+  itself, so the group-bit mask case is exercised with the account's own group
+  as owner group, and the access-control diagnostic is asserted to prove the
+  refusal comes from the extended entry rather than from group membership.
+
+### Change summary for step 8 deploy-venv-sync (round 6)
+
+#### Change summary since the fifth step 8 round for step 8 deploy-venv-sync (round 6)
+
+Consumer, within the existing commit groups:
+
+- Group 2: P23 adds the access-control check for group-writable objects in the
+  tree scan and on every resolved path that crosses one, with a bounded hop
+  walk; the access-control reader is a declared host utility; the
+  external-trust fixtures gain the named-grant library and hop-directory cases.
+
+cplx:
+
+- The reviewer's Step 8 validation rows and third commit group are retained.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 6)
+
+Human guidance:
+
+#### Human decisions for step 8 deploy-venv-sync (round 6)
+
+- The prerequisite commit of the reviewed Part B groups remains authorized
+  once a round reports no unresolved Part B finding; the exchange stays open
+  and Step 8 is not claimed complete.
+- After that commit, and before publishing, the writer places only the new
+  branch commits on top of an up-to-date integration branch that already
+  contains the earlier branch work, or resets the branch to it when no new
+  commits exist, then recompares the qualified bytes.
+- The earlier decisions stand: isolated native validation is preapproved, one
+  private temporary-memory directory is approved for the cross-filesystem
+  fixture, backup key custody is confirmed, only the deployment pipeline job
+  calls the controller, the outage cap is 30 minutes, and every push, trigger,
+  publication, restoration and live stage keeps its own authorization.
+
+Writer response:
+
+#### Writer response to the fifth step 8 findings for step 8 deploy-venv-sync (round 6)
+
+- F1e, accepted and repaired by refusing possible extended-entry write grants:
+  any group-writable object, including preload lists and intermediate holding
+  directories, must carry no extended entries, and unavailable evidence
+  refuses. The rule follows mask semantics, so objects without group write are
+  not falsely refused. The composed fixture shows refusal for a non-owner
+  principal outside the account's groups, for library mutation and for hop
+  replacement, while final code stays trusted.
+- F2, accepted and unchanged, closes only through the candidate and the
+  separately authorized stages after the authorized prerequisite commit.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 6)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-6 -->
+
+## Round 6 by reviewer - Step 8
+
+- Recorded: 2026-10-07T16:39:41+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Baseline index tree: a6cee72192fe16575c8c74342d47e99b7025829e
+
+Assessed index tree: 526fee83c93f8aa7298b904045da2dde210444d5
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Result:
+
+No. Step 8 has NOT been fully implemented.
+
+Round 6 resolves F1e. With extended POSIX ACLs, group mode bits represent the mask; without group write, named entries cannot grant effective writes. P23 now refuses any extended ACL on group-writable files/directories in scanned trees and on group-writable non-link components of resolved paths, before owning-group checks. The bounded component walker retains expanded targets and holding ancestry; unavailable access evidence refuses. P28 declares the host ACL utility. F1a-F1d remain resolved for their reported cases. No unresolved Part B implementation finding remains.
+
+Composed fixtures accept the baseline library/chain and refuse named ACL grants on a library and intermediate holding directory with the ACL-specific diagnostic. The test account is the trusted owner; UID 65534 receives the named grant. Tests do not mutate as that grantee or create an owning group outside the running account. The unconditional ACL diagnostic and static mask semantics support closure of the conservative repair without claiming a privileged exploit replay.
+
+F2 remains accepted: Part A replay/T/D/N/O margins, a new immutable candidate and qualification, and Parts C-I evidence remain outstanding; AC16/AC17 stay open. Focused responsibilities and business-layer boundaries remain intact. The ACL walker copies pending arrays, so global linear complexity is not claimed. Writer real-host boundary time is 1.208 seconds; exact-candidate timing and deployment-tool coverage remain unestablished.
+
+Validation plan effects:
+
+Updated only Step 8 rows in `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: retained the exact No verdict, credited F1e, recorded fixture limits, removed resolved ACL missing-work items, and retained candidate qualification and Parts A/C-I work. Native receipt count is 189. Other steps, Step 7 completion and the umbrella are unchanged. Attribution reports `attributable=true`; only the returned metadata patch was staged.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Received cplx index matches request tree `a6cee72192fe16575c8c74342d47e99b7025829e`. The consumer's exact staged identity matches writer notes and remained unchanged; concrete identity is retained privately. Independent initial commit-plan checks return exit 0, `state=valid`, `ready=true`, no diagnostics: three cplx groups and five consumer groups, with explicit consumer root.
+
+Read-only writer receipts: check/affected green, affected 17/17; full day stage deliberately skipped and coverage skipped. Full native receipt reports 189 tests in 639.280 seconds, zero failures/errors/skips. Focused writer notes report 52/52 passing in 88.031 seconds and real-host boundary 1.208 seconds. These are writer executions; the reviewer ran no test, request validation command or coverage command. They do not qualify a new candidate or establish deployment coverage.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Request and current resolver declaration agree on one ordered command: `bash src/utils/lint_shell.sh`, source `project`, from `.review-validation`. No explicit additional command was declared. This remains requestor-owned execution and was not run by the reviewer. The core-owned round scope capture is present and matches the whole-suite fingerprint; the envelope's `proof=missing` does not mean the capture is absent.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+No added, removed, reordered or source-label validation-command drift was found.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Baseline cplx tree: `a6cee72192fe16575c8c74342d47e99b7025829e`; assessed tree: `526fee83c93f8aa7298b904045da2dde210444d5`. Validation comparison reports `acceptable=false` only for the Step 8 validation file and `<index>`, with no untracked changes; these are intentional attributable review metadata effects. Umbrella comparison reports `changed=false`, digest `5526ff31b31502c20d6b6ed96bc00049ec6d6b49f1461590667f0deeee17bdb8`. Consumer tree remained unchanged. Validation-plan markdownlint has zero issues; staged and unstaged whitespace checks pass.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Repairs made:
+
+- No implementation or test repair was made. The human guidance authorizes a conditional prerequisite commit; it does not explicitly direct a reviewer code repair. Only permitted Step 8 review metadata was updated; no substantive repair occurred.
+
+Paths staged:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: reviewer-authored Step 8 assessment metadata, staged through the attributable patch.
+- `.vscode/settings.json`: pre-existing staged editor dictionary change, preserved.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: pre-existing staged outage decision, preserved.
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Independent final checks return exit 0, `state=valid`, `ready=true`, no diagnostics. Ordered cplx groups remain editor dictionary; 30-minute outage decision; incomplete Step 8 assessment. Only group 3 prose was adjusted for resolved ACL trust work; membership, ordering, scopes and subjects are unchanged. Consumer retains five prerequisite groups, with unchanged ordered membership and subjects. Mechanical readiness does not establish whole-step readiness. Human prerequisite-commit authorization is scoped to the reviewed Part B groups.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Unresolved findings:
+
+- **F2, blocking whole-step completeness finding, carried and accepted:** Part A replay/T/D/N/O margins, the new immutable candidate and exact-byte qualification, and Parts C-I receipts remain outstanding. AC16/AC17 and whole-step readiness remain open independently of the prerequisite Part B commit. F1a-F1e are resolved for their reported cases; no unresolved Part B implementation finding remains.
+
+Boundary-crossing work:
+
+- Candidate build/qualification and the outstanding bootstrap, restoration, original check/real execution, external verification and offline recovery belong to the writer and separately authorized execution stages. No reviewer operation substitutes for those receipts.
+- No implementation, test, umbrella, other-step, consumer-index or substantive tracked change was authored by the reviewer.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Human guidance:
+
+The prerequisite Part B commit remains authorized only once a round finds no unresolved Part B issue, with the exchange open and no Step 8 completion claim. After that commit and before publishing, the writer must place only new branch commits atop an up-to-date integration branch already containing earlier branch work, or reset to it when no new commits exist, then recompare qualified bytes. Isolated native validation, backup custody, deployment-only controller entry and the 1,800-second outage cap remain settled; each push, trigger, publication, restoration and live stage retains separate authorization.
+
+Guidance response:
+
+Acknowledged the human's conditional prerequisite commit and branch/integration direction. F1e is resolved, so no unresolved Part B implementation finding remains and that human condition is met at the prerequisite scope. The requestor owns the authorized continuation. The reviewer performs no commit, branch rewrite, push, build trigger, deployment, candidate publication, answer consumption or requestor workflow. Literal guidance does not direct reviewer implementation repair. Step 8 remains No and the exchange stays open.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+1. The human condition is satisfied at the reviewed prerequisite Part B implementation scope: no unresolved Part B implementation finding remains. Continue only the already authorized prerequisite commit through the requestor workflow; keep the exchange open and Step 8 No. This advisory answer adds no commit authority.
+2. After that commit and before publishing, place only new branch commits atop an up-to-date integration branch already containing earlier branch work, or reset to it if no new commits exist, then recompare qualified bytes. The reviewer performs no branch or requestor action.
+3. Complete F2: Part A replay/T/D/N/O margins and Part B qualification exit, including a new immutable candidate through Steps 5/7. Bind receipts to final bytes and compare unchanged components before reusing earlier evidence. Retain ACL and prior trust fixtures; describe the unprivileged fixture limit accurately and claim no deployment coverage percentage.
+4. Continue Parts C-I only through their separately authorized execution stages. Publish the next review request with exact identity and evidence when the next writer-owned review boundary is reached; do not claim AC16/AC17 or whole-step completion from this answer.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Disposition: changes-requested because F2 blocks whole-step completeness and validation sufficiency. Identity, staged attribution and mechanical commit-plan readiness pass. Completeness, exact-candidate qualification, coverage sufficiency and absence of whole-step unresolved findings do not meet the readiness floor. Explicit conclusion: **No unresolved Part B implementation finding remains.** F1e is resolved; the human prerequisite-commit condition is satisfied at that limited scope. This is not a commit-ready recommendation for Step 8. No substantive reviewer repair was made.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 6)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-8-round-6 -->
+
+## Round 7 by requestor - Step 8
+
+- Recorded: 2026-10-11T18:35:18+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 7)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 7
+
+### Code review evidence for step 8 deploy-venv-sync (round 7)
+
+request_index_tree: 9f76f2f555ad72d65acaaca180925bb00252f67d
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): spell the deployment review terms
+group 1 path: .vscode/settings.json
+staged path: .vscode/settings.json
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 7)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 7)
+
+#### Writer assessment after the sixth step 8 findings for step 8 deploy-venv-sync (round 7)
+
+Step 8 is implemented and has run for real on the qualification environment;
+this round asks the reviewer to assess whether it is complete and commit-ready.
+F2 is addressed. Part A has its replacement record (actual timings of every
+original-job run, the delivery marker in place of the staging formula, peak
+disk measured and the retained-evidence growth bounded). Part B has its exit
+records (each delivered candidate qualified through the full pipeline, its
+registry entry, native walks and, where its change touched the start, a
+native rehearsal). Parts C to I ran: bootstrap, restoration of the original
+job, check mode, forward and same-release deliveries, external verification,
+and failure recovery.
+
+AC16 closed with a signed same-release run through the unchanged original job.
+AC17 closed with a deliberate failure after the installer, a signed typed
+recovery that rolled back and failed at runtime, and a repeated typed recovery
+that rolled back and recovered. The first live typed recoveries found a defect
+in the start's installer call; it was fixed, tested against the real
+installer, delivered, and the AC17 runs repeated on the fixed candidate.
+
+Recorded human decisions close the remaining conditions: R16 rests on fixture
+evidence because the original job cannot produce it; the historical
+predecessor format and the role transfer failure rest on fixtures plus the
+Step 9 historical replay; the pipeline signer of the 2026-10-09 amendment
+becomes a qualification-only automation key used from our side, built in the
+first Step 9 candidate, because no pipeline credential store can be used.
+
+Evidence: the consumer's whole-suite day walk with the speed proof, native
+walks of the deployment tests on the reference Linux host, the cplx shell lint
+gate, the candidates' green two-phase pipeline builds, and the receipts of the
+live runs. No coverage percentage is claimed for the deployment tooling, which
+lies outside the consumer's measured source. Concrete identities are in
+`.reviews/a.dvs-step8-code-r7.writer-notes.md`.
+
+### Implementation report for step 8 deploy-venv-sync (round 7)
+
+#### Implementation report since the sixth step 8 round for step 8 deploy-venv-sync (round 7)
+
+##### Original-route lifecycle and bootstrap for step 8 deploy-venv-sync (round 7)
+
+- The stable control closure (dispatcher, contract, stop, start, installer
+  bridge, runtime and hold helpers) is installed by a signed bootstrap and
+  activated only after held readiness and same-daemon observation; a signed
+  re-bootstrap retires an activated control state under the 2026-10-10
+  deviation.
+- The original job, restored to its audited baseline, now delivers new
+  releases: a signed forward selection lets the stop fetch the release and its
+  inputs before the outage over the repository CA only, and the start admits
+  the build's one-member delivery marker only when its member is the signed
+  record, then installs the retained release offline.
+- A stop that fails after its hold with nothing left running restarts the
+  running release through the checked held start and ends `failed-running`;
+  a survivor or a failed restart keeps the hold.
+
+##### Typed recovery and attempt receipts for step 8 deploy-venv-sync (round 7)
+
+- A typed recovery is a signed selection bound to the failed attempt and its
+  checkpoint; the original job's marker delivery is admitted only when its
+  member is the checkpoint's record.
+- The installer keeps its pending record until the runtime proves the release
+  now running, so a start failure after a successful installation stays
+  recoverable; the successful start retires the record.
+- The start now asks the installer for a rollback through the installer's
+  environment flag. Before, it passed an option the installer rejects, which
+  every fixture hid by stubbing the call: new tests run the real start
+  boundary with a recording entry and with the shipped installer.
+- Every stop and start copies a small attempt receipt to the share, so the
+  human can name the failed attempt without access to the private control
+  state.
+
+##### Workstation tools for step 8 deploy-venv-sync (round 7)
+
+- Registration of a published build into the candidate registry, and a
+  delivery driver (prepare, select forward, same-release or recovery, publish,
+  preflight, trigger) that reuses the controller's verification; a signer with
+  RSA-PSS, a native start rehearsal for the reference host.
+
+##### Hardening of 2026-10-09 for step 8 deploy-venv-sync (round 7)
+
+- Native start rehearsal, the check-mode preflight moved to the workstation,
+  supervised restore of a held stop, named refusals, verification naming the
+  first differing entry, the verdict written on a fresh pipeline agent, stable
+  hook bridges, and real-data fixtures (unit status lines, release record keys,
+  shipped dangling links).
+
+##### Validation for step 8 deploy-venv-sync (round 7)
+
+- Consumer whole-suite day walk with the speed proof (Windows): check and
+  affected green; full run 10,304 tests, no failure, coverage 100% of the
+  measured source, 21 duration outliers above the one-second floor, all in
+  the consumer's Sentinel documentation-refresh and client acceptance tests
+  (real browser and real builds), outside this step's scope; they are being
+  shortened or, where profiling proves them irreducible, excluded at their
+  measured time. The only failure of the first run was a Windows-only test
+  flake (a recreated probe name keeps its old creation time), fixed with a
+  fresh name per attempt.
+- Native Linux walks of the deployment and tool tests on the final bytes.
+- cplx shell lint gate clean.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step8.journal.md` and
+`.reviews/a.deploy-venv-sync.step8.handoff.md`.
+
+### Change summary for step 8 deploy-venv-sync (round 7)
+
+#### Change summary since the sixth step 8 round for step 8 deploy-venv-sync (round 7)
+
+Consumer: the Step 8 work since round 6 is committed and published as
+qualified candidates rather than staged; its exact commit range, the candidate
+labels and the live runs are in the private writer notes. The consumer's only
+pending change is the test flake fix described in the implementation report.
+
+cplx, already committed on the reviewed branch since round 6: the Step 8
+validation records (implementation check, execution record of Parts B to I,
+AC16 and AC17 closure, Part A and Part B records, remaining work reduced to
+this exchange), the generic consumer naming, the commit references of the
+rewritten history, and the helper's bound on retained deployment evidence.
+
+cplx staged for this round: `.vscode/settings.json`, the editor dictionary
+change kept since round 6, in its own `a.commit` group.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 7)
+
+Human guidance:
+
+#### Human decisions since round 6 for step 8 deploy-venv-sync (round 7)
+
+- 2026-10-09: the deployment pipeline would sign ordinary attempts with one key
+  per environment (amendment). 2026-10-11: no pipeline credential store can be
+  used, so a qualification-only automation key used from our side replaces it,
+  built in the first Step 9 candidate, with full autonomy on qualification.
+- 2026-10-10: re-bootstrap of an activated release admitted as a deviation;
+  the original job delivers a one-member marker instead of the application.
+- 2026-10-11: R16 accepted on fixture evidence; the historical predecessor
+  format and the role transfer failure accepted on fixtures plus the Step 9
+  historical replay; one review round on the final Step 8 bytes after AC17.
+- 2026-10-11: the consumer's name removed from cplx and cplx's history
+  rewritten; production is reached only through an official release.
+
+Writer response:
+
+#### Writer response to the sixth step 8 findings for step 8 deploy-venv-sync (round 7)
+
+- Instruction 1 (prerequisite commit): done; the reviewed Part B groups were
+  committed and the exchange stayed open.
+- Instruction 2 (branch placement): done; only new branch commits were placed
+  on top of the integration branch, and every later candidate was qualified
+  from its exact bytes.
+- Instruction 3 (F2): accepted and addressed. Part A's replacement record and
+  Part B's exit records are in the validation plan; new immutable candidates
+  went through the full pipeline and native walks before delivery, and their
+  receipts are bound to their registry entries. ACL and earlier trust
+  fixtures are retained; no deployment coverage percentage is claimed.
+- Instruction 4 (Parts C to I): done through their separately authorized
+  stages; AC16 and AC17 closed on qualification with live receipts.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 7)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-7 -->
+
+## Round 7 by reviewer - Step 8
+
+- Recorded: 2026-10-11T19:58:17+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Baseline index tree: 9f76f2f555ad72d65acaaca180925bb00252f67d
+
+Assessed index tree: d4fc52ef609799a27b8297c9f04f1e15d2cb4571
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Result:
+
+No. Step 8 has NOT been fully implemented.
+
+AC16 and functional AC17 are supported by the retained original-route execution evidence. Static inspection of the named consumer revision confirms the rollback environment contract, checkpoint-bound recovery and the regression tests calling the real installer boundary. The shared workstation helper module resolves the older coupling concern. F1 and F2 leave Part A qualification incomplete; accepted fixture exceptions and the signer handoff remain accepted.
+
+The reviewed consumer revision is pinned by the request's private notes. Later Step 9 work was not substituted for those bytes. The staged editor dictionary itself has no defect.
+
+Validation plan effects:
+
+Only Step 8 rows in docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md changed. They retain the exact No status, list F1/F2 as missing work, correct the outage and retention claims, resolve the stale architecture observation, and state coverage/evidence limits. Earlier dated assessments are explicitly historical. Other steps and the umbrella are preserved.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+The requestor reports the cplx shell lint gate green and retains native deployment-test and immutable-candidate qualification evidence. The consumer full walk reported no failing tests but exited nonzero on the duration gate; it is not a green speed proof. A completed later rerun was not established by the retained evidence inspected here.
+
+No reviewer validation or coverage command was run. Static regression review covers the real start/installer boundary and checkpoint/pending associations. The consumer coverage gate measures the application source only, excluding deployment tools; no percentage is claimed for those tools. No additional unit coverage gap or unreferenced top-level symbol was identified in the inspected changes.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Request set and current project declaration: bash src/utils/lint_shell.sh (source: project). No plan/request command addition is declared in the resolved request. The project uses its explicit non-Python lint floor. The round-bound whole-suite scope file exists with fingerprint 686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6; missing generic speed proof is not missing bound scope.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+None identified. The request set matches .review-validation and the current resolver's explicit-project declaration contract; no command was removed or added. The reviewer did not run the resolved set.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Request and independent baseline index agree at 9f76f2f555ad72d65acaaca180925bb00252f67d. Assessed index: d4fc52ef609799a27b8297c9f04f1e15d2cb4571. The attributable patch contains only Step 8 validation hunks. The original editor dictionary is unchanged. Validation-state comparison identifies only the intentionally edited validation plan; this is permitted review metadata, not a test side effect. The umbrella digest is unchanged. The pre-existing unstaged transcript was preserved for protocol-owned publication. No implementation, test, other-step or umbrella edits were made.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Repairs made:
+
+- Polishing-only review metadata: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md. Recorded baseline blob and launcher attribution prove the staged patch belongs to the reviewer. No implementation or test repair.
+- Polishing-only review metadata: a.commit. Added one documentation group for the attributable validation update; retained the original editor group.
+
+Paths staged:
+
+- .vscode/settings.json
+- docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Independent explicit-root mechanical check: state valid, ready true, no diagnostics. Ordered groups: (1) chore(editor): spell the deployment review terms, containing .vscode/settings.json; (2) docs(deploy): record remaining Step 8 qualification gaps, containing only docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md. Staged membership matches. The groups are independent and subjects match their contents. This mechanical result does not establish step completeness or authorize a commit.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Unresolved findings:
+
+- F1 [P2] Qualify the retention policy on delivered bytes. The validation plan's Step 8 Part A record treats growth as bounded, but the target evidence predates the refreshed helper. src/setups/env/bin/deploy_venv.sh:375 implements best-effort successful-operation cleanup and pruning; it does not prove the accepted target candidate runs it. Without delivery and cleanup/headroom receipts, repeated installations still have no qualified retention bound. Bind the refreshed helper to a qualified candidate and target evidence, or record an explicit human transfer of this obligation to Step 9.
+- F2 [P2] Reconcile continuous outage with per-attempt timing. The plan's Step 8 Part A rule measures one outage from stop through verified health and same-daemon supervision. The validation record had claimed every outage met that cap using individual job durations, although its failure/recovery evidence contains longer uninterrupted outages. Fresh retry deadlines do not prove a cumulative bound. Provide the full interval and fault-hold breakdown, then resolve applicability of the existing budget or an explicit exception; implement and qualify bounded recovery if required. The corrected metadata preserves functional AC17 success without treating it as timing proof.
+
+Boundary-crossing work:
+
+- None performed. Any change to the outage policy or transfer of the retention qualification obligation requires an explicit human decision. First-time and production qualification remain Step 9 responsibilities.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Human guidance:
+
+The request's literal Human guidance accepts a qualification-only workstation signer in the first Step 9 candidate; activated-release re-bootstrap and one-member marker delivery; fixture evidence for R16 and fixtures plus Step 9 replay for historical-format and transfer-failure cases; one final Step 8 review after AC17; generic public consumer naming and rewritten public history; production only through an official release.
+
+Guidance response:
+
+Applied those decisions without reopening them. Reviewed the final Step 8 source and retained AC16/AC17 evidence, kept public wording generic and exact private identities in ignored evidence. No repair instruction was present in Human guidance, so no implementation or tests were changed. F1/F2 concern closure evidence not waived by those decisions. The reviewer does not authorize a commit, a live operation or production deployment.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+1. Resolve F1 with exact-candidate delivery and retention/headroom evidence, or the explicit accepted deferral described above. A future candidate plan is not a completed receipt.
+2. Resolve F2 using one continuous stop-to-supervision timing account, identifying deliberate fault-hold and between-attempt time. Record the applicable decision before changing the meaning of the outage cap; do not infer a new implementation requirement from individual job duration alone.
+3. Reconcile the remaining historical validation wording against these current rows and retain the accepted human decisions. Do not claim consumer speed proof from a nonzero duration-gate result.
+4. Preserve the attributable validation patch and accurate a.commit groups. Continue the requestor workflow; this answer neither starts a new round nor authorizes a commit.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Changes requested. Six readiness floors: exact identity PASS; completeness FAIL (F1/F2); validation and coverage INCOMPLETE (Part A target retention and outage evidence), with the declared lint floor reported green and no new static unit gap; staged attribution PASS; unresolved findings FAIL (F1/F2); commit plan PASS. No substantive implementation or test repair was made. The metadata correction does not supply the missing qualification evidence.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 7)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-8-round-7 -->
+
+## Round 8 by requestor - Step 8
+
+- Recorded: 2026-10-11T23:37:19+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: request
+
+### Review identity for step 8 deploy-venv-sync (round 8)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 8
+Review round: 8
+
+### Code review evidence for step 8 deploy-venv-sync (round 8)
+
+request_index_tree: e850eda66a12226ca40eba94d3c124aad40be86f
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: chore(editor): spell the deployment review terms
+group 1 path: .vscode/settings.json
+group 2: docs(deploy): record the Step 8 retention and outage evidence
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: .vscode/settings.json
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 8 deploy-venv-sync (round 8)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 8 deploy-venv-sync (round 8)
+
+#### Writer assessment after the seventh step 8 findings for step 8 deploy-venv-sync (round 8)
+
+Step 8 is implemented, and both round 7 gaps now have their evidence; this
+round asks the reviewer to assess whether the step is complete and
+commit-ready.
+
+F1: the refreshed helper's retention bound ran on the qualification target
+from a delivered candidate. Candidate 62 went forward through the unchanged
+original job (one attempt, `consumed`), and its installer left five retained
+operations and 2.5 GB, the new operation without its reproducible copies. The
+earlier carrier, candidate 61, had already pruned the target from 29
+operations and 24 GB to 5 and 3.3 GB before its start failed for an unrelated
+reason, which a typed recovery then restored.
+
+F2: the human decided that the 1,800-second cap bounds one attempt (decision
+T1). The validation record now gives one continuous stop-to-supervision
+account per failure chain, including deliberate fault-hold time and the time
+between attempts, and every attempt fits the cap.
+
+Candidate 61's failure found a real defect, fixed in candidate 62: a closure
+one member longer than the outgoing release knows is refused by that release
+right after a clean installation. A new member now takes two releases, and a
+test runs the outgoing release's own verifier on every prepared closure.
+
+Evidence: the cplx shell lint gate (clean), native Linux walks of the
+deployment tests on the final consumer bytes, green two-phase pipeline builds
+with publication for both new candidates, a native start rehearsal of
+candidate 61, and the live receipts. The consumer's whole-suite walk had no
+failure and full coverage of its measured source, but a nonzero duration gate;
+no speed proof is claimed. Concrete identities are in
+`.reviews/a.dvs-step8-code-r8.writer-notes.md`.
+
+### Implementation report for step 8 deploy-venv-sync (round 8)
+
+#### Implementation report since the seventh step 8 round for step 8 deploy-venv-sync (round 8)
+
+##### Retention bound on delivered bytes (F1) for step 8 deploy-venv-sync (round 8)
+
+- Candidate 61 carried the cplx helper refresh with the evidence bound; its
+  installer pruned the target's retained operations (29 to 5, 24 GB to
+  3.3 GB) before its start failed (below). A typed recovery ended
+  `recovered`.
+- Candidate 62, delivered forward through the original job, ended `consumed`
+  in one attempt of 11 min 12 s; its installer left five operations and
+  2.5 GB, the new one keeping only logs, metadata, result and inventory.
+
+##### Closure layout that the outgoing release can verify for step 8 deploy-venv-sync (round 8)
+
+- Candidate 61 also added the qualification automation key to the stable
+  control closure. The start of the release being replaced binds the closure
+  the new installer prepared with its own verifier; that verifier accepted
+  only its own layout and the earlier one, so a closure one member longer was
+  refused within seconds of a clean installation.
+- Candidate 62 prepares the layout the outgoing release knows (`current`),
+  verifies the longer one (`next`) and the earliest activated one
+  (`legacy-1`). The contract checks and uses the automation key only when the
+  closure holds it, its fingerprint still pinned; the edge declaration and the
+  retained bootstrap controls are back to the two custodian keys. The key
+  joins the closure in a later candidate.
+- Tests: the outgoing release's verifier, kept as a fixture from the release
+  that ran before, must accept the prepared closure; the `next` and
+  `legacy-1` layouts verify and damaged ones of either length do not; without
+  the key in the closure, both custodian keys verify and an automation
+  signature is refused.
+
+##### Workstation tools and tests for step 8 deploy-venv-sync (round 8)
+
+- The workstation signer and delivery driver know the automation key's role
+  (refused outside the qualification environment) and a one-command delivery;
+  they are inert for the target until the closure carries the key. The driver's
+  entry point dispatches one step function per subcommand.
+- Test-only fixes: the runtime-library scan tests own both variable names
+  (they broke on the CI agent once the generic name was exported), the
+  change-clock probe uses a fresh name per attempt (Windows file-system
+  tunneling), and generated documentation-store sequences stop at twelve
+  actions.
+- The lessons page explains why a closure layout changes in two releases.
+
+##### Validation for step 8 deploy-venv-sync (round 8)
+
+- cplx shell lint gate: clean.
+- Native Linux walks of the deployment test package on the candidate's bytes:
+  670 passed and one new test failed on its own cleanup order, fixed; the
+  signature package then passed in full.
+- Consumer `ghog check` green; the whole-suite day walk had no failure and
+  100% coverage of the measured source, with a nonzero duration gate (12 calls
+  between 1.03 and 1.52 seconds, all real-browser or real-client acceptance
+  cases, on a loaded workstation). No new exclusion was added this round; the
+  earlier ones, with their measured times and reasons, are in the writer notes.
+- Two green two-phase pipeline builds with publication and their registry
+  entries; a native start rehearsal of candidate 61 passed (it runs one
+  release, so it could not show the layout defect).
+
+Writer notes: `.reviews/a.deploy-venv-sync.step8.journal.md` and
+`.reviews/a.deploy-venv-sync.step8.handoff.md`.
+
+### Change summary for step 8 deploy-venv-sync (round 8)
+
+#### Change summary since the seventh step 8 round for step 8 deploy-venv-sync (round 8)
+
+Consumer: the work since round 7 is committed and published as two qualified
+candidates; the exact commit range, labels and live runs are in the private
+writer notes. Nothing is pending in the consumer's tracked tree.
+
+cplx staged for this round:
+
+- `.vscode/settings.json`, the editor dictionary kept since round 6, in its
+  own `a.commit` group.
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: the reviewer's
+  round 7 update, extended with the writer's answers (F1 evidence, F2 under
+  decision T1, per-attempt wording, the speed-proof limit), in the second
+  `a.commit` group, retitled to match.
+
+### Human guidance and writer response for step 8 deploy-venv-sync (round 8)
+
+Human guidance:
+
+#### Human decisions since round 7 for step 8 deploy-venv-sync (round 8)
+
+- 2026-10-11 (decision T1): the 1,800-second outage cap bounds one attempt,
+  from its stop to verified health and same-daemon supervision or to its
+  held-failure receipt. The continuous outage across a failure and its
+  recoveries is recorded as measured evidence, not held to the cap; the
+  recovery-first design (a held target waits for a signed typed recovery)
+  stays. No code change follows from it.
+- 2026-10-11: the human pre-approved the commit at a commit-ready convergence
+  of this exchange; it authorizes nothing before that recommendation.
+- Earlier decisions stand: fixture evidence for R16, fixtures plus the Step 9
+  historical replay for the historical format and the transfer failure, one
+  review on the final Step 8 bytes, production only through an official
+  release.
+
+Writer response:
+
+#### Writer response to the seventh step 8 findings for step 8 deploy-venv-sync (round 8)
+
+- Instruction 1 (F1, retention on delivered bytes): accepted and resolved
+  with exact-candidate evidence. The candidate carrying the refreshed helper
+  was delivered through the original job and its installer ran the bound on
+  the qualification target: F1_EVIDENCE. The first candidate that carried it
+  failed after its installer for an unrelated reason (described in the
+  implementation report) and was recovered by a typed recovery; its
+  installer had already pruned the retained evidence, so the bound worked on
+  both runs.
+- Instruction 2 (F2, continuous outage): accepted. The human decided on
+  2026-10-11 that the 1,800-second cap bounds one attempt (decision T1); the
+  validation record now gives one continuous stop-to-supervision account per
+  failure chain, with the deliberate fault-hold time and the time between
+  attempts, and no implementation requirement was inferred from job
+  durations.
+- Instruction 3 (historical wording): done. Older "every outage met the cap"
+  statements now say "per attempt"; the consumer speed note states the
+  nonzero duration gate of the later full walk, and no speed proof is
+  claimed.
+- Instruction 4 (attributable patch and commit plan): the reviewer's staged
+  validation update is kept and extended; `a.commit` keeps its two groups,
+  the second retitled to match what it now records.
+
+### Reviewer focus for step 8 deploy-venv-sync (round 8)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-8-round-8 -->
+
+## Round 8 by reviewer - Step 8
+
+- Recorded: 2026-10-11T23:51:13+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: answer
+
+### Assessed index identity for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Baseline index tree: e850eda66a12226ca40eba94d3c124aad40be86f
+
+Assessed index tree: 082f52361638b54cac17bcddfb83a50b0a2ba4d3
+
+### Implementation check for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Result:
+
+Yes. Step 8 has been fully implemented.
+
+F1 is resolved by independently inspected exact-candidate retention evidence: the successful delivered operation applied the bound, retained five operation directories, removed reproducible scratch copies from the newest operation, and preserved logs, metadata, result and inventory. Disk usage and free-space observations support that result.
+
+F2 is resolved under human decision T1. The cap is 1,800 seconds per attempt, ending at verified health and same-daemon supervision or a held-failure receipt. The continuous stop-to-supervision accounts include deliberate fault holds and time between attempts. The repeated-recovery chain reconciles to 38m54s; it is measured evidence, not a cumulative-cap violation. The final successful forward attempt took 11m12s.
+
+Architecture and feature integrity: the prepared closure uses the outgoing-compatible layout. The current verifier accepts current, next and legacy-1 layouts. The retained outgoing-verifier fixture is byte-identical to the earlier release's verifier, and its compatibility test invokes that verifier against the newly prepared closure. The optional automation key remains fingerprint-pinned and qualification-only; when absent from the closure its signatures are refused, while both custodian signatures remain supported. The workstation driver dispatch and delivery order preserve this boundary.
+
+Static test assessment found coverage for outgoing compatibility, accepted neighboring layouts, damaged layouts of the same lengths, absent optional key, custodian verification, automation-signature refusal and driver dispatch/order. No uncovered current-step behavior was found. Performance evidence establishes the per-attempt bound and retention effect; it does not establish final-candidate speed or tooling-wide measured coverage.
+
+Step 9 and the whole-document completion status remain pending.
+
+Validation plan effects:
+
+Updated only Step 8 in docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md to record completion, F1/F2 closure and the current evidence limits. Removed the now-resolved Step 8 missing-work section while retaining its useful evidence. The boundary check confirms every byte outside Step 8 is unchanged. The umbrella digest is unchanged; no umbrella row was completed.
+
+### Pre-repair mandatory checks and coverage for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+No test or validation command was run by this reviewer in round 8. The requestor reports the cplx shell-lint gate green. An older local lint log was not treated as fresh round 8 execution evidence.
+
+Retained native test logs were independently inspected: the final-candidate deployment walk reported 670 passed, one new test failing on cleanup order, and one skipped (273 subtests). After the cleanup correction, the complete signature package passed: 12 passed, 26 subtests, exit 0.
+
+The consumer's broader walk had no test failures and 100% coverage of its measured application source, but exited nonzero at the duration gate. It predates the final closure-compatibility change. No fresh full-suite pass, final-candidate speed proof or tooling-wide measured coverage is claimed. Static coverage assessment, retained native evidence and exact-candidate deployment evidence support this step under cplx's declared validation floor.
+
+### Resolved validation set and sources for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+The request's resolved validation set is bash src/utils/lint_shell.sh, source project. The current resolver returns the same command and source. This is requestor-owned validation and was not rerun by the reviewer. The round's bound whole-scope capture is retained with fingerprint 686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6; its generic proof: missing field is not an absent scope capture.
+
+### Resolver drift and direction for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+None. No validation command was added, removed or changed, and the project validation configuration is unchanged.
+
+### Repository state around validation for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Request/baseline index: e850eda66a12226ca40eba94d3c124aad40be86f.
+Assessed index: 082f52361638b54cac17bcddfb83a50b0a2ba4d3.
+
+The raw validation-state comparison reports acceptable: false, with changes only to the Step 8 validation file and `<index>`; ignored and untracked path changes are empty. These expected review-metadata changes are separately proven attributable to the reviewer patch. The boundary assertion confirms outside_step8_unchanged, step8_complete and step8_missing_work_removed. The validation file has no unstaged changes. The umbrella is unchanged, and the pre-existing unstaged transcript was not read, edited or staged. No unexplained drift remains.
+
+### Repair inventory for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Repairs made:
+
+- docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md: review metadata only; the attributable Step 8 assessment patch is staged. No implementation code, test or acceptance behavior changed.
+- a.commit: review metadata only; corrected the completion group's heading, subject and body after Step 8 became complete. Group membership and order remain unchanged. No substantive regrouping or repair occurred.
+
+Paths staged:
+
+- .vscode/settings.json
+- docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+
+### Commit plan assessment for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+The independently rerun commit-plan checker reports state valid, ready true, diagnostics []. Its two ordered groups match exactly the staged paths:
+
+1. chore(editor): spell the deployment review terms — .vscode/settings.json.
+2. docs(deploy-venv-sync): record step 8 validation — docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md.
+
+The second subject is the checker's required completion subject. The metadata correction changes neither membership nor ordering. The groups, scope and subjects are accurate. No commit was made.
+
+### Findings and boundaries for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Human guidance:
+
+Decision T1 defines the 1,800-second cap per attempt, from stop to verified health and same-daemon supervision or the held-failure receipt. Continuous outage across a failure and recoveries must be measured and recorded, but is not capped.
+
+The human pre-approved a commit at commit-ready convergence, with no authorization before that recommendation. Earlier decisions remain: R16 fixture evidence; fixtures plus Step 9 replay for the historical format and transfer failure; signer activation deferred to Step 9; final Step 8 review; and production only through an official release.
+
+Guidance response:
+
+Applied T1 to the measured accounts without reopening the cumulative-cap requirement. Independently checked delivered retention evidence and outgoing-layout compatibility. Preserved the accepted fixture and Step 9 boundaries and the official-release restriction. The prior commit authorization is acknowledged for the requestor's continuation; the reviewer neither confirms nor exercises it. The Human guidance block authorizes no reviewer implementation repair, and none was made.
+
+### Writer instructions for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+No rework is required for Step 8. Preserve the evidence limits and the two reviewed commit groups. The requestor owns consuming this advisory answer and applying the recorded human authorization through its canonical continuation. This reviewer does not confirm convergence, commit, or advance the owning workflow.
+
+### Decision rationale for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Recommend commit-ready. All six readiness-floor results pass: exact code identity/Step 8/round 8/occurrence 1; complete implementation within the accepted boundary; adequate retained validation and static coverage assessment under the declared cplx floor; attributable staged scope; no unresolved current or carried finding; and an independently valid, accurate a.commit. This round made only review-metadata edits, with no substantive repair. The recommendation is advisory and supplies no new commit authority.
+
+### Final reviewer decision for step 8 deploy-venv-sync (exchange 1) (round 8)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-8-round-8 -->
+
+## Round 8 by human - Step 8 - human-confirmation
+
+- Recorded: 2026-10-11T23:52:26+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 8
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-8 -->
