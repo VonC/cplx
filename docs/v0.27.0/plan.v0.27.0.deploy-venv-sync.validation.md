@@ -1261,7 +1261,17 @@ generic. No required Step 7 work remains unimplemented.
 
 No. Step 8 has NOT been fully implemented.
 
-Writer check on 2026-10-11, against the private journals since the 2026-10-07
+Writer check on the evening of 2026-10-11: everything the step asks for has
+run for real except its code exchange. AC16 closed with a signed same-release
+run (run 80); AC17 closed with a failure after the installer and two signed
+typed recoveries, the second one recovering (runs 87 to 89), after a live
+defect in the start's installer call was found, fixed and delivered (runs 81
+to 86). R16, the historical predecessor format and the role transfer failure
+rest on fixtures and on Step 9 by recorded decisions; the pipeline signer is
+decided and moves to the first Step 9 candidate; Part A and Part B records are
+written below. The one remaining item is the review round on the final bytes.
+
+Morning writer check on 2026-10-11, against the private journals since the 2026-10-07
 review. Parts B to F ran for real, and the consumer's unchanged original job
 now delivers new releases on qualification under fresh signed selections, with
 an unsigned launch refused and a held stop recovered. AC16 and AC17 still do not
@@ -1498,36 +1508,46 @@ Writer record of the afternoon of 2026-10-11:
 
 ### Missing work for Step 8
 
-- **Pipeline signer, 2026-10-09 amendment.** The deploy pipeline has no
-  credential store we may use, so no pipeline-held key is possible. Proposed
-  instead: a qualification-only automation key, its fingerprint pinned in the
-  verified closure and bound to the qualification environment, used by the
-  delivery driver from our side (render, sign, publish, preflight, trigger in
-  one command); the primary and backup keys stay for production and
-  break-glass. Needs the human's decision; then one candidate carrying the key,
-  one delivery signed with the primary key to activate it, and one delivery
-  signed automatically, with the refusal tests (key outside its environment,
-  missing key).
-- **AC17 typed recovery, rerun on the fixed candidate.** Deliver the candidate
-  that fixes the installer call (its successful start also retires the pending
-  record left by run 84), then on qualification: a deliberate failure after the
-  installer, a signed typed recovery that rolls back, a repeated recovery after
-  a rollback whose runtime failed, and a typed recovery after a held failure
-  before the installer; record the receipts, the terminal-job and local proofs,
-  zero artifact fetches and the preserved failed verdicts.
-- **Part A replacement record.** Record the timing of each run (stop, staging,
-  start, outage, pipeline duration against the job and pipeline envelopes) from
-  the receipts and logs, and confirm on the target that the evidence retention
-  bound holds once the consumer carries the refreshed helper; record that the
-  marker decision replaced the staging formula.
-- **Part B exit records.** Bind each delivered candidate's qualification
-  evidence (pipeline phases, analysis gate, native walk, native rehearsal) to its
-  registry entry; record the unchanged-component comparison against the earlier
-  qualified candidate; point to the backup key custody and rotation record;
-  recount the line budgets of the addendum and extend the private mapping with
-  the new workstation tools.
-- **Code exchange.** One review round on the final Step 8 bytes after the AC17
-  rerun (decided 2026-10-11); resolve its findings before closing the step.
+- **Code exchange.** One review round on the final Step 8 bytes (decided
+  2026-10-11); resolve its findings before closing the step.
+
+Evening record of 2026-10-11:
+
+- **AC17, closed live.** The candidate with the installer-call fix was
+  delivered forward from the `failed-running` state of run 84 (run 86), and its
+  successful start retired the installer's pending record. Then: run 87, a
+  signed same-release run with the server port held, failed after its installer
+  (`failed-held-after`); run 88, a signed typed recovery bound to it, rolled the
+  installation back (its installer log is on the share) and failed at runtime,
+  the port still held; run 89, a repeated typed recovery bound to run 88's
+  attempt, rolled back again with the port free and ended `recovered`, service
+  supervised, no hold. A failure before the installer is covered by run 84
+  (refusal path, no installer, `failed-running`) and by fixtures; the historical
+  format and the role transfer failure by fixtures plus Step 9 (decision C1).
+- **Pipeline signer, decided.** No pipeline credential store can be used. The
+  human approved a qualification-only automation key used from our side (A4),
+  with autonomy on qualification. The key pair exists; its closure member,
+  environment binding, signer role and first automatic delivery belong to the
+  first Step 9 candidate, which also carries the refreshed helpers.
+- **Part A record.** Original-job runs on qualification, pipeline duration and
+  outage (exact times in the private journals and the share's receipts and
+  stop logs): forward runs 69, 75, 77, 79, 86 at 14 to 17 minutes with outages
+  of 9 to 13 minutes; same-release run 80 at 13.6 minutes, outage about 10
+  minutes; failure and recovery runs 81 to 84 and 87 to 89 at 4 to 14 minutes.
+  Every outage stayed inside the 1,800-second cap; the delivery marker replaced
+  the staging formula (role staging under a minute). Peak disk: no transient
+  peak above the final value (run 80); retained growth bounded by the helper's
+  evidence retention, which the consumer takes with its next helper refresh.
+- **Part B exit records.** Delivered candidates 55, 56, 58 and 59 each have a
+  registry entry binding revision and digests, a green two-phase pipeline
+  build with publication, native walks of the deployment tests, and (55, 56,
+  58) a native start rehearsal; 59's change, the start's installer call, is
+  covered by the native tests that run the real installer. The tools archive is
+  the same across them. Backup key custody: the trust folder's record
+  (custodian confirmation of 2026-10-07). Line budgets recounted at the last
+  candidate and the private mapping extended with the workstation tools; every
+  Python file stays under the 650-line ceiling (the candidate adapter in the
+  550-650 band).
 
 Closed on 2026-10-11 since the morning check: AC16 (run 80); R16 and the two
 recovery cases with no live route (decisions recorded above); hardening e
