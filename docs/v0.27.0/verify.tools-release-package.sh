@@ -1,6 +1,7 @@
 #!/bin/bash
 # Step 5 regressions: private-stage cleanup, real gate/tar inventory agreement,
-# and the inherited residual register's exact ownership accounting.
+# the installed pkg_tools wrapper reaching the deployed cplx copy, and the
+# inherited residual register's exact ownership accounting.
 # The checker observation seam records inputs; full closure runs separately in
 # the cumulative runner. These fixtures are not candidate acceptance evidence.
 set -euo pipefail
@@ -91,6 +92,60 @@ for mode in regular absent symlink hardlink directory python-link root-link; do
     package_case "$mode"
 done
 
+# The pkg_tools command install_pkg.sh writes into <prefix>/bin must run the
+# deployed cplx copy. The copy inside the tools payload refuses by design, so a
+# wrapper onto it could only exit 3; an account without a deployed copy gets no
+# command at all. A stub pkg.sh in the cplx tree reports which copy was reached.
+wrapper_case() (
+    set -euo pipefail
+    local mode=$1 base=$scratch/wrapper-$1 status=0 reached
+    # HOME is passed per command: the installer reads it for the cplx copy,
+    # pkg_tools.sh for the tree it packages and for its payload boundary.
+    local home=$base/home
+    mkdir -p "$home/tools/bin"
+    # The payload carries its own copies, as rsync.sh promotes them.
+    cp "$scratch/source/bin/pkg_tools.sh" "$scratch/source/bin/pkg.sh" "$home/tools/bin/"
+    cp "$root/src/setups/env/bin/pkg" "$home/tools/bin/pkg"
+    if [[ $mode == deployed ]]; then
+        mkdir -p "$home/cplx/bin"
+        cp "$scratch/source/bin/pkg_tools.sh" "$scratch/source/bin/install_pkg.sh" "$home/cplx/bin/"
+        cat > "$home/cplx/bin/pkg.sh" <<'PACKAGER'
+#!/bin/bash
+printf 'WRAPPER-REACHED|%s\n' "$(cd -- "${BASH_SOURCE[0]%/*}" && pwd -P)"
+PACKAGER
+    fi
+    (
+        # shellcheck disable=SC1090,SC1091
+        source "$scratch/source/bin/install_pkg.sh"
+        INSTALL_PREFIX=$home HOME=$home install_optional_bin_entries
+    ) > "$base/install.log" 2>&1
+    case "$mode" in
+        deployed)
+            reached="WRAPPER-REACHED|$(cd -- "$home/cplx/bin" && pwd -P)"
+            HOME=$home "$home/bin/pkg_tools" > "$base/run.log" 2>&1 || status=$?
+            if ((status)); then cat "$base/run.log"; return "$status"; fi
+            grep -qxF "$reached" "$base/run.log"
+            # The historical `pkg tools` route reaches the same copy through
+            # the dispatcher's overlay lookup in <prefix>/bin.
+            HOME=$home "$home/bin/pkg" tools > "$base/dispatch.log" 2>&1
+            grep -qxF "$reached" "$base/dispatch.log"
+            ;;
+        absent)
+            [[ ! -e $home/bin/pkg_tools && ! -L $home/bin/pkg_tools ]]
+            ;;
+    esac
+    # The control: the payload copy refuses here, so a wrapper onto it would
+    # have failed the deployed case rather than passed it.
+    status=0
+    HOME=$home bash "$home/tools/bin/pkg_tools.sh" > "$base/payload.log" 2>&1 || status=$?
+    [[ $status == 3 ]]
+    grep -q 'inside the tools payload' "$base/payload.log"
+    printf 'PASS wrapper/%s: pkg_tools never targets the payload copy\n' "$mode"
+)
+for mode in deployed absent; do
+    wrapper_case "$mode"
+done
+
 # Load only the literal register and four named, unchanged harness functions.
 # The boundary fixtures supply reconciled observations, while the production
 # bookkeeping decides stale, owned and unadjudicated cases. Do not source the
@@ -155,4 +210,4 @@ register_case() (
     printf 'PASS register/%s: exact inherited ownership result\n' "$mode"
 )
 for mode in clean stale unowned owned replaced; do register_case "$mode"; done
-printf 'PASS tools-release-package: 7 package cases, 5 register controls\n'
+printf 'PASS tools-release-package: 7 package cases, 2 wrapper cases, 5 register controls\n'

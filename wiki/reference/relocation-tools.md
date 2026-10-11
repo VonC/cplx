@@ -54,8 +54,11 @@ packages); any other code is the checker's own refusal status.
 ## `pkg_tools.sh`: the build-only stage
 
 `pkg_tools.sh [<pkg.sh args>...]` must run from the deployed cplx tree
-(`~/cplx/bin/`); a copy inside `~/tools` refuses with exit 3. It packages a
-stage, never the live tree, so the gate and tar read the same trimmed set:
+(`~/cplx/bin/`); a copy inside `~/tools` refuses with exit 3. The
+`<prefix>/bin/pkg_tools` command that `install_pkg.sh` installs runs that
+deployed copy, so an account without `~/cplx/bin/pkg_tools.sh` gets no such
+command. The script packages a stage, never the live tree, so the gate and
+tar read the same trimmed set:
 
 1. **Stage**: a hardlink mirror (`cp -al`) of `~/tools` in a fresh
    `~/.cplx-pkgstage.XXXXXXXX`. A symlink at a write boundary (`tools`,
@@ -134,7 +137,7 @@ The passes, in order:
 | text path fix | `/home/<user>/` anchors in every text file (shebangs, `pyvenv.cfg`, `*.pc`, activate scripts) | `grep -I` skips binaries; the new prefix is shielded behind a placeholder, so re-runs and `/home`-based prefixes are safe |
 | ELF fix | `PT_INTERP` → the deployed `ld-linux-x86-64.so.2`, and the search path → the deployed library directories (python's root first), written as **`DT_RPATH`** | the rpath axis selects by population, not by the value it finds; the interpreter axis still rewrites only values containing `/home/`; skipped with a warning when patchelf is absent |
 | venv exclusion | nothing: every directory holding a `pyvenv.cfg` is pruned from the ELF walk and logged as `Venv tree excluded from the ELF pass: <path>` | the symlink and text passes still relocate a shipped venv's `bin/python` link and `pyvenv.cfg` |
-| convenience bin | `<prefix>/bin`: `echos`, `compare_file.sh` and `pkg` (the shipped dispatcher) links, `pkg_tools` and `install_pkg` wrappers | only for sources present in the tree |
+| convenience bin | `<prefix>/bin`: `echos`, `compare_file.sh` and `pkg` (the shipped dispatcher) links, an `install_pkg` wrapper, and a `pkg_tools` wrapper onto the installing account's `~/cplx/bin/pkg_tools.sh` (never the payload copy, which refuses) | only for sources present: in the tree, or in `~/cplx/bin` for `pkg_tools` |
 
 ### What the ELF pass writes, and to which objects
 
