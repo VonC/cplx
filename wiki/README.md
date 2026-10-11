@@ -31,6 +31,8 @@ Background and reasoning: why cplx is built the way it is.
 - 📦 [The build order](explanation/the-build-order.md)
 - 📦 [Why binaries remember the build home](explanation/why-binaries-remember-the-build-home.md)
 - 📦 [Why the archive declares its own scope](explanation/why-the-archive-declares-its-own-scope.md)
+- 📦 [One archive, two distributions](explanation/one-archive-two-distributions.md)
+- 📦 [Lock-identical, not byte-identical](explanation/lock-identical-not-byte-identical.md)
 
 ## 🎓 Tutorials
 
@@ -54,6 +56,10 @@ Recipes for a precise goal, for readers who already know the basics.
 - 🌉 [Survive a server OS upgrade](how-to/survive-a-server-os-upgrade.md)
 - 📦 [Promote a build into the live tree](how-to/promote-a-build-into-the-live-tree.md)
 - 📦 [Relocate an install to another prefix](how-to/relocate-an-install-to-another-prefix.md)
+- 🔨 [Check Python SQLite capability](how-to/check-python-sqlite-capability.md)
+- 📦 [Validate a change on a foreign CI agent](how-to/validate-a-change-on-a-foreign-ci-agent.md)
+- 📦 [Rebuild and publish the tools archive](how-to/rebuild-and-publish-the-tools-archive.md)
+- 📦 [Deploy a Python environment offline](how-to/deploy-a-python-environment-offline.md)
 - 📦 [Manage git credentials with git-pass-helper](how-to/manage-git-credentials-with-git-pass-helper.md)
 - 🛠️ [Make a release](how-to/make-a-release.md)
 
@@ -70,4 +76,6 @@ Exact, dry descriptions of commands, formats and conventions.
 - 🌉 [steps.md format](reference/steps-file-format.md)
 - 📦 [Packaging and relocation tools](reference/relocation-tools.md)
 - 📦 [Runtime closure checker](reference/toolchain-runtime-closure.md)
+- 📦 [Python wrapper](reference/python-wrapper.md)
+- 📦 [Deployment venv helpers](reference/deploy-venv-helpers.md)
 - 🛠️ [Exit codes](reference/exit-codes.md)

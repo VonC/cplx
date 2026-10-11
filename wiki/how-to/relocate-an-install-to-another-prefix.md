@@ -34,12 +34,16 @@ re-anchors every one of those paths at unpack time.
 
 ## 📋 Steps
 
-1. On the build account, package the live tree:
+1. On the build account, package the live tree from the deployed cplx
+   tree:
 
    ```bash
-   pkg.sh tools        # from ~/tools/bin or ~/cplx/bin
+   ~/cplx/bin/pkg_tools.sh
    ```
 
+   It trims a private stage of `~/tools` and runs the closure gate before
+   tar; a bare `pkg.sh tools` refuses, and so does a copy run from inside
+   `~/tools` ([Packaging and relocation tools](../reference/relocation-tools.md#pkg_toolssh-the-build-only-stage)).
    The script prints the archive path; an unchanged tree reuses the
    previous archive (SHA1 dedup) and `~/pkgs/tools.latest.tar.gz` always
    points at the newest one.
@@ -60,11 +64,23 @@ re-anchors every one of those paths at unpack time.
    ```
 
    Omit `--prefix` for the historical same-account layout (it defaults
-   to `$HOME`). After the rsync, the script re-anchors symlinks, clears
-   `__pycache__`, rewrites text paths, patches every ELF interpreter and
-   rpath, and installs convenience commands in `<prefix>/bin`. Re-running
-   is safe (`--force` to reinstall an already-deployed archive), even for
-   a prefix that itself lives under `/home`.
+   to `$HOME`). After the mirror (rsync, or `cp` on a host without it),
+   the script re-anchors symlinks, clears `__pycache__`, rewrites text
+   paths, patches every ELF interpreter and rpath outside venv trees, and
+   installs convenience commands in `<prefix>/bin`. Re-running is safe
+   (`--force` to reinstall an already-deployed archive), even for a prefix
+   that itself lives under `/home`.
+
+   When you verified a specific archive (by its SHA-256, for instance),
+   install exactly that file rather than the newest one found:
+
+   ```bash
+   bash install_pkg.sh tools --prefix <prefix> \
+       --archive <prefix>/pkgs/tools.<stamp>.tar.gz
+   ```
+
+   The path must be absolute and name a regular `tools.*.tar.gz` file;
+   otherwise the script exits 2 before extracting anything.
 
 4. To rehearse a future `$HOME` deployment from another account, override
    `HOME` for the install commands instead of passing `--prefix`:
@@ -101,7 +117,16 @@ programs above it looked correct.
 
 For a relocated Python, the test that exercises loader and rpath at once
 is an import: `<prefix>/tools/python/current/bin/python -c "import ssl,
-zlib; print('ok')"`.
+zlib; print('ok')"`. Include `sqlite3` in it: an archive built since v0.27.0
+must answer `import sqlite3` with its own `libsqlite3.so.0`, which ships under
+`tools/python/root/usr/lib64` ([Check Python SQLite capability](check-python-sqlite-capability.md)).
+
+If the archive or the prefix carries a venv, the install log names it once
+per tree with `Venv tree excluded from the ELF pass: <path>`. Expect the
+single `CPLX-ELF/1 end` line to read `state=completed reason=none` with
+`r-failed=0` and `i-failed=0`: the installer only warns about a failed
+write, so the counters are where it shows. A `state=skipped reason=patchelf-absent` line
+means no ELF was relocated at all.
 
 From an account that can still read the build home, absence of failure
 proves nothing; observe instead: `LD_DEBUG=libs <binary> 2>&1 | grep
@@ -114,3 +139,5 @@ proves nothing; observe instead: `LD_DEBUG=libs <binary> 2>&1 | grep
   flags, passes and exit codes.
 - [Promote a build into the live tree](promote-a-build-into-the-live-tree.md):
   what `pkg.sh` packages.
+- [Validate a change on a foreign CI agent](validate-a-change-on-a-foreign-ci-agent.md):
+  the same relocation, proved on another distribution.
