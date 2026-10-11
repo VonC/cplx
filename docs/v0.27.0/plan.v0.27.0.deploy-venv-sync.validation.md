@@ -1259,7 +1259,25 @@ generic. No required Step 7 work remains unimplemented.
 
 ### Analysis of Step 8 implementation state
 
-No. Step 8 has NOT been fully implemented.
+Yes. Step 8 has been fully implemented.
+
+Round 8 reviewer assessment: F1 is resolved by the delivered candidate's ready
+result, retention receipt and independent read-only target measurements. F2 is
+resolved by decision T1 and the continuous failure/recovery timing account;
+the cap applies to each attempt. The outgoing verifier fixture is byte-identical
+to the earlier release's verifier and exercises the newly prepared closure.
+Static review found no additional defect in the compatibility or signing changes.
+AC16, functional AC17 and the accepted fixture exceptions remain supported.
+The signer handoff and historical replay remain in Step 9. No implementation or
+test repair was made by the reviewer.
+
+Earlier dated assessments below are history, superseded by this round's
+assessment where they describe execution as absent or review as the only gap.
+
+Writer answer, night of 2026-10-11, for round 8: F1 is answered by candidate 62,
+delivered through the original job and measured on the target (run 94); F2 by
+the human's decision T1 and a continuous timing account of each failure chain.
+Both answers are recorded in the writer responses below and accepted in round 8.
 
 Writer check on the evening of 2026-10-11: everything the step asks for has
 run for real except its code exchange. AC16 closed with a signed same-release
@@ -1454,8 +1472,9 @@ runs of the consumer's qualification deploy pipeline.
   original job: run 69 (N to N+1), run 72 failed at stop on a post-stop race and
   run 73 delivered under a fresh signed attempt with the same checkpoint, runs 75
   and 77. Run 71, an unsigned launch naming a newer release, was refused at start
-  and restarted the running release (R19). Outages measured 9 to 17 minutes,
-  inside the 1,800-second cap; marker staging took under a minute.
+  and restarted the running release (R19). Each was one attempt, with outages
+  of 9 to 17 minutes inside the 1,800-second per-attempt cap (decision T1);
+  marker staging took under a minute.
 - **Part H.** After run 77 both external endpoints, read independently of the
   pipeline, named the qualification environment, the exact clean revision and
   the application account's project root; on the host, read under the
@@ -1506,10 +1525,9 @@ Writer record of the afternoon of 2026-10-11:
   proposed as a QAL-only automation key used from our side (no pipeline
   credential store exists), awaiting the human.
 
-### Missing work for Step 8
-
-- **Code exchange.** One review round on the final Step 8 bytes (decided
-  2026-10-11); resolve its findings before closing the step.
+Round 8 closes the code assessment and both round 7 findings. No required
+Step 8 work remains. The accepted R16, historical-format, transfer-failure
+and signer decisions remain in force.
 
 Evening record of 2026-10-11:
 
@@ -1534,10 +1552,13 @@ Evening record of 2026-10-11:
   stop logs): forward runs 69, 75, 77, 79, 86 at 14 to 17 minutes with outages
   of 9 to 13 minutes; same-release run 80 at 13.6 minutes, outage about 10
   minutes; failure and recovery runs 81 to 84 and 87 to 89 at 4 to 14 minutes.
-  Every outage stayed inside the 1,800-second cap; the delivery marker replaced
-  the staging formula (role staging under a minute). Peak disk: no transient
-  peak above the final value (run 80); retained growth bounded by the helper's
-  evidence retention, which the consumer takes with its next helper refresh.
+  Individual attempts stayed inside the 1,800-second cap, which bounds one
+  attempt (decision T1); the uninterrupted outage across failure and recovery
+  attempts is accounted separately in the writer response to F2 below.
+  The delivery marker replaced the staging formula (role staging under a
+  minute). Peak disk: no transient peak above the final value (run 80). The
+  helper's retention policy was then qualified on the target with candidate 62
+  (writer response to F1 below).
 - **Part B exit records.** Delivered candidates 55, 56, 58 and 59 each have a
   registry entry binding revision and digests, a green two-phase pipeline
   build with publication, native walks of the deployment tests, and (55, 56,
@@ -1548,6 +1569,58 @@ Evening record of 2026-10-11:
   candidate and the private mapping extended with the workstation tools; every
   Python file stays under the 650-line ceiling (the candidate adapter in the
   550-650 band).
+
+Writer response to round 7, F1 (retention on delivered bytes), on 2026-10-11:
+
+- **Candidate 62, delivered.** The first candidate that carries the refreshed
+  helper and starts cleanly went forward through the original job (run 94, one
+  attempt of 11 min 12 s, `consumed`, service supervised, no hold). Its
+  installer's environment operation kept only its logs, metadata, result and
+  inventory (uv cache, file source and selected wheels dropped), and the
+  retained operations went from 6 to 5 and from 4.1 GB to 2.5 GB, with 277 GB
+  free on the application filesystem afterwards. Its identity is bound by its
+  registry entry and its receipts on the share.
+- **Candidate 61, first carrier.** Its installer had already pruned the target
+  in run 91, from 29 operations and 24 GB to 5 operations and 3.3 GB. Its start
+  then failed for an unrelated reason, and a typed recovery (run 92,
+  `recovered`) restored the running release, whose older helper added one
+  unpruned operation back; run 94 removed it.
+- **Run 91's failure and its fix.** Candidate 61 also put the qualification
+  automation key into the control closure. Right after a clean installation,
+  the start of the release being replaced binds the new closure with its own
+  verifier, which knew no layout one member longer, and refused it within
+  seconds, before the application started. Candidate 62 prepares the layout
+  the outgoing release knows and verifies the longer one, so the key joins the
+  closure one release later (Step 9). A test now runs the outgoing release's
+  own verifier on every closure the tree prepares; the single-release native
+  rehearsal could not have shown it.
+
+Writer response to round 7, F2 (outage accounting), on 2026-10-11:
+
+- **Decision T1 (human, 2026-10-11).** The 1,800-second cap bounds one
+  attempt: from its stop to verified health and same-daemon supervision, or to
+  its held-failure receipt. After a failure past the installer the design keeps
+  the application held and waits for a signed typed recovery (recovery first,
+  no automatic rollback), so the continuous outage across a failure and its
+  recoveries is recorded as measured evidence, not held to the cap. No code
+  change.
+- **Attempts, stop to end receipt** (stop logs and attempt receipts on the
+  share): forward run 79 10 min 08 s, same-release run 80 10 min 53 s, forward
+  run 86 10 min 59 s; failure run 87 9 min 51 s, recovery run 88 10 min 42 s,
+  recovery run 89 11 min 37 s. Every attempt stays inside the cap.
+- **Continuous outage of the AC17 chain:** stop of run 87 at 17:48:10 to the
+  `recovered` receipt of run 89 at 18:27:04, 38 min 54 s. The deliberate fault
+  (a process holding the server port) lasted from 17:48:48 until just after
+  run 88's failure receipt at 18:12:18, about 24 minutes, and made run 88 fail
+  on purpose. Between attempts: 3 min 35 s and 3 min 09 s, of which about 40
+  seconds to render, sign and trigger and the rest the job's own start before
+  its stop. One failure plus one recovery, without the deliberate second
+  failure, sums to about 25 minutes from these measured parts; it was not run
+  as one chain.
+- **Continuous outage of the first AC17 run:** run 81's stop at 15:01:56 to the
+  service supervised again by run 84 at about 15:39, about 37 minutes, caused
+  by the installer-call defect (two recoveries that could not run, then about
+  14 minutes of diagnosis); the defect is fixed in the next candidate.
 
 Closed on 2026-10-11 since the morning check: AC16 (run 80); R16 and the two
 recovery cases with no live route (decisions recorded above); hardening e
@@ -1584,11 +1657,15 @@ Writer check on 2026-10-11: the forward route, the marker admission and the
 stop's restore of the running release stay inside the stable closure's owners;
 the stop now calls the held-start proof for its own reserved attempt, a narrow
 documented entry rather than a second start path. The workstation delivery
-driver reuses the controller's verification and rendering and imports small
-helpers (hashing, refusal, download) from the registration tool; a shared
-helper module would remove that coupling.
+driver reuses the controller's verification and rendering. Round 7 inspection
+finds hashing, refusal and download helpers in a shared module, used by both
+workstation tools; the earlier helper-coupling observation is resolved.
 
-Yes, the helper coupling between the two workstation tools needs addressing.
+Round 8: the compatibility adapter prepares a layout the outgoing verifier
+accepts while learning the next layout. Trust remains fingerprint-pinned and
+the additional signer remains restricted to qualification when its key is in
+the verified closure. The workstation entry point delegates each subcommand
+to its own function. No additional architecture fix was identified.
 
 ### Performance check for Step 8
 
@@ -1603,8 +1680,9 @@ exact-candidate qualification within the existing deadlines.
 Part A's T/D/N/O budget and actual G timing/peak-disk evidence are absent. Unit
 fixture timings do not qualify the unchanged role's transfer and staging workload.
 
-Writer check on 2026-10-11: actual forward deliveries took 9 to 17 minutes of
-outage against the 1,800-second cap, and the delivery marker cut role staging
+Writer check on 2026-10-11: actual forward deliveries, one attempt each, took
+9 to 17 minutes of outage against the 1,800-second per-attempt cap (decision
+T1, recorded later that day), and the delivery marker cut role staging
 to under a minute; acquisition of the release (about 800 MB) runs before the
 outage under its own 600-second bound. The comparison and scan costs above are
 unchanged. Peak disk per delivery is still unmeasured, and retained releases
@@ -1615,8 +1693,29 @@ above the final value; the retained growth (about 1.7 GiB per install, most of
 it venv evidence) now has a bound in the helper (five newest operations,
 reproducible copies dropped on success).
 
-Yes, the retention bound must be confirmed on the target once the consumer
-carries the refreshed helper.
+Round 7: `prune_evidence` removes a successful operation's reproducible copies
+and sorts retained operations before pruning, giving O(n log n) ordering cost
+in the operation count. Cleanup is best effort and records errors; source alone
+does not establish the target's disk bound. Each fresh recovery attempt also
+gets its own deadline, so bounded attempts do not prove that a continuous outage
+spanning retries fits the plan's single-budget rule. Deliberate fault injection
+must be accounted for explicitly in that qualification evidence.
+
+Writer response, evening of 2026-10-11: decision T1 makes the cap a bound on
+one attempt; every measured attempt fits, and the continuous failure and
+recovery outages are accounted in the writer responses (38 min 54 s for the AC17
+chain including about 24 minutes of deliberate fault, about 25 minutes for one
+failure and one recovery from measured parts). The retention bound has its
+target evidence: run 94 left five operations and 2.5 GB, the new one without
+its reproducible copies.
+
+Round 8 independently confirms the retained-operation count, disk usage,
+headroom and the successful operation's removal of reproducible copies. Its
+ready result binds the measured operation to the registered candidate's inputs.
+The stop log and successful receipt agree with the recorded attempt duration.
+Decision T1 and the continuous timing account resolve the earlier budget
+question without changing recovery behavior. No further performance fix is
+identified; both F1 and F2 are closed.
 
 ### Unit test coverage check for Step 8
 
@@ -1655,8 +1754,39 @@ function of the registration tool and of the delivery driver is called by their
 tests or from the driver's entry point. The native rehearsal script has no unit
 test; its evidence is two real passing runs on the reference host.
 
-No unit-tested class below 100% needs completing. No top-level symbol of the
-unmeasured tooling is unreferenced.
+Round 7 static assessment: the regression tests call the real start/installer
+boundary, check the rollback environment flag and pending-record flag, preserve
+the forward force argument, and require the shipped installer to reach its
+rollback branch. Recovery-mode checks bind pending candidate, checkpoint and
+installed identity; the retained native execution and actual repeated recovery
+support this fix. Shared workstation helpers have callers in their tool modules.
+
+The request's consumer full walk reported a nonzero duration-gate result despite
+no failing tests. The later rerun is not established by the retained completed
+evidence inspected here; no speed-proof claim is made. This is distinct from
+cplx's declared shell lint floor and the qualified candidate's native receipts.
+The reviewer ran no validation or coverage command. Coverage of the deployment
+tooling remains unmeasured by the application-only gate.
+
+Writer record, evening of 2026-10-11: a later consumer full walk on the next
+candidate's committed bytes ended with no failing test and 100% coverage of
+the measured source, and again with a nonzero duration gate (12 calls between
+1.03 and 1.52 seconds against the 1.00-second floor, all real-browser or
+real-client acceptance cases, measured on a loaded workstation). No consumer
+speed proof is claimed.
+
+Round 8 static review checks the real outgoing verifier fixture, current/next/
+legacy layout acceptance and damaged-layout refusal, both custodian signatures
+without the optional key, and refusal of its signature when absent or outside
+qualification. The workstation tests cover signer refusal and delivery order.
+The retained native results include the focused rerun after the test cleanup
+fix. The consumer full walk predates the final compatibility fix and remains
+duration-gate nonzero; it is not a final-candidate speed proof. The reviewer
+ran no test or coverage command in this round.
+
+No additional unit-tested class coverage gap was identified by static review;
+100% coverage of the deployment tooling is unestablished. No unreferenced
+top-level symbol was identified in the inspected changes.
 
 ### Feature integrity for Step 8
 
@@ -1679,6 +1809,12 @@ supervised, and every delivery left the previous release retained. No existing
 feature or report is impaired by the original-route deliveries; an unauthorized
 delivery cannot install. The open items are the acceptance gaps listed under
 missing work, not regressions.
+
+Round 8 preserves the recorded AC16 and functional AC17 results and the human's
+accepted deviations. Both carried findings are resolved. The delivered
+compatibility fix has original-route evidence and a test using the outgoing
+verifier. Only Step 8 validation rows were changed by the reviewer. Other steps
+and the umbrella remain intact; Step 9 still prevents whole-topic completion.
 
 ## Step 9. Deliver first-time and production installations through unchanged orchestration
 
