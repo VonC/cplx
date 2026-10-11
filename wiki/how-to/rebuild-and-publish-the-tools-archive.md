@@ -78,9 +78,14 @@ overwritten, so every gate below runs before it.
        --adapter <consumer-adapter> --expected-sha256 "$SHA"
    ```
 
-   The validator only accepts the Python versions its release policy names
-   (3.13.14 or 3.13.15 today) and a non-`SNAPSHOT` releases coordinate.
-   Pass the explicit archive: never let a `latest` link reselect the bytes.
+   The validator pins the qualified interpreters. It accepts a record whose
+   `candidate.python` is exactly `3.13.15` with a `regression.decision` of
+   `clean`, or exactly `3.13.14` with `blocking regression`. Any other
+   version refuses (`unsupported release Python`), and so does any other
+   pairing, an inconclusive finding included (`Python selection requires a
+   conclusive regression decision`). It also requires a non-`SNAPSHOT`
+   releases coordinate. Pass the explicit archive: never let a `latest`
+   link reselect the bytes.
 
 7. **Adopt with publication off.** Remove the candidate inputs, raise the
    consumer's tools pin to the new release, and keep its application
@@ -106,6 +111,25 @@ the accepted SHA-256, and `tools_release_record.py completion` exits 0.
   compatible consumer configuration, uploads still off, and verify that
   combination through the normal gate before uploads resume. The failed
   release stays as it is; a fix is a new candidate and a new version.
+
+## When a new Python version is qualified
+
+The accepted pair is code, not configuration: a record naming a newly
+qualified version refuses until the validator is changed. Qualifying a new
+patch release (the newest becomes the preferred version, the one before it
+the fallback) is a reviewed change in three places:
+
+- `validate_metadata` in `src/setups/env/bin/tools_release_record.py`: the
+  set `candidate["python"]` must belong to, and the rule that requires
+  `clean` for the preferred version and `blocking regression` for the
+  fallback;
+- `tests/unit/tools_release_record/test_tools_release_record/test_tools_release_record_tdd.py`:
+  the `python` of the baseline record, the fallback case
+  (`test_renewal_fallback_and_one_d10_rebuild_are_supported`), and the
+  refused version in `test_required_metadata_mutations_fail_closed`, which
+  must stay outside the new set;
+- the closure declaration's `python-<version>` record, renewed as step 1
+  describes.
 
 ## 👉 See also
 
