@@ -2125,7 +2125,7 @@ The Step 3 review also asked Step 4 to document the closed launcher interface.
 The staged pages had three defects, now repaired and staged:
 
 - The `setup.bat` table still listed fatal 42 for `packages reset`, and the
-  `senv.bat` note said `s packages reset` fatals 42. Step 3 (`a86f221`) removed
+  `senv.bat` note said `s packages reset` fatals 42. Step 3 (`53bb6e4`) removed
   that CMD check; an unset `CPLX_TOOL` now reaches `setup_packages.sh` fatal 12.
 - The new 111 row sat in the combined `setup.bat` / `setup.sh` /
   `setup_packages.sh` table, where `setup.sh` already uses 111 for a failed

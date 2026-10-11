@@ -130,11 +130,11 @@ fallback). It does bear on how D9 applies to the generated package index.
 
 ##### E1: cross-minor index reuse already caused a silent defect for feature-request architecture-minor-fallback (round 1)
 
-Commit `18c251d` (2026-08-24, "move the package key to rhel 9.8") records why
+Commit `f69979f` (2026-08-24, "move the package key to rhel 9.8") records why
 the 9.8 index had to be generated: while the key still named 9.6, "the package
 pipeline therefore resolved 9.6-era packages onto a 9.8 server, which is how the
 sandbox came to hold a binutils whose libraries the upgraded system no longer
-carried". The 9.6 index dates from 2025-07-21 (`af5f50c`). In other words, the
+carried". The 9.6 index dates from 2025-07-21 (`99eda11`). In other words, the
 exact situation that index fallback would create on purpose (a 9.8 server
 reading an older minor's index snapshot) has already produced an incoherent
 sandbox. The setup reported success, and the failure only showed later. That
@@ -143,7 +143,7 @@ postdates D9 (2026-08-07) and is the main input to Q06.
 ##### E2: the 9.6 and 9.8 python lists are not duplicates for feature-request architecture-minor-fallback (round 1)
 
 `git diff --no-index` over the two lists shows exactly one difference: the 9.6
-list carries `zlib-dev` (added by `b1c7b16`), and `18c251d` corrected it to
+list carries `zlib-dev` (added by `91f7c19`), and `f69979f` corrected it to
 `zlib-devel` in the 9.8 list only, noting that it "resolved to nothing and would
 stop the list at its third line". `zlib-dev-[0-9]` matches zero lines in both
 generated indexes, while `zlib-devel-1.2.11-41.el9.x86_64.rpm` is present in both.
@@ -228,7 +228,7 @@ proposed one.
 | Q03 | Agree, add diagnostic content | A |
 | Q04 | Agree in principle, answer text contradicts the code | A, with absence defined per metadata kind |
 | Q05 | Agree, add candidate symmetry | A |
-| Q06 | Disagree on the evidence of commit `18c251d` | New option C: no cross-minor index reuse; generate for the detected key |
+| Q06 | Disagree on the evidence of commit `f69979f` | New option C: no cross-minor index reuse; generate for the detected key |
 | Q07 | Agree, must be applied to the actual files | A, plus new Q10 |
 | Q08 | Agree, premise is inaccurate | A, for the corrected reason |
 | Q09 | Agree | A |
@@ -313,7 +313,7 @@ underscore, so no prefix or suffix match may decide eligibility."
 #### Verdict on Q06: generated index identity for feature-request architecture-minor-fallback (round 1)
 
 Disagree with the proposed Option A, on evidence the question does not cite.
-Commit `18c251d` records that a 9.8 server resolving packages from the 9.6 index
+Commit `f69979f` records that a 9.8 server resolving packages from the 9.6 index
 (generated 2025-07-21) produced a sandbox holding a binutils whose libraries the
 upgraded system no longer carried, with no setup failure. Option A's "reuse an
 eligible existing index for normal reads" reproduces that situation on purpose
@@ -338,7 +338,7 @@ detected key. A generation failure stops with its diagnostic."
 - Pro: a minor upgrade is exactly the event at which the snapshot must be
   refreshed, and C turns it into an automatic regeneration instead of a manual
   copy. The index and its download mirrors come from one resolution (Q02).
-  The incident of `18c251d` cannot recur through fallback.
+  The incident of `f69979f` cannot recur through fallback.
 - Con: this narrows D9's application. Fallback then covers the per-tool list and
   the mirror definition, not the index. The first package run after an upgrade
   needs mirror access, and one generated index per minor accumulates as a
@@ -347,7 +347,7 @@ detected key. A generation failure stops with its diagnostic."
 I would choose C. Because it changes one of the three lookups D9's item text
 names, record it as a D9 application decision for the human at consolidation,
 not as a silent rewording. If the human keeps index reuse (A), the requirement
-must at least: record the `18c251d` incident; report the selected index's key
+must at least: record the `f69979f` incident; report the selected index's key
 prominently; add the Q02 pairing sentence; and state the marker and empty-file
 behaviors above, since otherwise "generate when absent" never happens.
 
@@ -434,9 +434,9 @@ Requested changes:
 - **After the table.** Replace "The RHEL 9.6 and 9.8 definitions use the same
   rolling CentOS 9 Stream mirrors. Their duplicated names..." with a statement
   per file: the git lists and mirror values are identical; the python lists
-  differ by the `zlib-dev` to `zlib-devel` correction made in `18c251d`, the
+  differ by the `zlib-dev` to `zlib-devel` correction made in `f69979f`, the
   9.6 entry resolving to nothing; the generated indexes differ.
-- **New paragraph in the revision section.** Record the `18c251d` incident: a
+- **New paragraph in the revision section.** Record the `f69979f` incident: a
   9.8 server resolving packages from the 2025-07-21 9.6 index produced a sandbox
   whose binutils needed libraries the upgraded system no longer carried, without
   a setup failure.
@@ -492,7 +492,7 @@ Requested changes:
 #### Instructions for the writer for feature-request architecture-minor-fallback (round 1)
 
 1. Revise the requirement body before the questions. Record the new evidence
-   (the commit `18c251d` incident, the `zlib-dev` defect in the 9.6 python list,
+   (the commit `f69979f` incident, the `zlib-dev` defect in the 9.6 python list,
    the lookup-created empty index, the architecture-independent generation
    marker, the empty-or-absent property contract, fatal 9 before 902) where it
    bears on current behavior. Keep it as evidence, not implementation design.
@@ -538,7 +538,7 @@ Review round: 2
 ### Requestor assessment for feature-request architecture-minor-fallback (round 2)
 
 The round 1 changes are supported by repository evidence and have been applied
-to the requirement and its proposed answers. I verified commit 18c251d, the
+to the requirement and its proposed answers. I verified commit f69979f, the
 Python zlib-dev/zlib-devel difference, identical Git lists, different generated
 index contents, identical tracked mirror values, the generation completion
 marker and reload behavior, empty index creation, property-reader semantics,
@@ -570,7 +570,7 @@ that explicit human decision, not treat the proposals as already approved.
 
 ### Change summary for feature-request architecture-minor-fallback (round 2)
 
-Added the 18c251d stale-index incident and the actual curated-file differences
+Added the f69979f stale-index incident and the actual curated-file differences
 to the requirement. Corrected the missing-list failure path, index placeholder
 and completion-marker behavior, empty mirror semantics, and new-tool seeds.
 
@@ -611,7 +611,7 @@ retained present empty/comment-only list semantics and ordinary invalid-input
 errors, removed lookup placeholder creation, and made numeric-minor fallback
 and whole distribution/machine boundaries explicit in both directions.
 
-R1/Q06: accepted the new proposed option C based on 18c251d. Missing or empty
+R1/Q06: accepted the new proposed option C based on f69979f. Missing or empty
 detected-key indexes require generation despite completion markers; either
 reload flag forces regeneration. Generation failure remains a failure, and no
 other minor's snapshot is reused. Existing nonempty exact indexes retain their
@@ -696,7 +696,7 @@ the remote `~/tools/pkgs` (`get_full_package_name` in
 `src/setups/env/bin/packages_management.sh:356-386`, highest version wins), not
 against the index. Under the proposed Q06 C and AC10, the freshly generated 9.8
 index would then feed no download and no copy. The remote installation would
-reuse whatever the pre-upgrade runs staged. That is the `18c251d` failure mode
+reuse whatever the pre-upgrade runs staged. That is the `f69979f` failure mode
 again, reached through the resume marker instead of through index reuse, and
 AC7 ("completes dependency setup for Python and Git ... resolves `zlib-devel`")
 could pass without a single package having gone through the selected metadata.
@@ -744,7 +744,7 @@ single-package path.
 Q01 to Q10 need no further change. Two optional polish points, which do not by
 themselves justify a round:
 
-- Q06 option C's Pro could name the evidence directly: "prevents the `18c251d`
+- Q06 option C's Pro could name the evidence directly: "prevents the `f69979f`
   outcome from recurring through fallback".
 - Q10's question body could say "resolves in neither generated index" instead of
   "resolves in neither index", matching the body's snapshot wording.
@@ -1014,7 +1014,7 @@ No question is missing, redundant, or out of the selected scope.
 
 - Q01 D, Q06 C, Q10 A and Q11 A refine or narrow D9 as confirmed on 2026-08-07.
   Each refinement rests on repository evidence recorded in the requirement:
-  commit `18c251d`, the `zlib-dev` defect, and the current python resume marker.
+  commit `f69979f`, the `zlib-dev` defect, and the current python resume marker.
 - If Q06 A is chosen instead, the Q02 answer already records the pairing that
   acceptance must then carry. If Q11 B is chosen instead, the Q11 answer already
   records the AC7 and upgrade-procedure reset it requires. The alternatives are
@@ -1039,7 +1039,7 @@ Covered wording:
    resolves in neither generated index".
 3. **Question bodies Q05, Q06, Q07, Q08 and Q10.** Format identifiers as code,
    as the requirement body does: `centos_8_x86_64`, `rhel_7.9_x86_64`,
-   `x86_64`, `18c251d`, `zlib-dev`, `zlib-devel`, `tools/add_tool.bat`,
+   `x86_64`, `f69979f`, `zlib-dev`, `zlib-devel`, `tools/add_tool.bat`,
    `setup.properties`, `pkgs/<arch>/` and `tools/pkgs/`.
 
 Convergence rationale:

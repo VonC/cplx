@@ -12545,12 +12545,12 @@ instruction, so it cannot be lost while this exchange waits on an unstarted
 requirement:
 
 ```text
-a8945d9  fix(setups): read single-quoted hrefs in the index
-c51e4e8  fix(pkgs): resolve version ambiguity instead of refusing it
-e78bdf3  fix(install): derive the prefix from the version built
-68c7fbe  build(setups): move the package key to rhel 9.8
-7360b2e  build(senv): put shellcheck on the project path
-7be1c5d  docs(cplx): correct the tool-version and umbrella records
+a99ca67  fix(setups): read single-quoted hrefs in the index
+2f90408  fix(pkgs): resolve version ambiguity instead of refusing it
+2137516  fix(install): derive the prefix from the version built
+9a8801f  build(setups): move the package key to rhel 9.8
+9963f1b  build(senv): put shellcheck on the project path
+148fd36  docs(cplx): correct the tool-version and umbrella records
 ```
 
 It was done through the `group-commits-msg` batch entry over a temporary root
@@ -18369,7 +18369,7 @@ No production code is in this step and none changed. `install_pkg.sh` is not
 staged.
 
 This is round 1 of a new exchange for step 5. The step 4 exchange completed and
-its ten commits are on the branch, ending at `b0d10a4`.
+its ten commits are on the branch, ending at `69a8c6e`.
 
 No CI repository commit accompanies this round. Step 5 needs no agent build, so
 no verification input was synced and no build was triggered.
@@ -18941,7 +18941,7 @@ Production change in this step, declared: `src/setups/env/bin/install_pkg.sh`.
 Step 6 was planned "None in code" and the plan now records why it is not.
 
 This is round 1 of a new exchange for step 6. The step 5 exchange completed and
-its four commits are on the branch, ending at `8438a0c`.
+its four commits are on the branch, ending at `268c60c`.
 
 The CI repository carries four matching commits for this step, not part of this
 staged set: the step 6 capture wiring, the failure naming, the observation and

@@ -2153,11 +2153,11 @@ commit, so every figure is reproducible from the history rather than recalled.
 
 | Point | Commit | Physical lines | Delta |
 | --- | --- | --- | --- |
-| baseline, before the effort's production work | `ddebdc7` | 625 | - |
-| Step 0, the source-safe seam | `a19da45` | 649 | +24 |
-| Step 1, the observer | `2ab83f4` | 874 | +225 |
-| Step 2, the classifier | `bed0229` | 1015 | +141 |
-| Step 3, the formatter | `31db242` | 1120 | +105 |
+| baseline, before the effort's production work | `067d85b` | 625 | - |
+| Step 0, the source-safe seam | `33cbf74` | 649 | +24 |
+| Step 1, the observer | `66a7174` | 874 | +225 |
+| Step 2, the classifier | `b7cf1e2` | 1015 | +141 |
+| Step 3, the formatter | `8ae8d5a` | 1120 | +105 |
 | **Step 4, the wiring and the loader rule** | staged | **1281** | **+161** |
 
 Non-blank, non-comment lines: 631 at Step 3, 693 staged at Step 4, so 62 of the

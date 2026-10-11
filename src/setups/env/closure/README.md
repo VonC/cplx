@@ -120,8 +120,8 @@ The human authorized that auxiliary commit and its later retention merge on
 | Identity | Value |
 | --- | --- |
 | Source path | `src/setups/env/closure/closure-config.txt` |
-| Source snapshot | `13c80d572ba7bda91728806ad7dc11c53629a506` |
-| Source parent | `3a1d1135a3e627b74d134db24694121e70ea6b14` |
+| Source snapshot | `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7` |
+| Source parent | `3286fed0db223df7a60694367f4b8811ed16c762` |
 | Committed declaration SHA-256 | `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa` |
 
 The source snapshot changes only the declaration. It was created on
@@ -135,7 +135,7 @@ These commands extract the exact source blob and regenerate the pair from the
 repository root; the digest comes from Git's blob bytes, not a Windows checkout:
 
 ```sh
-source_sha=13c80d572ba7bda91728806ad7dc11c53629a506
+source_sha=f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7
 path=src/setups/env/closure/closure-config.txt
 git cat-file blob "$source_sha:$path" > a.sqlite-source-committed.txt
 sha256sum a.sqlite-source-committed.txt
@@ -161,7 +161,7 @@ closure_config_authority_check "$PWD" src/setups/env/closure/closure-config.txt 
 ```
 
 After review and the human-authorized grouped commits, the `ours` strategy
-merge `5f8d4d67ca549bb74e3bcbb798124d628c3d0619` retained the source snapshot
+merge `f26454defc6eab1b35b9a61609215ea83547b7a6` retained the source snapshot
 as its second parent. The tree before and after that merge is
 `ac3f0249da80b3afb7387a11a2ae6199da9c4cdd`. A temporary `pre-merge-commit`
 called the existing `pre-commit`; Git also ran `commit-msg`. All original hook

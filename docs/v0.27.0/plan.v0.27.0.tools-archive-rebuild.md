@@ -221,7 +221,7 @@ acceptance view; Step 2 will index their retained captures in the sidecar.
 
 The frozen closure Step 5 suite depends on the retired SQLite waiver. Reuse the
 prior SQLite effort's documented historical-control method: retain the exact
-declaration/envelope pair from `3a1d1135a3e627b74d134db24694121e70ea6b14`, verify
+declaration/envelope pair from `3286fed0db223df7a60694367f4b8811ed16c762`, verify
 their hashes, and run current scripts in an owned copy through `--shipped-dir`.
 Also run `verify.python-sqlite-closure.sh --fixtures-only` for the current floor.
 Keep historical regression evidence separate from candidate acceptance; do not
@@ -479,8 +479,8 @@ Use the existing SQLite build acceptance and same-process file-backed probe.
 Re-run all inherited closure/packaging checks. Package through `pkg_tools.sh`
 and retain timestamped name, size, SHA-1 and SHA-256. Keep source-envelope commit,
 declaration digest and final publishing revision distinct. The current source
-authority is `13c80d572ba7bda91728806ad7dc11c53629a506`, retained by merge
-`5f8d4d67ca549bb74e3bcbb798124d628c3d0619`; verify reachability from the actual
+authority is `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7`, retained by merge
+`f26454defc6eab1b35b9a61609215ea83547b7a6`; verify reachability from the actual
 publishing checkout. If declaration changes, execute the complete
 [item 6 Step 3 contract](plan.v0.27.0.python-sqlite-support.md#step-3-bind-the-candidate-layout-to-its-closure-declaration),
 including authorization, exact source snapshot, paired delivery, retention merge

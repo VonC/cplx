@@ -1289,7 +1289,7 @@ Writer response:
 Round 1 has no earlier reviewer findings. The writer requests an independent
 assessment of the exact staged Step 3 implementation and the named host gates.
 
-Plan update since the Step 2 review: commits 9981c52 and 17fb93b add
+Plan update since the Step 2 review: commits e89c16e and cecf19d add
 Step 3b to the plan and its validation skeleton, requested by the human on
 2026-09-24 before Step 3 started.
 
@@ -1300,7 +1300,7 @@ Step 3b to the plan and its validation skeleton, requested by the human on
 - Step 3's reviewed scope is unchanged: its public files plus P01/P07.
   P10/P11 changes are not in this batch, and their absence is not a finding.
   Step 3b work is reviewed under its own step.
-- 17fb93b's title "record step 2 validation" was imposed by a commit-plan
+- cecf19d's title "record step 2 validation" was imposed by a commit-plan
   checker defect, since fixed in the shared tooling. Its content only adds
   the Step 3b skeleton; the Step 2 verdict is unchanged.
 - Step 3's Debian and RHEL runs and Step 3b's mechanics are kept in private

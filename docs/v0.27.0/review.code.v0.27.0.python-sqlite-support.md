@@ -1368,7 +1368,7 @@ Historical suites were run once against the candidate pair. Step 2 has two
 old-version/waiver expectation failures (89/91 pass); Step 5 has 15 old-input
 gate/waiver/archive failures (235/250 reached cases pass). These are recorded
 as failed runs, not reported green. An isolated env copy with only the original
-pair restored from parent 3a1d113 then passes all 91 and 254 cases with identical
+pair restored from parent 3286fed then passes all 91 and 254 cases with identical
 scripts, harness and corpus. The new candidate fixture separately covers the
 new version and waiver-free behavior. Do not edit the 9,136-line old harness
 or interpret the historical controls as dynamic candidate acceptance.
@@ -1382,8 +1382,8 @@ the approved SQLite plan; this repository does not use a ghog/pytest walk.
 
 The user explicitly approved the prepared auxiliary source commit, retention
 merge and composable merge hook on 2026-09-16. Source commit
-13c80d572ba7bda91728806ad7dc11c53629a506 was created in a clean linked worktree
-with parent 3a1d1135a3e627b74d134db24694121e70ea6b14. Its sole changed file is
+f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7 was created in a clean linked worktree
+with parent 3286fed0db223df7a60694367f4b8811ed16c762. Its sole changed file is
 src/setups/env/closure/closure-config.txt. The committed LF UTF-8 blob has SHA-256
 63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa and matches
 the exact approved bytes. Existing pre-commit and commit-msg dispatchers and
@@ -1482,8 +1482,8 @@ missing work; the validation record states they are pending.
   The SQLite floor at `tools/python`, `root`, `current`, every other record,
   the families, the entry points and the root ordering are untouched.
 - **Source identity, checked independently by the reviewer:**
-  - `13c80d572ba7bda91728806ad7dc11c53629a506` is a commit whose parent is the
-    current branch head `3a1d113`;
+  - `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7` is a commit whose parent is the
+    current branch head `3286fed`;
   - `git diff-tree` shows exactly one changed path, the declaration;
   - its blob hashes to
     `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa`, equal to
@@ -1790,8 +1790,8 @@ The same Python 3.13.15 archive passed SQLite persistence and shipped-provider
 checks in the RHEL build account, a separate RHEL deployment and Debian 12
 Jenkins capture 174. Its SHA256 is
 `c9fcb783e10409411d2fd08f3951ec163b1143d7357203fc237afbb71ce24e91`.
-The build revision is `14d4af084c303b4ccaa234b3c9a19e7110d8e1ec`.
-The corrected observer revision is `d42014e2f358cb4b42564150f93625ae83784c73`;
+The build revision is `c6fb1204246bc8dfc2193a0e33e097f5dd8aa4c5`.
+The corrected observer revision is `a54e1755f453ddbfcc40584f79bf2a670572ebd3`;
 that observer correction required no candidate rebuild.
 
 Evidence already retained in ignored root artifacts:
@@ -1846,12 +1846,12 @@ the same archive via the existing owner-authorized Jenkins route.
 Actual acceptance required already-committed production repairs that are
 part of this step's assessment, beyond the current staged diff:
 
-- `f5c4a21eaafe6c58ca0dd7c094f8ec4af7628167` scopes the validated source
+- `0bba4d3488076d14e84707bd06217eb6fed8198e` scopes the validated source
   libpython preload to the source build check.
-- `14d4af084c303b4ccaa234b3c9a19e7110d8e1ec` uses SQLite DT_RUNPATH so the
+- `c6fb1204246bc8dfc2193a0e33e097f5dd8aa4c5` uses SQLite DT_RUNPATH so the
   normal promoted wrapper selects its shipped payload while the build tree
   remains present.
-- `d42014e2f358cb4b42564150f93625ae83784c73` binds filesystem identity to
+- `a54e1755f453ddbfcc40584f79bf2a670572ebd3` binds filesystem identity to
   kernel mapping identity through a held expected-provider descriptor and
   private mapping, with refusal tests for missing, changed or ambiguous
   evidence. The reference mapping itself cannot prove a library was loaded.
@@ -1989,12 +1989,12 @@ path.
   capability with disposable fixtures, including that the live view rejects a
   write and the parent sees no leftover mount.
 - **Production repairs relied on by this step**, all already committed:
-  - `f5c4a21` preloads the validated source `libpython` for the build probe
+  - `0bba4d3` preloads the validated source `libpython` for the build probe
     only, because the populated build's `DT_RPATH` otherwise selects the old
     installed library;
-  - `14d4af0` adds `-Wl,--enable-new-dtags` to the scoped SQLite link so the
+  - `c6fb120` adds `-Wl,--enable-new-dtags` to the scoped SQLite link so the
     promoted wrapper's path wins while the build sandbox still exists;
-  - `d42014e` binds filesystem identity to kernel mapping identity through a
+  - `a54e175` binds filesystem identity to kernel mapping identity through a
     held descriptor and a private one-page reference mapping, excludes that
     reference from loaded-library evidence, and keeps refusing missing,
     replaced, deleted, ambiguous and competing providers. Its tests cover the
@@ -2145,7 +2145,7 @@ The order is right: behavior first, then the specification amendments that
 authorize it, then the records that depend on both. The umbrella row and its
 topic snapshot travel with the validation record they cite. Membership, order
 and subjects match the staged work, and `a.commit` was not amended. The three
-production repairs this step relies on (`f5c4a21`, `14d4af0`, `d42014e`) are
+production repairs this step relies on (`0bba4d3`, `c6fb120`, `a54e175`) are
 already committed, so they are outside this batch by construction. The status 0
 proves only mechanical grouping.
 

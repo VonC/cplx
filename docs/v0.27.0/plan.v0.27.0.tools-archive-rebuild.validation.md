@@ -601,9 +601,9 @@ ownership entry is discharged correctly.
   AR1, AR2 and AR4 pass.
   Historical library rows provide the inherited parser input; they do not claim
   complete refreshed-library qualification.
-- **Authority and record**: source authority `13c80d572ba7bda91728806ad7dc11c53629a506`
-  and retention merge `5f8d4d67ca549bb74e3bcbb798124d628c3d0619` are reachable from
-  build base `6ed601008162f0527d289758005f7e16cffaf806`. The declaration remains
+- **Authority and record**: source authority `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7`
+  and retention merge `f26454defc6eab1b35b9a61609215ea83547b7a6` are reachable from
+  build base `2ba75d7eee2c06ae3939f7112383a6c42c8fef11`. The declaration remains
   `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa` and matches the
   packaged file. No renewal was required. Source overlay, authority and future
   publishing revision are distinct. The sidecar binds six capture digests and
@@ -635,7 +635,7 @@ ownership entry is discharged correctly.
   [replacement capture](evidence.tools-archive-rebuild.step5-candidate.json)
   binds a separate retained archive and raw bundle; the original captures remain
   byte-identical under explicit historical filenames. Authority and retention
-  merge remain reachable from source revision `7aa660f8a2f182fc91790fd1182166ad8b662d5b`.
+  merge remain reachable from source revision `a153e6faf55cca02d1fa02f805d783f2c07cc5b4`.
   The record verifier checks both candidates and their capture digests, preserves
   historical verdicts, reproduces the Markdown view and permits only
   AR1/AR2/AR4/RA1 passes for the replacement. No runtime pass was inherited.
@@ -706,7 +706,7 @@ No existing feature or reporting capability is impaired by Step 5.
 
 Yes. Step 6 has been fully implemented.
 
-The checkpoint ending `92e361a` is committed. Fresh RHEL qualification binds
+The checkpoint ending `c160ccf` is committed. Fresh RHEL qualification binds
 the final application, canonical lock and all 77 Debian-resolved wheels to
 the unchanged archive. Its ten required cells pass, as do fresh AR1/AR2/AR4
 checks. D10 compares both retained provider pairs and selects the packaged
@@ -873,7 +873,7 @@ Changed inputs invalidate affected results; optional cells remain distinguishabl
   `784f33ed` contains the three postponed-annotation reader repairs. The
   candidate pins were committed and pushed with publication off; application
   commit `7acda8ac4b35f20ee0bfee2ac27ecfab6afa174e` selects the native bundle
-  composed from cplx `72f6cb290700faf328b73d946e78e8fedab8c2cd`.
+  composed from cplx `020181e8f26d5a12bcaf22ed27ec30096f4bf1d6`.
   Build 175 refused the earlier Git Bash bundle because its manifest used
   binary markers. The composer now hashes binary bytes explicitly and emits
   the consumer's required two-space format. The Debian reader strips only

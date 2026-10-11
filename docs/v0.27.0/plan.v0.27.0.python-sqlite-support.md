@@ -35,7 +35,7 @@ is not satisfied by the item 6 candidate.
 ### Physical-line inventory for the SQLite plan
 
 Counts include blank lines and any final unterminated line, measured at
-`c0b0d4f`. Recount before editing. Read-only entries identify integration
+`b16a342`. Recount before editing. Read-only entries identify integration
 boundaries and do not authorize unrelated changes.
 
 | Existing file | Lines | Planned use |

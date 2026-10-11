@@ -37,7 +37,7 @@ The user authorized sensitive-term replacement, including the private applicatio
 
 ### Change summary for plan architecture-minor-fallback (round 1)
 
-Initial four-step implementation plan and matching empty validation skeleton were written after design consolidation commit 642ef28. The plan carries the approved design into three Bash helpers, isolated fixture suites, explicit reset arguments, atomic index/progress work and controlled RHEL acceptance. Six proposed implementation answers were placed with oqm. No implementation change was made while writing these documents.
+Initial four-step implementation plan and matching empty validation skeleton were written after design consolidation commit 9994182. The plan carries the approved design into three Bash helpers, isolated fixture suites, explicit reset arguments, atomic index/progress work and controlled RHEL acceptance. Six proposed implementation answers were placed with oqm. No implementation change was made while writing these documents.
 
 ### Writer response for plan architecture-minor-fallback (round 1)
 

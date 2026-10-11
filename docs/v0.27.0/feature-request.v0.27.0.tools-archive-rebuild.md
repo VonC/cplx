@@ -204,8 +204,8 @@ delivery bundle; an ordinary envelope-line edit does not renew authority.
 For the current 3.13.15 declaration, item 6's
 [Step 3 validation](plan.v0.27.0.python-sqlite-support.validation.md#analysis-of-step-3-implementation-state)
 records the completed retention merge and fresh-clone proof on 2026-09-16.
-The source is `13c80d572ba7bda91728806ad7dc11c53629a506`, retained by
-`5f8d4d67ca549bb74e3bcbb798124d628c3d0619`; it is also an ancestor of this
+The source is `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7`, retained by
+`f26454defc6eab1b35b9a61609215ea83547b7a6`; it is also an ancestor of this
 item's starting history. This completed prerequisite is not outstanding
 item 6 work. Item 7 must still demonstrate resolution from the checkout
 actually used to publish, or repeat renewal and its proof if the declaration

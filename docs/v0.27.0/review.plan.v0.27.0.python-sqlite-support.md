@@ -53,7 +53,7 @@ file-based IO clarifications to the requirement, design, plan and validation
 documents as required by write-plans; corrected one design grammar typo.
 
 The preceding design consolidation and matching requirement correction were
-committed as 1708823 and c0b0d4f. Their review exchange is closed. Six new plan
+committed as 7aacbdf and b16a342. Their review exchange is closed. Six new plan
 questions were placed through oqm; none reopens the six design choices.
 
 ### Writer response for plan python-sqlite-support (round 1)
@@ -107,8 +107,8 @@ to the Bash floor. The reviewer checked its constraints against the sources:
 - `rsync.sh` derives `${HOME}/cplx/tools/*` and `${HOME}/tools`;
 - `pkg_tools.sh` mirrors `$HOME/tools` and refuses a caller source root;
 - `closure_config_authority_check` reads `git cat-file blob <commit>:<path>`;
-- the committed envelope names `089f214`, a declaration commit that precedes
-  the envelope commit `fd12941`.
+- the committed envelope names `2212003`, a declaration commit that precedes
+  the envelope commit `22defd1`.
 
 The six questions are real implementation choices. Three substantive issues
 remain.
