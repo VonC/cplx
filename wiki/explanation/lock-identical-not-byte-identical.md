@@ -87,7 +87,7 @@ accepted explicitly.
 | --- | --- |
 | verifies the local files it is handed, against recorded versions and SHA-256 | acquires them: downloads, mirrors, credentials, transport to the target |
 | checks that the application root is serialized, through an attestation naming a lock the caller holds | provides that serialization across mirroring, sync and rollback |
-| creates and syncs the venv offline, checks readiness, writes the evidence | decides when an attempt may run and who authorized it (a signed selection, for instance), and orchestrates it |
+| creates and syncs the venv offline, checks readiness, writes the evidence | decides when an attempt may run and who authorized it (its orchestration's own approval, for instance), and orchestrates it |
 | packages without venvs, retains and selects releases, promotes on readiness | supplies its versioned runtime setup and its publication backend |
 
 Nothing about where a consumer stores artifacts, how it authenticates or

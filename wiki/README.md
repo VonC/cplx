@@ -34,6 +34,7 @@ Background and reasoning: why cplx is built the way it is.
 - 📦 [Why the archive declares its own scope](explanation/why-the-archive-declares-its-own-scope.md)
 - 📦 [One archive, two distributions](explanation/one-archive-two-distributions.md)
 - 📦 [Lock-identical, not byte-identical](explanation/lock-identical-not-byte-identical.md)
+- 📦 [A release that installs itself](explanation/a-release-that-installs-itself.md)
 
 ## 🎓 Tutorials
 
