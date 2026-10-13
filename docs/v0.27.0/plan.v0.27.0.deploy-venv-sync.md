@@ -2211,6 +2211,134 @@ marker address derives from the application's, and the controller binds its
 member to the registered record. The consumer explains this in its own
 documentation.
 
+#### Step 9 human decisions of 2026-10-11: scope, route and venue
+
+- **Production only through an official release.** Step 9 never deploys,
+  stops or restarts production, and requests no operations change.
+- **Route (b) as already practiced.** The production installation of
+  2026-07-13 was carried out by the operations provider's support team from
+  an emailed runbook run as the application account. Step 9 uses that same
+  practice twice: runbook 1, a read-only inspection whose log supplies Part A's
+  production evidence (installed pair, staging archives and markers, unit
+  hooks, utilities, repository and share access); runbook 2, an additive
+  preparation (verified closure, pointer, dispatcher last, historical retention
+  from the archives production already holds), with no stop, installation or
+  hook change, refusing before any write on an unexpected state, and proving
+  in its log that every existing file and process is unchanged. Runbook 2
+  waits for runbook 1's facts and for its rehearsal in Part D.
+- **Part D venue.** The pre-production account on the qualification host, an
+  installation made by the same runbook, receives production's exact pair the
+  original way. It has no unit: the first real hook bridging remains
+  production's first official stop, backed by fixtures and runbook 1's unit
+  evidence.
+- **End of Step 9.** Step 9 ends at "production prepared and rehearsed": Parts
+  A, B and D, both runbooks, the production package (released candidate,
+  registry entry, timing profile with a selection lifetime covering the
+  approval wait) and the delivery procedure. Parts F and G, and AC19's actual
+  production and external evidence, happen during the next official release;
+  the topic and the umbrella item stay pending until then.
+- **First install deferred (2026-10-12).** Part C, AC18 and the empty-prefix
+  transition extension move to a later effort: production is not empty, and no
+  new environment is planned. Step 9 adds no empty-prefix behavior.
+- **Qualification automation key.** A new closure member takes two
+  candidates: one whose verifier knows the longer layout, then one that
+  prepares it, because the outgoing release verifies what a delivery prepares
+  (2026-10-11 run that refused the one-step change).
+
+#### Step 9 redirect of 2026-10-12: the role runs a deploy step
+
+On 2026-10-12 the operations provider changed the shared batch role and the
+qualification variables. From the installation prefix, the role now runs
+`bin/as stop`, downloads `app_url` and unpacks it into `pkgs/`, runs
+`./pkgs/deploy_pkgs.sh` (pdf only, never on rollback), then `bin/as start`. The
+prefix dispatcher is no longer called, and the delivery marker carries no
+deploy script, so the Step 8 route cannot run under the new variables.
+
+Human decisions, 2026-10-12:
+
+- **Stop, deploy, start.** The release installs itself in the deploy step.
+  Stop only stops and start only starts; nothing of ours has to run inside
+  the outgoing release.
+- **No signature on the delivery route.** The role answers whether a run is a
+  delivery, the job's own authorization answers who chose the release, and
+  nothing is fetched ahead of the outage. A verifier shipped inside the
+  delivered payload could not prove its origin anyway. Integrity checks
+  against accidents remain: every member against the release record.
+- **Retirement.** Signed selections, attempt receipts, time windows, the
+  qualification automation key, the production keys, the signing tools, the
+  dispatcher, the control closure, the marker and stop-time acquisition are
+  retired after the first qualification delivery on the new route succeeds.
+
+The new route:
+
+1. The build publishes one delivery bundle: a gzip tar of top-level regular
+   files only (the entry, the release record, the companion, the application
+   and tools archives, the candidate identity). The role's per-directory
+   staging therefore stays a handful of tasks, as with the marker.
+2. The entry, run from the prefix without arguments beside those members,
+   checks each one against the record, installs through its existing
+   new-release mode with force, then starts the release under the deployment
+   hold, proves the expected revision through the local API and releases the
+   hold under same-daemon supervision. On any failure it restores the last
+   ready release, or the historical one, starts it and exits nonzero, so the
+   job fails while the service runs.
+3. The role's start then finds the stack running and changes nothing.
+4. The deploy job sends the bundle address only: no registry entry,
+   controller acquisition or signature.
+
+Production consequences: the historical release's own stop runs first; the
+first deploy step retains the historical pair (the P39 layout) before
+installing. Runbook 2 shrinks to a read-only pre-release check, and is
+dropped if runbook 1 shows the prefix administration wrapper production's
+stop needs. No closure, dispatcher or bootstrap is prepared ahead of the
+release. Production variables mirroring qualification remain an
+operations-provider prerequisite; AC19's evidence still comes from the next
+official release.
+
+Runbook 1 ran on 2026-10-12. Production runs exactly the historical pair the
+pre-production replica holds (equal archive and entry digests), behind the
+prefix administration wrapper the role's stop and start call, under a unit
+whose start lines have the form the hold verifies. Its two startup hooks are
+interim hand copies, byte-identical to repository versions of July: the first
+deploy step must retain them and install the hold bridges, which Phase A adds,
+and a rollback to the historical release puts them back. The share's log
+folder was not writable by the application account; the operations provider
+restored its permissions on 2026-10-13. No further inspection runbook is
+needed.
+
+Superseded by this redirect: the signed rows of the bootstrap and arming gate
+table (production bootstrap through route (b), a human signature for every
+deploy, retry and recovery), the production selection lifetime, and the
+two-candidate rule for a new closure member.
+
+Work in two phases. Phase A adds the bundle, the deploy step and the deploy
+job route, and delivers to qualification with the Step 8 machinery present
+but inert. Phase B retires that machinery and its tests, documents the route
+in both repositories' Diataxis pages, and delivers again to qualification.
+Validation: native fixture tests of the deploy step (success, refused member,
+install failure, start failure, both ending on a running release) on the
+development account; a rehearsal replaying the role's operations in an
+isolated scratch prefix, from a copy of the qualification layout and from the
+historical pair on pre-production; then a check-mode and a live
+qualification delivery. The download, unpacking and copy now fall inside the
+outage: measure them against the 1800-second cap. Each published bundle adds
+about 1.1 GB to the snapshot repository.
+
+Progress of 2026-10-13. Phase A delivered to qualification. The first live run
+failed at the role's stop: the stop command waited the daemon's own stop
+budget from a poll earlier, so it reported a stop that completed one second
+later as failed, and the play ended before its start. Human decision of
+2026-10-13: the stop command monitors the daemon for up to a minute and fails
+only on a component still running, and the operations provider's role
+tolerates a failed first stop of this application and retries it twice. Both
+are in place; a qualification delivery ran the new stop tasks. The retry is
+the only remedy for a release that predates the fixed stop command, which
+includes production's next official release. Phase B then retired the
+machinery listed above, removed the deploy job's route choice, and documented
+the route in both repositories; its qualification delivery follows. Open:
+neither the role nor the deploy step refuses a snapshot release in
+production; whether to add that refusal is a human decision.
+
 ## Rollout evidence and completion accounting
 
 Record reusable cplx implementation/validation separately from consuming
