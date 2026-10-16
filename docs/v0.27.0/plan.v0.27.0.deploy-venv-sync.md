@@ -2339,6 +2339,103 @@ the route in both repositories; its qualification delivery follows. Open:
 neither the role nor the deploy step refuses a snapshot release in
 production; whether to add that refusal is a human decision.
 
+#### Step 9 scope of 2026-10-15: no production delivery
+
+Human decision of 2026-10-14, recorded on 2026-10-15:
+
+- **No production delivery in Step 9.** Production is touched only by an
+  official release. Parts F and G, and AC19's production and external evidence,
+  wait for the next official release, as the 2026-10-11 decisions state.
+- **What remains of Step 9.** Part D on the pre-production account with the
+  bundle route, then the closing work: the production delivery procedure for
+  the next official release, the Step 9 validation record, the implementation
+  check and the code review.
+- **Part D venue.** When the pre-production deploy job is available, it
+  delivers the current qualification candidate through the real route, check
+  mode first, starting from the historical pair pre-production runs, the same
+  pair as production. That run rehearses production's next official release:
+  the historical release's own stop with the provider's stop retry, the first
+  deploy step retaining the historical pair and the two interim startup hooks,
+  the hold bridges, the start and the revision proof. A rollback to the
+  historical release with its hooks restored and a second forward delivery
+  follow. Download, unpacking and copy are measured against the 1800-second cap,
+  and the job's deployment and verdict artifacts are checked. Without the job,
+  a replay of the role's operations in an isolated scratch prefix built from
+  production's exact pair replaces it.
+- **End state.** Part D ends with pre-production back on the historical pair
+  unless the human decides otherwise.
+- **Venue chosen (human decision of 2026-10-15).** The pre-production deploy
+  job was not available. The replay on the development account described
+  below counts as Part D; pre-production was left untouched on the historical
+  pair.
+- **Snapshot guard (human decision of 2026-10-15): option A.** Production's
+  delivery address must name a bundle in the release repository, as the
+  delivery documentation states; no code guard is added.
+
+Finding of 2026-10-15: the historical release and the current one both find
+their components by an account-wide process match, not by prefix. A scratch
+replay is isolated only under an account whose own stack is stopped; under an
+account with a running stack, it would act on that stack. The historical
+administration script also reads its installation from `HOME`: a scratch
+prefix must be the replay's `HOME`, as the prefix is in every target.
+
+Findings and fixes of 2026-10-15 (human approval in chat):
+
+- **Failure from the historical pair.** The deploy step's recovery reinstalled
+  the historical release through the entry's rollback mode, which records no
+  ready release, then stopped at "no ready release" (status 7): the historical
+  release stayed installed but stopped. The recovery now hands a unit back to
+  the restored interim hooks, starts the historical release through its own
+  start command, waits for its own status, and ends with status 6.
+- **Local state across that rollback.** The historical installer replaces the
+  whole application tree, its packaged `state/` and `.env.local` included, the
+  former carrying authentication files from the build account. The entry now
+  keeps the operator's local state around it, as the modern installer does.
+- **Deliberate return to the historical release.** The deploy step gains an
+  operator rollback mode that returns to the retained rollback target, the
+  historical release included; the role's own rollback action only swaps
+  staging names.
+- **Deployment lock kept by the historical daemon.** The deploy step holds its
+  root lock on an open descriptor. The modern launcher closes it before
+  starting the daemon; the historical launcher passes it on, so a historical
+  release started by the deploy step (after a recovery, an operator rollback or
+  a refusal) kept the lock and refused every later delivery. The historical
+  start now runs without that descriptor. The replay found it on the second
+  forward delivery after a rollback.
+
+A replay of the role's operations in an isolated scratch prefix of the
+development account (its own stack stopped), built from production's exact
+pair, then passed with the qualification candidate carrying these fixes: a
+first release from the historical pair, an operator rollback to the historical
+release (hooks back byte for byte, local state kept), a second release, a
+second rollback, and a forced failed start from the historical pair, which
+ended with status 6 and the historical release running again. A first
+release's outage, from the historical release's own stop to the proven start,
+measured 513 to 593 seconds, and the failure route 770 seconds, against the
+1800-second cap.
+
+Code review findings of 2026-10-15, fixed the same day:
+
+- **Refused hand-over.** The installation entry refused an incomplete bundle,
+  an application archive that differs from its record, a failed preparation or
+  a missing deploy step with status 2, after the role's stop and before the
+  deploy step ran; the role then skips its start, so the installed release
+  stayed down. The entry now starts the installed release again with that
+  release's own start command, under the deployment root lock and without
+  passing the lock descriptor on, runs nothing from the refused bundle and
+  keeps status 2.
+- **Failed historical recovery.** When the historical restart fails (unit
+  hand-back timeout, start failure or health timeout), the hand-back has
+  already removed the hold marker, and the restored interim hooks ignore it.
+  The deploy step now enters the hold again and stops every process before
+  status 7. Without retained hold controls, both historical stop commands run
+  and a failure of either counts (second review round); when nothing can be
+  held and stopped again, the last line says so.
+
+Open prerequisite for the next official release: the production variables,
+which the operations provider's 2026-10-14 change removed and which were
+requested again on the qualification model.
+
 ## Rollout evidence and completion accounting
 
 Record reusable cplx implementation/validation separately from consuming
