@@ -2,12 +2,12 @@
 
 No, it is not implemented.
 
-Steps 1-7 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) retain
-their recorded validation, including Step 3b's non-qualifying scope and Step 7's
-2026-10-03 closure; Step 8 qualification-only original delivery/recovery and
-mandatory Step 9 first-time/production delivery are not started and lack their
-own implementation and actual execution evidence. Step 9 starts only after
-actual AC16/AC17 closure; the topic and umbrella stay pending until AC18/AC19.
+Steps 1-9 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) are
+validated within their recorded scope, including Step 3b's non-qualifying scope,
+Step 7's 2026-10-03 closure and Step 8's qualification-only delivery. The topic
+and the umbrella item stay pending by the human decision of 2026-10-11: AC19's
+production and external evidence comes with the next official release, and
+AC18 moved to a later effort on 2026-10-12.
 
 ## File-based IO cost clarification for deploy-venv-sync implementation
 
@@ -1820,14 +1820,36 @@ and the umbrella remain intact; Step 9 still prevents whole-topic completion.
 
 ### Analysis of Step 9 implementation state
 
-Not started. Actual Step 8 AC16/AC17 closure precedes all Step 9 implementation
-and lifecycle execution. Human round 8 decisions select the development replay,
-route (b), empty-prefix option (i) and shared-drive signatures. They are planning
-directions, not execution receipts. Q11-Q41 are consolidated, with R19 unsigned
-ordinary admission and Q38 offline backup trust confirmed on 2026-10-05.
-Tooling/layout qualification, production identity/access/unit evidence,
-implementation and separately authorized replays/bootstrap/production/recovery
-remain outstanding.
+Yes. Step 9 has been fully implemented.
+
+The code review of 2026-10-15 found two recovery gaps in the bundle route: an
+early hand-over refusal left the already-stopped installed release down, and a
+failed historical restart could exit with status 7 without restoring the hold
+or stopping what it had started. Its second round found that the fallback
+without retained controls lost a failed component stop when the daemon stop
+succeeded. All three are fixed. The successful replay does not reach those
+terminal states; stateful tests through the real entry and the deploy step
+cover them.
+
+The writer check on 2026-10-15 used the scope set by the human decisions of
+2026-10-11 (production only through an official release, Part D venue, Step 9
+ending at "production prepared and rehearsed"), 2026-10-12 (Part C and AC18
+deferred; the stop, deploy and start redirect without signatures), 2026-10-14
+(no production delivery in Step 9) and 2026-10-15 (the development-account
+replay counts as Part D; snapshot guard option A). Part A's production evidence
+came from the read-only inspection runbook. Part B is the bundle route with the
+historical retention, the interim hook admission, the four fixes Part D
+found on 2026-10-15, delivered to qualification, and the code review's
+recovery fixes. Part D replayed the role's operations from production's exact
+historical pair and passed the five recorded replay scenarios. The production
+delivery procedure is written. Parts F and G, AC19's production and external
+evidence, wait for the next official release, so the topic and the umbrella
+item stay pending.
+
+The improvement expectations below date from before the 2026-10-12 redirect.
+Their signed-selection, bootstrap, route (b), empty-prefix and registry bullets
+are superseded by the plan amendments of 2026-10-11, 2026-10-12 and 2026-10-15
+and are kept as history.
 
 ### Goal for Step 9
 
@@ -1909,24 +1931,190 @@ and umbrella item stay pending until this step is validated.
 
 ### What was implemented for Step 9
 
-_(empty, no check has taken place yet.)_.
+Exact runs, revisions and receipts are in the private journals; the outcomes
+below are sanitized.
+
+- **Part A, evidence.** The development venue ledger, and the read-only
+  inspection runbook, emailed and run by the operations provider's support team
+  on 2026-10-12. It proved that production runs exactly the historical pair the
+  pre-production replica holds (equal archive and entry digests), behind the
+  prefix administration wrapper the role's stop and start call, under a unit
+  whose start lines have the form the deployment hold verifies, with two
+  interim startup hooks byte-identical to repository versions of July. No
+  further inspection was needed, and the redirect dropped the additive runbook.
+- **Part B before the redirect.** The qualification automation key joined the
+  control closure, production targets gained a release-only selection with an
+  approval-aware lifetime, an unsigned production launch was refused before any
+  stop, and the historical retention was prepared from the installation's own
+  archives. Decision V retired this machinery after the first qualification
+  delivery on the new route.
+- **Part B after the redirect.** Each published build carries one flat delivery
+  bundle: entry, release record, candidate identity, companion, application and
+  tools archives. The deploy step checks every member against the record,
+  installs through the entry's new-release mode, starts under the deployment
+  hold, proves the expected revision through the local API and releases the
+  hold under same-daemon supervision. It ends with a refusal that restarts the
+  installed release (status 2), a failure that restores the last ready one
+  (status 6), or a failed recovery that stays held and stopped (status 7), whose
+  last line says so when the hold could not be restored. The deploy job
+  sends the bundle address only and serves the development, qualification and
+  pre-production targets, never production. The stop command monitors the daemon
+  (decision W), and the
+  operations provider's role retries a failed first stop. A historical
+  installation's first modern install retains its pair, entry and interim hook
+  copies, and the hold replaces those hooks with its bridges only once they are
+  retained. The signed route, its tools and tests were removed, and its
+  leftovers are removed from a host after a proven release.
+- **Part B fixes of 2026-10-15, found by Part D.** A failed first release over
+  the historical installation used to end held and stopped (status 7): the
+  recovery now hands a unit back to the restored interim hooks and starts the
+  historical release through its own start command and status (status 6). The
+  historical installer replaced the whole application tree, the build account's
+  packaged authentication state included: the operator's local state is now
+  kept around it. An operator rollback mode returns to the retained rollback
+  target, the historical release included. The historical daemon inherited the
+  deployment lock descriptor and refused every later delivery: the historical
+  start now runs without it, which also covers a refusal on a historical
+  installation.
+- **Part B fixes of 2026-10-15, found by the code review.** The entry refused
+  an incomplete bundle, an application archive differing from its record, a
+  failed preparation or a missing deploy step with a bare status 2, after the
+  role's stop and before the deploy step could restart anything, so the
+  installed release stayed down. It now starts the installed release again
+  with that release's own start command, under the deployment root lock and
+  without handing the lock to it, and runs nothing from the refused bundle. A
+  failed historical restart (hand-back timeout, start failure or health
+  timeout) exited with status 7 although the hand-back had removed the hold
+  marker and a partial start could keep running. The hold is now entered again
+  and every process stopped through the retained controls before status 7.
+  Without retained controls, both historical stops (components, then daemon)
+  run and a failure of either counts: the last line then says that the
+  installation could not be held and stopped again, never that it stopped
+  (found by the second review round).
+- **Qualification deliveries.** Every build since the redirect went through the
+  full pipeline with publication, a check-mode run and a live run of the
+  qualification deploy job, each live run ending with the proven revision under
+  supervision. The first live run exposed the stop race behind decision W.
+- **Part D, development-account replay.** The role's operations ran in an
+  isolated scratch prefix of the development account, whose own stack was
+  stopped: both releases find their components by an account-wide process
+  match, and the historical administration script reads its installation from
+  `HOME`, so the scratch prefix is the replay's `HOME`. The first run, before
+  that requirement was known, briefly started the account's own daemon and
+  sentinel (no processing; stopped again). The replay installs production's
+  exact pair with its own entry and places the interim hook copies. With the
+  qualification candidate carrying the fixes, it passed: a first release
+  (outage 593 seconds from the historical stop, plus 14 seconds of download),
+  an operator rollback (hooks back byte for byte, local state kept), a second
+  release (513 seconds), a second rollback, and a forced failed start ending
+  with status 6 and the historical release running again (770 seconds).
+  Earlier runs found the defects fixed above. Pre-production was not touched.
+- **Documentation.** Consumer wiki: the explanation of why a release installs
+  itself (historical rollback included), the qualification and the new
+  production delivery how-tos, the deployment job and role reference and the
+  deployment states reference; the states reference and both how-tos describe
+  the refused hand-over and the re-hold. cplx: the consumer-neutral
+  explanation of a release that installs itself, and the plan amendments of
+  2026-10-11, 2026-10-12 and 2026-10-15.
+- **Tests.** Native Linux walks of the deploy step, historical rollback, runtime
+  startup and failed-upgrade packages on the RHEL host: 155 passed, 1 skipped
+  (51 subtests). The lock-descriptor cases fail on the previous code, the
+  refusal and re-hold cases with 13 failures, the failed component stop with
+  1, and all pass on the fixes. The
+  consumer's groundhog check passes. The consumer's pipeline ran its complete
+  selection and the analysis gate on each delivered build; the last gate
+  reports no open issue.
 
 ### New types or classes introduced for Step 9
 
-_(empty, no check has taken place yet.)_.
+No Python class. The consumer gained host Bash: the deploy step with its
+operator rollback mode (`tools/deploy_bundle.sh`), the bundle builder
+(`ci/tools_release_bundle.sh`), the historical local-state keeping,
+retention and refused hand-over restart of the installation entry, the interim
+hook admission and the unit hand-back with its re-hold in the hold helpers
+(`tools/admin_hold.sh`), and the bundle route of the deploy job.
 
 ### Architecture check for Step 9
 
-_(empty, no check has taken place yet.)_.
+The delivery code is host Bash under the consumer's `tools/` and `ci/` and the
+deploy job definition, infrastructure outside the application's hexagonal
+layers. No domain, application or adapter module imports it, and it reaches
+the application only through its administration command and its local API.
+The deploy step loads only the hold and runtime helpers retained with each
+application archive, so an installation never runs helpers from the tree it is
+replacing. Retiring the signed route removed modules and tests; no layer gained
+a dependency. No, there is nothing that needs to be addressed.
 
 ### Performance check for Step 9
 
-_(empty, no check has taken place yet.)_.
+One hash per bundle member, one copy per kept local-state name, and bounded
+polls: health and historical health within 240 seconds each, the unit hand-back
+within 60 seconds. No step sorts or scans history to choose a release. A first
+release's outage measured 513 to 593 seconds, and the failure route 770
+seconds, against the 1800-second cap. No, there is no performance issue that
+needs to be addressed.
 
 ### Unit test coverage check for Step 9
 
-_(empty, no check has taken place yet.)_.
+The coverage gate measures `src/pdfss` (`[tool.coverage.run] source`); Step
+9's code is shell under `tools/` and `ci/` and the deploy job definition,
+outside that scope, so no percentage is claimed for it. Native tests exercise
+it: the deploy step tests exercise exit codes, the historical restart, the
+operator rollback and the lock descriptor; the historical rollback tests cover
+the restore and the local state; the hold tests cover the interim admission
+and the hand-back; the bundle tests cover the builder. Every function added on
+2026-10-15 is referenced by a test or from its own script: `current_record`,
+`historical_restored`, `start_historical`, `start_restored`, `held_historical`
+and `rollback_installed` in the deploy step, `dvs_local_safe`,
+`dvs_keep_local_state`, `dvs_return_local_state` and `dvs_refuse_handover` in
+the entry, `pdfss_hold_historical` and `_app_hold_regain` in the hold
+helpers. No application class changed for Step 9. The hand-over refusal tests
+run the real entry after a simulated role stop, for both installed-release
+formats, and assert that the installed release's own start ran and that the
+refused bundle's step never ran; an unwritable prefix and a missing deploy step
+restart it too, and an empty prefix starts nothing. The failed historical
+recovery tests keep the hold marker, the processes and the unit state in
+stateful stubs and assert the held and stopped state for the recovery, the
+operator rollback, a partly started release without a unit and an
+installation without retained controls, and the line that reports a hold not
+restored. The hand-back timeout test asserts that the marker and both bridges
+come back. The fallback tests without retained controls give the component
+and daemon stops independent outcomes and process state: both succeeding
+report a stopped release, while a failed component stop with the daemon
+stopped, and the inverse, leave the failed part running, report that the
+installation could not be held and stopped again and never claim a stopped
+release.
+No application class coverage gap is identified, and no top-level symbol of the
+files outside the coverage gate is unreferenced.
 
 ### Feature integrity for Step 9
 
-_(empty, no check has taken place yet.)_.
+Qualification kept delivering throughout, and the analysis gate is clean. The
+signed route was retired by decision V, an intended removal; Step 8's AC16 and
+AC17 evidence stays as history. Recorded limits: the development account and
+pre-production have no unit, so the unit hand-back and the historical bridges
+first run for real in production, backed by fixtures and the inspection
+runbook's unit evidence; the production variables at the operations provider
+are an open prerequisite of the next official release; AC19 closes with that
+release and AC18 in a later effort. Option A leaves the release-only address as
+the production snapshot guard. The code review's recovery findings are fixed:
+a refused hand-over restarts the installed release, and a failed historical
+recovery is held and stopped again, or its last line says it could not be, a
+failed stop of either part included.
+
+## Analysis of Step 9 Implementation
+
+Step 9 prepared and rehearsed production's next official release. The batch
+role now stops, downloads one delivery bundle, runs the bundle's deploy step
+and starts; the deploy step installs, proves and supervises the release, or
+restores the last ready one. For production's historical installation it keeps
+the historical pair, its hooks and the operator's local state, restores and
+restarts that release on failure, holds and stops it again when that fails,
+offers an operator rollback, and never leaves the deployment lock with the
+historical daemon. A bundle the entry refuses restarts the installed release.
+Part A's inspection fixed the production facts, qualification deliveries
+proved the route, the development-account replay from production's exact pair
+proved the five recorded scenarios, and the production delivery procedure
+documents them. The code review's refusal and failed historical recovery
+findings are fixed and tested. Production delivery waits for the next official
+release, so the topic and the umbrella item stay pending.
