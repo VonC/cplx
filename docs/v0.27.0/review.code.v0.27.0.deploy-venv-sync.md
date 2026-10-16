@@ -8464,3 +8464,945 @@ Human choice: Commit
 Outcome: continue-owning-workflow
 
 <!-- review-entry-id: human-confirmation-round-8 -->
+
+## Round 1 by requestor - Step 9
+
+- Recorded: 2026-10-15T14:12:19+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: unrecorded
+- Implementation step: 9
+- Outcome: request
+
+### Review identity for step 9 deploy-venv-sync (round 1)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 9
+Review round: 1
+
+### Code review evidence for step 9 deploy-venv-sync (round 1)
+
+request_index_tree: c772e04bb222e015d77c5e2d60dbef5faf7be963
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(deploy-venv-sync): amend the step 9 scope
+group 1 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 2: docs(deploy-venv-sync): record step 9 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 9 deploy-venv-sync (round 1)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 9 deploy-venv-sync (round 1)
+
+Step 9 is fully implemented within the scope the human decisions of
+2026-10-11, 2026-10-12, 2026-10-14 and 2026-10-15 set. Production is touched
+only by an official release; Part C and AC18 moved to a later effort; the stop,
+deploy and start redirect retired the signed route; Part D ran on the
+development account. AC19's production and external evidence (Parts F and G)
+comes with the next official release, so the topic and the umbrella item stay
+pending.
+
+Evidence:
+
+- Static checks: the repository lint gate (`bash src/utils/lint_shell.sh`) is
+  clean on 59 tracked scripts; the walk resolved for this effort ends with
+  exit 9 (no pytest suite, the shell gate passed); the Markdown check reports no
+  finding in the plan or the validation plan.
+- Tests: the consumer's native Linux walks of the deploy step, historical
+  rollback, runtime startup and failed-upgrade packages pass (145 passed, 1
+  skipped); the new lock-descriptor cases fail on the previous consumer code
+  and pass on the fix. Each delivered consumer build passed its complete
+  pipeline selection, coverage gate and analysis gate; the last analysis
+  reports no open issue.
+- Coverage: the consumer's coverage gate measures its application package;
+  Step 9's code is host shell outside that scope, so no percentage is claimed.
+  Every function added on 2026-10-15 is referenced by a test or from its own
+  script.
+- Architecture: the delivery code is host shell infrastructure outside the
+  application's hexagonal layers; no application module imports it.
+- Performance: linear checks and copies, bounded polls; a first release's
+  outage measured 513 to 593 seconds and the failure route 770 seconds, against
+  the 1800-second cap.
+- Feature integrity: qualification kept delivering throughout; the signed route
+  was retired by decision, an intended removal.
+
+One writer deviation is open for assessment: the validation record keeps the
+document-level status at "No, it is not implemented." and leaves the umbrella
+row pending, although every step now reads Yes. The implementation-check
+instruction would flip both; the human decision of 2026-10-11, recorded in the
+plan, keeps the topic and the umbrella item pending until AC19's production
+evidence.
+
+### Implementation report for step 9 deploy-venv-sync (round 1)
+
+The staged cplx change is documentation: the plan amendment of 2026-10-15 and
+the Step 9 validation record. The implementation itself lives in the consumer
+and was delivered to qualification before this request.
+
+- Part A: the read-only inspection runbook fixed the production facts on
+  2026-10-12 (exact historical pair, prefix administration wrapper, unit start
+  lines, two interim startup hooks equal to July repository versions).
+- Part B after the redirect: one flat delivery bundle per build; a deploy step
+  that checks every member against the release record, installs, starts under
+  the deployment hold, proves the revision and releases the hold under
+  same-daemon supervision, or restores the last ready release; the deploy job
+  sends the bundle address only; the stop command monitors the daemon and the
+  operations provider's role retries a failed first stop; the historical pair,
+  entry and interim hooks are retained on the first modern install; the signed
+  route and its leftovers were removed.
+- Part B fixes of 2026-10-15, found while preparing and running Part D: a failed
+  first release over the historical installation now restarts the historical
+  release with status 6 instead of ending held with status 7; the operator's
+  local state survives the historical installer, which otherwise replaced it
+  with the archive's packaged state; an operator rollback mode returns to the
+  retained target; the historical daemon no longer inherits the deployment lock.
+- Part D: a replay of the role's operations in an isolated scratch prefix of
+  the development account, from production's exact pair, passed a first
+  release, an operator rollback, a second release, a second rollback and a
+  forced failure ending with status 6. Its first run, before the `HOME`
+  requirement was found, briefly started the account's own daemon and
+  sentinel; they were stopped again and the replay was fixed.
+- Documentation: the consumer's production delivery how-to (new), its
+  qualification how-to, explanation and references; the plan amendment and
+  the validation record staged here.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step9.journal.md`,
+`.reviews/a.deploy-venv-sync.step9.handoff.md`
+
+### Change summary for step 9 deploy-venv-sync (round 1)
+
+Staged paths:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: new subsection "Step 9
+  scope of 2026-10-15: no production delivery" (scope, Part D venue rule and
+  choice, snapshot guard option A, replay constraints, the four fixes, measured
+  outages, the open production variables prerequisite).
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 9 analysis
+  (Yes), what was implemented, new types, architecture, performance, coverage
+  and feature integrity checks, implementation summary; document-level theme
+  sentence naming why the topic stays pending.
+
+`a.commit` groups:
+
+1. `docs(deploy-venv-sync): amend the step 9 scope`: the plan.
+2. `docs(deploy-venv-sync): record step 9 validation`: the validation plan.
+
+### Human guidance and writer response for step 9 deploy-venv-sync (round 1)
+
+Human guidance:
+
+Human decisions in chat on 2026-10-15:
+
+- The development-account replay counts as Part D; the live pre-production run
+  is not required, and pre-production stays on the historical pair.
+- Snapshot guard: option A, a release-only delivery address documented, with no
+  code guard.
+- Close Step 9.
+
+Recorded earlier and still binding: production is touched only by an official
+release (2026-10-11, 2026-10-14), and the topic and the umbrella item stay
+pending until AC19's production evidence from the next official release
+(2026-10-11).
+
+Writer response:
+
+First round of the Step 9 code exchange: no earlier feedback to answer. The
+Step 8 exchange closed with its own commit; its recommendations that moved to
+Step 9 (signer handoff, historical replay) are covered by the redirect, which
+retired the signer, and by Part D's replay from the historical pair.
+
+### Reviewer focus for step 9 deploy-venv-sync (round 1)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-9-round-1 -->
+
+## Round 1 by reviewer - Step 9
+
+- Recorded: 2026-10-15T17:16:21+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 9
+- Outcome: answer
+
+### Assessed index identity for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Baseline index tree: c772e04bb222e015d77c5e2d60dbef5faf7be963
+
+Assessed index tree: e18f1be50f3ac4648c477b23355e33b6296e2023
+
+### Implementation check for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Result:
+
+No. Step 9 has NOT been fully implemented.
+
+The amended scope and the five successful historical replay scenarios are accepted. Two in-scope consumer recovery paths still violate the staged status 2 and status 7 guarantees. Static source and test inspection establishes both findings; no production execution is required to address them.
+
+Validation plan effects:
+
+Updated only Step 9 in docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md: exact No verdict, concrete Missing work for Step 9, qualified terminal-state and replay claims, behavioral coverage gaps, and feature-integrity consequences. The attributable metadata patch is staged. Other steps, the document-level production deferral, the implementation plan and umbrella were preserved.
+
+### Pre-repair mandatory checks and coverage for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Requestor evidence reports a clean 59-script shell lint gate, clean Markdown checks, and native consumer tests with 145 passed and 1 skipped, plus a successful latest pipeline/analysis gate. These are retained writer results, not reviewer executions.
+
+The reviewer ran no validation suite, focused tests or coverage. Source inspection was sufficient to establish the defects. The consumer coverage gate measures its application package; the shell files are outside that scope. Tests exercise the relevant branches but omit old-service restart and actual held/stopped terminal-state assertions. Passing tests therefore do not establish these guarantees.
+
+The core-bound whole-scope capture exists at .reviews/a.review-scope.code.v0.27.0.deploy-venv-sync.json with fingerprint 686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6. The envelope marks proof missing; it is not treated as green test evidence. This repository has no pytest suite, so its reported groundhog exit 9 is not a shell-lint failure.
+
+### Resolved validation set and sources for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+The request and current project declaration resolve to one command: bash src/utils/lint_shell.sh, source project (.review-validation). No plan or request additions are present. The reviewer inspected the declaration and resolver contract and did not execute this requestor-owned set.
+
+### Resolver drift and direction for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+No drift: the current project command and the request's embedded ordered command/source set agree; neither additions nor removals were identified.
+
+### Repository state around validation for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+The baseline index matched request_index_tree c772e04bb222e015d77c5e2d60dbef5faf7be963. The assessed index is e18f1be50f3ac4648c477b23355e33b6296e2023 after staging only the attributed Step 9 metadata patch.
+
+The ordered before/after path set contains the implementation plan and its validation plan. The evidence comparison reports acceptable=false for the validation-plan path and <index>; manual classification of the attributed patch confirms these are the permitted reviewed-step metadata edits and their staging effect. The implementation-plan digest is unchanged; no validation command ran and no tracked validation side effect was introduced.
+
+The umbrella digest is unchanged: 0e319a93709d8d7173d895e126e40cf39c468416d509eb8e176c79030ee88289. No other step or umbrella row was edited.
+
+### Repair inventory for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Repairs made:
+
+- Review metadata only: corrected the Step 9 verdict, missing-work list and supporting claims in docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md. This is non-substantive reviewer metadata; no implementation code or test was repaired.
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md (attributable reviewer metadata patch only).
+
+### Commit plan assessment for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+The independent checker with the explicit cplx root returned state valid, ready true, exit 0 and no diagnostics before assessment and after metadata staging. The staged set is exactly the implementation plan and validation plan.
+
+Ordered groups remain accurate:
+
+1. docs(deploy-venv-sync): amend the step 9 scope — docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md.
+2. docs(deploy-venv-sync): record step 9 validation — docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md.
+
+No a.commit edit is needed. Mechanical readiness does not resolve the implementation findings.
+
+### Findings and boundaries for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Unresolved findings:
+
+- [P1] Restart the installed release on early bundle handoff rejection. Consumer tools/deploy_pkgs.sh:116-129 directly exits 2 for absent/invalid application inputs, a digest mismatch, temporary preparation failure or missing deploy step. This is the actual role entry after stop; the role skips its final start on failure. These exits precede deploy_bundle.sh::refuse(), leaving the unchanged service stopped. The staged validation claim at docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md:1955 therefore overstates refusal recovery. Add a trusted installed/retained recovery path under the root lock, preserve a nonzero verdict and never execute the rejected archive. Test the real entry after a simulated stop for modern and historical installations. The existing test_archive_differing_from_the_record_never_runs_its_step checks only exit 2 and no handoff.
+- [P1] Enforce held/stopped state after historical recovery fails. Consumer tools/admin_hold.sh:447-466 removes the hold marker and resumes historical hooks, which ignore the hold; a timeout or subsequent error does not restore it. Consumer tools/deploy_bundle.sh:224-245 then attempts historical start/health, while held() at lines 266-268 only logs and exits 7. A failed hand-back or partial start can thus leave an unheld or running installation while reporting it held and stopped. This also affects operator rollback through start_restored(). Reestablish effective hold-aware hooks and quiesce processes, with stateful tests asserting marker, hooks, unit parking and stopped processes after each failure. The current failed-health test stubs the helper and asserts only status/message; the hand-back timeout test omits restored-hold assertions.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Human guidance:
+
+Human decisions in chat on 2026-10-15:
+
+- The development-account replay counts as Part D; the live pre-production run is not required, and pre-production stays on the historical pair.
+- Snapshot guard: option A, a release-only delivery address documented, with no code guard.
+- Close Step 9.
+
+Recorded earlier and still binding: production is touched only by an official release (2026-10-11, 2026-10-14), and the topic and the umbrella item stay pending until AC19's production evidence from the next official release (2026-10-11).
+
+Guidance response:
+
+Applied all scope decisions. No live pre-production or production run, signed-route reinstatement, empty-prefix work or code snapshot guard is required by this review. Keeping the document-level status and umbrella pending is justified by the explicit human decision. Step 9 closure is blocked only by the two current recovery defects and their missing behavioral assertions. The guidance did not authorize implementation repair by the reviewer, so only exact-step validation metadata was edited.
+
+### Writer instructions for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Implement the two recovery fixes and stateful tests listed under Missing work for Step 9 in the consumer repository, update its delivery procedure as needed, and refresh sanitized Step 9 evidence. Preserve the accepted development replay, Part C/AC18 deferral, production-only-through-official-release rule, and snapshot guard option A. No production run is requested.
+
+Keep Step 9 No until the refusal and failed-recovery states are established. Run the writer-owned applicable validation and native consumer tests, retain private integration evidence outside public files, then publish a new review round with accurate staged documentation and commit groups. The topic and umbrella remain pending for AC19 production/external evidence.
+
+### Decision rationale for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Six readiness-floor results:
+
+1. Identity: PASS. Exact code identity, plan, step 9, round 1, occurrence 1 and request-time index agree.
+2. Implementation completeness: FAIL. Early refusal and failed historical recovery do not satisfy their terminal-state contracts.
+3. Validation and coverage: FAIL. Retained passing results omit the state assertions needed for both defects; no percentage is claimed for shell.
+4. Staged attribution: PASS. Only the attributable Step 9 validation metadata patch was added; umbrella and other steps are intact.
+5. Unresolved findings: FAIL. Two P1 findings remain for the writer.
+6. Commit grouping: PASS. Independent checker is valid/ready, both groups are accurate, and diagnostics are empty.
+
+Publish changes-requested. No substantive reviewer repair was made. Human approval to close Step 9 does not establish recovery behavior contradicted by source.
+
+### Final reviewer decision for step 9 deploy-venv-sync (exchange 1) (round 1)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-9-round-1 -->
+
+## Round 2 by requestor - Step 9
+
+- Recorded: 2026-10-15T17:56:56+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 9
+- Outcome: request
+
+### Review identity for step 9 deploy-venv-sync (round 2)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 9
+Review round: 2
+
+### Code review evidence for step 9 deploy-venv-sync (round 2)
+
+request_index_tree: f2154b693d0e1ca7436a6334a9fea9d87781c151
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(deploy-venv-sync): amend the step 9 scope
+group 1 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 2: docs(deploy-venv-sync): record step 9 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 9 deploy-venv-sync (round 2)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 9 deploy-venv-sync (round 2)
+
+Step 9 is fully implemented within the scope the human decisions of
+2026-10-11, 2026-10-12, 2026-10-14 and 2026-10-15 set. The two round 1
+findings are fixed in the consumer: a bundle the entry refuses before handing
+over now starts the installed release again (status 2), and a failed
+historical restart enters the hold again and stops every process before status
+7, or says on its last line that it could not. Production is touched only by an
+official release; Part C and AC18 moved to a later effort; Part D ran on the
+development account. AC19's production and external evidence (Parts F and G)
+comes with the next official release, so the topic and the umbrella item stay
+pending.
+
+Evidence:
+
+- Static checks: the repository lint gate (`bash src/utils/lint_shell.sh`) is
+  clean on 59 tracked scripts; the Markdown check reports no finding in the
+  plan or the validation plan; the consumer's groundhog check passes on the
+  fixes.
+- Tests: the consumer's native Linux walks of the deploy step, historical
+  rollback, runtime startup and failed-upgrade packages pass on the RHEL host
+  (153 passed, 1 skipped, 51 subtests). The new and tightened refusal and
+  re-hold cases fail on the previous consumer code (13 failures) and pass on
+  the fixes. The refusal cases run the real entry after a simulated role stop,
+  for both installed-release formats; the failed recovery cases assert the
+  hold marker, the bridges, the unit and the process state through stateful
+  stubs.
+- Coverage: the consumer's coverage gate measures its application package;
+  Step 9's code is host shell outside that scope, so no percentage is claimed.
+  Every function added on 2026-10-15, the three of this round included, is
+  referenced by a test or from its own script.
+- Architecture: the delivery code is host shell infrastructure outside the
+  application's hexagonal layers; the refusal restart runs the installed
+  release's own start command and nothing from the refused bundle.
+- Performance: the refusal waits at most 30 seconds for the deployment root
+  lock; the re-hold reuses the bounded hold and quiesce helpers. A first
+  release's outage measured 513 to 593 seconds and the failure route 770
+  seconds, against the 1800-second cap.
+- Feature integrity: qualification kept delivering throughout; the fixes
+  change only the refusal and failed-recovery paths, which a successful
+  delivery never takes.
+
+The writer deviation of round 1 stands and the reviewer accepted it: the
+document-level status stays "No, it is not implemented." and the umbrella row
+pending, by the human decision of 2026-10-11.
+
+### Implementation report for step 9 deploy-venv-sync (round 2)
+
+The staged cplx change is documentation: the plan amendment of 2026-10-15
+and the Step 9 validation record, both updated for this round. The fixes live
+in the consumer, committed and pushed to its CI remote.
+
+- Refused hand-over (finding 1). The consumer's installation entry has one
+  refusal function for its four early exits: an incomplete bundle, an
+  application archive that differs from its record, a failed preparation and
+  a missing deploy step. It prints the reason, takes the deployment root lock
+  (creating it if absent, refusing a link or a foreign file, waiting at most 30
+  seconds), runs the installed release's own start command from the prefix
+  with a clean environment and without the lock descriptors, and exits 2
+  either way. An empty prefix starts nothing. Nothing from the refused bundle
+  runs.
+- Failed historical recovery (finding 2). The unit hand-back regains the hold
+  (marker and bridges, unit parked) when it fails after dropping the marker:
+  a kill failure, a unit query failure or the budget running out. The deploy
+  step's historical start failure, in the recovery and in the operator
+  rollback, now enters the hold again and quiesces before status 7. Without
+  retained hold controls it runs the historical stop for components and
+  daemon. When neither works, the last line says the installation could not be
+  held and stopped again and may run without the hold.
+- Tests. Stateful stubs keep the hold marker, the processes and the unit
+  state; tests assert the held and stopped state for the recovery, the
+  operator rollback, a partly started release without a unit, an installation
+  without retained controls and a hold that cannot be restored. The hand-over
+  tests run the real entry after a simulated role stop, for modern and
+  historical installed releases, with a changed and a removed application
+  archive, without a deploy step, with an unwritable prefix and with an empty
+  prefix. The hand-back timeout test asserts the marker and both bridges come
+  back.
+- Documentation. The consumer's states reference lists the entry's refusal
+  line and the second status 7 line; its qualification and production
+  delivery how-tos describe both cases. The plan amendment records the two
+  findings and fixes; the validation record is updated (Yes, missing-work list
+  removed, evidence refreshed, coverage sentences rewritten).
+- Delivery. The fixes are pushed to the consumer's CI remote and a full build
+  with publication is running; it reaches qualification after it passes, as
+  the standing rule allows. The review does not depend on it: the fixes act
+  only on refusal and failed-recovery paths, which a successful delivery does
+  not take.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step9.journal.md`,
+`.reviews/a.deploy-venv-sync.step9.handoff.md`
+
+### Change summary for step 9 deploy-venv-sync (round 2)
+
+Staged paths:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: new subsection "Step 9
+  scope of 2026-10-15: no production delivery" (scope, Part D venue rule and
+  choice, snapshot guard option A, replay constraints, the four fixes Part D
+  found, measured outages, the code review's two recovery fixes, the open
+  production variables prerequisite).
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 9 analysis
+  (Yes, after the round 1 fixes), what was implemented with the code review
+  fixes, new types, architecture, performance, coverage and feature integrity
+  checks, implementation summary; the reviewer's missing-work list is
+  removed now that its items are done; document-level theme sentence naming
+  why the topic stays pending.
+
+Changes since round 1: the plan gained the code review findings and fixes; the
+validation record replaces the reviewer's No verdict, missing-work list and
+gap sentences with the fixes and their evidence.
+
+`a.commit` groups:
+
+1. `docs(deploy-venv-sync): amend the step 9 scope`: the plan.
+2. `docs(deploy-venv-sync): record step 9 validation`: the validation plan.
+
+### Human guidance and writer response for step 9 deploy-venv-sync (round 2)
+
+Human guidance:
+
+Human decisions in chat on 2026-10-15:
+
+- The development-account replay counts as Part D; the live pre-production run
+  is not required, and pre-production stays on the historical pair.
+- Snapshot guard: option A, a release-only delivery address documented, with no
+  code guard.
+- Close Step 9.
+
+Recorded earlier and still binding: production is touched only by an official
+release (2026-10-11, 2026-10-14), and the topic and the umbrella item stay
+pending until AC19's production evidence from the next official release
+(2026-10-11).
+
+Writer response:
+
+Both round 1 findings are accepted and fixed in the consumer.
+
+- [P1] Early hand-over refusal: accepted. Every early exit of the entry's
+  hand-over (absent or differing application archive, failed preparation,
+  missing deploy step) now goes through one refusal function that starts the
+  installed release again with that release's own start command, under the
+  deployment root lock and without passing the lock descriptor on, and keeps
+  status 2; nothing from the refused archive runs. Tests run the real entry
+  after a simulated role stop for both installed-release formats and assert
+  that the installed start ran and that the refused step never ran; the
+  existing differing-archive test is now one of those subtests.
+- [P1] Held and stopped after a failed historical recovery: accepted. The
+  hand-back regains the hold when it fails after dropping the marker, and a
+  failed historical start or health check, in the recovery and in the operator
+  rollback, enters the hold again and quiesces before status 7. Without
+  retained controls the historical stop runs; when nothing can be held, the
+  last line says so instead of claiming a held state. Stateful tests assert
+  the marker, the bridges, the unit and the process state after each failure;
+  the hand-back timeout test asserts the restored hold.
+
+The writer instructions are followed: the accepted replay, the Part C and
+AC18 deferral, the production-only-through-official-release rule and snapshot
+guard option A are unchanged; no production run took place. The reviewer's
+instruction to keep Step 9 at No held until the fixes and their tests passed;
+the record now reads Yes with the evidence above, and the topic and umbrella
+stay pending.
+
+### Reviewer focus for step 9 deploy-venv-sync (round 2)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-9-round-2 -->
+
+## Round 2 by reviewer - Step 9
+
+- Recorded: 2026-10-15T18:09:48+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 9
+- Outcome: answer
+
+### Assessed index identity for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Baseline index tree: f2154b693d0e1ca7436a6334a9fea9d87781c151
+
+Assessed index tree: 8c1b6b76c312f37e6e365453202a06692406899d
+
+### Implementation check for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Result:
+
+No. Step 9 has NOT been fully implemented.
+
+Round 1's early hand-over refusal is addressed: all four hand-over refusal exits invoke the installed release's own start under the root lock, close inherited lock descriptors, and preserve status 2. The real-entry tests exercise both retained layouts, refused archives, missing deploy script, failed preparation and an empty prefix. Static inspection of the installed administration path found no recursive acquisition of the deployment lock.
+
+The retained-control recovery fix now re-enters the hold, reinstalls bridges and quiesces after failed historical hand-back, start or health. The hand-back timeout test checks the real marker and bridge restoration; deploy-step tests check stateful process and hold stubs. However, the new fallback without retained controls loses a failing component stop when the daemon stop succeeds. The remaining finding prevents closing round 1's recovery-state issue.
+
+Architecture: host Bash infrastructure remains outside domain/application layers; no new layering defect identified. Performance: no new algorithmic cost identified; reported replay timings remain below the accepted cap. Coverage: these shell helpers are outside the application coverage source; no shell percentage is inferred. All new top-level helpers are referenced, but independent stop-failure paths are missing from the tests. Feature integrity: successful delivery evidence does not establish the failed-stop terminal state.
+
+Validation plan effects:
+
+Updated only Step 9 rows in `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: exact No verdict, remaining recovery limitation, concrete Missing work directly after What was implemented, coverage and feature-integrity qualifications, and the step implementation summary. The plan amendment, other steps, document-level pending status and umbrella were not edited by the reviewer. These changes are review metadata, with no implementation or test repair.
+
+### Pre-repair mandatory checks and coverage for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Requestor evidence reports the 59-script project lint gate and Markdown checks green, consumer checks green, native Linux tests at 153 passed / 1 skipped / 51 subtests, and 13 failures against the old-code negative control.
+
+The reviewer statically inspected the recovery code and tests plus the writer's named notes. No reviewer test, lint, coverage or resolved-suite execution was performed in this round. The reported green tests do not cover a failed component stop followed by a successful daemon stop. The core-owned whole-scope capture exists, but its proof remains `missing`; it is not green groundhog evidence. The project's declared shell lint gate is the applicable default; lack of pytest support is not a shell lint failure.
+
+### Resolved validation set and sources for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+The request resolves `bash src/utils/lint_shell.sh` from source `project`. The current `.review-validation` declares that same command, and the request has no additive command. This is requestor-owned validation and was not rerun by the reviewer.
+
+### Resolver drift and direction for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+No drift identified: the request and current declared project resolver input both select `bash src/utils/lint_shell.sh` with source `project`. No plan/request command addition was removed or replaced.
+
+### Repository state around validation for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Request and reviewer baseline index: `f2154b693d0e1ca7436a6334a9fea9d87781c151`. Assessed index after attributed Step 9 review metadata: `8c1b6b76c312f37e6e365453202a06692406899d`.
+
+The evidence launcher attributed the exact validation patch to the recorded baseline blob `8ef6ee88504a61ef62ea6e55ef031d4ee2ffae29`; only that patch was staged. The raw validation-state comparison reports `acceptable: false` for the validation plan and `<index>`. Inspection classifies both differences as the permitted exact-step review metadata, with no other tracked or untracked change in the captured ordered path set. The plan digest is unchanged. The umbrella comparison reports unchanged digest `0e319a93709d8d7173d895e126e40cf39c468416d509eb8e176c79030ee88289`.
+
+A concurrent pair of evidence captures briefly contended for Git's index lock. The failed capture was rerun sequentially after the other capture completed; it succeeded with the same assessed index. No lock or repository state was removed.
+
+### Repair inventory for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Repairs made:
+
+- Review metadata only, polishing-only: `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` records the Step 9 No verdict, concrete missing code/test work and qualified recovery evidence. No implementation code or tests were repaired.
+
+Paths staged:
+
+- docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+
+### Commit plan assessment for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+The independent commit-plan checker returned exit 0, `state: valid`, `ready: true`, and no diagnostics on the received state. Its ordered groups are:
+
+1. `docs(deploy-venv-sync): amend the step 9 scope` — `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`.
+2. `docs(deploy-venv-sync): record step 9 validation` — `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`.
+
+Those are exactly the two staged paths. The attributed metadata edit stays in group 2; membership, ordering and subjects remain accurate. No `a.commit` amendment or commit was made. Mechanical readiness does not close the recovery finding.
+
+### Findings and boundaries for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Unresolved findings:
+
+- [P2] Preserve both stop results before reporting the historical release stopped. In the consumer's `tools/deploy_bundle.sh:105`, the new `stop` action runs `as stop; as stop daemon`, so its result is the daemon command's result. On the supported recovery path without retained controls, if the component stop fails but the daemon stop succeeds, `held_historical` at lines 282-285 prints “The historical release was stopped again” although components can remain running. This leaves round 1's recovery-state finding partly open. Accumulate failures while still attempting both commands, return failure if either fails, and use the uncertainty message in that case. Extend `test_deploy_bundle_tdd.py`'s no-retained-controls case (around lines 425-434) with independent component/daemon outcomes and surviving process state: the present stub marks processes stopped for any stop invocation and the test exercises only successful stops.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Human guidance:
+
+The human accepts the development-account replay as Part D, does not require a live pre-production run, selects snapshot guard option A (a documented release-only address without a code guard), and asks to close Step 9. Production is touched only by an official release; the topic and umbrella remain pending for AC19 production/external evidence at that release.
+
+Guidance response:
+
+The accepted replay, Part C/AC18 deferral, option A and release-only production rule are preserved. No production execution or change is requested by this review. The document-level pending status and umbrella remain unchanged. Closing Step 9 still requires the remaining fallback defect and its test gap to be fixed; the guidance does not make a false stopped-state assertion acceptable. The literal guidance authorizes no reviewer implementation repair, so only Step 9 review metadata was edited.
+
+### Writer instructions for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Preserve the accepted scope amendments and production restriction. Fix the fallback stop action so both commands run and either failure prevents the stopped-state claim. Add meaningful failure-state cases for component failure with daemon success and the inverse, retaining the successful-stop case. Run the writer-owned affected validation, update Step 9's evidence only when those cases pass, and publish a fresh exact staged request through the existing exchange. Do not treat successful delivery as proof of these failure paths. The first round's early-refusal finding is closed; the remaining recovery finding requires this focused follow-up.
+
+### Decision rationale for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+The six readiness-floor results are:
+
+1. Identity — PASS: exact plan, Step 9, round 2, occurrence 1, umbrella and request-time index agree.
+2. Implementation completeness — FAIL: the historical fallback can lose a failed component stop and misstate its terminal state.
+3. Validation and coverage — FAIL: requestor checks are reported green, but static test assessment identifies the corresponding independent-stop failure gap; no shell coverage percentage or missing scope proof is represented as green.
+4. Staged attribution — PASS: only the attributable Step 9 validation metadata patch was added to the two writer-staged documentation paths.
+5. Unresolved findings — FAIL: one concrete recovery-state finding remains; the early-refusal finding is closed.
+6. Commit plan — PASS: independent checker valid/ready, no diagnostics, accurate groups and subjects.
+
+Publish `changes-requested`. No substantive reviewer repair was made. This recommendation is advisory and does not authorize a commit.
+
+### Final reviewer decision for step 9 deploy-venv-sync (exchange 1) (round 2)
+
+Decision: changes-requested. The writer must address the concrete instructions and publish another review round. This advisory answer does not authorize a commit.
+
+<!-- review-entry-id: answer-step-9-round-2 -->
+
+## Round 3 by requestor - Step 9
+
+- Recorded: 2026-10-15T18:26:22+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 9
+- Outcome: request
+
+### Review identity for step 9 deploy-venv-sync (round 3)
+
+Umbrella draft: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+Implementation plan: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+Implementation step: 9
+Review round: 3
+
+### Code review evidence for step 9 deploy-venv-sync (round 3)
+
+request_index_tree: 30bda036d678595282aea89f758065ab795cca06
+resolved_validation_set:
+
+- `bash src/utils/lint_shell.sh` (sources: project)
+
+test_scope:
+{"fingerprint": "686958cdf490661b3207a810e06364a48e923f6bf1c8c33c9a555c7f23cc75b6", "group": null, "proof": "missing", "requirement": "docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md", "scope": "whole"}
+
+commit_plan_result:
+
+```text
+state: valid
+ready: true
+group 1: docs(deploy-venv-sync): amend the step 9 scope
+group 1 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+group 2: docs(deploy-venv-sync): record step 9 validation
+group 2 path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+staged path: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md
+```
+
+### Validation scope for step 9 deploy-venv-sync (round 3)
+
+Validation scope: the whole suite.
+
+### Requestor assessment for step 9 deploy-venv-sync (round 3)
+
+Step 9 is fully implemented within the scope the human decisions of
+2026-10-11, 2026-10-12, 2026-10-14 and 2026-10-15 set. The round 2 finding is
+fixed in the consumer: the deploy step's stop action without retained controls
+runs both historical stops and fails when either fails, so a failed component
+stop followed by a successful daemon stop ends with the line that says the
+installation could not be held and stopped again, never with a stopped claim.
+Round 1's refusal finding was closed by the reviewer in round 2. Production is
+touched only by an official release; Part C and AC18 moved to a later effort;
+Part D ran on the development account. AC19's production and external
+evidence (Parts F and G) comes with the next official release, so the topic
+and the umbrella item stay pending.
+
+Evidence:
+
+- Static checks: the repository lint gate (`bash src/utils/lint_shell.sh`) is
+  clean on 59 tracked scripts; the Markdown check reports no finding in the
+  plan or the validation plan; the consumer's groundhog check passes on the
+  fix.
+- Tests: the consumer's native Linux walks of the deploy step, historical
+  rollback, runtime startup and failed-upgrade packages pass on the RHEL host
+  (155 passed, 1 skipped, 51 subtests). The stub administration command now
+  answers the component and daemon stops separately and leaves a part running
+  when its stop fails. The new failed-component-stop case fails on the
+  previous consumer code (1 failure) and passes on the fix; the inverse case
+  passes on both, since the daemon stop ran last; the successful-stop case is
+  kept.
+- Coverage: the consumer's coverage gate measures its application package;
+  Step 9's code is host shell outside that scope, so no percentage is claimed.
+  No helper was added in this round.
+- Architecture: unchanged; the stop action stays in the deploy step's runtime
+  program and runs the installed release's own stop commands.
+- Performance: unchanged; the two stops ran already, only their results are
+  kept.
+- Feature integrity: the change touches only the stop action, used by the
+  failed-recovery fallback without retained controls; a successful delivery
+  never takes that path.
+
+The writer deviation of round 1 stands, accepted by the reviewer: the
+document-level status stays "No, it is not implemented." and the umbrella row
+pending, by the human decision of 2026-10-11.
+
+### Implementation report for step 9 deploy-venv-sync (round 3)
+
+The staged cplx change is documentation: the plan amendment of 2026-10-15
+and the Step 9 validation record, updated for this round. The fix lives in the
+consumer, committed and pushed to its CI remote after the running build had
+passed its check stage.
+
+- Stop action (round 2 finding). The deploy step's runtime `stop` action runs
+  the component stop, then the daemon stop, records a failure of either and
+  exits with failure if one failed. `held_historical` keeps its two outcomes:
+  "stopped again" only when both stops succeeded, otherwise the line that the
+  installation could not be held and stopped again and may run without the
+  hold. A header note in the deploy step records it.
+- Tests. The stub administration command looks up a status per command and
+  argument (component stop and daemon stop separately), keeps a running
+  marker per part, and writes the stopped state only when both parts stopped.
+  A shared helper runs the failed historical start without retained controls
+  and asserts status 7 and both stop attempts; three cases use it: both stops
+  succeed (stopped claim kept), a failed component stop with the daemon
+  stopped, and the inverse (the failed part still running, the uncertainty
+  line, no stopped claim).
+- Documentation. The plan amendment's failed historical recovery bullet says
+  that both stops run and either failure counts; the validation record reads
+  Yes, with the reviewer's missing-work list removed, the evidence refreshed
+  and the coverage and feature-integrity sentences rewritten. The consumer's
+  delivery documents already describe the uncertainty line; they needed no
+  change.
+- Delivery. The consumer's build that started before this round carries the
+  round 1 fixes and is publishing; this round's fix reaches qualification with
+  the next build. The review does not depend on either: the change acts only
+  on a failed-recovery path.
+
+Writer notes: `.reviews/a.deploy-venv-sync.step9.journal.md`,
+`.reviews/a.deploy-venv-sync.step9.handoff.md`
+
+### Change summary for step 9 deploy-venv-sync (round 3)
+
+Staged paths:
+
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`: new subsection "Step 9
+  scope of 2026-10-15: no production delivery" (scope, Part D venue rule and
+  choice, snapshot guard option A, replay constraints, the four fixes Part D
+  found, measured outages, the code review's recovery fixes, the open
+  production variables prerequisite).
+- `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`: Step 9 analysis
+  (Yes, after the round 2 fix), what was implemented with the code review
+  fixes, new types, architecture, performance, coverage and feature integrity
+  checks, implementation summary; the reviewer's missing-work list is removed
+  now that its items are done; document-level theme sentence naming why the
+  topic stays pending.
+
+Changes since round 2: the plan's failed historical recovery bullet says both
+historical stops run and either failure counts; the validation record replaces
+the reviewer's No verdict, missing-work list and qualified sentences with the
+fix and its evidence (155 passed, the new failure case red on the previous
+code).
+
+`a.commit` groups:
+
+1. `docs(deploy-venv-sync): amend the step 9 scope`: the plan.
+2. `docs(deploy-venv-sync): record step 9 validation`: the validation plan.
+
+### Human guidance and writer response for step 9 deploy-venv-sync (round 3)
+
+Human guidance:
+
+Human decisions in chat on 2026-10-15:
+
+- The development-account replay counts as Part D; the live pre-production run
+  is not required, and pre-production stays on the historical pair.
+- Snapshot guard: option A, a release-only delivery address documented, with no
+  code guard.
+- Close Step 9.
+
+Recorded earlier and still binding: production is touched only by an official
+release (2026-10-11, 2026-10-14), and the topic and the umbrella item stay
+pending until AC19's production evidence from the next official release
+(2026-10-11).
+
+Writer response:
+
+The round 2 finding is accepted and fixed in the consumer.
+
+- [P2] Preserve both stop results: accepted. The `stop` action of the deploy
+  step's runtime program still attempts the component stop and the daemon
+  stop, keeps a failure from either and exits with failure if one failed, so
+  `held_historical` prints the uncertainty line instead of "stopped again".
+  The no-retained-controls tests now give both stops independent outcomes and
+  process state: the successful-stop case is kept, and a failed component
+  stop with a successful daemon stop and the inverse both assert status 7,
+  both stop attempts, the part left running, the uncertainty line and no
+  stopped claim. The first of these fails on the previous consumer code.
+
+The writer instructions are followed: the accepted scope amendments and the
+production restriction are unchanged; the affected validation ran (focused
+native walk, the red check, the consumer's groundhog check, the repository
+lint gate and the Markdown check) before Step 9's evidence was updated; no
+successful delivery is offered as proof of the failure path. The topic and the
+umbrella stay pending.
+
+### Reviewer focus for step 9 deploy-venv-sync (round 3)
+
+Check the exact plan step, staged implementation, test evidence, repaired path inventory, and a.commit accuracy.
+
+<!-- review-entry-id: request-step-9-round-3 -->
+
+## Round 3 by reviewer - Step 9
+
+- Recorded: 2026-10-15T18:30:15+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 9
+- Outcome: answer
+
+### Assessed index identity for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Baseline index tree: 30bda036d678595282aea89f758065ab795cca06
+
+Assessed index tree: 30bda036d678595282aea89f758065ab795cca06
+
+### Implementation check for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Result:
+
+Yes. Step 9 has been fully implemented.
+
+This conclusion uses the accepted scope amendments: production is prepared and rehearsed, Part D's development-account replay is accepted, Part C/AC18 is deferred, and production/external AC19 evidence remains for the next official release.
+
+All carried findings are closed. The early hand-over refusal now uses the installed release's start and preserves status 2. Historical recovery restores the hold and quiesces through retained controls, or explicitly reports inability to do so. Round 3's fallback attempts both historical stop commands, accumulates either failure and returns nonzero, so a failed component stop is no longer masked by successful daemon shutdown.
+
+Static inspection confirms that the revised tests independently model component and daemon stop results and surviving processes. Both asymmetric failures assert status 7, both stop attempts, the expected surviving part, the uncertainty message and absence of the stopped claim; the successful-stop case remains.
+
+No new architecture, performance or feature-integrity defect was identified within this scope. The change remains host Bash infrastructure and adds constant-size result bookkeeping. No application class changes or unreferenced production helpers are introduced. Shell exercise is assessed from tests, without a percentage claim for code outside the application's coverage source.
+
+Validation plan effects:
+
+The submitted Step 9 Yes verdict and removal of Missing work agree with this assessment. The validation already describes the fix, independent stop-failure tests and scope limitations, so no reviewer edit was needed. Other steps, document-level pending status and the umbrella remain unchanged. The latter two correctly await AC19 evidence under the human decision.
+
+### Pre-repair mandatory checks and coverage for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Requestor evidence and the named journal report: project shell lint green on 59 tracked scripts; plan/validation Markdown clean; consumer check green; native Linux validation 155 passed, 1 skipped and 51 subtests. The failed-component-stop test fails on the previous implementation and passes with the fix. The inverse case passes on both versions because the daemon result was already returned.
+
+The reviewer inspected the code/test delta, staged documentation, current coverage source and evidence records. No tests, lint or coverage were rerun by the reviewer. The core-owned whole-scope capture exists and matches the request fingerprint; its groundhog proof remains `missing`, which is not represented as green. This shell repository's explicit default is its direct lint gate, not the inapplicable pytest default. The consumer shell files are outside the `src/pdfss` coverage source; static exercise and the reported native tests provide their evidence.
+
+### Resolved validation set and sources for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+The request resolves `bash src/utils/lint_shell.sh` with source `project`. The current `.review-validation` declares that exact command. No plan or request addition is declared. The requestor owns execution of this set.
+
+### Resolver drift and direction for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+No drift identified: request and current project configuration select the same shell lint command and source, with no additive check removed or substituted.
+
+### Repository state around validation for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Request, baseline and assessed index all equal `30bda036d678595282aea89f758065ab795cca06`. The ordered validation path set contains both staged documents. The evidence launcher reports `acceptable: true` with no changed tracked, ignored or untracked paths.
+
+The umbrella digest remains `0e319a93709d8d7173d895e126e40cf39c468416d509eb8e176c79030ee88289`. No reviewer-authored tracked mutation, staging effect, validation side effect or boundary crossing occurred.
+
+### Repair inventory for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Repairs made: None.
+
+Paths staged: None.
+
+### Commit plan assessment for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Independent checker result: exit 0, `state: valid`, `ready: true`, no diagnostics. The complete staged set and ordered groups are:
+
+1. `docs(deploy-venv-sync): amend the step 9 scope`: `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md`.
+2. `docs(deploy-venv-sync): record step 9 validation`: `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md`.
+
+Membership, dependency order, scope and conventional subjects match the submitted changes. No `a.commit` amendment was needed. The reviewer did not commit.
+
+### Findings and boundaries for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Unresolved findings: None.
+
+Boundary-crossing work: None.
+
+### Human guidance response for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Human guidance:
+
+The human accepts the development-account replay as Part D, keeps pre-production on the historical pair, chooses snapshot guard option A (documented release-only address without a code guard), and asks to close Step 9. Production is touched only by an official release. The topic and umbrella stay pending for AC19 production/external evidence at that release.
+
+Guidance response:
+
+Step 9 can close within those decisions now that the recovery findings are fixed and tested. The accepted replay, Part C/AC18 deferral and option A stand. No live pre-production or production run was performed or required by this review. The pending document-level status and umbrella remain correct; this advisory result does not claim the deferred production evidence is complete.
+
+### Writer instructions for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+No further code rework is requested for Step 9. Continue through the existing requestor workflow and human commit gate. Preserve the pending topic and umbrella, release-only production rule, and next-release AC19 evidence obligations. This answer does not authorize production execution or a commit.
+
+### Decision rationale for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+The six readiness-floor results are:
+
+1. Identity: PASS. Exact plan, Step 9, round 3, occurrence 1, umbrella and request-time index agree.
+2. Completeness: PASS within the human-amended Step 9 scope; all carried findings are closed.
+3. Validation and coverage: PASS on reported writer checks and independent static assessment. The meaningful negative control covers the masked component-stop failure; no remaining shell-test gap is identified for the reviewed changes. No unmeasured shell coverage percentage or missing groundhog proof is claimed.
+4. Staged attribution: PASS. The two writer-staged documentation paths and index are unchanged by the reviewer.
+5. Unresolved findings: PASS. None remain in the reviewed scope.
+6. Commit plan: PASS. The independent checker is valid/ready without diagnostics, and grouping and subjects are accurate.
+
+Recommend `commit-ready`. No substantive or polishing repair was made in this round. This is advisory; the human owns the commit choice.
+
+### Final reviewer decision for step 9 deploy-venv-sync (exchange 1) (round 3)
+
+Decision: commit-ready (advisory). The evidence floor is complete, but this recommendation does not authorize a commit; authority remains at the durable human gate.
+
+<!-- review-entry-id: answer-step-9-round-3 -->
+
+## Round 3 by human - Step 9 - human-confirmation
+
+- Recorded: 2026-10-15T21:04:53+02:00
+- Exchange: code/code/v0.27.0/deploy-venv-sync
+- Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
+- Reviewed document: docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.md
+- Requestor LLM nature: claude
+- Reviewer LLM nature: codex
+- Implementation step: 9
+- Outcome: human-confirmation
+
+Human choice: Commit
+Outcome: continue-owning-workflow
+
+<!-- review-entry-id: human-confirmation-round-3 -->
