@@ -19,9 +19,11 @@ Python tree. Why it exists:
 | `sqlite3.c` SHA3-256 | `e2b869d3003b33c942b7dd7063604fbc53553e1b66609570df39b9b7b558ee81` (the change log's value) |
 | `SQLITE_SOURCE_ID` | `2026-10-16 14:45:20 555e07ef33f69a0957d24d8e555b702464a131d6f1607f4c3c1e4551e8e6ca76` |
 
-`sqlite_install_functions.sh` pins these values per version and checks
-them before `configure` and again before `make`: a version without pinned
-values refuses to build.
+`sqlite_install_functions.sh` pins these values per version. Its
+`verify_archive` hook checks all four on the exact archive the installer
+selected, before anything is extracted from it; `configure` and `make` check
+that archive and the extracted tree again, since a reused tree is not
+re-extracted. A version without pinned values refuses to build.
 
 ## Tool registration
 
@@ -79,7 +81,8 @@ symbol version above `GLIBC_2.34`.
 
 | Where | Check | Refusal |
 | --- | --- | --- |
-| `sqlite` `configure()` and `build()` | archive SHA-256 and SHA3-256, amalgamation SHA3-256, header source id | status 2 |
+| installer, `sqlite` `verify_archive` hook | on the selected archive, before extraction: its SHA-256 and SHA3-256, then the amalgamation SHA3-256 and header source id read from its members | exit 27, nothing extracted |
+| `sqlite` `configure()` and `build()` | the selected archive's SHA-256 and SHA3-256 again, the extracted tree's amalgamation SHA3-256 and header source id | status 2 |
 | `sqlite` `build()` and `post_install_check()` | SONAME, `libm.so.6` needed, no `DT_RPATH`, `GLIBC_2.34` ceiling | status 2 |
 | `sqlite` `post_install_check()` | both links reach `libsqlite3.so.<version>`, no `libsqlite3.so.0.8.6`, installed header source id | status 2 |
 | `python_setenv()` | the SQLite header and library a configured tree was built against (`sources/current/cplx-sqlite-inputs.txt`) | `config.log` retired, so the driver reconfigures, cleans and rebuilds; fatal 26 if the inputs are missing |

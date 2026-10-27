@@ -23,7 +23,7 @@ Exact values: [Bundled SQLite](../reference/bundled-sqlite.md).
 1. **Pin the release** (only when changing it). Set `CPLX_VERSION` and
    `CPLX_URL` in the `sqlite` block of `senv.local.bat` and
    `tools\senv.local.tpl`; the archive name encodes 3.X.Y as `3XXYY00`
-   under the release year. Add the version's five values to
+   under the release year. Add the version's four values to
    `sqlite_pinned_identity()` in
    `src\install\env\sqlite\sqlite_install_functions.sh`: the archive
    SHA-256 you compute, the SHA3-256 from the download page, the
@@ -129,6 +129,7 @@ Exact values: [Bundled SQLite](../reference/bundled-sqlite.md).
 | --- | --- |
 | `no pinned source identity` | step 1 was skipped for this version |
 | a digest or source id differs | the archive is not the selected release: download it again, never update the pin to match it |
+| exit 27, `failed its verification: nothing extracted` | the archive the installer selected, the newest file in `sources/` matching the version, failed one of the four checks before extraction: remove any other matching file, download again, never update the pin |
 | `SONAME ...`, `libm.so.6`, `DT_RPATH` | the configure line was changed; restore it |
 | probe: `SQLite version/source_id ... differs` | Python loaded another library: look for a host or leftover copy |
 | probe: `compile options differ` | the build or the pin changed; review which one is right before editing anything |
