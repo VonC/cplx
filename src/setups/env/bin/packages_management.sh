@@ -606,6 +606,11 @@ function remove_package() {
             else
                 warning "Skipping removal: '${file_to_remove}' is not a file or symlink or present"
             fi
+        elif ((processing_started)) && [[ "${line}" == "cpio: "* ]]; then
+            # cpio interleaves its "not created: newer or same age version
+            # exists" notices with the listing; the payload goes on after them.
+            # Stopping here left the rest of the package unpacked in root/.
+            continue
         else
             # Once we start processing './' lines, stop when a different line is reached
             if ((processing_started)); then
