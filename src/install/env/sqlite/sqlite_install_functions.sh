@@ -7,8 +7,8 @@
 
 # The selected release and its source identity: the archive digests from the
 # upstream download page, the amalgamation digest and source id from its change
-# log. A version change replaces the five values together, and Python's
-# sqlite_expected.json follows it.
+# log. A version change replaces the four values together, and Python's
+# sqlite_expected.txt follows it.
 function sqlite_pinned_identity() {
     # The shared driver supplies the requested version.
     # shellcheck disable=SC2154
@@ -39,15 +39,56 @@ function sqlite_digest_matches() {
     ok "SQLite: ${label} of '${file}' matches"
 }
 
-# Verify the source bytes before configure and before make, so a reused tree
-# is checked again. The archive is the one the dispatcher extracted.
+# Hash one archive member without extracting it to disk.
+function sqlite_member_sha3() {
+    local archive=$1 member=$2
+    (set -o pipefail; tar -xzOf "$archive" "$member" | openssl dgst -sha3-256 -r)
+}
+
+# Name the one member called $2 directly under the archive's top directory.
+function sqlite_archive_member() {
+    local archive=$1 name=$2 members
+    members=$(tar -tzf "$archive" | grep -E "^[^/]+/${name//./\\.}\$") \
+        || { error "SQLite: '${archive}' has no '${name}' under its top directory"; return 2; }
+    if [[ $members == *$'\n'* ]]; then
+        error "SQLite: '${archive}' has several '${name}' members"
+        return 2
+    fi
+    printf '%s\n' "$members"
+}
+
+# The dispatcher's hook, run on the exact archive it selected and before it
+# extracts anything: the archive digests first, then the amalgamation digest
+# and the source id read from the archive's own members.
+function verify_archive() {
+    local archive=$1 sqlite_archive_sha256 sqlite_archive_sha3 sqlite_amalgamation_sha3 sqlite_source_id
+    local member defined
+    sqlite_pinned_identity || return $?
+    sqlite_digest_matches SHA-256 "$archive" "$sqlite_archive_sha256" sha256sum || return $?
+    sqlite_digest_matches SHA3-256 "$archive" "$sqlite_archive_sha3" openssl dgst -sha3-256 -r || return $?
+    member=$(sqlite_archive_member "$archive" sqlite3.c) || return $?
+    sqlite_digest_matches "amalgamation SHA3-256" "$member" "$sqlite_amalgamation_sha3" \
+        sqlite_member_sha3 "$archive" || return $?
+    member=$(sqlite_archive_member "$archive" sqlite3.h) || return $?
+    defined=$(set -o pipefail; tar -xzOf "$archive" "$member" | sed -n 's/^#define SQLITE_SOURCE_ID *"\(.*\)"$/\1/p') \
+        || { error "SQLite: cannot read '${member}' from '${archive}'"; return 2; }
+    if [[ $defined != "$sqlite_source_id" ]]; then
+        error "SQLite: '${member}' in '${archive}' declares source id '${defined}', expected '${sqlite_source_id}'"
+        return 2
+    fi
+}
+
+# Verify again before configure and before make: a reused extraction folder
+# may come from another archive than the one the dispatcher selected, so the
+# tree's own amalgamation and source id are checked too.
 function sqlite_verify_sources() {
     local sqlite_archive_sha256 sqlite_archive_sha3 sqlite_amalgamation_sha3 sqlite_source_id
     local archive header defined
     sqlite_pinned_identity || return $?
+    # The dispatcher sets archive_file to the archive it selected.
     # shellcheck disable=SC2154
-    archive=${tool}/sources/sqlite-src-${version}.tar.gz
-    [[ -f $archive ]] || { error "SQLite: missing source archive '${archive}'"; return 2; }
+    archive=${archive_file:-}
+    [[ -n $archive && -f $archive ]] || { error "SQLite: no selected source archive '${archive}'"; return 2; }
     sqlite_digest_matches SHA-256 "$archive" "$sqlite_archive_sha256" sha256sum || return $?
     sqlite_digest_matches SHA3-256 "$archive" "$sqlite_archive_sha3" openssl dgst -sha3-256 -r || return $?
     # shellcheck disable=SC2154
