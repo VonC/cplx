@@ -84,7 +84,10 @@ compatibility investigation of the exact Python 3.13.15 release archive:
 ## Acceptance criteria for the bundled SQLite
 
 1. **AC1 source identity**: the `sqlite` build refuses an archive whose four
-   pinned values differ, and refuses a version that has no pinned values.
+   pinned values differ, and refuses a version that has no pinned values. It
+   checks the exact archive the installer selected before extracting
+   anything from it, and checks a reused extracted tree again before
+   configure and make.
 2. **AC2 library shape**: the built and the installed library have SONAME
    `libsqlite3.so.0`, need `libm.so.6`, carry `DT_RUNPATH` and no `DT_RPATH`,
    and need no `GLIBC_` node above 2.34. Both links reach

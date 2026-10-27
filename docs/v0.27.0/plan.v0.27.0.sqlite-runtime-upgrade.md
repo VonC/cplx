@@ -28,19 +28,26 @@ validation plan; access details stay in ignored notes.
 
 ## Shared execution command checklist for bundled SQLite steps
 
-From a CMD session that called `senv.bat`:
+From a CMD session that called `senv.bat`, at the repository root, with the
+sibling llm-shared checkout's interpreter as the authoring Python (the step
+runner requires an absolute path, which `%CD%` supplies):
 
 ```text
-bash docs/v0.27.0/verify.python-sqlite.sh --step 4 --python C:/absolute/path/to/python.exe
-bash docs/v0.27.0/verify.python-sqlite-build.sh --python C:/absolute/path/to/python.exe
+bash docs/v0.27.0/verify.python-sqlite.sh --step 4 --python %CD%/../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe
+bash docs/v0.27.0/verify.python-sqlite-build.sh --python %CD%/../llm-shared/venvs/python_3.13.9_llm-shared/Scripts/python.exe
+bash docs/v0.27.0/verify.sqlite-source.sh
 shellcheck -S style src/install/env/sqlite/sqlite_install_functions.sh
 ```
 
-On the build host, from a copy of the tree, the probe unit tests run with the
-host Python and with the rebuilt 3.13.15:
+On the build host, from a copy of the tree: the native installer fixtures,
+which Windows skips for want of real symlinks, and the probe unit tests with
+the host Python and with the rebuilt 3.13.15 of the live tools tree:
 
 ```text
-python3 -m unittest tests.unit.sqlite_probe.test_sqlite_probe.test_sqlite_probe_tdd
+bash docs/v0.27.0/verify.python-sqlite-build.sh --python /usr/bin/python3
+bash docs/v0.27.0/verify.sqlite-source.sh
+/usr/bin/python3 -m unittest tests.unit.sqlite_probe.test_sqlite_probe.test_sqlite_probe_tdd
+~/tools/python/bin/python -m unittest tests.unit.sqlite_probe.test_sqlite_probe.test_sqlite_probe_tdd
 ```
 
 ## Step 1: Build SQLite as a cplx library tool
@@ -61,11 +68,19 @@ Files:
 
 - `src/setups/env/bin/packages_management.sh` (existing): skip `cpio:`
   notices once the payload listing has started, so removal reaches every file.
+- `src/install/env/install` (existing): an optional `verify_archive` hook
+  receives the exact archive the dispatcher selected, before extraction; a
+  refusal stops with exit 27 and nothing extracted.
 - `src/install/env/sqlite/sqlite_install_functions.sh` (new):
   - `sqlite_pinned_identity` holds, per version, the archive SHA-256 and
     SHA3-256, the amalgamation SHA3-256 and the source id; an unknown version
     has none and is refused;
-  - `sqlite_verify_sources` checks them before extraction;
+  - `verify_archive` checks the selected archive's two digests, then the
+    amalgamation digest and the header source id streamed from its members,
+    before extraction;
+  - `sqlite_verify_sources` checks the selected archive and the extracted
+    tree again before configure and make, since a reused tree is not
+    re-extracted;
   - `configure` builds `jimsh0` first with the sandbox compiler and
     `--sysroot`, then configures with `--soname=legacy`, the parity options,
     `-Wl,--enable-new-dtags -lm` and no `DISABLE_DIRSYNC`;
@@ -80,6 +95,12 @@ Files:
   (existing): `sqlite` ordered between `git` and `python`.
 - `tools/senv.local.tpl` (existing): the `sqlite` block with version, source
   URL and the two check paths, whose basenames must match.
+- `docs/v0.27.0/verify.sqlite-source.sh` (new): the real installer and tool
+  functions on synthetic archives, with a fixture pin table; a corrupt
+  selected archive, an unknown version, a newer non-canonical archive beside
+  the canonical one, a wrong member digest and a wrong source id are refused
+  with exit 27 and nothing extracted; the canonical archive reaches
+  configure; a tampered reused tree is refused before configure.
 
 Completion: the tool builds and deploys
 `sqlite-3.54.1-<timestamp>.el9.x86_64.tar.gz`, and its build log shows the four
@@ -90,6 +111,11 @@ source values matching and the library checks passing twice.
 - `CPLX_BIN` stays empty: the tool ships a library, not a command.
 - The `sqlite3` CLI that `make install` builds is used only to read the
   options in Step 2; it is not shipped through Python's sandbox.
+- Code review round 1 found the first implementation checking a fixed archive
+  name inside `configure`, after the dispatcher had already extracted the
+  archive it selected. The `verify_archive` hook and its fixtures above are
+  the correction; the library built on the build host is unchanged, since
+  that build used the canonical archive.
 
 ## Step 2: Link Python to the bundled SQLite and require its exact build
 
