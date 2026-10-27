@@ -3,7 +3,7 @@
 No, it is not implemented.
 
 Track the five steps in the [implementation plan](plan.v0.27.0.sqlite-runtime-upgrade.md).
-Steps 1 and 2 are recorded below with their evidence; each later step gets its
+Steps 1 to 3 are recorded below with their evidence; each later step gets its
 own validation record. The item's code review has not run, so the umbrella
 row stays pending until it completes.
 
@@ -86,3 +86,22 @@ Recorded validation on 2026-10-27:
 
 A Python tree whose SQLite inputs are unchanged keeps its build reuse. The
 previous Python package stays in the tool's package directory for rollback.
+
+## Step 3: Document the bundled SQLite
+
+### Analysis of Step 3 implementation state
+
+Yes. Step 3 has been fully implemented.
+
+### What was implemented for Step 3
+
+- [Explanation](../../wiki/explanation/why-the-toolchain-builds-its-own-sqlite.md),
+  [how-to](../../wiki/how-to/build-and-verify-the-bundled-sqlite.md) and
+  [reference](../../wiki/reference/bundled-sqlite.md) pages.
+- Updates to the SQLite capability and archive rebuild how-to pages, the
+  sandbox-provenance explanation, the exit-code reference and the index.
+
+No automated wiki link check exists in the suite. On 2026-10-27 every
+relative link of the eight touched pages resolved on this branch.
+Two updated how-to pages come from item 8's branch, as the plan's Step 3
+addendum records.
