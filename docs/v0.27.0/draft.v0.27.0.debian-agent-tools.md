@@ -773,11 +773,12 @@ the correction below.
 | D4 | How install_pkg.sh stops needing the host rsync | (a) in-script cp fallback; (b) ship the rsync payload in the archive like patchelf; (c) both; (d) wait for the agent image | decided: (a). Both options add something, and the contrast is the argument: (a) adds one command, `cp`, which the script does not call today and which both supported targets already carry, while (b) would add a binary plus its libpopt, libzstd, liblz4 and libcrypto onto a foreign distribution, the failure class of Q26. The claim that both targets carry it is now measured rather than assumed. The consuming project's diagnose stage runs a command and behavior script on the Debian agent at every build, and the same script was run by hand on a RHEL 9.8 deployment server on 2026-08-09: both report all nineteen commands and every behavior present, `cp -a` keeping a symlink a symlink included, with rsync the only difference between them, present on the server and absent on the agent. The behaviors are satisfied by the older toolset of the two, RHEL running behind Debian on coreutils, findutils, grep and sed, which is the stronger direction for the claim. Correction, 2026-08-09: this rationale first read "needing only POSIX tools", which the requirement review disproved. The script is a Bash script using GNU behavior (`find -printf`, `grep -rlIZ --exclude-dir`, `xargs -0 -r`, `sed -i`), and the `cp -a` the fallback adds is itself a GNU and BSD extension. The decision is unaffected, only its justification; requirement 1 carries the audited contract. Compiling rsync in cplx is impossible here: a cplx-built binary carries a `/home/<builder>` interpreter and rsync must run before the pass that repairs it. Asking the CICD team for rsync stays a parallel, non-blocking track |
 | D5 | Batch a Python 3.13.x refresh with the sqlite rebuild | (a) yes, one release rebuild serves both, with the item 6 validation-build allowance below; (b) no, minimal change | decided: (a) on **3.13.14**, never 3.13.10; re-check 3.13.15 for regression reports just before the release rebuild and take it if clean. Qualified by human-confirmed Q06/F1 in [the SQLite requirement](feature-request.v0.27.0.python-sqlite-support.md): item 6 adds a separate non-release validation rebuild on the tracked 3.13.15 pin, retaining version and payload/archive identity. Item 7 keeps the final refresh, regression re-check and release rebuild and repeats SQLite acceptance on the final archive; the current pin does not prove the re-check. |
 | D8 | When to consider Python 3.14 | (a) now, widening the application pin; (b) next cycle; (c) never, stay on 3.13 to its end of life | (b): 3.13 must serve this rebuild (the application pins it), but 3.14 gains a year of maintenance, fits the annotation-heavy code through PEP 649, and is the only line RHEL 9 could ever provide as a package |
-| D7 | sqlite provenance for the python build | (a) copy from the server's `/usr`; (b) `sqlite-devel` and `sqlite-libs` payloads extracted into the python sandbox from the per-tool list; (c) sqlite rebuilt from source as a cplx tool | (b): (a) is impossible (the server has no header and no linker symlink), (b) is one list line in the same class as zlib and libffi, (c) only for a newer sqlite or independence from the RHEL patch cycle |
+| D7 | sqlite provenance for the python build | (a) copy from the server's `/usr`; (b) `sqlite-devel` and `sqlite-libs` payloads extracted into the python sandbox from the per-tool list; (c) sqlite rebuilt from source as a cplx tool | (b): (a) is impossible (the server has no header and no linker symlink), (b) is one list line in the same class as zlib and libffi, (c) only for a newer sqlite or independence from the RHEL patch cycle. Superseded on 2026-10-26 by D12, which takes (c) in item 9 |
 | D6 | cplx release carrying this effort | (a) fold into the current 0.26.0 cycle; (b) dedicated next cycle | (b): v0.26.0 shipped on 2026-08-06, this effort opens the v0.27.0 cycle |
 | D10 | C++ runtime generation shipped in the root | (a) keep the GCC 11 `libstdc++.so.6.0.29` the platform provides, inheriting a one-node margin (`GLIBCXX_3.4.29` against an agent at `3.4.30`); (b) ship the GCC 12 generation, sourced from a toolset payload, so the archive absorbs a wheel set that moves past that node | DECIDED inside requirement 4 as a CONDITIONAL POLICY, by the round 1 specification review of `issue.v0.27.0.toolchain-runtime-closure.md`. The consumer set is every shipped ELF recording a `DT_NEEDED` on `libstdc++.so.6`, measured once the final wheel and dependency set is fixed. The comparison covers `GLIBCXX_` and `CXXABI_` against what the shipped `libstdc++` defines, since libstdc++ provides both namespaces, while `libgcc_s` is checked separately against its own `GCC_` needs. Ship (a) if and only if every one of those is satisfied; otherwise ship (b) and re-run every closure check of requirement 4 against the new root; if NEITHER generation satisfies them, packaging FAILS rather than taking the closer one. ZERO SPARE NODES IS ALLOWED: the threshold is satisfaction, not headroom, so "the margin is gone" is explicitly NOT the switch condition, being ambiguous between zero headroom and an unsupported node. Requirement 7 supplies the measurement; requirement 4 owns the rule |
 | D9 | Architecture key across server minors | (a) copy the file set at every minor upgrade; (b) key on the major only; (c) exact curated definitions first, then eligible minor fallback, logged | decided: (a) was the temporary recovery; (c) is refined by [requirement 5](feature-request.v0.27.0.architecture-minor-fallback.md), consolidated on 2026-09-14. Prefer the highest lower minor, otherwise the lowest higher minor, within the same distribution, major and complete machine. Lists and mirrors resolve independently; indexes are generated for the detected key and never reused across minors. Either reload flag, or a missing or zero-length exact index, requires generation despite completion state. Resume progress applies only to the same selected list and detected key; changed or legacy state restarts. Correct 9.6 Python to `zlib-devel` before removing equivalent 9.8 curated definitions; retain indexes and operator-local properties. (b) remains rejected because exact divergent overrides must remain possible. |
 | D11 | Whether the venv a deployment runs must be the bytes the pipeline tested | (a) byte-identical: keep shipping the venv inside the application archive, or ship the wheel set and sync offline from it; (b) lock-identical: create the venv on the target and `uv sync` it from the project lock | decided: **(b) lock-identical**, on 2026-09-18. The deployed environment is reproduced from the same pinned lock rather than copied from the prefix the pipeline tested, so identities are fixed while bytes are re-materialised. Two consequences follow and both belong to item 8 rather than to a note: drift must be DETECTED rather than assumed, so the deployed site-packages is verified after the sync against the retained wheel identities, reusing the inventory helper item 7 builds for D10; and rollback re-resolves from the previous release's lock instead of restoring copied bytes, so the recovery procedure is rewritten rather than inherited. The deployment also gains two prerequisites it does not have today, `uv` itself and a reachable index, which is why shipping the wheel set beside the archive and syncing offline from it stays open inside (b): it satisfies lock-identical without a network dependency and keeps every artifact digest-pinned |
+| D12 | SQLite release the toolchain python links | (a) keep D7 (b), the distribution's `sqlite-libs` payload, 3.34.1 on el9; (b) build the newest stable upstream release from source as the cplx library tool `sqlite`, D7 (c) | decided: (b) with **3.54.1**, on 2026-10-26, delivered by item 9. A consuming project selected the standard-library `sqlite3` module for persistent storage, so the bundled runtime must carry the WAL-reset corruption fix: present from 3.7.0 through 3.51.2, fixed in 3.51.3, backported to 3.50.7 and 3.44.6. No backport was evidenced for the distribution's 3.34.1, and a vendor version number cannot prove one. The build keeps the replaced provider's compile options, keeps `libsqlite3.so.0` as its SONAME through `--soname=legacy`, and leaves out `DISABLE_DIRSYNC`, so SQLite keeps its directory sync. A later patch release is a reason to ask, not to switch silently. Prereleases and snapshots are excluded |
 
 ## List of feature-requests and issues to create
 
@@ -791,6 +792,7 @@ the correction below.
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
 | 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | completed | `docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md` | `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` |
 | 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | - | - |
+| 9 | Feature-request | Build the bundled SQLite from source | `sqlite-runtime-upgrade` | pending | - | - |
 
 ### Requirement details for the umbrella
 
@@ -1370,6 +1372,64 @@ previous release is proved on the target rather than argued.
 Depends on: item 7. Sequenced after publication so that an accepted
 archive, its platform acceptance and its adoption evidence are not
 disturbed by a packaging change.
+
+#### 9. Build the bundled SQLite from source
+
+Type: Feature-request. Slug: `sqlite-runtime-upgrade`. Regroups decision
+D12, which supersedes the payload route of D7, and the probe extension that
+proves its result.
+
+Item 6 gave the toolchain python a `_sqlite3` linked against the
+distribution's `sqlite-libs` payload, SQLite 3.34.1 on el9. That release
+predates the WAL-reset corruption fix SQLite documents on its WAL page, and
+updating the host package would not reach it: the toolchain loads its own
+copy under the prefix. Once a consuming project selected the standard-library
+`sqlite3` module for persistent storage, the bundled provider had to change.
+
+The item builds the newest stable upstream release, 3.54.1, as the cplx
+library tool `sqlite`: the third of the three ways to fill a sandbox gap, which
+D7 kept for "a newer sqlite". Python consumes it through a `_sqlite` line in its
+package list, in place of the two distribution payloads. The rules the work
+settled:
+
+- The source archive is checked before extraction against four pinned
+  values: its SHA-256 and SHA3-256, the amalgamation's SHA3-256 and the source
+  id. A version with no pinned values is refused.
+- `--soname=legacy` keeps `libsqlite3.so.0` as the SONAME that item 4's
+  closure floor and the `DT_NEEDED` of `_sqlite3` name; the autoconf build
+  sets none by default.
+- The compile options keep parity with the replaced provider and leave out
+  `DISABLE_DIRSYNC`. The 51 options the built library reports are pinned in
+  an expected-build file next to the probe.
+- The library carries `DT_RUNPATH`, never `DT_RPATH`, links `libm`
+  explicitly and needs no `GLIBC_` node above 2.34.
+- A changed SQLite header or library retires Python's configured tree, so
+  `_sqlite3` never keeps the previous headers through build reuse.
+- A removed distribution payload is removed completely, so no stale
+  `libsqlite3.so.0.8.6` survives in the sandbox to be packaged.
+- The probe compares the loaded version, source id and compile options with
+  the expected-build file, refuses a second real `libsqlite3.so*` beside the
+  provider, and runs a WAL smoke check on a disposable database: three writer
+  processes at `synchronous=FULL`, passive then truncating checkpoints, a
+  reopen and an integrity check.
+
+The row is ninth because it arrived after the split, not because it needs
+item 8: it depends on items 4, 6 and 7 only, so it can return to this
+integration branch while item 8 is pending. The implementation came first,
+under an urgent request; its requirement, plan and validation plan were
+written afterwards, and no specification review ran. The candidate archive
+passed on the Debian 12 agent on 2026-10-27; the item stays pending until its
+code review completes.
+
+Acceptance: on RHEL 9.8 and on the Debian 12 agent, the relocated archive's
+wrapper and an application-style venv load the bundled 3.54.1, with identity,
+WAL smoke and mapped-provider checks passing; CPython's `test_sqlite3` and
+`test_dbm_sqlite3` pass from the shipped tree; nothing loads from outside the
+prefix; and an upgrade over the previous archive leaves one provider. The
+consuming project's own locking, crash-recovery, disk-full and durability
+qualification stays outside this item.
+
+Depends on: items 4, 6 and 7.
 
 ### Out of the collection
 
