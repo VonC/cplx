@@ -37,9 +37,17 @@ class SqliteProbeTests(unittest.TestCase):
         self.provider = self.file("python/root/usr/lib64/libsqlite3.so.0.8.6")
         self.scratch = self.work / "scratch"
         self.scratch.mkdir()
+        # The test interpreter's own SQLite stands in for the selected build.
+        self.expected = self.work / "sqlite_expected.txt"
+        self.write_expected(probe.observe_sqlite(sqlite3))
         # NTFS has no Linux device major/minor; only synthetic mapping tests use this.
         if os.name != "posix":
             self.contexts.enter_context(mock.patch.object(probe, "device_numbers", return_value=(0, 7)))
+
+    def write_expected(self, build, extra=()):
+        lines = [f"version={build['version']}", f"source_id={build['source_id']}"]
+        lines += [f"compile_option={option}" for option in build["compile_options"]]
+        self.expected.write_text("\n".join([*lines, *extra]) + "\n", encoding="utf-8")
 
     def file(self, relative):
         path = self.work / relative
@@ -70,8 +78,8 @@ class SqliteProbeTests(unittest.TestCase):
     def args(self, **changes):
         values = dict(stage="installed", expected_python_root=str(self.root),
                       expected_extension_root=str(self.extension.parent),
-                      expected_provider=str(self.provider), scratch_dir=str(self.scratch),
-                      expected_libpython=None)
+                      expected_provider=str(self.provider), expected_sqlite=str(self.expected),
+                      scratch_dir=str(self.scratch), expected_libpython=None)
         values.update(changes)
         return types.SimpleNamespace(**values)
 
@@ -79,10 +87,12 @@ class SqliteProbeTests(unittest.TestCase):
         native = types.SimpleNamespace(__file__=str(self.extension))
         def import_module(name):
             return native if name == "_sqlite3" else sqlite3
+        # The fixture executable is not runnable; the WAL writers have their own tests.
         with mock.patch.object(probe.sys, "executable", str(self.executable)), \
                 mock.patch.object(probe.importlib, "import_module", side_effect=import_module), \
                 mock.patch.object(probe, 'mapped_reference', side_effect=lambda path:
                                   contextlib.nullcontext((references or {}).get(str(path)))), \
+                mock.patch.object(probe, "wal_smoke", return_value="passed"), \
                 mock.patch.object(probe, "read_maps", return_value=maps or self.mapping()) as reader:
             result = probe.assess(args or self.args())
         return result, reader
@@ -319,6 +329,7 @@ class SqliteProbeTests(unittest.TestCase):
         with mock.patch.object(probe, "database_roundtrip", side_effect=database), \
                 mock.patch.object(probe, 'mapped_reference', side_effect=lambda path:
                                   contextlib.nullcontext(None)), \
+                mock.patch.object(probe, "wal_smoke", side_effect=lambda *args: events.append("wal") or "passed"), \
                 mock.patch.object(probe, "read_maps", side_effect=maps):
             # run_probe owns its maps patch, so use the public assessment directly.
             native = types.SimpleNamespace(__file__=str(self.extension))
@@ -326,8 +337,9 @@ class SqliteProbeTests(unittest.TestCase):
                     mock.patch.object(probe.importlib, "import_module", side_effect=[native, sqlite3]):
                 result = probe.assess(self.args())
         self.assertEqual(result["outcome"], "passed", result)
-        self.assertEqual(events, ["database closed", "maps"])
+        self.assertEqual(events, ["database closed", "wal", "maps"])
         self.assertEqual(result["database"], "passed")
+        self.assertEqual(result["wal"], "passed")
         self.assertEqual(result["provider"]["path"], str(self.provider))
 
     def test_unavailable_proc_is_inconclusive(self):
@@ -338,6 +350,7 @@ class SqliteProbeTests(unittest.TestCase):
     def test_absent_expected_material_and_relative_paths_cannot_pass(self):
         for args in [self.args(expected_provider=str(self.root / "missing")),
                      self.args(expected_python_root="relative"),
+                     self.args(expected_sqlite=str(self.root / "missing")),
                      self.args(scratch_dir=str(self.root / "missing"))]:
             result, _ = self.run_probe(args)
             self.assertNotEqual(result["outcome"], "passed")
@@ -347,7 +360,8 @@ class SqliteProbeTests(unittest.TestCase):
         self.assertEqual(result["outcome"], "passed", result)
         arguments = ["--stage", "operator", "--expected-python-root", str(self.root),
                      "--expected-extension-root", str(self.extension.parent),
-                     "--expected-provider", str(self.provider), "--scratch-dir", str(self.scratch)]
+                     "--expected-provider", str(self.provider), "--expected-sqlite", str(self.expected),
+                     "--scratch-dir", str(self.scratch)]
         for outcome, expected_status in [("passed", 0), ("failed", 2), ("inconclusive", 2)]:
             output = io.StringIO()
             with mock.patch.object(probe, "assess", return_value={"outcome": outcome}), \
@@ -464,6 +478,76 @@ class SqliteProbeTests(unittest.TestCase):
         other = self.file("host/libsqlite3.so.0")
         result, _ = self.run_probe(maps=self.mapping(other))
         self.assertEqual(result["outcome"], "failed", result)
+
+    def test_runtime_other_than_the_selected_build_fails_before_the_database(self):
+        actual = probe.observe_sqlite(sqlite3)
+        # No real build reports this option, whatever SQLite runs the tests.
+        extra = "CPLX_FIXTURE_ONLY_OPTION"
+        changes = [dict(actual, version="3.0.0"), dict(actual, source_id="other"),
+                   dict(actual, compile_options=actual["compile_options"][1:]),
+                   dict(actual, compile_options=[*actual["compile_options"], extra])]
+        for build in changes:
+            self.write_expected(build)
+            with self.subTest(build=build), \
+                    mock.patch.object(probe, "database_roundtrip") as database:
+                result, reader = self.run_probe()
+                self.assertEqual(result["outcome"], "failed", result)
+                self.assertEqual(result["sqlite"], actual)
+                database.assert_not_called()
+                reader.assert_not_called()
+        # An option the selected build lacks, such as a carried-over
+        # DISABLE_DIRSYNC, is named, not just refused.
+        carried = dict(actual, compile_options=sorted([*actual["compile_options"], extra]))
+        with self.assertRaisesRegex(probe.ProbeError, rf"unexpected \['{extra}'\]"):
+            probe.check_sqlite_build(carried, actual)
+
+    def test_expected_build_file_refuses_ambiguity(self):
+        actual = probe.observe_sqlite(sqlite3)
+        version, source = f"version={actual['version']}", f"source_id={actual['source_id']}"
+        option = f"compile_option={actual['compile_options'][0]}"
+        for lines in [[source, option], [version, option], [version, source],
+                      [version, version, source, option], [version, source, option, option],
+                      [version, source, option, "unknown=1"], [version, source, option, "no separator"],
+                      [version, source, option + " "], [version, source, "compile_option="]]:
+            self.expected.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            with self.subTest(lines=lines), self.assertRaises(probe.ProbeError):
+                probe.load_expected_sqlite(self.expected)
+        self.expected.write_text("\n".join(["# selected build", "", version, source, option]),
+                                 encoding="utf-8")
+        loaded = probe.load_expected_sqlite(self.expected)
+        self.assertEqual(loaded["compile_options"], [actual["compile_options"][0]])
+
+    def test_second_library_file_beside_the_provider_refuses(self):
+        self.file("python/root/usr/lib64/libsqlite3.so.0.8.6.copied")
+        self.file("python/root/usr/lib64/libother.so.1")
+        self.assertEqual(probe.check_provider_directory(self.provider), str(self.provider))
+        self.file("python/root/usr/lib64/libsqlite3.so.3.54.1")
+        with self.assertRaisesRegex(probe.ProbeError, "second SQLite provider"):
+            probe.check_provider_directory(self.provider)
+        result, reader = self.run_probe()
+        self.assertEqual(result["outcome"], "failed", result)
+        reader.assert_not_called()
+
+    def test_linker_names_reaching_the_provider_are_one_provider(self):
+        self.link(self.provider.parent / "libsqlite3.so.0", self.provider)
+        self.link(self.provider.parent / "libsqlite3.so", self.provider)
+        self.assertEqual(probe.check_provider_directory(self.provider.parent / "libsqlite3.so.0"),
+                         str(self.provider))
+
+    def test_wal_writers_commit_checkpoint_and_survive_reopen(self):
+        self.assertEqual(probe.wal_smoke(sqlite3, self.scratch, sys.executable), "passed")
+        self.assertEqual(list(self.scratch.iterdir()), [])
+
+    def test_failed_wal_writer_refuses_and_cleans_up(self):
+        with mock.patch.object(probe, "WAL_WRITER", "import sys; sys.exit(4)"), \
+                self.assertRaisesRegex(probe.ProbeError, "WAL writers exited"):
+            probe.wal_smoke(sqlite3, self.scratch, sys.executable)
+        self.assertEqual(list(self.scratch.iterdir()), [])
+
+    def test_lost_wal_rows_refuse(self):
+        with mock.patch.object(probe, "WAL_WRITER", "pass"), \
+                self.assertRaisesRegex(probe.ProbeError, "0 rows"):
+            probe.wal_smoke(sqlite3, self.scratch, sys.executable)
 
     def test_cli_emits_one_json_failure_and_has_no_fixture_override(self):
         for arguments in [[], ["--maps", "fake"], ["--stage", "made-up"]]:
