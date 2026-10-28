@@ -1,11 +1,11 @@
 # v0.27.0 bundled SQLite implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented.
 
 Track the five steps in the [implementation plan](plan.v0.27.0.sqlite-runtime-upgrade.md).
 All five steps are implemented and checked, the Debian 12 agent run included.
-The item's code review has not run, so the umbrella row stays pending until it
-completes.
+The item's code review completed after three rounds, and its specification
+review converged after five, so umbrella row 9 is completed.
 
 ## Step 1: Build SQLite as a cplx library tool
 

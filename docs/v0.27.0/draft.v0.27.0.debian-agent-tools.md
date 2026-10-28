@@ -792,7 +792,7 @@ the correction below.
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
 | 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | completed | `docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md` | `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` |
 | 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | - | - |
-| 9 | Feature-request | Build the bundled SQLite from source | `sqlite-runtime-upgrade` | pending | - | - |
+| 9 | Feature-request | Build the bundled SQLite from source | `sqlite-runtime-upgrade` | completed | `docs/v0.27.0/feature-request.v0.27.0.sqlite-runtime-upgrade.md` | `docs/v0.27.0/plan.v0.27.0.sqlite-runtime-upgrade.validation.md` |
 
 ### Requirement details for the umbrella
 
