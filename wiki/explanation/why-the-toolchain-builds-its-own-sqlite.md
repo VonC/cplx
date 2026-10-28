@@ -112,6 +112,31 @@ concurrent writers. They do not qualify an application's own locking,
 crash recovery, disk-full behavior or durability; the consuming
 application still owns those tests.
 
+## What the consuming application still decides
+
+**Rollback.** Going back to the previous tools archive restores the
+previous toolchain only, with its SQLite 3.34.1, the WAL-reset race and
+the older feature set. It promises nothing about a database written under
+3.54.1: many stay readable by 3.34.1, but one whose schema uses a newer
+feature, such as a `STRICT` table, may not. Whether its data must stay
+compatible with the older release is the application's decision.
+
+**Inspecting a database.** The toolchain ships the library, not the
+`sqlite3` command. `python -m sqlite3 <file>`, run through the toolchain's
+python wrapper, opens a shell on the bundled 3.54.1. The host's `sqlite3`
+on RHEL 9 is 3.34.1, with the WAL-reset race: never write with it to a live
+database beside the application. The Python shell permits writes as well,
+so it is no read-only or concurrency guarantee either.
+
+**Upstream reports.** The build keeps `THREADSAFE=1`, so Python reports
+`sqlite3.threadsafety` 3. An open CPython issue, gh-160699, reports a crash
+when several threads execute on one shared connection. It describes
+CPython 3.15.1 with SQLite 3.53.4, confirmed on CPython 3.14.9 with
+SQLite 3.53.1, both on Windows 11; whether it applies to CPython 3.13.15
+on Linux with SQLite 3.54.1 is unverified. The default
+`check_same_thread=True` refuses that sharing, and the reporters avoid it
+with one connection per thread.
+
 ## 👉 Where to look next
 
 - [Build and verify the bundled SQLite](../how-to/build-and-verify-the-bundled-sqlite.md):
