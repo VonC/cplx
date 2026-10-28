@@ -163,6 +163,15 @@ Recorded validation on 2026-10-27:
   the prefix.
 - Upgrade over the previous archive, which carried Python 3.13.9: both
   installs exit 0, the old Python is gone, the wrapper probe passed, no leak.
+- Upgrade over the archive the consuming project pins,
+  `tools.2026-09-18_220913.tar.gz` (SHA-256 `df7dff7d...`, Python 3.13.15
+  with SQLite 3.34.1), recorded on 2026-10-28: both installs exit 0; Python's
+  sandbox then holds only `libsqlite3.so.3.54.1` and its two links; the
+  wrapper probe passed; a venv created before the upgrade loads the exact
+  build with database and WAL checks; no loader path or text file outside
+  the prefix. A verbose `test_sqlite3 test_dbm_sqlite3` run there names the
+  five skips: four big-memory tests skipped without a `-M` memory limit, and
+  `test_uri_windows`, which requires Windows.
 - Application-style venvs, fresh and upgraded: exact identity, database and
   WAL checks passed, provider mapped inside the relocated tree.
 - `CPLX-ELF` reported 26 failed rewrites in both this and the previous
