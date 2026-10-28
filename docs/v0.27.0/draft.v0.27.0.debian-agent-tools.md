@@ -1424,8 +1424,11 @@ code review completes.
 Acceptance: on RHEL 9.8 and on the Debian 12 agent, the relocated archive's
 wrapper and an application-style venv load the bundled 3.54.1, with identity,
 WAL smoke and mapped-provider checks passing; CPython's `test_sqlite3` and
-`test_dbm_sqlite3` pass from the shipped tree; nothing loads from outside the
-prefix; and an upgrade over the previous archive leaves one provider. The
+`test_dbm_sqlite3` pass from the shipped tree; the interpreter loader checks
+find no library outside the prefix except the Debian agent's host-injected
+monitoring library under its existing reported exclusion rule, an exclusion
+that never covers SQLite, Python or a dependency of a toolchain ELF; and an
+upgrade over the previous archive leaves one provider. The
 consuming project's own locking, crash-recovery, disk-full and durability
 qualification stays outside this item.
 
