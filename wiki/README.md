@@ -26,6 +26,7 @@ Background and reasoning: why cplx is built the way it is.
 - 🌉 [The architecture key](explanation/the-architecture-key.md)
 - 🔨 [The sandbox root](explanation/the-sandbox-root.md)
 - 🔨 [Where a sandbox file comes from](explanation/where-a-sandbox-file-comes-from.md)
+- 🔨 [Why the toolchain builds its own SQLite](explanation/why-the-toolchain-builds-its-own-sqlite.md)
 - 🔨 [Anatomy of a build](explanation/anatomy-of-a-build.md)
 - 🌉 [Checkpoints and resume](explanation/checkpoints-and-resume.md)
 - 📦 [The build order](explanation/the-build-order.md)
@@ -54,6 +55,7 @@ Recipes for a precise goal, for readers who already know the basics.
 - 🌉 [Survive a server OS upgrade](how-to/survive-a-server-os-upgrade.md)
 - 📦 [Promote a build into the live tree](how-to/promote-a-build-into-the-live-tree.md)
 - 📦 [Relocate an install to another prefix](how-to/relocate-an-install-to-another-prefix.md)
+- 🔨 [Build and verify the bundled SQLite](how-to/build-and-verify-the-bundled-sqlite.md)
 - 📦 [Manage git credentials with git-pass-helper](how-to/manage-git-credentials-with-git-pass-helper.md)
 - 🛠️ [Make a release](how-to/make-a-release.md)
 
@@ -66,6 +68,7 @@ Exact, dry descriptions of commands, formats and conventions.
 - 🌐 [Package list formats](reference/package-list-formats.md)
 - 🌐 [Python versions by distribution](reference/python-versions-by-distribution.md)
 - 🔨 [Tool contract](reference/tool-contract.md)
+- 🔨 [Bundled SQLite](reference/bundled-sqlite.md)
 - 🛠️ [Directory layout](reference/directory-layout.md)
 - 🌉 [steps.md format](reference/steps-file-format.md)
 - 📦 [Packaging and relocation tools](reference/relocation-tools.md)

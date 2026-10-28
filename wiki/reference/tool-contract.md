@@ -27,6 +27,14 @@ Checked by the shared `setenv()`; missing → fatal 22/23/24.
 
 ## Optional hook
 
+`verify_archive()`: when the tool defines it, the dispatcher calls it with
+the exact source archive it selected (the newest file in `sources/` matching
+the version), before extracting anything. A non-zero return stops the run
+with exit 27 and nothing extracted. It also runs when an earlier extraction
+folder is reused, which it does not inspect: the tool checks that tree in its
+own `configure()` or `build()`. SQLite uses it for its pinned source identity
+([Bundled SQLite](bundled-sqlite.md)).
+
 `<tool>_setenv()`: called at the end of the shared `setenv()` to bend
 the environment: `git_setenv` sets `M4`; `glibc_setenv` and `gcc_setenv`
 swap in the freshly built make/gcc and neutralize rpath flags;

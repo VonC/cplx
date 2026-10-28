@@ -2,11 +2,12 @@
 """Prove SQLite persistence and mapped library identity in the assessed process.
 
 Callers select the interpreter, the enclosing Python tool tree (containing both
-the installation/source and sandbox), the exact extension directory, and the
-shipped provider. Build callers also name their configured libpython in the
-source directory. No observation is used to invent an expected root. This
+the installation/source and sandbox), the exact extension directory, the
+shipped provider and the selected SQLite build (version, source id and compile
+options). Build callers also name their configured libpython in the source
+directory. No observation is used to invent an expected root or build. This
 standalone, standard-library script reads Linux maps once after closing the
-reopened database. Held file descriptors connect filesystem stat identities to
+reopened databases. Held file descriptors connect filesystem stat identities to
 kernel mappings without treating the private reference as a loaded library.
 Synthetic observations belong only in the unit tests.
 """
@@ -19,8 +20,35 @@ import os
 from pathlib import Path
 import re
 import stat
+import subprocess
 import sys
 import tempfile
+
+
+# Several writer processes, each committing its rows one transaction at a time
+# and checkpointing as it goes: the concurrent WAL traffic the WAL-reset fix is
+# about, kept small enough for every stage.
+WAL_WRITERS = 3
+WAL_ROWS = 40
+# A hang guard, not a performance budget: a writer still running after this
+# long leaves the WAL check inconclusive instead of blocking the caller.
+WAL_WRITER_TIMEOUT = 600
+WAL_WRITER = """
+import sqlite3, sys
+database, writer, rows = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+connection = sqlite3.connect(database, timeout=60)
+try:
+    if connection.execute("PRAGMA journal_mode").fetchone()[0] != "wal":
+        sys.exit(3)
+    connection.execute("PRAGMA synchronous=FULL")
+    for row in range(rows):
+        with connection:
+            connection.execute("INSERT INTO probe VALUES (?, ?)", (writer, row))
+        if row % 10 == 9:
+            connection.execute("PRAGMA wal_checkpoint(PASSIVE)").fetchall()
+finally:
+    connection.close()
+"""
 
 
 class ProbeError(Exception):
@@ -254,6 +282,115 @@ def database_roundtrip(sqlite, scratch):
     return "passed"
 
 
+def load_expected_sqlite(path):
+    """Read the selected build: one version, one source id, compile options.
+
+    The file holds `key=value` lines; `compile_option` repeats, blank lines and
+    `#` comments are ignored. Anything else refuses, so a typo cannot silently
+    drop an expectation.
+    """
+    try:
+        lines = canonical(path).read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError) as error:
+        raise ProbeError(f"expected SQLite build unreadable: {path}: {error}") from error
+    expected = {"compile_options": []}
+    for number, line in enumerate(lines, 1):
+        if not line.strip() or line.startswith("#"):
+            continue
+        key, separator, value = line.partition("=")
+        if not separator or not value or value != value.strip():
+            raise ProbeError(f"expected SQLite build line {number} is not key=value")
+        if key == "compile_option":
+            if value in expected["compile_options"]:
+                raise ProbeError(f"expected SQLite build repeats compile option {value}")
+            expected["compile_options"].append(value)
+        elif key in ("version", "source_id") and key not in expected:
+            expected[key] = value
+        else:
+            raise ProbeError(f"expected SQLite build line {number} has unknown or repeated key {key}")
+    if "version" not in expected or "source_id" not in expected or not expected["compile_options"]:
+        raise ProbeError("expected SQLite build needs version, source_id and compile_option lines")
+    return expected
+
+
+def observe_sqlite(sqlite):
+    """Ask the loaded library itself, never its header or a file name."""
+    with closing(sqlite.connect(":memory:")) as connection:
+        source_id = connection.execute("SELECT sqlite_source_id()").fetchone()[0]
+        options = [row[0] for row in connection.execute("PRAGMA compile_options")]
+    return {"version": sqlite.sqlite_version, "source_id": source_id,
+            "compile_options": sorted(options)}
+
+
+def check_sqlite_build(observed, expected):
+    """Refuse any runtime other than the selected build, naming the difference."""
+    for key in ("version", "source_id"):
+        if observed[key] != expected[key]:
+            raise ProbeError(f"SQLite {key} {observed[key]!r} differs from the selected {expected[key]!r}")
+    missing = sorted(set(expected["compile_options"]) - set(observed["compile_options"]))
+    unexpected = sorted(set(observed["compile_options"]) - set(expected["compile_options"]))
+    if missing or unexpected:
+        raise ProbeError(f"SQLite compile options differ from the selected build: "
+                         f"missing {missing}, unexpected {unexpected}")
+
+
+def check_provider_directory(provider):
+    """Every libsqlite3 library name beside the provider must reach the same file.
+
+    A leftover real file (an older `libsqlite3.so.0.8.6`, say) is a second
+    provider that a later relink or a different loader search could select.
+    """
+    backing = canonical(provider)
+    for entry in sorted(Path(provider).parent.iterdir()):
+        if re.fullmatch(r"libsqlite3\.so(\.[0-9]+)*", entry.name) and canonical(entry) != backing:
+            raise ProbeError(f"second SQLite provider beside {provider}: {entry}")
+    return str(backing)
+
+
+def wal_smoke(sqlite, scratch, executable):
+    """Write from several processes in WAL mode with FULL sync, checkpoint, reopen.
+
+    Children run the assessed interpreter with the inherited environment, so
+    they load what this process loaded. The database is owned and disposable.
+    """
+    scratch = directory(scratch)
+    with tempfile.TemporaryDirectory(prefix="sqlite-wal-", dir=scratch) as owned:
+        database = str(Path(owned) / "wal.sqlite")
+        with closing(sqlite.connect(database)) as connection:
+            mode = connection.execute("PRAGMA journal_mode=WAL").fetchone()[0]
+            if mode != "wal":
+                raise ProbeError(f"WAL journal mode refused: {mode}")
+            connection.execute("PRAGMA synchronous=FULL")
+            connection.execute("CREATE TABLE probe (writer INTEGER, row INTEGER, PRIMARY KEY (writer, row))")
+            connection.commit()
+            children = []
+            try:
+                for writer in range(WAL_WRITERS):
+                    children.append(subprocess.Popen(
+                        [str(executable), "-I", "-S", "-B", "-c", WAL_WRITER,
+                         database, str(writer), str(WAL_ROWS)]))
+                statuses = [child.wait(timeout=WAL_WRITER_TIMEOUT) for child in children]
+            except subprocess.TimeoutExpired as error:
+                raise ProbeError(f"WAL writer still running: {error}", "inconclusive") from error
+            finally:
+                for child in children:
+                    if child.poll() is None:
+                        child.kill()
+                        child.wait()
+            if any(statuses):
+                raise ProbeError(f"WAL writers exited with {statuses}")
+            busy, _, _ = connection.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+            if busy:
+                raise ProbeError("WAL truncate checkpoint stayed busy after the writers closed")
+        with closing(sqlite.connect(database)) as connection:
+            mode = connection.execute("PRAGMA journal_mode").fetchone()[0]
+            rows = connection.execute("SELECT count(*) FROM probe").fetchone()[0]
+            integrity = connection.execute("PRAGMA integrity_check").fetchall()
+        if (mode, rows, integrity) != ("wal", WAL_WRITERS * WAL_ROWS, [("ok",)]):
+            raise ProbeError(f"WAL database after reopen: mode {mode}, {rows} rows, integrity {integrity}")
+    return "passed"
+
+
 def check_extension(args, extension, python_root, executable):
     """Keep source-generated links distinct from installed lib-dynload bounds."""
     imported = Path(os.path.abspath(extension))
@@ -283,8 +420,8 @@ def check_extension(args, extension, python_root, executable):
 def assess(args):
     """Return partial evidence on every failure while keeping one JSON result."""
     result = {"stage": args.stage, "python_version": sys.version,
-              "executable": sys.executable, "extension": None,
-              "database": "not-run", "provider": None, "outcome": "failed"}
+              "executable": sys.executable, "extension": None, "sqlite": None,
+              "database": "not-run", "wal": "not-run", "provider": None, "outcome": "failed"}
     try:
         if args.stage not in ("build", "installed", "operator"):
             raise ProbeError("unknown probe stage")
@@ -294,11 +431,17 @@ def assess(args):
         executable = canonical(sys.executable)
         require_inside(executable, python_root, "Python executable")
         result["executable"] = str(executable)
+        expected = load_expected_sqlite(args.expected_sqlite)
         native = importlib.import_module("_sqlite3")
         result["extension"] = check_extension(args, native.__file__, python_root, executable)
         sqlite = importlib.import_module("sqlite3")
+        result["sqlite"] = observe_sqlite(sqlite)
+        check_sqlite_build(result["sqlite"], expected)
         result["database"] = "failed"
         result["database"] = database_roundtrip(sqlite, args.scratch_dir)
+        result["wal"] = "failed"
+        result["wal"] = wal_smoke(sqlite, args.scratch_dir, executable)
+        check_provider_directory(args.expected_provider)
         with ExitStack() as references:
             provider = references.enter_context(mapped_reference(args.expected_provider))
             libpython = (references.enter_context(mapped_reference(args.expected_libpython))
@@ -322,7 +465,8 @@ def assess(args):
 def main(argv=None):
     parser = ProbeArguments(description=__doc__, allow_abbrev=False)
     parser.add_argument("--stage", choices=("build", "installed", "operator"), required=True)
-    for name in ("expected-python-root", "expected-extension-root", "expected-provider", "scratch-dir"):
+    for name in ("expected-python-root", "expected-extension-root", "expected-provider",
+                 "expected-sqlite", "scratch-dir"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--expected-libpython")
     try:

@@ -54,6 +54,8 @@ and the placeholders at its end still need real server values before
 | 2 | `<tool>_install_functions.sh` missing |
 | 22 / 23 / 24 | `configure` / `clean` / `build` function not defined |
 | 25 | no `ld-linux-x86-64.so*` found in the sandbox (`SKIP_CC1_CHECK` bypasses) |
+| 26 | Python on el9: the sandbox has no SQLite header or library, or a stale `config.log` could not be retired |
+| 27 | the tool's `verify_archive` hook refused the selected source archive; nothing was extracted |
 | 199 | configure failed (convention; triggers the `config.log` pull-back) |
 | 19 | build (`make`) failed (convention) |
 | 4 | clean failed (convention) |

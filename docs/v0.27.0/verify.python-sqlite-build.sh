@@ -26,6 +26,7 @@ prepare() {
     cp "$repo/src/install/env/install_functions.sh" "$fixture/tools/install_functions.sh"
     cp "$repo/src/install/env/python/python_install_functions.sh" "$fixture/tools/python/"
     cp "$repo/src/install/env/python/sqlite_probe.py" "$fixture/tools/python/"
+    cp "$repo/src/install/env/python/sqlite_expected.txt" "$fixture/tools/python/"
     : > "$fixture/cplx.properties"
     : > "$fixture/tools/python/sources/python-src-3.13.15.tar.gz"
     : > "$fixture/events"
@@ -35,6 +36,10 @@ prepare() {
     prefix=$fixture/tools/python/python-3.13.15
     mkdir -p "$source_dir/Modules" "$source_dir/build/lib.linux-x86_64-3.13"
     mkdir -p "$fixture/tools/python/root/usr/lib64" "$prefix/bin" "$prefix/lib/python3.13/lib-dynload"
+    mkdir -p "$fixture/tools/python/root/usr/include"
+    printf 'selected header\n' > "$fixture/tools/python/root/usr/include/sqlite3.h"
+    printf 'selected library\n' > "$fixture/tools/python/root/usr/lib64/libsqlite3.so.3.54.1"
+    ln -s libsqlite3.so.3.54.1 "$fixture/tools/python/root/usr/lib64/libsqlite3.so"
     ln -s python-old "$fixture/tools/python/current"
     cat > "$fixture/echos/echos" <<'SH'
 info() { printf '%s\n' "$*"; }
@@ -68,6 +73,8 @@ setenv() {
     export LD_LIBRARY_PATH=$root/usr/lib64:$tool_prefix/lib
     export LD_RUN_PATH=$LD_LIBRARY_PATH
     export CPLX_CHECK_SRC=libpython3.so CPLX_CHECK_PREFIX=lib/libpython3.so
+    # As the shared setenv does, end with the tool's own hook.
+    if declare -f "${1}_setenv" > /dev/null; then "${1}_setenv"; fi
 }
 package() { echo package >> "$FIXTURE/events"; echo candidate > "$FIXTURE/package"; }
 deploy() { echo deploy >> "$FIXTURE/events"; }
@@ -121,6 +128,7 @@ stage=${args[--stage]}
 echo "probe-$stage" >> "$FIXTURE/events"
 [[ ${args[--expected-python-root]} == "$FIXTURE/tools/python" ]] || exit 100
 [[ ${args[--expected-provider]} == "$FIXTURE/tools/python/root/usr/lib64/libsqlite3.so.0" ]] || exit 101
+[[ ${args[--expected-sqlite]} == "$FIXTURE/tools/python/sqlite_expected.txt" ]] || exit 111
 [[ -d ${args[--scratch-dir]} && ${args[--scratch-dir]} == "$FIXTURE/tools/python/"* ]] || exit 102
 if [[ $stage == build ]]; then
     [[ $LD_PRELOAD == "${args[--expected-libpython]}" ]] || exit 109
@@ -150,6 +158,9 @@ SH
     : > "$source_dir/libpython3.so"
     printf 'configure: exit 0\n' > "$source_dir/config.log"
     printf 'build/lib.linux-x86_64-3.13' > "$source_dir/pybuilddir.txt"
+    # The tree was configured against the current sandbox SQLite.
+    sha256sum "$fixture/tools/python/root/usr/include/sqlite3.h" \
+        "$fixture/tools/python/root/usr/lib64/libsqlite3.so.3.54.1" > "$source_dir/cplx-sqlite-inputs.txt"
 }
 
 run_case() {
@@ -197,6 +208,20 @@ PROBE_FAIL=installed
 run_case 42 probe-build,probe-installed
 prepare reconfigure
 run_case 0 configure,make-clean,make-all,probe-build,make-install,probe-installed,package --reconfigure
+# A sandbox SQLite other than the recorded one retires config.log, so a plain
+# install takes the reconfigure path and records the new inputs.
+prepare sqlite-inputs-changed
+printf 'replacement library\n' > "$fixture/tools/python/root/usr/lib64/libsqlite3.so.3.54.1"
+run_case 0 configure,make-clean,make-all,probe-build,make-install,probe-installed,package
+[[ -f $source_dir/config.log.sqlite-inputs-changed ]] || exit 1
+cmp -s "$source_dir/cplx-sqlite-inputs.txt" <(sha256sum "$fixture/tools/python/root/usr/include/sqlite3.h" \
+    "$fixture/tools/python/root/usr/lib64/libsqlite3.so.3.54.1") || exit 1
+prepare sqlite-inputs-unrecorded
+rm "$source_dir/cplx-sqlite-inputs.txt"
+run_case 0 configure,make-clean,make-all,probe-build,make-install,probe-installed,package
+prepare sqlite-inputs-unavailable
+rm "$fixture/tools/python/root/usr/lib64/libsqlite3.so"
+run_case 26 ''
 prepare other-family
 FIXTURE_FAMILY=el8.x86_64
 rm "$source_dir/config.log" "$fixture/tools/python/sqlite_probe.py"

@@ -121,6 +121,13 @@ fi
 archive_file="${existing_archives[0]}"
 info "Found archive: '${archive_file}'"
 
+# A tool may verify the exact archive selected above before anything is
+# extracted from it. A reused extraction folder is not re-extracted, so the
+# tool checks that tree again itself.
+if declare -F verify_archive >/dev/null; then
+    verify_archive "${archive_file}" || fatal "Source archive '${archive_file}' failed its verification: nothing extracted" 27
+fi
+
 # Define the extraction folder (same name as version)
 archive_folder="${sources_dir}/${version}"
 

@@ -48,6 +48,17 @@ if "%CPLX_TOOL%" == "mpdecimal" (
   set "CPLX_BIN="
   set "CPLX_CONFIG_DONE=default"
 )
+rem set "CPLX_TOOL=sqlite"
+if "%CPLX_TOOL%" == "sqlite" (
+  set "CPLX_VERSION=3.54.1"
+  rem the archive name encodes the version as 3XXYYZZ, under the release year
+  set "CPLX_URL=https://sqlite.org/2026/sqlite-autoconf-3540100.tar.gz"
+  set "CPLX_SRC_EXT=tar.gz"
+  set "CPLX_CHECK_PREFIX=usr/lib64/libsqlite3.so"
+  set "CPLX_CHECK_SRC=libsqlite3.so"
+  set "CPLX_BIN="
+  set "CPLX_CONFIG_DONE=default"
+)
 
 if "%CPLX_TOOL%" == "openssl111" (
   set "CPLX_VERSION=1.1.1w"

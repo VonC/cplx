@@ -34,7 +34,8 @@ sqlite_audit() {
     for path in "$home/cplx/.env" "$home/cplx/.env_user" "$home/cplx/.env_init" \
         "$home/cplx/cplx.properties" "$home/cplx/rsync_include.txt" "$home/cplx/rsync_exclude.txt" \
         "$home/cplx/tools/install" "$home/cplx/tools/install_functions.sh" \
-        "$home/cplx/tools/python/python_install_functions.sh" "$home/cplx/tools/python/sqlite_probe.py"; do
+        "$home/cplx/tools/python/python_install_functions.sh" "$home/cplx/tools/python/sqlite_probe.py" \
+        "$home/cplx/tools/python/sqlite_expected.txt"; do
         printf '%s\0' "$path" >> "$listing"
     done
     while IFS= read -r -d '' path; do
@@ -83,16 +84,20 @@ sqlite_host() {
 }
 sqlite_operator() {
     local home=$1 evidence=$2 parser=$3 probe=$4 root=$5 extension=$6 provider=$7
+    # The selected SQLite build ships beside the probe, from the same revision.
+    local expected=${probe%/*}/sqlite_expected.txt
     [[ $(readlink -e "$root") == "$(readlink -e "$home/tools/python")" &&
        $(readlink -e "$extension") == "$(readlink -e "$home/tools/python/python-3.13.15/lib/python3.13/lib-dynload")" &&
        $(readlink -e "$provider") == "$(readlink -e "$home/tools/python/root/usr/lib64/libsqlite3.so.0")" ]] || {
         sqlite_fail 'operator expectations differ from the independently specified layout'; return;
     }
     sqlite_inside "$home" "$probe" || return
+    sqlite_inside "$home" "$expected" || return
     mkdir -p "$evidence/scratch"
     sqlite_capture "$home" "$evidence" operator "$home/tools/python/bin/python" -I -S -B "$probe" \
         --stage operator --expected-python-root "$root" --expected-extension-root "$extension" \
-        --expected-provider "$provider" --scratch-dir "$evidence/scratch" || return
+        --expected-provider "$provider" --expected-sqlite "$expected" \
+        --scratch-dir "$evidence/scratch" || return
     # A wrapper banner mixed into stdout is not a structured probe success.
     cp "$evidence/operator.log" "$evidence/operator.json"
     sqlite_result "$parser" "$evidence/operator.json" operator "$root" "$extension" "$provider"

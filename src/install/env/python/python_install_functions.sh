@@ -9,22 +9,24 @@ function python_sqlite_required() {
 # Expectations come from the caller's tree and configured source artifacts.
 function python_check_sqlite() {
     local stage=$1 python_tree source_tree prefix_tree executable extension_dir
-    local provider probe libpython scratch status record line key value
+    local provider probe expected libpython scratch status record line key value
     local -a records probe_args
     local -A config=()
     python_tree=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
     probe=$python_tree/sqlite_probe.py
+    # The selected SQLite build ships beside the probe, from the same checkout.
+    expected=$python_tree/sqlite_expected.txt
     provider=$python_tree/root/usr/lib64/libsqlite3.so.0
     scratch=$python_tree/logs
     # The shared driver supplies these stage inputs.
     # shellcheck disable=SC2154
     info "SQLite stage=${stage}, Python ${version}, source=${tool_src}, prefix=${tool_prefix}, provider=${provider}"
-    [[ -f $probe && -d $scratch ]] || {
-        error "SQLite ${stage}: missing shared probe '${probe}' or scratch '${scratch}'"
+    [[ -f $probe && -f $expected && -d $scratch ]] || {
+        error "SQLite ${stage}: missing shared probe '${probe}', expected build '${expected}' or scratch '${scratch}'"
         return 2
     }
     probe_args=(--stage "$stage" --expected-python-root "$python_tree"
-        --expected-provider "$provider" --scratch-dir "$scratch")
+        --expected-provider "$provider" --expected-sqlite "$expected" --scratch-dir "$scratch")
     if [[ $stage == build ]]; then
         source_tree=$(readlink -e "$tool_src")
         [[ -d $source_tree && $source_tree == "$python_tree/sources/"* ]] || {
@@ -108,6 +110,32 @@ function python_check_sqlite() {
     return "$status"
 }
 
+# Name the SQLite inputs a configured tree compiles _sqlite3 against: the
+# sandbox header and the library behind the linker name, by content.
+function python_sqlite_inputs() {
+    local library
+    # shellcheck disable=SC2154
+    library=$(readlink -e "${root}/usr/lib64/libsqlite3.so") || return 2
+    sha256sum "${root}/usr/include/sqlite3.h" "$library"
+}
+
+# A tree configured against other SQLite inputs must not be reused: make would
+# keep the old _sqlite3. Retiring its config.log makes the shared driver
+# reconfigure, clean and rebuild, the same path as an explicit reconfigure.
+function python_setenv() {
+    local stamp current
+    python_sqlite_required || return 0
+    # shellcheck disable=SC2154
+    stamp=${tool_src}/cplx-sqlite-inputs.txt
+    [[ -e ${tool_src}/config.log ]] || return 0
+    current=$(python_sqlite_inputs) || fatal "SQLite inputs missing from the sandbox '${root}'" 26
+    if [[ ! -f $stamp || $(< "$stamp") != "$current" ]]; then
+        warning "SQLite inputs differ from those '${tool_src}' was configured with: reconfigure and rebuild"
+        mv -f "${tool_src}/config.log" "${tool_src}/config.log.sqlite-inputs-changed" \
+            || fatal "Unable to retire '${tool_src}/config.log'" 26
+    fi
+}
+
 function configure() {
     task "config.log not present: reconfigure"
 
@@ -138,6 +166,10 @@ function configure() {
     # Execute the configure command.
     if ! "${configure_cmd[@]}"; then
         fatal "configure ERROR" 199
+    fi
+    if python_sqlite_required; then
+        python_sqlite_inputs > "${tool_src}/cplx-sqlite-inputs.txt" \
+            || fatal "Unable to record the SQLite inputs of '${tool_src}'" 26
     fi
     ok "configure done"
 }

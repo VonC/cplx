@@ -52,8 +52,7 @@ libuuid
 libuuid-devel
 readline
 readline-devel
-sqlite-libs
-sqlite-devel
+_sqlite
 # _mpdecimal
 # _gcc-c\+\+
 # _libstdc\+\+-devel

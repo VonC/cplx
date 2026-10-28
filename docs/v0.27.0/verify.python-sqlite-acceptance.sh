@@ -149,7 +149,8 @@ state_machine() (
     mkdir -p "$fixture"/{cplx/{bin,echos,closure,tools/python},tools/python/{bin,root/usr/lib64,python-3.13.15/lib/python3.13/lib-dynload},pkgs,evidence}
     for control in .env .env_ scalars cplx/.env cplx/.env_user cplx/.env_init cplx/cplx.properties \
         cplx/rsync_include.txt cplx/rsync_exclude.txt cplx/tools/install cplx/tools/install_functions.sh \
-        cplx/tools/python/python_install_functions.sh cplx/tools/python/sqlite_probe.py; do
+        cplx/tools/python/python_install_functions.sh cplx/tools/python/sqlite_probe.py \
+        cplx/tools/python/sqlite_expected.txt; do
         printf '# recording fixture\n' > "$fixture/$control"
     done
     printf 'printf "recorded deployment\\n"\n' > "$fixture/cplx/bin/install_pkg.sh"
