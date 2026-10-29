@@ -2,6 +2,20 @@
 
 Reference requirement: [feature-request.v0.27.0.deploy-venv-sync.md](feature-request.v0.27.0.deploy-venv-sync.md)
 
+## Current integration and release boundary (2026-10-28)
+
+The [requirement amendment](feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28)
+marks the topic implementation-complete for integration and release preparation.
+The [validation plan](plan.v0.27.0.deploy-venv-sync.validation.md) records the
+accepted Step 1-9 scopes. AC19 stays open: actual production and external
+acceptance must use prepared `main` before the final cplx tag, with private
+candidate identity, prerequisites, approvals and execution evidence.
+
+AC18/first-time installation remains deferred. The latest Step 9 plan amendments
+govern stop/deploy/start without delivery signatures. Earlier design passages
+describe historical decisions; they do not reinstate retired bootstrap/signing
+mechanics or a requirement to keep umbrella item 8 pending before integration.
+
 ## Context and scope for v0.27.0 deploy-venv-sync
 
 The application release carries dependency reconstruction inputs instead of a
@@ -25,14 +39,14 @@ required; these decisions are not implementation evidence.
 
 The human amendment of 2026-10-03 adds original-orchestration delivery and
 explicit recovery as AC16-AC17, with design Q10 and plan Step 8. Steps 1-7 have
-recorded validation; this added consumer integration remains unimplemented and
-requires a new candidate and actual execution evidence. Earlier decisions remain
-settled context.
+recorded validation; the later validation record now also closes the added
+implementation scope. Exact-candidate execution evidence remains required for
+each acceptance claim. Earlier decisions remain historical context.
 
 The 2026-10-04 amendment limits Step 8 to qualification and adds mandatory
 Step 9 for first-time and production delivery, with AC18-AC19 and design Q11.
-Step 9 execution starts only after actual AC16/AC17 closure. The topic remains
-open until both added environments and their recovery boundaries are validated.
+Step 9 execution starts only after actual AC16/AC17 closure. The current amendment
+above governs integration completion, AC18 deferral and AC19 release acceptance.
 
 ## Confirmed technical facts for v0.27.0 deploy-venv-sync
 
@@ -1083,8 +1097,9 @@ upgrade-and-rollback rehearsal, then production bootstrap/arming/check/real run
 and external verification under their separate authorizations. Production real
 execution also retains the operations pilot approval. Failure uses the qualified original stop/start recovery path with a fresh signed
 checkpoint-bound selection and retained offline inputs, without an operator or
-operations edit. Topic completion requires actual
-AC18/AC19 evidence; the umbrella item remains pending meanwhile.
+operations edit. This historical completion condition is superseded by the
+2026-10-28 boundary above: AC18 is deferred, integration is complete, and actual
+AC19 evidence remains mandatory from prepared `main` before the final cplx tag.
 
 ### Selected development replay and its evidence limits
 

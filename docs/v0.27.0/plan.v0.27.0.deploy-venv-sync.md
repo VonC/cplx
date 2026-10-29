@@ -7,6 +7,24 @@ The numbered steps cover reusable cplx behavior and required consuming integrati
 This plan introduces implementation tasks, not new design decisions or evidence
 that execution has already succeeded.
 
+## Integration completion and remaining release acceptance (2026-10-28)
+
+The human release decision marks Steps 1-9 implementation-complete within their
+recorded validation scopes and permits topic 8 integration into
+`debian-agent-tools`, umbrella promotion to `main` and release preparation.
+It supersedes earlier instructions to keep the topic and umbrella item pending
+until production delivery. See the [current requirement scope](feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28)
+and [validation record](plan.v0.27.0.deploy-venv-sync.validation.md).
+
+AC19 remains a mandatory release gate: record actual production and external
+acceptance from the prepared `main` candidate before the final cplx tag, with
+exact candidate/consumer-release identity, prerequisites, approvals and retained
+private evidence. This document does not assert that acceptance has run or
+authorize its execution. AC18/Part C remain deferred; the 2026-10-12 through
+2026-10-15 amendments retain the stop/deploy/start route without signatures.
+Historical tasks below do not reinstate retired mechanics. Release preparation
+must finish untagged while AC19 remains open.
+
 ## Ordered goals for v0.27.0 deploy-venv-sync
 
 | Step | Goal |
@@ -49,7 +67,7 @@ Human decision of 2026-10-04: Step 8 is limited to the qualification environment
 that can still bootstrap through the temporary delivery task before restoration.
 It covers neither first-time installation nor production deployment. Mandatory
 Step 9 starts only after actual AC16/AC17 evidence closes Step 8 and owns AC18/AC19.
-The topic and umbrella item 8 remain pending until Step 9 is validated. Changed
+The 2026-10-28 amendment above governs topic and umbrella completion. Changed
 Step 9 bytes require their own complete build, qualification and release binding;
 Step 8 success never qualifies different bytes.
 
@@ -2235,8 +2253,9 @@ documentation.
   A, B and D, both runbooks, the production package (released candidate,
   registry entry, timing profile with a selection lifetime covering the
   approval wait) and the delivery procedure. Parts F and G, and AC19's actual
-  production and external evidence, happen during the next official release;
-  the topic and the umbrella item stay pending until then.
+  production and external evidence, remain required. The 2026-10-28 amendment
+  supersedes the pending topic status and requires that evidence from prepared
+  `main` before the final cplx tag.
 - **First install deferred (2026-10-12).** Part C, AC18 and the empty-prefix
   transition extension move to a later effort: production is not empty, and no
   new environment is planned. Step 9 adds no empty-prefix behavior.
@@ -2443,10 +2462,12 @@ integration validation within each relevant step. Independently verified cplx
 work can be marked complete while consumer integration remains pending; a mixed
 step stays partially complete until both are demonstrated. Consumer acquisition
 does not block independent reusable tasks. Missing actual consumer, CI or target
-evidence still prevents whole-topic completion and any promotion that requires it.
+evidence still prevents closure of its acceptance gate. The 2026-10-28 amendment
+separates completed integration scope from AC19's mandatory pre-tag evidence.
 Do not replace required Debian/RHEL runtime, two-phase CI or offline recovery
 checks with fixtures. Keep exact private evidence in the handoff and publish only
-sanitized results. All implementation statuses remain not started in this review.
+sanitized results. Planning-time statuses below are historical; the validation
+plan records the completed implementation scopes and the open AC19 release gate.
 
 | Acceptance scope | Owning steps | Required closing evidence |
 | --- | --- | --- |
@@ -2466,8 +2487,8 @@ sanitized results. All implementation statuses remain not started in this review
 | Design Q08-Q09 candidate/promotion boundaries | 5, 6, 7 | Retention across later builds, exact-candidate qualification, immutable promotion |
 | AC16 original forward delivery | 8 | Actual same-release original-path deployment; fresh signed selection, four-input local rehash, all fatal checks, R16 restart preservation, baseline/source/ancestry proof, separate dry-run verdicts and shared/console/external evidence. |
 | AC17 original-path explicit recovery | 8 | Fresh signed failed-attempt/checkpoint recovery on every try, both offline formats, preinstaller failure, pipeline/local terminal proof, held runtime/supervision and original failure retained. |
-| AC18 first-time delivery | 9, after 8 | Selected development replay with exact task/argv/staging trace, verified scripts-only bootstrap, option (i) hooks, no-predecessor failures and signed retry. Accept with Step 8 managed run; DEV proves no unit behavior. Fixtures and route (b) production unit evidence back first real hooks in production. |
-| AC19 production delivery | 9, after 8 | Exact retained historical-pair development replay/offline rollback plus Step 8 managed proof, with stated no-unit/replay limits. Route (b) bootstrap once, fresh shared-drive signatures, existing release-only approval-aware managed production and external same-daemon evidence. Historical bridges first execute for real in production. |
+| AC18 first-time delivery | Later effort | Deferred on 2026-10-12; outside the completed integration scope. |
+| AC19 production delivery | Release acceptance after prepared `main`, before the final cplx tag | Exact candidate identity bound to the consumer release, actual authorized stop/deploy/start production delivery, release-only coordinates, operations prerequisites, runtime/same-daemon and external checks, outage limits and recovery evidence. Retain historical-pair replay and Step 8 proof with their no-unit/replay limits; neither substitutes for actual production acceptance. No retired bootstrap or signing mechanics. |
 
 Private implementation and execution evidence are mandatory completion inputs.
 If target access, observation compatibility, candidate retention, operator setup
@@ -2482,7 +2503,8 @@ historical. AC16/AC17 remain open until their own actual execution evidence exis
 The 2026-10-04 amendment limits those rows to qualification and adds mandatory
 Step 9 as not started. AC18/AC19 cannot close before AC16/AC17 and their own
 actual evidence. AC02, AC12, AC13, AC15 and retained-input obligations also apply
-to Step 9. Keep umbrella item 8 pending until the entire expanded topic is validated.
+to Step 9. The 2026-10-28 amendment supersedes this historical pending-item gate:
+integration is complete; AC19 remains mandatory before tagging.
 
 ## Implementation decisions
 

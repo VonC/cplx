@@ -791,8 +791,15 @@ the correction below.
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | completed | `docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md` | `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md` |
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
 | 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | completed | `docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md` | `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` |
-| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md` | `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` |
+| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | completed | `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md` | `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` |
 | 9 | Feature-request | Build the bundled SQLite from source | `sqlite-runtime-upgrade` | completed | `docs/v0.27.0/feature-request.v0.27.0.sqlite-runtime-upgrade.md` | `docs/v0.27.0/plan.v0.27.0.sqlite-runtime-upgrade.validation.md` |
+
+Item 8 is implementation-complete for integration by the human decision of
+2026-10-28. Its [validation plan](plan.v0.27.0.deploy-venv-sync.validation.md)
+records the accepted step scopes. AC19 remains open and mandatory: actual
+production and external acceptance must use the prepared `main` candidate before
+the final cplx tag. AC18 remains deferred. Integration and release preparation do
+not establish that acceptance or authorize production deployment or tagging.
 
 ### Requirement details for the umbrella
 
@@ -1267,7 +1274,9 @@ Depends on: items 1 to 6.
 Type: Feature-request. Slug: `deploy-venv-sync`. Regroups decision D11
 and the deployment half of the cleanups this collection unlocks.
 
-The mandatory Step 9 follow-through keeps this item pending after qualification.
+The following Step 9 history is superseded by the 2026-10-28 completion amendment
+and the latest [requirement scope](feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28).
+Implementation is complete for integration; AC19 remains a pre-tag release gate.
 Human decisions at round 8 on 2026-10-04 keep Step 8 operator-free: existing
 delivery installs closure/key/verifier and probes/receipts only; each real attempt,
 retry or recovery is freshly signed by the human on the shared drive with a
@@ -1291,7 +1300,8 @@ restoration, accepting possible downtime. Failed/held recovery gates remain.
 Q38 selects independent offline backup trust alongside the primary public key,
 with custody/recovery and verified rotation/revocation documented before B.
 Tooling/layout qualification and actual Steps 8-9 execution evidence remain open.
-No execution is authorized here; item 8 remains pending until Step 9 is validated.
+No execution is authorized here. The validation plan records Step 9 completion
+within its amended scope; actual production acceptance remains open under AC19.
 
 The application archive carries the project venv today. `pkg_app.sh` excludes
 result PDFs, `run.env` and the describe cache, and nothing excludes the

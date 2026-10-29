@@ -6,6 +6,29 @@
 - Umbrella: docs/v0.27.0/draft.v0.27.0.debian-agent-tools.md
 - Source draft: [Deployment venv draft](draft.v0.27.0.deploy-venv-sync.md)
 
+## Integration completion and pre-tag acceptance (2026-10-28)
+
+The human release decision of 2026-10-28 marks this topic implementation-complete
+for integration into `debian-agent-tools` and promotion of the completed umbrella
+to `main`. Steps 1-9 are validated within the scopes recorded in the
+[validation plan](plan.v0.27.0.deploy-venv-sync.validation.md), including Step 3b.
+This decision supersedes earlier wording that kept the topic and umbrella item 8
+pending until production delivery.
+
+AC19 remains open and mandatory: actual production acceptance and external
+evidence must use the prepared `main` candidate and be recorded before the final
+cplx release tag. Record the exact candidate identity and its relationship to the
+consumer release, production prerequisites, approvals, runtime/same-daemon checks,
+external checks and recovery evidence in the private integration records. A
+rehearsal, integration merge or release-preparation commit does not close AC19.
+Missing prerequisites or execution authority block that acceptance and tagging.
+
+AC18 and first-time installation remain deferred to a later effort by the
+2026-10-12 decision. The latest Step 9 amendments govern the delivered route:
+stop, deploy step, start, without delivery signatures. Historical bootstrap and
+signed-selection mechanics below do not reinstate retired work. Preparation of
+the release does not authorize production deployment, tagging or pushing.
+
 ## Revision introducing target-created environments
 
 Revision of 2026-10-03: the human requires delivery through the consumer's
@@ -18,8 +41,8 @@ Revision of 2026-10-04: Step 8 covers the qualification environment only, where
 the temporary delivery task can bootstrap before restoration. Mandatory Step 9
 adds first-time and production delivery through the unchanged original contract,
 after actual AC16/AC17 evidence closes Step 8. AC18, AC19 and requirement Q12
-record this extension. The topic and its umbrella item remain pending until
-Step 9 is validated.
+record this historical extension. The integration-completion amendment above
+now governs topic status and the remaining release acceptance gate.
 
 Umbrella item 8 and decision D11 replace a copied application environment with
 one reconstructed from the release lock on the deployment target. Item 7's
@@ -749,8 +772,8 @@ pair as production's pair.
 | AC15 | A same-Python-version toolchain replacement permits venv reuse only with current interpreter/prefix, lock and runtime validation plus fresh archive-digest evidence. Consuming automation/operator procedures enforce serialization for overlapping sync, mirroring, deployment, and rollback on the same application root. |
 | AC16 | One actual same-release qualification deployment uses the original role archive and independently signed selection with five exact hashes/URLs, four locally rehashed inputs and zero stop fetches. B qualifies primary/backup public keys and the verifier; C installs them without arming. R19 ordinary admission and unauthorized-delivery refusal retain all safety gates. Fresh signed selections govern every G attempt/retry; R16 checked restart preserves unused forward intent. Fatal stable gates, deployment-only stop recheck, runtime/same-daemon proof, baseline equality and concurrent history all pass. Shared logs/console and both external endpoints bind revision/environment/account. Controller-byte and check-traversal verdicts stay separate. |
 | AC17 | Each recovery has fresh signed authority bound to the failed attempt/checkpoint, including retries and role transfer failure before start. Pipeline job-terminal and stop local lock/process proof admit typed offline recovery of both predecessor formats with held runtime/supervision checks. G failure returns to its same-release checkpoint. No operator or Ansible change is required; failure stays failed and missing recovery authority cannot bypass failed/held-state gates. R19 admits ordinary restart only from a safe state, and unauthorized delivery never installs. |
-| AC18 | After AC16/AC17 closure, separately authorized empty-prefix replay in our development installation on the qualification host proves verified scripts-only bootstrap, guarded activation, exact original task/argv/staging replay, first install, no-predecessor failure and fresh signed retry. Accept replay plus Step 8's managed run with explicit limits: development has no unit and proves no hold/parking/supervision or managed orchestration; its no-unit profile is rejected in qualification/production. Option (i) hooks first execute with a real unit in production, backed by fixtures and route (b) unit evidence. New environments use route (b) once for bootstrap, never recurring operator arming. |
-| AC19 | After AC16/AC17 and AC18, the separately authorized development replay proves historical upgrade/offline rollback from retained exact archives whose pairing is verified against production evidence. Accept replay plus Step 8's managed running-release unit proof, explicitly excluding production historical bridging and first-install unit proof from replay. Fixtures and read-only route (b) production unit evidence back those first real production executions. Actual authorized production uses route (b) bootstrap once, fresh shared-drive signed selections, qualified release coordinates, existing managed job/template and unchanged pilot approval. Approval-aware expiry/budgets, all runtime/same-daemon checks and both external endpoints must pass; the topic remains pending until this actual evidence closes. |
+| AC18 | Deferred to a later first-installation effort by the 2026-10-12 decision. Empty-prefix delivery is outside the completed integration scope and is not an AC19 prerequisite. |
+| AC19 | Open, mandatory pre-tag release gate under the 2026-10-28 decision. Production acceptance must use the prepared `main` candidate with exact identity bound to the consumer release and retained private evidence. The accepted historical-pair replay and Step 8 managed proof retain their recorded limits; they do not prove actual production historical bridging, unit hand-back or external behavior. Before the final cplx tag, the authorized production run must satisfy release-only coordinates, operations prerequisites, existing approval, the current stop/deploy/start route, runtime/same-daemon and both external endpoint checks, outage limits and recovery readiness. No delivery signatures or retired bootstrap route are reinstated. Implementation completion permits integration and release preparation while this gate stays open. |
 
 ## Requirement clarifications
 

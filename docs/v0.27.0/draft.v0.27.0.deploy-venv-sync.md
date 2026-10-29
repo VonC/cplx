@@ -9,10 +9,18 @@
 
 | Order | Type | Key title | Slug | Status | Requirement | Validation plan |
 | --- | --- | --- | --- | --- | --- | --- |
-| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | - | - |
+| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | completed | `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md` | `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` |
 
 This item regroups D11 and deployment changes, following completed item 7,
 `tools-archive-rebuild`. Preserve its toolchain archive and acceptance/adoption evidence.
+
+The human decision of 2026-10-28 marks implementation complete for integration
+into `debian-agent-tools` and promotion to `main`. AC19 remains open and mandatory:
+actual production and external acceptance must use the prepared `main` candidate
+before the final cplx tag. AC18 remains deferred to a later effort. See the
+[current requirement scope](feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28)
+and validation plan for evidence and limits. The latest Step 9 stop/deploy/start
+route without signatures supersedes historical bootstrap/signing mechanics below.
 
 ## Terminology for deployment-created Python venvs
 
@@ -427,8 +435,8 @@ previously lost local configuration.
 Step 8 covers only the qualification environment that can bootstrap through the
 temporary delivery task before source restoration. It proves AC16/AC17 there;
 first-time installation and production deployment move to mandatory Step 9.
-Step 9 starts only after those actual evidence gates close, and the topic and
-umbrella item remain pending until AC18/AC19 are validated.
+Step 9 starts only after those actual evidence gates close. The 2026-10-28
+amendment now governs integration completion and the open AC19 pre-tag gate.
 
 Human decisions at round 8 on 2026-10-04 keep Step 8 operator-free. Existing
 delivery installs the stable closure, public key, verifier and probes/receipts,
@@ -537,7 +545,8 @@ authorized by this planning amendment.
 - Apply the original orchestration decision of 2026-10-03 through plan Step 8;
   preserve AC01-AC15 and add forward delivery AC16 and explicit recovery AC17.
 - Limit Step 8 to qualification; add mandatory Step 9 and AC18/AC19 for first-time
-  and production delivery after actual AC16/AC17 closure, keeping the topic pending.
+  and production delivery after actual AC16/AC17 closure. The later amendments
+  defer AC18 and close integration scope while retaining AC19 before tagging.
 - In Step 9, bootstrap scripts only through the selected existing access route, distinguish absent
   predecessor from missing evidence, and prove actual historical retention and
   production-specific identity, access, approval and release gates.

@@ -1,13 +1,20 @@
 # v0.27.0 deploy-venv-sync implementation tracking and validation
 
-No, it is not implemented.
+Yes, it is implemented within the confirmed integration scope.
 
 Steps 1-9 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) are
 validated within their recorded scope, including Step 3b's non-qualifying scope,
-Step 7's 2026-10-03 closure and Step 8's qualification-only delivery. The topic
-and the umbrella item stay pending by the human decision of 2026-10-11: AC19's
-production and external evidence comes with the next official release, and
-AC18 moved to a later effort on 2026-10-12.
+Step 7's 2026-10-03 closure and Step 8's qualification-only delivery. The human
+decision of 2026-10-28 supersedes the earlier pending topic status: implementation
+is complete for integration into `debian-agent-tools` and promotion to `main`.
+AC19 remains open: actual production and external evidence must use the prepared
+`main` candidate before the final cplx tag. AC18 remains deferred to a later
+effort. See the [current requirement scope](feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28).
+
+This status change records the release decision; it adds no production execution
+evidence. Exact candidate identity, operational prerequisites and authority,
+runtime/same-daemon checks, external checks and recovery evidence remain mandatory
+private acceptance records. Until AC19 closes, the prepared release stays untagged.
 
 ## File-based IO cost clarification for deploy-venv-sync implementation
 
@@ -1843,8 +1850,9 @@ found on 2026-10-15, delivered to qualification, and the code review's
 recovery fixes. Part D replayed the role's operations from production's exact
 historical pair and passed the five recorded replay scenarios. The production
 delivery procedure is written. Parts F and G, AC19's production and external
-evidence, wait for the next official release, so the topic and the umbrella
-item stay pending.
+evidence, remain open. Under the 2026-10-28 decision, they gate the final cplx
+tag on acceptance from prepared `main`; the topic and umbrella item are
+implementation-complete for integration.
 
 The improvement expectations below date from before the 2026-10-12 redirect.
 Their signed-selection, bootstrap, route (b), empty-prefix and registry bullets
@@ -1853,11 +1861,12 @@ and are kept as history.
 
 ### Goal for Step 9
 
-Close AC18/AC19 through verified first-time and production delivery under the
-unchanged contract. Accept the selected development replays plus Step 8's managed
-run with explicit no-unit and orchestration limits. Actual production delivery,
-historical recovery readiness and external evidence remain mandatory. The topic
-and umbrella item stay pending until this step is validated.
+Complete production preparation and rehearsal under the amended Step 9 scope.
+Accept the selected development replays plus Step 8's managed run with explicit
+no-unit and orchestration limits. AC18 is deferred. Actual production delivery,
+historical recovery readiness and external evidence remain mandatory under AC19,
+using the prepared `main` candidate before tagging, separately from the completed
+implementation and integration status.
 
 ### Step 9 improvement expectations
 
@@ -2095,9 +2104,10 @@ AC17 evidence stays as history. Recorded limits: the development account and
 pre-production have no unit, so the unit hand-back and the historical bridges
 first run for real in production, backed by fixtures and the inspection
 runbook's unit evidence; the production variables at the operations provider
-are an open prerequisite of the next official release; AC19 closes with that
-release and AC18 in a later effort. Option A leaves the release-only address as
-the production snapshot guard. The code review's recovery findings are fixed:
+are an open prerequisite of production acceptance; AC19 must close from prepared
+`main` before the final cplx tag, and AC18 belongs to a later effort. Option A
+leaves the release-only address as the production snapshot guard. The code
+review's recovery findings are fixed:
 a refused hand-over restarts the installed release, and a failed historical
 recovery is held and stopped again, or its last line says it could not be, a
 failed stop of either part included.
@@ -2116,5 +2126,7 @@ Part A's inspection fixed the production facts, qualification deliveries
 proved the route, the development-account replay from production's exact pair
 proved the five recorded scenarios, and the production delivery procedure
 documents them. The code review's refusal and failed historical recovery
-findings are fixed and tested. Production delivery waits for the next official
-release, so the topic and the umbrella item stay pending.
+findings are fixed and tested. The 2026-10-28 decision marks the topic and umbrella
+item implementation-complete for integration. Production delivery and external
+acceptance remain open under AC19 and must be evidenced from prepared `main`
+before the final cplx tag.
