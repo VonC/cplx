@@ -1,0 +1,572 @@
+Harness: docs/v0.27.0/verify.closure-check.sh --step 1, then the same file at
+         --step 0 and with no --step, then
+         docs/v0.27.0/verify.relocation-rpath.sh --step 3 for the preserved
+         surface
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+        readelf: GNU readelf version 2.35.2-72.el9
+        sha256sum: sha256sum (GNU coreutils) 8.32
+        git: 2.52.0, from the tools tree rather than from the login PATH
+Captured: 2026-09-06T11:56Z, by hand, over ssh, from a copy of the repository
+          subset under /tmp on the build host. A second session at 2026-09-06T15:20Z
+          re-measured the four host-gated commands for code review round 1, and
+          is retained at the end of this file under `round 2 re-measurement`.
+Purpose: Step 1 of the toolchain-runtime-closure plan, the declared candidate
+         shape and the observed loader scope. Unlike step 0 this capture DOES
+         record behaviour: four production modules exist by the end of it, one
+         of them filled.
+
+WHAT THIS RUN PROVES, in the three claims step 1 makes.
+
+  THE MODULE SET IS FIXED AND UNCONDITIONAL. Four modules are created together,
+         `closure_scope.sh` exists in no shape, and the three the later steps
+         fill carry a contract comment and a body of ZERO lines, which the suite
+         MEASURES rather than assumes. "Created empty" is a number here, so a
+         module quietly filled a step early would be visible.
+
+  THE OBSERVED SCOPE IS `build_elf_rpath` AND NOT A COPY OF IT. The suite reads
+         the function's own output and the checker's observed value and compares
+         them byte for byte, and it greps the checker for the installer's
+         tool-root glob and for its first composed suffix, both of which must be
+         absent. The property case is the one that survives a refactor: a second
+         implementation that agreed today would fail the moment it drifted, which
+         is the drift this whole requirement exists to remove.
+
+  THE DECLARED SHAPE TOUCHES NO FILESYSTEM, driven rather than described. The
+         same declaration is derived against a prefix carrying the whole tree
+         and against a prefix that does not exist, and with the prefix folded out
+         the two are identical. Its CONTROL is beside it: the observed side DOES
+         depend on the filesystem, so the two prefixes are not interchangeable
+         and the declared side's independence is a real property rather than an
+         accident of two paths that happen to answer alike.
+
+WHY UNDETERMINED IS NOT AN EMPTY SCOPE. `install_pkg.sh` can refuse while being
+         sourced, through a `fatal` that calls `exit`. Sourced in the checker's
+         own shell that would end the run and hand back the installer's exit code
+         as if it were a verdict; sourced in a subshell it ends the probe, and
+         the result is a typed UNDETERMINED. Four cases drive it, a refusal at
+         source time, a missing function, a failing call and an absent file, and
+         each asserts the exit code is the CHECKER'S OWN 5 rather than the
+         installer's 3. Two more assert what a lazier reading would have
+         produced: ZERO `ABSENT` lines and ZERO `PRESENT` lines, because a
+         checker that read an unobtainable scope as an empty one would report all
+         fourteen declared candidates absent and exit 0, which reads exactly like
+         a tree that is merely bare. A fifth asserts the report reaches its
+         verdict line, so the run is seen to complete rather than to die. Their
+         shared CONTROL is the real installer over the same tree, which produces
+         no UNDETERMINED at all.
+
+Identity: the five files this run measured, digested on the build host and on
+         the authoring host, matching byte for byte:
+
+         closure_check.sh         dbcb9c981b4dbc690f4858d84ceaaa137c0eaea7bf4a5fd6f6e4a6e381d2c6c6
+         closure_config.sh        fbafa5122cea61e34c8e1e98da499d8dba52a1f1d7e7703b0c7febf8ce3f6e4c
+         closure_elf.sh           5fe397e3aef80a1b1c1fb25113f660076082c9d817c7bfa7b2ae86e0ee1155b1
+         closure_rules.sh         afb2fe67eb702b8abce17a68cff3beb5862ffd06bddddfbe56301166564cbb24
+         verify.closure-check.sh  9c85b3b42ef65a9a2bd4f619945d65ab78a8c30e21ca375d1dc17e7b9b881d74
+
+         The contract and the corpus are UNCHANGED by this step, and the verdict
+         blocks below carry the same two digests the step 0 capture recorded,
+         78559532 and 558c66e5, which is how a reader knows step 1 added no
+         command and no fixture row.
+
+Host note: the distribution is read from /etc/os-release and never from `uname`,
+         for the reason the step 0 capture states.
+
+Sensitive-content note: no run below carries a deployment account name. The
+         relocation harness output does, in one path, so this capture retains
+         its verdict block rather than its 266 lines, and the run is reproduced
+         by the command named at the end.
+
+===== the step 1 suite =====
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 1 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /bin/sed
+  preflight/grep                                 PASS  /bin/grep
+  preflight/sort                                 PASS  /bin/sort
+  preflight/uniq                                 PASS  /bin/uniq
+  preflight/mkdir                                PASS  /bin/mkdir
+  preflight/rm                                   PASS  /bin/rm
+  preflight/chmod                                PASS  /bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  rhel 9.8
+  host/any-linux                                 PASS  rhel 9.8
+
+== capability gate: assoc
+  capability/assoc/in-domain                     PASS  yes
+  capability/assoc                               NOTE  supported: bash 5.1.8(1)-release, an associative assignment read back its own value
+
+== step 1 topology: four modules, created together, no fifth
+  step1/topology/closure_check.sh/exists         PASS  yes
+  step1/topology/closure_config.sh/exists        PASS  yes
+  step1/topology/closure_elf.sh/exists           PASS  yes
+  step1/topology/closure_rules.sh/exists         PASS  yes
+  step1/topology/no-closure_scope.sh             PASS  no
+  step1/topology/closure_config.sh/body-is-empty PASS  0
+  step1/topology/closure_elf.sh/body-is-empty    PASS  0
+  step1/topology/closure_rules.sh/body-is-empty  PASS  0
+  step1/topology/closure_check.sh/is-filled      PASS  yes
+  step1/topology/closure_check.sh/declared-commands PASS
+  step1/topology/closure_config.sh/declared-commands PASS
+  step1/topology/closure_elf.sh/declared-commands PASS
+  step1/topology/closure_rules.sh/declared-commands PASS
+  step1/topology/control/exemption-is-scoped-to-the-defined PASS  cplx_never_defined
+  step1/topology/control/no-exemption-without-the-source PASS  build_elf_rpath
+
+== step 1 scope: derived once, observed through build_elf_rpath
+  step1/observed/calls-build-elf-rpath           PASS  yes
+  step1/observed/no-reimplementation             PASS
+  step1/unwaivable/no-waiver-code-path           PASS
+  step1/tree/alias-planted                       PASS  yes
+  step1/declared/no-filesystem                   PASS  identical: 14 line(s), 447 bytes
+  step1/declared/control/observed-does-depend    PASS  yes
+  step1/declared/control/observed-empty-without-tree PASS
+  step1/declared/root-by-construction            PASS  identical: 14 line(s), 895 bytes
+  step1/declared/dedupe-preserves-first          PASS  identical: 14 line(s), 895 bytes
+  step1/declared/count                           PASS  14
+  step1/observed/equals-build-elf-rpath          PASS  identical: 1 line(s), 895 bytes
+  step1/observed/canonical-order-matches-declared PASS  identical: 14 line(s), 895 bytes
+
+== step 1 classification: PRESENT, ABSENT and UNEXPECTED
+  step1/canonical/exit-code                      PASS  0
+  step1/canonical/present                        PASS  14
+  step1/canonical/absent                         PASS  0
+  step1/canonical/unexpected                     PASS  0
+  step1/canonical/undetermined                   PASS  0
+  step1/canonical/alias-present                  PASS  PRESENT|declared|/tmp/cplx-closure-check.4180733/prefix/tools/python/current/lib
+  step1/canonical/version-present                PASS  PRESENT|declared|/tmp/cplx-closure-check.4180733/prefix/tools/python/python-3.13.9/lib
+  step1/absent/exit-code                         PASS  0
+  step1/absent/named                             PASS  ABSENT|declared|/tmp/cplx-closure-check.4180733/prefix/tools/git/root/lib64
+  step1/unexpected-subdir/exit-code              PASS  1
+  step1/unexpected-subdir/named                  PASS  UNEXPECTED|observed|/tmp/cplx-closure-check.4180733/prefix/tools/python/cplxunexpected/lib|subdirectory|cplxunexpected
+  step1/unexpected-subdir/control/declared-accepted PASS  0
+  step1/unexpected-subdir/control/no-refusal     PASS  0
+  step1/unexpected-root/exit-code                PASS  1
+  step1/unexpected-root/named                    PASS  UNEXPECTED|observed|/tmp/cplx-closure-check.4180733/prefix/tools/old/py3.13/lib|root|old
+  step1/unexpected-root/member-still-in-scope    PASS  yes
+  step1/unexpected-root/member-file-is-there     PASS  yes
+  step1/unexpected-root/control/declared-accepted PASS  0
+
+== step 1 UNDETERMINED: a scope that could not be observed
+  step1/undetermined/fatal/exit-is-the-checkers-own PASS  5
+  step1/undetermined/fatal/reports-the-status    PASS  yes
+  step1/undetermined/fatal/no-absent-line        PASS  0
+  step1/undetermined/fatal/no-present-line       PASS  0
+  step1/undetermined/fatal/every-candidate-undetermined PASS  15
+  step1/undetermined/fatal/report-completes      PASS  yes
+  step1/undetermined/no-function/exit-code       PASS  5
+  step1/undetermined/no-function/names-it        PASS  yes
+  step1/undetermined/failing/exit-code           PASS  5
+  step1/undetermined/failing/names-the-call      PASS  yes
+  step1/undetermined/absent-installer/exit-code  PASS  5
+  step1/undetermined/absent-installer/names-the-path PASS  yes
+  step1/undetermined/control/real-installer      PASS  0
+
+== step 1 arguments: a usage error is not a verdict
+  step1/args/no-root-declared                    PASS  2
+  step1/args/missing-operand                     PASS  2
+  step1/args/unknown-argument                    PASS  2
+
+== verdict
+  step        1
+  cases       70
+  failures    0
+  host        rhel 9.8
+  bash        5.1.8(1)-release
+  contract    /tmp/cplx-step1/docs/v0.27.0/contract.closure-tools.txt
+  corpus      /tmp/cplx-step1/docs/v0.27.0/fixtures.closure-corpus.txt
+  shipped-dir /tmp/cplx-step1/docs/v0.27.0/../../src/setups/env/bin
+  harness      9c85b3b42ef65a9a2bd4f619945d65ab78a8c30e21ca375d1dc17e7b9b881d74
+  contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+  corpus-sha   558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+  capability   assoc=supported
+
+OBJECTIVE MET for step 1
+
+===== step 0 re-run: the instrument still answers =====
+
+Step 1 changed the harness, so step 0 is re-run rather than assumed. Its
+red-baseline loop now asserts the refusal for the steps that are STILL red and
+records step 1 as filled: asserting it for every step would make step 0 fail on
+the first step that succeeded, and re-running a filled suite from inside step 0
+would report the same result under a name that hides which step produced it.
+
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 0 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /bin/sed
+  preflight/grep                                 PASS  /bin/grep
+  preflight/sort                                 PASS  /bin/sort
+  preflight/uniq                                 PASS  /bin/uniq
+  preflight/mkdir                                PASS  /bin/mkdir
+  preflight/rm                                   PASS  /bin/rm
+  preflight/chmod                                PASS  /bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  rhel 9.8
+  host/any-linux                                 PASS  rhel 9.8
+
+== step 0 gate controls: unavailable is not unsupported
+  step0/gate/shim-planted                        PASS
+  step0/gate/readelf-unavailable                 PASS  unavailable
+  step0/gate/readelf-unsupported                 PASS  unsupported
+  step0/gate/sha256sum-unavailable               PASS  unavailable
+  step0/gate/sha256sum-unsupported               PASS  unsupported
+  step0/gate/assoc-unavailable-without-bash      PASS  unavailable
+
+== step 0 capability gate: readelf, sha256sum, declare -A
+  step0/capability/readelf/in-domain             PASS  yes
+  step0/capability/readelf                       NOTE  supported: /bin/readelf answered -d -V over /bin/bash
+  step0/capability/sha256sum/in-domain           PASS  yes
+  step0/capability/sha256sum                     NOTE  supported: /bin/sha256sum digested the empty input correctly
+  step0/capability/assoc/in-domain               PASS  yes
+  step0/capability/assoc                         NOTE  supported: bash 5.1.8(1)-release, an associative assignment read back its own value
+
+== step 0 refusal path: a step whose declared tool is missing
+  step0/refusal/missing-tool-exit-code           PASS  5
+  step0/refusal/names-the-missing-command        PASS  yes
+  step0/refusal/suite-absent-exit-code           PASS  5
+  step0/refusal/two-refusals-are-distinct        PASS  no
+  step0/refusal/suite-absent-names-the-step      PASS  yes
+
+== step 0 red baseline: every later step declares, and the unfilled refuse
+  step0/declared/step1/tools-not-empty           PASS  yes
+  step0/declared/step1/host-not-empty            PASS  yes
+  step0/declared/step1/has-a-suite               NOTE  filled by step 1, the declared candidate shape and the observed loader scope; judged by --step 1
+  step0/declared/step2/tools-not-empty           PASS  yes
+  step0/declared/step2/host-not-empty            PASS  yes
+  step0/declared/step2/refuses                   PASS  5
+  step0/declared/step2/says-why                  PASS  yes
+  step0/declared/step3/tools-not-empty           PASS  yes
+  step0/declared/step3/host-not-empty            PASS  yes
+  step0/declared/step3/refuses                   PASS  5
+  step0/declared/step3/says-why                  PASS  yes
+  step0/declared/step4/tools-not-empty           PASS  yes
+  step0/declared/step4/host-not-empty            PASS  yes
+  step0/declared/step4/refuses                   PASS  5
+  step0/declared/step4/says-why                  PASS  yes
+  step0/declared/step5/tools-not-empty           PASS  yes
+  step0/declared/step5/host-not-empty            PASS  yes
+  step0/declared/step5/refuses                   PASS  5
+  step0/declared/step5/says-why                  PASS  yes
+  step0/declared/step6/tools-not-empty           PASS  yes
+  step0/declared/step6/host-not-empty            PASS  yes
+  step0/declared/step6/refuses                   PASS  5
+  step0/declared/step6/says-why                  PASS  yes
+  step0/declared/step7/tools-not-empty           PASS  yes
+  step0/declared/step7/host-not-empty            PASS  yes
+  step0/declared/step7/refuses                   PASS  5
+  step0/declared/step7/says-why                  PASS  yes
+
+== step 0 contract: the checker's own allowlist
+  step0/contract/entry-row-shape                 PASS
+  step0/contract/launcher-row-shape              PASS
+  step0/contract/yes-owns-a-launcher             PASS
+  step0/contract/enumerated-set                  PASS  cat chmod cp find git ln mkfifo mktemp readelf rm sha256sum tar tee
+  step0/contract/control/short-row-refused       PASS  awk|direct|-|no
+  step0/contract/control/yes-without-launcher-refused PASS  awk
+
+== step 0 mechanical assertion: proved before it has a subject
+  step0/mechanical/clean-script-has-no-finding   PASS
+  step0/mechanical/undeclared-command-is-named   PASS  awk
+  step0/mechanical/closure_check.sh              PASS
+  step0/mechanical/closure_config.sh             PASS
+  step0/mechanical/closure_elf.sh                PASS
+  step0/mechanical/closure_rules.sh              PASS
+  step0/mechanical/topology-is-nine              PASS  9
+  step0/mechanical/shipped-present               NOTE  4 of 9
+  step0/mechanical/shipped-absent                NOTE  closure_verify.sh closure_observe_live.sh closure_publish.sh closure_d10.sh deliver-closure-tools.sh
+
+== step 0 corpus: a truncated file is a failure, not a smaller run
+  step0/corpus/declares-a-count                  PASS  yes
+  step0/corpus/count-matches-rows                PASS  19
+  step0/corpus/spec-row-shape                    PASS
+  step0/corpus/ids-are-unique                    PASS
+  step0/corpus/donors-are-declared               PASS
+  step0/corpus/control/truncated-refused         PASS  19/18
+  step0/corpus/control/short-row-refused         PASS  spec|short-row|object|shared|tools/x|needed-add:libx.so.1
+
+== verdict
+  step        0
+  cases       68
+  failures    0
+  host        rhel 9.8
+  bash        5.1.8(1)-release
+  contract    /tmp/cplx-step1/docs/v0.27.0/contract.closure-tools.txt
+  corpus      /tmp/cplx-step1/docs/v0.27.0/fixtures.closure-corpus.txt
+  shipped-dir /tmp/cplx-step1/docs/v0.27.0/../../src/setups/env/bin
+  harness      9c85b3b42ef65a9a2bd4f619945d65ab78a8c30e21ca375d1dc17e7b9b881d74
+  contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+  corpus-sha   558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+  capability   readelf=supported
+  capability   sha256sum=supported
+  capability   assoc=supported
+
+OBJECTIVE MET for step 0
+
+===== the argument-free form: the aggregate =====
+
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===
+  step 0  exit 0  OBJECTIVE MET for step 0
+  step 1  exit 0  OBJECTIVE MET for step 1
+  step 2  exit 5    no suite exists for step 2 yet; it is written by step 2, the configuration bundle and its authority
+  step 3  exit 5    no suite exists for step 3 yet; it is written by step 3, the static subject set and the derived membership half
+  step 4  exit 5    no suite exists for step 4 yet; it is written by step 4, the floor, coherence, rule 1, rule 2 and aggregation
+  step 5  exit 5    no suite exists for step 5 yet; it is written by step 5, waivers, the packaging gate and the publication boundary
+  step 6  exit 5    no suite exists for step 6 yet; it is written by step 6, the foreign-host half of the verification
+  step 7  exit 5    no suite exists for step 7 yet; it is written by step 7, the acceptance on both hosts
+
+=== aggregate: exit 5
+
+===== preserved surface: verify.relocation-rpath.sh --step 3 =====
+
+Step 1's completion criteria name this suite because it is the one that asserts
+the installer's OWN host-tool allowlist over the installer text, so it would be
+the first to notice an accidental edit. Its verdict block:
+
+== verdict
+  step        3
+  cases       104
+  failures    0
+  corpus      /tmp/cplx-step1/docs/v0.27.0/contract.cplx-elf-1.txt
+  installer   /tmp/cplx-step1/src/setups/env/bin/install_pkg.sh
+
+OBJECTIVE MET for step 3
+
+TWO EARLIER RUNS OF THAT COMMAND FAILED, AND NEITHER WAS A REGRESSION. Both are
+recorded here because a run that fails for an environment reason and is quietly
+retried is indistinguishable from one that was made to pass:
+
+  first run    `corpus/present` FAILED: contract.cplx-elf-1.txt had not been
+               copied into the /tmp subset. A missing input, not a finding.
+  second run   `corpus/frozen-bytes` FAILED with `got [unavailable]`, because
+               the case reads `git hash-object` and `git` is absent from the
+               login PATH of that host while present in its own tools tree. This
+               is the exact shape this repository already recorded once, a tool
+               called missing across six review rounds while the binary was
+               there and merely off one shell's PATH, so it was verified rather
+               than believed. That missing `git` is the ONLY thing that made
+               this run exit 1.
+
+  third run    with `git` on PATH and `--target-capability` supplied: 104 cases,
+               0 failures.
+
+`assoc-array/exact-target` PRINTS `FAIL` IN THE BARE FORM AND IS NOT A STEP 3
+FAILURE, which the round 2 re-measurement below establishes by running the bare
+form to completion. The line is an INHERITED step 0 preflight result, and
+`verify.relocation-rpath.sh` says so itself in the same verdict block: `inherited
+1 step 0 preflight failure(s), not step 3 criteria` and `this host cannot answer
+step 0; step 3 does not ask it to`. The bare command still reports 104 cases, 0
+failures and exit 0. An earlier revision of this paragraph read that printed
+`FAIL` as a second cause of the exit-1 run and implied the bare form could not
+answer without `--target-capability`; both readings were wrong, and the plan's
+own step 1 criterion, which names the bare form, is satisfiable and satisfied.
+
+===== the authoring-host half =====
+
+Three of step 1's completion criteria are answered where the repository lives,
+not on the build host, because they read the working tree and the index:
+
+  bash src/utils/lint_shell.sh
+    lint_shell: 48 tracked scripts
+    lint_shell: clean
+
+    THE FOUR NEW MODULES WERE STAGED BEFORE THIS RUN, and that is not a
+    formality. The gate reads `git ls-files`, so an untracked script is not
+    linted at all: the first run of it reported 44 scripts and `clean` while
+    covering none of the new files. Staged, it reported 48 and one real finding,
+    SC2034 over the `INSTALL_PREFIX` assignment inside the probe subshell, which
+    shellcheck cannot see through the `source` on the line above. It carries a
+    scoped disable naming the reader, and the gate is clean over all 48.
+
+  git diff --exit-code HEAD -- src/setups/env/bin/install_pkg.sh
+    exit 0: the installer is unchanged. HEAD-relative and exit-status driven,
+    because `git diff --stat` alone ignores the index and a staged edit would
+    print nothing and read as proof that nothing changed.
+
+  grep -nE 'readelf|sha256sum|tar -t' src/setups/env/bin/install_pkg.sh
+    prints nothing: no checker tool reached the installer's audited contract.
+
+  grep -n 'build_elf_rpath' src/setups/env/bin/closure_check.sh
+    nine lines, of which the call sites are 171, 177, 189 and 190.
+
+  grep -nE 'tools/\*/|root/usr/lib64' src/setups/env/bin/closure_check.sh
+    prints nothing: no copy of the installer's own walk.
+
+===== line budget =====
+
+                                     before   after   advisory      band
+  closure_check.sh                        0     429   180 to 240    below 550, safe
+  closure_config.sh                       0      35   under 20      below 550, safe
+  closure_elf.sh                          0      26   under 20      below 550, safe
+  closure_rules.sh                        0      37   under 20      below 550, safe
+  verify.closure-check.sh               919    1351   plus 200/300  harness, not deployed
+  install_pkg.sh                       1308    1308   no growth     unchanged
+  pkg.sh                                184     184   untouched     untouched
+
+THE VARIANCES ARE RECORDED RATHER THAN ARGUED AWAY. Every advisory estimate in
+the plan's step 1 checkpoint is exceeded, and no BAND is: the deployment ceiling
+is 650 and the largest shipped file is 429. The reason is one number:
+`closure_check.sh` is 240 lines of body and 189 of comment, so its CODE lands
+exactly at the advisory upper bound and the total carries this repository's
+comment density on top. The same explains the three contract-comment modules,
+whose bodies are zero and whose comments enumerate the functions each will own
+and why. The harness grew 432 against an estimate of 200 to 300, for the 70
+cases of the step 1 suite and their controls.
+
+===== the route a reviewer repeats =====
+
+The mandatory command cannot answer on the Windows authoring host: it carries no
+/etc/os-release, so the `any-linux` gate reports UNANSWERED by design rather than
+a result. The declared route is the one this capture used:
+
+  ssh <the RHEL 9.8 build host, per a.infra-access.local.md>
+  cd /tmp/cplx-step1
+  bash docs/v0.27.0/verify.closure-check.sh --step 1
+
+and, for the preserved surface, in the same session:
+
+  export PATH=<the tools git bin>:$PATH
+  bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 \
+       --target-capability docs/v0.27.0/capability.rhel-9.8.txt
+
+The /tmp subset must carry docs/v0.27.0/contract.cplx-elf-1.txt beside the two
+harnesses, or the second command fails on a missing input rather than on a
+finding.
+
+===== round 2 re-measurement, for the reviewer's host-gated evidence =====
+
+Round 1 of the code review returned changes-requested. It did NOT find a defect
+in the implementation: it assessed the staged scope work, architecture,
+complexity, preservation diff, umbrella boundary, validation-state boundary and
+commit plan as sound. What it could not do was RUN the four host-gated commands,
+because the reviewer host is Windows Git Bash with no `readelf` and no readable
+`/etc/os-release`, so those harnesses reported their unavailable or host-gated
+paths. Under this repository's own rule an unavailable check is missing evidence
+and never a pass, so the readiness floor was incomplete and the reviewer refused
+to recommend commit readiness on it. That refusal is correct.
+
+The four commands were therefore run again, on the RHEL 9.8 build host, against
+the EXACT staged index the reviewer assessed.
+
+Index identity: the reviewer's baseline and post-assessment index tree, and the
+         tree these runs measured, are all
+         e37199c8de833049ee57224a21f0327581bf2d37. `git diff` over the seven
+         staged paths is empty, so the index and the working tree hold the same
+         bytes, and the copies under /tmp on the build host digest identically:
+
+         closure_check.sh        dbcb9c981b4dbc690f4858d84ceaaa137c0eaea7bf4a5fd6f6e4a6e381d2c6c6
+         verify.closure-check.sh 9c85b3b42ef65a9a2bd4f619945d65ab78a8c30e21ca375d1dc17e7b9b881d74
+         install_pkg.sh          6d043f148d175727fba55ac3b72f07b7f41d46d4fa67683efa751ea77c4fa625
+
+  command                                                    exit  cases  failures
+  bash docs/v0.27.0/verify.closure-check.sh --step 1            0     70         0
+  bash docs/v0.27.0/verify.closure-check.sh --step 0            0     68         0
+  bash docs/v0.27.0/verify.relocation-rpath.sh --step 3         0    104         0
+  the same with --target-capability capability.rhel-9.8.txt     0    104         0
+
+  aggregate                                                   PASS
+
+Each was run on its own, never chained, so a non-zero from one could not stop
+the others from running.
+
+STEP 0 NOW REPORTS 68 CASES WHERE THE STEP 0 CAPTURE RECORDS 66, and the two
+         contributions were counted rather than reasoned about:
+
+           red-baseline assertions   28 -> 26   minus 2
+           mechanical per-script     0 -> 4     plus 4
+                                                --------
+                                                 66 -> 68
+
+         The red-baseline loop asserted four cases for each of steps 1 to 7. It
+         now asserts four for each step whose suite does not exist, and for a
+         filled step keeps only the two declaration assertions, the tool set and
+         the host, replacing the refusal pair with a note. Step 1 is the one
+         filled step, so the loop loses exactly its `refuses` and `says-why`
+         pair. The mechanical assertion gains four because it runs over shipped
+         scripts that exist, and at step 0 none did.
+
+         The number moved because the instrument changed and because this step
+         gave it four real subjects, not because a case was dropped: `failures 0`
+         is unchanged and no assertion was weakened.
+
+THE BARE RELOCATION FORM IS GREEN, AND ITS PRINTED `FAIL` LINE IS NOT ITS OWN.
+         `bash docs/v0.27.0/verify.relocation-rpath.sh --step 3` prints one FAIL
+         line, `assoc-array/exact-target`, and still reports 104 cases, 0
+         failures and exit 0, because that line is an INHERITED step 0 preflight
+         result rather than a step 3 criterion. Its own verdict block says so:
+
+           == verdict
+             step        3
+             cases       104
+             failures    0
+             inherited   1 step 0 preflight failure(s), not step 3 criteria
+                         this host cannot answer step 0; step 3 does not ask it to
+
+           OBJECTIVE MET for step 3
+
+         Supplying `--target-capability docs/v0.27.0/capability.rhel-9.8.txt`
+         removes the printed line and changes nothing else: 104 cases, 0
+         failures, exit 0, same verdict. Both forms are retained above because
+         the plan's step 1 criterion names the bare one and this request added
+         the capability form as a stricter check; the two agree.
+
+WHAT THIS SECTION CORRECTS. The paragraph above headed TWO EARLIER RUNS
+         originally read the printed `assoc-array/exact-target` line as a second
+         cause of that run's exit 1, and inferred that the bare form could not
+         answer without `--target-capability`. Both readings were wrong. The
+         only cause of that exit 1 was `corpus/frozen-bytes` with `git` off the
+         shell's PATH. The plan's criterion, which names the bare form, is
+         satisfiable and satisfied. The paragraph has been corrected in place
+         and this note records what it said before, so the correction is
+         auditable rather than silent.
+
+===== round 2 verdict blocks, as printed =====
+
+bash docs/v0.27.0/verify.closure-check.sh --step 1
+
+  == verdict
+    step        1
+    cases       70
+    failures    0
+    host        rhel 9.8
+    bash        5.1.8(1)-release
+    harness      9c85b3b42ef65a9a2bd4f619945d65ab78a8c30e21ca375d1dc17e7b9b881d74
+    contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+    corpus-sha   558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+    capability   assoc=supported
+
+  OBJECTIVE MET for step 1
+
+bash docs/v0.27.0/verify.closure-check.sh --step 0
+
+  == verdict
+    step        0
+    cases       68
+    failures    0
+    host        rhel 9.8
+    bash        5.1.8(1)-release
+    harness      9c85b3b42ef65a9a2bd4f619945d65ab78a8c30e21ca375d1dc17e7b9b881d74
+    contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+    corpus-sha   558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+    capability   readelf=supported
+    capability   sha256sum=supported
+    capability   assoc=supported
+
+  OBJECTIVE MET for step 0
+
+bash docs/v0.27.0/verify.relocation-rpath.sh --step 3 --target-capability docs/v0.27.0/capability.rhel-9.8.txt
+
+  == verdict
+    step        3
+    cases       104
+    failures    0
+
+  OBJECTIVE MET for step 3
+
+The contract and corpus digests are the two the step 0 capture recorded, so this
+re-measurement also re-states that step 1 added no host command and no fixture
+row. The harness digest differs from the step 0 capture by design: this step
+changes the harness, and the step 0 capture is a frozen artifact of a closed
+round rather than a file this step rewrites.

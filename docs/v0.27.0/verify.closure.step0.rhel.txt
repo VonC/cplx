@@ -1,0 +1,267 @@
+Harness: docs/v0.27.0/verify.closure-check.sh --step 0, then the same file with
+         no --step, which runs every step in a fresh process and aggregates
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+        readelf: GNU readelf version 2.35.2-72.el9
+        sha256sum: sha256sum (GNU coreutils) 8.32
+Captured: 2026-09-04T13:33Z, by hand, over ssh, from a copy of the repository
+          subset under /tmp on the build host
+Purpose: Step 0 of the toolchain-runtime-closure plan. It writes no production
+         line, so this capture is not a baseline of behaviour: it is the RED
+         BASELINE of the instrument. Step 0 answers, steps 1 to 7 refuse, and
+         each refusal names the step that will fill it.
+
+WHY THE THREE CAPABILITIES ARE MEASURED AND NOT ASSERTED. The gate resolves
+         readelf, sha256sum and `declare -A` and records each as supported,
+         unsupported or unavailable. `supported` here means a probe OBSERVED the
+         tool doing the thing it is needed for: readelf answered `-d -V` over the
+         running shell's own ELF, sha256sum digested the empty input to the known
+         value, and an associative assignment read its own value back. A tool
+         that is merely on PATH is not supported by this gate.
+
+         The two failing outcomes are separated by driving them. A PATH built
+         from the harness's own declared tools and nothing else yields
+         `unavailable` for readelf and sha256sum, because they cannot be asked
+         at all; a stub planted first on that PATH yields `unsupported`, because
+         they were asked and answered wrongly. Both pairs are in the run below.
+         This is the distinction this repository got wrong once already, when a
+         tool present the whole time was recorded as "not installed" across six
+         review rounds because it was absent from one shell's PATH.
+
+Host note: the distribution is read from /etc/os-release and never from `uname`.
+         The Debian 12 agent is a container on a RHEL kernel, so every capture
+         taken there carries an el9 kernel string, and a host gate keyed on
+         `uname` would call the agent RHEL.
+
+Sensitive-content note: the deployment account name is replaced by
+         `deploy-account` under this repository's own replacement rule, which is
+         the same substitution every earlier capture in this directory carries.
+         No other content of any run below is edited.
+
+===== the step 0 suite =====
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, step 0 ===
+
+== harness prerequisite preflight
+  preflight/sed                                  PASS  /bin/sed
+  preflight/grep                                 PASS  /bin/grep
+  preflight/sort                                 PASS  /bin/sort
+  preflight/uniq                                 PASS  /bin/uniq
+  preflight/mkdir                                PASS  /bin/mkdir
+  preflight/rm                                   PASS  /bin/rm
+  preflight/chmod                                PASS  /bin/chmod
+
+== host gate: any-linux
+  host/identity                                  NOTE  rhel 9.8
+  host/any-linux                                 PASS  rhel 9.8
+
+== step 0 gate controls: unavailable is not unsupported
+  step0/gate/shim-planted                        PASS
+  step0/gate/readelf-unavailable                 PASS  unavailable
+  step0/gate/readelf-unsupported                 PASS  unsupported
+  step0/gate/sha256sum-unavailable               PASS  unavailable
+  step0/gate/sha256sum-unsupported               PASS  unsupported
+  step0/gate/assoc-unavailable-without-bash      PASS  unavailable
+
+== step 0 capability gate: readelf, sha256sum, declare -A
+  step0/capability/readelf/in-domain             PASS  yes
+  step0/capability/readelf                       NOTE  supported: /bin/readelf answered -d -V over /bin/bash
+  step0/capability/sha256sum/in-domain           PASS  yes
+  step0/capability/sha256sum                     NOTE  supported: /bin/sha256sum digested the empty input correctly
+  step0/capability/assoc/in-domain               PASS  yes
+  step0/capability/assoc                         NOTE  supported: bash 5.1.8(1)-release, an associative assignment read back its own value
+
+== step 0 refusal path: a step whose declared tool is missing
+  step0/refusal/missing-tool-exit-code           PASS  5
+  step0/refusal/names-the-missing-command        PASS  yes
+  step0/refusal/suite-absent-exit-code           PASS  5
+  step0/refusal/two-refusals-are-distinct        PASS  no
+  step0/refusal/suite-absent-names-the-step      PASS  yes
+
+== step 0 red baseline: every later step declares and refuses
+  step0/declared/step1/tools-not-empty           PASS  yes
+  step0/declared/step1/host-not-empty            PASS  yes
+  step0/declared/step1/refuses                   PASS  5
+  step0/declared/step1/says-why                  PASS  yes
+  step0/declared/step2/tools-not-empty           PASS  yes
+  step0/declared/step2/host-not-empty            PASS  yes
+  step0/declared/step2/refuses                   PASS  5
+  step0/declared/step2/says-why                  PASS  yes
+  step0/declared/step3/tools-not-empty           PASS  yes
+  step0/declared/step3/host-not-empty            PASS  yes
+  step0/declared/step3/refuses                   PASS  5
+  step0/declared/step3/says-why                  PASS  yes
+  step0/declared/step4/tools-not-empty           PASS  yes
+  step0/declared/step4/host-not-empty            PASS  yes
+  step0/declared/step4/refuses                   PASS  5
+  step0/declared/step4/says-why                  PASS  yes
+  step0/declared/step5/tools-not-empty           PASS  yes
+  step0/declared/step5/host-not-empty            PASS  yes
+  step0/declared/step5/refuses                   PASS  5
+  step0/declared/step5/says-why                  PASS  yes
+  step0/declared/step6/tools-not-empty           PASS  yes
+  step0/declared/step6/host-not-empty            PASS  yes
+  step0/declared/step6/refuses                   PASS  5
+  step0/declared/step6/says-why                  PASS  yes
+  step0/declared/step7/tools-not-empty           PASS  yes
+  step0/declared/step7/host-not-empty            PASS  yes
+  step0/declared/step7/refuses                   PASS  5
+  step0/declared/step7/says-why                  PASS  yes
+
+== step 0 contract: the checker's own allowlist
+  step0/contract/entry-row-shape                 PASS
+  step0/contract/launcher-row-shape              PASS
+  step0/contract/yes-owns-a-launcher             PASS
+  step0/contract/enumerated-set                  PASS  cat chmod cp find git ln mkfifo mktemp readelf rm sha256sum tar tee
+  step0/contract/control/short-row-refused       PASS  awk|direct|-|no
+  step0/contract/control/yes-without-launcher-refused PASS  awk
+
+== step 0 mechanical assertion: proved before it has a subject
+  step0/mechanical/clean-script-has-no-finding   PASS
+  step0/mechanical/undeclared-command-is-named   PASS  awk
+  step0/mechanical/topology-is-nine              PASS  9
+  step0/mechanical/shipped-present               NOTE  0 of 9
+  step0/mechanical/shipped-absent                NOTE  closure_check.sh closure_config.sh closure_elf.sh closure_rules.sh closure_verify.sh closure_observe_live.sh closure_publish.sh closure_d10.sh deliver-closure-tools.sh
+
+== step 0 corpus: a truncated file is a failure, not a smaller run
+  step0/corpus/declares-a-count                  PASS  yes
+  step0/corpus/count-matches-rows                PASS  19
+  step0/corpus/spec-row-shape                    PASS
+  step0/corpus/ids-are-unique                    PASS
+  step0/corpus/donors-are-declared               PASS
+  step0/corpus/control/truncated-refused         PASS  19/18
+  step0/corpus/control/short-row-refused         PASS  spec|short-row|object|shared|tools/x|needed-add:libx.so.1
+
+== verdict
+  step        0
+  cases       66
+  failures    0
+  host        rhel 9.8
+  bash        5.1.8(1)-release
+  contract    /tmp/cplx-step0/docs/v0.27.0/contract.closure-tools.txt
+  corpus      /tmp/cplx-step0/docs/v0.27.0/fixtures.closure-corpus.txt
+  shipped-dir /tmp/cplx-step0/docs/v0.27.0/../../src/setups/env/bin
+  harness      36efebff23555e55108d2f1432c03e1f103dc2b6826f0ad738710c9d75f8e848
+  contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+  corpus-sha   558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+  capability   readelf=supported
+  capability   sha256sum=supported
+  capability   assoc=supported
+
+OBJECTIVE MET for step 0
+
+===== every step, each in a fresh process =====
+=== verify.closure-check, v0.27.0 toolchain-runtime-closure, every step ===
+  step 0  exit 0  OBJECTIVE MET for step 0
+  step 1  exit 5    no suite exists for step 1 yet; it is written by step 1, the declared candidate shape and the observed loader scope
+  step 2  exit 5    no suite exists for step 2 yet; it is written by step 2, the configuration bundle and its authority
+  step 3  exit 5    no suite exists for step 3 yet; it is written by step 3, the static subject set and the derived membership half
+  step 4  exit 5    no suite exists for step 4 yet; it is written by step 4, the floor, coherence, rule 1, rule 2 and aggregation
+  step 5  exit 5    no suite exists for step 5 yet; it is written by step 5, waivers, the packaging gate and the publication boundary
+  step 6  exit 5    no suite exists for step 6 yet; it is written by step 6, the foreign-host half of the verification
+  step 7  exit 5    no suite exists for step 7 yet; it is written by step 7, the acceptance on both hosts
+
+=== aggregate: exit 5
+
+===== step 0 feature preservation: the four existing harnesses =====
+
+Nothing production changed in this step, so nothing can regress, and the one
+property to hold is that the four harnesses this collection already retained
+still answer. Lint does not prove that: it says the scripts parse, not that
+their cases still answer. So they were RUN, INDEPENDENTLY, each whatever the
+previous one returned, and each capture is retained beside this one.
+
+THE INVOCATIONS BELOW ARE THE FOUR THE PLAN FIXES, AND THIS MEASUREMENT IS WHY
+IT FIXES THEM. Every one of the four was first run in its argument-free form,
+on this host on 2026-09-04, and the four results were 2, 1, 1 and 2:
+
+  verify.install-pkg.sh          exit 2  its step 0 preflight REFUSES BY DESIGN
+                                         on an installer that can select a
+                                         fallback engine, and names step 1
+  verify.relocation-rpath.sh     exit 1  step 0 is blocked without
+                                         --target-capability, which is the
+                                         retained exact-target evidence
+  verify.wrapper-scope.sh        exit 1  step 0 is the PRE-CHANGE wrapper
+                                         baseline, and item 3 has since fixed
+                                         the wrapper, so the retained copy no
+                                         longer matches by construction
+  verify.wrapper-accept.sh       exit 2  --mode is a required argument with no
+                                         default, so no bare form of this
+                                         harness can ever return zero
+
+None of those four is a preservation failure. Each is a statement about the
+call, not about the tree, and none can be made zero without changing a frozen
+harness of items 1, 2 and 3. Code review round 1 of step 0 raised the
+argument-free list as a fixed contract, this measurement answered it, and the
+plan's Step 0 feature-preservation section and completion criteria were
+corrected to fix the four invocations below instead. Each harness is invoked at
+the step it can answer TODAY, named here so a reader can repeat it, and the raw
+status of every run is recorded rather than interpreted.
+
+  bash docs/v0.27.0/verify.install-pkg.sh --step 3
+  bash docs/v0.27.0/verify.relocation-rpath.sh --step 0 \
+       --target-capability docs/v0.27.0/capability.rhel-9.8.txt
+  bash docs/v0.27.0/verify.wrapper-scope.sh --step 2
+  bash docs/v0.27.0/verify.wrapper-accept.sh --mode identity
+
+THE FOURTH RUNS ON THE AUTHORING HOST AND NOWHERE ELSE. Its identity mode reads
+cplx history through git, by its own header "runs HERE, in this repository". The
+build host carries no cplx checkout and no git on its login PATH, and the Debian
+agent holds no cplx credentials at all, which is the reason every cplx harness
+travels to it as a verification-only copy. So its capture is retained beside the
+other three rather than reproduced here, and it is named in the aggregate.
+
+  harness                     invoked at            host        status
+  verify.install-pkg.sh       --step 3              RHEL 9.8    0
+  verify.relocation-rpath.sh  --step 0 + capability RHEL 9.8    0
+  verify.wrapper-scope.sh     --step 2              RHEL 9.8    0
+  verify.wrapper-accept.sh    --mode identity       authoring   0
+
+  aggregate                                                     PASS
+
+The aggregate is three-way and only the last row of the plan's own table is a
+pass: any status other than 0 or 5 FAILS, any 5 with no failure returns
+UNANSWERED naming the harness that could not answer, and only four zeros PASS.
+Four zeros were measured, so the surface is proven preserved rather than
+assumed.
+
+Retained captures, one per harness:
+  docs/v0.27.0/verify.closure.step0.preserve.install-pkg.rhel.txt
+  docs/v0.27.0/verify.closure.step0.preserve.relocation-rpath.rhel.txt
+  docs/v0.27.0/verify.closure.step0.preserve.wrapper-scope.rhel.txt
+  docs/v0.27.0/verify.closure.step0.preserve.wrapper-accept.authoring.txt
+
+===== round 2 re-measurement, after the plan correction =====
+
+The four fixed invocations were run again on 2026-09-04, independently and
+never chained, after the plan's Step 0 feature-preservation section was
+corrected to name them. Three on this host over ssh from the same
+/tmp/cplx-step0 copy, the fourth on the authoring host:
+
+  harness                     invoked at            host        status
+  verify.install-pkg.sh       --step 3              RHEL 9.8    0
+  verify.relocation-rpath.sh  --step 0 + capability RHEL 9.8    0
+  verify.wrapper-scope.sh     --step 2              RHEL 9.8    0
+  verify.wrapper-accept.sh    --mode identity       authoring   0
+
+  aggregate                                                     PASS
+
+The mandatory step 0 command was re-run in the same session and answered:
+
+  bash docs/v0.27.0/verify.closure-check.sh --step 0     exit 0
+    step 0, 66 cases, 0 failures, host rhel 9.8, bash 5.1.8(1)-release
+    readelf=supported  sha256sum=supported  assoc=supported
+    harness      36efebff23555e55108d2f1432c03e1f103dc2b6826f0ad738710c9d75f8e848
+    contract-sha 78559532e868b86c842b4fdd04affb959a093ff7bafef7ce4a9d1f77b1c91abe
+    corpus-sha   558c66e51f082b435826bc90a25102e9f07b8df454d94048c2bbcd715d1276ae
+
+The three digests match the staged working-tree files byte for byte, which is
+how a reader knows the re-measurement ran the reviewed harness and not a copy
+that had drifted.
+
+THE ROUTE A REVIEWER REPEATS. The mandatory command cannot answer on the
+Windows authoring host: it carries no readelf, no /etc/os-release identity and
+no distinct-refusal control, so a run there returns UNANSWERED by design. The
+declared route is the one this capture used:
+
+  ssh <the RHEL 9.8 build host, per a.infra-access.local.md>
+  cd /tmp/cplx-step0
+  bash docs/v0.27.0/verify.closure-check.sh --step 0

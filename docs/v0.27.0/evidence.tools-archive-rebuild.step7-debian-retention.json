@@ -1,0 +1,42 @@
+{
+  "schema": "tools-step7-adoption-retention/1",
+  "application_revision": "47418c764a5b7be5230896a6ebf31cf55c7f1728",
+  "archive_sha256": "df7dff7d63964f3b6b655dc135080df11b5fb026753fe0b290b9abc7372fbe87",
+  "build": {
+    "number": 189,
+    "result": "SUCCESS",
+    "building": false,
+    "duration": 2854823,
+    "timestamp": 1789999089889
+  },
+  "checkout_revisions": [
+    "47418c764a5b7be5230896a6ebf31cf55c7f1728",
+    "d08f5f6a75376d418aba854a76db6aef307b7bae"
+  ],
+  "reader_sha256": "6feb5534f375559c7191068a7ada9f07827499e37ac9340c8650c909b221928f",
+  "console_sha256": "1149f02e8d670a2d5058b1ce9a538a95966ee75c918ad88d864ef81615fa8463",
+  "metadata_sha256": "a930adf4868125ff66458a7a57041a3ef0786045d52c16b3633e66d9d68b2be4",
+  "archive_transport_sha256": "68bd550f22e79771eeac0c6223127a2a010b7520b65068e53cfb0d1278584802",
+  "application_bundle_sha256": "93dbac32614d9e74a62b5874b30fcbc96f7c06b575c6ee9ba8798bc27d00d878",
+  "changed_application_paths": [
+    "tools/tools.candidate",
+    "tools/tools.verification",
+    "tools/tools.version"
+  ],
+  "runtime": {
+    "python": "3.13.15",
+    "uv": "0.12.17",
+    "provider_map_sha256": "9edd1faf73802a0a653a8c199b14f235d7ebccb16e0d37cbeb382448e3f1a3d3",
+    "shared_runtime_sha256": "f2bbf444d1056976d44990075812f7aabe81b986aa5402e4b0ae9f434adeff75"
+  },
+  "retention": "$HOME/cplx-release-evidence/tools-archive-rebuild-step7-adoption/",
+  "input_change": "Release pin 10.0.0 replaces candidate selection; verification bundle is unchanged; uploads off.",
+  "recovery": "Not applicable: actual adoption succeeded. Controlled recovery fixture passed in the native cumulative run.",
+  "public_summary_export": {
+    "original_summary_sha256": "11a5ff7ee111e2676e5f991717afc17601c43d287eacf1087c6984748ad51780",
+    "exported_summary_sha256": "65fbaea69e3117b643311794b04cd8540ed1c2fefeee8211e5a51354f3bf19cc",
+    "changed_field": "consumers.venv_base",
+    "transformation": "Replace private agent workspace prefix with <agent-workspace>; retain the exact interpreter suffix and all capture identities.",
+    "original_retention": "acceptance/results.json beside retained original artifacts"
+  }
+}

@@ -63,8 +63,8 @@ URL and install functions), and consumers reference its output with the
 `_` prefix in their dependency list, which is also what fixes the build
 order ([The build order](the-build-order.md)).
 
-This is why OpenSSL, mpdecimal, git and Python are cplx tools, while
-zlib and ncurses are not.
+This is why OpenSSL, mpdecimal, SQLite, git and Python are cplx tools,
+while zlib and ncurses are not.
 
 ## Choosing
 
@@ -77,10 +77,13 @@ zlib and ncurses are not.
 
 A worked example: Python's `sqlite3` module. The deployment server has
 `libsqlite3.so.0`, so route 2 looks tempting, but it carries no
-`sqlite3.h`, so it cannot build the extension. The distribution's
-sqlite is recent enough for what CPython requires, so route 3 would buy
-nothing for a large cost. Route 1 wins: two short names
-(`sqlite-libs`, `sqlite-devel`) in Python's dependency list.
+`sqlite3.h`, so it cannot build the extension. Route 1 served for a
+while: two short names (`sqlite-libs`, `sqlite-devel`) in Python's
+dependency list. Then the distribution's 3.34.1 turned out to lack a
+write-ahead-log corruption fix the consuming application needs, so the
+version became too old for the software we actually want, and SQLite
+moved to route 3: the `sqlite` tool, consumed as `_sqlite`
+([Why the toolchain builds its own SQLite](why-the-toolchain-builds-its-own-sqlite.md)).
 
 Whichever route fills the sandbox, the file must also reach the
 *shipped* archive when the deployment target or another machine needs

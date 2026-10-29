@@ -1,0 +1,145 @@
+Harness: docs/v0.27.0/verify.install-pkg.sh --step 0
+Target: RHEL 9.8 deployment server, R-rs combination
+Captured: 2026-08-12, by hand, over ssh
+Purpose: Step 0 baseline of the CURRENT installer on the rsync path, plus the
+         case contract and the seven negative controls.
+
+Supersedes: three earlier captures, each withdrawn by a review round. The first
+         carried no installer fingerprint and resolved two of the installer's
+         four archive roots. The second predates the fixture oracle, the step
+         guard and the preflight gate. The third predates the removal of the
+         speculative fallback assertion, the fixture-shape control and the
+         restored `diff` in the tool inventory.
+
+Note: the installer path carried the deployment account name and has been
+substituted under the repository's sensitive-content rules. No other byte of the
+output is changed.
+
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 0 ===
+date      : 2026-08-12T13:56:10Z (UTC)
+harness   : verify.install-pkg.sh
+  sha256  : fd38508f018b1a9976c64eb071370ce8ac0a563792fca2abe5c89867f840fdc6
+  body    : d9027ad8dc9a77017b0067d4a1224d0bef39efa291e1e161f54ebaa37f59db44
+uname     : Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+installer : /home/deploy-account/cplx/bin/install_pkg.sh
+  sha256  : 3c1f6a562b56daf4078ff36fa494ceb558e5415f516b8616c46f67347ccfb3f1
+  lines   : 505
+  fallback: no (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : yes
+identity  : R-rs, requested; the engine is asserted from the run trace below
+home      : /tmp/cplx-verify.815485/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.815485
+
+--- preflight
+  preflight commands                 PASS  all 28 present
+  preflight stat fractional          PASS  1786542970.799188627
+  preflight combination              PASS  R-rs, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  control watchdog                   PASS  blocked, killed at 2s
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (rsync present: the mirror succeeds today, so the baseline is a
+   working install, and the root-file shapes are rsync's behaviour)
+  baseline fresh install             PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 3c1f6a562b56  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  engine rsync operated, read from the run trace
+  baseline root-file FIFO            PASS  exit 0
+      fixture   .env is a FIFO
+      identity  installer 3c1f6a562b56  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline FIFO replaced             PASS  regular file carrying the archive content
+  baseline root-file symlink         PASS  exit 0
+      fixture   .env is a symlink onto an external regular file
+      identity  installer 3c1f6a562b56  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline symlink replaced          PASS  regular file carrying the archive content
+  baseline external target intact    PASS  content and mtime unchanged
+
+=== VERDICT ===
+suites    : preflight controls baseline-rsync
+cases: 17, failures: 0
+Step 0: every assertion and every negative control behaved as designed.
+
+--- reading, added when the output was retained ---
+
+This is the R-rs half of the Step 0 baseline. Seventeen cases, no failures, and
+the identity is asserted rather than requested: `R-rs` on the header line is what
+the run asked for, and `baseline engine` confirms it by reading rsync's own
+file-list banner out of the case log. That banner is printed by the transfer, not
+by a decision to transfer, which is the distinction the whole engine assertion
+now rests on.
+
+The two root-file cases are the point of this capture. With rsync present, a FIFO
+planted at the destination `.env` is replaced by a regular file carrying the
+archive content, and a destination `.env` that is a symlink onto a regular file
+outside the prefix is likewise replaced while that external target stays
+identical in content and mtime. Exit 0 in both. These are the two behaviours
+Step 3 changes for the fallback engine only, so without them recorded Step 3
+would have nothing to change against. Promptness needs no separate assertion:
+every case runs under the twenty-second watchdog, so a blocking engine returns
+124 and fails the expected exit, which is what the calibrated watchdog control
+shows `cp -a` does to a FIFO.
+
+**What this harness deliberately cannot say.** There is no fallback expectation
+here and no fallback marker recognition. An earlier body guessed at Step 1's
+wording, and the guess was unsafe in the direction that matters: the plan has
+Step 1 emit a selection line before archive discovery while both rsync call sites
+stay unchanged, so a run could announce a fallback selection and still die at the
+unchanged mirror having copied nothing. Recognising that line would have reported
+`engine fallback, read from the run trace` for exactly such a run. Step 0 asserts
+only the two states it can witness, rsync operating and nothing operating, and
+refuses a target identity outright for any installer able to select a fallback.
+Selection becomes a separately named assertion when Step 1 defines its trace, and
+proof that the selected engine copied stays with the operation and post-state
+cases.
+
+**The controls now include the oracle that reads the setup.** `control
+fixture-shape` plants a plain regular file where a case declares an exact
+symlink, and requires refusal on the shape rather than on anything downstream. It
+runs here rather than only on a developer host because a shared-mode error in
+that oracle could accept a false declaration on both targets while every ordinary
+case stayed green: the fixture oracle interprets the setup every behavioural
+conclusion rests on, so it has to be recalibrated in the evidence being read, not
+in an anecdote about a different machine.
+
+`control omitted-root` matters on this host specifically. It plants a newer decoy
+archive in the pinned `$HOME/pkgs`, a root `install_pkg.sh` line 393 searches and
+the first resolver ignored. This is a real deployment account whose home holds
+archives, so under that resolver the installer could have consumed one of them
+while the harness approved the declared synthetic archive, returning exit 0 and
+satisfying every payload check. Every case runs with `HOME` pinned inside
+scratch, and the archive identity prints its searched root rather than a bare
+basename, because one name can exist under more than one of the four roots.
+
+`all 28 present` covers every external command the harness runs, including the
+child `bash` the case runner looks up on PATH, plus the plan's five
+verification-only additions. `diff` is the one command not invoked at step 0: it
+is the manifest comparison's tool, and this line is the promised evidence that
+step 5's acceptance gate will have it on this target.
+
+Three fingerprints, answering different questions.
+
+The installer is `3c1f6a56...`, 505 lines, with no `CPLX_INSTALL_PKG_FORCE_CP`
+support. The Debian capture reports the same digest, so both targets measured the
+same published installer, and neither measured this branch's `8ffb726c...`.
+Step 5 has to name which installer it exercises on each target rather than assume
+the branch one.
+
+The harness whole-file digest is `fd38508f...`, which pins this output to
+`docs/v0.27.0/verify.install-pkg.sh` as committed. It cannot be compared with the
+consuming project's copy, whose header comment differs by design.
+
+The shared-body digest is `d9027ad8...`, and the Debian capture reports the same
+value from a different file. That is what shows the two copies are in step, and
+it is visible in the evidence rather than resting on a `diff` a reader has to
+run.
+
+The kernel here reads `5.14.0-687.36.1.el9_8`, against `687.24.1` in the Debian
+capture. Different hosts, both on RHEL kernels; the CI agent is a container with
+a Debian userland, which its own reading explains.

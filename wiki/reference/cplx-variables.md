@@ -33,8 +33,19 @@ One `if "%CPLX_TOOL%"=="<tool>"` block per tool:
 | Variable | Effect |
 | --- | --- |
 | `CPLX_INSTALL_COPY_ONLY` | `install.bat` stops after copying the scripts (`ic`) |
-| `CPLX_RELOAD_PACKAGES` / `CPLX_FORCE_RELOAD_PACKAGES` | refresh / rebuild the package index (`sdpl`) |
-| `CPLX_SP_REPEAT` | re-process a given package during `sync_packages` |
+| `CPLX_RELOAD_PACKAGES` / `CPLX_FORCE_RELOAD_PACKAGES` | either requests one detected-index refresh per invocation despite a done marker (`sdpl` sets the force flag) |
+| `CPLX_SP_REPEAT` | with a valid nonempty list cursor, resume after the first active entry matching the cursor or this value; ineffective with empty/restarted progress |
+
+## Server-side switches (Linux, set for one command)
+
+| Variable | Read by | Effect |
+| --- | --- | --- |
+| `CPLX_INSTALL_PKG_FORCE_CP` | `install_pkg.sh` | exactly `1` forces the `cp` copy engine even where rsync exists, announced as `Copy engine: cp (forced by CPLX_INSTALL_PKG_FORCE_CP=1)`; any other value is treated as unset. A validation surface, not an operating mode |
+| `CPLX_TOOLS_RELEASE` | `closure_publish.sh` | exactly `1` makes `--expected-sha256` mandatory, so a tools release cannot publish without the SHA-256 its release record accepted |
+
+`CPLX_TOOLCHAIN_LD_LIBRARY_PATH` is not a switch: the
+[Python wrapper](python-wrapper.md) sets it to hold the library path it
+removed from its own environment, and nothing reads it from outside.
 
 ## Properties (files, shared by both machines)
 
@@ -44,6 +55,13 @@ One `if "%CPLX_TOOL%"=="<tool>"` block per tool:
 (remote working folder, parsed from the `#<alias>_cd` SSH-config
 comment), `architecture` (detected, e.g. `rhel_9.6_x86_64`), and
 `<architecture>_pkgs_url` mirror lists.
+
+The detected `architecture` continues to name the generated index and RPM
+cache. Curated lists and active mirror properties are selected independently:
+exact, highest lower minor, then lowest higher minor of the same distribution,
+major and machine. A missing/empty detected index is regenerated even without
+reload flags. Selected mirrors are resolved lazily and fixed for the invocation;
+the template is not merged into an existing active properties file.
 
 `src\setups\env\cplx.properties` (template `.tpl`): the subset shipped to
 the server: `services`, `CPLX_ARCH_EXT`, `CPLX_CHECK_PREFIX`,

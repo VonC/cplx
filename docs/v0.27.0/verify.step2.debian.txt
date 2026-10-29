@@ -1,0 +1,170 @@
+Harness: tools/installer_verify_step0.sh --step 2 (the consuming project's copy
+         of docs/v0.27.0/verify.install-pkg.sh)
+Target: Debian 12 CI agent, Jenkins build 43, rsync absent
+Identity: step2-candidate/Debian/no-rsync. A candidate suite, NOT an acceptance
+         matrix cell.
+Captured: 2026-08-13, by the pipeline stage 'Verify installer candidate (current
+         step)'
+Purpose: Step 2 evidence on the only Debian target, where the fallback is the
+         sole engine rather than a forced one, and where the mirror completing is
+         the Q19 defect actually being removed.
+
+Installer under test: a VERIFICATION INPUT, not a delivered installer.
+         tools/install_pkg.candidate.verification-only.sh in the consuming
+         project, a byte-identical copy of this branch's candidate. It does not
+         replace the bootstrap installer, does not enter pkg.sh's input or the
+         published archive, and no deployment step reads it.
+
+Produced by: consuming-project commit bb3ccae7, which advanced the candidate
+         stage to step 2. The harness and candidate copies came in with
+         7e0aca71.
+
+Superseded attempt: build 42 ran the step 1 suite against this step 2 candidate
+         and failed eight assertions, all `want 5 got 7` or an engine reported as
+         cp where the step 1 suite expects none. Nothing was broken. The harness
+         expectations are step-aware, so a candidate that now gets past the
+         mirror is refused by a suite that expects it to die there. The stage now
+         derives its suite, its flag and its artifact name from one STEP
+         variable, so the pairing cannot drift again.
+
+Source: fetched from the build's archived artifact
+        a.evidence/verify-step2.debian.txt, so it carries no timestamper prefix
+        and nothing was reformatted.
+
+Note: the workspace path carried the company name and the private project name,
+and both have been substituted under the repository's sensitive-content rules.
+No other byte of the output is changed.
+
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 2 ===
+date      : 2026-08-13T08:24:46Z (UTC)
+harness   : installer_verify_step0.sh
+  sha256  : 921526dcb999132febd1668a766b2cdb7e08b0bd9db23c38d78f4f0703fc0e2c
+  body    : 570332dcac91558fcfcaddc44803afb5955fc7e91fcf167026bd8b755f15015c
+uname     : Linux 5.14.0-687.24.1.el9_8.x86_64 x86_64
+installer : /home/jenkins/workspace/company_PDF_my-project_develop/tools/install_pkg.candidate.verification-only.sh
+  sha256  : 22f6d15915c8fbc30dbaa91148ca39c8b5d4c868730633b0135a928030ef6ead
+  lines   : 584
+  fallback: yes (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : no
+identity  : step2-candidate/Debian/no-rsync, requested; the engine is asserted from the run trace below
+            a step 2 candidate suite, NOT a matrix cell: the fallback now completes the mirror here, and the run dies at the root-file site until step 3.
+home      : /tmp/cplx-verify.65096/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.65096
+
+--- preflight
+  preflight commands                 PASS  all 28 present
+  preflight stat fractional          PASS  1786609486.840308462
+  preflight combination              PASS  step2-candidate/Debian/no-rsync, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  control watchdog                   PASS  blocked, killed at 2s
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (no rsync, step 2: the mirror now completes on the fallback and
+   the run dies at the root-file site instead, which step 3 fixes)
+  baseline no-rsync mirror           PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  engine cp operated, read from the run trace
+
+--- step 1: engine selection (a selection trace, not proof of a copy)
+  control selection-no-discovery     PASS  refused on [SELECTION: archive discovery marker], as designed
+  control selection-out-of-order     PASS  refused on [SELECTION: trace at line], as designed
+  step1 override unset               PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override unset trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override 1                   PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 1 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override 0                   PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 0 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override yes                 PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override yes trace           PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override true                PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override true trace          PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 override empty               PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override empty trace         PASS  selected cp, announced before discovery (a selection, not a copy)
+
+--- step 2: the mirror fallback and its destination boundary
+  step2 fallback fresh               PASS  exit 7
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 fresh engine                 PASS  engine cp operated, read from the run trace
+  step2 hidden entry carried         PASS  cp -a src/. carried the hidden entry
+  step2 fallback redeploy            PASS  exit 7
+      fixture   tools is a populated real directory holding the stale entry .stale-hidden
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 stale entries removed        PASS  hidden, visible and directory entries all gone
+  step2 dest regular file            PASS  exit 5
+      fixture   tools is a regular file where a tree is expected
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 dest file untouched          PASS  refused before any delete
+  step2 dest symlink to dir          PASS  exit 5
+      fixture   tools is a symlink onto an external directory
+      identity  installer 22f6d15915c8  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step2 external target intact       PASS  nothing outside the prefix was deleted
+
+=== VERDICT ===
+suites    : preflight controls baseline-no-rsync step1-selection step2-mirror
+cases: 35, failures: 0
+Step 2: every assertion and every negative control behaved as designed.
+
+--- reading, added when the output was retained ---
+
+This is the Debian half of the step 2 evidence, and it is the half where the
+change matters most. Here the fallback is not an override being honoured; it is
+the only engine there is, because this agent has no rsync. So `baseline no-rsync
+mirror` passing at exit 7 is the Q19 defect being removed, measured on the host
+where it actually bites.
+
+**Read that case against its own history.** At step 0 it asserted exit 5 at the
+mirror and a prefix with nothing deployed: the defect, written down. It now
+asserts exit 7 at the root-file site under the `mirrored-not-deployed` oracle,
+which requires the tools tree present with its canary symlink intact **and** the
+archive root files absent. The mirror completes; the root-file site still calls
+rsync unconditionally and fails. That is the honest intermediate state, and step
+3 must re-point this case again rather than delete it.
+
+**The boundary refuses the same two shapes here as on RHEL.** A destination that
+is a regular file and a destination that is a symlink onto an external directory
+both fail at exit 5 before any delete, with the external tree keeping its
+entries. This target has no rsync, so the same-fixture comparison against the
+rsync engine is the RHEL capture's alone.
+
+**Every selection case now runs the fallback.** Unset, `1`, `0`, `yes`, `true`
+and empty all select cp because rsync is absent, and all reach exit 7 rather than
+5. Their selection assertions are unchanged from step 1, which is the point: what
+a run does after selecting is a property of the step, not of the selection.
+
+**The suite this stage runs is now data.** Build 42 ran the step 1 suite against
+this step 2 candidate and failed eight assertions for the right reason. The stage
+derives its suite, its harness flag and its artifact name from a single STEP
+variable, so a mismatched pairing cannot recur silently, and the artifact cannot
+be named for a suite that did not run.
+
+**Fingerprints.** The installer is `22f6d159`, 584 lines, `fallback: yes`, equal
+byte for byte to the staged cplx source. The harness whole-file digest `921526dc`
+pins this capture to commit `7e0aca71`; the shared-body digest `570332dc` is the
+value the RHEL capture reports from the cplx file, so both targets ran the same
+code.
+
+**One thing this capture cannot show**, and it is worth naming because the run is
+green: with no rsync on this agent, nothing here compares the two engines. The
+claim that both fail the same way on a bad destination rests entirely on the RHEL
+capture's `step2 rsync dest regular file`.

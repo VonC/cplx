@@ -1,0 +1,8 @@
+# Project-local execution exception.
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+# This repository is intentionally offline-by-default for the Codex web
+# search tool. Enable search per task when current external information is
+# required.
+tools.web_search = false

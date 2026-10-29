@@ -56,7 +56,8 @@ version of the same dependency.
   with the installation prefix (`sed`), with the build-tree layout
   (`~/cplx/tools/`) mapped onto the deployed layout (`<prefix>/tools/`),
 - ELF binaries: `PT_INTERP` and the rpath are rewritten with `patchelf`
-  to point inside the deployed tree,
+  to point inside the deployed tree, except inside a venv (a directory
+  holding `pyvenv.cfg`), whose wheel objects are never walked,
 - `__pycache__` directories: removed, because their metadata keeps the
   build paths; Python rebuilds them on first import.
 
@@ -79,6 +80,67 @@ Only partially. The three layers baked into a build have three different
 answers, and only the first one can really move to compile time.
 
 ### Layer 1 (the rpath): mostly side-steppable
+
+**Since v0.27.0 the install-time rewrite settles this layer at deployment
+rather than at link time.** The pass writes `DT_RPATH`, not `DT_RUNPATH`, and
+the choice carries two consequences worth stating plainly:
+
+- **`LD_LIBRARY_PATH` no longer wins.** `DT_RUNPATH` is consulted after the
+  environment, so anything on `LD_LIBRARY_PATH` outranked the shipped
+  libraries; `DT_RPATH` is consulted before it. Setting `LD_LIBRARY_PATH` to
+  point at a system library will not override a shipped one any more, which is
+  the point: the prefix resolves against itself.
+- **`setenv` stops deciding for the shipped objects.** For a program or
+  library the pass rewrote, the `setenv` export no longer chooses which
+  libraries load, because the object carries its own answer and that answer is
+  consulted first. This holds only for objects the pass owns: the next section
+  shows where the environment becomes load-bearing again.
+
+`DT_RPATH` also applies transitively, to the dependencies of a shipped library
+and not only to the program that started the lookup, which `DT_RUNPATH` does
+not. That is what lets a shipped `.so` pull in another shipped `.so` instead of
+the system copy.
+
+### Where DT_RPATH stops: wheels with their own RUNPATH
+
+An earlier version of this page concluded that the interpreter's `DT_RPATH`
+also resolves everything the venv's wheels load, since the python ELF is the
+root object of the process. A run on the foreign CI agent disproved it.
+
+The loader's rule is per requesting object: when the object that needs a
+library carries a `DT_RUNPATH`, **no** `DT_RPATH` is consulted for that
+lookup, neither its own nor the one of any object above it in the loading
+chain. Some manylinux wheels ship extensions with a `DT_RUNPATH` holding an
+`$ORIGIN` entry, which is how they find the libraries bundled beside them.
+For their other needs (`libstdc++.so.6`, `libgcc_s.so.1`) the search order is
+then `LD_LIBRARY_PATH`, that `DT_RUNPATH`, and the host cache. The prefix's
+copies are simply not in it.
+
+On the build distribution nobody notices, because the host copies are
+compatible. On another distribution the host copy demands version nodes the
+shipped libc, already loaded by the interpreter, does not define, and the
+process fails. Two consequences follow, and both are settled:
+
+- **wheel objects are never rewritten.** The installer's ELF pass skips every
+  venv tree; replacing a wheel's `$ORIGIN` with the prefix list removed the
+  only entry through which it finds its bundled providers;
+- **the search path is supplied per command, by the consumer.** A consuming
+  application keeps one versioned runtime setup, shared by its CI and its
+  deployment, that puts the shipped library directories (the same list the
+  installer's `build_elf_rpath` computes) first in `LD_LIBRARY_PATH` for the
+  shipped Python and application commands only. It is applied at that command
+  boundary and never exported into an operator shell, because a host program
+  started with the shipped libc on its path fails the same way the old Python
+  wrapper did ([Python wrapper](../reference/python-wrapper.md)).
+
+So `LD_LIBRARY_PATH` is not obsolete. It no longer decides for the toolchain
+objects, and it is still the only mechanism that reaches a wheel with its own
+`DT_RUNPATH`.
+
+### Layer 1 at compile time: the `$ORIGIN` alternative
+
+What follows is the compile-time alternative, kept because it explains why the
+install-time pass exists rather than the other way round.
 
 Linking with `$ORIGIN`-relative entries (`$ORIGIN` expands, at load
 time, to the directory of the binary being loaded) plus
@@ -141,3 +203,5 @@ deployment rather than chasing a fully relocatable link.
   the exact behavior of `pkg.sh` and `install_pkg.sh`.
 - [The sandbox root](the-sandbox-root.md): where those absolute paths
   come from in the first place.
+- [One archive, two distributions](one-archive-two-distributions.md): why
+  the wheel boundary only showed on a foreign distribution.

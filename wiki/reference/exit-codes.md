@@ -15,8 +15,8 @@ exits with the given code.
 
 A missing `CPLX_TOOL` is not fatal: the session still activates and only
 prints a red `ERROR` reminder (`use 'st my_tool' to define it`). The
-tool-dependent commands refuse on their own until `st` is run: `s`/`sp`
-and `i` both fatal 2, `s packages reset` fatals 42.
+tool-dependent commands refuse on their own until `st` is run: `s` and
+`i` fatal 2, and `sp` (including `sp reset`) fatals 12.
 
 The packaging pair `pkg.sh` / `install_pkg.sh` has its own codes, listed
 with the tools in
@@ -54,6 +54,8 @@ and the placeholders at its end still need real server values before
 | 2 | `<tool>_install_functions.sh` missing |
 | 22 / 23 / 24 | `configure` / `clean` / `build` function not defined |
 | 25 | no `ld-linux-x86-64.so*` found in the sandbox (`SKIP_CC1_CHECK` bypasses) |
+| 26 | Python on el9: the sandbox has no SQLite header or library, or a stale `config.log` could not be retired |
+| 27 | the tool's `verify_archive` hook refused the selected source archive; nothing was extracted |
 | 199 | configure failed (convention; triggers the `config.log` pull-back) |
 | 19 | build (`make`) failed (convention) |
 | 4 | clean failed (convention) |
@@ -65,12 +67,30 @@ and the placeholders at its end still need real server values before
 | Code | Condition |
 | --- | --- |
 | 1 | `SSH_CONFIG_ENTRY` not defined |
-| 42 | `CPLX_TOOL` needed (`packages reset`) but unset |
+| 12 | `setup_packages.sh`: `CPLX_TOOL` unset |
 | 59 | `CPLX_CHECK_PREFIX` and `CPLX_CHECK_SRC` basenames differ |
+| 111 | `setup.sh`: `CPLX_REPEAT_STEP` or `CPLX_RESET_STEP` could not be applied; `setup_packages.sh`: index listing extraction or aggregation failed |
 | 112 | package index empty after scraping every mirror |
-| 113 | a mirror listing answered fewer than 50 lines (error page) |
+| 113 | mirror listing fetch failed or answered fewer than 50 lines (error page) |
+| 114 | curated metadata unreadable or no eligible list/mirror definition; selection stays within distribution, major and machine |
+| 115 | index scratch/candidate creation, writing or atomic publication failed |
+| 116 | atomic package-progress publication failed |
+| 117 | invalid package/reset arguments or reset entry absent from the selected active list; no progress change |
+| 201 | lookup attempted without a nonempty detected-architecture index |
 | 301 / 302 | package short name matched nothing / several entries in the index |
 | 5 | remote package installation returned non-zero |
+| 119 | `setup.bat`: session activation, argument parsing, the step repeat/reset helper or the Bash script failed |
+
+Codes above are the fatal identifiers printed by the scripts. Bash process
+statuses above 255 wrap modulo 256 (301 and 302 appear as 45 and 46).
+From CMD, `setup.bat` (`s`, `sp`, `sdpl`) prints the Bash identifier, then
+exits 119 whenever `setup.sh` or `setup_packages.sh` fails. It also exits 119
+before any setup work for arguments other than none, one step name,
+`packages [<step>]`, `packages p_<pkg>` or `packages reset [<entry>]`.
+A failed refresh preserves the previous index bytes but fails the current run.
+Missing or ambiguous RPMs and exhausted download URLs do not cause another
+minor selection. Missing/empty list progress is normal; legacy, mismatched or
+stale progress restarts rather than raising a fatal error.
 
 ## `packages_management.sh` (Linux sandbox installer)
 

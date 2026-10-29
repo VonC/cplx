@@ -1,0 +1,191 @@
+Harness: the Step 6 RHEL acceptance session, run by hand in the plan's stated order
+Target: RHEL 9.8 (Plow), kernel 5.14.0-687.41.1.el9_8.x86_64, bash 5.1.8(1)-release
+Run identity: rhel-acceptance-20260827T114631Z
+Captured: 2026-08-27, one ordered session, every artifact below citing that identity
+
+Purpose: Step 6 carries two debts that need the deployment target: the
+         exact-target capability confirmation, and the deployment with its
+         preload measurement. The plan says they are ONE ordered session rather
+         than two visits, and orders the capability check first so that the
+         Step 0 debt is a prerequisite inside the session's entry condition
+         rather than a parallel item settled elsewhere. This is that session.
+
+Safety, because this wrote to a real deployment target:
+  every write landed under one throwaway prefix on /tmp, a dedicated 4 GiB
+    logical volume that is neither tmpfs nor shared with /
+  HOME was pinned to that same prefix for the install. The installer's default
+    prefix is $HOME, so a mishandled --prefix would have fallen back to the
+    throwaway directory rather than the live account. Two independent guards,
+    because one of them being wrong is the failure that would matter
+  the live install was read for comparison and never written; the session
+    verified that afterwards and the prefix was removed
+
+What this establishes:
+
+  1. CAPABILITY, checked before the installer was invoked at all
+
+     declare-A: supported
+     bash: 5.1.8(1)-release
+     probe: ( declare -A _p && _p[k]=v && [ "${_p[k]}" = v ] )
+
+     The Step 0 provisional branch stays closed and the session continued to
+     deployment under the same run identity. Note the kernel has moved since
+     the August capability record, 687.36.1 to 687.41.1, and the answer is
+     unchanged.
+
+  2. THE DEPLOYMENT, of the published archive by the candidate installer
+
+     run: rhel-acceptance-20260827T114631Z
+     prefix: /tmp/rhel-acceptance-20260827T114631Z
+     archive: tools.2026-07-12_234035.tar.gz
+     archive-sha256: f3bba4d75a9fe8be42068e5ed78cc5cb2dd1028b17daef67bd2b742cb996a20d
+     install-exit: 0
+     install-seconds: 334
+     prefix-size: 1.9G
+
+     CPLX-ELF/1 end state=completed reason=none walked=675
+       r-rewritten=464 r-failed=26 r-already-correct=0 r-not-dynamic=49 r-excluded=136
+       i-rewritten=163 i-failed=26 i-unchanged=134 i-not-applicable=352
+       mig-checked=0 mig-failed=0
+
+     THE PATCHELF EXCLUSION IS CONFIRMED ON A REAL DEPLOYMENT. r-failed is 26
+     here and was 27 on the agent before the fix. The 26 are the ELF32 objects
+     the domain excludes by rule; the 27th was the pass trying to rewrite the
+     patchelf binary executing it, and it is gone.
+
+     The relocated tree works:
+       python-tag: RPATH into the new prefix, not RUNPATH
+       libstdc++-tag: RPATH into the new prefix, so libraries carry it too
+       python-runs: ok
+
+     The archive on this target also carries the stray program:
+       CPLX-ELF/1 obj case=6 rpath=rewritten interp=rewritten path=<python/root/a.out>
+     so `a.out` is a defect of the PUBLISHED archive on both distribution paths,
+     not of one agent's copy.
+
+  3. THE PRELOAD MEASUREMENT, before and after
+     run: rhel-acceptance-20260827T114631Z, measured inside that run
+
+
+     ld.so.preload: <the vendor agent>, system-wide, injected into every process
+     agent-tag-before: RPATH [$ORIGIN]
+     agent-tag-after:  RPATH [$ORIGIN]      unchanged; the deployment does not
+                                            touch the system library directory
+     agent-providers-before: statically linked
+     agent-providers-after:  statically linked
+
+     THE AGENT IS STATICALLY LINKED, which settles the question this measurement
+     exists to ask. Forcing DT_RPATH on the prefix cannot change what the
+     preloaded agent binds to, because it binds to nothing: it carries its own
+     dependencies. The precedence change from DT_RUNPATH to DT_RPATH therefore
+     cannot degrade it by capture.
+
+     Inside a process started from the relocated prefix, the loader resolved the
+     prefix's own libraries and then initialised the agent:
+
+       find library=libc.so.6 [0]; searching
+         trying file=<prefix>/tools/python/root/usr/lib64/libc.so.6
+       calling init: <prefix>/tools/python/root/lib64/ld-linux-x86-64.so.2
+       calling init: <prefix>/tools/python/root/usr/lib64/libc.so.6
+       calling init: <prefix>/tools/python/root/usr/lib64/libm.so.6
+       calling init: <prefix>/tools/python/root/lib64/libgcc_s.so.1
+       calling init: <prefix>/tools/python/current/lib/libpython3.13.so.1.0
+       calling init: <the vendor agent>
+       calling fini: <the vendor agent>
+       relocated-process-exit: 0
+
+     The agent loads and initialises inside a relocated process whose libraries
+     all come from the prefix.
+
+  4. THE MONITORING CRITERION: BLOCKED (SUPERSEDED)
+
+     THIS VERDICT NO LONGER STANDS and is left here because a retained capture
+     records what its session concluded. The standing disposition is
+     `not-pursued`, decided by the human owner of this effort on 2026-08-28 and
+     recorded in verify.acceptance.rpath.rhel.session2.txt section 4 with its
+     mechanism answer, every form attempted, and the decision attributed. This
+     capture carries no machine-readable disposition line, so the harness reads
+     the standing one from that later capture and never from this text.
+
+     What that session concluded at the time follows.
+
+     Reached from the one state the plan permits: the real deployment ran and
+     the preload measurement succeeded. It is not a verdict available to a run
+     that did not happen.
+
+     The requirement rejects the evidence above for this criterion, and is right
+     to. "A process that merely starts is not the check", and the loader trace
+     shows the agent's init running rather than the agent attached to and
+     reporting for the process. The trace is preload evidence, not monitoring
+     evidence, and it is recorded as the former only.
+
+     The three named forms, and what happened to each:
+
+     CORRECTED BY A LATER SESSION. The form 1 statement below is WRONG and is
+     left standing because a retained capture records what its session found,
+     and rewriting it would hide that the session got it wrong. The control tool
+     IS present at the vendor's standard path and is merely not executable by
+     this account: unavailable by permission, not absent. The correction and its
+     evidence are in verify.acceptance.rpath.rhel.session2.txt section 4.
+
+     form 1, a health or status query on the target reporting the agent attached
+       to the relocated process:
+         NOT AVAILABLE. No control tool exists at any of the vendor's usual
+         paths on this host.
+
+     form 2, an agent-side log or event recording that attachment:
+         NOT OBTAINABLE BY THIS ACCOUNT. The agent log tree is present and its
+         directories are listable, but of 8 files visible, 0 are readable by the
+         deployment account. Searching the readable set for this run's prefix
+         returned nothing, which is a statement about permission rather than
+         about the agent.
+
+     form 3, a written confirmation from the team owning the monitoring agent
+       that it observed the agent attached to, and reporting for, the exact
+       relocated process in this identified validation run:
+         DRAFTED, NOT YET DESPATCHED. The message is retained at
+         `docs/v0.27.0/request.monitoring-observable.rhel.md`. Sending it means
+         contacting another team, which is a human action rather than a
+         validation step, so the despatch date and the response are recorded
+         there when they exist and not before.
+
+     Blocked record fields, as the plan requires them:
+       owning team or channel: the team operating the monitoring agent on the
+         deployment estate. The agent is vendor-installed and owned by no rpm on
+         this host, so the channel is the estate's monitoring owner rather than
+         this project
+       which observable was requested: form 3, written confirmation of
+         attachment for this identified run. Forms 1 and 2 were attempted first
+         and are unavailable to the deployment account, which is recorded above
+       retained evidence for the request itself:
+         `docs/v0.27.0/request.monitoring-observable.rhel.md`, which carries the
+         message to send and the fields to complete when it is answered
+       request timestamp or identifier: DRAFTED 2026-08-27, NOT YET DESPATCHED.
+         The channel is not reachable from the validation session, so sending it
+         is a human action
+       response, or none received by date: not applicable until despatched
+
+     THIS RECORD IS NOT YET COMPLETE, and the harness asserts that rather than
+     letting it pass. Two of the five fields cannot be filled until the request
+     is actually sent, and filling them anyway would make `blocked` mean "nobody
+     asked", which is the one thing the five fields exist to prevent.
+     CONSEQUENCE, stated in the plan's own terms: evidence collection completes,
+     the monitoring criterion is UNSATISFIED, the acceptance is NOT green, and no
+     implementation success may be claimed on the strength of it. The verdict is
+     terminal: the effort does not sit waiting on another team's calendar, and
+     this blocked record is what carries the gap forward.
+
+  5. WHAT THE SESSION DID NOT SETTLE
+
+     The acceptance is not green, and the monitoring criterion is not the only
+     reason. `tools/python/root/a.out` is selected on this target's published
+     archive as it is on the agent's, and umbrella requirement 7 owns removing
+     it. Step 6's residual criterion admits no exception and no adjudication
+     reaches it.
+
+Session order, for the record: opened and identity recorded; capability checked
+before the installer was invoked; deployed and measured under the same identity;
+monitoring judged only after the deployment succeeded. The first attempt at the
+deployment failed to find the archive, because a symlink is invisible to the
+installer's `find -type f`, and it was rerun with the archive copied. Both
+attempts ran under this one run identity and neither touched the live install.

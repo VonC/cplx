@@ -1,6 +1,6 @@
 make
 zlib
-zlib-dev
+zlib-devel
 gmp
 libzstd
 gcc
@@ -52,8 +52,7 @@ libuuid
 libuuid-devel
 readline
 readline-devel
-sqlite-libs
-sqlite-devel
+_sqlite
 # _mpdecimal
 # _gcc-c\+\+
 # _libstdc\+\+-devel

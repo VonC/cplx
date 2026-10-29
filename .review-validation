@@ -1,0 +1,21 @@
+# Mandatory validation commands for this repository.
+#
+# cplx is a Bash project. Its Windows check.bat runs the shell lint gate for
+# `ghog check`. There is no pyproject.toml, tests/ tree or GROUNDHOG.md, so the
+# pytest part of the built-in `ghog day` default remains inapplicable here.
+# Declare the direct Bash gate so reviews can run it on Windows or Linux.
+#
+# What belongs in this file is what every review of this repository must prove,
+# for as long as the repository exists. It is NOT the place for one effort's
+# checks: a plan adds those to the resolved set itself, as plan additions, and
+# they retire when the effort does. A version-scoped command declared here would
+# outlive its own plan and bind reviews that have nothing to do with it.
+#
+# So the floor is the lint gate, and only the lint gate. Both entry points keep
+# the property the built-in default protects: one command runs the gate over
+# everything it covers and stops non-green at the first finding.
+#
+# These are mandatory for this repository. Plan and request additions are added
+# to them and can never subtract from them.
+
+bash src/utils/lint_shell.sh

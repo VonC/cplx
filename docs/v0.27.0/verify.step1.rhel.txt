@@ -1,0 +1,156 @@
+Harness: docs/v0.27.0/verify.install-pkg.sh --step 1
+Target: RHEL 9.8 deployment server, rsync present
+Identity: step1-candidate/RHEL/rsync. A selection suite, NOT an acceptance matrix
+         cell: one run exercises six selections plus the forced divergence, which
+         no single engine cell describes.
+Captured: 2026-08-13, by hand, over ssh
+Purpose: Step 1 evidence that the engine is selected once, before archive
+         discovery, and announced, with the override behaving as the design
+         settled. The step 0 preflight, controls and baseline run too, since the
+         dispatch is cumulative.
+
+Installer under test: this branch's candidate, copied to /tmp on the target. It
+         is not the deployed installer, and the header's sha256 is what ties this
+         run to the staged source.
+
+Supersedes: the 2026-08-12 18:44Z capture, which measured installer b78511b9.
+         That installer was sanitized after the step 1 review converged: one
+         comment line carrying the deployment account name, which the public
+         repository's pre-commit hook required before the file could be
+         committed. No executable byte changed, and the case counts are
+         identical, so only the installer digest moved.
+
+Note: nothing in this output required substitution under the repository's
+sensitive-content rules. The run used /tmp paths on both sides, so no deployment
+account name appears. No byte of the output is changed.
+
+=== verify.install-pkg, v0.27.0 rsync-cp-fallback, step 1 ===
+date      : 2026-08-13T06:22:24Z (UTC)
+harness   : verify.install-pkg.sh
+  sha256  : cb2915f5cbacb9e429204711550a9fe9c9a2846d94401332792ae3039eb168f1
+  body    : 65451888e1a4275e7d2d57c6292aa2dd1620cec1c169f8dbea744686cce4fb38
+uname     : Linux 5.14.0-687.36.1.el9_8.x86_64 x86_64
+installer : /tmp/install_pkg.candidate.sh
+  sha256  : 312be8aea5364b0a38a9149bcf3802e6b3b1e63cc495df80674aeb123176dd5d
+  lines   : 535
+  fallback: yes (CPLX_INSTALL_PKG_FORCE_CP support)
+rsync     : yes
+identity  : step1-candidate/RHEL/rsync, requested; the engine is asserted from the run trace below
+            a step 1 selection suite, NOT a matrix cell: it exercises six selections plus the forced divergence, where cp is selected and rsync still operates.
+home      : /tmp/cplx-verify.1613752/home (pinned, so archive selection is hermetic)
+scratch   : /tmp/cplx-verify.1613752
+
+--- preflight
+  preflight commands                 PASS  all 28 present
+  preflight stat fractional          PASS  1786602144.440374608
+  preflight combination              PASS  step1-candidate/RHEL/rsync, engine asserted below
+
+--- negative controls
+  control encoder                    PASS  6a6c6e
+  control watchdog                   PASS  blocked, killed at 2s
+  control wrong-archive              PASS  refused on [ARCHIVE identity: want], as designed
+  control omitted-root               PASS  refused on [ARCHIVE identity: want], as designed
+  control wrong-installer            PASS  refused on [INSTALLER identity: want], as designed
+  control exit-only                  PASS  refused on [POST-STATE], as designed
+  control fixture-shape              PASS  refused on [FIXTURE symlink:], as designed
+
+--- baseline of the CURRENT installer
+  (rsync present: the mirror succeeds today, so the baseline is a
+   working install, and the root-file shapes are rsync's behaviour)
+  baseline fresh install             PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline engine                    PASS  engine rsync operated, read from the run trace
+  baseline root-file FIFO            PASS  exit 0
+      fixture   .env is a FIFO
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline FIFO replaced             PASS  regular file carrying the archive content
+  baseline root-file symlink         PASS  exit 0
+      fixture   .env is a symlink onto an external regular file
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  baseline symlink replaced          PASS  regular file carrying the archive content
+  baseline external target intact    PASS  content and mtime unchanged
+
+--- step 1: engine selection (a selection trace, not proof of a copy)
+  control selection-no-discovery     PASS  refused on [SELECTION: archive discovery marker], as designed
+  control selection-out-of-order     PASS  refused on [SELECTION: trace at line], as designed
+  step1 override unset               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override unset trace         PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override 1                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 1 trace             PASS  selected cp, announced before discovery (a selection, not a copy)
+  step1 forced still operates rsync  PASS  engine rsync operated, read from the run trace
+  step1 override 0                   PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override 0 trace             PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override yes                 PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override yes trace           PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override true                PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override true trace          PASS  selected rsync, announced before discovery (a selection, not a copy)
+  step1 override empty               PASS  exit 0
+      fixture   fresh prefix, no tools and no root files
+      identity  installer 312be8aea536  archive PREFIX/pkgs/tools.2026-08-11_000000.tar.gz
+  step1 override empty trace         PASS  selected rsync, announced before discovery (a selection, not a copy)
+
+=== VERDICT ===
+suites    : preflight controls baseline-rsync step1-selection
+cases: 32, failures: 0
+Step 1: every assertion and every negative control behaved as designed.
+
+--- reading, added when the output was retained ---
+
+This is the RHEL half of the step 1 evidence, and it is the half that can show
+the override doing anything, because it is the only supported target where rsync
+exists to be overridden.
+
+**The six selections.** Unset, `0`, `yes`, `true` and empty all select rsync and
+print the resolved binary path. Only `1` selects cp, and it says it was forced.
+That is the design's fail-safe reading made visible: `yes` and `true` look truthy
+and are not treated as such, because the consumers of this variable are wrapper
+scripts in another repository rather than people, and a script that sets a
+plausible value should get the safe engine rather than the requested one.
+
+**The divergence, recorded rather than described.** `step1 forced still operates
+rsync` passes: with the fallback forced, the run selects cp and rsync still
+mirrors, because step 1 changes no call site. That assertion is true now and will
+be false after step 2, which is the point of it. Step 2 should change its expected
+operation and post-state, not quietly delete it, or the transition it exists to
+mark disappears with it.
+
+**Two ordering controls, calibrating different things.** `selection-no-discovery`
+feeds the oracle a well-formed selection line with no archive discovery marker,
+and it must refuse on the missing marker rather than report an ordering it could
+not have established. `selection-out-of-order` feeds exactly one marker followed
+by one otherwise-valid selection line, and it must refuse on the comparison. The
+second exists because the first proves the wrong half: an earlier version had
+only it, and the branch implementing Q06, the guarantee this whole step adds, had
+never executed. The six positive cases below cannot supply it, since a correctly
+ordered trace only exercises the passing path and no installer emits a wrongly
+ordered one.
+
+**What the identity line deliberately does not say.** It is not `R-rs` and not
+`R-fb`. Those are acceptance matrix cells describing one engine, and this run
+holds six selections and two operations. Calling it a cell would have made a
+selection suite look like engine acceptance, which is the same conflation the
+step 0 review spent two rounds removing from the engine assertion.
+
+**The step 0 suite rides along.** The dispatch is cumulative, so the seven
+controls and the whole step 0 baseline ran against the candidate here, at exit 0
+with the canary symlink surviving and both root-file shapes behaving as they did
+for the published installer. That is the "no behaviour change" claim tested
+rather than asserted: the candidate installs exactly as the pre-change installer
+did on this target.
+
+**Fingerprints.** The installer is `312be8ae`, 535 lines, `fallback: yes`, which
+is this branch's candidate and not the deployed `3c1f6a56`. The harness whole-file
+digest `cb2915f5` pins this capture to the committed cplx source; the shared-body
+digest `65451888` is the value the Debian capture also reports, from the
+consuming project's copy, which is what shows the two ran the same code.

@@ -21,7 +21,7 @@ expat
 expat-devel
 libxcrypt
 libxcrypt-devel
-libcom_err,
+libcom_err
 libcom_err-devel
 binutils
 gcc
@@ -34,8 +34,9 @@ asciidoc
 docbook-style-xsl
 docbook-dtds
 xmlto
-libxslti
+libxslt
 glib2
+elfutils-libelf
 glib2-devel
 libgpg-error
 libgpg-error-devel

@@ -1,0 +1,15 @@
+make
+zlib
+zlib-devel
+gmp
+libzstd
+gcc
+cpp
+libmpc
+libgcc
+glibc
+libstdc\+\+
+binutils
+glibc-devel
+glibc-headers
+kernel-headers
