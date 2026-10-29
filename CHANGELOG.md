@@ -6,6 +6,577 @@
 
 By using our own static libraries, compatible with the RHEL server version, we can get tools with the most up-to-date features and security patches. And we are no longer depending on the server system updates.
 
+## [v0.27.0-SNAPSHOT unreleased] Packed for Two -
+
+One toolchain archive, Debian and RHEL, offline venvs.
+
+- No Venv in the Suitcase
+  -- Ship the lock and wheels; build the environment on arrival.
+- SQLite Comes Along
+  -- A bundled database library joins the portable toolchain.
+
+This release carries the toolchain from its RHEL build host to Debian CI
+agents and deployment prefixes. Installation works without host rsync;
+ELF relocation writes DT_RPATH while preserving the loader and wheel
+trees, and the Python wrapper keeps shipped libraries out of host helper
+commands. Archive gates check library resolution, version requirements
+and provider identity, with acceptance and publication bound to the same
+archive bytes.
+
+Consumer applications can ship without venvs and reconstruct them at the
+target path from a locked companion containing the selected wheels and
+helpers. Offline synchronization produces readiness evidence and retains
+release inputs for recovery. SQLite 3.54.1 is built as a cplx tool and
+checked through Python against the expected provider. After a minor OS
+upgrade, setup can reuse eligible dependency lists and mirrors while
+keeping indexes and progress tied to the detected architecture.
+
+Production acceptance remains required before the final release tag.
+
+### Key changes (v0.27.0)
+
+- **Portable runtime and archive checks**: rsync-free installation,
+  forced RPATH relocation and the foreign-distribution Python wrapper
+  keep the toolchain usable across prefixes. Closure, platform and
+  publication checks bind acceptance to the exact tools archive.
+
+- **Locked offline environments**: package applications without venvs,
+  verify the release inputs, reconstruct the selected environment without
+  downloads or builds, and retain the inputs for predecessor recovery.
+  Consumers own service stop/start, supervision and health checks.
+
+- **SQLite and package metadata**: build SQLite 3.54.1 from source, check
+  its identity and capabilities through Python, and reuse eligible minor
+  release metadata without substituting another server's package index.
+
+### 🚀 Features (v0.27.0)
+
+- *(pkgs)* Add sqlite to the python sandbox
+- *(pkgs)* Key the package lists on RHEL 9.8
+- *(verify)* Add the step 0 installer harness
+- *(install_pkg)* Select and announce the copy engine
+- *(verify)* Add the step 1 engine selection cases
+- *(install_pkg)* Mirror without rsync, behind a destination boundary
+- *(verify)* Add the step 2 mirror fallback cases
+- *(install_pkg)* Deploy root files without rsync, behind a preflight
+- *(verify)* Add the step 3 root-file deploy cases
+- *(install_pkg)* Install without the host rsync, on a proven second engine
+- *(v0.27.0)* Plan the forced-RPATH relocation pass and its oracle
+- *(install_pkg)* Observe every walked ELF into one normalized tuple
+- *(install_pkg)* Assign one case per walked ELF
+- *(install_pkg)* Format the CPLX-ELF/1 records
+- *(relocation)* Force RPATH so wheels resolve inside the prefix
+- *(closure)* Fix the checker module topology
+- *(closure)* Classify the archive search scope
+- *(closure)* Declare the archive closure policy
+- *(closure)* Parse and bind the config bundle
+- *(closure)* Gate the checker on the bundle
+- *(closure)* Read every shipped ELF once
+- *(closure)* Refuse an unresolvable DT_NEEDED
+- *(closure)* Run the subject phase in the checker
+- *(closure)* Declare the archive entry points
+- *(closure)* Read every version definition once
+- *(closure)* Add the last three invariants
+- *(closure)* Run every invariant in order
+- *(closure)* Commit the declaration envelope
+- *(closure)* Move the report out of the entry point
+- *(closure)* Add the waiver outcomes
+- *(closure)* Add the publication boundary
+- *(closure)* Gate the toolchain packaging run
+- *(closure)* Add the live observer
+- *(closure)* Add the verification driver and bind publication to its evidence
+- *(closure)* Add the pipeline delivery of the authoritative tools
+- *(closure)* Add the D10 evidence and policy module
+- *(packages)* Select curated minor metadata
+- *(packages)* Publish guarded exact indexes
+- *(packages)* Scope progress and forward resets
+- *(packages)* Merge architecture minor fallback
+- *(sqlite)* Add shared provider probe
+- *(sqlite)* Check capability before packaging
+- *(closure)* Bind Python 3.13.15 declaration
+- *(python)* Merge `SQLite` support
+- *(release)* Validate archive evidence
+- *(d10)* Measure exact wheel consumers
+- *(tools)* Add pinned platform acceptance
+- *(tools-release)* Verify normal-pin adoption and coherent recovery
+- *(tools)* Merge validated archive release
+- *(sqlite)* Build SQLite 3.54.1 as a cplx tool
+- *(python)* Require the exact bundled SQLite
+- *(sqlite)* Merge the bundled `SQLite 3.54.1`
+- *(deploy)* Verify release inputs and transport
+- *(deploy-venv-sync)* Verify selected wheels
+- *(deploy-venv-sync)* Reconstruct exact venv
+- *(deploy-venv-sync)* Retain release inputs
+- *(deploy-venv-sync)* Validate CI evidence
+- *(deploy-venv-sync)* Bind qualified releases
+- *(deploy)* Validate published CI observations
+- *(deploy)* Bind native acceptance evidence
+- *(deploy-venv)* Bound the evidence a deployment keeps
+- *(deploy-venv-sync)* Integrate offline deployment
+- *(toolchain)* Integrate Debian and RHEL support
+
+### 🐛 Bug Fixes (v0.27.0)
+
+- *(sanitize)* Drop the deployment account name from the anchors
+- *(design)* Make a missing rpath input fail only the objects it was due for
+- *(v0.27.0)* State the tested host-tool rule and which host answers which step
+- *(setups)* Read single-quoted hrefs in the index
+- *(pkgs)* Resolve version ambiguity instead of refusing it
+- *(install)* Derive the prefix from the version built
+- *(install_pkg)* Never write the shipped loader
+- *(install_pkg)* Never write the running patchelf
+- *(wrapper)* Unset the search path for helpers
+- *(wrapper)* Fail closed on an unusable read
+- *(wrapper)* Work on a foreign distribution
+- *(echos)* Tolerate an unset FROM_UNIX
+- *(pkg)* Prepare and preserve closure candidates
+- *(closure)* Report runtime verification scope
+- *(check)* Run ShellCheck through ghog
+- *(closure)* Gate archives on runtime closure
+- *(packages)* Complete RHEL fallback setup
+- *(python)* Select source libpython for SQLite build check
+- *(python)* Honor the promoted SQLite library path
+- *(python)* Verify SQLite provider identity on overlay filesystems
+- *(publication)* Retain uncertain commit outcomes
+- *(release)* Bind publication to accepted bytes
+- *(tools)* Remove staged compiler probe
+- *(tools)* Normalize candidate verification evidence
+- *(tools)* Align application verification fixtures
+- *(tools)* Qualify deployed runtime boundaries
+- *(packages)* Remove a payload past cpio's notices
+- *(sqlite)* Pass the expected build to acceptance
+- *(sqlite)* Verify the selected archive first
+- *(deploy-venv-sync)* Preserve floating-point TOML settings
+- *(install)* Point the pkg_tools wrapper at the cplx copy
+
+### 🚜 Refactor (v0.27.0)
+
+- *(install_pkg)* Open a source-safe seam above an explicit main boundary
+- *(consumer)* Name the consuming application generically
+
+### 📚 Documentation (v0.27.0)
+
+- *(wiki)* Explain the three sandbox routes
+- *(wiki)* Document the architecture key
+- *(wiki)* List distribution python versions
+- *(wiki)* Put explanations first in the index
+- *(draft)* Define the v0.27.0 umbrella
+- *(draft)* Fold develop#19 and #20 findings
+- *(draft)* Fold develop#21 and #24 findings
+- *(draft)* Open the rsync fallback topic
+- *(v0.27.0)* Move the effort to a version folder
+- *(v0.27.0)* Settle the rsync fallback requirement
+- *(v0.27.0)* Retain the measurement evidence
+- *(v0.27.0)* Settle the rsync fallback design
+- *(v0.27.0)* Plan the rsync fallback work
+- *(v0.27.0)* Retain the step 0 baselines
+- *(v0.27.0)* Record step 0 completion
+- *(v0.27.0)* Retain the step 0 code review transcript
+- *(v0.27.0)* Retain the step 1 selection captures
+- *(v0.27.0)* Record step 1 implementation
+- *(v0.27.0)* Retain the step 1 code review transcript
+- *(v0.27.0)* Retain the step 2 mirror captures
+- *(v0.27.0)* Record step 2 implementation
+- *(v0.27.0)* Retain the step 2 code review transcript
+- *(v0.27.0)* Retain the step 3 deploy captures
+- *(v0.27.0)* Record step 3 implementation
+- *(v0.27.0)* Retain the step 3 code review transcript
+- *(wiki)* Publish the copy engines and the host-tool contract
+- *(v0.27.0)* Record step 4 documentation
+- *(v0.27.0)* Retain the step 4 code review transcript
+- *(v0.27.0)* Retain the step 5 acceptance evidence and its inputs
+- *(v0.27.0)* Consolidate the measured mtime acceptance rule
+- *(v0.27.0)* Complete the rsync fallback validation
+- *(v0.27.0)* Retain the step 5 code review transcript
+- *(draft)* Correct item 2 scope and inherit the residual
+- *(v0.27.0)* Open the relocation rpath item
+- *(v0.27.0)* Specify the RPATH relocation fix
+- *(v0.27.0)* Retain the rpath review transcript
+- *(v0.27.0)* Design the ordered ELF classifier
+- *(v0.27.0)* Retain the design review transcript
+- *(v0.27.0)* Retain the fifteen-round plan review transcript
+- *(v0.27.0)* Record step 0 as implemented against measured evidence
+- *(v0.27.0)* Decide the installer's permitted host-tool vocabulary
+- *(v0.27.0)* Record step 1 completion with two-host measured evidence
+- *(v0.27.0)* Retain the step 1 code review transcript
+- *(v0.27.0)* Use the record's own emphasis style
+- *(v0.27.0)* Consolidate the plan decisions and close its review round
+- *(v0.27.0)* Satisfy the markdown linter in the plan review transcript
+- *(cplx)* Correct the tool-version and umbrella records
+- *(relocation-force-rpath)* Record step 2 validation
+- *(v0.27.0)* Record the step 2 code review
+- *(relocation-force-rpath)* Fix the trailer position
+- *(relocation-force-rpath)* Record step 3 validation
+- *(v0.27.0)* Record the step 3 code review
+- *(relocation-force-rpath)* Locate the acceptance
+- *(design)* Exclude the loader from the library set
+- *(relocation-force-rpath)* Gate step 4 on what it owns
+- *(v0.27.0)* Record the ownership boundary
+- *(relocation-force-rpath)* Record the step 4 state
+- *(v0.27.0)* Record the step 4 code review
+- *(wiki)* Describe the forced rpath and its reach
+- *(relocation-force-rpath)* Record the step 5 state
+- *(v0.27.0)* Record the step 5 code review
+- *(relocation-force-rpath)* Amend the acceptance criteria
+- *(relocation-force-rpath)* Record the step 6 run and scope
+- *(relocation-force-rpath)* Record the completed step 6 handoff
+- *(relocation-force-rpath)* Write the resume note
+- *(draft)* Complete the umbrella row for this item
+- *(v0.27.0)* Record the step 6 code review
+- *(v0.27.0)* Derive the wrapper foreign-distro draft
+- *(v0.27.0)* Write the wrapper foreign-distro requirement
+- *(v0.27.0)* Design the wrapper search-path scope
+- *(v0.27.0)* Plan the wrapper foreign-distro steps
+- *(v0.27.0)* Claim Debian for the wrapper fix
+- *(plan)* Record pre-consolidation questions
+- *(plan)* Record the four review rounds
+- *(plan)* Consolidate the eight answers
+- *(v0.27.0)* Document the RHEL and Debian targets
+- *(v0.27.0)* Point every requirement at its hosts
+- *(plan)* Bind the step 0 host and capture rules
+- *(wrapper)* Record step 0 completion
+- *(review)* Record the step 0 review rounds
+- *(plan)* Name the step 1 command and capture
+- *(wrapper)* Record step 1 completion
+- *(review)* Record the step 1 review rounds
+- *(plan)* Name the step 2 capture and command
+- *(python-wrapper-foreign-distro)* Record step 2 validation
+- *(review)* Record the step 2 review rounds
+- *(plan)* Name the step 3 validation command
+- *(python-wrapper-foreign-distro)* Record step 3 validation
+- *(review)* Record the step 3 review rounds
+- *(plan)* Split step 4 into the freeze and the handoff
+- *(python-wrapper-foreign-distro)* Record the step 4 freeze
+- *(review)* Record the step 4 review rounds
+- *(plan)* Lowercase the step 4b identifier
+- *(python-wrapper-foreign-distro)* Record step 4b validation
+- *(review)* Record the step 4b review rounds
+- *(plan)* Name the step 5 instrument and settle its writes
+- *(review)* Record the step 5 review rounds
+- *(python-wrapper-foreign-distro)* Record step 5 validation
+- *(reference)* Qualify the repeated environment headings
+- *(issue)* Record pre-consolidation questions
+- *(draft)* Derive the toolchain runtime closure draft
+- *(issue)* Consolidate the runtime closure clarifications
+- *(review)* Record the runtime closure review rounds
+- *(umbrella)* Settle D10 and the item 4 hand-offs
+- *(design)* Record pre-consolidation questions
+- *(markdown)* Repair list and file-ending defects
+- *(closure)* Settle the runtime closure design
+- *(plan)* Record pre-consolidation questions
+- *(closure)* Settle the runtime closure plan
+- *(closure)* Fix the step 0 preservation command contract
+- *(toolchain-runtime-closure)* Record step 0 validation
+- *(review)* Record the step 0 review rounds
+- *(review)* Retire the item 3 step 4b exchange
+- *(toolchain-runtime-closure)* Record step 1 validation
+- *(review)* Record the step 1 review rounds
+- *(toolchain-runtime-closure)* Record step 2 validation
+- *(review)* Record the step 2 review rounds
+- *(toolchain-runtime-closure)* Split the unreferenced finding
+- *(toolchain-runtime-closure)* Record step 3 validation
+- *(review)* Record the step 3 review rounds
+- *(toolchain-runtime-closure)* Record step 4 validation
+- *(review)* Record the step 4 review rounds
+- *(toolchain-runtime-closure)* Correct the topology and the packaging premise
+- *(toolchain-runtime-closure)* Record step 5 validation
+- *(review)* Record the step 5 review rounds
+- *(toolchain-runtime-closure)* Give the evidence record to the report module
+- *(toolchain-runtime-closure)* Record step 6 validation
+- *(review)* Record the step 6 review rounds
+- *(closure)* Record the operator root deletion
+- *(closure)* Document the checker and its scope
+- *(toolchain-runtime-closure)* Split the acceptance into step 8 under Q14
+- *(toolchain-runtime-closure)* Record step 7 validation
+- *(review)* Record the step 7 review rounds
+- *(closure)* Settle final acceptance contract
+- *(closure)* Retain final candidate evidence
+- *(toolchain-runtime-closure)* Record step 8 validation
+- *(feature)* Record pre-consolidation questions
+- *(architecture)* Settle minor fallback
+- *(design)* Record pre-consolidation questions
+- *(architecture)* Settle fallback design
+- *(plan)* Record pre-consolidation questions
+- *(architecture)* Settle fallback plan
+- *(architecture-minor-fallback)* Record step 1 validation
+- *(architecture)* Record step 1 code review
+- *(architecture-minor-fallback)* Record step 2 validation
+- *(architecture)* Record step 2 code review
+- *(architecture-minor-fallback)* Record step 3 validation
+- *(architecture)* Record step 3 code review
+- *(packages)* Explain minor fallback and resume
+- *(architecture-minor-fallback)* Record step 4 validation
+- *(review)* Record step 4 code review
+- *(feature)* Record pre-consolidation questions
+- *(python-sqlite-support)* Record focused draft
+- *(python-sqlite-support)* Settle requirements
+- *(python-sqlite-support)* Record spec review
+- *(design)* Record pre-consolidation questions
+- *(sqlite)* Correct candidate closure requirement
+- *(sqlite)* Consolidate six design decisions
+- *(plan)* Record pre-consolidation questions
+- *(sqlite)* Bound validation IO costs
+- *(sqlite)* Consolidate implementation plan
+- *(python-sqlite-support)* Record step 1 validation
+- *(sqlite)* Record step 1 code review
+- *(python-sqlite-support)* Record step 2 validation
+- *(sqlite)* Record step 2 code review
+- *(python-sqlite-support)* Record step 3 validation
+- *(sqlite)* Record step 3 code review
+- *(sqlite)* Record source retention verification
+- *(sqlite)* Describe the verified execution route
+- *(python-sqlite-support)* Record step 4 validation
+- *(sqlite)* Retain the step 4 review
+- *(feature)* Record pre-consolidation questions
+- *(tools-archive-rebuild)* Record approved draft
+- *(tools-archive-rebuild)* Settle requirements
+- *(tools-archive-rebuild)* Record spec review
+- *(design)* Record pre-consolidation questions
+- *(tools-archive-rebuild)* Settle design
+- *(tools-archive-rebuild)* Record design review
+- *(plan)* Record pre-consolidation questions
+- *(tools-archive-rebuild)* Settle plan
+- *(tools-archive-rebuild)* Record plan review
+- *(publication)* Require uncertain commit checks
+- *(tools-archive-rebuild)* Record step 1 validation
+- *(tools-archive-rebuild)* Record step 1 review
+- *(tools-archive-rebuild)* Record step 2 validation
+- *(review)* Record step 2 archive release review
+- *(tools-archive-rebuild)* Record step 3 validation
+- *(d10)* Record step 3 code review
+- *(tools-archive-rebuild)* Record step 4 validation
+- *(tools)* Retain step 5 candidate evidence
+- *(tools-archive-rebuild)* Record step 5 validation
+- *(tools-archive-rebuild)* Record step 5 review
+- *(umbrella)* Decide lock-identical venv and add item 8
+- *(relocation)* Define venv preservation
+- *(tools)* Record step 6 acceptance gaps
+- *(tools)* Retain step 6 review evidence
+- *(tools)* Retain installer-only candidate
+- *(tools)* Record review scope resolution
+- *(tools-archive-rebuild)* Record step 5 validation
+- *(tools)* Qualify RHEL with Python 3.13.15
+- *(tools)* Record repaired RHEL checkpoint
+- *(review)* Retain point 3 review context
+- *(tools)* Bind Debian candidate evidence
+- *(tools)* Record point 4 checkpoint
+- *(review)* Retain point 4 review exchanges
+- *(tools)* Bind final platform acceptance
+- *(tools)* Retain step 6 review findings
+- *(tools-archive-rebuild)* Record step 6 validation
+- *(tools-release)* Retain publication and release-pin adoption evidence
+- *(tools-archive-rebuild)* Record step 7 validation
+- *(tools-archive-rebuild)* Retain step 7 code review
+- *(wiki)* Document the bundled SQLite build
+- *(debian-agent-tools)* Add the SQLite item
+- *(sqlite-runtime-upgrade)* Define the SQLite item
+- *(sqlite-runtime-upgrade)* Record step 1 validation
+- *(sqlite-runtime-upgrade)* Record step 2 validation
+- *(sqlite-runtime-upgrade)* Record step 3 validation
+- *(sqlite-runtime-upgrade)* Record step 4 validation
+- *(wiki)* Document the pre-extraction SQLite check
+- *(sqlite-runtime-upgrade)* Scope the source check
+- *(sqlite-runtime-upgrade)* Record step 5 validation
+- *(sqlite-runtime-upgrade)* Record the code review
+- *(feature)* Record pre-consolidation questions
+- *(sqlite-runtime-upgrade)* Record pinned upgrade
+- *(wiki)* State what the SQLite consumer decides
+- *(debian-agent-tools)* Align item 9 loader text
+- *(sqlite-runtime-upgrade)* Settle the requirement
+- *(sqlite-runtime-upgrade)* Record spec review
+- *(sqlite-runtime-upgrade)* Record step 5 validation
+- *(feature)* Record pre-consolidation questions
+- *(deploy-venv-sync)* Consolidate requirements
+- *(design)* Record pre-consolidation questions
+- *(deploy-venv-sync)* Consolidate design
+- *(plan)* Record pre-consolidation questions
+- *(deploy-venv-sync)* Clarify offline inputs
+- *(deploy-venv-sync)* Consolidate reviewed plan
+- *(deploy-venv-sync)* Record step 1 validation
+- *(deploy-venv-sync)* Retain step 1 code review
+- *(deploy-venv-sync)* Record step 2 validation
+- *(deploy-venv-sync)* Record step 2 review
+- *(deploy-venv-sync)* Add early pipeline probe
+- *(deploy-venv-sync)* Record step 2 validation
+- *(deploy-venv-sync)* Record step 3 validation
+- *(deploy-venv-sync)* Record step 3b validation
+- *(deploy-venv-sync)* Record step 3b review
+- *(deploy-venv-sync)* Record step 4 validation
+- *(deploy-venv-sync)* Record step 4 review
+- *(deploy-venv-sync)* Decide phase 2 test scope
+- *(deploy-venv-sync)* Preserve stage agents
+- *(deploy-venv-sync)* Record step 5 validation
+- *(deploy-venv-sync)* Record step 6 validation
+- *(deploy-venv-sync)* Record step 6 review
+- *(deploy-venv-sync)* Record step 7 validation
+- *(deploy-venv-sync)* Record step 7 review
+- *(plan)* Record pre-consolidation questions
+- *(deploy-venv-sync)* Settle deployment plan
+- *(review)* Retain deployment plan review
+- *(deploy-venv-sync)* Set the 30-minute outage cap
+- *(deploy-venv-sync)* Record incomplete step 8 review
+- *(deploy-venv-sync)* Record step 8 amendment
+- *(deploy-venv-sync)* Record the re-bootstrap deviation
+- *(deploy-venv-sync)* Analyze the original-job delivery
+- *(deploy-venv-sync)* Record the marker decision
+- *(wiki)* Document the toolchain changes behind a consumer deployment
+- *(wiki)* State the qualified Python versions of the tools archive
+- *(v0.27.0)* Use generic account and host names in recorded evidence
+- *(v0.27.0)* Cite the commits of the rewritten history
+- *(deploy-venv-sync)* Record Step 8 as it stands on 2026-10-11
+- *(deploy-venv-sync)* Record AC16 and AC17 closed on qualification
+- *(deploy-venv-sync)* Record step 8 validation
+- *(deploy-venv-sync)* Record the step 8 code review transcript
+- *(deploy-venv-sync)* Record the Step 9 redirect and its progress
+- *(wiki)* Explain a release that installs itself
+- *(deploy-venv-sync)* Amend the step 9 scope
+- *(deploy-venv-sync)* Record step 9 validation
+- *(deploy-venv-sync)* Record the step 9 code review transcript
+- *(deploy-venv-sync)* Separate release acceptance
+- *(deploy-venv-sync)* Normalize completion status
+- *(wiki)* Align release and deployment guidance
+
+### 🧪 Testing (v0.27.0)
+
+- *(install-pkg)* Add the step 5 acceptance suite and a calibrated oracle
+- *(v0.27.0)* Measure the step 0 baseline from a real relocation run
+- *(v0.27.0)* Enforce the host-tool contract in both directions
+- *(v0.27.0)* Prove the classifier from both sides
+- *(v0.27.0)* Retain the step 2 agent evidence
+- *(v0.27.0)* Add the CPLX-ELF/1 contract corpus
+- *(v0.27.0)* Prove the report contract from both ends
+- *(v0.27.0)* Retain the step 3 agent evidence
+- *(v0.27.0)* Run the tree, do not only count it
+- *(v0.27.0)* Retain the loader survival probe
+- *(v0.27.0)* Retain the build 110 agent evidence
+- *(v0.27.0)* Assert the pages, do not grep for absence
+- *(v0.27.0)* Close the fail-open faults and hand over
+- *(v0.27.0)* Retain the RHEL acceptance sessions
+- *(v0.27.0)* Retain the agent evidence for step 6
+- *(v0.27.0)* Retain the scope correction run
+- *(relocation)* Time each suite, reflink the copy
+- *(relocation)* Retake the Debian captures
+- *(wrapper)* Retain the pre-change wrapper bytes
+- *(wrapper)* Bind the capture to what it measured
+- *(wrapper)* Capture the step 0 baseline
+- *(wrapper)* Add the step 1 scope suite
+- *(wrapper)* Retake the step 0 capture
+- *(wrapper)* Capture the step 1 scope rule
+- *(wrapper)* Add the step 2 failure suite
+- *(wrapper)* Retake the step 0 capture for step 2
+- *(wrapper)* Retake the step 1 capture for step 2
+- *(wrapper)* Capture the step 2 fail-closed rule
+- *(wrapper)* Add the step 3 deployment suite
+- *(wrapper)* Retake the step 0 capture for step 3
+- *(wrapper)* Retake the step 1 capture for step 3
+- *(wrapper)* Retake the step 2 capture for step 3
+- *(wrapper)* Capture the RHEL no-regression run
+- *(wrapper)* Freeze the harness and drop a coined word
+- *(wrapper)* Retake the step 0 capture for the freeze
+- *(wrapper)* Retake the step 1 capture for the freeze
+- *(wrapper)* Retake the step 2 capture for the freeze
+- *(wrapper)* Retake the RHEL no-regression capture for the freeze
+- *(wrapper)* Publish the frozen harness identity
+- *(wrapper)* Add the step 5 acceptance instrument
+- *(wrapper)* Retain the Debian acceptance
+- *(closure)* Measure the archive the closure rule describes
+- *(closure)* Add the contract and fixture corpus
+- *(closure)* Add the step 0 verification harness
+- *(closure)* Retain the step 0 host captures
+- *(closure)* Add the step 1 scope suite
+- *(closure)* Retain the step 1 host capture
+- *(closure)* Add the step 2 authority suite
+- *(closure)* Retain the step 2 host capture
+- *(closure)* Declare the step 3 fixture rows
+- *(closure)* Add the step 3 subject suite
+- *(closure)* Retain the step 3 host capture
+- *(closure)* Declare the step 4 fixture rows
+- *(closure)* Add the step 4 invariant suite
+- *(closure)* Retain the step 4 host capture
+- *(closure)* Add the step 5 gate suite
+- *(closure)* Retain the step 5 host capture
+- *(closure)* Add the step 6 suite and measure the fixture name window
+- *(closure)* Retain the step 6 Debian capture
+- *(closure)* Add the step 7 suite and two-host gate
+- *(closure)* Retain the step 7 evidence and the trim measurement
+- *(closure)* Bind acceptance to one candidate
+- *(properties)* Record duplicate mirror fixture
+- *(sqlite)* Capture isolated candidate acceptance
+- *(d10)* Cover wheel identity and convergence
+- *(tools)* Qualify candidate agent integration
+- *(tools)* Cover step 5 package boundaries
+- *(deploy)* Qualify isolated locked wheel sync
+- *(deploy-venv-sync)* Cover selection drift
+- *(deploy-venv-sync)* Cover venv lifecycle
+
+### ⚙️ Miscellaneous Tasks (v0.27.0)
+
+- *(senv)* Default python to 3.13.14
+- *(vscode)* Accept the new doc vocabulary
+- *(vscode)* Accept the ABI review vocabulary
+- *(senv)* Load shared llm-shared doskey macros
+- *(vscode)* Accept the review vocabulary
+- *(vscode)* Accept the step 5 acceptance vocabulary
+- *(config)* Ignore local agent settings
+- *(config)* Add ELF and review spell words
+- *(vscode)* Accept the ELF and relocation vocabulary in the dictionary
+- *(vscode)* Accept the step 1 vocabulary in the dictionary
+- *(vscode)* Accept the remaining review vocabulary in the dictionary
+- *(vscode)* Accept the step 2 review vocabulary
+- *(vscode)* Add unfailable to the dictionary
+- *(vscode)* Add oneagentctl to the dictionary
+- *(vscode)* Add SUBJECTID and theorised
+- *(vscode)* Add five words this effort introduced
+- *(markdownlint)* Allow a trailing space inside a code span
+- *(vscode)* Spell the acceptance identifiers
+- *(vscode)* Spell the runtime closure vocabulary
+- *(markdown)* Add the shared gate entry points
+- *(spell)* Accept the closure design words
+- *(spell)* Accept the closure plan words
+- *(vscode)* Accept the closure review vocabulary
+- *(vscode)* Accept the closure review vocabulary
+- *(vscode)* Accept the step 4 review vocabulary
+- *(closure)* Declare the publication commands
+- *(codex)* Add the agent instructions and the local execution exception
+- *(closure)* Widen the host-tool contract to the verification path
+- *(codex)* Tighten the agent instructions
+- *(vscode)* Add the step 7 vocabulary to the dictionary
+- *(editor)* Align shell and spelling checks
+- *(editor)* Recognize unkeyed
+- *(editor)* Recognize unshifted
+- *(editor)* Accept SQLite planning terms
+- *(editor)* Accept fstat in review notes
+- *(editor)* Accept Python build terms
+- *(editor)* Accept patchlevel in review notes
+- *(closure)* Record Python 3.13.15 declaration source
+- *(closure)* Retain the SQLite declaration source
+- *(editor)* Accept nonpassing spelling
+- *(editor)* Recognize wheel inventory terms
+- *(editor)* Accept fixture terminology
+- *(editor)* Recognize review terminology
+- *(editor)* Recognize test lifecycle terms
+- *(editor)* Accept CI evidence terms
+- *(editor)* Extend tools release spelling vocabulary
+- *(editor)* Spell the bundled SQLite terms
+- *(git)* Ignore generated requirements file
+- *(editor)* Extend documentation vocabulary
+- *(editor)* Recognize network error name
+- *(deploy-venv-sync)* Recognize console script name
+- *(editor)* Allow unserialized
+- *(editor)* Recognize tarfile term
+- *(vscode)* Set inactive status bar color
+- *(editor)* Set the active tab background
+- *(editor)* Add deployment planning terms
+- *(editor)* Add the unevidenced planning term
+- *(editor)* Spell the deployment review terms
+
+### 🔨 Build (v0.27.0)
+
+- *(setups)* Move the package key to rhel 9.8
+- *(senv)* Put shellcheck on the project path
+- *(review)* Declare this repository's validation floor
+- *(deploy-venv-sync)* Run selection checks
+
 ## [v0.26.0] - 2026-08-07 - Amnesia for the build home
 
 install_pkg.sh re-anchors every path a binary memorized

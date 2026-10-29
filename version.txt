@@ -1,45 +1,42 @@
-0.26.0 -- Amnesia for the build home
+0.27.0-SNAPSHOT -- Packed for Two
 
-install_pkg.sh re-anchors every path a binary memorized
+One toolchain archive, Debian and RHEL, offline venvs.
 
-- Fork no more
-  -- pkg gains --add, a dispatcher, and thin project overlays
-- The forge writes its manual
-  -- a Diataxis wiki, a front page, and five theme logos
+- No Venv in the Suitcase
+  -- Ship the lock and wheels; build the environment on arrival.
+- SQLite Comes Along
+  -- A bundled database library joins the portable toolchain.
 
-This cycle makes cplx packages portable. pkg.sh archives any $HOME folder
-into ~/pkgs with a deterministic tar (sorted names, no gzip timestamp),
-SHA1 dedup and a latest symlink; install_pkg.sh unpacks the newest archive
-under any `--prefix` and re-anchors symlinks, text paths, `__pycache__` and
-ELF interpreter/rpath (patchelf) there. Every tools archive now carries
-its own installer, and both scripts survive their own relocation text
-pass. The extension point keeps consuming projects on one shared copy:
-repeatable `--add` items, a -- tar passthrough, the pkg dispatcher routing
-`pkg_<target>` overlays, the pkg_tools front end, and a generalized deploy
-of every archive root file.
+This release carries the toolchain from its RHEL build host to Debian CI
+agents and deployment prefixes. Installation works without host rsync;
+ELF relocation writes DT_RPATH while preserving the loader and wheel
+trees, and the Python wrapper keeps shipped libraries out of host helper
+commands. Archive gates check library resolution, version requirements
+and provider identity, with acceptance and publication bound to the same
+archive bytes.
 
-The project also documents itself and refreshes its toolchain: a Diataxis
-wiki (tutorials, how-to guides, reference, explanations) with a README
-front page and the five theme logos; Git 2.52.0 and Python 3.13.9 in
-senv; a per-tool env chain (.env_user sourcing .env_git and .env_python);
-gpg prompts repaired through a self-relocating pinentry wrapper; and
-install-side comfort: several source archives tolerated (newest wins with
-a warning), rsync.sh for live-tree promotion, compare_file.sh to diff a
-deployed file against its cplx source.
+Consumer applications can ship without venvs and reconstruct them at the
+target path from a locked companion containing the selected wheels and
+helpers. Offline synchronization produces readiness evidence and retains
+release inputs for recovery. SQLite 3.54.1 is built as a cplx tool and
+checked through Python against the expected provider. After a minor OS
+upgrade, setup can reuse eligible dependency lists and mirrors while
+keeping indexes and progress tied to the detected architecture.
+
+Production acceptance remains required before the final release tag.
 
 ### Key changes
 
-- **Packaging and relocation canon** pkg.sh and install_pkg.sh ship in
-  cplx itself, reach ~/cplx/bin at setup and ~/tools/bin at promotion,
-  and re-anchor a package under any prefix in four passes (symlinks,
-  text paths, `__pycache__`, ELF interpreter and rpath).
+- **Portable runtime and archive checks**: rsync-free installation,
+  forced RPATH relocation and the foreign-distribution Python wrapper
+  keep the toolchain usable across prefixes. Closure, platform and
+  publication checks bind acceptance to the exact tools archive.
 
-- **Extension point and dispatcher**: consuming projects add archive
-  items with --add, pass tar options after --, and plug a `pkg_<target>`
-  overlay through the pkg dispatcher instead of forking pkg.sh;
-  install_pkg.sh deploys every archive root file.
+- **Locked offline environments**: package applications without venvs,
+  verify the release inputs, reconstruct the selected environment without
+  downloads or builds, and retain the inputs for predecessor recovery.
+  Consumers own service stop/start, supervision and health checks.
 
-- **Wiki, toolchain and prompts**: the Diataxis wiki and README front
-  page document the build model end to end; senv moves to Git 2.51.0
-  and Python 3.13.7 with a per-tool env chain; the pinentry wrapper
-  makes gpg passphrase prompts work in any installation prefix.
+- **SQLite and package metadata**: build SQLite 3.54.1 from source, check
+  its identity and capabilities through Python, and reuse eligible minor
+  release metadata without substituting another server's package index.
