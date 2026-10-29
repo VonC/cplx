@@ -112,9 +112,9 @@ one library) and is never read as a pass.
 
 ## 👉 See also
 
+- [Rebuild and publish the tools archive](rebuild-and-publish-the-tools-archive.md):
+  SQLite acceptance repeated on the final archive.
 - [Tool contract](../reference/tool-contract.md): the `post_install_check()`
   hook.
 - [Runtime closure checker](../reference/toolchain-runtime-closure.md):
   the floor and its declaration.
-- [Rebuild and publish the tools archive](rebuild-and-publish-the-tools-archive.md):
-  SQLite acceptance repeated on the final archive.

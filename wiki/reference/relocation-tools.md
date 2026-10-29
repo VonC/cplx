@@ -271,12 +271,12 @@ same list rather than a shorter one:
 
 ## 👉 See also
 
-- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md):
-  the recipe using both tools.
 - [Why binaries remember the build home](../explanation/why-binaries-remember-the-build-home.md):
   why the passes exist.
-- [Runtime closure checker](toolchain-runtime-closure.md): the gate
-  `--closure-gate` runs.
+- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md):
+  the recipe using both tools.
 - [Rebuild and publish the tools archive](../how-to/rebuild-and-publish-the-tools-archive.md):
   `pkg_tools.sh` in the release sequence.
+- [Runtime closure checker](toolchain-runtime-closure.md): the gate
+  `--closure-gate` runs.
 - [Directory layout](directory-layout.md): where the trees sit.

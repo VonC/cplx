@@ -197,11 +197,11 @@ deployment rather than chasing a fully relocatable link.
 
 ## 👉 See also
 
-- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md):
-  the recipe.
-- [Packaging and relocation tools](../reference/relocation-tools.md):
-  the exact behavior of `pkg.sh` and `install_pkg.sh`.
 - [The sandbox root](the-sandbox-root.md): where those absolute paths
   come from in the first place.
 - [One archive, two distributions](one-archive-two-distributions.md): why
   the wheel boundary only showed on a foreign distribution.
+- [Relocate an install to another prefix](../how-to/relocate-an-install-to-another-prefix.md):
+  the recipe.
+- [Packaging and relocation tools](../reference/relocation-tools.md):
+  the exact behavior of `pkg.sh` and `install_pkg.sh`.

@@ -141,7 +141,7 @@ with one connection per thread.
 
 - [Build and verify the bundled SQLite](../how-to/build-and-verify-the-bundled-sqlite.md):
   the steps.
-- [Bundled SQLite](../reference/bundled-sqlite.md): the selected release,
-  its digests, configure line and compile options.
 - [Check Python SQLite capability](../how-to/check-python-sqlite-capability.md):
   the probe at each stage.
+- [Bundled SQLite](../reference/bundled-sqlite.md): the selected release,
+  its digests, configure line and compile options.

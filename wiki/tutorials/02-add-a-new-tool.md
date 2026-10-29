@@ -81,7 +81,7 @@ in the properties, template and package-list files.
 
 ## 👉 Next steps
 
-- The exact function-and-marker contract:
-  [Tool contract](../reference/tool-contract.md).
 - What the sandbox `root/` is for:
   [The sandbox root](../explanation/the-sandbox-root.md).
+- The exact function-and-marker contract:
+  [Tool contract](../reference/tool-contract.md).

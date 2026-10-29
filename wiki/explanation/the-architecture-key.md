@@ -80,11 +80,11 @@ for the separate artifacts.
 
 ## 👉 Where to look next
 
-- [Survive a server OS upgrade](../how-to/survive-a-server-os-upgrade.md):
-  the recovery, step by step.
-- [Target a new Linux server](../tutorials/03-target-a-new-linux-server.md):
-  creating a key's file set from scratch.
-- [Package list formats](../reference/package-list-formats.md): every
-  artifact the key names.
 - [Two machines, one build](two-machines-one-build.md): why the server
   gets to answer this question at all.
+- [Target a new Linux server](../tutorials/03-target-a-new-linux-server.md):
+  creating a key's file set from scratch.
+- [Survive a server OS upgrade](../how-to/survive-a-server-os-upgrade.md):
+  the recovery, step by step.
+- [Package list formats](../reference/package-list-formats.md): every
+  artifact the key names.

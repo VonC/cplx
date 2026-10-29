@@ -23,8 +23,37 @@ installed toolchain.
   ([contract](../reference/deploy-venv-helpers.md)).
 - A lock the consumer holds on the application root for the whole
   operation, mirroring and recovery included.
+- The consumer's service controls, deployment hold and health check. The
+  cplx helpers reconstruct the environment and record readiness; the consumer
+  owns stopping, starting and supervising its application.
 
-## 📋 Steps
+## Run the consumer's delivery
+
+For a stop/download/deploy/start delivery, publish one flat bundle containing
+the entry, release record, candidate identity, companion, application archive
+and tools archive. Select an approved release address before stopping. The
+production release-only address is an operator prerequisite; the cplx helpers
+do not enforce the consumer's release-selection policy.
+
+Run the consumer's stop, download and deploy steps in that order. Its deploy
+entry must verify the bundle, install under the application lock and service
+hold, start under the hold, prove the expected revision through the local
+health API, then release the hold under supervision of the same daemon. The
+orchestration's final start completes the consumer's sequence.
+
+Keep the previous release's own controls available for recovery. In the
+validated consumer integration, a refusal restarts the installed release and
+returns 2; a failed deployment that restores the last ready release returns 6;
+failed recovery returns 7 and attempts to leave the service held and stopped.
+Check the final diagnostic: it must report when restoring that hold or stopping
+the service failed. An early refusal must execute nothing from the refused
+bundle, and a failed component stop must remain a failure even if daemon stop
+succeeds. These are consumer entry outcomes, separate from the helper codes in
+[Deployment venv helpers](../reference/deploy-venv-helpers.md).
+
+The following steps describe the cplx operations used inside that integration.
+
+## 📋 Build and install with cplx helpers
 
 1. **Package without venvs** (release side). Route the consumer's
    packaging through the adapter, which excludes every `pyvenv.cfg` tree
@@ -80,7 +109,7 @@ installed toolchain.
 
 5. **Reconstruct.** With the lock held, write the attestation
    `{"schema":1,"application_root":"<app-root>","lock_path":"<lock-file>"}`
-   and run the delivered entry:
+   and run the delivered venv helper:
 
    ```bash
    bash <release-root>/helpers/deploy_venv.sh \
@@ -102,6 +131,9 @@ installed toolchain.
 - Only now advance retention:
   `$PY deploy_venv_release.py promote --retention <retention> --identity <record-sha256> --ready`.
 
+This proves environment readiness. Complete the consumer's start, expected
+revision check and supervision checks before declaring the delivery successful.
+
 ## ↩️ Restore the predecessor
 
 No download is allowed: recovery uses what was retained.
@@ -121,7 +153,7 @@ readiness again.
 
 ## 👉 See also
 
-- [Deployment venv helpers](../reference/deploy-venv-helpers.md): inputs,
-  operations and exit codes.
 - [Relocate an install to another prefix](relocate-an-install-to-another-prefix.md):
   installing the toolchain the venv is built from.
+- [Deployment venv helpers](../reference/deploy-venv-helpers.md): inputs,
+  operations and exit codes.

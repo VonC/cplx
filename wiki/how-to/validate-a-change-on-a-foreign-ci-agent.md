@@ -93,9 +93,9 @@ working one.
 
 ## 👉 See also
 
-- [Runtime closure checker](../reference/toolchain-runtime-closure.md#the-delivered-set-and-the-acceptance-bundle):
-  the delivered set and the bundle format.
 - [Why the archive declares its own scope](../explanation/why-the-archive-declares-its-own-scope.md#controls-travel-separately-from-the-candidate):
   why the controls never come from the candidate.
 - [Rebuild and publish the tools archive](rebuild-and-publish-the-tools-archive.md):
   the platform acceptance this procedure serves.
+- [Runtime closure checker](../reference/toolchain-runtime-closure.md#the-delivered-set-and-the-acceptance-bundle):
+  the delivered set and the bundle format.

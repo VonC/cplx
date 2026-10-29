@@ -133,9 +133,9 @@ the fallback) is a reviewed change in three places:
 
 ## 👉 See also
 
+- [One archive, two distributions](../explanation/one-archive-two-distributions.md):
+  why both hosts are required.
 - [Runtime closure checker](../reference/toolchain-runtime-closure.md):
   the gate, the release-record binding and the D10 inputs.
 - [Packaging and relocation tools](../reference/relocation-tools.md):
   `pkg_tools.sh` and `install_pkg.sh`.
-- [One archive, two distributions](../explanation/one-archive-two-distributions.md):
-  why both hosts are required.

@@ -95,7 +95,7 @@ and [Packaging and relocation tools](../reference/relocation-tools.md).
 
 - [The sandbox root](the-sandbox-root.md): what the sandbox is and how
   it stays honest.
-- [Add a dependency to a tool](../how-to/add-a-dependency-to-a-tool.md):
-  route 1, step by step.
 - [Add a new tool to cplx](../tutorials/02-add-a-new-tool.md): route 3,
   taught end to end.
+- [Add a dependency to a tool](../how-to/add-a-dependency-to-a-tool.md):
+  route 1, step by step.

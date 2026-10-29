@@ -135,9 +135,9 @@ proves nothing; observe instead: `LD_DEBUG=libs <binary> 2>&1 | grep
 
 ## 👉 See also
 
-- [Packaging and relocation tools](../reference/relocation-tools.md):
-  flags, passes and exit codes.
 - [Promote a build into the live tree](promote-a-build-into-the-live-tree.md):
   what `pkg.sh` packages.
 - [Validate a change on a foreign CI agent](validate-a-change-on-a-foreign-ci-agent.md):
   the same relocation, proved on another distribution.
+- [Packaging and relocation tools](../reference/relocation-tools.md):
+  flags, passes and exit codes.

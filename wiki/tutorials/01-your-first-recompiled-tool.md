@@ -110,8 +110,8 @@ You should see a timestamped, architecture-suffixed package, for example
 
 ## 👉 Next steps
 
-- [Add a new tool to cplx](02-add-a-new-tool.md)
 - The phase sequence is dissected in
   [Anatomy of a build](../explanation/anatomy-of-a-build.md).
 - The skip-what-is-done behavior is explained in
   [Checkpoints and resume](../explanation/checkpoints-and-resume.md).
+- [Add a new tool to cplx](02-add-a-new-tool.md)

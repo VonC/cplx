@@ -163,8 +163,6 @@ it as a right one.
 
 ## 👉 See also
 
-- [Runtime closure checker](../reference/toolchain-runtime-closure.md):
-  the scripts, the record shapes, the invariants and the exit codes.
 - [Why binaries remember the build home](why-binaries-remember-the-build-home.md):
   where the rpath the observed scope is derived from comes from.
 - [Two machines, one build](two-machines-one-build.md): why the
@@ -172,3 +170,5 @@ it as a right one.
   machines in the first place.
 - [Validate a change on a foreign CI agent](../how-to/validate-a-change-on-a-foreign-ci-agent.md):
   the pinned delivery in practice.
+- [Runtime closure checker](../reference/toolchain-runtime-closure.md):
+  the scripts, the record shapes, the invariants and the exit codes.

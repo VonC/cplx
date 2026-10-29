@@ -14,7 +14,7 @@ Versioning is handled by the `dev_workflow` submodule around one file,
 `version.txt`:
 
 ```text
-0.26.0-SNAPSHOT -- Witty release title
+0.27.0-SNAPSHOT -- Witty release title
 
 Description line 1.
 Description line 2.
@@ -26,7 +26,15 @@ Description line 2.
    tree (exit 118), and files like `CHANGELOG.md` or `version.txt` are
    exempted from that check via `git/exempt-files.txt`.
 
-2. Release:
+2. Complete the release's outstanding acceptance gates against the prepared
+   `main` candidate. Record its full commit identity with the evidence before
+   tagging. For v0.27.0, integration completion does not close
+   [deploy-venv-sync AC19](../../docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28):
+   actual production delivery, historical recovery readiness and external
+   acceptance remain required. Fixture and rehearsal results do not replace
+   that production evidence. AC18 is deferred to a later effort.
+
+3. Once those gates are closed, release:
 
    ```cmd
    brel
@@ -42,7 +50,7 @@ Description line 2.
    *cancels the release* (`git reset @~1` + tag deletion) so nothing
    half-released survives.
 
-3. Start the next iteration:
+4. Start the next iteration:
 
    ```cmd
    uv
@@ -52,7 +60,7 @@ Description line 2.
    and description (finish with `END`), writes the new `-SNAPSHOT`
    `version.txt` and commits `chore(release): prepare for new ...`.
 
-4. Useful repairs:
+5. Useful repairs:
 
    ```cmd
    crel        &:: cancel the last release: delete tag, reset the commit

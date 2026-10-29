@@ -72,7 +72,7 @@ that runs the entry changes.
 
 - [Lock-identical, not byte-identical](lock-identical-not-byte-identical.md):
   why the venv is created on the target, and where cplx stops.
-- [Deployment venv helpers](../reference/deploy-venv-helpers.md): the
-  record, the companion and the retention layout.
 - [Deploy a Python environment offline](../how-to/deploy-a-python-environment-offline.md):
   the procedure.
+- [Deployment venv helpers](../reference/deploy-venv-helpers.md): the
+  record, the companion and the retention layout.

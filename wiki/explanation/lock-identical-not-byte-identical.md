@@ -97,9 +97,9 @@ qualified on its side.
 
 ## 👉 See also
 
-- [Deployment venv helpers](../reference/deploy-venv-helpers.md): the
-  scripts, their inputs and their failure modes.
-- [Deploy a Python environment offline](../how-to/deploy-a-python-environment-offline.md):
-  the procedure.
 - [Why binaries remember the build home](why-binaries-remember-the-build-home.md#where-dt_rpath-stops-wheels-with-their-own-runpath):
   why wheels need the consumer's runtime setup.
+- [Deploy a Python environment offline](../how-to/deploy-a-python-environment-offline.md):
+  the procedure.
+- [Deployment venv helpers](../reference/deploy-venv-helpers.md): the
+  scripts, their inputs and their failure modes.

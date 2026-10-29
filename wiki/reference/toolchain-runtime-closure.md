@@ -317,13 +317,13 @@ unusable, 5 the evidence could not answer.
 - [Why the archive declares its own scope](../explanation/why-the-archive-declares-its-own-scope.md):
   why the shape is declared, and why a self-describing archive is not an
   authoritative one.
-- [Packaging and relocation tools](relocation-tools.md): `pkg.sh` and
-  `install_pkg.sh`, which the gate runs beside.
+- [Why binaries remember the build home](../explanation/why-binaries-remember-the-build-home.md):
+  the rpath the observed scope is derived from.
 - [Rebuild and publish the tools archive](../how-to/rebuild-and-publish-the-tools-archive.md):
   the release sequence these pieces serve.
 - [Validate a change on a foreign CI agent](../how-to/validate-a-change-on-a-foreign-ci-agent.md):
   delivering the authoritative copies to a job.
-- [Why binaries remember the build home](../explanation/why-binaries-remember-the-build-home.md):
-  the rpath the observed scope is derived from.
+- [Packaging and relocation tools](relocation-tools.md): `pkg.sh` and
+  `install_pkg.sh`, which the gate runs beside.
 - `src/setups/env/closure/README.md`: the digest domain, stated beside
   the data it governs.
