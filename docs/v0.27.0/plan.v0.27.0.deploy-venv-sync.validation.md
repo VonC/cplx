@@ -1,6 +1,8 @@
 # v0.27.0 deploy-venv-sync implementation tracking and validation
 
-Yes, it is implemented within the confirmed integration scope.
+Yes, it is implemented.
+
+Completion is limited to the confirmed integration scope described below.
 
 Steps 1-9 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) are
 validated within their recorded scope, including Step 3b's non-qualifying scope,
