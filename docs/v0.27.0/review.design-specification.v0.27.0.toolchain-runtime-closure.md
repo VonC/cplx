@@ -112,7 +112,7 @@ committed.
 ```
 
 The item branch is `toolchain-runtime-closure`, and the issue this design
-answers was consolidated and committed at `0c180ff`.
+answers was consolidated and committed at `33adf4e`.
 
 ##### The document's shape for design-specification toolchain-runtime-closure (round 1)
 
@@ -141,7 +141,7 @@ positive and nine negative controls.
 
 ##### Evidence cited, not re-taken for design-specification toolchain-runtime-closure (round 1)
 
-Three measurements committed at `03cfbe7`, each cited by the design fact it
+Three measurements committed at `ccfb875`, each cited by the design fact it
 establishes:
 
 | Measurement | What the design takes from it |
@@ -509,7 +509,7 @@ is committed yet.
 ```
 
 The item branch is `toolchain-runtime-closure`, and the issue this design
-answers was consolidated and committed at `0c180ff`.
+answers was consolidated and committed at `33adf4e`.
 
 ##### What changed, section by section for design-specification toolchain-runtime-closure (round 2)
 
@@ -943,7 +943,7 @@ needed, and nothing is committed yet.
 ```
 
 The item branch is `toolchain-runtime-closure`, and the issue this design
-answers was consolidated and committed at `0c180ff`.
+answers was consolidated and committed at `33adf4e`.
 
 ##### What changed, section by section for design-specification toolchain-runtime-closure (round 3)
 
@@ -1312,7 +1312,7 @@ needed, and nothing is committed yet.
 ```
 
 The item branch is `toolchain-runtime-closure`, and the issue this design
-answers was consolidated and committed at `0c180ff`.
+answers was consolidated and committed at `33adf4e`.
 
 ##### What changed, section by section for design-specification toolchain-runtime-closure (round 4)
 

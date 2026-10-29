@@ -538,7 +538,7 @@ representative failure would leave most branches unasserted.
 The original eleven questions were opened and settled across four specification review
 rounds. Each row names the question, the decision, where it lives in this
 document, and what was rejected. The options weighed, their pros and cons, and
-the acceptance reason for each answer are preserved in commit `6c8d6ed`,
+the acceptance reason for each answer are preserved in commit `d399b25`,
 recorded immediately before this table replaced them.
 
 | Question | Decision | Integrated in | Rejected alternatives |

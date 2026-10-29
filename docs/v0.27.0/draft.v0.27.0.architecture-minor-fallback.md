@@ -21,7 +21,7 @@ and mirror definitions also prevent dependency preparation.
 The temporary recovery on 7 August 2026 copied the Python and Git lists,
 added a 9.8 mirror property and regenerated the package index. Item 5 removes
 repeated copying on minor upgrades while retaining genuinely distinct exact
-overrides. Commit `18c251d` subsequently documented an incompatible older
+overrides. Commit `f69979f` subsequently documented an incompatible older
 index and corrected the Python dependency from `zlib-dev` to `zlib-devel`.
 
 ## D9 refinement approved on 14 September 2026

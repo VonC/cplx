@@ -278,8 +278,8 @@ approved LF UTF-8 bytes, including comments and final newline.
 
 | Source identity | Value |
 | --- | --- |
-| Source commit | `13c80d572ba7bda91728806ad7dc11c53629a506` |
-| Source parent | `3a1d1135a3e627b74d134db24694121e70ea6b14` |
+| Source commit | `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7` |
+| Source parent | `3286fed0db223df7a60694367f4b8811ed16c762` |
 | Declaration SHA-256 | `63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa` |
 | Envelope SHA-256 | `f849a4ce2a4bd53d30297f19708431222b1b1b9168fc32ec599066e9fc38b236` |
 | New fixture SHA-256 | `fa1cbadbe392a4d61921a5973c262ddfab95dab2dad3a7b01e4f26835dd4944d` |
@@ -319,8 +319,8 @@ its corpus SHA-256 is
 The 9,136-line historical harness was not edited.
 
 The human selected `Commit` after the independent review. The grouped commits
-are `8335008` (reviewed bundle, including the tracked fixture), `7230fea`
-(validation) and `ced51c4` (review transcript). The sensitive-content hook
+are `aa8aafb` (reviewed bundle, including the tracked fixture), `b9ad32e`
+(validation) and `fe1e9ad` (review transcript). The sensitive-content hook
 blocked one absolute local path in the transcript; rendering that command path
 relative to the repository allowed the hook to pass without a bypass.
 
@@ -328,9 +328,9 @@ Post-commit retention verification on 2026-09-16:
 
 | Retention identity | Value |
 | --- | --- |
-| Reviewed first parent | `ced51c4600a321295de091fa6d0152018de89904` |
-| Retention merge | `5f8d4d67ca549bb74e3bcbb798124d628c3d0619` |
-| Source second parent | `13c80d572ba7bda91728806ad7dc11c53629a506` |
+| Reviewed first parent | `fe1e9ad6aeb427067c8ea658c20c93b2b7a160b9` |
+| Retention merge | `f26454defc6eab1b35b9a61609215ea83547b7a6` |
+| Source second parent | `f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7` |
 | Tree before and after merge | `ac3f0249da80b3afb7387a11a2ae6199da9c4cdd` |
 
 The implementation worktree was clean, including untracked files, before and
@@ -454,9 +454,9 @@ SQLite provider success for one identified archive, with live-tree preservation.
   The actual bootstrap records ACL normalization and shared-runtime alignment
   on the copies. It preserves live trees and the production packaging rules.
 - Real acceptance exposed two scoped build fixes: source probing preloads the
-  independently validated source libpython (`f5c4a21`), and the SQLite link uses
+  independently validated source libpython (`0bba4d3`), and the SQLite link uses
   new dynamic tags so the normal promoted wrapper selects its shipped provider
-  (`14d4af0`). The accepted populated rebuild retained `_sqlite3=yes`, cleanup,
+  (`c6fb120`). The accepted populated rebuild retained `_sqlite3=yes`, cleanup,
   compilation and source/installed JSON. No operator loader override was added.
 - The candidate gate examined 605 ELF subjects, resolved 1,251 dependency edges
   and answered 4,518 version needs. All ten floor members, 21 multi-candidate
@@ -467,7 +467,7 @@ SQLite provider success for one identified archive, with live-tree preservation.
   Jenkins adapter supplies actual Debian userland/image/container identity,
   digest checks and an early retained artifact, with publication disabled.
 - Debian's initial provider refusal identified different OverlayFS stat and
-  mapping devices. Commit `d42014e` binds a held expected descriptor to a private
+  mapping devices. Commit `a54e175` binds a held expected descriptor to a private
   reference mapping in the single maps snapshot. The actual loaded provider
   must match that binding; the reference itself is excluded as loaded evidence.
   Replaced, deleted, missing and competing providers still refuse acceptance.

@@ -97,6 +97,34 @@ contain, which is not the question. Byte-for-byte equality with the
 reviewed copy does not change that: equality makes two files equivalent,
 and it does not make a candidate-supplied script an independent judge.
 
+## Controls travel separately from the candidate
+
+If the verifier may not come out of the archive, it has to come from
+somewhere else, and that somewhere has to be just as fixed. The answer is a
+second artifact, built from cplx and from nothing the candidate touches:
+`ci/deliver-closure-tools.sh` takes a full commit SHA, never a branch or a
+tag, and either places the authoritative copies in a job's workspace or
+composes them, with the acceptance harnesses, into one bundle carrying its
+own revision file and a SHA-256 manifest of every member.
+
+The installer is in that set for the same reason the checker is. The
+observed scope is `install_pkg.sh`'s own `build_elf_rpath`; taking the
+installer from the candidate would let the archive define the scope it is
+then measured against.
+
+On the consuming side the bundle is pinned twice: by the commit it names
+and by the digest of its exact bytes, both recorded in the consumer's
+repository as reviewed values. A host that holds no cplx credentials can
+still check what it received, because the check needs only the pin and the
+manifest; it cannot be talked into a different verifier by a moved branch
+or by an archive that ships a convenient one. A delivery that fails halfway
+is withdrawn rather than left partial, since a workspace holding half the
+tools would produce evidence under two commits at once.
+
+The rule mirrors the configuration side. The archive carries a claim; the
+party with cplx resolves the policy itself. The archive carries verifier
+bytes; the job runs the bytes the pin names.
+
 ## Two identities, doing opposite jobs
 
 They look alike, and confusing them costs the whole boundary:
@@ -142,3 +170,5 @@ it as a right one.
 - [Two machines, one build](two-machines-one-build.md): why the
   packaging host and the host that runs the payload are different
   machines in the first place.
+- [Validate a change on a foreign CI agent](../how-to/validate-a-change-on-a-foreign-ci-agent.md):
+  the pinned delivery in practice.

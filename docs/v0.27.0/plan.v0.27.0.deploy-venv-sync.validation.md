@@ -1,0 +1,2132 @@
+# v0.27.0 deploy-venv-sync implementation tracking and validation
+
+Yes, it is implemented within the confirmed integration scope.
+
+Steps 1-9 of the [implementation plan](plan.v0.27.0.deploy-venv-sync.md) are
+validated within their recorded scope, including Step 3b's non-qualifying scope,
+Step 7's 2026-10-03 closure and Step 8's qualification-only delivery. The human
+decision of 2026-10-28 supersedes the earlier pending topic status: implementation
+is complete for integration into `debian-agent-tools` and promotion to `main`.
+AC19 remains open: actual production and external evidence must use the prepared
+`main` candidate before the final cplx tag. AC18 remains deferred to a later
+effort. See the [current requirement scope](feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28).
+
+This status change records the release decision; it adds no production execution
+evidence. Exact candidate identity, operational prerequisites and authority,
+runtime/same-daemon checks, external checks and recovery evidence remain mandatory
+private acceptance records. Until AC19 closes, the prepared release stays untagged.
+
+## File-based IO cost clarification for deploy-venv-sync implementation
+
+Read the explicitly selected release manifest/index and referenced metadata directly.
+Do not discover release state by scanning documentation, CI history or unrelated
+directories. Reuse parsed metadata and identity maps within each phase; walk only
+declared archive/inventory roots. Stream required artifact hashes and retain
+before/after integrity checks. Offline inputs and diagnostics must survive
+cleanup. This is a batch workflow: required wheel, archive and ELF IO remains
+proportional to selected inputs, with existing deterministic sorting retained.
+
+## Validation boundaries for deploy-venv-sync
+
+Use the plan's per-step file list, physical-line baseline and shared execution
+checklist. Apply the 650-line ceiling to Python, including blanks, and record
+phase timings and scan counts without inventing an elapsed-time SLO.
+New scripts and standard-library unit fixtures follow cplx's native harness;
+configured consuming-project checks use groundhog. Native CI and actual Debian/
+RHEL/backend acceptance retain their separate execution evidence requirements.
+
+Keep public outcomes generic. The private local mapping supplies concrete
+consumer files, revisions, build/agent/operator identities and receipts.
+Every qualifying result must identify the exact candidate pair, toolchain,
+canonical/effective locks, profile, wheels and predecessor as applicable.
+A passing fixture is not evidence that the corresponding target case executed.
+
+## Step 1. Qualify release inputs and locked offline transport
+
+### Analysis of Step 1 implementation state
+
+Yes. Step 1 has been fully implemented.
+
+Manifest-driven qualification passed on Debian 12 and RHEL 9.8 with the same
+original static uv 0.12.17 and accepted tools archive, using shipped Python
+3.13.15. Consumer acquisition/provisioning and tooling-lock changes are complete;
+cumulative native checks and the consumer groundhog objective passed. Concrete
+private revisions, build identities, receipts and source comparison remain in
+the required local integration handoff. Review round 1 found an unusable-loopback
+precondition gap; the writer fixed it and repeated the cumulative native checks
+before requesting round 2.
+
+### Goal for Step 1
+
+Deliver and qualify the reconstruction bundle and release-pinned uv before depending on them in deployment.
+
+### Step 1 improvement expectations
+
+Check the independent tools version/digest and helper member schema, non-circular generated records and missing/tampered fixture payload rejection.
+Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
+
+Both supported targets prove the delivered uv executes and the selected transport supports locked/no-build/no-project-install synchronization. If neither designed transport works, stop for design review; static schema tests cannot complete this step.
+Review the plan's file-by-file changes and its mapped private obligations.
+Use `tests/unit/deploy_venv_sync/test_release_inputs/test_release_inputs_tdd.py` and the step's native integration/acceptance cases.
+
+### What was implemented for Step 1
+
+`deploy_venv_inputs.py` verifies explicit local inputs, independent application
+and tools identities, immutable helper revisions, wheel hashes and workspace
+metadata closure. It assembles and verifies a companion with an exact regular-file
+inventory and generates the non-circular outer bootstrap record. Duplicate JSON
+keys, unsafe or duplicate members, symlinks, changed bytes and overwrites fail.
+
+`deploy_venv_transport.py` creates a new effective metadata workspace and changes
+only mapped location values. Structural inverse comparison and canonical byte
+checks preserve dependency, version, group, marker and artifact identities before
+and after synchronization. Documentation URLs remain unchanged.
+
+`deploy_venv_probe.py` checks the explicit interpreter, profile, uv version/static
+linkage and current network namespace. It binds and connects a loopback socket
+before attempting transports, rejecting an unusable loopback as an environment
+error rather than a design failure. It attempts a real file Simple index with
+`--offline` first, then the approved allowlisted loopback fallback. Every sync
+has its own empty cache and environment and uses `--locked --no-build`, explicit
+Python, disabled Python downloads and no project/workspace installation.
+
+Both targets passed the loopback path; the file attempt exited 1. Missing wheels
+and stale locks exited 1, and incompatible wheels exited 2. Retained diagnostics
+confirm absence of a usable binary distribution for the incompatible-wheel case.
+Only loopback was present and external connection failed with ENETUNREACH.
+The installed fixture inventory was packaging 25.0. Complete application
+selection and wheel ELF equivalence remain Step 2 responsibilities.
+
+Consumer P01-P05 now use the confirmed acquisition source and digest-pinned
+original uv, preserve P16, and exercise the P17 fixture record. The production
+bootstrap verifies the original wheel and executable before installation;
+canonical lock regeneration changes only the tooling pin. Frozen qualification
+sources have explicit digest and Python syntax checks, plus native execution.
+Production P17 assembly remains Step 4.
+
+| Validation evidence and scope | Result |
+| --- | --- |
+| Native cumulative `verify.deploy-venv-sync.sh --step 1`, with explicit Python and consumer root | After round 1 repair: 108 tests, 23.583 seconds; syntax, mandatory Bash lint, ShellCheck and 650-line scan passed |
+| Debian manifest acceptance | Passed, 8.595 seconds; isolated locked loopback sync and all three negative cases |
+| RHEL manifest acceptance | Passed, 9.480 seconds; isolated locked loopback sync and all three negative cases |
+| Focused consumer CI execution | Passed in 10 minutes 27 seconds, including production uv acquisition and archived manifest evidence |
+| Consumer `ghog day` | Static checks, affected suite and full suite passed; full stage 5 minutes 46.4 seconds, 6544 collected, fail=0, warn=8, xfail=8, cov=100, outliers=0, excluded=0 |
+| Step source inspection and `git diff --check` | Passed |
+
+The plan records the runnable native command forms. Exact substituted commands,
+canonical/effective inputs and raw logs are retained privately. Qualification
+does not invoke the later single-build CI sequence or publish a release.
+
+The two new regression tests failed before the repair and passed afterwards:
+bind/connect failures report an unusable namespace, while a real loopback socket
+connection succeeds. The Debian/RHEL acceptance and consumer results above
+predate this precondition-only repair. They were independently confirmed in
+round 1 and were not rerun: synchronization behavior and qualified inputs are
+unchanged. The consumer's frozen qualification snapshot remains at that tested
+revision. No fresh platform qualification is claimed for the repaired helper.
+
+Physical counts include blank lines. New public files have baseline 0:
+
+| File | Final lines |
+| --- | --- |
+| `deploy_venv_inputs.py` | 282 |
+| `deploy_venv_transport.py` | 186 |
+| `deploy_venv_probe.py` | 315 |
+| `test_release_inputs_tdd.py` | 276 |
+| `test_release_inputs_pbt.py` | 25 |
+| `test_native_probe_tdd.py` | 99 |
+| Three new package markers | 0 each |
+| Native verification shell entry | 40 |
+| Native acceptance shell entry | 31 |
+
+Private counts: P01 329, P02 23, its new Python delegate 118, P03 116, P04 301,
+P05 1337 and unchanged P16 1. New consumer test modules are 71 and 30 lines.
+All involved Python files are below 550 and the enforced 650-line ceiling.
+The validation document baseline was 343 lines; its final count is recorded
+with the check evidence. Shell, lock and documentation sizes have no Python gate.
+
+### New types or classes introduced for Step 1
+
+Public helpers use focused functions. The probe's nested HTTP handler serves only
+declared files and generated pages and is disposed with its server/thread.
+The consumer bootstrap adds a restricted redirect handler and Simple-page link
+parser; neither enters application domain code. Unit fixtures introduce release
+input, transport, generated-property and probe test cases.
+
+### Architecture check for Step 1
+
+Manifest verification, transport rewriting and native qualification have separate
+modules. The transport dispatch loads the delivered probe lazily; the probe
+reuses transport preparation without import-time execution. Shell entries only
+validate explicit arguments and invoke shipped Python. Consumer acquisition
+stays outside reusable cplx reconstruction; no domain layer imports these tools.
+Helpers are delivered by explicit path rather than discovered through PATH.
+No architecture or file-size issue needs addressing.
+
+### Performance check for Step 1
+
+Identity maps and metadata visitors process their declared inputs linearly.
+Archive hashing and transfer are streamed, with deliberate repeated checks at
+transfer boundaries. Generated Simple pages cost the size of the declared
+registry/package output, without searching history or unrelated trees. No new
+sorting or pairwise dependency comparison was introduced. Native timings above
+include synchronization and negative cases; they are observations, not an SLO.
+No performance issue needs addressing.
+
+### Unit test coverage check for Step 1
+
+The unit fixtures cover independent pins, missing/corrupt inputs, duplicate keys,
+safe extraction, exact member closure, workspace/local-source metadata, wheel
+identity, transport inverse preservation, documentation URLs, unsafe mappings,
+source drift, native prerequisites and allowlisted GET/HEAD behavior. Generated
+tests exercise 24 transport permutations and identity-changing mutations.
+
+The consumer's 100% coverage result measures only its configured application
+source root. It does not measure the standalone CI scripts, frozen fixtures or
+cplx helpers. No percentage is claimed for those files. Static reference review
+finds every public top-level helper used by another helper, its CLI guard or
+unit fixtures; the probe is reached through the transport dispatch. Consumer
+bootstrap functions/classes are referenced by its acquisition entry or tests,
+and transport functions by its CLI/tests. Real platform acceptance additionally
+executes acquisition and sync, without being counted as unit coverage.
+
+No measured unit-tested class below 100% needs completing. No top-level symbol
+in the unmeasured implementation files is unreferenced.
+
+### Feature integrity for Step 1
+
+The independently accepted tools archive and pin remain unchanged. Existing
+wheel/installer behavior and reporting interfaces were not modified. Cumulative
+tests retain earlier release and transport checks. Canonical metadata remains
+immutable, and evidence is separate from frozen release inputs. The consumer's
+unrelated local changes were preserved. Later deployment naming, readiness,
+recovery, publication and complete-candidate qualification remain unimplemented
+under Steps 2-7, not implicit claims of this Step 1 result.
+
+## Step 2. Verify complete dependency selection and wheel ELF identity
+
+### Analysis of Step 2 implementation state
+
+Yes. Step 2 has been fully implemented.
+
+The qualified selection is checked against the canonical lock, target profile,
+retained wheel hashes and installed distributions. The compatible wheel inventory
+checks ELF files in site-packages and wheel-provided bin locations. Native target
+tests and acceptance, the inherited compatibility regression, and the consuming
+application's full CI test and coverage run passed. Runtime provider qualification
+belongs to a later step.
+
+### Goal for Step 2
+
+Compare complete installed distributions and all wheel ELF locations against the same canonical lock, target profile and retained original wheels.
+
+### Step 2 improvement expectations
+
+Capture fixture provenance: qualified uv version, toolchain digest, selected profile and source revision; refreshed oracles must remain traceable.
+Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
+
+Old helper clients still pass, and complete selection plus ELF checks reject each deliberate drift in both library and bin locations. Runtime provider qualification remains a later acceptance gate.
+Review the plan's file-by-file changes and its mapped private obligations.
+Use `tests/unit/deploy_venv_sync/test_selection_integrity/test_selection_integrity_tdd.py` and the step's native integration/acceptance cases.
+
+### What was implemented for Step 2
+
+- `deploy_venv_selection.py` validates qualified uv selection provenance,
+  marker/group/extra closure, wheel identity and tags, and the exact installed
+  distribution set. It emits lock, project, toolchain, profile and wheel-manifest
+  digests.
+- `tools_wheel_inventory.py` adds opt-in schema 2 capture for wheel ELF files in
+  site-packages and `bin`, while retaining the schema 1 capture, materialize
+  and describe interface. It checks original wheel and installed ELF hashes,
+  collisions and unsafe paths.
+- The native acceptance script composes the separate selection and ELF reports
+  against one lock and profile. The cumulative verifier includes Step 2 tests
+  and the unchanged compatibility regression. Unit fixtures cover deliberate
+  selection and ELF drift, including generated mutations.
+- The consuming application's provisioning and acceptance path retains the
+  qualified selection and original wheel identities. Its full CI test and
+  coverage run and native target fixture acceptance passed with publication off.
+- Two inherited native-Linux integration test classes now skip on Windows;
+  their Linux execution remains covered by the cumulative native harness.
+
+### New types or classes introduced for Step 2
+
+No production class or type was introduced. The new selection module uses
+focused functions and a JSON profile; the inventory retains its function-based
+interface.
+
+### Architecture check for Step 2
+
+Selection and ELF inventory remain separate command-line helpers. Their JSON
+identity binding keeps the domain decision independent of the consuming
+application's shell adapters. No incorrect layer import or misplaced behavior
+was found. Nothing needs fixing.
+
+### Performance check for Step 2
+
+Selection uses identity maps and one installed-distribution walk. ELF capture
+streams each retained wheel and walks the declared installed roots once;
+hashing work scales with required input bytes. Tag expansion and deterministic
+sorting have bounded selection-size cost. No performance issue needs addressing.
+
+### Unit test coverage check for Step 2
+
+The new production helpers are function-based, so no unit-tested production
+class has a per-class coverage target. Focused TDD and generated-mutation tests
+exercise selection, profile binding, installed metadata and library/bin ELF
+checks; inherited tests exercise schema 1 clients. The cplx native unittest
+harness has no configured coverage percentage gate for these helper files, so
+the consuming application's passing coverage gate is not attributed to them.
+Static reference inspection found every new top-level helper used by its own
+module or its tests. No unit-tested class below 100% needs completing. No
+top-level symbol outside a coverage gate is unreferenced.
+
+### Feature integrity for Step 2
+
+The independent qualified-uv profile records uv version, toolchain digest,
+source revision, target markers, effective groups and wheel hashes. Selection
+rejects missing, extra, duplicate, wrong-version, wrong-tag and hash-drifted
+distributions while respecting excluded markers. Schema 2 rejects changed
+site-packages and bin ELF files and duplicate destinations; schema 1 clients
+and the existing compatibility regression still pass. The native cumulative
+harness passed on the target OS, and the consuming application's full CI run
+passed its tests and coverage with release publication disabled. The local
+cplx groundhog walk passed affected and full tests but had no configured
+coverage-total line; the native cumulative harness is the cplx repository's
+specified equivalent. The consuming application's duration-only groundhog
+exception was accepted for Step 2 only and does not extend to later steps.
+
+## Analysis of Step 2 Implementation
+
+Step 2 now binds one explicit qualified dependency selection and every retained
+original wheel to the installed distributions and ELF subjects. The new
+selection helper validates lock closure and installation identity; the opt-in
+inventory extension verifies wheel ELF identity in both library and bin
+locations. The native verifier and acceptance entry cover the new path while
+preserving existing helper behavior. There are no new production classes.
+
+## Step 3. Implement exact-path reconstruction and readiness
+
+### Analysis of Step 3 implementation state
+
+Yes. Step 3 has been fully implemented.
+
+The exact-path lifecycle and consumer P01/P07 wiring pass the Step 3 native
+verifier, direct acceptance with a console-script wheel on first and repeated
+targets, and the record-backed companion path. The finite state matrix covers
+the selection, target and failure boundaries, including an early Bash failure
+after a previous ready record and a foreign venv interpreter link.
+
+### Goal for Step 3
+
+Create or synchronize only the full-version named environment using the selected shipped interpreter and qualified local inputs.
+
+### Step 3 improvement expectations
+
+Check bootstrap on a target without new helpers installed: verify before extraction, use absolute delivered paths, reject PATH fallback and absent/corrupt members.
+Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
+
+The returned exact path is used for creation, sync, tests and readiness; every failure leaves the operation not ready. Native fixture integration verifies runtime-boundary handling and consumer serialization attestation.
+Review the plan's file-by-file changes and its mapped private obligations.
+Use `tests/unit/deploy_venv_sync/test_venv_lifecycle/test_venv_lifecycle_tdd.py` and the step's native integration/acceptance cases.
+
+### What was implemented for Step 3
+
+The Linux entry selects the shipped interpreter by absolute path, derives one
+full-version venv path, validates or creates only that target, verifies the
+qualified local inputs, runs the release's absolute uv with ambient selection
+disabled, and records operation-bound readiness or the first failure. The
+consumer P01 and P07 paths verify the delivered bundle, dispatch the entry by
+absolute path, use its returned `VENV`, and retain the application-root
+serialization boundary across mirroring, reconstruction and readiness. P01 and
+P07 each reread the ten-key release record at their own integrity boundary;
+their grammars agree. The native verifier and acceptance mode now cover Step 3.
+
+The RHEL 9.8 target passed the cumulative `--step 3` verifier with 189 total
+unit cases. Direct acceptance used the shipped runtime with host/PATH/activation
+decoys and an offline wheel that installs `bin/pygmentize`: first and repeated
+runs each recorded two installed distributions and the exact venv Python
+shebang. The P07 record-backed companion path repeated that result and passed
+all 11 readiness checks. The earlier historical no-record recovery path also
+passed. The full-mode Debian 12 agent build 198 passed Provision, Package and
+Test with publication skipped; its acceptance reported 100% configured source
+coverage. P01/P07 bytes did not change during review repair, so that agent
+build was not repeated. The consumer `ghog day --force` passed 6,546 tests
+with 100% configured source coverage and no duration outliers. Exact input
+identities, commands and artifacts are retained privately under AC13.
+
+### New types or classes introduced for Step 3
+
+No new production class or type. The lifecycle is a focused Bash entry with
+embedded Python functions. The unit fixture is split into two modules by
+responsibility, with the original 11 cases and 21 additional matrix cases.
+
+### Architecture check for Step 3
+
+The consumer retains archive and lock ownership; the cplx entry performs only
+the verified venv lifecycle and delegates selection, transport and inventory
+to the existing helpers. No application domain layer imports a deployment
+adapter. The shipped runtime boundary is explicit, and host archive utilities
+stay outside its exports. No architecture fix is needed.
+
+### Performance check for Step 3
+
+The path is computed from one shipped interpreter and one release identity.
+Declared inputs and inventories are walked once per phase; rereads occur at
+separate integrity boundaries. No new quadratic or sorting-driven discovery
+path was found. The named host runs completed without a new timing gate.
+No performance fix is needed.
+
+### Unit test coverage check for Step 3
+
+The original 11 lifecycle unit cases cover exact naming, suffix escape,
+target symlink and foreign base, wrong prefix and version, selection flags,
+ambient environment sanitizing, command failure logs, readiness revocation
+and serialization attestation. The 21 matrix cases cover symlinked venv Python
+with an accepted console shebang; foreign shebang, configuration home and
+stdlib; matching and foreign `bin/python3` links; equal-version toolchain
+change; zero or several shipped Python
+candidates; directory and running-interpreter mismatch; unbound profile and
+metadata drift; source preparation and final inventory checks; stale lock,
+missing or corrupt wheel, interrupted or failed sync and failed post-sync
+check; repeat and mirror-removed targets; parent escape; and the Bash shipped
+Python selection and an early Bash failure after an earlier ready record. The
+matrix stubs command execution for finite failure rows. The RHEL cumulative
+native harness passed all 189 unit cases. The consumer's
+100% gate measures only configured application source (`src/my_project`), not these
+Bash entries, embedded Python, or P01/P07. The real target acceptance reached
+the console-script branch. No production class is below a class-level coverage
+target, and no top-level symbol outside the configured gate is unreferenced.
+No unit-tested class below 100% needs completing. No top-level symbol outside
+the configured coverage gate is unreferenced.
+
+### Feature integrity for Step 3
+
+The record-backed path intentionally omits Git restoration: Step 3 item 6
+requires replacing the new path's Git restoration, and the design's
+"Packaging and recovery boundaries" states that delivered metadata is used
+directly without Git restoration or a smudge filter. The historical no-record
+path still restores tracked content and checks repository cleanliness on the
+RHEL target. The consumer's directory, artifact and readiness contracts passed
+the Debian 12 agent build. ShellCheck passed for the edited script. The cplx
+`ghog day` wrapper passed its check step, then stopped at its non-applicable
+pytest step because this repository has no pytest project configuration; no
+cplx coverage result is claimed. The plan names the native cumulative harness
+as its repository-specific equivalent, and that harness passed on the target.
+
+## Analysis of Step 3 Implementation
+
+Step 3 now reconstructs one manifest-bound full-version venv using the shipped
+Python and qualified offline wheels. The entry invalidates any earlier ready
+record before handing off to the lifecycle, verifies all venv interpreter
+links and console-script shebangs, and retains operation-specific evidence.
+The consumer keeps archive and lock ownership and uses the exact returned
+`VENV` throughout readiness. The native verifier, unit matrix and real target
+acceptance cover creation, reuse, console scripts and failure boundaries.
+There are no new production classes.
+
+## Step 3b. Probe the mandated pipeline on actual agents, non-qualifying
+
+### Analysis of Step 3b implementation state
+
+Yes. Step 3b has been fully implemented.
+
+Probe builds 201 (part A) and 205 (part B) ran on actual agents, reached the
+mandated pipeline and proved publication was not invoked. Part B found that
+P01 could not reconstruct the named venv on the test agent, so its commands ran
+against an implicit environment. These are non-qualifying findings for Step 5.
+Default-mode build 206 exposed a probe-switch regression before any stage;
+after P10 was restored byte-for-byte, build 207 succeeded with the same stage
+names and statuses as pre-probe build 198, including publication skipped.
+
+### Goal for Step 3b
+
+Reach the mandated pipeline from the one consuming Jenkinsfile on actual agents, with publication disabled, and record the facts the Step 5 adapter is built on.
+
+### Step 3b improvement expectations
+
+Check that the default CI mode and its publication behavior are unchanged, that the probe build proves no publication command ran, and that the recorded publication setting is the value the library resolved.
+Check that part A records hook propagation, agent identity, working directory, checkout revision against the build revision, resolved interpreter and uv, created or selected environments, and real exit statuses including one deliberate test failure.
+Check that part B, after Step 3, records whether the venv reconstructed through P01 is selected by the library's commands without drift.
+Review this validation file as a per-step update target; keep unchecked evidence fields empty until implementation-check runs.
+
+At least one probe build of each part ran on actual agents and every expected observation is recorded, successful or not. Step 3b qualifies no candidate, proves no AC row and cannot complete Step 5.
+Review the plan's file-by-file changes and its mapped private obligations.
+Public entries stay sanitized; exact builds, agents, library revision and command mechanics stay in the private handoff.
+Record each observation handed to Step 5, with its sanitized outcome, under "What was implemented for Step 3b".
+
+### What was implemented for Step 3b
+
+- P10 and P11 probe changes were committed separately in the consumer and
+  pushed to its CI remote before each build. The dedicated probe branch retains
+  the pipeline call; P10's default path was restored byte-for-byte after the
+  probes, and the deliberate failing test was removed from the default branch.
+- Part A build 201 and part B build 205 each ran the preliminary provisioning
+  allocation followed by one mandated pipeline call in the same build.
+- Both builds recorded the loaded pipeline revision, actual agent identities,
+  stage durations and final result; allocation waits were not reported.
+- In both builds the test-agent checkout matched the build revision, and P11
+  ran once in the workspace root after checkout and before dependency commands.
+  It did not initialize outside the test step or again in child shells.
+- Part A recorded the host interpreter and tool version, an implicit project
+  environment, synchronization status 0 and fixed activation status 0.
+- Part A recorded requirements installation status 2 because its input was
+  absent, and the deliberate test failure status 1 masked to shell status 0.
+- Part B verified that its independently fetched toolchain archive matched the
+  digest passed from phase 1, but P01 preparation exited 127 because a fixed
+  host interpreter path was unavailable on the nested test agent.
+- Part B recorded that the Step 4 reconstruction companion was not yet
+  available (release-path status 2), so no named venv or verified alias was
+  prepared and zero drift against that environment could not be demonstrated.
+- Without reconstruction, part B synchronization status 0 selected the host
+  interpreter and created an implicit project environment; fixed activation
+  status 0 then selected that environment and changed the resolved tool version.
+- Part B requirements installation returned 0 against the implicit environment
+  and left its 80-package inventory unchanged; this does not establish a no-op
+  against the required named venv.
+- Part B's 12 focused unit tests passed, but the whole-project coverage gate
+  made the real test command exit 1; the mandated command masked it to shell
+  status 0, and the final build result was SUCCESS.
+- In both builds the effective publication-disabled setting was confirmed,
+  the job had no overriding publication parameter, a distinct POM was generated,
+  and the deployment command was explicitly skipped and never invoked.
+- Default-mode build 206 failed before any stage because the fallback switch
+  changed declarative execution. P10 was repaired to its pre-probe bytes;
+  build 207 then succeeded with the same ordered stage names and statuses as
+  pre-probe build 198, including the consumer's own publication stage skipped.
+  No publication command ran in either default-mode check.
+- Full console, stage and archived P11 records are retained privately for both
+  builds. The failed preparation, implicit environment and masked test status
+  are explicit inputs to Step 5 items 2, 4 and 6; no shared-library source
+  changed. Step 3b qualifies no candidate and proves no acceptance criterion.
+
+### New types or classes introduced for Step 3b
+
+None. P10 and P11 are consuming scripts; the deliberate failure is a
+probe-only test, with no new production class.
+
+### Architecture check for Step 3b
+
+The probe keeps orchestration in P10 and test-shell observation in P11. It
+adds no cplx source dependency or domain-layer import. The observational
+fallback is confined to probe mode; Step 5 must fail closed when preparation
+or outcome observation fails. No Step 3b architecture fix is needed.
+
+### Performance check for Step 3b
+
+P11 writes one bounded record per build from named command boundaries. The
+complete probes took 354.376 and 313.791 seconds; their stage durations are
+retained privately. No new project-tree scan or quadratic operation was added.
+No Step 3b performance fix is needed.
+
+### Unit test coverage check for Step 3b
+
+No cplx production class or Python symbol was changed. The consumer's
+configured coverage gate measures its application source, excluding P10, P11
+and the probe-only failing test. The focused 12 tests in build 205 passed, but
+19.31% whole-project coverage missed its 100% gate; that is a masked-command
+finding, not a coverage pass. The cplx groundhog walk passed its check phase
+and stopped at the non-applicable pytest phase because cplx is not configured
+as a pytest project. No unit-tested class below 100% needs completing for
+Step 3b. No top-level symbol outside the gate is unreferenced.
+
+### Feature integrity for Step 3b
+
+The consumer's original full-mode P10 bytes were restored after build 206
+showed that the probe switch broke declarative execution. Build 207 succeeded
+with the same ordered stage names and statuses as pre-probe build 198, including
+the consumer's own publication stage skipped. That stage was absent from probe
+mode. Both complete probe builds confirmed the mandated publication stage
+skipped deployment, while their final results and masked command failures were
+recorded separately. The broader consumer suite did not pass in the additional
+part B run because browser prerequisites were unavailable; Step 5 retains the
+full-suite and truthful-failure gates.
+
+## Analysis of Step 3b Implementation
+
+Step 3b made the consuming pipeline and adapter observable on actual agents.
+Both parts ran in one build each with publication disabled, and their private
+records cover the hook, revision, command statuses, agent allocation and final
+results. Part B established a precise incompatibility with the named-venv
+reconstruction path; it did not qualify an environment. The first default-mode
+check found a regression, which was repaired and verified by build 207 against
+the pre-probe stage sequence. No cplx source or shared-library file changed.
+
+## Step 4. Package without venvs and wire retained deployment recovery
+
+### Analysis of Step 4 implementation state
+
+Yes. Step 4 has been fully implemented.
+
+The application archives exclude discovered venv roots. Complete release
+inputs, including every required helper, qualify before mutation and are
+retained outside the mirror for offline recovery. The RHEL 9.8 target passed
+the cumulative verifier and acceptance after the round 1 repairs. Debian 12
+agent build 210 proved the unchanged packaging bytes in the default pipeline.
+
+### Goal for Step 4
+
+Produce venv-free application archives and support serialized offline reconstruction and both predecessor recovery paths. Consumer acquisition is separately tracked.
+
+### Step 4 improvement expectations
+
+Apply the human-approved consumer delivery/cplx reconstruction boundary. Verify complete local files before mutation and reject missing or invalid inputs without fetching. Run cplx with remote services denied from entry, empty disposable caches and no target Git checkout. Record independently validated cplx work separately from pending consumer acquisition/integration evidence; a mixed step and the overall topic remain incomplete until their required integration evidence exists.
+
+Check production helper assembly and supplied script/record/companion/tools identities. Test independent application/tools versions, missing/truncated/wrong-digest local inputs rejected without fetching before mutation, and retained predecessor helpers/tools with no network. Consumer acquisition cases are maintained privately.
+
+Archive inspections find no packaged application venv and both local recovery paths work with remote services denied and empty caches in the controlled integration fixture. Actual RHEL qualification remains step 7.
+Review the plan's file-by-file changes and its mapped private obligations.
+Use `tests/unit/deploy_venv_sync/test_archive_recovery/test_archive_recovery_tdd.py` and the step's native integration/acceptance cases.
+
+### What was implemented for Step 4
+
+- `deploy_venv_archive.py` discovers `pyvenv.cfg` roots once in declared
+  packaging roots, supplies exclusions to the existing packager, rejects unsafe
+  tar rules and inspects the completed archive. The consumer's packaging and
+  assembly routes use the same discovery and retain their archive coordinates.
+- `deploy_venv_inputs.py` assembles helpers and runtime support from a pinned
+  cplx revision. Its non-circular release record identifies the entry script,
+  companion and independent tools archive with exact checksums. Production
+  verification requires the full helper closure even when the entry helper is
+  omitted from a candidate manifest.
+- `deploy_venv_release.py` validates complete local inputs, publishes a record
+  only after qualification, and selects current or predecessor inputs. The
+  consumer owns staging of immutable retained copies. Readiness gates
+  promotion, and an explicit application archive prefix keeps retention names
+  independent of application naming.
+- `install_pkg.sh` accepts an explicit absolute archive path for the retained
+  installer. The Step 4 rule to ignore unrelated newer archives requires this
+  option, and the shipped installer is part of the complete helper closure.
+- The consuming deployment route validates supplied files before mutation,
+  keeps one root lock through mirroring, install, reconstruction and readiness,
+  and reconstructs from retained inputs after mirror deletion. It also retains
+  the historical first-transition path with its shipped venv and no modern
+  record requirement. Consumer changes were committed separately.
+- The cumulative native verifier passed on the RHEL 9.8 target with 210 broader
+  tests, shell lint, tools release gate and line/syntax ceilings. Acceptance
+  passed after the repairs with host interpreter and PATH decoys. Controlled runs refused missing,
+  truncated and wrong-digest inputs before mutation without fetches; exercised
+  modern and historical offline rollback, mirror deletion, competing root
+  operations and independent roots; and passed the 63-case installer regression.
+- Debian 12 agent build 210 succeeded on the packaging bytes, which the review
+  repairs did not change, with
+  publication disabled. Its default-mode stage sequence matched build 207;
+  its package and assembly member lists matched at 3,529 entries with no
+  `pyvenv.cfg`. All 1,406 archived evidence entries were captured.
+
+### New types or classes introduced for Step 4
+
+No class hierarchy was added. The new scripts provide focused functions for
+archive discovery and inspection, release-input qualification, retention and
+CLI dispatch. The existing input helper gained pinned helper assembly and
+release-record generation.
+
+### Architecture check for Step 4
+
+Packaging, release-input validation and retention remain separate script
+boundaries. The consumer orchestrates acquisition, installation and readiness;
+cplx validates supplied local inputs and performs reconstruction. No business
+layer was made dependent on a platform adapter. No Step 4 architecture fix is
+needed.
+
+### Performance check for Step 4
+
+Venv discovery walks only explicitly supplied roots once, then shares the
+result with exclusions and the assembly descriptor. Archive inspection and
+hashing are linear in selected input size; retention reads only referenced
+records. No repeated repository or release-history scan was added. No Step 4
+performance fix is needed.
+
+### Unit test coverage check for Step 4
+
+The archive/recovery and release-input unit folders exercise the new helper
+functions through discovery, unsafe-path, record, companion, retention and
+rollback cases. The focused Windows run passed 11 archive cases with two
+Linux-only cases skipped, and 30 release-input cases; the native cumulative
+verifier exercised the Linux path. There are no new classes with a class-file
+coverage target. cplx is not configured as a pytest project: its groundhog
+check passed, then stopped at the expected non-applicable pytest phase. The
+consumer's 100% configured gate measures application source only and excludes
+the changed deployment and packaging scripts; their exercise is established
+by the focused and native checks, not by that percentage. No unit-tested class
+below 100% needs completing. No top-level symbol outside the gate is
+unreferenced. The pinned helper staging and exact installer archive selection
+now have focused cases, including the Linux installer path on the target.
+
+### Feature integrity for Step 4
+
+The accepted tools archive and installer relocation exclusions remain intact.
+The consumer's default pipeline file stayed byte-identical to build 207's
+baseline. Build 210 succeeded with publication off and the same stage names
+and statuses; Package and Test passed and Publish was not executed. Release
+inputs are retained independently of mirrored application files and CI or uv
+caches. Missing local inputs do not trigger a fetch or advance predecessor
+protection. Publication eligibility remains Step 6 and actual target
+qualification remains Step 7.
+
+## Analysis of Step 4 Implementation
+
+Step 4 packages the application without any venv and gives deployment a
+complete, locally verifiable set of release inputs:
+
+- The archive helper discovers venv boundaries once in the declared packaging
+  roots. It feeds literal exclusions to the existing packager and to the
+  assembly descriptor, then rejects any produced archive that still carries a
+  venv.
+- The input helper stages the complete helper and runtime closure from one
+  exact revision and requires that closure on every production path. It
+  writes the non-circular release record.
+- The release helper checks the record and every supplied file before
+  mutation, and publishes a record only after qualifying it. It reads the
+  explicit current or predecessor inputs and promotes a candidate only after
+  readiness.
+- The installer accepts one exact archive, so an unrelated newer archive
+  cannot be selected.
+
+The consumer owns retained staging and its root lock. No class hierarchy was
+added; the new helpers are focused script functions.
+
+## Step 5. Integrate and qualify the single-build CI sequence
+
+### Analysis of Step 5 implementation state
+
+Yes. Step 5 has been fully implemented.
+
+The repaired eligibility validator passes native verification and acceptance.
+Actual agents qualify all four deliberate failures under the approved direct
+orchestration, followed by a fully captured successful default build. Its exact
+source, immutable library, ABI, phase outcomes and analysis are qualified.
+Every frozen original-candidate byte matches the approved immutable index after
+that later success. Runtime, workspace and actual publication-refusal evidence
+remains retained. Steps 6 and 7 and the overall effort remain incomplete.
+
+### Goal for Step 5
+
+Run blocking application validation first and directly orchestrate the preserved
+mandated stages second, with truthful command outcomes and protected candidate
+bytes.
+
+### Step 5 improvement expectations
+
+Check deploy_venv_release.py as a Step 5 implementation/line-budget target.
+Prove actual agents use the same pinned helper member identity and reject
+missing or changed helper delivery. Check dedicated phase 2 observer P21 and
+its negative tests; phase 1 observer P12 remains unchanged and only
+phase-neutral validation is shared through P13. Review this validation file as
+a per-step update target; keep unchecked evidence fields empty until
+implementation-check runs.
+
+Check phase 2's test scope against plan item 9. A complete-suite diagnosis with
+the default analysis scope comes first, with its recorded cause and remedy
+attempts. A switch to the declared smoke selection, phase 1's coverage report
+and the application-source analysis scope is acceptable only after that
+diagnosis confirms the failure. The later human amendments retain the approved
+browser and CI/tooling exclusions, the repository analysis source root and
+stage-local direct orchestration; they do not select the smoke fallback. The
+phase 1 coverage report fed to analysis must match the candidate's digest and
+revision. Local consumer validation is `check.bat` only under the human
+amendment; actual Jenkins tests, application coverage and quality checks remain
+mandatory.
+
+Actual Debian agents execute both phases with preserved acceptance/coverage,
+conclusive ABI/provider evidence, truthful failures under the qualifying
+orchestration and no release publication. Candidate retention survives a later
+successful default build. A probe or static Jenkinsfile inspection cannot
+complete this step. Review the plan's file-by-file changes and its mapped
+private obligations. Use
+`tests/unit/deploy_venv_sync/test_ci_evidence/test_ci_evidence_tdd.py` and the
+step's native integration/acceptance cases.
+
+### What was implemented for Step 5
+
+- `src/setups/env/bin/deploy_venv_release.py` adds combined-CI eligibility
+  validation and the `ci-check` entry point. It rejects ambiguous JSON,
+  incomplete or stale outcomes, candidate/revision/helper/tool/profile drift,
+  foreign coverage, altered inventory, failed dependency commands and absent,
+  mistyped or failed test-session observations. Schema version 1 requires an
+  integer, rejecting booleans and floating-point lookalikes. It verifies the exact existing
+  application, toolchain, entry-script and companion inputs before eligibility.
+- `verify.deploy-venv-sync.sh` and `acceptance.deploy-venv-sync.sh` accept
+  Step 5. Verification retains the cumulative unit, shell, syntax and physical
+  line-budget gates. Acceptance adds explicit combined-CI and coverage inputs
+  to the existing delivered-toolchain reconstruction contract.
+- The new `test_ci_evidence` unit module exercises positive eligibility and
+  rejection of stale, incomplete, mistyped, failed or mismatched evidence.
+  The existing release-input fixture now supplies the selection profile in
+  the companion bundle; its other contracts remain unchanged.
+- The consumer directly preserves the mandated checks, ordered stages, audited
+  test body, coverage transfer, analysis, quality and dry-run publication.
+  Agents own the stages that use their workspaces. Explicit script receivers
+  and getter-copied SCM configuration preserve sandbox compatibility without
+  private SCM mutation or a deprecated submodule getter.
+- The actual command-shell adapter reconstructs the named venv from pinned
+  delivered inputs, records provenance and before/after inventories, selects
+  shipped tools for application-controlled work and validates independent
+  framework observations. Bootstrap checkout provenance remains separate.
+- Retained negative executions cover real sync/install failures, a masked
+  failing test, disabled observation and foreign-base refusal before mutation.
+  Actual runtime cases cover wrong ambient Python/Git, absent and multiple
+  venvs, repeated retained targets, and fresh/reused generated configuration.
+- A consumer-only launcher exercised the publication-override guard in its
+  actual child build. The launcher and child outcomes were captured and
+  recursion was prevented. Temporary selections and launcher code were then
+  removed, preserving the approved architecture and test/analysis settings.
+- Complete default-build evidence passes the shared eligibility validator.
+  Every frozen byte of the original qualified candidate matches the approved
+  immutable index after that later successful build. The non-release store
+  retains the pending candidate until explicit promotion or abandonment.
+
+### New types or classes introduced for Step 5
+
+`CiEvidenceTest` is a new `unittest.TestCase` in the public unit-test tree.
+The production change adds focused functions to the existing release helper;
+the consumer's phase 2 observer is a dedicated script module. No production
+class hierarchy or new domain abstraction is introduced.
+
+### Architecture check for Step 5
+
+Release-input validation stays in the existing technical helper boundary.
+The application owns its shell adapter and Jenkins orchestration; shared
+library sources remain unchanged. The phase 2 observer records framework
+outcomes independently without weakening phase 1 policy. No domain class
+imports a transport, CI or filesystem adapter, and no business-layer dependency
+is introduced.
+
+The approved orchestration retains workspace agents while releasing idle outer
+allocations. This qualifies the consumer implementation; it does not establish
+an infrastructure repair or qualify the original shared-library wrapper.
+
+The release helper has 365 physical lines, its new evidence test has 238, and
+the empty package marker has zero. The dedicated consumer observer has 105
+lines. All affected Python files remain at or below 650 lines; the private
+inventory records the other mapped files. The verification and acceptance
+scripts have 45 and 116 lines respectively. The validation document is a
+non-Python reporting artifact.
+
+The copied stage bodies are bound to a recorded immutable library revision.
+Each qualification records it; a library revision change requires a new copy
+audit and qualification. The private source audit compares the ordered stages,
+checks, audited commands, coverage transfer and publication controls against
+that immutable revision, recording the explicitly approved agent and sandbox
+changes separately.
+
+No architecture, layer or file-size issue needs addressing.
+
+### Performance check for Step 5
+
+The new evidence checks use fixed section/key comparisons and linear scans of
+the explicit profile and artifact inputs. Hashing and archive validation scale
+with input bytes at required integrity boundaries; they introduce no quadratic
+search or new sorting step. Phase identities reuse explicit maps and retained
+observations. Native cumulative verification completed without a new timeout
+or expected-failure gate. Actual CI durations and agent CPU observations are
+retained privately; the human-deferred local consumer duration gate is not
+reported as executed.
+
+No performance issue needs addressing.
+
+### Unit test coverage check for Step 5
+
+The public evidence tests sit under
+`tests/unit/deploy_venv_sync/test_ci_evidence/` and exercise the new shared
+validator through positive and mutation cases, including strict boolean and
+integer session outcomes. Existing release-input tests cover the reused
+archive and binding checks. The cumulative native verification passed
+225 tests against the repaired implementation, with its preceding
+failing cases retained. This count describes the executed verification scope,
+not a unit-only coverage percentage.
+
+cplx has no configured Python coverage gate. The consumer's 100% gate measures
+its configured application source scope; CI helpers lie outside that scope.
+No percentage is inferred for either shared helpers or consumer CI modules.
+Static inspection includes module-level references and framework hook
+registration: every top-level symbol in an affected unmeasured implementation
+module is referenced by its package or tests. Unchanged phase 1 observer P12
+is outside the changed-symbol assessment. Actual fault executions supplement
+the dedicated phase 2 observer unit tests without becoming coverage claims.
+
+Static reading now maps every added rejection statement to a unit mutation:
+duplicate JSON keys; wrong object shapes or key sets; strictly typed schema;
+failed build, phase, analysis or quality; unsafe publication status; malformed
+profile digest; candidate and phase identity drift; changed before/after
+inventories; missing, changed or symlinked coverage; and mistyped dependency or
+session outcomes. The schema mutations failed before the strict-integer repair
+and pass after it. These are behavioral rejection cases, not a measured
+coverage percentage.
+
+No unit-test gap in the changed implementation needs completing. No top-level
+symbol in an affected unmeasured implementation module is unreferenced.
+
+### Feature integrity for Step 5
+
+Both actual-agent phases and every required later stage succeed under the
+approved defaults. The configured blocking phase 1 suite and coverage remain
+in place; phase 2 keeps the explicitly approved exclusions and the analysis
+root stays at the repository root. No smoke fallback or phase 1 coverage
+substitution is claimed. ABI/provider inspection, heavy-library imports,
+delivered-helper identity, dependency inventory and shipped-runtime selection
+remain conclusive in the retained private evidence.
+
+Actual sync and install failures, a masked failing test and disabled observation
+each failed combined validation under the qualifying direct orchestration.
+The exact source and immutable loaded library are recorded for each case;
+later analysis, quality and publication stages were not entered. Publication
+remains disabled, and an actual override attempt is refused. Full consoles and
+artifacts survive acquisition retries. The restored default source tree exactly
+matches the accepted pre-probe tree. After its successful build, every frozen
+original-candidate file remains byte-identical to the approved immutable index.
+The stage-local workaround preserves reporting and audit behavior without
+claiming infrastructure stability. Operator promotion and final target rollout
+remain the work of Steps 6 and 7. Review submission and the human cplx commit
+gate remain workflow gates after this implementation check.
+
+## Analysis of Step 5 Implementation
+
+Step 5 makes combined validation attributable to one exact candidate. The shared
+release helper checks both CI phases, delivered input identities, independent
+test-session outcomes, dependency inventories and phase 1 coverage before
+declaring eligibility. Native verification and acceptance expose that contract.
+
+The consumer adapter reconstructs the pinned environment in the actual command
+shell and refuses failed commands or missing observations. Direct orchestration
+preserves the mandated checks, ordered stages, audited test body, coverage,
+analysis, quality and dry-run publication with stage-local workspace agents.
+Actual controlled failures, restored defaults, runtime cases and immutable
+retention establish the planned behavior without qualifying the original wrapper.
+
+The new `CiEvidenceTest` class exercises eligibility and its rejection paths.
+Production changes use focused helper functions and a dedicated phase 2 observer;
+they introduce no production class hierarchy. The architecture, performance,
+unit exercise and feature-integrity assessments above have no remaining Step 5
+implementation gap. Independent review and human commit approval remain pending.
+
+## Step 6. Implement operator promotion and immutable release binding
+
+### Analysis of Step 6 implementation state
+
+Yes. Step 6 has been fully implemented.
+
+The separate operator command checks exact candidate qualification, preserves
+the existing publisher's artifact semantics, verifies retained inputs and
+publishes the binding last, and five actual backend cases passed with verified
+cleanup. Operator eligibility has its own command outside the delivered helper
+closure. The plan lists that module and its line budget. The expanded native
+suite exercises the publication safety boundaries and isolated command entry.
+
+### Goal for Step 6
+
+Provide the separate operator command that validates and publishes the exact qualified candidate pair through the existing application publisher.
+
+### Step 6 improvement expectations
+
+Publish the exact application, entry script and helper-bearing companion before
+their generated binding record. Reject mixed versions, incomplete qualification,
+partial releases and changed local bytes before announcement. Preserve current
+and predecessor inputs independently of CI retention. Private P14/P15 own the
+operator environment, credentials, repository coordinates and existing transport.
+
+### What was implemented for Step 6
+
+- **Eligibility**: `deploy_venv_publication.py publication-check` is an
+  operator-only command, reusing the unchanged release helper. Strict documents bind retained,
+  unexpired candidates to successful combined CI and six complete qualification
+  results: both target families, offline, readiness and both rollback forms.
+  Every result identifies the same candidate and predecessors and hashes its
+  nonempty evidence. Same-revision replacement bytes remain ineligible.
+- **Publication**: explicit role coordinates bind every file digest. Validated
+  identities survive the copy boundary; frozen byte copies are checked before
+  transport. Full remote readback checks retained tools and predecessors, rejects
+  conflicts, and verifies uploaded objects before the final binding. Equal-byte
+  retries retain the same binding without additional uploads.
+- **Private operator integration**: P14 wraps P15 using existing controlled
+  credentials and deploy-file transport. Exact-byte staging under the requested
+  extension preserves older publisher behavior for role-named local inputs.
+  Repository-bound backend receipts survive authorized test cleanup; actual
+  current and predecessor retention is checked on each publication.
+- **Execution entry points**: `verify.deploy-venv-sync.sh --step 6` extends the
+  cumulative native gate. `acceptance.deploy-venv-sync.sh --step 6` invokes the
+  explicit private operator with isolated backend test configuration. Neither
+  path adds a build, deployment, validation bypass or pipeline invocation.
+- **Local and native evidence**: the cplx groundhog walk completed with exit 9
+  for its non-pytest layout, followed by 248 native tests in 33.265 seconds,
+  syntax, ShellCheck and line-budget checks. The fresh consumer walk passed its
+  static checks, affected tests and full 6,662-test suite: no failures, eight
+  expected failures, measured coverage 100%, and no duration outliers. Its full
+  phase took 10 minutes 45.8 seconds. Freshness and terminal status were checked.
+- **Actual backend evidence**: complete publication, interrupted pair recovery,
+  failed binding recovery, conflicting bytes and missing retained inputs all
+  passed through the existing publisher. A direct conflicting deployment was
+  rejected and original bytes remained intact. Five owned test components were
+  deleted; all 240 associated asset URLs and all five component reads then
+  returned absent. The retention case created no component. Execution plus
+  cleanup took 937.836 seconds. Private receipts retain the exact identities,
+  host, shell, credential source, commands and observations.
+- **Evidence limits**: the selected snapshot backend allowed overwrite at an
+  exact timestamped coordinate. Immutable acceptance therefore used disposable
+  release coordinates after deletion capability was proven, as authorized.
+  Repository administration policy was not visible to the configured account;
+  the report records actual write/read behavior rather than unseen settings.
+
+Measured physical line counts, including markers and private integration files:
+
+| File or mapped responsibility | Before | After |
+| --- | --- | --- |
+| `deploy_venv_release.py` (reused unchanged) | 365 | 365 |
+| `deploy_venv_publication.py` | 0 | 249 |
+| `test_release_promotion_tdd.py` | 0 | 350 |
+| New public / private test leaf markers | 0 / 0 | 0 / 8 |
+| `verify.deploy-venv-sync.sh` | 45 | 45 |
+| `acceptance.deploy-venv-sync.sh` | 116 | 135 |
+| P14 operator adapter / backend acceptance | 0 / 0 | 286 / 165 |
+| P14 shell entry / focused tests | 0 / 0 | 14 / 128 |
+| P15 existing publisher | 395 | 410 |
+| Existing consumer value-object property test | 319 | 322 |
+| Implementation plan | 1017 | 1021 |
+| This validation document | 982 | 1126 |
+
+Every changed Python implementation and new test module is below the 550-line
+advisory threshold and the 650-line ceiling. This validation document is not
+subject to the Python ceiling; its physical size was recounted for the check.
+
+### New types or classes introduced for Step 6
+
+No production class hierarchy was introduced. Focused functions implement
+eligibility, predecessor binding, coordinate validation and publication through
+the `digest`/`upload` transport port. P14 supplies that port and the real backend
+acceptance adapter. `ReleasePromotionTest` provides the finite mutation and
+failure-injection cases; the private operator tests use parameterized functions.
+
+### Architecture check for Step 6
+
+The public helper owns qualification and publication order without credentials,
+network clients or consumer names. The private adapter owns authenticated reads,
+repository observations and the existing publisher invocation. No domain layer
+imports these operator adapters. Runtime reconstruction and consumer delivery
+remain separate responsibilities. Splitting publication from the release helper
+keeps both files below their budget without a new abstraction hierarchy.
+
+The publication module imports the unchanged release helper. Target-delivered
+code has no dependency on the operator module, and the delivered helper closure
+is unchanged. The private operator already selects that publication module;
+the acceptance entry retains its existing delegation to the private operator.
+
+No, there is no architecture issue that needs addressing for Step 6.
+
+### Performance check for Step 6
+
+Processing walks explicit files and fixed role maps. Hashing and freezing cost
+O(n) in the selected bytes; required integrity-boundary rereads remain explicit.
+Dictionary lookups avoid repeated discovery. Deterministic JSON sorting operates
+only on fixed schema and role keys, not an unbounded discovered collection.
+No new O(n squared) or input-dependent O(n log n) path was introduced.
+
+The consumer duration gate identified one affected property whose generation
+cost was reduced using its existing smaller sample budget, preserving strategies
+and assertions. The final complete walk had no duration outliers. Backend time
+includes real transport and cleanup, not a fixture-only timing claim.
+
+No, there is no performance issue that needs addressing for Step 6.
+
+### Unit test coverage check for Step 6
+
+The public suite exercises 23 test methods with finite mutations covering
+identity, expiry, missing files, incomplete CI and qualification, coordinate
+aliasing, source changes, retention, false upload success, retry and conflict.
+Seventeen private cases cover coordinate policy, exact publisher arguments,
+four destination extensions and historical receipt acceptance after cleanup.
+The cases are deterministic enumerations; no new property-based generator is
+needed for these operator rules. Both new test leaf packages include markers.
+
+The consumer coverage gate measures its application source root and reports
+100%; tests and standalone operator tools are outside that reported scope.
+cplx's native unittest gate reports execution, not a coverage percentage.
+No new or changed production class file is introduced by these function-based
+helpers. The existing value-object class exercised by the adjusted property
+remains inside the consumer's measured scope. Every top-level helper symbol
+outside the coverage gate is referenced by a test or its own implementation
+package, including the acceptance and CLI entry points.
+
+Additional mutations cover snapshot coordinates in multiple cases, missing
+objects in an already announced release, corrupt manifest readback, empty
+evidence with a matching digest, timezone-less expiry, relative and actual
+symlinked evidence roots, and non-path inputs. Early refusals prove zero upload;
+manifest readback failure proves no success receipt is emitted. The isolated
+operator command is exercised with both valid and incomplete qualification.
+The native Linux gate executes the real symlink case; only the supplementary
+Windows run skips it. All 248 native tests passed without skips.
+
+No, there is no unit-tested class below its required coverage needing work.
+No, there is no unreferenced top-level symbol in the changed standalone helpers.
+
+### Feature integrity for Step 6
+
+Existing deployment, packaging, CI validation and publisher entry paths remain
+intact. Backend tests used only dedicated disposable coordinates; accepted
+toolchain and production artifacts were preserved. The new private shell entry
+passes syntax and ShellCheck; the existing publisher's six diagnostics match
+its baseline exactly, with no new diagnostic introduced by the added branch.
+Receipts retain byte identities, failures and cleanup evidence locally.
+
+The bundled release helper is byte-identical to its prior committed version.
+Step 6 therefore does not require rebuilding the candidate to change its helper
+closure. Step 7 must still verify and fully qualify the selected exact candidate;
+any changed candidate inputs require renewed qualification. Retained candidates
+must not be edited in place. Synthetic backend fixtures establish publication
+behavior only and do not qualify a real candidate's target runtime.
+
+No existing feature or reporting capability is impaired by Step 6.
+
+## Analysis of Step 6 Implementation
+
+The implementation provides exact-candidate operator promotion through the
+existing consumer publisher. A focused operator module validates combined CI,
+target and rollback identities, freezes their bytes and verifies retained tools
+and predecessors before publishing objects and their binding in that order.
+Its command entry stays outside the unchanged target helper closure. No new
+production class hierarchy was introduced; the test class supplies the finite
+mutation and failure-injection matrix. Native, consumer and live backend
+evidence close Step 6, including verified disposal of all backend test artifacts.
+Final target qualification and production promotion remain Step 7.
+
+## Step 7. Complete exact-candidate target acceptance and rollout
+
+### Analysis of Step 7 implementation state
+
+Yes. Step 7 has been fully implemented.
+
+The reusable implementation and the actual consumer integration have matching
+execution evidence. The qualified nonpublishing candidate was promoted through
+the unchanged outside-CI operator, retrieved through the normal release path,
+and used for both offline predecessor recovery sequences. All 27 acceptance
+rows are backed by digest-bound evidence within their documented execution or
+unchanged-component reuse scopes. Cleaned consumer delivery and independent
+service supervision also passed. Reboot remains untested and nonblocking by
+human decision.
+
+### Goal for Step 7
+
+Qualify the retained candidate on both targets, then complete authorized promotion, offline reconstruction and recovery with matching evidence. Consumer integration qualification is separately tracked.
+
+### Step 7 improvement expectations
+
+Apply the human-approved consumer delivery/cplx reconstruction boundary. Verify complete local files before mutation and reject missing or invalid inputs without fetching. Run cplx with remote services denied from entry, empty disposable caches and no target Git checkout. Record independently validated cplx work separately from pending consumer acquisition/integration evidence; a mixed step and the overall topic remain incomplete until their required integration evidence exists.
+
+Require actual cplx offline reconstruction and rollback from complete locally supplied inputs, retaining predecessor script/helpers/tools. Record real consumer delivery/invocation evidence separately. Documentation or vendored role inspection is not a live qualification result.
+
+Every AC01-AC15 and design-level retention/promotion case has matching conclusive execution evidence, private obligations included. No production release is announced until its pair and qualification binding are complete.
+Review the plan's file-by-file changes and its mapped private obligations.
+Use `tests/unit/deploy_venv_sync/test_acceptance_evidence/test_acceptance_evidence_tdd.py` and the step's native integration/acceptance cases.
+
+### What was implemented for Step 7
+
+- `acceptance_deploy_venv_sync.py` drives 27 explicit acceptance cases through
+  subprocess adapters. It requires fresh completion observations, matching
+  candidate and predecessor identities, nonempty digest-checked evidence and
+  explicit negative readiness assertions. Fixture success is kept separate
+  from native qualification.
+- `acceptance.deploy-venv-sync.sh` and `verify.deploy-venv-sync.sh` wire the
+  driver and its focused unit tests into the native cumulative checks.
+  `acceptance.deploy-venv-sync.md` documents local inputs, adapter contracts,
+  native execution and the publication boundary without private endpoints.
+- `deploy_venv_release.py` exposes explicit CI observation for published
+  evidence while preserving strict nonpublishing eligibility for promotion.
+  Unit cases prove that default eligibility still rejects published evidence.
+- The refreshed cumulative native run passed 264 checks, shell syntax,
+  ShellCheck and the Python line ceiling; no changed Python file exceeds
+  650 lines. Focused driver tests also passed on the authoring host. They
+  assert exact preflight refusal reasons and successful native summaries for
+  both nonpublishing and explicitly published candidates. A successful subset
+  remains incomplete and lists the other 26 cases.
+- Actual native lifecycle evidence covers reconstruction, repeat sync, mirror
+  recreation, missing inputs, invalid environments, lock/wheel/distribution
+  drift, interrupted sync, binary tampering and changed toolchain identity.
+  Debian and RHEL observations include shipped runtime providers, original
+  wheel ELF bytes and dynamic paths, readiness and root serialization.
+- Both predecessor formats passed offline recovery after deliberate failure
+  and after successful upgrade using the repaired consumer entry. Installed
+  predecessor entry bytes match the observed baseline. The historical
+  compatibility exception accepts only two original comment-path relocations.
+- The official consumer deployment passed startup, revision and independent
+  lifecycle observation. Reboot testing is explicitly untested and nonblocking
+  by human decision; it is not used as evidence of lifecycle correctness.
+- A separate nonpublishing candidate passed strict combined CI, repository
+  nonpublication comparison, packaging/source-impact audit, Debian runtime and
+  rejection of mismatched qualification. Earlier negative controls are reused
+  only under explicit unchanged-component comparisons. Its exact native
+  runtime, serialization and both rollback sequences passed; independent
+  capture rehashed 11,934 files. Original provider-failure observations remain
+  explicitly bounded reuse, separate from fresh candidate execution.
+  Candidate retention across a later build is privately recorded.
+- The final qualification record binds combined CI, Debian, RHEL, offline
+  reconstruction, readiness and both predecessor recovery formats. The
+  unchanged operator accepted its exact candidate and predecessor identities.
+  The later authorized publication used those same qualified bytes.
+- The immutable tools archive is published and independently verified. All
+  eight retained predecessor objects have full-byte repository readback and
+  matching digests. Each predecessor retains its own entry, application and
+  tools, plus its reconstruction inputs where applicable.
+- The qualified timestamped snapshot was published, retrieved with matching
+  digests and used for actual offline recovery. The consumer already pins the
+  immutable tools version, URL and digest. No toolchain-acquisition redesign
+  or replacement of the accepted archive was needed.
+- After renewed human authorization, the original operator published the
+  qualified immutable application release. It verified every retained and
+  uploaded object by full-byte readback before publishing the final binding.
+  Normal release retrieval verified the same binding and all object digests.
+- The normally retrieved inputs passed ten native phases with remote services
+  denied before installation: baseline, deliberate failed upgrade, recovery,
+  successful upgrade and successful-upgrade rollback for both predecessor
+  formats. Independent capture rehashed the native evidence; the final
+  acceptance map connects qualification, publication, retrieval and recovery.
+- The consumer registry pins the five normally retrieved release inputs by
+  immutable coordinate and digest. The delivery pipeline and deployment
+  assertions accept exact release labels as well as timestamped snapshots;
+  consumer registration is committed and pushed, and deployment compatibility
+  is merged. Focused consumer and contract checks passed.
+- Temporary consumer diagnostics were removed through committed delivery
+  changes. Structural comparison preserved every other delivery task, and
+  the cleaned official check-mode run verified all five input digests. The
+  subsequent real deployment passed startup and both revision checks. Both
+  service APIs returned healthy matching revisions without drift; independent
+  observation confirmed the service unit watches the same script-started
+  daemon with the administrative hold removed. The minimal acquisition,
+  startup and revision checks remain in the consumer's deployment adapter;
+  shared deployment-library sources are unchanged.
+- Merged temporary diagnostic branches were removed locally and remotely
+  after exact ancestry checks and creation of a verified recovery bundle.
+  All worktree commits and file status were preserved. Reconciliation and
+  cleanup are complete, with historical diagnostics retained privately.
+
+### New types or classes introduced for Step 7
+
+The integration driver uses focused functions and explicit dictionaries. It
+adds no production class hierarchy. The new unit-test class owns subprocess
+fixtures for the acceptance evidence contract.
+
+### Architecture check for Step 7
+
+The driver owns orchestration and evidence validation; consumer adapters own
+acquisition, credentials, backend transport and application lifecycle commands.
+The shared release helper remains independent of those adapters. The explicit
+published-observation API does not relax promotion eligibility. No DDD or
+ports/adapters boundary violation was found. There is no architecture issue
+that needs addressing.
+
+### Performance check for Step 7
+
+File hashing streams bytes with bounded memory. Identity/evidence maps use
+linear traversal; deterministic reporting sorts bounded collections. Rehashes
+at capture, qualification and publication boundaries intentionally detect
+changed inputs. No new quadratic computation was found. There is no
+performance issue that needs addressing.
+
+### Unit test coverage check for Step 7
+
+The unit tests under `tests/unit/deploy_venv_sync/test_acceptance_evidence/`
+exercise fresh success, subprocess failure, stale/missing evidence, mutated
+identity, tampered files and incomplete negative observations. Existing CI
+evidence unit tests exercise the added published-observation API and retain
+strict default rejection.
+
+No configured project coverage percentage measures these cplx scripts; the
+consumer application's coverage gate does not measure them. This check makes
+no cplx percentage claim and did not rerun tests to infer one. Static inspection
+found references for every added top-level symbol, including `case()` called
+at module import to construct `CASES`. No production class below 100% coverage
+was identified as needing completion. No top-level symbol is unreferenced.
+
+### Feature integrity for Step 7
+
+Accepted toolchain bytes, original wheel bytes, canonical metadata and helper
+provenance remain bound to retained identities. Existing strict CI eligibility
+is preserved, and published CI observations are explicit. Negative outcomes
+remain failures and historical results retain their original candidate
+identity. Deployment and rollback evidence includes the consumer repair;
+earlier failed attempts remain retained. Publication and post-retrieval
+execution now close the remaining rollout gates. Historical observations retain
+their stated scope rather than being presented as new candidate executions.
+
+## Analysis of Step 7 Implementation
+
+Step 7 completes the exact-candidate lifecycle from protected CI inputs to
+authorized immutable publication and repository-independent recovery. The
+acceptance driver invokes explicit consumer adapters, rejects stale or altered
+observations and separates fixtures from target qualification. Its focused
+unit tests and the cumulative native checks passed. The observation API keeps
+published CI evidence distinct from nonpublishing promotion eligibility.
+
+The final operational proof includes both target runtimes, consumer delivery,
+retention, wrong-qualification rejection and release retrieval followed by both
+offline predecessor recoveries. Earlier negative controls are reused only where
+recorded source comparisons establish unchanged affected components. Private
+receipts preserve exact identities and execution details; public outcomes remain
+generic. No required Step 7 work remains unimplemented.
+
+## Step 8. Deliver through the consumer's original orchestration, unchanged
+
+### Analysis of Step 8 implementation state
+
+Yes. Step 8 has been fully implemented.
+
+Round 8 reviewer assessment: F1 is resolved by the delivered candidate's ready
+result, retention receipt and independent read-only target measurements. F2 is
+resolved by decision T1 and the continuous failure/recovery timing account;
+the cap applies to each attempt. The outgoing verifier fixture is byte-identical
+to the earlier release's verifier and exercises the newly prepared closure.
+Static review found no additional defect in the compatibility or signing changes.
+AC16, functional AC17 and the accepted fixture exceptions remain supported.
+The signer handoff and historical replay remain in Step 9. No implementation or
+test repair was made by the reviewer.
+
+Earlier dated assessments below are history, superseded by this round's
+assessment where they describe execution as absent or review as the only gap.
+
+Writer answer, night of 2026-10-11, for round 8: F1 is answered by candidate 62,
+delivered through the original job and measured on the target (run 94); F2 by
+the human's decision T1 and a continuous timing account of each failure chain.
+Both answers are recorded in the writer responses below and accepted in round 8.
+
+Writer check on the evening of 2026-10-11: everything the step asks for has
+run for real except its code exchange. AC16 closed with a signed same-release
+run (run 80); AC17 closed with a failure after the installer and two signed
+typed recoveries, the second one recovering (runs 87 to 89), after a live
+defect in the start's installer call was found, fixed and delivered (runs 81
+to 86). R16, the historical predecessor format and the role transfer failure
+rest on fixtures and on Step 9 by recorded decisions; the pipeline signer is
+decided and moves to the first Step 9 candidate; Part A and Part B records are
+written below. The one remaining item is the review round on the final bytes.
+
+Morning writer check on 2026-10-11, against the private journals since the 2026-10-07
+review. Parts B to F ran for real, and the consumer's unchanged original job
+now delivers new releases on qualification under fresh signed selections, with
+an unsigned launch refused and a held stop recovered. AC16 and AC17 still do not
+close. AC16 asks for a same-release run whose stop fetches nothing; the human's
+2026-10-10 decision proved forward deliveries instead, no signed same-release
+run through the original job exists, and R16's checked restart cannot occur
+there because the role delivers its download on every run. AC17's typed
+recovery, a signed selection bound to the failed attempt, never ran; the failed
+attempt identity does not reach the human, and the historical predecessor format
+and the role transfer failure have fixture evidence only. The 2026-10-09
+amendment's pipeline signer is not built: every live attempt was signed on the
+workstation. Part A's staging formula was superseded by the delivery marker
+without a recorded replacement, and peak disk is unmeasured. The delivered
+bytes have not been through the Step 8 code exchange since round 6.
+
+Reviewer assessment on 2026-10-07, round 6: P23 resolves F1e by conservatively
+refusing extended POSIX ACLs on group-writable files and path components before
+the owning-group decision. Without group write in the ACL mask, named entries
+cannot grant effective writes. F1a-F1d remain resolved for their reported cases;
+no unresolved Part B implementation finding remains. Part A remains partly open,
+the new immutable candidate is absent, and Parts C-I have not run. AC16/AC17 therefore
+remain open; prerequisite commit guidance does not establish whole-step readiness.
+
+### Goal for Step 8
+
+Close AC16/AC17 by delivering and recovering the exact selected candidate through
+the fixed original qualification path with our verification/lifecycle control.
+The real run redeploys C's candidate. No maintenance/operator access is needed:
+temporary delivery installs closure/key/verifier and probes/receipts, never arming;
+the human signs each fresh attempt/retry/recovery through the shared drive, and
+the pipeline launches original actions. Recovery uses pipeline job-terminal proof
+plus local lock/process proof; shared logs/console/endpoints return evidence.
+Only normal restoration-PR review involves operations. First installation and
+production remain mandatory Step 9 work, so Step 8 cannot complete the topic.
+
+### Step 8 improvement expectations
+
+Human confirmation on 2026-10-05 settles R19 and Q38, with no execution claim.
+P35/P41 cover absent/unreadable/unavailable share and expired, consumed, wrong-target,
+bad-signature, partial and malformed selection, each with unchanged and delivered
+start. Verify local exclusion/archive identity/checkpoint, no signed deployment
+reservation and no second share read in ordinary mode. Unchanged delivery takes
+checked restart and returns check status; unauthorized delivery installs nothing,
+restores the working checkpoint with checks and returns nonzero. The human accepts
+possible downtime before refusal. Preserve every failed/held or unresolved-attempt
+recovery gate; valid recovery remains typed even without an installer call.
+Before B, document Q38's independent backup custody/recovery and verified closure
+rotation/revocation. Qualify primary unavailable, backup unavailable, unauthorized
+key and interrupted rotation before freezing both public keys in release N.
+Backup signing cannot bypass ID/expiry/checkpoint controls or revoke the primary.
+
+- Preserve Steps 1-7 evidence and every prior acceptance gate.
+- Qualify release N's primary/backup public keys and host-utility verifier in B; install
+  them through C's verified stable closure without application Python. C creates
+  no forward/recovery authorization, retry count or non-expiring selection.
+- Every attempt/retry/recovery requires a new signed ID and short expiry from the
+  human workstation via a fixed environment folder. Verify exact five canonical
+  URLs/hashes, environment/profile and recovery checkpoint/failed-attempt binding.
+  Invalid or missing input grants no signed authority and follows R19 admission;
+  failed/held-state gates cannot be bypassed.
+- Test tampered payload/signature/key/closure, partial writes, clock skew/expiry,
+  shared-folder outage, simultaneous readers, consumed IDs across reboot/cleanup,
+  interrupted persistence, wrong environment/checkpoint and newer archive bytes.
+  No artifact-repository arming object, latest lookup or fallback trust exists.
+- Rehash Step 8's four retained inputs before stop without fetch; start uses only
+  its verified private application copy and fetches nothing. Test offline recovery
+  for both predecessor formats, before-installer failure and repeated recovery
+  after rollback succeeded but runtime checks failed. Each recovery retry is
+  newly signed; shared-drive control remains available while artifact services
+  are denied. Preserve the original failed verdict.
+- R16 A covers outside stop/start with pending forward selection before/after
+  restoration: full held runtime/supervision checks of the working release,
+  reservation release, receipt/check status, and forward selection still unused.
+  Recheck expiry on its later admission. Failed/unknown attempts cannot reuse
+  their signature; Q35/Q41 define the atomic reserve/spent/R16 distinction.
+- Ordinary restart requires no signature and uses the locally recorded working
+  checkpoint with every runtime/supervision check. Failed H after successful G
+  takes this path without rollback, preserving H's failed verdict. Cover both
+  unauthorized delivery after ordinary stop and reserved-attempt refusal restoration;
+  successful restoration cannot turn either refused deployment green.
+- Deployment-only stable stop recheck remains idempotent, before installation,
+  with no refetch/resnapshot/new candidate code; plain start and recovery omit it.
+  Failure remains held/nonzero without installation.
+- Verify unit identity, hold-before-stop and parking, both APIs while held,
+  daemon-first start, hold release and same-daemon supervision with fatal exits.
+  Unknown unit or runtime evidence cannot silently select a no-unit profile.
+- P22 proves the failed job terminal before original recovery launch; P31/P29
+  prove root-lock availability and no live attempt-owned process before local
+  terminalization. Cancellation/timeout alone is insufficient. Cover every Q21
+  state, incoming hold preservation and late old start; no operator fallback.
+- Q37/Q40 fixtures cover canonical version/domain bytes, duplicate fields,
+  unsupported algorithms, encoding changes and unavailable verifier utilities.
+  Verify atomic ready-envelope publication and stable bounded local snapshots.
+  Reserved/spent IDs survive shared-file replacement, cleanup and reboot; crashes
+  before/after each write, concurrent admission and late start cannot replay use.
+- Q34-Q41 bind C's key/closure/probe/retention/activation receipts, shared evidence,
+  candidate/checkpoint, replay state and signing handoff to E's prerequisites.
+  Strict dispatch and all stable control including P38 survive replaced trees;
+  missing application-runtime dependencies fail held.
+- A records development-account host network/client/shared-folder read-write
+  evidence before C, with same-disk staging-only filesystem replay T, disk D and
+  remote task count N. Add evidenced per-task orchestration overhead O from
+  retained or separately authorized check console timings. Budget at least
+  `2 * (T + N * O)` and `2 * D` headroom, using per-class sums where needed, and
+  document skipped-task limits/no double counting. Missing evidence blocks C.
+  C application-account proxy/client/share receipts remain final before E.
+- Verify per-candidate non-collision, source-baseline equality with concurrent
+  ancestry preserved, loaded-source/payload agreement and separate controller
+  five-input/check-traversal dry-run results. Check mode neither arms nor consumes
+  selections and claims no target command execution; directory creation disclosed.
+- Require separate authorization for host evidence/replay, bootstrap, restoration,
+  check/real actions, verification and recovery; remeasure actual G against caps.
+  Q22 preserves the older predecessor and uses the same-release failure checkpoint.
+  Reboot stays untested/nonblocking; healthy APIs do not restore lost local config.
+
+### What was implemented for Step 8
+
+The reviewed Part B change set implements strict P27 dispatch, P28 immutable
+closure preparation and receipt-bound activation, P29 signed selection and
+durable attempt state, P31/P32 lifecycle ownership, P30 exact-input acquisition
+and payload generation, and P22 pipeline-derived preceding-job terminal proof.
+P07/P23-P26/P38 wire verified installation, runtime sealing, hold and daemon
+identity checks into those owners. The prefix environment supports an unset
+inherited HOME without loading account login profiles. The staged public plan
+records the dated 1,800-second single outage budget.
+
+P23 checks external files, symlink hops and their ancestors across PATH,
+loader and cache directories. Existing preload lists are checked regardless of
+contents, cached files are checked directly, and searchable but unlistable
+directories refuse. Round 4 removes filesystem boundaries from both tree walks;
+fixtures cover outside targets on the same and different filesystems and a
+nested crossing, retaining trusted-update acceptance. Round 5 replaces
+final-target collection with the host component resolver and one text-pass
+validator for named paths and every non-dangling followed link. Composed fixtures
+cover trusted multi-hop acceptance, replaceable intermediate-hop refusal and
+replacement, and an unsafe directory-component hop. P28 declares the resolver
+and text utility; the loader-cache utility and static-host-utility support remain.
+
+Round 6 flags paths containing group-writable objects, walks their components
+and expanded symlink targets, and checks group-writable non-link components with
+the host ACL utility. Tree scans apply the same conservative ACL refusal before
+owning-group checks. Missing or failed access evidence refuses; P28 declares the
+ACL utility. Composed library and holding-directory fixtures assert the ACL
+diagnostic, establishing refusal before the existing account-group predicate.
+
+Retained check/affected evidence is green; the native receipt reports 189 tests,
+zero failures/errors and no skips on the revised bytes. The reviewer ran no test
+or coverage command. These receipts do not prove a new qualified immutable
+candidate or an actual original-path rollout.
+
+Writer record on 2026-10-11 of the execution since that review. Exact runs,
+revisions and receipts are in the private journals; deploy numbers below are
+runs of the consumer's qualification deploy pipeline.
+
+- **Part B, candidates.** Full two-phase pipeline builds again qualify each
+  delivered candidate: both test phases, coverage 100% of the measured source,
+  the analysis gate and publication, then a registry entry per candidate. Native
+  Linux walks of the deployment test package back each lifecycle change (623
+  passed on 2026-10-11). The forward route added target-side acquisition with
+  the repository CA as a closure member, forward admission in stop, an attempt
+  candidate taken from the selection, and control advance with crash
+  reconciliation. The 2026-10-10 delivery marker replaced role staging of the
+  application tree. A workstation signer, a registration tool and a delivery
+  driver (prepare, select, publish, preflight, trigger) are now tracked.
+- **Parts C and D, bootstrap and signing handoff.** After failed attempts on
+  2026-10-09, run 55 completed the first bootstrap through the temporary
+  delivery path: activated, supervised, both APIs on the candidate's revision.
+  Runs 57, 59 and 63 re-bootstrapped activated releases under the 2026-10-10
+  deviation. Primary and offline backup public keys and the repository CA are
+  closure members. Every live attempt carried its own fresh signature, short
+  expiry and checkpoint, written to the fixed share folder.
+- **Part E, restoration.** On 2026-10-11 the operations repository's
+  application path returned to its audited baseline through the normal pull
+  request workflow: path equal to the baseline, merge commit keeping concurrent
+  ancestry. The pipeline payload switched to the original route afterwards.
+- **Part F, original check mode.** Runs 64, 68, 70, 74 and 76 passed in check
+  mode, the controller's five-input verdict recorded separately from the check
+  traversal, with no selection consumed.
+- **Part G as amended on 2026-10-10.** Forward deliveries through the unchanged
+  original job: run 69 (N to N+1), run 72 failed at stop on a post-stop race and
+  run 73 delivered under a fresh signed attempt with the same checkpoint, runs 75
+  and 77. Run 71, an unsigned launch naming a newer release, was refused at start
+  and restarted the running release (R19). Each was one attempt, with outages
+  of 9 to 17 minutes inside the 1,800-second per-attempt cap (decision T1);
+  marker staging took under a minute.
+- **Part H.** After run 77 both external endpoints, read independently of the
+  pipeline, named the qualification environment, the exact clean revision and
+  the application account's project root; on the host, read under the
+  development account, the unit's main process observed the started daemon and
+  no hold marker remained.
+- **Part I, partly.** A held-before stop failure was recovered by a fresh signed
+  attempt (runs 72 and 73). Since 2026-10-11 a stop that fails after its hold
+  with nothing left running restarts the running release and records a running
+  failure; failures after the installer keep the hold for signed recovery.
+- **2026-10-09 hardening.** Native start rehearsal on the reference host (a);
+  the check-mode preflight moved to the workstation because check mode runs no
+  target command (c); supervised restore of a failed held stop before the
+  installer (d); named bootstrap refusals (first half of e); verdict written on
+  a fresh agent (f); stable hook bridges (g).
+
+Writer record of the afternoon of 2026-10-11:
+
+- **AC16, same-release run.** Run 79 delivered the candidate carrying typed
+  recovery and attempt receipts (forward, about 10 minutes of outage); run 80
+  then redeployed that same release under a fresh signed same-release
+  selection: stop admitted it, start admitted the checkpoint's marker,
+  reinstalled the retained release and ended `consumed` (outage about 10
+  minutes). Both runs left their attempt receipts on the share. A disk sampler
+  on the target (every 2 seconds) measured no transient peak above the final
+  value: `/project` grew 1.72 GiB and stayed, other filesystems unchanged.
+- **Part A, retention.** The growth is retained evidence: each venv operation
+  kept about 820 MB (uv cache, file index, wheel copies) and nothing removed an
+  operation (19.8 GB after 24 installs). The helper now drops a successful
+  operation's reproducible copies and keeps the five newest operations; the
+  consumer takes it with its next helper refresh.
+- **AC17, live finding.** Run 81, a signed same-release run with the server
+  port held, failed after its installer as planned (`failed-held-after`). The
+  next two signed typed recoveries (runs 82, 83) failed the same way although
+  the port was free by then: the start asked the installer for a rollback
+  through an option the installer does not have, and the installer refused it
+  before writing its log. Every fixture had stubbed that call. The target was
+  held with no admitted recovery and a bootstrap refused; run 84 (a signed
+  recovery whose job run delivered another build's marker) took the start's
+  refusal path, which restarts the installed release without any installer,
+  and ended `failed-running` with the service supervised again (outage about
+  37 minutes). The fix (the start sets the installer's rollback variable) and
+  tests that run the real installer call are in the next candidate, with the
+  way out documented; the AC17 recovery runs restart on that candidate.
+- **Decisions of 2026-10-11.** R16: fixture evidence accepted, the original
+  job cannot produce it. Historical predecessor format and role transfer
+  failure: fixtures plus the Step 9 historical replay accepted. Code exchange:
+  one review round on the final Step 8 bytes after AC17. Pipeline signer:
+  proposed as a QAL-only automation key used from our side (no pipeline
+  credential store exists), awaiting the human.
+
+Round 8 closes the code assessment and both round 7 findings. No required
+Step 8 work remains. The accepted R16, historical-format, transfer-failure
+and signer decisions remain in force.
+
+Evening record of 2026-10-11:
+
+- **AC17, closed live.** The candidate with the installer-call fix was
+  delivered forward from the `failed-running` state of run 84 (run 86), and its
+  successful start retired the installer's pending record. Then: run 87, a
+  signed same-release run with the server port held, failed after its installer
+  (`failed-held-after`); run 88, a signed typed recovery bound to it, rolled the
+  installation back (its installer log is on the share) and failed at runtime,
+  the port still held; run 89, a repeated typed recovery bound to run 88's
+  attempt, rolled back again with the port free and ended `recovered`, service
+  supervised, no hold. A failure before the installer is covered by run 84
+  (refusal path, no installer, `failed-running`) and by fixtures; the historical
+  format and the role transfer failure by fixtures plus Step 9 (decision C1).
+- **Pipeline signer, decided.** No pipeline credential store can be used. The
+  human approved a qualification-only automation key used from our side (A4),
+  with autonomy on qualification. The key pair exists; its closure member,
+  environment binding, signer role and first automatic delivery belong to the
+  first Step 9 candidate, which also carries the refreshed helpers.
+- **Part A record.** Original-job runs on qualification, pipeline duration and
+  outage (exact times in the private journals and the share's receipts and
+  stop logs): forward runs 69, 75, 77, 79, 86 at 14 to 17 minutes with outages
+  of 9 to 13 minutes; same-release run 80 at 13.6 minutes, outage about 10
+  minutes; failure and recovery runs 81 to 84 and 87 to 89 at 4 to 14 minutes.
+  Individual attempts stayed inside the 1,800-second cap, which bounds one
+  attempt (decision T1); the uninterrupted outage across failure and recovery
+  attempts is accounted separately in the writer response to F2 below.
+  The delivery marker replaced the staging formula (role staging under a
+  minute). Peak disk: no transient peak above the final value (run 80). The
+  helper's retention policy was then qualified on the target with candidate 62
+  (writer response to F1 below).
+- **Part B exit records.** Delivered candidates 55, 56, 58 and 59 each have a
+  registry entry binding revision and digests, a green two-phase pipeline
+  build with publication, native walks of the deployment tests, and (55, 56,
+  58) a native start rehearsal; 59's change, the start's installer call, is
+  covered by the native tests that run the real installer. The tools archive is
+  the same across them. Backup key custody: the trust folder's record
+  (custodian confirmation of 2026-10-07). Line budgets recounted at the last
+  candidate and the private mapping extended with the workstation tools; every
+  Python file stays under the 650-line ceiling (the candidate adapter in the
+  550-650 band).
+
+Writer response to round 7, F1 (retention on delivered bytes), on 2026-10-11:
+
+- **Candidate 62, delivered.** The first candidate that carries the refreshed
+  helper and starts cleanly went forward through the original job (run 94, one
+  attempt of 11 min 12 s, `consumed`, service supervised, no hold). Its
+  installer's environment operation kept only its logs, metadata, result and
+  inventory (uv cache, file source and selected wheels dropped), and the
+  retained operations went from 6 to 5 and from 4.1 GB to 2.5 GB, with 277 GB
+  free on the application filesystem afterwards. Its identity is bound by its
+  registry entry and its receipts on the share.
+- **Candidate 61, first carrier.** Its installer had already pruned the target
+  in run 91, from 29 operations and 24 GB to 5 operations and 3.3 GB. Its start
+  then failed for an unrelated reason, and a typed recovery (run 92,
+  `recovered`) restored the running release, whose older helper added one
+  unpruned operation back; run 94 removed it.
+- **Run 91's failure and its fix.** Candidate 61 also put the qualification
+  automation key into the control closure. Right after a clean installation,
+  the start of the release being replaced binds the new closure with its own
+  verifier, which knew no layout one member longer, and refused it within
+  seconds, before the application started. Candidate 62 prepares the layout
+  the outgoing release knows and verifies the longer one, so the key joins the
+  closure one release later (Step 9). A test now runs the outgoing release's
+  own verifier on every closure the tree prepares; the single-release native
+  rehearsal could not have shown it.
+
+Writer response to round 7, F2 (outage accounting), on 2026-10-11:
+
+- **Decision T1 (human, 2026-10-11).** The 1,800-second cap bounds one
+  attempt: from its stop to verified health and same-daemon supervision, or to
+  its held-failure receipt. After a failure past the installer the design keeps
+  the application held and waits for a signed typed recovery (recovery first,
+  no automatic rollback), so the continuous outage across a failure and its
+  recoveries is recorded as measured evidence, not held to the cap. No code
+  change.
+- **Attempts, stop to end receipt** (stop logs and attempt receipts on the
+  share): forward run 79 10 min 08 s, same-release run 80 10 min 53 s, forward
+  run 86 10 min 59 s; failure run 87 9 min 51 s, recovery run 88 10 min 42 s,
+  recovery run 89 11 min 37 s. Every attempt stays inside the cap.
+- **Continuous outage of the AC17 chain:** stop of run 87 at 17:48:10 to the
+  `recovered` receipt of run 89 at 18:27:04, 38 min 54 s. The deliberate fault
+  (a process holding the server port) lasted from 17:48:48 until just after
+  run 88's failure receipt at 18:12:18, about 24 minutes, and made run 88 fail
+  on purpose. Between attempts: 3 min 35 s and 3 min 09 s, of which about 40
+  seconds to render, sign and trigger and the rest the job's own start before
+  its stop. One failure plus one recovery, without the deliberate second
+  failure, sums to about 25 minutes from these measured parts; it was not run
+  as one chain.
+- **Continuous outage of the first AC17 run:** run 81's stop at 15:01:56 to the
+  service supervised again by run 84 at about 15:39, about 37 minutes, caused
+  by the installer-call defect (two recoveries that could not run, then about
+  14 minutes of diagnosis); the defect is fixed in the next candidate.
+
+Closed on 2026-10-11 since the morning check: AC16 (run 80); R16 and the two
+recovery cases with no live route (decisions recorded above); hardening e
+(the verification names the first differing entry); hardening b (unit status
+lines, release record keys and shipped dangling links copied from the target
+into fixtures; the previous-model authentication files on the target are
+private to the application account, so their fixture keeps the file name the
+target's own refusal printed).
+
+### New types or classes introduced for Step 8
+
+P30 adds a small immutable acquisition-limits value type; the pipeline-evidence
+adapter adds a connection value type. They configure technical adapters rather
+than introduce a business class hierarchy. The staged Python files remain below
+the 650-line ceiling; the candidate adapter is in the 550-650 caution band.
+The 2026-10-11 workstation tools add one exception type for refused
+registrations and plain functions for the delivery steps; the native rehearsal
+is a shell script. None enters the application package.
+
+### Architecture check for Step 8
+
+The focused dispatcher, closure, contract, stop/start and pipeline adapters
+retain distinct responsibilities; the reviewed changes introduce no observed
+business-layer dependency on deployment tooling. P23 now retains each resolution
+hop, and resolver errors, missing targets, unknown lines and loops refuse.
+Its external trust boundary now uses the ACL mask to identify possible named
+write grants and refuses extended ACLs on those objects regardless of owning
+group membership. Files and holding ancestry use that rule consistently.
+No implementation repair was made by review.
+
+No additional architecture fix was identified in the reviewed Part B bytes.
+
+Writer check on 2026-10-11: the forward route, the marker admission and the
+stop's restore of the running release stay inside the stable closure's owners;
+the stop now calls the held-start proof for its own reserved attempt, a narrow
+documented entry rather than a second start path. The workstation delivery
+driver reuses the controller's verification and rendering. Round 7 inspection
+finds hashing, refusal and download helpers in a shared module, used by both
+workstation tools; the earlier helper-coupling observation is resolved.
+
+Round 8: the compatibility adapter prepares a layout the outgoing verifier
+accepts while learning the next layout. Trust remains fingerprint-pinned and
+the additional signer remains restricted to qualification when its key is in
+the verified closure. The workstation entry point delegates each subcommand
+to its own function. No additional architecture fix was identified.
+
+### Performance check for Step 8
+
+Runtime inventory comparison uses associative membership rather than pairwise
+comparison. Candidate acquisition and lifecycle phases have bounded deadlines;
+the persisted outage constant matches the dated 1,800-second decision. Static
+review found no measured performance defect. Batched resolution and one
+text-validation pass process the reported components; the bounded ACL walker
+copies pending component arrays, so a global linear-complexity claim is not made.
+The native real-host boundary receipt is 1.208 seconds; host-dependent scans still need
+exact-candidate qualification within the existing deadlines.
+Part A's T/D/N/O budget and actual G timing/peak-disk evidence are absent. Unit
+fixture timings do not qualify the unchanged role's transfer and staging workload.
+
+Writer check on 2026-10-11: actual forward deliveries, one attempt each, took
+9 to 17 minutes of outage against the 1,800-second per-attempt cap (decision
+T1, recorded later that day), and the delivery marker cut role staging
+to under a minute; acquisition of the release (about 800 MB) runs before the
+outage under its own 600-second bound. The comparison and scan costs above are
+unchanged. Peak disk per delivery is still unmeasured, and retained releases
+accumulate on the target.
+
+Afternoon of 2026-10-11: the same-release run measured no transient disk peak
+above the final value; the retained growth (about 1.7 GiB per install, most of
+it venv evidence) now has a bound in the helper (five newest operations,
+reproducible copies dropped on success).
+
+Round 7: `prune_evidence` removes a successful operation's reproducible copies
+and sorts retained operations before pruning, giving O(n log n) ordering cost
+in the operation count. Cleanup is best effort and records errors; source alone
+does not establish the target's disk bound. Each fresh recovery attempt also
+gets its own deadline, so bounded attempts do not prove that a continuous outage
+spanning retries fits the plan's single-budget rule. Deliberate fault injection
+must be accounted for explicitly in that qualification evidence.
+
+Writer response, evening of 2026-10-11: decision T1 makes the cap a bound on
+one attempt; every measured attempt fits, and the continuous failure and
+recovery outages are accounted in the writer responses (38 min 54 s for the AC17
+chain including about 24 minutes of deliberate fault, about 25 minutes for one
+failure and one recovery from measured parts). The retention bound has its
+target evidence: run 94 left five operations and 2.5 GB, the new one without
+its reproducible copies.
+
+Round 8 independently confirms the retained-operation count, disk usage,
+headroom and the successful operation's removal of reproducible copies. Its
+ready result binds the measured operation to the registered candidate's inputs.
+The stop log and successful receipt agree with the recorded attempt duration.
+Decision T1 and the continuous timing account resolve the earlier budget
+question without changing recovery behavior. No further performance fix is
+identified; both F1 and F2 are closed.
+
+### Unit test coverage check for Step 8
+
+The consumer's configured coverage source is its application package under
+`src/`; the deployment adapters under `tools/` are outside that measured scope.
+Retained check/affected and native unit results therefore establish no coverage
+percentage for those adapters. Static inspection finds references in tests or
+the tooling package for each top-level Python adapter function and value type,
+including module entry points. No changed production business class was identified.
+
+The revised P23 fixtures cover writable preload lists, searchable directories,
+cached files and followed targets on the same and different filesystems, including
+a nested crossing. The new cases invoke the tree checker directly; static review
+confirms the composed boundary calls it. A literal nested mount was not created;
+the no-boundary walks cover mounts by construction and the native nested crossing
+exercises descendant traversal. The new composed fixtures refuse unsafe
+intermediate and component hops while final code remains trusted, demonstrate
+hop replacement, and accept trusted chains. They resolve that coverage finding.
+Round 6 adds named library and intermediate-directory ACL grants and composed
+refusal with an ACL-specific diagnostic. Native fixtures use the test account as
+trusted owner and grant UID 65534 access; they do not mutate as that grantee or
+create an owning group outside the running account. The diagnostic proves the
+unconditional ACL rejection precedes group membership. Together with static
+ACL-mask semantics, this resolves F1e for the conservative rule; it does not
+establish a privileged exploit replay. Prior safe-chain fixtures remain green.
+
+No additional Part B unit finding was identified; 100% coverage is unestablished
+for the unmeasured automation. No unreferenced top-level Python adapter symbol was found.
+
+Writer check on 2026-10-11: the coverage gate still measures only the
+application package, so the deployment tooling remains unmeasured. Static
+references: the stop's restore is driven by native fixtures through the real
+stop transaction (completed, failed with survivors, failed restart, restored and
+re-admitted), the reserved-attempt held start by its own case; every top-level
+function of the registration tool and of the delivery driver is called by their
+tests or from the driver's entry point. The native rehearsal script has no unit
+test; its evidence is two real passing runs on the reference host.
+
+Round 7 static assessment: the regression tests call the real start/installer
+boundary, check the rollback environment flag and pending-record flag, preserve
+the forward force argument, and require the shipped installer to reach its
+rollback branch. Recovery-mode checks bind pending candidate, checkpoint and
+installed identity; the retained native execution and actual repeated recovery
+support this fix. Shared workstation helpers have callers in their tool modules.
+
+The request's consumer full walk reported a nonzero duration-gate result despite
+no failing tests. The later rerun is not established by the retained completed
+evidence inspected here; no speed-proof claim is made. This is distinct from
+cplx's declared shell lint floor and the qualified candidate's native receipts.
+The reviewer ran no validation or coverage command. Coverage of the deployment
+tooling remains unmeasured by the application-only gate.
+
+Writer record, evening of 2026-10-11: a later consumer full walk on the next
+candidate's committed bytes ended with no failing test and 100% coverage of
+the measured source, and again with a nonzero duration gate (12 calls between
+1.03 and 1.52 seconds against the 1.00-second floor, all real-browser or
+real-client acceptance cases, measured on a loaded workstation). No consumer
+speed proof is claimed.
+
+Round 8 static review checks the real outgoing verifier fixture, current/next/
+legacy layout acceptance and damaged-layout refusal, both custodian signatures
+without the optional key, and refusal of its signature when absent or outside
+qualification. The workstation tests cover signer refusal and delivery order.
+The retained native results include the focused rerun after the test cleanup
+fix. The consumer full walk predates the final compatibility fix and remains
+duration-gate nonzero; it is not a final-candidate speed proof. The reviewer
+ran no test or coverage command in this round.
+
+No additional unit-tested class coverage gap was identified by static review;
+100% coverage of the deployment tooling is unestablished. No unreferenced
+top-level symbol was identified in the inspected changes.
+
+### Feature integrity for Step 8
+
+Static checks and retained unit evidence support strict dispatch, closure edges,
+signed admission, attempt persistence, pipeline terminal proof and single-budget
+propagation. No unresolved Part B implementation finding remains; the human's
+condition for the prerequisite Part B commit is met at that limited scope.
+The reviewer neither commits nor substitutes that condition for whole-step
+readiness. A new immutable candidate and exact-byte qualification remain required.
+Bootstrap, source restoration, original check/real execution, independent endpoint
+verification and both offline recoveries remain unexecuted; earlier Step 7
+receipts do not close these new original-path acceptance gates.
+
+This assessment changes only Step 8 validation rows. Prior Step 7 completion,
+other steps and the umbrella remain intact. Step 9 is still mandatory before
+topic completion; reboot remains untested and nonblocking.
+
+Writer check on 2026-10-11: qualification serves the latest delivered release,
+supervised, and every delivery left the previous release retained. No existing
+feature or report is impaired by the original-route deliveries; an unauthorized
+delivery cannot install. The open items are the acceptance gaps listed under
+missing work, not regressions.
+
+Round 8 preserves the recorded AC16 and functional AC17 results and the human's
+accepted deviations. Both carried findings are resolved. The delivered
+compatibility fix has original-route evidence and a test using the outgoing
+verifier. Only Step 8 validation rows were changed by the reviewer. Other steps
+and the umbrella remain intact; Step 9 still prevents whole-topic completion.
+
+## Step 9. Deliver first-time and production installations through unchanged orchestration
+
+### Analysis of Step 9 implementation state
+
+Yes. Step 9 has been fully implemented.
+
+The code review of 2026-10-15 found two recovery gaps in the bundle route: an
+early hand-over refusal left the already-stopped installed release down, and a
+failed historical restart could exit with status 7 without restoring the hold
+or stopping what it had started. Its second round found that the fallback
+without retained controls lost a failed component stop when the daemon stop
+succeeded. All three are fixed. The successful replay does not reach those
+terminal states; stateful tests through the real entry and the deploy step
+cover them.
+
+The writer check on 2026-10-15 used the scope set by the human decisions of
+2026-10-11 (production only through an official release, Part D venue, Step 9
+ending at "production prepared and rehearsed"), 2026-10-12 (Part C and AC18
+deferred; the stop, deploy and start redirect without signatures), 2026-10-14
+(no production delivery in Step 9) and 2026-10-15 (the development-account
+replay counts as Part D; snapshot guard option A). Part A's production evidence
+came from the read-only inspection runbook. Part B is the bundle route with the
+historical retention, the interim hook admission, the four fixes Part D
+found on 2026-10-15, delivered to qualification, and the code review's
+recovery fixes. Part D replayed the role's operations from production's exact
+historical pair and passed the five recorded replay scenarios. The production
+delivery procedure is written. Parts F and G, AC19's production and external
+evidence, remain open. Under the 2026-10-28 decision, they gate the final cplx
+tag on acceptance from prepared `main`; the topic and umbrella item are
+implementation-complete for integration.
+
+The improvement expectations below date from before the 2026-10-12 redirect.
+Their signed-selection, bootstrap, route (b), empty-prefix and registry bullets
+are superseded by the plan amendments of 2026-10-11, 2026-10-12 and 2026-10-15
+and are kept as history.
+
+### Goal for Step 9
+
+Complete production preparation and rehearsal under the amended Step 9 scope.
+Accept the selected development replays plus Step 8's managed run with explicit
+no-unit and orchestration limits. AC18 is deferred. Actual production delivery,
+historical recovery readiness and external evidence remain mandatory under AC19,
+using the prepared `main` candidate before tagging, separately from the completed
+implementation and integration status.
+
+### Step 9 improvement expectations
+
+- Preserve Steps 1-8 evidence, modern fatal runtime checks, both recovery formats,
+  signed per-attempt authority, stable deployment-only recheck and fixed contract.
+- P40 verifies the exact published archive against the independent registry hash
+  before safe allowlisted extraction/execution, including closure key/verifier.
+  Reject unsafe paths/links/special members, changed bytes, wrong profile/account
+  or staging-derived trust. Use host Bash/utilities, without application install.
+- P28 guarded first activation requires no stable version/current/foreign
+  dispatcher/unresolved attempt. Verify closure and pointer before final atomic
+  dispatcher publication. Test concurrent stop and every interruption cut point:
+  missing dispatcher fails without mutation; incomplete bootstrap refuses even
+  on unchanged staging. Resume only receipt-bound work under the root lock.
+- Inspect P28/P39/P29 receipts without dispatcher stop/start. Bootstrap orders
+  trust/closure installation, exact historical retention if needed and inspection,
+  never arming. Subsequent deployment uses normal successful-release activation.
+- Empty-prefix option (i) installs verified hold-aware hooks with initial hold
+  set and no application. Fixture unexpected unit execution and publication cut
+  points. Installed/running bootstrap leaves unit start/pre-start hooks, runtime
+  and staging untouched; first approved stop bridges only evidenced hooks.
+- Route (b) is a separately authorized one-time production/new-environment session
+  by the evidenced operations operator with existing application-account access,
+  executing our exact self-verifying commands. Route (a) is unavailable production.
+  No recurring operator arming or target-shell recovery dependency is accepted.
+- Human signatures arrive via each environment's fixed shared-drive folder.
+  P30 prepares exact signing instructions and P22 checks applicable receipts;
+  P29/P31 authenticate at admission. Tests cover stale/missing evidence and keys,
+  mismatched/expired/replayed selections, retry/recovery renewal and unarmed dry run.
+  Q38's offline backup signer supplies fresh authority; independent custody and
+  verified rotation/revocation remain mandatory, with no unsigned bypass.
+- Each C/D rehearsal uses our development installation/account on the qualification
+  host, separately authorized confined preparation/restoration and explicit DEV-only
+  no-unit profile. Qualification and production refuse that profile; unit query
+  failure never activates it. Preserve development restoration inputs.
+- P43 replays audited task/baseline stop/start argv, literal download filename,
+  unpack, per-directory rotation, staging copy and permissions. Exercise literal
+  and expanded HOME and direct argv where the role has no shell. Never install
+  or run the orchestration tool; trace every operation and confine every path.
+  Q39 fixes script location; Step 8 A uses only its staging-measurement subset.
+- C proves empty stop, selected first install, refusal/partial failure/no-target
+  states and fresh retry with terminal proof. P41 covers installer pending state
+  naming a provisional release after failed first readiness: no-predecessor
+  checkpoint rejects rollback/restart, held/nonzero.
+- D uses retained exact historical archives on that host, proves their pairing
+  against production reads, and rehearses upgrade/offline rollback with and without
+  staging markers. Never fabricate markers or substitute an isolated tools pair.
+  Bind supported historical health APIs and independent identity without relaxing
+  modern revision/environment/drift checks.
+- Development has no unit and replay is not managed orchestration. Do not claim
+  hold parking or same-daemon proof there. AC18/AC19 combine these replays with
+  Step 8 G's running-release managed unit proof. First-install unit hooks and
+  historical bridges first run for real in production, backed beforehand by
+  fixtures and route (b) read-only production unit evidence. Record those limits.
+- Production requires evidenced existing unit/job/profile/repository/share/access
+  and independently authorized route (b) bootstrap, followed by release-only
+  managed delivery. Keep the unchanged pilot approval and two-hour wait within
+  evidenced outer limits. The human signs the bounded short expiry; overrun,
+  cancellation, absent approval and snapshots block our launch. Target-detected
+  expiry follows R19 ordinary admission where state permits, never deployment
+  authority; a delivered archive is refused with checked restoration and nonzero.
+  No automatic authority refresh or byte change; use a separate execution deadline.
+- Externally verify both production endpoints, release/revision/environment/account,
+  absent hold and same script-started daemon. A fresh signed recovery selection
+  plus pipeline/local terminal proof restores offline without an operator, even
+  when start was never reached. Missing recovery authority cannot bypass the
+  failed/held-state gate; unsigned ordinary restart is limited to safe states.
+- Bind actual AC18/AC19 receipts, accepted DEV evidence limits, production results
+  and recovery readiness without clearing a failed verdict. Check mode and fixture
+  results alone cannot close execution criteria. No action is authorized here.
+
+### What was implemented for Step 9
+
+Exact runs, revisions and receipts are in the private journals; the outcomes
+below are sanitized.
+
+- **Part A, evidence.** The development venue ledger, and the read-only
+  inspection runbook, emailed and run by the operations provider's support team
+  on 2026-10-12. It proved that production runs exactly the historical pair the
+  pre-production replica holds (equal archive and entry digests), behind the
+  prefix administration wrapper the role's stop and start call, under a unit
+  whose start lines have the form the deployment hold verifies, with two
+  interim startup hooks byte-identical to repository versions of July. No
+  further inspection was needed, and the redirect dropped the additive runbook.
+- **Part B before the redirect.** The qualification automation key joined the
+  control closure, production targets gained a release-only selection with an
+  approval-aware lifetime, an unsigned production launch was refused before any
+  stop, and the historical retention was prepared from the installation's own
+  archives. Decision V retired this machinery after the first qualification
+  delivery on the new route.
+- **Part B after the redirect.** Each published build carries one flat delivery
+  bundle: entry, release record, candidate identity, companion, application and
+  tools archives. The deploy step checks every member against the record,
+  installs through the entry's new-release mode, starts under the deployment
+  hold, proves the expected revision through the local API and releases the
+  hold under same-daemon supervision. It ends with a refusal that restarts the
+  installed release (status 2), a failure that restores the last ready one
+  (status 6), or a failed recovery that stays held and stopped (status 7), whose
+  last line says so when the hold could not be restored. The deploy job
+  sends the bundle address only and serves the development, qualification and
+  pre-production targets, never production. The stop command monitors the daemon
+  (decision W), and the
+  operations provider's role retries a failed first stop. A historical
+  installation's first modern install retains its pair, entry and interim hook
+  copies, and the hold replaces those hooks with its bridges only once they are
+  retained. The signed route, its tools and tests were removed, and its
+  leftovers are removed from a host after a proven release.
+- **Part B fixes of 2026-10-15, found by Part D.** A failed first release over
+  the historical installation used to end held and stopped (status 7): the
+  recovery now hands a unit back to the restored interim hooks and starts the
+  historical release through its own start command and status (status 6). The
+  historical installer replaced the whole application tree, the build account's
+  packaged authentication state included: the operator's local state is now
+  kept around it. An operator rollback mode returns to the retained rollback
+  target, the historical release included. The historical daemon inherited the
+  deployment lock descriptor and refused every later delivery: the historical
+  start now runs without it, which also covers a refusal on a historical
+  installation.
+- **Part B fixes of 2026-10-15, found by the code review.** The entry refused
+  an incomplete bundle, an application archive differing from its record, a
+  failed preparation or a missing deploy step with a bare status 2, after the
+  role's stop and before the deploy step could restart anything, so the
+  installed release stayed down. It now starts the installed release again
+  with that release's own start command, under the deployment root lock and
+  without handing the lock to it, and runs nothing from the refused bundle. A
+  failed historical restart (hand-back timeout, start failure or health
+  timeout) exited with status 7 although the hand-back had removed the hold
+  marker and a partial start could keep running. The hold is now entered again
+  and every process stopped through the retained controls before status 7.
+  Without retained controls, both historical stops (components, then daemon)
+  run and a failure of either counts: the last line then says that the
+  installation could not be held and stopped again, never that it stopped
+  (found by the second review round).
+- **Qualification deliveries.** Every build since the redirect went through the
+  full pipeline with publication, a check-mode run and a live run of the
+  qualification deploy job, each live run ending with the proven revision under
+  supervision. The first live run exposed the stop race behind decision W.
+- **Part D, development-account replay.** The role's operations ran in an
+  isolated scratch prefix of the development account, whose own stack was
+  stopped: both releases find their components by an account-wide process
+  match, and the historical administration script reads its installation from
+  `HOME`, so the scratch prefix is the replay's `HOME`. The first run, before
+  that requirement was known, briefly started the account's own daemon and
+  sentinel (no processing; stopped again). The replay installs production's
+  exact pair with its own entry and places the interim hook copies. With the
+  qualification candidate carrying the fixes, it passed: a first release
+  (outage 593 seconds from the historical stop, plus 14 seconds of download),
+  an operator rollback (hooks back byte for byte, local state kept), a second
+  release (513 seconds), a second rollback, and a forced failed start ending
+  with status 6 and the historical release running again (770 seconds).
+  Earlier runs found the defects fixed above. Pre-production was not touched.
+- **Documentation.** Consumer wiki: the explanation of why a release installs
+  itself (historical rollback included), the qualification and the new
+  production delivery how-tos, the deployment job and role reference and the
+  deployment states reference; the states reference and both how-tos describe
+  the refused hand-over and the re-hold. cplx: the consumer-neutral
+  explanation of a release that installs itself, and the plan amendments of
+  2026-10-11, 2026-10-12 and 2026-10-15.
+- **Tests.** Native Linux walks of the deploy step, historical rollback, runtime
+  startup and failed-upgrade packages on the RHEL host: 155 passed, 1 skipped
+  (51 subtests). The lock-descriptor cases fail on the previous code, the
+  refusal and re-hold cases with 13 failures, the failed component stop with
+  1, and all pass on the fixes. The
+  consumer's groundhog check passes. The consumer's pipeline ran its complete
+  selection and the analysis gate on each delivered build; the last gate
+  reports no open issue.
+
+### New types or classes introduced for Step 9
+
+No Python class. The consumer gained host Bash: the deploy step with its
+operator rollback mode (`tools/deploy_bundle.sh`), the bundle builder
+(`ci/tools_release_bundle.sh`), the historical local-state keeping,
+retention and refused hand-over restart of the installation entry, the interim
+hook admission and the unit hand-back with its re-hold in the hold helpers
+(`tools/admin_hold.sh`), and the bundle route of the deploy job.
+
+### Architecture check for Step 9
+
+The delivery code is host Bash under the consumer's `tools/` and `ci/` and the
+deploy job definition, infrastructure outside the application's hexagonal
+layers. No domain, application or adapter module imports it, and it reaches
+the application only through its administration command and its local API.
+The deploy step loads only the hold and runtime helpers retained with each
+application archive, so an installation never runs helpers from the tree it is
+replacing. Retiring the signed route removed modules and tests; no layer gained
+a dependency. No, there is nothing that needs to be addressed.
+
+### Performance check for Step 9
+
+One hash per bundle member, one copy per kept local-state name, and bounded
+polls: health and historical health within 240 seconds each, the unit hand-back
+within 60 seconds. No step sorts or scans history to choose a release. A first
+release's outage measured 513 to 593 seconds, and the failure route 770
+seconds, against the 1800-second cap. No, there is no performance issue that
+needs to be addressed.
+
+### Unit test coverage check for Step 9
+
+The coverage gate measures `src/pdfss` (`[tool.coverage.run] source`); Step
+9's code is shell under `tools/` and `ci/` and the deploy job definition,
+outside that scope, so no percentage is claimed for it. Native tests exercise
+it: the deploy step tests exercise exit codes, the historical restart, the
+operator rollback and the lock descriptor; the historical rollback tests cover
+the restore and the local state; the hold tests cover the interim admission
+and the hand-back; the bundle tests cover the builder. Every function added on
+2026-10-15 is referenced by a test or from its own script: `current_record`,
+`historical_restored`, `start_historical`, `start_restored`, `held_historical`
+and `rollback_installed` in the deploy step, `dvs_local_safe`,
+`dvs_keep_local_state`, `dvs_return_local_state` and `dvs_refuse_handover` in
+the entry, `pdfss_hold_historical` and `_app_hold_regain` in the hold
+helpers. No application class changed for Step 9. The hand-over refusal tests
+run the real entry after a simulated role stop, for both installed-release
+formats, and assert that the installed release's own start ran and that the
+refused bundle's step never ran; an unwritable prefix and a missing deploy step
+restart it too, and an empty prefix starts nothing. The failed historical
+recovery tests keep the hold marker, the processes and the unit state in
+stateful stubs and assert the held and stopped state for the recovery, the
+operator rollback, a partly started release without a unit and an
+installation without retained controls, and the line that reports a hold not
+restored. The hand-back timeout test asserts that the marker and both bridges
+come back. The fallback tests without retained controls give the component
+and daemon stops independent outcomes and process state: both succeeding
+report a stopped release, while a failed component stop with the daemon
+stopped, and the inverse, leave the failed part running, report that the
+installation could not be held and stopped again and never claim a stopped
+release.
+No application class coverage gap is identified, and no top-level symbol of the
+files outside the coverage gate is unreferenced.
+
+### Feature integrity for Step 9
+
+Qualification kept delivering throughout, and the analysis gate is clean. The
+signed route was retired by decision V, an intended removal; Step 8's AC16 and
+AC17 evidence stays as history. Recorded limits: the development account and
+pre-production have no unit, so the unit hand-back and the historical bridges
+first run for real in production, backed by fixtures and the inspection
+runbook's unit evidence; the production variables at the operations provider
+are an open prerequisite of production acceptance; AC19 must close from prepared
+`main` before the final cplx tag, and AC18 belongs to a later effort. Option A
+leaves the release-only address as the production snapshot guard. The code
+review's recovery findings are fixed:
+a refused hand-over restarts the installed release, and a failed historical
+recovery is held and stopped again, or its last line says it could not be, a
+failed stop of either part included.
+
+## Analysis of Step 9 Implementation
+
+Step 9 prepared and rehearsed production's next official release. The batch
+role now stops, downloads one delivery bundle, runs the bundle's deploy step
+and starts; the deploy step installs, proves and supervises the release, or
+restores the last ready one. For production's historical installation it keeps
+the historical pair, its hooks and the operator's local state, restores and
+restarts that release on failure, holds and stops it again when that fails,
+offers an operator rollback, and never leaves the deployment lock with the
+historical daemon. A bundle the entry refuses restarts the installed release.
+Part A's inspection fixed the production facts, qualification deliveries
+proved the route, the development-account replay from production's exact pair
+proved the five recorded scenarios, and the production delivery procedure
+documents them. The code review's refusal and failed historical recovery
+findings are fixed and tested. The 2026-10-28 decision marks the topic and umbrella
+item implementation-complete for integration. Production delivery and external
+acceptance remain open under AC19 and must be evidenced from prepared `main`
+before the final cplx tag.

@@ -23,7 +23,11 @@ cplx\
 │   │   ├── doc\          package_list_urls.md (mirror notebook)
 │   │   └── env\          everything shipped to the server
 │   │       ├── .env, .env_init, .env_user, cplx.properties (+ .tpl)
-│   │       ├── bin\      packages_management.sh, rsync.sh, compare_file.sh
+│   │       ├── bin\      packages_management.sh, rsync.sh, compare_file.sh,
+│   │       │             pkg, pkg*.sh, install_pkg.sh, closure_*.sh,
+│   │       │             tools_release_record.py, tools_wheel_inventory.*,
+│   │       │             deploy_venv*
+│   │       ├── closure\  closure-config.txt + closure-envelope.txt (the declaration)
 │   │       ├── certs\    gpg config + pinentry-wrapper.sh
 │   │       └── tools\    per-tool .env_<tool> (git\, python\) + bootstrap `setup`
 │   ├── install\          the compile side
@@ -34,6 +38,7 @@ cplx\
 │   │       └── <tool>\   <tool>_install_functions.sh, bin\ wrappers
 │   ├── utils\            steps.sh, properties.sh, steps_format_anchors.sh
 │   └── echos\            bash colored output
+├── ci\                   deliver-closure-tools.sh (verifier delivery and bundle)
 ├── tools\                add_tool.bat, switchtool.bat, init.bat, git\,
 │   └── dev_workflow\     version/changelog submodule (batcolors inside)
 └── t\                    GCC installation manual (reference copy)
@@ -44,7 +49,8 @@ cplx\
 ```text
 ~/cplx/
 ├── .env                  remote bashrc: aliases, PATH, HOME redirection
-├── bin\                  utils + packages_management.sh
+├── bin\                  utils + packages_management.sh + the packaging scripts
+├── closure\              the closure declaration and envelope `pkg.sh` stages
 ├── echos\                colored output
 └── tools\
     ├── install, install_functions.sh, cplx.properties
@@ -73,3 +79,23 @@ this tree into `~/pkgs/<target>.<stamp>.tar.gz` and re-install it under
 any prefix ([Packaging and relocation tools](relocation-tools.md)); the
 static `patchelf` they need is vendored under `~/tools/patchelf/root/`
 with a `~/tools/bin/patchelf` symlink.
+
+## A packaged `tools` archive
+
+What `pkg_tools.sh` produces is the live tree, trimmed of its build-only
+payload, plus two things the live tree never holds, because they are
+staged into the private packaging stage only:
+
+```text
+tools/
+├── closure/              closure-config.txt + closure-envelope.txt, the
+│                         declaration the archive claims to satisfy
+└── bin/
+    └── closure_check.sh, closure_config.sh, closure_elf.sh,
+        closure_report.sh, closure_rules.sh   payload copies of the checker
+```
+
+The `bin/` copies are for an operator debugging an installed tree; nothing
+executes them to produce evidence about the archive they came in
+([Runtime closure checker](toolchain-runtime-closure.md)). The archive also
+carries `~/.env` and `~/.env_` at its root when they exist.

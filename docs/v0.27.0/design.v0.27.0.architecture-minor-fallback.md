@@ -7,7 +7,7 @@ Umbrella: [debian-agent-tools](draft.v0.27.0.debian-agent-tools.md), item 5 and 
 
 ## Context for the v0.27.0 metadata resolver
 
-The requirement is consolidated in `a5a974f`. Its eleven clarifications fix the
+The requirement is consolidated in `aafb3e6`. Its eleven clarifications fix the
 selection policy, index identity, cleanup boundary and synchronization behavior.
 This design records the architecture approved after design review round 2.
 All seven answers were confirmed as option A, including the covered cursor,

@@ -374,7 +374,7 @@ failed its source capability check. The executable's `DT_RPATH` selected the
 older installed `libpython` before its source-first `LD_LIBRARY_PATH`. The probe
 rejected the mapped path although SQLite database operations succeeded. Full
 failure diagnostics were retained, and live preservation passed. Commit
-`f5c4a21eaafe6c58ca0dd7c094f8ec4af7628167` fixes the source-stage invocation by
+`0bba4d3488076d14e84707bd06217eb6fed8198e` fixes the source-stage invocation by
 preloading its independently validated source library. Installed and operator
 invocations receive no added preload. All 32 native installer fixtures pass.
 The corrected isolated rebuild uses this revision and audit digest
@@ -390,7 +390,7 @@ live comparison remain retained.
 The subsequent normal operator check after promotion failed because the
 extension's inherited `DT_RPATH` selected the build sandbox's SQLite library.
 A separate diagnostic copy with `DT_RUNPATH` selected the promoted provider
-through the unchanged wrapper. Commit `14d4af084c303b4ccaa234b3c9a19e7110d8e1ec`
+through the unchanged wrapper. Commit `c6fb1204246bc8dfc2193a0e33e097f5dd8aa4c5`
 adds `--enable-new-dtags` only to the scoped SQLite link dependency. All 32
 native installer fixtures pass. The new populated rebuild uses this revision
 and audit `87618b518ac4199b28bdb0226a59040175858467be519102dbb98538c5a419e5`.
@@ -431,8 +431,8 @@ Size: 544587889 bytes
 SHA-256: c9fcb783e10409411d2fd08f3951ec163b1143d7357203fc237afbb71ce24e91
 SHA-1: cf9b4e85207873e476ccb712949e7e3dbf621d8e
 Python: 3.13.15
-Candidate build revision: 14d4af084c303b4ccaa234b3c9a19e7110d8e1ec
-Closure source: 13c80d572ba7bda91728806ad7dc11c53629a506
+Candidate build revision: c6fb1204246bc8dfc2193a0e33e097f5dd8aa4c5
+Closure source: f49efb94a0f909fc4e3eb4a280071b5e4e2c29b7
 Closure digest: 63a955f8bded96f6a469764c625e9653c0988abe03ebd8192fc541f802d9d5aa
 ```
 
@@ -582,7 +582,7 @@ independent connection between identities. The retained archive
 `1ff7251a951dfdd5af1e138f9c6a38f2d18950ecc1ce43b82a95ffe6d384b751`;
 its live comparison passed.
 
-Commit `d42014e2f358cb4b42564150f93625ae83784c73` implements this connection in
+Commit `a54e1755f453ddbfcc40584f79bf2a670572ebd3` implements this connection in
 the shared observer without counting the reference as a loaded library.
 The single maps read still follows the persistent database round trip.
 All 42 native probe tests pass, including refusals for replaced, deleted,
@@ -609,8 +609,8 @@ corrected precheck resolves both paths and produces the accepted build capture.
 
 The corrected verification bundle is `a.sqlite-verification.20260916c.tar.gz`,
 SHA-256 `96814af4ec5ac40455fbe3a005c2043de231dec97b5df0441b1995972e3fd4e5`.
-Its manifest records source revision `d42014e2f358cb4b42564150f93625ae83784c73`,
-candidate build revision `14d4af084c303b4ccaa234b3c9a19e7110d8e1ec` and probe
+Its manifest records source revision `a54e1755f453ddbfcc40584f79bf2a670572ebd3`,
+candidate build revision `c6fb1204246bc8dfc2193a0e33e097f5dd8aa4c5` and probe
 script SHA-256 `46d72267a8e10a4b6919629905f08a979d9f9a24106d52721c320357cec7a45e`.
 Consuming commit `88f59d8c` pins this verification material while retaining
 the original candidate archive digest.

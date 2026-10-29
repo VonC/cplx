@@ -111,7 +111,7 @@ exit 42
 PYTHON
 chmod +x "$runtimefix/interpreter"
 runtime_probe() {
-    bash "$runtime" "$runtimefix" "$runtimevenv" "$runtimefix/interpreter" \
+    APP_PACKAGE=my_project bash "$runtime" "$runtimefix" "$runtimevenv" "$runtimefix/interpreter" \
         "$runtimefix/inputs" "$runtimefix/out" "$python"
 }
 expect 42 runtime-exact-inputs runtime_probe

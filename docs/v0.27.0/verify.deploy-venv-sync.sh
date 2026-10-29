@@ -1,0 +1,46 @@
+#!/bin/bash
+# Cumulative fixture checks; target runtime qualification has its own entry.
+set -euo pipefail
+step='' python='' app=''
+while (($#)); do
+    case "$1" in
+        --step) step=${2:?}; shift 2 ;;
+        --python) python=${2:?}; shift 2 ;;
+        --app-repo) app=${2:?}; shift 2 ;;
+        *) printf 'Unknown argument: %s\n' "$1" >&2; exit 2 ;;
+    esac
+done
+[[ "$step" =~ ^[1-7]$ && "$python" == /* && -x "$python" && "$app" == /* && -d "$app/tools" ]] || {
+    echo 'Required: --step 1|2|3|4|5|6|7 --python /absolute/python (3.11+) --app-repo /absolute/consumer' >&2; exit 2;
+}
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.."
+status=0
+"$python" -c 'raise SystemExit(23)' || status=$?
+[[ "$status" == 23 ]] || { echo 'Interpreter masks failing exit codes; select the real Python executable' >&2; exit 2; }
+export TOOLS_TEST_APP="$app"
+"$python" -c 'import sys; assert sys.version_info >= (3, 11); print(sys.version)'
+# Run fixtures first so the test-first missing implementation has an explicit verdict.
+"$python" -B -m unittest discover -s tests/unit/deploy_venv_sync -t . -p 'test_*_*.py' -v
+bash src/utils/lint_shell.sh
+scripts=(docs/v0.27.0/verify.deploy-venv-sync.sh docs/v0.27.0/acceptance.deploy-venv-sync.sh)
+if [[ "$step" -ge 3 ]]; then scripts+=(src/setups/env/bin/deploy_venv.sh); fi
+if [[ "$step" -ge 4 ]]; then scripts+=(src/setups/env/bin/install_pkg.sh); fi
+for script in "${scripts[@]}"; do bash -n "$script"; done
+shellcheck "${scripts[@]}"
+if [[ "$step" -ge 2 ]]; then
+    bash docs/v0.27.0/verify.tools-release-d10.sh --python "$python"
+fi
+"$python" -B -m unittest discover -s tests/unit -t . -p 'test_*_*.py' -v
+"$python" - src/setups/env/bin tests/unit/deploy_venv_sync docs/v0.27.0 <<'PY'
+import ast
+from pathlib import Path
+import sys
+for root in map(Path, sys.argv[1:]):
+    for path in root.rglob('*.py'):
+        text = path.read_text(encoding='utf-8')
+        if (path.name.startswith('deploy_venv_') or 'deploy_venv_sync' in path.parts
+                or path.name == 'acceptance_deploy_venv_sync.py'):
+            assert len(text.splitlines()) <= 650, str(path)
+            ast.parse(text, filename=str(path))
+print('PASS syntax and 650 physical-line ceiling')
+PY

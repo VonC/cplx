@@ -469,7 +469,7 @@ Correct the retained 9.6 Python list to `zlib-devel`, then confirm equivalence
 and accepted setup before removing the redundant 9.8 Python/Git lists and
 tracked mirror key. Generated indexes and operator-local properties remain
 outside cleanup. Distinct exact overrides are retained, and generated indexes
-may exist for each minor. Commit `18c251d` records why an older generated
+may exist for each minor. Commit `f69979f` records why an older generated
 snapshot cannot stand in for the detected server's index. Item 5 implementation
 is pending; these are confirmed requirements, not completed code changes.
 
@@ -791,8 +791,15 @@ the correction below.
 | 5 | Feature-request | Resolve the architecture key across server minors | `architecture-minor-fallback` | completed | `docs/v0.27.0/feature-request.v0.27.0.architecture-minor-fallback.md` | `docs/v0.27.0/plan.v0.27.0.architecture-minor-fallback.validation.md` |
 | 6 | Feature-request | Build the toolchain python with sqlite | `python-sqlite-support` | completed | `docs/v0.27.0/feature-request.v0.27.0.python-sqlite-support.md` | `docs/v0.27.0/plan.v0.27.0.python-sqlite-support.validation.md` |
 | 7 | Feature-request | Rebuild, validate and publish the tools archive | `tools-archive-rebuild` | completed | `docs/v0.27.0/feature-request.v0.27.0.tools-archive-rebuild.md` | `docs/v0.27.0/plan.v0.27.0.tools-archive-rebuild.validation.md` |
-| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | pending | - | - |
+| 8 | Feature-request | Create the venv at deployment instead of shipping it | `deploy-venv-sync` | completed | `docs/v0.27.0/feature-request.v0.27.0.deploy-venv-sync.md` | `docs/v0.27.0/plan.v0.27.0.deploy-venv-sync.validation.md` |
 | 9 | Feature-request | Build the bundled SQLite from source | `sqlite-runtime-upgrade` | completed | `docs/v0.27.0/feature-request.v0.27.0.sqlite-runtime-upgrade.md` | `docs/v0.27.0/plan.v0.27.0.sqlite-runtime-upgrade.validation.md` |
+
+Item 8 is implementation-complete for integration by the human decision of
+2026-10-28. Its [validation plan](plan.v0.27.0.deploy-venv-sync.validation.md)
+records the accepted step scopes. AC19 remains open and mandatory: actual
+production and external acceptance must use the prepared `main` candidate before
+the final cplx tag. AC18 remains deferred. Integration and release preparation do
+not establish that acceptance or authorize production deployment or tagging.
 
 ### Requirement details for the umbrella
 
@@ -1243,7 +1250,7 @@ tests; 100% coverage, nonselecting testmon and guarded suites remain mandatory.
 This CI qualification supplies no browser evidence.
 
 On 2026-09-21 the human selected: "OK go for checkpoint, then work on completing
-step 6". The repaired Debian checkpoint is committed through `92e361a6`.
+step 6". The repaired Debian checkpoint is committed through `c160ccf1`.
 Step 6 is now fully implemented, as independently confirmed in round 16.
 The [fresh RHEL run](evidence.tools-archive-rebuild.step6-final-rhel.json)
 passes all ten required cells at Q07 scope, with the deployed venv bound to
@@ -1266,6 +1273,35 @@ Depends on: items 1 to 6.
 
 Type: Feature-request. Slug: `deploy-venv-sync`. Regroups decision D11
 and the deployment half of the cleanups this collection unlocks.
+
+The following Step 9 history is superseded by the 2026-10-28 completion amendment
+and the latest [requirement scope](feature-request.v0.27.0.deploy-venv-sync.md#integration-completion-and-pre-tag-acceptance-2026-10-28).
+Implementation is complete for integration; AC19 remains a pre-tag release gate.
+Human decisions at round 8 on 2026-10-04 keep Step 8 operator-free: existing
+delivery installs closure/key/verifier and probes/receipts only; each real attempt,
+retry or recovery is freshly signed by the human on the shared drive with a
+single-use ID/short expiry. R16 A preserves pending forward selection on checked
+outside stop/start. Pipeline original actions and local terminal proof handle
+recovery; only restoration-PR review involves operations.
+Step 8 A adds development-account host network/client/share evidence and same-disk
+filesystem replay plus evidenced per-task orchestration overhead. C application-
+account probes remain final. Release N includes the public key/verifier.
+Step 9 rehearsals use our development installation/account on the qualification
+host with an exact task/baseline/argv replay, no orchestration tool and no unit.
+AC18/AC19 accept those replays plus Step 8 managed proof with explicit limits:
+first-install unit hooks and historical bridging first run for real in production,
+backed by fixtures and route (b) read-only production unit evidence. Empty-prefix
+option (i) installs hold-aware hooks under initial hold; installed/running bootstrap
+leaves hooks untouched. Route (b) is selected once per production/new-environment
+bootstrap; no recurring operator arming. Consolidation on 2026-10-05 settles
+plan Q11-Q41. R19 admits unsigned ordinary restarts subject to lifecycle safety;
+unauthorized delivery installs nothing and returns nonzero after checked
+restoration, accepting possible downtime. Failed/held recovery gates remain.
+Q38 selects independent offline backup trust alongside the primary public key,
+with custody/recovery and verified rotation/revocation documented before B.
+Tooling/layout qualification and actual Steps 8-9 execution evidence remain open.
+No execution is authorized here. The validation plan records Step 9 completion
+within its amended scope; actual production acceptance remains open under AC19.
 
 The application archive carries the project venv today. `pkg_app.sh` excludes
 result PDFs, `run.env` and the describe cache, and nothing excludes the

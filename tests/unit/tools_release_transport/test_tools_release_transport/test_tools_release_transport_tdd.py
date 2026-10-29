@@ -1,4 +1,4 @@
-"""Test the real adapter against an isolated TLS repository, without live writes.
+"""Test the real adapter against an isolated TLS repository on native Linux.
 
 These are process integration fixtures using unittest, not unit coverage claims.
 The finite outcome matrix needs no additional property-testing dependency.
@@ -94,8 +94,9 @@ class Repository(http.server.BaseHTTPRequestHandler):
             self.answer(500 if self.server.mode == "error" else 201)
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "requires native Linux shell paths")
 class TransportTests(unittest.TestCase):
-    """Assert privacy, byte binding and mandatory response-loss reconciliation."""
+    """Assert privacy, byte binding and response-loss reconciliation on Linux."""
 
     @classmethod
     def setUpClass(cls):
@@ -341,14 +342,17 @@ class TransportTests(unittest.TestCase):
 
     def test_ordinary_publisher_preserves_release_and_snapshot_behaviour(self):
         publisher = APP / "tools/publish_pdf_nexus.sh"
-        pattern = re.search(r"tar -xzOf .*?--wildcards '([^']+)'", publisher.read_text()).group(1)
+        source = publisher.read_text()
+        pattern = re.search(r"tar -xzOf .*?--wildcards '([^']+)'", source).group(1)
+        # The application archive's classifier is the consumer's own name: read it.
+        kind = re.search(r'plan "\$ARCHIVE" "([^"]+)"', source).group(1)
         archive = self.root / "application.tar.gz"
         deploy = b"#!/bin/bash\nexit 0\n"
         with tarfile.open(archive, "w:gz") as output:
-            item = tarfile.TarInfo(pattern.replace("*", "app"))
+            item = tarfile.TarInfo(pattern.replace("*", kind))
             item.size = len(deploy)
             output.addfile(item, io.BytesIO(deploy))
-        digests = {"app": hashlib.sha1(archive.read_bytes()).hexdigest(),
+        digests = {"archive": hashlib.sha1(archive.read_bytes()).hexdigest(),
                    "deploy_pkgs": hashlib.sha1(deploy).hexdigest()}
         stubs = self.root / "bin"
         stubs.mkdir()
@@ -360,7 +364,7 @@ url = sys.argv[-1]
 digests = json.loads(os.environ['STUB_DIGESTS'])
 if not Path(os.environ['STUB_MARKER']).exists():
     sys.exit(22)
-key = 'deploy_pkgs' if 'deploy_pkgs' in url else 'app'
+key = 'deploy_pkgs' if 'deploy_pkgs' in url else 'archive'
 digest = 'f' * 40 if os.environ['STUB_MODE'] == 'different' else digests[key]
 print(json.dumps({'sha1': digest}) if '/search/' in url else digest)
 ''')
@@ -396,7 +400,7 @@ Path(os.environ['STUB_MARKER']).touch()
                 self.assertEqual(len(calls), {"fresh": 2, "identical": 0, "snapshot": 1}[mode])
                 if calls:
                     self.assertIn("-Dclassifier=deploy_pkgs", calls[-1])
-                    self.assertIn("-Dclassifiers=app", calls[-1])
+                    self.assertIn("-Dclassifiers=" + kind, calls[-1])
                     self.assertNotIn("-Dclassifier=tools", calls[-1])
 
 
